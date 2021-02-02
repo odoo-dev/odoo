@@ -7,8 +7,10 @@ const weContext = require('web_editor.context');
 const OdooEditor = require('web_editor.odoo-editor').OdooEditor;
 const snippetsEditor = require('web_editor.snippet.editor');
 const Toolbar = require('web_editor.toolbar');
+const weWidgets = require('wysiwyg.widgets');
 
 var id = 0;
+const faZoomClassRegex = RegExp('fa-[0-9]x');
 
 const Wysiwyg = Widget.extend({
     xmlDependencies: [
@@ -60,6 +62,7 @@ const Wysiwyg = Widget.extend({
      */
     start: async function () {
         const _super = this._super;
+        const _self = this;
 
         var options = this._editorOptions();
         this._value = options.value;
@@ -84,6 +87,20 @@ const Wysiwyg = Widget.extend({
             setContentEditable: this.options.setContentEditable,
         });
 
+        this._configureToolbar(options);
+
+        this.$editable.on('dblclick','img,.fa', function(e){
+            const _this = $(this);
+            let params = {"node" : _this};
+            if( _this.is('.fa')) {
+                // save layouting classes from icons to not break the page if you edit an icon
+                params.htmlClass = [..._this[0].classList].filter((className) => {
+                    return !className.startsWith('fa') || faZoomClassRegex.test(className);
+                }).join(' ');
+            }
+            _self.openMediaDialog(params);
+        });
+
         if (options.snippets) {
             $('body').addClass('editor_enable');
             this.snippetsMenu = new snippetsEditor.SnippetsMenu(this, Object.assign({
@@ -91,6 +108,13 @@ const Wysiwyg = Widget.extend({
                 selectorEditableArea: '.o_editable',
             }, options));
             this._insertSnippetMenu();
+
+            this.snippetsMenu.on('update_customize_elements', this, (e) => {
+                this.lastTargetedElement = e.target.$target
+                // only show the description button in the toolbar if the current selected snippet is an image
+                $("#media-description").toggle(this.lastTargetedElement.is('img'));
+
+            });
         }
 
         return _super.apply(this, arguments);
@@ -340,10 +364,72 @@ const Wysiwyg = Widget.extend({
     redo: function () {
         this.odooEditor.historyRedo();
     },
+    /**
+     * Open the Alt dialog
+     * dialog give access to edit <img> alt and title
+     */
+    openAltDialog(params) {
+        let $baseNode = params.node ? params.node : this.lastTargetedElement;
+
+        let altDialog = new weWidgets.AltDialog(this, params, $baseNode);
+        altDialog.open();
+    },
+    /**
+     * Open the media dialog
+     * use to insert img / icons / videos
+     */
+    openMediaDialog(params) {
+        const range = Wysiwyg.getRange();
+        // we loose the current selection inside the content editable
+        // when we click on the media dialog button
+        // so we need to be able to restore the selection when the modal is closed
+        const restoreSelection = function() {
+            if(range.sc === null) return;
+            Wysiwyg.setRange(range.sc, range.so, range. ec, range.eo);
+        }
+
+        let $baseNode = params.node ? params.node : this.lastTargetedElement;
+        let mediaDialog = new weWidgets.MediaDialog(this, params, $baseNode);
+        mediaDialog.open();
+
+        mediaDialog.on('save', this, function(element) {
+            // restore saved html classes
+            if (params.htmlClass) element.className += " " + params.htmlClass;
+
+            if (this.lastTargetedElement.is('img') || params.node) {
+                $baseNode.replaceWith(element.outerHTML);
+            } else {
+                restoreSelection();
+                document.execCommand('insertHTML', false, element.outerHTML);
+            }
+        });
+        mediaDialog.on('closed', this,  function() {
+            // if the mediaDialog content has been saved
+            // the previous selection in not relevant anymore
+            if(mediaDialog.destroyAction !== 'save') restoreSelection();
+        });
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
+    _configureToolbar: function (options) {
+        console.log('------\nconfigure toolbar\n------')
+        let $toolbar = $(this.odooEditor.toolbar);
+        console.log($toolbar, options);
+        $toolbar.find('#media-modal').click((function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.openMediaDialog({});
+        }).bind(this));
+        $toolbar.find('#media-description').click((function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            this.openAltDialog({});
+        }).bind(this));
+    },
     _editorOptions: function () {
         var self = this;
         var options = Object.assign({},  this.defaultOptions, this.options);
@@ -589,8 +675,16 @@ const Wysiwyg = Widget.extend({
  * @returns {Node} ec - end container
  * @returns {Number} eo - end offset
  */
-Wysiwyg.getRange = function (node) {
+Wysiwyg.getRange = function (node = undefined) {
     const selection = document.getSelection();
+    if(selection.rangeCount === 0) {
+        return {
+            sc: null,
+            so: 0,
+            ec: null,
+            eo: 0,
+        }
+    }
     const range = selection.getRangeAt(0);
 
     return {
