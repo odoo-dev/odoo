@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_orderpoint_cleanup" model="ir.cron">
+        <field name="name">Orderpoint: Create new and unlink 0.0 to do qty orderpoint</field>
+        <field name="model_id" ref="model_stock_warehouse_orderpoint"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_orderpoint_cleanup()</field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">5</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+    </record>
+</odoo>

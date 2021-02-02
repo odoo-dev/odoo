@@ -295,6 +295,10 @@ class StockWarehouseOrderpoint(models.Model):
         """
         action = self.env["ir.actions.actions"]._for_xml_id("stock.action_orderpoint_replenish")
         action['context'] = self.env.context
+        self.cron_orderpoint_cleanup()
+        return action
+
+    def cron_orderpoint_cleanup(self):
         orderpoints = self.env['stock.warehouse.orderpoint'].search([])
         # Remove previous automatically created orderpoint that has been refilled.
         to_remove = orderpoints.filtered(lambda o: o.create_uid.id == SUPERUSER_ID and o.qty_to_order <= 0.0 and o.trigger == 'manual')
@@ -311,7 +315,7 @@ class StockWarehouseOrderpoint(models.Model):
                 continue
             to_refill[(group['product_id'][0], warehouse_id)] = group['product_qty']
         if not to_refill:
-            return action
+            return
 
         # Remove incoming quantity from other origin than moves (e.g RFQ)
         product_ids, warehouse_ids = zip(*to_refill)
@@ -360,7 +364,7 @@ class StockWarehouseOrderpoint(models.Model):
         for orderpoint in orderpoints:
             orderpoint.route_id = orderpoint.product_id.route_ids[:1]
         orderpoints.filtered(lambda o: not o.route_id)._set_default_route_id()
-        return action
+        return
 
     @api.model
     def _get_orderpoint_values(self, product, location):

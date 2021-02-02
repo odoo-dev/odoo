@@ -26,6 +26,7 @@
         'data/stock_data.xml',
         'data/stock_sequence_data.xml',
         'data/stock_traceability_report_data.xml',
+        'data/ir_cron_data.xml',
 
         'report/report_stock_forecasted.xml',
         'report/report_stock_quantity.xml',
