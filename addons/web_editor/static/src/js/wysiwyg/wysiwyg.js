@@ -54,6 +54,10 @@ const Wysiwyg = Widget.extend({
         this._super.apply(this, arguments);
         this.id = ++id;
         this.options = options;
+        // autohideToolbar is true by default.
+        this.options.autohideToolbar = typeof this.options.autohideToolbar === 'boolean'
+            ? this.options.autohideToolbar
+            : true;
         this.saving_mutex = new concurrency.Mutex();
     },
     /**
