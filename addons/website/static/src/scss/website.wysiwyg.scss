@@ -71,6 +71,11 @@
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
 
+        we-customizeblock-option {
+            /* Ensure an extra option in the toolbar takes its whole width. */
+            grid-column-end: span 5;
+        }
+
         &::before {
             border: none !important;
         }
@@ -133,6 +138,9 @@
                     }
                 }
             }
+        }
+        we-input, we-input div, we-input input {
+            width: 100% !important;
         }
         #decoration {
             grid-column-end: span 4;

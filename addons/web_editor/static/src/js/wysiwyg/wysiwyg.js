@@ -114,10 +114,11 @@ const Wysiwyg = Widget.extend({
             this._insertSnippetMenu();
 
             this.snippetsMenu.on('update_customize_elements', this, (e) => {
+                this.altTools && this.altTools.destroy();
+                this.altTools = undefined;
                 this.lastTargetedElement = e.target.$target
                 // only show the description button in the toolbar if the current selected snippet is an image
                 $("#media-description").toggle(this.lastTargetedElement.is('img'));
-
             });
         }
 
@@ -371,23 +372,27 @@ const Wysiwyg = Widget.extend({
         this.odooEditor.historyRedo();
     },
     /**
-     * Open the Alt dialog.
-     * 
-     * Dialog give access to edit <img> alt and title.
+     * Open the Alt tools in the toolbar to edit <img> alt and title attributes.
      *
      * @param {object} params
-     * @param {Node} [params.node] Optionnal
+     * @param {Node} [params.node]
      */
-    openAltDialog(params = {}) {
-        const $baseNode = params.node ? params.node : this.lastTargetedElement;
-        const altDialog = new weWidgets.AltDialog(this, params, $baseNode);
-        altDialog.open();
+    toggleAltTools(params = {}) {
+        if (this.altTools) {
+            this.altTools.destroy();
+            this.altTools = undefined;
+        } else {
+            const img = params.node ? params.node : this.lastTargetedElement;
+            this.altTools = new weWidgets.AltTools(this, params, img);
+            this.altTools.appendTo(this.toolbar.$el);
+        }
+        this.toolbar.$el.find('#media-description').toggleClass('active', !!this.altTools);
     },
     /**
      * Open the media dialog.
      *
      * Used to insert or change image, icon, document and video.
-     * 
+     *
      * @param {object} params
      * @param {Node} [params.node] Optionnal
      * @param {Node} [params.htmlClass] Optionnal
@@ -426,16 +431,16 @@ const Wysiwyg = Widget.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    _configureToolbar: function (options) {
-        let $toolbar = $(this.odooEditor.toolbar);
-        const openModal = (e) => {
+    _configureToolbar: function () {
+        const $toolbar = this.toolbar.$el;
+        const openTools = e => {
             e.preventDefault();
             e.stopImmediatePropagation();
             e.stopPropagation();
-            e.target.id === 'media-modal' ? this.openMediaDialog() : this.openAltDialog();
+            e.target.id === 'media-modal' ? this.openMediaDialog() : this.toggleAltTools();
         };
-        $toolbar.find('#media-modal').click(openModal);
-        $toolbar.find('#media-description').click(openModal);
+        $toolbar.find('#media-modal').click(openTools);
+        $toolbar.find('#media-description').click(openTools);
     },
     _editorOptions: function () {
         var self = this;
