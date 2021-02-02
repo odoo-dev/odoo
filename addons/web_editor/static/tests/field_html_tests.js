@@ -191,7 +191,7 @@ QUnit.module('web_editor', {}, function () {
             Wysiwyg.setRange(pText, 1, pText, 10);
             // text is selected
 
-            var range = Wysiwyg.getRange($field[0]);
+            var range = Wysiwyg.getRange();
             assert.strictEqual(range.sc, pText,
                 "should select the text");
 
@@ -224,7 +224,7 @@ QUnit.module('web_editor', {}, function () {
                 ec: fontContent,
                 eo: fontContent.length,
             };
-            range = Wysiwyg.getRange($field[0]);
+            range = Wysiwyg.getRange();
             assert.deepEqual(_.pick(range, 'sc', 'so', 'ec', 'eo'), rangeControl,
                 "should select the text after color change");
 
