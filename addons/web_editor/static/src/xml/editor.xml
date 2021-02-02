@@ -14,17 +14,38 @@
                     <i class="fa fa-paragraph"></i>
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" id="paragraph">Normal</a></li>
-                    <li><a class="dropdown-item" href="#" id="pre"><pre>Code</pre></a></li>
-                    <li><a class="dropdown-item" href="#" id="heading1"><h1>Header 1</h1></a></li>
-                    <li><a class="dropdown-item" href="#" id="heading2"><h2>Header 2</h2></a></li>
-                    <li><a class="dropdown-item" href="#" id="heading3"><h3>Header 3</h3></a></li>
-                    <li><a class="dropdown-item" href="#" id="heading4"><h4>Header 4</h4></a></li>
-                    <li><a class="dropdown-item" href="#" id="heading5"><h5>Header 5</h5></a></li>
-                    <li><a class="dropdown-item" href="#" id="heading6"><h6>Header 6</h6></a></li>
-                    <li><a class="dropdown-item" href="#" id="blockquote"><blockquote>Quote</blockquote></a></li>
+                    <li id="paragraph-dropdown-item">
+                        <a class="dropdown-item" href="#" id="paragraph">Normal</a>
+                    </li>
+                    <li id="pre-dropdown-item">
+                        <a class="dropdown-item" href="#" id="pre"><pre>Code</pre></a>
+                    </li>
+                    <li id="heading1-dropdown-item">
+                        <a class="dropdown-item" href="#" id="heading1"><h1>Header 1</h1></a>
+                    </li>
+                    <li id="heading2-dropdown-item">
+                        <a class="dropdown-item" href="#" id="heading2"><h2>Header 2</h2></a>
+                    </li>
+                    <li id="heading3-dropdown-item">
+                        <a class="dropdown-item" href="#" id="heading3"><h3>Header 3</h3></a>
+                    </li>
+                    <li id="heading4-dropdown-item">
+                        <a class="dropdown-item" href="#" id="heading4"><h4>Header 4</h4></a>
+                    </li>
+                    <li id="heading5-dropdown-item">
+                        <a class="dropdown-item" href="#" id="heading5"><h5>Header 5</h5></a>
+                    </li>
+                    <li id="heading6-dropdown-item">
+                        <a class="dropdown-item" href="#" id="heading6"><h6>Header 6</h6></a>
+                    </li>
+                    <li id="blockquote-dropdown-item">
+                        <a class="dropdown-item" href="#" id="blockquote">
+                            <blockquote>Quote</blockquote>
+                        </a>
+                    </li>
                 </ul>
             </div>
+
             <div id="decoration" class="btn-group">
                 <div id="bold" title="Toggle bold" class="btn"><i class="fa fa-bold fa-fw"></i></div>
                 <div id="italic" title="Toggle italic" class="btn"><i class="fa fa-italic fa-fw"></i></div>

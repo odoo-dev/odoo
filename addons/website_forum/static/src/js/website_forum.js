@@ -12,7 +12,11 @@ var _t = core._t;
 
 publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     selector: '.website_forum',
-    xmlDependencies: ['/website_forum/static/src/xml/website_forum_share_templates.xml'],
+    xmlDependencies: [
+        '/web_editor/static/src/xml/editor.xml',
+        '/website_forum/static/src/xml/website_forum_templates.xml',
+        '/website_forum/static/src/xml/website_forum_share_templates.xml',
+    ],
     events: {
         'click .karma_required': '_onKarmaRequiredClick',
         'mouseenter .o_js_forum_tag_follow': '_onTagFollowBoxMouseEnter',
@@ -118,22 +122,11 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             var editorKarma = $textarea.data('karma') || 0; // default value for backward compatibility
             var $form = $textarea.closest('form');
             var hasFullEdit = parseInt($("#karma").val()) >= editorKarma;
-            // todo: make sure thoses options work in the new Odoo Editor
-            var toolbar = [
-                ['style', ['style']],
-                ['font', ['bold', 'italic', 'underline', 'clear']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-            ];
-            if (hasFullEdit) {
-                toolbar.push(['insert', ['link', 'picture']]);
-            }
-            toolbar.push(['history', ['undo', 'redo']]);
 
             var options = {
                 height: 200,
                 minHeight: 80,
-                toolbar: toolbar,
+                toolbarTemplate: 'website_forum.web_editor_toolbar',
                 styleWithSpan: false,
                 recordInfo: {
                     context: self._getContext(),
@@ -149,6 +142,9 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                 };
             }
             wysiwygLoader.loadFromTextarea(self, $textarea[0], options).then(wysiwyg => {
+                if (!hasFullEdit) {
+                    wysiwyg.toolbar.$el.find('#link, #media').remove();
+                }
                 // float-left class messes up the post layout OPW 769721
                 $form.find('.note-editable').find('img.float-left').removeClass('float-left');
             });
