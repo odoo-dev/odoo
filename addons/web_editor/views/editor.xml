@@ -100,6 +100,7 @@
         <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/web_editor.backend.scss"/>
     </xpath>
     <xpath expr="script[last()]" position="after">
+        <script type="text/javascript" src="/web_editor/static/src/js/frontend/loader.js" />
         <script type="text/javascript" src="/web_editor/static/src/js/backend/field_html.js" />
         <script type="text/javascript" src="/web_editor/static/src/js/backend/convert_inline.js" />
     </xpath>
