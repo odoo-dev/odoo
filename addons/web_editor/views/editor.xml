@@ -38,6 +38,7 @@
     <script type="text/javascript" src="/web_editor/static/src/js/base.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/editor/odoo-editor.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/editor/image_processing.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/editor/custom_colors.js"/>
 
     <!-- widgets & plugins -->
 
