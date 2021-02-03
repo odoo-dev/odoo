@@ -707,7 +707,7 @@ Wysiwyg.getRange = function () {
  * @param {Node} endNode
  * @param {Number} endOffset
  */
-Wysiwyg.setRange = function (startNode, startOffset, endNode, endOffset) {
+Wysiwyg.setRange = function (startNode, startOffset = 0, endNode = startNode, endOffset = startOffset) {
     const selection = document.getSelection();
     selection.removeAllRanges();
 
