@@ -570,11 +570,39 @@ var FileWidget = SearchableMediaWidget.extend({
 
         // Upload the smallest file first to block the user the least possible.
         files = _.sortBy(files, 'size');
-        _.each(files, function (file) {
+        let $progress = $('<div/>');
+        _.each(files, function (file, index) {
+            var fileSize = file.size;
+            if (fileSize < 1024) {
+                fileSize = fileSize.toFixed(2) + " bytes";
+            } else if (fileSize < 1048576) {
+                fileSize = (fileSize / 1024).toFixed(2) + " KB";
+            } else {
+                fileSize = (fileSize / 1048576).toFixed(2) + " MB";
+            }
+
+            $progress.append(QWeb.render('wysiwyg.widgets.upload.progressbar', {
+                fileId: index,
+                fileName: file.name,
+                fileSize: fileSize,
+            }));
+        });
+
+        this.connectionNotificationID = await this.displayNotification({
+            type: 'info',
+            sticky: true,
+            message: $progress[0].outerHTML,
+            await: true,
+        });
+        let $progressNotification = this.call('notification', 'getElement', this.connectionNotificationID);
+
+        let hasError = false;
+        _.each(files, function (file, index) {
             // Upload one file at a time: no need to parallel as upload is
             // limited by bandwidth.
             uploadMutex.exec(function () {
                 return utils.getDataURLFromFile(file).then(function (result) {
+                    let $progressBar = $progressNotification.find(`.js_progressbar_${index}`);
                     return self._rpc({
                         route: '/web_editor/attachment/add_data',
                         params: {
@@ -584,15 +612,42 @@ var FileWidget = SearchableMediaWidget.extend({
                             'res_model': self.options.res_model,
                             'width': 0,
                             'quality': 0,
+                        }}, {
+                            xhr: function () {
+                                var xhr = $.ajaxSettings.xhr();
+                                xhr.upload.onprogress = function (ev) {
+                                    var prcComplete = ev.loaded / ev.total * 100;
+                                    $progressBar.find('.progress-bar').css({
+                                        width: parseInt(prcComplete) + '%',
+                                    }).text(prcComplete.toFixed(2) + '%');
+                                };
+                                xhr.upload.onload = function () {
+                                    // Don't show yet success as backend code only starts now
+                                    $progressBar.find('.progress-bar').css({width: '100%'}).text('100%');
+                                };
+                                return xhr;
+                            },
                         },
-                    }).then(function (attachment) {
+                    ).then(function (attachment) {
+                        $progressBar.find('.fa-spinner, .progress').addClass('d-none');
+                        $progressBar.find('.js_progressbar_txt .text-success').removeClass('d-none');
                         self._handleNewAttachment(attachment);
+                    }).guardedCatch(function () {
+                        hasError = true;
+                        $progressBar.find('.fa-spinner, .progress').addClass('d-none');
+                        $progressBar.find('.js_progressbar_txt .text-danger').removeClass('d-none');
                     });
                 });
             });
         });
 
         return uploadMutex.getUnlockedDef().then(function () {
+            if (!hasError) {
+                setTimeout(() => {
+                    // Don't call notification.close as parent is destroyed in single image upload
+                    $progressNotification.toast('hide');
+                }, 3000);
+            }
             if (!self.options.multiImages && !self.noSave) {
                 self.trigger_up('save_request');
             }

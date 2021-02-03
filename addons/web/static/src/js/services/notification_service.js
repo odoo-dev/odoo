@@ -55,6 +55,7 @@ var NotificationService = AbstractService.extend({
      * reference id to the same widget.
      *
      * Note that this method does not wait for the appendTo method to complete.
+     * If you need to wait for it to be complete, set `params.await` to `true`.
      *
      * @param {Object} params
      * @param {function} [params.Notification] javascript class of a notification
@@ -68,6 +69,8 @@ var NotificationService = AbstractService.extend({
      * @param {string} [params.className] className to add on the dom
      * @param {function} [params.onClose] callback when the user click on the x
      *   or when the notification is auto close (no sticky)
+     * @param {boolean} [params.await=false] if true, the method will wait for
+     *   the appendTo method to complete.
      * @param {Object[]} params.buttons
      * @param {function} params.buttons[0].click callback on click
      * @param {Boolean} [params.buttons[0].primary] display the button as primary
@@ -82,8 +85,25 @@ var NotificationService = AbstractService.extend({
         }
         var NotificationWidget = params.Notification || Notification;
         var notification = this.notifications[++id] = new NotificationWidget(this, params);
-        notification.appendTo(this.$el);
-        return id;
+        if (params.await) {
+            return notification.appendTo(this.$el).then(function () {
+                return id;
+            });
+        } else {
+            notification.appendTo(this.$el);
+            return id;
+        }
+    },
+    /**
+     * It may sometimes be useful to get the notification element. For
+     * example, when part of the notification content needs to be updated such
+     * as a progress bar.
+     *
+     * @param {number} notificationId
+     * @returns {jQuery}
+     */
+    getElement: function (notificationId) {
+        return this.notifications[notificationId].$el;
     },
 
     //--------------------------------------------------------------------------
