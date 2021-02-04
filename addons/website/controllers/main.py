@@ -284,10 +284,12 @@ class Website(Home):
         return dynamic_filter
 
     @http.route('/website/snippet/filter_templates', type='json', auth='public', website=True)
-    def get_dynamic_snippet_templates(self, filter_id=False):
-        # todo: if filter_id.model -> filter template
+    def get_dynamic_snippet_templates(self, filter_name=False):
+        domain = [['key', 'ilike', '.dynamic_filter_template_'], ['type', '=', 'qweb']]
+        if filter_name:
+            domain.append(['key', 'ilike', r'\_%s\_' % filter_name])
         templates = request.env['ir.ui.view'].sudo().search_read(
-            [['key', 'ilike', '.dynamic_filter_template_'], ['type', '=', 'qweb']], ['key', 'name']
+            domain, ['key', 'name']
         )
         return templates
 

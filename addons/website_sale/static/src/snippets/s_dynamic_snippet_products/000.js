@@ -5,9 +5,24 @@ const config = require('web.config');
 const core = require('web.core');
 const publicWidget = require('web.public.widget');
 const DynamicSnippetCarousel = require('website.s_dynamic_snippet_carousel');
+var wSaleUtils = require('website_sale.utils');
 
 const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
     selector: '.s_dynamic_snippet_products',
+    read_events: {
+        'click .js_add_cart': '_onAddToCart',
+        'click .js_remove': '_onRemoveFromRecentlyViewed',
+    },
+
+    /**
+     * @constructor
+     */
+    start: function () {
+        if (!this.$el.get(0).dataset.productSource) {
+            this.$el.get(0).dataset.productSource = 'category';
+        }
+        this._super.apply(this, arguments);
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -20,7 +35,9 @@ const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
      * @private
      */
     _isConfigComplete: function () {
-        return this._super.apply(this, arguments) && this.$el.get(0).dataset.productCategoryId !== undefined;
+        const dataset = this.$el.get(0).dataset;
+        return this._super.apply(this, arguments) &&
+            (dataset.productSource !== 'category' || dataset.productCategoryId !== undefined);
     },
     /**
      *
@@ -44,11 +61,65 @@ const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
      */
     _getSearchDomain: function () {
         const searchDomain = this._super.apply(this, arguments);
-        const productCategoryId = parseInt(this.$el.get(0).dataset.productCategoryId);
-        if (productCategoryId >= 0) {
-            searchDomain.push(['public_categ_ids', 'child_of', productCategoryId]);
+        if (this.$el.get(0).dataset.productSource === 'category') {
+            const productCategoryId = parseInt(this.$el.get(0).dataset.productCategoryId);
+            if (productCategoryId >= 0) {
+                searchDomain.push(['public_categ_ids', 'child_of', productCategoryId]);
+            }
         }
         return searchDomain;
+    },
+    /**
+     * @override
+     */
+    _getRpcParameters: function () {
+        const productId = $("#product_details").find(".product_id");
+        return Object.assign(this._super.apply(this, arguments), {
+            productSource: this.$el.get(0).dataset.productSource || 'category',
+            productId: productId && productId.length ? productId[0].value : undefined,
+        });
+    },
+    /**
+     * Add product to cart and reload the carousel.
+     * @private
+     * @param {Event} ev
+     */
+    _onAddToCart: function (ev) {
+        var self = this;
+        var $card = $(ev.currentTarget).closest('.card');
+        this._rpc({
+            route: "/shop/cart/update_json",
+            params: {
+                product_id: $card.find('input[data-product-id]').data('product-id'),
+                add_qty: 1
+            },
+        }).then(function (data) {
+            wSaleUtils.updateCartNavBar(data);
+            var $navButton = $('header .o_wsale_my_cart').first();
+            var fetch = self._fetchData();
+            var animation = wSaleUtils.animateClone($navButton, $(ev.currentTarget).parents('.card'), 25, 40);
+            Promise.all([fetch, animation]).then(function (values) {
+                self._render();
+            });
+        });
+    },
+
+    /**
+     * Remove product from recently viewed products.
+     * @private
+     * @param {Event} ev
+     */
+    _onRemoveFromRecentlyViewed: function (ev) {
+        var self = this;
+        var $card = $(ev.currentTarget).closest('.card');
+        this._rpc({
+            route: "/shop/products/recently_viewed_delete",
+            params: {
+                product_id: $card.find('input[data-product-id]').data('product-id'),
+            },
+        }).then(function (data) {
+            self._fetchData().then(() => self._render());
+        });
     },
 
 });

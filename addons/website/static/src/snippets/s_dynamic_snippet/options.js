@@ -52,10 +52,11 @@ const dynamicSnippetOptions = options.Class.extend({
     /**
      * Fetch dynamic filters templates.
      * @private
+     * @param {String} filterName: gives the opportunity to subclasses to request a given set of templates
      * @returns {Promise}
      */
-    _fetchDynamicFilterTemplates: function () {
-        return this._rpc({route: '/website/snippet/filter_templates'});
+    _fetchDynamicFilterTemplates: function (filterName) {
+        return this._rpc({route: '/website/snippet/filter_templates', params: {filter_name: filterName}});
     },
     /**
      *

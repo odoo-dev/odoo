@@ -135,6 +135,8 @@ class WebsiteSnippetFilter(models.Model):
                 'image_fields': OrderedDict({}),
             }
             for field_name, field_widget in meta_data.items():
+                if field_name not in record:
+                    continue
                 value = record[field_name]
                 if field_widget in ('binary', 'image'):
                     data['image_fields'][field_name] = value
@@ -156,6 +158,8 @@ class WebsiteSnippetFilter(models.Model):
         for record in records:
             data = {}
             for field_name, field_widget in meta_data.items():
+                if field_name not in record:
+                    continue
                 value = record[field_name]
                 if field_widget in ('binary', 'image'):
                     data[field_name] = self.escape_falsy_as_empty(value)

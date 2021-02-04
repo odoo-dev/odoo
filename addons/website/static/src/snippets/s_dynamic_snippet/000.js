@@ -98,6 +98,13 @@ const DynamicSnippet = publicWidget.Widget.extend({
         return [];
     },
     /**
+     * Method to be overridden in child components in order to add custom parameters if needed.
+     * @private
+     */
+    _getRpcParameters: function () {
+        return {};
+    },
+    /**
      * Fetches the data.
      * @private
      */
@@ -106,13 +113,13 @@ const DynamicSnippet = publicWidget.Widget.extend({
             return this._rpc(
                 {
                     'route': '/website/snippet/filters',
-                    'params': {
+                    'params': Object.assign({
                         'filter_id': parseInt(this.$el.get(0).dataset.filterId),
                         'template_key': this.$el.get(0).dataset.templateKey,
                         'limit': parseInt(this.$el.get(0).dataset.numberOfRecords),
                         'search_domain': this._getSearchDomain(),
                         'with_sample': this.editableMode,
-                    },
+                    }, this._getRpcParameters()),
                 })
                 .then(
                     (data) => {

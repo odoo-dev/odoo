@@ -51,6 +51,14 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
         return this._super.apply(this, arguments);
     },
     /**
+     *
+     * @override
+     * @private
+     */
+    _fetchDynamicFilterTemplates: function (filterName) {
+        return this._super.apply(this, ['product']);
+    },
+    /**
      * Fetches product categories.
      * @private
      * @returns {Promise}
@@ -97,6 +105,10 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
         const templateKeys = this.$el.find("we-select[data-attribute-name='templateKey'] we-selection-items we-button");
         if (templateKeys.length > 0) {
             this._setOptionValue('templateKey', templateKeys.attr('data-select-data-attribute'));
+        }
+        const productSources = this.$el.find("we-select[data-attribute-name='productSource'] we-selection-items we-button");
+        if (productSources.length > 0) {
+            this._setOptionValue('productSource', productSources.attr('data-select-data-attribute'));
         }
         const productCategories = this.$el.find("we-select[data-attribute-name='productCategoryId'] we-selection-items we-button");
         if (productCategories.length > 0) {

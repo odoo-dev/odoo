@@ -10,7 +10,13 @@
             <t t-call="website.dynamic_snippet_carousel_options_template">
                 <t t-set="snippet_name" t-value="'dynamic_snippet_products'"/>
                 <t t-set="snippet_selector" t-value="'.s_dynamic_snippet_products'"/>
-                <we-select string="Product Category" data-name="product_category_opt" data-attribute-name="productCategoryId" data-no-preview="true">
+                <we-select string="Product Source" data-name="product_source_opt" data-attribute-name="productSource" data-no-preview="true">
+                    <we-button data-select-data-attribute="category" data-name="product_source_category_opt">Based on Category</we-button>
+                    <we-button data-select-data-attribute="recently_viewed">Recently Viewed</we-button>
+                    <we-button data-select-data-attribute="recently_sold_with">Recently Sold With</we-button>
+                    <we-button data-select-data-attribute="accessories">Accessories</we-button>
+                </we-select>
+                <we-select string="⌙ Category" data-name="product_category_opt" data-attribute-name="productCategoryId" data-no-preview="true" data-dependencies="product_source_category_opt"><!-- &emsp; -->
                     <we-button data-select-data-attribute="-1">All Products</we-button>
                 </we-select>
             </t>
