@@ -89,6 +89,22 @@ $.fn.extend({
         }
         return this;
     },
+    selectElement: function () {
+        if (this.length) {
+            const selection = document.getSelection();
+            selection.removeAllRanges();
+
+            const element = this[0];
+            const parent = element.parentNode;
+            const offsetStart = Array.from(parent.childNodes).indexOf(element);
+
+            const range = new Range();
+            range.setStart(parent, offsetStart);
+            range.setEnd(parent, offsetStart + 1);
+            selection.addRange(range);
+        }
+        return this;
+    },
 });
 
 var globalSelector = {
