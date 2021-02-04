@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="350" height="560" viewBox="0 0 350 560">
+  <defs>
+    <pattern id="image-1" width="1" height="1" patternUnits="objectBoundingBox">
+        <image width="157" height="120" href="#IMAGE-URL-1"/>
+    </pattern>
+    <pattern id="image-2" width="1" height="1" patternUnits="objectBoundingBox">
+        <image width="157" height="120" href="#IMAGE-URL-2"/>
+    </pattern>
+  </defs>
+  <g fill="none" fill-rule="evenodd" class="theme_test">
+    <rect width="700" height="1120" fill="#A1A1A1"/>
+    <g class="group" transform="translate(67 847)">
+      <rect width="282" height="225" x=".5" y=".5" fill="#000" stroke="#979797"/>
+      <rect width="282" height="225" x="283.5" y=".5" fill="#FFF" stroke="#979797"/>
+      <text fill="#3AADAA" class="text_cc1" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="76" y="39">CC1 TEXT</tspan>
+      </text>
+      <text fill="#7C6576" class="text_cc2" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="76" y="80">CC2 TEXT</tspan>
+      </text>
+      <text fill="#F6F6F6" class="text_cc3" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="76" y="121">CC3 TEXT</tspan>
+      </text>
+      <text fill="#FEFEFE" class="text_cc4" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="76" y="162">CC4 TEXT</tspan>
+      </text>
+      <text fill="#383E45" class="text_cc5" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="76" y="203">CC5 TEXT</tspan>
+      </text>
+      <text fill="#3AADAA" class="text_cc1" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="368" y="39">CC1 TEXT</tspan>
+      </text>
+      <text fill="#7C6576" class="text_cc2" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="368" y="80">CC2 TEXT</tspan>
+      </text>
+      <text fill="#F6F6F6" class="text_cc3" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="368" y="121">CC3 TEXT</tspan>
+      </text>
+      <text fill="#FEFEFE" class="text_cc4" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="368" y="162">CC4 TEXT</tspan>
+      </text>
+      <text fill="#383E45" class="text_cc5" font-family="Inter-Regular_Bold, Inter" font-size="22" font-weight="bold" letter-spacing=".095">
+        <tspan x="368" y="203">CC5 TEXT</tspan>
+      </text>
+    </g>
+    <rect width="100" height="100" x="-.25" fill="#3AADAA" class="bg_cc1"/>
+    <rect width="100" height="100" x="399.75" fill="#383E45" class="bg_cc5"/>
+    <rect width="100" height="100" x="99.75" fill="#7C6576" class="bg_cc2"/>
+    <rect width="100" height="100" x="299.75" fill="#FEFEFE" class="bg_cc4"/>
+    <rect width="100" height="100" x="199.75" fill="#F6F6F6" class="bg_cc3"/>
+    <rect width="157" height="120" x="74" y="153" fill="url(#image-1)"/>
+    <rect width="157" height="120" x="256" y="153" fill="url(#image-2)"/>
+
+  </g>
+</svg>

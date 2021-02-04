@@ -546,7 +546,6 @@ class Web_Editor(http.Controller):
                     svg = svg.replace('<svg ', '<svg style="transform: scaleY(-1)" ')
                 elif value == 'xy':
                     svg = svg.replace('<svg ', '<svg style="transform: scale(-1)" ')
-
         default_palette = {
             '1': '#3AADAA',
             '2': '#7C6576',
@@ -556,13 +555,14 @@ class Web_Editor(http.Controller):
         }
         color_mapping = {default_palette[palette_number]: color for color, palette_number in user_colors}
         # create a case-insensitive regex to match all the colors to replace, eg: '(?i)(#3AADAA)|(#7C6576)'
-        regex = '(?i)%s' % '|'.join('(%s)' % color for color in color_mapping.keys())
+        color_regex = '(?i)%s' % '|'.join('(%s)' % color for color in color_mapping.keys())
 
         def subber(match):
             key = match.group().upper()
             return color_mapping[key] if key in color_mapping else key
-        svg = re.sub(regex, subber, svg)
+        return subber
 
+        svg = re.sub(color_regex, subber, svg)
         return request.make_response(svg, [
             ('Content-type', 'image/svg+xml'),
             ('Cache-control', 'max-age=%s' % http.STATIC_CACHE_LONG),

@@ -78,7 +78,6 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
     session_init: function () {
         var self = this;
         var prom = this.session_reload();
-
         if (this.is_frontend) {
             return prom.then(function () {
                 return self.load_translations();
