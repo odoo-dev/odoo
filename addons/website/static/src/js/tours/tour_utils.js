@@ -253,6 +253,7 @@ function prepend_trigger(steps, prepend_text='') {
     return steps;
 }
 
+
 function registerThemeHomepageTour(name, steps) {
     tour.register(name, {
         url: "/?enable_editor=1",
