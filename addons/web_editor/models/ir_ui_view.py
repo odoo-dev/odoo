@@ -138,7 +138,7 @@ class IrUiView(models.Model):
         root.text = replacement.text
 
         # We need to replace some attrib for styles changes on the root element
-        for attribute in ('style', 'class'):
+        for attribute in ('style', 'class', 'src'):
             if attribute in replacement.attrib:
                 root.attrib[attribute] = replacement.attrib[attribute]
 

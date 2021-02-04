@@ -66,6 +66,7 @@
     <xpath expr="//link" position="before">
         <!-- Custom empty file for user custom bootstrap override -->
         <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/user_custom_bootstrap_overridden.scss"/>
+
     </xpath>
 </template>
 

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <!-- MAIN MENU -->
+    <menuitem name="Website Service"
+        id="website_service_main_menu"
+        sequence="65"
+        groups="base.group_user"/>
+
+    <!-- HEADER: Customization -->
+    <menuitem name="Customizations"
+        id="menu_website_service_customization"
+        sequence="1"
+        parent="website_service.website_service_main_menu"
+        groups="base.group_user"/>
+
+    <!-- HEADER: Industry -->
+    <menuitem name="Industries"
+        id="menu_website_service_industry"
+        sequence="2"
+        parent="website_service.website_service_main_menu"
+        groups="base.group_user"/>
+
+    <record model="ir.ui.view" id="view_customization_rule_tree">
+        <field name="name">website.customization.rule.tree</field>
+        <field name="model">website.customization.rule</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="snippet"/>
+                <field name="theme"/>
+                <field name="page"/>
+                <field name="location"/>
+            </tree>
+        </field>
+    </record>
+
+    <record  model="ir.ui.view" id="view_customization_rule_form">
+        <field name="name">website.customization.rule.form</field>
+        <field name="model">website.customization.rule</field>
+        <field name="arch" type="xml">
+            <form edit="1">
+                <sheet>
+                    <group>
+                        <field name="snippet"/>
+                        <field name="theme"/>
+                        <field name="page"/>
+                        <field name="location"/>
+                        <field name="xpath"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_customization_resource_tree">
+        <field name="name">website.customization.resource.tree</field>
+        <field name="model">website.customization.resource</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="snippet"/>
+                <field name="industry_id"/>
+                <field name="location"/>
+                <field name="resource_type"/>
+            </tree>
+        </field>
+    </record>
+
+    <record  model="ir.ui.view" id="view_customization_resource_form">
+        <field name="name">website.customization.resource.form</field>
+        <field name="model">website.customization.resource</field>
+        <field name="arch" type="xml">
+            <form edit="1">
+                <sheet>
+                    <group>
+                        <field name="snippet"/>
+                        <field name="industry_id"/>
+                        <field name="location"/>
+                        <field name="resource_type"/>
+                        <field name="resource_text" attrs="{'invisible': [('resource_type', '!=', 'text')]}"/>
+                        <field name="resource_image_id" widget="image" attrs="{'invisible': [('resource_type', '!=', 'img')]}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="website_service_customization_resource" model="ir.actions.act_window">
+        <field name="name">Customization Resource</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">website.customization.resource</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="website_service_customization_rule" model="ir.actions.act_window">
+        <field name="name">Customization Rules</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">website.customization.rule</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Customization Rules"
+        id="menu_customization_rule"
+        sequence="1"
+        parent="menu_website_service_customization"
+        action="website_service.website_service_customization_rule"/>
+
+    <menuitem name="Customization Resource"
+        id="menu_customization_resource"
+        sequence="2"
+        parent="menu_website_service_customization"
+        action="website_service.website_service_customization_resource"/>
+
+    <record model="ir.ui.view" id="view_industry_theme_link_tree">
+        <field name="name">website.industry.theme.link.tree</field>
+        <field name="model">website.industry.theme.link</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence"/>
+                <field name="industry_id"/>
+                <field name="theme_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="website_service_industry" model="ir.actions.act_window">
+        <field name="name">Industries</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">website.industry</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="website_service_industry_theme_link" model="ir.actions.act_window">
+        <field name="name">Industry-Theme Links</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">website.industry.theme.link</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Industries"
+        id="menu_industries"
+        sequence="1"
+        parent="menu_website_service_industry"
+        action="website_service.website_service_industry"/>
+
+    <menuitem name="Industry-Theme Links"
+        id="menu_industry_theme_link"
+        sequence="2"
+        parent="menu_website_service_industry"
+        action="website_service.website_service_industry_theme_link"/>
+
+    </data>
+</odoo>

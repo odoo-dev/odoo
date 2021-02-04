@@ -16,6 +16,7 @@ from odoo import api, fields, models, tools
 from odoo.addons.http_routing.models.ir_http import slugify, _guess_mimetype, url_for
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.portal.controllers.portal import pager
+from odoo.addons.iap.tools import iap_tools
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.modules.module import get_resource_path
@@ -63,6 +64,7 @@ class Website(models.Model):
     default_lang_id = fields.Many2one('res.lang', string="Default Language", default=_default_language, required=True)
     auto_redirect_lang = fields.Boolean('Autoredirect Language', default=True, help="Should users be redirected to their browser's language")
     cookies_bar = fields.Boolean('Cookies Bar', help="Display a customizable cookies bar on your website.")
+    survey_done = fields.Boolean('Survey Done')
 
     def _default_social_facebook(self):
         return self.env.ref('base.main_company').social_facebook
@@ -240,9 +242,9 @@ class Website(models.Model):
         attachments_to_unlink.unlink()
         return super(Website, self).unlink()
 
-    def create_and_redirect_to_theme(self):
+    def create_and_redirect_survey(self):
         self._force()
-        action = self.env.ref('website.theme_install_kanban_action')
+        action = self.env.ref('website.start_survey_act_url')
         return action.read()[0]
 
     # ----------------------------------------------------------
@@ -550,6 +552,115 @@ class Website(models.Model):
     # ----------------------------------------------------------
     # Utilities
     # ----------------------------------------------------------
+    def get_survey_logo(self):
+        if self.company_id.logo and self.company_id.logo != self.company_id._get_logo():
+            domain = [('res_model', '=', "res.partner"), ('res_field', '=', "image_1920"), ('company_id', '=', self.company_id.id)]
+            logo_attachment = self.env['ir.attachment'].sudo().search_read(domain, ['mimetype'], limit=1)
+            if logo_attachment:
+                return 'data:{};base64,{}'.format(logo_attachment[0]['mimetype'], self.company_id.logo.decode('utf-8'))
+        return False
+
+    def skip_survey(self):
+        self.survey_done = True
+        action_id = self.env['ir.model.data'].xmlid_to_res_id('website.theme_install_kanban_action')
+        return '/web#action={}&model=ir.module.module&view_type=kanban&cids={}'.format(action_id, self.company_id.id)
+
+    def call_iap_website_service(self, route, params):
+        endpoint = self.env['ir.config_parameter'].sudo().get_param('website.website_service_endpoint', 'https://iap-services.odoo.com') + route
+        return iap_tools.iap_jsonrpc(endpoint, params=params)
+
+    def get_recommended_themes(self, data):
+        params = {
+            'description': {
+                'industry_code': data['description']['industryCode']
+            }
+        }
+        iap_resp = self.call_iap_website_service('/website/recommended_themes', params)
+        theme_names = iap_resp.get('themes', [])
+        themes = []
+        for theme_name in theme_names:
+            theme_id = self.env['ir.module.module'].search([('name', '=', theme_name)])
+            if theme_id:
+                url = theme_id.image_ids.search([('url', 'like', 'screenshot'), ('url', 'like', theme_id.name)], limit=1).url
+                themes.append({
+                    'name': theme_id.name,
+                    'url': url,
+                    'id': theme_id.id
+                })
+        resp = {
+            'themes': themes
+        }
+        return resp
+
+    def customize_website(self, survey_data):
+
+        def install_app(app):
+            if app.state != 'installed':
+                app.button_install()
+
+        def customize_page(page_code, customized_snippets, pages_views):
+            if page_code == 'homepage':
+                page_view_id = self.homepage_id.view_id
+            else:
+                page_view_id = self.env['ir.ui.view'].browse(pages_views[page_code])
+            snippets = b''
+            customizations = []
+            for customized_snippet in customized_snippets:
+                snippet_key = customized_snippet['snippet_key']
+                try:
+                    view_id = self.env['website'].with_context(website_id=self.id).viewref(snippet_key)
+                    if view_id:
+                        snippets += view_id._render()
+                        customizations.extend(customized_snippet['customizations'])
+                except:
+                    logger.warning("View not found for key '%s'" % snippet_key)
+            page_view_id.save(value=snippets.decode('utf-8'), xpath="(//div[hasclass('oe_structure')])[last()]")
+            for customization in customizations:
+                try:
+                    if customization['type'] == 'text':
+                        page_view_id.save(value=customization['resource'], xpath=customization['xpath'])
+                    else:
+                        image_id = self.env['ir.attachment'].create({
+                            'name': customization['resource']['name'],
+                            'datas': customization['resource']['datas'],
+                            'type': 'binary',
+                        })
+                        if '/img' in customization['xpath']:
+                            customization_value = '<span src="/web/image/{}"/>'.format(image_id.id)
+                        else:
+                            url = "'/web/image/{}'".format(image_id.id)
+                            customization_value = '<span style="background-image: url({});"/>'.format(url)
+                        page_view_id.save(value=customization_value, xpath=customization['xpath'])
+                except:
+                    logger.warning("Customization '%s' failed" % customization['xpath'])
+
+        def set_features(selected_features):
+            feature_ids = self.env['website.survey.feature'].browse(selected_features)
+            pages_views = {}
+            for feature_id in feature_ids:
+                if feature_id.type == 'app' and feature_id.module_id:
+                    feature_id.module_id._button_immediate_function(install_app)
+                if feature_id.type == 'page' and feature_id.page_view_id:
+                    result = self.env['website'].new_page(name=feature_id.title, add_menu=True, template=feature_id.page_view_id.key)
+                    pages_views[feature_id.code] = result['view_id']
+            return pages_views
+
+        self.survey_done = True
+        logo = survey_data.get('logo')
+        if logo:
+            self.logo = logo.split(',', 1)[1]
+        pages_views = set_features(survey_data.get('selected_feautures'))
+        params = {
+            'data': {
+                'theme': survey_data.get('theme_name'),
+                'industry': survey_data.get('industry'),
+                'pages': list(pages_views.keys()),
+            }
+        }
+        custom_resources = self.call_iap_website_service('/website/custom_resources', params)
+        pages = custom_resources.get('pages', {})
+        for page_code, customized_snippets in pages.items():
+            customize_page(page_code, customized_snippets, pages_views)
 
     @api.model
     def get_current_website(self, fallback=True):

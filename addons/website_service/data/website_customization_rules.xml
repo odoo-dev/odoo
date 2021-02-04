@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="s_title__all__about_us__1" model="website.customization.rule">
+            <field name="snippet">s_title</field>
+            <field name="page">about_us</field>
+            <field name="theme">all</field>
+            <field name="xpath">//section[hasclass("s_title")]//h1//font</field>
+            <field name="location">1</field>
+        </record>
+        <record id="s_image__all__homepage__1" model="website.customization.rule">
+            <field name="snippet">s_picture</field>
+            <field name="page">homepage</field>
+            <field name="theme">all</field>
+            <field name="xpath">//section[hasclass('s_picture')]//img</field>
+            <field name="location">1</field>
+        </record>
+    </data>
+</odoo>

@@ -337,7 +337,7 @@ class IrModuleModule(models.Model):
             theme._theme_unload(website)
         website.theme_id = False
 
-    def button_choose_theme(self):
+    def button_choose_theme(self, survey_data=None):
         """
             Remove any existing theme on the current website and install the theme ``self`` instead.
 
@@ -359,6 +359,10 @@ class IrModuleModule(models.Model):
 
         # this will install 'self' if it is not installed yet
         self._theme_upgrade_upstream()
+
+        if survey_data:
+            survey_data['theme_name'] = self.name
+            website.customize_website(survey_data)
 
         active_todo = self.env['ir.actions.todo'].search([('state', '=', 'open')], limit=1)
         result = None
