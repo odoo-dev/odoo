@@ -301,7 +301,7 @@ QUnit.module(
       checkLegend(assert, graph, "Count");
       graph.destroy();
     });
-    QUnit.debug("displaying chart data with multiple groupbys", async function (assert) {
+    QUnit.skip("displaying chart data with multiple groupbys", async function (assert) {
       // this test makes sure the line chart shows all data labels (X axis) when
       // it is grouped by several fields
       assert.expect(6);
