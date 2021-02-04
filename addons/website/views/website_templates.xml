@@ -2410,4 +2410,31 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
     </tr>
 </template>
 
+<template id="website_survey_assets_js" name="Website Survey Asset JS">
+    <script type="text/javascript" src="/web/static/lib/owl/owl.js"/>
+    <script type="text/javascript" src="/website/static/src/components/survey/survey.js"/>
+</template>
+
+<template id="website_survey_assets_scss" name="Website Survey Asset SCSS" inherit_id="web.assets_frontend" primary="True">
+    <xpath expr="//link[last()]" position="after">
+        <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/survey.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/website.theme_install.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/website.wysiwyg.scss"/>
+    </xpath>
+</template>
+
+<template id="website_survey" name="Website Survey" inherit_id="web.frontend_layout" primary="True">
+    <xpath expr="//html" position="attributes">
+        <attribute name="lang"><t t-esc='lang'/></attribute>
+    </xpath>
+    <xpath expr="//head/t[@t-call-assets][last()]" position="after">
+        <t t-call-assets="website.website_survey_assets_js" lazy_load="True"/>
+    </xpath>
+    <xpath expr="//t[@t-call-assets='web.assets_frontend']" position="replace">
+        <t t-call-assets="website.website_survey_assets_scss" t-js="false"/>
+    </xpath>
+    <xpath expr="//nav" position="replace"/>
+    <xpath expr="//div[@id='wrapwrap']" position="replace"/>
+</template>
+
 </odoo>

@@ -176,4 +176,9 @@
     <script type="text/javascript" src="/website/static/src/js/widgets/ace.js"/>
 </template>
 
+<template id="website.survey_tour" inherit_id="website.assets_editor" priority="1000">
+    <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/website/static/src/js/tours/survey_tour.js"/>
+    </xpath>
+</template>
 </odoo>
