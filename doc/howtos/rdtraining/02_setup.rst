@@ -189,6 +189,7 @@ Install odoo requirements
     $ cd $HOME/src/odoo
     $ pip3 install -r requirements.txt
 
+.. _howto/rdtraining/02_setup/install-wkhtmltopdf:
 
 Install wkhtmltopdf
 -------------------
