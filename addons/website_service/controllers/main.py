@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import random
-import re
 
-from odoo import http, tools
+from odoo import http
 from odoo.http import request
-from odoo.modules.module import get_resource_path
+
 
 ILLUSTRATION_THEMES = ['theme_paptic', 'theme_cobalt']
 
@@ -56,77 +55,20 @@ SNIPPET_LISTS = {
 
 class WebsiteService(http.Controller):
 
-    @http.route('/website/industries', type='json', auth='public', csrf=False)
-    def website_get_industries(self, **kw):
-        industries = request.env['website.industry'].sudo().search_read([], ['name', 'label'])
-        return {
-            'industries': industries
-        }
-
-    def process_svg(self, theme, colors, images):
-        svg = None
-
-        shape_path = get_resource_path('website_service', 'static', 'shapes', '{}_preview.svg'.format(theme))
-        if not shape_path:
-            shape_path = get_resource_path('website_service', 'static', 'shapes', 'theme_bistro_preview.svg')
-            #raise werkzeug.exceptions.NotFound()
-        with tools.file_open(shape_path, 'r') as file:
-            svg = file.read()
-
-        default_colors = {
-            1: '#3AADAA',
-            2: '#7C6576',
-            3: '#F6F6F6',
-            4: '#FFFFFF',
-            5: '#383E45',
-        }
-        default_images = {
-            1: '#IMAGE-URL-1',
-            2: '#IMAGE-URL-2',
-        }
-
-        color_mapping = {default_colors[color_number]: color_value for color_number, color_value in colors.items()}
-        color_regex = '(?i)%s' % '|'.join('(%s)' % color for color in color_mapping.keys())
-        image_mapping = {default_images[image_number]: image_url for image_number, image_url in images.items()}
-        image_regex = '(?i)%s' % '|'.join('(%s)' % image for image in image_mapping.keys())
-
-        def subber_maker(mapping):
-            def subber(match):
-                key = match.group().upper()
-                return mapping[key] if key in mapping else key
-            return subber
-
-        svg = re.sub(color_regex, subber_maker(color_mapping), svg)
-        svg = re.sub(image_regex, subber_maker(image_mapping), svg)
-        return svg
-
     @http.route('/website/recommended_themes', type='json', auth='public', csrf=False)
-    def website_recommended_themes(self, palette=None, industry_name=None, **kw):
-        industry_id = request.env['website.industry'].sudo().search([('name', '=', industry_name)], limit=1)
+    def website_recommended_themes(self, description=None, **kw):
+        """
+        """
+        industry_code = description.get('industry_code', False)
+        industry_id = request.env['website.industry'].sudo().search([('name', '=', industry_code)], limit=1)
         themes = ['theme_avantgarde', 'theme_cobalt', 'theme_bistro']
-        
         if industry_id:
             link_ids = request.env['website.industry.theme.link'].sudo().search([('industry_id', '=', industry_id.id)])
             themes[:len(link_ids)] = [link_id.theme_id.name for link_id in link_ids]
         if not any([itheme in themes for itheme in ILLUSTRATION_THEMES]):
             themes[2] = random.choice(ILLUSTRATION_THEMES)
-        svg_colors = {}
-        if palette:
-            for k, v in palette.items():
-                color_match = re.match('^color([1-5])$', k)
-                if color_match:
-                    svg_colors[int(color_match.group(1))] = v
-        images = {
-            1: 'https://images.unsplash.com/photo-1615859499328-380adaffddb3?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=157&q=80',
-            2: 'https://images.unsplash.com/photo-1615859499328-380adaffddb3?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=157&q=80'
-        }
-        svgs = []
-        for theme in themes:
-            svg = self.process_svg(theme, svg_colors, images)
-            svgs.append(svg)
         return {
-            'themes': themes,
-            'svgs': svgs
+            'themes': themes
         }
 
     def get_snippet_list(self, page_code, theme):

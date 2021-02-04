@@ -297,6 +297,10 @@
             <field name="sequence">1</field>
             <field name="page_view_id" ref="aboutus"/>
             <field name="type">page</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-building</field>
+>>>>>>> tmp
         </record>
         <record id="page_our_services" model="website.survey.feature">
             <field name="title">Our Services</field>
@@ -305,6 +309,10 @@
             <field name="sequence">3</field>
             <field name="page_view_id" ref="our_services"/>
             <field name="type">page</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-handshake-o</field>
+>>>>>>> tmp
         </record>
         <record id="page_pricing" model="website.survey.feature">
             <field name="title">Pricing</field>
@@ -313,6 +321,10 @@
             <field name="sequence">4</field>
             <field name="page_view_id" ref="pricing"/>
             <field name="type">page</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-random</field>
+>>>>>>> tmp
         </record>
         <record id="page_privacy_policy" model="website.survey.feature">
             <field name="title">Privacy Policy</field>
@@ -321,6 +333,10 @@
             <field name="sequence">5</field>
             <field name="page_view_id" ref="privacy_policy"/>
             <field name="type">page</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-gavel</field>
+>>>>>>> tmp
         </record>
         <record id="app_news" model="website.survey.feature">
             <field name="title">News</field>
@@ -329,6 +345,10 @@
             <field name="website_type">blog</field>
             <field name="module_id" ref="base.module_website_blog"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-rss</field>
+>>>>>>> tmp
         </record>
         <record id="app_success_stories" model="website.survey.feature">
             <field name="title">Success Stories</field>
@@ -336,6 +356,10 @@
             <field name="sequence">7</field>
             <field name="module_id" ref="base.module_website_blog"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-star</field>
+>>>>>>> tmp
         </record>
         <record id="app_career" model="website.survey.feature">
             <field name="title">Career</field>
@@ -343,6 +367,10 @@
             <field name="sequence">8</field>
             <field name="module_id" ref="base.module_website_hr_recruitment"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-address-card</field>
+>>>>>>> tmp
         </record>
         <record id="app_shop" model="website.survey.feature">
             <field name="title">Shop</field>
@@ -351,6 +379,10 @@
             <field name="website_type">online_store</field>
             <field name="module_id" ref="base.module_website_sale"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-shopping-cart</field>
+>>>>>>> tmp
         </record>
         <record id="app_event" model="website.survey.feature">
             <field name="title">Events</field>
@@ -359,6 +391,10 @@
             <field name="website_type">event</field>
             <field name="module_id" ref="base.module_website_event"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-ticket</field>
+>>>>>>> tmp
         </record>
         <record id="app_forum" model="website.survey.feature">
             <field name="title">Forum</field>
@@ -366,6 +402,10 @@
             <field name="sequence">11</field>
             <field name="module_id" ref="base.module_website_forum"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-users</field>
+>>>>>>> tmp
         </record>
         <record id="app_live_chat" model="website.survey.feature">
             <field name="title">Live Chat</field>
@@ -373,6 +413,10 @@
             <field name="sequence">12</field>
             <field name="module_id" ref="base.module_website_livechat"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-comments</field>
+>>>>>>> tmp
         </record>
         <record id="app_elearning" model="website.survey.feature">
             <field name="title">eLearning</field>
@@ -381,6 +425,10 @@
             <field name="website_type">elearning</field>
             <field name="module_id" ref="base.module_website_slides"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-graduation-cap</field>
+>>>>>>> tmp
         </record>
         <record id="app_stores_locator" model="website.survey.feature">
             <field name="title">Stores Locator</field>
@@ -388,6 +436,10 @@
             <field name="sequence">15</field>
             <field name="module_id" ref="base.module_website_google_map"/>
             <field name="type">app</field>
+<<<<<<< HEAD
+=======
+            <field name="icon">fa-map-marker</field>
+>>>>>>> tmp
         </record>
     </data>
     <data noupdate="1">

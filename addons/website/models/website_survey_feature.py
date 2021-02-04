@@ -10,9 +10,8 @@ class WebsiteSurveyFeature(models.Model):
     _description = "Website Survey Feature"
     _order = 'sequence'
 
-    title = fields.Char(translate=True)
-    description = fields.Char(translate=True)
-    icon = fields.Char()
+    title = fields.Char()
+    description = fields.Char()
     code = fields.Char()
     website_type = fields.Char()
     type = fields.Selection([('page', 'Page'), ('app', 'App')])

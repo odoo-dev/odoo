@@ -1,4 +1,4 @@
-odoo.define("website.tour_utils", async function (require) {
+odoo.define("website.tour_utils", function (require) {
 "use strict";
 
 const core = require("web.core");
@@ -217,10 +217,10 @@ function goBackToBlocks(position = "bottom") {
     };
 }
 
-function goToTheme(position = "bottom") {
+function goToOptions(position = "bottom") {
     return {
         trigger: '.o_we_customize_theme_btn',
-        content: _t("Go to the Theme tab"),
+        content: _t("Go to the Options tab"),
         position: position,
         run: "click",
     };
@@ -253,95 +253,31 @@ function prepend_trigger(steps, prepend_text='') {
     return steps;
 }
 
-const snippets = [
-    {
-        id: 's_cover',
-        name: 'Cover',
-    },
-    {
-        id: 's_text_image',
-        name: 'Text - Image',
-    },
-    {
-        id: 's_banner',
-        name: 'Banner',
-    },
-    {
-        id: 's_carousel',
-        name: 'Carousel',
-    },
-    {
-        id: 's_images_wall',
-        name: 'Images Wall',
-    },
-    {
-        id: 's_masonry_block',
-        name: 'Masonry',
-    },
-    {
-        id: 's_picture',
-        name: 'Picture',
-    },
-    {
-        id: 's_text_image',
-        name: 'Image - Text',
-    },
-];
-
-const themeSnippets = {
-    'anelusia_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[4]},
-    'beauty_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[1]},
-    'monglia_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[1]},
-    'bewise_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[1]},
-    'bistro_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[7]},
-    'clean_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[1]},
-    'graphene_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[1]},
-    'kea_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[6]},
-    'loftspace_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[6]},
-    'orchid_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[7]},
-    'treehouse_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[7]},
-    'vehicle_tour': {title: {snippet: snippets[0], element: 'h1'}, image: snippets[1]},
-    'paptic_tour': {title: {snippet: snippets[1], element: 'h2'}, image: snippets[7]},
-    'cobalt_tour': {title: {snippet: snippets[1], element: 'h2'}, image: snippets[7]},
-    'artists_tour': {title: {snippet: snippets[1], element: 'h2'}, image: snippets[1]},
-    'enark_tour': {title: {snippet: snippets[2], element: 'h1'}, image: snippets[1]},
-    'kiddo_tour': {title: {snippet: snippets[2], element: 'h1'}, image: snippets[7]},
-    'odoo_experts_tour': {title: {snippet: snippets[2], element: 'h1'}, image: snippets[7]},
-    'real_estate_tour': {title: {snippet: snippets[2], element: 'h1'}, image: snippets[7]},
-    'zap_tour': {title: {snippet: snippets[2], element: 'h1'}, image: snippets[5]},
-    'avantgarde_tour': {title: {snippet: snippets[2], element: 'h1'}, image: snippets[1]},
-    'bookstore_tour': {title: {snippet: snippets[2], element: 'h1'}, image: snippets[6]},
-    'nano_tour': {title: {snippet: snippets[3], element: 'h2'}, image: snippets[7]},
-    'yes_tour': {title: {snippet: snippets[3], element: 'h2'}, image: snippets[6]},
-    'notes_tour': {title: {snippet: snippets[3], element: 'h2'}, image: snippets[7]},
-};
-
-function getSurveyTourSteps(name) {
-    const {title, image} = themeSnippets[name];
+// TODO: use a generic tour when survey has been completed
+function getSurveyTourSteps() {
     return [
-        clickOnText(title.snippet, title.element),
-        changeBackgroundColor(),
-        changeImage(image),
-        clickOnSave(),
+        goBackToBlocks(),
+        goToOptions(),
     ];
 }
 
-const surveyState = await rpc.query({
-    model: 'website',
-    method: 'get_survey_state',
-});
-
-function registerThemeHomepageTour(name, steps) {
-    const tourSteps = surveyState === 'done' && name !== 'homepage' ? getSurveyTourSteps(name) : steps;
-    tour.register(name, {
-        url: "/?enable_editor=1",
-        sequence: 1010,
-        saveAs: "homepage",
-    }, prepend_trigger(
-        tourSteps,
-        "html[data-view-xmlid='website.homepage'] "
-    ));
+async function registerThemeHomepageTour(name, steps) {
+    await rpc.query({
+        model: 'website',
+        method: 'get_survey_state',
+    }).then((surveyState) => {
+        const tourSteps = surveyState === 'done' ? getSurveyTourSteps() : steps;
+        tour.register(name, {
+            url: "/?enable_editor=1",
+            sequence: 1010,
+            saveAs: "homepage",
+        }, prepend_trigger(
+            tourSteps,
+            "html[data-view-xmlid='website.homepage'] "
+        ));
+    });
 }
+
 
 return {
     addMedia,
@@ -358,7 +294,7 @@ return {
     clickOnText,
     dragNDrop,
     goBackToBlocks,
-    goToTheme,
+    goToOptions,
     selectColorPalette,
     selectHeader,
     selectNested,

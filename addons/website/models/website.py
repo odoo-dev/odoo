@@ -567,11 +567,6 @@ class Website(models.Model):
         return False
 
     @api.model
-    def get_survey_industries(self):
-        resp = self.call_iap_website_service('/website/industries', {})     
-        return resp['industries']
-
-    @api.model
     def get_survey_state(self):
         website = self.get_current_website()
         return website.survey_state
@@ -587,22 +582,26 @@ class Website(models.Model):
 
     def get_recommended_themes(self, data):
         params = {
-            'industry_name': data.get('industryName'),
-            'palette': data.get('palette'),
+            'description': {
+                'industry_code': data['description']['industryCode']
+            }
         }
         iap_resp = self.call_iap_website_service('/website/recommended_themes', params)
         theme_names = iap_resp.get('themes', [])
-        svgs = iap_resp.get('svgs', [])
         themes = []
-        for theme_name, svg in zip(theme_names, svgs):
+        for theme_name in theme_names:
             theme_id = self.env['ir.module.module'].search([('name', '=', theme_name)])
             if theme_id:
+                url = theme_id.image_ids.search([('url', 'like', 'screenshot'), ('url', 'like', theme_id.name)], limit=1).url
                 themes.append({
-                    'id': theme_id.id,
                     'name': theme_id.name,
-                    'svg': svg
+                    'url': url,
+                    'id': theme_id.id
                 })
-        return themes
+        resp = {
+            'themes': themes
+        }
+        return resp
 
     def customize_website(self, survey_data):
 
