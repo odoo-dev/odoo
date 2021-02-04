@@ -75,21 +75,6 @@
                 </ul>
             </div>
 
-            <div id="colorInputButtonGroup" class="btn-group">
-                <label id="foreColor" htmlFor="foreColorInput">
-                    <input id="foreColorInput" type="color" name="foreColor" />
-                    <div class="btn color-button">
-                        <i class="fa fa-font color-indicator fore-color"></i>
-                    </div>
-                </label>
-                <label id="hiliteColor" htmlFor="hiliteColorInput">
-                    <input id="hiliteColorInput" type="color" name="hiliteColor"/>
-                    <div class="btn color-button">
-                        <i class="fa fa-paint-brush color-indicator hilite-color"></i>
-                    </div>
-                </label>
-            </div>
-
             <div id="justify" class="btn-group dropdown">
                 <button type="button" class="btn btn-sm dropdown-toggle"
                     data-toggle="dropdown" title="" tabindex="-1"
@@ -103,6 +88,25 @@
                         <div id="justifyRight" class="btn"><i class="fa fa-align-right fa-fw"></i></div>
                         <div id="justifyFull" class="btn"><i class="fa fa-align-justify fa-fw"></i></div>
                     </div>
+                </div>
+            </div>
+
+            <div id="link" class="btn-group">
+                <div id="media-modal" title="Insert or edit media" class="fa fa-file-image-o fa-fw btn editor-ignore"></div>
+                <div id="createLink" title="Link" class="fa fa-link fa-fw btn"></div>
+                <a id="media-description" href="#" title="Edit media description" class="btn editor-ignore">Description</a>
+            </div>
+
+            <div id="table" class="btn-group dropdown">
+                <button type="button" class="btn btn-sm dropdown-toggle"
+                    data-toggle="dropdown" title="" tabindex="-1"
+                    data-original-title="Table" aria-expanded="false"
+                    id="tableDropdownButton">
+                    <i class="fa fa-table fa-fw"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <div class="tablepicker"></div>
+                    <div class="tablepicker-size">1x1</div>
                 </div>
             </div>
 
@@ -121,23 +125,19 @@
                 </div>
             </div>
 
-            <div id="table" class="btn-group dropdown">
-                <button type="button" class="btn btn-sm dropdown-toggle"
-                    data-toggle="dropdown" title="" tabindex="-1"
-                    data-original-title="Table" aria-expanded="false"
-                    id="tableDropdownButton">
-                    <i class="fa fa-table fa-fw"></i>
-                </button>
-                <div class="dropdown-menu">
-                    <div class="tablepicker"></div>
-                    <div class="tablepicker-size">1x1</div>
-                </div>
-            </div>
-
-            <div id="link" class="btn-group">
-                <div id="media-modal" title="Insert or edit media" class="fa fa-file-image-o fa-fw btn editor-ignore"></div>
-                <div id="createLink" title="Link" class="fa fa-link fa-fw btn"></div>
-                <a id="media-description" href="#" title="Edit media description" class="btn editor-ignore">Description</a>
+            <div id="colorInputButtonGroup" class="btn-group">
+                <label id="foreColor" htmlFor="foreColorInput">
+                    <input id="foreColorInput" type="color" name="foreColor" />
+                    <div class="btn color-button">
+                        <i class="fa fa-font color-indicator fore-color"></i>
+                    </div>
+                </label>
+                <label id="hiliteColor" htmlFor="hiliteColorInput">
+                    <input id="hiliteColorInput" type="color" name="hiliteColor"/>
+                    <div class="btn color-button">
+                        <i class="fa fa-paint-brush color-indicator hilite-color"></i>
+                    </div>
+                </label>
             </div>
         </div>
     </t>

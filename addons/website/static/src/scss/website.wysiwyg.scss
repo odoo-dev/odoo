@@ -68,9 +68,8 @@
         background: transparent;
         margin-top: 10px;
         padding: 0 8px 0 13px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: auto auto auto;
 
         &::before {
             border: none !important;
