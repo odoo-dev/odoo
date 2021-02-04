@@ -403,7 +403,8 @@ const Wysiwyg = Widget.extend({
             Wysiwyg.setRange(range.sc, range.so, range.ec, range.eo);
         }
 
-        const mediaDialog = new weWidgets.MediaDialog(this, params, $(params.node).clone());
+        const mediaParams = Object.assign({}, this.options.mediaModalParams, params);
+        const mediaDialog = new weWidgets.MediaDialog(this, mediaParams, $(params.node).clone());
         mediaDialog.open();
 
         mediaDialog.on('save', this, function(element) {
