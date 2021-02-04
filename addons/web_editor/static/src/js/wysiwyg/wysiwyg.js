@@ -93,15 +93,20 @@ const Wysiwyg = Widget.extend({
 
         this._configureToolbar(options);
 
-        this.$editable.on('dblclick','img,.fa', function(e){
+        this.$editable.on('click','.o_image, .media_iframe_video', (e) => e.preventDefault());
+
+        this.$editable.on('dblclick','img, .fa, .o_image, .media_iframe_video', function() {
             const $el = $(this);
-            let params = {"node" : $el};
+            let params = {node: $el};
+            $el.selectElement();
+
             if( $el.is('.fa')) {
                 // save layouting classes from icons to not break the page if you edit an icon
                 params.htmlClass = [...$el[0].classList].filter((className) => {
                     return !className.startsWith('fa') || faZoomClassRegex.test(className);
                 }).join(' ');
             }
+
             self.openMediaDialog(params);
         });
 
@@ -112,14 +117,6 @@ const Wysiwyg = Widget.extend({
                 selectorEditableArea: '.o_editable',
             }, options));
             this._insertSnippetMenu();
-
-            this.snippetsMenu.on('update_customize_elements', this, (e) => {
-                this.altTools && this.altTools.destroy();
-                this.altTools = undefined;
-                this.lastTargetedElement = e.target.$target
-                // only show the description button in the toolbar if the current selected snippet is an image
-                $("#media-description").toggle(this.lastTargetedElement.is('img'));
-            });
         }
 
         return _super.apply(this, arguments).then(() => {
@@ -382,8 +379,7 @@ const Wysiwyg = Widget.extend({
             this.altTools.destroy();
             this.altTools = undefined;
         } else {
-            const img = params.node ? params.node : this.lastTargetedElement;
-            this.altTools = new weWidgets.AltTools(this, params, img);
+            this.altTools = new weWidgets.AltTools(this, params, params.node);
             this.altTools.appendTo(this.toolbar.$el);
         }
         this.toolbar.$el.find('#media-description').toggleClass('active', !!this.altTools);
@@ -407,19 +403,16 @@ const Wysiwyg = Widget.extend({
             Wysiwyg.setRange(range.sc, range.so, range.ec, range.eo);
         }
 
-        const $baseNode = params.node ? params.node : this.lastTargetedElement;
-        const mediaDialog = new weWidgets.MediaDialog(this, params, $baseNode);
+        const mediaDialog = new weWidgets.MediaDialog(this, params, $(params.node).clone());
         mediaDialog.open();
 
         mediaDialog.on('save', this, function(element) {
             // restore saved html classes
-            if (params.htmlClass) {element.className += " " + params.htmlClass;}
-            if (this.lastTargetedElement.is('img') || params.node) {
-                $baseNode.replaceWith(element.outerHTML);
-            } else {
-                restoreSelection();
-                document.execCommand('insertHTML', false, element.outerHTML);
+            if (params.htmlClass) {
+                element.className += " " + params.htmlClass;
             }
+            restoreSelection();
+            this.odooEditor.execCommand('insertHTML', element.outerHTML);
         });
         mediaDialog.on('closed', this,  function() {
             // if the mediaDialog content has been saved
