@@ -1,11 +1,20 @@
 /** @odoo-module **/
-import { GraphModel, DEFAULT_MEASURE } from "./graph_model";
+import {
+  GraphModel,
+  DEFAULT_MEASURE,
+  MODES,
+  ORDERS,
+  DEFAUL_ORDER,
+  DEFAULT_MODE,
+} from "./graph_model";
 import { GROUPABLE_TYPES, rankInterval } from "../view_utils/search_utils";
 const { Component, hooks } = owl;
 import { sortBy } from "../../utils/arrays";
 import { useSearch, useSetupView } from "../view_utils/hooks";
 import { useService } from "../../core/hooks";
 import { _lt } from "../../services/localization";
+import { processGraphViewDescription } from "./graph_arch_processor";
+import { getGroupBy } from "../view_utils/group_by";
 const { useState, useRef } = hooks;
 const COLORS = [
   "#1f77b4",
@@ -88,18 +97,35 @@ export const VIEW_DEFAULT_PROPS = {
   isEmbedded: false,
   isSample: false,
 };
+export const VIEW_PROPS = {
+  action: Object, // not sure yet
+  fields: { type: Object, elements: Object }, // more precision on elements...
+  modelName: String,
+  isEmbedded: Boolean,
+  isSample: Boolean,
+};
 export const GRAPH_DEFAULT_PROPS = {
   ...VIEW_DEFAULT_PROPS,
   activeMeasure: DEFAULT_MEASURE,
   additionalMeasures: [],
   disableLinking: false,
   groupBy: [],
-  mode: "bar",
-  order: null,
+  mode: DEFAULT_MODE,
+  order: DEFAUL_ORDER,
   stacked: true,
-  title: "Undefined",
+  title: "Undefined", // we should be sure it is in translated term in one way or other
 };
-_lt("Undefined"); // for script analysis
+export const GRAPH_PROPS = {
+  ...VIEW_PROPS,
+  activeMeasure: String,
+  additionalMeasures: { type: Array, elements: String },
+  disableLinking: Boolean,
+  groupBy: { type: Array, elements: String },
+  mode: { validate: (m) => MODES.includes(m) },
+  order: { validate: (o) => ORDERS.includes(o) },
+  stacked: Boolean,
+  title: String,
+};
 export class GraphView extends Component {
   constructor() {
     super(...arguments);
@@ -114,7 +140,7 @@ export class GraphView extends Component {
     this.tooltip = null;
     this.legendTooltip = null;
     this.noDataLabel = [this.env._t("No data")]; // compliqué...
-    // sampleDataTargets = [".o_graph_canvas_container"];
+    // sampleDataTargets = [".o_graph_canvas_container"]; // was used for sample data
     this.state = useState(
       Object.assign(
         {
@@ -139,6 +165,7 @@ export class GraphView extends Component {
         return this.state;
       },
     });
+
     const fields = this.props.fields;
     for (const fieldName in fields) {
       const field = fields[fieldName];
@@ -160,41 +187,26 @@ export class GraphView extends Component {
     }
     fields.__count__ = { string: this.env._t("Count"), type: "integer" };
     this.fields = fields;
+
     const { groupBy } = this.searchModel;
-    let initialGroupBy;
     if (this.props.state && this.props.state.groupBy) {
-      initialGroupBy = this.props.state.groupBy;
+      this.initialGroupBy = this.props.state.groupBy;
     } else if (groupBy && groupBy.length) {
-      initialGroupBy = groupBy;
+      this.initialGroupBy = groupBy;
     } else {
-      initialGroupBy = this.props.groupBy;
+      this.initialGroupBy = this.props.groupBy.map((gb) => getGroupBy(gb, this.fields));
     }
-    this.groupBy = [];
-    for (const gb of initialGroupBy) {
-      const { fieldName, interval } = gb;
-      if (!(fieldName in this.groupableFields)) {
-        continue; // or crash?
-      }
-      const index = this.groupBy.findIndex((gb) => gb.fieldName === fieldName);
-      if (index > -1) {
-        if (interval && initialGroupBy[index]) {
-          const registeredInterval = initialGroupBy[index].interval;
-          if (rankInterval(registeredInterval) > rankInterval(interval)) {
-            this.groupBy.splice(index, 1, gb);
-          }
-        }
-      } else {
-        this.groupBy.push(gb);
-      }
-    }
-    this.initialGroupBy = this.groupBy;
+
+    this.groupBy = this.processGroupBy(this.initialGroupBy);
+    this.initialGroupBy = this.groupBy; // ? keep this ?
+
     if (!(this.state.activeMeasure in this.fields)) {
       this.state.activeMeasure = DEFAULT_MEASURE; // or crash?
     }
     // sort measures for measure menu
     // there was a params.withButtons for the pie chart widget;
     this.model = new GraphModel(this._modelService, {
-      modelName: this.props.model,
+      modelName: this.props.modelName,
       fields: this.fields,
     });
   }
@@ -258,6 +270,28 @@ export class GraphView extends Component {
     this.state.order = this.state.order === order ? null : order;
     this.loadModel();
   }
+  processGroupBy(groupBy) {
+    const processedGroupBy = [];
+    for (const gb of groupBy) {
+      const { fieldName, interval } = gb;
+      if (!(fieldName in this.groupableFields)) {
+        continue; // or crash?
+      }
+      const index = processedGroupBy.findIndex((gb) => gb.fieldName === fieldName);
+      if (index > -1) {
+        if (interval && groupBy[index]) {
+          const registeredInterval = groupBy[index].interval;
+          if (rankInterval(registeredInterval) > rankInterval(interval)) {
+            processedGroupBy.splice(index, 1, gb);
+          }
+        }
+      } else {
+        processedGroupBy.push(gb);
+      }
+    }
+    return processedGroupBy;
+  }
+
   // //---------------------------------------------------------------------
   // // Private
   // //---------------------------------------------------------------------
@@ -836,3 +870,5 @@ GraphView.icon = "fa-bar-chart";
 GraphView.multiRecord = true;
 GraphView.template = "wowl.GraphView";
 GraphView.defaultProps = GRAPH_DEFAULT_PROPS;
+GraphView.props = GRAPH_PROPS;
+GraphView.processArch = processGraphViewDescription;

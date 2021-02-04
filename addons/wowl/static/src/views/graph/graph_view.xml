@@ -22,7 +22,7 @@
     </div>
 
     <t t-name="wowl.GraphView.MeasureMenu" owl="1">
-        <Dropdown t-on-dropdown-item-selected.stop="onMeasureSelected">
+        <Dropdown t-on-dropdown-item-selected="onMeasureSelected">
             Measures
             <t t-set-slot="menu">
                 <t t-foreach="Object.values(measures)" t-as="measure" t-key="measure.fieldName">
@@ -40,7 +40,7 @@
 
     <t t-name="wowl.GraphView.GroupByMenu" owl="1">
         <!-- reuse the "true" GroupBy menu in some way or the "control panel model" via a specific arch??? we could pass an generarted search arch (in which form???)-->
-        <!-- idea could we have arch in slot views??? (view Form, dashboards,...) -->   
+        <!-- idea could we have arch in slot views??? (view Form, dashboards,...) -->
         <Dropdown>
             Group By
         </Dropdown>
@@ -109,10 +109,10 @@
                 </div>
             </t>
             <t t-slot="default"> <!-- t-set-slot does not work here ??? -->
-                <label t-if="props.title" t-esc="props.title"/>
-                <t t-if="model.noContentHelperData" t-call="wowl.NoContentHelper">
-                    <t t-set="title" t-value="model.noContentHelperData.title"/>
-                    <t t-set="description" t-value="model.noContentHelperData.description"/>
+                <label t-if="title" t-esc="title"/>
+                <t t-if="model.displayNoContentHelper" t-call="wowl.NoContentHelper">
+                    <t t-set="title">Invalid data</t>
+                    <t t-set="description">Pie chart cannot mix positive and negative numbers. Try to change your domain to only display positive results</t>
                 </t>
                 <t t-else="">
                     <t t-if="props.isSample and !props.isEmbedded and props.noContentHelp" t-call="wowl.ActionHelper">

@@ -1,6 +1,5 @@
 /** @odoo-module **/
 import { evaluateExpr } from "../../py/index";
-import { getGroupBy } from "../view_utils/group_by";
 import { GROUPABLE_TYPES } from "../view_utils/search_utils";
 import { MODES, ORDERS } from "./graph_model";
 export function processGraphViewDescription(searchViewDescription) {
@@ -61,12 +60,11 @@ function parseXML(node, data) {
         } else {
           const { type } = data.fields[fieldName]; // exists (rng validation)
           if (GROUPABLE_TYPES.includes(type)) {
-            let gb = fieldName;
+            let groupBy = fieldName;
             const interval = node.getAttribute("interval");
             if (interval) {
-              gb += `:${interval}`;
+              groupBy += `:${interval}`;
             }
-            const groupBy = getGroupBy(gb, data.fields);
             data.groupBy.push(groupBy);
           }
         }

@@ -4,22 +4,24 @@ import { _lt } from "../../services/localization";
 const { core } = owl;
 const { EventBus } = core;
 const UNDEFINED = _lt("Undefined");
-const NO_CONTENT_HELPER_TITLE = _lt("Invalid data");
-const NO_CONTENT_HELPER_DESCRIPTION = _lt(
-  "Pie chart cannot mix positive and negative numbers. Try to change your domain to only display positive results"
-);
 export const DEFAULT_MEASURE = "__count__";
+export const MODES = ["bar", "line", "pie"];
+export const DEFAULT_MODE = "bar";
+export const ORDERS = ["ASC", "DESC", null];
+export const DEFAUL_ORDER = null;
 const DEFAULT_LOAD_PARAMS = {
   activeMeasure: DEFAULT_MEASURE,
   domains: [[]],
   groupBy: [],
-  mode: "bar",
-  order: null,
+  mode: DEFAULT_MODE,
+  order: DEFAUL_ORDER,
 };
-export const MODES = ["bar", "line", "pie"];
-export const ORDERS = ["ASC", "DESC", null];
-// to remove in some way
+
+// to remove in some way? could be replaced by a relaballing function sent in data
 export class DateClasses {
+  /**
+   * @param {(any[])[]} array
+   */
   constructor(array) {
     this.__referenceIndex = null;
     this.__array = array;
@@ -30,9 +32,18 @@ export class DateClasses {
       }
     }
   }
+  /**
+   * @param {number} index
+   * @param {any} o
+   * @returns {string}
+   */
   classLabel(index, o) {
     return `${this.__array[index].indexOf(o)}`;
   }
+  /**
+   * @param {string} classLabel
+   * @returns {any[]}
+   */
   classMembers(classLabel) {
     const classNumber = Number(classLabel);
     const classMembers = new Set();
@@ -43,14 +54,23 @@ export class DateClasses {
     }
     return [...classMembers];
   }
+  /**
+   * @param {string} classLabel
+   * @param {number} [index]
+   * @returns {any}
+   */
   representative(classLabel, index) {
     const classNumber = Number(classLabel);
     const i = index === undefined ? this.__referenceIndex : index;
-    if (!i) {
+    if (i === null) {
       return null;
     }
     return this.__array[i][classNumber];
   }
+  /**
+   * @param {number} index
+   * @returns {number}
+   */
   arrayLength(index) {
     return this.__array[index].length;
   }
@@ -59,7 +79,7 @@ export class GraphModel extends EventBus {
   constructor(modelService, params) {
     super();
     this.dataPoints = [];
-    this.noContentHelperData = null;
+    this.displayNoContentHelper = false;
     this.data = null;
     this.dateClasses = null;
     this.loadParams = {};
@@ -123,20 +143,17 @@ export class GraphModel extends EventBus {
    * Determines whether the data are good, and displays an error message
    * if this is not the case.
    */
-  getNoContentHelper(processedDataPoints) {
+  checkDataValidity(processedDataPoints) {
     // for now it is useless --> see filterDataPoints --> (not really import) bug in stable
     if (this.loadParams.mode === "pie") {
       const dataPoints = processedDataPoints;
       const someNegative = dataPoints.some((dataPt) => dataPt.value < 0);
       const somePositive = dataPoints.some((dataPt) => dataPt.value > 0);
       if (someNegative && somePositive) {
-        return {
-          title: NO_CONTENT_HELPER_TITLE.toString(),
-          description: NO_CONTENT_HELPER_DESCRIPTION.toString(),
-        };
+        return true;
       }
     }
-    return null;
+    return false;
   }
   /**
    * Sorts datapoints according to the current order (ASC or DESC).
@@ -273,14 +290,14 @@ export class GraphModel extends EventBus {
   }
   prepareChartData() {
     const processedDataPoints = this.processDataPoints();
-    this.noContentHelperData = this.getNoContentHelper(processedDataPoints);
-    if (this.noContentHelperData) {
+    this.displayNoContentHelper = this.checkDataValidity(processedDataPoints);
+    if (this.displayNoContentHelper) {
       this.dateClasses = null;
       this.data = null;
     } else {
       this.dateClasses =
         this.comparisonIndex === 0 ? null : this.getDateClasses(processedDataPoints);
-      this.data = this.noContentHelperData ? null : this.prepareData(processedDataPoints);
+      this.data = this.prepareData(processedDataPoints);
     }
     this.trigger("update");
   }

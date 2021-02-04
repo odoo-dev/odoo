@@ -59,7 +59,7 @@ export function useSetupView(setup) {
     Dropdown,
     DropdownItem,
     ...component.constructor.components,
-  }
+  };
 
   useSetupAction({
     export: setup.export,
