@@ -1,4 +1,6 @@
 /** @odoo-module **/
+import { sortBy } from "../utils/arrays";
+import { processSearchViewDescription } from "../views/view_utils/search_utils";
 export const viewManagerService = {
   name: "view_manager",
   dependencies: ["model"],
@@ -16,30 +18,79 @@ export const viewManagerService = {
     async function loadViews(params, options) {
       const key = JSON.stringify([params.model, params.views, params.context, options]);
       if (!cache[key]) {
-        cache[key] = modelService(params.model)
-          .call("load_views", [], {
-            views: params.views,
-            options: {
-              action_id: options.actionId || false,
-              load_filters: options.withFilters || false,
-              toolbar: options.withActionMenus || false,
-            },
-            context: params.context,
-          })
-          .then((result) => {
-            const viewDescriptions = result; // we add keys in result for legacy! ---> c'est moche!
-            for (const [_, viewType] of params.views) {
-              const viewDescription = result.fields_views[viewType];
-              viewDescription.fields = Object.assign({}, result.fields, viewDescription.fields); // before a deep freeze was done.
-              if (viewType === "search" && options.withFilters) {
-                viewDescription.irFilters = result.filters;
-              }
-              viewDescriptions[viewType] = viewDescription;
+        const result = await modelService(params.model).call("load_views", [], {
+          views: params.views,
+          options: {
+            action_id: options.actionId || false,
+            load_filters: options.withFilters || false,
+            toolbar: options.withActionMenus || false,
+          },
+          context: params.context,
+        });
+        const viewDescriptions = result; // we add keys in result for legacy! ---> c'est moche!
+
+        // we process search info first if any
+        const views = sortBy(params.views, (v) => (v[1] === "search" ? 0 : 1));
+        for (const [_, viewType] of views) {
+          const viewDescription = result.fields_views[viewType];
+          viewDescription.fields = JSON.parse(
+            JSON.stringify(Object.assign(result.fields, viewDescription.fields))
+          );
+
+          if (viewType === "search") {
+            if (options.withFilters) {
+              viewDescription.irFilters = result.filters;
             }
-            return viewDescriptions;
-          });
+            const searchDefaults = {};
+            for (const key in params.context) {
+              const match = /^search_default_(.*)$/.exec(key);
+              if (match) {
+                const val = params.context[key];
+                if (val) {
+                  searchDefaults[match[1]] = val;
+                }
+              }
+            }
+            viewDescriptions.search = await processSearchViewDescription(
+              viewDescription,
+              modelService,
+              searchDefaults
+            );
+          } else {
+            if (viewType === "list") {
+              viewDescription.type = viewType // replace tree by list in view description.
+            }
+
+            let View;
+            let viewProps;
+
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(viewDescription.arch, "text/xml");
+            const rootNode = xml.documentElement;
+            let processArch;
+            if (rootNode.hasAttribute("js_class")) {
+              const jsViewType = rootNode.getAttribute("js_class");
+              View = odoo.viewRegistry.get(jsViewType);
+              processArch = View.processArch || odoo.viewRegistry.get(viewType).processArch;
+            } else {
+              View = odoo.viewRegistry.get(viewType);
+              processArch = View.processArch;
+            }
+
+            if (processArch) {
+              viewProps = processArch(viewDescription);
+            } else {
+              viewProps = viewDescription;
+            }
+            if ("search" in viewDescriptions) {
+              viewProps.processedSearchViewDescription = viewDescriptions.search;
+            }
+            viewDescriptions[viewType] = { View, viewProps }; // should we put info on search view here already???
+          }
+        }
+        cache[key] = viewDescriptions;
       }
-      return await cache[key]; // FIXME: clarify the API --> already better but ...
+      return cache[key]; // FIXME: clarify the API --> already better but ...
     }
     return { loadViews };
   },

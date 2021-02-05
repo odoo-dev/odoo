@@ -24,4 +24,4 @@ export class Layout extends Component {
     this.am.switchView(viewType);
   }
 }
-Layout.template = "wowl.Action";
+Layout.template = "wowl.Layout";

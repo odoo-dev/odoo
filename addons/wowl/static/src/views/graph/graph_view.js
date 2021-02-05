@@ -100,9 +100,11 @@ export const VIEW_DEFAULT_PROPS = {
 export const VIEW_PROPS = {
   action: Object, // not sure yet
   fields: { type: Object, elements: Object }, // more precision on elements...
-  modelName: String,
+  model: String,
   isEmbedded: Boolean,
   isSample: Boolean,
+  processedSearchViewDescription: { type: Object, optional: 1 },
+  viewSwitcherEntries: { type: Array, elements: Object, optional: 1 },
 };
 export const GRAPH_DEFAULT_PROPS = {
   ...VIEW_DEFAULT_PROPS,
@@ -206,7 +208,7 @@ export class GraphView extends Component {
     // sort measures for measure menu
     // there was a params.withButtons for the pie chart widget;
     this.model = new GraphModel(this._modelService, {
-      modelName: this.props.modelName,
+      modelName: this.props.model,
       fields: this.fields,
     });
   }
