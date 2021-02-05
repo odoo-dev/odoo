@@ -18,6 +18,8 @@ export const viewManagerService = {
     async function loadViews(params, options) {
       const key = JSON.stringify([params.model, params.views, params.context, options]);
       if (!cache[key]) {
+        // would it not be better to have views in the form { list: 1, graph, 4, ...} and transform it here?
+
         const result = await modelService(params.model).call("load_views", [], {
           views: params.views,
           options: {
@@ -27,8 +29,7 @@ export const viewManagerService = {
           },
           context: params.context,
         });
-        const viewDescriptions = result; // we add keys in result for legacy! ---> c'est moche!
-
+        const viewDescriptions = result // for legacy purpose, keys in result are left in viewDescriptions
         // we process search info first if any
         const views = sortBy(params.views, (v) => (v[1] === "search" ? 0 : 1));
         for (const [_, viewType] of views) {
@@ -85,7 +86,14 @@ export const viewManagerService = {
             if ("search" in viewDescriptions) {
               viewProps.processedSearchViewDescription = viewDescriptions.search;
             }
-            viewDescriptions[viewType] = { View, viewProps }; // should we put info on search view here already???
+            if (View.props) {
+              for (const key in viewProps) {
+                if (!(key in View.props)) {
+                  delete viewProps[key];
+                }
+              }
+            }
+            viewDescriptions[viewType] = { View, viewProps };
           }
         }
         cache[key] = viewDescriptions;

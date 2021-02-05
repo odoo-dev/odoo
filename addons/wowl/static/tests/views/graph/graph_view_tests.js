@@ -170,7 +170,7 @@ QUnit.module(
     QUnit.module("GraphView");
     QUnit.test("simple graph rendering (with default props)", async function (assert) {
       assert.expect(8);
-      const props = { modelName: "foo" };
+      const props = { model: "foo" };
       const graph = await mount(GraphView, { env, target, props });
       assert.containsOnce(graph.el, "div.o_graph_canvas_container canvas");
       assert.strictEqual(
@@ -194,7 +194,7 @@ QUnit.module(
     });
     QUnit.test("simple graph rendering (one groupBy)", async function (assert) {
       assert.expect(4);
-      const props = { modelName: "foo", groupBy: ["bar"], fields: fooFields };
+      const props = { model: "foo", groupBy: ["bar"], fields: fooFields };
       const graph = await mount(GraphView, { env, target, props });
       assert.containsOnce(graph.el, "div.o_graph_canvas_container canvas");
       checkLabels(assert, graph, [["true"], ["false"]]);
@@ -210,7 +210,7 @@ QUnit.module(
     });
     QUnit.test("simple graph rendering (two groupBy)", async function (assert) {
       assert.expect(4);
-      const props = { modelName: "foo", groupBy: ["bar", "product_id"], fields: fooFields };
+      const props = { model: "foo", groupBy: ["bar", "product_id"], fields: fooFields };
       const graph = await mount(GraphView, { env, target, props });
       assert.containsOnce(graph.el, "div.o_graph_canvas_container canvas");
       checkLabels(assert, graph, [["true"], ["false"]]);
@@ -240,7 +240,7 @@ QUnit.module(
     });
     QUnit.test("mode props", async function (assert) {
       assert.expect(2);
-      const props = { modelName: "foo", mode: "pie" };
+      const props = { model: "foo", mode: "pie" };
       const graph = await mount(GraphView, { env, target, props });
       assert.strictEqual(graph.state.mode, "pie", "should be in pie chart mode");
       assert.strictEqual(graph.chart.config.type, "pie");
@@ -249,14 +249,14 @@ QUnit.module(
     QUnit.test("title props", async function (assert) {
       assert.expect(1);
       const title = "Partners";
-      const props = { modelName: "foo", title };
+      const props = { model: "foo", title };
       const graph = await mount(GraphView, { env, target, props });
       assert.strictEqual(graph.el.querySelector(".o_graph_view .o_content label").innerText, title);
       graph.unmount();
     });
     QUnit.test("field id not in groupBy", async function (assert) {
       assert.expect(3);
-      const props = { modelName: "foo", groupBy: ["id"], fields: fooFields };
+      const props = { model: "foo", groupBy: ["id"], fields: fooFields };
       const graph = await mount(GraphView, { env, target, props });
       checkLabels(assert, graph, [[]]);
       checkDatasets(assert, graph, ["backgroundColor", "data", "label", "originIndex", "stack"], {
@@ -271,7 +271,7 @@ QUnit.module(
     });
     QUnit.test("switching mode", async function (assert) {
       assert.expect(12);
-      const props = { modelName: "foo" };
+      const props = { model: "foo" };
       const graph = await mount(GraphView, { env, target, props });
       function checkMode(mode) {
         assert.strictEqual(graph.state.mode, mode);
@@ -293,7 +293,7 @@ QUnit.module(
       // point is displayed.
       // for a better visual aspect the point is centered on the graph (and not on the left!)
       serverData.models.foo.records = serverData.models.foo.records.slice(0, 1);
-      const props = { modelName: "foo", mode: "line" };
+      const props = { model: "foo", mode: "line" };
       const graph = await mount(GraphView, { env, target, props });
       assert.containsOnce(graph.el, "div.o_graph_canvas_container canvas");
       checkLabels(assert, graph, [[""], [], [""]]);
@@ -306,7 +306,7 @@ QUnit.module(
       // it is grouped by several fields
       assert.expect(6);
       const props = {
-        modelName: "foo",
+        model: "foo",
         groupBy: ["product_id", "bar", "color_id"],
         fields: fooFields,
       };

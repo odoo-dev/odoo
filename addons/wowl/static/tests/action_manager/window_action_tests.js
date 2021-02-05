@@ -990,7 +990,7 @@ QUnit.module("ActionManager", (hooks) => {
     ]);
     webClient.destroy();
   });
-  QUnit.test("restore previous view state when switching back", async function (assert) {
+  QUnit.debug("restore previous view state when switching back", async function (assert) {
     assert.expect(5);
     testConfig.serverData.actions[3].views.unshift([false, "graph"]);
     testConfig.serverData.views["partner,false,graph"] = "<graph/>";
@@ -1024,6 +1024,7 @@ QUnit.module("ActionManager", (hooks) => {
     );
     await switchView(webClient.el, "graph");
     await legacyExtraNextTick();
+    debugger
     assert.hasClass(
       $(webClient.el).find(".o_control_panel  .fa-area-chart")[0],
       "active",

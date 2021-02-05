@@ -33,16 +33,16 @@ export class ViewLoader extends Component {
       withFilters: this.props.withFilters,
     };
     const viewDescriptions = await this._viewManagerService.loadViews(params, options); // view manager could return View and propsFromArch,...
-
     const { View, viewProps: propsFromArch } = viewDescriptions[this.props.type];
+
     this.View = View;
+
     this.viewProps = Object.assign(
       { limit: this.props.action.limit },
       this.props,
       { views: this.views },
       propsFromArch
     );
-
     if (this.View.props) {
       // this is to make props validation work for views. Is it the good way?
       for (const key in this.viewProps) {

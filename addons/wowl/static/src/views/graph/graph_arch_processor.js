@@ -8,6 +8,7 @@ export function processGraphViewDescription(searchViewDescription) {
   const parser = new DOMParser();
   const xml = parser.parseFromString(arch, "text/xml");
   const archData = {
+    type: "graph",
     fields,
     groupBy: [],
   };

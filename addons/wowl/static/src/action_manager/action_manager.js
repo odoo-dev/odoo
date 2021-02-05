@@ -65,6 +65,7 @@ export function useSetupAction(params) {
   const component = Component.current;
   hooks.onMounted(() => {
     if (component.props.state) {
+      debugger
       setScrollPosition(component, component.props.state[scrollSymbol]);
     }
     if (params.beforeLeave && component.props.__beforeLeave__) {
@@ -73,6 +74,7 @@ export function useSetupAction(params) {
   });
   hooks.onWillUnmount(() => {
     if (component.props.__exportState__) {
+      debugger
       let state = {};
       state[scrollSymbol] = getScrollPosition(component);
       if (params.export) {
