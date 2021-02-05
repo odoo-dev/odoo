@@ -116,7 +116,12 @@ class DiscussSidebar extends Component {
                 thread.isPinned &&
                 thread.model === 'mail.channel'
             )
-            .sort((c1, c2) => c1.displayName < c2.displayName ? -1 : 1);
+            .sort((c1, c2) => {
+                if (c1.displayName && c2.displayName && c1.displayName !== c2.displayName) {
+                    return c1.displayName.toLowerCase() < c2.displayName.toLowerCase() ? -1 : 1;
+                }
+                return c1.id - c2.id;
+            });
         if (!this.discuss.sidebarQuickSearchValue) {
             return allOrderedAndPinnedMultiUserChannels;
         }

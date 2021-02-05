@@ -138,6 +138,26 @@ QUnit.test('sidebar find shows channels matching search term even when user is m
     );
 });
 
+QUnit.test('sidebar channels should ordered alphabetically', async function (assert) {
+    assert.expect(2);
+
+    this.data['mail.channel'].records.push({ id: 19, name: "Xyz" }, { id: 20, name: "abc" },
+                                        { id: 21, name: "Abc" }, { id: 22, name: "Xyz" });
+    await this.start();
+    const results = document.querySelectorAll('.o_DiscussSidebar_groupChannel .o_DiscussSidebarItem_name');
+    assert.deepEqual(
+        [results[0].textContent, results[1].textContent, results[2].textContent, results[3].textContent],
+        ["abc", "Abc", "Xyz", "Xyz"],
+        "Channel name should be in case insensitive alphabetical order"
+    );
+    const threadResults = document.querySelectorAll('.o_DiscussSidebar_groupChannel .o_DiscussSidebar_item');
+    assert.deepEqual(
+        [threadResults[2].getAttribute('data-thread-local-id'), threadResults[3].getAttribute('data-thread-local-id')],
+        ["mail.thread_mail.channel_19", "mail.thread_mail.channel_22"],
+        "Channels having the same name should be ordered based on the Id"
+    );
+});
+
 });
 });
 });
