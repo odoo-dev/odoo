@@ -313,6 +313,16 @@ class PaymentPortal(portal.CustomerPortal):
         # Monitor the transaction to make it available in the portal
         PaymentPostProcessing.monitor_transactions(tx_sudo)
 
+        # TODO ANVFE move to payment.transaction.create ?
+        # Float rounding is inconsistently managed at the ORM level
+        # To have a consistent value, make the orm use the database value
+        # not the cached one after record creation.
+        # e.g. amount = 1111.11
+        # tx = tx.create(amount=1111.11)
+        # tx.amount # 1111.1100000000001
+        # tx.invalidate_cache()
+        # tx.amount # 1111.11
+        tx_sudo.invalidate_cache(['amount'])
         return tx_sudo
 
     @http.route('/payment/confirmation', type='http', methods=['GET'], auth='public', website=True)
