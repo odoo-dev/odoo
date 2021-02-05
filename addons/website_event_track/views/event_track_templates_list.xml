@@ -218,7 +218,7 @@
                                 <t t-else="">
                                     <span class="mr-2" t-field="track.name"/>
                                 </t>
-                                <span t-if="not track.is_published and user_event_manager"
+                                <span t-if="not track.is_published"
                                     class="badge badge-danger">
                                     Unpublished
                                 </span>

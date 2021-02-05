@@ -30,7 +30,7 @@ class EventTrackController(http.Controller):
         if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([
                 search_domain_base,
-                ['|', ('is_published', '=', True), ('is_accepted', '=', True)]
+                [('is_published', '=', True)]
             ])
         return search_domain_base
 
@@ -240,6 +240,8 @@ class EventTrackController(http.Controller):
 
     def _event_agenda_get_tracks(self, event):
         tracks_sudo = event.sudo().track_ids.filtered(lambda track: track.date)
+        search_domain = self._get_event_tracks_base_domain(event)
+        tracks_sudo = tracks_sudo.search(search_domain)
         if not request.env.user.has_group('event.group_event_manager'):
             tracks_sudo = tracks_sudo.filtered(lambda track: track.is_published or track.stage_id.is_accepted)
         return tracks_sudo
