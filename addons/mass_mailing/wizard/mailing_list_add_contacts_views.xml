@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record model="ir.ui.view" id="view_mailing_list_add_contacts_form">
+        <field name="name">mailing.list.add.contacts.form</field>
+            <field name="model">mailing.list.add.contacts</field>
+            <field name="arch" type="xml">
+                <form string="Send a Sample Mail">
+                    <group>
+                        <field name="mailing_list_id" options="{'no_create_edit': True, 'no_open': True}"/>
+                    </group>
+                    <footer>
+                        <button string="Add" name="action_add_contacts" type="object" class="btn-primary"/>
+                        <button string="Add and Send Mailing" name="action_add_contacts_and_send_mailing" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+    </record>
+
+    <record id="action_mailing_list_add_contacts" model="ir.actions.act_window">
+        <field name="name">Add Selected Contacts to a Mailing List</field>
+        <field name="res_model">mailing.list.add.contacts</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

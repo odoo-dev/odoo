@@ -4,3 +4,4 @@
 from . import mail_compose_message
 from . import mailing_list_merge
 from . import mailing_mailing_test
+from . import mailing_list_add_contacts
