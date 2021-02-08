@@ -98,6 +98,7 @@ export const VIEW_DEFAULT_PROPS = {
   isSample: false,
 };
 export const VIEW_PROPS = {
+  __beforeLeave__: { type: Function, optional: 1, },
   __exportState__: { type: Function, optional: 1, }, // hum hum for export ...
   action: Object, // not sure yet
   fields: { type: Object, elements: Object }, // more precision on elements...
@@ -117,7 +118,6 @@ export const GRAPH_DEFAULT_PROPS = {
   mode: DEFAULT_MODE,
   order: DEFAUL_ORDER,
   stacked: true,
-  state: {},
   title: "Undefined", // we should be sure it is in translated term in one way or other
   type: "graph",
 };
@@ -130,7 +130,7 @@ export const GRAPH_PROPS = {
   mode: { validate: (m) => MODES.includes(m) },
   order: { validate: (o) => ORDERS.includes(o) },
   stacked: Boolean,
-  state: Object, // to describe
+  state: { type: Object, optional: 1, }, // to describe. Is it better to have it optional or to have a default {}?
   title: String,
 };
 export class GraphView extends Component {

@@ -2,13 +2,12 @@
 import { evaluateExpr } from "../../py/index";
 import { GROUPABLE_TYPES } from "../view_utils/search_utils";
 import { MODES, ORDERS } from "./graph_model";
-export function processGraphViewDescription(searchViewDescription) {
-  const fields = searchViewDescription.fields || {};
-  const arch = searchViewDescription.arch || "<graph/>";
+export function processGraphViewDescription(graphViewDescription) {
+  const fields = graphViewDescription.fields || {};
+  const arch = graphViewDescription.arch || "<graph/>";
   const parser = new DOMParser();
   const xml = parser.parseFromString(arch, "text/xml");
   const archData = {
-    type: "graph",
     fields,
     groupBy: [],
   };
