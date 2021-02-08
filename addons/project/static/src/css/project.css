@@ -88,3 +88,17 @@
     width: 96%;
     float: left;
 }
+
+.o_form_project_tasks.o_form_view.o_xxl_form_view .o_form_sheet {
+    max-width: none;
+    border-top: none;
+    border-right: none;
+    margin: 0px 0px;
+}
+.o_form_project_tasks.o_form_view.o_xxl_form_view .o_form_sheet_bg {
+    padding: 0px 0px;
+}
+.o_form_project_tasks.o_form_view.o_xxl_form_view .o_form_statusbar {
+    margin-left: 0px;
+    margin-right: 0px;
+}

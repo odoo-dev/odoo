@@ -2599,6 +2599,15 @@ var StateSelectionWidget = AbstractField.extend({
             .parent().attr('title', currentState.state_name)
             .attr('aria-label', this.string + ": " + currentState.state_name);
 
+        // Add label with status icon
+        if (this.nodeOptions && this.nodeOptions.show_label) {
+            const $label = $('<span>', {
+                text: currentState.state_name,
+                class: 'align-middle',
+            });
+            this.$el.append($label);
+        }
+
         // Render "FormSelection.Items" and move it into "FormSelection"
         var $items = $(qweb.render('FormSelection.items', {
             states: _.without(states, currentState)
