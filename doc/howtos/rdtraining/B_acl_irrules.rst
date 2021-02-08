@@ -10,7 +10,7 @@ Advanced B: ACL and Record Rules
     <howto/rdtraining>`.
 
     To follow the exercise, it is recommended that you fetch the branch
-    |core training branch| from the repository |core training repository|, it
+    14.0-core from the repository XXX, it
     contains a version of the module created during the core training we can use
     as a starting point.
 
