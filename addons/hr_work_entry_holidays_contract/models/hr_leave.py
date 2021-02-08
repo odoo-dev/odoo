@@ -72,59 +72,13 @@ class HrLeave(models.Model):
                     work_entries_vals_list += contracts._get_work_entries_values(leave.date_from, leave.date_to)
         return work_entries_vals_list
 
-
-    def _cancel_work_entry_conflict(self):
+    def _get_work_entry_to_intervals(self, work_entry):
         """
-        Creates a leave work entry for each hr.leave in self.
-        Check overlapping work entries with self.
-        Work entries completely included in a leave are archived.
-        e.g.:
-            |----- work entry ----|---- work entry ----|
-                |------------------- hr.leave ---------------|
-                                    ||
-                                    vv
-            |----* work entry ****|
-                |************ work entry leave --------------|
+        work_entry are overriden in hr_work_entry_contract therefore, the  _to_intervals method is available
+        :param work_entry:
+        :return:
         """
-        if not self:
-            return
-
-        # 1. Create a work entry for each leave
-        new_leave_work_entries = super()._cancel_work_entry_conflict()
-        if new_leave_work_entries:
-            # 2. Fetch overlapping work entries, grouped by employees
-            start = min(self.mapped('date_from'), default=False)
-            stop = max(self.mapped('date_to'), default=False)
-            work_entry_groups = self.env['hr.work.entry'].read_group([
-                ('date_start', '<', stop),
-                ('date_stop', '>', start),
-                ('employee_id', 'in', self.employee_id.ids),
-            ], ['work_entry_ids:array_agg(id)', 'employee_id'], ['employee_id', 'date_start', 'date_stop'], lazy=False)
-            work_entries_by_employee = defaultdict(lambda: self.env['hr.work.entry'])
-            for group in work_entry_groups:
-                employee_id = group.get('employee_id')[0]
-                work_entries_by_employee[employee_id] |= self.env['hr.work.entry'].browse(group.get('work_entry_ids'))
-
-            # 3. Archive work entries included in leaves
-            included = self.env['hr.work.entry']
-            overlappping = self.env['hr.work.entry']
-            for work_entries in work_entries_by_employee.values():
-                # Work entries for this employee
-                new_employee_work_entries = work_entries & new_leave_work_entries
-                previous_employee_work_entries = work_entries - new_leave_work_entries
-
-                # Build intervals from work entries
-                leave_intervals = new_employee_work_entries._to_intervals()
-                conflicts_intervals = previous_employee_work_entries._to_intervals()
-
-                # Compute intervals completely outside any leave
-                # Intervals are outside, but associated records are overlapping.
-                outside_intervals = conflicts_intervals - leave_intervals
-
-                overlappping |= self.env['hr.work.entry']._from_intervals(outside_intervals)
-                included |= previous_employee_work_entries - overlappping
-            overlappping.write({'leave_id': False})
-            included.write({'active': False})
+        return work_entry._to_intervals()
 
     def _refused_work_entry(self, work_entries):
         # Re-create attendance work entries

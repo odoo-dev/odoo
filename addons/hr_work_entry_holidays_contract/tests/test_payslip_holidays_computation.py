@@ -10,8 +10,7 @@ class TestPayslipHolidaysComputation(TestWorkEntryHolidaysContractBase):
 
     @classmethod
     def setUpClass(cls):
-        # arj fixme: check if this works with setUpClass
-        super().setUp()
+        super().setUpClass()
 
         cls.leave_type = cls.env['hr.leave.type'].create({
             'name': 'Legal Leaves',
