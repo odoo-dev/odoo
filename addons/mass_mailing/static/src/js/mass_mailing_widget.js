@@ -80,7 +80,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 dataPointID: self.dataPointID,
                 changes: _.object([fieldName], [self._unWrap($editable.html())])
             });
-            self.wysiwyg.setValue(result.html);
 
             self.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,
