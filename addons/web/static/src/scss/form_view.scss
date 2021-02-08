@@ -146,11 +146,26 @@
             }
         }
         .o_field_widget {
-            &, input.o_input {
+            &[type="text"], &[type="password"], &[type="number"], &textarea, &select {
                 &.o_active_field:not(.o_field_invalid) {
-                // :active, :focus {
                     background-color: rgba(#00a09d, 0.05);
                     border-color: #00a09d !important;
+                }
+            }
+            &.o_field_monetary.o_active_field {
+                border-color: #00a09d !important;
+                .o_input {
+                    background-color: rgba(#00a09d, 0.05);
+                }
+            }
+            &.o_field_many2one.o_active_field .o_input, &.o_field_date.o_active_field .o_input {
+                background-color: rgba(#00a09d, 0.05);
+                border-color: #00a09d !important;
+            }
+            &.o_field_many2manytags.o_active_field.o_input {
+                border-color: #00a09d !important;
+                .o_input {
+                    background-color: rgba(#00a09d, 0.05);
                 }
             }
         }
