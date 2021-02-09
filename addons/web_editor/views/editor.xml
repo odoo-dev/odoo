@@ -43,7 +43,6 @@
     <!-- widgets & plugins -->
 
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/media.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/dialog.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/alt_tools.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/color_palette.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/image_crop_widget.js"/>
@@ -100,6 +99,7 @@
         <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/web_editor.backend.scss"/>
     </xpath>
     <xpath expr="script[last()]" position="after">
+        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/dialog.js"/>
         <script type="text/javascript" src="/web_editor/static/src/js/frontend/loader.js" />
         <script type="text/javascript" src="/web_editor/static/src/js/backend/field_html.js" />
         <script type="text/javascript" src="/web_editor/static/src/js/backend/convert_inline.js" />
@@ -114,6 +114,7 @@
 
 <template id="_assets_frontend_minimal_js" inherit_id="web._assets_frontend_minimal_js">
     <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/dialog.js"/>
         <script type="text/javascript" src="/web_editor/static/src/js/frontend/loader_loading.js"/>
     </xpath>
 </template>
