@@ -1,6 +1,8 @@
 odoo.define('web_editor.wysiwyg', function (require) {
 'use strict';
+const core = require('web.core');
 const Widget = require('web.Widget');
+const Dialog = require('web.Dialog');
 const customColors = require('web_editor.custom_colors');
 const concurrency = require('web.concurrency');
 const weContext = require('web_editor.context');
@@ -9,6 +11,7 @@ const snippetsEditor = require('web_editor.snippet.editor');
 const Toolbar = require('web_editor.toolbar');
 const weWidgets = require('wysiwyg.widgets');
 
+var _t = core._t;
 var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
 
