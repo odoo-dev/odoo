@@ -35,8 +35,9 @@ class Meeting(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        print(vals_list)
         return super().create([
-            dict(vals, need_sync=False) if vals.get('recurrency') else vals
+            dict(vals, need_sync=False) if vals.get('recurrence_id') else vals
             for vals in vals_list
         ])
 

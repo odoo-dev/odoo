@@ -78,6 +78,8 @@ class GoogleSync(models.AbstractModel):
         result = super().write(vals)
         for record in self.filtered('need_sync'):
             if record.google_id:
+                print("record._google_patch", record)
+                # import pdb;pdb.set_trace()
                 record._google_patch(google_service, record.google_id, record._google_values(), timeout=3)
 
         return result
@@ -91,6 +93,8 @@ class GoogleSync(models.AbstractModel):
         google_service = GoogleCalendarService(self.env['google.service'])
         records_to_sync = records.filtered(lambda r: r.need_sync and r.active)
         for record in records_to_sync:
+            print("record._google_insert", record,record.need_sync)
+            # import pdb;pdb.set_trace()
             record._google_insert(google_service, record._google_values(), timeout=3)
         return records
 

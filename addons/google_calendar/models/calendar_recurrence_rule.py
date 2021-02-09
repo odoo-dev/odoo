@@ -43,11 +43,13 @@ class RecurrenceRule(models.Model):
                 event.google_id = False
         self.env['calendar.event'].create(vals)
 
-        for recurrence in self:
+        for recurrence in self.filtered('need_sync'):
             values = recurrence._google_values()
             if not recurrence.google_id:
+                # import pdb;pdb.set_trace()
                 recurrence._google_insert(google_service, values)
             else:
+                # import pdb;pdb.set_trace()
                 recurrence._google_patch(google_service, recurrence.google_id, values)
         self.calendar_event_ids.need_sync = False
         return detached_events
@@ -72,9 +74,10 @@ class RecurrenceRule(models.Model):
         # If only some events are updated, sync those events.
         # If all events are updated, sync the recurrence instead.
         values['need_sync'] = bool(dtstart)
+        result = super()._write_events(values, dtstart=dtstart)
         if not dtstart:
             self.need_sync = True
-        return super()._write_events(values, dtstart=dtstart)
+        return result
 
     def _get_google_synced_fields(self):
         return {'rrule'}
@@ -91,14 +94,19 @@ class RecurrenceRule(models.Model):
 
     @api.model
     def _odoo_values(self, google_recurrence, default_reminders=()):
-        base_values = dict(self.env['calendar.event']._odoo_values(google_recurrence, default_reminders), need_sync=False)
-        base_event = self.env['calendar.event'].create(base_values)
-        return {
+        vals = {
             'rrule': google_recurrence.rrule,
             'google_id': google_recurrence.id,
-            'base_event_id': base_event.id,
-            'calendar_event_ids': [(4, base_event.id)],
         }
+        base_values = dict(self.env['calendar.event']._odoo_values(google_recurrence, default_reminders), need_sync=False)
+        import pdb;pdb.set_trace()
+        if not google_recurrence.exists(self.env):
+            base_event = self.env['calendar.event'].create(base_values)
+            vals['base_event_id'] = base_event.id
+            vals['calendar_event_ids'] = [(4, base_event.id)]
+        else:
+            self.browse(google_recurrence.odoo_id(self.env))._write_events(base_values)
+        return vals
 
     def _google_values(self):
         event = self._get_first_event()

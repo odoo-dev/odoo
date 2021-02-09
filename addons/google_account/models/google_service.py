@@ -143,6 +143,8 @@ class GoogleService(models.AbstractModel):
                 res = requests.request(method.lower(), preuri + uri, data=params, headers=headers, timeout=timeout)
             else:
                 raise Exception(_('Method not supported [%s] not in [GET, POST, PUT, PATCH or DELETE]!') % (method))
+            print("***TO GOOGLE***:", params)
+            # import pdb;pdb.set_trace()
             res.raise_for_status()
             status = res.status_code
 

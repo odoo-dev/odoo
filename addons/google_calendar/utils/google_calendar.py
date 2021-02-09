@@ -53,7 +53,7 @@ class GoogleCalendarService():
 
         next_sync_token = data.get('nextSyncToken')
         default_reminders = data.get('defaultReminders')
-
+        print(events)
         return GoogleEvent(events), next_sync_token, default_reminders
 
     @requires_auth_token
