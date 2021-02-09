@@ -13,7 +13,7 @@ publicWidget.registry['public_user_editor_test'] = publicWidget.Widget.extend({
      */
     start: async function () {
         await this._super(...arguments);
-        await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', 'website.compiled_assets_wysiwyg']});
+        await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg']});
         await wysiwygLoader.loadFromTextarea(this, this.el, {});
     },
 });
