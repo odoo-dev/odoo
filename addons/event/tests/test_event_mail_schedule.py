@@ -13,6 +13,9 @@ class TestMailSchedule(TestEventCommon):
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
     def test_event_mail_schedule(self):
         """ Test mail scheduling for events """
+        event_cron_id = self.env.ref('event.event_mail_scheduler')
+        event_cron_triggers_before = self.env['ir.cron.trigger'].search([('cron_id', '=', event_cron_id.id)])
+
         now = fields.Datetime.now()
         event_date_begin = now + relativedelta(days=1)
         event_date_end = now + relativedelta(days=3)
@@ -32,8 +35,23 @@ class TestMailSchedule(TestEventCommon):
                     'interval_unit': 'days',
                     'interval_type': 'before_event',
                     'template_id': self.env['ir.model.data'].xmlid_to_res_id('event.event_reminder')}),
+                (0, 0, {  # immediately after event
+                    'interval_nbr': 0,
+                    'interval_unit': 'now',
+                    'interval_type': 'after_event',
+                    'template_id': self.env['ir.model.data'].xmlid_to_res_id('event.event_reminder')}),
             ]
         })
+
+        # ensure event global mails have a cron trigger
+        event_cron_triggers_1 = self.env['ir.cron.trigger'].search([('cron_id', '=', event_cron_id.id)])
+        new_triggers = event_cron_triggers_1 - event_cron_triggers_before
+        self.assertEqual(len(new_triggers), 2, 'Event: should have created 2 cron triggers, one for each global event communication')
+        self.assertEqual(
+            set(new_triggers.mapped('call_at')),
+            set([now + relativedelta(days=0), now + relativedelta(days=3)]),
+            'Event: should have triggers at now (begin - 1 day) and +3D (right at end)'
+        )
 
         # create some registrations
         self.env['event.registration'].with_user(self.user_eventuser).create({

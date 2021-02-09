@@ -397,7 +397,7 @@ class EventEvent(models.Model):
                 continue
 
             # lines to keep: those with already sent emails or registrations
-            mails_toremove = event._origin.event_mail_ids.filtered(lambda mail: not mail.mail_sent and not(mail.mail_registration_ids))
+            mails_toremove = event._origin.event_mail_ids.filtered(lambda mail: not mail.event_mail_sent and not(mail.mail_registration_count_done))
             command = [(3, mail.id) for mail in mails_toremove]
             if event.event_type_id.use_mail_schedule:
                 command += [

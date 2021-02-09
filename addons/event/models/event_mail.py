@@ -80,70 +80,110 @@ class EventMailScheduler(models.Model):
         'mail.template', string='Email Template',
         domain=[('model', '=', 'event.registration')], ondelete='restrict',
         help='This field contains the template of the mail that will be automatically sent')
-    scheduled_date = fields.Datetime('Scheduled Sent Mail', compute='_compute_scheduled_date', store=True)
-    mail_registration_ids = fields.One2many('event.mail.registration', 'scheduler_id')
-    mail_sent = fields.Boolean('Mail Sent on Event', copy=False)
-    done = fields.Boolean('Sent', compute='_compute_done', store=True, copy=False)
+    scheduled_date = fields.Datetime('Schedule Date', compute='_compute_scheduled_date', store=True)
+    # contact and status
+    mail_registration_ids = fields.One2many(
+        'event.mail.registration', 'scheduler_id',
+        help='Communication related to event registrations')
+    mail_registration_count_done = fields.Integer(
+        '# Sent', copy=False, readonly=True,
+        help='Number of sent communications related to event registrations')
+    mail_registration_sent = fields.Boolean(
+        'Mail Sent on Registrations', copy=False,
+        help='Communication sent on all registrations')
+    event_mail_sent = fields.Boolean(
+        'Mail Sent on Event', copy=False,
+        help='Event-related communication sent')
+    mail_state = fields.Selection(
+        [('running', 'Running'), ('scheduled', 'Scheduled'), ('sent', 'Sent')],
+        string='Global communication Status', compute='_compute_mail_state'
+    )
 
-    event_mail_state = fields.Selection([('running', 'Running'), ('scheduled', 'Scheduled'), ('sent', 'Sent')], compute='_compute_event_mail_state')
-    contact_count = fields.Integer('# Sent', readonly=True, copy=False)
-
-    @api.depends('mail_sent', 'interval_type', 'event_id.registration_ids', 'mail_registration_ids')
-    def _compute_done(self):
-        for mail in self:
-            if mail.interval_type in ['before_event', 'after_event']:
-                mail.done = mail.mail_sent
-            else:
-                mail.done = len(mail.mail_registration_ids) == len(mail.event_id.registration_ids) and all(mail.mail_sent for mail in mail.mail_registration_ids)
-
-    @api.depends('done', 'interval_type', 'scheduled_date', 'mail_sent')
-    def _compute_event_mail_state(self):
-        for mail in self:
-            if mail.interval_type == 'after_sub':
-                mail.event_mail_state = 'running'
-            elif mail.mail_sent:
-                mail.event_mail_state = 'sent'
-            elif mail.scheduled_date:
-                mail.event_mail_state = 'scheduled'
-            else:
-                mail.event_mail_state = 'running'
-
-    @api.depends('event_id.date_begin', 'interval_type', 'interval_unit', 'interval_nbr')
+    @api.depends('event_id.date_begin', 'event_id.date_end', 'interval_type', 'interval_unit', 'interval_nbr')
     def _compute_scheduled_date(self):
-        for mail in self:
-            if mail.interval_type == 'after_sub':
-                date, sign = mail.event_id.create_date, 1
-            elif mail.interval_type == 'before_event':
-                date, sign = mail.event_id.date_begin, -1
+        for scheduler in self:
+            if scheduler.interval_type == 'after_sub':
+                date, sign = scheduler.event_id.create_date, 1
+            elif scheduler.interval_type == 'before_event':
+                date, sign = scheduler.event_id.date_begin, -1
             else:
-                date, sign = mail.event_id.date_end, 1
+                date, sign = scheduler.event_id.date_end, 1
 
-            mail.scheduled_date = date + _INTERVALS[mail.interval_unit](sign * mail.interval_nbr) if date else False
+            scheduler.scheduled_date = date + _INTERVALS[scheduler.interval_unit](sign * scheduler.interval_nbr) if date else False
+
+    @api.depends('interval_type', 'scheduled_date', 'event_mail_sent')
+    def _compute_mail_state(self):
+        for scheduler in self:
+            # registrations based
+            if scheduler.interval_type == 'after_sub':
+                scheduler.mail_state = 'running'
+            # global event based
+            elif scheduler.event_mail_sent:
+                scheduler.mail_state = 'sent'
+            elif scheduler.scheduled_date:
+                scheduler.mail_state = 'scheduled'
+            else:
+                scheduler.mail_state = 'running'
+
+    def _compute_field_value(self, field):
+        """ When updating ``scheduled_date`` prepare a cron trigger so that
+        we effectively send emails when scheduled. Exclude onchange-like
+        computation, therefore filtering on ``id``. """
+        updated = self.filtered(
+            lambda scheduler: scheduler.id and scheduler.interval_type != 'after_sub'
+        ) if field.name == 'scheduled_date' else False
+        pre_values = updated.mapped('scheduled_date') if updated else []
+
+        super(EventMailScheduler, self)._compute_field_value(field)
+
+        new_values = [
+            val for val in updated.mapped('scheduled_date')
+            if val and val not in pre_values
+        ] if updated else []
+        if new_values:
+            schedule_cron = self.env.ref('event.event_mail_scheduler', raise_if_not_found=False)
+            if schedule_cron:
+                schedule_cron._trigger(at=new_values)
 
     def execute(self):
-        for mail in self:
+        for scheduler in self:
             now = fields.Datetime.now()
-            if mail.interval_type == 'after_sub':
-                # update registration lines
-                lines = [
-                    (0, 0, {'registration_id': registration.id})
-                    for registration in (mail.event_id.registration_ids - mail.mapped('mail_registration_ids.registration_id'))
-                ]
-                if lines:
-                    mail.write({'mail_registration_ids': lines})
+            if scheduler.interval_type == 'after_sub':
+                new_registrations = scheduler.event_id.registration_ids.filtered_domain(
+                    [('state', 'not in', ('cancel', 'draft'))]
+                ) - scheduler.mail_registration_ids.registration_id
+                scheduler._create_missing_mail_registrations(new_registrations)
+
                 # execute scheduler on registrations
-                mail.mail_registration_ids.filtered(lambda reg: reg.scheduled_date and reg.scheduled_date <= now).execute()
-
-                mail.contact_count = len(mail.mail_registration_ids.filtered(lambda reg: reg.mail_sent))
+                scheduler.mail_registration_ids.filtered(lambda reg: not reg.mail_sent and reg.scheduled_date and reg.scheduled_date <= now).execute()
+                total_sent = len(scheduler.mail_registration_ids.filtered(lambda reg: reg.mail_sent))
+                scheduler.update({
+                    'mail_registration_count_done': total_sent,
+                    'mail_registration_sent': total_sent >= (scheduler.event_id.seats_reserved + scheduler.event_id.seats_used),
+                })
             else:
-                # Do not send emails if the mailing was scheduled before the event but the event is over
-                if not mail.mail_sent and (mail.interval_type != 'before_event' or mail.event_id.date_end > now) and mail.notification_type == 'mail':
-                    mail.event_id.mail_attendees(mail.template_id.id)
-                    mail.write({'mail_sent': True})
-
-                    mail.contact_count = len(mail.event_id.registration_ids.filtered(lambda reg: reg.state != 'cancel'))
-
+                # before or after event -> one shot email
+                if scheduler.event_mail_sent or scheduler.notification_type != 'mail':
+                    continue
+                # do not send emails if the mailing was scheduled before the event but the event is over
+                if scheduler.interval_type == 'after_event' or scheduler.event_id.date_end > now:
+                    scheduler.event_id.mail_attendees(scheduler.template_id.id)
+                    scheduler.update({
+                        'event_mail_sent': True,
+                        'mail_registration_count_done': scheduler.event_id.seats_reserved + scheduler.event_id.seats_used,
+                    })
         return True
+
+    def _create_missing_mail_registrations(self, registrations):
+        new = []
+        for scheduler in self:
+            new += [{
+                'registration_id': registration.id,
+                'scheduler_id': scheduler.id,
+            } for registration in registrations]
+        if new:
+            return self.env['event.mail.registration'].create(new)
+        return self.env['event.mail.registration']
 
     @api.model
     def _warn_template_error(self, scheduler, exception):
@@ -185,7 +225,17 @@ You receive this email because you are:
 
     @api.model
     def run(self, autocommit=False):
-        schedulers = self.search([('done', '=', False), ('scheduled_date', '<=', datetime.strftime(fields.datetime.now(), tools.DEFAULT_SERVER_DATETIME_FORMAT))])
+        """ Backward compatible method, notably if crons are not updated when
+        migrating for some reason. """
+        return self.schedule_communications(autocommit=autocommit)
+
+    def schedule_communications(self, autocommit=False):
+        schedulers = self.search([
+            '&', '|',
+            '&', ('interval_type', '=', 'after_sub'), ('mail_registration_sent', '=', False),
+            ('event_mail_sent', '=', False),
+            ('scheduled_date', '<=', fields.Datetime.now())
+        ])
         for scheduler in schedulers:
             try:
                 with self.env.cr.savepoint():
@@ -211,6 +261,24 @@ class EventMailRegistration(models.Model):
     registration_id = fields.Many2one('event.registration', 'Attendee', required=True, ondelete='cascade')
     scheduled_date = fields.Datetime('Scheduled Time', compute='_compute_scheduled_date', store=True)
     mail_sent = fields.Boolean('Mail Sent')
+
+    def _compute_field_value(self, field):
+        """ When updating ``scheduled_date`` prepare a cron trigger so that
+        we effectively send emails when scheduled. Exclude onchange-like
+        computation, therefore filtering on ``id``. """
+        updated = self.filtered('id') if field.name == 'scheduled_date' else False
+        pre_values = updated.mapped('scheduled_date') if updated else []
+
+        super(EventMailRegistration, self)._compute_field_value(field)
+
+        new_values = [
+            val for val in updated.mapped('scheduled_date')
+            if val and val not in pre_values
+        ] if updated else []
+        if new_values:
+            schedule_cron = self.env.ref('event.event_mail_scheduler', raise_if_not_found=False)
+            if schedule_cron:
+                schedule_cron._trigger(at=new_values)
 
     def execute(self):
         for mail in self:

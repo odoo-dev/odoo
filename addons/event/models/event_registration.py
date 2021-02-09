@@ -152,15 +152,15 @@ class EventRegistration(models.Model):
         if registrations._check_auto_confirmation():
             registrations.sudo().action_confirm()
 
+        registrations._update_mail_schedulers()
+
         return registrations
 
     def write(self, vals):
         ret = super(EventRegistration, self).write(vals)
 
         if vals.get('state') == 'open':
-            # auto-trigger after_sub (on subscribe) mail schedulers, if needed
-            onsubscribe_schedulers = self.mapped('event_id.event_mail_ids').filtered(lambda s: s.interval_type == 'after_sub')
-            onsubscribe_schedulers.execute()
+            self._update_mail_schedulers()
 
         return ret
 
@@ -233,6 +233,23 @@ class EventRegistration(models.Model):
             'target': 'new',
             'context': ctx,
         }
+
+    def _update_mail_schedulers(self):
+        """ Update schedulers to set them as running again, and cron to be called
+        as soon as possible. """
+        open_registrations = self.filtered(lambda registration: registration.state == 'open')
+        if not open_registrations:
+            return
+
+        onsubscribe_schedulers = self.env['event.mail'].search([
+            ('event_id', 'in', open_registrations.event_id.ids),
+            ('interval_type', '=', 'after_sub')
+        ])
+        if not onsubscribe_schedulers:
+            return
+
+        onsubscribe_schedulers.write({'mail_registration_sent': False})
+        onsubscribe_schedulers._create_missing_mail_registrations(open_registrations)
 
     # ------------------------------------------------------------
     # MAILING / GATEWAY
