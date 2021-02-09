@@ -53,6 +53,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         } else {
             this.savableSelector = `${this.oeStructureSelector}, ${this.oeFieldSelector}`;
         }
+        this.editableFromEditorMenu = options.editableFromEditorMenu || this.editableFromEditorMenu;
         this._editorAutoStart = (context.editable && window.location.search.indexOf('enable_editor') >= 0);
         var url = new URL(window.location.href);
         url.searchParams.delete('enable_editor');
@@ -286,12 +287,17 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 }
 
                 this.wysiwyg.odooEditor.observerUnactive();
-                $savable.not('.o_dirty').addClass('o_dirty');
+                $savable.not('.o_dirty').each(function() {
+                    const $el = $(this);
+                    if (!$el.closest('[data-oe-readonly]').length) {
+                        $el.addClass('o_dirty');
+                    }
+                });
                 this.wysiwyg.odooEditor.observerActive();
             }
         });
 
-        this.observer.observe($('#wrapwrap')[0], {
+        this.observer.observe(document.body, {
             childList: true,
             subtree: true,
             attributes: true,
