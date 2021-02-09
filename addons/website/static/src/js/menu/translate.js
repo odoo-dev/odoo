@@ -3,6 +3,7 @@ odoo.define('website.translateMenu', function (require) {
 
 require('web.dom_ready');
 var core = require('web.core');
+var weDialog = require('wysiwyg.widgets.Dialog');
 var Dialog = require('web.Dialog');
 var EditorMenu = require('website.editMenu');
 var localStorage = require('web.local_storage');
@@ -48,7 +49,7 @@ var TranslatorInfoDialog = Dialog.extend({
 });
 
 // TODO: Handle this once images are handled.
-var AttributeTranslateDialog = Dialog.extend({
+var AttributeTranslateDialog = weDialog.extend({
     /**
      * @constructor
      */
@@ -56,7 +57,7 @@ var AttributeTranslateDialog = Dialog.extend({
         this._super(parent, _.extend({
             title: _t("Translate Attribute"),
             buttons: [
-                {text: _t("Close"), classes: 'btn-primary', click: () => {}} // this.applyAttributeChanges}
+                {text: _t("Close"), classes: 'btn-primary', click: this.save}
             ],
         }, options || {}));
         this.wysiwyg = options.wysiwyg;
@@ -82,23 +83,13 @@ var AttributeTranslateDialog = Dialog.extend({
         });
         return this._super.apply(this, arguments);
     },
-    // /**
-    //  * Apply the attributes changes in the VDocument.
-    //  */
-    // applyAttributeChanges: function () {
-    //     const attributeChange = () => {
-    //         for (const attributeName of Object.keys(this.translation)) {
-    //             const domNode = this.translation[attributeName];
-    //             const nodes = this.wysiwyg.editorHelpers.getNodes(this.node);
-    //             for (const node of nodes) {
-    //                 node.modifiers.get(JWEditorLib.Attributes).set(attributeName, domNode.textContent);
-    //             }
-    //         }
-    //         this.close();
-    //     }
-    //     this.wysiwyg.execCommand(attributeChange);
-    // }
 });
+
+const savableSelector = '[data-oe-translation-id], ' +
+    '[data-oe-model][data-oe-id][data-oe-field], ' +
+    '[placeholder*="data-oe-translation-id="], ' +
+    '[title*="data-oe-translation-id="], ' +
+    '[alt*="data-oe-translation-id="]';
 
 var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     assetLibs: ['web_editor.compiled_assets_wysiwyg', 'website.compiled_assets_wysiwyg'],
@@ -177,15 +168,13 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             devicePreview: false,
         };
 
-        const savableSelector = '[data-oe-translation-id], ' +
-        	'[data-oe-model][data-oe-id][data-oe-field], ' +
-        	'[placeholder*="data-oe-translation-id="], ' +
-        	'[title*="data-oe-translation-id="], ' +
-            '[alt*="data-oe-translation-id="]';
-
         this.translator = new EditorMenu(this, {
             wysiwygOptions: params,
             savableSelector: savableSelector,
+            editableFromEditorMenu: () => {
+                return $(savableSelector)
+                    .not('[data-oe-readonly]');
+            },
         });
 
         // We don't want the BS dropdown to close
@@ -258,7 +247,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @returns {JQuery}
      */
     _getEditableArea: function () {
-        return this.translator.wysiwyg.$editable.add(this.$editables_attribute);
+        return this.translator.wysiwyg.$editable.find(':o_editable').add(this.$editables_attribute);
     },
     /**
      * Returns a translation object.

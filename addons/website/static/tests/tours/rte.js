@@ -3,6 +3,7 @@ odoo.define('website.tour.rte', function (require) {
 
 var ajax = require('web.ajax');
 var session = require('web.session');
+var Wysiwyg = require('web_editor.wysiwyg');
 var tour = require('web_tour.tour');
 
 var domReady = new Promise(function (resolve) {
@@ -149,7 +150,7 @@ tour.register('rte_translator', {
     },
 }, {
     content: "underline",
-    trigger: '.note-air-popover button[data-event="underline"]',
+    trigger: '.oe-toolbar #underline',
 }, {
     content: "save new change",
     trigger: 'button[data-action=save]',
