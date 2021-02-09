@@ -10,7 +10,7 @@
     </xpath>
 </template>
 
-<template id="assets_wysiwyg" inherit_id="website.assets_wysiwyg" name="Website Mail Channel Editor Assets">
+<template id="assets_wysiwyg" inherit_id="website.assets_wysiwyg_website" name="Website Mail Channel Editor Assets">
     <xpath expr="//script[last()]" position="after">
         <script type="text/javascript" src="/website_mail_channel/static/src/snippets/s_channel/options.js"/>
     </xpath>

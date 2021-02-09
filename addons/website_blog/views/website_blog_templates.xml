@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="assets_wysiwyg" inherit_id="website.assets_wysiwyg" name="Blog posts snippet options">
+<template id="assets_wysiwyg" inherit_id="website.assets_wysiwyg_website" name="Blog posts snippet options">
     <xpath expr="." position="inside">
         <script type="text/javascript" src="/website_blog/static/src/snippets/s_latest_posts/options.js"/>
     </xpath>

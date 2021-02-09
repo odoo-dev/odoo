@@ -142,7 +142,7 @@ class TestUi(odoo.tests.HttpCase):
     def test_05_specific_website_editor(self):
         website_default = self.env['website'].search([], limit=1)
         new_website = self.env['website'].create({'name': 'New Website'})
-        website_editor_assets_view = self.env.ref('website.assets_wysiwyg')
+        website_editor_assets_view = self.env.ref('website.assets_wysiwyg_website')
         self.env['ir.ui.view'].create({
             'name': 'Editor Extension',
             'type': 'qweb',
