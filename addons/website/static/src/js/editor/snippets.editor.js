@@ -207,9 +207,9 @@ weSnippetEditor.SnippetsMenu.include({
     },
 });
 
-weSnippetEditor.Editor.include({
+weSnippetEditor.SnippetEditor.include({
     layoutElementsSelector: [
-        weSnippetEditor.Editor.prototype.layoutElementsSelector,
+        weSnippetEditor.SnippetEditor.prototype.layoutElementsSelector,
         '.s_parallax_bg',
         '.o_bg_video_container',
     ].join(','),
