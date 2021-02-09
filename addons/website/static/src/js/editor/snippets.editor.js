@@ -70,17 +70,38 @@ weSnippetEditor.Class.include({
                 size: 'medium',
                 title: _t("Google Map API Key"),
                 buttons: [
-                    {text: _t("Save"), classes: 'btn-primary', close: true, click: async () => {
-                        const newAPIKey = dialog.$('#api_key_input').val() || false;
-                        await this._rpc({
-                            model: 'website',
-                            method: 'write',
-                            args: [
-                                [websiteId],
-                                {google_maps_api_key: newAPIKey},
-                            ],
-                        });
-                        invalidated = true;
+                    {text: _t("Save"), classes: 'btn-primary', close: false, click: async (ev) => {
+                        const $apiKeyInput = dialog.$('#api_key_input');
+                        const valueAPIKey = $apiKeyInput.val() || false;
+                        if (!valueAPIKey) {
+                            $apiKeyInput.addClass('is-invalid');
+                            dialog.$('#api_key_help').text(_t('Enter an API Key'));
+                            return;
+                        }
+                        const $button = $(ev.currentTarget);
+                        $button.prop("disabled", true);
+                        try {
+                            const response = await fetch(`https://maps.googleapis.com/maps/api/staticmap?center=belgium&size=10x10&key=${valueAPIKey}`);
+                            if (response.status === 200) {
+                                await this._rpc({
+                                    model: 'website',
+                                    method: 'write',
+                                    args: [
+                                        [websiteId],
+                                        {google_maps_api_key: valueAPIKey},
+                                    ],
+                                });
+                                invalidated = true;
+                                dialog.close();
+                            } else {
+                                $apiKeyInput.addClass('is-invalid');
+                                dialog.$('#api_key_help').text(_t('Invalid API Key'));
+                            }
+                        } catch (e) {
+                            dialog.$('#api_key_help').text(_t('Check your connexion and try again'));
+                        } finally {
+                            $button.prop("disabled", false);
+                        }
                     }},
                     {text: _t("Cancel"), close: true}
                 ],
