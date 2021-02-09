@@ -186,8 +186,11 @@
         }
 
         &, &.table-striped {
-            tr:focus-within {
+            tr:focus-within:not(.o_selected_row) {
                 background-color: rgba(#00a09d, 0.05);
+                &.o_selected_row {
+                    background-color: lighten($o-form-lightsecondary, 10%);
+                }
                 &, + tr {
                     th, td {
                         border-top-color: #00a09d !important;
