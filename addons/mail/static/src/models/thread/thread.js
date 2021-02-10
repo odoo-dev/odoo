@@ -7,6 +7,7 @@ const { clear } = require('mail/static/src/model/model_field_command.js');
 const throttle = require('mail/static/src/utils/throttle/throttle.js');
 const Timer = require('mail/static/src/utils/timer/timer.js');
 const mailUtils = require('mail.utils');
+const { str_to_datetime } = require('web.time');
 
 function factory(dependencies) {
 
@@ -169,6 +170,9 @@ function factory(dependencies) {
             }
             if ('is_pinned' in data) {
                 data2.isServerPinned = data.is_pinned;
+            }
+            if ('last_activity_time' in data && data.last_activity_time) {
+                data2.lastActivityTime = str_to_datetime(data.last_activity_time);
             }
             if ('last_message' in data && data.last_message) {
                 data2.messagesAsServerChannel.push(['insert', { id: data.last_message.id }]);
@@ -1794,6 +1798,7 @@ function factory(dependencies) {
         is_moderator: attr({
             default: false,
         }),
+        lastActivityTime: attr(),
         lastCurrentPartnerMessageSeenByEveryone: many2one('mail.message', {
             compute: '_computeLastCurrentPartnerMessageSeenByEveryone',
             dependencies: [
@@ -1920,6 +1925,7 @@ function factory(dependencies) {
         }),
         messaging: many2one('mail.messaging', {
             compute: '_computeMessaging',
+            inverse: 'allThreads',
         }),
         messagingCurrentPartner: many2one('mail.partner', {
             related: 'messaging.currentPartner',

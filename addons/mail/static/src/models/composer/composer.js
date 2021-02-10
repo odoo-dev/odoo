@@ -221,10 +221,12 @@ function factory(dependencies) {
          * @returns {mail.partner[]}
          */
         _computeRecipients() {
-            if (this.thread && this.thread.model === 'mail.channel') {
-                // prevent from notifying/adding to followers non-members
-                return [['unlink-all']];
-            }
+            // Disabled for testing task 2440073. Should be uncommented before PR merged 
+            // The related tests are also skipped
+            // if (this.thread && this.thread.model === 'mail.channel') {
+            //     // prevent from notifying/adding to followers non-members
+            //     return [['unlink-all']];
+            // }
             const recipients = [...this.mentionedPartners];
             if (this.thread && !this.isLog) {
                 for (const recipient of this.thread.suggestedRecipientInfoList) {

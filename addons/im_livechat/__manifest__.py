@@ -42,6 +42,7 @@ Help your customers with this chat, and analyse their feedback.
     'qweb': [
         'static/src/bugfix/bugfix.xml',
         'static/src/components/composer/composer.xml',
+        'static/src/components/category_livechat_item/category_livechat_item.xml',
         'static/src/components/discuss_sidebar/discuss_sidebar.xml',
         'static/src/components/thread_icon/thread_icon.xml',
     ],

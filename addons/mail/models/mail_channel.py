@@ -462,7 +462,9 @@ class Channel(models.Model):
         if moderation_status == 'rejected':
             return self.env['mail.message']
 
-        self.filtered(lambda channel: channel.is_chat).mapped('channel_last_seen_partner_ids').sudo().write({'is_pinned': True})
+        chat_channel = self.filtered(lambda channel: channel.is_chat)
+        chat_channel.mapped('channel_last_seen_partner_ids').sudo().write({'is_pinned': True})
+        chat_channel.channel_update_last_activity_time()
 
         message = super(Channel, self.with_context(mail_create_nosubscribe=True)).message_post(message_type=message_type, moderation_status=moderation_status, **kwargs)
 
@@ -695,6 +697,7 @@ class Channel(models.Model):
                     info['seen_message_id'] = partner_channel.seen_message_id.id
                     info['custom_channel_name'] = partner_channel.custom_channel_name
                     info['is_pinned'] = partner_channel.is_pinned
+                    info['last_activity_time'] = partner_channel.last_activity_time
 
             # add members infos
             if channel.channel_type != 'channel':
@@ -765,7 +768,10 @@ class Channel(models.Model):
             channel = self.browse(result[0].get('channel_id'))
             # pin up the channel for the current partner
             if pin:
-                self.env['mail.channel.partner'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', channel.id)]).write({'is_pinned': True})
+                self.env['mail.channel.partner'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', channel.id)]).write({
+                    'is_pinned': True,
+                    'last_activity_time': fields.Datetime.now(),
+                })
             channel._broadcast(self.env.user.partner_id.ids)
         else:
             # create a new one
@@ -913,6 +919,12 @@ class Channel(models.Model):
         channel_partners.write({
             'custom_channel_name': name,
         })
+
+    def channel_update_last_activity_time(self, broadcast=True):
+        for channel in self:
+            partners_to = self.channel_partner_ids.ids if broadcast else self.env.user.partner_id.ids
+            self.env['mail.channel.partner'].search([('partner_id', 'in', partners_to), ('channel_id', '=', channel.id)]).write({'last_activity_time': fields.Datetime.now()})
+            self._broadcast(partners_to)
 
     def notify_typing(self, is_typing):
         """ Broadcast the typing notification to channel members

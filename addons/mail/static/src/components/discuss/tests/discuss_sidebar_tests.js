@@ -54,13 +54,13 @@ QUnit.test('sidebar find shows channels matching search term', async function (a
         },
     });
     await afterNextRender(() =>
-        document.querySelector(`.o_DiscussSidebar_groupHeaderItemAdd`).click()
+        document.querySelector(`.o_CategoryChannelTitle_commandChannelAdd`).click()
     );
-    document.querySelector(`.o_DiscussSidebar_itemNew`).focus();
+    document.querySelector(`.o_CategoryChannelTitle_newInput`).focus();
     document.execCommand('insertText', false, "test");
-    document.querySelector(`.o_DiscussSidebar_itemNew`)
+    document.querySelector(`.o_CategoryChannelTitle_newInput`)
         .dispatchEvent(new window.KeyboardEvent('keydown'));
-    document.querySelector(`.o_DiscussSidebar_itemNew`)
+    document.querySelector(`.o_CategoryChannelTitle_newInput`)
         .dispatchEvent(new window.KeyboardEvent('keyup'));
 
     await searchReadDef;
@@ -107,13 +107,13 @@ QUnit.test('sidebar find shows channels matching search term even when user is m
         },
     });
     await afterNextRender(() =>
-        document.querySelector(`.o_DiscussSidebar_groupHeaderItemAdd`).click()
+        document.querySelector(`.o_CategoryChannelTitle_commandChannelAdd`).click()
     );
-    document.querySelector(`.o_DiscussSidebar_itemNew`).focus();
+    document.querySelector(`.o_CategoryChannelTitle_newInput`).focus();
     document.execCommand('insertText', false, "test");
-    document.querySelector(`.o_DiscussSidebar_itemNew`)
+    document.querySelector(`.o_CategoryChannelTitle_newInput`)
         .dispatchEvent(new window.KeyboardEvent('keydown'));
-    document.querySelector(`.o_DiscussSidebar_itemNew`)
+    document.querySelector(`.o_CategoryChannelTitle_newInput`)
         .dispatchEvent(new window.KeyboardEvent('keyup'));
 
     await searchReadDef;
