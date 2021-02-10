@@ -14,10 +14,10 @@ class RecurrenceRule(models.Model):
 
 
     # Don't sync by default. Sync only when the recurrence is applied
-    need_sync = fields.Boolean(default=False)
+    need_sync = fields.Boolean(default=True)
 
     def _apply_recurrence(self, specific_values_creation=None, no_send_edit=False):
-        events = self.calendar_event_ids
+        events = self.filtered('need_sync').calendar_event_ids
         detached_events = super()._apply_recurrence(specific_values_creation, no_send_edit)
 
         google_service = GoogleCalendarService(self.env['google.service'])
@@ -75,38 +75,51 @@ class RecurrenceRule(models.Model):
         # If all events are updated, sync the recurrence instead.
         values['need_sync'] = bool(dtstart)
         result = super()._write_events(values, dtstart=dtstart)
-        if not dtstart:
-            self.need_sync = True
+        # if not dtstart:
+        #     self.need_sync = True
         return result
 
     def _get_google_synced_fields(self):
         return {'rrule'}
 
-    @api.model
-    def _sync_google2odoo(self, *args, **kwargs):
-        synced_recurrences = super()._sync_google2odoo(*args, **kwargs)
-        detached_events = synced_recurrences._apply_recurrence()
-        detached_events.unlink()
-        return synced_recurrences
+    def _write_from_google(self, gevent, vals):
+        current_rrule = self.rrule
+        super()._write_from_google(gevent, vals)
+        if self.rrule != current_rrule:
+            detached_events = self._apply_recurrence()
+            detached_events.unlink()
+        time_fields = (
+            self.env["calendar.event"]._get_time_fields()
+            | self.env["calendar.event"]._get_recurrent_fields()
+        )
+        self._write_events(dict({
+            field: value
+            for field, value in self.env["calendar.event"]._odoo_values(gevent).items()
+            if field not in time_fields
+        }, need_sync= False))
+
+    def _create_from_google(self, gevents, vals_list):
+        for gevent, vals in zip(gevents, vals_list):
+            base_values = dict(
+                self.env['calendar.event']._odoo_values(gevent),  # FIXME default reminders
+                need_sync=False,
+            )
+            base_event = self.env['calendar.event'].create(base_values)
+            vals['base_event_id'] = base_event.id
+            vals['calendar_event_ids'] = [(4, base_event.id)]
+        recurrence = super()._create_from_google(gevents, vals_list)
+        recurrence._apply_recurrence()
+        return recurrence
 
     def _get_sync_domain(self):
         return [('calendar_event_ids.user_id', '=', self.env.user.id)]
 
     @api.model
     def _odoo_values(self, google_recurrence, default_reminders=()):
-        vals = {
+        return {
             'rrule': google_recurrence.rrule,
             'google_id': google_recurrence.id,
         }
-        base_values = dict(self.env['calendar.event']._odoo_values(google_recurrence, default_reminders), need_sync=False)
-        import pdb;pdb.set_trace()
-        if not google_recurrence.exists(self.env):
-            base_event = self.env['calendar.event'].create(base_values)
-            vals['base_event_id'] = base_event.id
-            vals['calendar_event_ids'] = [(4, base_event.id)]
-        else:
-            self.browse(google_recurrence.odoo_id(self.env))._write_events(base_values)
-        return vals
 
     def _google_values(self):
         event = self._get_first_event()

@@ -72,6 +72,7 @@ class GoogleSync(models.AbstractModel):
         if 'google_id' in vals:
             self._from_google_ids.clear_cache(self)
         synced_fields = self._get_google_synced_fields()
+        print(self, vals)
         if 'need_sync' not in vals and vals.keys() & synced_fields:
             vals['need_sync'] = True
 
@@ -159,7 +160,7 @@ class GoogleSync(models.AbstractModel):
             dict(self._odoo_values(e, default_reminders), need_sync=False)
             for e in new
         ]
-        new_odoo = self.create(odoo_values)
+        new_odoo = self._create_from_google(new, odoo_values)
 
         cancelled = existing.cancelled()
         cancelled_odoo = self.browse(cancelled.odoo_ids(self.env))
@@ -174,7 +175,7 @@ class GoogleSync(models.AbstractModel):
             # Migration from 13.4 does not fill write_date. Therefore, we force the update from Google.
             if not odoo_record.write_date or updated >= pytz.utc.localize(odoo_record.write_date):
                 vals = dict(self._odoo_values(gevent, default_reminders), need_sync=False)
-                odoo_record.write(vals)
+                odoo_record._write_from_google(gevent, vals)
                 synced_records |= odoo_record
 
         return synced_records
@@ -220,6 +221,13 @@ class GoogleSync(models.AbstractModel):
                     ('need_sync', '=', True),
             ]])
         return self.with_context(active_test=False).search(domain)
+
+    def _write_from_google(self, gevent, vals):
+        self.write(vals)
+
+    @api.model
+    def _create_from_google(self, gevents, vals_list):
+        return self.create(vals_list)
 
     @api.model
     def _odoo_values(self, google_event: GoogleEvent, default_reminders=()):

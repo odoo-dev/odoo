@@ -158,6 +158,8 @@ class TestSyncOdoo2Google(TestSyncGoogle):
         self.assertTrue(to_delete)
         self.assertFalse(to_delete.active)
         self.assertFalse(event.google_id, "The google id will be set after the API call")
+        # TODO assert the recurrence is synced
+        # self.assertGoogleEventInserted({})
         self.assertGoogleEventDeleted(google_id)
 
     @patch_api

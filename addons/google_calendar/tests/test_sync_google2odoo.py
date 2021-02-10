@@ -364,13 +364,12 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         })
         recurrence = self.env['calendar.recurrence'].create({
             'google_id': google_id,
-            'rrule': 'FREQ=WEEKLY;COUNT=2;BYDAY=WE',
+            'rrule': 'FREQ=WEEKLY;COUNT=2;BYDAY=MO',
             'need_sync': False,
             'base_event_id': base_event.id,
             'calendar_event_ids': [(4, base_event.id)],
         })
         recurrence._apply_recurrence()
-        import pdb; pdb.set_trace()
         values = {
             'id': google_id,
             'summary': 'coucou',
@@ -383,11 +382,49 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
         recurrence = self.env['calendar.recurrence'].search([('google_id', '=', google_id)])
         events = recurrence.calendar_event_ids.sorted('start')
-        import pdb; pdb.set_trace()
         self.assertEqual(len(events), 2)
         self.assertEqual(recurrence.rrule, 'FREQ=WEEKLY;COUNT=2;BYDAY=WE')
         self.assertEqual(events[0].start_date, date(2020, 1, 8))
         self.assertEqual(events[1].start_date, date(2020, 1, 15))
         self.assertEqual(events[0].google_id, '%s_20200108' % google_id)
         self.assertEqual(events[1].google_id, '%s_20200115' % google_id)
+        self.assertGoogleAPINotCalled()
+
+    @patch_api
+    def test_recurrence_name_updated(self):
+        google_id = 'oj44nep1ldf8a3ll02uip0c9aa'
+        base_event = self.env['calendar.event'].create({
+            'name': 'coucou',
+            'allday': True,
+            'start': datetime(2020, 1, 6),
+            'stop': datetime(2020, 1, 6),
+            'need_sync': False,
+        })
+        recurrence = self.env['calendar.recurrence'].create({
+            'google_id': google_id,
+            'rrule': 'FREQ=WEEKLY;COUNT=2;BYDAY=MO',
+            'need_sync': False,
+            'base_event_id': base_event.id,
+            'calendar_event_ids': [(4, base_event.id)],
+        })
+        recurrence._apply_recurrence()
+        values = {
+            'id': google_id,
+            'summary': 'coucou again',
+            'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=2;BYDAY=MO'],
+            'start': {'date': '2020-01-06'},
+            'end': {'date': '2020-01-07'},
+            'reminders': {'useDefault': True},
+            'updated': self.now,
+        }
+        self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
+        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', google_id)])
+        events = recurrence.calendar_event_ids.sorted('start')
+        self.assertEqual(len(events), 2)
+        self.assertEqual(recurrence.rrule, 'FREQ=WEEKLY;COUNT=2;BYDAY=MO')
+        self.assertEqual(events.mapped('name'), ['coucou again','coucou again'])
+        self.assertEqual(events[0].start_date, date(2020, 1, 6))
+        self.assertEqual(events[1].start_date, date(2020, 1, 13))
+        self.assertEqual(events[0].google_id, '%s_20200106' % google_id)
+        self.assertEqual(events[1].google_id, '%s_20200113' % google_id)
         self.assertGoogleAPINotCalled()

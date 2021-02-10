@@ -35,7 +35,6 @@ class Meeting(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        print(vals_list)
         return super().create([
             dict(vals, need_sync=False) if vals.get('recurrence_id') else vals
             for vals in vals_list
@@ -45,7 +44,10 @@ class Meeting(models.Model):
         recurrence_update_setting = values.get('recurrence_update')
         if recurrence_update_setting in ('all_events', 'future_events') and len(self) == 1:
             values = dict(values, need_sync=False)
-        return super().write(values)
+        res = super().write(values)
+        if recurrence_update_setting in ('all_events',) and len(self) == 1:
+            self.recurrence_id.need_sync = True
+        return res
 
     def _get_sync_domain(self):
         return [('partner_ids.user_ids', 'in', self.env.user.id)]
