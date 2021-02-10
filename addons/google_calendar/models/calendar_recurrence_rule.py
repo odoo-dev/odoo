@@ -13,9 +13,6 @@ class RecurrenceRule(models.Model):
     _inherit = ['calendar.recurrence', 'google.calendar.sync']
 
 
-    # Don't sync by default. Sync only when the recurrence is applied
-    need_sync = fields.Boolean(default=True)
-
     def _apply_recurrence(self, specific_values_creation=None, no_send_edit=False):
         events = self.filtered('need_sync').calendar_event_ids
         detached_events = super()._apply_recurrence(specific_values_creation, no_send_edit)
@@ -46,10 +43,8 @@ class RecurrenceRule(models.Model):
         for recurrence in self.filtered('need_sync'):
             values = recurrence._google_values()
             if not recurrence.google_id:
-                # import pdb;pdb.set_trace()
                 recurrence._google_insert(google_service, values)
             else:
-                # import pdb;pdb.set_trace()
                 recurrence._google_patch(google_service, recurrence.google_id, values)
         self.calendar_event_ids.need_sync = False
         return detached_events
@@ -72,12 +67,8 @@ class RecurrenceRule(models.Model):
     def _write_events(self, values, dtstart=None):
         values.pop('google_id', False)
         # If only some events are updated, sync those events.
-        # If all events are updated, sync the recurrence instead.
         values['need_sync'] = bool(dtstart)
-        result = super()._write_events(values, dtstart=dtstart)
-        # if not dtstart:
-        #     self.need_sync = True
-        return result
+        return super()._write_events(values, dtstart=dtstart)
 
     def _get_google_synced_fields(self):
         return {'rrule'}
