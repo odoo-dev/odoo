@@ -6,6 +6,7 @@ import json
 import os
 import logging
 import pytz
+import re
 import requests
 import werkzeug.urls
 import werkzeug.utils
@@ -19,6 +20,7 @@ import odoo
 from odoo import http, models, fields, _
 from odoo.http import request
 from odoo.tools import OrderedSet
+from odoo.tools import html_escape as escape
 from odoo.addons.http_routing.models.ir_http import slug, slugify, _guess_mimetype
 from odoo.addons.web.controllers.main import Binary
 from odoo.addons.portal.controllers.portal import pager as portal_pager
@@ -290,6 +292,123 @@ class Website(Home):
             [['key', 'ilike', '.dynamic_filter_template_'], ['type', '=', 'qweb']], ['key', 'name']
         )
         return templates
+
+    # --------------------------------------------------------------------------
+    # Search Bar
+    # --------------------------------------------------------------------------
+
+    def _get_search_order(self, order):
+        # OrderBy will be parsed in orm and so no direct sql injection
+        # id is added to be sure that order is a unique sort key
+        order = order or 'name ASC'
+        return 'is_published desc, %s, id desc' % order
+
+    @http.route('/website/snippet/autocomplete', type='json', auth='public', website=True)
+    def autocomplete(self, search_type=None, term=None, order=None, limit=5, max_nb_chars=999, options=None):
+        """
+        Returns list of results according to the term and options
+
+        Params:
+            search_type (str): search type targeting search method website._autocomplete_%s
+            term (str): search term written by the user
+            order (str)
+            limit (int), default to 5: number of results to consider
+            max_nb_chars (int): max number of characters for text fields
+            options (dict): specific to search_type
+
+        Returns:
+            dict (or False if no result)
+                - 'results' (list): results (only their needed field values)
+                        note: the monetary fields will be strings properly formatted and
+                        already containing the currency
+                - 'results_count' (int): the number of results in the database
+                        that matched the search query
+        """
+        order = self._get_search_order(order)
+        options = options or {}
+        handler = getattr(request.website, '_autocomplete_%s' % search_type, None)
+        if not handler:
+            return {
+                'results': [],
+                'results_count': 0,
+                'parts': {},
+            }
+        if 'display_currency' not in options:
+            options['display_currency'] = request.website.get_current_pricelist().currency_id
+        results_count, results_data, mapping = handler(term, limit, order, options)
+        result = []
+        for record in results_data:
+            mapped = {}
+            for mapped_name, field_meta in mapping.items():
+                value = record.get(field_meta.get('name'))
+                if value:
+                    field_type = field_meta.get('type')
+                    if field_type == 'text':
+                        if value and len(value) > max_nb_chars:
+                            value = "%s..." % value[:(max_nb_chars - 3)]
+                        if field_meta.get('match') and value and term:
+                            pattern = '(%s)' % '|'.join([re.escape(search_term) for search_term in term.split(' ')])
+                            parts = re.split(pattern, value, flags=re.I)
+                            if len(parts) > 1:
+                                value = request.env['ir.ui.view'].sudo()._render_template(
+                                    "website.search_text_with_highlight",
+                                    {'parts': parts}
+                                ).decode('utf-8')
+                                field_type = 'html'
+
+                    if (field_type in ('image', 'binary')):
+                        value = escape(value)
+                    elif ('ir.qweb.field.%s' % field_type) in request.env:
+                        opt = {}
+                        if field_type == 'monetary':
+                            opt['display_currency'] = options['display_currency']
+                        elif field_type == 'html':
+                            opt['template_options'] = {}
+                        value = request.env[('ir.qweb.field.%s' % field_type)].value_to_html(value, opt)
+                    else:
+                        value = escape(value)
+                else:
+                    value = ''
+                mapped[mapped_name] = value
+            result.append(mapped)
+
+        return {
+            'results': result,
+            'results_count': results_count,
+            'parts': {key: True for key in mapping.keys()},
+        }
+
+    @http.route(['/pages', '/pages/page/<int:page>'], type='http', auth="public", website=True, sitemap=False)
+    def pages_list(self, page=1, search='', **kw):
+        Page = request.env['website.page']
+
+        domain = request.website.website_domain()
+        domain += [('is_published', '=', True)]
+        if search:
+            domain += ['|', ('name', 'ilike', search), ('url', 'ilike', search)]
+
+        pages = Page.sudo().search(domain, order='name asc, website_id desc, id')
+        pages = pages.filtered(pages._is_most_specific_page)
+        pages_count = len(pages)
+
+        step = 50
+        pager = portal_pager(
+            url="/pages",
+            url_args={'search': search},
+            total=pages_count,
+            page=page,
+            step=step
+        )
+
+        pages = pages[(page - 1) * step:page * step]
+
+        values = {
+            'pager': pager,
+            'pages': pages,
+            'search': search,
+            'search_count': pages_count,
+        }
+        return request.render("website.list_website_public_pages", values)
 
     # ------------------------------------------------------
     # Edit

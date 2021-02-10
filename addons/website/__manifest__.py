@@ -77,6 +77,7 @@
         'views/snippets/s_google_map.xml',
         'views/snippets/s_dynamic_snippet.xml',
         'views/snippets/s_dynamic_snippet_carousel.xml',
+        'views/snippets/s_searchbar.xml',
         'views/website_views.xml',
         'views/website_visitor_views.xml',
         'views/res_config_settings_views.xml',

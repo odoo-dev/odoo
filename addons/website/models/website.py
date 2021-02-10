@@ -7,6 +7,7 @@ import logging
 import hashlib
 import re
 
+from lxml import etree
 
 from werkzeug import urls
 from werkzeug.datastructures import OrderedMultiDict
@@ -19,7 +20,7 @@ from odoo.addons.portal.controllers.portal import pager
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.modules.module import get_resource_path
-from odoo.osv.expression import FALSE_DOMAIN
+from odoo.osv.expression import AND, OR, FALSE_DOMAIN
 from odoo.tools.translate import _
 
 logger = logging.getLogger(__name__)
@@ -1007,6 +1008,92 @@ class Website(models.Model):
 
     def _get_cached(self, field):
         return self._get_cached_values()[field]
+
+    def _build_search_domain(self, domain, search, fields):
+        """
+        Builds a search domain AND-combining a base domain with partial matches of each term in
+        the search expression in any of the fields.
+
+        :param domain: base domain combined in the search expression
+        :param search: search expression string
+        :param fields: list of field names to match the terms of the search expression with
+
+        :return: domain limited to the matches of the search expression
+        """
+        domains = domain.copy()
+        if search:
+            for search_term in search.split(' '):
+                subdomains = []
+                for field in fields:
+                    subdomains.append([(field, 'ilike', search_term)])
+                domains.append(OR(subdomains))
+        return AND(domains)
+
+    def _autocomplete_pages(self, search, limit, order, options):
+        """
+        Generates autocompletion results for the search facilities.
+        The method named '_autocomplete_<search type>' produce results for the specific search type.
+
+        :param search: search expression to match results against
+        :param limit: maximum number of results to return
+        :param order: order on which to sort results
+        :param options: dict containing options specific to the search type
+
+        :return: autocompletion results as a tuple containing:
+            - the total number of matches
+            - the results as a list of dict containing data for each field
+            - the mapping from the results towards the structure used in rendering templates.
+                The mapping is a dict that associates the rendering name of each field
+                to a dict containing the 'name' of the field in the results list and the 'type'
+                that must be used for rendering the value.
+        """
+        model = self.env['website.page']
+        with_description = options['displayDescription']
+        fields = ['name', 'url']
+        domain = self._build_search_domain([self.website_domain()], search, fields)
+        if not request.env.user.has_group('website.group_website_designer'):
+            domain += [('is_published', '=', True)]
+            model = model.sudo()
+        results = model.search(
+            domain,
+            limit=min(20, limit),
+            order=order
+        )
+        if with_description:
+            fields.append('view_id.arch_db')
+            name_results = results
+            domain = self._build_search_domain([self.website_domain()], search, fields)
+            results = model.search(
+                domain,
+                limit=min(20, limit),
+                order=order
+            )
+            results = results.union(name_results)
+            # arch matching might return non-text match -> also include base matches within limit
+        results = results.filtered(results._is_most_specific_page)
+        fields = ['id', 'name', 'url']
+        if with_description:
+            fields.append('arch')
+        results_data = results.read(fields)
+        mapping = {
+            'name': {'name': 'name', 'type': 'text', 'match': True},
+            'website_url': {'name': 'url', 'type': 'text'},
+        }
+        if with_description:
+            full_results_data = results_data
+            results_data = []
+            for result in full_results_data:
+                view_arch = etree.fromstring(result['arch'].encode('utf-8'))
+                match = False
+                text = ' '.join(view_arch.itertext())
+                text = re.sub('\\s+', ' ', text).strip()
+                result['arch'] = text
+                if result['id'] in name_results.ids or match:
+                    results_data.append(result)
+
+            mapping['description'] = {'name': 'arch', 'type': 'text', 'match': True}
+            results_data = results_data[:limit]
+        return (model.search_count(domain), results_data, mapping)
 
 
 class BaseModel(models.AbstractModel):
