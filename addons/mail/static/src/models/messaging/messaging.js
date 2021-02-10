@@ -13,6 +13,7 @@ function factory(dependencies) {
          */
         _willDelete() {
             this.env.services['bus_service'].off('window_focus', null, this._handleGlobalWindowFocus);
+
             return super._willDelete(...arguments);
         }
 
@@ -240,6 +241,10 @@ function factory(dependencies) {
          * Mailbox Starred.
          */
         starred: one2one('mail.thread'),
+        switcher: one2one('mail.switcher', {
+            default: [['create']],
+            isCausal: true,
+        }),
     };
 
     Messaging.modelName = 'mail.messaging';

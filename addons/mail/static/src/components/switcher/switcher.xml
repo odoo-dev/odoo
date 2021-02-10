@@ -6,7 +6,13 @@
             <div class="o_Switcher_overlay" t-on-click="_close"></div>
             <div class="o_Switcher_box">
                 <form>
-                    <input type="text" name="switch" t-ref="inputSwitcher"/>
+                    <SuggestionsList
+                        suggestionManagerLocalId="composer.suggestionManager.localId"
+                        isBelow="true"
+                        t-on-suggestion-selected="_onSuggestionSelected"
+                    >
+                        <input type="text" name="switch" t-ref="inputSwitcher"/>
+                    </SuggestionsList>
                 </form>
             </div>
         </div>

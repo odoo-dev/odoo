@@ -21,10 +21,13 @@ class Switcher extends Component {
             isOpen: false
         });
 
-        // useStore(props => {
-        //     const follower = this.env.models['mail.follower'].get(props.followerLocalId);
-        //     return [follower ? follower.__state : undefined];
-        // });
+        useStore(props => {
+            const switcher = this.env.messaging && this.env.messaging.switcher;
+            return {
+                switcher: switcher ? switcher.__state : undefined,
+                isMessagingInitialized: this.env.isMessagingInitialized(),
+            };
+        });
 
         document.addEventListener("keydown", event => {
             // See doc: https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event
@@ -42,17 +45,25 @@ class Switcher extends Component {
                 this._close();
             }
         });
+
+        this._input = useRef('inputSwitcher');
     }
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
+    focus() {
+        console.log(this._input);
+        this._input.el.focus();
+    }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+
     _open() {
         this.state.isOpen = true;
+        this.focus();
     }
 
     _close() {
