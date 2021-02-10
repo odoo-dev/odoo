@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="mail.CategoryChannelItem" owl="1">
+        <CategoryItem class="o_CategoryChannelItem" threadLocalId="thread.localId" unreadCounter="thread.message_needaction_counter">
+            <t t-set-slot="commands">
+                <div 
+                    class="o_CategoryChannelItem_command o_CategoryChannelItem_commandSettings fa fa-cog"
+                    t-on-click="_onClickSettings"
+                    title="Channel settings"
+                    role="img"
+                />
+                <t t-if="!thread.message_needaction_counter and !thread.group_based_subscription">
+                    <div
+                        class="o_CategoryChannelItem_command o_CategoryChannelItem_commandLeave fa fa-times"
+                        t-on-click="_onClickLeave"
+                        title="Leave this channel"
+                        role="img"
+                    />
+                </t>
+            </t>
+        </CategoryItem>
+    </t>
+</templates>

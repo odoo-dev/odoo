@@ -155,9 +155,83 @@ function factory(dependencies) {
             });
         }
 
+        /**
+         * @private
+         * @returns [{mail.thread}]
+         */
+        _computeAllOrderedAndPinnedChats() {
+            const chats = this.allPinnedChannelThreads
+                .filter(thread =>
+                    thread.channel_type === 'chat'
+                ).sort((t1, t2) => {
+                    if(t1.lastMessage && !t2.lastMessage) {
+                        return 1;
+                    }
+                    if (t2.lastMessage && !t1.lastMessage) {
+                        return -1;
+                    }
+                    if (t1.lastMessage && t2.lastMessage) {
+                        return t2.lastMessage.id - t1.lastMessage.id;
+                    }
+                    return t1.id - t2.id;
+                });
+            return [['replace', chats]];
+        }
+
+        /**
+         * @private
+         * @returns [{mail.thread}]
+         */
+        _computeAllOrderedAndPinnedMultiUserChannels() {
+            const channels = this.allPinnedChannelThreads
+                .filter(thread => 
+                    thread.channel_type === 'channel'
+                ).sort((t1, t2) => 
+                    t1.displayName < t2.displayName ? -1 : 1
+                );
+            return [['replace', channels]];
+        }
+
+        /**
+         * @private
+         * @returns [{mail.thread}]
+         */
+        _computeAllPinnedChannelThreads() {
+            const threads = this.allThreads
+                .filter(thread => 
+                    thread.model === 'mail.channel' &&
+                    thread.isPinned
+                );
+            return [['replace', threads]];
+        }
+
     }
 
     Messaging.fields = {
+        allOrderedAndPinnedChats: one2many('mail.thread', {
+            compute: '_computeAllOrderedAndPinnedChats',
+            dependencies: ['allPinnedChannelThreads', 'allPinnedChannelThreadsChannelType', 'allPinnedChannelThreadsLastMessage'],
+        }),
+        allOrderedAndPinnedMultiUserChannels: one2many('mail.thread', {
+            compute: '_computeAllOrderedAndPinnedMultiUserChannels',
+            dependencies: ['allPinnedChannelThreads', 'allPinnedChannelThreadsChannelType'],
+        }),
+        allPinnedChannelThreads: one2many('mail.thread', {
+            compute: '_computeAllPinnedChannelThreads',
+            dependencies: ['allThreads', 'allThreadsIsPinned'],
+        }),
+        allPinnedChannelThreadsChannelType: attr({
+            related: 'allPinnedChannelThreads.channel_type'
+        }),
+        allPinnedChannelThreadsLastMessage: one2many('mail.message', {
+            related: 'allPinnedChannelThreads.lastMessage',
+        }),
+        allThreads: one2many('mail.thread', {
+            inverse: 'messaging',
+        }),
+        allThreadsIsPinned: attr({
+            related: 'allThreads.isPinned',
+        }),
         cannedResponses: one2many('mail.canned_response'),
         chatWindowManager: one2one('mail.chat_window_manager', {
             default: [['create']],

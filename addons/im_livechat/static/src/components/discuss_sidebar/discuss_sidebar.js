@@ -3,6 +3,8 @@ odoo.define('im_livechat/static/src/components/discuss_sidebar/discuss_sidebar.j
 
 const components = {
     DiscussSidebar: require('mail/static/src/components/discuss_sidebar/discuss_sidebar.js'),
+    CategoryLivechatItem: require('im_livechat/static/src/components/category_livechat_item/category_livechat_item.js'),
+    CategoryLivechatTitle: require('im_livechat/static/src/components/category_livechat_title/category_livechat_title.js'),
 };
 
 const { patch } = require('web.utils');
@@ -50,6 +52,10 @@ patch(components.DiscussSidebar, 'im_livechat/static/src/components/discuss_side
         });
     },
 
+    livechatsList() {
+        return this.env.messaging && this.env.messaging.allOrderedAndPinnedLivechats;
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -70,9 +76,15 @@ patch(components.DiscussSidebar, 'im_livechat/static/src/components/discuss_side
     _useStoreSelector(props) {
         return Object.assign(this._super(...arguments), {
             allOrderedAndPinnedLivechats: this.quickSearchOrderedAndPinnedLivechatList(),
+            livechats: this.env.messaging && this.env.messaging.allOrderedAndPinnedLivechats,
         });
     },
 
+});
+
+Object.assign(components.DiscussSidebar.components, {
+    CategoryLivechatItem: components.CategoryLivechatItem,
+    CategoryLivechatTitle: components.CategoryLivechatTitle,
 });
 
 });

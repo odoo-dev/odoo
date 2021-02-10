@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-inherit="mail.DiscussSidebar" t-inherit-mode="extension">
-        <xpath expr="//*[@name='root']" position="inside">
-            <t t-set="livechats" t-value="quickSearchOrderedAndPinnedLivechatList()"/>
-            <t t-if="livechats and livechats.length">
-                <div class="o_DiscussSidebar_group o_DiscussSidebar_groupLivechat">
-                    <div class="o_DiscussSidebar_groupHeader">
-                        <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle">
-                            Livechat
-                        </div>
-                    </div>
-                    <div class="o_DiscussSidebar_list">
-                        <t t-foreach="livechats" t-as="livechat" t-key="livechat.localId">
-                            <DiscussSidebarItem
-                                class="o_DiscussSidebar_item"
-                                threadLocalId="livechat.localId"
-                            />
-                        </t>
-                    </div>
-                </div>
-            </t>
+        <xpath expr="//Category[contains(@class, 'o_DiscussSidebar_groupChat')]" position="before">
+            <t t-set="livechats" t-value="livechatsList()"/>
+            <Category class="o_DiscussSidebar_group o_DiscussSidebar_groupLivechat" categoryLocalId="discuss.categoryLivechat.localId">
+                <t t-set-slot="title">
+                    <CategoryLivechatTitle />
+                </t>
+                <t t-set-slot="activeThread">
+                    <t t-if="currentThread and currentThread.channel_type === 'livechat'">
+                        <CategoryLivechatItem threadLocalId="currentThread.localId"/>
+                    </t>
+                </t>
+                <t t-set-slot="content">
+                    <t t-foreach="livechats" t-as="livechat" t-key="livechat.localId">
+                        <CategoryLivechatItem threadLocalId="livechat.localId" />
+                    </t>
+                </t>
+            </Category>
         </xpath>
     </t>
 </templates>

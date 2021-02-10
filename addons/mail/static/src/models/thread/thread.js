@@ -1914,6 +1914,7 @@ function factory(dependencies) {
         }),
         messaging: many2one('mail.messaging', {
             compute: '_computeMessaging',
+            inverse: 'allThreads',
         }),
         messagingCurrentPartner: many2one('mail.partner', {
             related: 'messaging.currentPartner',

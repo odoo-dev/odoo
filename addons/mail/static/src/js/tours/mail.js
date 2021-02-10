@@ -57,3 +57,6 @@ tour.register('mail_tour', {
 }]);
 
 });
+
+// TODO
+// FIX NEW IMPLEMENT

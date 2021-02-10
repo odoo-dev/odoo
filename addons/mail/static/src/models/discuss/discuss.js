@@ -379,6 +379,19 @@ function factory(dependencies) {
             default: "",
             dependencies: ['isOpen'],
         }),
+        categoryChat: one2one('mail.category', {
+            default: [['create', {
+                id: "chat",
+                displayName: "Direct Messages",
+                isOpen: true,
+            }]],
+        }),
+        categoryChannel: one2one('mail.category', {
+            default: [['create', {
+                name: "channel",
+                displayName: "Channels",
+            }]],
+        }),
         /**
          * Serves as compute dependency.
          */

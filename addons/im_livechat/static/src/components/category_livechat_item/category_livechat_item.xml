@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="im_livechat.CategoryLivechatItem" owl="1">
+        <CategoryItem class="o_CategoryLivechatItem" threadLocalId="thread.localId" unreadCounter="thread.localMessageUnreadCounter">
+            <t t-set-slot="commands">
+                <t t-if="!thread.localMessageUnreadCounter">
+                    <div 
+                        class="fa fa-times o_CategoryLivechatItem_command o_CategoryLivechatItem_commandUnpin" 
+                        t-on-click="_onClickUnpin" 
+                        title="Unpin conversation" 
+                        role="img"
+                    />
+                </t>
+            </t>
+        </CategoryItem>
+    </t>
+</templates>

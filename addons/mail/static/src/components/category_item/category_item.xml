@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="mail.CategoryItem" owl="1">
+        <div class="o_CategoryItem"
+            t-att-class="{
+                'o-active': thread and discuss.thread === thread,
+                'o-unread': thread and thread.localMessageUnreadCounter > 0,
+            }"
+            t-att-data-thread-local-id="thread ? thread.localId : undefined"
+            t-att-data-thread-name="thread ? thread.displayName : undefined"
+            t-on-click="_onClick"
+        >
+            <t t-if="thread">
+                <div class="o_CategoryItem_item o_CategoryItem_avatar">
+                    <t t-slot="avatar">
+                        <ThreadIcon threadLocalId="thread.localId"/>
+                    </t>
+                </div>
+                <div class="o_CategoryItem_item">
+                    <t t-slot="name">
+                        <span class="CategoryItem_name" t-att-class="{'o-item-unread': thread.localMessageUnreadCounter > 0}">
+                            <t t-esc="thread.displayName"/>
+                        </span>
+                    </t>
+                </div>
+                <t t-if="thread.mass_mailing">
+                    <i class="fa fa-envelope-o" title="Messages are sent by email" role="img"/>
+                </t>
+                <div class="o-autogrow o_CategoryItem_item"/>
+                <div class="o_CategoryItem_item o_CategoryItem_commands">
+                    <t t-slot="commands"/>
+                </div>
+                <t t-if="props.unreadCounter">
+                    <div class="o_CategoryItem_counter o_CategoryItem_item badge badge-pill">
+                        <t t-esc="props.unreadCounter"/>
+                    </div>
+                </t>
+            </t>
+        </div>
+    </t>
+</templates>

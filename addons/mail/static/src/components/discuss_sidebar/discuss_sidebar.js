@@ -3,6 +3,12 @@ odoo.define('mail/static/src/components/discuss_sidebar/discuss_sidebar.js', fun
 
 const components = {
     AutocompleteInput: require('mail/static/src/components/autocomplete_input/autocomplete_input.js'),
+    Category: require('mail/static/src/components/category/category.js'),
+    CategoryItem: require('mail/static/src/components/category_item/category_item.js'),
+    CategoryChannelItem: require('mail/static/src/components/category_channel_item/category_channel_item.js'),
+    CategoryChannelTitle: require('mail/static/src/components/category_channel_title/category_channel_title.js'),
+    CategoryChatItem: require('mail/static/src/components/category_chat_item/category_chat_item.js'),
+    CategoryChatTitle: require('mail/static/src/components/category_chat_title/category_chat_title.js'),
     DiscussSidebarItem: require('mail/static/src/components/discuss_sidebar_item/discuss_sidebar_item.js'),
 };
 const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
@@ -41,6 +47,26 @@ class DiscussSidebar extends Component {
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
+
+    get categoryChat() {
+        return this.discuss && this.discuss.categoryChat;
+    }
+
+    get categoryChannel() {
+        return this.discuss && this.discuss.categoryChannel;
+    }
+
+    get chats() {
+        return this.env.messaging && this.env.messaging.allOrderedAndPinnedChats;
+    }
+
+    get channelChats() {
+        return this.env.messaging && this.env.messaging.allOrderedAndPinnedMultiUserChannels;
+    }
+
+    get currentThread() {
+         return this.discuss && this.discuss.thread;
+    }
 
     /**
      * @returns {mail.discuss}
@@ -172,9 +198,16 @@ class DiscussSidebar extends Component {
                     thread.isPinned &&
                     thread.model === 'mail.channel'
                 ).length,
+            categoryChat: discuss && discuss.categoryChat,
+            categoryChannel: discuss && discuss.categoryChannel,
             discussIsAddingChannel: discuss && discuss.isAddingChannel,
             discussIsAddingChat: discuss && discuss.isAddingChat,
             discussSidebarQuickSearchValue: discuss && discuss.sidebarQuickSearchValue,
+            
+            // need to be factored later
+            chats: this.env.messaging && this.env.messaging.allOrderedAndPinnedChats,
+            channelChats: this.env.messaging && this.env.messaging.allOrderedAndPinnedMultiUserChannels,
+            currentThread: discuss && discuss.thread ? discuss.thread.__state : undefined,
         };
     }
 

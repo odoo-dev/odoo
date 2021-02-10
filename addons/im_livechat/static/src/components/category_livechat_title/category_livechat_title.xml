@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="im_livechat.CategoryLivechatTitle" owl="1">
+        <CategoryTitle
+            class="o_CategoryLivechatTitle"
+            categoryLocalId="env.messaging.discuss.categoryLivechat.localId"
+            unreadCounter="unreadCounter"
+        />
+    </t>
+</templates>
