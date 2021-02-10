@@ -1,0 +1,12 @@
+.o_Gif {
+    display: flex;
+    flex-flow: row wrap;
+    max-width: 500px;
+    max-height: 500px;
+    overflow: auto;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: auto auto;
+}

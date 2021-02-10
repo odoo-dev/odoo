@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.Gif" owl="1">
+        <div class="o_Gif">
+            <div>
+                Search form here
+            </div>
+            <div class="grid">
+                <div class="grid-item" t-foreach="state.categories" t-as="category">
+                    <t t-esc="category.searchterm"/>
+                    <img t-att-src="category.image" />
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
