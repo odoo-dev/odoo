@@ -477,11 +477,12 @@ a.o_underline {
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
 
     & > h2 {
         max-width: 500px;
         text-align: center;
+        margin-right: 150px;
     }
 
     &::before {
