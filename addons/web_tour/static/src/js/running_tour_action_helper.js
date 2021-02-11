@@ -116,15 +116,15 @@ var RunningTourActionHelper = core.Class.extend({
     },
     _drag_and_drop: function (values, to) {
         var $to;
+        var elementCenter = values.
+        $element.offset();
+        elementCenter.left += values.$element.outerWidth()/2;
+        elementCenter.top += values.$element.outerHeight()/2;
         if (to) {
             $to = get_jquery_element_from_selector(to);
         } else {
             $to = $(document.body);
         }
-        var elementCenter = values.$element.offset();
-        elementCenter.left += values.$element.outerWidth()/2;
-        elementCenter.top += values.$element.outerHeight()/2;
-
 
         const calculateCenter = () => {
             const toCenter = $to.offset();
@@ -138,11 +138,18 @@ var RunningTourActionHelper = core.Class.extend({
             toCenter.top += $to.outerHeight()/2;
             return toCenter;
         };
-        let toCenter = calculateCenter();
 
         values.$element.trigger($.Event("mouseenter"));
         values.$element.trigger($.Event("mousedown", {which: 1, pageX: elementCenter.left, pageY: elementCenter.top}));
-        values.$element.trigger($.Event("mousemove", {which: 1, pageX: toCenter.left, pageY: toCenter.top + 10}));
+        // Some tests depends on elements present only when the element to drag
+        // start to move while some other tests break while moving.
+        if (!$to.length) {
+            values.$element.trigger($.Event("mousemove", {which: 1, pageX: elementCenter.left + 1, pageY: elementCenter.top}));
+            $to = get_jquery_element_from_selector(to);
+        }
+
+        let toCenter = calculateCenter();
+        values.$element.trigger($.Event("mousemove", {which: 1, pageX: toCenter.left, pageY: toCenter.top}));
         // recalculate the center as the mousemove might have made the element bigger.
         toCenter = calculateCenter();
         values.$element.trigger($.Event("mouseup", {which: 1, pageX: toCenter.left, pageY: toCenter.top}));
