@@ -136,6 +136,11 @@ const Wysiwyg = Widget.extend({
                 selectorEditableArea: '.o_editable',
             }, options));
             this._insertSnippetMenu();
+
+            this.snippetsMenu.on('update_customize_elements', this, e => {
+                // only show the description button in the toolbar if the current selected snippet is an image
+                $("#media-description").toggle(e.target.$target.is('img'));
+            });
         }
 
         return _super.apply(this, arguments).then(() => {
