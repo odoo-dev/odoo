@@ -108,7 +108,7 @@ class Partner(models.Model):
         """ Return 'limit'-first partners' id, name and email such that the name or email matches a
             'search' string. Prioritize users, and then extend the research to all partners. """
         search_dom = expression.OR([[('name', 'ilike', search)], [('email', 'ilike', search)]])
-        search_dom = expression.AND([[('active', '=', True)], search_dom])
+        search_dom = expression.AND([[('active', '=', True), ('type', '!=', 'private')], search_dom])
         fields = ['id', 'name', 'email']
 
         # Search users
