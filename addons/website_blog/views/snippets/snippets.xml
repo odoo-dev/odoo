@@ -25,5 +25,10 @@
             </we-row>
         </div>
     </xpath>
+
+    <!-- Hides ContainerWidth option for content in blog posts -->
+    <xpath expr="//div[@data-js='ContainerWidth']" position="attributes">
+        <attribute name="data-exclude">#o_wblog_post_content *</attribute>
+    </xpath>
 </template>
 </odoo>
