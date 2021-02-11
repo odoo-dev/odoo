@@ -408,6 +408,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'calendar_event_ids': [(4, base_event.id)],
         })
         recurrence._apply_recurrence()
+
         values = {
             'id': google_id,
             'summary': 'coucou again',
@@ -428,3 +429,48 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(events[0].google_id, '%s_20200106' % google_id)
         self.assertEqual(events[1].google_id, '%s_20200113' % google_id)
         self.assertGoogleAPINotCalled()
+
+    @patch_api
+    def test_recurrence_write_with_outliers(self):
+        google_id = 'oj44nep1ldf8a3ll02uip0c9aa'
+        base_event = self.env['calendar.event'].create({
+            'name': 'coucou',
+            'start': datetime(2021, 2, 15, 8, 0, 0),
+            'stop': datetime(2021, 2, 15, 10, 0, 0),
+            'need_sync': False,
+        })
+        recurrence = self.env['calendar.recurrence'].create({
+            'google_id': google_id,
+            'rrule': 'FREQ=WEEKLY;COUNT=3;BYDAY=MO',
+            'need_sync': False,
+            'base_event_id': base_event.id,
+            'calendar_event_ids': [(4, base_event.id)],
+        })
+        recurrence._apply_recurrence()
+        # Modify start of one of the events.
+        middle_event = recurrence.calendar_event_ids.filtered(lambda e: e.start == datetime(2021, 2, 22, 8, 0, 0))
+        middle_event.write({'start': datetime(2021, 2, 22, 16, 0, 0)})
+
+        values = {
+            'id': google_id,
+            'summary': 'coucou again',
+            'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=3;BYDAY=MO'],
+            'start': {'dateTime': '2021-02-15T08:00:00+01:00'},
+            'end': {'dateTime': '2021-02-15-T10:00:00+01:00'},
+            'reminders': {'useDefault': True},
+            'updated': self.now,
+        }
+        self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
+        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', google_id)])
+        events = recurrence.calendar_event_ids.sorted('start')
+        self.assertEqual(len(events), 3)
+        self.assertEqual(recurrence.rrule, 'FREQ=WEEKLY;COUNT=3;BYDAY=MO')
+        self.assertEqual(events.mapped('name'), ['coucou again', 'coucou again', 'coucou again'])
+        self.assertEqual(events[0].start, datetime(2021, 2, 15, 8, 0, 0))
+        self.assertEqual(events[1].start, datetime(2021, 2, 22, 16, 0, 0))
+        self.assertEqual(events[2].start, datetime(2021, 3, 1, 8, 0, 0))
+        # the google_id of recurrent events should not be modified when events start is modified.
+        # the original start date or datetime should always be present.
+        self.assertEqual(events[0].google_id, '%s_20210215T080000Z' % google_id)
+        self.assertEqual(events[1].google_id, '%s_20210222T080000Z' % google_id)
+        self.assertEqual(events[2].google_id, '%s_20210301T080000Z' % google_id)
