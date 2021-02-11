@@ -138,6 +138,8 @@ const Wysiwyg = Widget.extend({
             this._insertSnippetMenu();
 
             this.snippetsMenu.on('update_customize_elements', this, e => {
+                this.altTools && this.altTools.destroy();
+                this.altTools = undefined;
                 // only show the description button in the toolbar if the current selected snippet is an image
                 $("#media-description").toggle(e.target.$target.is('img'));
             });
