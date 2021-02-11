@@ -9,4 +9,16 @@
 .grid {
     display: grid;
     grid-template-columns: auto auto;
+
+    .grid-item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+
+        .gif-title {
+            color: #FFF;
+            position: absolute;
+        }
+    }
 }

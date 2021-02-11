@@ -26,6 +26,7 @@ class Gif extends Component {
     async mounted() {
         const cat = await this._getCategory();
         this.state.categories = cat.tags;
+        this._update();
     }
 
     /**

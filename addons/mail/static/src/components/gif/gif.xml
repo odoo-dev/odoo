@@ -8,8 +8,10 @@
             </div>
             <div class="grid">
                 <div class="grid-item" t-foreach="state.categories" t-as="category">
-                    <t t-esc="category.searchterm"/>
                     <img t-att-src="category.image" />
+                    <span class="gif-title">
+                        <t t-esc="category.searchterm"/>
+                    </span>
                 </div>
             </div>
         </div>
