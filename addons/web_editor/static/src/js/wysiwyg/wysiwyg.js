@@ -95,6 +95,18 @@ const Wysiwyg = Widget.extend({
         });
 
         this._configureToolbar(options);
+        this._observeOdooFieldChanges();
+        this.$editable.on(
+            'mousedown touchstart',
+            '*[data-oe-field][data-oe-type=datetime], *[data-oe-field][data-oe-type=date]',
+            function(e) {
+                const $field = $(this);
+                if (!$field.hasClass('o_editable_date_field_format_changed')) {
+                    $field.html($field.data('oe-original-with-format'));
+                    $field.addClass('o_editable_date_field_format_changed');
+                }
+            }
+        );
 
         this.$editable.on('click','.o_image, .media_iframe_video', (e) => e.preventDefault());
 
@@ -370,6 +382,76 @@ const Wysiwyg = Widget.extend({
      */
     redo: function () {
         this.odooEditor.historyRedo();
+    },
+    /**
+     * Start or resume the Odoo field changes muation observers.
+     *
+     * Necessary to keep all copies of a given field at the same value throughout the page.
+     */
+    _observeOdooFieldChanges: function () {
+        const observerOptions = { characterData:true, subtree: true, childList: true };
+        if(this.odooFieldObservers) {
+            for (let observerData of this.odooFieldObservers) {
+                observerData.observer.observe(observerData.field, observerOptions);
+            }
+        } else {
+            const odooFieldSelector = '[data-oe-model], [data-oe-translation-id]';
+            const $odooFields = this.$editable.find(odooFieldSelector);
+            this.odooFieldObservers = [];
+
+            $odooFields.each((i, field) => {
+                const observer = new MutationObserver(() => {
+                    let $node = $(field)
+                    let $nodes = $odooFields.filter(function () { return this !== field;});
+                    if ($node.data('oe-model')) {
+                        $nodes = $nodes.filter('[data-oe-model="'+$node.data('oe-model')+'"]')
+                            .filter('[data-oe-id="'+$node.data('oe-id')+'"]')
+                            .filter('[data-oe-field="'+$node.data('oe-field')+'"]');
+                    }
+
+                    if ($node.data('oe-translation-id')) $nodes = $nodes.filter('[data-oe-translation-id="'+$node.data('oe-translation-id')+'"]');
+                    if ($node.data('oe-type')) $nodes = $nodes.filter('[data-oe-type="'+$node.data('oe-type')+'"]');
+                    if ($node.data('oe-expression')) $nodes = $nodes.filter('[data-oe-expression="'+$node.data('oe-expression')+'"]');
+                    else if ($node.data('oe-xpath')) $nodes = $nodes.filter('[data-oe-xpath="'+$node.data('oe-xpath')+'"]');
+                    if ($node.data('oe-contact-options')) $nodes = $nodes.filter('[data-oe-contact-options="'+$node.data('oe-contact-options')+'"]');
+
+                    let nodes = $node.get();
+
+                    if ($node.data('oe-type') === "many2one") {
+                        $nodes = $nodes.add($('[data-oe-model]')
+                            .filter(function () { return this !== $node[0] && nodes.indexOf(this) === -1; })
+                            .filter('[data-oe-many2one-model="'+$node.data('oe-many2one-model')+'"]')
+                            .filter('[data-oe-many2one-id="'+$node.data('oe-many2one-id')+'"]')
+                            .filter('[data-oe-type="many2one"]'));
+
+                        $nodes = $nodes.add($('[data-oe-model]')
+                            .filter(function () { return this !== $node[0] && nodes.indexOf(this) === -1; })
+                            .filter('[data-oe-model="'+$node.data('oe-many2one-model')+'"]')
+                            .filter('[data-oe-id="'+$node.data('oe-many2one-id')+'"]')
+                            .filter('[data-oe-field="name"]'));
+                    }
+
+                    this._pauseOdooFieldObservers();
+                    // Tag the date fields to only replace the value
+                    // with the original date value once (see mouseDown event)
+                    if($node.hasClass('o_editable_date_field_format_changed')) {
+                        $nodes.addClass('o_editable_date_field_format_changed');
+                    }
+                    $nodes.html($node.html());
+                    this._observeOdooFieldChanges();
+                });
+                observer.observe(field, observerOptions);
+                this.odooFieldObservers.push({ field: field, observer: observer });
+            });
+        }
+    },
+    /**
+     * Stop the field changes mutation observers.
+     */
+    _pauseOdooFieldObservers: function () {
+        for (let observerData of this.odooFieldObservers) {
+            observerData.observer.disconnect();
+        }
     },
     /**
      * Open the Alt tools in the toolbar to edit <img> alt and title attributes.
