@@ -98,12 +98,16 @@ const Wysiwyg = Widget.extend({
         this._observeOdooFieldChanges();
         this.$editable.on(
             'mousedown touchstart',
-            '*[data-oe-field][data-oe-type=datetime], *[data-oe-field][data-oe-type=date]',
+            '[data-oe-field]',
             function(e) {
                 const $field = $(this);
-                if (!$field.hasClass('o_editable_date_field_format_changed')) {
+                if (($field.data('oe-type') === "datetime" || $field.data('oe-type') === "date") && !$field.hasClass('o_editable_date_field_format_changed')) {
                     $field.html($field.data('oe-original-with-format'));
                     $field.addClass('o_editable_date_field_format_changed');
+                }
+                if ($field.data('oe-type') === "monetary") {
+                    $field.attr('contenteditable', false);
+                    $field.find('.oe_currency_value').attr('contenteditable', true);
                 }
             }
         );
