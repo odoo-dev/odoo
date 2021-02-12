@@ -72,8 +72,52 @@
         grid-template-columns: repeat(5, minmax(0, 1fr));
 
         we-customizeblock-option {
+            color: #D9D9D9;
+            padding: 0;
             /* Ensure an extra option in the toolbar takes its whole width. */
             grid-column-end: span 5;
+
+            we-title {
+                &.o_short_title {
+                    width: unset !important;
+                    padding-right: 0 !important;
+                }
+                &.o_long_title {
+                    width: fit-content !important;
+                    padding-right: 10px !important;
+                }
+            }
+            .highlighted-text {
+                color: white;
+                font-weight: bold;
+                padding: 1px;
+            }
+            .dropdown {
+                position: unset;
+                width: -webkit-fill-available;
+
+                .dropdown-toggle {
+                    padding: 0;
+                    width: inherit;
+
+                    &::after {
+                        display: none;
+                    }
+                }
+                .dropdown-menu.show {
+                    position: absolute !important;
+
+                    we-button {
+                        text-align: left;
+                        font-family: Roboto, "Montserrat", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        font-weight: 400;
+                    }
+                }
+            }
+            input::placeholder {
+                font-style: italic;
+            }
         }
 
         &::before {
@@ -160,6 +204,15 @@
         #media-description {
             grid-column-end: span 2;
         }
+    }
+}
+.oe_edited_link {
+    position: relative;
+    &::before {
+        content: '';
+        border: dashed 3px #01bad2;
+        position: absolute;
+        inset: -5px;
     }
 }
 
