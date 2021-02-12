@@ -208,3 +208,25 @@
         width: $o-kanban-color-border-width * 2;
     }
 }
+
+.o_kanban_view.o_kanban_dashboard.o_currency_kanban {
+    .o_kanban_record {
+        justify-content: flex-start;
+    }
+    .o_bottom_row {
+        margin-top:auto;
+    }
+    .o_dashboard_graph {
+        margin-bottom: -$o-horizontal-padding/2;
+    }
+    .o_currency_rates {
+        font-size: 16px;
+    }
+    .badge {
+        margin-right: 0px;
+    }
+    .custom-checkbox{
+        left: 4px;
+        margin-bottom: 6px;
+    }
+}

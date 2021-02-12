@@ -33,6 +33,7 @@
                             <group>
                                 <field name="name"/>
                                 <field name="rate" digits="[12,12]"/>
+                                <field name="inverse_rate" digits="[12,12]"/>
                             </group>
                             <group>
                                 <field name="currency_id"/>
@@ -43,15 +44,6 @@
                     </sheet>
                 </form>
             </field>
-        </record>
-
-        <record id="act_view_currency_rates" model="ir.actions.act_window">
-            <field name="name">Currency Rates</field>
-            <field name="res_model">res.currency.rate</field>
-            <field name='view_mode'>tree,form</field>
-            <field name='view_id' ref='view_currency_rate_tree'/>
-            <field name="domain">[('currency_id','=', active_id)]</field>
-            <field name="context">{'default_currency_id': active_id}</field>
         </record>
 
         <record id="view_currency_search" model="ir.ui.view">
@@ -73,9 +65,10 @@
                 <tree string="Currencies" decoration-muted="(not active)">
                     <field name="name"/>
                     <field name="symbol"/>
-                    <field name="rate_ids" invisible="1"/>
-                    <field name="date"/>
+                    <field name="full_name" string="Name" optional="show"/>
+                    <field name="date" string="Last Update"/>
                     <field name="rate" digits="[12,6]"/>
+                    <field name="inverse_rate" digits="[12,6]" optional="hide"/>
                     <field name="active" widget="boolean_toggle"/>
                 </tree>
             </field>
@@ -85,24 +78,25 @@
             <field name="name">res.currency.kanban</field>
             <field name="model">res.currency</field>
             <field name="arch" type="xml">
-                <kanban class="o_kanban_mobile">
+                <kanban class="o_kanban_mobile o_currency_kanban o_kanban_dashboard">
                     <field name="name"/>
                     <field name="symbol"/>
+                    <field name="full_name"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_global_click">
                                 <div class="row mb4">
-                                    <div class="col-6">
-                                        <strong><span><t t-esc="record.name.value"/></span></strong>
+                                    <div class="col-2">
+                                        <h3><t t-esc="record.name.value"/></h3>
                                     </div>
-                                    <div class="col-6 text-right">
+                                    <div class="col-10">
                                         <span class="badge badge-pill"><t t-esc="record.symbol.value"/></span>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-12">
-                                        <strong><span>Current Rate: </span></strong>
-                                        <field name="rate" digits="[12,6]"/>
+                                        <div><field name="rate_string"/></div>
+                                        <div>Last update: <field name="date"/></div>
                                     </div>
                                 </div>
                             </div>
@@ -117,15 +111,14 @@
             <field name="model">res.currency</field>
             <field name="arch" type="xml">
                 <form string="Currency">
+                    <div class="oe_edit_only alert alert-info text-center" role="alert">
+                        You cannot reduce the number of decimal places of a currency nor update a rate already used on an accounting entry.
+                    </div>
                     <sheet>
-                        <div class="oe_button_box" name="button_box">
-                            <button class="oe_stat_button" string="Rates" type="action" name="%(act_view_currency_rates)d"
-                                icon="fa-money" widget="statinfo" attrs="{'invisible': [('active', '=', False)]}"/>
-                        </div>
                         <group>
                             <group>
                                 <field name="name"/>
-                                <field name="rate" digits="[12,12]"/>
+                                <field name="full_name" string="Name"/>
                                 <field name="active" widget="boolean_toggle"/>
                             </group>
                             <group>
@@ -133,10 +126,6 @@
                                 <field name="currency_subunit_label"/>
                             </group>
                         </group>
-
-                        <div class="oe_edit_only alert alert-info" role="alert">
-                            You won't be able to reduce the number of decimal places of a currency which has already been used to make accounting entries. 
-                        </div>
 
                         <group groups="base.group_no_one">
                             <group string="Price Accuracy">
@@ -149,6 +138,17 @@
                                 <field name="position"/>
                             </group>
                         </group>
+                        <notebook>
+                            <page string="Rates" name="rates">
+                                <field name="rate_ids" widget="one2many">
+                                    <tree string="Rates"  editable="bottom">
+                                        <field name="name"/>
+                                        <field name="rate" digits="[12,12]"/>
+                                        <field name="inverse_rate" digits="[12,12]"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>
@@ -156,7 +156,7 @@
         <record id="action_currency_form" model="ir.actions.act_window">
             <field name="name">Currencies</field>
             <field name="res_model">res.currency</field>
-            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_mode">kanban,tree,form</field>
             <field name="search_view_id" ref="view_currency_search"/>
             <field name="context">{'active_test': False}</field>
         </record>

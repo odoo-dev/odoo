@@ -13,6 +13,24 @@
                         <strong>This currency has already been used to generate accounting entries.</strong> <br/>
                         Changing its rounding factor now will not change the rounding made on previous entries; possibly causing an inconsistency with the new ones.
                     </div>
+                    
+                </xpath>
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="attrs">{'readonly':[('has_accounting_entries','=',True)]}</attribute>
+                </xpath>
+
+                <xpath expr="//tree//field[@name='name']" position="after">
+                    <field name="has_accounting_entries" invisible="1"/>
+                    <!-- <field name="has_accounting_entries" /> -->
+                </xpath>
+                <xpath expr="//tree//field[@name='name']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('has_accounting_entries','=',True)]}</attribute>
+                </xpath>
+                <xpath expr="//tree//field[@name='rate']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('has_accounting_entries','=',True)]}</attribute>
+                </xpath>
+                <xpath expr="//tree//field[@name='inverse_rate']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('has_accounting_entries','=',True)]}</attribute>
                 </xpath>
             </field>
         </record>

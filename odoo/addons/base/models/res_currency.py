@@ -5,8 +5,8 @@ import logging
 import math
 import re
 import time
-import traceback
 
+from lxml import etree
 from odoo import api, fields, models, tools, _
 
 _logger = logging.getLogger(__name__)
@@ -27,9 +27,13 @@ class Currency(models.Model):
 
     # Note: 'code' column was removed as of v6.0, the 'name' should now hold the ISO code.
     name = fields.Char(string='Currency', size=3, required=True, help="Currency Code (ISO 4217)")
+    full_name = fields.Char(string='Name')
     symbol = fields.Char(help="Currency sign, to be used when printing amounts.", required=True)
     rate = fields.Float(compute='_compute_current_rate', string='Current Rate', digits=0,
                         help='The rate of the currency to the currency of rate 1.')
+    inverse_rate = fields.Float(compute='_compute_current_rate', digits=0, readonly=True,
+                                help='The currency of rate 1 to the rate of the currency.')
+    rate_string = fields.Char(compute='_compute_current_rate')
     rate_ids = fields.One2many('res.currency.rate', 'currency_id', string='Rates')
     rounding = fields.Float(string='Rounding Factor', digits=(12, 6), default=0.01)
     decimal_places = fields.Integer(compute='_compute_decimal_places', store=True)
@@ -69,6 +73,11 @@ class Currency(models.Model):
         currency_rates = self._get_rates(company, date)
         for currency in self:
             currency.rate = currency_rates.get(currency.id) or 1.0
+            currency.inverse_rate = 1 / currency.rate
+            if currency != company.currency_id or currency.rate != 1.0:
+                currency.rate_string = '1 %s = %s %s' % (company.currency_id.name, currency.rate, currency.name)
+            else:
+                currency.rate_string = ''
 
     @api.depends('rounding')
     def _compute_decimal_places(self):
@@ -229,6 +238,20 @@ class Currency(models.Model):
             JOIN res_company c ON (r.company_id is null or r.company_id = c.id)
         """
 
+    @api.model
+    def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        result = super(Currency, self)._fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+        if view_type in ('tree','form'):
+            currency_name = (self.env['res.company'].browse(self._context.get('company_id')) or self.env.company).currency_id.name
+            doc = etree.XML(result['arch'])
+            for field in [['rate', _('Unit per %s', currency_name)],
+                          ['inverse_rate', _('%s per Unit', currency_name)]]:
+                node = doc.xpath("//tree//field[@name='%s']" % field[0])
+                if node:
+                    node[0].set('string', field[1])
+            result['arch'] = etree.tostring(doc, encoding='unicode')
+        return result
+
 
 class CurrencyRate(models.Model):
     _name = "res.currency.rate"
@@ -237,8 +260,11 @@ class CurrencyRate(models.Model):
 
     name = fields.Date(string='Date', required=True, index=True,
                            default=lambda self: fields.Date.today())
+    # latest_rate = fields.Float(digits=0, store=False, readonly=True, help='Field used to trigger warning when new rate differs much from latest')
     rate = fields.Float(digits=0, compute="_compute_rate", store=True, readonly=False, group_operator="avg",
         help='The rate of the currency to the currency of rate 1')
+    inverse_rate = fields.Float(digits=0, compute="_compute_inverse_rate", store=True, readonly=False, group_operator="avg",
+        help='The currency of rate 1 to the rate of the currency.')
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True, required=True, ondelete="cascade")
     company_id = fields.Many2one('res.company', string='Company',
                                  default=lambda self: self.env.company)
@@ -249,25 +275,25 @@ class CurrencyRate(models.Model):
     ]
 
     def _get_latest_rate(self):
-        return self.search([
-            ('currency_id', '=', self.currency_id.id),
-            ('company_id', '=', self.company_id.id or self.env.company.id),
-            ('name', '<=', self.name or fields.Date.today()),
-        ], order="name desc", limit=1)
+        rates = self.currency_id.rate_ids.filtered(lambda x: x.rate).sorted('name')
+        return rates and rates[-1] or None
 
-    @api.depends('currency_id', 'company_id', 'name')
+    @api.depends('inverse_rate')
     def _compute_rate(self):
         for currency_rate in self:
-            latest_rate = currency_rate._get_latest_rate()
-            currency_rate.rate = latest_rate.rate if latest_rate else 1.0
+            latest_rate = self._get_latest_rate().rate or 1.0
+            currency_rate.rate = currency_rate.inverse_rate and 1 / currency_rate.inverse_rate or latest_rate
+    
+    @api.depends('rate')
+    def _compute_inverse_rate(self):
+        for currency_rate in self:
+            latest_rate = self._get_latest_rate().rate or 1.0
+            currency_rate.inverse_rate = currency_rate.rate and 1 / currency_rate.rate or 1 / latest_rate
 
-    @api.onchange('rate')
+    @api.onchange('rate', 'inverse_rate')
     def _onchange_rate_warning(self):
-        if not self.currency_id.id:
-            return
-
         latest_rate = self._get_latest_rate()
-        if latest_rate and latest_rate.rate:
+        if latest_rate:
             diff = (latest_rate.rate - self.rate) / latest_rate.rate
             if abs(diff) > 0.2:
                 return {
