@@ -100,6 +100,7 @@
                 <script type="text/javascript" src="/mail/static/src/components/follower_subtype/follower_subtype.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/follower_subtype_list/follower_subtype_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/gif/gif.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/gif_list/gif_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/mail_template/mail_template.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/message/message.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/message_author_prefix/message_author_prefix.js"></script>
@@ -145,6 +146,7 @@
                 <script type="text/javascript" src="/mail/static/src/models/follower/follower.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/follower_subtype/follower_subtype.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/follower_subtype_list/follower_subtype_list.js"></script>
+                <script type="text/javascript" src="/mail/static/src/models/gif_manager/gif_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/locale/locale.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/mail_template/mail_template.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/message/message.js"></script>
@@ -215,6 +217,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower_subtype/follower_subtype.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower_subtype_list/follower_subtype_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/gif/gif.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/gif_list/gif_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/mail_template/mail_template.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message/message.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message_author_prefix/message_author_prefix.scss"/>

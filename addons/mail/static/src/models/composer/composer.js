@@ -1002,6 +1002,9 @@ function factory(dependencies) {
         extraSuggestedRecordsListName: attr({
            default: "",
         }),
+        gifManager: one2one('mail.gif_manager', {
+            default: [['create']]
+        }),
         /**
          * This field determines whether some attachments linked to this
          * composer are being uploaded.

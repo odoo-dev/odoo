@@ -4,11 +4,14 @@
     <t t-name="mail.Gif" owl="1">
         <div class="o_Gif">
             <div>
-                Search form here
+                <input type="text" t-on-keydown="_onKeydown" />
             </div>
+
+            <GifList gifManagerLocalId="props.gifManagerLocalId" />
+
             <div class="grid">
-                <div class="grid-item" t-foreach="state.categories" t-as="category">
-                    <img t-att-src="category.image" />
+                <div class="grid-item" t-foreach="gifManager.categories" t-as="category">
+                    <img class="gif" t-att-src="category.image" t-on-load="_update" />
                     <span class="gif-title">
                         <t t-esc="category.searchterm"/>
                     </span>

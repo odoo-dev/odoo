@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.GifList" owl="1">
+        <div class="o_GifList">
+            <div class="gridItem" t-foreach="gifManager.list" t-as="gif" t-key="gif.id">
+                <img class="gif" t-att-src="gif.media[0].tinygif.url" />
+                <span class="gifTitle">
+                    <t t-esc="gif.h1_title"/>
+                </span>
+            </div>
+        </div>
+    </t>
+
+</templates>

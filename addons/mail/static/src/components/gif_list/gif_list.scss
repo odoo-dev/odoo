@@ -1,22 +1,12 @@
-.o_Gif {
-    display: flex;
-    flex-flow: row wrap;
-    max-width: 500px;
-    max-height: 500px;
-    overflow: auto;
-}
-
-.grid {
+.o_GifList {
     display: grid;
     grid-template-columns: auto auto;
 
-    .grid-item {
+    .gridItem {
         display: flex;
         justify-content: center;
         align-items: center;
         position: relative;
-        width: 200px;
-        min-height: 50px;
 
         .gif {
             object-fit: cover;
@@ -24,7 +14,7 @@
             height: 100%;
         }
 
-        .gif-title {
+        .gifTitle {
             color: #FFF;
             position: absolute;
         }

@@ -1,17 +1,13 @@
-odoo.define('mail/static/src/components/gif/gif.js', function (require) {
+odoo.define('mail/static/src/components/gif_list/gif_list.js', function (require) {
 'use strict';
 
-const components = {
-    GifList: require('mail/static/src/components/gif_list/gif_list.js'),
-};
-
+const components = {};
 const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
-const { Component } = owl;
+const { Component, useState } = owl;
 
-class Gif extends Component {
+class GifList extends Component {
 
     /**
      * @override
@@ -19,7 +15,6 @@ class Gif extends Component {
     constructor(...args) {
         super(...args);
         useShouldUpdateBasedOnProps();
-        useUpdate({ func: () => this._update() });
         useStore(props => {
             const gifManager = this.env.models['mail.gif_manager'].get(props.gifManagerLocalId);
             return {
@@ -27,7 +22,6 @@ class Gif extends Component {
             };
         });
     }
-
     /**
      * @returns {mail.gif_manager}
      */
@@ -35,31 +29,16 @@ class Gif extends Component {
         return this.env.models['mail.gif_manager'].get(this.props.gifManagerLocalId);
     }
 
-    mounted() {
-        this.gifManager.getCategories();
-    }
-
-    async _onKeydown(ev) {
-        this.gifManager.search(ev.target.value.trim());
-    }
-
-    /**
-     * @private
-     */
-    _update() {
-        this.trigger('o-popover-compute');
-    }
-
 }
 
-Object.assign(Gif, {
+Object.assign(GifList, {
     components,
     props: {
         gifManagerLocalId: String,
     },
-    template: 'mail.Gif',
+    template: 'mail.GifList',
 });
 
-return Gif;
+return GifList;
 
 });
