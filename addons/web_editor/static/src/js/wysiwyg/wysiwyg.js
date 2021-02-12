@@ -6,12 +6,16 @@ const Dialog = require('web.Dialog');
 const customColors = require('web_editor.custom_colors');
 const concurrency = require('web.concurrency');
 const weContext = require('web_editor.context');
-const OdooEditor = require('web_editor.odoo-editor').OdooEditor;
+const OdooEditorLib = require('web_editor.odoo-editor');
 const snippetsEditor = require('web_editor.snippet.editor');
 const Toolbar = require('web_editor.toolbar');
 const weWidgets = require('wysiwyg.widgets');
 
 var _t = core._t;
+
+const OdooEditor = OdooEditorLib.OdooEditor;
+const isBlock = OdooEditorLib.isBlock;
+
 var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
 
@@ -138,11 +142,12 @@ const Wysiwyg = Widget.extend({
             this._insertSnippetMenu();
 
             this.snippetsMenu.on('update_customize_elements', this, e => {
-                this.altTools && this.altTools.destroy();
-                this.altTools = undefined;
                 // only show the description button in the toolbar if the current selected snippet is an image
                 $("#media-description").toggle(e.target.$target.is('img'));
             });
+
+            $(this.odooEditor.dom).on('click', this._updateEditorUI.bind(this));
+            $(this.odooEditor.dom).on('keydown', this._updateEditorUI.bind(this));
         }
 
         return _super.apply(this, arguments).then(() => {
@@ -465,7 +470,7 @@ const Wysiwyg = Widget.extend({
         }
     },
     /**
-     * Open the Alt tools in the toolbar to edit <img> alt and title attributes.
+     * Toggle the Alt tools in the toolbar to edit <img> alt and title attributes.
      *
      * @param {object} params
      * @param {Node} [params.node]
@@ -479,6 +484,27 @@ const Wysiwyg = Widget.extend({
             this.altTools.appendTo(this.toolbar.$el);
         }
         this.toolbar.$el.find('#media-description').toggleClass('active', !!this.altTools);
+    },
+    /**
+     * Toggle the Link tools/dialog to edit links. If a snippet menu is present,
+     * use the link tools, otherwise use the dialog.
+     *
+     * @param {object} [params]
+     */
+    toggleLinkTools(params = {}) {
+        if (this.snippetsMenu) {
+            if (this.linkTools) {
+                this.linkTools.destroy();
+                this.linkTools = undefined;
+            } else {
+                const $btn = this.toolbar.$el.find('#create-link');
+                this.linkTools = new weWidgets.LinkTools(this, params, this.odooEditor.dom, $btn);
+                this.linkTools.appendTo(this.toolbar.$el);
+            }
+        } else {
+            const linkDialog = new weWidgets.LinkDialog(this, params, this.$editable[0]);
+            linkDialog.open();
+        }
     },
     /**
      * Open the media dialog.
@@ -527,10 +553,35 @@ const Wysiwyg = Widget.extend({
             e.preventDefault();
             e.stopImmediatePropagation();
             e.stopPropagation();
-            e.target.id === 'media-modal' ? this.openMediaDialog() : this.toggleAltTools();
+            switch (e.target.id) {
+                case 'create-link':
+                    this.toggleLinkTools();
+                    break;
+                case 'media-modal':
+                    this.openMediaDialog();
+                    break;
+                case 'media-description':
+                    this.toggleAltTools();
+                    break;
+            }
         };
-        $toolbar.find('#media-modal').click(openTools);
-        $toolbar.find('#media-description').click(openTools);
+        $toolbar.find('#create-link, #media-modal, #media-description').click(openTools);
+    },
+    /**
+     * Update any editor UI that is not handled by the editor itself.
+     */
+    _updateEditorUI: function () {
+        // Remove the alt tools.
+        this.altTools && this.altTools.destroy();
+        this.altTools = undefined;
+        // Remove the link tools.
+        this.linkTools && this.linkTools.destroy();
+        this.linkTools = undefined;
+        // Hide the create-link button if the selection spans several blocks.
+        const range = this.odooEditor.document.getSelection().getRangeAt(0);
+        const $rangeContainer = $(range.commonAncestorContainer);
+        const spansBlocks = !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length
+        this.toolbar.$el.find('#create-link').toggleClass('d-none', spansBlocks);
     },
     _editorOptions: function () {
         var self = this;

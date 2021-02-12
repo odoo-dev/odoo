@@ -47,6 +47,7 @@
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/color_palette.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/image_crop_widget.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/link_dialog.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/link_tools.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/media_dialog.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/widgets/widgets.js"/>
 
