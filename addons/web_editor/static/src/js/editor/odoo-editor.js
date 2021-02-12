@@ -69,6 +69,13 @@ var exportVariable = (function (exports) {
         return [node, nodeSize(node)];
     }
     /**
+     * @param {Node} node
+     * @returns {Array.<node, number, node, number>}
+     */
+    function boundariesIn(node) {
+        return [node, 0, node, nodeSize(node)];
+    }
+    /**
      * Returns the given node's position relative to its parent (= its index in the
      * child nodes of its parent).
      *
@@ -108,6 +115,7 @@ var exportVariable = (function (exports) {
 
     const leftDeepFirstPath = createDOMPathGenerator(DIRECTIONS.LEFT, false, false);
     const leftDeepOnlyPath = createDOMPathGenerator(DIRECTIONS.LEFT, true, false);
+    const leftDeepFirstInlinePath = createDOMPathGenerator(DIRECTIONS.LEFT, false, true);
     const leftDeepOnlyInlinePath = createDOMPathGenerator(DIRECTIONS.LEFT, true, true);
     const leftDeepOnlyInlineInScopePath = createDOMPathGenerator(
         DIRECTIONS.LEFT,
@@ -115,7 +123,10 @@ var exportVariable = (function (exports) {
         true,
         true,
     );
+
+    const rightDeepFirstPath = createDOMPathGenerator(DIRECTIONS.RIGHT, false, false);
     const rightDeepOnlyPath = createDOMPathGenerator(DIRECTIONS.RIGHT, true, false);
+    const rightDeepFirstInlinePath = createDOMPathGenerator(DIRECTIONS.RIGHT, false, true);
     const rightDeepOnlyInlinePath = createDOMPathGenerator(DIRECTIONS.RIGHT, true, true);
     const rightDeepOnlyInlineInScopePath = createDOMPathGenerator(
         DIRECTIONS.RIGHT,
@@ -571,6 +582,13 @@ var exportVariable = (function (exports) {
         const isEditableRoot = node.isContentEditable && !node.parentElement.isContentEditable;
         return isEditableRoot || (node.classList && node.classList.contains('oe_unremovable'));
     }
+
+    function containsUnbreakable(node) {
+        if (!node) {
+            return false;
+        }
+        return isUnbreakable(node) || containsUnbreakable(node.firstChild);
+    }
     function isFontAwesome(node) {
         return (
             node &&
@@ -591,6 +609,16 @@ var exportVariable = (function (exports) {
             return false;
         }
         return isUnremovable(node) || containsUnremovable(node.firstChild);
+    }
+
+    function getCurrentLink(document) {
+        const range = document.defaultView.getSelection().getRangeAt(0);
+        return (
+            closestElement(range.startContainer, 'a') ||
+            [...closestElement(range.commonAncestorContainer).querySelectorAll('a')].find(node =>
+                range.intersectsNode(node),
+            )
+        );
     }
 
     // optimize: use the parent Oid to speed up detection
@@ -2001,7 +2029,7 @@ var exportVariable = (function (exports) {
             // Sanitize font awesome elements
             if (isFontAwesome(node)) {
                 // Ensure a zero width space is present inside the FA element.
-                if (node.innerHTML !== '​') node.innerHTML = '​';
+                if (node.innerHTML !== '&#x200B;') node.innerHTML = '&#x200B;';
             }
 
             // Sanitize media elements
@@ -2808,7 +2836,7 @@ var exportVariable = (function (exports) {
             }
         }
 
-        _unLink(offset, content) {
+        _unlink(offset, content) {
             const sel = this.document.defaultView.getSelection();
             if (sel.isCollapsed) {
                 const cr = preserveCursor(this.document);
@@ -2893,6 +2921,12 @@ var exportVariable = (function (exports) {
                 }
             }
         }
+        _bold() {
+            this._applyInlineStyle(el => {
+                el.style.fontWeight = 'bold';
+            });
+        }
+
         /**
          * @param {string} size A valid css size string
          */
@@ -2998,11 +3032,12 @@ var exportVariable = (function (exports) {
                 [
                     'toggleList',
                     'createLink',
-                    'unLink',
+                    'unlink',
                     'indentList',
                     'setFontSize',
                     'insertFontAwesome',
                     'insertHTML',
+                    'bold',
                 ].includes(method)
             ) {
                 return this['_' + method](...args);
@@ -3134,7 +3169,7 @@ var exportVariable = (function (exports) {
             if (show !== undefined && this.options.autohideToolbar) {
                 this.toolbar.style.visibility = show ? 'visible' : 'hidden';
             }
-            if (show === false) {
+            if (show === false && this.options.autohideToolbar) {
                 return;
             }
             const paragraphDropdownButton = this.toolbar.querySelector('#paragraphDropdownButton');
@@ -3183,11 +3218,11 @@ var exportVariable = (function (exports) {
                     button.classList.toggle('active', isActive);
                 }
             }
-            const linkNode = closestElement(sel.focusNode, 'a');
+            const linkNode = getCurrentLink(this.document);
             const linkButton = this.toolbar.querySelector('#createLink');
             linkButton && linkButton.classList.toggle('active', linkNode);
-            const unlinkButton = this.toolbar.querySelector('#unLink');
-            unlinkButton && unlinkButton.classList.toggle('active', linkNode);
+            const unlinkButton = this.toolbar.querySelector('#unlink');
+            unlinkButton && unlinkButton.classList.toggle('d-none', !linkNode);
             const undoButton = this.toolbar.querySelector('#undo');
             undoButton && undoButton.classList.toggle('disabled', !this.historyCanUndo());
             const redoButton = this.toolbar.querySelector('#redo');
@@ -3287,7 +3322,7 @@ var exportVariable = (function (exports) {
             this._recordHistoryCursor(true);
             const cursor = this.history[this.history.length - 1].cursor;
             const { focusOffset, focusNode, anchorNode, anchorOffset } = cursor || {};
-            const wasCollapsed = !cursor && focusNode === anchorNode && focusOffset === anchorOffset;
+            const wasCollapsed = !cursor || (focusNode === anchorNode && focusOffset === anchorOffset);
             if (this.keyboardType === KEYBOARD_TYPES.PHYSICAL || !wasCollapsed) {
                 if (ev.inputType === 'deleteContentBackward') {
                     this.historyRollback();
@@ -3339,6 +3374,16 @@ var exportVariable = (function (exports) {
                 ev.preventDefault();
                 if (ev.shiftKey || this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
                     this._applyCommand('oShiftEnter');
+                }
+            } else if (ev.keyCode === 8 && !ev.ctrlKey) {
+                // backspace
+                // We need to hijack it because firefox doesn't trigger a
+                // deleteBackward input event with a collapsed cursor in front of a
+                // contentEditable="false" (eg: font awesome)
+                const selection = this.document.getSelection();
+                if (selection.isCollapsed) {
+                    ev.preventDefault();
+                    this._applyCommand('oDeleteBackward');
                 }
             } else if (ev.keyCode === 9) {
                 // Tab
@@ -3501,14 +3546,12 @@ var exportVariable = (function (exports) {
                     sel.focusNode.parentNode.insertBefore(table, sel.focusNode);
                     setCursorStart(table.querySelector('td'));
                 } else if (
-                    ['bold', 'italic', 'underline', 'strikeThrough', 'removeFormat'].includes(
-                        buttonEl.id,
-                    )
+                    ['italic', 'underline', 'strikeThrough', 'removeFormat'].includes(buttonEl.id)
                 ) {
                     this.document.execCommand(buttonEl.id);
                 } else if (buttonEl.dataset.fontSize) {
                     this.execCommand('setFontSize', buttonEl.dataset.fontSize);
-                } else if (['createLink', 'unLink'].includes(buttonEl.id)) {
+                } else if (['bold', 'createLink', 'unlink'].includes(buttonEl.id)) {
                     this.execCommand(buttonEl.id);
                 } else if (['ordered', 'unordered', 'checklist'].includes(buttonEl.id)) {
                     this.execCommand('toggleList', TAGS[buttonEl.id]);
@@ -3683,9 +3726,78 @@ var exportVariable = (function (exports) {
 
     exports.BACKSPACE_FIRST_COMMANDS = BACKSPACE_FIRST_COMMANDS;
     exports.BACKSPACE_ONLY_COMMANDS = BACKSPACE_ONLY_COMMANDS;
+    exports.CTGROUPS = CTGROUPS;
+    exports.CTYPES = CTYPES;
+    exports.DIRECTIONS = DIRECTIONS;
     exports.OdooEditor = OdooEditor;
     exports.UNBREAKABLE_ROLLBACK_CODE = UNBREAKABLE_ROLLBACK_CODE;
     exports.UNREMOVABLE_ROLLBACK_CODE = UNREMOVABLE_ROLLBACK_CODE;
+    exports.boundariesIn = boundariesIn;
+    exports.boundariesOut = boundariesOut;
+    exports.childNodeIndex = childNodeIndex;
+    exports.clearEmpty = clearEmpty;
+    exports.closestBlock = closestBlock;
+    exports.closestElement = closestElement;
+    exports.closestPath = closestPath;
+    exports.commonParentGet = commonParentGet;
+    exports.containsUnbreakable = containsUnbreakable;
+    exports.containsUnremovable = containsUnremovable;
+    exports.createDOMPathGenerator = createDOMPathGenerator;
+    exports.createList = createList;
+    exports.endPos = endPos;
+    exports.enforceWhitespace = enforceWhitespace;
+    exports.fillEmpty = fillEmpty;
+    exports.findNode = findNode;
+    exports.firstChild = firstChild;
+    exports.getCurrentLink = getCurrentLink;
+    exports.getCursorDirection = getCursorDirection;
+    exports.getCursors = getCursors;
+    exports.getListMode = getListMode;
+    exports.getNormalizedCursorPosition = getNormalizedCursorPosition;
+    exports.getOuid = getOuid;
+    exports.getState = getState;
+    exports.getTraversedNodes = getTraversedNodes;
+    exports.insertText = insertText;
+    exports.isBlock = isBlock;
+    exports.isContentTextNode = isContentTextNode;
+    exports.isEmptyBlock = isEmptyBlock;
+    exports.isFakeLineBreak = isFakeLineBreak;
+    exports.isFontAwesome = isFontAwesome;
+    exports.isInPre = isInPre;
+    exports.isMediaElement = isMediaElement;
+    exports.isShrunkBlock = isShrunkBlock;
+    exports.isUnbreakable = isUnbreakable;
+    exports.isUnremovable = isUnremovable;
+    exports.isVisible = isVisible;
+    exports.isVisibleEmpty = isVisibleEmpty;
+    exports.isVisibleStr = isVisibleStr;
+    exports.latestChild = latestChild;
+    exports.leftDeepFirstInlinePath = leftDeepFirstInlinePath;
+    exports.leftDeepFirstPath = leftDeepFirstPath;
+    exports.leftDeepOnlyInlineInScopePath = leftDeepOnlyInlineInScopePath;
+    exports.leftDeepOnlyInlinePath = leftDeepOnlyInlinePath;
+    exports.leftDeepOnlyPath = leftDeepOnlyPath;
+    exports.leftPos = leftPos;
+    exports.moveNodes = moveNodes;
+    exports.nodeSize = nodeSize;
+    exports.parentsGet = parentsGet;
+    exports.prepareUpdate = prepareUpdate;
+    exports.preserveCursor = preserveCursor;
+    exports.restoreState = restoreState;
+    exports.rgbToHex = rgbToHex;
+    exports.rightDeepFirstInlinePath = rightDeepFirstInlinePath;
+    exports.rightDeepFirstPath = rightDeepFirstPath;
+    exports.rightDeepOnlyInlineInScopePath = rightDeepOnlyInlineInScopePath;
+    exports.rightDeepOnlyInlinePath = rightDeepOnlyInlinePath;
+    exports.rightDeepOnlyPath = rightDeepOnlyPath;
+    exports.rightPos = rightPos;
+    exports.setCursor = setCursor;
+    exports.setCursorEnd = setCursorEnd;
+    exports.setCursorStart = setCursorStart;
+    exports.setTagName = setTagName;
+    exports.splitTextNode = splitTextNode;
+    exports.startPos = startPos;
+    exports.toggleClass = toggleClass;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
