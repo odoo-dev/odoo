@@ -470,10 +470,8 @@ const Wysiwyg = Widget.extend({
      * @param {object} params
      * @param {Node} [params.node]
      */
-    toggleAltTools(params = {}) {
-        const image = params.node ||
-            this.odooEditor.document.getSelection().getRangeAt(0)
-                .commonAncestorContainer.querySelector('img');
+    toggleAltTools(params) {
+        const image = params.node || this.lastImageClicked;
         if (this.snippetsMenu) {
             if (this.altTools) {
                 this.altTools.destroy();
@@ -569,6 +567,11 @@ const Wysiwyg = Widget.extend({
             }
         };
         $toolbar.find('#create-link, #media-modal, #media-description').click(openTools);
+        $toolbar.find('#image-shape div').click(e => {
+            if (!this.lastImageClicked) return;
+            this.lastImageClicked.classList.toggle(e.target.id);
+            e.target.classList.toggle('active', $(this.lastImageClicked).hasClass(e.target.id));
+        });
     },
     /**
      * Update any editor UI that is not handled by the editor itself.
@@ -581,13 +584,21 @@ const Wysiwyg = Widget.extend({
         this.linkTools && this.linkTools.destroy();
         this.linkTools = undefined;
         // Hide the create-link button if the selection spans several blocks.
-        const range = this.odooEditor.document.getSelection().getRangeAt(0);
-        const $rangeContainer = $(range.commonAncestorContainer);
-        const spansBlocks = !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length
-        this.toolbar.$el.find('#create-link').toggleClass('d-none', spansBlocks);
-        // Only show the description button in the toolbar if the current
-        // selected snippet is an image.
-        $("#media-description").toggleClass('d-none', !$(e.target).is('img'));
+        const selection = this.odooEditor.document.getSelection();
+        const range = selection.rangeCount && selection.getRangeAt(0);
+        const $rangeContainer = range && $(range.commonAncestorContainer);
+        const spansBlocks = range && !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length
+        this.toolbar.$el.find('#create-link').toggleClass('d-none', !range || spansBlocks);
+        // Only show the description button and image-shape tools in the toolbar
+        // if the current selected snippet is an image.
+        const isInImage = $(e.target).is('img');
+        $('#media-description, #image-shape').toggleClass('d-none', !isInImage);
+        this.lastImageClicked = isInImage && e.target;
+        if (isInImage) {
+            for (const button of $('#image-shape div')) {
+                button.classList.toggle('active', $(e.target).hasClass(button.id));
+            }
+        }
     },
     _editorOptions: function () {
         var self = this;

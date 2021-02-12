@@ -140,6 +140,13 @@
                 <div id="unlink" title="Remove link" class="fa fa-unlink fa-fw btn"></div>
                 <a id="media-description" href="#" title="Edit media description" class="btn editor-ignore">Description</a>
             </div>
+
+            <div id="image-shape" class="btn-group">
+                <div id="rounded" title="Shape: Rounded" class="fa fa-square fa-fw btn editor-ignore"></div>
+                <div id="rounded-circle" title="Shape: Circle" class="fa fa-circle-o fa-fw btn editor-ignore"></div>
+                <div id="shadow" title="Shadow" class="fa fa-sun-o fa-fw btn editor-ignore"></div>
+                <div id="img-thumbnail" title="Shape: Thumbnail" class="fa fa-picture-o fa-fw btn editor-ignore"></div>
+            </div>
         </div>
     </t>
 

@@ -204,6 +204,11 @@
         #media-description {
             grid-column-end: span 2;
         }
+        #image-shape {
+            grid-column-end: span 4;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
     }
 }
 .oe_edited_link {
