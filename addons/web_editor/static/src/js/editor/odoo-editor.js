@@ -611,13 +611,15 @@ var exportVariable = (function (exports) {
         return isUnremovable(node) || containsUnremovable(node.firstChild);
     }
 
-    function getCurrentLink(document) {
-        const range = document.defaultView.getSelection().getRangeAt(0);
+    function getInSelection(document, selector) {
+        const selection = document.defaultView.getSelection();
+        const range = !!selection.rangeCount && selection.getRangeAt(0);
         return (
-            closestElement(range.startContainer, 'a') ||
-            [...closestElement(range.commonAncestorContainer).querySelectorAll('a')].find(node =>
-                range.intersectsNode(node),
-            )
+            range &&
+            (closestElement(range.startContainer, selector) ||
+                [
+                    ...closestElement(range.commonAncestorContainer).querySelectorAll(selector),
+                ].find(node => range.intersectsNode(node)))
         );
     }
 
@@ -3218,7 +3220,7 @@ var exportVariable = (function (exports) {
                     button.classList.toggle('active', isActive);
                 }
             }
-            const linkNode = getCurrentLink(this.document);
+            const linkNode = getInSelection(this.document, 'a');
             const linkButton = this.toolbar.querySelector('#createLink');
             linkButton && linkButton.classList.toggle('active', linkNode);
             const unlinkButton = this.toolbar.querySelector('#unlink');
@@ -3749,9 +3751,9 @@ var exportVariable = (function (exports) {
     exports.fillEmpty = fillEmpty;
     exports.findNode = findNode;
     exports.firstChild = firstChild;
-    exports.getCurrentLink = getCurrentLink;
     exports.getCursorDirection = getCursorDirection;
     exports.getCursors = getCursors;
+    exports.getInSelection = getInSelection;
     exports.getListMode = getListMode;
     exports.getNormalizedCursorPosition = getNormalizedCursorPosition;
     exports.getOuid = getOuid;
