@@ -136,7 +136,8 @@
 
             <div id="link" class="btn-group">
                 <div id="media-modal" title="Insert or edit media" class="fa fa-file-image-o fa-fw btn editor-ignore"></div>
-                <div id="createLink" title="Link" class="fa fa-link fa-fw btn"></div>
+                <div id="create-link" title="Insert or edit link" class="fa fa-link fa-fw btn editor-ignore"></div>
+                <div id="unlink" title="Remove link" class="fa fa-unlink fa-fw btn"></div>
                 <a id="media-description" href="#" title="Edit media description" class="btn editor-ignore">Description</a>
             </div>
         </div>
