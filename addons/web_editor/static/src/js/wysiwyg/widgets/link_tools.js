@@ -5,7 +5,7 @@ const core = require('web.core');
 const OdooEditorLib = require('web_editor.odoo-editor');
 const Widget = require('web.Widget');
 
-const getCurrentLink = OdooEditorLib.getCurrentLink;
+const getInSelection = OdooEditorLib.getInSelection;
 
 const _t = core._t;
 
@@ -189,7 +189,7 @@ const LinkTools = Widget.extend({
     _getOrCreateLink: function () {
         const range = this.editable.ownerDocument.getSelection().getRangeAt(0);
         this.needLabel = false;
-        let link = getCurrentLink(this.editable.ownerDocument);
+        let link = getInSelection(this.editable.ownerDocument, 'a');
         if (link) {
             const $link = $(link);
             $link.after($link.contents());
