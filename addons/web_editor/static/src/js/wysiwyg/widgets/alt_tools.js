@@ -10,18 +10,19 @@ var _t = core._t;
  * Let users change the alt & title of a media.
  */
 const AltTools = Widget.extend({
-    template: 'wysiwyg.widgets.alt',
+    template: 'wysiwyg.widgets.altTools',
     xmlDependencies: ['/web_editor/static/src/xml/wysiwyg.xml'],
 
     /**
      * @constructor
      */
-    init: function (parent, options, media) {
+    init: function (parent, options, media, $button) {
         options = options || {};
         this._super(parent, _.extend({}, {
             title: _t("Change media description and tooltip")
         }, options));
 
+        this.$button = $button;
         this.media = media;
         const allEscQuots = /&quot;/g;
         this.alt = ($(this.media).attr('alt') || "").replace(allEscQuots, '"');
@@ -33,9 +34,17 @@ const AltTools = Widget.extend({
      */
     start: async function () {
         const def = await this._super.apply(this, arguments);
+        this.$button.addClass('active');
         this.$el.find('#alt').on('input', this._onChange.bind(this));
         this.$el.find('#title').on('input', this._onChange.bind(this));
         return def;
+    },
+    /**
+     * @override
+     */
+    destroy: function () {
+        this.$button.removeClass('active');
+        this._super(...arguments);
     },
 
     //--------------------------------------------------------------------------

@@ -140,15 +140,10 @@ const Wysiwyg = Widget.extend({
                 selectorEditableArea: '.o_editable',
             }, options));
             this._insertSnippetMenu();
-
-            this.snippetsMenu.on('update_customize_elements', this, e => {
-                // only show the description button in the toolbar if the current selected snippet is an image
-                $("#media-description").toggle(e.target.$target.is('img'));
-            });
-
-            $(this.odooEditor.dom).on('click', this._updateEditorUI.bind(this));
-            $(this.odooEditor.dom).on('keydown', this._updateEditorUI.bind(this));
         }
+
+        $(this.odooEditor.dom).on('click', this._updateEditorUI.bind(this));
+        $(this.odooEditor.dom).on('keydown', this._updateEditorUI.bind(this));
 
         return _super.apply(this, arguments).then(() => {
             $(document.body).append(this.toolbar.$el);
@@ -476,14 +471,22 @@ const Wysiwyg = Widget.extend({
      * @param {Node} [params.node]
      */
     toggleAltTools(params = {}) {
-        if (this.altTools) {
-            this.altTools.destroy();
-            this.altTools = undefined;
+        const image = params.node ||
+            this.odooEditor.document.getSelection().getRangeAt(0)
+                .commonAncestorContainer.querySelector('img');
+        if (this.snippetsMenu) {
+            if (this.altTools) {
+                this.altTools.destroy();
+                this.altTools = undefined;
+            } else {
+                const $btn = this.toolbar.$el.find('#media-description');
+                this.altTools = new weWidgets.AltTools(this, params, image, $btn);
+                this.altTools.appendTo(this.toolbar.$el);
+            }
         } else {
-            this.altTools = new weWidgets.AltTools(this, params, params.node);
-            this.altTools.appendTo(this.toolbar.$el);
+            const altDialog = new weWidgets.AltDialog(this, params, image);
+            altDialog.open();
         }
-        this.toolbar.$el.find('#media-description').toggleClass('active', !!this.altTools);
     },
     /**
      * Toggle the Link tools/dialog to edit links. If a snippet menu is present,
@@ -570,7 +573,7 @@ const Wysiwyg = Widget.extend({
     /**
      * Update any editor UI that is not handled by the editor itself.
      */
-    _updateEditorUI: function () {
+    _updateEditorUI: function (e) {
         // Remove the alt tools.
         this.altTools && this.altTools.destroy();
         this.altTools = undefined;
@@ -582,6 +585,9 @@ const Wysiwyg = Widget.extend({
         const $rangeContainer = $(range.commonAncestorContainer);
         const spansBlocks = !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length
         this.toolbar.$el.find('#create-link').toggleClass('d-none', spansBlocks);
+        // Only show the description button in the toolbar if the current
+        // selected snippet is an image.
+        $("#media-description").toggleClass('d-none', !$(e.target).is('img'));
     },
     _editorOptions: function () {
         var self = this;
