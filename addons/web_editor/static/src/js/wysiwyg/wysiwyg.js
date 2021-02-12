@@ -580,6 +580,12 @@ const Wysiwyg = Widget.extend({
                 button.classList.toggle('active', this.lastImageClicked.style.width === button.id);
             }
         });
+        $toolbar.find('#image-padding .dropdown-item').click(e => {
+            if (!this.lastImageClicked) return;
+            $(this.lastImageClicked).removeClass((index, className) => (
+                (className.match(/(^|\s)padding-\w+/g) || []).join(' ')
+            )).addClass(e.target.dataset.class);
+        });
     },
     /**
      * Update any editor UI that is not handled by the editor itself.
@@ -600,7 +606,7 @@ const Wysiwyg = Widget.extend({
         // Only show the image tools in the toolbar if the current selected
         // snippet is an image.
         const isInImage = $(e.target).is('img');
-        $('#media-description, #image-shape, #image-width').toggleClass('d-none', !isInImage);
+        $('#media-description, #image-shape, #image-width, #image-padding').toggleClass('d-none', !isInImage);
         this.lastImageClicked = isInImage && e.target;
         // Toggle the 'active' class on the active image tool buttons.
         if (isInImage) {

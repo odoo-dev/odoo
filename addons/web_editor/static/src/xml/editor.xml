@@ -148,6 +148,21 @@
                 <div id="img-thumbnail" title="Shape: Thumbnail" class="fa fa-picture-o fa-fw btn editor-ignore"></div>
             </div>
 
+            <div id="image-padding" class="btn-group dropdown">
+                <button type="button" class="btn btn-sm dropdown-toggle"
+                    data-toggle="dropdown" title="" tabindex="-1"
+                    data-original-title="Image padding" aria-expanded="false">
+                    <span class="fa fa-plus-square-o"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" data-class="">None</a></li>
+                    <li><a class="dropdown-item" href="#" data-class="padding-small">Small</a></li>
+                    <li><a class="dropdown-item" href="#" data-class="padding-medium">Medium</a></li>
+                    <li><a class="dropdown-item" href="#" data-class="padding-large">Large</a></li>
+                    <li><a class="dropdown-item" href="#" data-class="padding-xl">XL</a></li>
+                </ul>
+            </div>
+
             <div id="image-width" class="btn-group">
                 <div class="btn editor-ignore">Auto</div>
                 <div id="100%" title="Resize Full" class="btn editor-ignore">100%</div>
