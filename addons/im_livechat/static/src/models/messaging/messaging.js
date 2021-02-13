@@ -16,11 +16,10 @@ registerInstancePatchModel('mail.messaging', 'im_livechat/static/src/models/mess
      * @private
      * @returns [{mail.thread}]
      */
-    _computeAllOrderedAndPinnedLivechats() {
-        const livechats = this.allPinnedChannelThreads
-            .filter(thread =>
-                thread.channel_type === 'livechat'
-            ).sort((t1, t2) => {
+    _computeAllPinnedAndSortedLivechatTypeThreads() {
+        const livechatThreads = this.allPinnedChannelModelThreads
+            .filter(thread =>thread.channel_type === 'livechat')
+            .sort((t1, t2) => {
                 if(t1.lastMessage && !t2.lastMessage) {
                     return 1;
                 }
@@ -32,14 +31,14 @@ registerInstancePatchModel('mail.messaging', 'im_livechat/static/src/models/mess
                 }
                 return t1.id - t2.id;
             });
-        return [['replace', livechats]];
+        return [['replace', livechatThreads]];
     }
 });
 
 registerFieldPatchModel('mail.messaging', 'im_livechat/static/src/models/messaging/messaging.js', {
-    allOrderedAndPinnedLivechats: one2many('mail.thread', {
-        compute: '_computeAllOrderedAndPinnedLivechats',
-        dependencies: ['allPinnedChannelThreads'],
+    allPinnedAndSortedLivechatTypeThreads: one2many('mail.thread', {
+        compute: '_computeAllPinnedAndSortedLivechatTypeThreads',
+        dependencies: ['allPinnedChannelModelThreads', 'allPinnedChannelModelThreadsChannelType', 'allPinnedChannelModelThreadsLastMessage'],
     }),
 });
 

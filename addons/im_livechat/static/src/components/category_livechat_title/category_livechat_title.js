@@ -17,7 +17,7 @@ class CategoryLivechatTitle extends Component {
         super(...args);
         useStore(props => {
             return {
-                livechats: this.env.messaging && this.env.messaging.allOrderedAndPinnedLivechats,
+                allPinnedAndSortedLivechatTypeThreads: this.env.messaging && this.env.messaging.allPinnedAndSortedLivechatTypeThreads,
             }
         });
     }
@@ -27,7 +27,7 @@ class CategoryLivechatTitle extends Component {
     //--------------------------------------------------------------------------
 
     get unreadCounter() {
-        return this.env.messaging.allOrderedAndPinnedLivechats
+        return this.env.messaging.allPinnedAndSortedLivechatTypeThreads
             .reduce((total, thread) => {
                 const counter = thread.localMessageUnreadCounter ? thread.localMessageUnreadCounter : 0;
                 return counter + total;

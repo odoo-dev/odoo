@@ -238,6 +238,17 @@ function factory(dependencies) {
             return `${thread.model}_${thread.id}`;
         }
 
+        /**
+         * @param {String} value 
+         */
+        updateSidebarQuickSearchValue(value) {
+            if (!this.sidebarQuickSearchValue) {
+                this.categoryChat.update({ isOpen: true });
+                this.categoryChannel.update({ isOpen: true });
+            }
+            this.update({ sidebarQuickSearchValue: value });
+        }
+
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -304,6 +315,38 @@ function factory(dependencies) {
                 return false;
             }
             return this.isAddingChat;
+        }
+
+        /**
+         * @private
+         * @returns [{mail.thread}]
+         */
+        _computeQuickSearchPinnedAndSortedChatTypeThreads() {
+            let threads = this.allPinnedAndSortedChatTypeThreads;
+            if (this.sidebarQuickSearchValue) {
+                const qsVal = this.sidebarQuickSearchValue.toLowerCase();
+                threads = this.allPinnedAndSortedChatTypeThreads.filter(thread => {
+                    const nameVal = thread.displayName.toLowerCase();
+                    return nameVal.includes(qsVal);
+                });
+            }
+            return [['replace', threads]];
+        }
+
+        /**
+         * @private
+         * @returns [{mail.thread}]
+         */
+        _computeQuickSearchPinnedAndSortedChannelTypeThreads() {
+            let threads = this.allPinnedAndSortedChannelTypeThreads;
+            if (this.sidebarQuickSearchValue) {
+                const qsVal = this.sidebarQuickSearchValue.toLowerCase();
+                threads = this.allPinnedAndSortedChannelTypeThreads.filter(thread => {
+                    const nameVal = thread.displayName.toLowerCase();
+                    return nameVal.includes(qsVal);
+                });
+            }
+            return [['replace', threads]];
         }
 
         /**
@@ -378,6 +421,13 @@ function factory(dependencies) {
             compute: '_computeAddingChannelValue',
             default: "",
             dependencies: ['isOpen'],
+        }),
+
+        allPinnedAndSortedChatTypeThreads: one2many('mail.thread', {
+            related: 'messaging.allPinnedAndSortedChatTypeThreads'
+        }),
+        allPinnedAndSortedChannelTypeThreads: one2many('mail.thread', {
+            related: 'messaging.allPinnedAndSortedChannelTypeThreads'
         }),
         categoryChat: one2one('mail.category', {
             default: [['create', {
@@ -491,6 +541,14 @@ function factory(dependencies) {
         }),
         messagingInbox: many2one('mail.thread', {
             related: 'messaging.inbox',
+        }),
+        quickSearchPinnedAndSortedChatTypeThreads: one2many('mail.thread', {
+            compute: '_computeQuickSearchPinnedAndSortedChatTypeThreads',
+            dependencies: ['allPinnedAndSortedChatTypeThreads', 'sidebarQuickSearchValue'],
+        }),
+        quickSearchPinnedAndSortedChannelTypeThreads: one2many('mail.thread', {
+            compute: '_computeQuickSearchPinnedAndSortedChannelTypeThreads',
+            dependencies: ['allPinnedAndSortedChannelTypeThreads', 'sidebarQuickSearchValue'],
         }),
         renamingThreads: one2many('mail.thread'),
         /**

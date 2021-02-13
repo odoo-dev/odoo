@@ -159,11 +159,10 @@ function factory(dependencies) {
          * @private
          * @returns [{mail.thread}]
          */
-        _computeAllOrderedAndPinnedChats() {
-            const chats = this.allPinnedChannelThreads
-                .filter(thread =>
-                    thread.channel_type === 'chat'
-                ).sort((t1, t2) => {
+        _computeAllPinnedAndSortedChatTypeThreads() {
+            const chatThreads = this.allPinnedChannelModelThreads
+                .filter(thread => thread.channel_type === 'chat')
+                .sort((t1, t2) => {
                     if(t1.lastMessage && !t2.lastMessage) {
                         return 1;
                     }
@@ -175,28 +174,54 @@ function factory(dependencies) {
                     }
                     return t1.id - t2.id;
                 });
-            return [['replace', chats]];
+            return [['replace', chatThreads]];
         }
 
         /**
          * @private
          * @returns [{mail.thread}]
          */
-        _computeAllOrderedAndPinnedMultiUserChannels() {
-            const channels = this.allPinnedChannelThreads
+        _computeAllPinnedAndSortedChannelTypeThreads() {
+            const channelThreads = this.allPinnedChannelModelThreads
+                .filter(thread => thread.channel_type === 'channel')
+                .sort((t1, t2) => t1.displayName < t2.displayName ? -1 : 1);
+            return [['replace', channelThreads]];
+        }
+
+        /**
+         * @private
+         * @returns [{mail.thread}]
+         */
+        _computeAllPinnedAndSortedMailBoxes() {
+            const threads = this.allThreads
                 .filter(thread => 
-                    thread.channel_type === 'channel'
-                ).sort((t1, t2) => 
-                    t1.displayName < t2.displayName ? -1 : 1
-                );
-            return [['replace', channels]];
+                    thread.model === 'mail.box' &&
+                    thread.isPinned
+                ).sort((mailbox1, mailbox2) => {
+                    if (mailbox1 === this.inbox) {
+                        return -1;
+                    }
+                    if (mailbox2 === this.inbox) {
+                        return 1;
+                    }
+                    if (mailbox1 === this.starred) {
+                        return -1;
+                    }
+                    if (mailbox2 === this.starred) {
+                        return 1;
+                    }
+                    const mailbox1Name = mailbox1.displayName;
+                    const mailbox2Name = mailbox2.displayName;
+                    mailbox1Name < mailbox2Name ? -1 : 1;
+                });;
+            return [['replace', threads]];
         }
 
         /**
          * @private
          * @returns [{mail.thread}]
          */
-        _computeAllPinnedChannelThreads() {
+        _computeAllPinnedChannelModelThreads() {
             const threads = this.allThreads
                 .filter(thread => 
                     thread.model === 'mail.channel' &&
@@ -208,29 +233,36 @@ function factory(dependencies) {
     }
 
     Messaging.fields = {
-        allOrderedAndPinnedChats: one2many('mail.thread', {
-            compute: '_computeAllOrderedAndPinnedChats',
-            dependencies: ['allPinnedChannelThreads', 'allPinnedChannelThreadsChannelType', 'allPinnedChannelThreadsLastMessage'],
+        allPinnedAndSortedChatTypeThreads: one2many('mail.thread', {
+            compute: '_computeAllPinnedAndSortedChatTypeThreads',
+            dependencies: ['allPinnedChannelModelThreads', 'allPinnedChannelModelThreadsChannelType', 'allPinnedChannelModelThreadsLastMessage'],
         }),
-        allOrderedAndPinnedMultiUserChannels: one2many('mail.thread', {
-            compute: '_computeAllOrderedAndPinnedMultiUserChannels',
-            dependencies: ['allPinnedChannelThreads', 'allPinnedChannelThreadsChannelType'],
+        allPinnedAndSortedChannelTypeThreads: one2many('mail.thread', {
+            compute: '_computeAllPinnedAndSortedChannelTypeThreads',
+            dependencies: ['allPinnedChannelModelThreads', 'allPinnedChannelModelThreadsChannelType'],
         }),
-        allPinnedChannelThreads: one2many('mail.thread', {
-            compute: '_computeAllPinnedChannelThreads',
-            dependencies: ['allThreads', 'allThreadsIsPinned'],
+        allPinnedAndSortedMailBoxes: one2many('mail.thread', {
+            compute: '_computeAllPinnedAndSortedMailBoxes',
+            dependencies: ['allThreads', 'allThreadsIsPinned', 'allThreadsModel', 'inbox', 'starred'],
         }),
-        allPinnedChannelThreadsChannelType: attr({
-            related: 'allPinnedChannelThreads.channel_type'
+        allPinnedChannelModelThreads: one2many('mail.thread', {
+            compute: '_computeAllPinnedChannelModelThreads',
+            dependencies: ['allThreads', 'allThreadsIsPinned', 'allThreadsModel'],
         }),
-        allPinnedChannelThreadsLastMessage: one2many('mail.message', {
-            related: 'allPinnedChannelThreads.lastMessage',
+        allPinnedChannelModelThreadsChannelType: attr({
+            related: 'allPinnedChannelModelThreads.channel_type',
+        }),
+        allPinnedChannelModelThreadsLastMessage: one2many('mail.message', {
+            related: 'allPinnedChannelModelThreads.lastMessage',
         }),
         allThreads: one2many('mail.thread', {
             inverse: 'messaging',
         }),
         allThreadsIsPinned: attr({
             related: 'allThreads.isPinned',
+        }),
+        allThreadsModel: attr({
+            related: 'allThreads.model',
         }),
         cannedResponses: one2many('mail.canned_response'),
         chatWindowManager: one2one('mail.chat_window_manager', {

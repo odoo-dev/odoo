@@ -2,7 +2,6 @@ odoo.define('mail/static/src/components/category_channel_item/category_channel_i
 'use strict'
 const components = {
     CategoryItem: require('mail/static/src/components/category_item/category_item.js'),
-    ThreadIcon: require('mail/static/src/components/thread_icon/thread_icon.js'),
 };
 
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
@@ -30,6 +29,13 @@ class CategoryChannelItem extends Component {
     // Public
     //--------------------------------------------------------------------------
     
+    /**
+     * @return {String}
+     */
+    get image() {
+        return `/web/image/mail.channel/${this.thread.id}/image_128`;
+    }
+
     /**
      * @returns {mail.thread}
      */

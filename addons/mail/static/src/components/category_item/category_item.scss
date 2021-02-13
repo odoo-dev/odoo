@@ -56,6 +56,16 @@
 // style
 // ------------------------------------------------------------------
 
+@mixin o-mail-category-item-image-style {
+    width: map-get($sizes, 100);
+    height: map-get($sizes, 100);
+}
+
+@mixin o-mail-category-item-image-container-style {
+    width: 30px;
+    height: 30px;
+}
+
 @mixin o-mail-category-item-name-style {
     
     &.o-item-unread {

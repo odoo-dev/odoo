@@ -83,11 +83,9 @@
 }
 
 .o_CategoryChatItem_image {
-    width: map-get($sizes, 100);
-    height: map-get($sizes, 100);
+    @include o-mail-category-item-image-style();
 }
 
 .o_CategoryChatItem_imageContainer {
-    width: 30px;
-    height: 30px;
+    @include o-mail-category-item-image-container-style();
 }

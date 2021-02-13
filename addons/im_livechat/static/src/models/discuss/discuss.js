@@ -1,9 +1,50 @@
 odoo.define('im_livechat/static/src/models/discuss/discuss.js', function (require) {
 'use strict'
 
-const { registerFieldPatchModel } = require('mail/static/src/model/model_core.js');
+const { 
+    registerFieldPatchModel,
+    registerInstancePatchModel 
+} = require('mail/static/src/model/model_core.js');
 
-const { one2one } = require('mail/static/src/model/model_field.js');
+const { one2one, one2many } = require('mail/static/src/model/model_field.js');
+
+registerInstancePatchModel('mail.discuss', 'im_livechat/static/src/models/discuss/discuss.js', {
+    
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+    
+    /**
+     * @override
+     * @param {String} value 
+     */
+    updateSidebarQuickSearchValue(value) {
+        if(!this.sidebarQuickSearchValue) {
+            this.categoryLivechat.update({ isOpen: true });
+        }
+        this._super(value);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @returns [{mail.thread}]
+     */
+    _computeQuickSearchPinnedAndSortedLivechatTypeThreads() {
+        let threads = this.allPinnedAndSortedLivechatTypeThreads;
+        if (this.sidebarQuickSearchValue) {
+            const qsVal = this.sidebarQuickSearchValue.toLowerCase();
+            threads = this.allPinnedAndSortedLivechatTypeThreads.filter(thread => {
+                const nameVal = thread.displayName.toLowerCase();
+                return nameVal.includes(qsVal);
+            })
+        }
+        return [['replace', threads]];
+    }
+});
 
 registerFieldPatchModel('mail.discuss', 'im_livechat/static/src/models/discuss/discuss.js', {
     categoryLivechat: one2one('mail.category', {
@@ -13,6 +54,13 @@ registerFieldPatchModel('mail.discuss', 'im_livechat/static/src/models/discuss/d
             isOpen: true,
         }]],
     }),
+    allPinnedAndSortedLivechatTypeThreads: one2many('mail.thread', {
+        related: 'messaging.allPinnedAndSortedLivechatTypeThreads',
+    }),
+    quickSearchPinnedAndSortedLivechatTypeThreads: one2many('mail.thread', {
+        compute: '_computeQuickSearchPinnedAndSortedLivechatTypeThreads',
+        dependencies: ['allPinnedAndSortedLivechatTypeThreads', 'sidebarQuickSearchValue'],
+    })
 });
 
 });

@@ -3,6 +3,16 @@
 <templates xml:space="preserve">
     <t t-name="mail.CategoryChannelItem" owl="1">
         <CategoryItem class="o_CategoryChannelItem" threadLocalId="thread.localId" unreadCounter="thread.message_needaction_counter">
+            <t t-set-slot="avatar">
+                <div class="o_CategoryChannelItem_imageContainer">
+                    <img class="o_CategoryChannelItem_image rounded-circle" t-att-src="image" alt="Thread Image" />
+                </div>
+            </t>
+            <t t-set-slot="name">
+                <span class="o_CategoryChannelItem_name" t-att-class="{'o-item-unread': thread.localMessageUnreadCounter > 0}">
+                    <t t-esc="thread.displayName"/>
+                </span>
+            </t>
             <t t-set-slot="commands">
                 <div 
                     class="o_CategoryChannelItem_command o_CategoryChannelItem_commandSettings fa fa-cog"

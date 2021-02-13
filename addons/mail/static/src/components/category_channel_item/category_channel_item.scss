@@ -2,10 +2,19 @@
 // Layout
 // ------------------------------------------------------------------
 
+.o_CategoryChannelItem {
+    padding: map-get($spacers, 2) 0;
+}
+
 .o_CategoryChannelItem_command {
     @include o-mail-category-item-command-layout();
 }
 
+.o_CategoryChannelItem_name {
+    @include o-mail-category-item-name-layout();
+    
+    margin-left: 10px;
+}
 
 // ------------------------------------------------------------------
 // style
@@ -13,4 +22,16 @@
 
 .o_CategoryChannelItem_command {
     @include o-mail-category-item-command-style();
+}
+
+.o_CategoryChannelItem_image {
+    @include o-mail-category-item-image-style();
+}
+
+.o_CategoryChannelItem_imageContainer{
+    @include o-mail-category-item-image-container-style();
+}
+
+.o_CategoryChannelItem_name {
+    @include o-mail-category-item-name-style();
 }

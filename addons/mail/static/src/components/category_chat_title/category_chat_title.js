@@ -19,7 +19,7 @@ class CategoryChatTitle extends Component {
         useStore(props => {
             const discuss = this.env.messaging.discuss;
             return {
-                allOrderedAndPinnedChats: this.env.messaging.allOrderedAndPinnedChats,
+                allPinnedAndSortedChatTypeThreads: discuss && discuss.allPinnedAndSortedChatTypeThreads,
                 discussIsAddingChat: discuss && discuss.isAddingChat,
                 isCategoryOpen: discuss && discuss.categoryChat.isOpen,
             }
@@ -46,7 +46,7 @@ class CategoryChatTitle extends Component {
     }
 
     get unreadCounter() {
-        return this.env.messaging.allOrderedAndPinnedChats
+        return this.discuss.allPinnedAndSortedChatTypeThreads
             .reduce((total, chat) => {
                 const counter = chat.localMessageUnreadCounter ? chat.localMessageUnreadCounter : 0;
                 return counter + total;

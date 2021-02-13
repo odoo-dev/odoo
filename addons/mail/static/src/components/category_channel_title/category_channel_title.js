@@ -20,7 +20,7 @@ class CategoryChannelTitle extends Component {
         useStore(props => {
             const discuss = this.env.messaging.discuss;
             return {
-                allOrderedAndPinnedMultiUserChannels: this.env.messaging && this.env.messaging.allOrderedAndPinnedMultiUserChannels,
+                allPinnedAndSortedChannelTypeThreads: discuss && discuss.allPinnedAndSortedChannelTypeThreads,
                 discussIsAddingChat: discuss && discuss.isAddingChat,
                 isCategoryOpen: discuss && discuss.categoryChannel.isOpen,
             }
@@ -47,7 +47,7 @@ class CategoryChannelTitle extends Component {
     }
 
     get unreadCounter() {
-        return this.env.messaging.allOrderedAndPinnedMultiUserChannels
+        return this.discuss.allPinnedAndSortedChannelTypeThreads
             .reduce((total, thread) => {
                 const counter = thread.message_needaction_counter ? thread.message_needaction_counter : 0;
                 return counter + total;
