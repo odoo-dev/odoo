@@ -436,8 +436,9 @@ class AccountJournal(models.Model):
         result = super(AccountJournal, self).write(vals)
 
         # Ensure the liquidity accounts are sharing the same foreign currency.
-        for journal in self.filtered(lambda journal: journal.type in ('bank', 'cash')):
-            journal.default_account_id.currency_id = journal.currency_id
+        if 'currency_id' in vals:
+            for journal in self.filtered(lambda journal: journal.type in ('bank', 'cash')):
+                journal.default_account_id.currency_id = journal.currency_id
 
         # Create the bank_account_id if necessary
         if 'bank_acc_number' in vals:
@@ -621,7 +622,7 @@ class AccountJournal(models.Model):
                     break
             if not invoice:
                 invoice = self.env['account.move'].create({})
-                invoice.with_context(no_new_invoice=True).message_post(attachment_ids=[attachment.id])
+            invoice.with_context(no_new_invoice=True).message_post(attachment_ids=[attachment.id])
             invoices += invoice
 
         action_vals = {

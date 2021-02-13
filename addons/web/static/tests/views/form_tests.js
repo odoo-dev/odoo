@@ -1,12 +1,14 @@
 odoo.define('web.form_tests', function (require) {
 "use strict";
 
+const AbstractField = require("web.AbstractField");
 var AbstractStorageService = require('web.AbstractStorageService');
 var BasicModel = require('web.BasicModel');
 var concurrency = require('web.concurrency');
 var core = require('web.core');
 var fieldRegistry = require('web.field_registry');
 const fieldRegistryOwl = require('web.field_registry_owl');
+const FormRenderer = require('web.FormRenderer');
 var FormView = require('web.FormView');
 var mixins = require('web.mixins');
 var NotificationService = require('web.NotificationService');
@@ -10824,6 +10826,158 @@ QUnit.module('Views', {
         assert.containsOnce(form, 'input[type="radio"]:eq(2):checked');
 
         form.destroy();
+    });
+
+    QUnit.test('Quick Edition: non-editable form', async function (assert) {
+        assert.expect(3);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form edit="0">
+                    <group>
+                        <field name="foo"/>
+                    </group>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        await testUtils.dom.click(form.$('.o_form_label'));
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        await testUtils.dom.click(form.$('.o_field_widget'));
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: CopyToClipboard click on value', async function (assert) {
+        assert.expect(4);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <group>
+                        <field name="foo" widget="CopyClipboardChar"/>
+                    </group>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsOnce(form, '.o_clipboard_button');
+
+        await testUtils.dom.click(form.$('.o_field_copy'));
+
+        assert.containsOnce(form, '.o_form_view.o_form_editable');
+        assert.containsNone(form, '.o_clipboard_button');
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: CopyToClipboard click on copy button', async function (assert) {
+        assert.expect(4);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <group>
+                        <field name="foo" widget="CopyClipboardChar"/>
+                    </group>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsOnce(form, '.o_clipboard_button');
+
+        await testUtils.dom.click(form.$('.o_field_copy .o_clipboard_button'));
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsOnce(form, '.o_clipboard_button');
+
+        form.destroy();
+    });
+
+    QUnit.test("attach callbacks with long processing in __renderView", async function (assert) {
+        /**
+         * The main use case of this test is discuss, in which the FormRenderer
+         * __renderView method is overridden to perform asynchronous tasks (the
+         * update of the chatter Component) resulting in a delay between the
+         * appending of the new form content into its element and the
+         * "on_attach_callback" calls. This is the purpose of "__renderView"
+         * which is meant to do all the async work before the content is appended.
+         */
+        assert.expect(11);
+
+        let testPromise = Promise.resolve();
+
+        const Renderer = FormRenderer.extend({
+            on_attach_callback() {
+                assert.step("form.on_attach_callback");
+                this._super(...arguments);
+            },
+            async __renderView() {
+                const _super = this._super.bind(this);
+                await testPromise;
+                return _super();
+            },
+        });
+
+        // Setup custom field widget
+        fieldRegistry.add("customwidget", AbstractField.extend({
+            className: "custom-widget",
+            on_attach_callback() {
+                assert.step("widget.on_attach_callback");
+            },
+        }));
+
+        const form = await createView({
+            arch: `<form><field name="bar" widget="customwidget"/></form>`,
+            data: this.data,
+            model: 'partner',
+            res_id: 1,
+            View: FormView.extend({
+                config: Object.assign({}, FormView.prototype.config, { Renderer }),
+            }),
+        });
+
+        assert.containsOnce(form, ".custom-widget");
+        assert.verifySteps([
+            "form.on_attach_callback", // Form attached
+            "widget.on_attach_callback", // Initial widget attached
+        ]);
+
+        const initialWidget = form.$(".custom-widget")[0];
+        testPromise = testUtils.makeTestPromise();
+
+        await testUtils.form.clickEdit(form);
+
+        assert.containsOnce(form, ".custom-widget");
+        assert.strictEqual(initialWidget, form.$(".custom-widget")[0], "Widgets have yet to be replaced");
+        assert.verifySteps([]);
+
+        testPromise.resolve();
+        await testUtils.nextTick();
+
+        assert.containsOnce(form, ".custom-widget");
+        assert.notStrictEqual(initialWidget, form.$(".custom-widget")[0], "Widgets have been replaced");
+        assert.verifySteps([
+            "widget.on_attach_callback", // New widget attached
+        ]);
+
+        form.destroy();
+
+        delete fieldRegistry.map.customwidget;
     });
 });
 

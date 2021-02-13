@@ -378,6 +378,61 @@ QUnit.test('open chat from "new message" chat window should open chat in place o
     );
 });
 
+QUnit.test('new message chat window should close on selecting the user if chat with the user is already open', async function (assert) {
+    assert.expect(2);
+
+    this.data['res.partner'].records.push({ id: 131, name: "Partner 131"});
+    this.data['res.users'].records.push({ id: 12, partner_id: 131 });
+    this.data['mail.channel'].records.push({
+        channel_type: "chat",
+        id: 20,
+        is_minimized: true,
+        members: [this.data.currentPartnerId, 131],
+        name: "Partner 131",
+        public: 'private',
+        state: 'open',
+    });
+    const imSearchDef = makeDeferred();
+    await this.start({
+        async mockRPC(route, args) {
+            const res = await this._super(...arguments);
+            if (args.method === 'im_search') {
+                imSearchDef.resolve();
+            }
+            return res;
+        },
+    });
+
+    // open "new message" chat window
+    await afterNextRender(() => document.querySelector(`.o_MessagingMenu_toggler`).click());
+    await afterNextRender(() => document.querySelector(`.o_MessagingMenu_newMessageButton`).click());
+
+    // search for a user in "new message" autocomplete
+    document.execCommand('insertText', false, "131");
+    document.querySelector(`.o_ChatWindow_newMessageFormInput`)
+        .dispatchEvent(new window.KeyboardEvent('keydown'));
+    document.querySelector(`.o_ChatWindow_newMessageFormInput`)
+        .dispatchEvent(new window.KeyboardEvent('keyup'));
+    // Wait for search RPC to be resolved. The following await lines are
+    // necessary because autocomplete is an external lib therefore it is not
+    // possible to use `afterNextRender`.
+    await imSearchDef;
+    await nextAnimationFrame();
+    const link = document.querySelector('.ui-autocomplete .ui-menu-item a');
+
+    await afterNextRender(() => link.click());
+    assert.containsNone(
+        document.body,
+        '.o_ChatWindow_newMessageFormInput',
+        "'new message' chat window should not be there"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_ChatWindow',
+        "should have only one chat window after selecting user whose chat is already open",
+    );
+});
+
 QUnit.test('new message autocomplete should automatically select first result', async function (assert) {
     assert.expect(1);
 
@@ -607,6 +662,121 @@ QUnit.test('chat window: open / close', async function (assert) {
     assert.verifySteps(
         ['rpc:channel_fold/open'],
         "should sync fold state 'open' with server after opening chat window again"
+    );
+});
+
+QUnit.test('Mobile: opening a chat window should not update channel state on the server', async function (assert) {
+    assert.expect(2);
+
+    this.data['mail.channel'].records.push({
+        id: 20,
+        state: 'closed',
+    });
+    await this.start({
+        env: {
+            device: {
+                isMobile: true,
+            },
+        },
+    });
+    await afterNextRender(() => document.querySelector(`.o_MessagingMenu_toggler`).click());
+    await afterNextRender(() => document.querySelector(`.o_NotificationList_preview`).click());
+    assert.containsOnce(
+        document.body,
+        '.o_ChatWindow',
+        "should have a chat window after clicking on thread preview"
+    );
+    const channels = await this.env.services.rpc({
+        model: 'mail.channel',
+        method: 'read',
+        args: [20],
+    }, { shadow: true });
+    assert.strictEqual(
+        channels[0].state,
+        'closed',
+        'opening a chat window in mobile should not update channel state on the server',
+    );
+});
+
+QUnit.test('Mobile: closing a chat window should not update channel state on the server', async function (assert) {
+    assert.expect(3);
+
+    this.data['mail.channel'].records.push({
+        id: 20,
+        state: 'open',
+    });
+    await this.start({
+        env: {
+            device: {
+                isMobile: true,
+            },
+        },
+    });
+    await afterNextRender(() => document.querySelector(`.o_MessagingMenu_toggler`).click());
+    await afterNextRender(() => document.querySelector(`.o_NotificationList_preview`).click());
+    assert.containsOnce(
+        document.body,
+        '.o_ChatWindow',
+        "should have a chat window after clicking on thread preview"
+    );
+    // Close chat window
+    await afterNextRender(() => document.querySelector(`.o_ChatWindowHeader_commandClose`).click());
+    assert.containsNone(
+        document.body,
+        '.o_ChatWindow',
+        "should not have a chat window after closing it"
+    );
+    const channels = await this.env.services.rpc({
+        model: 'mail.channel',
+        method: 'read',
+        args: [20],
+    }, { shadow: true });
+    assert.strictEqual(
+        channels[0].state,
+        'open',
+        'closing the chat window should not update channel state on the server',
+    );
+});
+
+QUnit.test("Mobile: chat window shouldn't open automatically after receiving a new message", async function (assert) {
+    assert.expect(1);
+
+    this.data['res.partner'].records.push({ id: 10, name: "Demo" });
+    this.data['res.users'].records.push({
+        id: 42,
+        partner_id: 10,
+    });
+    this.data['mail.channel'].records = [
+        {
+            channel_type: "chat",
+            id: 10,
+            members: [this.data.currentPartnerId, 10],
+            uuid: 'channel-10-uuid',
+        },
+    ];
+    await this.start({
+        env: {
+            device: {
+                isMobile: true,
+            },
+        },
+    });
+
+    // simulate receiving a message
+    await afterNextRender(() => this.env.services.rpc({
+        route: '/mail/chat_post',
+        params: {
+            context: {
+                mockedUserId: 42,
+            },
+            message_content: "hu",
+            uuid: 'channel-10-uuid',
+        },
+    }));
+    assert.containsNone(
+        document.body,
+        '.o_ChatWindow',
+        "On mobile, the chat window shouldn't open automatically after receiving a new message"
     );
 });
 
