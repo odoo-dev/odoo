@@ -677,19 +677,21 @@ const Wysiwyg = Widget.extend({
                 ['mx-auto', 'justifyCenter'],
                 ['float-right', 'justifyRight'],
             ];
-            commandState = justifyMapping.find(pair => (
+            commandState = (justifyMapping.find(pair => (
                 this.lastImageClicked.classList.contains(pair[0]))
-            )[1];
+            ) || [])[1];
         }
         const $buttons = this.toolbar.$el.find('#justify div.btn');
         for (const button of $buttons) {
             button.classList.toggle('active', button.id === commandState);
         }
-        const direction = commandState.replace('justify', '').toLowerCase();
-        const newClass = `fa-align-${direction === 'full' ? 'justify' : direction}`;
-        $paragraphDropdownButton.removeClass((index, className) => (
-            (className.match(/(^|\s)fa-align-\w+/g) || []).join(' ')
-        )).addClass(newClass);
+        if (commandState) {
+            const direction = commandState.replace('justify', '').toLowerCase();
+            const newClass = `fa-align-${direction === 'full' ? 'justify' : direction}`;
+            $paragraphDropdownButton.removeClass((index, className) => (
+                (className.match(/(^|\s)fa-align-\w+/g) || []).join(' ')
+            )).addClass(newClass);
+        }
     },
     _editorOptions: function () {
         var self = this;
