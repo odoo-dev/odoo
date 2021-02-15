@@ -190,7 +190,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             tabsize: 0,
             height: 380,
             resizable: true,
-            autohideToolbar: true,
         });
     },
     /**
