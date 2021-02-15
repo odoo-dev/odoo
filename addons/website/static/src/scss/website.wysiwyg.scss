@@ -210,9 +210,14 @@
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }
         #image-width {
-            grid-column-end: span 4;
+            grid-column-end: span 5;
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        #image-edit {
+            grid-column-end: span 3;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
     }
 }
