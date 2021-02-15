@@ -405,13 +405,14 @@ actual arch.
                     view_docs = view_docs[0]
                 for view_arch in view_docs:
                     check = valid_view(view_arch, env=self.env, model=view.model)
-                    view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
                     if not check:
+                        view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
                         raise ValidationError(_(
                             'Invalid view %(name)s definition in %(file)s',
                             name=view_name, file=view.arch_fs
                         ))
                     if check == "Warning":
+                        view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
                         _logger.warning('Invalid view %s definition in %s \n%s', view_name, view.arch_fs, view.arch)
             except ValueError as e:
                 lines = view_arch_utf8.splitlines(keepends=True)
@@ -870,7 +871,9 @@ actual arch.
         if model not in self.env:
             self.handle_view_error(_('Model not found: %(model)s', model=model), node)
 
-        self._postprocess_on_change(model, node)
+        if not validate:
+            # validation mode does not give a fuck about on_change
+            self._postprocess_on_change(model, node)
 
         name_manager = NameManager(validate, self.env[model])
         self.postprocess(node, [], editable, name_manager)
@@ -878,7 +881,9 @@ actual arch.
         name_manager.check_view_fields(self)
         name_manager.update_view_fields()
 
-        self._postprocess_access_rights(model, node)
+        if not validate:
+            # validation mode does not give a fuck about access rights
+            self._postprocess_access_rights(model, node)
 
         return etree.tostring(node, encoding="unicode").replace('\t', ''), name_manager
 
