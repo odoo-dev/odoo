@@ -102,7 +102,7 @@ const LinkTools = Widget.extend({
         }
 
         this._updateOptionsUI();
-        this._adaptPreview();
+        this._adaptLink();
 
         this.$('input:visible:first').focus();
 
@@ -232,12 +232,12 @@ const LinkTools = Widget.extend({
      * @private
      */
     _onAnyChange: function () {
-        this._adaptPreview();
+        this._adaptLink();
     },
     _onClickCheckbox: function (ev) {
         const $target = $(ev.target);
         $target.closest('we-button.o_we_checkbox_wrapper').toggleClass('active');
-        this._adaptPreview();
+        this._adaptLink();
     },
     _onPickSelectOption: function (ev) {
         const $target = $(ev.target);
@@ -245,7 +245,7 @@ const LinkTools = Widget.extend({
         $select.find('we-selection-items we-button').toggleClass('active', false);
         this._setSelectOption($target, true);
         this._updateOptionsUI();
-        this._adaptPreview();
+        this._adaptLink();
     },
     /**
      * @private
