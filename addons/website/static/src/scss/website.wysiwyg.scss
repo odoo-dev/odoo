@@ -210,7 +210,7 @@
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }
         #image-width {
-            grid-column-end: span 5;
+            grid-column-end: span 4;
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }
