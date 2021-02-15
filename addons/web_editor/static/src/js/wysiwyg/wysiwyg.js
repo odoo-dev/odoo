@@ -672,18 +672,27 @@ const Wysiwyg = Widget.extend({
             '#table',
             '#create-link',
         ].join(',')).toggleClass('d-none', isInImage);
+        // Toggle the toolbar arrow.
         this.toolbar.$el.toggleClass('noarrow', isInImage);
-        // Toggle the 'active' class on the active image tool buttons.
         if (isInImage) {
+            // Select the image in the DOM.
+            const selection = this.odooEditor.document.getSelection();
+            const range = this.odooEditor.document.createRange();
+            range.selectNode(this.lastImageClicked);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            // Always hide the unlink button on images
             this.toolbar.$el.find('#unlink').toggleClass('d-none', true);
-            const imagePosition = this.lastImageClicked.getBoundingClientRect();
+            // Show the floatingtoolbar on the topleft of the image.
             if (this.options.autohideToolbar) {
+                const imagePosition = this.lastImageClicked.getBoundingClientRect();
                 this.toolbar.$el.css({
                     visibility: 'visible',
                     top: imagePosition.top + 10 + 'px',
                     left: imagePosition.left + 10 + 'px',
                 });
             }
+            // Toggle the 'active' class on the active image tool buttons.
             for (const button of $('#image-shape div')) {
                 button.classList.toggle('active', $(e.target).hasClass(button.id));
             }
