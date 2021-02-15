@@ -48,31 +48,36 @@ var LinkDialog = Dialog.extend({
         this.data.className = "";
         this.data.iniClassName = "";
 
-        const selection = editable.ownerDocument.getSelection();
-        this.data.range = selection.getRangeAt(0);
+        const selection = editable && editable.ownerDocument.getSelection();
+        this.data.range = selection && selection.rangeCount && selection.getRangeAt(0);
 
-        this.needLabel = selection.isCollapsed;
+        if (this.data.range) {
+            this.needLabel = selection.isCollapsed;
 
-        const $link = $(this.data.range.startContainer).filter("a");
-        this.data.iniClassName = $link.attr("class") || "";
-        this.colorCombinationClass = false;
-        let $node = $link;
-        while ($node.length && !$node.is('body')) {
-            const className = $node.attr('class') || '';
-            const m = className.match(/\b(o_cc\d+)\b/g);
-            if (m) {
-                this.colorCombinationClass = m[0];
-                break;
+            const $link = $(this.data.range.startContainer).filter("a");
+            this.data.iniClassName = $link.attr("class") || "";
+            this.colorCombinationClass = false;
+            let $node = $link;
+            while ($node.length && !$node.is('body')) {
+                const className = $node.attr('class') || '';
+                const m = className.match(/\b(o_cc\d+)\b/g);
+                if (m) {
+                    this.colorCombinationClass = m[0];
+                    break;
+                }
+                $node = $node.parent();
             }
-            $node = $node.parent();
-        }
-        this.data.className = this.data.iniClassName.replace(/(^|\s+)btn(-[a-z0-9_-]*)?/gi, ' ');
+            this.data.className = this.data.iniClassName.replace(/(^|\s+)btn(-[a-z0-9_-]*)?/gi, ' ');
 
-        const startLink = $(this.data.range.startContainer).closest('a')[0];
-        const endLink = $(this.data.range.endContainer).closest('a')[0];
-        const isLink = startLink && (startLink === endLink);
-        this.data.text = (isLink ? startLink.textContent : this.data.range.toString())
-            .replace(/[ \t\r\n]+/g, ' ');
+            const startLink = $(this.data.range.startContainer).closest('a')[0];
+            const endLink = $(this.data.range.endContainer).closest('a')[0];
+            const isLink = startLink && (startLink === endLink);
+            this.data.text = (isLink ? startLink.textContent : this.data.range.toString())
+                .replace(/[ \t\r\n]+/g, ' ');
+        } else {
+            this.data.text = this.data.text ? this.data.text.replace(/[ \t\r\n]+/g, ' ') : '';
+            this.needLabel = true;
+        }
 
         var allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
         var allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
@@ -145,7 +150,6 @@ var LinkDialog = Dialog.extend({
         }
         this.data.isNewWindow = data.isNewWindow;
         this.final_data = this.data;
-        this._createLink();
         return this._super.apply(this, arguments);
     },
 
@@ -170,39 +174,7 @@ var LinkDialog = Dialog.extend({
         };
         this.$("#link-preview").attr(attrs).html((data.label && data.label.length) ? data.label : data.url);
     },
-    _createLink: function () {
-        const linkUrl = this.final_data.url;
-        const linkText = this.final_data.text;
-        const isNewWindow = this.final_data.isNewWindow;
 
-        const range = this.final_data.range;
-        const hasTextChanged = range.toString() !== linkText;
-
-        const ancestorAnchor = $(range.startContainer).closest('a')[0];
-        let anchors = [];
-        if (ancestorAnchor && ancestorAnchor === $(range.endContainer).closest('a')[0]) {
-            anchors.push($(ancestorAnchor).html(linkText).get(0));
-        } else if (hasTextChanged) {
-            const anchor = $('<A>' + linkText + '</A>')[0];
-            range.insertNode(anchor);
-            anchors.push(anchor);
-        } else {
-            const anchor = $('a')[0];
-            range.surroundContents(anchor);
-            anchors.push(anchor);
-        }
-        for (const anchor of anchors) {
-            $(anchor).attr('href', linkUrl);
-            $(anchor).attr('class', this.final_data.className || null);
-            $(anchor).css(this.final_data.style || {});
-            if (isNewWindow) {
-                $(anchor).attr('target', '_blank');
-            } else {
-                $(anchor).removeAttr('target');
-            }
-            range.selectNode(anchor);
-        };
-    },
     /**
      * Get the link's data (url, label and styles).
      *
