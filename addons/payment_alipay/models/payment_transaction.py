@@ -22,6 +22,12 @@ class PaymentTransaction(models.Model):
             return super()._get_specific_rendering_values(processing_values)
 
         base_url = self.acquirer_id._get_base_url()
+        # Round the computed total fee to the minor units to avoid weird string representations.
+        # E.g., str(1111.11 + 7.09) == '1118.1999999999998'
+        if self.fees:
+            total_fee = self.currency_id.round(self.amount + self.fees)
+        else:
+            total_fee = self.amount
         alipay_tx_values = {
             '_input_charset': 'utf-8',
             'notify_url': urls.url_join(base_url, AlipayController._notify_url),
@@ -29,7 +35,7 @@ class PaymentTransaction(models.Model):
             'partner': self.acquirer_id.alipay_merchant_partner_id,
             'return_url': urls.url_join(base_url, AlipayController._return_url),
             'subject': self.reference,
-            'total_fee': self.amount + self.fees,
+            'total_fee': total_fee,
         }
         if self.acquirer_id.alipay_payment_method == 'standard_checkout':
             # https://global.alipay.com/docs/ac/global/create_forex_trade
