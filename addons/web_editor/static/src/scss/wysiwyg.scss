@@ -35,6 +35,10 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     color: $o-we-color;
     font-family: $o-we-font-family;
 
+    &.noarrow::before {
+        display: none;
+    }
+
     // Main layout of buttons
     .btn-group, .btn {
         width: auto !important;
