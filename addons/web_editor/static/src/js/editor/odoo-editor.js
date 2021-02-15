@@ -964,6 +964,9 @@ var exportVariable = (function (exports) {
         startIndex = 0,
         endIndex = sourceEl.childNodes.length,
     ) {
+        if (selfClosingElementTags.includes(destinationEl.nodeName)) {
+            throw new Error(`moveNodes: Invalid destination element ${destinationEl.nodeName}`);
+        }
         // For table elements, there just cannot be a meaningful move, add them
         // after the table.
         if (['TBODY', 'THEAD', 'TFOOT', 'TR', 'TH', 'TD'].includes(destinationEl.tagName)) {
@@ -1459,7 +1462,7 @@ var exportVariable = (function (exports) {
                 leftNode.remove();
                 return;
             }
-            if (!isBlock(leftNode)) {
+            if (!isBlock(leftNode) || isVisibleEmpty(leftNode)) {
                 /**
                  * Backspace just after an inline node, convert to backspace at the
                  * end of that inline node.
@@ -2879,19 +2882,15 @@ var exportVariable = (function (exports) {
         }
 
         _toggleList(mode) {
-            let sel = this.document.defaultView.getSelection();
-            let end = leftDeepFirstPath(sel.anchorNode, sel.anchorOffset).next().value;
-
             let li = new Set();
             let blocks = new Set();
 
-            for (let node of leftDeepFirstPath(sel.focusNode, sel.focusOffset)) {
+            for (let node of getTraversedNodes(this.document)) {
                 let block = closestBlock(node);
                 if (!['OL', 'UL'].includes(block.tagName)) {
                     let ublock = block.closest('ol, ul');
                     ublock && getListMode(ublock) == mode ? li.add(block) : blocks.add(block);
                 }
-                if (node == end) break;
             }
 
             let target = [...(blocks.size ? blocks : li)];
@@ -3527,6 +3526,7 @@ var exportVariable = (function (exports) {
             this._protect(() => {
                 if (buttonEl.classList.contains('tablepicker-cell')) {
                     const table = this.document.createElement('table');
+                    table.classList.add('table', 'table-bordered'); // for bootstrap
                     const tbody = this.document.createElement('tbody');
                     table.appendChild(tbody);
                     const rowId = +buttonEl.dataset.rowId;
