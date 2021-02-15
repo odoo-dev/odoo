@@ -120,15 +120,27 @@ class Query(object):
     def select(self, *args):
         """ Return the SELECT query as a pair ``(query_string, query_params)``. """
         from_clause, where_clause, params = self.get_sql()
+        return self._select(
+            args or [f'"{next(iter(self._tables))}".id'],
+            from_clause,
+            where_clause,
+        ), params
+
+    def _select(self, select_clause, from_clause, where_clause):
         query_str = 'SELECT {} FROM {} WHERE {}{}{}{}'.format(
-            ", ".join(args or [f'"{next(iter(self._tables))}".id']),
+            ", ".join(select_clause),
             from_clause,
             where_clause or "TRUE",
+            *self._select_options()
+        )
+        return query_str
+
+    def _select_options(self):
+        return (
             (" ORDER BY %s" % self.order) if self.order else "",
             (" LIMIT %d" % self.limit) if self.limit else "",
             (" OFFSET %d" % self.offset) if self.offset else "",
         )
-        return query_str, params
 
     def get_sql(self):
         """ Returns (query_from, query_where, query_params). """
@@ -143,9 +155,52 @@ class Query(object):
         where_clause = " AND ".join(self._where_clauses)
         return from_clause, where_clause, params + self._where_params
 
+    def select_forked(self, *args):
+        """ Return the SELECT query as a pair ``(query_string, query_params)``. """
+        select_clause = args or [f'"{next(iter(self._tables))}".id']
+        quieres = []
+        all_params = []
+        priority = 0
+        for from_clause, where_clause, params in self.get_sql_forked():
+            select_clause_local = select_clause[:]
+            select_clause_local.append("%s AS forked_priority" % priority)
+            query_str = self._select(
+                select_clause_local,
+                from_clause,
+                where_clause,
+            )
+
+            quieres.append(query_str)
+            all_params.extend(params)
+            priority += 1
+
+        main_query = " UNION ALL ".join("(%s)" % q for q in quieres)
+        # TODO: do we have id field ?
+        main_query = "SELECT DISTINCT ON(id) {} FROM ({}) AS x ORDER BY id, forked_priority".format(
+            ", ".join(select_clause),
+            main_query
+        )
+        # TODO: exclude forked_priority from final select
+        # TODO: add missed _select_options
+        return main_query, params
+
+    def get_sql_forked(self):
+        """ Returns [(query_from, query_where, query_params)]. """
+        # TODO
+        tables = [_from_table(table, alias) for alias, table in self._tables.items()]
+        joins = []
+        params = []
+        for alias, (kind, table, condition, condition_params) in self._joins.items():
+            joins.append(f'{kind} {_from_table(table, alias)} ON ({condition})')
+            params.extend(condition_params)
+
+        from_clause = " ".join([", ".join(tables)] + joins)
+        where_clause = " AND ".join(self._where_clauses)
+        return from_clause, where_clause, params + self._where_params
+
     @lazy_property
     def _result(self):
-        query_str, params = self.select()
+        query_str, params = self.select_forked()
         self._cr.execute(query_str, params)
         return [row[0] for row in self._cr.fetchall()]
 
@@ -185,3 +240,25 @@ class Query(object):
         kind = '' if implicit else ('LEFT JOIN' if outer else 'JOIN')
         rhs_alias = self._join(kind, lhs_alias, lhs_column, rhs_table, rhs_column, link, extra, extra_params)
         return rhs_alias, _from_table(rhs_table, rhs_alias)
+
+
+class Fork(object):
+
+    def __init__(self, items):
+        # items: alias -> expression
+        self.items = items
+
+    def __str__(self):
+        return self.unite((expression for alias, expression in self.items))
+
+
+class Or(Fork):
+
+    def unite(self, expressions):
+        return ' OR '.join(expressions)
+
+
+class Coalesce(Fork):
+
+    def defaul_unite(self, expressions):
+        return "COALESCE(%s)" % ', '.join(expressions)

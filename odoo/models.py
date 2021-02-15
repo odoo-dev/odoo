@@ -52,7 +52,7 @@ from . import SUPERUSER_ID
 from . import api
 from . import tools
 from .exceptions import AccessError, MissingError, ValidationError, UserError
-from .osv.query import Query
+from .osv.query import Query, Coalesce
 from .tools import frozendict, lazy_classproperty, ormcache, \
                    Collector, LastOrderedSet, OrderedSet, IterableGenerator, \
                    groupby
@@ -4283,22 +4283,27 @@ Fields:
                 expression.expression(domain, parent_model.sudo(), parent_alias, query)
 
     @api.model
-    def _generate_translated_field(self, table_alias, field, query):
+    def _generate_translated_field(self, table_alias, field, query, wrapper=None):
         """
         Add possibly missing JOIN with translations table to ``query`` and
         generate the expression for the translated field.
 
         :return: the qualified field name (or expression) to use for ``field``
         """
+        if not wrapper:
+            wrapper = lambda x: x
         if self.env.lang:
             alias = query.left_join(
                 table_alias, 'id', 'ir_translation', 'res_id', field,
                 extra='"{rhs}"."type" = \'model\' AND "{rhs}"."name" = %s AND "{rhs}"."lang" = %s AND "{rhs}"."value" != %s',
                 extra_params=["%s,%s" % (self._name, field), self.env.lang, ""],
             )
-            return 'COALESCE("%s"."%s", "%s"."%s")' % (alias, 'value', table_alias, field)
+            return Coalesce([
+                (alias, wrapper('"%s"."%s"' % (alias, 'value'))),
+                (table_alias, wrapper('"%s"."%s"' % (table_alias, field)))
+            ])
         else:
-            return '"%s"."%s"' % (table_alias, field)
+            return wrapper('"%s"."%s"' % (table_alias, field))
 
     @api.model
     def _generate_m2o_order_by(self, alias, order_field, query, reverse_direction, seen):

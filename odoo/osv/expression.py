@@ -910,7 +910,7 @@ class expression(object):
 
                     unaccent = self._unaccent if sql_operator.endswith('like') else lambda x: x
 
-                    left = unaccent(model._generate_translated_field(alias, left, self.query))
+                    left = model._generate_translated_field(alias, left, self.query, wrapper=unaccent)
                     instr = unaccent('%s')
                     push_result(f"{left} {sql_operator} {instr}", [right])
 
