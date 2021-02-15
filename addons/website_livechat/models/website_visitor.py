@@ -6,6 +6,7 @@ import json
 
 from odoo import models, api, fields, _
 from odoo.exceptions import UserError
+from odoo.http import request
 
 
 class WebsiteVisitor(models.Model):
@@ -99,4 +100,22 @@ class WebsiteVisitor(models.Model):
                 (3, self.env.ref('base.public_partner').id),
                 (4, partner.id),
             ]
+            # copy sessions of the secondary visitors to the main partner visitor.
+            main_partner_visitor = self.env['website.visitor'].sudo().search(
+                [('partner_id', '=', partner.id), ('id', 'not in', self.ids)],
+                order='last_connection_datetime DESC', limit=1,
+            )
+            if main_partner_visitor:
+                main_partner_visitor.mail_channel_ids |= self.mail_channel_ids
         super(WebsiteVisitor, self)._link_to_partner(partner, update_values=update_values)
+
+    def _create_visitor(self):
+        visitor = super(WebsiteVisitor, self)._create_visitor()
+        mail_channel_uuid = json.loads(request.httprequest.cookies.get('im_livechat_session', '{}')).get('uuid')
+        if mail_channel_uuid:
+            mail_channel = request.env["mail.channel"].search([("uuid", "=", mail_channel_uuid)])
+            visitor.mail_channel_ids = [(4, mail_channel.id)]
+            mail_channel.sudo().write({
+                'anonymous_name': visitor.display_name
+            })
+        return visitor
