@@ -586,6 +586,20 @@ const Wysiwyg = Widget.extend({
                 (className.match(/(^|\s)padding-\w+/g) || []).join(' ')
             )).addClass(e.target.dataset.class);
         });
+        $toolbar.find('#justify div.btn').on('mousedown', e => {
+            if (!this.lastImageClicked) return;
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            e.preventDefault();
+            this.lastImageClicked.classList.remove('float-left', 'float-right');
+            if (this.lastImageClicked.classList.contains('mx-auto')) {
+                this.lastImageClicked.classList.remove('d-block', 'mx-auto');
+            }
+            const mode = e.target.parentElement.id.replace('justify', '').toLowerCase();
+            const classes = mode === 'center' ? ['d-block', 'mx-auto'] : ['float-' + mode];
+            this.lastImageClicked.classList.add(...classes);
+            this._updateImageJustifyButton(e.target.parentElement.id);
+        });
         $toolbar.find('#image-crop #crop').click(e => {
             new weWidgets.ImageCropWidget(this, this.lastImageClicked).appendTo(this.$editable);
         });
@@ -610,6 +624,8 @@ const Wysiwyg = Widget.extend({
         // snippet is an image.
         const isInImage = $(e.target).is('img');
         $('#media-description, #image-shape, #image-width, #image-padding, #image-crop').toggleClass('d-none', !isInImage);
+        // Hide the justify full button in images.
+        this.toolbar.$el.find('#justifyFull').toggleClass('d-none', isInImage);
         this.lastImageClicked = isInImage && e.target;
         // Toggle the 'active' class on the active image tool buttons.
         if (isInImage) {
@@ -619,7 +635,31 @@ const Wysiwyg = Widget.extend({
             for (const button of $('#image-width div')) {
                 button.classList.toggle('active', e.target.style.width === button.id);
             }
+            this._updateImageJustifyButton();
         }
+    },
+    _updateImageJustifyButton: function (commandState) {
+        if (!this.lastImageClicked) return;
+        const $paragraphDropdownButton = this.toolbar.$el.find('#paragraphDropdownButton');
+        if (!commandState) {
+            const justifyMapping = [
+                ['float-left', 'justifyLeft'],
+                ['mx-auto', 'justifyCenter'],
+                ['float-right', 'justifyRight'],
+            ];
+            commandState = justifyMapping.find(pair => (
+                this.lastImageClicked.classList.contains(pair[0]))
+            )[1];
+        }
+        const $buttons = this.toolbar.$el.find('#justify div.btn');
+        for (const button of $buttons) {
+            button.classList.toggle('active', button.id === commandState);
+        }
+        const direction = commandState.replace('justify', '').toLowerCase();
+        const newClass = `fa-align-${direction === 'full' ? 'justify' : direction}`;
+        $paragraphDropdownButton.removeClass((index, className) => (
+            (className.match(/(^|\s)fa-align-\w+/g) || []).join(' ')
+        )).addClass(newClass);
     },
     _editorOptions: function () {
         var self = this;
