@@ -489,22 +489,53 @@ const Wysiwyg = Widget.extend({
     /**
      * Toggle the Link tools/dialog to edit links. If a snippet menu is present,
      * use the link tools, otherwise use the dialog.
-     *
-     * @param {object} [params]
      */
-    toggleLinkTools(params = {}) {
+    toggleLinkTools() {
         if (this.snippetsMenu) {
             if (this.linkTools) {
                 this.linkTools.destroy();
                 this.linkTools = undefined;
             } else {
                 const $btn = this.toolbar.$el.find('#create-link');
-                this.linkTools = new weWidgets.LinkTools(this, params, this.odooEditor.dom, $btn);
+                this.linkTools = new weWidgets.LinkTools(this, {}, this.odooEditor.dom, $btn);
                 this.linkTools.appendTo(this.toolbar.$el);
             }
         } else {
-            const linkDialog = new weWidgets.LinkDialog(this, params, this.$editable[0]);
+            const linkDialog = new weWidgets.LinkDialog(this, {}, this.$editable[0]);
             linkDialog.open();
+            linkDialog.on('save', this, (linkInfo) => {
+                const linkUrl = linkInfo.url;
+                const linkText = linkInfo.text;
+                const isNewWindow = linkInfo.isNewWindow;
+
+                const range = linkInfo.range;
+                const hasTextChanged = range.toString() !== linkText;
+
+                const ancestorAnchor = $(range.startContainer).closest('a')[0];
+                let anchors = [];
+                if (ancestorAnchor && ancestorAnchor === $(range.endContainer).closest('a')[0]) {
+                    anchors.push($(ancestorAnchor).html(linkText).get(0));
+                } else if (hasTextChanged) {
+                    const anchor = $('<A>' + linkText + '</A>')[0];
+                    range.insertNode(anchor);
+                    anchors.push(anchor);
+                } else {
+                    const anchor = $('a')[0];
+                    range.surroundContents(anchor);
+                    anchors.push(anchor);
+                }
+                for (const anchor of anchors) {
+                    $(anchor).attr('href', linkUrl);
+                    $(anchor).attr('class', linkInfo.className || null);
+                    $(anchor).css(linkInfo.style || {});
+                    if (isNewWindow) {
+                        $(anchor).attr('target', '_blank');
+                    } else {
+                        $(anchor).removeAttr('target');
+                    }
+                    range.selectNode(anchor);
+                };
+            });
         }
     },
     /**
