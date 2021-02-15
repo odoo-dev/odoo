@@ -801,7 +801,7 @@ actual arch.
             fields = list({'arch', 'model'}.union(fields))
 
         # read the view arch
-        [view_data] = root.read(fields=fields)
+        [view_data] = root._read_format(fields)
         view_arch = etree.fromstring(view_data['arch'].encode('utf-8'))
         if not root.inherit_id:
             if self._context.get('inherit_branding'):
