@@ -653,12 +653,33 @@ const Wysiwyg = Widget.extend({
         // Only show the image tools in the toolbar if the current selected
         // snippet is an image.
         const isInImage = $(e.target).is('img');
-        $('#media-description, #image-shape, #image-width, #image-padding, #image-edit').toggleClass('d-none', !isInImage);
-        // Hide the justify full button in images.
-        this.toolbar.$el.find('#justifyFull').toggleClass('d-none', isInImage);
+        this.toolbar.$el.find([
+            '#media-description',
+            '#image-shape',
+            '#image-width',
+            '#image-padding',
+            '#image-edit',
+        ].join(',')).toggleClass('d-none', !isInImage);
         this.lastImageClicked = isInImage && e.target;
+        // Hide the irrelevant text buttons.
+        this.toolbar.$el.find([
+            '#style',
+            '#decoration',
+            '#justifyFull',
+            '#list',
+            '#table',
+            '#create-link',
+            '#unlink',
+        ].join(',')).toggleClass('d-none', isInImage);
+        this.toolbar.$el.toggleClass('noarrow', isInImage);
         // Toggle the 'active' class on the active image tool buttons.
         if (isInImage) {
+            const imagePosition = this.lastImageClicked.getBoundingClientRect();
+            this.toolbar.$el.css({
+                visibility: 'visible',
+                top: imagePosition.top + 10 + 'px',
+                left: imagePosition.left + 10 + 'px',
+            });
             for (const button of $('#image-shape div')) {
                 button.classList.toggle('active', $(e.target).hasClass(button.id));
             }
