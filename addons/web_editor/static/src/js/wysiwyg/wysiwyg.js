@@ -586,6 +586,9 @@ const Wysiwyg = Widget.extend({
                 (className.match(/(^|\s)padding-\w+/g) || []).join(' ')
             )).addClass(e.target.dataset.class);
         });
+        $toolbar.find('#image-crop #crop').click(e => {
+            new weWidgets.ImageCropWidget(this, this.lastImageClicked).appendTo(this.$editable);
+        });
     },
     /**
      * Update any editor UI that is not handled by the editor itself.
@@ -606,7 +609,7 @@ const Wysiwyg = Widget.extend({
         // Only show the image tools in the toolbar if the current selected
         // snippet is an image.
         const isInImage = $(e.target).is('img');
-        $('#media-description, #image-shape, #image-width, #image-padding').toggleClass('d-none', !isInImage);
+        $('#media-description, #image-shape, #image-width, #image-padding, #image-crop').toggleClass('d-none', !isInImage);
         this.lastImageClicked = isInImage && e.target;
         // Toggle the 'active' class on the active image tool buttons.
         if (isInImage) {
