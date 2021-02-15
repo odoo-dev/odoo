@@ -281,7 +281,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                     record.type === 'attributes' &&
                     (record.oldValue === record.target.getAttribute(record.attributeName) ||
                         (record.oldValue && record.oldValue.startsWith('sizzle')) ||
-                        $savable.is(this.oeFieldSelector))
+                        (!$savable.is(this.oeStructureSelector)))
                 ) {
                     continue;
                 }

@@ -296,7 +296,7 @@ const Wysiwyg = Widget.extend({
             await this.snippetsMenu.cleanForSave();
         }
 
-        // await this._saveModifiedImages();
+        await this.saveModifiedImages();
         await this._saveViewBlocks();
         // await this._saveCoverPropertiesBlocks();
         // await this._saveMegaMenuClasses();
@@ -340,7 +340,7 @@ const Wysiwyg = Widget.extend({
      * @param {jQuery} $editable
      * @returns {Promise}
      */
-    saveModifiedImages: function ($editable) {
+    saveModifiedImages: function ($editable = this.$editable) {
         const defs = _.map($editable, async editableEl => {
             const {oeModel: resModel, oeId: resId} = editableEl.dataset;
             const proms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
