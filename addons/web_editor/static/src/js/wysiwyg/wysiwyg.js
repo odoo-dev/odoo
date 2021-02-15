@@ -669,11 +669,11 @@ const Wysiwyg = Widget.extend({
             '#list',
             '#table',
             '#create-link',
-            '#unlink',
         ].join(',')).toggleClass('d-none', isInImage);
         this.toolbar.$el.toggleClass('noarrow', isInImage);
         // Toggle the 'active' class on the active image tool buttons.
         if (isInImage) {
+            this.toolbar.$el.find('#unlink').toggleClass('d-none', true);
             const imagePosition = this.lastImageClicked.getBoundingClientRect();
             this.toolbar.$el.css({
                 visibility: 'visible',
