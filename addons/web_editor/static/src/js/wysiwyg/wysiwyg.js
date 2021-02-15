@@ -600,8 +600,38 @@ const Wysiwyg = Widget.extend({
             this.lastImageClicked.classList.add(...classes);
             this._updateImageJustifyButton(e.target.parentElement.id);
         });
-        $toolbar.find('#image-crop #crop').click(e => {
+        $toolbar.find('#image-crop').click(e => {
+            if (!this.lastImageClicked) return;
             new weWidgets.ImageCropWidget(this, this.lastImageClicked).appendTo(this.$editable);
+        });
+        $toolbar.find('#image-transform').click(e => {
+            if (!this.lastImageClicked) return;
+            const $image = $(this.lastImageClicked);
+            if ($image.data('transfo-destroy')) {
+                $image.removeData('transfo-destroy');
+                return;
+            }
+            $image.transfo();
+            const mouseup = () => {
+                $('.note-popover button[data-event="transform"]').toggleClass('active', $image.is('[style*="transform"]'));
+            };
+            $(this.odooEditor.document).on('mouseup', mouseup);
+            const mousedown = mousedownEvent => {
+                if (!$(mousedownEvent.target).closest('.transfo-container').length) {
+                    $image.transfo('destroy');
+                    $(this.odooEditor.document).off('mousedown', mousedown).off('mouseup', mouseup);
+                }
+                if ($(mousedownEvent.target).closest('.note-popover').length) {
+                    $image.data('transfo-destroy', true).attr('style', ($image.attr('style') || '').replace(/[^;]*transform[\w:]*;?/g, ''));
+                }
+                $image.trigger('content_changed');
+            };
+            $(this.odooEditor.document).on('mousedown', mousedown);
+        });
+        $toolbar.find('#image-delete').click(e => {
+            if (!this.lastImageClicked) return;
+            $(this.lastImageClicked).remove();
+            this.lastImageClicked = undefined;
         });
     },
     /**
@@ -623,7 +653,7 @@ const Wysiwyg = Widget.extend({
         // Only show the image tools in the toolbar if the current selected
         // snippet is an image.
         const isInImage = $(e.target).is('img');
-        $('#media-description, #image-shape, #image-width, #image-padding, #image-crop').toggleClass('d-none', !isInImage);
+        $('#media-description, #image-shape, #image-width, #image-padding, #image-edit').toggleClass('d-none', !isInImage);
         // Hide the justify full button in images.
         this.toolbar.$el.find('#justifyFull').toggleClass('d-none', isInImage);
         this.lastImageClicked = isInImage && e.target;

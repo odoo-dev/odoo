@@ -170,8 +170,11 @@
                 <div id="25%" title="Resize Quarter" class="btn editor-ignore">25%</div>
             </div>
 
-            <div id="image-crop" class="btn-group">
-                <div id="crop" class="btn fa fa-crop editor-ignore"></div>
+            <div id="image-edit" class="btn-group">
+                <div id="image-crop" title="Crop Image" class="btn fa fa-crop editor-ignore"></div>
+                <div id="image-transform" class="btn editor-ignore fa fa-object-ungroup"
+                    title="Transform the picture (click twice to reset transformation)"></div>
+                <div id="image-delete" class="btn editor-ignore fa fa-trash-o" title="Remove (DELETE)"></div>
             </div>
         </div>
     </t>
