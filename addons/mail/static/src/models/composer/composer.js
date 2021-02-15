@@ -376,6 +376,11 @@ function factory(dependencies) {
             if (!this.thread) {
                 return;
             }
+            const suggestionDelimiters = ['@', ':', '#', '/'];
+            const lastInputChar = this.textInputContent.substring(this.textInputCursorStart - 1, this.textInputCursorStart);
+            if (suggestionDelimiters.indexOf(this.suggestionDelimiter || lastInputChar) !== -1) {
+                return;
+            }
             if (this.thread.typingMembers.includes(this.env.messaging.currentPartner)) {
                 this.thread.refreshCurrentPartnerIsTyping();
             } else {
