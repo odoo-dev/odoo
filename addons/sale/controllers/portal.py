@@ -322,7 +322,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
     # Payment overrides
 
     @http.route()
-    def payment_pay(self, *args, sale_order_id=None, access_token=None, **kwargs):
+    def payment_pay(self, *args, amount=None, sale_order_id=None, access_token=None, **kwargs):
         """ Override of payment to replace the transaction values by that of the sale order.
 
         This is necessary for the reconciliation as all transaction values need to match exactly
@@ -341,6 +341,10 @@ class PaymentPortal(payment_portal.PaymentPortal):
             if not order_sudo:
                 raise ValidationError(_("The provided parameters are invalid."))
 
+            if amount is not None:
+                amount, = self.cast_as_numeric([amount], numeric_type='float')
+            else:
+                amount = order_sudo.amount_total
             # Check the access token against the order values. Done after fetching the order as we
             # need the order fields to check the access token.
             db_secret = request.env['ir.config_parameter'].sudo().get_param('database.secret')
@@ -348,20 +352,18 @@ class PaymentPortal(payment_portal.PaymentPortal):
                 access_token,
                 db_secret,
                 order_sudo.partner_id.id,
-                order_sudo.amount_total,
+                amount,
                 order_sudo.currency_id.id
             ):
                 raise ValidationError(_("The provided parameters are invalid."))
 
-            # Overwrite the base transaction values with that of the order
             kwargs.update({
-                'amount': order_sudo.amount_total,
                 'currency_id': order_sudo.currency_id.id,
                 'partner_id': order_sudo.partner_id.id,
                 'company_id': order_sudo.company_id.id,
                 'sale_order_id': sale_order_id,
             })
-        return super().payment_pay(*args, access_token=access_token, **kwargs)
+        return super().payment_pay(*args, access_token=access_token, amount=amount, **kwargs)
 
     def _get_custom_rendering_context_values(self, sale_order_id=None, **kwargs):
         """ Override of payment to add the sale order id in the custom rendering context values.
