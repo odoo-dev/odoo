@@ -47,10 +47,10 @@
             </div>
 
             <div id="decoration" class="btn-group">
-                <div id="bold" title="Toggle bold" class="btn"><i class="fa fa-bold fa-fw"></i></div>
-                <div id="italic" title="Toggle italic" class="btn"><i class="fa fa-italic fa-fw"></i></div>
-                <div id="underline" title="Toggle underline" class="btn"><i class="fa fa-underline fa-fw"></i></div>
-                <div id="removeFormat" title="Remove format" class="btn"><i class="fa fa-eraser fa-fw"></i></div>
+                <div id="bold" title="Toggle bold" class="btn fa fa-bold fa-fw"></div>
+                <div id="italic" title="Toggle italic" class="btn fa fa-italic fa-fw"></div>
+                <div id="underline" title="Toggle underline" class="btn fa fa-underline fa-fw"></div>
+                <div id="removeFormat" title="Remove format" class="btn fa fa-eraser fa-fw"></div>
             </div>
 
             <div id="font-size" class="btn-group dropdown">
