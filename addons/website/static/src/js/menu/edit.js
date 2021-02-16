@@ -408,6 +408,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         this.trigger_up('widgets_stop_request', {
             $target: this._targetForEdition(),
         });
+        this.observer.disconnect();
     },
     /**
      * Called when edition was stopped. Notifies the
