@@ -139,7 +139,7 @@ const Wysiwyg = Widget.extend({
                 wysiwyg: this,
                 selectorEditableArea: '.o_editable',
             }, options));
-            this._insertSnippetMenu();
+            await this._insertSnippetMenu();
         }
 
         $(this.odooEditor.dom).on('click', this._updateEditorUI.bind(this));

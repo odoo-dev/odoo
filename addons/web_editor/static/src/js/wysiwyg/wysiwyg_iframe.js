@@ -156,7 +156,7 @@ Wysiwyg.include({
         if (this.options.inIframe) {
             return this.snippetsMenu.appendTo(this.$utilsZone);
         } else {
-            this._super.apply(this, arguments);
+            return this._super.apply(this, arguments);
         }
     },
 });
