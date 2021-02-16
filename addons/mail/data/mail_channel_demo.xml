@@ -16,6 +16,11 @@
             <field name="description">Research and development discussion group</field>
         </record>
 
+        <record model="mail.room" id="demo_room">
+            <field name="name">demo room</field>
+            <field name="room_token">demo-token</field>
+        </record>
+
         <!-- Best sales practices messages -->
         <record id="mail_message_channel_1_1" model="mail.message">
             <field name="model">mail.channel</field>

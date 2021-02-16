@@ -7,6 +7,7 @@ from odoo import _, api, fields, models, tools
 from odoo.addons.bus.models.bus_presence import AWAY_TIMER
 from odoo.addons.bus.models.bus_presence import DISCONNECTION_TIMER
 from odoo.osv import expression
+import uuid
 
 _logger = logging.getLogger(__name__)
 
@@ -24,6 +25,8 @@ class Partner(models.Model):
     channel_ids = fields.Many2many('mail.channel', 'mail_channel_partner', 'partner_id', 'channel_id', string='Channels', copy=False)
     # override the field to track the visibility of user
     user_id = fields.Many2one(tracking=True)
+    peer_token = fields.Char(string='Peer Token')
+    room_id = fields.Many2one('mail.room')
 
     def _compute_im_status(self):
         super()._compute_im_status()
@@ -77,6 +80,7 @@ class Partner(models.Model):
             "name": self.name,
             "active": self.active,
             "im_status": self.im_status,
+            "peer_token": self.peer_token,
         }
 
     @api.model
@@ -127,7 +131,7 @@ class Partner(models.Model):
         if len(users) < limit:
             partners = self.search_read(search_dom, fields, limit=limit)
             # Remove duplicates
-            partners = [p for p in partners if not len([u for u in users if u['id'] == p['id']])] 
+            partners = [p for p in partners if not len([u for u in users if u['id'] == p['id']])]
 
         # add OdooBot even if its partner is archived
         if len(partners) + len(users) < limit and "odoobot".startswith(search.lower()):

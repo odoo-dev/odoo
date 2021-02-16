@@ -18,7 +18,7 @@
                 <t t-if="env.messaging.device.isMobile" t-call="mail.Discuss.content"/>
                 <t t-else="">
                     <div class="o_Discuss_content">
-                        <t t-call="mail.Discuss.content"/>
+                        <RoomManager/>
                     </div>
                 </t>
                 <t t-if="discuss.hasModerationDiscardDialog">

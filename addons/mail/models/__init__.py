@@ -8,6 +8,7 @@ from . import mail_alias_mixin
 from . import mail_followers
 from . import mail_notification
 from . import mail_render_mixin
+from . import mail_room
 from . import mail_message
 from . import mail_activity
 from . import mail_mail

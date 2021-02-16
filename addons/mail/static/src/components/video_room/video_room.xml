@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.VideoRoom" owl="1">
+        <div>
+            <t t-foreach="[...room.peerTokens]" t-as="peerToken" t-key="peerToken">
+                <div>
+                    <span t-esc="peerToken"/>
+                    <video t-on-loadedmetadata="_onVideoLoadedMetaData" t-ref="video_{{ peerToken }}"/>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

@@ -44,6 +44,9 @@ function factory(dependencies) {
             if ('id' in data) {
                 data2.id = data.id;
             }
+            if ('peer_token' in data) {
+                data2.peerToken = data.peer_token;
+            }
             if ('im_status' in data) {
                 data2.im_status = data.im_status;
             }
@@ -70,7 +73,11 @@ function factory(dependencies) {
                     data2.user = [['insert', user]];
                 }
             }
-
+            if ('room_id' in data) {
+                data2.room = [['insert', {
+                    id: data.room_id,
+                }]];
+            }
             return data2;
         }
 
@@ -315,6 +322,10 @@ function factory(dependencies) {
         }),
         id: attr({
             required: true,
+        }),
+        peerToken: attr(),
+        room: one2many('mail.chat_room', {
+            inverse: 'partnerIds',
         }),
         im_status: attr(),
         memberThreads: many2many('mail.thread', {

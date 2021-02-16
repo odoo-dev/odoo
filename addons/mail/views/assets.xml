@@ -121,6 +121,8 @@
                 <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_typing_icon/thread_typing_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_view/thread_view.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/room_manager/room_manager.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/video_room/video_room.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_core.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_errors.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_field.js"></script>
@@ -132,6 +134,7 @@
                 <script type="text/javascript" src="/mail/static/src/models/attachment_viewer/attachment_viewer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/canned_response/canned_response.js"/>
                 <script type="text/javascript" src="/mail/static/src/models/channel_command/channel_command.js"/>
+                <script type="text/javascript" src="/mail/static/src/models/chat_room/chat_room.js"/>
                 <script type="text/javascript" src="/mail/static/src/models/chat_window/chat_window.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/chat_window_manager/chat_window_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/chatter/chatter.js"></script>
@@ -322,6 +325,14 @@
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/mail/static/src/components/discuss_mobile_mailbox_selection/discuss_mobile_mailbox_selection_tests.js"/>
             </xpath>
+        </template>
+
+        <template id="peer_lib" name="PeerJS Library">
+            <script type="text/javascript" src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+        </template>
+
+        <template id="peer_js_assets" name="PeerJS Lib group" groups="base.group_user">
+            <t t-call-assets="mail.peer_lib"/>
         </template>
     </data>
 </odoo>

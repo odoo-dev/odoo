@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.RoomManager" owl="1">
+        <div>
+            <t t-if="state.roomLocalId">
+                <VideoRoom roomLocalId="state.roomLocalId" currentPeerToken="state.peerToken"/>
+            </t>
+        </div>
+    </t>
+
+</templates>

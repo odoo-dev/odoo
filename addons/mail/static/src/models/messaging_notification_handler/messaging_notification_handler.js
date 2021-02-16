@@ -81,6 +81,12 @@ function factory(dependencies) {
                         return this._handleNotificationNeedaction(message);
                     case 'mail.channel':
                         return this._handleNotificationChannel(id, message);
+                    case 'mail.room':
+                        if (id !== this.env.messaging.currentPartner.id) {
+                            // ignore broadcast to other partners
+                            return;
+                        }
+                        return this._handleNotificationRoom(message);
                     case 'res.partner':
                         if (id !== this.env.messaging.currentPartner.id) {
                             // ignore broadcast to other partners
@@ -431,6 +437,31 @@ function factory(dependencies) {
             } else if (!type) {
                 return this._handleNotificationPartnerChannel(data);
             }
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {string} [data.info]
+         * @param {string} [data.type]
+         */
+        async _handleNotificationRoom(data) {
+            const {
+                room_token,
+                id,
+                peer_tokens,
+            } = data;
+            /*
+            const convertedData = this.env.models['mail.chat_room'].convertData({
+                id,
+            });
+            const chatRoom = this.env.models['mail.chat_room'].findFromIdentifyingData(convertedData);
+            */
+            const chatRoom = this.env.models['mail.chat_room'].all().filter((room) => room.id === id)[0];
+            if (!chatRoom) {
+                return;
+            }
+            chatRoom.updateTokens(peer_tokens);
         }
 
         /**
