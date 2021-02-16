@@ -101,6 +101,7 @@
         'static/src/components/follower_subtype/follower_subtype.xml',
         'static/src/components/follower_subtype_list/follower_subtype_list.xml',
         'static/src/components/gif/gif.xml',
+        'static/src/components/gif_categories/gif_categories.xml',
         'static/src/components/gif_list/gif_list.xml',
         'static/src/components/mail_template/mail_template.xml',
         'static/src/components/message/message.xml',

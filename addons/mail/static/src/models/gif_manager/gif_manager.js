@@ -2,7 +2,7 @@ odoo.define('mail/static/src/models/gif_manager/gif_manager.js', function (requi
 'use strict';
 
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr, many2many, many2one } = require('mail/static/src/model/model_field.js');
+const { attr, many2many, many2one, one2many } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -22,7 +22,7 @@ function factory(dependencies) {
         async search(search) {
             const response = await this._ajax('search', { q: search });
             this.update({
-                list: response.results
+                search: response.results
             });
         }
 
@@ -48,8 +48,8 @@ function factory(dependencies) {
         categories: attr({
             default: [],
         }),
-        list: attr({
-            default: []
+        search: attr({
+            default: [],
         }),
     };
 

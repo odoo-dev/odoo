@@ -6,16 +6,12 @@
             <div>
                 <input type="text" t-on-keydown="_onKeydown" />
             </div>
-
-            <GifList gifManagerLocalId="props.gifManagerLocalId" />
-
-            <div class="grid">
-                <div class="grid-item" t-foreach="gifManager.categories" t-as="category">
-                    <img class="gif" t-att-src="category.image" t-on-load="_update" />
-                    <span class="gif-title">
-                        <t t-esc="category.searchterm"/>
-                    </span>
-                </div>
+            <div class="grid" t-if="!gifManager.search.length">
+                <t t-foreach="gifManager.categories" t-as="category" t-key="category.id">
+                    <div class="grid-item">
+                        <img class="gif" t-att-src="category.image" t-on-load="_update" />
+                    </div>
+                </t>
             </div>
         </div>
     </t>

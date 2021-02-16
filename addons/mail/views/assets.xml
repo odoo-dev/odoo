@@ -100,6 +100,7 @@
                 <script type="text/javascript" src="/mail/static/src/components/follower_subtype/follower_subtype.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/follower_subtype_list/follower_subtype_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/gif/gif.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/gif_categories/gif_categories.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/gif_list/gif_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/mail_template/mail_template.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/message/message.js"></script>
@@ -217,6 +218,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower_subtype/follower_subtype.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/follower_subtype_list/follower_subtype_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/gif/gif.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/gif_categories/gif_categories.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/gif_list/gif_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/mail_template/mail_template.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/message/message.scss"/>

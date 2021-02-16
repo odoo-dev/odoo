@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.GifCategories" owl="1">
+        <div class="o_GifCategories">
+            PROUT
+            <!-- <img class="gif" t-att-src="gifCategory.image" t-on-load="_update" /> -->
+            <!-- <span class="gif-title">
+                 <t t-esc="props.category.searchterm"/>
+                 </span> -->
+        </div>
+    </t>
+
+</templates>
