@@ -6,6 +6,7 @@ import logging
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.addons.base.models.res_partner import _tz_get
 
 _logger = logging.getLogger(__name__)
 
@@ -37,11 +38,16 @@ class Attendee(models.Model):
         [('free', 'Available'), ('busy', 'Busy')], 'Available/Busy', readonly=True)
     access_token = fields.Char('Invitation Token', default=_default_access_token)
     recurrence_id = fields.Many2one('calendar.recurrence', related='event_id.recurrence_id')
+    mail_tz = fields.Selection(_tz_get, compute='_compute_mail_tz', help='Timezone used for displaying time in the mail template')
 
     @api.depends('partner_id', 'partner_id.name', 'email')
     def _compute_common_name(self):
         for attendee in self:
             attendee.common_name = attendee.partner_id.name or attendee.email
+
+    def _compute_mail_tz(self):
+        for attendee in self:
+            attendee.mail_tz = attendee.partner_id.tz
 
     @api.model_create_multi
     def create(self, vals_list):

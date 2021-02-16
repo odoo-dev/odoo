@@ -506,7 +506,7 @@ class Meeting(models.Model):
 
     def get_interval(self, interval, tz=None):
         """ Format and localize some dates to be used in email templates
-            :param string interval: Among 'day', 'month', 'dayname' and 'time' indicating the desired formatting
+            :param string interval: Among 'day', 'month', 'dayname', 'time' and 'stime' indicating the desired formatting
             :param string tz: Timezone indicator (optional)
             :return unicode: Formatted date or time (as unicode string, to prevent jinja2 crash)
         """
@@ -534,6 +534,9 @@ class Meeting(models.Model):
             # FIXME: formats are specifically encoded to bytes, maybe use babel?
             dummy, format_time = self._get_date_formats()
             result = tools.ustr(date.strftime(format_time + " %Z"))
+
+        elif interval == 'stime':
+            result = babel.dates.format_time(date, format='HH:mm', locale=get_lang(self.env).code)
 
         return result
 

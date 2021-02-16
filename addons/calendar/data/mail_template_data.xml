@@ -33,16 +33,25 @@
         % if not recurrent:
         <td width="130px;">
             <div style="border-top-left-radius: 3px; border-top-right-radius: 3px; font-size: 12px; border-collapse: separate; text-align: center; font-weight: bold; color: #ffffff; min-height: 18px; background-color: #875A7B; border: 1px solid #875A7B;">
-                ${object.event_id.get_interval('dayname', tz=object.partner_id.tz if not object.event_id.allday else None)}
+                ${object.event_id.get_interval('dayname', tz=object.mail_tz if not object.event_id.allday else None)}
             </div>
             <div style="font-size: 48px; min-height: auto; font-weight: bold; text-align: center; color: #5F5F5F; background-color: #F8F8F8; border: 1px solid #875A7B;">
-                ${object.event_id.get_interval('day', tz=object.partner_id.tz if not object.event_id.allday else None)}
+                ${object.event_id.get_interval('day', tz=object.mail_tz if not object.event_id.allday else None)}
             </div>
             <div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; background-color: #875A7B;'>
-                ${object.event_id.get_interval('month', tz=object.partner_id.tz if not object.event_id.allday else None)}
+                ${object.event_id.get_interval('month', tz=object.mail_tz if not object.event_id.allday else None)}
             </div>
-            <div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-right-radius: 3px; font-weight: bold; border: 1px solid #875A7B; border-bottom-left-radius: 3px;">
-                ${not object.event_id.allday and object.event_id.get_interval('time', tz=object.partner_id.tz) or ''}
+            <div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-right-radius: 3px; font-weight: bold ; border: 1px solid #875A7B; border-bottom-left-radius: 3px;">
+                % if not object.event_id.allday
+                    <div>
+                        ${object.event_id.get_interval('stime', tz=object.mail_tz)}
+                    </div>
+                    % if object.mail_tz
+                    <div style="font-size: 10px; font-weight: normal">
+                        (${object.mail_tz})
+                    </div>
+                    % endif
+                %endif
             </div>
         </td>
         <td width="20px;"/>
