@@ -149,37 +149,6 @@ class TestMrpOrder(TestMrpCommon):
         # check sub product availability state is assigned
         self.assertEqual(production_2.reservation_state, 'assigned', 'Production order should be availability for assigned state')
 
-    def test_split_move_line(self):
-        """ Consume more component quantity than the initial demand.
-        It should create extra move and share the quantity between the two stock
-        moves """
-        mo, bom, p_final, p1, p2 = self.generate_mo(qty_base_1=10, qty_final=1, qty_base_2=1)
-        mo.action_assign()
-        # check is_quantity_done_editable
-        mo_form = Form(mo)
-        mo_form.qty_producing = 1
-        mo = mo_form.save()
-        details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
-        with details_operation_form.move_line_ids.edit(0) as ml:
-            ml.qty_done = 2
-        details_operation_form.save()
-        details_operation_form = Form(mo.move_raw_ids[1], view=self.env.ref('stock.view_stock_move_operations'))
-        with details_operation_form.move_line_ids.edit(0) as ml:
-            ml.qty_done = 11
-        details_operation_form.save()
-
-        self.assertEqual(len(mo.move_raw_ids), 2)
-        self.assertEqual(len(mo.move_raw_ids.mapped('move_line_ids')), 2)
-        self.assertEqual(mo.move_raw_ids[0].move_line_ids.mapped('qty_done'), [2])
-        self.assertEqual(mo.move_raw_ids[1].move_line_ids.mapped('qty_done'), [11])
-        self.assertEqual(mo.move_raw_ids[0].quantity_done, 2)
-        self.assertEqual(mo.move_raw_ids[1].quantity_done, 11)
-        mo.button_mark_done()
-        self.assertEqual(len(mo.move_raw_ids), 4)
-        self.assertEqual(len(mo.move_raw_ids.mapped('move_line_ids')), 4)
-        self.assertEqual(mo.move_raw_ids.mapped('quantity_done'), [1, 10, 1, 1])
-        self.assertEqual(mo.move_raw_ids.mapped('move_line_ids.qty_done'), [1, 10, 1, 1])
-
     def test_update_quantity_1(self):
         """ Build 5 final products with different consumed lots,
         then edit the finished quantity and update the Manufacturing
