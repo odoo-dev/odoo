@@ -5,25 +5,31 @@
     <xpath expr="//div[@id='wrap']" position="inside">
         <div class="container mt32 mb16 d-none d-md-block d-print-none" t-if="event.sponsor_ids">
             <div t-attf-class="d-flex flex-wrap mb-5 #{'' if (len(event.sponsor_ids) > 10) else 'justify-content-md-center'}">
-                <t t-foreach="event.sponsor_ids" t-as="sponsor">
+                <t t-foreach="event.sponsor_ids.sorted(key=lambda sponsor: (sponsor.website_published if sponsor.exhibitor_type!='sponsor' else True), reverse=True)"
+                    t-as="sponsor">
                     <t t-if="sponsor.url">
-                        <a class="o_wevent_sponsor o_wevent_sponsor_card" target="_blank" t-att-href="sponsor.url">
+                        <a class="o_wevent_sponsor o_wevent_sponsor_card h-100 text-decoration-none" target="_blank" t-att-href="sponsor.url"
+                            t-att-data-publish="'on' if sponsor.website_published or sponsor.exhibitor_type == 'sponsor' else 'off'">
                             <div class="h-100 shadow-sm p-2">
                                 <span t-field="sponsor.image_128"
                                     t-options='{"widget": "image", "class": "img img-fluid"}'/>
                                 <span t-if="sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon'"
                                       t-field="sponsor.sponsor_type_id" t-attf-class="o_ribbon o_ribbon_right ribbon_#{sponsor.sponsor_type_id.display_ribbon_style}"/>
                             </div>
+                            <span t-if="not sponsor.website_published and sponsor.exhibitor_type != 'sponsor'"
+                                class="d-flex justify-content-center badge badge-danger o_wevent_online_badge_unpublished">Unpublished</span>
                         </a>
                     </t>
                     <t t-if="not sponsor.url">
-                        <div class="o_wevent_sponsor o_wevent_sponsor_card">
+                        <div class="o_wevent_sponsor o_wevent_sponsor_card h-100" t-att-data-publish="'on' if sponsor.website_published or sponsor.exhibitor_type == 'sponsor' else 'off'">
                             <div class="h-100 shadow-sm p-2">
                                 <span t-field="sponsor.image_128"
                                     t-options='{"widget": "image", "class": "img img-fluid"}'/>
                                 <span t-if="sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon'"
                                       t-field="sponsor.sponsor_type_id" t-attf-class="o_ribbon o_ribbon_right ribbon_#{sponsor.sponsor_type_id.display_ribbon_style}"/>
                             </div>
+                            <span t-if="not sponsor.website_published and sponsor.exhibitor_type != 'sponsor'"
+                                    class="d-flex justify-content-center badge badge-danger o_wevent_online_badge_unpublished">Unpublished</span>
                         </div>
                     </t>
                 </t>
