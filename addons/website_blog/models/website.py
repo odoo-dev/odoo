@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, models, _
-from odoo.addons.http_routing.models.ir_http import url_for
+from odoo.addons.http_routing.models.ir_http import url_for, unslug
 
 
 class Website(models.Model):
@@ -62,3 +62,42 @@ class Website(models.Model):
         suggested_controllers = super(Website, self).get_suggested_controllers()
         suggested_controllers.append((_('Blog'), url_for('/blog'), 'website_blog'))
         return suggested_controllers
+
+    def _autocomplete_blogs(self, search, limit, order, options):
+        """See _autocomplete_pages"""
+        model = self.env['blog.post']
+        with_description = options['displayDescription']
+        with_date = options['displayDetail']
+        blog = options.get('blog')
+        tags = options.get('tag')
+        domain = [self.website_domain()]
+        if blog:
+            domain.append([('blog_id', '=', unslug(blog)[1])])
+        if tags:
+            active_tag_ids = [unslug(tag)[1] for tag in tags.split(',')] or []
+            if active_tag_ids:
+                active_tags = self.env['blog.tag'].browse(active_tag_ids).exists()
+                domain.append([('tag_ids', 'in', active_tags.ids)])
+
+        fields = ['name']
+        if with_description:
+            fields.append('subtitle')
+        domain = self._build_search_domain(domain, search, fields)
+        results = model.search(
+            domain,
+            limit=min(20, limit),
+            order=order
+        )
+        fields.append('website_url')
+        if with_date:
+            fields.append('published_date')
+        results_data = results.read(fields)
+        mapping = {
+            'name': {'name': 'name', 'type': 'text', 'match': True},
+            'website_url': {'name': 'website_url', 'type': 'text'},
+        }
+        if with_description:
+            mapping['description'] = {'name': 'subtitle', 'type': 'text', 'match': True}
+        if with_date:
+            mapping['detail'] = {'name': 'published_date', 'type': 'date'}
+        return (model.search_count(domain), results_data, mapping)
