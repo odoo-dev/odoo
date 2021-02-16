@@ -857,8 +857,6 @@ const Wysiwyg = Widget.extend({
      * @return {Promise} rejected if the save cannot be done
      */
     _saveViewBlocks: function (context) {
-        $('.o_editable')
-            .removeClass('o_editable o_is_inline_editable o_editable_date_field_linked o_editable_date_field_format_changed');
 
         const $allBlocks = $((this.options || {}).savableSelector).filter('.o_dirty');
 
@@ -866,6 +864,9 @@ const Wysiwyg = Widget.extend({
         $dirty
             .removeAttr('contentEditable')
             .removeClass('o_dirty oe_carlos_danger o_is_inline_editable');
+
+        $('.o_editable')
+            .removeClass('o_editable o_is_inline_editable o_editable_date_field_linked o_editable_date_field_format_changed');
 
         const defs = _.map($allBlocks, (el) => {
             const $el = $(el);
