@@ -270,21 +270,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // Observe changes to mark dirty structures and fields.
         this.observer = new MutationObserver(records => {
             for (const record of records) {
-                const $savable = $(record.target).closest(this.savableSelector);
+                if (!this.wysiwyg.odooEditor.filterMutationRecord(record)) continue;
 
-                // Filter out:
-                // 1) Sizzle triggers many attribute mutations that do not
-                //    really change anything.
-                // 2) Some code changes attributes on odoo fields that should be
-                //    discarded because they will not be saved.
-                if (
-                    record.type === 'attributes' &&
-                    (record.oldValue === record.target.getAttribute(record.attributeName) ||
-                        (record.oldValue && record.oldValue.startsWith('sizzle')) ||
-                        (!$savable.is(this.oeStructureSelector)))
-                ) {
-                    continue;
-                }
+                const $savable = $(record.target).closest(this.savableSelector);
 
                 this.wysiwyg.odooEditor.observerUnactive();
                 $savable.not('.o_dirty').each(function() {
