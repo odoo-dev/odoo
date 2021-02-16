@@ -8,6 +8,7 @@ import logging
 import odoo
 import requests
 import werkzeug
+import time
 
 from odoo import http, tools
 from odoo.addons.iap.tools import iap_tools
@@ -108,13 +109,16 @@ class MailClientExtensionController(http.Controller):
 
     @http.route('/mail_client_extension/modules/get', type="json", auth="outlook", csrf=False, cors="*")
     def modules_get(self,  **kwargs):
-        return {'modules': ['contacts', 'crm']}
+        installed_modules = request.env['ir.module.module'].search([('state', '=', 'installed')])
+        modules = [module.name for module in installed_modules]
+        # TODO return modules having name = mail_client_extension without breaking older versions of the plugin
+        return {'modules': modules}
 
-    # Find an existing company based on the email.
-    def _find_existing_company(self, domain):
-        if domain in iap_tools._MAIL_DOMAIN_BLACKLIST:
-            return
-        return request.env['res.partner'].search([('is_company', '=', True), ('email', '=ilike', '%' + domain)], limit=1)
+    def _find_existing_company(self, normalized_email):
+        sender_domain = normalized_email.split('@')[1]
+        search = sender_domain if sender_domain not in iap_tools._MAIL_DOMAIN_BLACKLIST else normalized_email
+        return request.env['res.partner'].search([('is_company', '=', True), ('email', '=ilike', '%' + search)],
+                                                 limit=1)
 
     def _get_company_dict(self, company):
         if not company:
@@ -126,6 +130,7 @@ class MailClientExtensionController(http.Controller):
                     'phone': company.phone,
                     'mobile': company.mobile,
                     'email': company.email,
+                    'image': company.image_1920,
                     'address': {
                         'street': company.street,
                         'city': company.city,
@@ -145,7 +150,7 @@ class MailClientExtensionController(http.Controller):
         emails = iap_data.get('email')
         new_company_info = {
             'is_company': True,
-            'name': iap_data.get("name"),
+            'name': iap_data.get("name") or domain,
             'street': iap_data.get("street_name"),
             'city': iap_data.get("city"),
             'zip': iap_data.get("postal_code"),
@@ -185,8 +190,21 @@ class MailClientExtensionController(http.Controller):
         
         return new_company, {'type': 'company_created'}
 
+    @staticmethod
+    def _get_partner_dict(partner):
+        return {
+            'id': partner.id,
+            'name': partner.name,
+            'title': partner.function,
+            'email': partner.email,
+            'image': partner.image_128,
+            'phone': partner.phone,
+            'mobile': partner.mobile,
+            'enrichment_info': None,
+        }
+
     @http.route('/mail_client_extension/partner/get', type="json", auth="outlook", cors="*")
-    def res_partner_get_by_email(self, email, name, **kwargs):
+    def res_partner_get_by_email(self, email, name, partner_id=None, **kwargs):
         response = {}
 
         #compute the sender's domain
@@ -196,44 +214,56 @@ class MailClientExtensionController(http.Controller):
             return response
         sender_domain = normalized_email.split('@')[1]
 
-        # Search for the partner based on the email.
-        # If multiple are found, take the first one.
-        partner = request.env['res.partner'].search([('email', 'in', [normalized_email, email])], limit=1)
+        if partner_id:
+            partner = request.env['res.partner'].browse(partner_id).exists()
+        else:
+            # Search for the partner based on the email.
+            # If multiple are found, take the first one.
+            partner = request.env['res.partner'].search([('email', 'in', [normalized_email, email])], limit=1)
         if partner:
-            response['partner'] = {
-                'id': partner.id,
-                'name': partner.name,
-                'title': partner.function,
-                'email': partner.email,
-                'image': partner.image_128,
-                'phone': partner.phone,
-                'mobile': partner.mobile,
-                'enrichment_info': None
-            }
-            # if there is already a company for this partner, just take it without enrichment.
-            if partner.parent_id:
-                response['partner']['company'] = self._get_company_dict(partner.parent_id)
+            response['partner'] = self._get_partner_dict(partner)
+            if partner.company_type == 'company':
+                response['partner']['company'] = self._get_company_dict(partner)
             else:
-                company = self._find_existing_company(sender_domain)
-                if not company: # create and enrich company
-                    company, enrichment_info = self._create_company_from_iap(sender_domain)
-                    response['enrichment_info'] = enrichment_info
-                partner.write({'parent_id': company})
-                response['partner']['company'] = self._get_company_dict(company)
-        else: #no partner found
+                if partner.parent_id:
+                    response['partner']['company'] = self._get_company_dict(partner.parent_id)
+                else:
+                    response['partner']['company'] = self._get_company_dict(None)
+        else: #no partner found, for maintaining older versions of the plugin
             response['partner'] = {
                 'id': -1,
                 'name': name,
                 'email': email,
                 'enrichment_info': None
             }
-            company = self._find_existing_company(sender_domain)
+            company = self._find_existing_company(normalized_email)
             if not company:  # create and enrich company
                 company, enrichment_info = self._create_company_from_iap(sender_domain)
                 response['enrichment_info'] = enrichment_info
             response['partner']['company'] = self._get_company_dict(company)
 
         return response
+
+    @http.route('/mail_client_extension/partners/query', type="json", auth="outlook", cors="*")
+    def res_partners_get_by_query(self, query, **kwargs):
+
+        filter_domain = ['|', '|', ('display_name', 'ilike', query), ('ref', '=', query), ('email', 'ilike', query)]
+        # Search for the partner based on the email.
+        # If multiple are found, take the first one.
+        partners_response = []
+        partners = request.env['res.partner'].search(filter_domain, limit=30)
+        for partner in partners:
+            response = self._get_partner_dict(partner)
+            #if the partner is a company we assign company directly
+            if partner.company_type == 'company':
+                response['company'] = self._get_company_dict(partner)
+            else:
+                if partner.parent_id:
+                    response['company'] = self._get_company_dict(partner.parent_id)
+                else:
+                    response['company'] = self._get_company_dict(company=None)
+            partners_response.append(response)
+        return {"partners": partners_response}
 
     @http.route('/mail_client_extension/partner/create', type="json", auth="outlook", cors="*")
     def res_partner_create(self, email, name, company, **kwargs):
@@ -249,3 +279,44 @@ class MailClientExtensionController(http.Controller):
 
         response = {'id': partner.id}
         return response
+
+    @http.route('/mail_client_extension/partner/log_mail_content', type="json", auth="outlook", cors="*")
+    def log_single_mail_content(self, partner_id, message, **kw):
+        partner = request.env['res.partner'].browse(partner_id)
+        partner.message_post(body=message)
+
+    @http.route('/mail_client_extension/partner/enrich_company', type="json", auth="outlook", cors="*")
+    def res_partner_enrich_company(self, partner_email, partner_id=None, enrich_on_not_exists=False):
+        response = {}
+
+        normalized_email = tools.email_normalize(partner_email)
+        if not normalized_email:
+            response['error'] = 'Bad email.'
+            return response
+        company_domain = normalized_email.split('@')[1]
+
+        if partner_id and partner_id > 0:
+            partner = request.env['res.partner'].browse(partner_id)
+            if partner.parent_id:
+                company = partner.parent_id
+            else:
+                company = self._find_existing_company(normalized_email)
+                if not company and enrich_on_not_exists:  # create and enrich company
+                    company, enrichment_info = self._create_company_from_iap(company_domain)
+                    response['enrichment_info'] = enrichment_info
+                    partner.write({'parent_id': company})
+        else:
+            company = self._find_existing_company(normalized_email)
+            if not company:  # create and enrich company
+                company, enrichment_info = self._create_company_from_iap(company_domain)
+                response['enrichment_info'] = enrichment_info
+        response['company'] = self._get_company_dict(company)
+
+        return response
+
+    @http.route('/mail_client_extension/partner/view', type='http', auth='user', methods=['GET'])
+    def partner_redirect_form_view(self, partner_id):
+        server_action = http.request.env.ref('mail_client_extension.partner_view')
+        return werkzeug.utils.redirect(
+            '/web#action=%s&model=res.partner&id=%s' % (server_action.id, int(partner_id)))
+
