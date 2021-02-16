@@ -49,6 +49,19 @@
             </field>
         </record>
 
+        <record id="account_tax_carryover_line_tree" model="ir.ui.view">
+            <field name="name">account.tax.carryover.line.tree</field>
+            <field name="model">account.tax.carryover.line</field>
+            <field name="arch" type="xml">
+                <tree create="0" delete="0" decoration-muted="carried_over_date">
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="amount"/>
+                    <field name="carried_over_date"/>
+                </tree>
+            </field>
+        </record>
+
         <record id="account_tax_report_line_form" model="ir.ui.view">
             <field name="name">account.tax.report.line.form</field>
             <field name="model">account.tax.report.line</field>
@@ -76,12 +89,16 @@
                         </group>
                         <group>
                             <field name="carry_over_destination_line_id"/>
-                            <field name="carry_over_analytic_account_id"/>
                         </group>
                     </group>
-                    <group string="Sublines">
-                        <field name="children_line_ids" context="{'default_report_id': report_id}"/>
-                    </group>
+                    <notebook>
+                        <page string="Sublines">
+                            <field name="children_line_ids" context="{'default_report_id': report_id}"/>
+                        </page>
+                        <page string="Carry over lines">
+                            <field name="carryover_line_ids"/>
+                        </page>
+                    </notebook>
                 </sheet>
                 </form>
             </field>

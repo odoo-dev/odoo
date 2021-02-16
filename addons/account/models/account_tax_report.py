@@ -112,14 +112,22 @@ class AccountTaxReportLine(models.Model):
     formula = fields.Char(string="Formula", help="Python expression used to compute the value of a total line. This field is mutually exclusive with tag_name, setting it turns the line to a total line. Tax report line codes can be used as variables in this expression to refer to the balance of the corresponding lines in the report. A formula cannot refer to another line using a formula.")
 
     # fields used to carry over amounts between periods
-    carry_over_condition_method = fields.Char(string="Condition for carry over",
-                                              help="The name of the method used to check if a carry over is needed.")
-    carry_over_destination_line_id = fields.Many2one(string="Carry over line",
-                                                     comodel_name="account.tax.report.line",
-                                                     help="The line to which the value of this line will be carried over to if needed. If left empty the line will carry over to itself.")
-    carry_over_analytic_account_id = fields.Many2one(string="Analytic account",
-                                                     comodel_name="account.analytic.account",
-                                                     help="The analytic account used to carry over amounts between periods. If none is selected, a new acount will be created when necessary.")
+    # Turn this into a select maybe?
+    carry_over_condition_method = fields.Char(
+        string="Condition for carry over",
+        help="The name of the method used to check if a carry over is needed."
+    )
+    carry_over_destination_line_id = fields.Many2one(
+        string="Carry over to",
+        comodel_name="account.tax.report.line",
+        help="The line to which the value of this line will be carried over to if needed."
+             " If left empty the line will carry over to itself."
+    )
+    carryover_line_ids = fields.One2many(
+        string="Carryover lines",
+        comodel_name='account.tax.carryover.line',
+        inverse_name='tax_report_line_id'
+    )
 
     @api.model
     def create(self, vals):
@@ -278,7 +286,7 @@ class AccountTaxReportLine(models.Model):
         Do not override this method, but instead set your condition methods on each lines.
         :param options: The options of the reports
         :param line_amount: The amount on the line
-        :param carried_over_amount: The amount carried over by the analytic account for this line
+        :param carried_over_amount: The amount carried over for this line
         :return: A tuple containing the lower and upper bounds from which the line will be carried over.
         E.g. (0, 42) : Lines which value is below 0 or above 42 will be carried over.
         E.g. (0, None) : Only lines which value is below 0 will be carried over.
