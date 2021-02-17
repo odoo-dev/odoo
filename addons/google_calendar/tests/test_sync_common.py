@@ -9,7 +9,6 @@ from odoo.tests.common import SavepointCase
 from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
 from odoo.addons.google_calendar.models.res_users import User
 from odoo.addons.google_calendar.models.google_sync import GoogleSync
-from odoo.modules.registry import Registry
 from odoo.addons.google_account.models.google_service import TIMEOUT
 
 
