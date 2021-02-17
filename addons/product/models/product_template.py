@@ -16,7 +16,7 @@ class ProductTemplate(models.Model):
     _name = "product.template"
     _inherit = ['mail.thread', 'mail.activity.mixin', 'image.mixin']
     _description = "Product Template"
-    _order = "name"
+    _order = "priority desc, name"
 
     @tools.ormcache()
     def _get_default_category_id(self):
@@ -139,6 +139,11 @@ class ProductTemplate(models.Model):
 
     can_image_1024_be_zoomed = fields.Boolean("Can Image 1024 be zoomed", compute='_compute_can_image_1024_be_zoomed', store=True)
     has_configurable_attributes = fields.Boolean("Is a configurable product", compute='_compute_has_configurable_attributes', store=True)
+
+    priority = fields.Selection([
+        ('0', 'Normal'),
+        ('1', 'Favorite'),
+    ], default='0', string="Priority")
 
     def _compute_item_count(self):
         for template in self:
@@ -460,7 +465,7 @@ class ProductTemplate(models.Model):
         # Only use the product.product heuristics if there is a search term and the domain
         # does not specify a match on `product.template` IDs.
         if not name or any(term[0] == 'id' for term in (args or [])):
-            return super(ProductTemplate, self)._name_search(name=name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
+            return list(super(ProductTemplate, self)._name_search(name=name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid))
 
         Product = self.env['product.product']
         templates = self.browse([])
@@ -499,9 +504,9 @@ class ProductTemplate(models.Model):
                     name_get_uid=name_get_uid))
 
         # re-apply product.template order + name_get
-        return super(ProductTemplate, self)._name_search(
+        return list(super(ProductTemplate, self)._name_search(
             '', args=[('id', 'in', list(searched_ids))],
-            operator='ilike', limit=limit, name_get_uid=name_get_uid)
+            operator='ilike', limit=limit, name_get_uid=name_get_uid))
 
     def open_pricelist_rules(self):
         self.ensure_one()

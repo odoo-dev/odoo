@@ -77,7 +77,7 @@ class ProductProduct(models.Model):
     _description = "Product"
     _inherits = {'product.template': 'product_tmpl_id'}
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'default_code, name, id'
+    _order = 'priority desc, default_code, name, id'
 
     # price: total price, context dependent (partner, pricelist, quantity)
     price = fields.Float(
@@ -127,6 +127,8 @@ class ProductProduct(models.Model):
     packaging_ids = fields.One2many(
         'product.packaging', 'product_id', 'Product Packages',
         help="Gives the different ways to package the same product.")
+
+    priority = fields.Selection(related='product_tmpl_id.priority', readonly=True, store=True)
 
     # all image fields are base64 encoded and PIL-supported
 
@@ -552,9 +554,9 @@ class ProductProduct(models.Model):
                     ('product_code', operator, name),
                     ('product_name', operator, name)], access_rights_uid=name_get_uid)
                 if suppliers_ids:
-                    product_ids = self._search([('product_tmpl_id.seller_ids', 'in', suppliers_ids)], limit=limit, access_rights_uid=name_get_uid)
+                    product_ids = list(self._search([('product_tmpl_id.seller_ids', 'in', suppliers_ids)] + args, limit=limit, access_rights_uid=name_get_uid))
         else:
-            product_ids = self._search(args, limit=limit, access_rights_uid=name_get_uid)
+            product_ids = list(self._search(args, limit=limit, access_rights_uid=name_get_uid))
         return product_ids
 
     @api.model
