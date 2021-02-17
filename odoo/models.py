@@ -4290,7 +4290,7 @@ Fields:
 
         :return: the qualified field name (or expression) to use for ``field``
         """
-        if not wrapper:
+        if wrapper is None:
             wrapper = lambda x: x
         if self.env.lang:
             alias = query.left_join(
