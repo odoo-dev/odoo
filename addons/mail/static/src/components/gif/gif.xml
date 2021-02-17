@@ -6,10 +6,17 @@
             <div>
                 <input type="text" t-on-keydown="_onKeydown" />
             </div>
-            <div class="grid" t-if="!gifManager.search.length">
+            <div class="grid" t-if="!gifManager.searchResult.length">
                 <t t-foreach="gifManager.categories" t-as="category" t-key="category.id">
                     <div class="grid-item">
                         <img class="gif" t-att-src="category.image" t-on-load="_update" />
+                    </div>
+                </t>
+            </div>
+            <div class="grid" t-if="gifManager.searchResult.length">
+                <t t-foreach="gifManager.searchResult" t-as="search" t-key="search.id">
+                    <div class="grid-item">
+                        <img class="gif" t-att-src="search.media[0].nanogif.preview" t-on-load="_update" />
                     </div>
                 </t>
             </div>
