@@ -527,7 +527,7 @@ return AbstractRenderer.extend({
                 return 'popover';
             },
             windowResize: function () {
-                self._render();
+                self._onWindowResize();
             },
             views: {
                 timeGridDay: {
@@ -983,6 +983,16 @@ return AbstractRenderer.extend({
         if (popover && !popover.contains(e.target)) {
             this._unselectEvent();
         }
+    },
+    /**
+     * Handler for resize event.
+     * As the result it will resize the calendar to fit the window space.
+     *
+     * @private
+     */
+    _onWindowResize: function () {
+        this.$el.height($(window).height() - this.$el.offset().top);
+        this.calendar.updateSize();
     },
     /**
      * @private
