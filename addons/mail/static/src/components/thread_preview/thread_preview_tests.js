@@ -47,13 +47,13 @@ QUnit.test('mark as read', async function (assert) {
         message_unread_counter: 1,
     });
     this.data['mail.message'].records.push({
-        channel_ids: [11],
         id: 100,
         model: 'mail.channel',
         res_id: 11,
     });
 
     await this.start({
+        debug: true,
         hasChatWindow: true,
         async mockRPC(route, args) {
             if (route.includes('channel_seen')) {

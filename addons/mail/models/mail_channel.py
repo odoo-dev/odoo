@@ -57,9 +57,6 @@ class Channel(models.Model):
     channel_last_seen_partner_ids = fields.One2many(
         'mail.channel.partner', 'channel_id', string='Last Seen',
         groups='base.group_user')
-    channel_message_ids = fields.Many2many(
-        'mail.message', 'mail_message_mail_channel_rel',
-        string='Channel Messages')
     is_member = fields.Boolean('Is Member', compute='_compute_is_member', compute_sudo=True)
     group_ids = fields.Many2many(
         'res.groups', string='Auto Subscription',
@@ -526,7 +523,7 @@ class Channel(models.Model):
         # When posting a message on a mail channel, manage moderation and postpone notify users
         if not msg_vals or msg_vals.get('moderation_status') != 'pending_moderation':
             # link message to channel
-            message.write({'channel_ids': [(4, cid) for cid in self.ids]})
+            # message.write({'channel_ids': [(4, cid) for cid in self.ids]})
             rdata = super(Channel, self)._notify_thread(message, msg_vals=msg_vals, **kwargs)
 
             message_format_values = message.message_format()[0]
@@ -821,7 +818,7 @@ class Channel(models.Model):
             :rtype : list(dict)
         """
         self.ensure_one()
-        domain = [("channel_ids", "in", self.ids)]
+        domain = ["&", ("model", "=", "mail.channel"), ("res_id", "in", self.ids)]
         if last_id:
             domain.append(("id", "<", last_id))
         return self.env['mail.message'].message_fetch(domain=domain, limit=limit)
@@ -940,7 +937,7 @@ class Channel(models.Model):
         kept only for compatibility reasons.
         """
         self.ensure_one()
-        domain = [('channel_ids', 'in', self.ids)]
+        domain = ["&", ("model", "=", "mail.channel"), ("res_id", "in", self.ids)]
         if last_message_id:
             domain = expression.AND([domain, [('id', '<=', last_message_id)]])
         last_message = self.env['mail.message'].search(domain, order="id DESC", limit=1)
@@ -982,14 +979,13 @@ class Channel(models.Model):
 
     def channel_fetched(self):
         """ Broadcast the channel_fetched notification to channel members
-            :param channel_ids : list of channel id that has been fetched by current user
         """
         for channel in self:
-            if not channel.channel_message_ids.ids:
+            if not channel.message_ids.ids:
                 return
             if channel.channel_type != 'chat':
                 return
-            last_message_id = channel.channel_message_ids.ids[0] # zero is the index of the last message
+            last_message_id = channel.message_ids.ids[0] # zero is the index of the last message
             channel_partner = self.env['mail.channel.partner'].search([('channel_id', '=', channel.id), ('partner_id', '=', self.env.user.partner_id.id)], limit=1)
             if channel_partner.fetched_message_id.id == last_message_id:
                 # last message fetched by user is already up-to-date
@@ -1152,10 +1148,10 @@ class Channel(models.Model):
             return []
         self.flush()
         self.env.cr.execute("""
-            SELECT mail_channel_id AS id, MAX(mail_message_id) AS message_id
-            FROM mail_message_mail_channel_rel
-            WHERE mail_channel_id IN %s
-            GROUP BY mail_channel_id
+            SELECT res_id AS id, MAX(id) AS message_id
+            FROM mail_message
+            WHERE model = 'mail.channel' AND res_id IN %s
+            GROUP BY res_id
             """, (tuple(self.ids),))
         return self.env.cr.dictfetchall()
 
