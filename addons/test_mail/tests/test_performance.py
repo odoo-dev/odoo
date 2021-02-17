@@ -977,7 +977,11 @@ class TestMailHeavyPerformancePost(BaseMailPerformance):
         ]
         self.attachements = self.env['ir.attachment'].with_user(self.env.user).create(self.vals)
         attachement_ids = self.attachements.ids
+<<<<<<< HEAD
         with self.assertQueryCount(emp=79):
+=======
+        with self.assertQueryCount(emp=82):
+>>>>>>> 05c731d8133... temp
             self.cr.sql_log = self.warm and self.cr.sql_log_count
             record.with_context({}).message_post(
                 body='<p>Test body <img src="cid:cid1"> <img src="cid:cid2"></p>',
