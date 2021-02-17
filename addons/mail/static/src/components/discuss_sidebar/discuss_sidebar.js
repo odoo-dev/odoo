@@ -50,6 +50,13 @@ class DiscussSidebar extends Component {
     }
 
     /**
+     * @returns {mail.chat_room}
+     */
+    get rooms() {
+        return this.env.models['mail.chat_room'].all();
+    }
+
+    /**
      * @returns {string}
      */
     get FIND_OR_CREATE_CHANNEL() {
@@ -162,10 +169,12 @@ class DiscussSidebar extends Component {
      */
     _useStoreSelector(props) {
         const discuss = this.env.messaging.discuss;
+        const chatRooms = this.env.models['mail.chat_room'].all();
         return {
             allOrderedAndPinnedChats: this.quickSearchPinnedAndOrderedChats,
             allOrderedAndPinnedMailboxes: this.orderedMailboxes,
             allOrderedAndPinnedMultiUserChannels: this.quickSearchOrderedAndPinnedMultiUserChannels,
+            chatRooms: chatRooms.map(chatRoom => chatRoom.__state),
             allPinnedChannelAmount:
                 this.env.models['mail.thread']
                 .all(thread =>
@@ -263,6 +272,17 @@ class DiscussSidebar extends Component {
     _onClickChatAdd(ev) {
         ev.stopPropagation();
         this.discuss.update({ isAddingChat: true });
+    }
+
+    /**
+     * Called when clicking on channel title.
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickRoom(roomLocalId, ev) {
+        ev.stopPropagation();
+        this.env.messaging.toggleRoom(roomLocalId);
     }
 
     /**

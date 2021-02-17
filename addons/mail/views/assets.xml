@@ -121,7 +121,6 @@
                 <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_typing_icon/thread_typing_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_view/thread_view.js"></script>
-                <script type="text/javascript" src="/mail/static/src/components/room_manager/room_manager.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/video_room/video_room.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_core.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_errors.js"></script>
@@ -178,6 +177,7 @@
                 <script type="text/javascript" src="/mail/static/src/widgets/form_renderer/form_renderer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/widgets/messaging_menu/messaging_menu.js"></script>
                 <script type="text/javascript" src="/mail/static/src/widgets/notification_alert/notification_alert.js"/>
+                <script type="text/javascript" src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
 
                 <!-- notification_list_item.scss contains variables/mixins, it must be positioned before sub-components of NotificationList -->
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_list/notification_list_item.scss"/>
@@ -233,7 +233,6 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_typing_icon/thread_typing_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_view/thread_view.scss"/>
-                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/room_manager/room_manager.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/video_room/video_room.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/discuss/discuss.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/form_renderer/form_renderer.scss"/>
@@ -327,14 +326,6 @@
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/mail/static/src/components/discuss_mobile_mailbox_selection/discuss_mobile_mailbox_selection_tests.js"/>
             </xpath>
-        </template>
-
-        <template id="peer_lib" name="PeerJS Library">
-            <script type="text/javascript" src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
-        </template>
-
-        <template id="peer_js_assets" name="PeerJS Lib group" groups="base.group_user">
-            <t t-call-assets="mail.peer_lib"/>
         </template>
     </data>
 </odoo>

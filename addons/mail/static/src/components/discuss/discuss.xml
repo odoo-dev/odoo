@@ -16,9 +16,12 @@
                     <DiscussSidebar class="o_Discuss_sidebar"/>
                 </t>
                 <t t-if="env.messaging.device.isMobile" t-call="mail.Discuss.content"/>
+                <t t-if="env.messaging.chatRoomLocalId">
+                    <VideoRoom roomLocalId="env.messaging.chatRoomLocalId"/>
+                </t>
                 <t t-else="">
                     <div class="o_Discuss_content">
-                        <RoomManager/>
+                        <t t-call="mail.Discuss.content"/>
                     </div>
                 </t>
                 <t t-if="discuss.hasModerationDiscardDialog">

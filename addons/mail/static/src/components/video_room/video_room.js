@@ -24,6 +24,7 @@ class VideoRoom extends Component {
         this.state = useState({
             sendVideo: true,
             sendSound: true,
+            peerToken: '',
         });
         this._getRefs = useRefs();
         this.stream = undefined;
@@ -41,9 +42,9 @@ class VideoRoom extends Component {
     }
 
     async mounted() {
-        this.peer = new Peer(this.props.currentPeerToken);
+        this.state.peerToken = await this.env.models['mail.chat_room'].get(this.props.roomLocalId).joinRoom();
+        this.peer = new Peer(this.state.peerToken);
         await this._getStream();
-
         this.peer.on('call', call => {
             call.answer(this.stream);
             call.on('stream', callerStream => {
@@ -62,11 +63,11 @@ class VideoRoom extends Component {
             console.log('PEER-ERROR:::::');
             console.log(error);
         });
-        const video = await this._addStream(this.stream, this.props.currentPeerToken);
+        const video = await this._addStream(this.stream, this.state.peerToken);
         video.muted = true;
 
         for (const token of this.room.peerTokens) {
-            if (token === this.props.currentPeerToken) {
+            if (token === this.state.peerToken) {
                 continue;
             }
             setTimeout(async () => {
@@ -76,8 +77,9 @@ class VideoRoom extends Component {
         }
     }
 
-    willUnmount() {
-        this.peer.disconnect();
+    async willUnmount() {
+        await this.peer.disconnect();
+        await this.env.models['mail.chat_room'].get(this.props.roomLocalId).leaveRoom();
     }
 
     //--------------------------------------------------------------------------
@@ -202,7 +204,6 @@ class VideoRoom extends Component {
 Object.assign(VideoRoom, {
     props: {
         roomLocalId: String,
-        currentPeerToken: String,
     },
     template: 'mail.VideoRoom',
 });

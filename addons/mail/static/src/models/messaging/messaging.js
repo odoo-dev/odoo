@@ -31,6 +31,12 @@ function factory(dependencies) {
         // Public
         //----------------------------------------------------------------------
 
+        toggleRoom(chatRoomLocalId) {
+            if (this.chatRoomLocalId === chatRoomLocalId) {
+                chatRoomLocalId = '';
+            }
+            this.update({ chatRoomLocalId });
+        }
         /**
          * @returns {boolean}
          */
@@ -164,6 +170,9 @@ function factory(dependencies) {
             inverse: 'messaging',
             isCausal: true,
             readonly: true,
+        }),
+        chatRoomLocalId: attr({
+            default: '',
         }),
         commands: one2many('mail.channel_command'),
         currentPartner: one2one('mail.partner'),

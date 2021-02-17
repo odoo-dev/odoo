@@ -324,9 +324,9 @@ function factory(dependencies) {
             required: true,
         }),
         peerToken: attr(),
-        room: one2many('mail.chat_room', {
-            inverse: 'partnerIds',
-        }),
+        //room: one2many('mail.chat_room', {
+        //    inverse: 'partnerIds',
+        //}),
         im_status: attr(),
         memberThreads: many2many('mail.thread', {
             inverse: 'members',

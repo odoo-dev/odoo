@@ -4,7 +4,6 @@
 import base64
 import logging
 import psycopg2
-import uuid
 import werkzeug.utils
 import werkzeug.wrappers
 
@@ -294,35 +293,3 @@ class MailController(http.Controller):
             return {}
         return records._message_get_suggested_recipients()
 
-    @http.route(["/mail/room/join/<int:room_token>",
-                 "/mail/room/join"], type='json', auth='user')
-    def join_room(self, room_token):
-        # create peer token on partner if it doesn't exist yet
-        current_partner = request.env.user.partner_id
-        peer_token = current_partner.peer_token
-        if not peer_token:
-            peer_token = 'odoo_'+str(uuid.uuid4())
-            current_partner.peer_token = peer_token
-
-        # join room token & notify room partners.
-        room = request.env['mail.room'].search([('room_token', '=', room_token)], limit=1)
-        current_partner.room_id = room
-        room._notify_room_change(current_partner.id)
-
-        return {'peerToken': peer_token, 'roomData': {
-            'id': room.id,
-            'peer_tokens': [partner_id.peer_token for partner_id in room.partner_ids if partner_id.im_status in ['online', 'away']],
-            'room_token': room.room_token,
-            'name': room.name,
-        }}
-
-    @http.route(["/mail/room/disconect/<int:room_token>",
-                 "/mail/room/disconect"], type='json', auth='user')
-    def leave_room(self, room_token=None):
-        if room_token:
-            # leave this room
-            pass
-        else:
-            # leave all rooms, although the room_id of partners should be a singleton, it doesn't make sense
-            # to be logged in multiple rooms at once.
-            pass

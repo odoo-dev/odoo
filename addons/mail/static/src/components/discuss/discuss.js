@@ -11,7 +11,7 @@ const components = {
     ModerationRejectDialog: require('mail/static/src/components/moderation_reject_dialog/moderation_reject_dialog.js'),
     NotificationList: require('mail/static/src/components/notification_list/notification_list.js'),
     ThreadView: require('mail/static/src/components/thread_view/thread_view.js'),
-    RoomManager: require('mail/static/src/components/room_manager/room_manager.js'),
+    VideoRoom: require('mail/static/src/components/video_room/video_room.js'),
 };
 const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
@@ -186,6 +186,7 @@ class Discuss extends Component {
             isMessagingInitialized: this.env.isMessagingInitialized(),
             replyingToMessage,
             starred: this.env.messaging.starred, // for widget
+            chatRoomLocalId: this.env.messaging.chatRoomLocalId,
             thread,
             threadCache: threadView && threadView.threadCache,
             threadChannelType: thread && thread.channel_type, // for widget

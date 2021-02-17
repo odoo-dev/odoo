@@ -12,7 +12,25 @@ class RtcRoom(models.Model):
     room_token = fields.Char(required=True, default=lambda x: str(uuid.uuid4()))
     partner_ids = fields.One2many('res.partner', 'room_id', string='Peers')
 
-    def _notify_room_change(self, partner_id):
+    def join_room(self):
+        current_partner = self.env.user.partner_id
+        # create peer token on partner if it doesn't exist yet
+        if not current_partner.peer_token:
+            peer_token = 'odoo_' + str(uuid.uuid4())
+            current_partner.peer_token = peer_token
+        current_partner.room_id = self.id
+        self._notify_room_change(current_partner.id)
+
+        return {
+            'peerToken': current_partner.peer_token,
+            'peerTokens': [partner_id.peer_token for partner_id in self.partner_ids if partner_id.im_status in ['online', 'away']],
+        }
+
+    def leave_room(self):
+        self.env.user.partner_id.room_id = False
+        self._notify_room_change()
+
+    def _notify_room_change(self, partner_id=None):
         """
        :param peer_token:
        :param status:

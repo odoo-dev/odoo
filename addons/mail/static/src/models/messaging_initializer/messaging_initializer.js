@@ -60,6 +60,7 @@ function factory(dependencies) {
             if (this.env.autofetchPartnerImStatus) {
                 this.env.models['mail.partner'].startLoopFetchImStatus();
             }
+            await this.env.models['mail.chat_room'].fetchRooms();
         }
 
         //----------------------------------------------------------------------

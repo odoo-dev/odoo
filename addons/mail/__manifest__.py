@@ -122,7 +122,6 @@
         'static/src/components/thread_textual_typing_status/thread_textual_typing_status.xml',
         'static/src/components/thread_typing_icon/thread_typing_icon.xml',
         'static/src/components/thread_view/thread_view.xml',
-        'static/src/components/room_manager/room_manager.xml',
         'static/src/components/video_room/video_room.xml',
         'static/src/widgets/common.xml',
         'static/src/widgets/discuss/discuss.xml',
