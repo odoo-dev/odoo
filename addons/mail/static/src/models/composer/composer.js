@@ -909,6 +909,28 @@ function factory(dependencies) {
             }
             return false;
         }
+
+        async getLinkPreview() {
+            const escapedAndCompactContent = escapeAndCompactTextContent(this.textInputContent);
+            let body = escapedAndCompactContent.replace(/&nbsp;/g, ' ').trim();
+            // We should call this only when a link is detected inside the composer
+            if (body) {
+                // Create oembed attachment
+                const data = await this.env.services.rpc({
+                    route: '/mail/attachment_oembed',
+                    params: {
+                        text: parseAndTransform(body, addLink)
+                    },
+                }, { shadow: true });
+
+                for (const attachment of data) {
+                    this.update({
+                        attachments: [['insert', attachment]]
+                    });
+                }
+            }
+        }
+
     }
 
     Composer.fields = {

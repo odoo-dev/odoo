@@ -292,3 +292,31 @@ class MailController(http.Controller):
         except:
             return {}
         return records._message_get_suggested_recipients()
+
+    @http.route('/mail/attachment_oembed', type='json', auth='user')
+    def attachment_oembed(self, text):
+        safari = request and request.httprequest.user_agent.browser == 'safari'
+        oEmbedjson = request.env['mail.oembed'].getoEmbedJson(text)
+        attachment = False
+        result = []
+        for oEmbed in oEmbedjson:
+            attachment = request.env['ir.attachment'].create({
+                'name': oEmbed.get('url'),
+                'res_model': 'mail.compose.message',
+                'mimetype': 'application/json+oembed'
+            })
+            data = oEmbed.get('json')
+            request.env['mail.oembed'].sudo().create({
+                'attachment_id': attachment.id,
+                'json': data,
+                'type': data.get('type'),
+                'html': data.get('html'),
+                'url': data.get('url'),
+                'width': data.get('width'),
+                'height': data.get('height'),
+                'thumbnail_url': data.get('thumbnail_url'),
+                'thumbnail_width': data.get('thumbnail_width'),
+                'thumbnail_height': data.get('thumbnail_height'),
+            })
+            result.append(attachment._attachment_format(safari=safari)[0])
+        return result
