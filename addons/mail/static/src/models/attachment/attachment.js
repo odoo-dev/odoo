@@ -39,6 +39,10 @@ function factory(dependencies) {
                 data2.name = data.name;
             }
 
+            if ('oembed' in data) {
+                data2.oembed = data.oembed[0];
+            }
+
             // relation
             if ('res_id' in data && 'res_model' in data) {
                 data2.originThread = [['insert', {
@@ -255,7 +259,8 @@ function factory(dependencies) {
                 this.mediaType === 'image' ||
                 this.mediaType === 'video' ||
                 this.mimetype === 'application/pdf' ||
-                this.isTextFile
+                this.isTextFile ||
+                this.oembed
             );
         }
 
@@ -368,6 +373,7 @@ function factory(dependencies) {
             default: '',
         }),
         name: attr(),
+        oembed: attr(),
         originThread: many2one('mail.thread', {
             inverse: 'originThreadAttachments',
         }),
