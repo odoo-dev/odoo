@@ -43,6 +43,12 @@ function factory(dependencies) {
         updateTokens(peerTokens) {
             this.update({ peerTokens });
         }
+
+        removeUser(peerToken) {
+            const peerTokens = new Set(this.peerTokens);
+            peerTokens.delete(peerToken);
+            this.update({ peerTokens: [...peerTokens] });
+        }
     }
 
     ChatRoom.fields = {

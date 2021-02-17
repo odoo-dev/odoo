@@ -2,13 +2,33 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.VideoRoom" owl="1">
-        <div>
-            <t t-foreach="[...room.peerTokens]" t-as="peerToken" t-key="peerToken">
-                <div>
-                    <span t-esc="peerToken"/>
-                    <video t-on-loadedmetadata="_onVideoLoadedMetaData" t-ref="video_{{ peerToken }}"/>
-                </div>
-            </t>
+        <div class="o_VideoRoom">
+            <button class="btn btn-secondary mr-2"
+                aria-label="Mute/unmute"
+                title="Mute/unmute"
+                t-on-click="_onClickMicrophone">
+                <i class="fa" t-att-class="{
+                    'fa-microphone': state.sendSound,
+                    'fa-microphone-slash': !state.sendSound,
+                    'text-danger': !state.sendSound,
+                }"/>
+            </button>
+            <button class="btn btn-secondary mr-2"
+                aria-label="Toggle Video"
+                title="Toggle Video"
+                t-on-click="_onClickCamera">
+                <i class="fa fa-video-camera" t-att-class="{
+                    'text-danger': !state.sendVideo,
+                }"/>
+            </button>
+            <div class="o_VideoRoom_video_container">
+                <t t-foreach="[...room.peerTokens]" t-as="peerToken" t-key="peerToken">
+                    <div class="o_VideoRoom_video_box">
+                        <video class="o_VideoRoom_video" t-on-loadedmetadata="_onVideoLoadedMetaData" t-ref="video_{{ peerToken }}"/>
+                        <span class="o_VideoRoom_video_name" t-esc="peerToken"/>
+                    </div>
+                </t>
+            </div>
         </div>
     </t>
 

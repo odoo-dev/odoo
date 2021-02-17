@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.RoomManager" owl="1">
-        <div>
+        <div class="o_RoomManager">
             <t t-if="state.roomLocalId">
                 <VideoRoom roomLocalId="state.roomLocalId" currentPeerToken="state.peerToken"/>
             </t>

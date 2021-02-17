@@ -20,42 +20,53 @@ class VideoRoom extends Component {
                 partnerRoot: this.env.messaging.partnerRoot,
             };
         });
+        this.state = useState({
+            sendVideo: true,
+            sendSound: true,
+        });
+        this.stream = undefined;
     }
 
-    async willPatch() {
+    async mounted() {
         const peer = new Peer(this.props.currentPeerToken);
-        let stream;
         try {
-            stream = await navigator.mediaDevices.getUserMedia({
+            this.stream = await navigator.mediaDevices.getUserMedia({
                 video: true,
                 audio: true,
             });
         } catch (e) {
-            console.log(e);
-            stream = await navigator.mediaDevices.getUserMedia({
+            this.stream = await navigator.mediaDevices.getUserMedia({
                 audio: true,
             });
-        } finally {
-            peer.on('call', call => {
-                call.answer(stream);
-                call.on('stream', callerStream => {
-                    this._addStream(callerStream, call.peer);
-                });
-                call.on('error', error => {
-                    console.log(error);
-                });
-            });
-            const video = await this._addStream(stream, this.props.currentPeerToken);
-            video.muted = true;
-
-            for (const token of this.room.peerTokens) {
-                if (token === this.props.currentPeerToken) {
-                    continue;
-                }
-                await this._connectToPeer(peer, token, stream);
-            }
         }
 
+        peer.on('call', call => {
+            call.answer(this.stream);
+            call.on('stream', callerStream => {
+                this._addStream(callerStream, call.peer);
+            });
+            call.on('error', error => {
+                console.log(error);
+            });
+            call.peerConnection.oniceconnectionstatechange = () => {
+                if (call.peerConnection.iceConnectionState === 'disconnected') {
+                    this.room.removeUser(call.peer);
+                }
+            }
+        });
+        peer.on('error', error => {
+            console.log('PEER-ERROR:::::');
+            console.log(error);
+        });
+        const video = await this._addStream(this.stream, this.props.currentPeerToken);
+        video.muted = true;
+
+        for (const token of this.room.peerTokens) {
+            if (token === this.props.currentPeerToken) {
+                continue;
+            }
+            this._connectToPeer(peer, token, this.stream);
+        }
     }
 
     /**
@@ -69,28 +80,36 @@ class VideoRoom extends Component {
     // Private
     //--------------------------------------------------------------------------
 
-    async _connectToPeer(peer, token, stream) {
-        const options = {
-            'constraints': {
-                'mandatory': {
-                    'OfferToReceiveAudio': true,
-                    'OfferToReceiveVideo': true
-                }
-            }
+    _connectToPeer(peer, token, stream) {
+        const constraints = {
+            'mandatory': {
+                'OfferToReceiveAudio': true,
+                'OfferToReceiveVideo': true,
+            },
         };
-        const call = await peer.call(token, stream, options);
-        console.log(call);
+        const options = {
+            constraints,
+            'offerToReceiveAudio': true,
+            'offerToReceiveVideo': true,
+        }
+        const call = peer.call(token, stream, options);
         if (!call) {
             return;
+        }
+        call.peerConnection.oniceconnectionstatechange = () => {
+            if (call.peerConnection.iceConnectionState === 'disconnected') {
+                this.room.removeUser(token);
+            }
         }
         call.on('stream', async caleeStream => {
             await this._addStream(caleeStream, token);
         });
         call.on('error', error => {
+            console.log('ERROR:::::');
             console.log(error);
         });
         call.on('close', () => {
-            // TODO
+            room.removeUser(token);
         });
     }
     /**
@@ -120,6 +139,16 @@ class VideoRoom extends Component {
 
     async _onVideoLoadedMetaData(ev) {
         await ev.target.play();
+    }
+
+    _onClickMicrophone(ev) {
+        this.state.sendSound = !this.state.sendSound;
+        this.stream.getAudioTracks()[0].enabled = this.state.sendSound;
+    }
+
+    _onClickCamera(ev) {
+        this.state.sendVideo = !this.state.sendVideo;
+        this.stream.getVideoTracks()[0].enabled = this.state.sendVideo;
     }
 }
 

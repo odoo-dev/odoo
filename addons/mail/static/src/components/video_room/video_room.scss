@@ -1,0 +1,33 @@
+.o_RoomManager {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.o_VideoRoom {
+    width: 100%;
+    height: 100%;
+}
+
+.o_VideoRoom_video_container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 500px);
+}
+
+.o_VideoRoom_video_box {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.o_VideoRoom_video {
+    width: 100%;
+    height: 100%;
+}
+
+.o_VideoRoom_video_name {
+    width: 100%;
+    text-align: center;
+}

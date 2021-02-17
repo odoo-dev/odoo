@@ -233,6 +233,8 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_typing_icon/thread_typing_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_view/thread_view.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/room_manager/room_manager.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/video_room/video_room.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/discuss/discuss.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/form_renderer/form_renderer.scss"/>
             </xpath>
