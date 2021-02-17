@@ -7,7 +7,7 @@ from odoo import api, fields, models, tools, SUPERUSER_ID, _
 
 from odoo.http import request
 from odoo.addons.website.models import ir_http
-from odoo.addons.http_routing.models.ir_http import url_for
+from odoo.addons.http_routing.models.ir_http import url_for, slug, unslug
 
 _logger = logging.getLogger(__name__)
 
@@ -386,6 +386,77 @@ class Website(models.Model):
         suggested_controllers = super(Website, self).get_suggested_controllers()
         suggested_controllers.append((_('eCommerce'), url_for('/shop'), 'website_sale'))
         return suggested_controllers
+
+    def _autocomplete_products(self, search, limit, order, options):
+        """See _autocomplete_pages"""
+        model = self.env['product.template']
+        with_image = options['displayImage']
+        with_description = options['displayDescription']
+        with_category = options['displayExtraLink']
+        with_price = options['displayDetail']
+
+        domains = [request.website.sale_product_domain()]
+        category = options.get('category')
+        attrib_values = options.get('attrib_values')
+
+        if category:
+            domains.append([('public_categ_ids', 'child_of', unslug(category)[1])])
+
+        if attrib_values:
+            attrib = None
+            ids = []
+            for value in attrib_values:
+                if not attrib:
+                    attrib = value[0]
+                    ids.append(value[1])
+                elif value[0] == attrib:
+                    ids.append(value[1])
+                else:
+                    domains.append([('attribute_line_ids.value_ids', 'in', ids)])
+                    attrib = value[0]
+                    ids = [value[1]]
+            if attrib:
+                domains.append([('attribute_line_ids.value_ids', 'in', ids)])
+
+        fields = ['name']
+        if with_description:
+            fields.append('description_sale')
+        domain = self._build_search_domain(domains, search, fields)
+        results = model.search(
+            domain,
+            limit=min(20, limit),
+            order=order
+        )
+        fields.append('website_url')
+        results_data = results.read(fields)
+        for product, record in zip(results, results_data):
+            if with_price:
+                combination_info = product._get_combination_info(only_template=True)
+                monetary_options = {'display_currency': options['display_currency']}
+                record['price'] = request.env['ir.qweb.field.monetary'].value_to_html(combination_info['price'], monetary_options)
+                if combination_info['has_discounted_price']:
+                    record['list_price'] = request.env['ir.qweb.field.monetary'].value_to_html(combination_info['list_price'], monetary_options)
+            if with_image:
+                record['image_url'] = '/web/image/product.template/%s/image_128' % record['id']
+            if with_category and product.public_categ_ids:
+                record['category'] = _('Category: %s', product.public_categ_ids.name)
+                slugs = [slug(category) for category in product.public_categ_ids]
+                record['category_url'] = '/shop/category/%s' % ','.join(slugs)
+        mapping = {
+            'name': {'name': 'name', 'type': 'text', 'match': True},
+            'website_url': {'name': 'website_url', 'type': 'text'},
+        }
+        if with_image:
+            mapping['image_url'] = {'name': 'image_url', 'type': 'html'}
+        if with_description:
+            mapping['description'] = {'name': 'description_sale', 'type': 'text', 'match': True}
+        if with_price:
+            mapping['detail'] = {'name': 'price', 'type': 'html'}
+            mapping['detail_strike'] = {'name': 'list_price', 'type': 'html'}
+        if with_category:
+            mapping['extra_link'] = {'name': 'category', 'type': 'text', 'match': True}
+            mapping['extra_link_url'] = {'name': 'category_url', 'type': 'text'}
+        return (model.search_count(domain), results_data, mapping)
 
 
 class WebsiteSaleExtraField(models.Model):

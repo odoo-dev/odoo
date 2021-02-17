@@ -234,8 +234,15 @@
     </template>
 
     <template id="search" name="Search Box">
-        <t t-call="website_sale.website_sale_products_search_box">
-            <t t-set="action" t-value="keep('/shop'+ ('/category/'+slug(category)) if category else None, search=0)"/>
+        <t t-call="website.website_search_box_input">
+            <t t-set="_classes" t-value="'o_wsale_products_searchbar_form mt-2'"/>
+            <t t-set="_snippet" t-value="'s_searchbar_input'"/>
+            <t t-set="search_type" t-value="'products'"/>
+            <t t-set="action" t-value="keep('/shop'+ ('/category/'+slug(category)) if category else None, search=0) or '/shop'"/>
+            <t t-set="display_image" t-value="'true'"/>
+            <t t-set="display_description" t-value="'true'"/>
+            <t t-set="display_extra_link" t-value="'true'"/>
+            <t t-set="display_detail" t-value="'true'"/>
             <t t-if="attrib_values">
                 <t t-foreach="attrib_values" t-as="a">
                     <input type="hidden" name="attrib" t-att-value="'%s-%s' % (a[0], a[1])" />
@@ -245,8 +252,8 @@
     </template>
 
     <template id="search_count_box" inherit_id="website.website_search_box" active="False" customize_show="True" name="Show # found">
-        <xpath expr="//button[hasclass('oe_search_button')]" position="inside">
-            <span t-if='search' class='oe_search_found'> <small>(<t t-esc="search_count"/> found)</small></span>
+        <xpath expr="//button[contains(@t-att-class, 'oe_search_button')]" position="inside">
+            <span t-if='search' class='oe_search_found'> <small>(<t t-esc="search_count or 0"/> found)</small></span>
         </xpath>
     </template>
 
