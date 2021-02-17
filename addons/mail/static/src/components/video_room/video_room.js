@@ -3,6 +3,7 @@ odoo.define('mail/static/src/components/video_room/video_room.js', function (req
 
 
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+const useRefs = require('mail/static/src/component_hooks/use_refs/use_refs.js');
 
 const { Component, useState } = owl;
 
@@ -24,7 +25,19 @@ class VideoRoom extends Component {
             sendVideo: true,
             sendSound: true,
         });
+        this._getRefs = useRefs();
         this.stream = undefined;
+        this.peer = undefined;
+        this.options = {
+            constraints: {
+                mandatory: {
+                    'OfferToReceiveAudio': true,
+                    'OfferToReceiveVideo': true,
+                },
+                'offerToReceiveAudio': true,
+                'offerToReceiveVideo': true,
+            },
+        };
     }
 
     async mounted() {
@@ -43,16 +56,16 @@ class VideoRoom extends Component {
         peer.on('call', call => {
             call.answer(this.stream);
             call.on('stream', callerStream => {
-                this._addStream(callerStream, call.peer);
+                const callToken = call.peer;
+                this._addStream(callerStream, callToken);
+                call.peerConnection.onconnectionstatechange = () => {
+                    this._onConnectionStateChange(call.peerConnection.connectionState, callToken);
+                };
             });
             call.on('error', error => {
                 console.log(error);
             });
-            call.peerConnection.oniceconnectionstatechange = () => {
-                if (call.peerConnection.iceConnectionState === 'disconnected') {
-                    this.room.removeUser(call.peer);
-                }
-            }
+
         });
         peer.on('error', error => {
             console.log('PEER-ERROR:::::');
@@ -65,9 +78,19 @@ class VideoRoom extends Component {
             if (token === this.props.currentPeerToken) {
                 continue;
             }
-            this._connectToPeer(peer, token, this.stream);
+            setTimeout(async () => {
+                await this._connectToPeer(peer, token, this.stream);
+            }, 1000);
         }
     }
+
+    willUnmount() {
+
+    }
+
+    //--------------------------------------------------------------------------
+    // Getters / Setters
+    //--------------------------------------------------------------------------
 
     /**
      * @returns {mail.chat_room}
@@ -80,45 +103,42 @@ class VideoRoom extends Component {
     // Private
     //--------------------------------------------------------------------------
 
-    _connectToPeer(peer, token, stream) {
-        const constraints = {
-            'mandatory': {
-                'OfferToReceiveAudio': true,
-                'OfferToReceiveVideo': true,
-            },
-        };
-        const options = {
-            constraints,
-            'offerToReceiveAudio': true,
-            'offerToReceiveVideo': true,
-        }
-        const call = peer.call(token, stream, options);
+    async _removePeer(token) {
+        //this.room.removeUser(token);
+        const refs = this._getRefs();
+        const video = refs[`video_${token}`];
+        //video.srcObject = undefined;
+        console.log(video.srcObject);
+    }
+    async _connectToPeer(peer, token, stream) {
+        console.log(this.options);
+        const call = await peer.call(token, stream, this.options);
         if (!call) {
             return;
         }
-        call.peerConnection.oniceconnectionstatechange = () => {
-            if (call.peerConnection.iceConnectionState === 'disconnected') {
-                this.room.removeUser(token);
-            }
-        }
         call.on('stream', async caleeStream => {
             await this._addStream(caleeStream, token);
+            call.peerConnection.onconnectionstatechange = () => {
+                this._onConnectionStateChange(call.peerConnection.connectionState, token);
+            };
         });
         call.on('error', error => {
             console.log('ERROR:::::');
             console.log(error);
         });
         call.on('close', () => {
-            room.removeUser(token);
+            this._removePeer(token);
         });
     }
     /**
      * @private
      */
     async _addStream(stream, token) {
-        const video = this.__owl__.refs[`video_${token}`];
+        const refs = this._getRefs();
+        const video = refs[`video_${token}`];
         video.srcObject = stream;
         try {
+            console.log(video.srcObject);
             await video.play();
         } catch (e) {
             // ignore
@@ -135,7 +155,18 @@ class VideoRoom extends Component {
         await ajax.loadLibs(asset);
     }
 
-    // HANDLERS
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    async _onConnectionStateChange(state, token) {
+        switch(state) {
+            case "failed":
+            case "closed":
+            case "disconnected":
+                this._removePeer(token);
+        }
+    }
 
     async _onVideoLoadedMetaData(ev) {
         await ev.target.play();
@@ -143,11 +174,17 @@ class VideoRoom extends Component {
 
     _onClickMicrophone(ev) {
         this.state.sendSound = !this.state.sendSound;
+        if (!this.stream.getAudioTracks()[0]) {
+            return;
+        }
         this.stream.getAudioTracks()[0].enabled = this.state.sendSound;
     }
 
     _onClickCamera(ev) {
         this.state.sendVideo = !this.state.sendVideo;
+        if (!this.stream.getVideoTracks()[0]) {
+            return;
+        }
         this.stream.getVideoTracks()[0].enabled = this.state.sendVideo;
     }
 }
