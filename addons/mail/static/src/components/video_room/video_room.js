@@ -42,7 +42,7 @@ class VideoRoom extends Component {
 
     async mounted() {
         this.peer = new Peer(this.props.currentPeerToken);
-        this._getStream();
+        await this._getStream();
 
         this.peer.on('call', call => {
             call.answer(this.stream);
