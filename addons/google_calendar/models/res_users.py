@@ -80,6 +80,14 @@ class User(models.Model):
 
     def _sync_google_calendar(self, calendar_service: GoogleCalendarService):
         self.ensure_one()
+
+        # don't attempt to sync when another sync is already in progress, as we wouldn't be
+        # able to commit the transaction anyway (row is locked)
+        self.env.cr.execute("""SELECT id FROM res_users WHERE id = %s FOR NO KEY UPDATE SKIP LOCKED""", [self.id])
+        if not self.env.cr.rowcount:
+            _logger.info("skipping calendar sync, locked user %s", self.login)
+            return False
+
         full_sync = not bool(self.google_calendar_sync_token)
         with google_calendar_token(self) as token:
             try:

@@ -170,7 +170,7 @@ class GoogleSync(models.AbstractModel):
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 google_service.delete(google_id, token=token, timeout=timeout)
-                self.need_sync = False
+                self.exists().need_sync = False
 
     @after_commit
     def _google_patch(self, google_service: GoogleCalendarService, google_id, values, timeout=TIMEOUT):
