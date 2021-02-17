@@ -30,7 +30,7 @@ class VideoRoom extends Component {
         this.peer = undefined;
         this.options = {
             constraints: {
-                mandatory: {
+                mandatory: { // legacy chrome syntax
                     'OfferToReceiveAudio': true,
                     'OfferToReceiveVideo': true,
                 },
@@ -41,19 +41,10 @@ class VideoRoom extends Component {
     }
 
     async mounted() {
-        const peer = new Peer(this.props.currentPeerToken);
-        try {
-            this.stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-            });
-        } catch (e) {
-            this.stream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-            });
-        }
+        this.peer = new Peer(this.props.currentPeerToken);
+        this._getStream();
 
-        peer.on('call', call => {
+        this.peer.on('call', call => {
             call.answer(this.stream);
             call.on('stream', callerStream => {
                 const callToken = call.peer;
@@ -67,7 +58,7 @@ class VideoRoom extends Component {
             });
 
         });
-        peer.on('error', error => {
+        this.peer.on('error', error => {
             console.log('PEER-ERROR:::::');
             console.log(error);
         });
@@ -79,13 +70,14 @@ class VideoRoom extends Component {
                 continue;
             }
             setTimeout(async () => {
-                await this._connectToPeer(peer, token, this.stream);
+                // FIXME
+                await this._connectToPeer(this.peer, token, this.stream);
             }, 1000);
         }
     }
 
     willUnmount() {
-
+        this.peer.disconnect();
     }
 
     //--------------------------------------------------------------------------
@@ -103,12 +95,30 @@ class VideoRoom extends Component {
     // Private
     //--------------------------------------------------------------------------
 
+    async _getStream() {
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true,
+            });
+        } catch (e) {
+            this.stream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+            });
+        }
+    }
     async _removePeer(token) {
         //this.room.removeUser(token);
         const refs = this._getRefs();
         const video = refs[`video_${token}`];
-        //video.srcObject = undefined;
-        console.log(video.srcObject);
+        /*
+         * FIXME since the disconect event is delayed, short disconnections like a page refresh
+         * will stop the stream, we want to keep the video srcObject available in this case.
+         * with a better server-side control of connections, this shouldn't be an issue.
+         */
+        const stream = video.srcObject;
+        video.srcObject = undefined;
+        video.srcObject = stream;
     }
     async _connectToPeer(peer, token, stream) {
         console.log(this.options);
