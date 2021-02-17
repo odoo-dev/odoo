@@ -25,6 +25,9 @@ class Repair(models.Model):
         default='/',
         copy=False, required=True,
         states={'confirmed': [('readonly', True)]})
+    description = fields.Char(
+        'Repair Description',
+        states={'confirmed': [('readonly', True)]})
     product_id = fields.Many2one(
         'product.product', string='Product to Repair',
         domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', company_id), ('company_id', '=', False)]",
@@ -74,7 +77,8 @@ class Repair(models.Model):
     guarantee_limit = fields.Date('Warranty Expiration', states={'confirmed': [('readonly', True)]})
     operations = fields.One2many(
         'repair.line', 'repair_id', 'Parts',
-        copy=True, readonly=True, states={'draft': [('readonly', False)]})
+        copy=True, readonly=True,
+        states={'draft': [('readonly', False)], 'confirmed': [('readonly', False)], 'under_repair': [('readonly', False)]})
     pricelist_id = fields.Many2one(
         'product.pricelist', 'Pricelist',
         default=lambda self: self.env['product.pricelist'].search([('company_id', 'in', [self.env.company.id, False])], limit=1).id,
@@ -98,7 +102,8 @@ class Repair(models.Model):
         help="Move created by the repair order")
     fees_lines = fields.One2many(
         'repair.fee', 'repair_id', 'Operations',
-        copy=True, readonly=True, states={'draft': [('readonly', False)]})
+        copy=True, readonly=True,
+        states={'draft': [('readonly', False)], 'confirmed': [('readonly', False)], 'under_repair': [('readonly', False)]})
     internal_notes = fields.Text('Internal Notes')
     quotation_notes = fields.Text('Quotation Notes')
     user_id = fields.Many2one('res.users', string="Responsible", default=lambda self: self.env.user, check_company=True)
@@ -106,6 +111,7 @@ class Repair(models.Model):
         'res.company', 'Company',
         readonly=True, required=True, index=True,
         default=lambda self: self.env.company)
+    sale_order_id = fields.Many2one('sale.order', 'Sale Order', copy=False, help="Sale Order from which the product to be repaired comes from.")
     tag_ids = fields.Many2many('repair.tags', string="Tags")
     invoiced = fields.Boolean('Invoiced', copy=False, readonly=True)
     repaired = fields.Boolean('Repaired', copy=False, readonly=True)
@@ -206,12 +212,8 @@ class Repair(models.Model):
 
     @api.model
     def create(self, vals):
-        # To avoid consuming a sequence number when clicking on 'Create', we preprend it if the
-        # the name starts with '/'.
-        vals['name'] = vals.get('name') or '/'
-        if vals['name'].startswith('/'):
-            vals['name'] = (self.env['ir.sequence'].next_by_code('repair.order') or '/') + vals['name']
-            vals['name'] = vals['name'][:-1] if vals['name'].endswith('/') and vals['name'] != '/' else vals['name']
+        # We generate a standard reference
+        vals['name'] = self.env['ir.sequence'].next_by_code('repair.order') or '/'
         return super(Repair, self).create(vals)
 
     def button_dummy(self):
@@ -497,6 +499,7 @@ class Repair(models.Model):
         if self.filtered(lambda repair: repair.state != 'under_repair'):
             raise UserError(_("Repair must be under repair in order to end reparation."))
         for repair in self:
+            repair._check_product_tracking()
             repair.write({'repaired': True})
             vals = {'state': 'done'}
             vals['move_id'] = repair.action_repair_done().get(repair.id)
@@ -596,6 +599,15 @@ class Repair(models.Model):
             res[repair.id] = move.id
         return res
 
+    def _check_product_tracking(self):
+        invalid_lines = self.operations.filtered(lambda x: x.product_id.tracking != 'none' and not x.lot_id)
+        if invalid_lines:
+            products = invalid_lines.product_id
+            raise ValidationError(_(
+                "Serial number is required for operation lines with products: %s",
+                ", ".join(products.mapped('name')),
+            ))
+
 
 class RepairLine(models.Model):
     _name = 'repair.line'
@@ -650,16 +662,7 @@ class RepairLine(models.Model):
         ('cancel', 'Cancelled')], 'Status', default='draft',
         copy=False, readonly=True, required=True,
         help='The status of a repair line is set automatically to the one of the linked repair order.')
-
-    @api.constrains('lot_id', 'product_id')
-    def _check_product_tracking(self):
-        invalid_lines = self.filtered(lambda x: x.product_id.tracking != 'none' and not x.lot_id)
-        if invalid_lines:
-            products = invalid_lines.product_id
-            raise ValidationError(_(
-                "Serial number is required for operation lines with products: %s",
-                ", ".join(products.mapped('name')),
-            ))
+    tracking = fields.Selection(string='Product Tracking', related="product_id.tracking")
 
     @api.depends('price_unit', 'repair_id', 'product_uom_qty', 'product_id', 'repair_id.invoice_method')
     def _compute_price_subtotal(self):
