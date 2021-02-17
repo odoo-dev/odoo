@@ -36,8 +36,14 @@ class TestSyncGoogle(SavepointCase):
     def assertGoogleEventNotDeleted(self):
         GoogleSync._google_delete.assert_not_called()
 
-    def assertGoogleEventInserted(self, values):
-        GoogleSync._google_insert.assert_called_once_with(self.google_service, values)
+    def assertGoogleEventInserted(self, values, timeout=None):
+        expected_args = (values,)
+        expected_kwargs = {'timeout': timeout} if timeout else {}
+        GoogleSync._google_insert.assert_called_once()
+        args, kwargs = GoogleSync._google_insert.call_args
+        self.assertEqual(args[1:], expected_args) # skip Google service arg
+        self.assertEqual(kwargs, expected_kwargs)
+        # GoogleSync._google_insert.assert_called_once_with(self.google_service, values)
 
     def assertGoogleEventNotInserted(self):
         GoogleSync._google_insert.assert_not_called()

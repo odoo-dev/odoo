@@ -447,6 +447,10 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'calendar_event_ids': [(4, base_event.id)],
         })
         recurrence._apply_recurrence()
+        events = recurrence.calendar_event_ids.sorted('start')
+        self.assertEqual(events[0].google_id, '%s_20210215T080000Z' % google_id)
+        self.assertEqual(events[1].google_id, '%s_20210222T080000Z' % google_id)
+        self.assertEqual(events[2].google_id, '%s_20210301T080000Z' % google_id)
         # Modify start of one of the events.
         middle_event = recurrence.calendar_event_ids.filtered(lambda e: e.start == datetime(2021, 2, 22, 8, 0, 0))
         middle_event.write({'start': datetime(2021, 2, 22, 16, 0, 0)})

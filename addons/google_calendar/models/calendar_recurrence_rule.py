@@ -40,12 +40,6 @@ class RecurrenceRule(models.Model):
                 event.google_id = False
         self.env['calendar.event'].create(vals)
 
-        for recurrence in self.filtered('need_sync'):
-            values = recurrence._google_values()
-            if not recurrence.google_id:
-                recurrence._google_insert(google_service, values)
-            else:
-                recurrence._google_patch(google_service, recurrence.google_id, values)
         self.calendar_event_ids.need_sync = False
         return detached_events
 

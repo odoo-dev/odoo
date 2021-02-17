@@ -158,8 +158,21 @@ class TestSyncOdoo2Google(TestSyncGoogle):
         self.assertTrue(to_delete)
         self.assertFalse(to_delete.active)
         self.assertFalse(event.google_id, "The google id will be set after the API call")
-        # TODO assert the recurrence is synced
-        # self.assertGoogleEventInserted({})
+        self.assertGoogleEventInserted({
+            'id': False,
+            'start': {'date': '2020-01-15'},
+            'end': {'date': '2020-01-16'},
+            'summary': 'Event',
+            'description': '',
+            'location': '',
+            'visibility': 'public',
+            'guestsCanModify': True,
+            'reminders': {'overrides': [], 'useDefault': False},
+            'organizer': {'email': 'odoobot@example.com', 'self': True},
+            'attendees': [],
+            'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=2;BYDAY=WE'],
+            'extendedProperties': {'shared': {'%s_odoo_id' % self.env.cr.dbname: event.recurrence_id.id}}
+        }, timeout=3)
 
         self.assertGoogleEventDeleted(google_id)
 

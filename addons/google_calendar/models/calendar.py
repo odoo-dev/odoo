@@ -23,7 +23,7 @@ class Meeting(models.Model):
         # Event if the event is moved, the google_id remains the same.
         for event in self:
             google_recurrence_id = event.recurrence_id._get_event_google_id(event)
-            if google_recurrence_id:
+            if not event.google_id and google_recurrence_id:
                 event.google_id = google_recurrence_id
             elif not event.google_id:
                 event.google_id = False
