@@ -1490,7 +1490,7 @@ var exportVariable = (function (exports) {
             }
             const parentEl = this.parentNode;
 
-            if (!isBlock(this)) {
+            if (!isBlock(this) || isVisibleEmpty(this)) {
                 /**
                  * Backspace at the beginning of an inline node, nothing has to be
                  * done: propagate the backspace. If the node was empty, we remove
@@ -2034,7 +2034,7 @@ var exportVariable = (function (exports) {
             // Sanitize font awesome elements
             if (isFontAwesome(node)) {
                 // Ensure a zero width space is present inside the FA element.
-                if (node.innerHTML !== '&#x200B;') node.innerHTML = '&#x200B;';
+                if (node.innerHTML !== '\u200B') node.innerHTML = '&#x200B;';
             }
 
             // Sanitize media elements
@@ -2300,6 +2300,7 @@ var exportVariable = (function (exports) {
 
         observerApply(destel, records) {
             for (let record of records) {
+                if (!this.filterMutationRecord(record)) continue;
                 switch (record.type) {
                     case 'characterData': {
                         this.history[this.history.length - 1].dom.push({
@@ -2367,6 +2368,15 @@ var exportVariable = (function (exports) {
                     }
                 }
             }
+        }
+        filterMutationRecord(record) {
+            // discard attribute mutations that gets back to the same value.
+            if (
+                record.type === 'attribute' &&
+                record.oldValue === record.target.getAttribute(record.attributeName)
+            )
+                return false;
+            return true;
         }
 
         resetHistory() {
