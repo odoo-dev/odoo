@@ -78,14 +78,14 @@
             <div class="o_DiscussSidebar_group o_DiscussSidebar_groupRoom">
                 <div class="o_DiscussSidebar_groupHeader">
                     <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle">
-                        Chat ROom
+                        Chat Rooms
                     </div>
                     <div class="o-autogrow"/>
                     <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus"/>
                 </div>
                 <div class="o_DiscussSidebar_list">
                     <t t-foreach="rooms" t-as="room" t-key="room.localId">
-                        <div t-on-click="_onClickRoom(room.localId)"> <t t-esc="room.name"/> </div>
+                        <div class="o_DiscussSidebarItem" t-on-click="_onClickRoom(room.localId)"> <t t-esc="room.name"/> </div>
                     </t>
                 </div>
             </div>

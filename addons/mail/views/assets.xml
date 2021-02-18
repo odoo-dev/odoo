@@ -151,6 +151,7 @@
                 <script type="text/javascript" src="/mail/static/src/models/message/message.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/message_seen_indicator/message_seen_indicator.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/messaging/messaging.js"></script>
+                <script type="text/javascript" src="/mail/static/src/models/rtc/rtc.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/messaging_initializer/messaging_initializer.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/messaging_menu/messaging_menu.js"></script>
                 <script type="text/javascript" src="/mail/static/src/models/messaging_notification_handler/messaging_notification_handler.js"></script>

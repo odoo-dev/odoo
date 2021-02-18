@@ -31,7 +31,15 @@ function factory(dependencies) {
         // Public
         //----------------------------------------------------------------------
 
-        toggleRoom(chatRoomLocalId) {
+        async leaveRoom() {
+            if (!this.chatRoomLocalId) {
+                return;
+            }
+            await this.env.models['mail.chat_room'].get(this.chatRoomLocalId).leaveRoom();
+        }
+
+        async toggleRoom(chatRoomLocalId) {
+            this.env.mailRtc.disconnectSession();
             if (this.chatRoomLocalId === chatRoomLocalId) {
                 chatRoomLocalId = '';
             }

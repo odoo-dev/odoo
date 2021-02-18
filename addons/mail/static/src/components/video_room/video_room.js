@@ -16,59 +16,35 @@ class VideoRoom extends Component {
         super(...args);
         useStore(props => {
             const chatRoom = this.env.models['mail.chat_room'].get(props.roomLocalId);
+            const mailRtc = this.env.mailRtc;
             return {
                 chatRoom: chatRoom ? chatRoom.__state : undefined,
                 partnerRoot: this.env.messaging.partnerRoot,
+                sendSound: mailRtc.sendSound,
+                sendVideo: mailRtc.sendVideo,
             };
         });
-        this.state = useState({
-            sendVideo: true,
-            sendSound: true,
-            peerToken: '',
-        });
         this._getRefs = useRefs();
-        this.stream = undefined;
-        this.peer = undefined;
-        this.options = {
-            constraints: {
-                mandatory: { // legacy chrome syntax
-                    'OfferToReceiveAudio': true,
-                    'OfferToReceiveVideo': true,
-                },
-                'offerToReceiveAudio': true,
-                'offerToReceiveVideo': true,
-            },
-        };
+        this.peerToken = '';
+    }
+
+    async willStart() {
+        this.peerToken = await this.env.models['mail.chat_room'].get(this.props.roomLocalId).joinRoom();
+        await this.env.mailRtc.initSession(this.peerToken);
     }
 
     async mounted() {
-        this.state.peerToken = await this.env.models['mail.chat_room'].get(this.props.roomLocalId).joinRoom();
-        this.peer = new Peer(this.state.peerToken);
-        await this._getStream();
-        this.peer.on('call', call => {
-            this._processCall(call);
-        });
-        this.peer.on('error', error => {
-            console.log('PEER-ERROR:::::');
-            console.log(error);
-        });
-        const video = await this._addStream(this.stream, this.state.peerToken);
-        video.muted = true;
-
+        const refs = this._getRefs();
+        await this.env.mailRtc.setVideoRefs(refs);
+        await this.env.mailRtc.updateVideo();
         for (const token of this.room.peerTokens) {
-            if (token === this.state.peerToken) {
+            if (token === this.peerToken) {
                 continue;
             }
             setTimeout(async () => {
-                // FIXME
-                await this._connectToPeer(this.peer, token, this.stream);
+                await this.env.mailRtc.connectToPeer(token);
             }, 1000);
         }
-    }
-
-    async willUnmount() {
-        await this.peer.disconnect();
-        await this.env.models['mail.chat_room'].get(this.props.roomLocalId).leaveRoom();
     }
 
     //--------------------------------------------------------------------------
@@ -83,117 +59,19 @@ class VideoRoom extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    async _getStream() {
-        try {
-            this.stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-            });
-        } catch (e) {
-            this.stream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-            });
-        }
-    }
-    _processCall(call) {
-        if (!this.room.peerTokens.includes(call.peer)) {
-            return;
-        }
-        call.answer(this.stream);
-        call.on('stream', callerStream => {
-            const callToken = call.peer;
-            this._addStream(callerStream, callToken);
-            call.peerConnection.onconnectionstatechange = () => {
-                this._onConnectionStateChange(call.peerConnection.connectionState, callToken);
-            };
-        });
-        call.on('error', error => {
-            console.log(error);
-        });
-    }
-    async _removePeer(token) {
-        //this.room.removeUser(token);
-        const refs = this._getRefs();
-        const video = refs[`video_${token}`];
-        /*
-         * FIXME since the disconect event is delayed, short disconnections like a page refresh
-         * will stop the stream, we want to keep the video srcObject available in this case.
-         * with a better server-side control of connections, this shouldn't be an issue.
-         */
-        const stream = video.srcObject;
-        video.srcObject = undefined;
-        video.srcObject = stream;
-    }
-    async _connectToPeer(peer, token, stream) {
-        console.log(this.options);
-        const call = await peer.call(token, stream, this.options);
-        if (!call) {
-            return;
-        }
-        call.on('stream', async caleeStream => {
-            await this._addStream(caleeStream, token);
-            call.peerConnection.onconnectionstatechange = () => {
-                this._onConnectionStateChange(call.peerConnection.connectionState, token);
-            };
-        });
-        call.on('error', error => {
-            console.log('ERROR:::::');
-            console.log(error);
-        });
-        call.on('close', () => {
-            this._removePeer(token);
-        });
-    }
-    /**
-     * @private
-     */
-    async _addStream(stream, token) {
-        const refs = this._getRefs();
-        const video = refs[`video_${token}`];
-        video.srcObject = stream;
-        try {
-            console.log(video.srcObject);
-            await video.play();
-        } catch (e) {
-            // ignore
-        }
-        return video;
-    }
-
-    //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-
-    async _onConnectionStateChange(state, token) {
-        switch(state) {
-            case "failed":
-            case "closed":
-            case "disconnected":
-                this._removePeer(token);
-        }
-    }
 
     async _onVideoLoadedMetaData(ev) {
         await ev.target.play();
     }
 
     _onClickMicrophone(ev) {
-        this.state.sendSound = !this.state.sendSound;
-        if (!this.stream.getAudioTracks()[0]) {
-            return;
-        }
-        this.stream.getAudioTracks()[0].enabled = this.state.sendSound;
+        this.env.mailRtc.toggleMicrophone();
     }
 
     _onClickCamera(ev) {
-        this.state.sendVideo = !this.state.sendVideo;
-        if (!this.stream.getVideoTracks()[0]) {
-            return;
-        }
-        this.stream.getVideoTracks()[0].enabled = this.state.sendVideo;
+        this.env.mailRtc.toggleVideo();
     }
 }
 
