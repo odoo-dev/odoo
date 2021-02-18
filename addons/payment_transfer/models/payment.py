@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
+from odoo.fields import Command
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.tools.float_utils import float_compare
 
@@ -17,18 +18,26 @@ class TransferPaymentAcquirer(models.Model):
         ('transfer', 'Manual Payment')
     ], default='transfer', ondelete={'transfer': 'set default'})
 
-    @api.model
-    def _create_missing_journal_for_acquirers(self, company=None):
-        # By default, the wire transfer method uses the default Bank journal.
-        company = company or self.env.company
-        acquirers = self.env['payment.acquirer'].search(
-            [('provider', '=', 'transfer'), ('journal_id', '=', False), ('company_id', '=', company.id)])
+    def _set_default_journal(self, company=None):
+        """
+        We may want certain acquirers to be linked to a journal by default.
+        It can be done by overwriting this method in order to return that particular journal.
+        """
+        for acquirer in self.filtered(lambda x: x.provider == 'transfer'):
+            company = company or self.env.company
+            bank_journal = self.env['account.journal'].search([('type', '=', 'bank'), ('company_id', '=', company.id)], limit=1)
+            if bank_journal:
+                acquirer.write({'journal_id': bank_journal.id})
 
-        bank_journal = self.env['account.journal'].search(
-            [('type', '=', 'bank'), ('company_id', '=', company.id)], limit=1)
-        if bank_journal:
-            acquirers.write({'journal_id': bank_journal.id})
-        return super(TransferPaymentAcquirer, self)._create_missing_journal_for_acquirers(company=company)
+    def _set_payment_method(self):
+        """
+        Transfer should be usable as a payment method, all the time
+        """
+        for acquirer in self.filtered(lambda a: a.inbound_payment_method_id):
+            acquirer.inbound_payment_method_id.payment_acquirer_id = acquirer.id
+            self.inbound_payment_method_ids += self.inbound_payment_method_id
+            if acquirer.journal_id and acquirer.inbound_payment_method_id not in acquirer.journal_id.inbound_payment_method_ids:
+                acquirer.journal_id.inbound_payment_method_ids = [Command.link(acquirer.inbound_payment_method_id.id)]
 
     def transfer_get_form_action_url(self):
         return '/payment/transfer/feedback'

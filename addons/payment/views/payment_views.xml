@@ -84,6 +84,10 @@
                                     <field name="cancel_msg"/>
                                 </group>
                             </page>
+                            <page string="Debug">
+                                <field name="inbound_payment_method_id"/>
+                                <field name="inbound_payment_method_ids"/>
+                            </page>
                         </notebook>
                     </sheet>
                 </form>

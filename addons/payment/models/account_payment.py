@@ -6,6 +6,30 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
+class AccountPaymentMethod(models.Model):
+    _inherit = 'account.payment.method'
+
+    @api.depends('method_type')
+    def _compute_available_acquirers_ids(self):
+        # Get all enabled acquirers, that have not yet been linked to a journal.
+        available_acquirers_ids = self.env['payment.acquirer'].search([('state', '!=', 'disabled')])
+        for method in self:
+            if method.method_type.code == 'sdd':
+                available_acquirers_ids = available_acquirers_ids.filtered(lambda a: a.provider == 'sepa_direct_debit')
+            elif method.method_type.code == 'electronic':
+                available_acquirers_ids = available_acquirers_ids.filtered(lambda a: a.provider != 'sepa_direct_debit')
+            method.available_payment_acquirers_ids = available_acquirers_ids.ids
+
+    available_payment_acquirers_ids = fields.Many2many('account.payment.method', compute='_compute_available_acquirers_ids')
+
+    payment_acquirer_id = fields.Many2one(
+        comodel_name='payment.acquirer',
+        string='Payment Acquirer',
+        help='The payment acquirer linked to this payment method.',
+        domain="[('id', 'in', available_payment_acquirers_ids)]"
+    )
+
+
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
 

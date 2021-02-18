@@ -9,6 +9,7 @@ import pprint
 import psycopg2
 
 from odoo import api, exceptions, fields, models, _, SUPERUSER_ID
+from odoo.fields import Command
 from odoo.tools import consteq, float_round, image_process, ustr
 from odoo.exceptions import ValidationError
 from odoo.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
@@ -110,6 +111,7 @@ class PaymentAcquirer(models.Model):
         help="Capture the amount from Odoo, when the delivery is completed. Use this if you want to charge your customers cards only once you are sure you can ship the goods to them.")
     journal_id = fields.Many2one(
         'account.journal', 'Payment Journal', domain="[('type', 'in', ['bank', 'cash']), ('company_id', '=', company_id)]",
+        copy=False,
         help="""Journal where the successful transactions will be posted""")
     check_validity = fields.Boolean(string="Verify Card Validity",
         help="""Trigger a transaction of 1 currency unit and its refund to check the validity of new credit cards entered in the customer portal.
@@ -168,21 +170,23 @@ class PaymentAcquirer(models.Model):
         ('s2s','Payment from Odoo')],
         default='form', required=True, string='Payment Flow',
         help="""Note: Subscriptions does not take this field in account, it uses server to server by default.""")
-    inbound_payment_method_ids = fields.Many2many('account.payment.method', related='journal_id.inbound_payment_method_ids', readonly=False)
+    inbound_payment_method_ids = fields.One2many('account.payment.method', related='journal_id.inbound_payment_method_ids')
+    inbound_payment_method_id = fields.Many2one('account.payment.method', readonly=True,
+                                                help="""Used to store the payment method linked to this particular 
+                                                payment acquirer.""", copy=False)
 
     @api.onchange('payment_flow')
     def _onchange_payment_flow(self):
-        electronic = self.env.ref('payment.account_payment_method_electronic_in')
         if self.token_implemented and self.payment_flow == 's2s':
-            if electronic not in self.inbound_payment_method_ids:
-                self.inbound_payment_method_ids = [(4, electronic.id)]
-        elif electronic in self.inbound_payment_method_ids:
-            self.inbound_payment_method_ids = [(2, electronic.id)]
+            self.inbound_payment_method_ids += self.inbound_payment_method_id
+        else:
+            self.inbound_payment_method_ids -= self.inbound_payment_method_id
 
-    @api.onchange('state')
-    def onchange_state(self):
-        """Disable dashboard display for test acquirer journal."""
-        self.journal_id.update({'show_on_dashboard': self.state == 'enabled'})
+    @api.onchange('journal_id')
+    def _onchange_journal_id(self):
+        # Update, add the method linked to the acquirer to the journal
+        if self.inbound_payment_method_id not in self.journal_id.inbound_payment_method_ids:
+            self.journal_id.inbound_payment_method_ids += self.inbound_payment_method_id
 
     def _search_is_tokenized(self, operator, value):
         tokenized = self._get_feature_support()['tokenize']
@@ -252,30 +256,6 @@ class PaymentAcquirer(models.Model):
         """
         return dict(authorize=[], tokenize=[], fees=[])
 
-    def _prepare_account_journal_vals(self):
-        '''Prepare the values to create the acquirer's journal.
-        :return: a dictionary to create a account.journal record.
-        '''
-        self.ensure_one()
-        account_vals = self.company_id.chart_template_id._prepare_transfer_account_for_direct_creation(self.name, self.company_id)
-        account = self.env['account.account'].create(account_vals)
-        inbound_payment_method_ids = []
-        if self.token_implemented and self.payment_flow == 's2s':
-            inbound_payment_method_ids.append((4, self.env.ref('payment.account_payment_method_electronic_in').id))
-        return {
-            'name': self.name,
-            'code': self.name.upper(),
-            'sequence': 999,
-            'type': 'bank',
-            'company_id': self.company_id.id,
-            'default_account_id': account.id,
-            # Show the journal on dashboard if the acquirer is published on the website.
-            'show_on_dashboard': self.state == 'enabled',
-            # Don't show payment methods in the backend.
-            'inbound_payment_method_ids': inbound_payment_method_ids,
-            'outbound_payment_method_ids': [],
-        }
-
     def _get_acquirer_journal_domain(self):
         """Returns a domain for finding a journal corresponding to an acquirer"""
         self.ensure_one()
@@ -288,42 +268,44 @@ class PaymentAcquirer(models.Model):
 
     @api.model
     def _create_missing_journal_for_acquirers(self, company=None):
-        '''Create the journal for active acquirers.
-        We want one journal per acquirer. However, we can't create them during the 'create' of the payment.acquirer
-        because every acquirers are defined on the 'payment' module but is active only when installing their own module
-        (e.g. payment_paypal for Paypal). We can't do that in such modules because we have no guarantee the chart template
-        is already installed.
         '''
-        # Search for installed acquirers modules that have no journal for the current company.
-        # If this method is triggered by a post_init_hook, the module is 'to install'.
-        # If the trigger comes from the chart template wizard, the modules are already installed.
+        We want to be able to add a default journal for some acquirers.
+        However, we can't add them during the 'create' of the payment.acquirer because every acquirers are defined on
+        the 'payment' module but is active only when installing their own module (e.g. payment_paypal for Paypal).
+        We can't do that in such modules because we have no guarantee the chart template is already installed.
+        '''
         company = company or self.env.company
         acquirers = self.env['payment.acquirer'].search([
             ('module_state', 'in', ('to install', 'installed')),
             ('journal_id', '=', False),
             ('company_id', '=', company.id),
-        ])
+        ]).filtered(lambda l: l.company_id.chart_template_id)
 
-        # Here we will attempt to first create the journal since the most common case (first
-        # install) is to successfully to create the journal for the acquirer, in the case of a
-        # reinstall (least common case), the creation will fail because of a unique constraint
-        # violation, this is ok as we catch the error and then perform a search if need be
-        # and assign the existing journal to our reinstalled acquirer. It is better to ask for
-        # forgiveness than to ask for permission as this saves us the overhead of doing a select
-        # that would be useless in most cases.
-        Journal = journals = self.env['account.journal']
-        for acquirer in acquirers.filtered(lambda l: not l.journal_id and l.company_id.chart_template_id):
-            try:
-                with self.env.cr.savepoint():
-                    journal = Journal.create(acquirer._prepare_account_journal_vals())
-            except psycopg2.IntegrityError as e:
-                if e.pgcode == psycopg2.errorcodes.UNIQUE_VIOLATION:
-                    journal = Journal.search(acquirer._get_acquirer_journal_domain(), limit=1)
-                else:
-                    raise
-            acquirer.journal_id = journal
-            journals += journal
-        return journals
+        if acquirers:
+            acquirers._set_default_journal(company)
+            acquirers._set_payment_method()
+
+    def _set_default_journal(self, company=None):
+        """
+        We may want certain acquirers to be linked to a journal by default.
+        It can be done by overwriting this method in order to return that particular journal.
+        """
+        return False
+
+    def _set_payment_method(self):
+        """
+        Linked the payment method the other way round with it's acquirer, and ensure to add the payment method to the
+        linked journal if there is a default journal for this payment acquirer.
+        """
+        for acquirer in self.filtered(lambda a: a.inbound_payment_method_id):
+            acquirer.inbound_payment_method_id.payment_acquirer_id = acquirer.id
+            if acquirer.journal_id and acquirer.inbound_payment_method_id not in acquirer.journal_id.inbound_payment_method_ids:
+                acquirer.journal_id.inbound_payment_method_ids = [Command.link(acquirer.inbound_payment_method_id.id)]
+
+            if self.token_implemented and self.payment_flow == 's2s':
+                self.inbound_payment_method_ids += self.inbound_payment_method_id
+            else:
+                self.inbound_payment_method_ids -= self.inbound_payment_method_id
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -335,6 +317,20 @@ class PaymentAcquirer(models.Model):
         result = super(PaymentAcquirer, self).write(vals)
         self._check_required_if_provider()
         return result
+
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        default = dict(default or {}, name=_("%s (Copy)", self.name))
+        # Make sure to not use the same payment method for copied acquirers
+        copy = super().copy(default=default)
+        method_type = self.inbound_payment_method_id.method_type
+        copy.inbound_payment_method_id = self.env['account.payment.method'].create({
+            'name': self.inbound_payment_method_id.name,
+            'method_type': method_type.id,
+            'state': 'deactivated',
+            'payment_acquirer_id': copy.id
+        })
+        return copy
 
     def get_acquirer_extra_fees(self, amount, currency_id, country_id):
         extra_fees = {
@@ -684,7 +680,7 @@ class PaymentTransaction(models.Model):
             'partner_type': 'customer',
             'journal_id': self.acquirer_id.journal_id.id,
             'company_id': self.acquirer_id.company_id.id,
-            'payment_method_id': self.env.ref('payment.account_payment_method_electronic_in').id,
+            'payment_method_id': self.acquirer_id.inbound_payment_method_id.id,
             'payment_token_id': self.payment_token_id and self.payment_token_id.id or None,
             'payment_transaction_id': self.id,
             'ref': self.reference,

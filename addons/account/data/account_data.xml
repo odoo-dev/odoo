@@ -116,12 +116,12 @@
         </record>
 
         <!-- Payment methods -->
-        <record id="account_payment_method_manual_in" model="account.payment.method">
+        <record id="account_payment_method_type_manual_in" model="account.payment.method.type">
             <field name="name">Manual</field>
             <field name="code">manual</field>
             <field name="payment_type">inbound</field>
         </record>
-        <record id="account_payment_method_manual_out" model="account.payment.method">
+        <record id="account_payment_method_type_manual_out" model="account.payment.method.type">
             <field name="name">Manual</field>
             <field name="code">manual</field>
             <field name="payment_type">outbound</field>

@@ -98,7 +98,8 @@ class AccountPayment(models.Model):
 
     def action_post(self):
         res = super(AccountPayment, self).action_post()
-        payment_method_check = self.env.ref('account_check_printing.account_payment_method_check')
+        # fix
+        payment_method_check = self.env.ref('account_check_printing.account_payment_method_type_check')
         for payment in self.filtered(lambda p: p.payment_method_id == payment_method_check and p.check_manual_sequencing):
             sequence = payment.journal_id.check_sequence_id
             payment.check_number = sequence.next_by_id()

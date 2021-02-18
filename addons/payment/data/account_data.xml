@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="account_payment_method_electronic_in" model="account.payment.method">
-        <field name="name">Electronic</field>
-        <field name="code">electronic</field>
-        <field name="payment_type">inbound</field>
-    </record>
+    <data noupdate="1">
+        <record id="payment.account_payment_method_type_electronic_in" model="account.payment.method.type">
+            <field name="name">Electronic</field>
+            <field name="code">electronic</field>
+            <field name="payment_type">inbound</field>
+        </record>
+    </data>
 </odoo>

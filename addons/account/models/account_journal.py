@@ -30,10 +30,10 @@ class AccountJournal(models.Model):
     _check_company_auto = True
 
     def _default_inbound_payment_methods(self):
-        return self.env.ref('account.account_payment_method_manual_in')
+        return self._get_inbound_payment_methods()
 
     def _default_outbound_payment_methods(self):
-        return self.env.ref('account.account_payment_method_manual_out')
+        return self._get_outbound_payment_methods()
 
     def __get_bank_statements_available_sources(self):
         return [('undefined', _('Undefined Yet'))]
@@ -127,17 +127,12 @@ class AccountJournal(models.Model):
 
                                           "e.g: ^(?P<prefix1>.*?)(?P<year>\d{4})(?P<prefix2>\D*?)(?P<month>\d{2})(?P<prefix3>\D+?)(?P<seq>\d+)(?P<suffix>\D*?)$")
 
-    inbound_payment_method_ids = fields.Many2many(
+    inbound_payment_method_ids = fields.One2many(
         comodel_name='account.payment.method',
-        relation='account_journal_inbound_payment_method_rel',
-        column1='journal_id',
-        column2='inbound_payment_method',
         domain=[('payment_type', '=', 'inbound')],
         string='Inbound Payment Methods',
-        compute='_compute_inbound_payment_method_ids',
-        ondelete="restrict",
-        store=True,
-        readonly=False,
+        inverse_name='journal_id',
+        default=_default_inbound_payment_methods,
         help="Manual: Get paid by cash, check or any other method outside of Odoo.\n"
              "Electronic: Get paid automatically through a payment acquirer by requesting a transaction"
              " on a card saved by the customer when buying or subscribing online (payment token).\n"
@@ -145,17 +140,12 @@ class AccountJournal(models.Model):
              " submit to your bank. When encoding the bank statement in Odoo,you are suggested to"
              " reconcile the transaction with the batch deposit. Enable this option from the settings."
     )
-    outbound_payment_method_ids = fields.Many2many(
+    outbound_payment_method_ids = fields.One2many(
         comodel_name='account.payment.method',
-        relation='account_journal_outbound_payment_method_rel',
-        column1='journal_id',
-        column2='outbound_payment_method',
         domain=[('payment_type', '=', 'outbound')],
         string='Outbound Payment Methods',
-        compute='_compute_outbound_payment_method_ids',
-        ondelete="restrict",
-        store=True,
-        readonly=False,
+        inverse_name='journal_id',
+        default=_default_outbound_payment_methods,
         help="Manual:Pay bill by cash or any other method outside of Odoo.\n"
              "Check:Pay bill by check and print it from Odoo.\n"
              "SEPA Credit Transfer: Pay bill from a SEPA Credit Transfer file you submit to your"
@@ -216,6 +206,20 @@ class AccountJournal(models.Model):
         ('code_company_uniq', 'unique (code, company_id)', 'Journal codes must be unique per company.'),
     ]
 
+    def _get_inbound_payment_methods(self):
+        method_type = self.env.ref('account.account_payment_method_type_manual_in')
+        return self.env['account.payment.method'].create({
+            'name': method_type.name,
+            'method_type': method_type.id
+        })
+
+    def _get_outbound_payment_methods(self):
+        method_type = self.env.ref('account.account_payment_method_type_manual_out')
+        return self.env['account.payment.method'].create({
+            'name': method_type.name,
+            'method_type': method_type.id
+        })
+
     @api.depends('type')
     def _compute_default_account_type(self):
         default_account_id_types = {
@@ -230,22 +234,6 @@ class AccountJournal(models.Model):
                 journal.default_account_type = self.env.ref(default_account_id_types[journal.type]).id
             else:
                 journal.default_account_type = False
-
-    @api.depends('type')
-    def _compute_outbound_payment_method_ids(self):
-        for journal in self:
-            if journal.type in ('bank', 'cash'):
-                journal.outbound_payment_method_ids = self._default_outbound_payment_methods()
-            else:
-                journal.outbound_payment_method_ids = False
-
-    @api.depends('type')
-    def _compute_inbound_payment_method_ids(self):
-        for journal in self:
-            if journal.type in ('bank', 'cash'):
-                journal.inbound_payment_method_ids = self._default_inbound_payment_methods()
-            else:
-                journal.inbound_payment_method_ids = False
 
     @api.depends('company_id', 'type')
     def _compute_suspense_account_id(self):
@@ -807,3 +795,20 @@ class AccountJournal(models.Model):
         last_statement_domain = (domain or []) + [('journal_id', '=', self.id)]
         last_st_line = self.env['account.bank.statement.line'].search(last_statement_domain, order='date desc, id desc', limit=1)
         return last_st_line.statement_id
+
+    @api.model
+    def _add_method_to_journals(self, journals, payment_method_type):
+        for journal in journals:
+            method = self.env['account.payment.method'].create({
+                'name': payment_method_type.name,
+                'method_type': payment_method_type.id
+            })
+            if payment_method_type.payment_type == "outbound":
+                journal.outbound_payment_method_ids += method
+            else:
+                journal.inbound_payment_method_ids += method
+
+    def _has_method_of_type(self, payment_method_type):
+        self.ensure_one()
+        methods = self.outbound_payment_method_ids if payment_method_type.payment_type == "outbound" else self.inbound_payment_method_ids
+        return any(method.code == payment_method_type.code for method in methods)

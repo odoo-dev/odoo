@@ -17,5 +17,31 @@
                     </field>
                 </field>
         </record>
+        <record id="view_account_payment_method_tree_inherit" model="ir.ui.view">
+            <field name="name">account.payment.method.tree.inherit</field>
+            <field name="model">account.payment.method</field>
+            <field name="inherit_id" ref="account.view_account_payment_method_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='method_type']" position="after">
+                    <field name="code" invisible="1"/>
+                    <field name="available_payment_acquirers_ids" invisible="1"/>
+                    <field name="payment_acquirer_id" attrs="{'required': [('code', '=', 'electronic')], 'readonly': [('code', '=', 'manual')]}"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_account_payment_method_form_inherit" model="ir.ui.view">
+            <field name="name">account.payment.method.tree.form</field>
+            <field name="model">account.payment.method</field>
+            <field name="inherit_id" ref="account.view_account_payment_method_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='payment_account_id']" position="after">
+                    <field name="code" invisible="1"/>
+                    <field name="available_payment_acquirers_ids" invisible="1"/>
+                    <field name="payment_acquirer_id"
+                           attrs="{'required': [('code', '=', 'electronic')], 'readonly': [('code', '=', 'manual')]}"
+                           options="{'no_create': True}"/>
+                </xpath>
+            </field>
+        </record>
     </data>
 </odoo>

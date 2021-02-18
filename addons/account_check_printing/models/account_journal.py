@@ -31,6 +31,14 @@ class AccountJournal(models.Model):
         help="Technical feature used to know whether check printing was enabled as payment method.",
     )
 
+    def _get_outbound_payment_methods(self):
+        res = super()._get_outbound_payment_methods()
+        method_type = self.env.ref('account_check_printing.account_payment_method_type_check')
+        return res + self.env['account.payment.method'].create({
+            'name': method_type.name,
+            'method_type': method_type.id
+        })
+
     @api.depends('check_manual_sequencing')
     def _compute_check_next_number(self):
         for journal in self:
@@ -53,14 +61,6 @@ class AccountJournal(models.Model):
             if journal.check_sequence_id:
                 journal.check_sequence_id.sudo().number_next_actual = int(journal.check_next_number)
                 journal.check_sequence_id.sudo().padding = len(journal.check_next_number)
-
-    @api.depends('type')
-    def _compute_outbound_payment_method_ids(self):
-        super()._compute_outbound_payment_method_ids()
-        for journal in self:
-            if journal.type == 'cash':
-                check_method = self.env.ref('account_check_printing.account_payment_method_check')
-                journal.outbound_payment_method_ids -= check_method
 
     @api.depends('outbound_payment_method_ids')
     def _compute_check_printing_payment_method_selected(self):
@@ -94,19 +94,15 @@ class AccountJournal(models.Model):
                 'company_id': journal.company_id.id,
             })
 
-    def _default_outbound_payment_methods(self):
-        methods = super(AccountJournal, self)._default_outbound_payment_methods()
-        return methods + self.env.ref('account_check_printing.account_payment_method_check')
-
     @api.model
     def _enable_check_printing_on_bank_journals(self):
         """ Enables check printing payment method and add a check sequence on bank journals.
             Called upon module installation via data file.
         """
-        check_method = self.env.ref('account_check_printing.account_payment_method_check')
-        for bank_journal in self.search([('type', '=', 'bank')]):
-            bank_journal._create_check_sequence()
-            bank_journal.outbound_payment_method_ids += check_method
+        self._create_check_sequence()
+        method_type = self.env.ref('account_check_printing.account_payment_method_type_check')
+        journals = self.search([('type', '=', 'bank',)]).filtered(lambda j: not j.check_printing_payment_method_selected)
+        self._add_method_to_journals(journals=journals, payment_method_type=method_type)
 
     def get_journal_dashboard_datas(self):
         domain_checks_to_print = [
@@ -121,7 +117,6 @@ class AccountJournal(models.Model):
         )
 
     def action_checks_to_print(self):
-        check_method = self.env.ref('account_check_printing.account_payment_method_check')
         return {
             'name': _('Checks to Print'),
             'type': 'ir.actions.act_window',
@@ -133,6 +128,6 @@ class AccountJournal(models.Model):
                 journal_id=self.id,
                 default_journal_id=self.id,
                 default_payment_type='outbound',
-                default_payment_method_id=check_method.id,
+                default_payment_method_id=self.check_method_id.id,
             ),
         }

@@ -90,14 +90,18 @@
                                         <field name="payment_debit_account_id"
                                                attrs="{'required': [('id', '!=', False), ('type', 'in', ('bank', 'cash'))], 'invisible': [('type', 'not in', ('bank', 'cash'))]}"
                                                groups="account.group_account_readonly"/>
-                                        <field name="inbound_payment_method_ids" string="Methods" widget="many2many_checkboxes" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}"/>
                                     </group>
                                     <group string="Outgoing Payments">
                                         <field name="id" invisible="1"/>
                                         <field name="payment_credit_account_id"
                                                attrs="{'required': [('id', '!=', False), ('type', 'in', ('bank', 'cash'))], 'invisible': [('type', 'not in', ('bank', 'cash'))]}"
                                                groups="account.group_account_readonly"/>
-                                        <field name="outbound_payment_method_ids" string="Methods" widget="many2many_checkboxes" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}"/>
+                                    </group>
+                                    <group>
+                                        <field name="inbound_payment_method_ids" string="Methods" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}" nolabel="1"/>
+                                    </group>
+                                    <group>
+                                        <field name="outbound_payment_method_ids" string="Methods" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}" nolabel="1"/>
                                     </group>
                                     <group name="outgoing_payment" />
                                 </group>

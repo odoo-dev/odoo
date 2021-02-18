@@ -29,7 +29,7 @@
                     <group>
                         <group name="group1">
                             <field name="journal_id" widget="selection" required="1"/>
-                            <field name="payment_method_id" widget="radio"
+                            <field name="payment_method_id"
                                    required="1"
                                    attrs="{'invisible': [('hide_payment_method', '=', True)]}"/>
                             <field name="partner_bank_id"
