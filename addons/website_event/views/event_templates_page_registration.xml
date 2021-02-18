@@ -116,17 +116,19 @@
 
 <!-- Event - Registration -->
 <template id="registration_template" name="Registration">
-    <div t-if="request.env.user.has_group('event.group_event_manager')" class="alert alert-info rounded-0 o_website_event_configuration o_not_editable" role="status">
-        <a t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event">
-            <i class="fa fa-pencil mr-2" role="img" aria-label="Edit" title="Edit event registration in backend"/><em>Configure Event Tickets</em>
-        </a>
-    </div>
     <div t-if="toast_message" class="o_wevent_register_toaster d-none" t-att-data-message="toast_message"/>
     <div t-if="not event.event_registrations_open" class="bg-white mb-5">
         <div class="alert alert-info mb-0 d-flex justify-content-between align-items-center" role="status">
             <t t-if="event.start_sale_date and event.start_sale_date &gt; datetime.date.today()">
-                <em class="col-md-8">Ticket Sales starting on <t t-esc="event.start_sale_date"/></em>
-                <button class="btn btn-danger mr-1 ml-3 col-md-4"  disabled="1">Registrations not yet open</button>
+                <div class="col-md-8 d-flex">
+                    <em class="mr-2">Ticket Sales starting on <t t-esc="event.start_sale_date"/></em>
+                    <div t-if="request.env.user.has_group('event.group_event_manager')" class="o_not_editable ml-2" role="link">
+                        <a t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event">
+                            <i class="fa fa-gear mr-2" role="img" aria-label="Configure" title="Configure event tickets"/><em>Configure Tickets</em>
+                        </a>
+                    </div>
+                </div>
+                <button class="btn btn-danger ml-2 col-md-4"  disabled="1">Registrations not yet open</button>
             </t>
             <t t-else="">
                 <div class="col-md-8">
@@ -150,19 +152,25 @@
             <t t-set="tickets" t-value="event.event_ticket_ids.filtered(lambda ticket: not ticket.is_expired)"/>
             <!-- If some tickets expired and there is only one type left, we keep the same layout -->
             <t t-if="len(event.event_ticket_ids) &gt; 1 or tickets.description">
-                <div class="d-flex justify-content-between align-items-center py-2 pl-3 pr-2 border-bottom">
-                    <div id="price-range" class="pr-3 d-none"/>
-                    <span t-if="not event.event_registrations_open" class="text-danger">
+                <div class="d-flex align-items-center py-2 pl-3 pr-2 border-bottom">
+                    <span id="tickets-title" class="btn py-2 o_wevent_registration_title text-left">Tickets</span>
+                    <div id="price-range" class="d-none"/>
+                    <div t-if="request.env.user.has_group('event.group_event_manager')" class="o_not_editable ml-2" role="link">
+                        <a t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event">
+                            <i class="fa fa-gear mr-2" role="img" aria-label="Configure" title="Configure event tickets"/><em>Configure Tickets</em>
+                        </a>
+                    </div>
+                    <span t-if="not event.event_registrations_open" class="text-danger o_toggle-d-none">
                         <i class="fa fa-ban mr-2"/>Sold Out
                     </span>
-                    <div t-if="event.is_participating" id="registered" class="ml-auto pr-3 d-none">
+                    <div t-if="event.is_participating" id="registered" class="ml-auto pr-3 d-none o_toggle-d-none">
                         <span class="o_wevent_badge badge badge-success ml-3">
                             <i class="fa fa-check mr-2"/>Registered
                         </span>
                     </div>
-                    <a href="#" role="button" class="btn o_wevent_registration_btn text-left" data-target="#o_wevent_tickets_collapse">
-                        <span class="py-2">Tickets</span>
-                        <span class="close d-none">×</span>
+                    <a href="#" role="button" class="o_wevent_registration_btn d-none" data-target="#o_wevent_tickets_collapse">
+                        <span>Tickets</span>
+                        <span class="btn py-0 close d-none">×</span>
                     </a>
                 </div>
                 <div id="o_wevent_tickets_collapse" class="collapse show">
@@ -216,6 +224,11 @@
                             <span t-else="">Registration</span>
                         </h6>
                         <small t-if="tickets.end_sale_date and tickets.sale_available and not tickets.is_expired" class="text-muted mr-3" itemprop="availabilityEnds">Sales end on <span itemprop="priceValidUntil" t-field="tickets.end_sale_date"/></small>
+                        <div t-if="request.env.user.has_group('event.group_event_manager')" class="o_not_editable ml-2" role="link">
+                            <a t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event">
+                                <i class="fa fa-gear mr-2" role="img" aria-label="Configure" title="Configure event tickets"/><em>Configure Tickets</em>
+                            </a>
+                        </div>
                         <div class="ml-auto o_wevent_nowrap">
                             <t t-if="event.event_registrations_open">
                                 <span class="text-dark font-weight-bold align-middle pr-2">Qty</span>
@@ -378,18 +391,18 @@
     <xpath expr="//div[@id='registered']" position="attributes">
         <attribute name="class">ml-auto pr-3</attribute>
     </xpath>
-    <xpath expr="//div[@id='price-range']" position="attributes">
-        <attribute name="class">ml-0 pr-3</attribute>
-    </xpath>
     <xpath expr="//div[@id='o_wevent_tickets_collapse']" position="attributes">
         <attribute name="class">collapse</attribute>
     </xpath>
     <xpath expr="//a[hasclass('o_wevent_registration_btn')]" position="attributes">
-        <attribute name="class">btn btn-primary o_wevent_registration_btn collapsed</attribute>
+        <attribute name="class">btn btn-primary o_wevent_registration_btn collapsed ml-auto</attribute>
         <attribute name="data-toggle">collapse</attribute>
     </xpath>
-    <xpath expr="//span[hasclass('close')]" position="attributes">
-        <attribute name="class">close d-none</attribute>
+    <xpath expr="//span[@id='tickets-title']" position="attributes">
+        <attribute name="class">btn py-2 o_wevent_registration_title text-left o_toggle-d-none d-none</attribute>
+    </xpath>
+    <xpath expr="//div[@id='price-range']" position="attributes">
+        <attribute name="class">pr-3 ml-2 o_toggle-d-none</attribute>
     </xpath>
 </template>
 

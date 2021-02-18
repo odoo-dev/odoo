@@ -34,24 +34,23 @@
         }
     }
 
+    .o_wevent_registration_title {
+        box-shadow: none;
+        font-weight: $font-weight-bold;
+        text-transform: uppercase;
+        transition: none;
+        cursor: default !important;
+    }
+
     .o_wevent_registration_btn {
-        flex: 0 0 100%;
+        transition: none;
+
+        &:not(.collapsed) {
+            box-shadow: none;
+        }
 
         &.collapsed {
             flex: 0 0 33%;
-
-            .close {
-                display: none;
-            }
-        }
-        .close {
-            display: block;
-        }
-        &:not(.collapsed) {
-            box-shadow: none;
-            font-weight: $font-weight-bold;
-            text-transform: uppercase;
-            transition: none;
         }
     }
 

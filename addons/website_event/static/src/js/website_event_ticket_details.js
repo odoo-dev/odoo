@@ -38,9 +38,9 @@ odoo.define('website_event.ticket_details', function (require) {
         _onTicketDetailsClick: function (ev){
             ev.preventDefault();
             if (this.foldedByDefault){
-                $(ev.currentTarget).toggleClass('btn-primary text-left pl-0');
-                $(ev.currentTarget).siblings().toggleClass('d-none');
-                this.$('.close').toggleClass('d-none');
+                $(ev.currentTarget).toggleClass('btn-primary');
+                $(ev.currentTarget).siblings('.o_toggle-d-none').toggleClass('d-none');
+                $(ev.currentTarget).children().toggleClass('d-none');
             }
         },
         /**
