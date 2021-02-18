@@ -650,6 +650,10 @@ class Task(models.Model):
     # customer portal: include comment and incoming emails in communication history
     website_message_ids = fields.One2many(domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ['email', 'comment'])])
 
+    # Task Dependencies fields
+    allow_task_dependencies = fields.Boolean(related='project_id.allow_task_dependencies')
+    depend_on_ids = fields.Many2many('project.task', relation="task_dependencies_rel", column1="task_id", column2="depends_on_id", string="Blocked By")
+
     # recurrence fields
     allow_recurring_tasks = fields.Boolean(related='project_id.allow_recurring_tasks')
     recurring_task = fields.Boolean(string="Recurrent")
@@ -1392,6 +1396,21 @@ class Task(models.Model):
     # ------------
     # Actions
     # ------------
+
+    def action_open_task_form(self):
+        """ Open the form view of the task it depends on
+
+            The self should contains the task which the current task depends on it in the view tree of depend_on_ids field.
+            That is the task in the line in which the user clicks on the button 'View Task'.
+        """
+        return {
+            'name': _('Related Task'),
+            'view_mode': 'form',
+            'res_model': 'project.task',
+            'res_id': self.id,
+            'type': 'ir.actions.act_window',
+            'context': dict(self._context, create=False)
+        }
 
     def action_recurring_tasks(self):
         return {
