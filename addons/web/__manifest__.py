@@ -267,7 +267,8 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/scss/layout_background.scss',
             'web/static/src/scss/layout_boxed.scss',
             'web/static/src/scss/layout_clean.scss',
-            'web/static/src/scss/asset_styles_company_report.scss',
+            # TODO Check where this file is gone ? Maybe with a rebase, but we should find its new place if any
+            # 'web/static/src/scss/asset_styles_company_report.scss',
 
             'web/static/src/js/services/session.js',
             'web/static/src/js/public/public_root.js',
