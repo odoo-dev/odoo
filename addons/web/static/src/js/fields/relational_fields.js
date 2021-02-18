@@ -244,6 +244,7 @@ var FieldMany2One = AbstractField.extend({
      */
     _bindAutoComplete: function () {
         var self = this;
+        let isItemManuallyFocused = false;
         // avoid ignoring autocomplete="off" by obfuscating placeholder, see #30439
         if ($.browser.chrome && this.$input.attr('placeholder')) {
             this.$input.attr('placeholder', function (index, val) {
@@ -279,6 +280,13 @@ var FieldMany2One = AbstractField.extend({
                 event.stopImmediatePropagation();
                 event.preventDefault();
 
+                // do not select anything if floating is false i.e. if user did not
+                // type any character then pressing tab should not select anything
+                // except if user manually selected item using up/down arrow key
+                if (!self.floating && event.keyCode === 9 && !isItemManuallyFocused) {
+                    return false;
+                }
+
                 var item = ui.item;
                 self.floating = false;
                 if (item.id) {
@@ -290,6 +298,10 @@ var FieldMany2One = AbstractField.extend({
             },
             focus: function (event) {
                 event.preventDefault(); // don't automatically select values on focus
+                // if user manually set focus on item by up/down keys
+                if (event.keyCode === 40 || event.keyCode === 38) {
+                    isItemManuallyFocused = true;
+                }
             },
             open: function (event) {
                 self._onScroll = function (ev) {
@@ -300,6 +312,7 @@ var FieldMany2One = AbstractField.extend({
                 window.addEventListener('scroll', self._onScroll, true);
             },
             close: function (event) {
+                isItemManuallyFocused = false;
                 // it is necessary to prevent ESC key from propagating to field
                 // root, to prevent unwanted discard operations.
                 if (event.which === $.ui.keyCode.ESCAPE) {

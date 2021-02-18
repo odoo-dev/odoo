@@ -2697,7 +2697,7 @@ QUnit.module('fields', {}, function () {
             });
 
             var $input = form.$('.o_field_many2one input');
-            await testUtils.fields.editInput($input, "first");
+            await testUtils.fields.editAndTrigger($input, "first", ["keydown", "keyup"]);
             await testUtils.fields.triggerKey('down', $input, 'tab');
             await testUtils.fields.triggerKey('press', $input, 'tab');
             await testUtils.fields.triggerKey('up', $input, 'tab');
@@ -2718,6 +2718,41 @@ QUnit.module('fields', {}, function () {
             assert.strictEqual($('.modal').length, 0,
                 "there shouldn't be any modal in body");
             relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = M2O_DELAY;
+            form.destroy();
+        });
+
+        QUnit.test('do not select a value by pressing TAB on empty many2one', async function (assert) {
+            assert.expect(3);
+
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `<form>
+                        <field name="trululu"/>
+                        <field name="display_name"/>
+                    </form>`,
+            });
+
+            const $input = form.$('.o_field_many2one input');
+            await testUtils.dom.click($input);
+            await testUtils.fields.triggerKeydown($input, 'tab');
+            assert.strictEqual($input.val(), '', "no record should have been selected");
+
+            // open autocomplete dropdown and manually select item by UP/DOWN key and press TAB
+            await testUtils.dom.click($input);
+            await testUtils.fields.triggerKeydown($input, 'down');
+            await testUtils.fields.triggerKeydown($input, 'tab');
+            assert.strictEqual($input.val(), 'second record', "no record should have been selected");
+
+            // clear many2one and then open autocomplete, write something and press TAB
+            await testUtils.fields.editAndTrigger($input, '', 'keydown');
+            await testUtils.dom.click($input);
+            await testUtils.dom.click($input);
+            await testUtils.fields.editAndTrigger($input, 'aa', 'keyup');
+            await testUtils.fields.triggerKeydown($input, 'tab');
+            assert.strictEqual($input.val(), 'first record', "no record should have been selected");
+
             form.destroy();
         });
 
