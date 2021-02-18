@@ -17,10 +17,10 @@ Odoo Web tours.
         'views/tour_views.xml'
     ],
     'assets': {
-        'assets_qweb': [
+        'web.assets_qweb': [
             "web_tour/static/src/xml/debug_manager.xml",
         ],
-        'assets_common': [
+        'web.assets_common': [
             'web_tour/static/src/scss/**/*',
             'web_tour/static/src/js/running_tour_action_helper.js',
             'web_tour/static/src/js/tip.js',
@@ -29,13 +29,13 @@ Odoo Web tours.
             'web_tour/static/src/js/tour_step_utils.js',
             'web_tour/static/src/js/tour_utils.js',
         ],
-        'assets_backend': [
+        'web.assets_backend': [
             'web_tour/static/src/js/debug_manager.js',
         ],
-        'assets_frontend': [
+        'web.assets_frontend': [
             'web_tour/static/src/js/public/**/*',
         ],
-        'qunit_suite_tests': [
+        'web.qunit_suite_tests': [
             'web_tour/static/tests/**/*',
         ],
     },

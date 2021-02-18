@@ -587,7 +587,7 @@ class HomeStaticTemplateHelpers(object):
         """Proxy for ir_asset.get_asset_paths
         Useful to make 'self' testable.
         """
-        return request.env['ir.asset'].get_asset_paths(addons=self.addons, bundle='assets_qweb', xml=True)
+        return request.env['ir.asset'].get_asset_paths(addons=self.addons, bundle='web.assets_qweb', xml=True)
 
     def _get_qweb_templates(self):
         """One and only entry point that gets and evaluates static qweb templates

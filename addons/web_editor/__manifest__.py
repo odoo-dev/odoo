@@ -22,11 +22,11 @@ Odoo Web Editor widget.
         # MAIN BUNDLES
         #----------------------------------------------------------------------
 
-        'assets_qweb': [
+        'web.assets_qweb': [
             'web_editor/static/src/xml/*.xml',
         ],
-        'assets_wysiwyg': [
-            ('include', 'assets_summernote'),
+        'web_editor.assets_wysiwyg': [
+            ('include', 'web_editor.assets_summernote'),
 
             # lib
             'web_editor/static/lib/cropperjs/cropper.css',
@@ -37,7 +37,7 @@ Odoo Web Editor widget.
             'web_editor/static/lib/webgl-image-filter/webgl-image-filter.js',
 
             # odoo utils
-            ('include', '_assets_helpers'),
+            ('include', 'web._assets_helpers'),
 
             'web_editor/static/src/scss/bootstrap_overridden.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
@@ -64,7 +64,7 @@ Odoo Web Editor widget.
             'web_editor/static/src/js/wysiwyg/wysiwyg_snippets.js',
             'web_editor/static/src/js/wysiwyg/wysiwyg_iframe.js',
         ],
-        'assets_summernote': [
+        'web_editor.assets_summernote': [
             'web_editor/static/src/js/editor/summernote_import_start.js',
 
             'web_editor/static/lib/summernote/src/css/**/*',
@@ -101,21 +101,21 @@ Odoo Web Editor widget.
             'web_editor/static/src/js/editor/summernote_import_end.js',
             'web_editor/static/src/js/editor/summernote.js',
         ],
-        'assets_common': [
+        'web.assets_common': [
             'web_editor/static/lib/vkbeautify/**/*',
             'web_editor/static/src/js/common/**/*',
             'web_editor/static/src/js/wysiwyg/root.js',
         ],
-        'assets_backend': [
+        'web.assets_backend': [
             'web_editor/static/src/scss/web_editor.common.scss',
             'web_editor/static/src/scss/web_editor.backend.scss',
 
             'web_editor/static/src/js/backend/**/*',
         ],
-        'assets_frontend_minimal': [
+        'web.assets_frontend_minimal': [
             'web_editor/static/src/js/frontend/loader_loading.js',
         ],
-        'assets_frontend': [
+        'web.assets_frontend': [
             'web_editor/static/src/scss/web_editor.common.scss',
             'web_editor/static/src/scss/web_editor.frontend.scss',
 
@@ -126,17 +126,17 @@ Odoo Web Editor widget.
         # SUB BUNDLES
         #----------------------------------------------------------------------
 
-        '_assets_primary_variables': [
+        'web._assets_primary_variables': [
             'web_editor/static/src/scss/web_editor.variables.scss',
         ],
-        '_assets_secondary_variables': [
+        'web._assets_secondary_variables': [
             'web_editor/static/src/scss/secondary_variables.scss',
         ],
-        '_assets_backend_helpers': [
+        'web._assets_backend_helpers': [
             'web_editor/static/src/scss/bootstrap_overridden_backend.scss',
             'web_editor/static/src/scss/bootstrap_overridden.scss',
         ],
-        '_assets_frontend_helpers': [
+        'web._assets_frontend_helpers': [
             ('prepend', 'web_editor/static/src/scss/bootstrap_overridden.scss'),
         ],
 
@@ -144,10 +144,10 @@ Odoo Web Editor widget.
         # TESTS BUNDLES
         # ----------------------------------------------------------------------
 
-        'qunit_suite_tests': [
+        'web.qunit_suite_tests': [
             'web_editor/static/src/js/wysiwyg/test_root.js',
 
-            ('include', 'assets_wysiwyg'),
+            ('include', 'web_editor.assets_wysiwyg'),
 
             'web_editor/static/tests/**/*',
         ],

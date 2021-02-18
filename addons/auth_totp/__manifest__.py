@@ -23,7 +23,7 @@ can setup API keys to replace their main password.
         'views/templates.xml',
     ],
     'assets': {
-        'assets_tests': [
+        'web.assets_tests': [
             'auth_totp/static/tests/totp_flow.js',
         ],
     },

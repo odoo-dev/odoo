@@ -29,16 +29,16 @@ Re-implement Odoo's file import system:
         'security/ir.model.access.csv',
     ],
     'assets': {
-        'assets_qweb': [
+        'web.assets_qweb': [
             'base_import/static/src/xml/base_import.xml',
         ],
-        'assets_backend': [
+        'web.assets_backend': [
             'base_import/static/src/scss/base_import.scss',
             'base_import/static/lib/javascript-state-machine/state-machine.js',
             'base_import/static/src/js/import_action.js',
             'base_import/static/src/js/import_menu.js',
         ],
-        'qunit_suite_tests': [
+        'web.qunit_suite_tests': [
             'base_import/static/tests/import_buttons_tests.js',
         ],
     },

@@ -3,7 +3,7 @@
 
     <!-- Call this template instead of "web.assets_tests" to have the proper conditional check -->
     <template id="conditional_assets_tests" name="Tests Assets Bundle">
-        <t t-call-assets="assets_tests" t-if="'tests' in debug or test_mode_enabled" defer_load="True" />
+        <t t-call-assets="web.assets_tests" t-if="'tests' in debug or test_mode_enabled" defer_load="True" />
     </template>
 
     <template id="web.layout" name="Web layout">&lt;!DOCTYPE html&gt;
@@ -36,8 +36,8 @@
         </xpath>
         <xpath expr="//head/link[last()]" position="after">
             <link rel="preload" href="/web/static/lib/fontawesome/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" crossorigin=""/>
-            <t t-call-assets="assets_common" t-js="false"/>
-            <t t-call-assets="assets_frontend" t-js="false"/>
+            <t t-call-assets="web.assets_common" t-js="false"/>
+            <t t-call-assets="web.assets_frontend" t-js="false"/>
         </xpath>
         <xpath expr="//head/script[@id='web.layout.odooscript']" position="after">
             <script type="text/javascript">
@@ -47,11 +47,11 @@
                     document.cookie = `tz=${userTZ}; path=/`;
                 }
             </script>
-            <t t-call-assets="assets_common_minimal" t-css="false" defer_load="True"/>
-            <t t-call-assets="assets_frontend_minimal" t-css="false" defer_load="True"/>
+            <t t-call-assets="web.assets_common_minimal" t-css="false" defer_load="True"/>
+            <t t-call-assets="web.assets_frontend_minimal" t-css="false" defer_load="True"/>
             <t t-call="web.conditional_assets_tests"/>
-            <t t-call-assets="assets_common_lazy" t-css="false" lazy_load="True"/>
-            <t t-call-assets="assets_frontend_lazy" t-css="false" lazy_load="True"/>
+            <t t-call-assets="web.assets_common_lazy" t-css="false" lazy_load="True"/>
+            <t t-call-assets="web.assets_frontend_lazy" t-css="false" lazy_load="True"/>
         </xpath>
         <xpath expr="//t[@t-raw='0']" position="replace">
             <div id="wrapwrap" t-attf-class="#{pageName or ''}">
@@ -177,7 +177,7 @@
     </template>
 
     <template id="web.test_helpers">
-        <t t-call-assets="tests_assets" t-js="False"/>
+        <t t-call-assets="web.tests_assets" t-js="False"/>
         <style>
             body {
                 position: relative; // bootstrap-datepicker needs this
@@ -194,7 +194,7 @@
                 display: inherit;
             }
         </style>
-        <t t-call-assets="tests_assets" t-css="False"/>
+        <t t-call-assets="web.tests_assets" t-css="False"/>
     </template>
 
     <template id="web.qunit_suite">
@@ -205,15 +205,15 @@
                 <script>
                     odoo._modules = <t t-raw="get_modules_order()"/>;
                 </script>
-                <t t-call-assets="assets_common" t-js="false"/>
-                <t t-call-assets="assets_backend" t-js="false"/>
-                <t t-call-assets="assets_common" t-css="false"/>
-                <t t-call-assets="assets_backend" t-css="false"/>
+                <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_backend" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-css="false"/>
 
                 <t t-call="web.test_helpers"/>
 
-                <t t-call-assets="qunit_suite_tests" t-js="false"/>
-                <t t-call-assets="qunit_suite_tests" t-css="false"/>
+                <t t-call-assets="web.qunit_suite_tests" t-js="false"/>
+                <t t-call-assets="web.qunit_suite_tests" t-css="false"/>
             </t>
             <div id="qunit"/>
             <div id="qunit-fixture"/>
@@ -229,15 +229,15 @@
                 <script>
                     odoo._modules = <t t-raw="get_modules_order()"/>;
                 </script>
-                <t t-call-assets="assets_common" t-js="false"/>
-                <t t-call-assets="assets_backend" t-js="false"/>
-                <t t-call-assets="assets_common" t-css="false"/>
-                <t t-call-assets="assets_backend" t-css="false"/>
+                <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_backend" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-css="false"/>
 
                 <t t-call="web.test_helpers"/>
 
-                <t t-call-assets="qunit_mobile_suite_tests" t-js="false"/>
-                <t t-call-assets="qunit_mobile_suite_tests" t-css="false"/>
+                <t t-call-assets="web.qunit_mobile_suite_tests" t-js="false"/>
+                <t t-call-assets="web.qunit_mobile_suite_tests" t-css="false"/>
             </t>
             <div id="qunit"/>
             <div id="qunit-fixture"/>
@@ -255,10 +255,10 @@
                     odoo._modules = <t t-raw="get_modules_order()"/>;
                 </script>
 
-                <t t-call-assets="assets_common" t-js="false"/>
-                <t t-call-assets="assets_backend" t-js="false"/>
-                <t t-call-assets="assets_common" t-css="false"/>
-                <t t-call-assets="assets_backend" t-css="false"/>
+                <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_backend" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-css="false"/>
 
                 <t t-call="web.test_helpers"/>
 
@@ -300,11 +300,11 @@
                     odoo.loadMenusPromise = odoo.reloadMenus();
                     odoo._modules = <t t-raw="get_modules_order()"/>;
                 </script>
-                <t t-call-assets="assets_common" t-js="false"/>
-                <t t-call-assets="assets_backend" t-js="false"/>
-                <t t-call-assets="assets_common" t-css="false"/>
-                <t t-call-assets="assets_backend" t-css="false"/>
-                <t t-call-assets="assets_backend_prod_only" t-css="false"/>
+                <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_backend" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-css="false"/>
+                <t t-call-assets="web.assets_backend_prod_only" t-css="false"/>
                 <t t-call="web.conditional_assets_tests"/>
             </t>
             <t t-set="head" t-value="head_web + (head or '')"/>

@@ -14,9 +14,9 @@
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="initial-scale=1"/>
                 <title><t t-esc="title or 'Odoo Report'"/></title>
-                <t t-call-assets="report_common" t-js="false"/>
-                <t t-call-assets="common" t-css="false"/>
-                <t t-call-assets="report_common" t-css="false"/>
+                <t t-call-assets="web.report_assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.report_assets_common" t-css="false"/>
             </head>
             <body t-att-class="'container' if not full_width else 'container-fluid'">
                 <div id="wrapwrap">
@@ -40,8 +40,8 @@
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="initial-scale=1"/>
                 <title><t t-esc="title or 'Odoo Report'"/></title>
-                <t t-call-assets="report_common" t-js="false"/>
-                <t t-call-assets="common" t-css="false"/>
+                <t t-call-assets="web.report_assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
                 <style>
                     <t t-raw="preview_css"/>
 
@@ -236,9 +236,9 @@
         <t t-raw="'&lt;base href=%s&gt;' % base_url"/>
         <html style="height: 0;">
             <head>
-                <t t-call-assets="report_pdf" t-js="false"/>
-                <t t-call-assets="report_common" t-js="false"/>
-                <t t-call-assets="report_pdf" t-css="false"/>
+                <t t-call-assets="web.report_assets_pdf" t-js="false"/>
+                <t t-call-assets="web.report_assets_common" t-js="false"/>
+                <t t-call-assets="web.report_assets_pdf" t-css="false"/>
                 <meta charset="utf-8"/>
                 <t t-set="subst_needed" t-value="subst is True"/>
                 <t t-if="subst_needed">

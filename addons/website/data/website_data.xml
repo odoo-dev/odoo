@@ -787,14 +787,14 @@
     <data>
         <record id="option_ripple_effect_css" model="ir.asset">
             <field name="name">option_ripple_effect_css</field>
-            <field name="bundle">assets_frontend</field>
+            <field name="bundle">web.assets_frontend</field>
             <field name="glob">website/static/src/scss/options/ripple_effect.scss</field>
             <field name="active" eval="False"/>
         </record>
 
         <record id="option_ripple_effect_js" model="ir.asset">
             <field name="name">option_ripple_effect_js</field>
-            <field name="bundle">assets_frontend</field>
+            <field name="bundle">web.assets_frontend</field>
             <field name="glob">website/static/src/js/content/ripple_effect.js</field>
             <field name="active" eval="False"/>
         </record>
