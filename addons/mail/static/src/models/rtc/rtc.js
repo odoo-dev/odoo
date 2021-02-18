@@ -22,18 +22,6 @@ function factory(dependencies) {
         //----------------------------------------------------------------------
 
         /**
-         * Open the form view of the record with provided id and model.
-         * Gets the chat with the provided person and returns it.
-         *
-         * If a chat is not appropriate, a notification is displayed instead.
-         *
-         * @param {Object} param0
-         * @param {integer} [param0.partnerId]
-         * @param {integer} [param0.userId]
-         * @param {Object} [options]
-         * @returns {mail.thread|undefined}
-         */
-        /**
          * @param {String} callToken the peerToken of the called peer
          */
         async connectToPeer(callToken) {
