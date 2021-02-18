@@ -112,14 +112,17 @@ class MailClientExtensionController(http.Controller):
         return {'modules': ['contacts', 'crm']}
 
     # Find an existing company based on the email.
-    def _find_existing_company(self, domain):
-        if domain in iap_tools._MAIL_DOMAIN_BLACKLIST:
-            return
-        return request.env['res.partner'].search([('is_company', '=', True), ('email', '=ilike', '%' + domain)], limit=1)
+    def _find_existing_company(self, normalized_email):
+        sender_domain = normalized_email.split('@')[1]
+        search = sender_domain if sender_domain not in iap_tools._MAIL_DOMAIN_BLACKLIST else normalized_email
+        return request.env['res.partner'].search([('is_company', '=', True), ('email', '=ilike', '%' + search)], limit=1)
 
     def _get_company_dict(self, company):
         if not company:
             return {'id': -1}
+
+        print('_get_company_dict')
+        print(company.iap_enrich_info)
 
         return {
                     'id': company.id,
@@ -127,6 +130,7 @@ class MailClientExtensionController(http.Controller):
                     'phone': company.phone,
                     'mobile': company.mobile,
                     'email': company.email,
+                    'image': company.image_1920,
                     'address': {
                         'street': company.street,
                         'city': company.city,
@@ -152,7 +156,7 @@ class MailClientExtensionController(http.Controller):
             'zip': iap_data.get("postal_code"),
             'phone': phone_numbers[0] if phone_numbers else None,
             'website': iap_data.get("domain"),
-            'email': emails[0] if emails else None
+            'email': emails[0] if emails else domain
         }
 
         logo_url = iap_data.get('logo')
@@ -183,7 +187,7 @@ class MailClientExtensionController(http.Controller):
             values=iap_data,
             subtype_id=request.env.ref('mail.mt_note').id,
         )
-        
+
         return new_company, {'type': 'company_created'}
 
     @http.route('/mail_client_extension/partner/get', type="json", auth="outlook", cors="*")
@@ -215,7 +219,7 @@ class MailClientExtensionController(http.Controller):
             if partner.parent_id:
                 response['partner']['company'] = self._get_company_dict(partner.parent_id)
             else:
-                company = self._find_existing_company(sender_domain)
+                company = self._find_existing_company(normalized_email)
                 if not company: # create and enrich company
                     company, enrichment_info = self._create_company_from_iap(sender_domain)
                     response['enrichment_info'] = enrichment_info
@@ -228,7 +232,7 @@ class MailClientExtensionController(http.Controller):
                 'email': email,
                 'enrichment_info': None
             }
-            company = self._find_existing_company(sender_domain)
+            company = self._find_existing_company(normalized_email)
             if not company:  # create and enrich company
                 company, enrichment_info = self._create_company_from_iap(sender_domain)
                 response['enrichment_info'] = enrichment_info
@@ -236,28 +240,63 @@ class MailClientExtensionController(http.Controller):
 
         return response
 
+    @http.route('/mail_client_extension/partners/query', type="json", auth="outlook", cors="*")
+    def res_partners_get_by_query(self, query, **kwargs):
+        response = {}
+
+        filter_domain = ['|', '|', ('display_name', 'ilike', query), ('ref', '=', query), ('email', 'ilike', query)]
+        # Search for the partner based on the email.
+        # If multiple are found, take the first one.
+        partners_response = []
+        partners = request.env['res.partner'].search(filter_domain, limit=30)
+        for partner in partners:
+            response = {
+                'id': partner.id,
+                'name': partner.name,
+                'title': partner.function,
+                'email': partner.email,
+                'image': partner.image_128,
+                'phone': partner.phone,
+                'mobile': partner.mobile,
+                'enrichment_info': None
+            }
+            # if there is already a company for this partner, just take it without enrichment.
+            if partner.parent_id:
+                response['company'] = self._get_company_dict(partner.parent_id)
+            else:
+                response['company'] = self._get_company_dict(company=None)
+            partners_response.append(response)
+        return {"partners": partners_response}
+
     @http.route('/mail_client_extension/partner/create', type="json", auth="outlook", cors="*")
-    def res_partner_create(self, email, name, company, **kwargs):
+    def res_partner_create(self, email, name, company=False, **kwargs):
         # TODO search the company again instead of relying on the one provided here?
         # Create the partner if needed.
         partner_info = {
             'name': name,
             'email': email,
         }
-        if company > -1:
+        if company and company > 0:
             partner_info['parent_id'] = company
         partner = request.env['res.partner'].create(partner_info)
 
         response = {'id': partner.id}
         return response
 
+    # TODO: remove
     @http.route('/mail_client_extension/log_single_mail_content', type="json", auth="outlook", cors="*")
-    def log_single_mail_content(self, lead, message, **kw):
+    def log_single_mail_content_lead(self, lead, message, **kw):
         crm_lead = request.env['crm.lead'].browse(lead)
         crm_lead.message_post(body=message)
 
+    @http.route('/mail_client_extension/log_email', type="json", auth="outlook", cors="*")
+    def log_single_mail_content(self, res_id, res_model, message, **kw):
+        assert res_model in ('crm.lead', 'res.partner')
+        crm_lead = request.env[res_model].browse(res_id)
+        crm_lead.message_post(body=message)
+
     @http.route('/mail_client_extension/lead/get_by_partner_id', type="json", auth="outlook", cors="*")
-    def crm_lead_get_by_partner_id(self, partner, limit, offset, **kwargs):
+    def crm_lead_get_by_partner_id(self, partner, limit=1000, offset=0, **kwargs):
         partner_leads = request.env['crm.lead'].search([('partner_id', '=', partner)], offset=offset, limit=limit)
         leads = []
         for lead in partner_leads:
