@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import datetime, timedelta
+
 from odoo.addons.crm.tests.common import TestCrmCommon
+from odoo.addons.website.tests.test_website_visitor import WebsiteVisitorTests
+from odoo.tests import tagged
 from odoo.tests.common import users
 
 
+@tagged('website_visitor')
 class TestWebsiteVisitor(TestCrmCommon):
 
     def setUp(self):
@@ -65,3 +70,55 @@ class TestWebsiteVisitor(TestCrmCommon):
         customer.write({'mobile': False})
         self.assertEqual(visitor.email, customer.email_normalized)
         self.assertEqual(visitor.mobile, lead_2.mobile)
+
+
+@tagged('website_visitor')
+class WebsiteVisitorTestsCrm(WebsiteVisitorTests):
+    def test_clean_inactive_visitors_crm(self):
+        """ Visitors attached to leads should not be deleted even if not connected recently. """
+        active_visitors = self.env['website.visitor'].create([{
+            'name': 'Lead Carl',
+            'lang_id': self.env.ref('base.lang_en').id,
+            'country_id': self.env.ref('base.be').id,
+            'website_id': 1,
+            'last_connection_datetime': datetime.now() - timedelta(days=8),
+            'lead_ids': [(0, 0, {
+                'name': 'Lead Carl'
+            })]
+        }])
+
+        self._test_clean_inactive_visitors(self.env['website.visitor'], active_visitors)
+
+    def test_link_to_visitor_crm(self):
+        """ Same as parent's 'test_link_to_visitor' except we also test that leads
+        are merged into main visitor. """
+        [main_visitor, linked_visitor] = self.env['website.visitor'].create([
+            self._prepare_main_visitor_data(),
+            self._prepare_linked_visitor_data()
+        ])
+        linked_visitor._link_to_visitor(main_visitor)
+
+        self.assertVisitorDeactivated(linked_visitor, main_visitor)
+
+        # leads of both visitors should be merged into main one
+        self.assertEqual(
+            main_visitor.lead_ids.mapped('name'),
+            ['Mitchel Main Lead', 'Mitchel Secondary Lead'])
+
+    def _prepare_main_visitor_data(self):
+        values = super(WebsiteVisitorTestsCrm, self)._prepare_main_visitor_data()
+        values.update({
+            'lead_ids': [(0, 0, {
+                'name': 'Mitchel Main Lead'
+            })]
+        })
+        return values
+
+    def _prepare_linked_visitor_data(self):
+        values = super(WebsiteVisitorTestsCrm, self)._prepare_linked_visitor_data()
+        values.update({
+            'lead_ids': [(0, 0, {
+                'name': 'Mitchel Secondary Lead'
+            })]
+        })
+        return values
