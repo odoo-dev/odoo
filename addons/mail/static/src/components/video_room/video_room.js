@@ -46,18 +46,7 @@ class VideoRoom extends Component {
         this.peer = new Peer(this.state.peerToken);
         await this._getStream();
         this.peer.on('call', call => {
-            call.answer(this.stream);
-            call.on('stream', callerStream => {
-                const callToken = call.peer;
-                this._addStream(callerStream, callToken);
-                call.peerConnection.onconnectionstatechange = () => {
-                    this._onConnectionStateChange(call.peerConnection.connectionState, callToken);
-                };
-            });
-            call.on('error', error => {
-                console.log(error);
-            });
-
+            this._processCall(call);
         });
         this.peer.on('error', error => {
             console.log('PEER-ERROR:::::');
@@ -109,6 +98,22 @@ class VideoRoom extends Component {
             });
         }
     }
+    _processCall(call) {
+        if (!this.room.peerTokens.includes(call.peer)) {
+            return;
+        }
+        call.answer(this.stream);
+        call.on('stream', callerStream => {
+            const callToken = call.peer;
+            this._addStream(callerStream, callToken);
+            call.peerConnection.onconnectionstatechange = () => {
+                this._onConnectionStateChange(call.peerConnection.connectionState, callToken);
+            };
+        });
+        call.on('error', error => {
+            console.log(error);
+        });
+    }
     async _removePeer(token) {
         //this.room.removeUser(token);
         const refs = this._getRefs();
@@ -156,15 +161,6 @@ class VideoRoom extends Component {
             // ignore
         }
         return video;
-    }
-    /**
-     * To be overwritten in tests.
-     *
-     * @private
-     */
-    async _loadAssets() {
-        asset = await ajax.loadAsset('mail.peer_js_assets');
-        await ajax.loadLibs(asset);
     }
 
     //--------------------------------------------------------------------------
