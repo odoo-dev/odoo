@@ -2186,7 +2186,7 @@ var SnippetsMenu = Widget.extend({
                     $toInsert.removeClass('oe_snippet_body');
                     self.draggableComponent.$scrollTarget.off('scroll.scrolling_element');
 
-                    if (!dropped && ui.position.top > 3 && ui.position.left + ui.helper.outerHeight() < self.el.getBoundingClientRect().left) {
+                    if (!dropped && ui.position.top > 3 && ui.position.left < 0) {
                         var $el = $.nearest({x: ui.position.left, y: ui.position.top}, '.oe_drop_zone', {container: document.body}).first();
                         if ($el.length) {
                             $el.after($toInsert);
