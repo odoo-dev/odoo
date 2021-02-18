@@ -2549,7 +2549,12 @@ class AccountMove(models.Model):
             ('date', '<=', fields.Date.today()),
             ('auto_post', '=', True),
         ])
-        records.post()
+        if records:
+            cr = self.env.cr
+            for rec in records :
+                rec.post()
+                cr.commit()
+
 
     # offer the possibility to duplicate thanks to a button instead of a hidden menu, which is more visible
     def action_duplicate(self):
