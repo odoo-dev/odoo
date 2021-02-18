@@ -243,6 +243,11 @@
     &.o-has-message-selection:not(.o-selected) {
         opacity: 0.5;
     }
+
+    &.o-highlighted {
+        background-color: rgba($o-brand-primary, .1);
+        border-left: 4px solid $o-brand-primary;
+    }
 }
 
 .o_Message_authorName {

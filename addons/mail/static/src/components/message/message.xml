@@ -7,6 +7,7 @@
                 'o-clicked': state.isClicked,
                 'o-discussion': message and (message.is_discussion or message.is_notification),
                 'o-has-message-selection': threadView and threadView.threadViewer and threadView.threadViewer.selectedMessage,
+                'o-highlighted': message and message.isHighlighted,
                 'o-mobile': env.messaging.device.isMobile,
                 'o-not-discussion': message and !(message.is_discussion or message.is_notification),
                 'o-notification': message and message.message_type === 'notification',
