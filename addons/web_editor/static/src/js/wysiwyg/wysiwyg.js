@@ -84,9 +84,10 @@ const Wysiwyg = Widget.extend({
         this.$editable.data('oe-model', options.recordInfo.res_model);
         this.$editable.data('oe-id', options.recordInfo.res_id);
         $(document).on('mousedown', this._blur);
-        this.$editable.on('blur', () => {
-            console.log('trigger blur');
-            this.trigger_up('wysiwyg_blur');
+        this.$editable.on('blur', (e) => {
+            if(!e.relatedTarget || !e.relatedTarget.closest('.oe-toolbar')){
+                this.trigger_up('wysiwyg_blur');
+            }
         });
 
         this.toolbar = new Toolbar(this, this.options.toolbarTemplate);
@@ -193,16 +194,12 @@ const Wysiwyg = Widget.extend({
                 startOffsetTop = e.pageY;
             };
             this.resizerMousemove = (e) => {
-                console.log("e.pageY:", e.pageY);
                 const offsetTop = e.pageY - startOffsetTop;
-                console.log('offsetTop', offsetTop);
                 let height = startHeight + offsetTop;
-                console.log("height:", height);
                 if (height < minHeight) height = minHeight;
                 this.$editable.height(height);
             };
             this.resizerMouseup = () => {
-                console.log('off')
                 $body.off('mousemove', this.resizerMousemove);
                 $body.off('mouseup', this.resizerMouseup);
             };
