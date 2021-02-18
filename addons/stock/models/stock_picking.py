@@ -921,6 +921,11 @@ class Picking(models.Model):
         pickings_to_backorder.with_context(cancel_backorder=False)._action_done()
         return True
 
+    def action_set_quantities_to_reservation(self):
+        for move in self.move_lines.filtered(lambda move: move.state in ('partially_available', 'assigned')):
+            if move.product_id.tracking == 'none':
+                move.quantity_done = move.reserved_availability
+
     def _pre_action_done_hook(self):
         if not self.env.context.get('skip_immediate'):
             pickings_to_immediate = self._check_immediate()
