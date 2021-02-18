@@ -18,4 +18,9 @@
     'demo': [
         'data/product_demo.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            'website_sale_gift_card/static/src/js/website_sale_gift_card.js',
+        ]
+    }
 }

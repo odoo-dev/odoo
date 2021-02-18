@@ -18,8 +18,23 @@ On a simple click, your visitors can subscribe to mailing lists managed in the E
         'views/mailing_list_views.xml',
         'views/website_mass_mailing_views.xml',
     ],
-    'qweb': [
-        'static/src/xml/*.xml',
-    ],
     'auto_install': ['website', 'mass_mailing'],
+    'assets': {
+        'web.assets_frontend': [
+            # after //link[last()]
+            'website_mass_mailing/static/src/scss/website_mass_mailing_popup.scss',
+            # after //script[last()]
+            'website_mass_mailing/static/src/js/website_mass_mailing.js',
+        ],
+        'website.assets_wysiwyg': [
+            # after //script[last()]
+            'website_mass_mailing/static/src/js/website_mass_mailing.editor.js',
+        ],
+        'web.assets_qweb': [
+            'website_mass_mailing/static/src/xml/*.xml',
+        ],
+        'web.assets_tests': [
+            'website_mass_mailing/static/tests/tours/newsletter_popup.js'
+        ]
+    }
 }
