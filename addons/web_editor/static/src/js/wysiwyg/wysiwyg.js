@@ -113,6 +113,9 @@ const Wysiwyg = Widget.extend({
                     $field.attr('contenteditable', false);
                     $field.find('.oe_currency_value').attr('contenteditable', true);
                 }
+                if ($field.is('[data-oe-many2one-id]')) {
+                    $field.attr('contenteditable', false);
+                }
             }
         );
 
@@ -424,7 +427,7 @@ const Wysiwyg = Widget.extend({
                     if ($node.data('oe-type')) $nodes = $nodes.filter('[data-oe-type="'+$node.data('oe-type')+'"]');
                     if ($node.data('oe-expression')) $nodes = $nodes.filter('[data-oe-expression="'+$node.data('oe-expression')+'"]');
                     else if ($node.data('oe-xpath')) $nodes = $nodes.filter('[data-oe-xpath="'+$node.data('oe-xpath')+'"]');
-                    if ($node.data('oe-contact-options')) $nodes = $nodes.filter('[data-oe-contact-options="'+$node.data('oe-contact-options')+'"]');
+                    if ($node.data('oe-contact-options')) $nodes = $nodes.filter("[data-oe-contact-options='"+$node[0].dataset.oeContactOptions+"']");
 
                     let nodes = $node.get();
 
