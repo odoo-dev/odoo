@@ -448,6 +448,12 @@ var BasicModel = AbstractModel.extend({
                     if (parent && parent.type === 'list') {
                         parent.data = _.without(parent.data, record.id);
                         delete self.localData[record.id];
+                        // Check if we are on last page and all record are deleted from current
+                        // page i.e. if there is no state.data.length then go to previous page
+                        // if (!parent.data.length && parent.count <= (parent.offset + parent.limit)) {
+                        if (!parent.data.length && parent.offset >= parent.limit) {
+                            parent.offset = (parent.offset - parent.limit) > 0 ? (parent.offset - parent.limit) : 0;
+                        }
                     } else {
                         record.res_ids.splice(record.offset, 1);
                         record.offset = Math.min(record.offset, record.res_ids.length - 1);
