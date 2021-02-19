@@ -245,7 +245,7 @@ class Channel(models.Model):
         result = super(Channel, self).write(vals)
 
         if vals.get('group_ids'):
-            self._subscribe_users()
+            self._subscribe_users_automatically()
 
         # avoid keeping messages to moderate and accept them
         if vals.get('moderation') is False:
@@ -266,18 +266,17 @@ class Channel(models.Model):
     # MEMBERS MANAGEMENT
     # ------------------------------------------------------------
 
-    def _subscribe_users(self):
-        to_create = []
-        for mail_channel in self:
-            if mail_channel.group_ids:
-                partners_to_add = mail_channel.group_ids.users.partner_id - mail_channel.channel_partner_ids
-                to_create += [{
-                    'channel_id': mail_channel.id,
-                    'partner_id': partner.id,
-                } for partner in partners_to_add]
-
+    def _subscribe_users_automatically(self):
+        to_create = self._subscribe_users_automatically_get_members()
         if to_create:
-            self.env['mail.channel.partner'].create(to_create)
+            self.env['mail.channel.partner'].sudo().create(to_create)
+
+    def _subscribe_users_automatically_get_members(self):
+        return [
+            {'channel_id': channel.id, 'partner_id': partner.id}
+            for channel in self.filtered(lambda channel: channel.group_ids)
+            for partner in channel.group_ids.users.partner_id - channel.channel_partner_ids
+        ]
 
     def action_follow(self):
         self.ensure_one()
