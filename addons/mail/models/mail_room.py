@@ -21,6 +21,7 @@ class RtcRoom(models.Model):
         current_partner.room_id = self.id
         self._notify_room_change(current_partner.id)
 
+        # TODO ultimately, we return partner_ids instead of peer_tokens. this is a POC simplification to avoid the front-end relational layer.
         return {
             'peerToken': current_partner.peer_token,
             'peerTokens': [partner_id.peer_token for partner_id in self.partner_ids if partner_id.im_status in ['online', 'away']],
