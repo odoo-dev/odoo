@@ -83,13 +83,12 @@ class ThreadView extends Component {
 
     /**
      * @private
-     * @param {MouseEvent} ev
      */
-    onScroll(ev) {
+    _loadMore() {
         if (!this._messageListRef.comp) {
             return;
         }
-        this._messageListRef.comp.onScroll(ev);
+        this._messageListRef.comp._loadMore();
     }
 
     /**

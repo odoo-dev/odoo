@@ -116,7 +116,9 @@ class Chatter extends Component {
         if (!this._threadRef.comp) {
             return;
         }
-        this._threadRef.comp.onScroll(ev);
+        if (ev.target.scrollTop === (ev.target.scrollHeight - ev.target.offsetHeight)) {
+            this._threadRef.comp._loadMore(ev);
+        }
     }
 
 }
