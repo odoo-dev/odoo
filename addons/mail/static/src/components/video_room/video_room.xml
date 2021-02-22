@@ -3,24 +3,6 @@
 
     <t t-name="mail.VideoRoom" owl="1">
         <div class="o_VideoRoom">
-            <button class="btn btn-secondary mr-2"
-                aria-label="Mute/unmute"
-                title="Mute/unmute"
-                t-on-click="_onClickMicrophone">
-                <i class="fa" t-att-class="{
-                    'fa-microphone': env.mailRtc.sendSound,
-                    'fa-microphone-slash': !env.mailRtc.sendSound,
-                    'text-danger': !env.mailRtc.sendSound,
-                }"/>
-            </button>
-            <button class="btn btn-secondary mr-2"
-                aria-label="Toggle Video"
-                title="Toggle Video"
-                t-on-click="_onClickCamera">
-                <i class="fa fa-video-camera" t-att-class="{
-                    'text-danger': !env.mailRtc.sendVideo,
-                }"/>
-            </button>
             <div class="o_VideoRoom_video_container">
                 <t t-if="activePeers and activePeers.length">
                     <t t-foreach="activePeers" t-as="peer" t-key="peer.token">

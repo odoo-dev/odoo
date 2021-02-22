@@ -169,12 +169,14 @@ class DiscussSidebar extends Component {
      */
     _useStoreSelector(props) {
         const discuss = this.env.messaging.discuss;
+        const mailRtc = this.env.mailRtc;
         const chatRooms = this.env.models['mail.chat_room'].all();
         return {
             allOrderedAndPinnedChats: this.quickSearchPinnedAndOrderedChats,
             allOrderedAndPinnedMailboxes: this.orderedMailboxes,
             allOrderedAndPinnedMultiUserChannels: this.quickSearchOrderedAndPinnedMultiUserChannels,
             chatRooms: chatRooms.map(chatRoom => chatRoom.__state),
+            chatRoomLocalId: this.env.messaging.chatRoomLocalId,
             allPinnedChannelAmount:
                 this.env.models['mail.thread']
                 .all(thread =>
@@ -184,6 +186,8 @@ class DiscussSidebar extends Component {
             discussIsAddingChannel: discuss && discuss.isAddingChannel,
             discussIsAddingChat: discuss && discuss.isAddingChat,
             discussSidebarQuickSearchValue: discuss && discuss.sidebarQuickSearchValue,
+            sendSound: mailRtc.sendSound,
+            sendVideo: mailRtc.sendVideo,
         };
     }
 
@@ -191,6 +195,17 @@ class DiscussSidebar extends Component {
     // Handlers
     //--------------------------------------------------------------------------
 
+    _onClickMicrophone(ev) {
+        this.env.mailRtc.toggleMicrophone();
+    }
+
+    _onClickCamera(ev) {
+        this.env.mailRtc.toggleVideo();
+    }
+
+    _onClickDisconnect(ev) {
+        this.env.messaging.toggleRoom();
+    }
     /**
      * @private
      * @param {Event} ev

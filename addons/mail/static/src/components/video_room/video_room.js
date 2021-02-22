@@ -21,8 +21,6 @@ class VideoRoom extends Component {
                 chatRoom: chatRoom ? chatRoom.__state : undefined,
                 partnerRoot: this.env.messaging.partnerRoot,
                 activePeers: mailRtc.activePeers,
-                sendSound: mailRtc.sendSound,
-                sendVideo: mailRtc.sendVideo,
             };
             this.localToken = '';
         });
@@ -87,14 +85,6 @@ class VideoRoom extends Component {
 
     async _onVideoLoadedMetaData(ev) {
         await ev.target.play();
-    }
-
-    _onClickMicrophone(ev) {
-        this.env.mailRtc.toggleMicrophone();
-    }
-
-    _onClickCamera(ev) {
-        this.env.mailRtc.toggleVideo();
     }
 }
 

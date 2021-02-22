@@ -2,7 +2,44 @@
 // Layout
 // ------------------------------------------------------------------
 
+
+.o_DiscussSidebar_threadContainer {
+    overflow-y: scroll;
+    margin-bottom: 50px;
+
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: lightgray;
+    }
+}
+
+.o_DiscussSidebar_inputDeviceController {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    bottom: 10px;
+}
+
+.o_DiscussSidebar_inputDeviceController_room {
+    display: flex;
+    margin: auto auto auto 5px;
+    max-width: 50%;
+    overflow: hidden;
+}
+
+.o_DiscussSidebar_inputDeviceController_room_name {
+    margin: auto auto auto 0px;
+}
+
+.o_DiscussSidebar_groupRoom_active {
+    font-weight: bold;
+}
+
 .o_DiscussSidebar {
+    position: relative;
     display: flex;
     flex-flow: column;
     width: $o-mail-chat-sidebar-width;

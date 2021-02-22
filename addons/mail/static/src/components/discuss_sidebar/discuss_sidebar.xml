@@ -12,83 +12,123 @@
                 </t>
             </div>
             <hr class="o_DiscussSidebar_separator"/>
-            <t t-if="env.models['mail.thread'].all(thread => thread.isPinned and thread.model === 'mail.channel').length > 19">
-                <input class="o_DiscussSidebar_quickSearch" t-on-input="_onInputQuickSearch" placeholder="Quick search..." t-ref="quickSearchInput" t-esc="discuss.sidebarQuickSearchValue"/>
+            <div class="o_DiscussSidebar_threadContainer">
+                <t t-if="env.models['mail.thread'].all(thread => thread.isPinned and thread.model === 'mail.channel').length > 19">
+                    <input class="o_DiscussSidebar_quickSearch" t-on-input="_onInputQuickSearch" placeholder="Quick search..." t-ref="quickSearchInput" t-esc="discuss.sidebarQuickSearchValue"/>
+                </t>
+                <div class="o_DiscussSidebar_group o_DiscussSidebar_groupChannel">
+                    <div class="o_DiscussSidebar_groupHeader">
+                        <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle o-clickable" t-on-click="_onClickChannelTitle">
+                            Channels
+                        </div>
+                        <div class="o-autogrow"/>
+                        <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus" t-on-click="_onClickChannelAdd" title="Add or join a channel"/>
+                    </div>
+                    <div class="o_DiscussSidebar_list">
+                        <t t-if="discuss.isAddingChannel">
+                            <div class="o_DiscussSidebar_item o_DiscussSidebar_itemNew">
+                                <AutocompleteInput
+                                    class="o_DiscussSidebar_itemNewInput"
+                                    customClass="'o_DiscussSidebar_newChannelAutocompleteSuggestions'"
+                                    isFocusOnMount="true"
+                                    isHtml="true"
+                                    placeholder="FIND_OR_CREATE_CHANNEL"
+                                    select="_onAddChannelAutocompleteSelect"
+                                    source="_onAddChannelAutocompleteSource"
+                                    t-on-o-hide="_onHideAddingItem"
+                                />
+                            </div>
+                        </t>
+                        <t t-foreach="quickSearchOrderedAndPinnedMultiUserChannels" t-as="channel" t-key="channel.localId">
+                            <DiscussSidebarItem
+                                class="o_DiscussSidebar_item"
+                                threadLocalId="channel.localId"
+                            />
+                        </t>
+                    </div>
+                </div>
+                <div class="o_DiscussSidebar_group o_DiscussSidebar_groupChat">
+                    <div class="o_DiscussSidebar_groupHeader">
+                        <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle">
+                            Direct Messages
+                        </div>
+                        <div class="o-autogrow"/>
+                        <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus" t-on-click="_onClickChatAdd" title="Start a conversation"/>
+                    </div>
+                    <div class="o_DiscussSidebar_list">
+                        <t t-if="discuss.isAddingChat">
+                            <div class="o_DiscussSidebar_item o_DiscussSidebar_itemNew">
+                                <AutocompleteInput
+                                    class="o_DiscussSidebar_itemNewInput"
+                                    isFocusOnMount="true"
+                                    placeholder="'Find or start a conversation...'"
+                                    select="_onAddChatAutocompleteSelect"
+                                    source="_onAddChatAutocompleteSource"
+                                    t-on-o-hide="_onHideAddingItem"
+                                />
+                            </div>
+                        </t>
+                        <t t-foreach="quickSearchPinnedAndOrderedChats" t-as="chat" t-key="chat.localId">
+                            <DiscussSidebarItem
+                                class="o_DiscussSidebar_item"
+                                threadLocalId="chat.localId"
+                            />
+                        </t>
+                    </div>
+                </div>
+                <div class="o_DiscussSidebar_group o_DiscussSidebar_groupRoom">
+                    <div class="o_DiscussSidebar_groupHeader">
+                        <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle">
+                            Chat Rooms
+                        </div>
+                        <div class="o-autogrow"/>
+                        <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus"/>
+                    </div>
+                    <div class="o_DiscussSidebar_list">
+                        <t t-foreach="rooms" t-as="room" t-key="room.localId">
+                            <div t-att-class="{
+                                'o_DiscussSidebar_groupRoom_active': env.messaging.chatRoomLocalId === room.localId,
+                            }" class="o_DiscussSidebarItem" t-on-click="_onClickRoom(room.localId)">
+                                <t t-esc="room.name"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+            <t t-if="env.messaging.chatRoomLocalId">
+                <!-- TODO component? -->
+                <div class="o_DiscussSidebar_inputDeviceController">
+                    <div class="o_DiscussSidebar_inputDeviceController_room">
+                        <button class="btn mr-2"
+                            aria-label="Disconnect"
+                            title="Disconnect"
+                            t-on-click="_onClickDisconnect">
+                            <i class="fa fa-lg fa-phone text-danger"/>
+                        </button>
+                        <span class="o_DiscussSidebar_inputDeviceController_room_name" t-esc="env.messaging.chatRoomLocalId"/>
+                    </div>
+                    <div class="o_DiscussSidebar_inputDeviceController_buttons">
+                        <button class="btn mr-2"
+                            aria-label="Mute/unmute"
+                            title="Mute/unmute"
+                            t-on-click="_onClickMicrophone">
+                            <i class="fa fa-lg" t-att-class="{
+                                'fa-microphone': env.mailRtc.sendSound,
+                                'fa-microphone-slash': !env.mailRtc.sendSound,
+                                'text-danger': !env.mailRtc.sendSound,
+                            }"/>
+                        </button>
+                        <button class="btn mr-2"
+                            aria-label="Toggle Video"
+                            title="Toggle Video"
+                            t-on-click="_onClickCamera">
+                            <i class="fa fa-lg fa-video-camera" t-att-class="{
+                                'text-danger': !env.mailRtc.sendVideo,
+                            }"/>
+                        </button>
+                    </div>
+                </div>
             </t>
-            <div class="o_DiscussSidebar_group o_DiscussSidebar_groupChannel">
-                <div class="o_DiscussSidebar_groupHeader">
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle o-clickable" t-on-click="_onClickChannelTitle">
-                        Channels
-                    </div>
-                    <div class="o-autogrow"/>
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus" t-on-click="_onClickChannelAdd" title="Add or join a channel"/>
-                </div>
-                <div class="o_DiscussSidebar_list">
-                    <t t-if="discuss.isAddingChannel">
-                        <div class="o_DiscussSidebar_item o_DiscussSidebar_itemNew">
-                            <AutocompleteInput
-                                class="o_DiscussSidebar_itemNewInput"
-                                customClass="'o_DiscussSidebar_newChannelAutocompleteSuggestions'"
-                                isFocusOnMount="true"
-                                isHtml="true"
-                                placeholder="FIND_OR_CREATE_CHANNEL"
-                                select="_onAddChannelAutocompleteSelect"
-                                source="_onAddChannelAutocompleteSource"
-                                t-on-o-hide="_onHideAddingItem"
-                            />
-                        </div>
-                    </t>
-                    <t t-foreach="quickSearchOrderedAndPinnedMultiUserChannels" t-as="channel" t-key="channel.localId">
-                        <DiscussSidebarItem
-                            class="o_DiscussSidebar_item"
-                            threadLocalId="channel.localId"
-                        />
-                    </t>
-                </div>
-            </div>
-            <div class="o_DiscussSidebar_group o_DiscussSidebar_groupChat">
-                <div class="o_DiscussSidebar_groupHeader">
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle">
-                        Direct Messages
-                    </div>
-                    <div class="o-autogrow"/>
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus" t-on-click="_onClickChatAdd" title="Start a conversation"/>
-                </div>
-                <div class="o_DiscussSidebar_list">
-                    <t t-if="discuss.isAddingChat">
-                        <div class="o_DiscussSidebar_item o_DiscussSidebar_itemNew">
-                            <AutocompleteInput
-                                class="o_DiscussSidebar_itemNewInput"
-                                isFocusOnMount="true"
-                                placeholder="'Find or start a conversation...'"
-                                select="_onAddChatAutocompleteSelect"
-                                source="_onAddChatAutocompleteSource"
-                                t-on-o-hide="_onHideAddingItem"
-                            />
-                        </div>
-                    </t>
-                    <t t-foreach="quickSearchPinnedAndOrderedChats" t-as="chat" t-key="chat.localId">
-                        <DiscussSidebarItem
-                            class="o_DiscussSidebar_item"
-                            threadLocalId="chat.localId"
-                        />
-                    </t>
-                </div>
-            </div>
-            <div class="o_DiscussSidebar_group o_DiscussSidebar_groupRoom">
-                <div class="o_DiscussSidebar_groupHeader">
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle">
-                        Chat Rooms
-                    </div>
-                    <div class="o-autogrow"/>
-                    <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupHeaderItemAdd fa fa-plus"/>
-                </div>
-                <div class="o_DiscussSidebar_list">
-                    <t t-foreach="rooms" t-as="room" t-key="room.localId">
-                        <div class="o_DiscussSidebarItem" t-on-click="_onClickRoom(room.localId)"> <t t-esc="room.name"/> </div>
-                    </t>
-                </div>
-            </div>
         </div>
     </t>
 

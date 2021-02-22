@@ -38,8 +38,8 @@ function factory(dependencies) {
             await this.env.models['mail.chat_room'].get(this.chatRoomLocalId).leaveRoom();
         }
 
-        async toggleRoom(chatRoomLocalId) {
-            this.env.mailRtc.disconnectSession();
+        async toggleRoom(chatRoomLocalId='') {
+            await this.env.mailRtc.disconnectSession();
             if (this.chatRoomLocalId === chatRoomLocalId) {
                 chatRoomLocalId = '';
             }
