@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo><data noupdate="1">
-    <!-- Add batch picking -->
-    <record id="stock_picking_batch_1" model="stock.picking.batch">
-        <field name="picking_type_id" ref="stock.picking_type_out"/>
-        <field name="company_id" ref="base.main_company"/>
-    </record>
-    <record id="stock_picking_batch_2" model="stock.picking.batch">
-        <field name="picking_type_id" ref="stock.picking_type_out"/>
-        <field name="company_id" ref="base.main_company"/>
-    </record>
-
     <!-- Resource: stock.inventory -->
     <record id="stock_inventory_1" model="stock.inventory">
         <field name="name">Starting Inventory</field>
@@ -55,7 +45,6 @@
         <field name="priority">1</field>
         <field name="user_id" eval="False"/>
         <field name="picking_type_id" ref="stock.picking_type_out"/>
-        <field name="batch_id" ref="stock_picking_batch_2"/>
         <field name="location_id" ref="stock.stock_location_stock"/>
         <field name="location_dest_id" ref="stock.stock_location_customers"/>
         <field name="company_id" ref="base.main_company"/>
@@ -65,7 +54,6 @@
         <field name="priority">0</field>
         <field name="user_id" eval="False"/>
         <field name="picking_type_id" ref="stock.picking_type_out"/>
-        <field name="batch_id" ref="stock_picking_batch_2"/>
         <field name="location_id" ref="stock.stock_location_stock"/>
         <field name="location_dest_id" ref="stock.stock_location_customers"/>
         <field name="company_id" ref="base.main_company"/>
@@ -75,7 +63,6 @@
         <field name="priority">0</field>
         <field name="user_id" eval="False"/>
         <field name="picking_type_id" ref="stock.picking_type_out"/>
-        <field name="batch_id" ref="stock_picking_batch_1"/>
         <field name="location_id" ref="stock.stock_location_stock"/>
         <field name="location_dest_id" ref="stock.stock_location_customers"/>
         <field name="company_id" ref="base.main_company"/>
@@ -85,10 +72,21 @@
         <field name="priority">1</field>
         <field name="user_id" eval="False"/>
         <field name="picking_type_id" ref="stock.picking_type_out"/>
-        <field name="batch_id" ref="stock_picking_batch_1"/>
         <field name="location_id" ref="stock.stock_location_stock"/>
         <field name="location_dest_id" ref="stock.stock_location_customers"/>
         <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <!-- Add batch picking -->
+    <record id="stock_picking_batch_1" model="stock.picking.batch">
+        <field name="picking_type_id" ref="stock.picking_type_out"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="picking_ids" eval="[(6, 0, [ref('stock_picking_batch.Picking_C'), ref('stock_picking_batch.Picking_D')])]"/>
+    </record>
+    <record id="stock_picking_batch_2" model="stock.picking.batch">
+        <field name="picking_type_id" ref="stock.picking_type_out"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="picking_ids" eval="[(6, 0, [ref('stock_picking_batch.Picking_A'), ref('stock_picking_batch.Picking_B')])]"/>
     </record>
 
     <!-- Add stock move -->

@@ -89,9 +89,9 @@ class StockPickingBatch(models.Model):
         batchs = self.filtered(lambda batch: batch.state not in ['cancel', 'done'])
         for batch in batchs:
             if not batch.picking_ids:
-                return
+                batch._origin.state = 'cancel'
             # Cancels automatically the batch picking if all its transfers are cancelled.
-            if all(picking.state == 'cancel' for picking in batch.picking_ids):
+            elif all(picking.state == 'cancel' for picking in batch.picking_ids):
                 batch.state = 'cancel'
             # Batch picking is marked as done if all its not canceled transfers are done.
             elif all(picking.state in ['cancel', 'done'] for picking in batch.picking_ids):
