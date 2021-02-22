@@ -83,8 +83,11 @@ class VideoRoom extends Component {
     // Handlers
     //--------------------------------------------------------------------------
 
-    async _onVideoLoadedMetaData(ev) {
+    async _onVideoLoadedMetaData(token, ev) {
         await ev.target.play();
+        if (token === this.localToken) {
+            ev.target.muted = true;
+        }
     }
 }
 
