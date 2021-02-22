@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+import logging
+import re
+
+from . import lint_case
+
+_logger = logging.getLogger(__name__)
+
+TSTRING_RE = re.compile(r'_l?t\(`.*?`\)', re.DOTALL)
+EXPRESSION_RE = re.compile(r'\$\{.+?\}')
+
+class TestJsTranslations(lint_case.LintCase):
+
+    def check_text(self, text):
+        """ Search for translated template strings that contains an expression
+            :param text: The js text to search
+            :return: A tuple of line number and invalid template string or (None, None)
+        """
+        for m in TSTRING_RE.finditer(text):
+            template_string = m.group(0)
+            if EXPRESSION_RE.search(template_string):
+                line_nb = text[:m.start()].count('\n') + 1
+                return (line_nb, template_string)
+        return (None, None)
+
+    def test_regular_expression(self):
+        bad_js = """
+        const foo = {
+            valid: _lt(`not useful but valid template-string`),
+            invalid: _lt(`invalid template-string
+            that spans multiple lines ${expression}`)
+        };
+        """
+        line, template_string = self.check_text(bad_js)
+        self.assertIn('invalid template-string', template_string)
+        self.assertNotIn('but valid template-string', template_string)
+        self.assertEqual(line, 4)
+
+    def test_js_translations(self):
+        """ Test that there are no translation of JS template strings """
+
+        counter = 0
+        for js_file in self.iter_module_files('*.js'):
+            counter += 1
+            with open(js_file, 'r') as f:
+                js_txt = f.read()
+                line_number, template_string = self.check_text(js_txt)
+                if template_string:
+                    self.fail("Translation of a template string found in `%s` at line %s: %s" % (js_file, line_number, template_string))
+
+        _logger.info('%s files tested', counter)
