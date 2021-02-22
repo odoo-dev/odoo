@@ -363,9 +363,8 @@ class SnailmailLetter(models.Model):
 
     @api.model
     def _is_valid_address(self, record):
-        record.ensure_one()
         required_keys = ['street', 'city', 'zip', 'country_id']
-        return all(record[key] for key in required_keys)
+        return len(record) <= 1 and all(record[key] for key in required_keys)
 
     def _format_snailmail_failures(self):
         """
