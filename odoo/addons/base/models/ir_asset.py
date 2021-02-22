@@ -56,13 +56,12 @@ def get_paths(path_def, extensions, manifest_cache=None):
         manifest_cache = http.addons_manifest
 
     paths = []
-    clean_path_def = path_def[1:] if path_def.startswith('/') else path_def
-    addon = clean_path_def.split('/')[0]
+    addon = [part for part in path_def.split('/') if part][0]
     addon_manifest = manifest_cache.get(addon)
 
     if addon_manifest:
         addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
-        full_path = os.path.normpath(os.path.join(addons_path, clean_path_def))
+        full_path = os.path.normpath(os.path.join(addons_path, path_def))
         # When fetching template file paths, we need the full paths since xml
         # files are read from the file system. But web assets (scripts and
         # stylesheets) must be loaded using relative paths, hence the trimming
@@ -79,7 +78,7 @@ def get_paths(path_def, extensions, manifest_cache=None):
     if not len(paths):
         # No file matching the path; the path_def is considered as a URL (or a
         # miswritten glob, resulting in a console error).
-        paths = [path_def]
+        paths = [path_def if not addon or path_def.startswith('/') else '/' + path_def]
 
     # Paths are filtered on the extensions (if any).
     return addon, [path
