@@ -3,6 +3,7 @@ odoo.define('wysiwyg.widgets.LinkDialog', function (require) {
 
 var core = require('web.core');
 var Dialog = require('wysiwyg.widgets.Dialog');
+const OdooEditorLib = require('web_editor.odoo-editor');
 
 
 var _t = core._t;
@@ -53,8 +54,8 @@ var LinkDialog = Dialog.extend({
 
         if (this.data.range) {
             this.needLabel = selection.isCollapsed;
-
-            const $link = $(this.data.range.startContainer).filter("a");
+            const firstLinkInSelection = OdooEditorLib.getInSelection(this.editable.ownerDocument, 'a');
+            const $link = $(firstLinkInSelection);
             this.data.iniClassName = $link.attr("class") || "";
             this.colorCombinationClass = false;
             let $node = $link;
@@ -72,6 +73,7 @@ var LinkDialog = Dialog.extend({
             const startLink = $(this.data.range.startContainer).closest('a')[0];
             const endLink = $(this.data.range.endContainer).closest('a')[0];
             const isLink = startLink && (startLink === endLink);
+            this.data.url = $link.attr('href') || '';
             this.data.text = (isLink ? startLink.textContent : this.data.range.toString())
                 .replace(/[ \t\r\n]+/g, ' ');
         } else {
