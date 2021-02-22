@@ -439,11 +439,6 @@ class Project(models.Model):
             self.allowed_internal_user_ids |= internal_users
         return res
 
-    def message_unsubscribe(self, partner_ids=None, channel_ids=None):
-        """ Unsubscribe from all tasks when unsubscribing from a project """
-        self.mapped('tasks').message_unsubscribe(partner_ids=partner_ids, channel_ids=channel_ids)
-        return super(Project, self).message_unsubscribe(partner_ids=partner_ids, channel_ids=channel_ids)
-
     def _alias_get_creation_values(self):
         values = super(Project, self)._alias_get_creation_values()
         values['alias_model_id'] = self.env['ir.model']._get('project.task').id
