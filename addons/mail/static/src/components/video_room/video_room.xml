@@ -22,11 +22,11 @@
                 }"/>
             </button>
             <div class="o_VideoRoom_video_container">
-                <t t-if="room.peerTokens and room.peerTokens.length">
-                    <t t-foreach="[...room.peerTokens]" t-as="peerToken" t-key="peerToken">
-                        <div class="o_VideoRoom_video_box">
-                            <video class="o_VideoRoom_video" t-on-loadedmetadata="_onVideoLoadedMetaData" t-ref="video_{{ peerToken }}"/>
-                            <span class="o_VideoRoom_video_name" t-esc="peerToken"/>
+                <t t-if="activePeers and activePeers.length">
+                    <t t-foreach="activePeers" t-as="peer" t-key="peer.token">
+                        <div class="o_VideoRoom_video_box" t-key="'video_box_'+peer.token">
+                            <video class="o_VideoRoom_video" t-key="'video_'+peer.token" t-att-muted="localToken === peer.token" t-att-token="peer.token" t-ref="video_{{ peer.token }}" t-on-loadedmetadata="_onVideoLoadedMetaData"/>
+                            <span class="o_VideoRoom_video_name" t-esc="peer.token"/>
                         </div>
                     </t>
                 </t>

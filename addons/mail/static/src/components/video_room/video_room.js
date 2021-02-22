@@ -20,31 +20,25 @@ class VideoRoom extends Component {
             return {
                 chatRoom: chatRoom ? chatRoom.__state : undefined,
                 partnerRoot: this.env.messaging.partnerRoot,
+                activePeers: mailRtc.activePeers,
                 sendSound: mailRtc.sendSound,
                 sendVideo: mailRtc.sendVideo,
             };
+            this.localToken = '';
         });
         this._getRefs = useRefs();
-        this.peerToken = '';
     }
 
     async willStart() {
-        this.peerToken = await this.env.models['mail.chat_room'].get(this.props.roomLocalId).joinRoom();
-        await this.env.mailRtc.initSession(this.peerToken);
+        this.localToken = await this.env.models['mail.chat_room'].get(this.props.roomLocalId).joinRoom();
+        await this.env.mailRtc.initSession(this.localToken);
     }
 
-    async mounted() {
-        const refs = this._getRefs();
-        await this.env.mailRtc.setVideoRefs(refs);
-        await this.env.mailRtc.updateVideo();
-        for (const token of this.room.peerTokens) {
-            if (token === this.peerToken) {
-                continue;
-            }
-            setTimeout(async () => {
-                await this.env.mailRtc.connectToPeer(token);
-            }, 1000);
-        }
+    mounted() {
+        this._loadVideos();
+    }
+    patched() {
+        this._loadVideos();
     }
 
     //--------------------------------------------------------------------------
@@ -56,6 +50,35 @@ class VideoRoom extends Component {
      */
     get room() {
         return this.env.models['mail.chat_room'].get(this.props.roomLocalId);
+    }
+
+    /**
+     * @returns {mail.chat_room}
+     */
+    get activePeers() {
+        return Object.values(this.env.mailRtc.activePeers);
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Since it is not possible to directly put a mediaStreamObject as the src or src-object of the template,
+     * the video src is manually inserted into the DOM.
+     */
+    _loadVideos() {
+        const refs = this._getRefs();
+        if (!this.env.mailRtc.activePeers) {
+            return;
+        }
+        for (const token in this.env.mailRtc.activePeers) {
+            const video = refs[`video_${token}`];
+            if (!video) {
+                continue;
+            }
+            video.srcObject = this.env.mailRtc.activePeers[token].stream;
+        }
     }
 
     //--------------------------------------------------------------------------

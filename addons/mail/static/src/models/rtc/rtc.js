@@ -68,14 +68,23 @@ function factory(dependencies) {
             const peer = new Peer(peerToken);
             const stream = await this._getStream();
             this._setupPeer(peer);
-            this.update({ peer, peerToken, stream });
-        }
+            const room = this.env.models['mail.chat_room'].get(this.env.messaging.chatRoomLocalId);
 
-        /**
-         * @param {Object} refs the refs Object of the videos
-         */
-        setVideoRefs(refs) {
-            this.update({ videoRefs: refs });
+            for (const token of room.peerTokens) {
+                if (token === peerToken) {
+                    continue;
+                }
+                setTimeout(async () => {
+                    // FIXME
+                    await this.connectToPeer(token);
+                }, 1000);
+            }
+            this.update({
+                peer,
+                peerToken,
+                stream,
+                activePeers: Object.assign({ [peerToken]: { token: peerToken, stream }}, this.activePeers),
+            });
         }
 
         toggleMicrophone() {
@@ -87,18 +96,11 @@ function factory(dependencies) {
         }
 
         toggleVideo() {
-            this.update({ sendSound: !this.sendSound });
+            this.update({ sendVideo: !this.sendVideo });
             if (!this.stream.getVideoTracks()[0]) {
                 return;
             }
-            this.stream.getVideoTracks()[0].enabled = this.state.sendVideo;
-        }
-
-        /**
-         * adds the stream to the video representing the current partner.
-         */
-        async updateVideo() {
-            await this._addStream(this.stream, this.peerToken, { muted: true });
+            this.stream.getVideoTracks()[0].enabled = this.sendVideo;
         }
 
         //----------------------------------------------------------------------
@@ -109,21 +111,9 @@ function factory(dependencies) {
          * @private
          * @param {Stream} stream
          * @param {String} token the token of video
-         * @param {Object} [param2]
-         * @param {Boolean} [param2.muted] whether the video should be muted
          */
-        async _addStream(stream, token, { muted=false } = {} ) {
-            const video = this.videoRefs[`video_${token}`];
-            if (!video) {
-                return;
-            }
-            video.srcObject = stream;
-            try {
-                await video.play();
-            } catch (e) {
-                // ignore
-            }
-            video.muted = muted;
+        async _addStream(stream, token) {
+            this.update({ activePeers: Object.assign({ [token]: { token, stream }}, this.activePeers) });
         }
 
         /**
@@ -145,7 +135,7 @@ function factory(dependencies) {
                 stream: clear(),
                 peer: clear(),
                 peerToken: clear(),
-                videoRefs: clear(),
+                activePeers: clear(),
             })
         }
 
@@ -212,17 +202,11 @@ function factory(dependencies) {
          * @private
          * @param {String} token
          */
-        async _removePeer(token) {
+        _removePeer(token) {
             //this.room.removeUser(token);
-            /*
-             * FIXME since the disconect event is delayed, short disconnections like a page refresh
-             * will stop the stream, we want to keep the video srcObject available in this case.
-             * with a better server-side control of connections, this shouldn't be an issue.
-             */
-            const video = this.videoRefs[`video_${token}`];
-            const stream = video.srcObject;
-            video.srcObject = undefined;
-            video.srcObject = stream;
+            const newActivePeers = Object.assign({}, this.activePeers);
+            delete newActivePeers[token];
+            this.update({ activePeers: newActivePeers });
         }
 
         /**
@@ -242,10 +226,15 @@ function factory(dependencies) {
 
     Rtc.fields = {
         peer: attr(),
+        /*
+         * Object that contains the peer streams per peer token
+         * { token: { token, stream }}
+         *
+         */
+        activePeers: attr(),
         peerToken: attr({
             default: '',
         }),
-        videoRefs: attr(),
         stream: attr(),
         sendVideo: attr({
             default: true,
