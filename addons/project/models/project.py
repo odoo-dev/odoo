@@ -103,17 +103,6 @@ class Project(models.Model):
     _rating_satisfaction_days = False  # takes all existing ratings
     _check_company_auto = True
 
-    def _compute_attached_docs_count(self):
-        Attachment = self.env['ir.attachment']
-        for project in self:
-            project.doc_count = Attachment.search_count([
-                '|',
-                '&',
-                ('res_model', '=', 'project.project'), ('res_id', '=', project.id),
-                '&',
-                ('res_model', '=', 'project.task'), ('res_id', 'in', project.task_ids.ids)
-            ])
-
     def _compute_task_count(self):
         task_data = self.env['project.task'].read_group([('project_id', 'in', self.ids), '|', '&', ('stage_id.is_closed', '=', False), ('stage_id.fold', '=', False), ('stage_id', '=', False)], ['project_id'], ['project_id'])
         result = dict((data['project_id'][0], data['project_id_count']) for data in task_data)
@@ -212,7 +201,6 @@ class Project(models.Model):
     allowed_internal_user_ids = fields.Many2many('res.users', 'project_allowed_internal_users_rel',
                                                  string="Allowed Internal Users", default=lambda self: self.env.user, domain=[('share', '=', False)])
     allowed_portal_user_ids = fields.Many2many('res.users', 'project_allowed_portal_users_rel', string="Allowed Portal Users", domain=[('share', '=', True)])
-    doc_count = fields.Integer(compute='_compute_attached_docs_count', string="Number of Documents Attached")
     date_start = fields.Date(string='Start Date')
     date = fields.Date(string='Expiration Date', index=True, tracking=True)
     subtask_project_id = fields.Many2one('project.project', string='Sub-task Project', ondelete="restrict",
@@ -473,13 +461,6 @@ class Project(models.Model):
             .env.ref('project.act_project_project_2_project_task_all') \
             .sudo().read()[0]
         action['display_name'] = self.name
-        return action
-
-    def action_view_account_analytic_line(self):
-        """ return the action to see all the analytic lines of the project's analytic account """
-        action = self.env["ir.actions.actions"]._for_xml_id("analytic.account_analytic_line_action")
-        action['context'] = {'default_account_id': self.analytic_account_id.id}
-        action['domain'] = [('account_id', '=', self.analytic_account_id.id)]
         return action
 
     def action_view_all_rating(self):

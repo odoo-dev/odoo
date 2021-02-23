@@ -99,9 +99,6 @@
                    <i class="ml-2 fa fa-exclamation-triangle text-danger small" role="img" title="Some of the employees who are recording time on this project are not linked to any Sales Order Item. This means that their time will be considered as non-billable." aria-label="Some of the employees who are recording time on this project are not linked to any ales Order Item. This means that their time will be considered as non-billable."/>
                 </t>
             </xpath>
-            <xpath expr="//a[@name='action_view_account_analytic_line']" position="attributes">
-                <attribute name="t-if">record.analytic_account_id.raw_value and !record.allow_timesheets.raw_value and record.allow_billable.raw_value</attribute>
-            </xpath>
             <xpath expr="//a[@t-if='record.allow_timesheets.raw_value']" position="replace">
                 <a t-if="record.allow_timesheets.raw_value and record.allow_billable.raw_value" name="action_view_timesheet" type="object" class="o_project_kanban_box o_project_timesheet_box" groups="project.group_project_manager">
                     <div>
