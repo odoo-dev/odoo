@@ -174,6 +174,11 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @returns {Object}
      */
     _getWysiwygOptions: function () {
+        const fakeEl = document.createElement('fakeElement');
+        fakeEl.innerHTML = this.value || '';
+        if (fakeEl.textContent.trim() === '') {
+            this.value = '<p></p>';
+        }
         return Object.assign({}, this.nodeOptions, {
             recordInfo: {
                 context: this.record.getContext(this.recordParams),
