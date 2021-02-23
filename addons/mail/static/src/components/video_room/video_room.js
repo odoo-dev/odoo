@@ -54,7 +54,7 @@ class VideoRoom extends Component {
      * @returns {mail.chat_room}
      */
     get activePeers() {
-        return Object.values(this.env.mailRtc.activePeers);
+        return this.env.mailRtc.activePeers ? Object.values(this.env.mailRtc.activePeers) : undefined;
     }
 
     //--------------------------------------------------------------------------
