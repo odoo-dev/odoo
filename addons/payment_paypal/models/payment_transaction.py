@@ -21,7 +21,7 @@ class PaymentTransaction(models.Model):
         string="PayPal Transaction Type", help="This has no use in Odoo except for debugging.")
 
     def _get_specific_rendering_values(self, processing_values):
-        if self.acquirer_id.provider != 'paypal':
+        if self.provider != 'paypal':
             return super()._get_specific_rendering_values(processing_values)
 
         base_url = self.acquirer_id._get_base_url()
@@ -64,7 +64,7 @@ class PaymentTransaction(models.Model):
 
     def _process_feedback_data(self, data):
         self.ensure_one()
-        if self.acquirer_id.provider != 'paypal':
+        if self.provider != 'paypal':
             return super()._process_feedback_data(data)
 
         txn_id = data.get('txn_id')

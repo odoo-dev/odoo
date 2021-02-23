@@ -712,7 +712,7 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         post_processing_values = {
-            'provider': self.acquirer_id.provider,
+            'provider': self.provider,
             'reference': self.reference,
             'amount': self.amount,
             'currency_code': self.currency_id.name,

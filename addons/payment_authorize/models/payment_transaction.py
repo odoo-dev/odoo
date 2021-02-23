@@ -18,7 +18,7 @@ class PaymentTransaction(models.Model):
 
     def _get_specific_processing_values(self, processing_values):
         """ Override of payment to include the access token in the processing values. """
-        if self.acquirer_id.provider != 'authorize':
+        if self.provider != 'authorize':
             return super()._get_specific_processing_values(processing_values)
 
         return {
@@ -53,7 +53,7 @@ class PaymentTransaction(models.Model):
     def _send_payment_request(self):
         super()._send_payment_request()  # log sent message
 
-        if self.acquirer_id.provider != 'authorize':
+        if self.provider != 'authorize':
             return
 
         if not self.token_id.authorize_profile:
@@ -167,7 +167,7 @@ class PaymentTransaction(models.Model):
         """
         self.ensure_one()
 
-        if self.acquirer_id.provider != 'authorize':
+        if self.provider != 'authorize':
             super()._send_refund_request()
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
@@ -189,7 +189,7 @@ class PaymentTransaction(models.Model):
         """
         self.ensure_one()
 
-        if self.acquirer_id.provider != 'authorize':
+        if self.provider != 'authorize':
             super()._send_capture_request()
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
@@ -211,7 +211,7 @@ class PaymentTransaction(models.Model):
         """
         self.ensure_one()
 
-        if self.acquirer_id.provider != 'authorize':
+        if self.provider != 'authorize':
             super()._send_void_request()
 
         authorize_API = AuthorizeAPI(self.acquirer_id)

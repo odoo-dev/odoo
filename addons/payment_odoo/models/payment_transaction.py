@@ -28,7 +28,7 @@ class PaymentTransaction(models.Model):
         :return: The dict of acquirer-specific rendering values
         :rtype: dict
         """
-        if self.acquirer_id.provider != 'odoo':
+        if self.provider != 'odoo':
             return super()._get_specific_rendering_values(processing_values)
 
         converted_amount = payment_utils.to_minor_currency_units(
@@ -82,7 +82,7 @@ class PaymentTransaction(models.Model):
         """
         super()._send_payment_request()  # Log the 'sent' message
 
-        if self.acquirer_id.provider != 'odoo':
+        if self.provider != 'odoo':
             return
 
         # Make the payment request

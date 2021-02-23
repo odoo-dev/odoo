@@ -17,7 +17,7 @@ class PaymentTransaction(models.Model):
     def _send_payment_request(self):
         """ Override of payment to simulate a payment request. """
         super()._send_payment_request()  # Log the 'sent' message
-        if self.acquirer_id.provider != 'test':
+        if self.provider != 'test':
             return
 
         # The payment request response would normally transit through the controller but in the end,

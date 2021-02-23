@@ -22,7 +22,7 @@ class PaymentToken(models.Model):
         """
         self.ensure_one()
 
-        if self.acquirer_id.provider != 'adyen':
+        if self.provider != 'adyen':
             return super()._handle_deactivation_request()
 
         data = {
@@ -50,7 +50,7 @@ class PaymentToken(models.Model):
         """
         self.ensure_one()
 
-        if self.acquirer_id.provider != 'adyen':
+        if self.provider != 'adyen':
             return super()._handle_activation_request()
 
         raise UserError(_("Saved payment methods cannot be restored once they have been deleted."))

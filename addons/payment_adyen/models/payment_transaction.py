@@ -31,7 +31,7 @@ class PaymentTransaction(models.Model):
         :return: The dict of acquirer-specific processing values
         :rtype: dict
         """
-        if self.acquirer_id.provider != 'adyen':
+        if self.provider != 'adyen':
             return super()._get_specific_processing_values(processing_values)
 
         converted_amount = payment_utils.to_minor_currency_units(
@@ -57,7 +57,7 @@ class PaymentTransaction(models.Model):
         """
         super()._send_payment_request()  # Log the 'sent' message
 
-        if self.acquirer_id.provider != 'adyen':
+        if self.provider != 'adyen':
             return
 
         # Make the payment request to Adyen

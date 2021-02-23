@@ -18,7 +18,7 @@ class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
     def _get_specific_rendering_values(self, processing_values):
-        if self.acquirer_id.provider != 'alipay':
+        if self.provider != 'alipay':
             return super()._get_specific_rendering_values(processing_values)
 
         base_url = self.acquirer_id._get_base_url()
