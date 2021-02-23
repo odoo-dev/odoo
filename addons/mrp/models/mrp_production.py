@@ -178,7 +178,7 @@ class MrpProduction(models.Model):
         ('assigned', 'Ready'),
         ('waiting', 'Waiting Another Operation')],
         string='Material Availability',
-        compute='_compute_state', copy=False, index=True, readonly=True,
+        compute='_compute_reservation_state', copy=False, index=True, readonly=True,
         store=True, tracking=True,
         help=" * Ready: The material is available to start the production.\n\
             * Waiting: The material is not available to start the production.\n\
@@ -479,7 +479,22 @@ class MrpProduction(models.Model):
             elif any(not float_is_zero(move.quantity_done, precision_rounding=move.product_uom.rounding or move.product_id.uom_id.rounding) for move in production.move_raw_ids):
                 production.state = 'progress'
 
-            production._set_reservation_state()
+    @api.depends('state', 'move_raw_ids.state')
+    def _compute_reservation_state(self):
+        for production in self:
+            # Compute reservation state
+            # State where the reservation does not matter.
+            production.reservation_state = False
+            # Compute reservation state according to its component's moves.
+            if production.state not in ('draft', 'done', 'cancel'):
+                relevant_move_state = production.move_raw_ids._get_relevant_state_among_moves()
+                if relevant_move_state == 'partially_available':
+                    if production.bom_id.operation_ids and production.bom_id.ready_to_produce == 'asap':
+                        production.reservation_state = production._get_ready_to_produce_state()
+                    else:
+                        production.reservation_state = 'confirmed'
+                elif relevant_move_state != 'draft':
+                    production.reservation_state = relevant_move_state
 
     @api.depends('move_raw_ids', 'state', 'move_raw_ids.product_uom_qty')
     def _compute_unreserve_visible(self):
@@ -924,22 +939,6 @@ class MrpProduction(models.Model):
             move.move_line_ids.filtered(lambda ml: ml.state not in ('done', 'cancel')).qty_done = 0
             move.move_line_ids = move._set_quantity_done_prepare_vals(new_qty)
 
-    def _set_reservation_state(self):
-        for production in self:
-            # Compute reservation state
-            # State where the reservation does not matter.
-            production.reservation_state = False
-            # Compute reservation state according to its component's moves.
-            if production.state not in ('draft', 'done', 'cancel'):
-                relevant_move_state = production.move_raw_ids._get_relevant_state_among_moves()
-                if relevant_move_state == 'partially_available':
-                    if production.bom_id.operation_ids and production.bom_id.ready_to_produce == 'asap':
-                        production.reservation_state = production._get_ready_to_produce_state()
-                    else:
-                        production.reservation_state = 'confirmed'
-                elif relevant_move_state != 'draft':
-                    production.reservation_state = relevant_move_state
-
     def _update_raw_moves(self, factor):
         self.ensure_one()
         update_info = []
@@ -1104,7 +1103,6 @@ class MrpProduction(models.Model):
             # run scheduler for moves forecasted to not have enough in stock
             production.move_raw_ids._trigger_scheduler()
             production.state = 'confirmed'
-            production._set_reservation_state()
         return True
 
     def action_assign(self):
