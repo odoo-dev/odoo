@@ -64,7 +64,7 @@ class PaymentAcquirer(models.Model):
         currency = self.env['res.currency'].browse(currency_id).exists()
         if currency:
             acquirers = acquirers.filtered(
-                lambda a: a.provider != 'authorize' or currency in a.authorize_currency_ids
+                lambda a: a.provider != 'authorize' or currency == a.authorize_currency_id
             )
 
         return acquirers
