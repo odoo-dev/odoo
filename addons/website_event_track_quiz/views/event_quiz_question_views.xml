@@ -57,6 +57,7 @@
                             <tree editable="bottom" create="true" delete="true">
                                 <field name="sequence" widget="handle"/>
                                 <field name="text_value"/>
+                                <field name="is_correct"/>
                                 <field name="awarded_points"/>
                                 <field name="comment"/>
                             </tree>

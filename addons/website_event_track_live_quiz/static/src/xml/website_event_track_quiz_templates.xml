@@ -2,7 +2,7 @@
 <odoo>
 
 <t t-extend="quiz.validation">
-    <t t-jquery="button.o_quiz_js_quiz_reset" t-operation="after">
+    <t t-jquery=".o_quiz_js_quiz_actions" t-operation="append">
         <a t-if="widget.nextSuggestion"
             t-attf-class="btn border o_quiz_js_quiz_next_track #{widget.track.completed ? 'btn-secondary' : 'btn-light'}"
             t-att-href="widget.nextSuggestion.suggestion.website_url">

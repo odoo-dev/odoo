@@ -32,6 +32,7 @@ class WebsiteEventTrackQuiz(EventTrackController):
         result = {
             'answers': {
                 answer.question_id.id: {
+                    'awarded_points': answer.awarded_points,
                     'is_correct': answer.is_correct,
                     'comment': answer.comment
                 } for answer in answers_details['user_answers']
@@ -43,9 +44,11 @@ class WebsiteEventTrackQuiz(EventTrackController):
             result['visitor_uuid'] = visitor_sudo.access_token
         return result
 
-    @http.route('/event_track/quiz/reset', type="json", auth="user", website=True)
+    @http.route('/event_track/quiz/reset', type="json", auth="public", website=True)
     def quiz_reset(self, event_id, track_id):
         track = self._fetch_track(track_id)
+        if not request.env.user.has_group('event.group_event_manager') and not track.sudo().quiz_id.unlimited_tries:
+            return
 
         event_track_visitor = track._get_event_track_visitors(force_create=True)
         event_track_visitor.write({
