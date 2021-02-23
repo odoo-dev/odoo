@@ -472,23 +472,25 @@ options.Class.include({
     /**
      * @private
      */
+    async _customizeWebsiteByType(widgetValue, params, type) {
+        switch (type) {
+            case 'views':
+                return await this._customizeWebsiteViews(widgetValue, params);
+            case 'variable':
+                return await this._customizeWebsiteVariable(widgetValue, params);
+            case 'color':
+                return await this._customizeWebsiteColor(widgetValue, params);
+        }
+    },
+    /**
+     * @private
+     */
     _customizeWebsite: async function (previewMode, widgetValue, params, type) {
         // Never allow previews for theme customizations
         if (previewMode) {
             return;
         }
-
-        switch (type) {
-            case 'views':
-                await this._customizeWebsiteViews(widgetValue, params);
-                break;
-            case 'variable':
-                await this._customizeWebsiteVariable(widgetValue, params);
-                break;
-            case 'color':
-                await this._customizeWebsiteColor(widgetValue, params);
-                break;
-        }
+        await this._customizeWebsiteByType(widgetValue, params, type);
 
         if (params.reload || config.isDebug('assets')) {
             // Caller will reload the page, nothing needs to be done anymore.
@@ -794,10 +796,30 @@ options.registry.BackgroundVideo = options.Class.extend({
 
 options.registry.OptionsTab = options.Class.extend({
 
+    /**
+     * @override
+    */
+    init() {
+        this._super(...arguments);
+        this.grays = {};
+    },
+
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
 
+    /**
+     * @see this.selectClass for parameters
+     */
+    async customizeWebsiteGrayParameter(previewMode, widgetValue, params) {
+        this.grays[params.variable] = +widgetValue;
+        for (let i = 1; i < 10; i++) {
+            const key = (100 * i).toString();
+            this.grays[key] = this._buildGray(key);
+        }
+        this._updateGrayPaletteUI();
+        await this._customizeWebsite(previewMode, this.grays, params, 'grays');
+    },
     /**
      * @see this.selectClass for parameters
      */
@@ -929,6 +951,45 @@ options.registry.OptionsTab = options.Class.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * @private
+     * @param {String} id
+     * @returns {String} the adjusted color of gray
+     */
+    _buildGray(id) {
+        const gray = weUtils.getCSSVariableValue(`base-${id}`);
+        const grayRGB = ColorpickerWidget.convertCSSColorToRgba(gray);
+        const hsl = ColorpickerWidget.convertRgbToHsl(grayRGB.red, grayRGB.green, grayRGB.blue);
+        const adjustedGrayRGB = ColorpickerWidget.convertHslToRgb(this.grays['gray-hue'],
+            Math.min(Math.max(hsl.saturation + this.grays['gray-extra-saturation'], 0), 100),
+            hsl.lightness);
+        return ColorpickerWidget.convertRgbaToCSSColor(adjustedGrayRGB.red, adjustedGrayRGB.green, adjustedGrayRGB.blue);
+    },
+    /**
+     * @private
+     * update UI gray palette preview
+     */
+    _updateGrayPaletteUI() {
+        this.$el.find("span#grays").each((_, e) => {
+            e.style.setProperty("background-color", this.grays[e.getAttribute('variable')], "important");
+        });
+    },
+    /**
+     * @private
+     */
+    async _customizeWebsiteGrayParameters(values, params) {
+        const url = '/website/static/src/scss/options/user_gray_palette_parameters.scss';
+        return this._makeSCSSCusto(url, values);
+    },
+    /**
+     * @override
+     */
+    async _customizeWebsiteByType(widgetValue, params, type) {
+        if (type === "grays") {
+            return this._customizeWebsiteGrayParameters(widgetValue, params);
+        }
+        return this._super(...arguments);
+    },
+    /**
      * @override
      */
     async _checkIfWidgetsUpdateNeedWarning(widgets) {
@@ -957,6 +1018,10 @@ options.registry.OptionsTab = options.Class.extend({
                 return "NONE";
             }
             return weUtils.getCSSVariableValue('body-image-type');
+        }
+        if (methodName === 'customizeWebsiteGrayParameter') {
+            this.grays[params.variable] = +weUtils.getCSSVariableValue(params.variable);
+            return this.grays[params.variable];
         }
         return this._super(...arguments);
     },

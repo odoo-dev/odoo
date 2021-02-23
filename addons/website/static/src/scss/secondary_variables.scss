@@ -145,6 +145,21 @@ $-actual-user-theme-color-palette: map-remove($-actual-user-theme-color-palette,
 );
 $o-theme-color-palettes: append($o-theme-color-palettes, $-actual-user-theme-color-palette);
 
+// Update the gray palette & save the default
+$o-gray-color-palette: () !default;
+@for $i from 1 through 9 {
+    $key: #{$i * 100};
+    $base-color:  map-get($o-base-gray-color-palette, $key);
+    $o-website-values: map-merge($o-website-values, (base-#{$key}: $base-color));
+    $o-gray-color-palette: map-merge($o-gray-color-palette,
+            o-map-omit(($key: map-get($o-user-gray-palette-parameters, $key)))
+    );
+}
+$grays-vars: 'gray-hue', 'gray-extra-saturation';
+@each $gray-var in $grays-vars {
+    $o-website-values: map-merge($o-website-values, ($gray-var: map-get($o-user-gray-palette-parameters, $gray-var)));
+}
+
 // ---
 
 // Enable last color and theme color palettes, which are now the user customized

@@ -16,10 +16,14 @@ $o-base-color-palette: map-merge($o-base-color-palette, (
 // automatically replaced with corresponsing color of chosen color palette.
 $o-user-color-palette: () !default;
 
-// By default, all user theme color palette values are null. Each null value
+// By default, all user theme & gray color palette values are null. Each null value
 // is automatically replaced with corresponsing color of chosen theme color
 // palette.
 $o-user-theme-color-palette: () !default;
+$o-user-gray-palette-parameters: (
+    'gray-hue': 210,
+    'gray-extra-saturation': 0,
+) !default;
 
 $o-social-colors: (
     'facebook': #3B5999,

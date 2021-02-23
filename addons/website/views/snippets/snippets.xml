@@ -1206,6 +1206,25 @@
             <we-colorpicker title="Warning" data-customize-website-color="" data-color-type="theme" data-color="warning"/>
             <we-colorpicker title="Error" data-customize-website-color="" data-color-type="theme" data-color="danger"/>
         </we-row>
+        <we-collapse>
+            <we-row string="Grays" class="o_we_gray_preview o_we_collapse_toggler">
+                <t t-foreach="9" t-as="i">
+                    <t t-set="greyCode" t-value="str((9-i)*100)"/>
+                    <span t-attf-title="Gray #{greyCode}"
+                          id="grays"
+                          t-attf-variable="#{greyCode}"
+                          t-attf-class="o_we_user_value_widget bg-#{greyCode}"/>
+                </t>
+            </we-row>
+            <we-row>
+                <we-range string="⌙ Hue" data-customize-website-gray-parameter="" data-min="0" data-max="360"
+                          data-variable="gray-hue" class="o_we_slider_tint"/>
+            </we-row>
+            <we-row>
+                <we-range string="⌙ Saturation" data-customize-website-gray-parameter="" data-min="-20" data-max="100"
+                          data-variable="gray-extra-saturation"/>
+            </we-row>
+        </we-collapse>
     </div>
     <div data-js="OptionsTab" data-selector="website-settings" data-no-check="true">
         <we-row string="Theme">
