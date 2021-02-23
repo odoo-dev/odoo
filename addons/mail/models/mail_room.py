@@ -20,7 +20,7 @@ class RtcRoom(models.Model):
         # TODO ultimately, we return enriched partner_ids instead of peer_tokens. this is a POC simplification to avoid the front-end relational layer.
         return {
             'peerToken': self.room_token + str(current_partner.id),
-            'peerTokens': [self.room_token + str(partner_id.id) for partner_id in self.partner_ids if partner_id.im_status in ['online', 'away']],
+            'peerTokens': [self.room_token + str(partner_id.id) for partner_id in self.partner_ids if partner_id.im_status != 'offline'],
         }
 
     def leave_room(self):
@@ -34,7 +34,7 @@ class RtcRoom(models.Model):
         """
         self.ensure_one()
         notifications = []
-        peer_tokens = [self.room_token + str(partner.id) for partner in self.partner_ids if partner.im_status in ['online', 'away']]
+        peer_tokens = [self.room_token + str(partner.id) for partner in self.partner_ids if partner.im_status != 'offline']
         for partner in self.partner_ids:
             if partner.id == partner_id:
                 continue

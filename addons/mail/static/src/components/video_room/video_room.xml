@@ -4,11 +4,11 @@
     <t t-name="mail.VideoRoom" owl="1">
         <div class="o_VideoRoom">
             <div class="o_VideoRoom_video_container">
-                <t t-if="activePeers and activePeers.length">
-                    <t t-foreach="activePeers" t-as="peer" t-key="peer.token">
-                        <div class="o_VideoRoom_video_box" t-key="'video_box_'+peer.token">
-                            <video class="o_VideoRoom_video" t-key="'video_'+peer.token" t-att-muted="localToken === peer.token" t-att-token="peer.token" t-ref="video_{{ peer.token }}" t-on-loadedmetadata="_onVideoLoadedMetaData(peer.token)"/>
-                            <span class="o_VideoRoom_video_name" t-esc="peer.token"/>
+                <t t-if="room.peerTokens and room.peerTokens.length">
+                    <t t-foreach="room.peerTokens" t-as="token" t-if="env.mailRtc.activePeers[token]" t-key="token">
+                        <div class="o_VideoRoom_video_box" t-key="'video_box_'+token">
+                            <video class="o_VideoRoom_video" t-key="'video_'+token" t-att-muted="localToken === token" t-att-token="token" t-ref="video_{{ token }}" t-on-loadedmetadata="_onVideoLoadedMetaData(token)"/>
+                            <span class="o_VideoRoom_video_name" t-esc="token"/>
                         </div>
                     </t>
                 </t>

@@ -21,6 +21,7 @@ class VideoRoom extends Component {
                 chatRoom: chatRoom ? chatRoom.__state : undefined,
                 partnerRoot: this.env.messaging.partnerRoot,
                 activePeers: mailRtc.activePeers,
+                roomPeerTokens: chatRoom.peerTokens,
             };
             this.localToken = '';
         });
@@ -51,7 +52,8 @@ class VideoRoom extends Component {
     }
 
     /**
-     * @returns {mail.chat_room}
+     * @returns {Array[]}
+     * TODO check remove
      */
     get activePeers() {
         return this.env.mailRtc.activePeers ? Object.values(this.env.mailRtc.activePeers) : undefined;
