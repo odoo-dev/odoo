@@ -691,6 +691,7 @@ action = act
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="fold"/>
+                <field name="hired_stage"/>
             </tree>
         </field>
     </record>
@@ -735,6 +736,7 @@ action = act
                     </group>
                     <group name="stage_details">
                         <field name="fold"/>
+                        <field name="hired_stage"/>
                         <field name="job_ids" widget="many2many_tags"/>
                     </group>
                 </group>

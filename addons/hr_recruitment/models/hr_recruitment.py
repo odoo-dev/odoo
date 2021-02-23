@@ -63,6 +63,8 @@ class RecruitmentStage(models.Model):
     fold = fields.Boolean(
         "Folded in Kanban",
         help="This stage is folded in the kanban view when there are no records in that stage to display.")
+    hired_stage = fields.Boolean('Hired Stage',
+        help="If checked, this stage is used to determine the hire date of an applicant")
     legend_blocked = fields.Char(
         'Red Kanban Label', default=lambda self: _('Blocked'), translate=True, required=True)
     legend_done = fields.Char(
@@ -275,7 +277,7 @@ class Applicant(models.Model):
     @api.depends('stage_id')
     def _compute_date_closed(self):
         for applicant in self:
-            if applicant.stage_id and applicant.stage_id.fold:
+            if applicant.stage_id and applicant.stage_id.hired_stage:
                 applicant.date_closed = fields.datetime.now()
             else:
                 applicant.date_closed = False
