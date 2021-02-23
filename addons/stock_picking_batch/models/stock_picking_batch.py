@@ -72,11 +72,6 @@ class StockPickingBatch(models.Model):
                 ('company_id', '=', batch.company_id.id),
                 ('immediate_transfer', '=', False),
                 ('state', 'in', domain_states),
-                '|',
-                '|',
-                ('batch_id', '=', False),
-                ('batch_id', '=', batch.id),
-                ('batch_id', 'in', cancelled_batch_ids),
             ]
             if batch.picking_type_id:
                 domain += [('picking_type_id', '=', batch.picking_type_id.id)]
