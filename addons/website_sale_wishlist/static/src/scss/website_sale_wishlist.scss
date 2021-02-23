@@ -6,6 +6,18 @@
     div.css_not_available .o_add_wishlist_dyn {
         display: none;
     }
+
+    .btn.o_add_wishlist_dyn {
+        line-height: 1rem;
+        transform: scale(0.9);
+        transition: transform 200ms;
+
+        &:hover {
+            background-color: transparent;
+            color: theme-color('primary');
+            transform: scale(1);
+        }
+    }
 }
 
 // XS size

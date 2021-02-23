@@ -2,9 +2,9 @@
 <odoo>
 
 <template id="s_products_recently_viewed" name="Viewed Products">
-    <section class="s_wsale_products_recently_viewed o_snippet_invisible pt24 pb24 d-none" style="min-height: 400px;">
+    <section class="s_wsale_products_recently_viewed o_snippet_invisible pt32 pb32 d-none" style="min-height: 400px;">
         <div class="container">
-            <h3 class="text-center mb32">Recently Viewed Products</h3>
+            <h3 class="mb32">Recently Viewed Products</h3>
             <div class="slider o_not_editable"/>
         </div>
     </section>
@@ -102,6 +102,14 @@
         </div>
 
         <div data-js="ProductsRecentlyViewed" data-selector=".s_wsale_products_recently_viewed"/>
+
+        <div data-selector="#product_detail #o-carousel-product"
+            data-no-check="true">
+                <we-button-group string="Thumbnails Position" data-no-preview="true" data-reload="/">
+                    <we-button title="Left" data-customize-website-views="website_sale.carousel_product_indicators_left"><i class="fa fa-fw fa-long-arrow-left"/></we-button>
+                    <we-button title="Bottom" data-customize-website-views="website_sale.carousel_product_indicators_bottom"><i class="fa fa-fw fa-long-arrow-down"/></we-button>
+                </we-button-group>
+        </div>
     </xpath>
 </template>
 
