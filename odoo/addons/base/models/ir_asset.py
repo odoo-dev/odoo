@@ -167,10 +167,7 @@ class IrAsset(models.Model):
             exts += TEMPLATE_EXTENSIONS
 
         if addons is None:
-            if not http.request:
-                addons = self.env['ir.module.module']._installed_sorted()
-            else:
-                addons = http.module_boot()
+            addons = self._get_addons_list()
 
         # 1. Creates an empty assets list (if initial call).
         if asset_paths is None:
@@ -204,13 +201,9 @@ class IrAsset(models.Model):
         def remove_paths(targets):
             """Removes the given paths from the current assets list.
             Returns the index of the first target"""
-            res = None
             for target in targets:
                 target_index = get_path_index_or_raise(target)
                 del asset_paths[target_index]
-                if res is None:
-                    res = target_index
-            return res
 
         def process_path(directive, target, path_def):
             """
@@ -246,11 +239,12 @@ class IrAsset(models.Model):
                     # The list is empty when the target path has the wrong extension.
                     # -> nothing to replace
                     return
+                target_index = get_path_index_or_raise(target_paths[0])
 
             if directive == REPLACE_DIRECTIVE:
                 # Remove all target paths and add all paths found
-                target_index = remove_paths(target_paths)
                 add_paths(addon, paths, target_index)
+                remove_paths(target_paths)
             elif directive == REMOVE_DIRECTIVE:
                 # Remove all paths found
                 remove_paths(paths)
@@ -258,9 +252,9 @@ class IrAsset(models.Model):
                 # Add all paths found...
                 insert_index = None
                 if directive == BEFORE_DIRECTIVE:
-                    insert_index = get_path_index_or_raise(target)
+                    insert_index = target_index
                 elif directive == AFTER_DIRECTIVE:
-                    insert_index = get_path_index_or_raise(target) + 1
+                    insert_index = target_index + 1
                 elif directive == PREPEND_DIRECTIVE:
                     insert_index = bundle_start_index
                 add_paths(addon, paths, insert_index)
@@ -327,6 +321,17 @@ class IrAsset(models.Model):
     def _get_asset_domain(self, bundle):
         """Meant to be overridden to add additional parts to the search domain"""
         return [('bundle', '=', bundle), ('active', '=', True)]
+
+    def _get_addons_list(self):
+        """
+        Returns the list of addons to take into account when loading assets.
+        Can be overridden to filter the returned list of modules.
+        :returns: string[]: list of module names
+        """
+        if not http.request:
+            return self.env['ir.module.module']._installed_sorted()
+        else:
+            return http.module_boot()
 
     @staticmethod
     def _get_manifest_cache():
