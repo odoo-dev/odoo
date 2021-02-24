@@ -735,6 +735,12 @@ class TestQWeb(TransactionCase):
                 template
             )
 
+def load_tests(loader, suite, _):
+    # can't override TestQWeb.__dir__ because dir() called on *class* not
+    # instance
+    suite.addTests(TestQWeb.get_cases())
+    return suite
+
 class TestPageSplit(TransactionCase):
     # need to explicitly assertTreesEqual because I guess it's registered for
     # equality between _Element *or* HtmlElement but we're comparing a parsed
@@ -809,7 +815,11 @@ class TestPageSplit(TransactionCase):
         )
 
 class TestEmptyLines(TransactionCase):
-    arch = '''<t t-name='test'>
+    def test_no_empty_lines(self):
+        t = self.env['ir.ui.view'].create({
+            'name': 'test',
+            'type': 'qweb',
+            'arch_db': '''<t t-name='test'>
             
                 <div>
                     
@@ -817,29 +827,62 @@ class TestEmptyLines(TransactionCase):
                 
                 
             </t>'''
+        })
+        rendered = str(self.env['ir.qweb']._render(t.id), 'utf-8')
+        self.assertFalse(re.compile(r'^\s+\n').match(rendered))
+        self.assertFalse(re.compile(r'\n\s+\n').match(rendered))
 
-    def test_no_empty_lines(self):
+    def test_no_empty_lines_with_comment(self):
         t = self.env['ir.ui.view'].create({
             'name': 'test',
             'type': 'qweb',
-            'arch_db': self.arch
+            'arch_db': '''<t t-name='test'>
+            
+                <div>
+                
+                <!-- comment -->
+                    
+                </div>
+                
+                
+            </t>'''
         })
         rendered = str(self.env['ir.qweb']._render(t.id), 'utf-8')
-        self.assertFalse(re.compile('^\s+\n').match(rendered))
-        self.assertFalse(re.compile('\n\s+\n').match(rendered))
+        self.assertFalse(re.compile(r'^\s+\n').match(rendered))
+        self.assertFalse(re.compile(r'\n\s+\n').match(rendered))
+
+    def test_no_empty_lines_with_t(self):
+        t = self.env['ir.ui.view'].create({
+            'name': 'test',
+            'type': 'qweb',
+            'arch_db': '''<t t-name='test'>
+            
+                <div>
+
+                <t t-if="False">no render</t>
+                    
+                </div>
+                
+                
+            </t>'''
+        })
+        rendered = str(self.env['ir.qweb']._render(t.id), 'utf-8')
+        self.assertFalse(re.compile(r'^\s+\n').match(rendered))
+        self.assertFalse(re.compile(r'\n\s+\n').match(rendered))
 
     def test_keep_empty_lines(self):
         t = self.env['ir.ui.view'].create({
             'name': 'test',
             'type': 'qweb',
-            'arch_db': self.arch
+            'arch_db': '''<t t-name='test'>
+            
+                <div>
+                    
+                </div>
+                
+                
+            </t>'''
         })
         rendered = str(self.env['ir.qweb']._render(t.id, {'__keep_empty_lines': True}), 'utf-8')
-        self.assertTrue(re.compile('^\s+\n').match(rendered))
-        self.assertTrue(re.compile('\n\s+\n').match(rendered))
-
-def load_tests(loader, suite, _):
-    # can't override TestQWeb.__dir__ because dir() called on *class* not
-    # instance
-    suite.addTests(TestQWeb.get_cases())
-    return suite
+        self.assertTrue(re.compile(r'^\s+\n').match(rendered))
+        self.assertTrue(re.compile(r'\n\s+\n').match(rendered))
