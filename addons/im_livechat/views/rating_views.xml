@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="rating_rating_view_form_livechat" model="ir.ui.view">
+        <field name="name">rating.rating.form.livechat</field>
+        <field name="model">rating.rating</field>
+        <field name="inherit_id" ref="rating.rating_rating_view_form"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <div name="rating_image_container" position="replace">
+                <field name="rating_text" string="Rating"/>
+            </div>
+        </field>
+    </record>
+
     <record id="rating_rating_view_search_livechat" model="ir.ui.view">
         <field name="name">rating.rating.search.livechat</field>
         <field name="model">rating.rating</field>
@@ -34,6 +46,13 @@
             </p>
         </field>
         <field name="context">{'search_default_rating_last_7_days': 1}</field>
+    </record>
+
+    <record id="rating_rating_action_view_livechat_rating_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="40"/>
+        <field name="view_mode">form</field>
+        <field name="act_window_id" ref="rating_rating_action_view_livechat_rating"/>
+        <field name="view_id" ref="rating_rating_view_form_livechat"/>
     </record>
 
     <record id="rating_rating_action_livechat_report" model="ir.actions.act_window">

@@ -504,7 +504,7 @@ var Feedback = Widget.extend({
             rate: this.rating,
             reason: reason,
         };
-        this.dp.add(session.rpc('/im_livechat/feedback', args)).then(function () {
+        this.dp.add(session.rpc('/im_livechat/feedback', args)).then(function (response) {
             var emoji = RATING_TO_EMOJI[self.rating] || "??";
             var content = _.str.sprintf(_t("Rating: %s"), emoji);
             if (reason) {
@@ -554,6 +554,7 @@ var Feedback = Widget.extend({
 
         // only display textearea if bad smiley selected
         if (this.rating !== 5) {
+            this._sendFeedback();
             this.$('.o_livechat_rating_reason').show();
         } else {
             this.$('.o_livechat_rating_reason').hide();
@@ -2011,7 +2012,7 @@ var _t = core._t;
 
 /**
  * This is an abstract widget for rendering thread windows.
- * AbstractThreadWindow is kept for legacy reasons. 
+ * AbstractThreadWindow is kept for legacy reasons.
  */
 var AbstractThreadWindow = Widget.extend({
     template: 'im_livechat.legacy.mail.AbstractThreadWindow',

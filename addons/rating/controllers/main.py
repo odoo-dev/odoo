@@ -40,8 +40,8 @@ class Rating(http.Controller):
             return request.not_found()
         rate_names = {
             5: _("satisfied"),
-            3: _("not satisfied"),
-            1: _("highly dissatisfied")
+            3: _("okay"),
+            1: _("dissatisfied")
         }
         rating.write({'rating': rate, 'consumed': True})
         lang = rating.partner_id.lang or get_lang(request.env).code
