@@ -2141,16 +2141,22 @@ class MailThread(models.AbstractModel):
             } for pid in inbox_pids]
             self.env['mail.notification'].sudo().create(notif_create_values)
 
-        bus_notifications = []
+        notifications = []
         if inbox_pids or channel_ids:
             message_format_values = False
             if inbox_pids:
                 message_format_values = message.message_format()[0]
                 for partner_id in inbox_pids:
-                    bus_notifications.append([(self._cr.dbname, 'ir.needaction', partner_id), dict(message_format_values)])
+                    notifications.append({
+                        'target': self.env['res.partner'].browse(partner_id),
+                        'type': 'mail.inbox_new_message',
+                        'payload': {
+                            'message': dict(message_format_values),
+                        },
+                    })
             if channel_ids:
                 channels = self.env['mail.channel'].sudo().browse(channel_ids)
-                bus_notifications += channels._channel_message_notifications(message, message_format_values)
+                notifications += channels._channel_message_notifications(message, message_format_values)
                 # Message from mailing channel should not make a notification in Odoo for users
                 # with notification "Handled by Email", but web client should receive the message.
                 # To do so, message is still sent from longpolling, but channel is marked as read
@@ -2159,9 +2165,7 @@ class MailThread(models.AbstractModel):
                     users = channel.channel_partner_ids.mapped('user_ids')
                     for user in users.filtered(lambda u: u.notification_type == 'email'):
                         channel.with_user(user).channel_seen(message.id)
-
-        if bus_notifications:
-            self.env['bus.bus'].sudo().sendmany(bus_notifications)
+        self.env['bus.bus'].sudo()._send_notifications(notifications)
 
     def _notify_record_by_email(self, message, recipients_data, msg_vals=False,
                                 model_description=False, mail_auto_delete=True, check_existing=False,
@@ -2301,7 +2305,7 @@ class MailThread(models.AbstractModel):
                 _context = self._context
 
                 @self.env.cr.postcommit.add
-                def send_notifications():
+                def _send_notifications():
                     db_registry = registry(dbname)
                     with api.Environment.manage(), db_registry.cursor() as cr:
                         env = api.Environment(cr, SUPERUSER_ID, _context)

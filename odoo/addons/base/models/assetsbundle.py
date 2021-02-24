@@ -340,9 +340,15 @@ class AssetsBundle(object):
         # For end-user assets (common and backend), send a message on the bus
         # to invite the user to refresh their browser
         if self.env and 'bus.bus' in self.env and self.name in self.TRACKED_BUNDLES:
-            channel = (self.env.registry.db_name, 'bundle_changed')
             message = (self.name, self.version)
-            self.env['bus.bus'].sendone(channel, message)
+            self.env['bus.bus']._send_notifications([{
+                'target': self.env['res.partner'],
+                'type': 'base.bundle_changed',
+                'payload': {
+                    'name': self.name,
+                    'version': self.version,
+                },
+            }])
             _logger.debug('Asset Changed:  xml_id: %s -- version: %s' % message)
 
         return attachment

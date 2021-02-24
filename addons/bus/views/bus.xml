@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <template id="assets_common" name="bus.assets_common" inherit_id="web.assets_common">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/bus/static/src/js/main.js"/>
+            <script type="text/javascript" src="/bus/static/src/services/crosstab_communication.js"/>
+            <script type="text/javascript" src="/bus/static/src/services/localstorage_communication.js"/>
+            <script type="text/javascript" src="/bus/static/src/services/longpolling_communication.js"/>
+            <script type="text/javascript" src="/bus/static/src/services/server_communication.js"/>
+        </xpath>
+    </template>
+
     <template id="assets_backend" name="im assets" inherit_id="web.assets_backend">
         <xpath expr="." position="inside">
-            <script type="text/javascript" src="/bus/static/src/js/longpolling_bus.js"></script>
-            <script type="text/javascript" src="/bus/static/src/js/crosstab_bus.js"></script>
-            <script type="text/javascript" src="/bus/static/src/js/services/bus_service.js"></script>
-            <script type="text/javascript" src="/bus/static/src/js/web_client_bus.js"></script>
+            <!-- <script type="text/javascript" src="/bus/static/src/js/longpolling_bus.js"></script> -->
+            <!-- <script type="text/javascript" src="/bus/static/src/js/crosstab_bus.js"></script> -->
+            <!-- <script type="text/javascript" src="/bus/static/src/js/services/bus_service.js"></script> -->
+            <!-- <script type="text/javascript" src="/bus/static/src/js/web_client_bus.js"></script> -->
         </xpath>
     </template>
 
