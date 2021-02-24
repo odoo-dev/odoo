@@ -231,6 +231,20 @@ class TestMailgateway(BaseFunctionalTest, MockEmails):
         self.assertEqual(len(self._mails), 1,
                          'message_process: incoming email on Followers alias should send a bounce email')
 
+    @mute_logger('odoo.addons.mail.models.mail_thread', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
+    def test_message_process_alias_bounce_message(self):
+        """ Incoming email on a restricted alias (in 'to' or 'cc') -> bounce with body having correct email """
+        self.alias.write({'alias_contact': 'partners'})
+        bounce_message_with_alias = "The following email sent to %s cannot be accepted because this is a private email address." % self.alias.display_name.lower()
+
+        # Test bounce email body for alias in to
+        record = self.format_and_process(MAIL_TEMPLATE, to='Groups@example.com', cc='other@gmail.com', subject='Should Bounce')
+        self.assertIn(bounce_message_with_alias, self._mails[0].get('body'))
+
+        # Test bounce email body for alias in cc
+        record = self.format_and_process(MAIL_TEMPLATE, to='other@gmail.com', cc='groups@Example.com', subject='Should Bounce')
+        self.assertIn(bounce_message_with_alias, self._mails[1].get('body'))
+
     @mute_logger('odoo.addons.mail.models.mail_thread', 'odoo.models')
     def test_message_process_alias_partner(self):
         """ Incoming email from a known partner on a Partners alias -> ok (+ test on alias.user_id) """
