@@ -20,7 +20,7 @@ class Track(models.Model):
 
     @api.model
     def _get_default_stage_id(self):
-        return self.env['event.track.stage'].search([], limit=1).id
+        return self.env['event.track.stage'].search([], limit=1)
 
     # description
     name = fields.Char('Title', required=True, translate=True)
@@ -41,6 +41,9 @@ class Track(models.Model):
         index=True, copy=False, default=_get_default_stage_id,
         group_expand='_read_group_stage_ids',
         required=True, tracking=True)
+    legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked Explanation', readonly=True)
+    legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid Explanation', readonly=True)
+    legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing Explanation', readonly=True)
     is_accepted = fields.Boolean('Is Accepted', related='stage_id.is_accepted', readonly=True)
     kanban_state = fields.Selection([
         ('normal', 'Grey'),
@@ -51,6 +54,9 @@ class Track(models.Model):
              " * Grey is the default situation\n"
              " * Red indicates something is preventing the progress of this track\n"
              " * Green indicates the track is ready to be pulled to the next stage")
+    kanban_state_label = fields.Char(
+        string='Kanban State Label', compute='_compute_kanban_state_label',
+        store=True, tracking=True)
     # speaker
     partner_id = fields.Many2one('res.partner', 'Speaker')
     partner_name = fields.Char(
@@ -71,6 +77,9 @@ class Track(models.Model):
     partner_company_name = fields.Char(
         'Company Name', related='partner_id.parent_name',
         compute_sudo=True, readonly=True)
+    partner_tag_line = fields.Char(
+        'Tag Line', compute='_compute_partner_tag_line',
+        help='Description of the partner (name, function and company name)')
     image = fields.Image(
         string="Speaker Photo", compute="_compute_speaker_image",
         readonly=False, store=True,
@@ -79,7 +88,7 @@ class Track(models.Model):
     # time information
     date = fields.Datetime('Track Date')
     date_end = fields.Datetime('Track End Date', compute='_compute_end_date', store=True)
-    duration = fields.Float('Duration', default=1.5, help="Track duration in hours.")
+    duration = fields.Float('Duration', default=0.5, help="Track duration in hours.")
     is_track_live = fields.Boolean(
         'Is Track Live', compute='_compute_track_time_data',
         help="Track has started and is ongoing")
@@ -178,6 +187,21 @@ class Track(models.Model):
         for track in self:
             if not track.image:
                 track.image = track.partner_id.image_256
+
+    @api.depends('partner_name', 'partner_function', 'partner_company_name')
+    def _compute_partner_tag_line(self):
+        for track in self:
+            tag_line = False
+            if track.partner_name:
+                tag_line = track.partner_name
+                if track.partner_function:
+                    tag_line = '%s, %s' % (tag_line, track.partner_function)
+                    if track.partner_company_name:
+                        tag_line = _('%s at %s', tag_line, track.partner_company_name)
+                else:
+                    if track.partner_company_name:
+                        tag_line = _('%s from %s', tag_line, track.partner_company_name)
+            track.partner_tag_line = tag_line
 
     # TIME
 
@@ -309,6 +333,18 @@ class Track(models.Model):
                 track.website_cta_start_remaining = int(td.total_seconds())
             else:
                 track.website_cta_start_remaining = 0
+
+    # STAGES
+
+    @api.depends('stage_id', 'kanban_state')
+    def _compute_kanban_state_label(self):
+        for track in self:
+            if track.kanban_state == 'normal':
+                track.kanban_state_label = track.stage_id.legend_normal
+            elif track.kanban_state == 'blocked':
+                track.kanban_state_label = track.stage_id.legend_blocked
+            else:
+                track.kanban_state_label = track.stage_id.legend_done
 
     # ------------------------------------------------------------
     # CRUD

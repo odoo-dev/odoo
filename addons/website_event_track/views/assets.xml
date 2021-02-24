@@ -10,6 +10,7 @@
     <xpath expr="//script[last()]" position="after">
         <script type="text/javascript" src="/website_event_track/static/src/js/website_event_track.js"></script>
         <script type="text/javascript" src="/website_event_track/static/src/js/event_track_reminder.js"></script>
+        <script type="text/javascript" src="/website_event_track/static/src/js/event_track_timer.js"/>
         <script type="text/javascript" src="/website_event_track/static/src/js/website_event_pwa_widget.js"/>
         <script type="text/javascript" src="/website_event_track/static/lib/idb-keyval/idb-keyval.js"/>
     </xpath>
