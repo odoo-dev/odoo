@@ -6,6 +6,11 @@ from odoo import fields, models
 
 _logger = getLogger(__name__)
 
+excluded_theme_category_ids = [
+    'base.module_category_hidden',
+    'base.module_category_theme_hidden',
+]
+theme_category_id = 'base.module_category_theme'
 
 class IrAsset(models.Model):
 
@@ -24,13 +29,21 @@ class IrAsset(models.Model):
         addons_list = super(IrAsset, self)._get_addons_list()
         website = self.env['website'].get_current_website(fallback=False)
         if website:
-            theme_category = self.env['ir.module.category'].sudo().search([('name', '=', 'Theme')])
-            names_to_remove = [mod.name
-                for mod in self.env['ir.module.module'].search([('category_id', 'child_of', theme_category.id)])
-                if not website.theme_id or website.theme_id != mod
+            def get_id(view_id):
+                view = self.env.ref(view_id, False)
+                return view.id if view else False
+            all_themes = self.env['ir.module.module'].sudo().search([
+                ('category_id', 'not in', [get_id(id) for id in excluded_theme_category_ids]),
+                '|',
+                ('category_id', '=', get_id(theme_category_id)),
+                ('category_id.parent_id', '=', get_id(theme_category_id))
+            ])
+            uninstalled_theme_names = [theme.name
+                for theme in all_themes
+                if not website.theme_id or website.theme_id != theme
             ]
             addons_list = [addon
                 for addon in addons_list
-                if addon not in names_to_remove
+                if addon not in uninstalled_theme_names
             ]
         return addons_list

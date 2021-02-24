@@ -176,23 +176,19 @@ class IrAsset(models.Model):
         # start of the CURRENT bundle.
         bundle_start_index = len(asset_paths)
 
-        def get_path_index(path):
+        def get_path_index(path, raise_if_none=True):
             """Returns the index of the given path in the current assets list."""
             for i in range(len(asset_paths)):
                 if asset_paths[i][0] == path:
                     return i
-
-        def get_path_index_or_raise(path):
-            idx = get_path_index(path)
-            if idx is None:
+            if raise_if_none:
                 raise Exception("File %s not found in bundle %s" % (path, bundle))
-            return idx
 
         def add_paths(addon, paths, target_index=None):
             """Adds the given paths to the current list. An index can be specified."""
             target_index = len(asset_paths) if target_index is None else target_index
             for path in paths:
-                if get_path_index(path) is not None:
+                if get_path_index(path, False) is not None:
                     # the path is already present in the asset list: don't duplicate it
                     continue
                 asset_paths.insert(target_index, (path, addon, bundle))
@@ -202,7 +198,7 @@ class IrAsset(models.Model):
             """Removes the given paths from the current assets list.
             Returns the index of the first target"""
             for target in targets:
-                target_index = get_path_index_or_raise(target)
+                target_index = get_path_index(target)
                 del asset_paths[target_index]
 
         def process_path(directive, target, path_def):
@@ -239,7 +235,7 @@ class IrAsset(models.Model):
                     # The list is empty when the target path has the wrong extension.
                     # -> nothing to replace
                     return
-                target_index = get_path_index_or_raise(target_paths[0])
+                target_index = get_path_index(target_paths[0])
 
             if directive == REPLACE_DIRECTIVE:
                 # Remove all target paths and add all paths found
