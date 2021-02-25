@@ -856,7 +856,7 @@ class WebsiteSale(http.Controller):
             'landing_route': '/shop/payment/validate',
         }
 
-    @http.route('/shop/payment', type='http', auth='public', website=True)
+    @http.route('/shop/payment', type='http', auth='public', website=True, sitemap=False)
     def shop_payment(self, **post):
         """ Payment step. This page proposes several payment means based on available
         payment.acquirer. State at this point :
