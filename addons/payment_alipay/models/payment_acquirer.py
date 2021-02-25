@@ -20,7 +20,8 @@ class PaymentAcquirer(models.Model):
         selection=[
             ('express_checkout', 'Express Checkout (only for Chinese merchants)'),
             ('standard_checkout', 'Cross-border')
-        ], default='express_checkout')
+        ], default='express_checkout',
+        required_if_provider='alipay')
     alipay_merchant_partner_id = fields.Char(
         string="Merchant Partner ID", required_if_provider='alipay', groups='base.group_system')
     alipay_md5_signature_key = fields.Char(
