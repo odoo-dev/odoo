@@ -1,27 +1,14 @@
 /*
  * EVENT TOOL: REMINDER WIDGET
  */
-.o_wevent_event .o_wetrack_js_reminder {
-    // Icon only
-    &.btn-link {
-        padding: 0;
+.o_wetrack_js_reminder i {
+    &.fa-bell {
+        color: gold;
     }
-
-    // Ensure width for size coherency
-    &:not(.btn-link) {
-        min-width: 100px;
-    }
-
-    i {
-        &.fa-bell {
-            color: gold;
-        }
-        &.fa-bell-o {
-            color: black;
-        }
+    &.fa-bell-o {
+        color: black;
     }
 }
-
 
 /*
  * AGENDA

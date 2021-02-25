@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 class WebsiteEventMeetController(EventCommunityController):
 
     def _get_event_rooms_base_domain(self, event):
-        search_domain_base = [('event_id', '=', event.id), ('is_published', '=', True)]
+        search_domain_base = [('event_id', '=', event.id)]
         return search_domain_base
 
     def _sort_event_rooms(self, room):
@@ -42,28 +42,41 @@ class WebsiteEventMeetController(EventCommunityController):
 
     def _event_meeting_rooms_get_values(self, event, lang=None):
         search_domain = self._get_event_rooms_base_domain(event)
-        meeting_rooms_all = request.env['event.meeting.room'].sudo().search(search_domain)
-        if lang:
+        is_event_manager = request.env.user.has_group("event.group_event_manager")
+
+        if not is_event_manager:
             search_domain = expression.AND([
                 search_domain,
-                [('room_lang_id', '=', int(lang))]
+                [('is_published', '=', True)]
             ])
-        meeting_rooms = request.env['event.meeting.room'].sudo().search(search_domain)
-        meeting_rooms = meeting_rooms.sorted(self._sort_event_rooms, reverse=True)
 
-        is_event_manager = request.env.user.has_group("event.group_event_manager")
+        meeting_rooms_all = request.env['event.meeting.room'].sudo().search(search_domain)
         if not is_event_manager:
-            meeting_rooms = meeting_rooms.filtered(lambda m: not m.room_is_full)
+            meeting_rooms_all = meeting_rooms_all.filtered(lambda m: not m.room_is_full)
 
+        try:
+            lang_id = int(lang)
+        except Exception:
+            lang_id = False
+
+        meeting_rooms = meeting_rooms_all
+        if lang_id is not False:
+            meeting_rooms = meeting_rooms.filtered(lambda m: m.room_lang_id.id == lang_id)
+
+        meeting_rooms = meeting_rooms.sorted(self._sort_event_rooms, reverse=True)
         visitor = request.env['website.visitor']._get_visitor_from_request()
+
+        current_lang = request.env['res.lang'].browse(lang_id)
+        if not current_lang.name:
+            current_lang = False
 
         return {
             # event information
             "event": event.sudo(),
-            'main_object': event,
+            "main_object": event,
             # rooms
             "meeting_rooms": meeting_rooms,
-            "current_lang": request.env["res.lang"].browse(int(lang)) if lang else False,
+            "current_lang": current_lang,
             "available_languages": meeting_rooms_all.mapped("room_lang_id"),
             "default_lang_code": request.context.get('lang', request.env.user.lang),
             "default_username": visitor.display_name if visitor else None,

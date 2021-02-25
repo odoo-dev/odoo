@@ -60,7 +60,7 @@ var discoverTalkSteps = function (talkName, fromList, reminderOn, toggleReminder
 var discoverRoomSteps = function (roomName) {
     var steps = [{
         content: 'Go on "' + roomName + '" room in List',
-        trigger: 'a.o_wevent_meeting_room_card h4:contains("' + roomName + '")',
+        trigger: '.o_wevent_meeting_room_card h4:contains("' + roomName + '")',
         run: function() {
             // can't click on it, it will try to launch Jitsi and fail on chrome headless
         },
