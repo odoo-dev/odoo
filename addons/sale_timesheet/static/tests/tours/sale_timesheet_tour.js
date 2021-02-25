@@ -107,11 +107,11 @@ tour.register('sale_timesheet_tour', {
     trigger: 'div.o_notebook_headers',
     content: 'Click on Timesheets page to log a timesheet',
     run: function (actions) {
-        const notebookId = $('div.o_timesheet').closest("div.tab-pane").attr('id');
+        const notebookId = $('div.o_task_timesheet').closest("div.tab-pane").attr('id');
         actions.click(this.$anchor.find(`a[data-toggle="tab"][href="#${notebookId}"]`));
     },
 }, {
-    trigger: 'div.o_timesheet td.o_field_x2many_list_row_add a[role="button"]',
+    trigger: 'div.o_task_timesheet td.o_field_x2many_list_row_add a[role="button"]',
     content: 'Click on Add a line to create a new timesheet into the task.',
     run: 'click',
 }, {

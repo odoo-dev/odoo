@@ -22,10 +22,9 @@ class ProjectTaskCreateTimesheet(models.TransientModel):
         analytic_line = self.task_id.timesheet_ids.filtered(lambda l: l.user_timer_id)
         self.task_id.user_timer_id.unlink()
         return analytic_line.write({
-            'display_timer_pause': False,
             'name': self.description,
             'unit_amount': self.time_spent,
-            })
+        })
 
     def action_delete_timesheet(self):
         analytic_line = self.task_id.timesheet_ids.filtered(lambda l: l.user_timer_id)
