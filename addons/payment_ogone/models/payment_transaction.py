@@ -7,7 +7,7 @@ from lxml import etree, objectify
 from werkzeug import urls
 
 from odoo import _, api, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 from . import const
 from odoo.addons.payment import utils as payment_utils
@@ -64,6 +64,9 @@ class PaymentTransaction(models.Model):
 
         if self.provider != 'ogone':
             return
+
+        if not self.token_id:
+            raise UserError("Ogone: " + _("The transaction is not linked to a token."))
 
         tree = self._ogone_send_order_request()
         feedback_data = {

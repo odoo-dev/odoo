@@ -24,7 +24,7 @@
                 </group>
             </xpath>
             <xpath expr="//field[@name='country_ids']" position="after">
-                <label for="authorize_currency_id" attrs="{'invisible': [('provider', '!=', 'authorize')]}"/>
+                <label for="authorize_currency_id" string="Currency" attrs="{'invisible': [('provider', '!=', 'authorize')]}"/>
                 <div attrs="{'invisible': [('provider', '!=', 'authorize')]}">
                     <field name="authorize_currency_id"/>
                     <button class="oe_link" icon="fa-refresh" type="object"

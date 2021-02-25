@@ -7,7 +7,7 @@ import pprint
 from werkzeug import urls
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_stripe.const import INTENT_STATUS_MAPPING, PAYMENT_METHOD_TYPES
@@ -144,11 +144,7 @@ class PaymentTransaction(models.Model):
 
         # Make the payment request to Stripe
         if not self.token_id:
-            _logger.warning(
-                f"attempted to send a payment request for transaction with id {self.id} which "
-                f"has no registered token"
-            )
-            return
+            raise UserError("Stripe: " + _("The transaction is not linked to a token."))
 
         payment_intent = self._stripe_create_payment_intent()
         feedback_data = {
