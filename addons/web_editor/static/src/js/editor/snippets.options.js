@@ -1996,6 +1996,7 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     tagName: 'we-range',
     events: {
         'change input': '_onInputChange',
+        'input input': '_onInputInput',
     },
 
     /**
@@ -2060,6 +2061,14 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     _onInputChange(ev) {
         this._value = ev.target.value;
         this._onUserValueChange(ev);
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onInputInput(ev) {
+        this._value = ev.target.value;
+        this._onUserValuePreview(ev);
     },
     /**
      * @private
@@ -3831,6 +3840,9 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     setQuality(previewMode, widgetValue, params) {
+        if (previewMode) {
+            return;
+        }
         this._getImg().dataset.quality = widgetValue;
         return this._applyOptions();
     },
@@ -3838,6 +3850,9 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     glFilter(previewMode, widgetValue, params) {
+        if (previewMode) {
+            return;
+        }
         const dataset = this._getImg().dataset;
         if (widgetValue) {
             dataset.glFilter = widgetValue;
@@ -3850,6 +3865,9 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     customFilter(previewMode, widgetValue, params) {
+        if (previewMode) {
+            return;
+        }
         const img = this._getImg();
         const {filterOptions} = img.dataset;
         const {filterProperty} = params;
