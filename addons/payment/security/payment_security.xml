@@ -6,7 +6,7 @@
     <record id="acquirer_company_rule" model="ir.rule">
         <field name="name">Access acquirers in own companies only</field>
         <field name="model_id" ref="payment.model_payment_acquirer"/>
-        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
 
     <!-- Transactions -->
@@ -14,7 +14,7 @@
     <record id="transaction_user_rule" model="ir.rule">
         <field name="name">Access own transactions only</field>
         <field name="model_id" ref="payment.model_payment_transaction"/>
-        <field name="domain_force">['|',('partner_id', '=', False), ('partner_id', '=', user.partner_id.id)]</field>
+        <field name="domain_force">['|', ('partner_id', '=', False), ('partner_id', '=', user.partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('base.group_user')), (4, ref('base.group_portal')), (4, ref('base.group_public'))]"/>
     </record>
 
@@ -29,7 +29,7 @@
     <record id="transaction_company_rule" model="ir.rule">
         <field name="name">Access transactions in own companies only</field>
         <field name="model_id" ref="payment.model_payment_transaction"/>
-        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
 
     <!-- Tokens -->
@@ -52,7 +52,7 @@
     <record id="token_company_rule" model="ir.rule">
         <field name="name">Access tokens in own companies only</field>
         <field name="model_id" ref="payment.model_payment_token"/>
-        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
 
 </odoo>
