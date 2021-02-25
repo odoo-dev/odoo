@@ -97,3 +97,23 @@
         opacity:.1;
     }
 }
+
+.o_wevent_sponsor_hover_dropdown {
+    &:hover > .o_wevent_sponsor_hover_dropdown_tooltip {
+        display: block;
+        background-color: $body-bg;
+    }
+
+    & > .o_wevent_sponsor_hover_dropdown_tooltip {
+        display: none;
+        position: absolute;
+        width: 350px;
+        transform: translateY(-100%);
+        z-index: 1;
+    }
+
+    & > .o_wevent_sponsor_hover_dropdown_tooltip,
+    .o_wevent_sponsor_hover_dropdown_content {
+        border: 1px solid $border-color;
+    }
+}

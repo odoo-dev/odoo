@@ -6,26 +6,43 @@
         <div class="container mt32 mb16 d-none d-md-block d-print-none" t-if="event.sponsor_ids">
             <div t-attf-class="d-flex flex-wrap mb-5 #{'' if (len(event.sponsor_ids) > 10) else 'justify-content-md-center'}">
                 <t t-foreach="event.sponsor_ids" t-as="sponsor">
-                    <t t-if="sponsor.url">
-                        <a class="o_wevent_sponsor o_wevent_sponsor_card" target="_blank" t-att-href="sponsor.url">
-                            <div class="h-100 shadow-sm p-2">
-                                <span t-field="sponsor.image_128"
-                                    t-options='{"widget": "image", "class": "img img-fluid"}'/>
-                                <span t-if="sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon'"
-                                      t-field="sponsor.sponsor_type_id" t-attf-class="o_ribbon o_ribbon_right ribbon_#{sponsor.sponsor_type_id.display_ribbon_style}"/>
+                    <div class="o_wevent_sponsor_hover_dropdown position-relative">
+                        <div class="o_wevent_sponsor_hover_dropdown_tooltip p-3">
+                            <span t-field="sponsor.name" class="h4 mb-0"/>
+                            <div t-if="sponsor.url" class="d-flex text-break align-items-baseline">
+                                <i class="fa fa-home mr-2"/><a t-att-href="sponsor.url"><span t-field="sponsor.url"/></a>
                             </div>
-                        </a>
-                    </t>
-                    <t t-if="not sponsor.url">
-                        <div class="o_wevent_sponsor o_wevent_sponsor_card">
-                            <div class="h-100 shadow-sm p-2">
-                                <span t-field="sponsor.image_128"
-                                    t-options='{"widget": "image", "class": "img img-fluid"}'/>
-                                <span t-if="sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon'"
-                                      t-field="sponsor.sponsor_type_id" t-attf-class="o_ribbon o_ribbon_right ribbon_#{sponsor.sponsor_type_id.display_ribbon_style}"/>
+                            <div t-elif="sponsor.partner_id.website" class="d-flex text-break align-items-baseline">
+                                <i class="fa fa-home mr-2"/><a t-att-href="sponsor.partner_id.website"><span t-field="sponsor.partner_id.website"/></a>
+                            </div>
+                            <div t-if="sponsor.email" class="d-flex text-break align-items-baseline">
+                                <i class="fa fa-envelope mr-2"/><a t-att-mailto="sponsor.email"><span t-field="sponsor.email"/></a>
+                            </div>
+                            <div t-if="sponsor.phone" class="d-flex text-break align-items-baseline">
+                                <i class="fa fa-phone mr-2"/><span t-field="sponsor.phone"/>
                             </div>
                         </div>
-                    </t>
+                        <t t-if="sponsor.url">
+                            <a class="o_wevent_sponsor o_wevent_sponsor_card o_wevent_sponsor_hover_dropdown_content" target="_blank" t-att-href="sponsor.url">
+                                <div class="h-100 shadow-sm p-2">
+                                    <span t-field="sponsor.image_128"
+                                        t-options='{"widget": "image", "class": "img img-fluid"}'/>
+                                    <span t-if="sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon'"
+                                        t-field="sponsor.sponsor_type_id" t-attf-class="o_ribbon o_ribbon_right ribbon_#{sponsor.sponsor_type_id.display_ribbon_style}"/>
+                                </div>
+                            </a>
+                        </t>
+                        <t t-if="not sponsor.url">
+                            <div class="o_wevent_sponsor o_wevent_sponsor_card o_wevent_sponsor_hover_dropdown_content">
+                                <div class="h-100 shadow-sm p-2">
+                                    <span t-field="sponsor.image_128"
+                                        t-options='{"widget": "image", "class": "img img-fluid"}'/>
+                                    <span t-if="sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon'"
+                                        t-field="sponsor.sponsor_type_id" t-attf-class="o_ribbon o_ribbon_right ribbon_#{sponsor.sponsor_type_id.display_ribbon_style}"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
                 </t>
             </div>
         </div>
