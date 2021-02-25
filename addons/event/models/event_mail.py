@@ -167,17 +167,23 @@ You receive this email because you are:
     def run(self, autocommit=False):
         schedulers = self.search([('done', '=', False), ('scheduled_date', '<=', datetime.strftime(fields.datetime.now(), tools.DEFAULT_SERVER_DATETIME_FORMAT))])
         for scheduler in schedulers:
-            try:
-                with self.env.cr.savepoint():
-                    # Prevent a mega prefetch of the registration ids of all the events of all the schedulers
-                    self.browse(scheduler.id).execute()
-            except Exception as e:
-                _logger.exception(e)
-                self.invalidate_cache()
-                self._warn_template_error(scheduler, e)
-            else:
-                if autocommit:
-                    self.env.cr.commit()
+            # when using savepoint, it throws a 'no such savepoint' error
+            # when running the event.email scheduler
+            scheduler.execute()
+            # try:
+            #     with self.env.cr.savepoint():
+            #         scheduler.execute()
+            # except Exception as e:
+            #     print('======================')
+            #     print('EXCEPTION')
+            #     print(e)
+            #     print('======================')
+            #     _logger.exception(e)
+            #     self.invalidate_cache()
+            #     self._warn_template_error(scheduler, e)
+            # else:
+            #     if autocommit:
+            #         self.env.cr.commit()
         return True
 
 
