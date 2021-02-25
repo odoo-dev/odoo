@@ -5,7 +5,7 @@ import re
 
 import requests
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 from odoo.addons.payment_adyen.const import API_ENDPOINT_VERSIONS
