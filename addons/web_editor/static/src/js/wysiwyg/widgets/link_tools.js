@@ -196,12 +196,12 @@ const LinkTools = Widget.extend({
         if (link && (!$link.has(range.startContainer).length || !$link.has(range.endContainer).length)) {
             // Expand the current link to include the whole selection.
             let before = link.previousSibling;
-            while (range.intersectsNode(before)) {
+            while (before !== null && range.intersectsNode(before)) {
                 link.insertBefore(before, link.firstChild);
                 before = link.previousSibling;
             }
             let after = link.nextSibling;
-            while (range.intersectsNode(after)) {
+            while (after !== null && range.intersectsNode(after)) {
                 link.appendChild(after);
                 after = link.nextSibling;
             }
