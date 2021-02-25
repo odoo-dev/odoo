@@ -69,6 +69,7 @@ class PaymentAcquirer(models.Model):
         column1='payment_id', column2='country_id',
         help="The countries for which this payment acquirer is available.\n"
              "If none is set, it is available for all countries.")
+    # TODO ANVFE add constraint to enforce journal_id to be set when enabling an acquirer ?
     journal_id = fields.Many2one(
         string="Payment Journal", comodel_name='account.journal',
         help="The journal in which the successful transactions are posted",
@@ -464,4 +465,7 @@ class PaymentAcquirer(models.Model):
         :rtype: recordset of `res.currency`
         """
         self.ensure_one()
+        # FIXME ANVFE always return journal currency?
+        # We should never reach here if the acquirer is enabled (or in test mode)
+        # And the journal_id is necessary if the acquirer is enabled.
         return self.journal_id.currency_id or self.company_id.currency_id

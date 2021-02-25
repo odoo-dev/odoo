@@ -47,6 +47,9 @@ class PaymentTransaction(models.Model):
 
         sips_tx_values = dict(processing_values)
         currency = self.env['res.currency'].browse(processing_values['currency_id'])
+        # FIXME ANVFE remove this check? We cannot see the acquirer if it's not a supported
+        # currency anyway :c
+        # Otherwise we should do the same check for payulatam ?
         if currency.name not in SUPPORTED_CURRENCIES:
             raise ValidationError(
                 "Sips: " + _("This currency is not supported: %s", currency.name)

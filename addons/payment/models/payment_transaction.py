@@ -31,6 +31,11 @@ class PaymentTransaction(models.Model):
     def _lang_get(self):
         return self.env['res.lang'].get_installed()
 
+    # FIXME ANVFE can't we remove creation/edition rights on transactions to users ?
+    # IMHO there is no sense to manually create transactions and there are sudos
+    # around tx creations everywhere.
+    # and the views are specified as create=False
+
     acquirer_id = fields.Many2one(
         string="Acquirer", comodel_name='payment.acquirer', readonly=True, required=True)
     provider = fields.Selection(related='acquirer_id.provider')
@@ -78,6 +83,7 @@ class PaymentTransaction(models.Model):
         string="Invoices", comodel_name='account.move', relation='account_invoice_transaction_rel',
         column1='transaction_id', column2='invoice_id', readonly=True, copy=False,  # TODO TBE Shouldn't we completely forbid duplicating transactions?
         domain=[('move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))])
+    # TODO ANVFE rename into invoice_count ?
     invoice_ids_nbr = fields.Integer(string="Invoices count", compute='_compute_invoice_ids_nbr')
 
     # Fields used for user redirection & payment post-processing
@@ -778,7 +784,7 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         # Validate invoices automatically once the transaction is confirmed
-        self.mapped('invoice_ids').filtered(lambda inv: inv.state == 'draft').action_post()
+        self.invoice_ids.filtered(lambda inv: inv.state == 'draft').action_post()
 
         # Create and post missing payments
         for tx in self.filtered(lambda t: not t.payment_id):

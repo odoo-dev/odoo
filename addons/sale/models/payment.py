@@ -46,6 +46,8 @@ class PaymentTransaction(models.Model):
         """ Override of payment to send the quotations automatically. """
         super(PaymentTransaction, self)._set_pending(state_message=state_message)
 
+        # FIXME ANVFE update method accordingly to super method
+        # (and clean this strange behavior linked to transfer ???)
         for record in self:
             sales_orders = record.sale_order_ids.filtered(lambda so: so.state in ['draft', 'sent'])
             sales_orders.filtered(lambda so: so.state == 'draft').with_context(tracking_disable=True).write({'state': 'sent'})

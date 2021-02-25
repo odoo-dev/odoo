@@ -327,13 +327,17 @@ class PaymentPortal(payment_portal.PaymentPortal):
         This is necessary for the reconciliation as all transaction values need to match exactly
         that of the sale order.
 
+        :param list args: Parent method's position arguments
         :param str sale_order_id: The sale order for which a payment id made, as a `sale.order` id
         :param str access_token: The access token used to authenticate the partner
-        :param list args: Parent method's position arguments
         :param dict kwargs: Parent method's keyword arguments
         :return: The result of the parent method
+        :rtype: str
+        # FIXME ANV raise docstring is not up to date
+        # shouldn't it be ValidationError instead ???
         :raise: werkzeug.exceptions.NotFound if the order id is invalid
         """
+        # TODO ANV move cast_as_numeric inside the if condition ?
         sale_order_id, = self.cast_as_numeric([sale_order_id], numeric_type='int')
         if sale_order_id:
             order_sudo = request.env['sale.order'].sudo().browse(sale_order_id).exists()
@@ -368,10 +372,9 @@ class PaymentPortal(payment_portal.PaymentPortal):
         """ Override of payment to add the sale order id in the custom rendering context values.
 
         :param int sale_order_id: The sale order for which a payment id made, as a `sale.order` id
-        :param dict custom_create_values: Additional rendering values overwriting the default ones
-        :param list args: Parent method's position arguments
         :param dict kwargs: Parent method's keyword arguments
         :return: The extended rendering context values
+        :rtype: dict
         """
         rendering_context_values = super()._get_custom_rendering_context_values(**kwargs)
         if sale_order_id:
@@ -381,11 +384,12 @@ class PaymentPortal(payment_portal.PaymentPortal):
     def _create_transaction(self, *args, sale_order_id=None, custom_create_values=None, **kwargs):
         """ Override of payment to add the sale order id in the custom create values.
 
+        :param list args: Parent method's position arguments
         :param int sale_order_id: The sale order for which a payment id made, as a `sale.order` id
         :param dict custom_create_values: Additional create values overwriting the default ones
-        :param list args: Parent method's position arguments
         :param dict kwargs: Parent method's keyword arguments
         :return: The result of the parent method
+        :rtype: `payment.transaction` record
         """
         if sale_order_id:
             if custom_create_values is None:

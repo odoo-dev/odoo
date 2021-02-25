@@ -10,6 +10,7 @@ class PaymentAcquirer(models.Model):
     provider = fields.Selection(
         selection_add=[('transfer', "Wire Transfer")], default='transfer',
         ondelete={'transfer': 'set default'})
+    # TODO ANVFE rename qr_code ? wouldn't expect a boolean at first glance :D
     qr_code = fields.Boolean(
         string="Enable QR Codes", help="Enable the use of QR-codes when paying by wire transfer.")
 
