@@ -240,7 +240,7 @@ list of filtered posts (by date or tag).
 
                     <div class="container text-center position-relative h-100 d-flex flex-column flex-grow-1 justify-content-around">
                         <div t-attf-class="o_wblog_post_title #{opt_blog_post_select_to_tweet and 'js_tweet'} #{opt_blog_post_select_to_comment and 'js_comment'}">
-                            <div t-field="blog_post.name" id="o_wblog_post_name" data-oe-expression="blog_post.name" t-att-data-blog-id="blog_post.id" placeholder="Blog Post Title"/>
+                            <h1 t-field="blog_post.name" id="o_wblog_post_name" data-oe-expression="blog_post.name" t-att-data-blog-id="blog_post.id" placeholder="Blog Post Title"/>
                             <div t-field="blog_post.subtitle" id="o_wblog_post_subtitle"  placeholder="Subtitle"/>
                         </div>
                         <a id="o_wblog_post_content_jump" href="#o_wblog_post_main" class="css_editable_mode_hidden justify-content-center align-items-center rounded-circle mx-auto text-decoration-none">
@@ -325,7 +325,7 @@ list of filtered posts (by date or tag).
 
                 <div t-att-class="not opt_blog_post_breadcrumb and 'pt-4'">
                     <div t-attf-class="o_wblog_post_title mb-3 #{'js_tweet' if opt_blog_post_select_to_tweet else ''} #{'js_comment' if opt_blog_post_select_to_comment else ''}" t-ignore="False">
-                        <div t-field="blog_post.name" id="o_wblog_post_name" data-oe-expression="blog_post.name" t-att-data-blog-id="blog_post.id" placeholder="Title"/>
+                        <h1 t-field="blog_post.name" id="o_wblog_post_name" data-oe-expression="blog_post.name" t-att-data-blog-id="blog_post.id" placeholder="Title"/>
                         <div t-field="blog_post.subtitle" id="o_wblog_post_subtitle"  placeholder="Subtitle"/>
                     </div>
                     <div class="text-muted mb-2">
@@ -411,7 +411,7 @@ list of filtered posts (by date or tag).
                             <div class="flex-grow-1 pr-3">
                                 <span class="bg-gamma h6 d-inline-block py-1 px-2 rounded-sm">Read Next</span>
                                 <a t-att-href="'/blog/' + slug(next_post.blog_id) + '/post/' + slug(next_post)" t-att-title="'Read next' + next_post.name">
-                                    <div t-field="next_post.name" id="o_wblog_post_name" t-att-data-blog-id="next_post.id" placeholder="Blog Post Title" class="h2"/>
+                                    <div t-field="next_post.name" id="o_wblog_post_name" t-att-data-blog-id="next_post.id" placeholder="Blog Post Title" class="h1"/>
                                     <div t-field="next_post.subtitle" id="o_wblog_post_subtitle" placeholder="Subtitle" class="lead"/>
                                 </a>
                             </div>
@@ -443,7 +443,7 @@ list of filtered posts (by date or tag).
 
                         <div class="container text-center position-relative h-100 d-flex flex-column flex-grow-1 justify-content-around">
                             <div t-attf-class="o_wblog_post_title">
-                                <div t-field="next_post.name" id="o_wblog_post_name" t-att-data-blog-id="next_post.id" placeholder="Blog Post Title"/>
+                                <div t-field="next_post.name" id="o_wblog_post_name" t-att-data-blog-id="next_post.id" placeholder="Blog Post Title" class="h1"/>
                                 <div t-field="next_post.subtitle" id="o_wblog_post_subtitle"  placeholder="Subtitle"/>
                             </div>
 

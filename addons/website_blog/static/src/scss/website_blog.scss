@@ -264,6 +264,7 @@ $o-wblog-title-sizes-variants: (
     // ==============================================
     .o_wblog_post_title {
         #o_wblog_post_name {
+            font-family: inherit;
             font-weight: $display4-weight;
             line-height: $display-line-height;
             // Default font-size.
