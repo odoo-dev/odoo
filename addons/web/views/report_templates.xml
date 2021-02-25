@@ -333,7 +333,7 @@
         </t>
     </template>
 
-    <template id="external_layout_background">
+    <template id="external_layout_striped">
         <div t-attf-class="o_company_#{company.id}_layout header" t-att-style="report_header_style">
             <div class="o_background_header">
             <div class="float-right">
@@ -351,7 +351,7 @@
             </div>
         </div>
 
-        <div t-attf-class="o_company_#{company.id}_layout article o_report_layout_background" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <div t-attf-class="o_company_#{company.id}_layout article o_report_layout_striped {{  'o_layout_background' if company.background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.background_image.decode('utf-8') if company.background_image and company.background == 'Custom' else '/base/static/img/bg_background_template.jpg' }});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <t t-call="web.address_layout"/>
             <t t-raw="0"/>
         </div>
@@ -393,7 +393,7 @@
             </div>
         </div>
 
-        <div t-attf-class="article o_report_layout_boxed o_company_#{company.id}_layout" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <div t-attf-class="article o_report_layout_boxed o_company_#{company.id}_layout {{  'o_layout_background' if company.background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.background_image.decode('utf-8') if company.background_image and company.background == 'Custom' else '/base/static/img/bg_background_template.jpg' }});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <div class="pt-5">
                 <!-- This div ensures that the address is not cropped by the header. -->
                 <t t-call="web.address_layout"/>
@@ -417,7 +417,7 @@
         </div>
     </template>
 
-    <template id="external_layout_clean">
+    <template id="external_layout_bold">
         <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
             <div class="o_clean_header">
             <div class="row">
@@ -437,7 +437,7 @@
             </div>
         </div>
 
-        <div t-attf-class="article o_report_layout_clean o_company_#{company.id}_layout"  t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <div t-attf-class="article o_report_layout_bold o_company_#{company.id}_layout {{  'o_layout_background' if company.background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.background_image.decode('utf-8') if company.background_image and company.background == 'Custom' else '/base/static/img/bg_background_template.jpg' }});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <t t-call="web.address_layout"/>
             <t t-raw="0"/>
         </div>
@@ -485,7 +485,7 @@
             </div>
         </div>
 
-        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout"  t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_layout_background' if company.background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.background_image.decode('utf-8') if company.background_image and company.background == 'Custom' else '/base/static/img/bg_background_template.jpg' }});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <div class="pt-5">
                 <!-- This div ensures that the address is not cropped by the header. -->
                 <t t-call="web.address_layout"/>
@@ -618,8 +618,7 @@
             <t t-set="layout" t-value="company.external_report_layout_id.key or 'web.external_layout_standard'" />
                 .o_company_<t t-esc='company.id'/>_layout {
                 font-family: '<t t-esc="font" />';
-
-            <t t-if="layout == 'web.external_layout_background'">
+            <t t-if="layout == 'web.external_layout_striped'">
                 .o_background_header {
                     h3 {
                         color: <t t-esc='primary'/>;
@@ -632,7 +631,7 @@
                         }
                     }
                 }
-                &amp;.o_report_layout_background {
+                &amp;.o_report_layout_striped {
                    strong {
                         color: <t t-esc='secondary'/>;
                     }
@@ -692,7 +691,7 @@
                     }
                 }
             </t>
-            <t t-elif="layout == 'web.external_layout_clean'" >
+            <t t-elif="layout == 'web.external_layout_bold'" >
                 &amp;.o_clean_footer {
                     border-top: 3px solid <t t-esc='secondary'/>;
                     h4 {
@@ -703,7 +702,7 @@
                         background-color: <t t-esc='secondary'/>;
                     }
                 }
-                &amp;.o_report_layout_clean {
+                &amp;.o_report_layout_bold {
                     h1, h2, h3 {
                         color: <t t-esc='primary'/>;
                     }

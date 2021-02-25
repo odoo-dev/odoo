@@ -18,7 +18,7 @@
         </xpath>
     </template>
 
-    <template id="l10n_in_external_layout_clean" inherit_id="web.external_layout_clean">
+    <template id="l10n_in_external_layout_bold" inherit_id="web.external_layout_bold">
         <xpath expr="//li[@t-if='company.vat']" position="replace">
             <li t-if="vat or company.vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="vat or company.vat"/></li>
         </xpath>
@@ -30,7 +30,7 @@
         </xpath>
     </template>
 
-    <template id="l10n_in_external_layout_background" inherit_id="web.external_layout_background">
+    <template id="l10n_in_external_layout_striped" inherit_id="web.external_layout_striped">
         <xpath expr="//li[@t-if='company.vat']" position="replace">
             <li t-if="vat or company.vat" class="list-inline-item"><i class="fa fa-building-o" role="img" aria-label="Fiscal number"/><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-esc="vat or company.vat"/></li>
         </xpath>

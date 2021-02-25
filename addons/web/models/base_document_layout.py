@@ -31,6 +31,7 @@ class BaseDocumentLayout(models.TransientModel):
     preview_logo = fields.Binary(related='logo', string="Preview logo")
     report_header = fields.Text(related='company_id.report_header', readonly=False)
     report_footer = fields.Text(related='company_id.report_footer', readonly=False)
+    company_details = fields.Text(related='company_id.company_details', readonly=False, default=lambda self: self._default_company_details())
 
     # The paper format changes won't be reflected in the preview.
     paperformat_id = fields.Many2one(related='company_id.paperformat_id', readonly=False)
@@ -44,6 +45,9 @@ class BaseDocumentLayout(models.TransientModel):
     custom_colors = fields.Boolean(compute="_compute_custom_colors", readonly=False)
     logo_primary_color = fields.Char(compute="_compute_logo_colors")
     logo_secondary_color = fields.Char(compute="_compute_logo_colors")
+
+    background = fields.Selection(related='company_id.background', readonly=False)
+    background_image = fields.Binary(related='company_id.background_image', readonly=False)
 
     report_layout_id = fields.Many2one('report.layout')
 
@@ -65,6 +69,9 @@ class BaseDocumentLayout(models.TransientModel):
     vat = fields.Char(related='company_id.vat', readonly=True)
     name = fields.Char(related='company_id.name', readonly=True)
     country_id = fields.Many2one(related="company_id.country_id", readonly=True)
+
+    def _default_company_details(self):
+        return 'test'
 
     @api.depends('logo_primary_color', 'logo_secondary_color', 'primary_color', 'secondary_color',)
     def _compute_custom_colors(self):
@@ -89,7 +96,7 @@ class BaseDocumentLayout(models.TransientModel):
                 wizard_for_image = wizard
             wizard.logo_primary_color, wizard.logo_secondary_color = wizard_for_image._parse_logo_colors()
 
-    @api.depends('report_layout_id', 'logo', 'font', 'primary_color', 'secondary_color', 'report_header', 'report_footer')
+    @api.depends('report_layout_id', 'logo', 'font', 'primary_color', 'secondary_color', 'report_header', 'report_footer', 'background', 'background_image')
     def _compute_preview(self):
         """ compute a qweb based preview to display on the wizard """
 
@@ -109,7 +116,7 @@ class BaseDocumentLayout(models.TransientModel):
             wizard.logo = wizard.company_id.logo
             wizard.report_header = wizard.company_id.report_header
             wizard.report_footer = wizard.company_id.report_footer
-            wizard.paperformat_id = wizard.company_id.paperformat_id
+            wizard.paperformat_id = wizard.company_id.paperformat_id.filtered(lambda paperformat: not paperformat.report_ids)
             wizard.external_report_layout_id = wizard.company_id.external_report_layout_id
             wizard.font = wizard.company_id.font
             wizard.primary_color = wizard.company_id.primary_color
