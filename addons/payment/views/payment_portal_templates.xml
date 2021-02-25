@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    
+
     <!-- Integration of a conditional "Manage payment methods" link in /my -->
     <template id="pay_meth_link" inherit_id="portal.portal_layout">
         <xpath expr="//div[hasclass('o_portal_my_details')]" position="inside">
@@ -15,7 +15,7 @@
             </div>
         </xpath>
     </template>
-    
+
     <!-- Display of /payment/pay -->
     <template id="pay">
         <!-- Variables description:
@@ -63,7 +63,7 @@
             </div>
         </t>
     </template>
-    
+
     <!-- Display of /my/payment_methods -->
     <template id="payment_methods" name="Payment Methods">
         <t t-call="portal.frontend_layout">
@@ -87,7 +87,7 @@
             </div>
         </t>
     </template>
-    
+
     <!-- Display of /payment/status -->
     <template id="payment_status" name="Payment Status">
         <t t-call="portal.frontend_layout">
@@ -108,7 +108,7 @@
             </div>
         </t>
     </template>
-    
+
     <!-- Display of /payment/confirmation -->
     <template id="confirm">
         <!-- Variables description:
@@ -185,7 +185,7 @@
             </div>
         </t>
     </template>
-    
+
     <!-- Breadcrumb for the portal -->
     <template id="portal_breadcrumb">
         <!-- Variables description:
