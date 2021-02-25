@@ -103,7 +103,9 @@ class PaymentTransaction(models.Model):
         groups="base.group_system", readonly=True)
 
     # Duplicated partner values allowing to keep a record of them, should they be later updated
-    partner_id = fields.Many2one(string="Customer", comodel_name='res.partner', readonly=True)
+    partner_id = fields.Many2one(
+        string="Customer", comodel_name='res.partner', readonly=True,
+        required=True, ondelete="restrict")
     partner_name = fields.Char(string="Partner Name")
     partner_lang = fields.Selection(string="Language", selection=_lang_get)
     partner_email = fields.Char(string="Email")
