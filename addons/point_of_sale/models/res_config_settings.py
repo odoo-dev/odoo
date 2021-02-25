@@ -12,6 +12,7 @@ class ResConfigSettings(models.TransientModel):
     module_pos_six = fields.Boolean(string="Six Payment Terminal", help="The transactions are processed by Six. Set the IP address of the terminal on the related payment method.")
     update_stock_quantities = fields.Selection(related="company_id.point_of_sale_update_stock_quantities", readonly=False)
     module_pos_coupon = fields.Boolean("Coupon and Promotion Programs", help="Allow the use of coupon and promotion programs in PoS.")
+    group_pos_margin = fields.Boolean(implied_group='point_of_sale.group_pos_margin')
 
     def set_values(self):
         super(ResConfigSettings, self).set_values()

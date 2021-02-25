@@ -50,6 +50,9 @@
                                 <field name="qty"/>
                                 <field name="product_uom_id" string="UoM" groups="uom.group_uom"/>
                                 <field name="price_unit" widget="monetary"/>
+                                <field name="purchase_price" optional="hide" widget="monetary" groups="point_of_sale.group_pos_margin"/>
+                                <field name="margin" optional="hide" widget="monetary" groups="point_of_sale.group_pos_margin"/>
+                                <field name="margin_percent" optional="hide" widget="percentage" groups="point_of_sale.group_pos_margin"/>
                                 <field name="discount" string="Disc.%" widget="monetary"/>
                                 <field name="tax_ids_after_fiscal_position" widget="many2many_tags" string="Taxes"/>
                                 <field name="tax_ids" widget="many2many_tags" invisible="1"/>
@@ -92,6 +95,13 @@
                                 class="oe_subtotal_footer_separator"
                                 widget="monetary"
                                 attrs="{'invisible': [('amount_paid','=', 'amount_total')]}"/>
+                            <label for="margin" groups="point_of_sale.group_pos_margin"/>
+                            <div class="text-nowrap" groups="point_of_sale.group_pos_margin">
+                                <field name="margin" class="oe_inline"/>
+                                <span class="oe_inline">
+                                    (<field name="margin_percent" nolabel="1" class="oe_inline" widget="percentage"/>)
+                                </span>
+                            </div>
                             <field name="currency_id" invisible="1"/>
                         </group>
                         <div class="oe_clear"/>
@@ -188,6 +198,8 @@
         <field name="arch" type="xml">
             <pivot string="PoS Orders" sample="1">
                 <field name="date_order" type="row"/>
+                <field name="margin" groups="point_of_sale.group_pos_margin"/>
+                <field name="margin_percent" invisible="1"/>
                 <field name="amount_total" type="measure"/>
             </pivot>
         </field>

@@ -217,6 +217,10 @@ class PosOrder(models.Model):
     amount_paid = fields.Float(string='Paid', states={'draft': [('readonly', False)]},
         readonly=True, digits=0, required=True)
     amount_return = fields.Float(string='Returned', digits=0, required=True, readonly=True)
+    amount_untaxed = fields.Float(string="Untaxed Amount", digits=0, readonly=True,
+                                  store=True, compute='_compute_amount_untaxed')
+    margin = fields.Monetary(string="Margin", compute='_compute_margin', store=True)
+    margin_percent = fields.Float(string="Margin (%)", compute='_compute_margin', store=True)
     lines = fields.One2many('pos.order.line', 'order_id', string='Order Lines', states={'draft': [('readonly', False)]}, readonly=True, copy=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', required=True, states={
@@ -277,6 +281,31 @@ class PosOrder(models.Model):
     def _compute_currency_rate(self):
         for order in self:
             order.currency_rate = self.env['res.currency']._get_conversion_rate(order.company_id.currency_id, order.currency_id, order.company_id, order.date_order)
+
+    @api.depends('lines.price_subtotal')
+    def _compute_amount_untaxed(self):
+        for order in self:
+            amount_untaxed = 0.0
+            for line in order.lines:
+                amount_untaxed += line.price_subtotal
+            order.amount_untaxed = amount_untaxed
+
+    @api.depends('lines.margin', 'amount_untaxed')
+    def _compute_margin(self):
+        if not all(self._ids):
+            for order in self:
+                order.margin = sum(order.lines.mapped('margin'))
+                order.margin_percent = order.amount_untaxed and order.margin/order.amount_untaxed
+        else:
+            self.env["pos.order.line"].flush(['margin'])
+            # On batch records recomputation (e.g. at install), compute the margins
+            # with a single read_group query for better performance.
+            grouped_order_lines_data = self.env['pos.order.line'].read_group(
+                [('order_id', 'in', self.ids)], ['margin', 'order_id'], ['order_id'])
+            mapped_data = {m['order_id'][0]: m['margin'] for m in grouped_order_lines_data}
+            for order in self:
+                order.margin = mapped_data.get(order.id, 0.0)
+                order.margin_percent = order.amount_untaxed and order.margin/order.amount_untaxed
 
     @api.onchange('payment_ids', 'lines')
     def _onchange_amount_all(self):
@@ -681,6 +710,12 @@ class PosOrderLine(models.Model):
         readonly=True, required=True)
     price_subtotal_incl = fields.Float(string='Subtotal', digits=0,
         readonly=True, required=True)
+    margin = fields.Float(string="Margin", compute='_compute_margin', digits='Product Price', store=True)
+    margin_percent = fields.Float(string="Margin (%)", compute='_compute_margin', store=True)
+    purchase_price = fields.Float(
+        string='Cost', compute="_compute_purchase_price",
+        digits='Product Price', store=True, readonly=False
+    )
     discount = fields.Float(string='Discount (%)', digits=0, default=0.0)
     order_id = fields.Many2one('pos.order', string='Order Ref', ondelete='cascade', required=True)
     tax_ids = fields.Many2many('account.tax', string='Taxes', readonly=True)
@@ -860,6 +895,38 @@ class PosOrderLine(models.Model):
                 # Trigger the Scheduler for Pickings
                 pickings_to_confirm.action_confirm()
         return True
+
+    @api.depends('product_id', 'company_id', 'currency_id', 'product_uom_id')
+    def _compute_purchase_price(self):
+        for line in self:
+            if not line.product_id:
+                line.purchase_price = 0.0
+            else:
+                line = line.with_company(line.company_id)
+                product = line.product_id
+                product_cost = product.standard_price
+                if not product_cost:
+                    line.purchase_price = 0.0
+                else:
+                    to_cur = line.currency_id
+                    if line.product_uom_id and line.product_uom_id != product.uom_id:
+                        product_cost = product.uom_id._compute_price(
+                            product_cost,
+                            line.product_uom_id,
+                        )
+                    line.purchase_price = product.cost_currency_id._convert(
+                        from_amount=product_cost,
+                        to_currency=to_cur,
+                        company=line.company_id or self.env.company,
+                        date=line.order_id.date_order or fields.Date.today(),
+                        round=False,
+                    ) if to_cur and product_cost else product_cost
+
+    @api.depends('price_subtotal', 'qty', 'purchase_price')
+    def _compute_margin(self):
+        for line in self:
+            line.margin = line.price_subtotal - (line.purchase_price * line.qty)
+            line.margin_percent = line.price_subtotal and line.margin / line.price_subtotal
 
 
 class PosOrderLineLot(models.Model):

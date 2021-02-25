@@ -10,6 +10,7 @@
                     <field name="order_id" type="measure"/>
                     <field name="product_qty" type="measure"/>
                     <field name="price_total" type="measure"/>
+                    <field name="margin" groups="point_of_sale.group_pos_margin"/>
                 </pivot>
             </field>
         </record>
@@ -20,6 +21,7 @@
             <field name="arch" type="xml">
                 <graph string="Point of Sale Analysis" sample="1" disable_linking="1">
                     <field name="product_categ_id" type="row"/>
+                    <field name="margin" type="measure" groups="point_of_sale.group_pos_margin"/>
                     <field name="price_total" type="measure"/>
                 </graph>
             </field>
