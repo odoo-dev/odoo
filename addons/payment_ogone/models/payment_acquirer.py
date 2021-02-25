@@ -5,7 +5,7 @@ from hashlib import sha256
 
 import requests
 
-from odoo import fields, models
+from odoo import _, fields, models
 
 from .const import VALID_KEYS
 
