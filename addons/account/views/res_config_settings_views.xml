@@ -305,21 +305,34 @@
                                         <div class="mt16">
                                             <field name="terms_type" class="o_light_label" widget="radio"/>
                                             <div class="d-flex">
-                                                <field name="invoice_terms"
-                                                       attrs="{'invisible': [('terms_type', '=', 'html')]}"
-                                                       class="oe_account_terms"
-                                                       placeholder="Insert your terms &amp; conditions here..."/>
-                                                <field name="invoice_terms_html"
-                                                       attrs="{'invisible': [('terms_type', '=', 'plain')]}"
-                                                       class="oe_account_terms"
-                                                       placeholder="Insert your terms &amp; conditions here..."/>
+                                                <div>
+                                                    <span class="text-muted" attrs="{'invisible': [('terms_type', '=', 'html')]}">
+                                                        A note containing your terms and conditions will be added the bottom of each quatation/order/invoice
+                                                    </span> 
+                                                    <field name="invoice_terms" attrs="{'invisible': [('terms_type', '=', 'html')]}" class="oe_account_terms" placeholder="Insert your terms &amp; conditions here..."/> 
+                                                </div>
+                                                <div>
+                                                    <div>
+                                                        <span class="text-muted" attrs="{'invisible': [('terms_type', '=', 'plain')]}">
+                                                            URL to a web page containing your terms and conditions will be added at the bottom of each quotation/order/invoice  
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <field name="preview_ready" invisible="1"/>
                                             <div attrs="{'invisible': [('preview_ready', '=', False)]}">
-                                                <a href="/terms">
-                                                    <i class="fa fa-arrow-right"></i>
-                                                    Preview
-                                                </a>
+                                                <div>
+                                                    <a href="/terms" attrs="{'invisible': [('preview_ready', '=', False)]}">
+                                                        <i class="fa fa-arrow-right"></i>
+                                                            Edit in website builder
+                                                    </a>
+                                                </div>
+                                                <div>
+                                                    <a href="/terms">
+                                                        <i class="fa fa-arrow-right"></i>
+                                                            Preview
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
