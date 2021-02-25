@@ -16,7 +16,7 @@ class WebsiteSale(main.WebsiteSale):
             request.session['error_promo_code'] = coupon_status['error']
         return request.redirect(post.get('r', '/shop/cart'))
 
-    @http.route(['/shop/payment'], type='http', auth="public", website=True)
+    @http.route()
     def shop_payment(self, **post):
         order = request.website.sale_get_order()
         order.recompute_coupon_lines()

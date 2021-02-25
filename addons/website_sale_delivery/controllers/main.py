@@ -9,7 +9,7 @@ from odoo.exceptions import UserError
 
 class WebsiteSaleDelivery(WebsiteSale):
 
-    @http.route(['/shop/payment'], type='http', auth="public", website=True)
+    @http.route()
     def shop_payment(self, **post):
         order = request.website.sale_get_order()
         carrier_id = post.get('carrier_id')
