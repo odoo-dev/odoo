@@ -183,8 +183,8 @@ class CustomerPortal(portal.CustomerPortal):
         if order_sudo.has_to_be_paid():
             logged_in = not request.env.user._is_public()
             acquirers_sudo = request.env['payment.acquirer'].sudo()._get_compatible_acquirers(
-                company_id=order_sudo.company_id.id,
-                partner_id=order_sudo.partner_id.id,
+                order_sudo.company_id.id,
+                order_sudo.partner_id.id,
                 currency_id=order_sudo.currency_id.id,
                 sale_order_id=order_sudo.id,
             )  # In sudo mode to read the fields of acquirers and partner (if not logged in)
@@ -323,32 +323,28 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
     @http.route()
     def payment_pay(self, *args, amount=None, sale_order_id=None, access_token=None, **kwargs):
-        """ Override of payment to replace the transaction values by that of the sale order.
+        """ Override of payment to replace the missing transaction values by that of the sale order.
 
-        This is necessary for the reconciliation as all transaction values need to match exactly
-        that of the sale order.
+        This is necessary for the reconciliation as all transaction values, excepted the amount,
+        need to match exactly that of the sale order.
 
-        :param list args: Parent method's position arguments
+        :param list args: Parent method's positional arguments
+        :param str amount: The (possibly partial) amount to pay used to check the access token
         :param str sale_order_id: The sale order for which a payment id made, as a `sale.order` id
         :param str access_token: The access token used to authenticate the partner
         :param dict kwargs: Parent method's keyword arguments
         :return: The result of the parent method
         :rtype: str
-        # FIXME ANV raise docstring is not up to date
-        # shouldn't it be ValidationError instead ???
-        :raise: werkzeug.exceptions.NotFound if the order id is invalid
+        :raise: ValidationError if the order id is invalid
         """
-        # TODO ANV move cast_as_numeric inside the if condition ?
+        # Cast numeric parameters as int or float and void them if their str value is malformed
+        amount, = self.cast_as_numeric([amount], numeric_type='float')
         sale_order_id, = self.cast_as_numeric([sale_order_id], numeric_type='int')
         if sale_order_id:
             order_sudo = request.env['sale.order'].sudo().browse(sale_order_id).exists()
             if not order_sudo:
                 raise ValidationError(_("The provided parameters are invalid."))
 
-            if amount is not None:
-                amount, = self.cast_as_numeric([amount], numeric_type='float')
-            else:
-                amount = order_sudo.amount_total
             # Check the access token against the order values. Done after fetching the order as we
             # need the order fields to check the access token.
             db_secret = request.env['ir.config_parameter'].sudo().get_param('database.secret')
@@ -385,12 +381,12 @@ class PaymentPortal(payment_portal.PaymentPortal):
     def _create_transaction(self, *args, sale_order_id=None, custom_create_values=None, **kwargs):
         """ Override of payment to add the sale order id in the custom create values.
 
-        :param list args: Parent method's position arguments
+        :param list args: Parent method's positional arguments
         :param int sale_order_id: The sale order for which a payment id made, as a `sale.order` id
         :param dict custom_create_values: Additional create values overwriting the default ones
         :param dict kwargs: Parent method's keyword arguments
         :return: The result of the parent method
-        :rtype: `payment.transaction` record
+        :rtype: recordset of `payment.transaction`
         """
         if sale_order_id:
             if custom_create_values is None:

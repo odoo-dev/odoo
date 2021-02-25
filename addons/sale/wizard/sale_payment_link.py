@@ -25,8 +25,7 @@ class PaymentLinkWizard(models.TransientModel):
         return res
 
     def _generate_link(self):
-        """ Override of the base method to add the sale_order_id in the link. """
-        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        """ Override of payment to add the sale_order_id in the link. """
         for payment_link in self:
             # The sale_order_id field only makes sense if the document is a sales order
             if payment_link.res_model == 'sale.order':
@@ -34,8 +33,9 @@ class PaymentLinkWizard(models.TransientModel):
                 base_url = related_document.get_base_url()
                 payment_link.link = f'{base_url}/payment/pay' \
                                     f'?reference={urls.url_quote(payment_link.description)}' \
+                                    f'&amount={payment_link.amount}' \
                                     f'&sale_order_id={payment_link.res_id}' \
                                     f'&access_token={payment_link.access_token}'
-                # Order-related fields (amount, ...) are retrieved in the controller
+                # Order-related fields are retrieved in the controller
             else:
                 super(PaymentLinkWizard, payment_link)._generate_link()

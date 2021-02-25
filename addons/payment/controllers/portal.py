@@ -71,7 +71,7 @@ class PaymentPortal(portal.CustomerPortal):
         :rtype: str
         :raise: werkzeug.exceptions.NotFound if the access token is invalid
         """
-        # Cast numeric parameters as int or float and skip them if their str value is malformed
+        # Cast numeric parameters as int or float and void them if their str value is malformed
         currency_id, acquirer_id, partner_id, company_id = self.cast_as_numeric(
             [currency_id, acquirer_id, partner_id, company_id], numeric_type='int'
         )
