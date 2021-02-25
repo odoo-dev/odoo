@@ -4,6 +4,8 @@
 import logging
 import re
 
+from odoo.modules import get_resource_from_path
+
 from . import lint_case
 
 _logger = logging.getLogger(__name__)
@@ -42,12 +44,17 @@ class TestJsTranslations(lint_case.LintCase):
         """ Test that there are no translation of JS template strings """
 
         counter = 0
+        failures = 0
         for js_file in self.iter_module_files('*.js'):
             counter += 1
             with open(js_file, 'r') as f:
                 js_txt = f.read()
                 line_number, template_string = self.check_text(js_txt)
                 if template_string:
-                    self.fail("Translation of a template string found in `%s` at line %s: %s" % (js_file, line_number, template_string))
+                    failures += 1
+                    mod, relative_path, _ = get_resource_from_path(js_file)
+                    _logger.error("Translation of a template string found in `%s/%s` at line %s: %s", mod, relative_path, line_number, template_string)
 
         _logger.info('%s files tested', counter)
+        if failures > 0:
+            self.fail("%s invalid template strings found in js files." % failures)
