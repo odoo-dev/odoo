@@ -40,15 +40,12 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
-        rounded_amount = round(self.amount, self.currency_id.decimal_places)
         if self.acquirer_id.capture_manually or self.operation == 'validation':
             return authorize_API.authorize(
-                rounded_amount, self.reference, opaque_data=opaque_data
-            )
+                self.amount, self.reference, opaque_data=opaque_data)
         else:
             return authorize_API.auth_and_capture(
-                rounded_amount, self.reference, opaque_data=opaque_data
-            )
+                self.amount, self.reference, opaque_data=opaque_data)
 
     def _send_payment_request(self):
         super()._send_payment_request()  # log sent message
