@@ -51,7 +51,8 @@ class PaymentTransaction(models.Model):
         help="The fees amount; set by the system as it depends on the acquirer", readonly=True)
     token_id = fields.Many2one(
         string="Payment Token", comodel_name='payment.token', readonly=True,
-        domain='[("acquirer_id", "=", "acquirer_id")]')
+        domain='[("acquirer_id", "=", "acquirer_id")]',
+        ondelete="restrict")
     state = fields.Selection(
         string="Status",
         selection=[('draft', "Draft"), ('pending', "Pending"), ('authorized', "Authorized"),
