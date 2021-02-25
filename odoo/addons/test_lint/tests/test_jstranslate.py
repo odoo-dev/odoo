@@ -18,14 +18,15 @@ class TestJsTranslations(lint_case.LintCase):
     def check_text(self, text):
         """ Search for translated template strings that contains an expression
             :param text: The js text to search
-            :return: A tuple of line number and invalid template string or (None, None)
+            :return: A list of tuple with line number and invalid template string or an empty list
         """
+        error_list = list()
         for m in TSTRING_RE.finditer(text):
             template_string = m.group(0)
             if EXPRESSION_RE.search(template_string):
                 line_nb = text[:m.start()].count('\n') + 1
-                return (line_nb, template_string)
-        return (None, None)
+                error_list.append((line_nb, template_string))
+        return error_list
 
     def test_regular_expression(self):
         bad_js = """
@@ -35,10 +36,13 @@ class TestJsTranslations(lint_case.LintCase):
             that spans multiple lines ${expression}`)
         };
         """
-        line, template_string = self.check_text(bad_js)
-        self.assertIn('invalid template-string', template_string)
-        self.assertNotIn('but valid template-string', template_string)
-        self.assertEqual(line, 4)
+        error_list = self.check_text(bad_js)
+        self.assertEqual(len(error_list), 1)
+        for line, template_string in error_list:
+            template_string = error_list[0][1]
+            self.assertIn('invalid template-string', template_string)
+            self.assertNotIn('but valid template-string', template_string)
+            self.assertEqual(line, 4)
 
     def test_js_translations(self):
         """ Test that there are no translation of JS template strings """
@@ -49,8 +53,8 @@ class TestJsTranslations(lint_case.LintCase):
             counter += 1
             with open(js_file, 'r') as f:
                 js_txt = f.read()
-                line_number, template_string = self.check_text(js_txt)
-                if template_string:
+                error_list = self.check_text(js_txt)
+                for line_number, template_string in error_list:
                     failures += 1
                     mod, relative_path, _ = get_resource_from_path(js_file)
                     _logger.error("Translation of a template string found in `%s/%s` at line %s: %s", mod, relative_path, line_number, template_string)
