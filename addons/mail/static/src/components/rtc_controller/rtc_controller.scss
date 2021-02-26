@@ -1,0 +1,15 @@
+.o_RtcController_inputDeviceController {
+    display: flex;
+    justify-content: space-between;
+}
+
+.o_RtcController_inputDeviceController_room {
+    display: flex;
+    margin: auto auto auto 5px;
+    max-width: 50%;
+    overflow: hidden;
+}
+
+.o_RtcController_inputDeviceController_room_name {
+    margin: auto auto auto 0px;
+}

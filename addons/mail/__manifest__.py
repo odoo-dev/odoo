@@ -123,6 +123,7 @@
         'static/src/components/thread_typing_icon/thread_typing_icon.xml',
         'static/src/components/thread_view/thread_view.xml',
         'static/src/components/video_room/video_room.xml',
+        'static/src/components/rtc_controller/rtc_controller.xml',
         'static/src/widgets/common.xml',
         'static/src/widgets/discuss/discuss.xml',
         'static/src/widgets/discuss_invite_partner_dialog/discuss_invite_partner_dialog.xml',

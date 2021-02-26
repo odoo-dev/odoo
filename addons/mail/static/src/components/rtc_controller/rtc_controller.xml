@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.RtcController" owl="1">
+        <div class="o_RtcController_inputDeviceController">
+            <div class="o_RtcController_inputDeviceController_room">
+                <button class="btn mr-2"
+                    aria-label="Disconnect"
+                    title="Disconnect"
+                    t-on-click="_onClickDisconnect">
+                    <i class="fa fa-lg fa-phone text-danger"/>
+                </button>
+                <span class="o_RtcController_inputDeviceController_room_name" t-esc="room.name"/>
+            </div>
+            <div class="o_RtcController_inputDeviceController_buttons">
+                <button class="btn mr-2"
+                    aria-label="Mute/unmute"
+                    title="Mute/unmute"
+                    t-on-click="_onClickMicrophone">
+                    <i class="fa fa-lg" t-att-class="{
+                        'fa-microphone': env.mailRtc.sendSound,
+                        'fa-microphone-slash': !env.mailRtc.sendSound,
+                        'text-danger': !env.mailRtc.sendSound,
+                    }"/>
+                </button>
+                <button class="btn mr-2"
+                    aria-label="Toggle Video"
+                    title="Toggle Video"
+                    t-on-click="_onClickCamera">
+                    <i class="fa fa-lg fa-video-camera" t-att-class="{
+                        'text-danger': !env.mailRtc.sendVideo,
+                    }"/>
+                </button>
+            </div>
+        </div>
+    </t>
+
+</templates>

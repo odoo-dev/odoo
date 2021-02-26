@@ -4,6 +4,7 @@ odoo.define('mail/static/src/components/discuss_sidebar/discuss_sidebar.js', fun
 const components = {
     AutocompleteInput: require('mail/static/src/components/autocomplete_input/autocomplete_input.js'),
     DiscussSidebarItem: require('mail/static/src/components/discuss_sidebar_item/discuss_sidebar_item.js'),
+    RtcController: require('mail/static/src/components/rtc_controller/rtc_controller.js'),
 };
 const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
@@ -169,7 +170,6 @@ class DiscussSidebar extends Component {
      */
     _useStoreSelector(props) {
         const discuss = this.env.messaging.discuss;
-        const mailRtc = this.env.mailRtc;
         const chatRooms = this.env.models['mail.chat_room'].all();
         return {
             allOrderedAndPinnedChats: this.quickSearchPinnedAndOrderedChats,
@@ -186,8 +186,6 @@ class DiscussSidebar extends Component {
             discussIsAddingChannel: discuss && discuss.isAddingChannel,
             discussIsAddingChat: discuss && discuss.isAddingChat,
             discussSidebarQuickSearchValue: discuss && discuss.sidebarQuickSearchValue,
-            sendSound: mailRtc.sendSound,
-            sendVideo: mailRtc.sendVideo,
         };
     }
 
@@ -195,17 +193,6 @@ class DiscussSidebar extends Component {
     // Handlers
     //--------------------------------------------------------------------------
 
-    _onClickMicrophone(ev) {
-        this.env.mailRtc.toggleMicrophone();
-    }
-
-    _onClickCamera(ev) {
-        this.env.mailRtc.toggleVideo();
-    }
-
-    _onClickDisconnect(ev) {
-        this.env.messaging.toggleRoom();
-    }
     /**
      * @private
      * @param {Event} ev

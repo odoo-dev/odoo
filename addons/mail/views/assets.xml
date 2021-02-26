@@ -122,6 +122,7 @@
                 <script type="text/javascript" src="/mail/static/src/components/thread_typing_icon/thread_typing_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_view/thread_view.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/video_room/video_room.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/rtc_controller/rtc_controller.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_core.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_errors.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_field.js"></script>
@@ -235,6 +236,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_typing_icon/thread_typing_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_view/thread_view.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/video_room/video_room.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/rtc_controller/rtc_controller.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/discuss/discuss.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/widgets/form_renderer/form_renderer.scss"/>
             </xpath>
