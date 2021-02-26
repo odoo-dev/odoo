@@ -2221,8 +2221,11 @@ var exportVariable = (function (exports) {
     const BG_CLASSES_REGEX = /\bbg-.*\b/g;
 
     const KEYBOARD_TYPES = { VIRTUAL: 'VIRTUAL', PHYSICAL: 'PHYSICAL', UNKNOWN: 'UKNOWN' };
+
+    const isUndo = ev => ev.key === 'z' && (ev.ctrlKey || ev.metaKey);
+    const isRedo = ev => ev.key === 'y' && (ev.ctrlKey || ev.metaKey);
     class OdooEditor extends EventTarget {
-        constructor(dom, options = {}) {
+        constructor(dom, options = { controlHistoryFromDocument: false }) {
             super();
             this.options = options;
 
@@ -2269,6 +2272,29 @@ var exportVariable = (function (exports) {
             this.selectionChanged = true;
             this.dom.addEventListener('mousedown', this._updateMouseState.bind(this));
             this.dom.addEventListener('mouseup', this._updateMouseState.bind(this));
+
+            this.document.addEventListener('keydown', ev => {
+                if (this.options.controlHistoryFromDocument) {
+                    if (isUndo(ev)) {
+                        ev.preventDefault();
+                        this.historyUndo();
+                    } else if (isRedo(ev)) {
+                        ev.preventDefault();
+                        this.historyRedo();
+                    }
+                } else {
+                    if (isRedo(ev) || isUndo(ev)) {
+                        this.automaticStepUnactive('controlHistoryFromDocument');
+                        this.dom.setAttribute('contenteditable', false);
+                    }
+                }
+            });
+            this.document.addEventListener('keyup', ev => {
+                if (!this.options.controlHistoryFromDocument && (isRedo(ev) || isUndo(ev))) {
+                    this.dom.setAttribute('contenteditable', true);
+                    this.automaticStepActive('controlHistoryFromDocument');
+                }
+            });
 
             if (this.options.toolbar) {
                 this.toolbar = this.options.toolbar;
@@ -3635,7 +3661,7 @@ var exportVariable = (function (exports) {
             // is a non-empty Unicode character string containing the printable
             // representation of the key. In this case, call `deleteRange` before
             // inserting the printed representation of the character.
-            if (!ev.ctrlKey && /^.$/u.test(ev.key)) {
+            if (/^.$/u.test(ev.key) && !ev.ctrlKey && !ev.metaKey) {
                 const selection = this.document.defaultView.getSelection();
                 if (selection && !selection.isCollapsed) {
                     this.deleteRange(selection);
@@ -3647,7 +3673,7 @@ var exportVariable = (function (exports) {
                 if (ev.shiftKey || this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
                     this._applyCommand('oShiftEnter');
                 }
-            } else if (ev.keyCode === 8 && !ev.ctrlKey) {
+            } else if (ev.keyCode === 8 && !ev.ctrlKey && !ev.metaKey) {
                 // backspace
                 // We need to hijack it because firefox doesn't trigger a
                 // deleteBackward input event with a collapsed cursor in front of a
@@ -3662,13 +3688,15 @@ var exportVariable = (function (exports) {
                 if (this._applyCommand('indentList', ev.shiftKey ? 'outdent' : 'indent')) {
                     ev.preventDefault();
                 }
-            } else if (ev.key === 'z' && ev.ctrlKey) {
+            } else if (isUndo(ev)) {
                 // Ctrl-Z
                 ev.preventDefault();
+                ev.stopPropagation();
                 this.historyUndo();
-            } else if (ev.key === 'y' && ev.ctrlKey) {
+            } else if (isRedo(ev)) {
                 // Ctrl-Y
                 ev.preventDefault();
+                ev.stopPropagation();
                 this.historyRedo();
             }
         }
