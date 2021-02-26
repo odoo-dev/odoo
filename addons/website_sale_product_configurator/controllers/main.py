@@ -65,6 +65,7 @@ class WebsiteSale(main.WebsiteSale):
                 add_qty=main_product['quantity'],
                 product_custom_attribute_values=main_product['product_custom_attribute_values'],
                 no_variant_attribute_values=main_product['no_variant_attribute_values'],
+                kwargs=kwargs
             )
 
             # Link option with its parent.
@@ -77,6 +78,7 @@ class WebsiteSale(main.WebsiteSale):
                     linked_line_id=option_parent[parent_unique_id],
                     product_custom_attribute_values=option['product_custom_attribute_values'],
                     no_variant_attribute_values=option['no_variant_attribute_values'],
+                    kwargs=kwargs,
                 )
                 option_parent[option['unique_id']] = option_value['line_id']
 
