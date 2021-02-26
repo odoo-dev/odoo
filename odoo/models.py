@@ -2096,7 +2096,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         gb_function = split[1] if len(split) == 2 else None
         temporal = field_type in ('date', 'datetime')
         tz_convert = field_type == 'datetime' and self._context.get('tz') in pytz.all_timezones
-        qualified_field = self._inherits_join_calc(self._table, split[0], query)
+        qualified_field = self._inherits_join_calc(self._table, split[0], query, allow_related=True)
         if temporal:
             display_formats = {
                 # Careful with week/year formats:
@@ -2298,7 +2298,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         for gb in groupby_fields:
             assert gb in self._fields, "Unknown field %r in 'groupby'" % gb
             gb_field = self._fields[gb].base_field
-            assert gb_field.store and gb_field.column_type, "Fields in 'groupby' must be regular database-persisted fields (no function or related fields), or function fields with store=True"
+            # for non-stored related field we do a quick check here and deep check in _inherits_join_calc
+            assert (gb_field.store or gb_field.related and gb_field.related_field.store) and gb_field.column_type, "Fields in 'groupby' must be regular database-persisted fields, or function fields with store=True, or related field without one2many element in the chain"
 
         aggregated_fields = []
         select_terms = []
@@ -2437,27 +2438,57 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return parent_alias
 
     @api.model
-    def _inherits_join_calc(self, alias, fname, query):
+    def _inherits_join_calc(self, alias, fname, query, allow_related=False):
         """
         Adds missing table select and join clause(s) to ``query`` for reaching
-        the field coming from an '_inherits' parent table (no duplicates).
+        the field coming from an '_inherits' parent table (no duplicates)
+        or from related.
 
         :param alias: name of the initial SQL alias
         :param fname: name of inherited field to reach
         :param query: query object on which the JOIN should be added
+        :param allow_related: whether we make joins for explicit
+                              (i.e. not inherited) related non-stored field
         :return: qualified name of field, to be used in SELECT clause
         """
         # INVARIANT: alias is the SQL alias of model._table in query
         model, field = self, self._fields[fname]
-        while field.inherited:
-            # retrieve the parent model where field is inherited from
-            parent_model = self.env[field.related_field.model_name]
-            parent_fname = field.related[0]
-            # JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
-            parent_alias = query.left_join(
-                alias, parent_fname, parent_model._table, 'id', parent_fname,
-            )
-            model, alias, field = parent_model, parent_alias, field.related_field
+        def process_inherited(model, alias, field):
+            while field.inherited:
+                # retrieve the parent model where field is inherited from
+                parent_model = self.env[field.related_field.model_name]
+                parent_fname = field.related[0]
+                # JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
+                parent_alias = query.left_join(
+                    alias, parent_fname, parent_model._table, 'id', parent_fname,
+                )
+                model, alias, field = parent_model, parent_alias, field.related_field
+            return model, alias, field
+
+
+        model, alias, field = process_inherited(model, alias, field)
+        def process_related(model, alias, field):
+            related_field = field.related_field
+            for join_fname in field.related[:-1]:
+                field = model._fields[join_fname]
+                if field.inherited:
+                    model, alias, field = process_inherited(model, alias, field)
+                if field.related and not field.store:
+                    assert field.compute_sudo or field.auto_join, "Non-stored related field must be a chain of fields with compute_sudo=True or auto_join=True"
+                    model, alias, field = process_related(model, alias, field)
+                model = self.env[field.comodel_name]
+                assert field.type == 'many2one' and field.store, "Non-stored related field must be a chain of stored many2one fields"
+                alias = query.left_join(
+                    alias, join_fname,
+                    model._table, 'id',
+                    join_fname
+                )
+            return self.env[related_field.model_name], alias, related_field
+
+        if field.related_field and allow_related:
+            model, alias, field = process_related(model, alias, field)
+            fname = field.name
+
         # handle the case where the field is translated
         if field.translate is True:
             return model._generate_translated_field(alias, fname, query)

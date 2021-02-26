@@ -65,3 +65,32 @@ class OrderLine(models.Model):
 
     order_id = fields.Many2one('test_read_group.order', ondelete='cascade')
     value = fields.Integer()
+
+
+class Related1(models.Model):
+    _name = 'test_read_group.related1'
+    _description = 'related1'
+
+    partner_id = fields.Many2one('res.partner', required=True)
+    country_code = fields.Char(related='partner_id.country_id.code')
+
+
+class Related2(models.Model):
+    _name = 'test_read_group.related2'
+    _description = 'related2'
+
+    related1_id = fields.Many2one('test_read_group.related1', delegate=True, required=True)
+    state_id = fields.Many2one('res.country.state', related='partner_id.state_id')
+    state_stored_id = fields.Many2one('res.country.state', related='partner_id.state_id', store=True, string='State (stored)')
+    country_code2 = fields.Char(related='partner_id.country_id.code', string='Country Code 2')
+    partner_city = fields.Char(related='partner_id.city')
+
+
+class Related3(models.Model):
+    _name = 'test_read_group.related3'
+    _description = 'related3'
+
+    related2_id = fields.Many2one('test_read_group.related2', delegate=True, required=True)
+    state_code = fields.Char(related='partner_id.state_id.code', string='State Code')
+    state_code2 = fields.Char(related='state_id.code', string='State Code2')
+    state_stored_code = fields.Char(related='state_stored_id.code', string='State Code (stored)')
