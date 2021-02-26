@@ -155,6 +155,12 @@ class Event(models.Model):
             if event.id:  # avoid to perform a slug on a not yet saved record in case of an onchange.
                 event.website_url = '/event/%s' % slug(event)
 
+    def copy_data(self, default=None):
+        if not default:
+            default = {}
+        default.update({'stage_id': self._get_default_stage_id().id, 'kanban_state': None})
+        return super(Event, self).copy_data(default)
+
     # ------------------------------------------------------------
     # CRUD
     # ------------------------------------------------------------
