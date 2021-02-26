@@ -49,13 +49,13 @@ class Project(models.Model):
         default=_default_timesheet_product_id)
     warning_employee_rate = fields.Boolean(compute='_compute_warning_employee_rate')
 
-    @api.depends('sale_order_id', 'sale_line_employee_ids', 'allow_billable')
+    @api.depends('sale_line_id', 'sale_line_employee_ids', 'allow_billable')
     def _compute_pricing_type(self):
         billable_projects = self.filtered('allow_billable')
         for project in billable_projects:
             if project.sale_line_employee_ids:
                 project.pricing_type = 'employee_rate'
-            elif project.sale_order_id:
+            elif project.sale_line_id:
                 project.pricing_type = 'fixed_rate'
             else:
                 project.pricing_type = 'task_rate'
@@ -68,21 +68,21 @@ class Project(models.Model):
             return [('allow_billable', operator, value)]
         if operator == '=':
             if value == 'task_rate':
-                return [('sale_line_employee_ids', '=', False), ('sale_order_id', '=', False)]
+                return [('sale_line_employee_ids', '=', False), ('sale_line_id', '=', False)]
             if value == 'fixed_rate':
-                return [('sale_line_employee_ids', '=', False), ('sale_order_id', '!=', False)]
+                return [('sale_line_employee_ids', '=', False), ('sale_line_id', '!=', False)]
             if value == 'employee_rate':
-                return [('sale_line_employee_ids', '!=', False), ('sale_order_id', '!=', False)]
+                return [('sale_line_employee_ids', '!=', False), ('sale_line_id', '!=', False)]
         else:
             if value == 'task_rate':
-                return ['|', ('sale_line_employee_ids', '!=', False), ('sale_order_id', '!=', False)]
+                return ['|', ('sale_line_employee_ids', '!=', False), ('sale_line_id', '!=', False)]
             if value == 'fixed_rate':
-                return ['|', ('sale_line_employee_ids', '!=', False), ('sale_order_id', '=', False)]
+                return ['|', ('sale_line_employee_ids', '!=', False), ('sale_line_id', '=', False)]
             if value == 'employee_rate':
                 return [('sale_line_employee_ids', '=', False)]
         return UserError(_('Value does not exist in the pricing type'))
 
-    @api.depends('sale_order_id', 'partner_id', 'pricing_type')
+    @api.depends('partner_id', 'pricing_type')
     def _compute_display_create_order(self):
         for project in self:
             project.display_create_order = project.partner_id and project.pricing_type == 'task_rate'
