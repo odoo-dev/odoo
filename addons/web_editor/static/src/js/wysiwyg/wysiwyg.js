@@ -475,7 +475,7 @@ const Wysiwyg = Widget.extend({
      * @param {Node} [params.node]
      */
     toggleAltTools(params) {
-        const image = params.node || this.lastImageClicked;
+        const image = (params && params.node) || this.lastImageClicked;
         if (this.snippetsMenu) {
             if (this.altTools) {
                 this.altTools.destroy();
