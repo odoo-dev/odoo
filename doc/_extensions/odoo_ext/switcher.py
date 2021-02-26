@@ -2,7 +2,6 @@ from docutils import nodes, utils
 from docutils.parsers.rst import Directive
 
 from pygments.lexers import get_lexer_by_name, PythonLexer
-PythonLexer.name = 'Python 2'
 
 def setup(app):
     app.add_directive('switcher', SwitcherDirective)
@@ -24,7 +23,8 @@ class SwitcherDirective(Directive):
             else:
                 assert child['names'], ("A switcher case must be either a "\
                                         "code block or a compound with a name")
-                titles.append(' '.join(child['names']))
+                [name] = child['names']
+                titles.append(get_lexer_by_name(name).name)
         tabs = nodes.bullet_list('', *[
             nodes.list_item('', nodes.Text(title))
             for title in titles

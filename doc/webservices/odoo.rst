@@ -13,16 +13,6 @@ all of its data are also available from the outside for external analysis or
 integration with various tools. Part of the :ref:`reference/orm/model` API is
 easily available over XML-RPC_ and accessible from a variety of languages.
 
-.. Odoo XML-RPC idiosyncrasies:
-   * uses multiple endpoint and a nested call syntax instead of a
-     "hierarchical" server structure (e.g. ``odoo.res.partner.read()``)
-   * uses its own own manual auth system instead of basic auth or sessions
-     (basic is directly supported the Python and Ruby stdlibs as well as
-     ws-xmlrpc, not sure about ripcord)
-   * own auth is inconvenient as (uid, password) have to be explicitly passed
-     into every call. Session would allow db to be stored as well
-   These issues are especially visible in Java, somewhat less so in PHP
-
 Connection
 ==========
 
@@ -34,59 +24,83 @@ Connection
 
         .. code-block:: python3
 
+            import urllib.parse
             import xmlrpc.client
-            info = xmlrpc.client.ServerProxy('https://demo.odoo.com/start').start()
-            url, db, username, password = \
-                info['host'], info['database'], info['user'], info['password']
-            common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
-            uid = common.authenticate(db, username, password, {})
-            models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
+            info = xmlrpc.client.ServerProxy(
+                'https://demo.odoo.com/start').start()
+            url, db, user, pwd = (
+                urllib.parse.urlparse(info['host']),
+                info['database'],
+                info['user'],
+                info['password'],
+            )
+            common = xmlrpc.client.ServerProxy(
+                f'{url.scheme}://{url.netloc}/RPC2')
+            models = xmlrpc.client.ServerProxy(
+                f'{url.scheme}://{user}:{pwd}@{url.netloc}/RPC2/{db}')
 
         .. code-block:: ruby
 
+            require "uri"
             require "xmlrpc/client"
-            info = XMLRPC::Client.new2('https://demo.odoo.com/start').call('start')
-            url, db, username, password = \
-                info['host'], info['database'], info['user'], info['password']
-            common = XMLRPC::Client.new2("#{url}/xmlrpc/2/common")
-            uid = common.call('authenticate', db, username, password, {})
-            models = XMLRPC::Client.new2("#{url}/xmlrpc/2/object").proxy
+            info = XMLRPC::Client.new2(
+                'https://demo.odoo.com/start').call('start')
+            url, db, user, pwd = [
+                URI.parse(info['host']),
+                info['database'],
+                info['user'],
+                info['password'],
+            ]
+            common = XMLRPC::Client.new2(
+                "#{url.scheme}://#{url.host}/RPC2")
+            models = XMLRPC::Client.new2(
+                "#{url.scheme}://#{user}:#{pwd}@#{url.host}/RPC2/#{db}")
 
         .. code-block:: php
 
             require_once('ripcord.php');
             $info = ripcord::client('https://demo.odoo.com/start')->start();
-            list($url, $db, $username, $password) =
-              array($info['host'], $info['database'], $info['user'], $info['password']);
-            $common = ripcord::client("$url/xmlrpc/2/common");
-            $uid = $common->authenticate($db, $username, $password, array());
-            $models = ripcord::client("$url/xmlrpc/2/object");
+            list($url, $db, $user, $pwd) = [
+                parse_url($info['host']),
+                $info['database'],
+                $info['user'],
+                $info['password'])
+            ];
+            $common = ripcord::client(
+              "${url['scheme']}://${url['host']}/RPC2");
+            $models = ripcord::client(
+              "${url['scheme']}://$user:$pwd@${url['host']}/RPC2/$db");
 
         .. code-block:: java
 
-            final XmlRpcClient client = new XmlRpcClient();
-            final XmlRpcClientConfigImpl start_config = new XmlRpcClientConfigImpl();
-            start_config.setServerURL(new URL("https://demo.odoo.com/start"));
-            final Map<String, String> info = (Map<String, String>)client.execute(
-                start_config, "start", emptyList());
+            final XmlRpcClient start =  new XmlRpcClient() {{
+                setConfig(new XmlRpcClientConfigImpl() {{
+                    setServerURL(new URL("https://demo.odoo.com/start"));
+                }});
+            }};
+            final Map<String, String> info =
+                (Map<String, String>) start.execute("start", emptyList());
 
             final String url = info.get("host"),
                           db = info.get("database"),
-                    username = info.get("user"),
-                    password = info.get("password");
+                    user = info.get("user"),
+                    pwd = info.get("password");
 
-            final XmlRpcClientConfigImpl common_config = new XmlRpcClientConfigImpl();
-            common_config.setServerURL(new URL(String.format("%s/xmlrpc/2/common", url)));
-
-            int uid = (int)client.execute(
-                common_config, "authenticate", Arrays.asList(
-                    db, username, password, emptyMap()));
-
-            final XmlRpcClient models = new XmlRpcClient() {{
+            final XmlRpcClient common = new XmlRpcClient() {{
                 setConfig(new XmlRpcClientConfigImpl() {{
-                    setServerURL(new URL(String.format("%s/xmlrpc/2/object", url)));
+                    setServerURL(new URL(String.format("%s/RPC2", url)));
                 }});
             }};
+
+            final XmlRpcClient models = new XmlRpcClient() {{
+                setTypeFactory(new XmlRpcTypeNil(this));
+                setConfig(new XmlRpcClientConfigImpl() {{
+                    setServerURL(new URL(url + "/RPC2/" + db));
+                    setBasicUserName(user);
+                    setBasicPassword(pwd);
+                }});
+            }};
+            models.execute("res.users.context_get", asList(0));
 
 Configuration
 -------------
@@ -122,29 +136,29 @@ parameters
 
         url = <insert server URL>
         db = <insert database name>
-        username = 'admin'
-        password = <insert password for your admin user (default: admin)>
+        user = 'admin'
+        pwd = <insert password of the admin user (default: admin)>
 
     .. code-block:: ruby
 
         url = <insert server URL>
         db = <insert database name>
-        username = "admin"
-        password = <insert password for your admin user (default: admin)>
+        user = "admin"
+        pwd = <insert password of the admin user (default: admin)>
 
     .. code-block:: php
 
         $url = <insert server URL>;
         $db = <insert database name>;
-        $username = "admin";
-        $password = <insert password for your admin user (default: admin)>;
+        $user = "admin";
+        $pwd = <insert password of the admin user (default: admin)>;
 
     .. code-block:: java
 
         final String url = <insert server URL>,
-                      db = <insert database name>,
-                username = "admin",
-                password = <insert password for your admin user (default: admin)>;
+            db = <insert database name>,
+            user = "admin",
+            pwd = <insert password of the admin user (default: admin)>;
 
 API Keys
 ''''''''
@@ -177,9 +191,9 @@ later and know whether you should remove them or keep them around.
 
 Click :guilabel:`Generate Key`, then copy the key provided. **Store this key
 carefully**: it is equivalent to your password, and just like your password
-the system will not be able to retrieve or show the key again later on. If you lose
-this key, you will have to create a new one (and probably delete the one you
-lost).
+the system will not be able to retrieve or show the key again later on. If you
+lose this key, you will have to create a new one (and probably delete the one
+you lost).
 
 Once you have keys configured on your account, they will appear above the
 :guilabel:`New API Key` button, and you will be able to delete them:
@@ -202,26 +216,43 @@ database:
 
     .. code-block:: python3
 
+        import urllib.parse
         import xmlrpc.client
-        info = xmlrpc.client.ServerProxy('https://demo.odoo.com/start').start()
-        url, db, username, password = \
-            info['host'], info['database'], info['user'], info['password']
+        info = xmlrpc.client.ServerProxy(
+            'https://demo.odoo.com/start').start()
+        url, db, user, pwd = (
+            urllib.parse.urlparse(info['host']),
+            info['database'],
+            info['user'],
+            info['password'],
+        )
 
     .. code-block:: ruby
 
+        require "uri"
         require "xmlrpc/client"
-        info = XMLRPC::Client.new2('https://demo.odoo.com/start').call('start')
-        url, db, username, password = \
-            info['host'], info['database'], info['user'], info['password']
+        info = XMLRPC::Client.new2(
+            'https://demo.odoo.com/start').call('start')
+        url, db, user, pwd = [
+            URI.parse(info['host']),
+            info['database'],
+            info['user'],
+            info['password'],
+        ]
 
     .. case:: PHP
 
         .. code-block:: php
 
             require_once('ripcord.php');
-            $info = ripcord::client('https://demo.odoo.com/start')->start();
-            list($url, $db, $username, $password) =
-              array($info['host'], $info['database'], $info['user'], $info['password']);
+            $info = ripcord::client(
+                'https://demo.odoo.com/start')->start();
+            list($url, $db, $user, $pwd) = [
+                parse_url($info['host']),
+                $info['database'],
+                $info['user'],
+                $info['password'])
+            ];
 
         .. note::
 
@@ -232,25 +263,26 @@ database:
             installation.
 
             Since calls are performed over
-            `HTTPS <https://en.wikipedia.org/wiki/HTTP_Secure>`_, it also requires that
-            the `OpenSSL extension
+            `HTTPS <https://en.wikipedia.org/wiki/HTTP_Secure>`_, it also
+            requires that the `OpenSSL extension
             <https://php.net/manual/en/openssl.installation.php>`_ be enabled.
 
     .. case:: Java
 
         .. code-block:: java
 
-            final XmlRpcClient client = new XmlRpcClient();
-
-            final XmlRpcClientConfigImpl start_config = new XmlRpcClientConfigImpl();
-            start_config.setServerURL(new URL("https://demo.odoo.com/start"));
-            final Map<String, String> info = (Map<String, String>)client.execute(
-                start_config, "start", emptyList());
+            final XmlRpcClient start =  new XmlRpcClient() {{
+                setConfig(new XmlRpcClientConfigImpl() {{
+                    setServerURL(new URL("https://demo.odoo.com/start"));
+                }});
+            }};
+            final Map<String, String> info =
+                (Map<String, String>) start.execute("start", emptyList());
 
             final String url = info.get("host"),
-                          db = info.get("database"),
-                    username = info.get("user"),
-                    password = info.get("password");
+                db = info.get("database"),
+                user = info.get("user"),
+                pwd = info.get("password");
 
         .. note::
 
@@ -266,13 +298,11 @@ Logging in
 Odoo requires users of the API to be authenticated before they can query most
 data.
 
-The ``xmlrpc/2/common`` endpoint provides meta-calls which don't require
+The ``RPC2`` endpoint provides meta-calls which don't require
 authentication, such as the authentication itself or fetching version
 information. To verify if the connection information is correct before trying
 to authenticate, the simplest call is to ask for the server's version. The
-authentication itself is done through the ``authenticate`` function and
-returns a user identifier (``uid``) used in authenticated calls instead of
-the login.
+authentication to a specific database is done via standard http.
 
 .. rst-class:: setup doc-aside
 
@@ -280,25 +310,28 @@ the login.
 
     .. code-block:: python3
 
-        common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
+        common = xmlrpc.client.ServerProxy(
+            f'{url.scheme}://{url.netloc}/RPC2')
         common.version()
 
     .. code-block:: ruby
 
-        common = XMLRPC::Client.new2("#{url}/xmlrpc/2/common")
+        common = XMLRPC::Client.new2("#{url.scheme}://#{url.host}/RPC2")
         common.call('version')
 
     .. code-block:: php
 
-        $common = ripcord::client("$url/xmlrpc/2/common");
+        $common = ripcord::client("${url['scheme']}://${url['host']}/RPC2");
         $common->version();
 
     .. code-block:: java
 
-        final XmlRpcClientConfigImpl common_config = new XmlRpcClientConfigImpl();
-        common_config.setServerURL(
-            new URL(String.format("%s/xmlrpc/2/common", url)));
-        client.execute(common_config, "version", emptyList());
+        final XmlRpcClient common = new XmlRpcClient() {{
+            setConfig(new XmlRpcClientConfigImpl() {{
+                setServerURL(new URL(String.format("%s/RPC2", url)));
+            }});
+        }};
+        common.execute("version", emptyList());
 
 .. rst-class:: doc-aside
 
@@ -317,39 +350,59 @@ the login.
 
     .. code-block:: python3
 
-        uid = common.authenticate(db, username, password, {})
+        models = xmlrpc.client.ServerProxy(
+            f'{url.scheme}://{user}:{pwd}@{url.netloc}/RPC2/{db}')
 
     .. code-block:: ruby
 
-        uid = common.call('authenticate', db, username, password, {})
+        models = XMLRPC::Client.new2(
+            "#{url.scheme}://#{user}:#{pwd}@#{url.host}/RPC2/#{db}")
 
     .. code-block:: php
 
-        $uid = $common->authenticate($db, $username, $password, array());
+        $models = ripcord::client(
+            "${url['scheme']}://$user:$pwd@${url['host']}/RPC2/$db");
 
     .. code-block:: java
 
-        int uid = (int)client.execute(
-            common_config, "authenticate", asList(
-                db, username, password, emptyMap()));
+        final XmlRpcClient models = new XmlRpcClient() {{
+            setTypeFactory(new XmlRpcTypeNil(this));
+            setConfig(new XmlRpcClientConfigImpl() {{
+                setServerURL(new URL(String.format("%s/RPC2/%s", url, db)));
+                setBasicUserName(user);
+                setBasicPassword(pwd);
+            }});
+        }};
 
 .. _webservices/odoo/calling_methods:
 
 Calling methods
 ===============
 
-The second endpoint is ``xmlrpc/2/object``, is used to call methods of odoo
-models via the ``execute_kw`` RPC function.
+When connected to a specific database, the procedure name is the concatenation
+of the model name, ``.`` and the method name. The parameters are:
 
-Each call to ``execute_kw`` takes the following parameters:
+* a mandatory subject, which provides both the records and context to use for
+  the call (if any) and can be one of:
+  * a falsy value (in the Python sense so an empty collection, the boolean
+  ``false``, a ``null``, the integer ``0``, ...)
+  * an array (list) of record ids
+  * a struct (mapping/dict) with the keys ids (an array/list of record ids) and
+  context (call's context)
+* an optional array of positional parameters
+* an optional struct of keyword parameters
 
-* the database to use, a string
-* the user id (retrieved through ``authenticate``), an integer
-* the user's password, a string
-* the model name, a string
-* the method name, a string
-* an array/list of parameters passed by position
-* a mapping/dict of parameters to pass by keyword (optional)
+The result of the call is whatever the method returned, with a few conversions:
+
+* returned recordsets are converted to arrays of ids
+* iterables are converted to arrays of whatever they contain
+* mappings are converted to structs
+* mapping keys are converted to strings
+* other objects are converted to structs of their vars
+
+Depending on the API, it may also be possible to create or keep a proxy to a model on which you can keep calling methods.
+
+For instance to see if we can read the res.partner model we can call check_access_rights with no subject, operation passed by position and raise_exception passed by keyword (in order to get a true/false result rather than true/error):
 
 .. container:: doc-aside
 
@@ -364,38 +417,43 @@ Each call to ``execute_kw`` takes the following parameters:
 
         .. code-block:: python3
 
-            models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
-            models.execute_kw(db, uid, password,
-                'res.partner', 'check_access_rights',
-                ['read'], {'raise_exception': False})
+            partners = models.res.partner
+            partners.check_access_rights(
+                [],  # empty recordset
+                ['read'],  # positional arguments
+                {'raise_exception': False}  # keyword arguments
+            )
 
         .. code-block:: ruby
 
-            models = XMLRPC::Client.new2("#{url}/xmlrpc/2/object").proxy
-            models.execute_kw(db, uid, password,
-                'res.partner', 'check_access_rights',
-                ['read'], {raise_exception: false})
+            partners = models.proxy('res.partner')
+            partners.check_access_rights(
+                [],  # empty recordset
+                ['read'],  # positional arguments
+                {raise_exception: false}  # keyword arguments
+            )
 
         .. code-block:: php
 
-            $models = ripcord::client("$url/xmlrpc/2/object");
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'check_access_rights',
-                array('read'), array('raise_exception' => false));
+            $partners = $models->res->partner;
+            $partners->check_access_rights(
+                [],  // empty recordset
+                ['read'],  // positional arguments
+                ['raise_exception' => false]  // keyword arguments
+            );
 
         .. code-block:: java
 
-            final XmlRpcClient models = new XmlRpcClient() {{
-                setConfig(new XmlRpcClientConfigImpl() {{
-                    setServerURL(new URL(String.format("%s/xmlrpc/2/object", url)));
-                }});
-            }};
-            models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "check_access_rights",
-                asList("read"),
-                new HashMap() {{ put("raise_exception", false); }}
-            ));
+            models.execute(
+                "res.partner.check_access_rights",
+                asList(
+                    0,  // empty recordset
+                    asList("read"),  // positional arguments
+                    new HashMap<String, Object>() {{  // keyword arguments
+                        put("raise_exception", false);
+                    }}
+                )
+            );
 
     .. code-block:: json
 
@@ -410,8 +468,8 @@ Records can be listed and filtered via :meth:`~odoo.models.Model.search`.
 
 :meth:`~odoo.models.Model.search` takes a mandatory
 :ref:`domain <reference/orm/domains>` filter (possibly empty), and returns the
-database identifiers of all records matching the filter. To list customer
-companies for instance:
+database identifiers of all records matching the filter. To list companies for
+instance:
 
 .. container:: doc-aside
 
@@ -419,30 +477,53 @@ companies for instance:
 
         .. code-block:: python3
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search',
-                [[['is_company', '=', True]]])
+            partners = models.res.partner
+            partners.search(
+                [],
+                [  # function arguments
+                    [  # 1st argument, domain
+                        ['is_company', '=', True]  # domain leaf
+                    ]
+                ]
+            )
 
         .. code-block:: ruby
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search',
-                [[['is_company', '=', true]]])
+            partners = models.proxy('res.partner')
+            partners.search(
+                [],
+                [  # function arguments
+                    [  # 1st argument, domain
+                        ['is_company', '=', true]  # domain leaf
+                    ]
+                ],
+                {}  # empty function keyword arguments
+            )
 
         .. code-block:: php
 
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'search', array(
-                    array(array('is_company', '=', true))));
+            $partners = $models->res->partner;
+            $partners->search(
+                [],
+                [  // function arguments
+                    [  // 1st argument, domain
+                        ['is_company', '=', true]  // domain leaf
+                    ]
+                ],
+                []  # empty function keyword arguments
+            )
 
         .. code-block:: java
 
-            asList((Object[])models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "search",
-                asList(asList(
-                    asList("is_company", "=", true)))
-            )));
+            models.execute('res.parter.search', asList(
+                0,
+                asList(  // function arguments
+                    asList(  // 1st argument, domain
+                        asList("is_company", "=", true)  // domain leaf
+                    )
+                ),
+                new HashMap();   # empty function keyword arguments
+            ));
 
     .. code-block:: json
 
@@ -461,33 +542,53 @@ available to only retrieve a subset of all matched records.
 
         .. code-block:: python3
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search',
+            partners = models.res.partner
+            partners.search(
+                [],
                 [[['is_company', '=', True]]],
-                {'offset': 10, 'limit': 5})
+                {
+                    'offset': 10,
+                    'limit': 5
+                }
+            )
 
         .. code-block:: ruby
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search',
+            partners = models.proxy('res.partner')
+            partners.search(
+                [],
                 [[['is_company', '=', true]]],
-                {offset: 10, limit: 5})
+                {
+                    offset: 10,
+                    limit: 5
+                }
+            )
 
         .. code-block:: php
 
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'search',
-                array(array(array('is_company', '=', true))),
-                array('offset'=>10, 'limit'=>5));
+            $partners = $models->res->partner;
+            $partners->search(
+                [],
+                [[['is_company', '=', true]]],
+                {
+                    'offset' => 10,
+                    'limit' => 5
+                }
+            )
 
         .. code-block:: java
 
-            asList((Object[])models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "search",
-                asList(asList(
-                    asList("is_company", "=", true))),
-                new HashMap() {{ put("offset", 10); put("limit", 5); }}
+            asList((Object[])models.execute("res.parter.search", asList(
+                0,
+                asList(
+                    asList(
+                        asList("is_company", "=", true)
+                    )
+                ),
+                new HashMap() {{
+                    put("offset", 10);
+                    put("limit", 5);
+                }}
             )));
 
     .. code-block:: json
@@ -509,29 +610,33 @@ only the number of records matching the query. It takes the same
 
         .. code-block:: python3
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search_count',
-                [[['is_company', '=', True]]])
+            partners = models.res.partner
+            partners.search_count(
+                [],
+                [[['is_company', '=', True]]]
+            )
 
         .. code-block:: ruby
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search_count',
-                [[['is_company', '=', true]]])
+            partners = models.proxy('res.partner')
+            partners.search_count(
+                [],
+                [[['is_company', '=', true]]]
+            )
 
         .. code-block:: php
 
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'search_count',
-                array(array(array('is_company', '=', true))));
+            $partners = $models->res->partner;
+            $partners->search_count(
+                [],
+                [[['is_company', '=', true]]]
+            )
 
         .. code-block:: java
 
-            (Integer)models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "search_count",
-                asList(asList(
-                    asList("is_company", "=", true)))
+            (Integer)models.execute("res.parter.search_count", asList(
+                0,
+                asList(asList(asList("is_company", "=", true)))
             ));
 
     .. code-block:: json
@@ -559,53 +664,50 @@ which tends to be a huge amount.
 
         .. code-block:: python3
 
-            ids = models.execute_kw(db, uid, password,
-                'res.partner', 'search',
+            partners = models.res.partner
+            ids = partners.search(
+                [],
                 [[['is_company', '=', True]]],
-                {'limit': 1})
-            [record] = models.execute_kw(db, uid, password,
-                'res.partner', 'read', [ids])
+                {'limit': 1}
+            )
+            [record] = partners.read(ids)
             # count the number of fields fetched by default
             len(record)
 
         .. code-block:: ruby
 
-            ids = models.execute_kw(db, uid, password,
-                'res.partner', 'search',
+            partners = models.proxy('res.partner')
+            ids = partners.search(
+                [],
                 [[['is_company', '=', true]]],
-                {limit: 1})
-            record = models.execute_kw(db, uid, password,
-                'res.partner', 'read', [ids]).first
-            # count the number of fields fetched by default
+                {limit: 1}
+            )
+            record = partners.read(ids).first
             record.length
 
         .. code-block:: php
 
-            $ids = $models->execute_kw($db, $uid, $password,
-                'res.partner', 'search',
-                array(array(array('is_company', '=', true))),
-                array('limit'=>1));
-            $records = $models->execute_kw($db, $uid, $password,
-                'res.partner', 'read', array($ids));
-            // count the number of fields fetched by default
-            count($records[0]);
+            $partners = $models->res->partner;
+            $ids = $partners->search(
+                [],
+                [[['is_company', '=', true]]],
+                ['limit' => 1]
+            );
+            $record = $partners->read($ids)[0];
+            count($record);
 
         .. code-block:: java
 
             final List ids = asList((Object[])models.execute(
-                "execute_kw", asList(
-                    db, uid, password,
-                    "res.partner", "search",
-                    asList(asList(
-                        asList("is_company", "=", true))),
-                    new HashMap() {{ put("limit", 1); }})));
-            final Map record = (Map)((Object[])models.execute(
-                "execute_kw", asList(
-                    db, uid, password,
-                    "res.partner", "read",
-                    asList(ids)
+                "res.partner.search", asList(
+                    0,
+                    asList(asList(asList("is_company", "=", true))),
+                    new HashMap() {{ put("limit", 1); }}
                 )
-            ))[0];
+            ))
+            final Map record = (Map)((Object[])models.execute(
+                "res.partner.read", asList(ids)
+            )[0];
             // count the number of fields fetched by default
             record.size();
 
@@ -621,29 +723,27 @@ Conversedly, picking only three fields deemed interesting.
 
         .. code-block:: python3
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'read',
-                [ids], {'fields': ['name', 'country_id', 'comment']})
+            partners.read(ids, [], {
+                'fields': ['name', 'country_id', 'comment']
+            })
 
         .. code-block:: ruby
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'read',
-                [ids], {fields: %w(name country_id comment)})
+            partners.read(ids, [], {
+                'fields': ['name', 'country_id', 'comment']
+            })
 
         .. code-block:: php
 
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'read',
-                array($ids),
-                array('fields'=>array('name', 'country_id', 'comment')));
+            partners.read(ids, [], [
+                'fields' => ['name', 'country_id', 'comment']
+            ])
 
         .. code-block:: java
 
-            asList((Object[])models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "read",
+            asList((Object[])models.execute("res.partner.read", asList(
                 asList(ids),
+                emptyList(),
                 new HashMap() {{
                     put("fields", asList("name", "country_id", "comment"));
                 }}
@@ -673,32 +773,42 @@ updating a record):
 
         .. code-block:: python3
 
-            models.execute_kw(
-                db, uid, password, 'res.partner', 'fields_get',
-                [], {'attributes': ['string', 'help', 'type']})
+            partners = models.res.partner
+            partners.fields_get(
+                [],
+                [],
+                {'attributes': ['string', 'help', 'type']}
+            )
 
         .. code-block:: ruby
 
-            models.execute_kw(
-                db, uid, password, 'res.partner', 'fields_get',
-                [], {attributes: %w(string help type)})
+            partners = models.proxy('res.partner')
+            partners.fields_get(
+                [],
+                [],
+                {'attributes': ['string', 'help', 'type']}
+            )
 
         .. code-block:: php
 
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'fields_get',
-                array(), array('attributes' => array('string', 'help', 'type')));
+            $partners = $models->res->partner;
+            $partners->fields_get(
+                [],
+                [],
+                ['attributes' => ['string', 'help', 'type']]
+            )
 
         .. code-block:: java
 
-            (Map<String, Map<String, Object>>)models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "fields_get",
-                emptyList(),
-                new HashMap() {{
-                    put("attributes", asList("string", "help", "type"));
-                }}
-            ));
+            (Map<String, Map<String, Object>>)models.execute(
+                "res.partner.fields_get", asList(
+                    0,
+                    emptyList(),
+                    new HashMap() {{
+                        put("attributes", asList("string", "help", "type"));
+                    }}
+                )
+            );
 
     .. code-block:: json
 
@@ -758,37 +868,43 @@ if that list is not provided it will fetch all fields of matched records):
 
         .. code-block:: python3
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search_read',
+            partners = models.res.partner
+            partners.search_read(
+                [],
                 [[['is_company', '=', True]]],
-                {'fields': ['name', 'country_id', 'comment'], 'limit': 5})
+                {'fields': ['name', 'country_id', 'comment'], 'limit': 5}
+            )
 
         .. code-block:: ruby
 
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search_read',
+            partners = models.proxy('res.partner')
+            partners.search_read(
+                [],
                 [[['is_company', '=', true]]],
-                {fields: %w(name country_id comment), limit: 5})
+                {fields: %w[name country_id comment], limit: 5}
+            )
 
         .. code-block:: php
 
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'search_read',
-                array(array(array('is_company', '=', true))),
-                array('fields'=>array('name', 'country_id', 'comment'), 'limit'=>5));
+            $partners = $models->res->partner;
+            $partners->search_read(
+                [],
+                [[['is_company', '=', true]]],
+                ['fields'=>['name', 'country_id', 'comment'], 'limit'=>5]
+            )
 
         .. code-block:: java
 
-            asList((Object[])models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "search_read",
-                asList(asList(
-                    asList("is_company", "=", true))),
-                new HashMap() {{
-                    put("fields", asList("name", "country_id", "comment"));
-                    put("limit", 5);
-                }}
-            )));
+            asList((Object[])models.execute(
+                "res.partner.search_read", asList(
+                    0,
+                    asList(asList(asList("is_company", "=", true))),
+                    new HashMap() {{
+                        put("fields", asList("name", "country_id", "comment"));
+                        put("limit", 5);
+                    }}
+                )
+            ));
 
     .. code-block:: json
 
@@ -842,29 +958,39 @@ set through the mapping argument, the default value will be used.
 
         .. code-block:: python3
 
-            id = models.execute_kw(db, uid, password, 'res.partner', 'create', [{
-                'name': "New Partner",
-            }])
+            partners = models.res.partner
+            id = partners.create(
+                [],
+                [{'name': 'New Partner'}]
+            )
 
         .. code-block:: ruby
 
-            id = models.execute_kw(db, uid, password, 'res.partner', 'create', [{
-                name: "New Partner",
-            }])
+            partners = models.proxy('res.partner')
+            partners.create(
+                [],
+                [{name: 'New Partner'}]
+            )
 
         .. code-block:: php
 
-            $id = $models->execute_kw($db, $uid, $password,
-                'res.partner', 'create',
-                array(array('name'=>"New Partner")));
+            $partners = $models->res->partner;
+            $id = $partners->create(
+                [],
+                [['name' => 'New Partner']]
+            )
 
         .. code-block:: java
 
-            final Integer id = (Integer)models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "create",
-                asList(new HashMap() {{ put("name", "New Partner"); }})
-            ));
+            final Integer id = (Integer)models.execute(
+                "res.partner.create", asList(
+                    0,
+                    asList(new HashMap() {{
+                        put("name", "New Partner");
+                    }})
+
+                )
+            );
 
     .. code-block:: json
 
@@ -900,44 +1026,49 @@ a record).
 
         .. code-block:: python3
 
-            models.execute_kw(db, uid, password, 'res.partner', 'write', [[id], {
-                'name': "Newer partner"
-            }])
+            partners = models.res.partner
+            partners.write(
+                [id],  # i.e. the ID from the create() rpc
+                [{'name': "Newer partner"}],
+                {}
+            )
             # get record name after having changed it
-            models.execute_kw(db, uid, password, 'res.partner', 'name_get', [[id]])
+            partners.name_get([id])
 
         .. code-block:: ruby
 
-            models.execute_kw(db, uid, password, 'res.partner', 'write', [[id], {
-                name: "Newer partner"
-            }])
+            partners = models.proxy('res.partner')
+            partners.write(
+                [id],
+                [{name: "Newer partner"}],
+                {}
+            )
             # get record name after having changed it
-            models.execute_kw(db, uid, password, 'res.partner', 'name_get', [[id]])
+            partners.name_get([id])
 
         .. code-block:: php
 
-            $models->execute_kw($db, $uid, $password, 'res.partner', 'write',
-                array(array($id), array('name'=>"Newer partner")));
+            $partners = $models->res->partner;
+            $partners->write(
+                [$id],
+                [['name' => 'Newer partner']],
+                []
+            )
             // get record name after having changed it
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'name_get', array(array($id)));
+            $partners->name_get([$id])
 
         .. code-block:: java
 
-            models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "write",
-                asList(
-                    asList(id),
-                    new HashMap() {{ put("name", "Newer Partner"); }}
-                )
+            models.execute("res.partner.write", asList(
+                asList(id),
+                asList(new HashMap() {{
+                    put("name", "Newer Partner");
+                }})
             ));
             // get record name after having changed it
-            asList((Object[])models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "name_get",
-                asList(asList(id))
-            )));
+            models.execute("res.partner.name_get", asList(
+                asList(id)
+            ))
 
     .. code-block:: json
 
@@ -955,39 +1086,43 @@ Records can be deleted in bulk by providing their ids to
 
         .. code-block:: python3
 
-            models.execute_kw(db, uid, password, 'res.partner', 'unlink', [[id]])
+            partners = models.res.partner
+            partners.unlink([id])
             # check if the deleted record is still in the database
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search', [[['id', '=', id]]])
+            partners.search(
+                [],
+                [[['id', '=', id]]],
+            )
 
         .. code-block:: ruby
 
-            models.execute_kw(db, uid, password, 'res.partner', 'unlink', [[id]])
+            partners = models.proxy('res.partner')
+            partners.unlink([id])
             # check if the deleted record is still in the database
-            models.execute_kw(db, uid, password,
-                'res.partner', 'search', [[['id', '=', id]]])
+            partners.search(
+                [],
+                [[['id', '=', id]]],
+            )
 
         .. code-block:: php
 
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'unlink',
-                array(array($id)));
+            $partners = $models->res->partner;
+            $partners->unlink([id])
             // check if the deleted record is still in the database
-            $models->execute_kw($db, $uid, $password,
-                'res.partner', 'search',
-                array(array(array('id', '=', $id))));
+            $partners->search(
+                [id],
+                [[['id', '=', $id]]]
+            )
 
         .. code-block:: java
 
-            models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "unlink",
-                asList(asList(id))));
+            models.execute("res.partner.unlink", asList(
+                asList(id)
+            ))
             // check if the deleted record is still in the database
-            asList((Object[])models.execute("execute_kw", asList(
-                db, uid, password,
-                "res.partner", "search",
-                asList(asList(asList("id", "=", 78)))
+            asList((Object[])models.execute("res.partner.search", asList(
+                0,
+                asList(asList(asList("id", "=", id)))
             )));
 
     .. code-block:: json
@@ -1056,61 +1191,77 @@ Provides information about Odoo models via its various fields
 
         .. code-block:: python3
 
-            models.execute_kw(db, uid, password, 'ir.model', 'create', [{
-                'name': "Custom Model",
-                'model': "x_custom_model",
-                'state': 'manual',
-            }])
-            models.execute_kw(
-                db, uid, password, 'x_custom_model', 'fields_get',
-                [], {'attributes': ['string', 'help', 'type']})
+            ir_models = models.ir.model
+            x_custom_model_id = ir_models.create(
+                [],
+                [{
+                    'name': "Custom Model",
+                    'model': 'x_custom_model',
+                    'state': 'manual'
+                }]
+            )
+
+            x_custom_models = models.x_custom_model
+            x_custom_models.fields_get(
+                [],
+                [],
+                {'attributes': ['string', 'help', 'type']}
+            )
 
         .. code-block:: php
 
-            $models->execute_kw(
-                $db, $uid, $password,
-                'ir.model', 'create', array(array(
+            $ir_models = $models->ir->model
+            $x_custom_model_id = $ir_models->create(
+                []
+                [[
                     'name' => "Custom Model",
                     'model' => 'x_custom_model',
                     'state' => 'manual'
-                ))
-            );
-            $models->execute_kw(
-                $db, $uid, $password,
-                'x_custom_model', 'fields_get',
-                array(),
-                array('attributes' => array('string', 'help', 'type'))
-            );
+                ]]
+            )
+
+            $x_custom_models = $models->x_custom_model
+            $x_custom_models->fields_get(
+                [],
+                [],
+                ['attributes' => ['string', 'help', 'type']]
+            )
 
         .. code-block:: ruby
 
-            models.execute_kw(
-                db, uid, password,
-                'ir.model', 'create', [{
+            ir_models = models.proxy('ir.model')
+            x_custom_model_id = ir_models.create(
+                [],
+                [{
                     name: "Custom Model",
                     model: 'x_custom_model',
                     state: 'manual'
-                }])
-            fields = models.execute_kw(
-                db, uid, password, 'x_custom_model', 'fields_get',
-                [], {attributes: %w(string help type)})
+                }]
+            )
+
+            x_custom_models = models.proxy('x_custom_model')
+            x_custom_models.fields_get(
+                [],
+                [],
+                {attributes: %w(string help type)}
+            )
 
         .. code-block:: java
 
-            models.execute(
-                "execute_kw", asList(
-                    db, uid, password,
-                    "ir.model", "create",
+            final Integer xCustomModelId = models.execute(
+                "ir.model.create", asList(
+                    0,
                     asList(new HashMap<String, Object>() {{
                         put("name", "Custom Model");
                         put("model", "x_custom_model");
                         put("state", "manual");
                     }})
-            ));
+                )
+            )
+
             final Object fields = models.execute(
-                "execute_kw", asList(
-                    db, uid, password,
-                    "x_custom_model", "fields_get",
+                "x_custom_model.fields_get", asList(
+                    0,
                     emptyList(),
                     new HashMap<String, Object> () {{
                         put("attributes", asList(
@@ -1118,11 +1269,20 @@ Provides information about Odoo models via its various fields
                                 "help",
                                 "type"));
                     }}
-            ));
+                )
+            )
 
     .. code-block:: json
 
         {
+            "id": {
+                "type": "integer",
+                "string": "Id"
+            }
+            "display_name": {
+                "type": "char",
+                "string": "Display Name"
+            },
             "create_uid": {
                 "type": "many2one",
                 "string": "Created by"
@@ -1130,10 +1290,6 @@ Provides information about Odoo models via its various fields
             "create_date": {
                 "type": "datetime",
                 "string": "Created on"
-            },
-            "__last_update": {
-                "type": "datetime",
-                "string": "Last Modified on"
             },
             "write_uid": {
                 "type": "many2one",
@@ -1143,14 +1299,10 @@ Provides information about Odoo models via its various fields
                 "type": "datetime",
                 "string": "Last Updated on"
             },
-            "display_name": {
-                "type": "char",
-                "string": "Display Name"
+            "__last_update": {
+                "type": "datetime",
+                "string": "Last Modified on"
             },
-            "id": {
-                "type": "integer",
-                "string": "Id"
-            }
         }
 
 .. _reference/webservice/inspection/fields:
@@ -1197,124 +1349,100 @@ activated as actual fields on the model.
 
         .. code-block:: python3
 
-            id = models.execute_kw(db, uid, password, 'ir.model', 'create', [{
-                'name': "Custom Model",
-                'model': "x_custom",
-                'state': 'manual',
-            }])
-            models.execute_kw(
-                db, uid, password,
-                'ir.model.fields', 'create', [{
-                    'model_id': id,
+            # Add a new field "x_name" on "x_custom_model"
+            fields = models.ir.model.fields
+            fields.create(
+                [],
+                [{
+                    'model_id': x_custom_model_id,  # from the above example
                     'name': 'x_name',
                     'ttype': 'char',
                     'state': 'manual',
-                    'required': True,
-                }])
-            record_id = models.execute_kw(
-                db, uid, password,
-                'x_custom', 'create', [{
-                    'x_name': "test record",
-                }])
-            models.execute_kw(db, uid, password, 'x_custom', 'read', [[record_id]])
+                }]
+            )
+
+            # Create a new record and read it
+            x_custom_models = models.x_custom_model
+            id = x_custom_models.create(
+                [],
+                [{
+                    'x_name': "test record"
+                }]
+            )
+            x_custom_models.read([id])
 
         .. code-block:: php
 
-            $id = $models->execute_kw(
-                $db, $uid, $password,
-                'ir.model', 'create', array(array(
-                    'name' => "Custom Model",
-                    'model' => 'x_custom',
-                    'state' => 'manual'
-                ))
-            );
-            $models->execute_kw(
-                $db, $uid, $password,
-                'ir.model.fields', 'create', array(array(
-                    'model_id' => $id,
+            // Add a new field "x_name" on "x_custom_model"
+            $fields = models->ir->model->fields
+            $fields->create(
+                [],
+                [[
+                    'model_id' => $x_custom_model_id,  // above example
                     'name' => 'x_name',
                     'ttype' => 'char',
                     'state' => 'manual',
-                    'required' => true
-                ))
-            );
-            $record_id = $models->execute_kw(
-                $db, $uid, $password,
-                'x_custom', 'create', array(array(
+                ]]
+            )
+
+            // Create a new record and read it
+            $x_custom_models = $models->x_custom_model
+            $id = $x_custom_model->create(
+                [],
+                [[
                     'x_name' => "test record"
-                ))
-            );
-            $models->execute_kw(
-                $db, $uid, $password,
-                'x_custom', 'read',
-                array(array($record_id)));
+                ]]
+            )
+            $x_custom_model->read([$id])
 
         .. code-block:: ruby
 
-            id = models.execute_kw(
-                db, uid, password,
-                'ir.model', 'create', [{
-                    name: "Custom Model",
-                    model: "x_custom",
-                    state: 'manual'
-                }])
-            models.execute_kw(
-                db, uid, password,
-                'ir.model.fields', 'create', [{
-                    model_id: id,
+            # Add a new field "x_name" on "x_custom_model"
+            fields = models.proxy('ir.model.fields')
+            fields.create(
+                [],
+                [[
+                    model_id: x_custom_model_id,  # from the above example
                     name: "x_name",
                     ttype: "char",
                     state: "manual",
-                    required: true
-                }])
-            record_id = models.execute_kw(
-                db, uid, password,
-                'x_custom', 'create', [{
+                ]]
+            )
+
+            # Create a new record and read it
+            x_custom_models = models.proxy('x_custom_model')
+            id = x_custom_models.create(
+                [],
+                [{
                     x_name: "test record"
-                }])
-            models.execute_kw(
-                db, uid, password,
-                'x_custom', 'read', [[record_id]])
+                }]
+            )
+            x_custom_models.read([id])
 
         .. code-block:: java
 
+            // Add a new field "x_name" on "x_custom_model"
+            models.execute("ir.model.fields.create", asList(
+                0,
+                asList(,new HashMap<String, Object>() {{
+                    put("model_id", xCustomModelId);
+                    put("name", "x_name");
+                    put("ttype", "char");
+                    put("state", "manual");
+                }})
+            ));
+
+            // Create a new record and read it
             final Integer id = (Integer)models.execute(
-                "execute_kw", asList(
-                    db, uid, password,
-                    "ir.model", "create",
-                    asList(new HashMap<String, Object>() {{
-                        put("name", "Custom Model");
-                        put("model", "x_custom");
-                        put("state", "manual");
-                    }})
-            ));
-            models.execute(
-                "execute_kw", asList(
-                    db, uid, password,
-                    "ir.model.fields", "create",
-                    asList(new HashMap<String, Object>() {{
-                        put("model_id", id);
-                        put("name", "x_name");
-                        put("ttype", "char");
-                        put("state", "manual");
-                        put("required", true);
-                    }})
-            ));
-            final Integer record_id = (Integer)models.execute(
-                "execute_kw", asList(
-                    db, uid, password,
-                    "x_custom", "create",
+                "x_custom_model.create", asList(
+                    0,
                     asList(new HashMap<String, Object>() {{
                         put("x_name", "test record");
                     }})
-            ));
+                )
+            );
 
-            client.execute(
-                "execute_kw", asList(
-                    db, uid, password,
-                    "x_custom", "read",
-                    asList(asList(record_id))
-            ));
+            models.execute("x_custom_model.read", asList(id));
 
     .. code-block:: json
 

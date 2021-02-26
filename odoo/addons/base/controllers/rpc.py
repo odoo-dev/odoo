@@ -61,7 +61,7 @@ class RPC(Controller):
         try:
             response = self._xmlrpc(service)
         except Exception as error:
-            response = wsgi_server.xmlrpc_handle_exception_string(error)
+            response = wsgi_server.xmlrpc_convert_exception_string(error)
         return Response(response=response, mimetype='text/xml')
 
     @route("/xmlrpc/2/<service>", auth="none", methods=["POST"], csrf=False, save_session=False)
@@ -70,7 +70,7 @@ class RPC(Controller):
         try:
             response = self._xmlrpc(service)
         except Exception as error:
-            response = wsgi_server.xmlrpc_handle_exception_int(error)
+            response = wsgi_server.xmlrpc_convert_exception_int(error)
         return Response(response=response, mimetype='text/xml')
 
     @route('/jsonrpc', type='json', auth="none", save_session=False)
