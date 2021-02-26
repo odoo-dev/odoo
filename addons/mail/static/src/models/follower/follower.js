@@ -3,6 +3,7 @@ odoo.define('mail/static/src/models/follower.follower.js', function (require) {
 
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
 const { attr, many2many, many2one } = require('mail/static/src/model/model_field.js');
+const { insert, link, unlink, unlinkAll } = require('mail/static/src/model/model_field_command.js');
 
 function factory(dependencies) {
 
@@ -21,14 +22,14 @@ function factory(dependencies) {
             const data2 = {};
             if ('channel_id' in data) {
                 if (!data.channel_id) {
-                    data2.channel = [['unlink-all']];
+                    data2.channel = unlinkAll()
                 } else {
                     const channelData = {
                         id: data.channel_id,
                         model: 'mail.channel',
                         name: data.name,
                     };
-                    data2.channel = [['insert', channelData]];
+                    data2.channel = insert(channelData);
                 }
             }
             if ('id' in data) {
@@ -42,14 +43,14 @@ function factory(dependencies) {
             }
             if ('partner_id' in data) {
                 if (!data.partner_id) {
-                    data2.partner = [['unlink-all']];
+                    data2.partner = unlinkAll();
                 } else {
                     const partnerData = {
                         email: data.email,
                         id: data.partner_id,
                         name: data.name,
                     };
-                    data2.partner = [['insert', partnerData]];
+                    data2.partner = insert(partnerData);
                 }
             }
             return data2;
@@ -99,7 +100,7 @@ function factory(dependencies) {
          */
         selectSubtype(subtype) {
             if (!this.selectedSubtypes.includes(subtype)) {
-                this.update({ selectedSubtypes: [['link', subtype]] });
+                this.update({ selectedSubtypes: link(subtype) });
             }
         }
 
@@ -111,20 +112,20 @@ function factory(dependencies) {
                 route: '/mail/read_subscription_data',
                 params: { follower_id: this.id },
             }));
-            this.update({ subtypes: [['unlink-all']] });
+            this.update({ subtypes: unlinkAll() });
             for (const data of subtypesData) {
                 const subtype = this.env.models['mail.follower_subtype'].insert(
                     this.env.models['mail.follower_subtype'].convertData(data)
                 );
-                this.update({ subtypes: [['link', subtype]] });
+                this.update({ subtypes: link(subtype) });
                 if (data.followed) {
-                    this.update({ selectedSubtypes: [['link', subtype]] });
+                    this.update({ selectedSubtypes: link(subtype) });
                 } else {
-                    this.update({ selectedSubtypes: [['unlink', subtype]] });
+                    this.update({ selectedSubtypes: unlink(subtype) });
                 }
             }
             this._subtypesListDialog = this.env.messaging.dialogManager.open('mail.follower_subtype_list', {
-                follower: [['link', this]],
+                follower: link(this),
             });
         }
 
@@ -133,7 +134,7 @@ function factory(dependencies) {
          */
         unselectSubtype(subtype) {
             if (this.selectedSubtypes.includes(subtype)) {
-                this.update({ selectedSubtypes: [['unlink', subtype]] });
+                this.update({ selectedSubtypes: unlink(subtype) });
             }
         }
 

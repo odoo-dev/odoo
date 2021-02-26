@@ -12,6 +12,7 @@ const {
     dragenterFiles,
     start,
 } = require('mail/static/src/utils/test_utils.js');
+const { insert, link } = require('mail/static/src/model/model_field_command.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -88,7 +89,7 @@ QUnit.test('dragover files on thread with composer', async function (assert) {
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     await afterNextRender(() =>
@@ -137,7 +138,7 @@ QUnit.test('message list desc order', async function (assert) {
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -235,7 +236,7 @@ QUnit.test('message list asc order', async function (assert) {
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -349,7 +350,7 @@ QUnit.test('mark channel as fetched when a new message is loaded and as seen whe
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     await afterNextRender(async () => this.env.services.rpc({
@@ -423,7 +424,7 @@ QUnit.test('mark channel as fetched and seen when a new message is loaded if com
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -478,7 +479,7 @@ QUnit.test('show message subject if thread is mailing channel', async function (
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView);
 
@@ -523,7 +524,7 @@ QUnit.test('[technical] new messages separator on posting message', async functi
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -592,7 +593,7 @@ QUnit.test('new messages separator on receiving new message [REQUIRE FOCUS]', as
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -685,7 +686,7 @@ QUnit.test('new messages separator on posting message', async function (assert) 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -742,10 +743,10 @@ QUnit.test('basic rendering of canceled notification', async function (assert) {
     await this.start();
     const threadViewer = await this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -835,7 +836,7 @@ QUnit.test('should scroll to bottom on receiving new message if the list is init
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.afterEvent({
         eventName: 'o-component-message-list-scrolled',
@@ -906,7 +907,7 @@ QUnit.test('should not scroll on receiving new message if the list is initially 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.afterEvent({
         eventName: 'o-component-message-list-scrolled',
@@ -980,7 +981,7 @@ QUnit.test("delete all attachments of message without content should no longer d
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', { id: 11, model: 'mail.channel' }]],
+        thread: insert({ id: 11, model: 'mail.channel' }),
     });
     // wait for messages of the thread to be loaded
     await this.afterEvent({
@@ -1038,7 +1039,7 @@ QUnit.test('delete all attachments of a message with some text content should st
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', { id: 11, model: 'mail.channel' }]],
+        thread: insert({ id: 11, model: 'mail.channel' }),
     });
     // wait for messages of the thread to be loaded
     await this.afterEvent({
@@ -1103,7 +1104,7 @@ QUnit.test('delete all attachments of a message with tracking fields should stil
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', { id: 11, model: 'mail.channel' }]],
+        thread: insert({ id: 11, model: 'mail.channel' }),
     });
     // wait for messages of the thread to be loaded
     await this.afterEvent({
@@ -1157,7 +1158,7 @@ QUnit.test('Post a message containing an email address followed by a mention on 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1200,7 +1201,7 @@ QUnit.test(`Mention a partner with special character (e.g. apostrophe ')`, async
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1248,7 +1249,7 @@ QUnit.test('mention 2 different partners that have the same name', async functio
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1300,7 +1301,7 @@ QUnit.test('mention a channel with space in the name', async function (assert) {
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1344,7 +1345,7 @@ QUnit.test('mention a channel with "&" in the name', async function (assert) {
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1388,7 +1389,7 @@ QUnit.test('mention a channel on a second line when the first line contains #', 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1432,7 +1433,7 @@ QUnit.test('mention a channel when replacing the space after the mention by anot
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1491,7 +1492,7 @@ QUnit.test('mention 2 different channels that have the same name', async functio
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1536,10 +1537,10 @@ QUnit.test('show empty placeholder when thread contains no message', async funct
     await this.start();
     const threadViewer = await this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -1580,10 +1581,10 @@ QUnit.test('show empty placeholder when thread contains only empty messages', as
     await this.start();
     const threadViewer = await this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -1629,10 +1630,10 @@ QUnit.test('message with subtype should be displayed (and not considered as empt
     await this.start();
     const threadViewer = await this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -1684,10 +1685,10 @@ QUnit.test('[technical] message list with a full page of empty messages should s
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -1747,7 +1748,7 @@ QUnit.test('first unseen message should be directly preceded by the new message 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     // send a command that leads to receiving a transient message
@@ -1801,7 +1802,7 @@ QUnit.test('composer should be focused automatically after clicking on the send 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1839,7 +1840,7 @@ QUnit.test('failure on loading messages should display error', async function (a
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView);
 
@@ -1873,7 +1874,7 @@ QUnit.test('failure on loading messages should prompt retry button', async funct
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView);
 
@@ -1920,7 +1921,7 @@ QUnit.test('failure on loading more messages should not alter message list displ
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1970,7 +1971,7 @@ QUnit.test('failure on loading more messages should display error and prompt ret
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -2029,7 +2030,7 @@ QUnit.test('Retry loading more messages on failed load more messages should load
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     messageFetchShouldFail = true;

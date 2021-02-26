@@ -16,6 +16,7 @@ const useStore = require('mail/static/src/component_hooks/use_store/use_store.js
 
 const Bus = require('web.Bus');
 const { date_to_str } = require('web.time');
+const { insert } = require('mail/static/src/model/model_field_command.js');
 
 const { Component, tags: { xml } } = owl;
 
@@ -52,7 +53,7 @@ QUnit.test('activity simplest layout', async function (assert) {
     await this.start();
     const activity = this.env.models['mail.activity'].create({
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -124,7 +125,7 @@ QUnit.test('activity with note layout', async function (assert) {
     const activity = this.env.models['mail.activity'].create({
         id: 12,
         note: 'There is no good or bad note',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -155,7 +156,7 @@ QUnit.test('activity info layout when planned after tomorrow', async function (a
         dateDeadline: date_to_str(fiveDaysFromNow),
         id: 12,
         state: 'planned',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -190,7 +191,7 @@ QUnit.test('activity info layout when planned tomorrow', async function (assert)
         dateDeadline: date_to_str(tomorrow),
         id: 12,
         state: 'planned',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -223,7 +224,7 @@ QUnit.test('activity info layout when planned today', async function (assert) {
         dateDeadline: date_to_str(today),
         id: 12,
         state: 'today',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -258,7 +259,7 @@ QUnit.test('activity info layout when planned yesterday', async function (assert
         dateDeadline: date_to_str(yesterday),
         id: 12,
         state: 'overdue',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -293,7 +294,7 @@ QUnit.test('activity info layout when planned before yesterday', async function 
         dateDeadline: date_to_str(fiveDaysBeforeNow),
         id: 12,
         state: 'overdue',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -324,7 +325,7 @@ QUnit.test('activity with a summary layout', async function (assert) {
     const activity = this.env.models['mail.activity'].create({
         id: 12,
         summary: 'test summary',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -355,8 +356,8 @@ QUnit.test('activity without summary layout', async function (assert) {
     await this.start();
     const activity = this.env.models['mail.activity'].create({
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
-        type: [['insert', { id: 1, displayName: "Fake type" }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
+        type: insert({ id: 1, displayName: "Fake type" }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -394,13 +395,13 @@ QUnit.test('activity details toggle', async function (assert) {
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const activity = this.env.models['mail.activity'].create({
-        creator: [['insert', { id: 1, display_name: "Admin" }]],
+        creator: insert({ id: 1, display_name: "Admin" }),
         dateCreate: date_to_str(today),
         dateDeadline: date_to_str(tomorrow),
         id: 12,
         state: 'planned',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
-        type: [['insert', { id: 1, displayName: "Fake type" }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
+        type: insert({ id: 1, displayName: "Fake type" }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -446,14 +447,14 @@ QUnit.test('activity details layout', async function (assert) {
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const activity = this.env.models['mail.activity'].create({
-        assignee: [['insert', { id: 10, display_name: "Pauvre pomme" }]],
-        creator: [['insert', { id: 1, display_name: "Admin" }]],
+        assignee: insert({ id: 10, display_name: "Pauvre pomme" }),
+        creator: insert({ id: 1, display_name: "Admin" }),
         dateCreate: date_to_str(today),
         dateDeadline: date_to_str(tomorrow),
         id: 12,
         state: 'planned',
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
-        type: [['insert', { id: 1, displayName: "Fake type" }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
+        type: insert({ id: 1, displayName: "Fake type" }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -523,8 +524,8 @@ QUnit.test('activity with mail template layout', async function (assert) {
     await this.start();
     const activity = this.env.models['mail.activity'].create({
         id: 12,
-        mailTemplates: [['insert', { id: 1, name: "Dummy mail template" }]],
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        mailTemplates: insert({ id: 1, name: "Dummy mail template" }),
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -609,11 +610,11 @@ QUnit.test('activity with mail template: preview mail', async function (assert) 
     await this.start({ env: { bus } });
     const activity = this.env.models['mail.activity'].create({
         id: 12,
-        mailTemplates: [['insert', {
+        mailTemplates: insert({
             id: 1,
             name: "Dummy mail template",
-        }]],
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        }),
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -652,11 +653,11 @@ QUnit.test('activity with mail template: send mail', async function (assert) {
     });
     const activity = this.env.models['mail.activity'].create({
         id: 12,
-        mailTemplates: [['insert', {
+        mailTemplates: insert({
             id: 1,
             name: "Dummy mail template",
-        }]],
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        }),
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -688,7 +689,7 @@ QUnit.test('activity upload document is available', async function (assert) {
         canWrite: true,
         category: 'upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -719,7 +720,7 @@ QUnit.test('activity click on mark as done', async function (assert) {
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
 
@@ -764,7 +765,7 @@ QUnit.test('activity mark as done popover should focus feedback input on open [R
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
 
@@ -826,8 +827,8 @@ QUnit.test('activity click on edit', async function (assert) {
     const activity = this.env.models['mail.activity'].create({
         canWrite: true,
         id: 12,
-        mailTemplates: [['insert', { id: 1, name: "Dummy mail template" }]],
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        mailTemplates: insert({ id: 1, name: "Dummy mail template" }),
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.strictEqual(
@@ -961,11 +962,11 @@ QUnit.test('activity click on cancel', async function (assert) {
     const activity = this.env.models['mail.activity'].create({
         canWrite: true,
         id: 12,
-        mailTemplates: [['insert', {
+        mailTemplates: insert({
             id: 1,
             name: "Dummy mail template",
-        }]],
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        }),
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
 
     // Create a parent component to surround the Activity component in order to be able
@@ -1041,7 +1042,7 @@ QUnit.test('activity mark done popover close on ESCAPE', async function (assert)
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
 
     await this.createActivityComponent(activity);
@@ -1075,7 +1076,7 @@ QUnit.test('activity mark done popover click on discard', async function (assert
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     await afterNextRender(() => {
@@ -1129,7 +1130,7 @@ QUnit.test('data-oe-id & data-oe-model link redirection on click', async functio
         category: 'not_upload_file',
         id: 12,
         note: `<p><a href="#" data-oe-id="250" data-oe-model="some.model">some.model_250</a></p>`,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
     assert.containsOnce(

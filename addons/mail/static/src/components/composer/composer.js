@@ -18,6 +18,7 @@ const {
     isEventHandled,
     markEventHandled,
 } = require('mail/static/src/utils/utils.js');
+const { replace } = require('mail/static/src/model/model_field_command.js');
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
@@ -181,7 +182,7 @@ class Composer extends Component {
      */
     get newAttachmentExtraData() {
         return {
-            composers: [['replace', this.composer]],
+            composers: replace(this.composer),
         };
     }
 

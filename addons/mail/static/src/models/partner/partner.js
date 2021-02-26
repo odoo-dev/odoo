@@ -3,6 +3,7 @@ odoo.define('mail/static/src/models/partner/partner.js', function (require) {
 
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
 const { attr, many2many, many2one, one2many, one2one } = require('mail/static/src/model/model_field.js');
+const { insert, link, unlinkAll } = require('mail/static/src/model/model_field_command.js');
 
 const utils = require('web.utils');
 
@@ -27,12 +28,12 @@ function factory(dependencies) {
             }
             if ('country' in data) {
                 if (!data.country) {
-                    data2.country = [['unlink-all']];
+                    data2.country = unlinkAll();
                 } else {
-                    data2.country = [['insert', {
+                    data2.country = insert({
                         id: data.country[0],
                         name: data.country[1],
-                    }]];
+                    });
                 }
             }
             if ('display_name' in data) {
@@ -54,7 +55,7 @@ function factory(dependencies) {
             // relation
             if ('user_id' in data) {
                 if (!data.user_id) {
-                    data2.user = [['unlink-all']];
+                    data2.user = unlinkAll();
                 } else {
                     let user = {};
                     if (Array.isArray(data.user_id)) {
@@ -67,7 +68,7 @@ function factory(dependencies) {
                             id: data.user_id,
                         };
                     }
-                    data2.user = [['insert', user]];
+                    data2.user = insert(user);
                 }
             }
 
@@ -142,7 +143,7 @@ function factory(dependencies) {
             }, { shadow: true }));
             this.update({ hasCheckedUser: true });
             if (userIds.length > 0) {
-                this.update({ user: [['insert', { id: userIds[0] }]] });
+                this.update({ user: insert({ id: userIds[0] }) });
             }
         }
 
@@ -265,7 +266,7 @@ function factory(dependencies) {
          * @returns {mail.messaging}
          */
         _computeMessaging() {
-            return [['link', this.env.messaging]];
+            return link(this.env.messaging);
         }
 
         /**

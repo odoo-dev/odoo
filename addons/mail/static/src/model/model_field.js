@@ -1,7 +1,7 @@
 odoo.define('mail/static/src/model/model_field.js', function (require) {
 'use strict';
 
-const { FieldCommand } = require('mail/static/src/model/model_field_command.js');
+const { FieldCommand, link, noop, replace, unlink, unlinkAll } = require('mail/static/src/model/model_field_command.js');
 
 /**
  * Class whose instances represent field on a model.
@@ -248,7 +248,7 @@ class ModelField {
     clear(record, options) {
         let hasChanged = false;
         if (this.fieldType === 'relation') {
-            if (this.parseAndExecuteCommands(record, [['unlink-all']], options)) {
+            if (this.parseAndExecuteCommands(record, unlinkAll(), options)) {
                 hasChanged = true;
             }
         }
@@ -303,7 +303,7 @@ class ModelField {
                 }
             }
             if (this.fieldType === 'relation') {
-                return [['replace', newVal]];
+                return replace(newVal);
             }
             return newVal;
         }
@@ -314,15 +314,15 @@ class ModelField {
             const newVal = otherField.get(otherRecord);
             if (this.fieldType === 'relation') {
                 if (newVal) {
-                    return [['replace', newVal]];
+                    return replace(newVal);
                 } else {
-                    return [['unlink-all']];
+                    return unlinkAll();
                 }
             }
             return newVal;
         }
         if (this.fieldType === 'relation') {
-            return [];
+            return noop();
         }
     }
 
@@ -359,7 +359,7 @@ class ModelField {
             // single command given
             return newVal.execute(this, record, options);
         }
-        if (typeof newVal instanceof Array && newVal[0] instanceof FieldCommand) {
+        if (newVal instanceof Array && newVal[0] instanceof FieldCommand) {
             // multi command given
             let hasChanged = false;
             for (const command of newVal) {
@@ -595,7 +595,7 @@ class ModelField {
             if (hasToUpdateInverse) {
                 this.env.modelManager._update(
                     recordToLink,
-                    { [this.inverse]: [['link', record]] },
+                    { [this.inverse]: link(record) },
                     { allowWriteReadonly: true, hasToUpdateInverse: false }
                 );
             }
@@ -631,7 +631,7 @@ class ModelField {
         if (hasToUpdateInverse) {
             this.env.modelManager._update(
                 recordToLink,
-                { [this.inverse]: [['link', record]] },
+                { [this.inverse]: link(record) },
                 { allowWriteReadonly: true, hasToUpdateInverse: false }
             );
         }
@@ -765,7 +765,7 @@ class ModelField {
                 } else {
                     this.env.modelManager._update(
                         recordToUnlink,
-                        { [this.inverse]: [['unlink', record]] },
+                        { [this.inverse]: unlink(record) },
                         { allowWriteReadonly: true, hasToUpdateInverse: false }
                     );
                 }
@@ -809,7 +809,7 @@ class ModelField {
             } else {
                 this.env.modelManager._update(
                     otherRecord,
-                    { [this.inverse]: [['unlink', record]] },
+                    { [this.inverse]: unlink(record) },
                     { allowWriteReadonly: true, hasToUpdateInverse: false }
                 );
             }

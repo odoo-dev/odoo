@@ -316,6 +316,10 @@
                 <script type="text/javascript" src="/mail/static/src/utils/timer/timer_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/widgets/form_renderer/form_renderer_tests.js"></script>
                 <script type="text/javascript" src="/mail/static/src/widgets/notification_alert/notification_alert_tests.js"/>
+
+                <!-- model -->
+                <script type="text/javascript" src="mail/static/src/model/tests/test_models.js"></script>
+                <script type="text/javascript" src="mail/static/src/model/tests/model_field_command_tests.js"></script>
             </xpath>
         </template>
 

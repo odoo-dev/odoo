@@ -12,6 +12,7 @@ const {
     createRootComponent,
     start,
 } = require('mail/static/src/utils/test_utils.js');
+const { insert, link } = require('mail/static/src/model/model_field_command.js');
 
 const Bus = require('web.Bus');
 
@@ -52,8 +53,8 @@ QUnit.test('base rendering not editable', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        channel: [['insert', { id: 1, model: 'mail.channel', name: "François Perusse" }]],
-        followedThread: [['link', thread]],
+        channel: insert({ id: 1, model: 'mail.channel', name: "François Perusse" }),
+        followedThread: link(thread),
         id: 2,
         isActive: true,
         isEditable: false,
@@ -95,8 +96,8 @@ QUnit.test('base rendering editable', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        channel: [['insert', { id: 1, model: 'mail.channel', name: "François Perusse" }]],
-        followedThread: [['link', thread]],
+        channel: insert({ id: 1, model: 'mail.channel', name: "François Perusse" }),
+        followedThread: link(thread),
         id: 2,
         isActive: true,
         isEditable: true,
@@ -166,8 +167,8 @@ QUnit.test('click on channel follower details', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        channel: [['insert', { id: 10, model: 'mail.channel', name: "channel" }]],
-        followedThread: [['link', thread]],
+        channel: insert({ id: 10, model: 'mail.channel', name: "channel" }),
+        followedThread: link(thread),
         id: 2,
         isActive: true,
         isEditable: true,
@@ -224,15 +225,15 @@ QUnit.test('click on partner follower details', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        followedThread: [['link', thread]],
+        followedThread: link(thread),
         id: 2,
         isActive: true,
         isEditable: true,
-        partner: [['insert', {
+        partner: insert({
             email: "bla@bla.bla",
             id: this.env.messaging.currentPartner.id,
             name: "François Perusse",
-        }]],
+        }),
     });
     await this.createFollowerComponent(follower);
     assert.containsOnce(
@@ -330,15 +331,15 @@ QUnit.test('edit follower and close subtype dialog', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        followedThread: [['link', thread]],
+        followedThread: link(thread),
         id: 2,
         isActive: true,
         isEditable: true,
-        partner: [['insert', {
+        partner: insert({
             email: "bla@bla.bla",
             id: this.env.messaging.currentPartner.id,
             name: "François Perusse",
-        }]],
+        }),
     });
     await this.createFollowerComponent(follower);
     assert.containsOnce(

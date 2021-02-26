@@ -10,6 +10,11 @@ const {
     createRootComponent,
     start,
 } = require('mail/static/src/utils/test_utils.js');
+const {
+    create,
+    insert,
+    link,
+} = require('mail/static/src/model/model_field_command.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -49,27 +54,27 @@ QUnit.test('rendering when just one has received the message', async function (a
     const thread = this.env.models['mail.thread'].create({
         id: 1000,
         model: 'mail.channel',
-        partnerSeenInfos: [['create', [
+        partnerSeenInfos: create([
             {
                 channelId: 1000,
-                lastFetchedMessage: [['insert', { id: 100 }]],
+                lastFetchedMessage: insert({ id: 100 }),
                 partnerId: 10,
             },
             {
                 channelId: 1000,
                 partnerId: 100,
             },
-        ]]],
-        messageSeenIndicators: [['insert', {
+        ]),
+        messageSeenIndicators: insert({
             channelId: 1000,
             messageId: 100,
-        }]],
+        }),
     });
     const message = this.env.models['mail.message'].insert({
-        author: [['insert', { id: this.env.messaging.currentPartner.id, display_name: "Demo User" }]],
+        author: insert({ id: this.env.messaging.currentPartner.id, display_name: "Demo User" }),
         body: "<p>Test</p>",
         id: 100,
-        originThread: [['link', thread]],
+        originThread: link(thread),
     });
     await this.createMessageSeenIndicatorComponent({ message, thread });
     assert.containsOnce(
@@ -96,28 +101,28 @@ QUnit.test('rendering when everyone have received the message', async function (
     const thread = this.env.models['mail.thread'].create({
         id: 1000,
         model: 'mail.channel',
-        partnerSeenInfos: [['create', [
+        partnerSeenInfos: create([
             {
                 channelId: 1000,
-                lastFetchedMessage: [['insert', { id: 100 }]],
+                lastFetchedMessage: insert({ id: 100 }),
                 partnerId: 10,
             },
             {
                 channelId: 1000,
-                lastFetchedMessage: [['insert', { id: 99 }]],
+                lastFetchedMessage: insert({ id: 99 }),
                 partnerId: 100,
             },
-        ]]],
-        messageSeenIndicators: [['insert', {
+        ]),
+        messageSeenIndicators: insert({
             channelId: 1000,
             messageId: 100,
-        }]],
+        }),
     });
     const message = this.env.models['mail.message'].insert({
-        author: [['insert', { id: this.env.messaging.currentPartner.id, display_name: "Demo User" }]],
+        author: insert({ id: this.env.messaging.currentPartner.id, display_name: "Demo User" }),
         body: "<p>Test</p>",
         id: 100,
-        originThread: [['link', thread]],
+        originThread: link(thread),
     });
     await this.createMessageSeenIndicatorComponent({ message, thread });
     assert.containsOnce(
@@ -144,29 +149,29 @@ QUnit.test('rendering when just one has seen the message', async function (asser
     const thread = this.env.models['mail.thread'].create({
         id: 1000,
         model: 'mail.channel',
-        partnerSeenInfos: [['create', [
+        partnerSeenInfos: create([
             {
                 channelId: 1000,
-                lastFetchedMessage: [['insert', { id: 100 }]],
-                lastSeenMessage: [['insert', { id: 100 }]],
+                lastFetchedMessage: insert({ id: 100 }),
+                lastSeenMessage: insert({ id: 100 }),
                 partnerId: 10,
             },
             {
                 channelId: 1000,
-                lastFetchedMessage: [['insert', { id: 99 }]],
+                lastFetchedMessage: insert({ id: 99 }),
                 partnerId: 100,
             },
-        ]]],
-        messageSeenIndicators: [['insert', {
+        ]),
+        messageSeenIndicators: insert({
             channelId: 1000,
             messageId: 100,
-        }]],
+        }),
     });
     const message = this.env.models['mail.message'].insert({
-        author: [['insert', { id: this.env.messaging.currentPartner.id, display_name: "Demo User" }]],
+        author: insert({ id: this.env.messaging.currentPartner.id, display_name: "Demo User" }),
         body: "<p>Test</p>",
         id: 100,
-        originThread: [['link', thread]],
+        originThread: link(thread),
     });
     await this.createMessageSeenIndicatorComponent({ message, thread });
     assert.containsOnce(
@@ -194,28 +199,28 @@ QUnit.test('rendering when just one has seen & received the message', async func
     const thread = this.env.models['mail.thread'].create({
         id: 1000,
         model: 'mail.channel',
-        partnerSeenInfos: [['create', [
+        partnerSeenInfos: create([
             {
                 channelId: 1000,
-                lastFetchedMessage: [['insert', { id: 100 }]],
-                lastSeenMessage: [['insert', { id: 100 }]],
+                lastFetchedMessage: insert({ id: 100 }),
+                lastSeenMessage: insert({ id: 100 }),
                 partnerId: 10,
             },
             {
                 channelId: 1000,
                 partnerId: 100,
             },
-        ]]],
-        messageSeenIndicators: [['insert', {
+        ]),
+        messageSeenIndicators: insert({
             channelId: 1000,
             messageId: 100,
-        }]],
+        }),
     });
     const message = this.env.models['mail.message'].insert({
-        author: [['insert', { id: this.env.messaging.currentPartner.id, display_name: "Demo User" }]],
+        author: insert({ id: this.env.messaging.currentPartner.id, display_name: "Demo User" }),
         body: "<p>Test</p>",
         id: 100,
-        originThread: [['link', thread]],
+        originThread: link(thread),
     });
     await this.createMessageSeenIndicatorComponent({ message, thread });
     assert.containsOnce(
@@ -243,30 +248,30 @@ QUnit.test('rendering when just everyone has seen the message', async function (
     const thread = this.env.models['mail.thread'].create({
         id: 1000,
         model: 'mail.channel',
-        partnerSeenInfos: [['create', [
+        partnerSeenInfos: create([
             {
                 channelId: 1000,
-                lastFetchedMessage: [['insert', { id: 100 }]],
-                lastSeenMessage: [['insert', { id: 100 }]],
+                lastFetchedMessage: insert({ id: 100 }),
+                lastSeenMessage: insert({ id: 100 }),
                 partnerId: 10,
             },
             {
                 channelId: 1000,
-                lastFetchedMessage: [['insert', { id: 100 }]],
-                lastSeenMessage: [['insert', { id: 100 }]],
+                lastFetchedMessage: insert({ id: 100 }),
+                lastSeenMessage: insert({ id: 100 }),
                 partnerId: 100,
             },
-        ]]],
-        messageSeenIndicators: [['insert', {
+        ]),
+        messageSeenIndicators: insert({
             channelId: 1000,
             messageId: 100,
-        }]],
+        }),
     });
     const message = this.env.models['mail.message'].insert({
-        author: [['insert', { id: this.env.messaging.currentPartner.id, display_name: "Demo User" }]],
+        author: insert({ id: this.env.messaging.currentPartner.id, display_name: "Demo User" }),
         body: "<p>Test</p>",
         id: 100,
-        originThread: [['link', thread]],
+        originThread: link(thread),
     });
     await this.createMessageSeenIndicatorComponent({ message, thread });
     assert.containsOnce(

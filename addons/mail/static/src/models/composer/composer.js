@@ -4,6 +4,7 @@ odoo.define('mail/static/src/models/composer/composer.js', function (require) {
 const emojis = require('mail.emojis');
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
 const { attr, many2many, many2one, one2one } = require('mail/static/src/model/model_field.js');
+const { insert, link, replace, unlink, unlinkAll } = require('mail/static/src/model/model_field_command.js');
 const mailUtils = require('mail.utils');
 
 const {
@@ -51,17 +52,17 @@ function factory(dependencies) {
         closeSuggestions() {
             if (this.activeSuggestedRecordName) {
                 this.update({
-                    [this.activeSuggestedRecordName]: [['unlink']],
+                    [this.activeSuggestedRecordName]: unlink(),
                 });
             }
             if (this.extraSuggestedRecordsListName) {
                 this.update({
-                    [this.extraSuggestedRecordsListName]: [['unlink-all']],
+                    [this.extraSuggestedRecordsListName]:unlinkAll(),
                 });
             }
             if (this.mainSuggestedRecordsListName) {
                 this.update({
-                    [this.mainSuggestedRecordsListName]: [['unlink-all']],
+                    [this.mainSuggestedRecordsListName]: unlinkAll(),
                 });
             }
             this.update({
@@ -195,7 +196,7 @@ function factory(dependencies) {
                 case 'activeSuggestedChannel':
                     recordReplacement = this[this.activeSuggestedRecordName].name;
                     this.update({
-                        mentionedChannels: [['link', this[this.activeSuggestedRecordName]]],
+                        mentionedChannels: link(this[this.activeSuggestedRecordName]),
                     });
                     break;
                 case 'activeSuggestedChannelCommand':
@@ -204,7 +205,7 @@ function factory(dependencies) {
                 case 'activeSuggestedPartner':
                     recordReplacement = this[this.activeSuggestedRecordName].name;
                     this.update({
-                        mentionedPartners: [['link', this[this.activeSuggestedRecordName]]],
+                        mentionedPartners: link(this[this.activeSuggestedRecordName]),
                     });
                     break;
             }
@@ -223,7 +224,7 @@ function factory(dependencies) {
         _computeRecipients() {
             if (this.thread && this.thread.model === 'mail.channel') {
                 // prevent from notifying/adding to followers non-members
-                return [['unlink-all']];
+                return unlinkAll();
             }
             const recipients = [...this.mentionedPartners];
             if (this.thread && !this.isLog) {
@@ -233,7 +234,7 @@ function factory(dependencies) {
                     }
                 }
             }
-            return [['replace', recipients]];
+            return replace(recipients);
         }
 
         /**
@@ -347,10 +348,10 @@ function factory(dependencies) {
                         {},
                         this.env.models['mail.message'].convertData(messageData),
                         {
-                            originThread: [['insert', {
+                            originThread: insert({
                                 id: thread.id,
                                 model: thread.model,
-                            }]],
+                            }),
                         })
                     );
                     thread.loadNewMessages();
@@ -389,11 +390,11 @@ function factory(dependencies) {
                     return;
                 }
                 this.update({
-                    [this.activeSuggestedRecordName]: [['link', this[this.extraSuggestedRecordsListName][0]]],
+                    [this.activeSuggestedRecordName]: link(this[this.extraSuggestedRecordsListName][0]),
                 });
             } else {
                 this.update({
-                    [this.activeSuggestedRecordName]: [['link', this[this.mainSuggestedRecordsListName][0]]],
+                    [this.activeSuggestedRecordName]: link(this[this.mainSuggestedRecordsListName][0]),
                 });
             }
         }
@@ -438,7 +439,7 @@ function factory(dependencies) {
                 });
             } else {
                 this.update({
-                    [this.activeSuggestedRecordName]: [['link', fullList[0]]],
+                    [this.activeSuggestedRecordName]: link(fullList[0]),
                 });
             }
         }
@@ -455,7 +456,7 @@ function factory(dependencies) {
             );
             if (activeElementIndex === -1) {
                 this.update({
-                    [this.activeSuggestedRecordName]: [['link', fullList[0]]]
+                    [this.activeSuggestedRecordName]: link(fullList[0])
                 });
             } else if (activeElementIndex !== 0) {
                 this.update({
@@ -506,7 +507,7 @@ function factory(dependencies) {
          * @returns {mail.partner[]}
          */
         _computeExtraSuggestedPartners() {
-            return [['unlink', this.mainSuggestedPartners]];
+            return unlink(this.mainSuggestedPartners);
         }
 
         /**
@@ -570,7 +571,7 @@ function factory(dependencies) {
                     unmentionedPartners.push(partner);
                 }
             }
-            return [['unlink', unmentionedPartners]];
+            return unlink(unmentionedPartners);
         }
 
         /**
@@ -596,7 +597,7 @@ function factory(dependencies) {
                     unmentionedChannels.push(channel);
                 }
             }
-            return [['unlink', unmentionedChannels]];
+            return unlink(unmentionedChannels);
         }
 
         /**
@@ -723,10 +724,10 @@ function factory(dependencies) {
         _reset() {
             this.closeSuggestions();
             this.update({
-                attachments: [['unlink-all']],
+                attachments: unlinkAll(),
                 isLastStateChangeProgrammatic: true,
-                mentionedChannels: [['unlink-all']],
-                mentionedPartners: [['unlink-all']],
+                mentionedChannels: unlinkAll(),
+                mentionedPartners: unlinkAll(),
                 subjectContent: "",
                 textInputContent: '',
                 textInputCursorEnd: 0,
@@ -740,19 +741,19 @@ function factory(dependencies) {
          */
         _updateSuggestedCannedResponses(mentionKeyword) {
             this.update({
-                suggestedCannedResponses: [['replace', this.env.messaging.cannedResponses.filter(
+                suggestedCannedResponses: replace(this.env.messaging.cannedResponses.filter(
                     cannedResponse => cannedResponse.source.includes(mentionKeyword)
-                )]],
+                )),
             });
 
             if (this.suggestedCannedResponses[0]) {
                 this.update({
-                    activeSuggestedCannedResponse: [['link', this.suggestedCannedResponses[0]]],
+                    activeSuggestedCannedResponse: link(this.suggestedCannedResponses[0]),
                     hasToScrollToActiveSuggestion: true,
                 });
             } else {
                 this.update({
-                    activeSuggestedCannedResponse: [['unlink']],
+                    activeSuggestedCannedResponse: unlink(),
                 });
             }
         }
@@ -786,12 +787,12 @@ function factory(dependencies) {
 
             if (this.suggestedChannels[0]) {
                 this.update({
-                    activeSuggestedChannel: [['link', this.suggestedChannels[0]]],
+                    activeSuggestedChannel: link(this.suggestedChannels[0]),
                     hasToScrollToActiveSuggestion: true,
                 });
             } else {
                 this.update({
-                    activeSuggestedChannel: [['unlink']],
+                    activeSuggestedChannel: unlink(),
                 });
             }
         }
@@ -809,15 +810,15 @@ function factory(dependencies) {
                 }
                 return true;
             });
-            this.update({ suggestedChannelCommands: [['replace', commands]] });
+            this.update({ suggestedChannelCommands: replace(commands) });
             if (this.suggestedChannelCommands[0]) {
                 this.update({
-                    activeSuggestedChannelCommand: [['link', this.suggestedChannelCommands[0]]],
+                    activeSuggestedChannelCommand: link(this.suggestedChannelCommands[0]),
                     hasToScrollToActiveSuggestion: true,
                 });
             } else {
                 this.update({
-                    activeSuggestedChannelCommand: [['unlink']],
+                    activeSuggestedChannelCommand: unlink(),
                 });
             }
         }
@@ -857,17 +858,17 @@ function factory(dependencies) {
 
             if (this.mainSuggestedPartners[0]) {
                 this.update({
-                    activeSuggestedPartner: [['link', this.mainSuggestedPartners[0]]],
+                    activeSuggestedPartner: link(this.mainSuggestedPartners[0]),
                     hasToScrollToActiveSuggestion: true,
                 });
             } else if (this.extraSuggestedPartners[0]) {
                 this.update({
-                    activeSuggestedPartner: [['link', this.extraSuggestedPartners[0]]],
+                    activeSuggestedPartner: link(this.extraSuggestedPartners[0]),
                     hasToScrollToActiveSuggestion: true,
                 });
             } else {
                 this.update({
-                    activeSuggestedPartner: [['unlink']],
+                    activeSuggestedPartner: unlink(),
                 });
             }
         }
