@@ -257,3 +257,37 @@ class TestSyncOdoo2Google(TestSyncGoogle):
             'reminders': {'overrides': [], 'useDefault': False},
             'visibility': 'public',
         }, timeout=3)
+
+
+
+    @patch_api
+    def test_event_until_utc(self):
+        """ UNTIl rrule value must be in UTC: ending with a 'Z """
+        google_id = 'aaaaaaaaa'
+        event = self.env['calendar.event'].create({
+            'name': "Event",
+            'start': datetime(2020, 1, 15),
+            'stop': datetime(2020, 1, 15),
+            'allday': True,
+            'need_sync': False,
+        })
+        recurrence = self.env['calendar.recurrence'].create({
+            'google_id': google_id,
+            'rrule': 'FREQ=DAILY;UNTIL=20200117T235959',
+            'base_event_id': event.id,
+            'need_sync': False,
+        })
+        recurrence._apply_recurrence()
+        self.assertEqual(recurrence._google_values()['recurrence'][0], 'RRULE:FREQ=DAILY;UNTIL=20200117T235959Z',
+                         "The rrule sent to google should be in UTC: end with Z")
+        # Add it even if it is not the end of the string
+        recurrence.write({'rrule': 'FREQ=DAILY;UNTIL=20200118T235959;INTERVAL=3'})
+        recurrence._apply_recurrence()
+        self.assertEqual(recurrence._google_values()['recurrence'][0],
+                         'RRULE:FREQ=DAILY;UNTIL=20200118T235959Z;INTERVAL=3',
+                         "The rrule sent to google should be in UTC: end with Z and preserve the following parameters")
+        # Don't add two Z at the end of the UNTIL value
+        recurrence.write({'rrule': 'FREQ=DAILY;UNTIL=20200119T235959Z'})
+        recurrence._apply_recurrence()
+        self.assertEqual(recurrence._google_values()['recurrence'][0], 'RRULE:FREQ=DAILY;UNTIL=20200119T235959Z',
+                         "The rrule sent to google should be in UTC: end with one Z")

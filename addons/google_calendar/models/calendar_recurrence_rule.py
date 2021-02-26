@@ -120,6 +120,13 @@ class RecurrenceRule(models.Model):
         # DTSTART is not allowed by Google Calendar API.
         # Event start and end times are specified in the start and end fields.
         rrule = re.sub('DTSTART:[0-9]{8}T[0-9]{1,8}\\n', '', self.rrule)
+        # UNTIL must be in UTC (appending Z)
+        # We want to only add a 'Z' non UTC UNTIL values:
+        # 'RRULE:FREQ=DAILY;UNTIL=20210224T235959;INTERVAL=3 --> match UNTIL=20210224T235959
+        # 'RRULE:FREQ=DAILY;UNTIL=20210224T235959 --> match
+        # 'RRULE:FREQ=DAILY;UNTIL=20210224T235959Z --> don't match
+        # 'RRULE:FREQ=DAILY;UNTIL=20210224T235959Z;INTERVAL=3 --> don't match
+        rrule = re.sub(r"(UNTIL=\d{8}T\d{6})($|;)", r"\1Z\2", rrule)
         values['recurrence'] = ['RRULE:%s' % rrule] if 'RRULE:' not in rrule else [rrule]
         values['extendedProperties'] = {
             'shared': {
