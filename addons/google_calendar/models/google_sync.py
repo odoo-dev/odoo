@@ -187,7 +187,7 @@ class GoogleSync(models.AbstractModel):
     @after_commit
     def _google_patch(self, google_service: GoogleCalendarService, google_id, values, timeout=TIMEOUT):
         with google_calendar_token(self.env.user.sudo()) as token:
-            if token:
+            if token and self.need_sync:
                 google_service.patch(google_id, values, token=token, timeout=timeout)
                 self.need_sync = False
 
@@ -196,7 +196,7 @@ class GoogleSync(models.AbstractModel):
         if not values:
             return
         with google_calendar_token(self.env.user.sudo()) as token:
-            if token:
+            if token and self.need_sync:
                 google_id = google_service.insert(values, token=token, timeout=timeout)
                 self.write({
                     'google_id': google_id,
