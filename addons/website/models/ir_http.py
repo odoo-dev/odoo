@@ -373,7 +373,7 @@ class Http(models.AbstractModel):
                 # contains branding (<div t-att-data="request.browse('ok')"/>).
                 et = etree.fromstring(view.with_context(inherit_branding=False).read_combined(['arch'])['arch'])
                 node = et.xpath(exception.path)
-                line = node is not None and etree.tostring(node[0], encoding='unicode')
+                line = node and etree.tostring(node[0], encoding='unicode')
                 if line:
                     values['view'] = View._views_get(exception_template).filtered(
                         lambda v: line in v.arch
