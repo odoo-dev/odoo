@@ -16,6 +16,7 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
         'input .search-query': '_onInput',
         'focusout': '_onFocusOut',
         'keydown .search-query': '_onKeydown',
+        'search .search-query': '_onSearch',
     },
     autocompleteMinWidth: 300,
 
@@ -43,6 +44,7 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
         this.displayExtraLink = !!this.$input.data('displayExtraLink');
         this.displayDetail = !!this.$input.data('displayDetail');
         this.displayImage = !!this.$input.data('displayImage');
+        this.wasEmpty = !this.$input.val();
 
         if (this.limit) {
             this.$input.attr('autocomplete', 'off');
@@ -166,6 +168,20 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
                     $element.focus();
                 }
                 break;
+        }
+    },
+    /**
+     * @private
+     */
+    _onSearch: function (ev) {
+        if (!this.$input[0].value) { // clear button clicked
+            this._render(); // remove existing suggestions
+            this.limit = 0; // prevent autocomplete
+            ev.preventDefault();
+            if (!this.wasEmpty) {
+                const form = this.$('.o_search_order_by').parents('form');
+                form.submit();
+            }
         }
     },
 });
