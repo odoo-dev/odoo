@@ -217,7 +217,7 @@ class TestCRMLead(TestCrmCommon):
         lead_form = Form(lead)
 
         # reset partner phone to a local number
-        partner_phone, partner_email = '202 555 0999', partner.email
+        partner_phone, partner_email = '202 555 0999', partner.email_normalized
         partner_phone_formatted = phone_format(partner_phone, 'US', '1')
         partner_phone_sanitized = phone_format(partner_phone, 'US', '1', force_format='E164')
         self.assertEqual(partner_phone_formatted, '+1 202-555-0999')
@@ -234,6 +234,13 @@ class TestCRMLead(TestCrmCommon):
         self.assertEqual(partner.phone, partner_phone)
         self.assertEqual(lead.phone, partner_phone_formatted)
         self.assertEqual(lead.phone_sanitized, partner_phone_sanitized)
+
+        # for email_from, if only formatting differs, warning ribbon should
+        # not appear and email on partner should not be updated
+        lead_form.email_from = lead_form.partner_id.email_formatted
+        self.assertFalse(lead_form.ribbon_message)
+        lead_form.save()
+        self.assertEqual(lead_form.partner_id.email, partner_email)
 
         # writing on the lead field must change the partner field
         new_email = '"John Zoidberg" <john.zoidberg@test.example.com>'
