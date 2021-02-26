@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_copy_bom_operations" model="ir.ui.view">
+        <field name="name">Copy Bill of Material Operations Wizard</field>
+        <field name="model">mrp.copy.bom.operations</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="operation_ids" widget="many2many"/>
+                </group>
+                <footer>
+                    <button type="object" name="action_copy_operations" string="Copy Operations"/>
+                    <button special="cancel" string="Cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_copy_bom_operations" model="ir.actions.act_window">
+        <field name="name">Copy Bill of Material Operations</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">mrp.copy.bom.operations</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
