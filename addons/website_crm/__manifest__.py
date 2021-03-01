@@ -20,7 +20,19 @@ This module includes contact phone and mobile numbers validation.""",
         'views/res_config_settings_views.xml',
         'views/website_visitor_views.xml',
     ],
-    'qweb': ['static/src/xml/*.xml'],
     'installable': True,
     'auto_install': True,
+    'assets': {
+        'website.assets_editor': [
+            # inside .
+            'website_crm/static/src/js/website_crm_editor.js',
+        ],
+        'web.assets_tests': [
+            # inside .
+            'website_crm/static/tests/tours/website_crm.js',
+        ],
+        'web.assets_qweb': [
+            'website_crm/static/src/xml/*.xml',
+        ],
+    }
 }
