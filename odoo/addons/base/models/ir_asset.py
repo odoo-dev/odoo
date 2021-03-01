@@ -325,7 +325,7 @@ class IrAsset(models.Model):
         :returns: string[]: list of module names
         """
         if not http.request:
-            return self.env['ir.module.module']._installed_sorted()
+            return self.env['ir.module.module'].sudo()._installed_sorted()
         else:
             return http.module_boot()
 
