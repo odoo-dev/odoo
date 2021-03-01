@@ -11,6 +11,7 @@ from odoo import api, exceptions, fields, models, _
 
 from odoo.tools import pycompat
 from odoo.tools.misc import clean_context
+from odoo.osv.query import Query
 
 _logger = logging.getLogger(__name__)
 
@@ -795,3 +796,130 @@ class MailActivityMixin(models.AbstractModel):
             domain = ['&'] + domain + [('user_id', '=', user_id)]
         self.env['mail.activity'].search(domain).unlink()
         return True
+
+    def _read_progress_bar(self, domain, group_by, progress_bar):
+        if not (progress_bar['field'] == 'activity_state' and self._fields[group_by].store):
+            return super()._read_progress_bar(domain, group_by, progress_bar)
+
+        # use datetime.utcnow() instead of date.today(), because
+        # it's used in _compute_state_from_date and on mocking in tests
+        today_utc = datetime.utcnow()
+        today = date(year=today_utc.year, month=today_utc.month, day=today_utc.day)
+
+        # Code below is a version of _read_group_raw:
+        # * lazy is always False
+        # * extra joins for mail_activity
+        # * extra grouping by mail_activity.res_id
+        # * extra field in select: days_to_deadline
+        # * extra SELECT wrapper to compute and group by activity_state
+        fields = ['activity_state']
+        # we also group by activity_state, but because it's a virtual field, we'll add it later manually
+        groupby = [group_by]
+        offset = 0
+        limit = None
+        orderby = False
+
+        self.check_access_rights('read')
+        query = self._where_calc(domain)
+
+        groupby_list = groupby
+        annotated_groupbys = [self._read_group_process_groupby(gb, query) for gb in groupby_list]
+        groupby_fields = [g['field'] for g in annotated_groupbys]
+        order = orderby or ','.join([g for g in groupby_list])
+        groupby_dict = {gb['groupby']: gb for gb in annotated_groupbys}
+
+        self._apply_ir_rules(query, 'read')
+        aggregated_fields = []
+        select_terms = []
+
+        for gb in annotated_groupbys:
+            select_terms.append('%s as "%s" ' % (gb['qualified_field'], gb['groupby']))
+
+        groupby_terms, orderby_terms = self._read_group_prepare(order, aggregated_fields, annotated_groupbys, query)
+
+        groupby_terms.append('mail_activity.res_id')
+
+        from_clause, where_clause, where_clause_params = query.get_sql()
+        count_field = '_'
+        count_field += '_count'
+
+        prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
+        prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
+
+        select_params = [today]
+        query = """
+            SELECT
+                min("%(table)s".id) AS id,
+                count("%(table)s".id) AS "%(count_field)s",
+                min(mail_activity.date_deadline - (%%s AT TIME ZONE COALESCE(ma_res_partner.tz, 'UTC'))::date) AS days_to_deadline
+                %(extra_fields)s
+            FROM %(from)s
+
+            RIGHT JOIN mail_activity ON
+                mail_activity.res_model = '%(model_name)s'
+                AND "%(table)s".id = mail_activity.res_id
+            LEFT JOIN res_users AS ma_res_users ON mail_activity.user_id = ma_res_users.id
+            LEFT JOIN res_partner AS ma_res_partner ON ma_res_users.partner_id = ma_res_partner.id
+
+            %(where)s
+            %(groupby)s
+            %(orderby)s
+            %(limit)s
+            %(offset)s
+        """ % {
+            'model_name': self._name,
+            'table': self._table,
+            'count_field': count_field,
+            'extra_fields': prefix_terms(',', select_terms),
+            'from': from_clause,
+            'where': prefix_term('WHERE', where_clause),
+            'groupby': prefix_terms('GROUP BY', groupby_terms),
+            'orderby': prefix_terms('ORDER BY', orderby_terms),
+            'limit': prefix_term('LIMIT', int(limit) if limit else None),
+            'offset': prefix_term('OFFSET', int(offset) if limit else None),
+        }
+        query = """
+            SELECT
+                min(id) as id,
+                SUM(__count) as __count,
+                CASE
+                    WHEN days_to_deadline > 0 THEN 'planned'
+                    WHEN days_to_deadline < 0 THEN 'overdue'
+                    WHEN days_to_deadline = 0 THEN 'today'
+                    ELSE null
+                END as activity_state
+                %(extra_fields)s
+            FROM (
+              %(query)s
+            ) AS x
+            %(groupby)s
+        """ % {
+            'count_field': count_field,
+            'query': query,
+            'extra_fields': prefix_terms(',', ['"%s"' % gb['groupby'] for gb in annotated_groupbys]),
+            'groupby': prefix_terms('GROUP BY', ['"%s"' % gb['groupby'] for gb in annotated_groupbys] + ['activity_state']),
+        }
+
+        self._cr.execute(query, select_params + where_clause_params)
+        fetched_data = self._cr.dictfetchall()
+
+        self._read_group_resolve_many2one_fields(fetched_data, annotated_groupbys)
+
+        data = [{k: self._read_group_prepare_data(k, v, groupby_dict) for k, v in r.items()} for r in fetched_data]
+
+        if self.env.context.get('fill_temporal') and data:
+            data = self._read_group_fill_temporal(data, groupby, aggregated_fields,
+                                                  annotated_groupbys)
+
+        result = [self._read_group_format_result(d, annotated_groupbys, groupby, domain) for d in data]
+
+        # Code below is ending of original read_group method
+        dt = [
+            f for f in groupby
+            if self._fields[f.split(':')[0]].type in ('date', 'datetime')    # e.g. 'date:month'
+        ]
+        for group in result:
+            for df in dt:
+                if group.get(df):
+                    group[df] = group[df][1]
+        return result

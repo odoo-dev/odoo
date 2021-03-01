@@ -11,6 +11,12 @@ from odoo import _, api, fields, models
 class Base(models.AbstractModel):
     _inherit = 'base'
 
+    def _read_progress_bar(self, domain, group_by, progress_bar):
+        fname = progress_bar['field']
+        if not (self._fields[group_by].store and self._fields[fname].store):
+            return
+        return self.read_group(domain, [fname], [group_by, fname], lazy=False)
+
     @api.model
     def read_progress_bar(self, domain, group_by, progress_bar):
         """
@@ -25,6 +31,38 @@ class Base(models.AbstractModel):
         :return a dictionnary mapping group_by values to dictionnaries mapping
                 progress bar field values to the related number of records
         """
+        data = {}
+        field_type = self._fields[group_by].type
+        if field_type == 'selection':
+            selection_labels = dict(self.fields_get()[group_by]['selection'])
+
+        def adapt(group_by_value):
+            if field_type == 'selection':
+                group_by_value = selection_labels[group_by_value] \
+                    if group_by_value in selection_labels else False
+
+            if type(group_by_value) == tuple:
+                group_by_value = group_by_value[1] # FIXME should use technical value (0)
+
+            return group_by_value
+
+        def set_defaults(group_by_value):
+            if group_by_value not in data:
+                data[group_by_value] = {}
+                for key in progress_bar['colors']:
+                    data[group_by_value][key] = 0
+
+        # Try with optimization first
+        read_group_data = self._read_progress_bar(domain, group_by, progress_bar)
+        if read_group_data is not None:
+            for gr in read_group_data:
+                group_by_value = str(adapt(gr[group_by]))
+                progressbar_value = gr[progress_bar['field']]
+                set_defaults(group_by_value)
+                if progressbar_value in data[group_by_value]:
+                    data[group_by_value][progressbar_value] = gr['__count']
+            return data
+
 
         # Workaround to match read_group's infrastructure
         # TO DO in master: harmonize this function and readgroup to allow factorization
@@ -39,13 +77,8 @@ class Base(models.AbstractModel):
 
         records_values = self.search_read(domain or [], [progress_bar['field'], group_by])
 
-        data = {}
-        field_type = self._fields[group_by].type
-        if field_type == 'selection':
-            selection_labels = dict(self.fields_get()[group_by]['selection'])
-
         for record_values in records_values:
-            group_by_value = record_values[group_by]
+            group_by_value = adapt(record_values[group_by])
 
             # Again, imitating what _read_group_format_result and _read_group_prepare_data do
             if group_by_value and field_type in ['date', 'datetime']:
@@ -63,17 +96,7 @@ class Base(models.AbstractModel):
                         group_by_value, format=display_date_formats[group_by_modifier],
                         locale=locale)
 
-            if field_type == 'selection':
-                group_by_value = selection_labels[group_by_value] \
-                    if group_by_value in selection_labels else False
-
-            if type(group_by_value) == tuple:
-                group_by_value = group_by_value[1] # FIXME should use technical value (0)
-
-            if group_by_value not in data:
-                data[group_by_value] = {}
-                for key in progress_bar['colors']:
-                    data[group_by_value][key] = 0
+            set_defaults(group_by_value)
 
             field_value = record_values[progress_bar['field']]
             if field_value in data[group_by_value]:
