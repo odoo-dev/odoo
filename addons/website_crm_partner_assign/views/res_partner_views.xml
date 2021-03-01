@@ -144,7 +144,7 @@
         <field name="inherit_id" ref="base_geolocalize.view_crm_partner_geo_form"/>
         <field name="arch" type="xml">
             <data>
-                <xpath expr="//page[@name='geo_location']" position="inside">
+                <xpath expr="//page[@name='geo_location']/group" position="before">
                     <group>
                         <group>
                             <separator string="Partner Activation" colspan="2"/>
