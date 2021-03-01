@@ -29,6 +29,7 @@
             <field name="color">5</field>
             <field name="code">LEAVE90</field>
             <field name="is_leave">True</field>
+            <field name="leave_right">False</field>
         </record>
 
         <record id="work_entry_type_sick_leave" model="hr.work.entry.type">

@@ -35,6 +35,9 @@
                 <group>
                     <field name="is_leave"/>
                 </group>
+            <xpath
+            <xpath expr="//field[@name='leave_right']" position="after">
++                <field name="is_leave"/>
             </xpath>
         </field>
     </record>
