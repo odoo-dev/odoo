@@ -1179,7 +1179,9 @@ class WebsiteSale(http.Controller):
 
 class PaymentPortal(payment_portal.PaymentPortal):
 
-    @http.route('/shop/payment/transaction/<int:order_id>', type='json', auth='public')
+    @http.route(
+        '/shop/payment/transaction/<int:order_id>', type='json', auth='public', website=True
+    )
     def shop_payment_transaction(self, order_id, access_token, **kwargs):
         """ Create a draft transaction and return its processing values.
 
