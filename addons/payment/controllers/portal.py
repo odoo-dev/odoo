@@ -14,10 +14,10 @@ from odoo.addons.portal.controllers import portal
 
 class PaymentPortal(portal.CustomerPortal):
 
-    """
-    This controller contains the foundations for online payments through the portal. It allows to
-    complete a full payment flow without the need of going though a document-based flow made
-    available by another module's controller.
+    """ This controller contains the foundations for online payments through the portal.
+
+    It allows to complete a full payment flow without the need of going though a document-based flow
+    made available by another module's controller.
 
     Such controllers should extend this one to gain access to the _create_transaction static method
     that implements the creation of a transaction before its processing, or to override specific
@@ -36,10 +36,10 @@ class PaymentPortal(portal.CustomerPortal):
       to start the flow over.
     """
 
-    # TODO TBE according to feedback 2353112, this route is used to test credit cards numbers on our
-    # customers' database. Providers such as Authorize.Net allows passing the IP address of the
-    # visitor to filter the payment attempts. Shouldn't we design something at the level of the
-    # framework (http.py?) to prevent such attacks?
+    # TODO TBE According to feedback 2353112, this route is used to test credit cards numbers on our
+    # TODO TBE customers' database. Providers such as Authorize.Net allows passing the IP address of
+    # TODO TBE the visitor to filter the payment attempts. Shouldn't we design something at the
+    # TODO TBE level of the framework to prevent such attacks?
     @http.route(
         '/payment/pay', type='http', methods=['GET'], auth='public', website=True, sitemap=False,
     )
@@ -313,16 +313,6 @@ class PaymentPortal(portal.CustomerPortal):
         # Monitor the transaction to make it available in the portal
         PaymentPostProcessing.monitor_transactions(tx_sudo)
 
-        # TODO ANVFE move to payment.transaction.create ?
-        # Float rounding is inconsistently managed at the ORM level
-        # To have a consistent value, make the orm use the database value
-        # not the cached one after record creation.
-        # e.g. amount = 1111.11
-        # tx = tx.create(amount=1111.11)
-        # tx.amount # 1111.1100000000001
-        # tx.invalidate_cache()
-        # tx.amount # 1111.11
-        tx_sudo.invalidate_cache(['amount'])
         return tx_sudo
 
     @http.route('/payment/confirmation', type='http', methods=['GET'], auth='public', website=True)

@@ -26,25 +26,6 @@ class PaymentAcquirer(models.Model):
         string="Use IPN", help="Paypal Instant Payment Notification", default=True,
         groups='base.group_system')
 
-    def _compute_fees(self, amount, currency, country):
-        self.ensure_one()
-        if self.provider != 'paypal':
-            return super()._compute_fees(amount, currency, country)
-
-        fees = 0.0
-        if self.fees_active:
-            if self.company_id.country_id == country:
-                fixed = self.fees_dom_fixed
-                variable = self.fees_dom_var
-            else:
-                fixed = self.fees_int_fixed
-                variable = self.fees_int_var
-            # The fees are to be subtracted from the amount. eg.: billed = 100, variable = 2.9%,
-            # fixed = 0.30 -> PayPal takes 3.2 and merchant earns 96.8.
-            # To actually earn 100, 103.3 must be billed: 103.3 * 2.9% + 0.3 = 3.3
-            fees = (amount * variable / 100.0 + fixed) / (1 - variable / 100.0)
-        return fees
-
     def _paypal_get_api_url(self):
         """ Return the API URL according to the acquirer state.
 

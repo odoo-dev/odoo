@@ -12,18 +12,28 @@
         'data/payment_icon_data.xml',
         'data/payment_acquirer_data.xml',
         'data/payment_cron.xml',
-        'views/payment_views.xml',
-        'views/account_payment_views.xml',
-        'views/account_invoice_views.xml',
-        'views/payment_templates.xml',
-        'views/payment_portal_templates.xml',
+
         'views/assets.xml',
+        'views/payment_portal_templates.xml',
+        'views/payment_templates.xml',
+
+        'views/account_invoice_views.xml',
+        'views/account_payment_views.xml',
+        'views/payment_acquirer_views.xml',
+        'views/payment_icon_views.xml',
+        'views/payment_transaction_views.xml',
+        'views/payment_token_views.xml',  # Depends on `action_payment_transaction_linked_to_token`
         'views/res_partner_views.xml',
+
+        # TODO TBE From what I saw of the functional flow, a user should never have to edit a tx
+        # TODO TBE manually. We should maybe remove the perm_write and perm_create rights for users
+        # TODO TBE now that txs are created with sudo?
         'security/ir.model.access.csv',
         'security/payment_security.xml',
+
+        'wizards/account_payment_register_views.xml',
         'wizards/payment_acquirer_onboarding_templates.xml',
         'wizards/payment_link_wizard_views.xml',
-        'wizards/account_payment_register_views.xml',
     ],
     'auto_install': True,
 }

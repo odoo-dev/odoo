@@ -54,9 +54,9 @@ class PaymentTransaction(models.Model):
         if self.tokenize:
             cc_number = payment_utils.build_token_name(payment_details_short=data['cc_summary'])
             token = self.env['payment.token'].create({
+                'acquirer_id': self.acquirer_id.id,
                 'name': f"TEST {cc_number}",
                 'partner_id': self.partner_id.id,
-                'acquirer_id': self.acquirer_id.id,
                 'acquirer_ref': 'fake acquirer reference',
                 'verified': True,
             })

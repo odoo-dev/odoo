@@ -165,9 +165,9 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         token = self.env['payment.token'].create({
+            'acquirer_id': self.acquirer_id.id,
             'name': payment_utils.build_token_name(data['additionalData'].get('cardSummary')),
             'partner_id': self.partner_id.id,
-            'acquirer_id': self.acquirer_id.id,
             'acquirer_ref': data['additionalData']['recurring.recurringDetailReference'],
             'adyen_shopper_reference': data['additionalData']['recurring.shopperReference'],
             'verified': True,  # The payment is authorized, so the payment method is valid

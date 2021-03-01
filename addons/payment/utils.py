@@ -141,8 +141,8 @@ def format_partner_address(address1="", address2=""):
     :return: The formatted one-line address
     :rtype: str
     """
-    if not address1 or not address2:
-        return address1 or address2 or ""
+    address1 = address1 or ""  # Avoid casting as "False"
+    address2 = address2 or ""  # Avoid casting as "False"
     return f"{address1} {address2}".strip()
 
 

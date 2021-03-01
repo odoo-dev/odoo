@@ -163,9 +163,9 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         token = self.env['payment.token'].create({
+            'acquirer_id': self.acquirer_id.id,
             'name': data.get('CARDNUMBER'),  # Already padded with 'X's
             'partner_id': self.partner_id.id,
-            'acquirer_id': self.acquirer_id.id,
             'acquirer_ref': data['ALIASID'],
             'verified': False,  # No payment has been processed through this token yet
             'active': self.tokenize,  # Immediately archive the token if it was not requested

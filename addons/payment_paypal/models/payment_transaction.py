@@ -30,7 +30,7 @@ class PaymentTransaction(models.Model):
                      and urls.url_join(base_url, PaypalController._notify_url)
         return {
             'address1': self.partner_address,
-            'amount': processing_values['amount'],
+            'amount': self.amount,
             'business': self.acquirer_id.paypal_email_account,
             'city': self.partner_city,
             'country': self.partner_country_id.code,

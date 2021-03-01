@@ -41,11 +41,11 @@ class PaymentTransaction(models.Model):
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
         if self.acquirer_id.capture_manually or self.operation == 'validation':
-            return authorize_API.authorize(
-                self.amount, self.reference, opaque_data=opaque_data)
+            return authorize_API.authorize(self.amount, self.reference, opaque_data=opaque_data)
         else:
             return authorize_API.auth_and_capture(
-                self.amount, self.reference, opaque_data=opaque_data)
+                self.amount, self.reference, opaque_data=opaque_data
+            )
 
     def _send_payment_request(self):
         super()._send_payment_request()  # log sent message
@@ -141,9 +141,9 @@ class PaymentTransaction(models.Model):
         _logger.info(f"create_customer_profile request response:\n{pprint.pformat(cust_profile)}")
         if cust_profile:
             token = self.env['payment.token'].create({
+                'acquirer_id': self.acquirer_id.id,
                 'name': cust_profile.get('name'),
                 'partner_id': self.partner_id.id,
-                'acquirer_id': self.acquirer_id.id,
                 'acquirer_ref': cust_profile.get('payment_profile_id'),
                 'authorize_profile': cust_profile.get('profile_id'),
             })

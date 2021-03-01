@@ -20,8 +20,7 @@ class PaymentAcquirer(models.Model):
         selection=[
             ('express_checkout', 'Express Checkout (only for Chinese merchants)'),
             ('standard_checkout', 'Cross-border')
-        ], default='express_checkout',
-        required_if_provider='alipay')
+        ], default='express_checkout', required_if_provider='alipay')
     alipay_merchant_partner_id = fields.Char(
         string="Merchant Partner ID", required_if_provider='alipay', groups='base.group_system')
     alipay_md5_signature_key = fields.Char(
@@ -40,29 +39,6 @@ class PaymentAcquirer(models.Model):
             )
 
         return acquirers
-
-    def _compute_fees(self, amount, currency, country):
-        """ Compute alipay fees.
-
-        :param float amount: The amount to pay for the transaction
-        :param recordset currency: The currency of the transaction, as a `res.currency` record
-        :param recordset country: The customer country, as a `res.country` record
-        :return: The computed fees
-        :rtype: float
-        """
-        if self.provider != 'alipay':
-            return super()._compute_fees(amount, currency, country)
-
-        fees = 0.0
-        if self.fees_active:
-            if country.id == self.company_id.country_id.id:
-                fixed = self.fees_dom_fixed
-                variable = self.fees_dom_var
-            else:
-                fixed = self.fees_int_fixed
-                variable = self.fees_int_var
-            fees = (amount * variable / 100.0 + fixed) / (1 - variable / 100.0)
-        return fees
 
     def _alipay_build_sign(self, val):
         # Rearrange parameters in the data set alphabetically

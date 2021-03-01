@@ -101,7 +101,6 @@ class StripeController(http.Controller):
                         f"received payment_intents response:\n{pprint.pformat(payment_intent)}"
                     )
                     self._include_payment_intent_in_feedback_data(payment_intent, data)
-                # FIXME ANVFE elif ?
                 if checkout_session.get('setup_intent'):  # Can be None
                     # Fetch the SetupIntent and PaymentMethod objects from Stripe
                     setup_intent = tx_sudo.acquirer_id._stripe_make_request(
@@ -113,12 +112,11 @@ class StripeController(http.Controller):
                         f"received setup_intents response:\n{pprint.pformat(setup_intent)}"
                     )
                     self._include_setup_intent_in_feedback_data(setup_intent, data)
-            # FIXME ANVFE _handle_feedback_data even if the webhook signature is wrong ???
-            try:
-                # Handle the feedback data crafted with Stripe API objects as a regular feedback
-                request.env['payment.transaction'].sudo()._handle_feedback_data('stripe', data)
-            except ValidationError:  # Acknowledge the notification to avoid getting spammed
-                _logger.exception("unable to handle the event data; skipping to acknowledge")
+                try:
+                    # Handle the feedback data crafted with Stripe API objects as a regular feedback
+                    request.env['payment.transaction'].sudo()._handle_feedback_data('stripe', data)
+                except ValidationError:  # Acknowledge the notification to avoid getting spammed
+                    _logger.exception("unable to handle the event data; skipping to acknowledge")
         return ''
 
     def _include_payment_intent_in_feedback_data(self, payment_intent, data):

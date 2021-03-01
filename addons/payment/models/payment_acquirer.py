@@ -69,7 +69,6 @@ class PaymentAcquirer(models.Model):
         column1='payment_id', column2='country_id',
         help="The countries for which this payment acquirer is available.\n"
              "If none is set, it is available for all countries.")
-    # TODO ANVFE add constraint to enforce journal_id to be set when enabling an acquirer ?
     journal_id = fields.Many2one(
         string="Payment Journal", comodel_name='account.journal',
         help="The journal in which the successful transactions are posted",
@@ -421,12 +420,17 @@ class PaymentAcquirer(models.Model):
         return self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
     def _compute_fees(self, amount, currency, country):
-        """ Compute the acquirer-specific fees given a transaction context.
+        """ Compute the transaction fees.
 
-        For an acquirer to support fees computation, it must override this method and return the
-        resulting fees as a float.
+        The computation is based on the generic fields `fees_dom_fixed`, `fees_dom_var`,
+        `fees_int_fixed` and `fees_int_var` and is done according to the following formula:
 
-        Note: self.ensure_one()
+        `fees = (amount * variable / 100.0 + fixed) / (1 - variable / 100.0)` where the value
+        of `fixed` and `variable` is taken either from the domestic (dom) or international (int)
+        field depending on whether the country matches the company's country.
+
+        For an acquirer to base the computation on different variables, or to use a different
+        formula, it must override this method and return the resulting fees as a float.
 
         :param float amount: The amount to pay for the transaction
         :param recordset currency: The currency of the transaction, as a `res.currency` record
@@ -435,7 +439,17 @@ class PaymentAcquirer(models.Model):
         :rtype: float
         """
         self.ensure_one()
-        return 0.0
+
+        fees = 0.0
+        if self.fees_active:
+            if country == self.company_id.country_id:
+                fixed = self.fees_dom_fixed
+                variable = self.fees_dom_var
+            else:
+                fixed = self.fees_int_fixed
+                variable = self.fees_int_var
+            fees = (amount * variable / 100.0 + fixed) / (1 - variable / 100.0)
+        return fees
 
     def _get_validation_amount(self):
         """ Get the amount to transfer in a payment method validation operation.
@@ -465,7 +479,4 @@ class PaymentAcquirer(models.Model):
         :rtype: recordset of `res.currency`
         """
         self.ensure_one()
-        # FIXME ANVFE always return journal currency?
-        # We should never reach here if the acquirer is enabled (or in test mode)
-        # And the journal_id is necessary if the acquirer is enabled.
         return self.journal_id.currency_id or self.company_id.currency_id

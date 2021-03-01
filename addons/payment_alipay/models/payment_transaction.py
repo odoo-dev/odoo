@@ -22,7 +22,8 @@ class PaymentTransaction(models.Model):
             return super()._get_specific_rendering_values(processing_values)
 
         base_url = self.acquirer_id._get_base_url()
-        # Round the computed total fee to the minor units to avoid weird string representations.
+        # Similarly to what is done in `payment::payment.transaction.create`, we need to round the
+        # sum of the amount and of the fees avoid inconsistent string representations.
         # E.g., str(1111.11 + 7.09) == '1118.1999999999998'
         if self.fees:
             total_fee = self.currency_id.round(self.amount + self.fees)

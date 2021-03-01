@@ -31,11 +31,6 @@ class PaymentTransaction(models.Model):
     def _lang_get(self):
         return self.env['res.lang'].get_installed()
 
-    # FIXME ANVFE can't we remove creation/edition rights on transactions to users ?
-    # IMHO there is no sense to manually create transactions and there are sudos
-    # around tx creations everywhere.
-    # and the views are specified as create=False
-
     acquirer_id = fields.Many2one(
         string="Acquirer", comodel_name='payment.acquirer', readonly=True, required=True)
     provider = fields.Selection(related='acquirer_id.provider')
@@ -56,8 +51,7 @@ class PaymentTransaction(models.Model):
         help="The fees amount; set by the system as it depends on the acquirer", readonly=True)
     token_id = fields.Many2one(
         string="Payment Token", comodel_name='payment.token', readonly=True,
-        domain='[("acquirer_id", "=", "acquirer_id")]',
-        ondelete="restrict")
+        domain='[("acquirer_id", "=", "acquirer_id")]', ondelete='restrict')
     state = fields.Selection(
         string="Status",
         selection=[('draft', "Draft"), ('pending', "Pending"), ('authorized', "Authorized"),
@@ -83,8 +77,7 @@ class PaymentTransaction(models.Model):
         string="Invoices", comodel_name='account.move', relation='account_invoice_transaction_rel',
         column1='transaction_id', column2='invoice_id', readonly=True, copy=False,  # TODO TBE Shouldn't we completely forbid duplicating transactions?
         domain=[('move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))])
-    # TODO ANVFE rename into invoice_count ?
-    invoice_ids_nbr = fields.Integer(string="Invoices count", compute='_compute_invoice_ids_nbr')
+    invoices_count = fields.Integer(string="Invoices Count", compute='_compute_invoices_count')
 
     # Fields used for user redirection & payment post-processing
     is_post_processed = fields.Boolean(
@@ -110,8 +103,8 @@ class PaymentTransaction(models.Model):
 
     # Duplicated partner values allowing to keep a record of them, should they be later updated
     partner_id = fields.Many2one(
-        string="Customer", comodel_name='res.partner', readonly=True,
-        required=True, ondelete="restrict")
+        string="Customer", comodel_name='res.partner', readonly=True, required=True,
+        ondelete='restrict')
     partner_name = fields.Char(string="Partner Name")
     partner_lang = fields.Selection(string="Language", selection=_lang_get)
     partner_email = fields.Char(string="Email")
@@ -129,7 +122,7 @@ class PaymentTransaction(models.Model):
     #=== COMPUTE METHODS ===#
 
     @api.depends('invoice_ids')
-    def _compute_invoice_ids_nbr(self):
+    def _compute_invoices_count(self):
         self.env.cr.execute(
             '''
             SELECT transaction_id, count(invoice_id)
@@ -140,9 +133,9 @@ class PaymentTransaction(models.Model):
             [tuple(self.ids)]
         )
         query_res = self.env.cr.fetchall()
-        tx_data = {tx_id: invoice_count for tx_id, invoice_count in query_res}
+        tx_data = {tx_id: invoices_count for tx_id, invoices_count in query_res}
         for tx in self:
-            tx.invoice_ids_nbr = tx_data.get(tx.id, 0)
+            tx.invoices_count = tx_data.get(tx.id, 0)
 
     #=== CONSTRAINT METHODS ===#
 
@@ -200,7 +193,19 @@ class PaymentTransaction(models.Model):
                 values.get('callback_method'),
             )
 
-        return super().create(values_list)
+        txs = super().create(values_list)
+
+        # Monetary fields are rounded with the currency at creation time by the ORM. Sometimes, this
+        # can lead to inconsistent string representation of the amounts sent to the providers.
+        # E.g., tx.create(amount=1111.11) -> tx.amount == 1111.1100000000001
+        # To ensure a proper string representation, we invalidate this request's cache values of the
+        # `amount` and `fees` fields for the created transactions. This forces the ORM to read the
+        # values from the DB where there were stored using `float_repr`, which produces a result
+        # consistent with the format expected by providers.
+        # E.g., tx.create(amount=1111.11) ; tx.invalidate_cache() -> tx.amount == 1111.11
+        txs.invalidate_cache(['amount', 'fees'])
+
+        return txs
 
     @api.model
     def _get_specific_create_values(self, provider, values):
@@ -654,7 +659,7 @@ class PaymentTransaction(models.Model):
                 )
                 continue  # Ignore invalidated callbacks
 
-            success = getattr(record, method)(tx)  # Execute the callback
+            success = record[method](tx)  # Execute the callback
             tx.callback_is_done = success or success is None  # Missing returns are successful
 
     def _send_refund_request(self):

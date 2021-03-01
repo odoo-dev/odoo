@@ -11,10 +11,7 @@ odoo.define('payment_test.payment_form', require => {
         //--------------------------------------------------------------------------
 
         /**
-         * Execute the acquirer-specific implementation of the direct payment flow.
-         *
-         * For an acquirer to redefine the processing of the direct payment flow, it must override
-         * this method.
+         * Simulate a feedback from a payment provider and redirect the customer to the status page.
          *
          * @override method from payment.payment_form_mixin
          * @private
@@ -29,7 +26,6 @@ odoo.define('payment_test.payment_form', require => {
             }
 
             const customerInput = document.getElementById('customer_input').value;
-            // Simulate a feedback from our imaginary payment provider
             return this._rpc({
                 route: '/payment/test/simulate_payment',
                 params: {

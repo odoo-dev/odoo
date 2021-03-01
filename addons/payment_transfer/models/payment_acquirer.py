@@ -10,13 +10,13 @@ class PaymentAcquirer(models.Model):
     provider = fields.Selection(
         selection_add=[('transfer', "Wire Transfer")], default='transfer',
         ondelete={'transfer': 'set default'})
-    # TODO ANVFE rename qr_code ? wouldn't expect a boolean at first glance :D
     qr_code = fields.Boolean(
         string="Enable QR Codes", help="Enable the use of QR-codes when paying by wire transfer.")
 
     @api.model
     def _create_missing_journals(self, company=None):
         """ Override of payment to assign the default Bank journal instead or Electronic. """
+        # Search for transfer acquirers having no journal
         company = company or self.env.company
         transfer_acquirers = self.env['payment.acquirer'].search([
             ('provider', '=', 'transfer'),
@@ -25,10 +25,10 @@ class PaymentAcquirer(models.Model):
         ])
 
         if transfer_acquirers:
+            # Pick the Bank journal
             bank_journal = self.env['account.journal'].search(
-                [('type', '=', 'bank'),
-                ('company_id', '=', company.id)
-            ], limit=1)
+                [('type', '=', 'bank'), ('company_id', '=', company.id)], limit=1
+            )
             if bank_journal:
                 transfer_acquirers.write({'journal_id': bank_journal.id})
 

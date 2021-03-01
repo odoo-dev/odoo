@@ -217,9 +217,9 @@ class PaymentTransaction(models.Model):
 
         # Create the token
         token = self.env['payment.token'].create({
+            'acquirer_id': self.acquirer_id.id,
             'name': payment_utils.build_token_name(data['additionalData'].get('cardSummary')),
             'partner_id': self.partner_id.id,
-            'acquirer_id': self.acquirer_id.id,
             'acquirer_ref': acquirer_ref,
             'verified': True,  # The payment is authorized, so the payment method is valid
             'odoo_payment_method_type': payment_method_type,

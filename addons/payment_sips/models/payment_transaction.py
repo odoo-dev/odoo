@@ -46,25 +46,17 @@ class PaymentTransaction(models.Model):
             return super()._get_specific_rendering_values(processing_values)
 
         sips_tx_values = dict(processing_values)
-        currency = self.env['res.currency'].browse(processing_values['currency_id'])
-        # FIXME ANVFE remove this check? We cannot see the acquirer if it's not a supported
-        # currency anyway :c
-        # Otherwise we should do the same check for payulatam ?
-        if currency.name not in SUPPORTED_CURRENCIES:
-            raise ValidationError(
-                "Sips: " + _("This currency is not supported: %s", currency.name)
-            )
         base_url = self.get_base_url()
         data = {
-            'amount': payment_utils.to_minor_currency_units(processing_values['amount'], currency),
-            'currencyCode': SUPPORTED_CURRENCIES[currency.name],  # The ISO 4217 numeric code
+            'amount': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
+            'currencyCode': SUPPORTED_CURRENCIES[self.currency_id.name],  # The ISO 4217 code
             'merchantId': self.acquirer_id.sips_merchant_id,
             'normalReturnUrl': urls.url_join(base_url, SipsController._return_url),
             'automaticResponseUrl': urls.url_join(base_url, SipsController._notify_url),
-            'transactionReference': processing_values['reference'],
-            'statementReference': processing_values['reference'],
+            'transactionReference': self.reference,
+            'statementReference': self.reference,
             'keyVersion': self.acquirer_id.sips_key_version,
-            'returnContext': json.dumps(dict(reference=sips_tx_values['reference'])),
+            'returnContext': json.dumps(dict(reference=self.reference)),
         }
         tx_url = self.acquirer_id.sips_prod_url if self.acquirer_id.state == 'enabled' \
             else self.acquirer_id.sips_test_url
