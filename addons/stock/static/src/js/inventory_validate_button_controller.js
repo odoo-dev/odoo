@@ -68,9 +68,7 @@ var InventoryValidationController = ListController.extend({
                         return;
                     }
                     // ... but in any other cases, we go back on the inventory form.
-                    self.do_notify(
-                        false,
-                        _t("The inventory has been validated"));
+                    self.displayNotification({ message: _t("The inventory has been validated") });
                     self.trigger_up('history_back');
                 };
 

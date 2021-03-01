@@ -94,7 +94,7 @@ var QuickCreate = Dialog.extend({
         if (!val) {
             this.$('label, input').addClass('o_field_invalid');
             var warnings = _.str.sprintf('<ul><li>%s</li></ul>', _t("Meeting Subject"));
-            this.do_warn(_t("Invalid fields:"), warnings);
+            this.displayNotification({ title: _t("Invalid fields:"), message: warnings, type: 'danger' });
         }
         dataCalendar.title = val;
         return (val)? this.trigger_up('quickCreate', {data: dataCalendar, options: this.options}) : false;

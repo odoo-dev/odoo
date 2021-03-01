@@ -149,7 +149,7 @@ var PartnerAutocompleteMixin = {
                     } else if (company_data.error_message === 'No Account Token') {
                         self._notifyAccountToken();
                     } else {
-                        self.do_notify(false, company_data.error_message);
+                        self.displayNotification({ message: company_data.error_message });
                     }
                     company_data = company;
                 }
@@ -336,7 +336,11 @@ var PartnerAutocompleteMixin = {
             var content = Qweb.render('partner_autocomplete.insufficient_credit_notification', {
                 credits_url: url
             });
-            self.do_notify(title, content, false, 'o_partner_autocomplete_no_credits_notify');
+            self.displayNotification({
+                title,
+                message: content,
+                className: 'o_partner_autocomplete_no_credits_notify',
+                isMessageHtml: true, // the message is coming from a Qweb template using safe instructions
         });
     },
 
@@ -352,10 +356,15 @@ var PartnerAutocompleteMixin = {
                 var content = Qweb.render('partner_autocomplete.account_token', {
                     account_url: url
                 });
-                self.do_notify(title, content, false, 'o_partner_autocomplete_no_credits_notify');
+                self.displayNotification({
+                    title,
+                    message: content,
+                    className: 'o_partner_autocomplete_no_credits_notify',
+                    isMessageHtml: true, // the message is coming from a Qweb template using safe instructions
+                });
             }
             else {
-                self.do_notify(title);
+                self.displayNotification({ title });
             }
         });
     },

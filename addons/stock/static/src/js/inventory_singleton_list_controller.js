@@ -51,9 +51,9 @@ var SingletonListController = InventoryReportListController.extend({
         var similarRecords = findSimilarRecords(handle);
 
         if (similarRecords.length > 1) {
-            var notification = _t("You tried to create a record who already exists."+
-            "<br/>This last one has been modified instead.");
-            this.do_notify(_t("This record already exists."), notification);
+            var notification = _t("You tried to create a record who already exists. "+
+            "This last one has been modified instead.");
+            this.displayNotification({ title: _t("This record already exists."), message: notification });
             this.reload();
             return Promise.reject();
         }

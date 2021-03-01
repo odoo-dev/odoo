@@ -2432,11 +2432,11 @@ var BasicModel = AbstractModel.extend({
                     const modelFieldName = record.fields[modelField].string;
                     const referenceFieldName = record.fields[fieldName].string;
 
-                    this.do_warn(_t(`'${referenceFieldName}' is unsynchronized
+                    this.displayNotification({ title: _t(`'${referenceFieldName}' is unsynchronized
                                      with '${modelFieldName}'.`),
-                                 _t(`If you change ${modelFieldName} or
+                                 message: _t(`If you change ${modelFieldName} or
                                      ${referenceFieldName}, the synchronization
-                                     will be reapplied and the data will be modified.`), true);
+                                     will be reapplied and the data will be modified.`), sticky: true, type: 'danger' });
                     return false;
                 }
                 return {

@@ -190,7 +190,8 @@ function displayNotification(parent, action) {
         title: _.escape(title),
         message: sprintf(_.escape(message), ...links),
         type,
-        sticky
+        sticky,
+        isMessageHtml: true, // dynamic parts of the message are escaped above
     });
     return next;
 }

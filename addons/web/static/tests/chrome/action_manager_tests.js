@@ -2258,7 +2258,7 @@ QUnit.module('ActionManager', {
                 report: ReportService,
                 notification: NotificationService.extend({
                     notify: function (params) {
-                        assert.step(params.type || 'notification');
+                        assert.step(params.type || 'warning');
                     }
                 }),
             },
@@ -2315,7 +2315,7 @@ QUnit.module('ActionManager', {
                 report: ReportService,
                 notification: NotificationService.extend({
                     notify: function (params) {
-                        assert.step(params.type || 'notification');
+                        assert.step(params.type || 'warning');
                     }
                 })
             },
@@ -2379,7 +2379,7 @@ QUnit.module('ActionManager', {
                 report: ReportService,
                 notification: NotificationService.extend({
                     notify: function (params) {
-                        assert.step(params.type || 'notification');
+                        assert.step(params.type || 'warning');
                     }
                 })
             },
