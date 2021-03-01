@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="s_dynamic_snippet_products" name="Dynamic Products">
+    <template id="s_dynamic_snippet_products" name="Products">
         <t t-call="website.s_dynamic_snippet_template">
             <t t-set="snippet_name" t-value="'s_dynamic_snippet_products'"/>
         </t>
