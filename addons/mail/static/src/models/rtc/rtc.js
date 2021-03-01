@@ -65,19 +65,23 @@ function factory(dependencies) {
             if (this.peer) {
                 return;
             }
-            const peer = new Peer(peerToken);
+            this.env.services.bus_service.onNotification(null, notifs => this._onNotification(notifs));
+            this.env.services.bus_service.addChannel('mail.rtc.partner:' + peerToken);
+            const peer = undefined; // new Peer(peerToken); // TODO REPALCE
             const stream = await this._getStream();
-            this._setupPeer(peer);
+            // this._setupPeer(peer); // TODO REPALCE
             const room = this.env.models['mail.chat_room'].get(this.env.messaging.chatRoomLocalId);
 
             for (const token of room.peerTokens) {
                 if (token === peerToken) {
                     continue;
                 }
-                setTimeout(async () => {
-                    // FIXME
-                    await this.connectToPeer(token);
-                }, 1000);
+                await this._notifyPeer({
+                    fromToken: peerToken,
+                    targetToken: token,
+                    event: 'rtc-call',
+                 });
+                // await this.connectToPeer(token); // TODO REPALCE
             }
             this.update({
                 peer,
@@ -106,6 +110,32 @@ function factory(dependencies) {
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
+
+        _onNotification(notifications) {
+            for (const notification of notifications) {
+                if(!notification[0].includes('mail.rtc.partner:')) {
+                    return;
+                }
+                const { event, fromToken, payload } = JSON.parse(notification[1]);
+            }
+        }
+
+        async _notifyPeer({ targetToken, event, payload, fromToken=this.peerToken }) {
+            if (!targetToken) {
+                return;
+            }
+            await this.env.services.rpc({
+                route: '/longpolling/send',
+                params: {
+                    channel: 'mail.rtc.partner:' + targetToken,
+                    message: JSON.stringify({
+                        event,
+                        fromToken,
+                        payload,
+                    }),
+                },
+            }, { shadow: true });
+        }
 
         /**
          * @private

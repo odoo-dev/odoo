@@ -5,9 +5,14 @@
         <div class="o_VideoRoom">
             <div class="o_VideoRoom_video_container">
                 <t t-if="room.peerTokens and room.peerTokens.length">
-                    <t t-foreach="room.peerTokens" t-as="token" t-if="env.mailRtc.activePeers[token]" t-key="token">
+                    <t t-foreach="room.peerTokens" t-as="token" t-key="token">
                         <div class="o_VideoRoom_video_box" t-key="'video_box_'+token">
-                            <video class="o_VideoRoom_video" t-key="'video_'+token" t-att-muted="localToken === token" t-att-token="token" t-ref="video_{{ token }}" t-on-loadedmetadata="_onVideoLoadedMetaData(token)"/>
+                            <video t-if="env.mailRtc.activePeers[token]"
+                                   class="o_VideoRoom_video"
+                                   t-key="'video_'+token"
+                                   t-att-muted="localToken === token"
+                                   t-att-token="token" t-ref="video_{{ token }}"
+                                   t-on-loadedmetadata="_onVideoLoadedMetaData(token)"/>
                             <span class="o_VideoRoom_video_name" t-esc="token"/>
                         </div>
                     </t>
