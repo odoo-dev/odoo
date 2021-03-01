@@ -89,7 +89,7 @@ class AccountAnalyticLine(models.Model):
             if project.sale_line_id:
                 return project.sale_line_id
         if task.allow_billable:
-            if task.pricing_type in ('task_rate', 'fixed_rate'):
+            if task.pricing_type in ('task_rate', 'fixed_rate') or task.partner_id != project.partner_id:
                 return task.sale_line_id
             else:  # then pricing_type = 'employee_rate'
                 map_entry = project.sale_line_employee_ids.filtered(lambda map_entry: map_entry.employee_id == employee)
