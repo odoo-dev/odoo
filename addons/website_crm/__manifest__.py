@@ -31,8 +31,5 @@ This module includes contact phone and mobile numbers validation.""",
             # inside .
             'website_crm/static/tests/tours/website_crm.js',
         ],
-        'web.assets_qweb': [
-            'website_crm/static/src/xml/*.xml',
-        ],
     }
 }

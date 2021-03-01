@@ -23,8 +23,5 @@
             # inside .
             'pos_adyen/static/src/js/models.js',
         ],
-        'web.assets_qweb': [
-            'pos_adyen/static/src/xml/pos.xml',
-        ],
     }
 }

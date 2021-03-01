@@ -18,9 +18,4 @@ Publish your members/association directory publicly.
     ],
     'demo': ['data/membership_demo.xml'],
     'installable': True,
-    'assets': {
-        'web.assets_qweb': [
-            'website_membership/static/src/xml/*.xml',
-        ],
-    }
 }
