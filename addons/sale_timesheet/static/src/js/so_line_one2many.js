@@ -5,20 +5,28 @@ const fieldRegistry = require('web.field_registry');
 const FieldOne2Many = require('web.relational_fields').FieldOne2Many;
 
 const SoLineOne2Many = FieldOne2Many.extend({
-    _onFieldChanged: function (ev) {
+
+    /**
+     * nodeName: timesheet_ids field is renamed in timesheet_grid so we have to name the field from Options.
+     *
+     * @override
+     */
+    _onFieldChanged(ev) {
+        const nodeName = this.nodeOptions.nodeName;
         if (
             ev.data.changes &&
-            ev.data.changes.hasOwnProperty('timesheet_ids') &&
-            ev.data.changes.timesheet_ids.operation === 'UPDATE' &&
-            ev.data.changes.timesheet_ids.data.hasOwnProperty('so_line')) {
+            nodeName &&
+            ev.data.changes.hasOwnProperty(nodeName) &&
+            ev.data.changes[nodeName].operation === 'UPDATE' &&
+            ev.data.changes[nodeName].data.hasOwnProperty('so_line')) {
             const line = this.value.data.find(line => {
-                return line.id === ev.data.changes.timesheet_ids.id;
+                return line.id === ev.data.changes[nodeName].id;
             });
             if (!line.is_so_line_edited) {
-                ev.data.changes.timesheet_ids.data.is_so_line_edited = true;
+                ev.data.changes[nodeName].data.is_so_line_edited = true;
             }
         }
-        this._super.apply(this, arguments);
+        this._super(...arguments);
     }
 });
 
