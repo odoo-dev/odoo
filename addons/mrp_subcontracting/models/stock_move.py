@@ -139,6 +139,9 @@ class StockMove(models.Model):
     def _action_record_components(self):
         self.ensure_one()
         production = self.move_orig_ids.production_id[-1:]
+        if self._has_tracked_subcontract_components():
+            production.qty_producing = self.product_uom_qty
+            production.with_context(subcontract_move_id=True)._set_qty_producing()
         view = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
         return {
             'name': _('Subcontract'),
