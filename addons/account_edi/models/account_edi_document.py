@@ -182,20 +182,14 @@ class AccountEdiDocument(models.Model):
                 edi_result = edi_format._cancel_payment_edi(documents.move_id, test_mode=test_mode)
                 _postprocess_cancel_edi_results(documents, edi_result)
 
-    def _process_documents_no_web_services(self):
-        """ Post and cancel all the documents that don't need a web service.
-        """
-        jobs = self.filtered(lambda d: not d.edi_format_id._needs_web_services())._prepare_jobs()
-        for documents, doc_type in jobs:
-            self._process_job(documents, doc_type)
+    @api.model
+    def _process_jobs(self, jobs, with_commit=True):
+        ''' Process the jobs created by '_prepare_jobs' needing a web service call.
 
-    def _process_documents_web_services(self, job_count=None, with_commit=True):
-        """ Post and cancel all the documents that need a web service. This is called by CRON.
-
-        :param job_count: Limit to the number of jobs to process among the ones that are available for treatment.
-        """
-        jobs = self.filtered(lambda d: d.edi_format_id._needs_web_services())._prepare_jobs()
-        jobs = jobs[0:job_count or len(jobs)]
+        :param jobs:        The list of jobs to process.
+        :param with_commit: Flag indicating a commit should be made between each job.
+        :return:
+        '''
         for documents, doc_type in jobs:
             move_to_cancel = documents.filtered(lambda doc: doc.attachment_id \
                                                     and doc.state == 'to_cancel' \
@@ -222,3 +216,31 @@ class AccountEdiDocument(models.Model):
             else:
                 if with_commit and len(jobs) > 1:
                     self.env.cr.commit()
+
+    def _process_documents_no_web_services(self):
+        """ Post and cancel all the documents that don't need a web service.
+        """
+        jobs = self.filtered(lambda d: not d.edi_format_id._needs_web_services())._prepare_jobs()
+        for documents, doc_type in jobs:
+            self._process_job(documents, doc_type)
+
+    def _process_documents_web_services(self):
+        ''' Post and cancel all the documents that need a web service. '''
+        jobs = self.filtered(lambda d: d.edi_format_id._needs_web_services())._prepare_jobs()
+        self._process_jobs(jobs, with_commit=False)
+
+    @api.model
+    def _cron_process_documents_web_services(self, job_count=None):
+        ''' Method called by the EDI cron processing all web-services.
+
+        :param job_count: Limit explicitely the number of web service calls. If not provided, process all.
+        '''
+        edi_documents = self.search([('state', 'in', ('to_send', 'to_cancel'))])
+        all_jobs = edi_documents.filtered(lambda d: d.edi_format_id._needs_web_services())._prepare_jobs()
+        jobs_to_process = all_jobs[0:job_count] if job_count else all_jobs
+
+        self._process_jobs(jobs_to_process)
+
+        # Mark the CRON to be triggered again asap since there is some remaining jobs to process.
+        if len(all_jobs) - len(jobs_to_process):
+            self.env.ref('account_edi.ir_cron_edi_network')._trigger()

@@ -75,9 +75,9 @@ class TestAccountEdi(AccountEdiTestCommon):
             doc = self.invoice._get_edi_document(self.edi_format)
             self.assertEqual(len(doc), 1)
             self.assertEqual(doc.state, 'to_send')
-            doc._process_documents_web_services(with_commit=False)
+            doc._process_documents_web_services()
             self.assertEqual(doc.state, 'to_send')
-            doc._process_documents_web_services(with_commit=False)
+            doc._process_documents_web_services()
             self.assertEqual(doc.state, 'sent')
 
     def test_edi_flow_request_cancel_success(self):
@@ -87,7 +87,7 @@ class TestAccountEdi(AccountEdiTestCommon):
             doc = self.invoice._get_edi_document(self.edi_format)
             self.assertEqual(doc.state, 'to_send')
             self.assertEqual(self.invoice.state, 'posted')
-            doc._process_documents_web_services(with_commit=False)
+            doc._process_documents_web_services()
             self.assertEqual(doc.state, 'sent')
             self.assertEqual(self.invoice.state, 'posted')
             self.invoice.button_cancel_posted_moves()
@@ -105,7 +105,7 @@ class TestAccountEdi(AccountEdiTestCommon):
             doc = self.invoice._get_edi_document(self.edi_format)
             self.assertEqual(doc.state, 'to_send')
             self.assertEqual(self.invoice.state, 'posted')
-            doc._process_documents_web_services(with_commit=False)
+            doc._process_documents_web_services()
             self.assertEqual(doc.state, 'sent')
             self.assertEqual(self.invoice.state, 'posted')
             self.invoice.button_cancel_posted_moves()
@@ -150,12 +150,12 @@ class TestAccountEdi(AccountEdiTestCommon):
                            _cancel_invoice_edi_method=_mock_cancel):
             self.invoice.action_post()
             doc = self.invoice._get_edi_document(self.edi_format)
-            doc._process_documents_web_services(with_commit=False)
+            doc._process_documents_web_services()
             self.assertEqual(doc.state, 'sent')
 
             # Request Cancellation
             self.invoice.button_cancel_posted_moves()
-            doc._process_documents_web_services(with_commit=False)  # first step of cancel
+            doc._process_documents_web_services()  # first step of cancel
             self.assertEqual(doc.state, 'to_cancel')
 
             # Call off edi Cancellation
@@ -163,10 +163,10 @@ class TestAccountEdi(AccountEdiTestCommon):
             self.assertEqual(doc.state, 'to_cancel')
 
             # If we cannot call off edi cancellation, only solution is to post again
-            doc._process_documents_web_services(with_commit=False)  # second step of cancel
+            doc._process_documents_web_services()  # second step of cancel
             self.assertEqual(doc.state, 'cancelled')
             self.invoice.action_post()
-            doc._process_documents_web_services(with_commit=False)
+            doc._process_documents_web_services()
             self.assertEqual(doc.state, 'sent')
 
     def test_batches(self):
