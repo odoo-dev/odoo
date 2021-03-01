@@ -60,7 +60,6 @@ class PaymentTransaction(models.Model):
         if self.provider != 'sips':
             return res
 
-        sips_tx_values = dict(processing_values)
         base_url = self.get_base_url()
         data = {
             'amount': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
@@ -76,13 +75,12 @@ class PaymentTransaction(models.Model):
         api_url = self.acquirer_id.sips_prod_url if self.acquirer_id.state == 'enabled' \
             else self.acquirer_id.sips_test_url
         data = '|'.join([f'{k}={v}' for k, v in data.items()])
-        sips_tx_values.update({
+        return {
             'api_url': api_url,
             'Data': data,
             'InterfaceVersion': self.acquirer_id.sips_version,
             'Seal': self.acquirer_id._sips_generate_shasign(data),
-        })
-        return sips_tx_values
+        }
 
     @api.model
     def _get_tx_from_feedback_data(self, provider, data):

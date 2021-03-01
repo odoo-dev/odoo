@@ -30,13 +30,13 @@ class PaymentTransaction(models.Model):
             else 'https://sandboxsecure.payu.in/_payment'
         payumoney_values = {
             'key': self.acquirer_id.payumoney_merchant_key,
-            'txnid': processing_values['reference'],
-            'amount': processing_values['amount'],
-            'productinfo': processing_values['reference'],
+            'txnid': self.reference,
+            'amount': self.amount,
+            'productinfo': self.reference,
             'firstname': first_name,
             'lastname': last_name,
-            'email': self.partner_id.email,
-            'phone': self.partner_id.phone,
+            'email': self.partner_email,
+            'phone': self.partner_phone,
             'return_url': urls.url_join(self.get_base_url(), PayUMoneyController._return_url),
             'api_url': api_url,
         }

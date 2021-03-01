@@ -58,7 +58,7 @@ class PaymentTransaction(models.Model):
         rendering_values = {
             'ACCOUNT_PSPID': self.acquirer_id.ogone_pspid,
             'ALIAS_ALIASID': payment_utils.singularize_reference_prefix(prefix='ODOO-ALIAS'),
-            'ALIAS_ORDERID': processing_values.get('reference'),
+            'ALIAS_ORDERID': self.reference,
             'ALIAS_STOREPERMANENTLY': 'Y' if self.tokenize else 'N',
             'CARD_PAYMENTMETHOD': 'CreditCard',
             'LAYOUT_LANGUAGE': self.partner_lang,

@@ -55,8 +55,8 @@ class PaymentTransaction(models.Model):
             else 'https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/'
         payulatam_values = {
             'merchantId': self.acquirer_id.payulatam_merchant_id,
-            'referenceCode': processing_values.get('reference'),
-            'description': processing_values.get('reference'),
+            'referenceCode': self.reference,
+            'description': self.reference,
             'amount': float_repr(processing_values['amount'], self.currency_id.decimal_places or 2),
             'tax': 0,
             'taxReturnBase': 0,

@@ -46,9 +46,8 @@ class PaymentTransaction(models.Model):
         if self.provider != 'buckaroo':
             return res
 
-        rendering_values = dict(processing_values)
         return_url = urls.url_join(self.acquirer_id._get_base_url(), BuckarooController._return_url)
-        rendering_values.update({
+        rendering_values = {
             'api_url': self.acquirer_id._buckaroo_get_api_url(),
             'Brq_websitekey': self.acquirer_id.buckaroo_website_key,
             'Brq_amount': self.amount,
@@ -59,7 +58,7 @@ class PaymentTransaction(models.Model):
             'Brq_returncancel': return_url,
             'Brq_returnerror': return_url,
             'Brq_returnreject': return_url,
-        })
+        }
         if self.partner_lang:
             rendering_values['Brq_culture'] = self.partner_lang.replace('_', '-')
         rendering_values['Brq_signature'] = self.acquirer_id._buckaroo_generate_digital_sign(
