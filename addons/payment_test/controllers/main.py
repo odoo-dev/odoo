@@ -1,11 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import logging
-
 from odoo import http
 from odoo.http import request
-
-_logger = logging.getLogger(__name__)
 
 
 class PaymentTestController(http.Controller):
