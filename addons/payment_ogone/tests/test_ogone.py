@@ -1,195 +1,70 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from lxml import objectify
-import time
+from freezegun import freeze_time
 
-from odoo.addons.payment.models.payment_acquirer import ValidationError
-from odoo.addons.payment.tests.common import PaymentAcquirerCommon
-from odoo.addons.payment_ogone.controllers.main import OgoneController
-from werkzeug import urls
-
-from odoo.tools import mute_logger
 from odoo.tests import tagged
+from odoo.tools import mute_logger
+
+from odoo.addons.payment import utils as payment_utils
+
+from .common import OgoneCommon
+from ..controllers.main import OgoneController
 
 
-@tagged('post_install', '-at_install', 'external', '-standard')
-class OgonePayment(PaymentAcquirerCommon):
+@tagged('post_install', '-at_install')
+class OgoneTest(OgoneCommon):
 
-    @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def test_validation_amount(self):
+        self.assertEqual(self.ogone._get_validation_amount(), 1.0)
 
-        cls.ogone = cls.env.ref('payment.payment_acquirer_ogone')
-        cls.ogone.write({
-            'ogone_pspid': 'dummy',
-            'ogone_userid': 'dummy',
-            'ogone_password': 'dummy',
-            'ogone_shakey_in': 'dummy',
-            'ogone_shakey_out': 'dummy',
-            'state': 'test',
-        })
+    # freeze time for consistent singularize_prefix behavior during the test
+    @freeze_time("2011-11-02 12:00:21")
+    def test_reference(self):
+        tx = self.create_transaction(flow="redirect", reference="")
+        self.assertEqual(tx.reference, "tx-20111102120021",
+            "Ogone: transaction reference wasn't correctly singularized.")
 
-    def test_10_ogone_form_render(self):
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        # be sure not to do stupid thing
-        self.assertEqual(self.ogone.state, 'test', 'test without test environment')
+        # Test prefixes of length > 40 chars
+        reference = self.env['payment.transaction']._compute_reference(
+            provider=self.ogone.provider,
+            prefix="This is a reference of more than 40 characters to annoy ogone",
+        )
+        self.assertEqual(reference, "This is a reference of mo-20111102120021")
+        self.assertEqual(len(reference), 40)
 
-        # ----------------------------------------
-        # Test: button direct rendering + shasign
-        # ----------------------------------------
-
-        form_values = {
-            'PSPID': 'dummy',
-            'ORDERID': 'test_ref0',
-            'AMOUNT': '1',
-            'CURRENCY': 'EUR',
-            'LANGUAGE': 'en_US',
-            'CN': 'Norbert Buyer',
-            'EMAIL': 'norbert.buyer@example.com',
-            'OWNERZIP': '1000',
-            'OWNERADDRESS': 'Huge Street 2/543',
-            'OWNERCTY': 'Belgium',
-            'OWNERTOWN': 'Sin City',
-            'OWNERTELNO': '0032 12 34 56 78',
-            'SHASIGN': '815f67b8ff70d234ffcf437c13a9fa7f807044cc',
-            'ACCEPTURL': urls.url_join(base_url, OgoneController._accept_url),
-            'DECLINEURL': urls.url_join(base_url, OgoneController._decline_url),
-            'EXCEPTIONURL': urls.url_join(base_url, OgoneController._exception_url),
-            'CANCELURL': urls.url_join(base_url, OgoneController._cancel_url),
+    # freeze time for consistent singularize_prefix behavior during the test
+    @freeze_time("2011-11-02 12:00:21")
+    def test_redirect_form_values(self):
+        return_url = self.build_url(OgoneController._flexcheckout_return_url)
+        expected_values = {
+            'ACCOUNT_PSPID': self.ogone.ogone_pspid,
+            'ALIAS_ALIASID': payment_utils.singularize_reference_prefix(prefix='ODOO-ALIAS'),
+            'ALIAS_ORDERID': self.reference,
+            'ALIAS_STOREPERMANENTLY': 'N', # 'Y' if self.tokenize
+            'CARD_PAYMENTMETHOD': 'CreditCard',
+            'LAYOUT_LANGUAGE': self.partner.lang,
+            'PARAMETERS_ACCEPTURL': return_url,
+            'PARAMETERS_EXCEPTIONURL': return_url,
         }
+        expected_values['SHASIGNATURE_SHASIGN'] = self.ogone._ogone_generate_signature(
+            expected_values, incoming=False, format_keys=True
+        ).upper()
 
-        # render the button
-        res = self.ogone.render(
-            'test_ref0', 0.01, self.currency_euro.id,
-            partner_id=None,
-            partner_values=self.buyer_values)
+        tx = self.create_transaction(flow="redirect")
+        with mute_logger('odoo.addons.payment.models.payment_transaction'):
+            processing_values = tx._get_processing_values()
 
-        # check form result
-        tree = objectify.fromstring(res)
-        self.assertEqual(tree.get('action'), 'https://secure.ogone.com/ncol/test/orderstandard.asp', 'ogone: wrong form POST url')
-        for form_input in tree.input:
-            if form_input.get('name') in ['submit']:
-                continue
+        form_info = self.get_form_info(processing_values['redirect_form_html'])
+
+        self.assertEqual(form_info['action'], 'https://ogone.test.v-psp.com/Tokenization/HostedPage')
+        inputs = form_info['inputs']
+        self.assertEqual(len(expected_values), len(inputs))
+        for rendering_key, value in expected_values.items():
+            form_key = rendering_key.replace('_', '.')
             self.assertEqual(
-                form_input.get('value'),
-                form_values[form_input.get('name')],
-                'ogone: wrong value for input %s: received %s instead of %s' % (form_input.get('name'), form_input.get('value'), form_values[form_input.get('name')])
+                inputs[form_key],
+                value,
+                "Ogone: received value %s for input %s (expected %s)" % (
+                    inputs[form_key], form_key, value,
+                )
             )
-
-        # ----------------------------------------
-        # Test2: button using tx + validation
-        # ----------------------------------------
-
-        # create a new draft tx
-        tx = self.env['payment.transaction'].create({
-            'amount': 0.01,
-            'acquirer_id': self.ogone.id,
-            'currency_id': self.currency_euro.id,
-            'reference': 'test_ref0',
-            'partner_id': self.buyer_id})
-        # render the button
-        res = self.ogone.render(
-            'should_be_erased', 0.01, self.currency_euro,
-            tx_id=tx.id,
-            partner_id=None,
-            partner_values=self.buyer_values)
-
-        # check form result
-        tree = objectify.fromstring(res)
-        self.assertEqual(tree.get('action'), 'https://secure.ogone.com/ncol/test/orderstandard.asp', 'ogone: wrong form POST url')
-        for form_input in tree.input:
-            if form_input.get('name') in ['submit']:
-                continue
-            self.assertEqual(
-                form_input.get('value'),
-                form_values[form_input.get('name')],
-                'ogone: wrong value for form input %s: received %s instead of %s' % (form_input.get('name'), form_input.get('value'), form_values[form_input.get('name')])
-            )
-
-    @mute_logger('odoo.addons.payment_ogone.models.payment', 'ValidationError')
-    def test_20_ogone_form_management(self):
-        # be sure not to do stupid thing
-        self.assertEqual(self.ogone.state, 'test', 'test without test environment')
-
-        # typical data posted by ogone after client has successfully paid
-        ogone_post_data = {
-            'orderID': u'test_ref_2',
-            'STATUS': u'9',
-            'CARDNO': u'XXXXXXXXXXXX0002',
-            'PAYID': u'25381582',
-            'CN': u'Norbert Buyer',
-            'NCERROR': u'0',
-            'TRXDATE': u'11/15/13',
-            'IP': u'85.201.233.72',
-            'BRAND': u'VISA',
-            'ACCEPTANCE': u'test123',
-            'currency': u'EUR',
-            'amount': u'1.95',
-            'SHASIGN': u'7B7B0ED9CBC4A85543A9073374589033A62A05A5',
-            'ED': u'0315',
-            'PM': u'CreditCard'
-        }
-
-        # should raise error about unknown tx
-        with self.assertRaises(ValidationError):
-            self.env['payment.transaction'].form_feedback(ogone_post_data)
-
-        # create tx
-        tx = self.env['payment.transaction'].create({
-            'amount': 1.95,
-            'acquirer_id': self.ogone.id,
-            'currency_id': self.currency_euro.id,
-            'reference': 'test_ref_2-1',
-            'partner_name': 'Norbert Buyer',
-            'partner_country_id': self.country_france.id})
-        # validate it
-        tx.form_feedback(ogone_post_data)
-        # check state
-        self.assertEqual(tx.state, 'done', 'ogone: validation did not put tx into done state')
-        self.assertEqual(tx.ogone_payid, ogone_post_data.get('PAYID'), 'ogone: validation did not update tx payid')
-
-        # reset tx
-        tx = self.env['payment.transaction'].create({
-            'amount': 1.95,
-            'acquirer_id': self.ogone.id,
-            'currency_id': self.currency_euro.id,
-            'reference': 'test_ref_2-2',
-            'partner_name': 'Norbert Buyer',
-            'partner_country_id': self.country_france.id})
-
-        # now ogone post is ok: try to modify the SHASIGN
-        ogone_post_data['SHASIGN'] = 'a4c16bae286317b82edb49188d3399249a784691'
-        with self.assertRaises(ValidationError):
-            tx.form_feedback(ogone_post_data)
-
-        # simulate an error
-        ogone_post_data['STATUS'] = 2
-        ogone_post_data['SHASIGN'] = 'a4c16bae286317b82edb49188d3399249a784691'
-        tx.form_feedback(ogone_post_data)
-        # check state
-        self.assertEqual(tx.state, 'cancel', 'ogone: erroneous validation did not put tx into error state')
-
-    def test_30_ogone_s2s(self):
-        test_ref = 'test_ref_%.15f' % time.time()
-        # be sure not to do stupid thing
-        self.assertEqual(self.ogone.state, 'test', 'test without test environment')
-
-        # create a new draft tx
-        tx = self.env['payment.transaction'].create({
-            'amount': 0.01,
-            'acquirer_id': self.ogone.id,
-            'currency_id': self.currency_euro.id,
-            'reference': test_ref,
-            'partner_id': self.buyer_id,
-            'type': 'server2server',
-        })
-
-        # create an alias
-        res = tx.ogone_s2s_create_alias({
-            'expiry_date_mm': '01',
-            'expiry_date_yy': '2015',
-            'holder_name': 'Norbert Poilu',
-            'number': '4000000000000002',
-            'brand': 'VISA'})
-
-        res = tx.ogone_s2s_execute({})
