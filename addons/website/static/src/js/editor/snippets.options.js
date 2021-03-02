@@ -2603,6 +2603,137 @@ options.registry.MobileVisibility = options.Class.extend({
     },
 });
 
+options.registry.ConditionalVisibility = options.Class.extend({
+
+    /**
+     * @overide
+     */
+    init: function () {
+        this._super.apply(this, arguments);
+        this.campaigns = {};
+    },
+
+    changeVisibility: function (previewMode, widgetValue, params) {
+        this._changeDataAttribute('data-visibility', widgetValue);
+    },
+
+    changeCountryFilter: function (previewMode, widgetValue, params) {
+        this._applyStyleToDom('data-country', 'data-country', widgetValue);
+        this._changeDataAttribute('data-country', widgetValue);
+    },
+
+    changeLanguageFilter: function (previewMode, widgetValue, params) {
+        this._applyStyleToDom('lang', 'data-language', widgetValue);
+        this._changeDataAttribute('data-language', widgetValue);
+    },
+
+    changeMediumFilter: function (previewMode, widgetValue, params) {
+        this._applyStyleToDom('data-utm-medium', 'data-medium', widgetValue);
+        this._changeDataAttribute('data-medium', widgetValue);
+    },
+
+    changeCampaignFilter: function (previewMode, widgetValue, params) {
+        this._applyStyleToDom('data-utm-campaign', 'data-campaign', widgetValue);
+        this._changeDataAttribute('data-campaign', widgetValue);
+    },
+
+    changeSourceFilter: function(previewMode, widgetValue, params) {
+        this._applyStyleToDom('data-utm-source', 'data-source', widgetValue);
+        this._changeDataAttribute('data-source', widgetValue);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    _applyStyleToDom: function(htmlAttribute, dataAttribute, value) {
+        let style = document.getElementById('wrap').getElementsByTagName('style')[0];
+        if (!style) {
+            let body = document.getElementById('wrap');
+            style = document.createElement('style');
+            style.type = 'text/css';
+            body.insertBefore(style, body.firstChild);
+        }
+
+        let rule = `html:not([${htmlAttribute}*="${value}"]) [data-visibility="conditional"][${dataAttribute}="${value}"]`;
+        if (style.sheet.rules.length === 0) {
+            style.sheet.insertRule(`${rule} { display: none; }`);
+        } else {
+            let i = 0;
+            while (i < style.sheet.rules.length && style.sheet.rules[i].selectorText !== rule) { // this loop would be easier if the styleSheet rules would implement any
+                i++;
+            }
+            if (i >= style.sheet.rules.length) {
+                style.sheet.insertRule(`${rule} { display: none; }`, i);
+                style.innerHTML += `${rule} { display: none; }`;
+            }
+        }
+    },
+
+    _changeDataAttribute: function (attribute, value) {
+        if (!value) {
+            this.$target.removeAttr(attribute);
+        } else {
+            this.$target.attr(attribute, value);
+        }
+    },
+
+    _fetchCampaignData: async function () {
+        const r = await this._rpc({route: '/web/dataset/search_read', params: {model: 'utm.campaign'}});
+        return r.records;
+    },
+
+    /**
+     * @override
+     * @param uiFragment 
+     */
+    _renderCustomXML: async function (uiFragment) {
+        const campaigns = await this._fetchCampaignData();
+        for (let index in campaigns) {
+            this.campaigns[campaigns[index].id] = campaigns[index];
+        }
+        const filtersSelectorEl = uiFragment.querySelector('[data-name="campaign_opt"]');
+        await this._renderSelectUserValueWidgetButtons(filtersSelectorEl, this.campaigns);
+    },
+
+     /**
+     * Renders we-buttons into a SelectUserValueWidget element according to provided data.
+     * @param {HTMLElement} selectUserValueWidgetElement the SelectUserValueWidget buttons
+     *   have to be created into.
+     * @param {JSON} data
+     * @private
+     */
+    _renderSelectUserValueWidgetButtons: async function (selectUserValueWidgetElement, data) {
+        for (let id in data) {
+            const button = document.createElement('we-button');
+            button.dataset.changeCampaignFilter = data[id].name;
+            button.innerHTML = data[id].name;
+            selectUserValueWidgetElement.appendChild(button);
+        }
+    },
+    /**
+     * @override
+     */ 
+    
+    _computeWidgetState: function (methodName, params) {
+        switch (methodName) {
+            case 'changeVisibility':
+                return this.$target.attr('data-visibility') || '';
+            case 'changeCountryFilter':
+                return this.$target.attr('data-country') || '';
+            case 'changeLanguageFilter':
+                return this.$target.attr('data-language') || '';
+            case 'changeMediumFilter':
+                return this.$target.attr('data-medium') || '';
+            case 'changeSourceFilter':
+                return this.$target.attr('data-source') || '';
+            case 'changeCampaignFilter':
+                return this.$target.attr('data-campaign') || '';
+        }
+    }
+});
+
+
 return {
     UrlPickerUserValueWidget: UrlPickerUserValueWidget,
     FontFamilyPickerUserValueWidget: FontFamilyPickerUserValueWidget,

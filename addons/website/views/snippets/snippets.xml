@@ -1058,6 +1058,42 @@
         </we-button-group>
     </div>
 
+    <div data-js="ConditionalVisibility" data-option-name="conditionalVisibility" data-selector="section">
+        <we-select string="Visibility" data-no-preview="true">
+            <we-button data-change-visibility="hidden">Hidden</we-button>
+            <we-button data-change-visibility="">Always visible</we-button>
+            <we-button data-change-visibility="conditional" data-name="visibility_conditional">Conditionally</we-button>
+        </we-select>
+
+        <we-select string="⌙ Countries" data-no-preview="true" data-dependencies="visibility_conditional">
+            <we-button data-change-country-filter="">/</we-button>
+            <we-button data-change-country-filter="BE">Belgium</we-button>
+            <we-button data-change-country-filter="UK">Uninted Kingdom</we-button>
+        </we-select>
+
+        <we-select string="⌙ Languages" data-no-preview="true" data-dependencies="visibility_conditional">
+            <we-button data-change-language-filter="">/</we-button>
+            <we-button data-change-language-filter="en">English</we-button>
+            <we-button data-change-language-filter="fr">French</we-button>
+        </we-select>
+
+        <we-select string="⌙ Medium" data-no-preview="true" data-dependencies="visibility_conditional">
+            <we-button data-change-medium-filter="">/</we-button>
+            <we-button data-change-medium-filter="Facebook">Facebook</we-button>
+            <we-button data-change-medium-filter="Twitter">Twitter</we-button>
+        </we-select>
+
+        <we-select string="⌙ Source" data-no-preview="true" data-dependencies="visibility_conditional">
+            <we-button data-change-source-filter="">/</we-button>
+            <we-button data-change-source-filter="Facebook">Facebook</we-button>
+            <we-button data-change-source-filter="Twitter">Twitter</we-button>
+        </we-select>
+
+        <we-select string="⌙ Campaign" data-no-preview="true" data-name="campaign_opt" data-dependencies="visibility_conditional">
+            <we-button data-change-campaign-filter="">All</we-button>
+        </we-select>
+    </div>>
+
     <!-- Cookies Bar -->
     <div data-selector="#website_cookies_bar" data-js="CookiesBar" data-target=".modal">
         <we-select string="Layout" class="o_we_inline">
