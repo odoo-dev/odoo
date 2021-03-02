@@ -4,6 +4,7 @@
 import logging
 
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ class CalendarEvent(models.Model):
             )
 
     def action_send_sms(self):
+        if not self.partner_ids:
+            raise UserError(_("There are no attendees on these events"))
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'sms.composer',
