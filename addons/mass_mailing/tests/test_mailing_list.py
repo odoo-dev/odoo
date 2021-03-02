@@ -72,8 +72,7 @@ class TestMailingListMerge(MassMailCommon):
         # This test ensure that the mailing lists are correctly merged and no
         # duplicates are appearing in C
 
-        result_list = self.env['mailing.list.merge'].create({
-            'src_list_ids': [(4, list_id) for list_id in [self.mailing_list_1.id, self.mailing_list_2.id]],
+        result_list = self.env['mailing.list.merge'].with_context({'active_ids':[self.mailing_list_1.id, self.mailing_list_2.id]}).create({
             'dest_list_id': self.mailing_list_3.id,
             'merge_options': 'existing',
             'new_list_name': False,
