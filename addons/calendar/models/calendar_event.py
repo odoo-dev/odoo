@@ -217,7 +217,7 @@ class Meeting(models.Model):
     duration = fields.Float('Duration', compute='_compute_duration', store=True, readonly=False)
     description = fields.Text('Description')
     privacy = fields.Selection(
-        [('public', 'Everyone'),
+        [('public', 'Everyone Readonly'),
          ('private', 'Only me'),
          ('confidential', 'Only internal users')],
         'Privacy', default='public', required=True)
@@ -864,3 +864,12 @@ class Meeting(models.Model):
         if status == 'declined':
             return attendee.do_decline()
         return attendee.do_tentative()
+
+    def check_access_rule(self, operation, raise_exception=True):
+        try:
+            super().check_access_rule(operation)
+            return None if raise_exception else True
+        except:
+            if raise_exception:
+                raise
+            return False
