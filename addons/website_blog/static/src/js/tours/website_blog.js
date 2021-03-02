@@ -43,11 +43,11 @@ odoo.define("website_blog.tour", function (require) {
         position: "top",
         run: function (actions) {
             actions.auto();
-            actions.text("Blog content", this.$anchor.find("p"));
+            actions.text("Blog content", this.$anchor.find("div.o_default_snippet_text"));
         },
     }, {
         trigger: "button[data-action=save]",
-        extra_trigger: "#o_wblog_post_content .o_wblog_post_content_field p:first:not(:containsExact(" + _t("Start writing here...") + "))",
+        extra_trigger: "#o_wblog_post_content .o_wblog_post_content_field div:first:not(:containsExact(" + _t("Start writing here...") + "))",
         content: _t("<b>Click on Save</b> to record your changes."),
         position: "bottom",
     }, {

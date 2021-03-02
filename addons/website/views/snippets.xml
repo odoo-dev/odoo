@@ -1442,7 +1442,7 @@
 
     <!-- Anchor Name -->
     <div data-js="anchorName"
-        data-selector=":not(p).oe_structure > *, :not(p)[data-oe-type=html] > *"
+        data-selector=":not(p).oe_structure > section, :not(p).oe_structure > div, :not(p)[data-oe-type=html] > section, :not(p)[data-oe-type=html] > div"
         data-exclude=".modal *">
         <we-button data-no-preview="true" data-open-anchor-dialog="">
             <i class="fa fa-fw fa-anchor"/> Link Anchor

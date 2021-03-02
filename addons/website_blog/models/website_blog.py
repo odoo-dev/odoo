@@ -127,7 +127,7 @@ class BlogPost(models.Model):
 
     def _default_content(self):
         return '''
-            <p class="o_default_snippet_text">''' + _("Start writing here...") + '''</p>
+            <div class="o_default_snippet_text">''' + _("Start writing here...") + '''</div>
         '''
     name = fields.Char('Title', required=True, translate=True, default='')
     subtitle = fields.Char('Sub Title', translate=True)
