@@ -1630,7 +1630,7 @@ var AbstractMessage = Class.extend({
      */
     getAvatarSource: function () {
         if (this.hasAuthor()) {
-            return '/web/image/res.partner/' + this.getAuthorID() + '/image_128';
+            return '/web/avatar/res.partner/' + this.getAuthorID() + '/image_128';
         }
     },
     /**
