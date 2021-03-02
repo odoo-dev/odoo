@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import Counter
+
 from odoo import models, fields, api, _
 
 
@@ -38,17 +40,33 @@ class WebsiteSnippetFilter(models.Model):
             samples = merged
         return samples
 
-    def _get_products(self, website, product_source, limit, context):
-        handler = getattr(self, '_get_products_%s' % product_source, self._get_products_category)
-        products = handler(website, limit, context)
-        return products
-
-    def _get_products_category(self, website, limit, context):
+    def _get_products(self, website, product_selection, limit, context):
+        handler = getattr(self, '_get_products_%s' % product_selection, self._get_products_newest)
         search_domain = context.get('search_domain')
         domain = [('website_published', '=', True)] + website.website_domain() + (search_domain or [])
-        return self.env['product.product'].search(domain, limit=limit)
+        products = handler(website, limit, domain, context)
+        return products
 
-    def _get_products_recently_viewed(self, website, limit, context):
+    def _get_products_newest(self, website, limit, domain, context):
+        return self.env['product.product'].with_context(display_default_code=False).search(domain, limit=limit, order="create_date desc")
+
+    def _get_products_latest_sold(self, website, limit, domain, context):
+        products = []
+        sale_orders = self.env['sale.order'].sudo().search([
+            ('state', 'in', ('sale', 'done'))
+        ], limit=8, order='date_order DESC')
+        if sale_orders:
+            products = []
+            for sale_order in sale_orders:
+                products.extend(sale_order.order_line.product_id.mapped('id'))
+            products_ids = [id for id, _ in Counter(products).most_common()]
+            if products_ids:
+                domain.append(['id', 'in', products_ids])
+                products = self.env['product.product'].with_context(display_default_code=False).search(domain)
+                products = products.sorted(key=lambda p: products_ids.index(p.id))
+        return products[:limit]
+
+    def _get_products_latest_viewed(self, website, limit, domain, context):
         products = []
         visitor = self.env['website.visitor']._get_visitor_from_request()
         if visitor:
@@ -58,10 +76,11 @@ class WebsiteSnippetFilter(models.Model):
                 ['product_id', 'visit_datetime:max'], ['product_id'], limit=limit, orderby='visit_datetime DESC')
             products_ids = [product['product_id'][0] for product in tracked_products]
             if products_ids:
-                products = self.env['product.product'].with_context(display_default_code=False).browse(products_ids[:limit])
+                domain.append(['id', 'in', products_ids])
+                products = self.env['product.product'].with_context(display_default_code=False).search(domain, limit=limit)
         return products
 
-    def _get_products_recently_sold_with(self, website, limit, context):
+    def _get_products_recently_sold_with(self, website, limit, domain, context):
         products = []
         current_product_id = context.get('product_id')
         if current_product_id:
@@ -77,10 +96,11 @@ class WebsiteSnippetFilter(models.Model):
                     included_products.extend(sale_order.order_line.product_id.mapped('id'))
                 products_ids = list(set(included_products) - set(excluded_products))
                 if products_ids:
-                    products = self.env['product.product'].with_context(display_default_code=False).browse(products_ids[:limit])
+                    domain.append(['id', 'in', products_ids])
+                    products = self.env['product.product'].with_context(display_default_code=False).search(domain, limit=limit)
         return products
 
-    def _get_products_accessories(self, website, limit, context):
+    def _get_products_accessories(self, website, limit, domain, context):
         products = []
         current_product_id = context.get('product_id')
         if current_product_id:
@@ -94,5 +114,6 @@ class WebsiteSnippetFilter(models.Model):
                 ).mapped('id')
                 products_ids = list(set(included_products) - set(excluded_products))
                 if products_ids:
-                    products = self.env['product.product'].with_context(display_default_code=False).browse(products_ids[:limit])
+                    domain.append(['id', 'in', products_ids])
+                    products = self.env['product.product'].with_context(display_default_code=False).search(domain, limit=limit)
         return products

@@ -18,8 +18,8 @@ const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
      * @constructor
      */
     start: function () {
-        if (!this.$el.get(0).dataset.productSource) {
-            this.$el.get(0).dataset.productSource = 'category';
+        if (!this.$el.get(0).dataset.productSelection) {
+            this.$el.get(0).dataset.productSelection = 'newest';
         }
         this._super.apply(this, arguments);
     },
@@ -35,9 +35,8 @@ const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
      * @private
      */
     _isConfigComplete: function () {
-        const dataset = this.$el.get(0).dataset;
         return this._super.apply(this, arguments) &&
-            (dataset.productSource !== 'category' || dataset.productCategoryId !== undefined);
+            this.$el.get(0).dataset.productSelection !== undefined;
     },
     /**
      *
@@ -61,11 +60,33 @@ const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
      */
     _getSearchDomain: function () {
         const searchDomain = this._super.apply(this, arguments);
-        if (this.$el.get(0).dataset.productSource === 'category') {
-            const productCategoryId = parseInt(this.$el.get(0).dataset.productCategoryId);
-            if (productCategoryId >= 0) {
-                searchDomain.push(['public_categ_ids', 'child_of', productCategoryId]);
+        let productCategoryId = this.$el.get(0).dataset.productCategoryId;
+        if (productCategoryId && productCategoryId !== 'all') {
+            if (productCategoryId === 'current') {
+                const url = new URL(window.location);
+                productCategoryId = url.searchParams.get("category");
+                if (!productCategoryId) {
+                    const parts = url.pathname.split('/');
+                    productCategoryId = parts[parts.indexOf('category') + 1];
+                }
+                if (productCategoryId && productCategoryId.lastIndexOf('-')) {
+                    productCategoryId = productCategoryId.substring(productCategoryId.lastIndexOf('-') + 1);
+                }
             }
+            if (productCategoryId) {
+                searchDomain.push(['public_categ_ids', 'child_of', parseInt(productCategoryId)]);
+            }
+        }
+        const productNames = this.$el.get(0).dataset.productNames;
+        if (productNames) {
+            const nameDomain = [];
+            for (const productName of productNames.split(',')) {
+                if (nameDomain.length) {
+                    nameDomain.unshift('|');
+                }
+                nameDomain.push(['name', 'ilike', productName]);
+            }
+            searchDomain.push(...nameDomain);
         }
         return searchDomain;
     },
@@ -75,7 +96,7 @@ const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
     _getRpcParameters: function () {
         const productId = $("#product_details").find(".product_id");
         return Object.assign(this._super.apply(this, arguments), {
-            productSource: this.$el.get(0).dataset.productSource || 'category',
+            productSelection: this.$el.get(0).dataset.productSelection || 'newest',
             productId: productId && productId.length ? productId[0].value : undefined,
         });
     },

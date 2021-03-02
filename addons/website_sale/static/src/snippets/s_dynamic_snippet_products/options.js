@@ -34,7 +34,14 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
             // Refresh is needed because default values are obtained after start()
         });
     },
-
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+        const productId = $("input.product_id");
+        this.hasProductId = productId.val();
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -47,6 +54,9 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
     _computeWidgetVisibility: function (widgetName, params) {
         if (widgetName === 'filter_opt') {
             return false;
+        }
+        if (widgetName === 'cross_selling_opt') {
+            return this.hasProductId;
         }
         return this._super.apply(this, arguments);
     },
@@ -106,13 +116,13 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
         if (templateKeys.length > 0) {
             this._setOptionValue('templateKey', templateKeys.attr('data-select-data-attribute'));
         }
-        const productSources = this.$el.find("we-select[data-attribute-name='productSource'] we-selection-items we-button");
-        if (productSources.length > 0) {
-            this._setOptionValue('productSource', productSources.attr('data-select-data-attribute'));
-        }
         const productCategories = this.$el.find("we-select[data-attribute-name='productCategoryId'] we-selection-items we-button");
         if (productCategories.length > 0) {
             this._setOptionValue('productCategoryId', productCategories.attr('data-select-data-attribute'));
+        }
+        const productSelections = this.$el.find("we-select[data-attribute-name='productSelection'] we-selection-items we-button");
+        if (productSelections.length > 0) {
+            this._setOptionValue('productSelection', productSelections.attr('data-select-data-attribute'));
         }
     },
 
