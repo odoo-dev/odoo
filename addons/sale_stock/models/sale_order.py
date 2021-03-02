@@ -83,7 +83,7 @@ class SaleOrder(models.Model):
 
     @api.depends('picking_ids', 'picking_ids.state')
     def _get_delivery_status(self):
-        for order in self.filtered(lambda o: o.state not in ('done', 'cancel')):
+        for order in self:
             if order.picking_ids:
                 if all(x.state == 'done' for x in order.picking_ids.filtered(lambda x: x.state != 'cancel')):
                     order.delivery_status = 'fully'
