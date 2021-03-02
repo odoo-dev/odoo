@@ -319,19 +319,40 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <field name="preview_ready" invisible="1"/>
+                                            <field name="preview_ready" invisible="0"/>
+                                            <field name="module_website_installed" invisible="0"/>
                                             <div attrs="{'invisible': [('preview_ready', '=', False)]}">
-                                                <div>
-                                                    <a href="/terms" attrs="{'invisible': [('preview_ready', '=', False)]}">
-                                                        <i class="fa fa-arrow-right"></i>
-                                                            Edit in website builder
-                                                    </a>
+                                                <div attrs="{'invisible': [('module_website_installed', '=', True)]}">
+                                                    <div>
+                                                        <a href="/terms" >
+                                                            <i class="fa fa-arrow-right"></i>
+                                                                Edit in pop up
+                                                        </a>
+                                                    </div>
+                                                    <div>
+                                                        <a href="/terms">
+                                                            <i class="fa fa-arrow-right"></i>
+                                                                Preview
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <!-- <field name="module_website_installed" invisible="0"/> -->
+                                                <div attrs="{'invisible': [('module_website_installed', '=', False)]}">
+                                                    <div>
+                                                        <a href="/terms" >
+                                                            <i class="fa fa-arrow-right"></i>
+                                                                Edit in website builder
+                                                        </a>
+                                                    </div>
+                                                    <div>
+                                                        <a href="/terms">
+                                                            <i class="fa fa-arrow-right"></i>
+                                                                Preview
+                                                        </a>
+                                                    </div>
                                                 </div>
                                                 <div>
-                                                    <a href="/terms">
-                                                        <i class="fa fa-arrow-right"></i>
-                                                            Preview
-                                                    </a>
+                                                    <button name="action_term_popup" type="object" string ="Pop up"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -636,6 +657,22 @@
                         </div>
                     </div>
                 </xpath>
+            </field>
+        </record>
+
+        <record id="res_config_term_view_form" model="ir.ui.view">
+            <field name="name">res.config.term.view.form.account</field>
+            <field name="model">res.company</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="invoice_terms_html" class="oe_account_terms"/>
+                    </group>
+                    <footer>
+                        <button string="Save" name="save_terms" type="object" class="btn-primary"/>
+                        <button string="Discard" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
             </field>
         </record>
 

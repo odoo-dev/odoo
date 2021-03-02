@@ -112,16 +112,15 @@ class ResCompany(models.Model):
     # compute method To get "terms_default.xml" template and store in the invoice_terms_html field.
     @api.depends('terms_type')
     def default_get_terms_and_conditions(self):
-        if(self.terms_type == 'html'):
-            term_template = self.env.ref("account.default_terms_and_conditions", False)
-            if term_template:
-                rendered_body = term_template._render({'name': self.name, 'country': self.country_id.name}, engine='ir.qweb')
-                self.invoice_terms_html = rendered_body
+        if self.invoice_terms_html == None:
+            if(self.terms_type == 'html'):
+                term_template = self.env.ref("account.default_terms_and_conditions", False)
+                if term_template:
+                    rendered_body = term_template._render({'name': self.name, 'country': self.country_id.name}, engine='ir.qweb')
+                    self.invoice_terms_html = rendered_body
 
     invoice_terms_html = fields.Html(string='Default Terms and Conditions as a Web page', translate=True,
                                      compute = 'default_get_terms_and_conditions', store = True, readonly=False)
-
-
 
     account_setup_bill_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding bill step", default='not_done')
 
@@ -571,3 +570,11 @@ class ResCompany(models.Model):
 
         return {'date_from': datetime(year=current_date.year, month=1, day=1).date(),
                 'date_to': datetime(year=current_date.year, month=12, day=31).date()}
+
+    def save_terms(self):
+        vals= self.env['res.company']
+        vals.write({
+            'invoice_terms_html':self.invoice_terms_html,
+        })
+        
+
