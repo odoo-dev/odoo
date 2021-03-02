@@ -10,10 +10,12 @@ export class Dropdown extends Component {
     this.hotkeyService = useService("hotkey");
     this.hotkeyTokens = [];
     this.state = useState({ open: this.props.startOpen, groupIsOpen: this.props.startOpen });
-    // Close on outside click listener
-    hooks.useExternalListener(window, "click", this.onWindowClicked);
-    // Listen to siblings states
-    useBus(Dropdown.bus, "state-changed", this.onSiblingDropdownStateChanged);
+    if (!this.props.manualOnly) {
+      // Close on outside click listener
+      hooks.useExternalListener(window, "click", this.onWindowClicked);
+      // Listen to siblings states
+      useBus(Dropdown.bus, "state-changed", this.onSiblingDropdownStateChanged);
+    }
     hooks.onMounted(() => {
       if (this.state.open) {
         this.subscribeKeynav();
@@ -153,7 +155,7 @@ export class Dropdown extends Component {
     const closeSelf =
       dropdownClosingRequest.isFresh &&
       dropdownClosingRequest.mode === ParentClosingMode.ClosestParent;
-    if (closeAll || closeSelf) {
+    if (!this.props.manualOnly && (closeAll || closeSelf)) {
       this._close();
     }
     // Mark closing request as started
@@ -218,6 +220,10 @@ export class Dropdown extends Component {
 Dropdown.bus = new core.EventBus();
 Dropdown.props = {
   startOpen: {
+    type: Boolean,
+    optional: true,
+  },
+  manualOnly: {
     type: Boolean,
     optional: true,
   },

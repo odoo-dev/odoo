@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<nav t-name="wowl.studio.EditorMenu" class="o_web_studio_menu">
+
+    <div class="o_web_studio_breadcrumb o_web_studio_menu_item">
+        <ol class="breadcrumb" >
+            <li class="breadcrumb-item o_back_button" t-on-click="onEditorTabBack">
+                <t t-esc="studio.editorTab"/>
+            </li>
+            <li t-foreach="props.studioBreadcrumbs" t-as="bc"><t t-esc="bc.name" /></li>
+        </ol>
+    </div>
+
+    <div
+        class="
+            o_web_studio_menu_item
+            o_web_studio_menu_undo_redo">
+        <div class="o_web_studio_menu_before_undo_redo"/>
+        <div class="o_web_studio_undo" t-on-click="onUndo">
+            <button class="btn o_web_studio_undo_redo_button"><i class="fa fa-undo"/><span>Undo</span></button>
+        </div>
+        <div class="o_web_studio_undo_redo_separator">
+            <div class="o_web_studio_undo_redo_separator_line"/>
+        </div>
+        <div class="o_web_studio_redo" t-on-click="onRedo">
+            <button class="btn o_web_studio_undo_redo_button"><i class="fa fa-repeat"/><span>Redo</span></button>
+        </div>
+    </div>
+
+    <div
+        class="
+            o_web_studio_menu_before_snackbar
+            o_web_studio_menu_item"/>
+    <div
+        class="
+            o_web_studio_menu_item
+            o_web_studio_snackbar">
+        <i class="o_web_studio_snackbar_icon"/>
+        <span class="o_web_studio_snackbar_text"/>
+    </div>
+    <div
+        class="
+            o_web_studio_menu_after_snackbar
+            o_web_studio_menu_item"/>
+
+    <div
+        class="
+            o_web_studio_menu_item
+            o_web_studio_menu_before_sections"/>
+    <ul class="o_menu_sections">
+        <li class="o_web_studio_menu_item"
+            t-on-click="openTab('views')"
+            role="button">
+            <a href="#">Views</a>
+        </li>
+        <li class="o_web_studio_menu_item"
+            t-on-click="openTab('reports')">
+            <a href="#">Reports</a>
+        </li>
+        <li class="o_web_studio_menu_item"
+            t-on-click="openTab('translations')"
+            t-if="i18n.multiLang">
+            <a href="#">Translations</a>
+        </li>
+        <li class="o_web_studio_menu_item"
+            t-on-click="openTab('automations')">
+            <a href="#">Automations</a>
+        </li>
+        <li class="o_web_studio_menu_item"
+            t-on-click="openTab('acl')">
+            <a href="#">Access Controls</a>
+        </li>
+        <li class="o_web_studio_menu_item"
+            t-on-click="openTab('filters')">
+            <a href="#">Filter Rules</a>
+        </li>
+
+        <div class="
+            o_web_studio_views_icons_before_separator
+            o_web_studio_menu_item"/>
+        <div class="o_web_studio_views_icons_separator"/>
+        <div class="
+            o_web_studio_views_icons_after_separator
+            o_web_studio_menu_item"/>
+        <li class="
+            o_web_studio_menu_item
+            o_web_studio_submenu_icons">
+            <div class="o_web_studio_views_icons">
+                <a href="#" t-foreach="activeViews" t-as="view" t-att-title="view.title" t-att-aria-label="view.title"
+                   t-on-click.prevent="trigger('studio-switch-view', {viewType: view.type})">
+                    <i t-attf-class="{{ 'fa ' + view.faclass }}" />
+                </a>
+            </div>
+
+        </li>
+    </ul>
+
+</nav>
+
+</templates>

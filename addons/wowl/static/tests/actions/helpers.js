@@ -62,8 +62,9 @@ export async function createWebClient(params) {
     ...params.testConfig,
     mockRPC,
   });
+  const WcClass = params.WebClientClass || WebClient;
   const target = getFixture();
-  const wc = await mount(WebClient, { env, target });
+  const wc = await mount(WcClass, { env, target });
   registerCleanup(() => {
     for (const controller of controllers) {
       if (!controller.isDestroyed()) {
@@ -123,12 +124,18 @@ function addLegacyMockEnvironment(comp, testConfig, legacyParams = {}) {
     },
     legacyParams.dataManager
   );
-  const legacyEnv = legacy.makeTestEnvironment({ dataManager, bus: legacy.core.bus });
+  const legacyEnv = legacy.makeTestEnvironment({
+    dataManager,
+    bus: legacyParams.bus || legacy.core.bus,
+  });
   Component.env = legacyEnv;
   mapLegacyEnvToWowlEnv(legacyEnv, comp.env);
   // deploy the legacyActionManagerService (in Wowl env)
   const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
   testConfig.serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
+  // deploy the legacyPseudoWebClient
+  const legacyPseudoWebClient = legacy.PseudoWebClient(legacyEnv);
+  testConfig.serviceRegistry.add(legacyPseudoWebClient.name, legacyPseudoWebClient);
   // patch DebouncedField delay
   const debouncedField = legacy.basicFields.DebouncedField;
   const initialDebouncedVal = debouncedField.prototype.DEBOUNCE;
@@ -193,6 +200,12 @@ export function getActionManagerTestConfig() {
     1: { id: 1, children: [], name: "App1", appID: 1, actionID: 1001 },
     2: { id: 2, children: [], name: "App2", appID: 2, actionID: 1002 },
   };
+  // Inject standard stuff in menus
+  Object.values(menus).forEach((menu) => {
+    menu.xmlid = "";
+    menu.webIcon = false;
+    menu.webIconData = "";
+  });
   const actionsArray = [
     {
       id: 1,

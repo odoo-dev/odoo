@@ -1593,6 +1593,10 @@ class Binary(http.Controller):
                     win.jQuery(win).trigger(%s, %s);
                 </script>"""
         args = []
+
+        from pprint import pprint
+        pprint("FIIILLLLLLEESSSS")
+        pprint(files)
         for ufile in files:
 
             filename = ufile.filename

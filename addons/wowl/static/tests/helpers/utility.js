@@ -167,7 +167,7 @@ export function click(el, selector) {
     }
     target = els[0];
   }
-  const ev = new MouseEvent("click", { bubbles: true });
+  const ev = new MouseEvent("click", { bubbles: true, cancelable: true });
   target.dispatchEvent(ev);
   return nextTick();
 }

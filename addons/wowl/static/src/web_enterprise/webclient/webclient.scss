@@ -1,0 +1,201 @@
+//------------------------------------------------------------------------------
+// Inputs and selects (note: put the o_input class to have the style)
+//------------------------------------------------------------------------------
+[type="text"],
+[type="password"],
+[type="number"],
+textarea,
+select {
+  width: 100%;
+  display: block;
+  outline: none;
+}
+.o_input {
+  border: 1px solid $o-form-lightsecondary;
+  border-top-style: none;
+  border-right-style: none;
+  border-left-style: none;
+
+  .o_input {
+    border: none !important;
+    padding: 0;
+  }
+}
+select {
+  // FIXME buggy 'padding-left'
+  cursor: pointer;
+  background-color: transparent;
+  min-width: 50px;
+
+  appearance: none;
+  background-image: url("/web_enterprise/static/src/img/down-arrow.png");
+  background-repeat: no-repeat;
+  background-position: right center;
+  border-radius: 0; // webkit OSX browsers have a border-radius on select
+
+  color: $o-main-text-color;
+
+  // This is a hack to remove the outline in FF
+  &:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 $o-main-text-color;
+    > option {
+      color: $o-main-text-color;
+    }
+  }
+}
+
+@mixin o-placeholder {
+  // Rules below need to be separeted. Otherwise all browsers will discard the whole rule.
+  color: $o-brand-secondary;
+  opacity: 0.5;
+}
+::-webkit-input-placeholder {
+  // WebKit, Blink, Edge
+  @include o-placeholder;
+}
+::-moz-placeholder {
+  // Mozilla Firefox 19+
+  @include o-placeholder;
+}
+:-ms-input-placeholder {
+  // Internet Explorer 10-11
+  @include o-placeholder;
+}
+
+//------------------------------------------------------------------------------
+// Buttons
+//------------------------------------------------------------------------------
+// Bootstrap define buttons using just one base-color for each color variation
+// (eg.$primary), without control over text-color or border.
+// The following code define exceptions for buttons that needs a different
+// design by default or in specific scenarios.
+
+.btn-secondary {
+  // Customize the button design without overwrite the default '$secondary'
+  // variable that it's used by other components like .btn-outline-secondary,
+  // list-groups, tables, badges...
+
+  @include button-variant(
+    $background: $o-btn-secondary-bg,
+    $border: $o-btn-secondary-bg,
+    $hover-background: $o-btn-secondary-hover-bg,
+    $hover-border: $o-btn-secondary-hover-bg,
+    $active-background: $o-btn-secondary-active-bg,
+    $active-border: $o-btn-secondary-active-bg
+  );
+
+  // By default, act like a .btn-link
+  color: $primary;
+
+  &.fa:not(.fa-search) {
+    // For button icons, act like '.btn-link.text-muted'
+    color: $secondary;
+  }
+}
+
+.btn-outline-secondary {
+  // Slightly customize to act like an odoo custom btn-secondary with
+  // light gray border and $secondary text.
+  // Used for not prioritary actions ordropdown (eg. dashboard view).
+
+  @include button-variant(
+    $background: $o-btn-secondary-bg,
+    $border: lighten($secondary, 40%),
+    $hover-background: $o-btn-secondary-hover-bg,
+    $hover-border: $o-btn-secondary-hover-bg,
+    $active-background: $o-btn-secondary-active-bg,
+    $active-border: lighten($secondary, 40%)
+  );
+
+  color: $secondary;
+}
+
+//------------------------------------------------------------------------------
+// Misc.
+//------------------------------------------------------------------------------
+.o_loading {
+  background-color: $o-brand-odoo;
+  color: white;
+  padding: 4px;
+}
+
+.oe_clear {
+  clear: both;
+}
+
+//== Titles
+@include media-breakpoint-down(sm) {
+  h1 {
+    font-size: $h1-font-size * 3 / 4;
+  }
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: $o-font-size-base-touch;
+  }
+}
+
+//== Alerts
+.alert {
+  &.alert-info,
+  &.alert-success,
+  &.alert-warning,
+  &.alert-danger {
+    border-width: 0 0 0 3px;
+  }
+  a {
+    font-weight: $alert-link-font-weight;
+  }
+}
+
+//== Well
+.card {
+  box-shadow: none;
+}
+
+//== Badges
+.badge {
+  border: 1px solid $o-brand-primary;
+}
+
+//== Buttons
+.btn,
+.btn-group > .btn {
+  border-radius: 0px;
+
+  &:hover,
+  &:active,
+  &:focus,
+  &:active:focus {
+    outline: none;
+  }
+}
+
+.btn-primary.active,
+.btn-secondary.active {
+  box-shadow: none;
+}
+
+.btn-primary,
+.btn-secondary {
+  text-transform: uppercase;
+}
+
+//== Navbar
+.navbar .navbar-toggle {
+  border-color: transparent;
+}
+
+//== Labels
+.label {
+  border-radius: 0;
+  font-size: 1em; // Override 75% of .label
+}
+
+//== Popover
+.popover {
+  border-radius: $border-radius;
+}

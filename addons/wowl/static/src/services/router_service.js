@@ -2,6 +2,8 @@
 
 import { browser } from "../core/browser";
 import { serviceRegistry } from "../webclient/service_registry";
+import { shallowEqual } from "../utils/objects";
+import { objectToUrlEncodedString } from '../utils/misc';
 
 function parseString(str) {
   const parts = str.split("&");
@@ -13,6 +15,10 @@ function parseString(str) {
   return result;
 }
 
+function sanitizeHash(hash) {
+  return Object.fromEntries(Object.entries(hash).filter(([_, v]) => v !== undefined));
+}
+
 export function parseHash(hash) {
   return hash === "#" || hash === "" ? {} : parseString(hash.slice(1));
 }
@@ -21,16 +27,9 @@ export function parseSearchQuery(search) {
   return search === "" ? {} : parseString(search.slice(1));
 }
 
-function toString(query) {
-  return Object.entries(query)
-    .filter(([k, v]) => v !== undefined)
-    .map(([k, v]) => (v ? `${k}=${encodeURIComponent(v)}` : k))
-    .join("&");
-}
-
 export function routeToUrl(route) {
-  const search = toString(route.search);
-  const hash = toString(route.hash);
+  const search = objectToUrlEncodedString(route.search);
+  const hash = objectToUrlEncodedString(route.hash);
   return route.pathname + (search ? "?" + search : "") + (hash ? "#" + hash : "");
 }
 
@@ -56,6 +55,39 @@ function getRoute() {
   return { pathname, search: searchQuery, hash: hashQuery };
 }
 
+export function makePreProcessQuery(getCurrent) {
+  const lockedKeys = new Set();
+  return (hash) => {
+    const newHash = {};
+    Object.keys(hash).forEach((key) => {
+      if (lockedKeys.has(key)) {
+        return;
+      }
+      const k = key.split(" ");
+      let value;
+      if (k.length === 2) {
+        value = hash[key];
+        key = k[1];
+        if (k[0] === "lock") {
+          lockedKeys.add(key);
+        } else if (k[0] === "unlock") {
+          lockedKeys.delete(key);
+        } else {
+          return;
+        }
+      }
+      newHash[key] = value || hash[key];
+    });
+    const current = getCurrent();
+    Object.keys(current.hash).forEach((key) => {
+      if (lockedKeys.has(key) && !(key in newHash)) {
+        newHash[key] = current.hash[key];
+      }
+    });
+    return newHash;
+  };
+}
+
 function makeRouter(env) {
   let bus = env.bus;
   let current = getRoute();
@@ -65,8 +97,8 @@ function makeRouter(env) {
   });
 
   function doPush(mode = "push", route) {
-    const url = location.origin + routeToUrl(route);
-    if (url !== window.location.href) {
+    if (!shallowEqual(route.hash, current.hash)) {
+      const url = location.origin + routeToUrl(route);
       if (mode === "push") {
         window.history.pushState({}, url, url);
       } else {
@@ -80,25 +112,37 @@ function makeRouter(env) {
     return current;
   }
 
+  const preProcessQuery = makePreProcessQuery(getCurrent);
   return {
     get current() {
       return getCurrent();
     },
-    pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
-    replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
+    pushState: makePushState(getCurrent, doPush.bind(null, "push"), preProcessQuery),
+    replaceState: makePushState(getCurrent, doPush.bind(null, "replace"), preProcessQuery),
     redirect: (url, wait) => redirect(env, url, wait),
   };
 }
 
-export function makePushState(env, getCurrent, doPush) {
+/*export function __makePush(): Router['pushState'] {
+
+  const lockedKeys = new Set();
+  return (hash, replace) => {
+    const _hash: Query = {};
+
+    });
+  };
+}*/
+export function makePushState(getCurrent, doPush, preProcessQuery) {
   let _replace = false;
   let timeoutId;
   let tempHash;
   return (hash, replace = false) => {
     clearTimeout(timeoutId);
+    hash = preProcessQuery(hash);
     _replace = _replace || replace;
     tempHash = Object.assign(tempHash || {}, hash);
     timeoutId = setTimeout(() => {
+      tempHash = sanitizeHash(tempHash);
       const current = getCurrent();
       if (!_replace) {
         tempHash = Object.assign({}, current.hash, tempHash);

@@ -1,0 +1,224 @@
+.o_web_studio_menu_after_snackbar {
+    min-width: 40px;
+    max-width: 40px;
+}
+
+.o_web_studio_menu_before_sections {
+    flex: 1 1 auto;
+    min-width: 20px;
+}
+
+.o_web_studio_menu_before_snackbar {
+    min-width: 20px;
+    max-width: 20px;
+}
+
+.o_web_studio_menu_before_undo_redo {
+    min-width: 8px;
+    max-width: 8px;
+}
+
+.o_web_studio_menu_item {
+    border-bottom: $o-web-studio-menu-item-border-width solid $o-web-studio-bg-dark;
+}
+
+.o_web_studio_menu_undo_redo {
+    display: flex;
+}
+
+.o_web_studio_redo {
+    margin-left: 5px;
+}
+
+.o_web_studio_snackbar_icon {
+    margin-right: 3px;
+}
+
+.o_web_studio_snackbar_text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+}
+
+.o_web_studio_undo {
+    margin-right: 5px;
+}
+
+.o_web_studio_undo_redo_button {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0 3px;
+}
+
+.o_web_studio_undo_redo_separator {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.o_web_studio_undo_redo_separator_line {
+    border-left: 1px solid $o-web-studio-text-disabled;
+    height: 1.3rem;
+}
+
+.o_web_studio_views_icons_after_separator {
+    width: $grid-gutter-width*0.5;
+}
+
+.o_web_studio_views_icons_before_separator {
+    width: $grid-gutter-width*0.5 + $grid-gutter-width*0.3;
+}
+
+.o_web_studio_views_icons_separator {
+    border-left: 1px solid $o-web-studio-bg-dark;
+    height: 100%;
+}
+
+.o_web_studio_menu {
+    display: flex;
+    background-color: $o-web-studio-bg-medium;
+    text-align: center;
+    min-height: $o-web-studio-menu-height;
+
+    .o_web_studio_breadcrumb {
+        display: inline-flex;
+        flex: 0 1 $o-web-studio-sidebar-width;
+
+        &.o_web_studio_breadcrumb_report {
+            flex-basis: $o-web-studio-report-sidebar-width;
+        }
+
+        > ol {
+            background-color: inherit;
+            margin: 12px $o-horizontal-padding;
+
+            > li {
+                font-size: 0.8em;
+                text-transform: uppercase;
+                line-height: 1;
+                cursor: default;
+                font-weight: bold;
+                color: $o-web-studio-text-inactive;
+
+                &.active:not(:first-child) {
+                    color: $o-web-studio-text-light;
+                }
+
+                &.o_back_button:hover {
+                    cursor: pointer;
+                    color: white;
+                }
+
+                + li:before {
+                    font-weight: normal;
+                    content: "\003E";
+                }
+            }
+        }
+    }
+
+    .o_web_studio_undo, .o_web_studio_redo {
+        display: inline-flex;
+
+        i {
+            margin-right: 5px;
+        }
+
+        > button {
+            padding-left: 0;
+            cursor: default;
+            background-color: $o-web-studio-bg-medium;
+            color: $o-web-studio-text-disabled;
+            outline: none;
+            box-shadow: none;
+
+            > span {
+                text-transform: uppercase;
+                font-weight: bold;
+                font-size: 0.8em;
+            }
+        }
+
+        &.o_web_studio_active > button {
+            color: $o-web-studio-text-inactive;
+
+            &:hover {
+                cursor: pointer;
+                color: $o-web-studio-text-light;
+            }
+        }
+    }
+
+    .o_web_studio_snackbar {
+        min-width: 0;
+        display: inline-flex;
+        align-items: center;
+        color: $o-web-studio-text-inactive;
+    }
+
+    .o_menu_sections {
+        display: flex;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        > li {
+            display: flex;
+            align-items: center;
+            position: relative;
+
+            > .dropdown-menu {
+                right: 0;
+                left: auto;
+            }
+
+            &:not(.o_web_studio_submenu_icons) {
+                &:hover, &:active, &:focus {
+                    cursor: pointer;
+                    outline: none;
+                    border-color: lighten($o-brand-primary, 10%);
+                    background-color: darken($o-web-studio-bg-medium, 2%);
+
+                    > a {
+                        color: white;
+                    }
+                }
+
+                &.active {
+                    border-color: $o-brand-primary;
+
+                    > a {
+                        outline: none;
+                        color: $o-web-studio-text-light;
+                    }
+                }
+            }
+
+            > a {
+                font-size: 0.9em;
+                display: block;
+                padding: 0 ($grid-gutter-width*0.3);
+                color: $o-web-studio-text-inactive;
+            }
+        }
+
+        .o_web_studio_views_icons {
+            display: flex;
+            flex-flow: row wrap;
+            min-height: 100%;
+
+            > a {
+                display: flex;
+                align-items: center;
+                padding: 0 7px;
+                background-color: transparent;
+                color: $o-web-studio-text-inactive;
+
+                &:hover {
+                    color: $o-web-studio-text-light;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <div t-name="wowl.FileUploader" class="o_file_uploader">
+    <t t-set="__input__" >
+      <input type="file" class="o_input_file"
+         t-att="{'multiple': props.multiUpload ? true : false, 'accept': props.acceptedFileExtensions || '*'}"
+         t-ref="fileInput"
+         t-on-change="_onChangedFiles"
+         style="display: none !important;" />
+    </t>
+    <label t-if="props.withLabel"><t t-slot="default" />
+      <t t-raw="__input__"/>
+    </label>
+    <t t-else="">
+      <t t-raw="__input__"/>
+    </t>
+  </div>
+
+</templates>

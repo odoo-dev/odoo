@@ -1,0 +1,361 @@
+.o_form_view {
+  @include media-breakpoint-up(md) {
+    display: flex;
+    flex-flow: column nowrap;
+    min-height: 100%;
+  }
+
+  // Sheet
+  .o_form_sheet_bg {
+    flex: 1 0 auto;
+    background-color: $o-webclient-background-color;
+    border-bottom: 1px solid gray("300");
+
+    > .o_form_sheet {
+      @include make-container();
+      @include make-container-max-widths();
+
+      background-color: $o-view-background-color;
+      border: 1px solid gray("400");
+      box-shadow: 0 5px 20px -15px black;
+      margin: $o-sheet-vpadding * 0.2 auto;
+      @include media-breakpoint-up(md) {
+        margin: $o-sheet-vpadding * 0.5 auto;
+      }
+      padding: $o-sheet-vpadding;
+      @include o-form-sheet-inner-right-padding;
+      @include o-form-sheet-inner-left-padding;
+
+      // Selection
+      > .o_selection {
+        float: right;
+      }
+    }
+  }
+
+  // Title & avatar
+  .oe_title {
+    color: $headings-color;
+    @include media-breakpoint-up(vsm, $o-extra-grid-breakpoints) {
+      padding-right: $o-innergroup-rpadding;
+    }
+  }
+
+  .oe_avatar + .oe_title {
+    padding-right: $o-avatar-size + 10;
+  }
+
+  // Groups
+  .o_group {
+    // all groups take width 100% in mobile
+    @mixin o-generate-groups($n) {
+      @for $i from 1 through $n {
+        .o_group_col_#{$i} {
+          @include media-breakpoint-down(md) {
+            width: 100%;
+          }
+        }
+      }
+    }
+    @include o-generate-groups($o-form-group-cols);
+
+    &.o_inner_group {
+      > tbody > tr > td {
+        padding: 0 $o-innergroup-rpadding 0 0;
+      }
+    }
+
+    @include media-breakpoint-up(vsm, $o-extra-grid-breakpoints) {
+      .o_field_widget {
+        &.o_text_overflow {
+          width: 1px !important; // hack to make the table layout believe it is a small element (so that the table does not grow too much) ...
+          min-width: 100%; // ... but in fact it takes the whole table space
+        }
+      }
+
+      .o_form_label {
+        margin-bottom: $o-form-spacing-unit;
+      }
+    }
+    @include media-breakpoint-down(md) {
+      &.o_label_nowrap .o_form_label {
+        white-space: normal;
+      }
+    }
+  }
+
+  // Labels
+  .o_form_label {
+    &.o_form_label_empty,
+    &.o_form_label_false {
+      opacity: 0.5;
+      font-weight: normal;
+    }
+    @include media-breakpoint-down(sm) {
+      font-size: $o-font-size-base-touch;
+    }
+  }
+
+  // Notebooks
+  .o_notebook {
+    > .o_notebook_headers {
+      @include o-form-sheet-negative-margin;
+
+      > .nav.nav-tabs {
+        @include o-form-sheet-inner-left-padding;
+        border-bottom: $nav-tabs-border-width solid gray("400");
+
+        > .nav-item {
+          white-space: nowrap;
+
+          > .nav-link {
+            color: $body-color;
+            border-color: gray("400");
+            background-color: white;
+
+            &:hover,
+            &:focus,
+            &:active {
+              outline: none;
+              color: $link-color;
+            }
+
+            &.active {
+              border-bottom-color: white;
+
+              &,
+              &:hover,
+              &:focus,
+              &:active {
+                color: $headings-color;
+                border-top-color: $o-brand-odoo;
+              }
+            }
+
+            &.disabled {
+              color: $text-muted;
+            }
+          }
+
+          + .nav-item > .nav-link {
+            border-left: 0;
+          }
+        }
+      }
+    }
+
+    > .tab-content {
+      border-bottom: 1px solid gray("400");
+
+      > .tab-pane {
+        > :first-child {
+          // Reset margin to 0 and use tab-pane's padding
+          // to define the distance between panel and content
+          margin-top: 0;
+
+          // These elements will appear attached to the tabs
+          &.oe_form_field_html {
+            @include o-form-sheet-negative-margin;
+            margin-top: -$o-horizontal-padding;
+            border: none;
+
+            .note-editor.panel {
+              border: none;
+            }
+
+            .note-toolbar.panel-heading {
+              @include o-form-sheet-inner-left-padding;
+              @include o-form-sheet-inner-right-padding;
+              border-top: none;
+              padding-top: $o-horizontal-padding * 0.3;
+            }
+
+            .note-editing-area,
+            .o_readonly {
+              padding: $card-spacer-y $card-spacer-x;
+              @include o-form-sheet-inner-left-padding;
+              @include o-form-sheet-inner-right-padding;
+            }
+
+            .note-editable.panel-body {
+              padding: 0;
+            }
+
+            // If immediatly followed by an .oe_clear element, the note-editor it's the 'only'
+            // tab's element. Reset margins to push the bar at the bottom.
+            + .oe_clear:last-child {
+              margin-bottom: -$o-horizontal-padding - $o-sheet-vpadding - $o-form-spacing-unit;
+            }
+          }
+
+          &.o_field_x2many.o_field_x2many_list {
+            display: block;
+            width: auto;
+            @include o-form-sheet-negative-margin;
+            margin-top: -$o-horizontal-padding;
+
+            // use original padding-left for handle cell in editable list
+            tr > :first-child.o_handle_cell {
+              padding-left: $o-horizontal-padding;
+            }
+            tr > :first-child {
+              @include o-form-sheet-inner-left-padding;
+            }
+            tr > :last-child {
+              @include o-form-sheet-inner-right-padding;
+            }
+          }
+        }
+      }
+    }
+
+    &:last-child > .tab-content {
+      border-bottom: none;
+    }
+  }
+  // Notebooks for small screen
+  @include media-breakpoint-down(sm) {
+    .o_notebook .o_notebook_headers {
+      overflow-x: auto;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      .nav.nav-tabs {
+        flex-flow: row nowrap;
+      }
+    }
+    .o_cp_buttons {
+      width: 100%;
+      div,
+      .o-kanban-button-new {
+        width: 100%;
+      }
+    }
+  }
+  // One2Many List views
+  .o_field_widget .o_list_table {
+    &.table-striped {
+      > tbody {
+        > tr:not(.o_data_row) > td {
+          border-top: none;
+        }
+      }
+      // Show "border" if tfoot has content only
+      > tfoot > tr {
+        box-shadow: inset 0 1px 0 gray("300");
+        > td {
+          border: none;
+
+          &:empty {
+            padding: 0;
+          }
+        }
+      }
+    }
+  }
+
+  // Translate icon
+  .o_field_translate {
+    padding-right: 0;
+  }
+
+  // Specific style classes
+  .o_group.o_inner_group.oe_subtotal_footer {
+    border-top: 1px solid gray("300");
+    .oe_subtotal_footer_separator {
+      border-top: 1px solid gray("300");
+    }
+  }
+
+  // Status Bar
+  .o_form_statusbar {
+    > .o_statusbar_status > .o_arrow_button {
+      font-weight: 500;
+
+      &.btn-primary.disabled {
+        font-weight: bold;
+      }
+
+      // Last element at the right should respect overall padding
+      &:first-of-type {
+        padding-right: $o-horizontal-padding;
+      }
+    }
+    // Match the status bar button styles with rest of the buttons in touch device
+    @include media-breakpoint-down(sm) {
+      > .o_statusbar_buttons > .btn {
+        margin: 0;
+        padding: $o-touch-btn-padding;
+      }
+    }
+  }
+
+  &.o_xxl_form_view {
+    flex-flow: row nowrap;
+    height: 100%;
+
+    > .o_form_sheet_bg {
+      flex: 1 1 auto; // Side chatter is disabled if this has to shrink but this was added for safety
+      width: $o-form-sheet-min-width + 2 * $o-horizontal-padding;
+      // max-width: map-get($container-max-widths, xl) + 2 * $o-horizontal-padding; // would be logical but breaks no-chatter form views
+      padding: 0 $o-horizontal-padding;
+      overflow: auto;
+      border-bottom: none;
+
+      > .o_form_statusbar,
+      > .alert {
+        margin-left: -$o-horizontal-padding;
+        margin-right: -$o-horizontal-padding;
+      }
+
+      > .o_form_sheet {
+        width: 100%;
+        max-width: map-get($container-max-widths, xl);
+      }
+    }
+  }
+}
+
+// Overriden style when form view in modal
+.modal .modal-dialog {
+  .o_form_view {
+    @include media-breakpoint-down(md) {
+      .o_group.o_inner_group > tbody > tr > td.o_td_label {
+        min-width: 100px;
+      }
+    }
+  }
+  &.modal-sm .o_form_view {
+    .o_group {
+      @include form-break-table;
+    }
+  }
+}
+
+// XXS form view specific rules
+.o_form_view.o_xxs_form_view {
+  .o_group {
+    // Target XXS form view on mobile devices in portrait mode
+    @include media-breakpoint-down(sm) {
+      &.o_inner_group:not(.oe_subtotal_footer) > tbody > tr > td {
+        .o_field_widget {
+          margin-bottom: $o-form-spacing-unit * 4;
+        }
+      }
+    }
+    .o_td_label .o_form_label {
+      font-weight: normal;
+    }
+  }
+
+  .o_form_label {
+    margin-top: 3px;
+    font-size: $o-label-font-size-factor * $o-font-size-base-touch;
+    font-weight: normal;
+    color: $o-brand-secondary;
+
+    &.o_form_label_empty {
+      display: none;
+    }
+  }
+}

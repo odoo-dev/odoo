@@ -7,6 +7,10 @@ import { browser } from "../../core/browser";
 const { Component } = owl;
 
 export class UserMenu extends Component {
+  static isDisplayed(env) {
+    return !env.services.device.isSmall;
+  }
+
   setup() {
     this.user = useService("user");
     const { origin } = browser.location;

@@ -89,6 +89,9 @@ class ActionAdapter extends ComponentAdapter {
         return;
       }
       this.router.pushState(query);
+    } else if (ev.name === "set_title_part") {
+      const { part, title } = payload;
+      this.title.setParts({ [part]: title || null });
     } else if (ev.name === "warning") {
       if (payload.type === "dialog") {
         class WarningDialog extends Component {}
@@ -222,7 +225,9 @@ export class ViewAdapter extends ActionAdapter {
       setupDebugView(accessRights, envWowl, this, this.props.viewParams.action)
     );
     if (this.props.viewInfo.type === "form") {
-      useDebugManager(() => setupDebugViewForm(envWowl, this, this.props.viewParams.action));
+      useDebugManager((accessRights) =>
+        setupDebugViewForm(envWowl, this, this.props.viewParams.action)
+      );
     }
     if (!envWowl.inDialog) {
       hooks.onMounted(() => {
@@ -270,7 +275,7 @@ export class ViewAdapter extends ActionAdapter {
   /**
    * @override
    */
-  async updateWidget() {
+  async updateWidget(nextProps) {
     const shouldUpdateWidget = this.shouldUpdateWidget;
     this.shouldUpdateWidget = true;
     if (!shouldUpdateWidget) {
@@ -290,7 +295,7 @@ export class ViewAdapter extends ActionAdapter {
    * Override to add the state of the legacy controller in the exported state.
    */
   exportState() {
-    const widgetState = this.widget.exportState();
+    const widgetState = this.widget && this.widget.exportState();
     const state = super.exportState();
     return Object.assign({}, state, widgetState);
   }

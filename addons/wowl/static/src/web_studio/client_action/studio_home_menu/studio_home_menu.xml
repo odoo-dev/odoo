@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<t t-name="web_studio.StudioHomeMenu" t-inherit="web_enterprise.HomeMenu" t-inherit-mode="primary" owl="1">
+    <!-- New App button -->
+    <xpath expr="//div[@class='o_apps']/a[@class='o_app o_menuitem']" position="attributes">
+        <attribute name="t-att-class">{
+            o_focused: appIndex === app_index,
+            o_web_studio_new_app: app.isNewAppButton
+        }</attribute>
+    </xpath>
+    <!-- Edit icons -->
+    <xpath expr="//div[@class='o_apps']/a[@class='o_app o_menuitem']" position="inside">
+        <a t-if="!app.isNewAppButton" class="o_web_studio_edit_icon" t-on-click.stop.prevent="_onEditIconClick(app)">
+            <i class="fa fa-pencil-square"/>
+        </a>
+    </xpath>
+    <!-- Icon creator dialog -->
+    <xpath expr="//div[@class='o_home_menu']" position="inside">
+        <Dialog t-if="state.iconCreatorDialogShown"
+            contentClass="'o_web_studio_edit_menu_icon_modal'"
+            size="'modal-md'"
+            title="'Edit Application Icon'"
+            t-on-dialog-closed.stop="_closeDialog"
+            >
+            <IconCreator editable="true" t-props="state.editedAppData" t-on-icon-changed.stop="_onIconChanged"/>
+            <t t-set="buttons">
+                <button class="btn btn-primary" t-on-click="_onSave">Confirm</button>
+                <button class="btn btn-secondary" t-on-click="_closeDialog">Cancel</button>
+            </t>
+        </Dialog>
+    </xpath>
+</t>
+
+</templates>

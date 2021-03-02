@@ -7,6 +7,8 @@ import { clearUncommittedChanges } from "../../src/actions/action_service";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
+import { debugService } from "../../src/debug/debug_service";
+import { Registry } from "../../src/core/registry";
 
 let testConfig;
 
@@ -1482,14 +1484,15 @@ QUnit.module("ActionManager", (hooks) => {
         lang: "en",
         uid: 7,
         tz: "taht",
+        allowed_company_ids: [1],
       },
     };
     const sessionStorage = testConfig.browser.sessionStorage;
     testConfig.browser.sessionStorage = Object.assign(Object.create(sessionStorage), {
       setItem(k, value) {
-        assert.strictEqual(
-          value,
-          JSON.stringify(expectedAction),
+        assert.deepEqual(
+          JSON.parse(value),
+          expectedAction,
           "should store the executed action in the sessionStorage"
         );
       },
@@ -1960,9 +1963,9 @@ QUnit.module("ActionManager", (hooks) => {
       assert.expect(5);
       let writeCalls = 0;
       const mockRPC = async (route, { method }) => {
-        if (method === "write") {
-          writeCalls += 1;
-        }
+          if (method === 'write') {
+              writeCalls += 1;
+          }
       };
       const webClient = await createWebClient({ testConfig, mockRPC });
       // execute an action and edit existing record
@@ -1984,4 +1987,78 @@ QUnit.module("ActionManager", (hooks) => {
       assert.strictEqual(writeCalls, 1);
     }
   );
+  QUnit.test(
+    "do not call clearUncommittedChanges() when target=new and dialog is opened",
+    async function (assert) {
+      assert.expect(2);
+      const webClient = await createWebClient({ testConfig });
+      // Open Partner form view and enter some text
+      await doAction(webClient, 3, { viewType: "form" });
+      await legacyExtraNextTick();
+      await testUtils.fields.editInput(
+        webClient.el.querySelector(".o_input[name=display_name]"),
+        "TEST"
+      );
+      // Open dialog without saving should not ask to discard
+      await doAction(webClient, 5);
+      await legacyExtraNextTick();
+      assert.containsOnce(webClient, ".o_dialog");
+      assert.containsOnce(webClient, ".o_dialog .o_act_window .o_view_controller");
+      webClient.destroy();
+    }
+  );
+  QUnit.test("do not restore after action button clicked", async function (assert) {
+    assert.expect(5);
+    const mockRPC = async (route) => {
+      if (route.includes("do_something")) {
+        return true;
+      }
+    };
+    testConfig.serverData.views["partner,false,form"] = `
+      <form>
+        <header><button name="do_something" string="Call button" type="object"/></header>
+        <sheet>
+          <field name="display_name"/>
+        </sheet>
+      </form>`;
+    const webClient = await createWebClient({ testConfig, mockRPC });
+    await doAction(webClient, 3, { viewType: "form", resId: 1 });
+    await legacyExtraNextTick();
+    assert.isVisible(webClient.el.querySelector(".o_form_buttons_view .o_form_button_edit"));
+    await click(webClient.el.querySelector(".o_form_buttons_view .o_form_button_edit"));
+    await legacyExtraNextTick();
+    assert.isVisible(webClient.el.querySelector(".o_form_buttons_edit .o_form_button_save"));
+    assert.isVisible(webClient.el.querySelector(".o_statusbar_buttons button[name=do_something]"));
+    await click(webClient.el.querySelector(".o_statusbar_buttons button[name=do_something]"));
+    await legacyExtraNextTick();
+    assert.isVisible(webClient.el.querySelector(".o_form_buttons_edit .o_form_button_save"));
+    await click(webClient.el.querySelector(".o_form_buttons_edit .o_form_button_save"));
+    await legacyExtraNextTick();
+    assert.isVisible(webClient.el.querySelector(".o_form_buttons_view .o_form_button_edit"));
+    webClient.destroy();
+  });
+  QUnit.test("debugManager is active for (legacy) views", async function (assert) {
+    assert.expect(2);
+
+    testConfig.serviceRegistry.add(debugService.name, debugService);
+    testConfig.systrayRegistry = new Registry();
+    testConfig.debug = "1";
+    const mockRPC = async (route, args) => {
+      if (route.includes("check_access_rights")) {
+        return true;
+      }
+    };
+    const webClient = await createWebClient({ testConfig, mockRPC });
+    await doAction(webClient, 1);
+    assert.containsNone(
+      webClient.el,
+      ".o_debug_manager .o_dropdown_item:contains('Edit View: Kanban')"
+    );
+    await click(webClient.el.querySelector(".o_debug_manager .o_dropdown_toggler"));
+    assert.containsOnce(
+      webClient.el,
+      ".o_debug_manager .o_dropdown_item:contains('Edit View: Kanban')"
+    );
+    webClient.destroy();
+  });
 });

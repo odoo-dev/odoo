@@ -13,7 +13,8 @@
         t-if="currentApp"
         class="o_menu_brand"
         payload="currentApp"
-        t-esc="currentApp.name" />
+        t-esc="currentApp.name" 
+        t-ref="menuBrand"/>
 
       <!-- Current App Sections -->
       <t t-call="wowl.NavBar.SectionsMenu">
@@ -40,7 +41,7 @@
     </t>
   </Dropdown>
 
-  <ul t-name="wowl.NavBar.SectionsMenu" class="o_menu_sections" role="menu" owl="1">
+  <ul t-name="wowl.NavBar.SectionsMenu" class="o_menu_sections" t-ref="appSubMenus" role="menu" owl="1">
     <t
       t-foreach="sections"
       t-as="section"

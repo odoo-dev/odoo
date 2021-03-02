@@ -1,0 +1,91 @@
+// ------------------------------------------------------------------
+// Base layout rules, use the 'webclient.scss' file for styling
+// ------------------------------------------------------------------
+html {
+  height: 100%;
+
+  .o_web_client {
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+
+    &.o_fullscreen > .o_main_navbar {
+      display: none;
+    }
+
+    .o_main_navbar {
+      flex: 0 0 auto;
+    }
+
+    > .o_action_manager {
+      direction: ltr; //Define direction attribute here so when rtlcss preprocessor run, it converts it to rtl
+      flex: 1 1 100%;
+      @include media-breakpoint-up(md) {
+        overflow: hidden;
+        // iOS fix for scroll-x element inside scroll-y element
+        -webkit-overflow-scrolling: touch;
+      }
+
+      > .o_action {
+        height: 100%;
+        display: flex;
+        flex-flow: column nowrap;
+        > .o_control_panel {
+          flex: 0 0 auto;
+        }
+        > .o_content {
+          flex: 1 1 100%;
+          position: relative; // Allow to redistribute the 100% height to its child
+          @include media-breakpoint-up(md) {
+            overflow: auto;
+            // iOS fix for scroll-x element inside scroll-y element
+            -webkit-overflow-scrolling: touch;
+          }
+          @include media-breakpoint-down(sm) {
+            overflow: visible;
+            height: auto;
+          }
+        }
+      }
+    }
+  }
+
+  @include media-breakpoint-down(sm) {
+    .o_web_client {
+      &.modal-open {
+        .o_content {
+          overflow: hidden;
+        }
+      }
+    }
+
+    .o_viewer_content .o_viewer_img_wrapper .o_viewer_zoomer {
+      overflow: scroll;
+    }
+  }
+
+  // FIXME: Fix scrolling in modal on focus input due to a bug between Chrome (Android) and Bootstrap
+  body.modal-open {
+    position: fixed;
+  }
+
+  .o_loading {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: $zindex-modal + 1;
+  }
+}
+
+@media print {
+  html .o_web_client {
+    .o_main_navbar {
+      display: none;
+    }
+    .o_content {
+      position: static;
+      overflow: visible;
+      height: auto;
+    }
+  }
+}

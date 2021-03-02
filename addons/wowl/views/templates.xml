@@ -21,7 +21,9 @@
 
         <!-- insert all js files in /wowl -->
         <t t-foreach="jsFiles" t-as="jsFile">
-            <script type="text/javascript" t-att-src="jsFile"></script>
+            <t t-if="not (isCommunity is not None and isCommunity and 'web_enterprise' in jsFile)" >
+                <script type="text/javascript" t-att-src="jsFile"></script>
+            </t>
         </t>
     </template>
 
@@ -38,7 +40,6 @@
         <xpath expr="//script[@src='/web/static/src/js/chrome/web_client.js']" position="replace"/>
         <xpath expr="//script[@src='/web/static/src/js/services/crash_manager_service.js']" position="replace"/>
         <xpath expr="//script[@src='/web/static/src/js/tools/test_menus_loader.js']" position="replace"/>
-
 
         <xpath expr="//script[@src='/web/static/lib/fuzzy-master/fuzzy.js']" position="after">
             <script type="text/javascript" src="/web/static/lib/Chart/Chart.js"></script> <!-- would be good to lazy load it -->

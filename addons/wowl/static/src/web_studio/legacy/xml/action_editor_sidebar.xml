@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<div t-name="web_studio.ActionEditorSidebar" class="o_web_studio_sidebar">
+    <!-- Header -->
+    <div class="o_web_studio_sidebar_header"/>
+
+    <!-- Content -->
+    <div class="o_web_studio_sidebar_content">
+        <div class="o_web_studio_sidebar_text">
+            <label for="name">Action's title</label>
+            <input id="name" name="name" t-att-value="widget.action_attrs.name" type="text"/>
+        </div>
+        <div class="o_web_studio_sidebar_textarea o_web_studio_sidebar_iscode">
+            <label for="help">Empty List Message</label>
+            <textarea id="help" name="help" cols="40" rows="5"><t t-esc="widget.action_attrs.help"/></textarea>
+        </div>
+        <t t-call="web_studio.Sidebar.Groups"/>
+        <t t-call="web_studio.Sidebar.Toolbox" t-if="widget.debug">
+            <t t-call="web_studio.Sidebar.Parameters"/>
+        </t>
+    </div>
+</div>
+
+</templates>

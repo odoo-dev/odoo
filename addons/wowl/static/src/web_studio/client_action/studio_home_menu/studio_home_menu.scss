@@ -1,0 +1,61 @@
+// Home menu in studio mode
+.o_studio_home_menu {
+  @include o-web-studio-app-creator-background;
+
+  .database_expiration_panel {
+    visibility: hidden;
+  }
+
+  .o_app {
+    position: relative;
+
+    &:not(.o_web_studio_new_app) {
+      opacity: 0.5;
+
+      .o_app_icon {
+        transition-property: none;
+      }
+      &:hover,
+      &:focus,
+      &.o_focused {
+        background-color: transparent;
+        opacity: 0.9;
+      }
+    }
+
+    &.o_web_studio_new_app {
+      background-color: rgba(white, 0.05);
+      border-color: rgba(white, 0.1);
+
+      .o_app_icon {
+        box-shadow: none;
+      }
+      &:hover,
+      &:focus,
+      &.o_focused {
+        border-color: rgba(white, 0.6);
+      }
+    }
+
+    .o_web_studio_edit_icon {
+      visibility: hidden;
+      @include o-position-absolute($top: 5px, $right: 25px);
+
+      i {
+        background-color: $o-brand-primary;
+        border-radius: 20%;
+        color: white;
+        padding: 0 1px;
+      }
+    }
+
+    &:hover .o_web_studio_edit_icon {
+      opacity: 0.6;
+      visibility: visible;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}

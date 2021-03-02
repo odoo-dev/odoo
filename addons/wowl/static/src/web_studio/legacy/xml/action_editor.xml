@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<div t-name="web_studio.ActionEditor" class="o_web_studio_action_editor">
+    <div class="o_web_studio_views">
+
+            <div class="o_web_studio_view_column">
+                <div class="o_web_studio_view_category" name="general">
+                    <h6><strong>General Views</strong></h6>
+                </div>
+                <div class="o_web_studio_view_category" name="timeline">
+                    <h6><strong>Timeline Views</strong></h6>
+                </div>
+            </div>
+            <!-- <div class="o_web_studio_view_brake"/> -->
+            <div class="o_web_studio_view_column">
+                <div class="o_web_studio_view_category" name="multiple">
+                    <h6><strong>Multiple Records Views</strong></h6>
+                </div>
+                <div class="o_web_studio_view_category" name="reporting">
+                    <h6><strong>Reporting Views</strong></h6>
+                </div>
+            </div>
+
+    </div>
+</div>
+
+<t t-name="web_studio.ActionEditorView">
+    <div t-attf-class="o_web_studio_view_type #{!widget.active ? 'o_web_studio_inactive' : ''}" t-att-data-type="widget.view_type">
+        <div class="o_web_studio_thumbnail">
+            <span t-if="!widget.active" class="o_web_studio_view_label">Activate View</span>
+            <span t-if="widget.default_view" class="o_web_studio_default_view fa-stack fa-sm" role="img" aria-label="Default view" title="Default view">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-home fa-stack-1x"></i>
+            </span>
+            <img t-att-src="'/web_studio/static/src/img/view_type/' + widget.view_type + '.png'" t-attf-alt="View #{widget.view_type}"/>
+        </div>
+        <div class="o_web_studio_name"><t t-esc="widget.view_type"/></div>
+        <i t-if="widget.can_default or widget.can_be_disabled" class="dropdown-toggle fa fa-ellipsis-v o_web_studio_more" data-toggle="dropdown" role="img" aria-label="Dropdown menu" title="Dropdown menu"/>
+        <div class="dropdown-menu dropdown-menu-right" role="menu">
+            <t t-if="widget.can_default">
+                <a href="#" role="menuitem" t-attf-class="dropdown-item#{widget.default_view ? ' o_web_studio_view_type_default' : ''}" data-action="set_default_view">
+                    <i t-if="widget.default_view" class="fa fa-check" role="img" aria-label="Is default view" title="Is default view"/>
+                    Set as Default
+                </a>
+            </t>
+            <div t-if="widget.can_default and widget.can_be_disabled" class="dropdown-divider" role="separator"/>
+            <t t-if="widget.debug">
+                <a href="#" role="menuitem" class="dropdown-item" data-action="restore_default_view">
+                    Restore Default View
+                </a>
+            </t>
+            <a role="menuitem" href="#" data-action="disable_view" class="dropdown-item" t-if="widget.can_be_disabled">Disable</a>
+        </div>
+    </div>
+</t>
+
+</templates>

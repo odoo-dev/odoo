@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<t t-name="web_studio.searchRenderer">
+    <div class="o_web_studio_search_sample_ui o_web_studio_blurred_childs">
+        <i class="fa fa-search text-right"/>
+        <hr/>
+    </div>
+    <div class="o_web_studio_search_autocompletion_container table-responsive o_list_view">
+        <table class="o_web_studio_search_autocompletion_fields o_list_table table ui-droppable" data-type="autocompletion_fields">
+            <thead>
+                <tr>
+                    <th>
+                        <i class="fa fa-magic"/> <span>Autocompletion Fields</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="o_web_studio_search_sub_item o_web_studio_search_list_editable table-responsive o_list_view">
+        <table class="o_web_studio_search_filters o_list_table table ui-droppable" data-type="filters">
+            <thead>
+                <tr>
+                    <th>
+                        <span><i class="fa fa-filter"/> Filters</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="o_web_studio_search_sub_item o_web_studio_search_list_editable table-responsive o_list_view">
+        <table class="o_web_studio_search_group_by o_list_table table ui-droppable" data-type="group_by">
+            <thead>
+                <tr>
+                    <th>
+                        <span><i class="fa fa-bars"/>  Group by</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="o_web_studio_search_sub_item table-responsive o_web_studio_blurred_childs">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        <span><i class="fa fa-star"/> Favourites</span>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="o_web_studio_search_sub_item o_web_studio_search_sub_item_icon text-right o_web_studio_blurred_childs">
+        <i class="fa fa-list" title="List View" role="img" aria-label="List View"/>
+        <i class="fa fa-bar-chart" title="Graph View" role="img" aria-label="Graph View"/>
+        <i class="fa fa-table" title="Grid View" role="img" aria-label="Grid View"/>
+    </div>
+</t>
+
+</templates>

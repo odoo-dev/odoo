@@ -1,0 +1,23 @@
+.o_web_studio_field_modal {
+    .modal-header, .modal-footer {
+        background-color: lighten(gray('200'), 5%);
+    }
+
+    .o_web_studio_field_dialog_form {
+        padding: 35px 18px 25px 16px;
+
+        > label {
+            padding-right: 15px;
+        }
+
+        .o_web_studio_selection_editor {
+            .ui-sortable-handle {
+                cursor: move;
+            }
+        }
+
+        .o_field_widget {
+            width: 100%;
+        }
+    }
+}

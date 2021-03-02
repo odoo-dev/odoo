@@ -1,0 +1,38 @@
+// ------------------------------------------------------------------
+// Roboto
+// ------------------------------------------------------------------
+$roboto-font-path: "../fonts/Roboto";
+
+@mixin roboto-font($type, $weight, $style) {
+  @font-face {
+    font-family: "Roboto";
+    src: url("#{$roboto-font-path}/Roboto-#{$type}-webfont.eot");
+    src: url("#{$roboto-font-path}/Roboto-#{$type}-webfont.eot?#iefix") format("embedded-opentype"),
+      url("#{$roboto-font-path}/Roboto-#{$type}-webfont.woff") format("woff"),
+      url("#{$roboto-font-path}/Roboto-#{$type}-webfont.ttf") format("truetype"),
+      url("#{$roboto-font-path}/Roboto-#{$type}-webfont.svg#Roboto") format("svg");
+    font-weight: $weight;
+    font-style: $style;
+  }
+
+  @font-face {
+    font-family: "Roboto-#{$type}";
+    src: url("#{$roboto-font-path}/Roboto-#{$type}-webfont.eot");
+    src: url("#{$roboto-font-path}/Roboto-#{$type}-webfont.eot?#iefix") format("embedded-opentype"),
+      url("#{$roboto-font-path}/Roboto-#{$type}-webfont.woff") format("woff"),
+      url("#{$roboto-font-path}/Roboto-#{$type}-webfont.ttf") format("truetype"),
+      url("#{$roboto-font-path}/Roboto-#{$type}-webfont.svg#Roboto") format("svg");
+  }
+}
+
+@mixin roboto-font-pair($type, $weight) {
+  @include roboto-font("#{$type}", $weight, normal);
+  @include roboto-font("#{$type}Italic", $weight, italic);
+}
+
+@include roboto-font-pair("Thin", 100);
+@include roboto-font-pair("Light", 300);
+@include roboto-font-pair("Regular", 400);
+@include roboto-font-pair("Medium", 500);
+@include roboto-font-pair("Bold", 700);
+@include roboto-font-pair("Black", 900);

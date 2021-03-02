@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<t t-name="web_studio.AppCreator" owl="1">
+    <div class="o_web_studio_app_creator">
+        <div t-if="state.step !== 'model_configuration'" class="o_web_studio_app_creator_box">
+            <div t-attf-class="o_web_studio_app_creator_left">
+                <div class="o_web_studio_app_creator_left_content">
+                    <t t-if="state.step === 'welcome'">
+                        <h2 class="mb0 o_web_studio_welcome">Welcome to</h2>
+                        <h1 class="mt8">Odoo Studio</h1>
+                        <h5 class="text-muted">The fastest way to create a web application.</h5>
+                    </t>
+                    <t t-elif="state.step === 'app'">
+                        <h3 class="mb32">Create your App</h3>
+                        <div class="o_web_studio_app_creator_name" t-att-class="{ o_web_studio_app_creator_field_warning: invalid.appName }">
+                            <label for="appName">Choose an app name</label>
+                            <input type="text" id="appName" class="o_input"
+                                autofocus=""
+                                name="appName"
+                                placeholder="e.g. Real Estate"
+                                t-att-value="state.appName"
+                                t-on-input="_onInput"
+                            />
+                        </div>
+                    </t>
+                    <t t-elif="state.step === 'model'">
+                        <h3 class="mb32">Create your first Menu</h3>
+                        <div class="o_web_studio_app_creator_menu" t-att-class="{ o_web_studio_app_creator_field_warning: invalid.menuName }">
+                            <label for="menuName">Choose your first object name</label>
+                            <input type="text" id="menuName" class="o_input"
+                                autofocus=""
+                                name="menuName"
+                                placeholder="e.g. Properties"
+                                t-att-value="state.menuName"
+                                t-on-input="_onInput"
+                            />
+                        </div>
+                        <div class="o_web_studio_app_creator_model_choice">
+                            <div class="custom-control custom-radio">
+                                <input type="radio"
+                                    id="model_choice_new"
+                                    name="model_choice"
+                                    value="new"
+                                    class="custom-control-input"
+                                    t-on-change="_onChecked"
+                                    t-att-checked="state.modelChoice === 'new'" />
+                                <label class="custom-control-label" for="model_choice_new">New Model</label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio"
+                                    id="model_choice_existing"
+                                    name="model_choice"
+                                    value="existing"
+                                    class="custom-control-input"
+                                    t-on-change="_onChecked"
+                                    t-att-checked="state.modelChoice === 'existing'" />
+                                <label class="custom-control-label" for="model_choice_existing">Existing Model</label>
+                            </div>
+                        </div>
+                        <div
+                            t-if="state.modelChoice === 'existing'" class="o_web_studio_app_creator_model mt8"
+                            t-att-class="{ o_web_studio_app_creator_field_warning: invalid.modelId }"
+                        >
+                                <label for="name">Model</label>
+                                <ComponentAdapter Component="FieldMany2One"
+                                    widgetArgs="['model', record, { mode: 'edit' }]"
+                                    name="'model'"
+                                    record="record"
+                                    options="{ mode: 'edit', noCreate: true }"
+                                    t-on-field-changed="_onModelIdChanged"
+                                />
+                        </div>
+                    </t>
+                </div>
+                <div class="o_web_studio_app_creator_buttons">
+                    <button t-if="state.step !== 'welcome'" type="button"
+                        class="btn fa fa-chevron-left o_web_studio_app_creator_previous"
+                        aria-label="Previous"
+                        title="Previous"
+                        t-on-click="_onPrevious"
+                    />
+                    <button type="button"
+                        class="btn o_web_studio_app_creator_next"
+                        aria-label="Next"
+                        title="Next"
+                        t-att-class="{ is_ready: isReady }"
+                        t-on-click="_onNext"
+                        >
+                        <span t-if="state.step === 'welcome' or (state.step === 'app' and state.app_name) or (state.step === 'model' and state.modelChoice === 'new' and state.menu_name)">Next</span>
+                        <span t-elif="(state.step === 'model' and state.modelChoice === 'existing' and state.menu_name and !invalid.modelChoice) or (state.step === 'model_configuration')">Create your app</span>
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+            </div>
+            <div class="o_web_studio_app_creator_right" t-if="state.step !== 'model_configuration'">
+                <div class="o_web_studio_app_creator_right_content">
+                    <t t-if="state.step === 'welcome'">
+                        <img class="o_web_studio_welcome_image" src="/web_studio/static/src/img/studio_app_icon.png"/>
+                    </t>
+                    <IconCreator t-else=""
+                        backgroundColor="state.iconData.backgroundColor"
+                        color="state.iconData.color"
+                        iconClass="state.iconData.iconClass"
+                        editable="state.step === 'app'"
+                        type="state.iconData.type"
+                        webIconData="state.iconData.webIconData"
+                        t-on-icon-changed.stop="_onIconChanged"
+                    />
+                </div>
+            </div>
+        </div>
+        <ModelConfigurator
+            t-if="state.step === 'model_configuration'"
+            debug='debug'
+            label="'Create your app'"
+            t-on-confirm-options.stop="_onConfirmOptions"
+            t-on-previous.stop="_onPrevious"
+        />
+    </div>
+</t>
+
+</templates>

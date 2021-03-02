@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <body t-name="wowlent.WebClientEnterprise" t-inherit="wowl.WebClient" t-inherit-mode="primary">
+      <xpath expr="//NavBar" position="replace">
+        <EnterpriseNavBar/>
+      </xpath>
+  </body>
+
+</templates>

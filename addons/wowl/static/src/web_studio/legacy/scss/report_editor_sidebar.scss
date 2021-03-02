@@ -1,0 +1,269 @@
+.o_web_studio_sidebar.o_web_studio_report_sidebar {
+    .o_web_studio_sidebar_content {
+        &.o_web_studio_sidebar_content_properties {
+            padding-top: 0px;
+            padding-right: 5px;
+            padding-bottom: 15px;
+            padding-left: 5px;
+            margin-top: -15px;
+            flex: 1 0 auto;
+        }
+        .o_web_studio_component {
+            // override component from view editor because hooks can be
+            // larger in report editor
+            max-width: 160px;
+        }
+        .o_web_studio_accordion {
+            position: relative;
+            margin: 0 -5px;
+
+            &:before {
+                content: "";
+                background-color: transparentize($o-web-studio-bg-light,0.5);
+                width: 1px;
+                @include o-position-absolute(0, auto, 0, 5px);
+            }
+            .o_web_studio_subsection_title {
+                color: white;
+                font-size: 13px;
+            }
+            a {
+                @include o-hover-text-color(lighten($o-brand-primary, 5%), $o-brand-primary);
+            }
+            .card {
+                position: relative;
+                border: none;
+                margin-top: 0;
+
+                &:hover, &.o_web_studio_active {
+                    .card-header {
+                        background: $o-web-studio-bg-darker;
+
+                        button[data-toggle="collapse"] {
+                            color: white;
+                        }
+                    }
+                }
+                &.o_web_studio_active {
+                    .card-header {
+                        i.fa-angle-left {
+                            transform: rotate(-90deg);
+                        }
+                    }
+                    &:last-child {
+                        .card-header:before {
+                            bottom: 0;
+                        }
+                    }
+                }
+                .collapsing {
+                    transition: none;
+                }
+                .card-header {
+                    background: $o-web-studio-bg-dark;
+                    padding: 0;
+                    border: none;
+
+                    &:before, &:after {
+                        background-color: darken($o-web-studio-bg-light, 50%);
+                        content: "";
+                        @include o-position-absolute($top:0, $bottom: 0,  $left: 5px);
+                        width: 1px;
+                    }
+                    &:after {
+                        @include size(auto, 1px);
+                    }
+                    > h5 {
+                        margin-bottom: 0px;
+                    }
+                    button[data-toggle="collapse"] {
+                        display: block;
+                        padding: 3px 8px 6px 10px;
+                        color: $o-web-studio-text-inactive;
+
+                        > small {
+                            font-size: 90%;
+
+                            &.fa {
+                                font-size: 70%;
+                            }
+                        }
+                        .o_text {
+                            @include o-text-overflow(inline-block);
+                            width: 92%;
+                            vertical-align: middle;
+                            font: 400 11px $o-web-studio-font-family-monospace;
+                        }
+                        i.fa-angle-left {
+                            transition: transform .3s;
+                            position: absolute;
+                            right: 1.5rem;
+                        }
+                    }
+                }
+                .card-body {
+                    border: none;
+                    border-top: 1px solid $o-web-studio-bg-dark;
+                    padding-top: 8px;
+                    @include o-bg-color($o-web-studio-bg-medium);
+
+                    .row {
+                        margin-bottom: 8px;
+                    }
+                    input, select, textarea, div.input-group-addon {
+                        padding: 2px 5px;
+                    }
+                    textarea {
+                        resize: vertical;
+                    }
+                    .o_web_studio_sidebar_text {
+                        & > label {
+                            display: block;
+                        }
+                    }
+                    .o_web_studio_width > input {
+                        width: 76%;
+                        display: inline-block;
+                    }
+                    .o_web_studio_margin > input {
+                        display: inline-block;
+                        width: 21%;
+                    }
+                    .o_web_studio_text_decoration, .o_web_studio_text_alignment, .o_web_studio_font_size {
+                        > button , button.dropdown-toggle {
+                            @include o-web-studio-btn;
+                            padding: 2px 7px;
+                            font-size: 13px;
+                            &.active {
+                                border-color: lighten($o-brand-primary, 5%) !important;
+                            }
+                        }
+                    }
+                    .o_web_studio_font_size {
+                        .dropdown-item-text {
+                            cursor: pointer;
+
+                            &.active {
+                                background-color: $o-brand-primary;
+                            }
+                        }
+                    }
+                    .o_web_studio_size > input,
+                    .o_web_studio_offset > input {
+                        width: 40%;
+                        margin-right: 5px;
+                    }
+                    .o_web_studio_classes > input {
+                        width: 98%;
+                    }
+                    .o_web_studio_tif_ifexpression {
+                        position: relative;
+
+                        .fa {
+                            @include o-position-absolute(1px, 1px);
+                            background-color: $o-web-studio-bg-darker;
+                            padding: 4px;
+                            cursor: pointer;
+                        }
+                    }
+                    .o_web_studio_table_style {
+                        > select {
+                            margin-left: 3px;
+                        }
+                    }
+                    .o_field_many2manytags {
+                        width: 100%;
+                        background-color: $o-web-studio-bg-dark;
+                    }
+                    .o_web_studio_colors {
+                        position: relative;
+
+                        > .dropdown {
+                            display: inline-block;
+                            position: initial;
+
+                            > button {
+                                @include o-web-studio-btn;
+                                @include o-web-studio-btn-variation($o-web-studio-bg-dark, $o-web-studio-bg-darker);
+                                padding: 2px 7px;
+                                font-size: 13px;
+                                font-weight: 300;
+                                text-transform: none;
+                            }
+                            .dropdown-menu {
+                                padding: 0;
+                                border-color: $o-web-studio-bg-darker;
+                            }
+                            .dropdown-item {
+                                &, &:hover, &:active, &:focus {
+                                    background-color: $o-web-studio-bg-darker;
+                                }
+                                > button {
+                                    @include o-web-studio-btn;
+                                    @include o-web-studio-btn-variation($o-web-studio-bg-medium, $o-web-studio-bg-dark);
+                                }
+                            }
+                            .o_web_studio_color_palette {
+                                .o_web_studio_color_row {
+                                    height: 20px;
+                                }
+                                button {
+                                    @include size(20px, 18px);
+                                    border: 0px solid black;
+                                    margin: 0 1px;
+
+                                    &:hover {
+                                        box-shadow: inset 0 0 0 2px white;
+                                        border-width: 1px;
+                                    }
+                                }
+                                h6 {
+                                    color: $o-web-studio-text-disabled;
+                                    font-size:15px;
+                                    margin-top: 9px;
+                                    margin-bottom: 9px;
+                                }
+                            }
+                        }
+                    }
+                    .o_web_studio_toption_options {
+                        &:first-child {
+                            margin-top: 12px;
+                        }
+                        .o_field_boolean > label {
+                            margin: 0;
+                        }
+                    }
+                    .o_web_studio_text .btn-sm {
+                        padding: 3px 8px;
+                    }
+                    .o_field_selector_value {
+                        background-color: $o-web-studio-bg-dark;
+                    }
+                    .o_input {
+                        border-bottom: none;
+                    }
+                }
+            }
+            @for $i from 1 through 30 {
+                .card:nth-child(#{$i}) .card-header {
+                    padding-left:  3px * $i;
+
+                    &:after {
+                        width: 3px * ($i);
+                        top: 50%;
+                    }
+                }
+            }
+            .card.o_web_studio_active .card-header:after {
+                top: 15px; // middle of the header
+            }
+            .card:first-child .card-header:before {
+                top: 50%;
+            }
+            .card:last-child .card-header:before {
+                bottom: 50%;
+            }
+        }
+    }
+}

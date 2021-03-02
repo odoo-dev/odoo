@@ -100,3 +100,37 @@ export function json_node_to_xml(node, humanReadable, indent) {
     return r + "/>";
   }
 }
+
+export function objectToUrlEncodedString(obj) {
+  return Object.entries(obj)
+    .map(([k, v]) => (v ? `${k}=${encodeURIComponent(v)}` : k))
+    .join("&");
+}
+
+export function urlBuilder(origin) {
+  if (origin) {
+    // remove trailing slashes
+    origin = origin.replace(/\/+$/, '');
+  } else {
+    const { host , protocol } = odoo.browser.location;
+    origin = `${protocol}//${host}`;
+  }
+
+  function url(route, params) {
+    params = params || {};
+    let queryString = objectToUrlEncodedString(params);
+    queryString = queryString.length > 0 ? `?${queryString}` : queryString;
+
+    // Compare the wanted url against the current origin
+    let prefix = ['http://', 'https://', '//'].some((el) =>
+      route.length >= el.length && route.slice(0, el.length) === el
+    );
+    prefix = prefix ? '' : origin;
+    return `${prefix}${route}${queryString}`;
+  }
+
+  return {
+    origin,
+    url,
+  };
+}

@@ -18,7 +18,14 @@ Odoo Web core module written in Owl.
     'auto_install': True,
     'data': [
         'views/templates.xml',
+        'views/ent_templates.xml',
     ],
+
+    'qweb': [
+        'static/src/web_studio/legacy/edit_menu/edit_menu.xml',
+        'static/src/web_studio/legacy/xml/*',
+    ],
+
     'assets': {
         'js': [
             'static/src/**/*',
@@ -30,6 +37,7 @@ Odoo Web core module written in Owl.
             'static/src/download/**/*',
             'static/src/errors/**/*',
             'static/src/debug/**/*',
+            'static/src/switch_company_menu/**/*',
             'static/src/effects/**/*',
             'static/src/legacy/**/*',
             'static/src/localization/**/*',
@@ -38,6 +46,7 @@ Odoo Web core module written in Owl.
             'static/src/services/**/*',
             'static/src/utils/**/*',
             'static/src/views/**/*',
+            'static/src/web_enterprise/**/*',
             'static/src/webclient/**/*',
             'static/src/env.js',
             'static/tests/**/*',
@@ -46,11 +55,15 @@ Odoo Web core module written in Owl.
             'static/src/components/**/*',
             'static/src/actions/**/*',
             'static/src/debug/**/*',
+            'static/src/switch_company_menu/**/*',
             'static/src/effects/**/*',
             'static/src/notifications/**/*',
             'static/src/webclient/**/*',
             'static/src/errors/**/*',
             'static/src/views/**/*',
+            'static/src/web_enterprise/webclient/navbar/*',
+            'static/src/web_enterprise/**/*',
+            'static/src/web_studio/**/*',
         ],
         'style': [
             'static/src/utils/**/*',
@@ -63,6 +76,11 @@ Odoo Web core module written in Owl.
             'static/src/views/**/*',
             'static/src/errors/**/*',
             'static/src/services/**/*',
+            'static/src/web_enterprise/webclient/burger_menu/**/*',
+
+            'static/src/web_studio/client_action/variables.scss',
+            'static/src/web_studio/client_action/mixins.scss',
+            'static/src/web_studio/**/*',
         ]
     },
 }

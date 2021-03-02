@@ -1,0 +1,121 @@
+@mixin o-studio-sprite-icon($x: 0, $y: 0) {
+    background-position: $x $y;
+}
+
+.o_web_studio_component:after{
+    background-image: url('/web_studio/static/src/img/ui/studio_icons.png');
+    background-repeat: no-repeat;
+    content: '';
+    width: 20px;
+    height: 20px;
+
+    // Optimized version to avoid blurred icons on HiDPI screens
+    @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
+        background-image: url('/web_studio/static/src/img/ui/studio_icons@2x.png');
+        background-size: 20px 440px;
+    }
+}
+
+.o_web_studio_field_fa {
+    .fa {
+        position: absolute;
+        left: 7px;
+        top: 6px;
+        font-size: 20px;
+    }
+    &:after {
+        content: none;
+    }
+}
+
+.o_web_studio_field_binary:after {
+    @include o-studio-sprite-icon(0, 0);
+}
+
+.o_web_studio_field_boolean:after {
+    @include o-studio-sprite-icon(0, -20px);
+}
+
+.o_web_studio_field_char:after {
+    @include o-studio-sprite-icon(0, -40px);
+}
+
+.o_web_studio_field_columns:after {
+    @include o-studio-sprite-icon(0, -60px);
+}
+
+.o_web_studio_field_date:after {
+    @include o-studio-sprite-icon(0, -80px);
+}
+
+.o_web_studio_field_datetime:after {
+    @include o-studio-sprite-icon(0, -100px);
+}
+
+.o_web_studio_field_float:after {
+    @include o-studio-sprite-icon(0, -120px);
+}
+
+.o_web_studio_field_html:after {
+    @include o-studio-sprite-icon(0, -140px);
+}
+
+.o_web_studio_field_picture:after {
+    @include o-studio-sprite-icon(0, -160px);
+}
+
+.o_web_studio_field_integer:after {
+    @include o-studio-sprite-icon(0, -180px);
+}
+
+.o_web_studio_field_many2many:after {
+    @include o-studio-sprite-icon(0, -200px);
+}
+
+.o_web_studio_field_many2one:after {
+    @include o-studio-sprite-icon(0, -220px);
+}
+
+.o_web_studio_field_monetary:after {
+    @include o-studio-sprite-icon(0, -240px);
+}
+
+.o_web_studio_field_one2many:after {
+    @include o-studio-sprite-icon(0, -260px);
+}
+
+.o_web_studio_field_selection:after {
+    @include o-studio-sprite-icon(0, -280px);
+}
+
+.o_web_studio_field_tabs:after {
+    @include o-studio-sprite-icon(0, -300px);
+}
+
+.o_web_studio_field_tags:after {
+    @include o-studio-sprite-icon(0, -320px);
+}
+
+.o_web_studio_field_text:after {
+    @include o-studio-sprite-icon(0, -340px);
+}
+
+.o_web_studio_filter_separator:after {
+    @include o-studio-sprite-icon(0, -360px);
+}
+
+.o_web_studio_field_priority:after {
+    @include o-studio-sprite-icon(0, -380px);
+}
+
+.o_web_studio_field_related:after {
+    @include o-studio-sprite-icon(0, -400px);
+}
+
+.o_web_studio_filter:after {
+    @include o-studio-sprite-icon(0, -420px);
+}
+
+.o_web_studio_field_signature:after {
+    @include o-studio-sprite-icon(0, -440px);
+}

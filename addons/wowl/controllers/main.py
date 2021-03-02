@@ -34,6 +34,7 @@ class WowlClient(http.Controller):
                 'scssFiles': [file for addon, file in get_addon_files(bundle='style', css=True)],
                 'jsFiles': [file for addon, file in get_addon_files(bundle='js', js=True)],
                 "debug": request.session.debug,
+                'isCommunity': 'wowlent' not in request.httprequest.full_path,
             }
             response = request.render('wowl.root', qcontext=context)
             response.headers['X-Frame-Options'] = 'DENY'
@@ -100,10 +101,45 @@ class WowlClient(http.Controller):
         ])
         return response
 
-    @http.route('/wowl/tests', type='http', auth="user")
+    # LPE Fixme:remove route /wowlent/tests when enterprise is another module
+    @http.route(['/wowl/tests', '/wowlent/tests'], type='http', auth="user")
     def test_suite(self, **kw):
         context = {
             'scssFiles': [file for addon, file in get_addon_files(bundle='style', css=True)],
             'jsFiles': [file for addon, file in get_addon_files(bundle='tests_js', js=True)],
+            'isCommunity': 'wowlent' not in request.httprequest.full_path,
         }
         return request.render('wowl.qunit_suite', context)
+
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    # web_enterprise part
+    # aab: remove me
+    @http.route('/wowlent', type='http', auth="none")
+    def wowl_ent(self, **kw):
+        if not request.session.uid:
+            return werkzeug.utils.redirect('/web/login', 303)
+        if kw.get('redirect'):
+            return werkzeug.utils.redirect(kw.get('redirect'), 303)
+
+        request.uid = request.session.uid
+        try:
+            # LPE Fixme: this cannot be ORM cached (class outside ORM realm) but we could impl
+            # a cache if necessary (just like load_menus)
+            qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=[], debug=request.session.debug)
+            session_info = request.env['ir.http'].session_info()
+            session_info['qweb'] = qweb_checksum
+            context = {
+                "session_info": session_info,
+                'scssFiles': [file for addon, file in get_addon_files(bundle='style', css=True)],
+                'jsFiles': [file for addon, file in get_addon_files(bundle='js', js=True)],
+                'live_reload': 'all' in config['dev_mode'],
+                "debug": request.session.debug,
+            }
+            response = request.render('wowl.ent_root', qcontext=context)
+            response.headers['X-Frame-Options'] = 'DENY'
+            return response
+        except AccessError:
+            return werkzeug.utils.redirect('/web/login?error=access')

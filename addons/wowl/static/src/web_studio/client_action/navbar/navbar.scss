@@ -1,0 +1,48 @@
+.o_studio_navbar {
+  background-color: $o-web-studio-bg-dark;
+  border-color: $o-web-studio-bg-dark;
+
+  .o_menu_sections {
+    color: lightgrey;
+    height: $o-web-studio-menu-height - 1;
+  }
+
+  .o_web_edit_menu,
+  .o_web_create_new_model {
+    color: $o-web-studio-text-inactive;
+    display: inline;
+    margin-left: 15px;
+    padding: 2px 10px 2px 10px;
+    font-size: 12px;
+
+    &:hover {
+      background-color: inherit;
+      color: white;
+    }
+  }
+
+  .o_studio_buttons {
+    grid-area: systray;
+    display: flex;
+
+    .o_web_studio_notes,
+    .o_web_studio_leave {
+      height: 100%;
+      display: table;
+      margin: 0 20px;
+
+      > a {
+        color: $o-web-studio-bg-light;
+        display: table-cell;
+        vertical-align: middle;
+      }
+    }
+    .o_web_studio_leave {
+      margin: 0;
+
+      > a {
+        font-weight: bold;
+      }
+    }
+  }
+}
