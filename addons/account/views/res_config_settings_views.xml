@@ -319,10 +319,11 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <field name="preview_ready" invisible="0"/>
-                                            <field name="module_website_installed" invisible="0"/>
+                                            <field name="preview_ready" invisible="1"/>
+                                            <!-- <field name="module_website_installed" invisible="0"/> -->
                                             <div attrs="{'invisible': [('preview_ready', '=', False)]}">
-                                                <div attrs="{'invisible': [('module_website_installed', '=', True)]}">
+                                                <!-- attrs="{'invisible': [('module_website_installed', '=', True)]}" -->
+                                                <div>
                                                     <div>
                                                         <a href="/terms" >
                                                             <i class="fa fa-arrow-right"></i>
@@ -337,7 +338,8 @@
                                                     </div>
                                                 </div>
                                                 <!-- <field name="module_website_installed" invisible="0"/> -->
-                                                <div attrs="{'invisible': [('module_website_installed', '=', False)]}">
+                                                <!-- attrs="{'invisible': [('module_website_installed', '=', False)]}" -->
+                                                <div>
                                                     <div>
                                                         <a href="/terms" >
                                                             <i class="fa fa-arrow-right"></i>

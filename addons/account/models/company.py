@@ -112,7 +112,7 @@ class ResCompany(models.Model):
     # compute method To get "terms_default.xml" template and store in the invoice_terms_html field.
     @api.depends('terms_type')
     def default_get_terms_and_conditions(self):
-        if self.invoice_terms_html == None:
+        if self.invoice_terms_html == False:
             if(self.terms_type == 'html'):
                 term_template = self.env.ref("account.default_terms_and_conditions", False)
                 if term_template:
@@ -121,7 +121,8 @@ class ResCompany(models.Model):
 
     invoice_terms_html = fields.Html(string='Default Terms and Conditions as a Web page', translate=True,
                                      compute = 'default_get_terms_and_conditions', store = True, readonly=False)
-
+                           
+   
     account_setup_bill_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding bill step", default='not_done')
 
     # Needed in the Point of Sale

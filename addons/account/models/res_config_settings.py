@@ -129,21 +129,6 @@ class ResConfigSettings(models.TransientModel):
         related='company_id.terms_type', readonly=False)
     preview_ready = fields.Boolean(string="Display preview button", compute='_compute_terms_preview')
 
-    module_website_installed = fields.Boolean(readonly=True,
-                           compute='compute_module_website_installed',
-                           string='Is Module installed?')
-    #   Methos to check website module is installed or not(True if Installed) 
-    @api.depends()
-    def compute_module_website_installed(self):
-        print("\n\n\n\n\n\n\n\nInside _compute_module_website_installed")
-        print("\n\n\n\n\n\n\n\n",self.module_website_installed,"\n\n\n\n\n\n\n\n")
-        if self.module_website_installed==False:
-            module = self.env['ir.module.module'].search([('name', '=', 'website')])
-            module_website_installed = True if module and module.state == 'installed' else False
-            print("\n\n\n\n\n\n\n\n",module_website_installed,"\n\n\n\n\n\n\n\n")
-            for record in self:
-                record.module_website_installed = module_website_installed 
-
     use_invoice_terms = fields.Boolean(
         string='Default Terms & Conditions',
         config_parameter='account.use_invoice_terms')
@@ -222,8 +207,6 @@ class ResConfigSettings(models.TransientModel):
         return super(ResConfigSettings, self).create(values)
 
     def action_term_popup(self):
-        # vals= self.env['res.company']
-        # vals.invoice_terms_html = self.invoice_terms_html
         return {
             'name': ('open terms in pop up'),
             'type': 'ir.actions.act_window',
@@ -231,6 +214,7 @@ class ResConfigSettings(models.TransientModel):
             'res_model': 'res.company',
             'view_id': self.env.ref("account.res_config_term_view_form",False).id,
             'target': 'new',
+            'context': {'default_invoice_terms_html': self.company_id.invoice_terms_html},
             'res_id': self.company_id.id,
         }
 
