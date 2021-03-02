@@ -345,6 +345,7 @@
             'mail/static/src/services/chat_window_service/chat_window_service.js',
             # inside .
             'mail/static/src/services/dialog_service/dialog_service.js',
+            'mail/static/src/services/messaging/messaging.js',
             # inside .
             'mail/static/src/utils/deferred/deferred.js',
             # inside .
