@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="project_task_burndown_chart_report_view_search" model="ir.ui.view">
+        <field name="name">project.task.burndown.chart.report.view.search</field>
+        <field name="model">project.task.burndown.chart.report</field>
+        <field name="arch" type="xml">
+            <search string="Burndown Chart">
+                <field name="project_id" string="Project" filter_domain="[('project_id', 'ilike', self)]" />
+                <filter name="filter_date_begin" date="date_begin" string="Date Begin" />
+                <filter name="filter_date_end" date="date_end" string="Date End" />
+            </search>
+        </field>
+    </record>
+
+    <record id="project_task_burndown_chart_report_view_graph" model="ir.ui.view">
+        <field name="name">project.task.burndown.chart.report.view.graph</field>
+        <field name="model">project.task.burndown.chart.report</field>
+        <field name="arch" type="xml">
+            <graph string="Burndown Chart" type="line" sample="1" disable_linking="1" js_class="burndown_chart">
+                <!-- <field name="date_begin" invisible="1" /> -->
+                <field name="date_begin" string="Date" interval="day" type="row" />
+                <field name="stage_id"/>
+                <field name="nb_tasks" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_project_task_burndown_chart_report" model="ir.actions.act_window">
+        <field name="name">Burndown Chart</field>
+        <field name="res_model">project.task.burndown.chart.report</field>
+        <field name="view_mode">graph</field>
+        <field name="search_view_id" ref="project.project_task_burndown_chart_report_view_search"/>
+        <field name="context">{}</field>
+        <field name="help">
+        </field>
+    </record>
+
+</odoo>
