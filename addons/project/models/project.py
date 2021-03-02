@@ -199,7 +199,7 @@ class Project(models.Model):
             ('employees', 'All employees'),
             ('portal', 'Portal users and all employees'),
         ],
-        string='Visibility', required=True, inverse='_inverse_privacy_visibility',
+        string='Visibility', required=True,
         default='portal',
         help="Defines the visibility of the tasks of the project:\n"
             "- Invited employees: employees may only see the followed project and tasks.\n"
@@ -268,17 +268,6 @@ class Project(models.Model):
     def _compute_alias_enabled(self):
         for project in self:
             project.alias_enabled = project.alias_domain and project.alias_id.alias_name
-
-    def _inverse_privacy_visibility(self):
-        """
-        Unsubscribe non-internal users from the project and tasks if the project privacy visibility
-        goes to a value different than 'portal'
-        """
-        for project in self.filtered(lambda p: p.privacy_visibility != 'portal'):
-            portal_users = project.message_partner_ids.user_ids.filtered('share')
-            if portal_users:
-                project.message_unsubscribe(partner_ids=portal_users.partner_id.ids)
-            project.mapped('tasks')._inverse_project_privacy_visibility()
 
     def _compute_access_url(self):
         super(Project, self)._compute_access_url()
@@ -367,6 +356,8 @@ class Project(models.Model):
         if vals.get('partner_id') or vals.get('privacy_visibility'):
             for project in self.filtered(lambda project: project.privacy_visibility == 'portal'):
                 project.message_subscribe(project.partner_id.ids)
+        if vals.get('privacy_visibility'):
+            self._change_privacy_visibility()
         return res
 
     def action_unlink(self):
@@ -514,6 +505,20 @@ class Project(models.Model):
             project._compute_rating_request_deadline()
             self.env.cr.commit()
 
+    # ---------------------------------------------------
+    # Privacy
+    # ---------------------------------------------------
+
+    def _change_privacy_visibility(self):
+        """
+        Unsubscribe non-internal users from the project and tasks if the project privacy visibility
+        goes to a value different than 'portal'
+        """
+        for project in self.filtered(lambda p: p.privacy_visibility != 'portal'):
+            portal_users = project.message_partner_ids.user_ids.filtered('share')
+            if portal_users:
+                project.message_unsubscribe(partner_ids=portal_users.partner_id.ids)
+            project.mapped('tasks')._change_project_privacy_visibility()
 
 class Task(models.Model):
     _name = "project.task"
@@ -840,12 +845,6 @@ class Task(models.Model):
     def _check_parent_id(self):
         if not self._check_recursion():
             raise ValidationError(_('Error! You cannot create a recursive hierarchy of tasks.'))
-
-    def _inverse_project_privacy_visibility(self):
-        for task in self.filtered(lambda t: t.project_privacy_visibility != 'portal'):
-            portal_users = task.message_partner_ids.user_ids.filtered('share')
-            if portal_users:
-                task.message_unsubscribe(partner_ids=portal_users.partner_id.ids)
 
     def _compute_attachment_ids(self):
         for task in self:
@@ -1383,6 +1382,14 @@ class Task(models.Model):
     def _rating_get_parent_field_name(self):
         return 'project_id'
 
+    # ---------------------------------------------------
+    # Privacy
+    # ---------------------------------------------------
+    def _change_project_privacy_visibility(self):
+        for task in self.filtered(lambda t: t.project_privacy_visibility != 'portal'):
+            portal_users = task.message_partner_ids.user_ids.filtered('share')
+            if portal_users:
+                task.message_unsubscribe(partner_ids=portal_users.partner_id.ids)
 
 class ProjectTags(models.Model):
     """ Tags of project's tasks """
