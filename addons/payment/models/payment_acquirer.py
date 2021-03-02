@@ -302,10 +302,10 @@ class PaymentAcquirer(models.Model):
             if acquirer.journal_id and acquirer.inbound_payment_method_id not in acquirer.journal_id.inbound_payment_method_ids:
                 acquirer.journal_id.inbound_payment_method_ids = [Command.link(acquirer.inbound_payment_method_id.id)]
 
-            if self.token_implemented and self.payment_flow == 's2s':
-                self.inbound_payment_method_ids += self.inbound_payment_method_id
+            if acquirer.token_implemented and acquirer.payment_flow == 's2s':
+                acquirer.inbound_payment_method_ids += acquirer.inbound_payment_method_id
             else:
-                self.inbound_payment_method_ids -= self.inbound_payment_method_id
+                acquirer.inbound_payment_method_ids -= acquirer.inbound_payment_method_id
 
     @api.model_create_multi
     def create(self, vals_list):

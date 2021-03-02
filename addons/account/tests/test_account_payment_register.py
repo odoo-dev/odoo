@@ -21,33 +21,36 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         cls.payment_debit_account_id = cls.company_data['default_journal_bank'].payment_debit_account_id.copy()
         cls.payment_credit_account_id = cls.company_data['default_journal_bank'].payment_credit_account_id.copy()
 
-        # Fix this
-        cls.custom_payment_method_in = cls.env['account.payment.method'].create({
+        cls.custom_payment_method_type_in = cls.env['account.payment.method.type'].create({
             'name': 'custom_payment_method_in',
             'code': 'CUSTOMIN',
             'payment_type': 'inbound',
         })
-        cls.manual_payment_method_in = cls.env.ref('account.account_payment_method_manual_in')
+        cls.custom_payment_method_in = cls.env['account.payment.method'].create({
+            'name': cls.custom_payment_method_type_in.name,
+            'method_type': cls.custom_payment_method_type_in.id
+        })
 
-        # Fix this
-        cls.custom_payment_method_out = cls.env['account.payment.method'].create({
+        cls.custom_payment_method_type_out = cls.env['account.payment.method.type'].create({
             'name': 'custom_payment_method_out',
             'code': 'CUSTOMOUT',
             'payment_type': 'outbound',
         })
-        cls.manual_payment_method_out = cls.env.ref('account.account_payment_method_manual_out')
+        cls.custom_payment_method_out = cls.env['account.payment.method'].create({
+            'name': cls.custom_payment_method_type_out.name,
+            'method_type': cls.custom_payment_method_type_out.id
+        })
 
         cls.company_data['default_journal_bank'].write({
             'payment_debit_account_id': cls.payment_debit_account_id.id,
             'payment_credit_account_id': cls.payment_credit_account_id.id,
             'inbound_payment_method_ids': [(6, 0, (
-                cls.manual_payment_method_in.id,
+                cls.inbound_payment_method.id,
                 cls.custom_payment_method_in.id,
             ))],
             'outbound_payment_method_ids': [(6, 0, (
-                cls.env.ref('account.account_payment_method_manual_out').id,
+                cls.outbound_payment_method.id,
                 cls.custom_payment_method_out.id,
-                cls.manual_payment_method_out.id,
             ))],
         })
 
@@ -351,8 +354,8 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         })._create_payments()
 
         self.assertRecordValues(payments, [
-            {'payment_method_id': self.manual_payment_method_in.id},
-            {'payment_method_id': self.manual_payment_method_in.id},
+            {'payment_method_id': self.inbound_payment_method.id},
+            {'payment_method_id': self.inbound_payment_method.id},
         ])
         self.assertRecordValues(payments[0].line_ids.sorted('balance') + payments[1].line_ids.sorted('balance'), [
             # == Payment 1: to pay out_invoice_1 ==
@@ -401,8 +404,8 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         })._create_payments()
 
         self.assertRecordValues(payments, [
-            {'payment_method_id': self.manual_payment_method_out.id},
-            {'payment_method_id': self.manual_payment_method_out.id},
+            {'payment_method_id': self.outbound_payment_method.id},
+            {'payment_method_id': self.outbound_payment_method.id},
         ])
         self.assertRecordValues(payments[0].line_ids.sorted('balance') + payments[1].line_ids.sorted('balance'), [
             # == Payment 1: to pay in_invoice_1 & in_invoice_2 ==
@@ -451,9 +454,9 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         })._create_payments()
 
         self.assertRecordValues(payments, [
-            {'payment_method_id': self.manual_payment_method_out.id},
-            {'payment_method_id': self.manual_payment_method_out.id},
-            {'payment_method_id': self.manual_payment_method_out.id},
+            {'payment_method_id': self.outbound_payment_method.id},
+            {'payment_method_id': self.outbound_payment_method.id},
+            {'payment_method_id': self.outbound_payment_method.id},
         ])
         self.assertRecordValues(payments[0].line_ids.sorted('balance') + payments[1].line_ids.sorted('balance') + payments[2].line_ids.sorted('balance'), [
             # == Payment 1: to pay in_invoice_1 ==

@@ -170,6 +170,18 @@ class AccountTestInvoicingCommon(TransactionCase):
             'rounding_method': 'DOWN',
         })
 
+        method_type = cls.env.ref('account.account_payment_method_type_manual_in')
+        cls.inbound_payment_method = cls.env['account.payment.method'].create({
+            'name': method_type.name,
+            'method_type': method_type.id
+        })
+
+        method_type = cls.env.ref('account.account_payment_method_type_manual_out')
+        cls.outbound_payment_method = cls.env['account.payment.method'].create({
+            'name': method_type.name,
+            'method_type': method_type.id
+        })
+
     @classmethod
     def setup_company_data(cls, company_name, chart_template=None, **kwargs):
         ''' Create a new company having the name passed as parameter.
@@ -535,14 +547,6 @@ class TestAccountReconciliationCommon(AccountTestInvoicingCommon):
         cls.fx_journal = cls.company.currency_exchange_journal_id
         cls.diff_income_account = cls.company.income_currency_exchange_account_id
         cls.diff_expense_account = cls.company.expense_currency_exchange_account_id
-
-
-        # Fix this
-        cls.inbound_payment_method = cls.env['account.payment.method'].create({
-            'name': 'inbound',
-            'code': 'IN',
-            'payment_type': 'inbound',
-        })
 
         cls.expense_account = cls.company_data['default_account_expense']
         # cash basis intermediary account

@@ -23,8 +23,8 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         cls.company_data['default_journal_bank'].write({
             'payment_debit_account_id': cls.payment_debit_account_id.id,
             'payment_credit_account_id': cls.payment_credit_account_id.id,
-            'inbound_payment_method_ids': [(6, 0, cls.env.ref('account.account_payment_method_manual_in').ids)],
-            'outbound_payment_method_ids': [(6, 0, cls.env.ref('account.account_payment_method_manual_out').ids)],
+            'inbound_payment_method_ids': [(6, 0, cls.inbound_payment_method.id)],
+            'outbound_payment_method_ids': [(6, 0, cls.outbound_payment_method.id)],
         })
 
         cls.partner_a.write({
@@ -50,7 +50,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'currency_id': self.company_data['currency'].id,
             'partner_id': False,
             'destination_account_id': copy_receivable.id,
-            'payment_method_id': self.env.ref('account.account_payment_method_manual_in').id,
+            'payment_method_id': self.inbound_payment_method.id,
             'partner_bank_id': False,
         }
         expected_move_values = {
@@ -208,7 +208,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'currency_id': self.company_data['currency'].id,
             'partner_id': False,
             'destination_account_id': copy_receivable.id,
-            'payment_method_id': self.env.ref('account.account_payment_method_manual_in').id,
+            'payment_method_id': self.inbound_payment_method.id,
         }
         expected_move_values = {
             'currency_id': self.company_data['currency'].id,

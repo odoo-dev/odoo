@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo><data noupdate="1">
+    <record id="payment_method_test" model="account.payment.method">
+        <field name="name">Test</field>
+        <field name="method_type" ref="payment.account_payment_method_type_electronic_in"/>
+        <field name="state">deactivated</field>
+    </record>
     <record id="payment_acquirer_test" model="payment.acquirer">
         <field name="name">Test</field>
         <field name="display_as">Test (do not use in production)</field>
         <field name="sequence">99</field>
         <field name="provider">test</field>
         <field name="image_128" type="base64" file="payment_test/static/src/img/test_logo.jpg"/>
+        <field name="inbound_payment_method_id" ref="payment_method_test"/>
         <field name="description" type="html">
 <p>Test Payment Acquirer</p>
 <ul class="list-inline">

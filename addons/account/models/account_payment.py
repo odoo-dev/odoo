@@ -398,6 +398,8 @@ class AccountPayment(models.Model):
             else:
                 available_payment_methods = pay.journal_id.outbound_payment_method_ids
 
+            available_payment_methods = available_payment_methods.filtered(lambda m: m.state != 'deactivated')
+
             # Select the first available one by default.
             if available_payment_methods:
                 pay.payment_method_id = available_payment_methods[0]._origin
@@ -410,9 +412,11 @@ class AccountPayment(models.Model):
     def _compute_payment_method_fields(self):
         for pay in self:
             if pay.payment_type == 'inbound':
-                pay.available_payment_method_ids = pay.journal_id.inbound_payment_method_ids
+                available_payment_method_ids = pay.journal_id.inbound_payment_method_ids
             else:
-                pay.available_payment_method_ids = pay.journal_id.outbound_payment_method_ids
+                available_payment_method_ids = pay.journal_id.outbound_payment_method_ids
+
+            pay.available_payment_method_ids = available_payment_method_ids.filtered(lambda m: m.state != 'deactivated')
 
             pay.hide_payment_method = len(pay.available_payment_method_ids) == 1 and pay.available_payment_method_ids.code == 'manual'
 

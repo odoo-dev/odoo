@@ -12,12 +12,16 @@ class TestPrintCheck(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
         super().setUpClass(chart_template_ref=chart_template_ref)
-        # fix this
-        cls.payment_method_check = cls.env.ref("account_check_printing.account_payment_method_check")
+
+        cls.payment_method_type_check = cls.env.ref('account_check_printing.account_payment_method_type_check')
+        cls.payment_method_check = cls.env['account.payment.method'].create({
+            'name': cls.payment_method_type_check.name,
+            'method_type': cls.payment_method_type_check.id
+        })
 
         cls.company_data['default_journal_bank'].write({
             'outbound_payment_method_ids': [(6, 0, (
-                cls.env.ref('account.account_payment_method_manual_out').id,
+                cls.outbound_payment_method.id,
                 cls.payment_method_check.id,
             ))],
         })

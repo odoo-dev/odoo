@@ -279,6 +279,8 @@ class AccountPaymentRegister(models.TransientModel):
             else:
                 available_payment_methods = wizard.journal_id.outbound_payment_method_ids
 
+            available_payment_methods = available_payment_methods.filtered(lambda m: m.state != 'deactivated')
+
             # Select the first available one by default.
             if available_payment_methods:
                 wizard.payment_method_id = available_payment_methods[0]._origin
@@ -291,9 +293,11 @@ class AccountPaymentRegister(models.TransientModel):
     def _compute_payment_method_fields(self):
         for wizard in self:
             if wizard.payment_type == 'inbound':
-                wizard.available_payment_method_ids = wizard.journal_id.inbound_payment_method_ids
+                available_payment_method_ids = wizard.journal_id.inbound_payment_method_ids
             else:
-                wizard.available_payment_method_ids = wizard.journal_id.outbound_payment_method_ids
+                available_payment_method_ids = wizard.journal_id.outbound_payment_method_ids
+
+            wizard.available_payment_method_ids = available_payment_method_ids.filtered(lambda m: m.state != 'deactivated')
 
             wizard.hide_payment_method = len(wizard.available_payment_method_ids) == 1 and wizard.available_payment_method_ids.code == 'manual'
 
@@ -306,6 +310,8 @@ class AccountPaymentRegister(models.TransientModel):
                 available_payment_methods = wizard.journal_id.inbound_payment_method_ids
             else:
                 available_payment_methods = wizard.journal_id.outbound_payment_method_ids
+
+            available_payment_methods = available_payment_methods.filtered(lambda m: m.state != 'deactivated')
 
             # Select the first available one by default.
             if available_payment_methods:
