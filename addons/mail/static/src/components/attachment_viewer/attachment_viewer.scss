@@ -11,6 +11,11 @@
     z-index: -1;
 }
 
+.o_AttachmentViewer_buttonDownload {
+    display: flex;
+    align-items: center;
+}
+
 .o_AttachmentViewer_buttonNavigation {
     position: absolute;
     display: flex;
@@ -42,19 +47,18 @@
     display: flex;
     height: $o-navbar-height;
     align-items: center;
-    padding: 0 15px;
     width: 100%;
 }
 
 .o_AttachmentViewer_headerItem {
-    margin: 0 5px;
+    margin: 0 map-get($spacers, 2);
 
     &:first-child {
-        margin-left: 0;
+        margin-inline-start: map-get($spacers, 4);
     }
 
     &:last-child {
-        margin-right: 0;
+        margin-inline-end: map-get($spacers, 4);
     }
 }
 
@@ -79,6 +83,12 @@
     }
 }
 
+.o_AttachmentViewer_name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .o_AttachmentViewer_toolbar {
     position: absolute;
     bottom: 45px;
@@ -98,11 +108,20 @@
 .o_AttachmentViewer_viewIframe {
     width: 90%;
     height: 100%;
+
+    &.o-isMobile {
+        width: map-get($sizes, 100);
+    }
 }
 
 .o_AttachmentViewer_viewVideo {
     width: 75%;
     height: 75%;
+
+    &.o-isMobile {
+        width: map-get($sizes, 100);
+        height: map-get($sizes, 100);
+    }
 }
 
 .o_AttachmentViewer_zoomer {
