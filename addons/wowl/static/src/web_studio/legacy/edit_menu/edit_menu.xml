@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<t t-name="web_studio.EditMenu.MenuItem">
+    <li>
+        <a href="#" class="o_web_edit_menu" role="button"><i class="fa fa-fw fa-pencil"/> Edit Menu</a>
+    </li>
+</t>
+
+<!--
+  Same as website.contentMenu.dialog.submenu (move to web?)
+-->
+<t t-name="studio.contentMenu.dialog.submenu">
+    <li t-att-data-menu-id="submenu.id" t-attf-id="editmenu_submenu_{{ submenu.id }}">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text fa fa-bars" role="img" aria-label="Submenu label" title="Submenu label"/>
+            </div>
+            <span class="form-control">
+                <span class="js_menu_label">
+                    <t t-esc="submenu.name"/>
+                </span>
+                <i t-if="_.contains(widget.roots, submenu)" class="float-right fa fa-home" style="margin-top: 3px" role="img" aria-label="Home" title="Home"/>
+            </span>
+            <div class="input-group-append">
+                <button type="button" class="btn btn-primary js_edit_menu fa fa-pencil-square-o" aria-label="Edit Menu Item" title="Edit Menu Item"/>
+                <button type="button" class="btn btn-danger js_delete_menu fa fa-trash-o" aria-label="Delete Menu Item" title="Delete Menu Item"/>
+            </div>
+        </div>
+        <t t-set="children" t-value="submenu.childrenTree"/>
+        <ul t-if="children">
+            <t t-foreach="children" t-as="submenu">
+                <t t-call="studio.contentMenu.dialog.submenu"/>
+            </t>
+        </ul>
+    </li>
+</t>
+
+<t t-name="web_studio.EditMenu.Dialog">
+    <div>
+        <ul class="oe_menu_editor list-unstyled">
+            <t t-foreach="widget.roots" t-as="submenu">
+                <t t-call="studio.contentMenu.dialog.submenu"/>
+            </t>
+        </ul>
+        <div class="o_web_studio_edit_menu_desc small float-right">
+            <i class="fa fa-info-circle"/> Drag a menu to the right to create a sub-menu
+        </div>
+    </div>
+</t>
+
+<div t-name="web_studio.EditMenu.Dialog.New">
+    <div>
+        <label for="name">Name</label>
+        <input class="o_input" name="name" placeholder="My Menu" type="text"/>
+    </div>
+    <div class="mt16">
+        <div class="model_choice"/>
+    </div>
+    <div class="mt16 model_chooser">
+        <label for="name">Model</label>
+        <div class="js_model"/>
+    </div>
+</div>
+
+
+</templates>

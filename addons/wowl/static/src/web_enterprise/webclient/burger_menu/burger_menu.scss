@@ -1,0 +1,146 @@
+//------------------------------------------------------------------------------
+// LPE FIXME: was menu_mobile.scss
+// Mobile Burger Menu
+//------------------------------------------------------------------------------
+
+.o_web_client .o_main_navbar {
+  .o_disabled {
+    pointer-events: none;
+    opacity: 0.4;
+  }
+}
+
+.o_burger_menu.burgerslide-enter {
+  left: 100%;
+}
+.o_burger_menu.burgerslide-enter-to {
+  transition: left 0.2s;
+  left: 0%;
+}
+.o_burger_menu.burgerslide-leave {
+  left: 0%;
+}
+.o_burger_menu.burgerslide-leave-to {
+  transition: left 0.2s;
+  left: 100%;
+}
+.o_mobile_menu_toggle {
+  font-size: 18px;
+}
+
+.o_burger_menu {
+  display: flex;
+  flex-flow: column nowrap;
+  position: fixed;
+  top: 0px;
+  bottom: 0px;
+  width: 100%;
+  font-size: 15px;
+  font-weight: 300;
+  z-index: $zindex-tooltip + 10;
+
+  .o_burger_menu_topbar {
+    flex: 0 0 $o-navbar-height;
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    background: darken($o-brand-odoo, 10%);
+    color: white;
+    .dropdown-toggle {
+      padding: 10px 16px;
+    }
+    .o_burger_menu_avatar {
+      height: 26px;
+      width: 26px;
+      object-fit: cover;
+    }
+    .o_burger_menu_username,
+    .o_burger_menu_caret {
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+    .o_burger_menu_close {
+      height: 100%;
+      padding: 16px;
+    }
+  }
+
+  .o_burger_menu_content {
+    flex: 1 1 auto;
+    overflow: auto;
+    background: white;
+    &.o_burger_menu_dark {
+      background-color: $o-brand-odoo;
+    }
+
+    .o_burger_menu_app {
+      ul {
+        padding: 0px;
+        .o_dropdown_toggler {
+          font-weight: inherit;
+          width: 100%;
+          text-align: initial;
+        }
+        .o_dropdown_menu {
+          background-color: initial;
+          border: initial;
+          box-shadow: initial;
+          position: relative;
+          padding-left: 1em;
+        }
+
+        > li,
+        .o_burger_menu_section {
+          list-style: none;
+          span {
+            display: block;
+            padding: 10px 0px;
+            color: white;
+            font-weight: inherit;
+          }
+        }
+      }
+    }
+
+    .o_burger_menu_user {
+      color: $o-main-text-color;
+      .o_burger_menu_companies {
+        padding: 16px;
+        border-bottom: 1px solid $o-main-color-muted;
+        .o_burger_menu_user_title {
+          font-size: 12px;
+          margin-bottom: 5px;
+          font-weight: bold;
+        }
+      }
+      .o_user_menu_mobile {
+        padding: 16px;
+        list-style: none;
+        > li {
+          &.divider {
+            // FIXME ?
+            background-color: $o-main-color-muted;
+            height: 1px;
+            margin: 10px -16px;
+          }
+          > a {
+            display: block;
+            padding: 10px 0;
+            color: $o-main-text-color;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Hide the arrow on the home menu
+body.o_home_menu_background .o_burger_menu > .o_burger_menu_topbar .dropdown-toggle::after {
+  display: none;
+}
+
+@include media-breakpoint-down(sm) {
+  .o_debug_dropdown {
+    z-index: $zindex-tooltip + 10;
+  }
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<div t-name="web_studio.StudioClientAction" class="o_studio"
+    t-on-switch-tab="onSwitchTab"
+    t-on-studio-switch-view="switchView"
+    t-on-studio-edit-view="switchViewLegacy">
+    <StudioNavbar breadcrumbs="props.breadcrumbs"/>
+
+    <t t-if="studio.mode === studio.MODES.HOME_MENU">
+        <StudioHomeMenu apps="homeMenuProps.apps"/>
+    </t>
+
+    <t t-if="studio.mode === studio.MODES.APP_CREATOR">
+        <ComponentAdapter Component="AppCreatorWrapper"/>
+    </t>
+
+    <t t-if="studio.mode === studio.MODES.EDITOR">
+        <EditorMenu studioBreadcrumbs="[{name: 'prout'}]"/>
+
+        <ActionContainer t-att-class="{o_hidden: studio.editorTab === 'views' or studio.editedReport}"/>
+
+        <t t-if="studio.editorTab === 'views'">
+            <!-- <ActionEditorSidebar/> -->
+            <EditorAdapter t-if="studio.editedViewType" Component="ActionEditorMain" params="{ action: studio.editedAction, viewType: studio.editedViewType }" t-key="key"/>
+            <EditorAdapter t-else="" Component="ActionEditor" params="studio.editedAction" class="o_web_studio_client_action" t-key="key"/>
+        </t>
+
+<!--         <t t-if="studio.editorTab === 'reports' and studio.editedReport">
+            <ReportEditorSidebar/>
+            <ReportEditor/>
+            <Pager/>
+        </t> -->
+    </t>
+</div>
+
+</templates>

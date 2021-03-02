@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<!-- Owl Templates -->
+
+<li t-name="wowl.BurgerMenu" owl="1">
+    <a type="button"
+        class="fa fa-bars o_mobile_menu_toggle"
+        title="Toggle menu" aria-label="Toggle menu"
+         t-on-click="_openBurger"/>
+    <Portal target="'body.o_web_client'">
+      <div t-if="state.isBurgerOpened" class="o_burger_menu" t-transition="burgerslide">
+        <div class="o_burger_menu_topbar"
+            t-on-click.stop='_toggleUserMenu'>
+            <span class="dropdown-toggle">
+                <img class="rounded-circle o_burger_menu_avatar" t-att-src="'/web/image?model=res.users&amp;field=image_128&amp;id=' + user.userId" alt="Menu"/>
+                <span class="o_burger_menu_username"><t t-esc="user.name"/></span>
+            </span>
+            <span class="fa fa-close float-right o_burger_menu_close" role="img" aria-label="Close menu"
+                title="Close menu"
+                t-on-click.stop="_closeBurger"/>
+        </div>
+        <div class="o_burger_menu_content"
+            t-att-class="{o_burger_menu_dark: !state.isUserMenuOpened and currentApp}">
+            <div t-if="!currentApp or state.isUserMenuOpened" class="o_burger_menu_user">
+                <MobileSwitchCompanyMenu t-if="user.allowed_companies.length > 1" />
+                <BurgerUserMenu/>
+            </div>
+
+            <!-- Current App Sections -->
+            <div class="o_burger_menu_app" t-if="!state.isUserMenuOpened and currentApp">
+                <ul class="o_menu_sections">
+                    <t t-foreach="currentAppSections" t-as="subMenu">
+                        <t t-call="wowl.BurgerSection">
+                            <t t-set="section" t-value="subMenu" />
+                        </t>
+                    </t>
+                </ul>
+            </div>
+        </div>
+      </div>
+      <div t-else="" />
+    </Portal>
+</li>
+
+<t t-name="wowl.BurgerSection">
+    <Dropdown t-if="section.childrenTree.length" t-att-class="'o_burger_menu_section'" t-on-click.stop="_onDropDownClicked" manualOnly="true" t-key="section.id">
+        <span class="float-left"><t t-esc="section.name" /></span><span class="fa fa-chevron-right toggle_icon float-right"/>
+        <t t-set-slot="menu" >
+            <t t-foreach="section.childrenTree" t-as="subSection" >
+                <t t-call="wowl.BurgerSection">
+                    <t t-set="section" t-value="subSection" />
+                </t>
+            </t>
+        </t>
+    </Dropdown>
+    <DropdownItem t-else="" t-key="section.id" t-on-click.stop="_onMenuClicked(section)">
+        <t t-esc="section.name" />
+    </DropdownItem>
+</t>
+
+</templates>

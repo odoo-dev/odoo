@@ -1,0 +1,36 @@
+.o_web_studio_client_action .o_web_studio_editor_manager.o_web_studio_report_editor_manager {
+    .o_web_studio_sidebar {
+        // make it bigger
+        flex: 0 0 $o-web-studio-report-sidebar-width;
+    }
+    .o_web_studio_report_actions {
+        @include o-position-absolute($top: 8px, $right: 24px);
+        z-index: 1;
+
+        .o_web_studio_report_print {
+            margin-right: 8px;
+        }
+
+        .o_web_studio_report_pager {
+            display: inline-block;
+            background-color: $o-web-studio-bg-medium;
+            border-radius: 5px;
+            color: $o-web-studio-text-inactive;
+            padding: 3px 3px 3px 8px;
+
+            .o_pager_value {
+                color: white;
+            }
+            .o_pager_counter {
+                margin-right: 8px;
+                vertical-align: middle;
+                line-height: 1;
+            }
+            .btn-group > button {
+                padding: 0 5px;
+                @include o-web-studio-btn-variation($o-web-studio-bg-medium, $o-web-studio-bg-medium);
+                @include o-hover-opacity;
+            }
+        }
+    }
+}

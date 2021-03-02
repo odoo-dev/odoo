@@ -4,15 +4,22 @@ import { serviceRegistry } from "../webclient/service_registry";
 
 const loadMenusUrl = `/wowl/load_menus`;
 
-async function fetchLoadMenus(url) {
-  const res = await odoo.browser.fetch(url);
-  if (!res.ok) {
-    throw new Error("Error while fetching menus");
-  }
-  return res.json();
+function makeFetchLoadMenus() {
+  const cacheHashes = odoo.session_info.cache_hashes;
+  let loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
+  return async function fetchLoadMenus(reload) {
+    if (reload) {
+      loadMenusHash = new Date().getTime().toString();
+    }
+    const res = await odoo.browser.fetch(`${loadMenusUrl}/${loadMenusHash}`);
+    if (!res.ok) {
+      throw new Error("Error while fetching menus");
+    }
+    return res.json();
+  };
 }
 
-function makeMenus(env, menusData) {
+function makeMenus(env, menusData, fetchLoadMenus) {
   let currentAppId;
   return {
     getAll() {
@@ -44,17 +51,23 @@ function makeMenus(env, menusData) {
       }
       await env.services.action.doAction(menu.actionID, { clearBreadcrumbs: true });
       this.setCurrentMenu(menu);
-      env.services.router.pushState({
-        menu_id: `${menu.id}`,
-      });
     },
     setCurrentMenu(menu) {
       menu = typeof menu === "number" ? this.getMenu(menu) : menu;
       if (menu && menu.appID !== currentAppId) {
         currentAppId = menu.appID;
         env.bus.trigger("MENUS:APP-CHANGED");
+        env.services.router.pushState({
+          "lock menu_id": `${menu.id}`,
+        });
       }
     },
+    async reload() {
+      if (fetchLoadMenus) {
+        menusData = await fetchLoadMenus(true);
+        env.bus.trigger("MENUS:APP-CHANGED");
+      }
+    }
   };
 }
 
@@ -62,10 +75,9 @@ export const menuService = {
   name: "menu",
   dependencies: ["action", "router"],
   async deploy(env) {
-    const cacheHashes = odoo.session_info.cache_hashes;
-    const loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
-    const menusData = await fetchLoadMenus(`${loadMenusUrl}/${loadMenusHash}`);
-    return makeMenus(env, menusData);
+    const fetchLoadMenus = makeFetchLoadMenus();
+    const menusData = await fetchLoadMenus();
+    return makeMenus(env, menusData, fetchLoadMenus);
   },
 };
 

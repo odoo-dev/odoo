@@ -43,6 +43,7 @@ function registerClientAction(name, action) {
     `;
     Action.components = { ClientActionAdapter };
     Action.isLegacy = true;
+    Action.forceFullscreen = action.prototype.forceFullscreen;
     actionRegistry.add(name, Action);
   } else {
     // the action is either a Component or a function, register it directly

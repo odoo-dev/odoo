@@ -1,0 +1,208 @@
+.o_home_menu_background {
+  // 'Home menu background' design is shared with enterprise login
+  // screens and it's located in '/web_enterprise/static/src/scss/ui.scss'
+
+  // When applied on webclient (note: we do not specify the webclient class
+  // here to avoid breaking studio custom style)
+  &:not(.o_home_menu_background_custom) .o_main_navbar {
+    background-color: transparent;
+    border-color: transparent;
+
+    .show .dropdown-toggle {
+      background-color: rgba(black, 0.1);
+    }
+    .oe_topbar_avatar {
+      box-shadow: $o-home-studio-menu-shadow;
+    }
+
+    &,
+    & > ul > li {
+      > a {
+        text-shadow: $o-home-studio-menu-shadow;
+
+        &:hover,
+        &:focus {
+          background-color: rgba(black, 0);
+        }
+      }
+    }
+  }
+  &.o_home_menu_background_custom .o_home_menu {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
+
+.o_home_menu {
+  font-size: $o-font-size-base-touch;
+  -webkit-overflow-scrolling: touch; // smooth scrolling in iOS app (Safari)
+
+  .o_apps {
+    user-select: none;
+
+    .o_app {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 3%;
+      outline: none;
+      text-decoration: none;
+      transition: all 0.3s ease 0s;
+
+      .o_app_icon {
+        background: {
+          repeat: no-repeat;
+          position: center;
+          size: cover;
+        }
+        border-radius: 4%;
+        box-shadow: 0 8px 0 -10px black;
+        transition: all 0.3s ease 0s;
+
+        // Pictogram icons (studio)
+        &_has_pictogram::before {
+          background: linear-gradient(to right top, transparent, rgba(white, 0.15));
+          border-radius: 4%;
+          box-shadow: inset 0 1px 0 0 rgba(white, 0.4), inset 0 -1px 0 0 rgba(black, 0.4);
+        }
+
+        .fa {
+          font-size: $o-home-menu-app-icon-max-width * 0.5;
+          text-shadow: 0 2px 0 rgba(0, 0, 0, 0.23);
+          @media screen and (max-width: 260px) {
+            // where icons start to shrink
+            font-size: 30px; // on old browser
+            font-size: 13vw; // ~33px at 260px
+          }
+        }
+      }
+
+      .o_caption {
+        color: white;
+        text-shadow: 0 1px 1px rgba(black, 0.8);
+      }
+
+      &:focus,
+      &.o_focused,
+      &:hover {
+        .o_app_icon {
+          box-shadow: 0 8px 15px -10px black;
+          transform: translateY(-1px);
+        }
+      }
+
+      &.o_menuitem {
+        &:focus,
+        &.o_focused {
+          background-color: rgba(white, 0.05);
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+
+  .o_menuitems {
+    margin-bottom: 40px;
+
+    .o_menuitem {
+      color: $gray-200;
+      outline: none;
+      @include o-text-overflow;
+      @include media-breakpoint-up(md) {
+        font-size: 20px;
+      }
+
+      .o_menuitem_parents {
+        font-weight: $font-weight-light;
+        color: $gray-400;
+      }
+
+      &:hover,
+      &:focus,
+      &.o_focused {
+        color: white;
+        .o_menuitem_parents {
+          color: $gray-300;
+        }
+      }
+
+      &:focus,
+      &.o_focused {
+        background-color: rgba(white, 0.05);
+      }
+    }
+  }
+
+  .o_no_result {
+    color: $o-brand-lightsecondary;
+    font-size: 22px;
+  }
+}
+
+.o_home_menu {
+  z-index: $zindex-modal - 1;
+
+  .o_menu_search {
+    align-items: center;
+    background-color: rgba(white, 0.1);
+    border-radius: 4px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 0 rgba(black, 0.1);
+    display: flex;
+    flex: 0 0 auto;
+    height: $o-navbar-height;
+    margin: 0 auto;
+    max-width: $o-home-menu-container-size;
+    padding: 10px 15px;
+    text-shadow: 0 1px 0 rgba(black, 0.5);
+    width: 100%;
+    @include media-breakpoint-up(md) {
+      margin: 22px auto;
+    }
+
+    .o_menu_search_icon {
+      color: white;
+      flex: 0 0 auto;
+      font-size: 20px;
+      margin-right: 15px;
+    }
+
+    .o_menu_search_input {
+      background-color: rgba(0, 0, 0, 0);
+      border: none;
+      color: white;
+      flex: 1 1 auto;
+      text-shadow: inherit;
+
+      &:focus {
+        outline: none;
+      }
+
+      @mixin o-placeholder {
+        // Rules below need to be separated. Otherwise all browsers will discard the whole rule.
+        color: white;
+        opacity: 0.5;
+      }
+
+      &::-webkit-input-placeholder {
+        // WebKit, Blink, Edge
+        @include o-placeholder;
+      }
+      &::-moz-placeholder {
+        // Mozilla Firefox 19+
+        @include o-placeholder;
+      }
+    }
+  }
+
+  &.o_search_hidden .o_menu_search {
+    margin: 0;
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+    user-select: none;
+
+    > .o_menu_search_input {
+      cursor: default;
+    }
+  }
+}

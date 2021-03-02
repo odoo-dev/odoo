@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <div t-name="wowl.studio.HomeMenuCustomizer" class="o_web_studio_home_studio_menu">
+    <FileUploader
+        t-ref="fileUploader"
+        withLabel="false"
+        fileUploadUrl="'/web/binary/upload_attachment'"
+        onUploaded="bgImageUploaded"
+        multiUpload="false"
+        uploadParams="{
+          model: 'res.company',
+          id: user.current_company[0],
+        }">
+    </FileUploader>
+    <Dropdown>
+      Customizations
+      <t t-set-slot="menu">
+        <DropdownItem t-on-click="_changeBackgroundImage">
+          Change background image
+        </DropdownItem>
+        <DropdownItem t-if="menus.getMenu('root').backgroundImage or true"
+          class="o_web_studio_reset_default_background"
+          t-on-click="_resetBgImage">
+          Reset Default Background
+        </DropdownItem>
+        <DropdownItem class="o_web_studio_import" t-on-click="_import">
+          Import
+        </DropdownItem>
+        <DropdownItem class="o_web_studio_export" t-on-click="_export">
+          Export
+        </DropdownItem>
+      </t>
+  </Dropdown>
+</div>
+
+</templates>

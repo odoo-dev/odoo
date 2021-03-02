@@ -1,0 +1,86 @@
+.o_searchview {
+  @include media-breakpoint-up(md) {
+    border-bottom: 1px solid $o-brand-secondary;
+  }
+  @include media-breakpoint-down(sm) {
+    margin-right: 5px; // o_switch_view_button_icon alignment
+    padding-right: 0;
+  }
+
+  .o_searchview_facet {
+    @include media-breakpoint-down(sm) {
+      flex-flow: row wrap;
+    }
+
+    border: 1px solid $o-brand-secondary;
+    background: $o-brand-lightsecondary;
+    color: $o-brand-secondary;
+
+    .o_searchview_facet_label {
+      background-color: $o-brand-odoo;
+    }
+
+    .o_facet_remove:hover {
+      color: darken($o-brand-secondary, 20%);
+    }
+  }
+
+  .o_searchview_input {
+    border: none;
+    outline: none;
+  }
+  .o_searchview_icon {
+    @include o-position-absolute($top: 4px, $right: 0);
+  }
+  .o_searchview_autocomplete li.o_selection_focus {
+    background-color: $table-hover-bg;
+  }
+}
+
+.o_search_options {
+  margin: auto 0;
+  display: block;
+}
+
+.o_web_client .o_mobile_search {
+  align-items: normal;
+  background-color: white;
+  border: none;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  overflow: auto;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: $zindex-modal;
+
+  .o_mobile_search_header {
+    background-color: $o-brand-odoo;
+    display: flex;
+    min-height: $o-navbar-height;
+    justify-content: space-between;
+    width: 100%;
+
+    .o_mobile_search_button {
+      color: white;
+
+      &:active {
+        background-color: darken($o-brand-primary, 10%);
+      }
+    }
+  }
+
+  .o_mobile_search_content {
+    flex: auto;
+    height: auto;
+    overflow-y: auto;
+    width: 100%;
+  }
+
+  .o_mobile_search_footer {
+    width: 100%;
+  }
+}

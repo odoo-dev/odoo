@@ -1,0 +1,208 @@
+// ------- Provide room for the caret -------
+@mixin o-list-view-sortable-caret-padding($base: $table-cell-padding, $ratio: 1) {
+  > thead > tr > th.o_column_sortable:not(:empty) {
+    padding-right: ceil((($base * $ratio) / 1rem) * $o-root-font-size) + 5px; // FIXME
+
+    // Extra room when needed
+    &:last-child {
+      padding-right: ceil((($base * $ratio) / 1rem) * $o-root-font-size) + 5px +
+        $o-horizontal-padding !important; // FIXME
+    }
+  }
+}
+
+// ------- Define paddings independently for each table component -------
+@mixin o-list-view-full-width-padding($base: $table-cell-padding, $ratio: 1) {
+  $body-padding: floor((($base * $ratio * 0.7) / 1rem) * $o-root-font-size); // FIXME
+
+  > thead > tr > :not(:empty) {
+    padding: ceil((($base * $ratio) / 1rem) * $o-root-font-size + 4px) 4px; // FIXME
+  }
+  > tbody > tr:not(.o_list_table_grouped) > td {
+    padding: $body-padding 4px;
+  }
+  > tfoot > tr > :not(:empty) {
+    padding: ceil((($base * $ratio) / 1rem) * $o-root-font-size + 2px) 4px; // FIXME
+  }
+
+  @include o-list-view-sortable-caret-padding($base, $ratio);
+
+  // ------- Make full-width tables to fit odoo layout -------
+  > thead,
+  > tbody,
+  > tfoot {
+    > tr > * {
+      &:first-child {
+        padding-left: $o-horizontal-padding !important;
+      }
+      &:last-child {
+        padding-right: $o-horizontal-padding !important;
+      }
+      &.o_list_record_selector {
+        padding-right: 5px !important;
+      }
+    }
+  }
+}
+
+// Common style for list views (also inside form views)
+.o_list_view .o_list_table {
+  // We need this to be collapse because we want to add a border on the rows
+  // for sale order/invoice lines of type section.
+  border-collapse: collapse;
+
+  .o_column_sortable:not(:empty)::after {
+    position: absolute;
+  }
+
+  @include o-list-view-sortable-caret-padding;
+
+  // ------- Force empty cells' padding -------
+  > thead,
+  > tbody,
+  > tfoot {
+    > tr > :empty {
+      padding: 0;
+      &::after {
+        // ... end hide caret icon
+        display: none;
+      }
+    }
+  }
+
+  // ------- Increase thead and tfoot vertical padding -------
+  > thead,
+  > tfoot {
+    > tr > * {
+      // List views always have the table-sm class, maybe we should
+      // remove it (and consider it does not exist) and change the default
+      // table paddings
+      padding-top: $table-cell-padding-sm * 1.25;
+      padding-bottom: $table-cell-padding-sm * 1.25;
+    }
+  }
+
+  // ------- Style thead -------
+  > thead {
+    background-color: white;
+    border: none;
+
+    > tr:first-child > th {
+      border: none;
+    }
+  }
+
+  > tfoot {
+    border-bottom: none;
+    border-top: none;
+  }
+
+  // ------- Decrease table's inner content "visual depth" -------
+  tbody:first-of-type > tr:first-child:not(.o_group_header) {
+    box-shadow: inset 0px 5px 10px -4px rgba(black, 0.1);
+  }
+
+  // ------- Force progress bars to respect table's layout -------
+  .o_progressbar_cell {
+    .o_progressbar {
+      display: table-row;
+
+      > div {
+        width: 100%;
+        display: table-cell;
+      }
+
+      .o_progressbar_value {
+        width: 45px;
+        min-width: 45px;
+      }
+    }
+  }
+
+  // -------   Grouped list views -------
+  &.o_list_table_grouped {
+    > tbody > tr.o_group_header {
+      background-color: rgba(gray("200"), 0.9);
+
+      &.o_group_has_content {
+        @include o-hover-text-color($gray-600, theme-color("primary"));
+
+        &.o_group_open {
+          font-weight: bold;
+          @include o-hover-text-color($headings-color, theme-color("primary"));
+        }
+      }
+      &,
+      &.o_group_has_content {
+        &:focus-within {
+          color: $o-brand-primary;
+        }
+      }
+    }
+
+    // Disable striped design for grouped content
+    &.table-striped > tbody + tbody > tr:not(.o_group_header):nth-of-type(odd) {
+      background-color: $table-bg;
+    }
+  }
+
+  .o_data_row:not(.o_selected_row) > .o_data_cell:not(.o_readonly_modifier):not(:last-child) {
+    border-right: 1px solid transparent;
+  }
+  .o_data_row.o_selected_row > .o_data_cell {
+    border-bottom: 1px solid $table-border-color;
+    &.o_required_modifier:not(.o_readonly_modifier) {
+      border-bottom: 1px solid black;
+      &.o_invalid_cell {
+        border-bottom: 1px solid red;
+      }
+    }
+    &:not(.o_readonly_modifier):not(:last-child) {
+      border-right: 1px solid $table-border-color;
+    }
+  }
+  .o_data_row.o_selected_row > .o_list_record_remove {
+    border-bottom: 1px solid $table-border-color;
+  }
+}
+
+// Standalone list views
+.o_content > .o_list_view > .table-responsive > .table {
+  // List views always have the table-sm class, maybe we should remove
+  // it (and consider it does not exist) and change the default table paddings
+  @include o-list-view-full-width-padding($base: $table-cell-padding-sm, $ratio: 2);
+  &:not(.o_list_table_grouped) {
+    @include media-breakpoint-up(xl) {
+      @include o-list-view-full-width-padding($base: $table-cell-padding-sm, $ratio: 2.5);
+    }
+  }
+
+  .o_optional_columns_dropdown_toggle {
+    padding: 8px 10px;
+  }
+}
+// Restore on mobile the scroll on list view
+@include media-breakpoint-down(sm) {
+  .o_view_controller > .o_content > .o_list_view > .table-responsive {
+    overflow: auto;
+
+    .o_list_table tr:focus-within {
+      background-color: inherit;
+    }
+  }
+
+  .o_data_row_selected {
+    user-select: none; // Prevent text selection when editing
+    background-color: $table-hover-bg !important;
+  }
+
+  .o_web_client.o_touch_device .o_content table.o_list_table.table tr > {
+    :first-child {
+      display: none;
+    }
+    // first-child will be hidden so add left padding to second child
+    :nth-child(2) {
+      padding-left: $o-horizontal-padding !important;
+    }
+  }
+}

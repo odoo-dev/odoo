@@ -1,0 +1,935 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<div t-name="web_studio.ViewEditorSidebar" class="o_web_studio_sidebar">
+    <!-- Header -->
+    <div class="o_web_studio_sidebar_header">
+        <div name="new" t-attf-class="o_web_studio_new #{_.contains(['form', 'list', 'kanban', 'search'], widget.view_type)  ? (widget.state.mode === 'new' ? 'active' : '') : 'inactive'}">
+            <i class="fa fa-plus"/> Add
+        </div>
+        <div name="view" t-attf-class="o_web_studio_view #{widget.state.mode === 'view' ? 'active' : ''}">
+            <i class="fa fa-television"/> View
+        </div>
+        <div name="properties" t-attf-class="disabled o_web_studio_properties #{widget.state.mode !== 'properties' ? 'inactive' : 'active'}">
+            <i class="fa fa-server"/> Properties
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="o_web_studio_sidebar_content o_display_view" t-if="!(widget.mode === 'properties')">
+        <t t-if="widget.state.mode === 'view'">
+            <div t-if="_.contains(['list', 'form', 'kanban', 'gantt'], widget.view_type)" class="o_web_studio_sidebar_checkbox">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" id="create" name="create" class="custom-control-input"
+                        t-att-checked="widget.isTrue(widget.state.attrs.create) ? 'checked' : undefined"/>
+                    <label for="create" class="custom-control-label">Can Create</label>
+                </div>
+            </div>
+            <div t-if="_.contains(['list', 'form', 'gantt'], widget.view_type)" class="o_web_studio_sidebar_checkbox">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" id="edit" name="edit" class="custom-control-input"
+                        t-att-checked="widget.isTrue(widget.state.attrs.edit) ? 'checked' : undefined"/>
+                    <label for="edit" class="custom-control-label">Can Edit</label>
+                </div>
+            </div>
+            <div t-if="_.contains(['list', 'form'], widget.view_type)" class="o_web_studio_sidebar_checkbox">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" id="delete" name="delete" class="custom-control-input"
+                        t-att-checked="widget.isTrue(widget.state.attrs.delete) ? 'checked' : undefined"/>
+                    <label for="delete" class="custom-control-label">Can Delete</label>
+                </div>
+            </div>
+            <t t-if="_.contains(['list', 'form', 'search'], widget.view_type)">
+                <t t-call="web_studio.ShowInvisibleElements"/>
+            </t>
+            <t t-if="widget.view_type === 'list'">
+                <div class="o_web_studio_sidebar_select">
+                    <label for="editable">Editable</label>
+                    <select id="editable" name="editable">
+                        <option></option>
+                        <option t-att-selected="widget.state.attrs.editable === 'top' ? 'selected' : undefined" value="top">New record on top</option>
+                        <option t-att-selected="widget.state.attrs.editable === 'bottom' ? 'selected' : undefined" value="bottom">New record at the bottom</option>
+                    </select>
+                </div>
+                <div class="custom-control custom-checkbox">
+                   <input type="checkbox" id="multi_edit" name="multi_edit" class="custom-control-input" t-att-checked="widget.isTrue(widget.state.attrs.multi_edit or 'false') ? 'checked' : undefined"/>
+                   <label for="multi_edit" class="custom-control-label">Enable Mass Editing</label>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="sort_field">Sort By</label>
+                    <select id="sort_field" name="sort_field">
+                        <option></option>
+                        <t t-foreach="widget.fields_in_view" t-as="field">
+                            <t t-set="fieldInfo" t-value="widget.fieldsInfo[field]"/>
+                            <t t-if="fieldInfo.optional !== 'hide' and fieldInfo.invisible !== true and field_value.store === true">
+                                <option t-att-value='field' t-att-selected="widget.defaultOrder and field ===  widget.defaultOrder[0] ? widget.defaultOrder[0] : undefined">
+                                    <t t-esc="field_value.string"/> <span t-if="widget.debug">(<t t-esc="field_value.name"/>)</span>
+                                </option>
+                            </t>
+                        </t>
+                    </select>
+                </div>
+                <div id="sort_order_div" t-att-class="'o_web_studio_sidebar_select' + (!widget.defaultOrder ? ' d-none' : '')">
+                    <label for="sort_order">Order</label>
+                    <select id="sort_order" name="sort_order">
+                            <option value="asc" t-att-selected="widget.defaultOrder and widget.defaultOrder[1] === 'asc' ? widget.defaultOrder[1] : 'asc'">Ascending</option>
+                            <option value="desc" t-att-selected="widget.defaultOrder and 'desc' ===  widget.defaultOrder[1] ? widget.defaultOrder[1] : undefined">Descending</option>
+                    </select>
+                </div>
+            </t>
+            <!-- Kanban view settings -->
+            <t t-if="widget.view_type === 'kanban'">
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="quick_create" name="quick_create" class="custom-control-input" data-leave-empty='checked'
+                            t-att-checked="widget.state.attrs.quick_create ? undefined : 'checked'"/>
+                        <label for="quick_create" class="custom-control-label">Quick Create</label>
+                    </div>
+                </div>
+                <t t-call="web_studio.ShowInvisibleElements"/>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="default_group_by">Default Group by</label>
+                    <select id="default_group_by" name="default_group_by">
+                        <option t-att-selected="widget.state.attrs.default_group_by ? undefined : 'selected'"></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and _.contains(widget.GROUPABLE_TYPES, field.type)" t-att-selected="widget.state.attrs.default_group_by ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+            </t>
+            <!-- Map view settings -->
+            <t t-if="widget.view_type === 'map'">
+                <div class="o_web_studio_sidebar_select">
+                    <label for="res_partner">Contact Field</label>
+                    <select id="res_partner" name="res_partner">
+                        <option></option>
+                        <option t-if="widget.model_name === 'res.partner'" t-att-selected="widget.state.attrs.res_partner ===  'id' ? 'selected' : undefined" value="id">
+                            ID <span t-if="widget.debug">(id)</span>
+                        </option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.type === 'many2one' and field.relation === 'res.partner'" t-att-selected="widget.state.attrs.res_partner ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string" /> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="hide_name" name="hide_name" class="custom-control-input" data-leave-empty='unchecked'
+                            t-att-checked="widget.state.attrs.hide_name ? 'checked' : undefined"/>
+                        <label for="hide_name" class="custom-control-label">Hide Name</label>
+                    </div>
+                </div>
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="hide_address" name="hide_address" class="custom-control-input" data-leave-empty='unchecked'
+                            t-att-checked="widget.state.attrs.hide_address ? 'checked' : undefined"/>
+                        <label for="hide_address" class="custom-control-label">Hide Address</label>
+                    </div>
+                </div>
+                <div class="o_web_studio_sidebar_tags">
+                    <label for="map_popup_fields">Additional Fields</label>
+                    <div class="o_map_popup_fields"/>
+                </div>
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="routing" name="routing" class="custom-control-input" data-leave-empty='unchecked'
+                            t-att-checked="widget.state.attrs.routing ? 'checked' : undefined"/>
+                        <label for="routing" class="custom-control-label">Enable Routing</label>
+                    </div>
+                </div>
+                <div class="o_web_studio_sidebar_select mt-0" t-if="widget.state.attrs.routing">
+                    <label for="default_order">Sort by</label>
+                    <select id="default_order" name="default_order">
+                        <option></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and !_.contains(['one2many', 'many2many', 'binary'], field.type)" t-att-selected="widget.state.attrs.default_order ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string" /> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+            </t>
+            <!-- Calendar view settings -->
+            <t t-if="widget.view_type === 'calendar'">
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="quick_add" name="quick_add" class="custom-control-input" data-leave-empty='checked'
+                            t-att-checked="widget.isTrue(widget.state.attrs.quick_add) ? 'checked' : undefined"/>
+                        <label for="quick_add" class="custom-control-label">Quick Create</label>
+                    </div>
+                </div>
+                <div
+                    class="o_web_studio_sidebar_select"
+                    t-if="widget.debug &amp;&amp; widget.isTrue(widget.state.attrs.quick_add)"
+                    title="This field will be used when creating records directly from the calendar view."
+                    >
+                    <label for="create_name_field">Quick Create Field</label>
+                    <select id="create_name_field" name="create_name_field">
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store &amp;&amp; field.type === 'char'" t-att-selected="widget.state.attrs.create_name_field ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span>(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+
+                <div class="o_web_studio_sidebar_select">
+                    <label for="date_start">Start Date Field</label>
+                    <select id="date_start" name="date_start">
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and _.contains(['date', 'datetime'], field.type)" t-att-selected="widget.state.attrs.date_start ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="date_stop">Stop Date Field</label>
+                    <select id="date_stop" name="date_stop">
+                        <option t-att-selected="widget.state.attrs.date_stop ? undefined : 'selected'"></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and _.contains(['date', 'datetime'], field.type)" t-att-selected="widget.state.attrs.date_stop ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="date_delay">Delay Field</label>
+                    <select id="date_delay" name="date_delay">
+                        <option t-att-selected="widget.state.attrs.date_delay ? undefined : 'selected'"></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="_.contains(['float', 'integer'], field.type)" t-att-selected="widget.state.attrs.date_delay ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="color">Color</label>
+                    <select id="color" name="color">
+                        <option t-att-selected="widget.state.attrs.color ? undefined : 'selected'"></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="_.contains(['many2one', 'selection'], field.type)" t-att-selected="widget.state.attrs.color ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="all_day">All Day</label>
+                    <select id="all_day" name="all_day">
+                        <option t-att-selected="widget.state.attrs.all_day ? undefined : 'selected'"></option>
+                        <!-- all_day needs to be a boolean field -->
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.type === 'boolean'" t-att-selected="widget.state.attrs.all_day ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="mode">Default Display Mode</label>
+                    <select id="mode" name="mode">
+                        <option></option>
+                        <option t-att-selected="widget.state.attrs.mode === 'day' ? 'selected' : undefined" value="day">day</option>
+                        <option t-att-selected="widget.state.attrs.mode === 'week' ? 'selected' : undefined" value="week">week</option>
+                        <option t-att-selected="widget.state.attrs.mode === 'month' ? 'selected' : undefined" value="month">month</option>
+                        <option t-att-selected="widget.state.attrs.mode === 'year' ? 'selected' : undefined" value="year">year</option>
+                    </select>
+                </div>
+            </t>
+            <!-- Gantt view settings -->
+            <t t-if="widget.view_type === 'gantt'">
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="display_unavailability" name="display_unavailability" class="custom-control-input" data-leave-empty='unchecked'
+                            t-att-checked="widget.state.attrs.display_unavailability ? 'checked' : undefined"/>
+                        <label for="display_unavailability" class="custom-control-label">Display Unavailability</label>
+                    </div>
+                </div>
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="total_row" name="total_row" class="custom-control-input" data-leave-empty='unchecked'
+                            t-att-checked="widget.state.attrs.total_row ? 'checked' : undefined"/>
+                        <label for="total_row" class="custom-control-label">Display Total row</label>
+                    </div>
+                </div>
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="collapse_first_level" name="collapse_first_level" class="custom-control-input" data-leave-empty='unchecked'
+                            t-att-checked="widget.state.attrs.collapse_first_level ? 'checked' : undefined"/>
+                        <label for="collapse_first_level" class="custom-control-label">Collapse First Level</label>
+                    </div>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="date_start">Start Date Field</label>
+                    <select id="date_start" name="date_start">
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and _.contains(['date', 'datetime'], field.type)" t-att-selected="widget.state.attrs.date_start ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="date_stop">Stop Date Field</label>
+                    <select id="date_stop" name="date_stop">
+                        <option t-att-selected="widget.state.attrs.date_stop ? undefined : 'selected'"></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and _.contains(['date', 'datetime'], field.type)" t-att-selected="widget.state.attrs.date_stop ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_text">
+                    <label for="string">Label</label>
+                    <input id="string" name="string" type="text" data-type="attributes"
+                        t-att-value="widget.state.attrs.string"/>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="default_group_by">Default Group by</label>
+                    <select id="default_group_by" name="default_group_by">
+                        <option t-att-selected="widget.state.attrs.default_group_by ? undefined : 'selected'"></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and _.contains(widget.GROUPABLE_TYPES, field.type)" t-att-selected="widget.state.attrs.default_group_by ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="default_scale">Default Scale</label>
+                    <select id="default_scale" name="default_scale">
+                        <option></option>
+                        <option t-att-selected="widget.state.attrs.default_scale === 'day' ? 'selected' : undefined" value="day">day</option>
+                        <option t-att-selected="widget.state.attrs.default_scale === 'week' ? 'selected' : undefined" value="week">week</option>
+                        <option t-att-selected="widget.state.attrs.default_scale === 'month' ? 'selected' : undefined" value="month">month</option>
+                        <option t-att-selected="widget.state.attrs.default_scale === 'year' ? 'selected' : undefined" value="year">year</option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="color">Color</label>
+                    <select id="color" name="color">
+                        <option t-att-selected="widget.state.attrs.color ? undefined : 'selected'"></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="_.contains(['integer', 'many2one'], field.type)" t-att-selected="widget.state.attrs.color ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string"/> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="precision_day">Day Precision</label>
+                    <select id="precision_day" name="precision_day">
+                        <option></option>
+                        <option t-att-selected="widget.state.attrs.ganttPrecision.day === 'hour:quarter' ? 'selected' : undefined" value="hour:quarter">Quarter Hour</option>
+                        <option t-att-selected="widget.state.attrs.ganttPrecision.day === 'hour:half' ? 'selected' : undefined" value="hour:half">Half Hour</option>
+                        <option t-att-selected="widget.state.attrs.ganttPrecision.day === 'hour:full' ? 'selected' : undefined" value="hour:full">Hour</option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="precision_week">Week Precision</label>
+                    <select id="precision_week" name="precision_week">
+                        <option></option>
+                        <option t-att-selected="widget.state.attrs.ganttPrecision.week === 'day:half' ? 'selected' : undefined" value="day:half">Half Day</option>
+                        <option t-att-selected="widget.state.attrs.ganttPrecision.week === 'day:full' ? 'selected' : undefined" value="day:full">Day</option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="precision_month">Month Precision</label>
+                    <select id="precision_month" name="precision_month">
+                        <option></option>
+                        <option t-att-selected="widget.state.attrs.ganttPrecision.month === 'day:half' ? 'selected' : undefined" value="day:half">Half Day</option>
+                        <option t-att-selected="widget.state.attrs.ganttPrecision.month === 'day:full' ? 'selected' : undefined" value="day:full">Day</option>
+                    </select>
+                </div>
+            </t>
+
+            <!-- Cohort view settings -->
+            <t t-if="widget.view_type === 'cohort'">
+                <div class="o_web_studio_sidebar_select">
+                    <label for="date_start">Start Date Field</label>
+                    <select id="date_start" name="date_start">
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and _.contains(['date', 'datetime'], field.type)" t-att-selected="widget.state.attrs.date_start ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string" /> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="date_stop">Stop Date Field</label>
+                    <select id="date_stop" name="date_stop">
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.store and _.contains(['date', 'datetime'], field.type)" t-att-selected="widget.state.attrs.date_stop ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string" /> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="measure">Measure Field</label>
+                    <select id="measure" name="measure">
+                        <option></option>
+                        <option t-foreach="widget.orderered_fields" t-as="field" t-if="field.name !== 'id' and field.store and _.contains(['integer', 'float', 'monetary'], field.type)" t-att-selected="widget.state.attrs.measure ===  field.name ? 'selected' : undefined" t-att-value="field.name">
+                            <t t-esc="field.string" /> <span t-if="widget.debug">(<t t-esc="field.name"/>)</span>
+                        </option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="interval">Interval</label>
+                    <select id="interval" name="interval">
+                        <option t-att-selected="widget.state.attrs.interval === 'day' ? 'selected' : undefined" value="day">Day</option>
+                        <option t-att-selected="widget.state.attrs.interval === 'week' ? 'selected' : undefined" value="week">Week</option>
+                        <option t-att-selected="widget.state.attrs.interval === 'month' ? 'selected' : undefined" value="month">Month</option>
+                        <option t-att-selected="widget.state.attrs.interval === 'year' ? 'selected' : undefined" value="year">Year</option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="mode">Mode</label>
+                    <select id="mode" name="mode">
+                        <option t-att-selected="(widget.state.attrs.mode === 'retention' || !widget.state.attrs.mode) ? 'selected' : undefined" value="retention">Retention</option>
+                        <option t-att-selected="widget.state.attrs.mode === 'churn' ? 'selected' : undefined" value="churn">Churn</option>
+                    </select>
+                </div>
+                <div class="o_web_studio_sidebar_select">
+                    <label for="timeline">Timeline</label>
+                    <select id="timeline" name="timeline">
+                        <option t-att-selected="(widget.state.attrs.timeline === 'forward' || !widget.state.attrs.timeline) ? 'selected' : undefined" value="forward">Forward</option>
+                        <option t-att-selected="widget.state.attrs.timeline === 'backward' ? 'selected' : undefined" value="backward">Backward</option>
+                    </select>
+                </div>
+            </t>
+
+            <!-- Pivot view settings -->
+            <t t-if="widget.view_type === 'pivot'">
+
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <!-- Disable linking is presented as a positive sentence for easier understanding (hence inverse) -->
+                        <input type="checkbox" id="disable_linking" name="disable_linking" class="custom-control-input" data-inverse="1" data-leave-empty='unchecked'
+                            t-att-checked="widget.state.attrs.disable_linking ? undefined : 'checked'"/>
+                        <label for="disable_linking" class="custom-control-label">Allow Link to List View</label>
+                    </div>
+                </div>
+                <div class="o_web_studio_sidebar_checkbox">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" id="display_quantity" name="display_quantity" class="custom-control-input" data-leave-empty='unchecked'
+                            t-att-checked="widget.state.attrs.display_quantity ? 'checked' : undefined"/>
+                        <label for="display_quantity" class="custom-control-label">Display Count</label>
+                    </div>
+                </div>
+            </t>
+            <t t-call="web_studio.Sidebar.Toolbox" t-if="widget.debug">
+                <div>
+                    <t t-call="web_studio.Sidebar.Parameters"/>
+                    <t t-if="!widget.isEditingX2m" class="ml-1 mr-1">
+                        <t t-call="web_studio.Sidebar.XMLEditor"/>
+                    </t>
+                    <t t-if="_.contains(['list', 'form'], widget.view_type)">
+                        <button class="btn btn-secondary btn-lg o_web_studio_defaults">Default Values</button>
+                    </t>
+                </div>
+                <button class="btn btn-danger btn-lg float-right o_web_studio_restore">Restore Default View</button>
+            </t>
+        </t>
+    </div>
+    <t t-if="widget.state.mode === 'properties'">
+        <div t-if="widget.state.node.tag === 'field'" class="o_web_studio_sidebar_content o_display_field">
+            <t t-if="widget.view_type == 'search'">
+                <t t-call="web_studio.ViewEditorSidebar.autocompletion_field"/>
+            </t>
+            <t t-else="1">
+                <t t-call="web_studio.ViewEditorSidebar.field"/>
+            </t>
+        </div>
+        <div t-if="widget.state.node.tag === 'page'" class="o_web_studio_sidebar_content o_display_page">
+            <t t-call="web_studio.ViewEditorSidebar.page"/>
+        </div>
+        <div t-if="widget.state.node.tag === 'label'" class="o_web_studio_sidebar_content o_display_label">
+            <t t-call="web_studio.ViewEditorSidebar.label"/>
+        </div>
+        <div t-if="widget.state.node.tag === 'group'" class="o_web_studio_sidebar_content o_display_group">
+            <t t-call="web_studio.ViewEditorSidebar.group"/>
+        </div>
+        <t t-if="widget.state.node.tag === 'div'">
+            <t t-if="widget.state.node.attrs.class === 'oe_chatter'">
+                <div class="o_web_studio_sidebar_content o_display_chatter">
+                    <t t-call="web_studio.ViewEditorSidebar.chatter"/>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="o_web_studio_sidebar_content o_display_div">
+                    <t t-call="web_studio.ViewEditorSidebar.div"/>
+                </div>
+            </t>
+        </t>
+        <div t-if="widget.state.node.tag === 'img'" class="o_web_studio_sidebar_content o_display_img">
+            <t t-call="web_studio.ViewEditorSidebar.img"/>
+        </div>
+        <div t-if="widget.state.node.tag === 'button'" class="o_web_studio_sidebar_content o_web_studio_sidebar_approval">
+            <t t-call="web_studio.ViewEditorSidebar.approval"/>
+        </div>
+        <div t-if="widget.state.node.tag === 'button'" class="o_web_studio_sidebar_content o_display_button">
+            <t t-call="web_studio.ViewEditorSidebar.button"/>
+        </div>
+        <div t-if="widget.state.node.tag ==='filter'" class="o_web_studio_sidebar_content o_display_filter">
+            <t t-if="widget.state.attrs.is_group_by === true">
+                <t t-call="web_studio.ViewEditorSidebar.group_by"/>
+            </t>
+            <t t-else="1">
+                <t t-call="web_studio.ViewEditorSidebar.filter"/>
+            </t>
+        </div>
+        <div t-if="widget.state.node.tag ==='separator'" class="o_web_studio_sidebar_content o_display_filter_separator">
+            <t t-call="web_studio.Sidebar.Toolbox">
+                <t t-call="web_studio.Sidebar.Remove"/>
+            </t>
+        </div>
+    </t>
+</div>
+
+<!-- custom checkbox for invisibility settings -->
+<t t-name="web_studio.ViewEditorSidebar.InvisibleCheckbox">
+    <div class="clearfix o_web_studio_sidebar_checkbox">
+        <t t-set="attrs_invisible" t-value="widget.state.attrs.modifiers.invisible and widget.state.attrs.modifiers.invisible !== true"/>
+        <div t-attf-class="custom-control custom-checkbox{{attrs_invisible ? ' o_web_studio_checkbox_inactive' : ''}}">
+            <input type="checkbox" id="invisible" name="invisible" class="custom-control-input" data-type="attributes"
+                t-att-checked="widget.state.modifiers.invisible ? 'checked' : undefined"/>
+            <label for="invisible" class="custom-control-label">Invisible</label>
+            <a role="button" href="#" data-type="invisible" class="btn btn-link o_web_studio_attrs">Conditional</a>
+        </div>
+    </div>
+</t>
+
+<!-- FieldEditor -->
+<t t-name="web_studio.ViewEditorSidebar.field">
+    <t t-call="web_studio.ViewEditorSidebar.InvisibleCheckbox"/>
+    <t t-if="widget.state.modifiers.invisible !== true">
+        <t t-if="_.contains(['list', 'form'], widget.view_type)">
+            <div class="clearfix o_web_studio_sidebar_checkbox">
+                <t t-set="attrs_required" t-value="widget.state.modifiers.required and widget.state.modifiers.required !== true"/>
+                <div t-attf-class="custom-control custom-checkbox#{attrs_required ? ' o_web_studio_checkbox_inactive' : ''}">
+                    <input type="checkbox" id="required" name="required" class="custom-control-input" data-type="attributes"
+                        t-att-checked="widget.state.attrs.required ? 'checked' : undefined"
+                        t-att-disabled="widget.state.field.required ? 'disabled' : undefined"/>
+                    <label for="required" class="custom-control-label">Required</label>
+                    <a role="button" href="#" data-type="required" class="btn btn-link o_web_studio_attrs">Conditional</a>
+                </div>
+            </div>
+            <div class="clearfix o_web_studio_sidebar_checkbox">
+                <t t-set="attrs_readonly" t-value="widget.state.modifiers.readonly and widget.state.modifiers.readonly !== true"/>
+                <div t-attf-class="custom-control custom-checkbox#{attrs_readonly ? ' o_web_studio_checkbox_inactive' : ''}">
+                    <input type="checkbox" id="readonly" name="readonly" class="custom-control-input" data-type="attributes"
+                        t-att-checked="widget.state.attrs.readonly ? 'checked' : undefined"/>
+                    <label for="readonly" class="custom-control-label">Read only</label>
+                    <a role="button" href="#" data-type="readonly" class="btn btn-link o_web_studio_attrs">Conditional</a>
+                </div>
+            </div>
+            <div t-if="widget.view_type === 'list'" class="o_web_studio_sidebar_optional_select">
+                <label for="optional">Optional</label>
+                <select id="optional" name="optional" data-type="attributes">
+                    <option></option>
+                    <option t-att-selected="widget.state.attrs.optional === 'show' ? 'selected' : undefined" value="show">Show by default</option>
+                    <option t-att-selected="widget.state.attrs.optional === 'hide' ? 'selected' : undefined" value="hide">Hide by default</option>
+                </select>
+            </div>
+        </t>
+        <div t-if="widget.view_type === 'kanban'" class="o_web_studio_sidebar_checkbox">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" id="bold" name="bold" class="custom-control-input" data-type="attributes"
+                    data-leave-empty="unchecked" t-att-checked="widget.state.attrs.bold ? 'checked' : undefined"/>
+                <label for="bold" class="custom-control-label">Bold</label>
+            </div>
+        </div>
+        <div t-if="widget.view_type === 'kanban' and widget.showDisplay" class="o_web_studio_sidebar_select">
+            <label for="display">Display</label>
+            <select id="display" name="display" data-type="attributes">
+                <option t-att-selected="!widget.state.attrs.display ? 'selected' : undefined" value="false">Inline</option>
+                <option t-att-selected="widget.state.attrs.display === 'right' ? 'selected' : undefined" value="right">Pull Right</option>
+                <option t-att-selected="widget.state.attrs.display === 'full' ? 'selected' : undefined" value="full">Default</option>
+            </select>
+        </div>
+        <div class="o_web_studio_sidebar_text">
+            <label for="string">Label</label>
+            <input id="string" name="string" type="text" data-type="attributes"
+                t-att-value="widget.state.attrs.string"/>
+        </div>
+        <div t-if="widget.view_type === 'form'" class="o_web_studio_sidebar_text">
+            <label for="help">Help Tooltip</label>
+            <input id="help" name="help" type="text" data-type="attributes"
+                t-att-value="widget.state.attrs.help"/>
+        </div>
+        <t t-if="widget.state.attrs.related">
+            <div class="o_web_studio_sidebar_text">
+                <label for="related">Related Field</label>
+                <input id="related" name="related" type="text" readonly="readonly"
+                    t-att-value="widget.state.attrs.related"/>
+            </div>
+        </t>
+        <div t-if="(widget.view_type === 'form' or (widget.view_type === 'list' and widget.state.attrs.editable))
+            and widget.has_placeholder" class="o_web_studio_sidebar_text">
+            <label for="placeholder">Placeholder</label>
+            <input id="placeholder" name="placeholder" type="text" placeholder="Placeholder Text" data-type="attributes"
+                t-att-value="widget.state.attrs.placeholder"/>
+        </div>
+        <div class="o_web_studio_sidebar_text" t-if="widget.debug">
+            <label for="name">Technical Name</label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" t-if="widget.isRenamingAllowed(widget.state.attrs.name)">x_studio_</span>
+                </div>
+                <input t-if="widget.isRenamingAllowed(widget.state.attrs.name)" id="id" name="name" type="text" data-type="field_name" t-att-value="widget.state.attrs.name.replace('x_studio_', '')"/>
+                <span t-else="1"><t t-esc="widget.state.attrs.name"/></span>
+            </div>
+        </div>
+        <t t-if="_.contains(['list', 'form', 'kanban'], widget.view_type) and (widget.debug or widget.state.attrs.widget !== 'statusbar')">
+            <div class="o_web_studio_sidebar_select">
+                <label for="widget">Widget</label>
+                <select id="widget" name="widget" data-type="attributes">
+                    <option t-foreach="widget.state.field.field_widgets" t-as="w" t-att-selected="widget.widgetKey ===  w[0] ? 'selected' : undefined" t-att-value="w[0]">
+                        <t
+                            t-set="desc"
+                            t-value="widget.getFieldInfo(w[1], 'description')"/>
+                        <t t-if="widget.debug">
+                            <t
+                                t-set="desc"
+                                t-value="desc and desc + ' ('+w[0]+')' or w[0]"/>
+                        </t>
+                        <t t-if="widget.widgetKey === w[0] and !desc">
+                            <t t-set="desc" t-value="widget.widgetKey"/>
+                        </t>
+                        <t t-esc="desc"/>
+                    </option>
+                </select>
+            </div>
+            <t t-if="widget.OPTIONS_BY_WIDGET[widget.widgetKey]">
+                <t t-foreach="widget.OPTIONS_BY_WIDGET[widget.widgetKey]" t-as="option">
+                    <div t-if="option.type === 'boolean'" class="o_web_studio_sidebar_checkbox">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" data-type="options" t-attf-id="option_#{option.name}" t-att-name="option.name" class="custom-control-input"
+                                t-att-data-leave-empty='option.leaveEmpty' t-att-checked="widget.state.attrs.options[option.name] ? 'checked' : undefined"/>
+                            <label t-attf-for="option_#{option.name}" class="custom-control-label" t-esc="option.string"/>
+                        </div>
+                    </div>
+                    <div t-if="option.type === 'text'" class="o_web_studio_sidebar_text">
+                        <label t-attf-for="option_#{option}" t-esc="option.string"/>
+                        <input type="text" data-type="options" t-attf-id="option_#{option.name}" t-att-name="option.name"
+                            t-att-placeholder="option.placeholder" t-att-value="widget.state.attrs.options[option.name]"/>
+                    </div>
+                    <div t-if="option.type === 'selection'" class="o_web_studio_sidebar_select">
+                        <label t-attf-for="option_#{option}" t-esc="option.string"/>
+                        <select data-type="options" t-attf-id="option_#{option.name}" t-att-name="option.name" >
+                            <option t-foreach="option.selection" t-as="value" t-att-value="!_.isString(value[0]) ? JSON.stringify(value[0]) : value[0]"
+                                t-att-selected="_.isEqual(widget.state.attrs.options[option.name], value[0]) ? 'selected' : undefined" t-esc="value[1]"/>
+                        </select>
+                    </div>
+                </t>
+            </t>
+        </t>
+        <t t-if="widget.view_type === 'list' and widget.hasAggregate">
+            <div class="o_web_studio_sidebar_select">
+                <label for="aggregate">Aggregate</label>
+                <select id="aggregate" name="aggregate" data-type="attributes">
+                    <option name="" data-type="attributes" value=""></option>
+                    <option name="sum" data-type="attributes" t-att-selected="widget.state.attrs.sum ? 'selected' : undefined" value="sum">Sum</option>
+                    <option name="avg" data-type="attributes" t-att-selected="widget.state.attrs.avg? 'selected' : undefined" value="avg">Average</option>
+                </select>
+            </div>
+        </t>
+        <div t-if="!_.contains(widget.NON_DEFAULT_TYPES, widget.state.field.type)"
+            t-att-class="widget.state.field.type === 'selection' ? 'o_web_studio_sidebar_select' : 'o_web_studio_sidebar_text'">
+            <label for="default_value">Default value</label>
+            <t t-if="widget.state.field.type === 'selection'">
+                <select id="default_value" name="default_value" data-type="default_value">
+                    <option t-att-selected="widget.state.default_value ? undefined : 'selected'"></option>
+                    <option t-foreach="widget.state.field.selection" t-as="item"
+                        t-att-value="item[0]"
+                        t-att-selected="widget.state.default_value ===  item[0] ? 'selected' : undefined">
+                        <t t-esc="item[1]"/>
+                    </option>
+                </select>
+            </t>
+            <t t-else="">
+                <input id="default_value" type="text" data-type="default_value"
+                    t-att-value="widget.state.default_value"/>
+            </t>
+        </div>
+        <t t-if="_.contains(['many2many', 'many2one', 'one2many'], widget.state.field.type)">
+            <div class="o_web_studio_sidebar_text o_web_studio_sidebar_iscode">
+                <label for="domain">Domain</label>
+                <input id="domain" name="domain" type="text" data-type="attributes"
+                    t-att-value="widget.domainToStr(widget.state.attrs.domain)"/>
+            </div>
+            <div class="o_web_studio_sidebar_text o_web_studio_sidebar_iscode">
+                <label for="context">Context</label>
+                <input id="context" name="context" type="text" data-type="attributes"
+                    t-att-value="JSON.stringify(widget.state.attrs.context)"/>
+            </div>
+        </t>
+    </t>
+    <t t-call="web_studio.Sidebar.Groups"/>
+    <div t-if="widget.state.field.manual and widget.state.field.type === 'selection'">
+        <a href="#" role="button" class="btn btn-link o_web_studio_edit_selection_values"><i class="fa fa-pencil"/> Edit Values</a>
+    </div>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <div>
+            <t t-call="web_studio.Sidebar.Parameters"/>
+            <t t-call="web_studio.Sidebar.Remove"/>
+        </div>
+    <t t-if="widget.state.attrs['studio-view-group-names']">
+        <hr/>
+        <t t-call="web_studio.Sidebar.Warning.Groups"/>
+    </t>
+    </t>
+</t>
+
+<!-- FieldEditor for the SearchView-->
+<t t-name="web_studio.ViewEditorSidebar.autocompletion_field">
+    <div>
+        <label for="string">Label</label>
+        <input id="string" name="string" type="text" data-type="attributes"
+            t-att-value="widget.state.attrs.string"/>
+    </div>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    </t>
+</t>
+
+<!-- PageEditor -->
+<t t-name="web_studio.ViewEditorSidebar.page">
+    <t t-call="web_studio.ViewEditorSidebar.InvisibleCheckbox"/>
+    <div class="o_web_studio_sidebar_text">
+        <label for="string">Label</label>
+        <input id="string" name="string" type="text"
+            t-att-value="widget.state.attrs.string"/>
+    </div>
+    <t t-call="web_studio.Sidebar.Groups"/>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    <t t-if="widget.state.attrs['studio-view-group-names']">
+        <hr/>
+        <t t-call="web_studio.Sidebar.Warning.Groups"/>
+    </t>
+    </t>
+</t>
+
+<!-- GroupEditor -->
+<t t-name="web_studio.ViewEditorSidebar.group">
+    <t t-call="web_studio.ViewEditorSidebar.InvisibleCheckbox"/>
+    <div class="o_web_studio_sidebar_text">
+        <label for="string">Column Title</label>
+        <input id="string" name="string" type="text"
+            t-att-value="widget.state.attrs.string"/>
+    </div>
+    <t t-call="web_studio.Sidebar.Groups"/>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    <t t-if="widget.state.attrs['studio-view-group-names']">
+        <hr/>
+        <t t-call="web_studio.Sidebar.Warning.Groups"/>
+    </t>
+    </t>
+</t>
+
+<!-- FilterEditor -->
+<t t-name="web_studio.ViewEditorSidebar.filter">
+    <div class="o_web_studio_sidebar_text">
+        <label for="string">Label</label>
+        <input id="string" name="string" type="text"
+            t-att-value="widget.state.attrs.string"/>
+    </div>
+    <div class="o_web_studio_sidebar_text">
+        <label for="domain">Domain</label>
+        <input id="domain" name="domain" type="text"
+            t-att-value="widget.state.attrs.domain" readonly="readonly"/>
+    </div>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    </t>
+</t>
+
+<!-- ChatterEditor -->
+<t t-name="web_studio.ViewEditorSidebar.chatter">
+    <div class="o_web_studio_sidebar_text">
+        <label for="email_alias">Email Alias</label>
+        <div class="input-group">
+            <input id="email_alias" name="email_alias" type="text" data-type="email_alias"
+                t-att-value="widget.state.email_alias"/>
+            <div class="input-group-append">
+                <div class="input-group-text">@<t t-if="widget.state.alias_domain" t-esc="widget.state.alias_domain"/></div>
+            </div>
+        </div>
+        <div t-if="widget.state.email_alias and widget.state.alias_domain" class="mt8">
+            Send a <a t-att-href="'mailto:' + widget.state.email_alias + '@' + widget.state.alias_domain + '?subject=test'">test email</a>.
+        </div>
+    </div>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    </t>
+</t>
+
+<!-- ApprovalEditor -->
+<t t-name="web_studio.ViewEditorSidebar.approval">
+    <h3>Approvals</h3>
+    <t t-set="studio_approval" t-value="widget.state.attrs.studio_approval &amp;&amp; widget.isTrue(widget.state.attrs.studio_approval)"/>
+    <div class="o_web_studio_sidebar_checkbox">
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox"
+                   id="studio_approval"
+                   name="studio_approval"
+                   class="custom-control-input"
+                   t-att-checked="studio_approval ? 'checked' : undefined"
+                   data-leave-empty='unchecked'
+            />
+            <label for="studio_approval" class="custom-control-label">Set approval rules</label>
+        </div>
+    </div>
+    <t t-if="studio_approval">
+        <t t-set="has_approval_rules" t-value="!!widget.state.approvalData.rules"/>
+        <t t-if="has_approval_rules">
+            <t t-foreach="widget.state.approvalData.rules" t-as="rule">
+                <t t-call="web_studio.ViewEditorSidebar.ApprovalRule"/>
+            </t>
+        </t>
+        <div>
+            <a href="#" role="button" class="o_web_studio_sidebar_btn_link o_approval_new">Add an approval rule</a>
+        </div>
+        <hr/>
+    </t>
+</t>
+
+<!-- ButtonEditor -->
+<t t-name="web_studio.ViewEditorSidebar.button">
+    <!-- Stat button customization section -->
+    <div t-if="widget.is_stat_btn" class="o_web_studio_sidebar_text o_web_studio_sidebar_iscode">
+        <label>Icon</label>
+        <input name="icon" type="text"
+            t-att-value="widget.state.attrs.icon"/>
+    </div>
+    <!-- Rainbow man section -->
+    <t t-if="widget.showRainbowMan">
+        <h3>Rainbow Man</h3>
+        <t t-set="rainbow" t-value="widget.state.attrs.effect"/>
+        <div class="o_web_studio_sidebar_checkbox">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" id="rainbow" name="rainbow" class="custom-control-input" t-att-checked="rainbow ? 'checked' : undefined"/>
+                <label for="rainbow" class="custom-control-label">Rainbow Effect</label>
+            </div>
+        </div>
+        <t t-if="rainbow">
+            <div class="o_web_studio_sidebar_text">
+                <label for="rainbow_message">Message</label>
+                <input id="rainbow_message" name="rainbow_message" type="text" t-att-value="rainbow.message or 'Well Done!'"/>
+            </div>
+            <div class="o_web_studio_sidebar_select">
+                <label for="rainbow_fadeout">Fadeout Speed</label>
+                <select id="rainbow_fadeout" name="rainbow_fadeout">
+                    <option t-att-selected="rainbow.fadeout === 'fast' ? 'selected' : undefined" value="fast">Fast</option>
+                    <option t-att-selected="rainbow.fadeout === 'medium' ? 'selected' : undefined" value="medium">Medium</option>
+                    <option t-att-selected="rainbow.fadeout === 'slow' ? 'selected' : undefined" value="slow">Slow</option>
+                    <option t-att-selected="rainbow.fadeout === 'no' ? 'selected' : undefined" value="no">No</option>
+                </select>
+            </div>
+            <div>
+                <input id="rainbow_img_url" name="rainbow_img_url" type="hidden" t-att-value="rainbow.img_url"/>
+                <div class="mb8 ml64 mr64">
+                    <img t-att-src="rainbow.img_url or '/web/static/src/img/smile.svg'" class="img img-fluid" alt="Great !"/>
+                </div>
+            </div>
+            <div class="text-center">
+                <button class="btn btn-secondary btn-lg o_img_upload"><i class="fa fa-upload"/> Change Image</button>
+                <button t-if="rainbow.img_url" class="btn btn-secondary btn-lg o_img_reset"><i class="fa fa-undo"/>Reset Image</button>
+            </div>
+            <span class="d-none">
+                <t t-call="HiddenInputFile">
+                    <t t-set="fileupload_id" t-value="widget.fileupload_id"/>
+                    <t t-set="fileupload_action" t-translation="off">/web/binary/upload_attachment</t>
+                    <input type="hidden" name="model" value="res.users"/>
+                    <input type="hidden" name="id" t-att-value="widget.user_id"/>
+                </t>
+            </span>
+        </t>
+    </t>
+    <t t-call="web_studio.Sidebar.Groups"/>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    </t>
+</t>
+
+<!-- LabelEditor -->
+<t t-name="web_studio.ViewEditorSidebar.label">
+    <div class="o_web_studio_sidebar_text">
+        <label for="string">Label</label>
+        <input id="string" name="string" type="text"
+            t-att-value="widget.state.attrs.string"/>
+    </div>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    </t>
+</t>
+
+<!-- DivEditor -->
+<t t-name="web_studio.ViewEditorSidebar.div">
+    <div t-if="widget.view_type === 'kanban' and widget.state.$node and widget.state.$node.hasClass('o_dropdown_kanban')" class="o_web_studio_sidebar_checkbox">
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox" id="set_cover" name="set_cover" class="custom-control-input" t-att-checked="widget.state.$node.find('a[data-type=set_cover]').length ? 'checked' : undefined"/>
+            <label for="set_cover" class="custom-control-label">Set Cover Image</label>
+        </div>
+    </div>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    </t>
+</t>
+
+<!-- ImageEditor -->
+<t t-name="web_studio.ViewEditorSidebar.img">
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    </t>
+</t>
+
+<!-- SearchViewFilterEditor -->
+<t t-name="web_studio.ViewEditorSidebar.group_by">
+    <div class="o_web_studio_sidebar_text">
+        <label for="string">Label</label>
+        <input id="string" name="string" type="text" data-type="attributes"
+            t-att-value="widget.state.attrs.string"/>
+    </div>
+    <t t-call="web_studio.Sidebar.Toolbox">
+        <t t-call="web_studio.Sidebar.Remove"/>
+    </t>
+</t>
+
+<!-- ShowInvisibleElements -->
+<t t-name="web_studio.ShowInvisibleElements">
+    <div class="o_web_studio_sidebar_separator"/>
+    <div class="o_web_studio_sidebar_checkbox">
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox" id="show_invisible" class="custom-control-input"
+                t-att-checked="widget.state.show_invisible ? 'checked' : undefined"/>
+            <label for="show_invisible" class="custom-control-label">Show Invisible Elements</label>
+        </div>
+    </div>
+</t>
+
+<!-- ApprovalRule-->
+<div t-name="web_studio.ViewEditorSidebar.ApprovalRule" class="o_studio_sidebar_approval_rule">
+    <div>
+        <label t-attf-for="rule_group_{{rule.id}}" title="Only members of this group will be able to approve or reject the rule.">Approval Group</label>
+        <div class="o_approval_group" t-att-data-rule-id="rule.id" t-att-data-group-id="rule.group_id[0]">
+            <button
+                t-attf-class="btn btn-sm btn-dark o_approval_domain {{rule.domain?'':'inactive'}}"
+                t-att-data-rule-id="rule.id"
+                t-att-title="rule.domain?'Edit rule condition':'Set condition on rule'">
+                <i class="fa fa-fw fa-filter"/>
+            </button>
+            <button
+                class="btn btn-sm btn-dark inactive o_approval_archive"
+                t-att-data-rule-id="rule.id"
+                title="Remove rule">
+                <i class="fa fa-fw fa-trash"/>
+            </button>
+        </div>
+    </div>
+    <div class="o_web_studio_sidebar_text">
+        <input t-attf-id="approval_message_{{rule.id}}" t-att-data-rule-id="rule.id" t-attf-name="approval_message_{{rule.id}}" type="text"
+            t-att-value="rule.message || null" placeholder="Add a description..."/>
+    </div>
+    <div class="o_web_studio_sidebar_checkbox mt4">
+        <div class="custom-control custom-checkbox">
+            <input
+                type="checkbox"
+                t-attf-id="exclusive_user_{{rule.id}}"
+                t-attf-name="exclusive_user_{{rule.id}}"
+                class="custom-control-input"
+                t-att-data-rule-id="rule.id"
+                t-att-checked="rule.exclusive_user ? 'checked' : undefined"/>
+            <label t-attf-for="exclusive_user_{{rule.id}}"
+                    class="custom-control-label"
+                    title="The user who approves this rule will not be able to approve other rules for the same record.">
+                Limit approver to this rule
+            </label>
+        </div>
+    </div>
+</div>
+
+<div t-name="web_studio.ExistingFieldsInputSearch">
+    <input type="text" class="o_web_studio_sidebar_search_input" placeholder="Search..." />
+</div>
+</templates>

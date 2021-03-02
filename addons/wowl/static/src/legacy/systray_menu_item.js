@@ -18,6 +18,10 @@ const legacySystrayMenuItems = legacySystrayMenu.Items;
 // to the wowl one, but wrapped into Owl components
 
 legacySystrayMenuItems.forEach((item, index) => {
+  // LPE: FIXME lol!
+  if (item.prototype.template === "SwitchCompanyMenu") {
+    return;
+  }
   const name = `_legacy_systray_item_${index}`;
   class SystrayItem extends Component {
     constructor() {

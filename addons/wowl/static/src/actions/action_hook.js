@@ -28,7 +28,7 @@ function getScrollPosition(component) {
  * Set top and left scroll positions to the given values. By default, the
  * scrolling area is the '.o_content' main div. In mobile, it is the body.
  */
-function setScrollPosition(component, offset) {
+export function setScrollPosition(component, offset) {
   let scrollingEl;
   if (component.env.isSmall) {
     scrollingEl = document.body;
@@ -55,16 +55,25 @@ export function useSetupAction(params) {
     if (params.beforeLeave && component.props.__beforeLeave__) {
       component.props.__beforeLeave__(params.beforeLeave);
     }
-  });
-  onWillUnmount(() => {
     if (component.props.__exportState__) {
-      let state = {};
-      state[scrollSymbol] = getScrollPosition(component);
-      if (params.export) {
-        Object.assign(state, params.export());
-      }
-      component.props.__exportState__(state);
+      component.env.bus.on('ACTION_MANAGER:EXPORT_CONTROLLER_STATE', component, (fn) => {
+        let state = {};
+        state[scrollSymbol] = getScrollPosition(component);
+        if (params.export) {
+          Object.assign(state, params.export());
+        }
+        component.props.__exportState__(state);
+        if (fn) {
+          fn(state);
+        }
+      });
     }
+
+  });
+
+  onWillUnmount(() => {
+   component.env.bus.trigger('ACTION_MANAGER:EXPORT_CONTROLLER_STATE');
+   component.env.bus.off('ACTION_MANAGER:EXPORT_CONTROLLER_STATE', component);
   });
   return {
     scrollTo(offset) {

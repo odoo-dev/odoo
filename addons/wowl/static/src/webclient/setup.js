@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "./service_registry";
 const { loadFile } = owl.utils;
 
 export async function deployServices(env) {
   const toDeploy = new Set();
   let timeoutId;
-  serviceRegistry.on("UPDATE", null, async (payload) => {
+  odoo.serviceRegistry.on("UPDATE", null, async (payload) => {
     const { operation, value } = payload;
     if (operation === "delete") {
       // We hardly see why it would be usefull to remove a service.
@@ -25,7 +24,6 @@ export async function deployServices(env) {
 
 async function _deployServices(env, toDeploy, timeoutId) {
   const services = env.services;
-  odoo.serviceRegistry;
   for (const service of odoo.serviceRegistry.getAll()) {
     if (!(service.name in services)) {
       toDeploy.add(service);

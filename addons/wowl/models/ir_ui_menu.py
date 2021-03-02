@@ -1,3 +1,5 @@
+import re
+
 from odoo import api, fields, models, tools, _
 
 
@@ -35,7 +37,26 @@ class IrUiMenu(models.Model):
             'children': children,
             'actionModel': action[0] if action else False,
             'actionID': int(action[1]) if action else False,
-            'xmlid': menu_data.get('xmlid', '')
+            'xmlid': menu_data.get('xmlid', ''),
+            'webIcon': menu_data.get('web_icon'),
         }
+        parent = menu_data.get('parent_id')
+        hasParent = parent and parent[0] > 0
+        if not hasParent:
+            wid = menu_data.get('web_icon', '').split(',')
+            iconClass, color = (wid and len(wid) > 1) and wid or [None, None]
+            backgroundColor = wid[2] if wid and len(wid) == 3 else None
+
+            if menu_data.get('web_icon_data'):
+                menu['webIconData'] = re.sub(r'\s/g', "", ('data:image/png;base64,%s' % menu_data['web_icon_data'].decode('utf-8')))
+            elif backgroundColor is not None:  # Could split in three parts?
+                menu['webIcon'] = {
+                    'iconClass': iconClass,
+                    'color': color,
+                    'backgroundColor': backgroundColor,
+                }
+            else:
+                menu['webIconData'] = '/web_enterprise/static/src/img/default_icon_app.png'
+
         accumulator[menuID] = menu
         return accumulator, menu

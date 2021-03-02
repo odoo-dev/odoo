@@ -1,0 +1,80 @@
+/* stat button override */
+.oe_stat_button[studio_approval] {
+    position: relative;  // needed to position the validation widget on the border
+    .o_web_studio_approval {
+       position: absolute;
+       top: 0;
+       right: 0;
+       margin-left: 0;
+   }
+}
+
+/* approval component (avatars inside buttons) */
+.o_web_studio_approval {
+    margin-left: 8px;
+    display: inline;  // Popover has a div tag by default
+
+    .o_web_studio_approval_avatar {
+        margin-left: 2px;
+        width: 16px;
+        height: 16px;
+        vertical-align: text-bottom;
+        &.border {
+            border-width: 2px !important;
+        }
+    }
+    .o_web_studio_approval_more {
+        width: 16px;
+        height: 16px;
+        font-size: 9px;
+        display: inline-block;
+        text-align: center;
+        vertical-align: middle;
+        margin-left: 2px;
+        line-height: 16px;
+    }
+
+}
+
+/* popover content */
+.o_web_studio_approval_info {
+    max-width: 320px;
+    &[data-mobile] {
+        max-width: none;
+    }
+    margin: -1rem -0.75rem -0.5rem -0.75rem;
+    .o_web_studio_approval_no_entry, .o_web_studio_approval_has_entry {
+        display: flex;
+        flex-direction: row;
+        padding: 0.5rem 0.75rem;
+        .o_web_studio_approval_button {
+            margin-left: 3px;
+        }
+        .o_web_studio_approval_avatar {
+            margin-right: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            img {
+                width: 32px;
+                height: 32px;
+                &.border {
+                    border-width: 3px !important;
+                }
+            }
+        }
+        .o_web_studio_approval_description {
+            flex-grow: 1;
+            p {
+                margin: 0;
+            }
+        }
+        &.o_approval_success {
+            @include alert-variant(theme-color-level('success', -10), theme-color-level('success', -9), theme-color-level('success', 6));
+        }
+        &.o_approval_danger {
+            @include alert-variant(theme-color-level('danger', -10), theme-color-level('danger', -9), theme-color-level('danger', 6));
+        }
+    }
+}

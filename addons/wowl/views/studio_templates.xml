@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="web_studio.assets" name="Web Studio Assets">
+        <!-- can not be in the lazy load bundle because the button event is in an include of action manager -->
+        <script type="text/javascript" src="/web_studio/static/src/js/action_manager.js"></script>
+
+        <!-- can not be in the lazy load bundle because the button event is in an include of web_client -->
+        <script type="text/javascript" src="/web_studio/static/src/js/bus.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/systray_item.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/web_client.js"></script>
+
+        <!-- can not be in the lazy load bundle because the menu is an include and the menu is already created -->
+        <script type="text/javascript" src="/web_studio/static/src/js/menu.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/common_menu_dialog.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/edit_menu.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/new_model.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/submenu.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/studio_home_menu.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/icon_creator.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/utils.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/tours/web_studio.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/model_configurator.js"></script>
+    </template>
+
+    <template id="webclient_bootstrap" inherit_id="web.webclient_bootstrap">
+        <xpath expr="//t[@t-call-assets='web.assets_backend'][@t-css='false']" position="after">
+            <t t-call-assets="web_studio.assets" groups="base.group_system"/>
+        </xpath>
+    </template>
+</odoo>

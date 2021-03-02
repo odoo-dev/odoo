@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="wowl.ent_assets_primary_variables" inherit_id="web._assets_primary_variables" priority="15" primary="True">
+        <xpath expr="//link[last()]" position="after">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/primary_variables.scss"/>
+        </xpath>
+    </template>
+
+    <template id="wowl.ent_assets_secondary_variables" inherit_id="web._assets_secondary_variables" priority="15" primary="True">
+        <xpath expr="//link" position="before">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/secondary_variables.scss"/>
+        </xpath>
+    </template>
+
+    <template id="wowl.ent_assets_backend_helpers" inherit_id="web._assets_backend_helpers" priority="15" primary="True">
+        <xpath expr="//link[@href='/web/static/src/scss/bootstrap_overridden.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/bootstrap_overridden.scss"/>
+        </xpath>
+    </template>
+
+    <template id="wowl._assets_helpers">
+        <t t-call="web._assets_utils"/>
+        <t t-call="wowl.ent_assets_primary_variables"/>
+        <t t-call="wowl.ent_assets_secondary_variables"/>
+
+        <t t-raw="0"/>
+
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/bootstrap/scss/_variables.scss"/>
+    </template>
+
+    <template id="wowl._ent_assets_backend" inherit_id="web.assets_backend" primary="True">
+        <xpath expr="//t[@t-call='web._assets_helpers']" position="replace">
+            <t t-call="wowl._assets_helpers">
+                <t t-call="wowl.ent_assets_backend_helpers"/>
+            </t>
+        </xpath>
+
+        <xpath expr="//link[@href='/web/static/src/scss/webclient_extra.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/webclient.scss"/>
+        </xpath>
+        <xpath expr="//link[@href='/web/static/src/scss/webclient_layout.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/webclient_layout.scss"/>
+        </xpath>
+        <xpath expr="//link[@href='/web/static/src/scss/fields_extra.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/fields.scss"/>
+        </xpath>
+        <xpath expr="//link[@href='/web/static/src/scss/form_view_extra.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/form_view.scss"/>
+        </xpath>
+        <xpath expr="//link[@href='/web/static/src/scss/list_view_extra.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/list_view.scss"/>
+        </xpath>
+        <xpath expr="//link[@href='/web/static/src/scss/search_view_extra.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/search_view.scss"/>
+        </xpath>
+        <xpath expr="//link[last()]" position="after">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/home_menu/home_menu.scss"/>
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/home_menu/home_menu_layout.scss"/>
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/kanban_view.scss"/>
+        </xpath>
+        <!-- Lazy load in prod/eager in tests => So place this at the right spot-->
+        <xpath expr="//script[@src='/web/static/lib/fuzzy-master/fuzzy.js']" position="after">
+            <script type="text/javascript" src="/web/static/lib/Chart/Chart.js"></script> <!-- would be good to lazy load it -->
+            <script type="text/javascript" src="/web/static/lib/luxon/luxon.js"></script>
+        </xpath>
+    </template>
+
+    <template id="wowl.ent_assets_backend" inherit_id="wowl._ent_assets_backend" primary="True">
+        <xpath expr="//script[@src='/web/static/src/js/chrome/abstract_web_client.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/action_manager.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/action_manager_act_window.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/action_manager_report.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/apps_menu.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/menu.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/root_widget.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/systray_menu.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/user_menu.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/chrome/web_client.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/services/crash_manager_service.js']" position="replace"/>
+    </template>
+
+    <template id="wowl.ent_assets_common" inherit_id="web.assets_common" primary="True">
+        <xpath expr="//t[@t-call='web._assets_helpers']" position="replace">
+            <t t-call="wowl._assets_helpers"/>
+        </xpath>
+
+        <xpath expr="//link[@href='/web/static/src/scss/ui_extra.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/ui.scss"/>
+        </xpath>
+        <xpath expr="//link[last()]" position="after">
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/fonts.scss"/>
+        </xpath>
+    </template>
+
+    <template id="wowl.ent_assets">
+        <!-- basic scss setup -->
+        <t t-call="wowl._assets_helpers">
+            <t t-call="wowl.ent_assets_backend_helpers"/>
+        </t>
+        <t t-call="web._assets_bootstrap"/>
+
+        <!-- insert all scss files in /wowl -->
+        <t t-foreach="scssFiles" t-as="scssFile">
+            <link rel="stylesheet" type="text/scss" t-att-href="scssFile"/>
+        </t>
+
+        <!-- insert all js files in /wowl -->
+        <t t-foreach="jsFiles" t-as="jsFile">
+            <!-- LPE FIXME -->
+            <t t-if="'src/webclient/webclient_configure' not in jsFile">
+                <script type="text/javascript" t-att-src="jsFile"></script>
+            </t>
+        </t>
+    </template>
+
+    <template id="wowl.ent_root">&lt;!DOCTYPE html&gt;
+        <html>
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport"
+                      content="width=device-width, initial-scale=1, user-scalable=no"/>
+                <title t-esc="title or 'WOWL'"/>
+                <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/img/favicon.ico'"/>
+
+                <script>
+                    window.odoo = {
+                        session_info: <t t-raw="json.dumps(session_info)"/>,
+                        debug: "<t t-esc="debug"/>",
+                        csrf_token: "<t t-esc="request.csrf_token(None)"/>",
+                    };
+                </script>
+
+
+                <t t-call-assets="wowl.ent_assets_common" t-js="false"/>
+                <t t-call-assets="wowl.ent_assets_backend" t-js="false"/>
+                <t t-call-assets="wowl.ent_assets_common" t-css="false"/>
+                <t t-call-assets="wowl.ent_assets_backend" t-css="false"/>
+                <t t-call-assets="wowl.assets_backend_prod_only" t-css="false"/>
+
+                <t t-call-assets="wowl.ent_assets" t-js="False"/>
+                <t t-call-assets="wowl.ent_assets" t-css="False"/>
+            </head>
+            <body />
+        </html>
+    </template>
+
+    <template id="wowl.ent_test_assets" inherit_id="wowl.test_assets">
+        <xpath expr="//t[@t-foreach='jsFiles']" position="replace">
+            <!-- insert all js files in /wowl -->
+            <t t-foreach="jsFiles" t-as="jsFile">
+                <!-- LPE FIXME -->
+                <t t-if="'src/webclient/webclient_configure' not in jsFile and not isCommunity">
+                    <script type="text/javascript" t-att-src="jsFile"></script>
+                </t>
+                <t t-else="" >
+                    <script type="text/javascript" t-att-src="jsFile"></script>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="wowl.ent_qunit_suite" inherit_id="wowl.qunit_suite" >
+        <xpath expr="//t[@t-call-assets='web.assets_common'][@t-js='false']" position="replace">
+            <t t-call-assets="wowl.ent_assets_common" t-js="false"/>
+        </xpath>
+        <xpath expr="//t[@t-call-assets='web.assets_common'][@t-css='false']" position="replace">
+            <t t-call-assets="wowl.ent_assets_common" t-css="false"/>
+        </xpath>
+        <xpath expr="//t[@t-call-assets='wowl.test_assets_backend'][@t-js='false']" position="replace">
+            <t t-call-assets="wowl._ent_assets_backend" t-js="false"/>
+        </xpath>
+        <xpath expr="//t[@t-call-assets='wowl.test_assets_backend'][@t-css='false']" position="replace">
+            <t t-call-assets="wowl._ent_assets_backend" t-css="false"/>
+        </xpath>
+    </template>
+</odoo>

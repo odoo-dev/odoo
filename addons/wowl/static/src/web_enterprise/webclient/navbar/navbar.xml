@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+  <t t-name="wowl.EnterpriseNavBar" t-inherit="wowl.NavBar" t-inherit-mode="primary">
+      <xpath expr="//t[@t-call='wowl.NavBar.AppsMenu']" position="replace">
+         <a href="#" class="fa o_menu_toggle" accesskey="h" title="Applications"
+            aria-label="Applications" t-ref="menuApps" t-on-click.prevent="hm.toggle()"/>
+      </xpath>
+  </t>
+
+</templates>

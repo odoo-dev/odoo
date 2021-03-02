@@ -1,0 +1,32 @@
+.o_web_studio_report_editor {
+    min-height: 100%;
+    position: relative;
+
+    .o_web_studio_report_iframe_container {
+        margin: 0 auto;
+        box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+        background: white;
+        box-sizing: border-box;
+
+        @include media-breakpoint-up(lg) {
+            margin: $o-sheet-vpadding auto $o-sheet-vpadding*2;
+        }
+
+        .o_web_studio_loader {
+            width: 100px;
+            height: 100px;
+            @include o-position-absolute(128px, 50%);
+            margin-right: -50px;
+            .fa {
+                animation-duration: 1s;
+            }
+        }
+
+        .o_web_studio_report_iframe {
+            border: none;
+            width: 100%;
+            position: relative;
+            min-height: 100px; /* useful for phantomjs */
+        }
+    }
+}

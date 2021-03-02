@@ -1,0 +1,137 @@
+.o_home_menu {
+  align-items: center;
+  direction: ltr;
+  display: flex;
+  flex-flow: column nowrap;
+  height: 100%;
+  overflow: auto;
+
+  &.o_search_hidden .o_home_menu_scrollable > div:first-child {
+    margin-top: 10px;
+    @include media-breakpoint-up(md) {
+      margin-top: 90px;
+    }
+  }
+
+  .o_home_menu_scrollable {
+    align-items: center;
+    display: flex;
+    flex: 100%;
+    flex-flow: column nowrap;
+    overflow: auto;
+    position: relative;
+    width: 100%;
+
+    .o_apps {
+      display: flex;
+      flex: 0 0 auto;
+      flex-flow: row wrap;
+      max-width: $o-home-menu-container-size;
+      width: 100%;
+
+      .o_app {
+        padding: 10px 0;
+        text-align: center;
+        width: percentage(1/3);
+        @include media-breakpoint-up(sm) {
+          width: percentage(1/4);
+        }
+        @include media-breakpoint-up(md) {
+          width: percentage(1/6);
+        }
+
+        .o_app_icon {
+          margin: auto;
+          max-width: $o-home-menu-app-icon-max-width;
+          overflow: hidden;
+          position: relative;
+          width: 80%;
+
+          &:before {
+            // so that the div is a square
+            content: "";
+            display: block;
+            padding-top: 100%;
+          }
+
+          > i.fa {
+            // studio
+            @include o-position-absolute(25%, 0, auto, 0);
+          }
+        }
+        .o_caption {
+          margin: 4px 0;
+          @include o-text-overflow(block);
+        }
+
+        &.o_menuitem {
+          margin-left: 0;
+        }
+      }
+    }
+    .o_menuitems {
+      flex: 1 0 auto;
+      max-width: $o-home-menu-container-size;
+      width: 100%;
+
+      .o_menuitem {
+        margin-bottom: 3px;
+        padding: 2px;
+        width: 100%;
+        @include media-breakpoint-down(sm) {
+          padding: 6px;
+        }
+
+        &:focus,
+        &.o_focused {
+          padding-left: 5px;
+        }
+      }
+    }
+    .o_no_results {
+      flex: 1 0 auto;
+      margin-top: 10px;
+    }
+  }
+}
+
+.database_expiration_panel {
+  text-align: center;
+  margin: 0 auto;
+  max-width: 768px;
+  width: 100%;
+  @include media-breakpoint-up(md) {
+    margin: 25px auto 0 auto;
+  }
+
+  a > i.fa {
+    margin: 0 0.2em;
+  }
+
+  .oe_instance_register_form {
+    @include media-breakpoint-down(sm) {
+      .form-group {
+        margin-right: 25px;
+      }
+    }
+
+    &.vertical-slide-enter,
+    &.vertical-slide-leave-to {
+      max-height: 0;
+      margin-top: 0 !important;
+    }
+    &.vertical-slide-enter-active,
+    &.vertical-slide-leave-active {
+      overflow: hidden;
+      transition-property: max-height, margin-top;
+      transition-duration: 0.4s;
+    }
+    &.vertical-slide-enter-to,
+    &.vertical-slide-leave {
+      max-height: 32px;
+      @include media-breakpoint-down(sm) {
+        max-height: 72px;
+      }
+    }
+  }
+}
