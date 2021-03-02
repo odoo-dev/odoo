@@ -58,7 +58,7 @@
                             name="predictive_lead_setting_container">
                             <field name="predictive_lead_scoring_fields_str" invisible="1"/>
                             <field name="predictive_lead_scoring_start_date_str" invisible="1"/>
-                            <div class=<xpath expr="//page[@name='geo_location"o_setting_left_pane"></div>
+                            <div class="o_setting_left_pane"></div>
                             <div class="o_setting_right_pane">
                                 <b>Predictive Lead Scoring</b>
                                 <div class="text-muted">
