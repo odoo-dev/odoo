@@ -94,7 +94,7 @@
         ],
         'mass_mailing.mass_mailing_mail_style': [
             # new asset template 
-            'mass_mailing/static/src/css/mail_style',
+            'mass_mailing/static/src/css/mail_style.css',
         ],
         'web.assets_qweb': [
             'mass_mailing/static/src/xml/*.xml',
