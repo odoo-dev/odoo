@@ -282,7 +282,7 @@
                                 <input type='text' name="contact_name" class="form-control contact_name"/>
                             </div>
                             <div class="form-group">
-                                <label class="col-form-label h4dd" for="title">Title</label>
+                                <label class="col-form-label h4dd" for="title">Opportunity</label>
                                 <input type='text' name="title" class="form-control title"/>
                             </div>
                             <div class="form-group">

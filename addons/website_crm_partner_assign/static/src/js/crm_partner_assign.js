@@ -16,6 +16,7 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
         'click .edit_opp_confirm': '_onEditOppConfirm',
         'change .edit_opp_form .next_activity': '_onChangeNextActivity',
         'click div.input-group span.fa-calendar': '_onCalendarIconClick',
+        'change div.form-group input.contact_name': '_onChangeContactName',
     },
 
     //--------------------------------------------------------------------------
@@ -260,6 +261,16 @@ publicWidget.registry.crmPartnerAssign = publicWidget.Widget.extend({
                 down: 'fa fa-chevron-down',
             },
         });
+    },
+
+    _onChangeContactName: function (ev){
+       var contact_opportunity = document.getElementsByName("contact_name")[0].value;
+       if (contact_opportunity){
+            document.getElementsByName("title")[0].value = contact_opportunity + "'" +"s Opportunity";
+       }
+       else{
+            document.getElementsByName("title")[0].value = " ";
+       }
     },
 
     _parse_date: function (value) {
