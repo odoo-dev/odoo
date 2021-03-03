@@ -4,15 +4,16 @@ import useShouldUpdateBasedOnProps from '@mail/component_hooks/use_should_update
 import useStore from '@mail/component_hooks/use_store/use_store';
 import EditableText from '@mail/components/editable_text/editable_text';
 import PartnerImStatusIcon from '@mail/components/partner_im_status_icon/partner_im_status_icon';
+import GroupChatLeaveConfirmDialog from '@mail/components/group_chat_leave_confirm_dialog/group_chat_leave_confirm_dialog';
 import ThreadIcon from '@mail/components/thread_icon/thread_icon';
 
 import { isEventHandled } from '@mail/utils/utils';
 
 import Dialog from 'web.Dialog';
 
-const { Component } = owl;
+const { Component, useState } = owl;
 
-const components = { EditableText, PartnerImStatusIcon, ThreadIcon }
+const components = { EditableText, GroupChatLeaveConfirmDialog, PartnerImStatusIcon, ThreadIcon }
 
 export class DiscussSidebarCategoryItem extends Component {
 
@@ -29,6 +30,9 @@ export class DiscussSidebarCategoryItem extends Component {
                 categoryItem: categoryItem && categoryItem.__state,
                 correspondentName: correspondent && correspondent.name,
             }
+        });
+        this.state = useState({
+            hasDeleteConfirmDialog: false,
         });
     }
 
@@ -106,6 +110,10 @@ export class DiscussSidebarCategoryItem extends Component {
         ev.stopPropagation();
     }
 
+    _onClickLeaveGroupChat() {
+        this.thread.members.length === 1 ? this.thread.unsubscribe() : this.state.hasLeaveConfirmDialog = true;
+    }
+
     /**
      * @private
      * @param {MouseEvent} ev
@@ -143,6 +151,10 @@ export class DiscussSidebarCategoryItem extends Component {
     _onClickUnpin(ev) {
         ev.stopPropagation();
         this.categoryItem.channel.unsubscribe();
+    }
+
+    _onLeaveConfirmDialogClosed() {
+        this.state.hasLeaveConfirmDialog = false;
     }
 
     /**

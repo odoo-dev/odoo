@@ -152,9 +152,10 @@ function factory(dependencies) {
         async _initChannels({
             channel_channel = [],
             channel_direct_message = [],
+            channel_group_chat = [],
             channel_private_group = [],
         } = {}) {
-            const channelsData = channel_channel.concat(channel_direct_message, channel_private_group);
+            const channelsData = channel_channel.concat(channel_direct_message, channel_group_chat, channel_private_group);
             return executeGracefully(channelsData.map(channelData => () => {
                 const convertedData = this.env.models['mail.thread'].convertData(channelData);
                 if (!convertedData.members) {
@@ -263,7 +264,7 @@ function factory(dependencies) {
                     newItemPlaceholderText: this.env._t("Find or start a conversation..."),
                     serverStateKey: 'is_discuss_sidebar_category_chat_open',
                     sortComputeMethod: 'last_action',
-                    supportedChannelTypes: ['chat'],
+                    supportedChannelTypes: ['chat', 'group'],
                 }),
             });
         }
