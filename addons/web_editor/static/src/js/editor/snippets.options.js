@@ -3832,7 +3832,10 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
      */
     async _loadImageInfo() {
         this.img = new Image();
-        Object.entries(this.$target[0].dataset).forEach(([key, value]) => {
+        Object.entries(this.$target[0].dataset).filter(([key]) =>
+            // Avoid copying dynamic editor attributes
+            !['oeId','oeModel', 'oeField', 'oeXpath', 'noteId'].includes(key)
+        ).forEach(([key, value]) => {
             this.img.dataset[key] = value;
         });
         const src = getBgImageURL(this.$target[0]);
@@ -4719,6 +4722,8 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
 
         // Create empty clone of $target with same display size, make it draggable and give it a tooltip.
         this.$bgDragger = this.$target.clone().empty();
+        // Prevent clone from being seen as editor if target is editor (eg. background on root tag)
+        this.$bgDragger.removeClass('o_editable');
         // Some CSS child selector rules will not be applied since the clone has a different container from $target.
         // The background-attachment property should be the same in both $target & $bgDragger, this will keep the
         // preview more "wysiwyg" instead of getting different result when bg position saved (e.g. parallax snippet)
@@ -4832,7 +4837,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @private
      */
     _onDocumentClicked: function (ev) {
-        if (!ev.target.closest('.o_we_background_position_overlay')) {
+        if (!$(ev.target).closest('.o_we_background_position_overlay')) {
             this._toggleBgOverlay(false);
         }
     },

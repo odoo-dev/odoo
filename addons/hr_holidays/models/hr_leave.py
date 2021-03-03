@@ -792,7 +792,7 @@ class HolidaysRequest(models.Model):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or self.env.is_superuser()
 
         if not is_officer:
-            if any(hol.date_from.date() < fields.Date.today() for hol in self):
+            if any(hol.date_from.date() < fields.Date.today() and hol.employee_id.leave_manager_id != self.env.user for hol in self):
                 raise UserError(_('You must have manager rights to modify/validate a time off that already begun'))
 
         employee_id = values.get('employee_id', False)
@@ -906,6 +906,7 @@ class HolidaysRequest(models.Model):
                 'privacy': 'confidential',
                 'event_tz': holiday.user_id.tz,
                 'activity_ids': [(5, 0, 0)],
+                'res_id': holiday.id,
             }
             # Add the partner_id (if exist) as an attendee
             if holiday.user_id and holiday.user_id.partner_id:
@@ -1174,14 +1175,10 @@ class HolidaysRequest(models.Model):
     def activity_update(self):
         to_clean, to_do = self.env['hr.leave'], self.env['hr.leave']
         for holiday in self:
-            start = UTC.localize(holiday.date_from).astimezone(timezone(holiday.employee_id.tz or 'UTC'))
-            end = UTC.localize(holiday.date_to).astimezone(timezone(holiday.employee_id.tz or 'UTC'))
             note = _(
-                'New %(leave_type)s Request created by %(user)s from %(start)s to %(end)s',
+                'New %(leave_type)s Request created by %(user)s',
                 leave_type=holiday.holiday_status_id.name,
                 user=holiday.create_uid.name,
-                start=start,
-                end=end
             )
             if holiday.state == 'draft':
                 to_clean |= holiday

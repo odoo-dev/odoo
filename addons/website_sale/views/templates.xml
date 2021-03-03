@@ -925,6 +925,7 @@
                                                 <div style="width: 200px;" class="s_website_form_label"/>
                                                 <a role="button" href="/shop/checkout" class="btn btn-secondary float-left"><span class="fa fa-chevron-left"/> Previous</a>
                                                 <a role="button" class="btn btn-primary float-right s_website_form_send" href="/shop/confirm_order">Next <span class="fa fa-chevron-right" /></a>
+                                                <span id="s_website_form_result"></span>
                                             </div>
                                         </div>
                                     </form>
@@ -981,7 +982,12 @@
                 <tr>
                     <th class="td-img">Product</th>
                     <th></th>
-                    <th class="text-center td-qty">Quantity</th>
+                    <th class="text-center td-qty">
+                        <t t-set="show_qty" t-value="is_view_active('website_sale.product_quantity')"/>
+                        <t t-if="show_qty">
+                            Quantity
+                        </t>
+                    </th>
                     <th class="text-center td-price">Price</th>
                     <th class="text-center td-action"></th>
                 </tr>
@@ -991,7 +997,13 @@
                     <tr t-att-class="'optional_product info' if line.linked_line_id else None">
                         <td colspan="2" t-if="not line.product_id.product_tmpl_id" class='td-img'></td>
                         <td align="center" t-if="line.product_id.product_tmpl_id" class='td-img'>
-                            <span t-field="line.product_id.image_128" t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded o_image_64_max'}" />
+                            <span t-if="line._is_not_sellable_line() and line.product_id.image_128">
+                                <img t-att-src="image_data_uri(line.product_id.image_128)" class="img o_image_64_max rounded" t-att-alt="line.name_short"/>
+                            </span>
+                            <span t-else=""
+                                t-field="line.product_id.image_128"
+                                t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded o_image_64_max'}"
+                            />
                         </td>
                         <td t-if="line.product_id.product_tmpl_id" class='td-product_name'>
                             <div>
@@ -1005,21 +1017,26 @@
                         </td>
                         <td class="text-center td-qty">
                             <div class="css_quantity input-group mx-auto">
-                                 <t t-if="not line._is_not_sellable_line()">
-                                    <div class="input-group-prepend">
-                                        <a t-attf-href="#" class="btn btn-link js_add_cart_json d-none d-md-inline-block" aria-label="Remove one" title="Remove one">
-                                            <i class="fa fa-minus"></i>
-                                        </a>
-                                    </div>
-                                    <input type="text" class="js_quantity form-control quantity" t-att-data-line-id="line.id" t-att-data-product-id="line.product_id.id" t-att-value="int(line.product_uom_qty) == line.product_uom_qty and int(line.product_uom_qty) or line.product_uom_qty" />
-                                    <div class="input-group-append">
-                                        <a t-attf-href="#" class="btn btn-link float_left js_add_cart_json d-none d-md-inline-block" aria-label="Add one" title="Add one">
-                                            <i class="fa fa-plus"></i>
-                                        </a>
-                                    </div>
+                                <t t-if="not line._is_not_sellable_line()">
+                                    <t t-if="show_qty">
+                                        <div class="input-group-prepend">
+                                            <a t-attf-href="#" class="btn btn-link js_add_cart_json d-none d-md-inline-block" aria-label="Remove one" title="Remove one">
+                                                <i class="fa fa-minus"></i>
+                                            </a>
+                                        </div>
+                                        <input type="text" class="js_quantity form-control quantity" t-att-data-line-id="line.id" t-att-data-product-id="line.product_id.id" t-att-value="int(line.product_uom_qty) == line.product_uom_qty and int(line.product_uom_qty) or line.product_uom_qty" />
+                                        <div class="input-group-append">
+                                            <a t-attf-href="#" class="btn btn-link float_left js_add_cart_json d-none d-md-inline-block" aria-label="Add one" title="Add one">
+                                                <i class="fa fa-plus"></i>
+                                            </a>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <input type="hidden" class="js_quantity form-control quantity" t-att-data-line-id="line.id" t-att-data-product-id="line.product_id.id" t-att-value="int(line.product_uom_qty) == line.product_uom_qty and int(line.product_uom_qty) or line.product_uom_qty" />
+                                    </t>
                                 </t>
                                 <t t-else="">
-                                    <span class="text-muted text-center" t-esc="int(line.product_uom_qty)"/>
+                                    <span class="text-muted w-100" t-esc="int(line.product_uom_qty)"/>
                                 </t>
                             </div>
                         </td>
@@ -1115,9 +1132,15 @@
         </div>
         <t t-if="website_sale_order and website_sale_order.website_order_line">
             <t t-foreach="website_sale_order.website_order_line" t-as="line">
-                <div class="row mb8 cart_line">
+                <div class="form-row mb8 cart_line">
                     <div class="col-3 text-center">
-                        <span t-field="line.product_id.image_128" t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded o_image_64_max mb-2'}" />
+                        <span t-if="line._is_not_sellable_line() and line.product_id.image_128">
+                            <img t-att-src="image_data_uri(line.product_id.image_128)" class="img o_image_64_max rounded mb-2 img-fluid" t-att-alt="line.name_short"/>
+                        </span>
+                        <span t-else=""
+                            t-field="line.product_id.image_128"
+                            t-options="{'widget': 'image', 'qweb_img_responsive': True, 'class': 'rounded o_image_64_max mb-2'}"
+                        />
                     </div>
                     <div class="col-9">
                         <div>
@@ -1356,12 +1379,10 @@
                                             <input type="text" name="name" t-attf-class="form-control #{error.get('name') and 'is-invalid' or ''}" t-att-value="'name' in checkout and checkout['name']" />
                                         </div>
                                         <div class="w-100"/>
-                                        <t t-if="mode[1] == 'billing'">
-                                            <div t-attf-class="form-group #{error.get('email') and 'o_has_error' or ''} col-lg-6" id="div_email">
-                                                <label class="col-form-label" for="email">Email</label>
-                                                <input type="email" name="email" t-attf-class="form-control #{error.get('email') and 'is-invalid' or ''}" t-att-value="'email' in checkout and checkout['email']" />
-                                            </div>
-                                        </t>
+                                        <div t-attf-class="form-group #{error.get('email') and 'o_has_error' or ''} col-lg-6" id="div_email">
+                                            <label t-attf-class="col-form-label #{mode[1] == 'shipping' and 'label-optional' or ''}" for="email">Email</label>
+                                            <input type="email" name="email" t-attf-class="form-control #{error.get('email') and 'is-invalid' or ''}" t-att-value="'email' in checkout and checkout['email']" />
+                                        </div>
                                         <div t-attf-class="form-group #{error.get('phone') and 'o_has_error' or ''} col-lg-6" id="div_phone">
                                             <label class="col-form-label" for="phone">Phone</label>
                                             <input type="tel" name="phone" t-attf-class="form-control #{error.get('phone') and 'is-invalid' or ''}" t-att-value="'phone' in checkout and checkout['phone']" />
@@ -1605,7 +1626,13 @@
                             <tr t-foreach="website_sale_order.website_order_line" t-as="line">
                                 <td class='' colspan="2" t-if="not line.product_id.product_tmpl_id"></td>
                                 <td class='td-img text-center' t-if="line.product_id.product_tmpl_id">
-                                    <span t-field="line.product_id.image_128" t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded o_image_64_max'}" />
+                                    <span t-if="line._is_not_sellable_line() and line.product_id.image_128">
+                                        <img t-att-src="image_data_uri(line.product_id.image_128)" class="img o_image_64_max rounded" t-att-alt="line.name_short"/>
+                                    </span>
+                                    <span t-else=""
+                                        t-field="line.product_id.image_128"
+                                        t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded o_image_64_max'}"
+                                    />
                                 </td>
                                 <td class='td-product_name' t-if="line.product_id.product_tmpl_id">
                                     <div>
@@ -1886,23 +1913,25 @@
         </field>
     </record>
 
-    <template id="ecom_show_extra_fields" inherit_id="website_sale.product" active="False" customize_show="True" name="Show Extra Fields">
+    <template id="ecom_show_extra_fields" inherit_id="website_sale.product" active="True" name="Show Extra Fields">
         <xpath expr="//div[@id='product_details']" position="inside">
-            <hr/>
-            <p class="text-muted">
-                <t t-foreach='website.shop_extra_field_ids' t-as='field' t-if='product[field.name]'>
-                    <b><t t-esc='field.label'/>: </b>
-                    <t t-if='field.field_id.ttype != "binary"'>
-                        <span t-esc='product[field.name]' t-options="{'widget': field.field_id.ttype}"/>
+            <t t-if="any([product[field.name] for field in website.shop_extra_field_ids])">
+                <hr/>
+                <p class="text-muted">
+                    <t t-foreach='website.shop_extra_field_ids' t-as='field' t-if='product[field.name]'>
+                        <b><t t-esc='field.label'/>: </b>
+                        <t t-if='field.field_id.ttype != "binary"'>
+                            <span t-esc='product[field.name]' t-options="{'widget': field.field_id.ttype}"/>
+                        </t>
+                        <t t-else=''>
+                            <a target='_blank' t-attf-href='/web/content/product.template/#{product.id}/#{field.name}?download=1'>
+                                <i class='fa fa-file'></i>
+                            </a>
+                        </t>
+                        <br/>
                     </t>
-                    <t t-else=''>
-                        <a target='_blank' t-attf-href='/web/content/product.template/#{product.id}/#{field.name}?download=1'>
-                            <i class='fa fa-file'></i>
-                        </a>
-                    </t>
-                    <br/>
-                </t>
-            </p>
+                </p>
+            </t>
         </xpath>
     </template>
 

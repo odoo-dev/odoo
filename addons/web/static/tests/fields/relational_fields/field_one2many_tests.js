@@ -13,6 +13,7 @@ var RamStorage = require('web.RamStorage');
 var relationalFields = require('web.relational_fields');
 var testUtils = require('web.test_utils');
 var fieldUtils = require('web.field_utils');
+const { patch, unpatch } = require('web.utils');
 
 const cpHelpers = testUtils.controlPanel;
 var createView = testUtils.createView;
@@ -5076,7 +5077,7 @@ QUnit.module('fields', {}, function () {
                 "should correctly display the m2o");
             assert.strictEqual(form.$('.o_data_row:first td:nth(2) .badge').length, 2,
                 "m2m should contain two tags");
-            assert.strictEqual(form.$('.o_data_row:first td:nth(2) .badge:first span').text(),
+            assert.strictEqual(form.$('.o_data_row:first td:nth(2) .badge:first span .o_tag_badge_text').text(),
                 'second record', "m2m values should have been correctly fetched");
 
             await testUtils.dom.click(form.$('.o_data_row:first'));
@@ -9602,24 +9603,23 @@ QUnit.module('fields', {}, function () {
             const prom = new Promise(r => {
                 resolveCP = r;
             });
-            ControlPanel.patch('cp_patch_mock', T =>
-                class extends T {
-                    constructor() {
-                        super(...arguments);
-                        owl.hooks.onMounted(() => {
-                            assert.step('mounted');
-                        });
-                        owl.hooks.onWillUnmount(() => {
-                            assert.step('willUnmount');
-                        });
-                    }
-                    async update() {
-                        // the issue is a race condition, so we manually delay the update to turn it deterministic
-                        await prom;
-                        super.update(...arguments);
-                    }
-                }
-            );
+            patch(ControlPanel.prototype, 'cp_patch_mock', {
+                setup() {
+                    this._super(...arguments);
+                    owl.hooks.onMounted(() => {
+                        assert.step('mounted');
+                    });
+                    owl.hooks.onWillUnmount(() => {
+                        assert.step('willUnmount');
+                    });
+                },
+                async update() {
+                    const _super = this._super.bind(this);
+                    // the issue is a race condition, so we manually delay the update to turn it deterministic
+                    await prom;
+                    _super.update(...arguments);
+                },
+            });
 
             const form = await createView({
                 View: FormView,
@@ -9644,7 +9644,7 @@ QUnit.module('fields', {}, function () {
 
             assert.verifySteps([]);
 
-            ControlPanel.unpatch('cp_patch_mock');
+            unpatch(ControlPanel.prototype, 'cp_patch_mock');
             delete fieldRegistry.map.pad_like;
             form.destroy();
 

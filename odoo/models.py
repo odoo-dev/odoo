@@ -168,7 +168,7 @@ class MetaModel(api.Meta):
                 "Invalid import of %s.%s, it should start with 'odoo.addons'." % (self.__module__, name)
             self._module = self.__module__.split('.')[2]
 
-        # Remember which models to instanciate for this module.
+        # Remember which models to instantiate for this module.
         if self._module:
             self.module_to_models[self._module].append(self)
 
@@ -1557,7 +1557,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # try to find a view_id if none provided
         if not view_id:
-            # <view_type>_view_ref in context can be used to overrride the default view
+            # <view_type>_view_ref in context can be used to override the default view
             view_ref_key = view_type + '_view_ref'
             view_ref = self._context.get(view_ref_key)
             if view_ref:
@@ -1629,7 +1629,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         result['arch'] = xarch
         result['fields'] = xfields
 
-        # Add related action information if aksed
+        # Add related action information if asked
         if toolbar:
             vt = 'list' if view_type == 'tree' else view_type
             bindings = self.env['ir.actions.actions'].get_bindings(self._name)
@@ -1883,7 +1883,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
     @api.model
     def _read_group_expand_full(self, groups, domain, order):
-        """Extend the group to include all targer records by default."""
+        """Extend the group to include all target records by default."""
         return groups.search([], order=order)
 
     @api.model
@@ -3232,7 +3232,7 @@ Fields:
         Returns rooturl for a specific given record.
 
         By default, it return the ir.config.parameter of base_url
-        but it can be overidden by model.
+        but it can be overridden by model.
 
         :return: the base url for this record
         :rtype: string
@@ -3397,7 +3397,7 @@ Fields:
         if not query.where_clause:
             return self
 
-        # detemine ids in database that satisfy ir.rules
+        # determine ids in database that satisfy ir.rules
         valid_ids = set()
         query.add_where(f'"{self._table}".id IN %s')
         query_str, params = query.select()
@@ -3582,15 +3582,23 @@ Fields:
             if not(self.env.uid == SUPERUSER_ID and not self.pool.ready):
                 bad_names.update(LOG_ACCESS_COLUMNS)
 
+        # set magic fields
+        vals = {key: val for key, val in vals.items() if key not in bad_names}
+        if self._log_access:
+            vals.setdefault('write_uid', self.env.uid)
+            vals.setdefault('write_date', self.env.cr.now())
+
+        field_values = []                           # [(field, value)]
         determine_inverses = defaultdict(list)      # {inverse: fields}
         records_to_inverse = {}                     # {field: records}
         relational_names = []
         protected = set()
         check_company = False
-        for fname in vals:
+        for fname, value in vals.items():
             field = self._fields.get(fname)
             if not field:
                 raise ValueError("Invalid field %r on model %r" % (fname, self._name))
+            field_values.append((field, value))
             if field.inverse:
                 if field.type in ('one2many', 'many2many'):
                     # The written value is a list of commands that must applied
@@ -3645,26 +3653,12 @@ Fields:
 
             real_recs = self.filtered('id')
 
-            # If there are only fields that do not trigger _write (e.g. only
-            # determine inverse), the below ensures that `write_date` and
-            # `write_uid` are updated (`test_orm.py`, `test_write_date`)
-            if self._log_access and self.ids:
-                towrite = env.all.towrite[self._name]
-                for record in real_recs:
-                    towrite[record.id]['write_uid'] = self.env.uid
-                    towrite[record.id]['write_date'] = False
-                self.env.cache.invalidate([
-                    (self._fields['write_date'], self.ids),
-                    (self._fields['write_uid'], self.ids),
-                ])
-
-            # for monetary field, their related currency field must be cached
-            # before the amount so it can be rounded correctly
-            for fname in sorted(vals, key=lambda x: self._fields[x].type=='monetary'):
-                if fname in bad_names:
-                    continue
-                field = self._fields[fname]
-                field.write(self, vals[fname])
+            # field.write_sequence determines a priority for writing on fields.
+            # Monetary fields need their corresponding currency field in cache
+            # for rounding values. X2many fields must be written last, because
+            # they flush other fields when deleting lines.
+            for field, value in sorted(field_values, key=lambda item: item[0].write_sequence):
+                field.write(self, value)
 
             # determine records depending on new values
             #
@@ -3722,6 +3716,12 @@ Fields:
         # determine records that require updating parent_path
         parent_records = self._parent_store_update_prepare(vals)
 
+        if self._log_access:
+            # set magic fields (already done by write(), but not for computed fields)
+            vals = dict(vals)
+            vals.setdefault('write_uid', self.env.uid)
+            vals.setdefault('write_date', self.env.cr.now())
+
         # determine SQL values
         columns = []                    # list of (column_name, format, value)
 
@@ -3736,12 +3736,6 @@ Fields:
 
             assert field.column_type
             columns.append((name, field.column_format, val))
-
-        if self._log_access:
-            if not vals.get('write_uid'):
-                columns.append(('write_uid', '%s', self._uid))
-            if not vals.get('write_date'):
-                columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
 
         # update columns
         if columns:
@@ -3810,6 +3804,15 @@ Fields:
             # add missing defaults
             vals = self._add_missing_default_values(vals)
 
+            # set magic fields
+            for name in bad_names:
+                vals.pop(name, None)
+            if self._log_access:
+                vals.setdefault('create_uid', self.env.uid)
+                vals.setdefault('create_date', self.env.cr.now())
+                vals.setdefault('write_uid', self.env.uid)
+                vals.setdefault('write_date', self.env.cr.now())
+
             # distribute fields into sets for various purposes
             data = {}
             data['stored'] = stored = {}
@@ -3817,8 +3820,6 @@ Fields:
             data['inherited'] = inherited = defaultdict(dict)
             data['protected'] = protected = set()
             for key, val in vals.items():
-                if key in bad_names:
-                    continue
                 field = self._fields.get(key)
                 if not field:
                     raise ValueError("Invalid field %r on model %r" % (key, self._name))
@@ -3919,18 +3920,10 @@ Fields:
         other_fields = set()            # non-column fields
         translated_fields = set()       # translated fields
 
-        # column names, formats and values (for common fields)
-        columns0 = [('id', "nextval(%s)", self._sequence)]
-        if self._log_access:
-            columns0.append(('create_uid', "%s", self._uid))
-            columns0.append(('create_date', "%s", AsIs("(now() at time zone 'UTC')")))
-            columns0.append(('write_uid', "%s", self._uid))
-            columns0.append(('write_date', "%s", AsIs("(now() at time zone 'UTC')")))
-
         for data in data_list:
             # determine column values
             stored = data['stored']
-            columns = [column for column in columns0 if column[0] not in stored]
+            columns = [('id', "nextval(%s)", self._sequence)]
             for name, val in sorted(stored.items()):
                 field = self._fields[name]
                 assert field.store
@@ -3960,7 +3953,7 @@ Fields:
             # The problem then becomes: how to "estimate" the right size of the batch to have
             # good performance?
             #
-            # This requires extensive testing, and it was prefered not to introduce INSERTs in
+            # This requires extensive testing, and it was preferred not to introduce INSERTs in
             # batch, to avoid regressions as much as possible.
             #
             # That said, we haven't closed the door completely.
@@ -4238,7 +4231,7 @@ Fields:
         :rtype: osv.query.Query
         """
         # if the object has an active field ('active', 'x_active'), filter out all
-        # inactive records unless they were explicitely asked for
+        # inactive records unless they were explicitly asked for
         if self._active_name and active_test and self._context.get('active_test', True):
             # the item[0] trick below works for domain items and '&'/'|'/'!'
             # operators too
@@ -5137,9 +5130,6 @@ Fields:
             :param values: dict of field values, in any format.
             :param validate: whether values must be checked
         """
-        def is_monetary(pair):
-            return pair[0].type == 'monetary'
-
         self.ensure_one()
         cache = self.env.cache
         fields = self._fields
@@ -5148,8 +5138,8 @@ Fields:
         except KeyError as e:
             raise ValueError("Invalid field %r on model %r" % (e.args[0], self._name))
 
-        # convert monetary fields last in order to ensure proper rounding
-        for field, value in sorted(field_values, key=is_monetary):
+        # convert monetary fields after other columns for correct value rounding
+        for field, value in sorted(field_values, key=lambda item: item[0].write_sequence):
             cache.set(self, field, field.convert_to_cache(value, self, validate))
 
             # set inverse fields on new records in the comodel

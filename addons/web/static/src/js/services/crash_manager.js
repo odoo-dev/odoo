@@ -16,6 +16,8 @@ var core = require('web.core');
 var Dialog = require('web.Dialog');
 var ErrorDialogRegistry = require('web.ErrorDialogRegistry');
 var Widget = require('web.Widget');
+var config = require('web.config');
+var { formatTraceback, annotateTraceback} = require("@web/js/core/error_utils");
 
 var _t = core._t;
 var _lt = core._lt;
@@ -46,10 +48,63 @@ var CrashManagerDialog = Dialog.extend({
      */
     init: function (parent, options, error) {
         this._super.apply(this, [parent, options]);
+        this.error = error;
         this.message = error.message;
         this.traceback = error.traceback;
         core.bus.off('close_dialogs', this);
     },
+
+    willStart: async function () {
+        await this._super()
+        const jsError = this.error.data && this.error.data.jsError;
+        if (jsError) {
+            if (config.isDebug('assets')) {
+                this.traceback = await annotateTraceback(jsError);
+            } else {
+                this.traceback = formatTraceback(jsError);
+            }
+        }
+    },
+
+    start: async function () {
+        await this._super();
+        const message = this.message;
+        const traceback = this.traceback;
+
+        if (!traceback) {
+            return;
+        }
+        this.$(".o_error_detail").on("shown.bs.collapse", function (e) {
+            e.target.scrollTop = e.target.scrollHeight;
+        });
+
+        const $clipboardBtn = this.$(".o_clipboard_button");
+        $clipboardBtn.tooltip({title: _t("Copied !"), trigger: "manual", placement: "left"});
+        this.clipboard = new window.ClipboardJS($clipboardBtn[0], {
+            text: function () {
+                return (_t("Error") + ":\n" + message + "\n\n" + traceback).trim();
+            },
+            // Container added because of Bootstrap modal that give the focus to another element.
+            // We need to give to correct focus to ClipboardJS (see in ClipboardJS doc)
+            // https://github.com/zenorocha/clipboard.js/issues/155
+            container: this.el,
+        });
+        this.clipboard.on("success", function (e) {
+            _.defer(function () {
+                $clipboardBtn.tooltip("show");
+                _.delay(function () {
+                    $clipboardBtn.tooltip("hide");
+                }, 800);
+            });
+        });
+    },
+    destroy() {
+        if (this.clipboard) {
+            this.$(".o_clipboard_button").tooltip('dispose');
+            this.clipboard.destroy();
+        }
+        this._super();
+    }
 });
 
 var ErrorDialog = CrashManagerDialog.extend({
@@ -99,7 +154,6 @@ var CrashManager = AbstractService.extend({
             'odoo.exceptions.Warning': _lt("Warning"),
         };
 
-        this.browserDetection = new BrowserDetection();
         this._super.apply(this, arguments);
 
         // crash manager integration
@@ -137,7 +191,7 @@ var CrashManager = AbstractService.extend({
                 self.show_error({
                     type: _t("Odoo Client Error"),
                     message: message,
-                    data: {debug: file + ':' + line + "\n" + _t('Traceback:') + "\n" + traceback},
+                    data: {debug: file + ':' + line + "\n" + _t('Traceback:') + "\n" + traceback, jsError: error},
                 });
             }
         };
@@ -146,21 +200,11 @@ var CrashManager = AbstractService.extend({
         // promise has been rejected due to a crash
         core.bus.on('crash_manager_unhandledrejection', this, function (ev) {
             if (ev.reason && ev.reason instanceof Error) {
-                // Error.prototype.stack is non-standard.
-                // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
-                // However, most engines provide an implementation.
-                // In particular, Chrome formats the contents of Error.stack
-                // https://v8.dev/docs/stack-trace-api#compatibility
-                let traceback;
-                if (self.browserDetection.isBrowserChrome()) {
-                    traceback = ev.reason.stack;
-                } else {
-                    traceback = `${_t("Error:")} ${ev.reason.message}\n${ev.reason.stack}`;
-                }
+                let traceback = ev.reason.stack;
                 self.show_error({
                     type: _t("Odoo Client Error"),
                     message: '',
-                    data: {debug: _t('Traceback:') + "\n" + traceback},
+                    data: {debug: _t('Traceback:') + "\n" + traceback, jsError: ev.reason},
                 });
             } else {
                 // the rejection is not due to an Error, so prevent the browser
@@ -254,41 +298,6 @@ var CrashManager = AbstractService.extend({
         var dialog = new dialogClass(this, {
             title: _.str.capitalize(error.type) || _t("Odoo Error"),
         }, error);
-
-
-        // When the dialog opens, initialize the copy feature and destroy it when the dialog is closed
-        var $clipboardBtn;
-        var clipboard;
-        dialog.opened(function () {
-            // When the full traceback is shown, scroll it to the end (useful for better python error reporting)
-            dialog.$(".o_error_detail").on("shown.bs.collapse", function (e) {
-                e.target.scrollTop = e.target.scrollHeight;
-            });
-
-            $clipboardBtn = dialog.$(".o_clipboard_button");
-            $clipboardBtn.tooltip({title: _t("Copied !"), trigger: "manual", placement: "left"});
-            clipboard = new window.ClipboardJS($clipboardBtn[0], {
-                text: function () {
-                    return (_t("Error") + ":\n" + error.message + "\n\n" + error.data.debug).trim();
-                },
-                // Container added because of Bootstrap modal that give the focus to another element.
-                // We need to give to correct focus to ClipboardJS (see in ClipboardJS doc)
-                // https://github.com/zenorocha/clipboard.js/issues/155
-                container: dialog.el,
-            });
-            clipboard.on("success", function (e) {
-                _.defer(function () {
-                    $clipboardBtn.tooltip("show");
-                    _.delay(function () {
-                        $clipboardBtn.tooltip("hide");
-                    }, 800);
-                });
-            });
-        });
-        dialog.on("closed", this, function () {
-            $clipboardBtn.tooltip('dispose');
-            clipboard.destroy();
-        });
 
         return dialog.open();
     },

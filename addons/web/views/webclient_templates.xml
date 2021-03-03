@@ -147,7 +147,6 @@
         <script type="text/javascript" src="/web/static/src/js/core/dom.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/local_storage.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/mixins.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/core/patch_mixin.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/qweb.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/ram_storage.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/registry.js"></script>
@@ -166,6 +165,7 @@
         <script type="text/javascript" src="/web/static/src/js/services/local_storage_service.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/notification_service.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/crash_manager.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/core/error_utils.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/session_storage_service.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/tools/debug_manager.js"></script>
@@ -635,6 +635,7 @@
         <script type="text/javascript" src="/web/static/lib/Chart/Chart.js"></script>
         <script type="text/javascript" src="/web/static/lib/nearest/jquery.nearest.js"/>
         <script type="text/javascript" src="/web/static/lib/daterangepicker/daterangepicker.js"></script>
+        <script type="text/javascript" src="/web/static/lib/stacktracejs/stacktrace.js"></script>
         <script type="text/javascript" src="/web/static/src/js/libs/daterangepicker.js"></script>
 
         <script type="text/javascript" src="/web/static/tests/main_tests.js"></script>
@@ -737,7 +738,7 @@
         <script type="text/javascript" src="/web/static/tests/core/data_comparison_utils_tests.js"></script>
         <script type="text/javascript" src="/web/static/tests/core/math_utils_tests.js"></script>
         <script type="text/javascript" src="/web/static/tests/core/mixins_tests.js"></script>
-        <script type="text/javascript" src="/web/static/tests/core/patch_mixin_tests.js"></script>
+        <script type="text/javascript" src="/web/static/tests/core/patch_tests.js"></script>
         <script type="text/javascript" src="/web/static/tests/core/time_tests.js"></script>
         <script type="text/javascript" src="/web/static/tests/core/concurrency_tests.js"></script>
         <script type="text/javascript" src="/web/static/tests/core/util_tests.js"></script>
@@ -776,6 +777,8 @@
         <script type="text/javascript" src="/web/static/tests/widgets/domain_selector_tests.js"/>
         <script type="text/javascript" src="/web/static/tests/widgets/model_field_selector_tests.js"/>
         <script type="text/javascript" src="/web/static/tests/widgets/rainbow_man_tests.js"/>
+
+        <script type="text/javascript" src="/web/static/tests/report/client_action_tests.js"/>
 
         <script type="text/javascript" src="/web/static/tests/tools/debug_manager_tests.js"/>
 

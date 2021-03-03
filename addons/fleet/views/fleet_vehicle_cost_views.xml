@@ -107,7 +107,8 @@
                                 </strong>
                             </div>
                             <div>
-                                <field name="start_date"/> - <field name="expiration_date"/>
+                                <t t-if="new Date(record.expiration_date.raw_value) &lt; (new Date())" t-set="expiration_class" t-value="'oe_kanban_text_red'"/>
+                                <span t-att-class="expiration_class"><field name="start_date"/> - <field name="expiration_date"/></span>
                             </div>
                             <div>
                                 <field name="insurer_id" widget="res_partner_many2one"/>
@@ -222,8 +223,8 @@
                             <field name="purchaser_id"/>
                             <label for="odometer"/>
                             <div class="o_row">
-                                <field name="odometer"/>
-                                <field name="odometer_unit"/>
+                                <field name="odometer" class="oe_inline"/>
+                                <field name="odometer_unit" class="pl-1 pl-sm-0"/>
                             </div>
                         </group>
                     </group>
@@ -255,7 +256,7 @@
                 <field name="notes" optional="show" />
                 <field name="amount" sum="Total" widget="monetary"/>
                 <field name="currency_id" invisible="1"/>
-                <field name="state" readonly="1" widget="badge" decoration-success="state == 'done'" decoration-warning="state == 'todo'"  decoration-info="state == 'running'" />
+                <field name="state" readonly="1" widget="badge" decoration-success="state == 'done'" decoration-warning="state == 'new'"  decoration-info="state == 'running'" />
             </tree>
         </field>
     </record>
@@ -264,23 +265,49 @@
         <field name="name">fleet.vehicle.log.services.kanban</field>
         <field name="model">fleet.vehicle.log.services</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile">
+            <kanban default_group_by="state">
                 <field name="currency_id"/>
+                <field name="activity_ids"/>
+                <field name="activity_state"/>
+                <field name="purchaser_id"/>
+                <field name="vendor_id"/>
+                <field name="amount"/>
+                <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_global_click">
-                            <div>
-                                <strong>
-                                    <field name="vehicle_id" widget="res_partner_many2one"/>
+                        <div t-attf-class="oe_kanban_global_click container" class="o_kanban_record_has_image_fill">
+                            <div class="oe_kanban_details">
+                                <div class="o_kanban_record_top">
+                                    <img t-att-src="kanban_image('fleet.vehicle', 'image_128', record.vehicle_id.raw_value)" t-att-alt="record.vehicle_id.value" class="o_image_24_cover float-left"/>
+                                    <div class="o_kanban_record_headings pl-2 pr-2">
+                                        <div class="text-truncate o_kanban_record_title">
+                                            <strong>
+                                                <field name="vehicle_id"/>
+                                                <span t-attf-class="float-right badge #{['todo', 'running'].indexOf(record.state.raw_value) > -1 ? 'badge-secondary' : ['cancelled'].indexOf(record.state.raw_value) > -1 ? 'badge-danger' : 'badge-success'}">
+                                                    <field name="state"/>
+                                                </span>
+                                            </strong>
+                                        </div>
+                                        <div class="text-truncate">
+                                            <em><field name="service_type_id"/></em>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-truncate">
+                                    <field name="purchaser_id"/>
                                     <span class="float-right"><field name="date"/></span>
-                                </strong>
-                            </div>
-                            <div>
-                                <field name="purchaser_id" widget="res_partner_many2one"/>
-                            </div>
-                            <div>
-                                <span><field name="vendor_id" widget="res_partner_many2one"/></span>
-                                <span class="float-right"><field name="amount" widget="monetary"/></span>
+                                </div>
+                                <div class="text-truncate">
+                                    <field name="vendor_id"/>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="activity_ids" widget="kanban_activity"/>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </t>

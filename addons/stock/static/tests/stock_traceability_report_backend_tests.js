@@ -1,9 +1,13 @@
 odoo.define('stock.stock_traceability_report_backend_tests', function (require) {
     "use strict";
 
+    const ControlPanel = require('web.ControlPanel');
     const dom = require('web.dom');
     const StockReportGeneric = require('stock.stock_report_generic');
     const testUtils = require('web.test_utils');
+    const { patch, unpatch } = require('web.utils');
+
+    const { createActionManager, dom: domUtils } = testUtils;
 
     /**
      * Helper function to instantiate a stock report action.
@@ -66,6 +70,81 @@ odoo.define('stock.stock_traceability_report_backend_tests', function (require) 
                 "Displayed template should match");
 
             report.destroy();
+        });
+
+        QUnit.test("mounted is called once when returning on 'Stock report' from breadcrumb", async assert => {
+            // This test can be removed as soon as we don't mix legacy and owl layers anymore.
+            assert.expect(7);
+
+            let mountCount = 0;
+
+            patch(ControlPanel.prototype, 'test.ControlPanel', {
+                mounted() {
+                    mountCount = mountCount + 1;
+                    this.__uniqueId = mountCount;
+                    assert.step(`mounted ${this.__uniqueId}`);
+                    this.__superMounted = this._super.bind(this);
+                    this.__superMounted(...arguments);
+                },
+                willUnmount() {
+                    assert.step(`willUnmount ${this.__uniqueId}`);
+                    this.__superMounted(...arguments);
+                },
+            });
+
+            const actionManager = await createActionManager({
+                actions: [
+                    {
+                        id: 42,
+                        name: "Stock report",
+                        tag: 'stock_report_generic',
+                        type: 'ir.actions.client',
+                        context: {},
+                        params: {},
+                    },
+                ],
+                archs: {
+                    'partner,false,form': '<form><field name="display_name"/></form>',
+                    'partner,false,search': '<search></search>',
+                },
+                data: {
+                    partner: {
+                        fields: {
+                            display_name: { string: "Displayed name", type: "char" },
+                        },
+                        records: [
+                            {id: 1, display_name: "Genda Swami"},
+                        ],
+                    },
+                },
+                mockRPC: function (route) {
+                    if (route === '/web/dataset/call_kw/stock.traceability.report/get_html') {
+                        return Promise.resolve({
+                            html: '<a class="o_stock_reports_web_action" href="#" data-active-id="1" data-res-model="partner">Go to form view</a>',
+                        });
+                    }
+                    return this._super.apply(this, arguments);
+                },
+                intercepts: {
+                    do_action: ev => actionManager.doAction(ev.data.action, ev.data.options),
+                },
+            });
+
+            await actionManager.doAction(42);
+            await domUtils.click(actionManager.$('.o_stock_reports_web_action'));
+            await domUtils.click(actionManager.$('.breadcrumb-item:first'));
+            actionManager.destroy();
+
+            assert.verifySteps([
+                'mounted 1',
+                'willUnmount 1',
+                'mounted 2',
+                'willUnmount 2',
+                'mounted 3',
+                'willUnmount 3',
+            ]);
+
+            unpatch(ControlPanel.prototype, 'test.ControlPanel');
         });
     });
 });

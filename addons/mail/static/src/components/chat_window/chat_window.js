@@ -11,8 +11,6 @@ const useStore = require('mail/static/src/component_hooks/use_store/use_store.js
 const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
 const { isEventHandled } = require('mail/static/src/utils/utils.js');
 
-const patchMixin = require('web.patchMixin');
-
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
@@ -289,12 +287,6 @@ class ChatWindow extends Component {
      * @param {KeyboardEvent} ev
      */
     _onKeydown(ev) {
-        /**
-         * Prevent auto-focus of fuzzy search in the home menu.
-         * Useful in order to allow copy/paste content inside chat window with
-         * CTRL-C & CTRL-V when on the home menu.
-         */
-        ev.stopPropagation();
         if (!this.chatWindow) {
             // prevent crash during delete
             return;
@@ -364,6 +356,6 @@ Object.assign(ChatWindow, {
     template: 'mail.ChatWindow',
 });
 
-return patchMixin(ChatWindow);
+return ChatWindow;
 
 });

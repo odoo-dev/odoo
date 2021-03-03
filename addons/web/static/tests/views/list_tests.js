@@ -16,6 +16,7 @@ var mixins = require('web.mixins');
 var NotificationService = require('web.NotificationService');
 var RamStorage = require('web.RamStorage');
 var testUtils = require('web.test_utils');
+const { patch, unpatch } = require('web.utils');
 var widgetRegistry = require('web.widget_registry');
 var Widget = require('web.Widget');
 
@@ -4801,6 +4802,39 @@ QUnit.module('Views', {
             "there should be two buttons (one by header)");
         assert.doesNotHaveClass(list, '.o_group_header:eq(1) button', 'o_invisible_modifier',
             "the second header button should be visible");
+
+        list.destroy();
+    });
+
+    QUnit.test('groupby node with a button with modifiers using a many2one', async function (assert) {
+        assert.expect(5);
+
+        this.data.res_currency.fields.m2o = {string: "Currency M2O", type: "many2one", relation: "bar"};
+        this.data.res_currency.records[0].m2o = 1;
+
+        const list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: `
+                <tree expand="1">
+                    <field name="foo"/>
+                    <groupby name="currency_id">
+                        <field name="m2o"/>
+                        <button string="Button 1" type="object" name="button_method" attrs='{"invisible": [("m2o", "=", false)]}'/>
+                    </groupby>
+                </tree>`,
+            mockRPC(route, args) {
+                assert.step(args.method);
+                return this._super(...arguments);
+            },
+            groupBy: ['currency_id'],
+        });
+
+        assert.containsOnce(list, '.o_group_header:eq(0) button.o_invisible_modifier');
+        assert.containsOnce(list, '.o_group_header:eq(1) button:not(.o_invisible_modifier)');
+
+        assert.verifySteps(['web_read_group', 'read']);
 
         list.destroy();
     });
@@ -11193,15 +11227,12 @@ QUnit.module('Views', {
 
         let mountedCounterCall = 0;
 
-        ControlPanel.patch('test.ControlPanel', T => {
-            class ControlPanelPatchTest extends T {
-                mounted() {
-                    mountedCounterCall = mountedCounterCall + 1;
-                    assert.step(`mountedCounterCall-${mountedCounterCall}`);
-                    super.mounted(...arguments);
-                }
-            }
-            return ControlPanelPatchTest;
+        patch(ControlPanel.prototype, 'test.ControlPanel', {
+            mounted() {
+                mountedCounterCall = mountedCounterCall + 1;
+                assert.step(`mountedCounterCall-${mountedCounterCall}`);
+                this._super(...arguments);
+            },
         });
 
         const MyListView = ListView.extend({
@@ -11228,7 +11259,7 @@ QUnit.module('Views', {
             'mountedCounterCall-1',
         ]);
 
-        ControlPanel.unpatch('test.ControlPanel');
+        unpatch(ControlPanel.prototype, 'test.ControlPanel');
 
         list.destroy();
     });
