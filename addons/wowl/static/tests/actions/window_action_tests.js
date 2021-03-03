@@ -1514,6 +1514,7 @@ QUnit.module("ActionManager", (hooks) => {
           lang: "en",
           uid: 7,
           tz: "taht",
+          allowed_company_ids: [1],
           active_model: "partner",
           active_id: 1,
           active_ids: [1],
