@@ -2,7 +2,7 @@
 <templates>
 
 <div t-name="web_studio.StudioClientAction" class="o_studio">
-    <StudioNavbar breadcrumbs="props.breadcrumbs"/>
+    <StudioNavbar/>
 
     <StudioHomeMenu apps="homeMenuProps.apps" t-if="studio.mode === studio.MODES.HOME_MENU"/>
     <ComponentAdapter Component="AppCreatorWrapper" t-if="studio.mode === studio.MODES.APP_CREATOR"/>
