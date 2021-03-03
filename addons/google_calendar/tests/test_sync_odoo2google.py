@@ -258,6 +258,39 @@ class TestSyncOdoo2Google(TestSyncGoogle):
             'visibility': 'public',
         }, timeout=3)
 
+    @patch_api
+    def test_event_need_sync(self):
+        event = self.env['calendar.event'].create({
+            'name': "Event",
+            'start': datetime(2020, 1, 15),
+            'stop': datetime(2020, 1, 15),
+            'allday': True,
+            'recurrence_id': False,
+            'recurrency': True,
+        })
+        self.assertFalse(event.need_sync,
+                         "Event created with True recurrency should not be synched to avoid "
+                         "duplicate event on google")
+
+        recurrence = self.env['calendar.recurrence'].create({
+            'google_id': False,
+            'rrule': 'FREQ=WEEKLY;COUNT=2;BYDAY=WE',
+            'base_event_id': event.id,
+            'need_sync': False,
+        })
+        event_2 = self.env['calendar.event'].create({
+            'name': "Event",
+            'start': datetime(2020, 1, 15),
+            'stop': datetime(2020, 1, 15),
+            'allday': True,
+            'recurrence_id': recurrence.id,
+        })
+        self.assertFalse(event_2.need_sync,
+                         "Event created with recurrence_id should not be synched to avoid "
+                         "duplicate event on google")
+
+        self.assertGoogleEventNotInserted()
+        self.assertGoogleEventNotDeleted()
 
 
     @patch_api
