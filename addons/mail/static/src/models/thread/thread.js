@@ -525,6 +525,39 @@ function factory(dependencies) {
         }
 
         /**
+         * Performs the `group_chat_create` RPC on `mail.channel`.
+         *
+         *
+         * @static
+         * @param {Object} param0
+         * @param {integer[]} param0.partnerIds
+         * @param {boolean} [param0.pinForCurrentPartner]
+         * @returns {mail.thread|undefined} the created or existing chat
+         */
+        static async performRpcCreateGroupChat({ partnerIds, pinForCurrentPartner }) {
+            const device = this.env.messaging.device;
+            const data = await this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'group_chat_create',
+                kwargs: {
+                    context: Object.assign({}, this.env.session.user_content, {
+                        // optimize the return value by avoiding useless queries
+                        // in non-mobile devices
+                        isMobile: device.isMobile,
+                    }),
+                    partners_to: partnerIds,
+                    pin: pinForCurrentPartner,
+                },
+            });
+            if (!data) {
+                return;
+            }
+            return this.env.models['mail.thread'].insert(
+                this.env.models['mail.thread'].convertData(data)
+            );
+        }
+
+        /**
          * Performs the `channel_join_and_get_info` RPC on `mail.channel`.
          *
          * @static
@@ -621,6 +654,18 @@ function factory(dependencies) {
                     suggestedRecipientInfoList: insertAndReplace(recipientInfoList),
                 });
             }
+        }
+
+        /**
+         *
+         * @param name
+         */
+        async renameForAll(name) {
+            await this.env.services.rpc({
+                model: "mail.channel",
+                method: "write",
+                args: [this.id, { name: name }],
+            });
         }
 
         /*
@@ -1001,7 +1046,7 @@ function factory(dependencies) {
          * @param {string} newName
          */
         async rename(newName) {
-            if (this.channel_type === 'chat') {
+            if (this.channel_type === 'chat' || this.channel_type === 'group') {
                 await this.async(() => this.env.services.rpc({
                     model: 'mail.channel',
                     method: 'channel_set_custom_name',
@@ -1154,6 +1199,9 @@ function factory(dependencies) {
         _computeDisplayName() {
             if (this.channel_type === 'chat' && this.correspondent) {
                 return this.custom_channel_name || this.correspondent.nameOrDisplayName;
+            }
+            if (this.channel_type === 'group') {
+                return this.custom_channel_name || this.name;
             }
             return this.name;
         }

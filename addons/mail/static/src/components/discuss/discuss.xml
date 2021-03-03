@@ -72,6 +72,30 @@
                 <t t-if="discuss.thread and discuss.threadView and discuss.thread === env.messaging.starred">
                     <button class="o_Discuss_unstarAllButton btn btn-secondary" t-att-disabled="discuss.threadView.messages.length === 0" t-on-click="_onClickUnstarAll">Unstar all</button>
                 </t>
+                <t t-if="discuss.thread and discuss.threadView and (discuss.threadView.thread.isChatChannel || discuss.threadView.thread.channel_type === 'group')">
+                    <Popover position="'bottom'">
+                        <button class="o_Discuss_InviteButton btn btn-secondary" t-on-click="_onClickInviteButton">
+                            <i class="fa fa-user-plus"/>
+                        </button>
+                        <t t-set="opened">
+                            <PartnerSelector
+                                initialMembers="discuss.threadView.thread.members"
+                                threadLocalId="discuss.threadView.thread.localId"
+                            />
+                        </t>
+                    </Popover>
+                    <Popover position="'bottom'">
+                            <button class="o_Discuss_InviteButton btn btn-secondary" t-on-click="">
+                                <i class="fa fa-chevron-circle-down"/>
+                            </button>
+                            <t t-set="opened">
+                                <PartnerListing
+                                    members="discuss.threadView.thread.members"
+                                    threadLocalId="discuss.threadView.thread.localId"
+                                />
+                            </t>
+                    </Popover>
+                </t>
                 <t t-if="env.messaging.device.isMobile">
                     <t t-if="discuss.activeMobileNavbarTabId === 'chat'">
                         <button class="o_Discuss_mobileNewMessageButton btn btn-secondary" t-on-click="_onClickMobileNewMessageButton">New Message</button>
