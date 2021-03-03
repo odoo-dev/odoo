@@ -217,8 +217,8 @@ class Meeting(models.Model):
     duration = fields.Float('Duration', compute='_compute_duration', store=True, readonly=False)
     description = fields.Text('Description')
     privacy = fields.Selection(
-        [('public', 'Everyone Readonly'),
-         ('private', 'Only me'),
+        [('public', 'Public'),
+         ('private', 'Private'),
          ('confidential', 'Only internal users')],
         'Privacy', default='public', required=True)
     location = fields.Char('Location', tracking=True, help="Location of Event")

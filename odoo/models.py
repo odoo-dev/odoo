@@ -3350,6 +3350,7 @@ Fields:
     def check_access_rule(self, operation):
         """ Verifies that the operation given by ``operation`` is allowed for
             the current user according to ir.rules.
+
            :param operation: one of ``write``, ``unlink``
            :raise UserError: * if current ir.rules do not permit this operation.
            :return: None if the operation is allowed
