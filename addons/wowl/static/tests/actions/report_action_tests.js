@@ -210,7 +210,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/report/check_wkhtmltopdf",
       "notify",
       // context={"lang":'en',"uid":7,"tz":'taht', allowed_company_ids: [1]}
-      "/report/html/some_report?context={%22lang%22%3A%22en%22%2C%22uid%22%3A7%2C%22tz%22%3A%22taht%22%2C%22allowed_company_ids%22%3A[1]}",
+      "/report/html/some_report?context=%7B%22lang%22%3A%22en%22%2C%22uid%22%3A7%2C%22tz%22%3A%22taht%22%2C%22allowed_company_ids%22%3A%5B1%5D%7D",
     ]);
     webClient.destroy();
     testUtils.mock.unpatch(ReportClientAction);
