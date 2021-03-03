@@ -11,11 +11,13 @@ from odoo.fields import Datetime, Date
 
 class TestWorkEntryLeave(TestWorkEntryHolidaysBase):
 
-    def setUp(cls):
-        super(TestWorkEntryLeave, cls).setUp()
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestWorkEntryLeave, cls).setUpClass()
 
     def test_work_entry_company_values(self):
-        date_from = datetime(2021, 2, 5, 8, 0 , 0)
+        date_from = datetime(2021, 2, 5, 8, 0, 0)
         leave = self.create_leave(date_from=date_from, date_to=date_from+relativedelta(days=5))
         calendar = leave._get_calendar()
         self.assertTrue(calendar.id in [leave.employee_id.resource_calendar_id.id, self.env.company.resource_calendar_id.id],

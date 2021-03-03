@@ -3,7 +3,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from odoo.fields import Datetime, Date
+from odoo.fields import Datetime
 from odoo.tests.common import TransactionCase
 
 

@@ -8,8 +8,10 @@ from odoo.addons.hr_work_entry_holidays_contract.tests.common import TestWorkEnt
 
 
 class TestWorkEntryLeave(TestWorkEntryHolidaysContractBase):
-    def setUp(cls):
-        super(TestWorkEntryHolidaysContractBase, cls).setUp()
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
     def test_resource_leave_has_work_entry_type(self):
         leave = self.create_leave()

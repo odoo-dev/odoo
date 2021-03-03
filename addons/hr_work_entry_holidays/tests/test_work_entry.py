@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime, date
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytz
-from unittest.mock import patch
 
 from odoo.tests.common import tagged
 from odoo.fields import Date, Datetime
