@@ -637,8 +637,6 @@ class AccountTaxRepartitionLine(models.Model):
         help="The order in which distribution lines are displayed and matched. For refunds to work properly, invoice distribution lines should be arranged in the same order as the credit note distribution lines they correspond to.")
     use_in_tax_closing = fields.Boolean(string="Tax Closing Entry")
 
-    #TODO OCO ajouter une contrainte qui dit que les tags ne peuvent pas venir d'un pays différent de celui de la taxe ??(à mon avis, ce serait bien)
-
     @api.onchange('account_id', 'repartition_type')
     def _on_change_account_id(self):
         if not self.account_id or self.repartition_type == 'base':
@@ -651,6 +649,14 @@ class AccountTaxRepartitionLine(models.Model):
         for record in self:
             if record.invoice_tax_id and record.refund_tax_id:
                 raise ValidationError(_("Tax distribution lines should apply to either invoices or refunds, not both at the same time. invoice_tax_id and refund_tax_id should not be set together."))
+
+    @api.constrains('invoice_tax_id', 'refund_tax_id', 'tag_ids')
+    def validate_tags_country(self):
+        for record in self:
+            tag_countries = set(record.mapped('tag_ids.country_id'))
+            if tag_countries and {record.tax_id.country_id} != tag_countries:
+                import pdb; pdb.set_trace()
+                raise ValidationError(_("A tax should only use tags from its country. You should use another tax and a fiscal position if you wish to uses the tags from foreign tax reports."))
 
     @api.depends('factor_percent')
     def _compute_factor(self):
@@ -666,7 +672,6 @@ class AccountTaxRepartitionLine(models.Model):
     def _compute_tax_id(self):
         for record in self:
             record.tax_id = record.invoice_tax_id or record.refund_tax_id
-            record.country_id = record.tax_id.country_id
 
     @api.onchange('repartition_type')
     def _onchange_repartition_type(self):

@@ -84,6 +84,8 @@ class AccountChartTemplate(models.Model):
     _name = "account.chart.template"
     _description = "Account Chart Template"
 
+    #TODO OCO idée à discuter: l'installation du CoA setup le fiscal country sur le pays du CoA (comme ça, on évite le cas bizarre où ils ne correspondent pas) ==> compute éditable ?
+
     name = fields.Char(required=True)
     parent_id = fields.Many2one('account.chart.template', string='Parent Chart Template')
     code_digits = fields.Integer(string='# of Digits', required=True, default=6, help="No. of Digits to use for account code")
@@ -105,12 +107,16 @@ class AccountChartTemplate(models.Model):
         string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
     expense_currency_exchange_account_id = fields.Many2one('account.account.template',
         string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', help="The country this chart of accounts belongs to, if any.")
+
     account_journal_suspense_account_id = fields.Many2one('account.account.template', string='Journal Suspense Account')
     account_journal_payment_debit_account_id = fields.Many2one('account.account.template', string='Journal Outstanding Receipts Account')
     account_journal_payment_credit_account_id = fields.Many2one('account.account.template', string='Journal Outstanding Payments Account')
+
     default_cash_difference_income_account_id = fields.Many2one('account.account.template', string="Cash Difference Income Account")
     default_cash_difference_expense_account_id = fields.Many2one('account.account.template', string="Cash Difference Expense Account")
     default_pos_receivable_account_id = fields.Many2one('account.account.template', string="PoS receivable account")
+
     property_account_receivable_id = fields.Many2one('account.account.template', string='Receivable Account')
     property_account_payable_id = fields.Many2one('account.account.template', string='Payable Account')
     property_account_expense_categ_id = fields.Many2one('account.account.template', string='Category of Expense Account')
@@ -991,7 +997,6 @@ class AccountTaxTemplate(models.Model):
         """
         # default_company_id is needed in context to allow creation of default
         # repartition lines on taxes
-        # TODO OCO ici, setter default_coutry_id ?
         ChartTemplate = self.env['account.chart.template'].with_context(default_company_id=company.id)
         todo_dict = {'account.tax': {}, 'account.tax.repartition.line': {}}
         tax_template_to_tax = {}
@@ -1006,6 +1011,10 @@ class AccountTaxTemplate(models.Model):
             for template in templates:
                 if all(child.id in tax_template_to_tax for child in template.children_tax_ids):
                     vals = template._get_tax_vals(company, tax_template_to_tax)
+
+                    if self.chart_template_id.country_id:
+                        vals['country_id'] = self.chart_template_id.country_id.id
+
                     tax_template_vals.append((template, vals))
                 else:
                     # defer the creation of this tax to the next batch
