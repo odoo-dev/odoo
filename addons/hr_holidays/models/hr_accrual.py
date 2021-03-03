@@ -4,7 +4,7 @@ import datetime
 import logging
 
 from odoo import api, fields, models
-from odoo.tools.date_utils import get_quarter, end_of,get_timedelta
+from odoo.tools.date_utils import get_quarter, end_of, get_timedelta
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, time
 
@@ -65,7 +65,7 @@ class AccrualPlanLine(models.Model):
             selected_period = periods[frequency] if frequency != 'weekly' else periods[accrual.frequency][accrual.week_day]
             accrual_start = selected_period['start_date']
             accrual_stop = selected_period['end_date']
-            validity_date = employee_first_date + get_timedelta(accrual.start_count , accrual.start_type)
+            validity_date = employee_first_date + get_timedelta(accrual.start_count, accrual.start_type)
             results.append({'accrual_id': accrual.id,
                             'accrual_start': accrual_start, 'accrual_stop': accrual_stop,
                             'sufficient_seniority': validity_date.date() <= today, 'seniority': validity_date})

@@ -72,7 +72,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         # Calculate the actual leaves of the employee after invalidating the cache to force the sql request
         self.accrual_user.invalidate_cache()
         leaves_count = round(self.accrual_user.leaves_count, 2)
-        self.assertEqual(leaves_count,2.0, 'Employee should have 2 days')
+        self.assertEqual(leaves_count, 2.0, 'Employee should have 2 days')
 
     def test_modification_on_employee(self):
         """
@@ -193,7 +193,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         alloc.linked_request_ids.write({'nextcall': False})
         alloc._update_accrual()
         alloc._update_accrual()
-        self.assertEqual(self.employee_emp.leaves_count,1.0, 'Cron only allocates 1 day every week')
+        self.assertEqual(self.employee_emp.leaves_count, 1.0, 'Cron only allocates 1 day every week')
 
     def test_accrual_validation(self):
         """ Test if cron does not allocate past it's validity date """

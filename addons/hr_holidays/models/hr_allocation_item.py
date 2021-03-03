@@ -69,7 +69,7 @@ class AllocationItem(models.Model):
                     end_date = start_date + relativedelta(years=1)
                 start_date = end_date - relativedelta(years=1)
             elif not frequency:
-                # The accrual plan has no valid step. 
+                # The accrual plan has no valid step.
                 continue
             else:
                 selected_period = periods[frequency] if frequency != 'weekly' else periods[frequency][item.accrual_id.week_day]
