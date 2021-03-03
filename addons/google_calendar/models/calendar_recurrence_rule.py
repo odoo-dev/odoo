@@ -6,6 +6,7 @@ import re
 from odoo import api, fields, models
 
 from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
+from odoo.tools.misc import profile
 
 
 class RecurrenceRule(models.Model):
@@ -82,7 +83,9 @@ class RecurrenceRule(models.Model):
     @api.model
     def _sync_google2odoo(self, *args, **kwargs):
         synced_recurrences = super()._sync_google2odoo(*args, **kwargs)
-        detached_events = synced_recurrences._apply_recurrence()
+        detached_events = synced_recurrences.with_context(dont_notify=True)._apply_recurrence()
+        if not synced_recurrences._context.get("dont_notify"):
+            synced_recurrences._notify_attendees()
         detached_events.unlink()
         return synced_recurrences
 
@@ -121,3 +124,13 @@ class RecurrenceRule(models.Model):
             },
         }
         return values
+
+    def _notify_attendees(self):
+        recurrences = self.filtered(
+            lambda recurrence: recurrence.base_event_id.alarm_ids and (
+                not recurrence.until or recurrence.until >= fields.Date.today()
+            ) and (max(recurrence.calendar_event_ids.mapped('stop')) >= fields.Datetime.now())
+        )
+        partners = recurrences.base_event_id.partner_ids
+        if partners:
+            self.env['calendar.alarm_manager']._notify_next_alarm(partners.ids)
