@@ -343,7 +343,7 @@ class AccountChartTemplate(models.Model):
         for model in model_to_check:
             if self.env[model].sudo().search([('company_id', '=', company_id.id)], limit=1):
                 return True
-        if self.env['account.move'].sudo().search([('company_id', '=', company_id.id), ('name', '!=', '/')], limit=1):
+        if self.env['account.move'].sudo().search([('company_id', '=', company_id.id), ('name', '!=', '/')], limit=1): #TODO OCO voir avec tsb: je retirerais la condition sur account.move.line et j'ignorerais tous les moves en draft, peu importe leur contenu. C'est mieux, non ? => permet de cleaner le "fix" de l10n_de_reports
             return True
         return False
 
@@ -991,6 +991,7 @@ class AccountTaxTemplate(models.Model):
         """
         # default_company_id is needed in context to allow creation of default
         # repartition lines on taxes
+        # TODO OCO ici, setter default_coutry_id ?
         ChartTemplate = self.env['account.chart.template'].with_context(default_company_id=company.id)
         todo_dict = {'account.tax': {}, 'account.tax.repartition.line': {}}
         tax_template_to_tax = {}

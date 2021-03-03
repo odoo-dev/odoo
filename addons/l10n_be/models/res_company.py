@@ -15,6 +15,6 @@ class ResCompany(models.Model):
         # If a belgian company has a VAT number then it's company registry is it's VAT Number (without country code).
         super(ResCompany, self)._compute_company_registry()
         for company in self.filtered(lambda comp: comp.country_id.code == 'BE' and comp.vat):
-            vat_country, vat_number = self.env['res.partner']._split_vat(company.vat)
+            vat_country, vat_number = self.env['res.partner']._split_vat(company.vat) #TODO OCO wtf is that ?
             if vat_country == 'be' and self.env['res.partner'].simple_vat_check(vat_country, vat_number):
                 company.company_registry = vat_number
