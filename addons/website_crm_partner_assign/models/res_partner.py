@@ -67,3 +67,15 @@ class ResPartner(models.Model):
     def _compute_partner_weight(self):
         for partner in self:
             partner.partner_weight = partner.grade_id.partner_weight if partner.grade_id else 0
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(ResPartner, self).create(vals_list)
+        lowest_grade = self.env['res.partner.grade'].search([], order='partner_weight asc', limit=1)
+        lowest_activation = self.env['res.partner.activation'].search([], limit=1)
+        if self._context.get('assign_lowest_grade'):
+            if lowest_grade:
+                res['grade_id'] = lowest_grade.id
+            if lowest_activation:
+                res['activation'] = lowest_activation.id
+        return res
