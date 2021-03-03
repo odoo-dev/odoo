@@ -16,7 +16,6 @@ const paletteData = {
     14: {id: 14, color1: '#3CC37C', color2: '#E9C893', color3: '#F5F5F5', type: 'base'},
     15: {id: 15, color1: '#01524B', color2: '#1993A3', color3: '#dddde6', type: 'base'},
     16: {id: 16, color1: '#464D77', color2: '#36827f', color3: '#f2f0ec', type: 'base'},
-    17: {id: 17, color1: '#4717f6', color2: '#A43ACB', color3: '#FAFAFA', type: 'base'},
   }
 };
 

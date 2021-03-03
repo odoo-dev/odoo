@@ -17,9 +17,8 @@
       const qweb = new QWeb({templates});
 
       const SkipButtonTemplate = xml`
-        <div class="align-self-end">
-          <button class="btn btn-secondary" t-on-click="skip()">Skip</button>
-        </div>`;
+        <button class="btn btn-secondary px-4" t-on-click="skip()">Skip</button>
+        `;
 
       class SkipButton extends Component {
         static template = SkipButtonTemplate
@@ -36,16 +35,18 @@
       }
 
       const WelcomeScreenTemplate = xml`
-        <div class="o_survey_screen o_welcome_screen">
-          <div class="h-25"/>
-          <div class= "d-flex o_welcome_screen_message h-50">
-              <div class="align-self-center">
-                  <h1>Ready to build the perfect website?</h1>
-                  <h1>We'll set you up and running in 4 steps</h1>
-                  <button class="btn btn-primary mt-3 btn-lg" t-on-click="goToDescription()">Let's do it</button>
+        <div class="o_survey_screen h-100 d-flex flex-column o_welcome_screen">
+          <div class="container-fluid pt-3 pb-2">
+            <img class="ml-lg-5" style="height: 31px; width: 99px;" src="/website/static/src/img/odoo_logo.svg" title="Odoo Logo"/>
+          </div>
+          <div class="o_survey_screen_content d-flex h-100">
+              <div class="container align-self-center o_survey_show">
+                  <div class="display-4 mb-2">Ready to build the<br class="d-none d-lg-inline"/> <b>perfect website?</b></div>
+                  <div class="lead font-weight-normal mb-4 text-600">We'll set you up and running in <b>4 steps</b></div>
+                  <button class="o_survey_show btn btn-primary btn-lg px-4 py-2" t-on-click="goToDescription()">Let's do it</button>
               </div>
           </div>
-          <div class="d-flex h-25">
+          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
             <SkipButton/>
           </div>
         </div>`;
@@ -61,62 +62,63 @@
         }
 
         const DescriptionScreenTemplate = xml`
-        <div class="o_survey_screen o_description_screen">
-          <div class="h-25"/>
-          <div class="d-flex h-50">
-              <div class="align-self-center mx-auto">
-                  <h1>
+        <div class="o_survey_screen h-100 d-flex flex-column o_description_screen">
+          <div class="container-fluid pt-3 pb-2">
+            <img class="ml-lg-5" style="height: 31px; width: 99px;" src="/website/static/src/img/odoo_logo.svg" title="Odoo Logo"/>
+          </div>
+          <div class="o_survey_screen_content d-flex h-100 flex-grow-1">
+              <div class="container align-self-center">
+                  <div class="o_survey_typing_text d-inline d-md-block mb-md-2 mb-lg-4 o_survey_show">
                       <span>I want </span>
-                      <div class="dropdown d-inline-block" style="width: 720px;">
-                          <div class="d-inline-block" style="width: 720px;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <a>
-                              <t t-if="description.selectedType"><t t-esc="getters.getSelectedType(description.selectedType).label" /></t>
-                              <i class="fa fa-angle-down" style="float:right;" title="dropdown_angle_down" role="img"/>
+                      <div t-attf-class="dropdown d-inline-block {{description.selectedType ? 'o_step_completed' : 'o_step_todo show'}}">
+                          <div class="w-100 px-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <a class="d-flex align-items-center">
+                              <i class="text-primary" t-if="description.selectedType"><t t-esc="getters.getSelectedType(description.selectedType).label" /></i>
+                              <i class="fa fa-angle-down text-black-50 ml-auto pl-2" title="dropdown_angle_down" role="img"/>
                             </a>
                           </div>
-                          <div class="dropdown-menu" style="width: 720px;" role="menu">
+                          <div t-attf-class="dropdown-menu border-0 shadow-lg {{description.selectedType ? 'o_step_completed' : 'o_step_todo show'}}" role="menu">
                             <t t-foreach="getters.getWebsiteTypes()" t-as="type" t-key="type.name">
                                 <a t-att-title="type.name"
                                     t-att-data-id="type.id"
                                     t-on-click="selectWebsiteType"
-                                    style="width: 720px;"
                                     class="dropdown-item o_change_website_type">
                                     <t t-esc="type.label"/>
                                 </a>
                             </t>
                           </div>
                       </div>
-                      <span> for my</span>
-                  </h1>
-                  <h1>
-                      <input class="industry_selection" t-on-blur="blurIndustrySelection" t-on-input="inputIndustrySelection" />
-                      <span> business, with the</span>
-                  </h1>
-                  <h1>
+                      <span t-att-class="!description.selectedType ? 'o_survey_hide' : 'o_survey_show'"> for my</span>
+                  </div>
+                  <div t-attf-class="o_survey_typing_text d-inline d-md-block o_survey_industry mb-md-2 mb-lg-4 {{!description.selectedType ? 'o_survey_hide' : 'o_survey_show'}}">
+                      <i class="industry_selection d-inline d-md-inline-block rounded bg-100 px-2 px-md-3 mx-2 mx-md-0" contenteditable="True" t-on-blur="blurIndustrySelection" t-on-input="inputIndustrySelection"/>
+                      <span> business</span>
+                      <span t-att-class="!description.selectedIndustry ? 'o_survey_hide' : 'o_survey_show'">, with the</span>
+                  </div>
+                  <div t-attf-class="o_survey_typing_text d-inline d-md-block mb-md-2 mb-lg-4 {{!description.selectedIndustry ? 'o_survey_hide' : 'o_survey_show'}}">
                       <span>main objective to </span>
-                      <div class="dropdown d-inline-block" style="width: 620px;">
-                          <div class="d-inline-block" style="width: 620px;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <a>
+                      <div t-attf-class="dropdown d-inline-block {{description.selectedPurpose ? 'o_step_completed' : 'o_step_todo'}}">
+                          <div class="w-100 px-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <a class="d-flex align-items-center">
                               <t t-if="description.selectedPurpose"><t t-esc="getters.getSelectedPurpose(description.selectedPurpose).label" /></t>
-                              <i class="fa fa-angle-down" style="float:right;" title="dropdown_angle_down" role="img"/>
+                              <i class="fa fa-angle-down text-black-50 ml-auto pl-2" title="dropdown_angle_down" role="img"/>
                             </a>
                           </div>
-                          <div class="dropdown-menu" style="width: 620px;" role="menu">
+                          <div class="dropdown-menu border-0 shadow-lg" role="menu">
                             <t t-foreach="getters.getWebsitePurpose()" t-as="type" t-key="type.name">
                                 <a t-att-title="type.name"
                                     t-att-data-id="type.id"
                                     t-on-click="selectWebsitePurpose"
-                                    style="width: 620px;"
                                     class="dropdown-item o_change_website_purpose">
                                     <t t-esc="type.label"/>
                                 </a>
                             </t>
                           </div>
                       </div>
-                  </h1>
+                  </div>
               </div>
           </div>
-          <div class="d-flex h-25">
+          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
             <SkipButton/>
           </div>
         </div>`;
@@ -133,12 +135,13 @@
           mounted() {
             this.dispatch('selectIndustry', undefined);
             $('.industry_selection').autocomplete({
+              appendTo: ".o_survey_industry",
               delay: 400,
               minLength: 1,
               source: this.autocompleteSearch.bind(this),
               select: this.selectIndustry.bind(this),
               classes: {
-                  'ui-autocomplete': 'custom-ui-autocomplete',
+                'ui-autocomplete': 'custom-ui-autocomplete shadow-lg border-0 o_survey_show_fast',
               }
             });
           }
@@ -172,22 +175,25 @@
           }
 
           blurIndustrySelection(ev) {
-            const label = this.labelToCode[ev.target.value];
+            const label = this.labelToCode[ev.target.outerText];
             this.dispatch('selectIndustry', label);
             if (label === undefined) {
-              $('.industry_selection').val('');
+              $('.industry_selection').text('');
             } else {
               this.checkDescriptionCompletion();
             }
           }
 
           inputIndustrySelection(ev) {
-            this.dispatch('selectIndustry', this.labelToCode[ev.target.value]);
+            this.dispatch('selectIndustry', this.labelToCode[ev.target.outerText]);
           }
 
           selectWebsiteType(ev) {
             const id = $(ev.target).data('id');
             this.dispatch('selectWebsiteType', id);
+            setTimeout(function() {
+              $('.industry_selection').get(0).focus();
+            });
             this.checkDescriptionCompletion();
           }
 
@@ -209,21 +215,25 @@
         }
 
         const LogoValidationScreenTemplate = xml`
-        <div class="o_survey_screen o_logo_validation_screen">
-          <div class="h-25"/>
-          <div class="d-flex h-50">
-              <div class="align-self-center mx-auto">
-                  <h1 class="text-center">Is this your logo?</h1>
-                  <div class="align-self-center mx-auto mt-4 mb-4" style="width: fit-content;">
-                      <img class="website_logo" t-attf-src="{{logoValidation.logo}}"/>
-                  </div>
-                  <div class="align-self-center mx-auto" style="width:fit-content;">
-                      <button class="btn btn-lg btn-success mr-2" t-on-click="validateLogo(true)">Yes</button>
-                      <button class="btn btn-lg btn-danger ml-2" t-on-click="validateLogo(false)">No</button>
-                  </div>
-              </div>
+        <div class="o_survey_screen h-100 d-flex flex-column o_logo_validation_screen">
+          <div class="container-fluid pt-3 pb-2">
+            <img class="ml-lg-5" style="height: 31px; width: 99px;" src="/website/static/src/img/odoo_logo.svg" title="Odoo Logo"/>
           </div>
-          <div class="d-flex h-25">
+          <div class="o_survey_screen_content d-flex flex-grow-1 h-100">
+            <div class="container d-flex flex-column align-items-center justify-content-center">
+              <div class="o_survey_typing_text text-center mb-3">Is this your logo?</div>
+              <div class="d-flex flex-column justify-content-center mx-auto">
+                <div class="o_survey_logo_wrapper border rounded d-inline-block">
+                  <img class="website_logo " t-attf-src="{{logoValidation.logo}}"/>
+                </div>
+                <div class="d-flex justify-content-between border-top mt-4 pt-3">
+                    <button class="btn btn-lg btn-outline-secondary" t-on-click="validateLogo(false)">No</button>
+                    <button class="btn btn-lg btn-success px-5" t-on-click="validateLogo(true)">Yes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
             <SkipButton/>
           </div>
         </div>
@@ -261,44 +271,48 @@
         }
 
         const PaletteSelectionScreenTemplate = xml`
-        <div class="o_survey_screen o_palette_selection_screen">
-          <div class="d-flex" style="min-height: 20%;">
-              <div class="align-self-center mx-auto">
-                  <input type="file" class="logo_selection_input" t-on-change="changeLogo" style="display:none" name="logo_selection" accept="image/*"/>
-                  <h1 class="text-center">Choose Your Brand Color <span class="text-muted">or </span><span t-on-click="uploadLogo" class="text-primary" style="cursor: pointer;">Upload</span> your logo</h1>
-              </div>
+        <div class="o_survey_screen h-100 d-flex flex-column o_palette_selection_screen">
+          <div class="container-fluid pt-3 pb-2">
+            <img class="ml-lg-5" style="height: 31px; width: 99px;" src="/website/static/src/img/odoo_logo.svg" title="Odoo Logo"/>
           </div>
-          <div class="d-flex">
-            <div class="w-100 palette_selection container">
-              <t t-foreach="getters.getPalettes()" t-as="row" t-key="row_index">
-                <div class="row palette_row align-items-end">
-                  <t t-foreach="row" t-as="palette" t-key="palette_index">
-                    <t t-if="palette.type == 'empty'">
-                      <div class="col-md"/>
-                    </t>
-                    <t t-else="">
-                      <div class="col-md">
-                        <t t-if="palette.type == 'recommended'">
-                          <h2 class="text-center text-muted">recommended</h2>
-                        </t>
-                        <div class="palette_card" t-on-click="selectPalette(palette.id)">
-                          <div class="row">
-                            <div class="color_sample first" t-attf-style="background-color: {{palette.color1}}"/>
-                            <div class="color_sample second" t-attf-style="background-color: {{palette.color2}}"/>
-                            <div class="color_sample third" t-attf-style="background-color: {{palette.color3}}"/>
-                          </div>
+          <div class="o_survey_screen_content container palette_selection d-flex flex-grow-1 h-100">
+            <div class="d-flex flex-column flex-lg-row w-100 h-100 h-lg-auto align-self-md-center o_survey_show">
+              <div class="w-100 w-lg-25 order-lg-3 my-4 my-md-0 d-flex flex-column">
+                <div class="h4 text-center"><b>Detect</b> from Logo</div>
+                <a href="#" t-on-click="uploadLogo" class="o_survey_logo_upload btn-link rounded bg-100 py-3 d-flex flex-grow-1 justify-content-center align-items-center text-decoration-none">
+                  <input type="file" class="logo_selection_input" t-on-change="changeLogo" style="display:none" name="logo_selection" accept="image/*"/>
+                  <div>
+                    <i class="fa fa-cloud-upload fa-6x"></i>
+                    <div class="text-center">Upload</div>
+                  </div>
+                </a>
+              </div>
+              <div class="position-relative d-flex justify-content-center order-lg-2 w-100 w-lg-0 py-3 py-lg-0 px-lg-5 mb-4 mb-lg-0">
+                <div class="border-top w-100"></div>
+                <b class="palette_selection_or bg-white text-muted w-lg-100 text-center px-3 py-lg-3">OR</b>
+                <div class="border-left d-none d-lg-inline h-100 mx-auto w-0"></div>
+              </div>
+              <div class="w-100 w-lg-auto flex-grow-1 o_survey_show_fast">
+                <div class="h4 text-center"><b>Choose</b> Your Brand Color</div>
+                <div class="d-flex flex-wrap align-items-end">
+                  <t t-foreach="getters.getPalettes()" t-as="row" t-key="row_index">
+                    <t t-foreach="row" t-as="palette" t-key="palette_index">
+                      <div t-if="palette.type != 'empty'" class="w-50 w-md-25 px-2 pt-3">
+                        <h6 t-if="palette.type == 'recommended'" class="text-center text-success d-block badge mb-0 mt-n2">Recommended</h6>
+                        <div t-attf-class="palette_card rounded-pill overflow-hidden d-flex" t-on-click="selectPalette(palette.id)" t-attf-style="background-color: {{palette.color3}}">
+                          <div class="color_sample w-100 first" t-attf-style="background-color: {{palette.color1}}"/>
+                          <div class="color_sample w-100 second" t-attf-style="background-color: {{palette.color2}}"/>
+                          <div class="color_sample w-100 third" t-attf-style="background-color: {{palette.color3}}"/>
                         </div>
                       </div>
                     </t>
                   </t>
                 </div>
-              </t>
+              </div>
             </div>
           </div>
-          <div>
-            <div style="position: absolute; bottom: 20px;">
-              <SkipButton/>
-            </div>
+          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
+            <SkipButton/>
           </div>
         </div>
         `;
@@ -332,43 +346,39 @@
         }
 
         const FeatureSelectionScreenTemplate = xml`
-        <div class="o_survey_screen o_feature_selection_screen">
-          <div class="d-flex" style="min-height: 20%;">
-              <div class="align-self-center mx-auto w-75">
-                  <h1 class="text-left">Add pages or features</h1>
-              </div>
+        <div class="o_survey_screen h-100 d-flex flex-column o_feature_selection_screen">
+          <div class="container-fluid pt-3 pb-2">
+            <img class="ml-lg-5" style="height: 31px; width: 99px;" src="/website/static/src/img/odoo_logo.svg" title="Odoo Logo"/>
           </div>
-          <div class="w-75 mx-auto" style="height: 75%;">
-              <div class="w-100 page_feature_selection container">
-                <t t-foreach="getters.getFeatures()" t-as="row" t-key="row_index">
-                  <div class="row">
+          <div class="o_survey_screen_content container d-flex h-100 align-items-lg-center">
+            <div class="my-4">
+              <div class="o_survey_typing_text o_survey_show_fast">Add <b>Pages</b> or <b>Features</b></div>
+              <div class="page_feature_selection o_survey_show">
+                <div class="w-100 page_feature_selection container d-flex flex-wrap bg-100 p2 p-lg-3">
+                  <t t-foreach="getters.getFeatures()" t-as="row" t-key="row_index">
                     <t t-foreach="row" t-as="feature" t-key="feature_index">
-                      <t t-if="feature.type == 'empty'">
-                        <div class="col-sm"/>
-                      </t>
-                      <t t-else="">
-                        <div class="col-sm">
-                          <div t-attf-class="page_feature_card {{feature.selected ? 'selected' : ''}}" t-on-click="dispatch('toggleFeature', feature.id)">
-                            <h2><t t-esc="feature.title"/> <i class="fa fa-check-circle fa-lg"></i></h2>
-                            <p><t t-esc="feature.description"/></p>
+                      <div class="p-2 w-100 w-md-50 w-lg-25" t-if="feature.type != 'empty'">
+                        <div t-attf-class="card h-100 {{feature.selected ? 'border-success' : ''}}" t-on-click="dispatch('toggleFeature', feature.id)">
+                          <div class="card-body">
+                            <i t-attf-class="fa {{feature.selected ? 'fa-check-circle text-success' : 'fa-circle-o text-300'}}" />
+                            <h5 class="card-title" t-esc="feature.title"/>
+                            <p class="card-text text-muted" t-esc="feature.description"/>
                           </div>
                         </div>
-                      </t>
+                      </div>
                     </t>
-                  </div>
-                </t>
+                  </t>
+                </div>
               </div>
-              <div class="d-flex align-self-end w-100 justify-content-end" style="min-height: 50px;">
-                  <button class="btn btn-primary btn-lg mt-3 mb-3" t-on-click="buildWebsite()">Build my website</button>
-              </div>
-          </div>
-          <div>
-            <div style="position: absolute; bottom: 20px;">
-              <SkipButton/>
             </div>
+          </div>
+          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
+            <SkipButton/>
+            <button class="btn btn-primary btn-lg ml-3" t-on-click="buildWebsite()">Build my website</button>
           </div>
         </div>
         `;
+
 
         class FeaturesSelectionScreen extends Component {
           static template = FeatureSelectionScreenTemplate;
@@ -400,39 +410,45 @@
         }
 
         const ThemeSelectionScreenTemplate = xml`
-        <div class="o_survey_screen o_theme_selection_screen">
-          <div class="d-flex h-25">
-              <div class="align-self-center mx-auto">
-                  <h1 class="text-center">Choose your favorite style</h1>
-              </div>
+        <div class="o_survey_screen h-100 d-flex flex-column o_theme_selection_screen">
+          <div class="container-fluid pt-3 pb-2">
+            <img class="ml-lg-5" style="height: 31px; width: 99px;" src="/website/static/src/img/odoo_logo.svg" title="Odoo Logo"/>
           </div>
-          <div class="d-flex flex-row justify-content-center align-items-end h-75">
-              <div class="theme_preview small">
-                  <div class="theme_screenshot theme_recommendation_2" t-attf-style="background-image: url('{{themeSelection.secondTheme.url}}');">
-                      <div class="button_area">
-                          <button class="btn btn-primary" t-on-click="chooseTheme(themeSelection.secondTheme.id)">Use this theme</button>
-                      </div>
+
+          <div class="o_survey_screen_content d-flex flex-column justify-content-lg-around h-100">
+            <div class="o_survey_typing_text text-center mt-4">Choose your favorite <b>Style</b></div>
+            <div class="container">
+              <div class="row py-4">
+                <div class="col-12 col-lg-4 d-flex align-items-end mb-4 mb-lg-0">
+                  <div class="theme_preview bg-600 rounded position-relative w-100 small">
+                    <div class="theme_screenshot rounded theme_recommendation_2" t-attf-style="background-image: url('{{themeSelection.secondTheme.url || 'https://source.unsplash.com/random/400x800'  }}');"/>
+                    <div class="button_area rounded d-flex align-items-center justify-content-center">
+                      <button class="btn btn-primary px-5" href="#" t-on-click="chooseTheme(themeSelection.secondTheme.id)">Use this theme</button>
+                    </div>
                   </div>
-              </div>
-              <div style="width: 3%;"/>
-              <div class="theme_preview large">
-                  <div class="theme_screenshot theme_recommendation_1" t-attf-style="background-image: url('{{themeSelection.firstTheme.url}}');">
-                      <div class="button_area">
-                          <button class="btn btn-primary" t-on-click="chooseTheme(themeSelection.firstTheme.id)">Use this theme</button>
-                      </div>
+                </div>
+                <div class="col-12 col-lg-4 d-flex align-items-end mb-4 mb-lg-0">
+                  <div class="theme_preview bg-600 rounded position-relative w-100">
+                    <div class="theme_screenshot rounded theme_recommendation_1" t-attf-style="background-image: url('{{themeSelection.firstTheme.url || 'https://source.unsplash.com/random/400x800'  }}');"/>
+                    <div class="button_area rounded d-flex align-items-center justify-content-center">
+                      <button class="btn btn-primary px-5" href="#" t-on-click="chooseTheme(themeSelection.firstTheme.id)">Use this theme</button>
+                    </div>
                   </div>
-              </div>
-              <div style="width: 3%;"/>
-              <div class="theme_preview small">
-                  <div class="theme_screenshot theme_recommendation_3" t-attf-style="background-image: url('{{themeSelection.thirdTheme.url}}');">
-                      <div class="button_area">
-                          <button class="btn btn-primary" t-on-click="chooseTheme(themeSelection.thirdTheme.id)">Use this theme</button>
-                      </div>
+                </div>
+                <div class="col-12 col-lg-4 d-flex align-items-end">
+                  <div class="theme_preview bg-600 rounded position-relative w-100 small">
+                    <div class="theme_screenshot rounded theme_recommendation_3" t-attf-style="background-image: url('{{themeSelection.thirdTheme.url || 'https://source.unsplash.com/random/400x800'  }}');"/>
+                    <div class="button_area rounded d-flex align-items-center justify-content-center">
+                      <button class="btn btn-primary px-5" href="#" t-on-click="chooseTheme(themeSelection.thirdTheme.id)">Use this theme</button>
+                    </div>
                   </div>
+                </div>
               </div>
+            </div> 
           </div>
         </div>
         `;
+
 
         class ThemeSelectionScreen extends Component {
           static template = ThemeSelectionScreenTemplate;
