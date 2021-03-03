@@ -2611,35 +2611,42 @@ options.registry.ConditionalVisibility = options.Class.extend({
     init: function () {
         this._super.apply(this, arguments);
         this.campaigns = {};
+        // this.$target[0].style.display = "block";
     },
 
-    changeVisibility: function (previewMode, widgetValue, params) {
-        this._changeDataAttribute('data-visibility', widgetValue);
+    /**
+     * @override
+     */
+
+    selectDataAttribute: function (previewMode, widgetValue, params) {
+        // this.$target[0].visibilityOptions[params.attributeName] = widgetValue;
+        return this._super(...arguments);
     },
 
-    changeCountryFilter: function (previewMode, widgetValue, params) {
-        this._applyStyleToDom('data-country', 'data-country', widgetValue);
-        this._changeDataAttribute('data-country', widgetValue);
+    onTargetShow: async function () {
+        this.$target[0].style = this.$target[0].previousStyle; // restoring the previous style attribute if any
     },
 
-    changeLanguageFilter: function (previewMode, widgetValue, params) {
-        this._applyStyleToDom('lang', 'data-language', widgetValue);
-        this._changeDataAttribute('data-language', widgetValue);
+    onTargetHide: async function() {
+        this.$target[0].previousStyle = this.$target.style; // we save the current style as we're going to modify it
+        this.$target[0].style.display = 'none';
     },
 
-    changeMediumFilter: function (previewMode, widgetValue, params) {
-        this._applyStyleToDom('data-utm-medium', 'data-medium', widgetValue);
-        this._changeDataAttribute('data-medium', widgetValue);
-    },
-
-    changeCampaignFilter: function (previewMode, widgetValue, params) {
-        this._applyStyleToDom('data-utm-campaign', 'data-campaign', widgetValue);
-        this._changeDataAttribute('data-campaign', widgetValue);
-    },
-
-    changeSourceFilter: function(previewMode, widgetValue, params) {
-        this._applyStyleToDom('data-utm-source', 'data-source', widgetValue);
-        this._changeDataAttribute('data-source', widgetValue);
+    cleanForSave: async function () {
+        //const visibilityOptions = this.$target[0].visibilityOptions;
+        this.$target[0].style = this.$target[0].previousStyle // restoring the previous style if any
+        for (let attr of this.$target[0].attributes) {
+            if (attr.name.startsWith('data-visibility-')) {
+                let shortName = attr.name.replace('data-visibility-', '');
+                if (shortName === 'lang') {
+                    console.log('applied style to dom for :', shortName);
+                    this._applyStyleToDom(shortName, attr.name, attr.value);
+                } else {
+                    console.log('applied style to dom for :', shortName);
+                    this._applyStyleToDom('data-' + shortName, attr.name, attr.value);
+                }
+            }
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -2654,13 +2661,14 @@ options.registry.ConditionalVisibility = options.Class.extend({
             style.type = 'text/css';
             body.insertBefore(style, body.firstChild);
         }
-
-        let rule = `html:not([${htmlAttribute}*="${value}"]) [data-visibility="conditional"][${dataAttribute}="${value}"]`;
+        // Hide the elements if html does not have the attributes, the body is not in editable mode and the element have a conditional visibility as well as the value as its data attribute
+        let rule = `html:not([${htmlAttribute}*="${value}"]) body:not(.editor_enable) [data-visibility="conditional"][${dataAttribute}="${value}"]`;
         if (style.sheet.rules.length === 0) {
             style.sheet.insertRule(`${rule} { display: none; }`);
+            style.innerHTML += `${rule} { display: none; }`;
         } else {
             let i = 0;
-            while (i < style.sheet.rules.length && style.sheet.rules[i].selectorText !== rule) { // this loop would be easier if the styleSheet rules would implement any
+            while (i < style.sheet.rules.length && style.sheet.rules[i].selectorText !== rule) { // this loop would be easier if the styleSheet rules would implement .any
                 i++;
             }
             if (i >= style.sheet.rules.length) {
@@ -2668,7 +2676,9 @@ options.registry.ConditionalVisibility = options.Class.extend({
                 style.innerHTML += `${rule} { display: none; }`;
             }
         }
+        this.$target.addClass('o_snippet_invisible');
     },
+
 
     _changeDataAttribute: function (attribute, value) {
         if (!value) {
@@ -2715,22 +2725,6 @@ options.registry.ConditionalVisibility = options.Class.extend({
      * @override
      */ 
     
-    _computeWidgetState: function (methodName, params) {
-        switch (methodName) {
-            case 'changeVisibility':
-                return this.$target.attr('data-visibility') || '';
-            case 'changeCountryFilter':
-                return this.$target.attr('data-country') || '';
-            case 'changeLanguageFilter':
-                return this.$target.attr('data-language') || '';
-            case 'changeMediumFilter':
-                return this.$target.attr('data-medium') || '';
-            case 'changeSourceFilter':
-                return this.$target.attr('data-source') || '';
-            case 'changeCampaignFilter':
-                return this.$target.attr('data-campaign') || '';
-        }
-    }
 });
 
 

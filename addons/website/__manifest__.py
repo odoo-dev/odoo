@@ -17,6 +17,7 @@
         'portal',
         'social_media',
         'auth_signup',
+        'utm',
     ],
     'installable': True,
     'data': [
