@@ -12,10 +12,10 @@ from itertools import tee, count
 from textwrap import dedent
 
 import itertools
-from lxml import etree, html
+
+from lxml import etree
+from markupsafe import escape
 from psycopg2.extensions import TransactionRollbackError
-import werkzeug
-from werkzeug.utils import escape as _escape
 
 from odoo.tools import pycompat, freehash
 from odoo.tools.safe_eval import check_values
@@ -159,9 +159,6 @@ class QWebException(Exception):
 
     def __repr__(self):
         return str(self)
-
-# Avoid DeprecationWarning while still remaining compatible with werkzeug pre-0.9
-escape = (lambda text: _escape(text, quote=True)) if parse_version(getattr(werkzeug, '__version__', '0.0')) < parse_version('0.9.0') else _escape
 
 def foreach_iterator(base_ctx, enum, name):
     ctx = base_ctx.copy()
@@ -517,15 +514,16 @@ class QWeb(object):
         imports and utilities), returned as a Python AST.
         Currently provides:
         * collections
-        * itertools
         Define:
-        * escape
+        * escape, Markup
         * to_text (empty string for a None or False, otherwise unicode string)
         """
         return ast.parse(dedent("""
             from collections import OrderedDict
+            from html import unescape # not sure whether this one or werkzeug's is better
+            from markupsafe import escape, Markup
             from odoo.tools.pycompat import to_text
-            from odoo.addons.base.models.qweb import escape, foreach_iterator
+            from odoo.addons.base.models.qweb import foreach_iterator
             """))
 
     def _create_def(self, options, body, prefix='fn', lineno=None):
@@ -691,15 +689,36 @@ class QWeb(object):
             ctx=ctx
         )
 
+    # The attributes paradox
+    #
+    # Attributes are their own context with its own rules, which overlap with
+    # but are different from "body" content.
+    #
+    # This means markup-safe content is not necessarily attribute-safe e.g.
+    # "script-safe" JSON, or literal HTML, literally doesn't fit in attributes.
+    #
+    # All the same we can't just ignore that content is already HTML-escaped,
+    # because double-escaping is a semantics change and incorrect.
+    #
+    # This leads to conflicting requirements e.g. given t-attf-foo="a > b {{ c }}",
+    # if the literal is not considered markup-safe but `c` is, this is going to
+    # result in being serialised back to "a &amp;gt; b <c>", because the first
+    # section will be read in as "a > b", then escaped to be concatenated to the
+    # markup-safe "c" leading to "a &gt; b", which will be escaped *again*.
+    #
+    # Now why would it be escaped again? Well the answer is in the second
+    # paragraph and is the issue which occurs if the literal above *is*
+    # considered markup-safe: `"&lt;a&gt;"` would be parsed to Markup("<a>"),
+    # which can not appear as-is in an attribute and must be escaped.
+    #
+    # The only possible option I can see here is to unescape `Markup` values
+    # before re-escaping them.
     def _append_attributes(self):
         # t_attrs = self._post_processing_att(tagName, t_attrs, options)
         # for name, value in t_attrs.items():
         #     if value or isinstance(value, string_types)):
-        #         append(u' ')
-        #         append(name)
-        #         append(u'="')
-        #         append(escape(pycompat.to_text((value)))
-        #         append(u'"')
+        #         [...]
+        # always generates double-quoted attributes
         return [
             ast.Assign(
                 targets=[ast.Name(id='t_attrs', ctx=ast.Store())],
@@ -745,18 +764,46 @@ class QWeb(object):
                         ]
                     ),
                     body=[
+                        # append(' '')
                         self._append(ast.Str(u' ')),
-                        self._append(ast.Name(id='name', ctx=ast.Load())),
+                        # append(name)
+                        self._append(ast.Name('name', ast.Load())),
+                        # append('="')
                         self._append(ast.Str(u'="')),
+                        # stringify first because the one time we want markup to
+                        # be stripped the stdlib decides to optimise that case
+                        # if isinstance(value, Markup):
+                        #     value = unescape(str(value))
+                        ast.If(
+                            test=ast.Call(
+                                func=ast.Name('isinstance', ast.Load()),
+                                args=[ast.Name('value', ast.Load()), ast.Name('Markup', ast.Load())],
+                                keywords=[]
+                            ),
+                            body=[ast.Assign(
+                                targets=[ast.Name('value', ast.Store())],
+                                value=ast.Call(
+                                    func=ast.Name('unescape', ast.Load()),
+                                    args=[ast.Call(
+                                        func=ast.Name('str', ast.Load()),
+                                        args=[ast.Name('value', ast.Load())],
+                                        keywords=[]
+                                    )], keywords=[]
+                                )
+                            )],
+                            orelse=[]
+                        ),
+                        # append(escape(to_text(value)))
                         self._append(ast.Call(
-                            func=ast.Name(id='escape', ctx=ast.Load()),
+                            func=ast.Name('escape', ast.Load()),
                             args=[ast.Call(
-                                func=ast.Name(id='to_text', ctx=ast.Load()),
-                                args=[ast.Name(id='value', ctx=ast.Load())], keywords=[],
-                                starargs=None, kwargs=None
-                            )], keywords=[],
-                            starargs=None, kwargs=None
+                                 func=ast.Name('to_text', ast.Load()),
+                                 args=[ast.Name('value', ast.Load())],
+                                 keywords=[]
+                            )],
+                            keywords=[]
                         )),
+                        # append('"')
                         self._append(ast.Str(u'"')),
                     ],
                     orelse=[]
@@ -1015,9 +1062,7 @@ class QWeb(object):
         return self._compile_tag(el, content, options, False)
 
     def _compile_directive_set(self, el, options):
-        body = []
         varname = el.attrib.pop('t-set')
-        varset = self._values_var(ast.Str(varname), ctx=ast.Store())
 
         if 't-value' in el.attrib:
             value = self._compile_expr(el.attrib.pop('t-value') or 'None')
@@ -1028,6 +1073,16 @@ class QWeb(object):
             body = self._compile_directive_content(el, options)
             if body:
                 def_name = self._create_def(options, body, prefix='set', lineno=el.sourceline)
+                # ''.join($varset)
+                joined = ast.Call(
+                    func=ast.Attribute(value=ast.Str(u''), attr='join', ctx=ast.Load()),
+                    args=[ast.Name(id='content', ctx=ast.Load())], keywords=[]
+                )
+                # Markup(_): rendering of content is considered safe
+                safe = ast.Call(
+                    func=ast.Name(id='Markup', ctx=ast.Load()),
+                    args=[joined], keywords=[]
+                )
                 return [
                     # content = []
                     ast.Assign(
@@ -1043,15 +1098,8 @@ class QWeb(object):
                             ctx=ast.Load()
                         )
                     )),
-                    # $varset = u''.join($varset)
-                    ast.Assign(
-                        targets=[self._values_var(ast.Str(varname), ctx=ast.Store())],
-                        value=ast.Call(
-                            func=ast.Attribute(value=ast.Str(u''), attr='join', ctx=ast.Load()),
-                            args=[ast.Name(id='content', ctx=ast.Load())], keywords=[],
-                            starargs=None, kwargs=None
-                        )
-                    )
+                    # $varset = _
+                    ast.Assign(targets=[self._values_var(ast.Str(varname), ctx=ast.Store())], value=safe)
                 ]
 
             else:
@@ -1192,6 +1240,13 @@ class QWeb(object):
         return content + self._compile_widget_value(el, options)
 
     def _compile_directive_raw(self, el, options):
+        _logger.warning(
+            "Found deprecated directive @t-raw=%r in template %r. Replace by "
+            "@t-esc, and explicitely wrap content in `markupsafe.Markup` if "
+            "necessary (which likely is not the case)",
+            el.get('t-raw'),
+            options.get('template', '<unknown>')
+        )
         field_options = self._compile_widget_options(el)
         content = self._compile_widget(el, el.attrib.pop('t-raw'), field_options)
         return content + self._compile_widget_value(el, options)
@@ -1404,7 +1459,6 @@ class QWeb(object):
         call_options = el.attrib.pop('t-call-options', None)
         nsmap = options.get('nsmap')
 
-        _values = self._make_name('values_copy')
 
         content = [
             # values_copy = values.copy()
@@ -1683,7 +1737,7 @@ class QWeb(object):
     def _compile_expr0(self, expr):
         if expr == "0":
             # u''.join(values.get(0, []))
-            return ast.Call(
+            joined = ast.Call(
                 func=ast.Attribute(
                     value=ast.Str(u''),
                     attr='join',
@@ -1702,11 +1756,18 @@ class QWeb(object):
                 ],
                 keywords=[], starargs=None, kwargs=None
             )
+            # Markup(...): 0 is a rendered body, so should be safe
+            return ast.Call(
+                func=ast.Name(id='Markup', ctx=ast.Load()),
+                args=[joined], keywords=[]
+            )
         return self._compile_expr(expr)
 
     def _compile_format(self, f):
         """ Parses the provided format string and compiles it to a single
         expression ast, uses string concatenation via "+".
+
+        Literal sections of the format are wrapped in Markup.
         """
         elts = []
         base_idx = 0

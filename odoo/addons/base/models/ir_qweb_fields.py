@@ -7,11 +7,12 @@ from io import BytesIO
 
 import babel
 import babel.dates
+from markupsafe import Markup as M, escape
 from PIL import Image
 from lxml import etree
 
 from odoo import api, fields, models, _, _lt
-from odoo.tools import html_escape, posix_to_ldml, float_utils, format_date, format_duration, pycompat
+from odoo.tools import posix_to_ldml, float_utils, format_date, format_duration, pycompat
 from odoo.tools.misc import get_lang, babel_locale_parse
 
 _logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ def nl2br(string):
     :param str string:
     :rtype: unicode
     """
-    return pycompat.to_text(string).replace(u'\n', u'<br>\n')
+    return pycompat.to_text(string).replace('\n', M('<br>\n'))
 
 #--------------------------------------------------------------------
 # QWeb Fields converters
@@ -103,7 +104,7 @@ class FieldConverter(models.AbstractModel):
         Converts a single value to its HTML version/output
         :rtype: unicode
         """
-        return html_escape(pycompat.to_text(value))
+        return escape(pycompat.to_text(value))
 
     @api.model
     def record_to_html(self, record, field_name, options):
@@ -274,7 +275,7 @@ class TextConverter(models.AbstractModel):
         """
         Escapes the value and converts newlines to br. This is bullshit.
         """
-        return nl2br(html_escape(value)) if value else ''
+        return nl2br(escape(value)) if value else ''
 
 
 class SelectionConverter(models.AbstractModel):
@@ -294,7 +295,7 @@ class SelectionConverter(models.AbstractModel):
     def value_to_html(self, value, options):
         if not value:
             return ''
-        return html_escape(pycompat.to_text(options['selection'][value]) or u'')
+        return escape(pycompat.to_text(options['selection'][value]) or u'')
 
     @api.model
     def record_to_html(self, record, field_name, options):
@@ -315,7 +316,7 @@ class ManyToOneConverter(models.AbstractModel):
         value = value.sudo().display_name
         if not value:
             return False
-        return nl2br(html_escape(value))
+        return nl2br(escape(value))
 
 
 class ManyToManyConverter(models.AbstractModel):
@@ -328,7 +329,7 @@ class ManyToManyConverter(models.AbstractModel):
         if not value:
             return False
         text = ', '.join(value.sudo().mapped('display_name'))
-        return nl2br(html_escape(text))
+        return nl2br(escape(text))
 
 
 class HTMLConverter(models.AbstractModel):
@@ -450,7 +451,7 @@ class MonetaryConverter(models.AbstractModel):
         else:
             post = u'\N{NO-BREAK SPACE}{symbol}'.format(symbol=display_currency.symbol or '')
 
-        return u'{pre}<span class="oe_currency_value">{0}</span>{post}'.format(formatted_amount, pre=pre, post=post)
+        return M('{pre}<span class="oe_currency_value">{0}</span>{post}').format(formatted_amount, pre=pre, post=post)
 
     @api.model
     def record_to_html(self, record, field_name, options):
@@ -657,10 +658,13 @@ class BarcodeConverter(models.AbstractModel):
             value,
             **{key: value for key, value in options.items() if key in ['width', 'height', 'humanreadable', 'quiet', 'mask']})
         img_attributes = {k[4:]: v for k, v in options.items() if k.startswith('img_')}
-        if 'alt' not in img_attributes:
-            img_attributes.update({'alt': 'Barcode %s' % value})
-        attributes = ' '.join(['%s="%s"' % attrs for attrs in img_attributes.items()])
-        return u'<img src="data:png;base64,%s" %s>' % (base64.b64encode(barcode).decode('ascii'), attributes)
+        img_attributes['src'] = 'data:png;base64,' + base64.b64encode(barcode).decode()
+        img_attributes.setdefault('alt', 'Barcode %s' % value)
+
+        attributes = M(' ').join(
+            M('%s="%s"') % attrs for attrs in img_attributes.items()
+        )
+        return M('<img %s>') % attributes
 
 
 class Contact(models.AbstractModel):
@@ -699,14 +703,23 @@ class Contact(models.AbstractModel):
         if not value:
             return ''
 
-        opf = options and options.get('fields') or ["name", "address", "phone", "mobile", "email"]
-        opsep = options and options.get('separator') or "\n"
+        opf = options.get('fields') or ["name", "address", "phone", "mobile", "email"]
+        sep = options.get('separator')
+        template_options = options.get('template_options', {})
+        if sep:
+            opsep = escape(sep)
+        elif template_options.get('no_tag_br'):
+            # escaped joiners will auto-escape joined params
+            opsep = escape(', ')
+        else:
+            opsep = M('<br/>')
+
         value = value.sudo().with_context(show_address=True)
         name_get = value.name_get()[0][1]
 
         val = {
             'name': name_get.split("\n")[0],
-            'address': html_escape(opsep.join(name_get.split("\n")[1:])).strip(),
+            'address': opsep.join(name_get.split("\n")[1:]).strip(),
             'phone': value.phone,
             'mobile': value.mobile,
             'city': value.city,
@@ -719,7 +732,7 @@ class Contact(models.AbstractModel):
             'object': value,
             'options': options
         }
-        return self.env['ir.qweb']._render('base.contact', val, **options.get('template_options', dict()))
+        return self.env['ir.qweb']._render('base.contact', val, **template_options)
 
 
 class QwebView(models.AbstractModel):
@@ -729,13 +742,12 @@ class QwebView(models.AbstractModel):
 
     @api.model
     def record_to_html(self, record, field_name, options):
-        if not getattr(record, field_name):
-            return None
-
         view = getattr(record, field_name)
+        if not view:
+            return ''
 
         if view._name != "ir.ui.view":
-            _logger.warning("%s.%s must be a 'ir.ui.view' model." % (record, field_name))
-            return None
+            _logger.warning("%s.%s must be a 'ir.ui.view', got %r.", record, field_name, view._name)
+            return ''
 
-        return pycompat.to_text(view._render(options.get('values', {}), engine='ir.qweb'))
+        return view._render(options.get('values', {}), engine='ir.qweb')
