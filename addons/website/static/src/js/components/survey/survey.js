@@ -61,7 +61,7 @@
         }
 
         const DescriptionScreenTemplate = xml`
-        <div class="o_survey_screen o_description_sceen">
+        <div class="o_survey_screen o_description_screen">
           <div class="h-25"/>
           <div class="d-flex h-50">
               <div class="align-self-center mx-auto">
