@@ -115,12 +115,16 @@
                 <script type="text/javascript" src="/mail/static/src/components/notification_popover/notification_popover.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/notification_request/notification_request.js"/>
                 <script type="text/javascript" src="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/partner_selector/partner_selector.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/selectable_partner/selectable_partner.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/selectable_partners_list/selectable_partners_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_icon/thread_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_preview/thread_preview.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_typing_icon/thread_typing_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_view/thread_view.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/top_bar/top_bar.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_core.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_errors.js"></script>
                 <script type="text/javascript" src="/mail/static/src/model/model_field.js"></script>

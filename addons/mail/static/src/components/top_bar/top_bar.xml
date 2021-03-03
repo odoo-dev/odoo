@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.TopBar" owl="1">
+        <div class="o_TopBar">
+            <Popover position="'bottom'">
+                <button class="o_TopBar_buttons o_TopBar_buttonInvite o_TopBar_toolButtons btn btn-light" t-on-keydown="_onKeydownInviteButton">
+                    <i class="fa fa-user-plus"/>
+                </button>
+                <t t-set="opened">
+                    <PartnerSelector/>
+                </t>
+            </Popover>
+        </div>
+    </t>
+
+</templates>

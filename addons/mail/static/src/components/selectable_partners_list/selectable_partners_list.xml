@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.SelectablePartnersList" owl="1">
+        <div class="o_SelectablePartnersList">
+            <t t-foreach="partners" t-as="partner" t-key="partner.localId">
+                <SelectablePartner
+                    partner = "partner"
+                />
+            </t>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.PartnerSelector" owl="1">
+        <div class="o_PartnerSelectorPopover">
+            Select people
+            <input type="text" t-ref="search-input" t-on-keyup="_onKeyUp()"/>
+            <SelectablePartnersList
+                inputSearch = "inputSearch"
+            />
+        </div>
+    </t>
+
+</templates>

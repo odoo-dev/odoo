@@ -4,6 +4,7 @@ odoo.define('mail/static/src/components/thread_view/thread_view.js', function (r
 const components = {
     Composer: require('mail/static/src/components/composer/composer.js'),
     MessageList: require('mail/static/src/components/message_list/message_list.js'),
+    TopBar: require('mail/static/src/components/top_bar/top_bar.js'),
 };
 const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
