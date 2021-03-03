@@ -1296,6 +1296,15 @@ var BasicModel = AbstractModel.extend({
                 // optionally clear the DataManager's cache
                 self._invalidateCache(parent);
                 return self.reload(parentID);
+            }).then(function (datapoint) {
+                // if there are no records to display and we are not on first page(we check it
+                // by checking offset is greater than limit i.e. we are not on first page)
+                // reason for adding logic after reload to make sure there is no records after operation
+                if (parent && parent.type === 'list' && !parent.data.length && parent.offset >= parent.limit) {
+                    parent.offset = (parent.offset - parent.limit) > 0 ? (parent.offset - parent.limit) : 0;
+                    return self.reload(parentID);
+                }
+                return datapoint;
             });
     },
     /**

@@ -4397,6 +4397,50 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('list view move to previous page when all records from last page archive/unarchived', function (assert) {
+        assert.expect(9);
+
+        // add active field on foo model and make all records active
+        this.data.foo.fields.active = { string: 'Active', type: 'boolean', default: true };
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree limit="3"><field name="display_name"/></tree>',
+            viewOptions: {
+                hasSidebar: true,
+            },
+        });
+
+        assert.strictEqual(list.pager.$('.o_pager_counter').text().trim(), '1-3 / 4',
+            "should have 2 pages and current page should be first page");
+        assert.strictEqual(list.$('tbody td.o_list_record_selector').length, 3,
+            "should have 3 records");
+
+        // move to next page
+        list.pager.$('.o_pager_next').click();
+        assert.strictEqual(list.pager.$('.o_pager_counter').text().trim(), '4-4 / 4',
+            "should be on second page");
+        assert.strictEqual(list.$('tbody td.o_list_record_selector').length, 1,
+            "should have 1 records");
+        assert.ok(list.sidebar.$el.hasClass('o_hidden'), 'sidebar should be invisible');
+
+        list.$('tbody td.o_list_record_selector:first input').click();
+        assert.ok(!list.sidebar.$el.hasClass('o_hidden'), 'sidebar should be visible');
+
+        // archive all records of current page
+        list.sidebar.$('a:contains(Archive)').click();
+        assert.strictEqual($('.modal').length, 1, 'a confirm modal should be displayed');
+        $('.modal-footer .btn-primary').click(); // Click on 'Ok'
+        assert.strictEqual(list.$('tbody td.o_list_record_selector').length, 3,
+            "should have 3 records");
+        assert.strictEqual(list.pager.$('.o_pager_counter').text().trim(), '1-3 / 3',
+            "should have 1 page only");
+
+        list.destroy();
+    });
+
     QUnit.test('list should ask to scroll to top on page changes', function (assert) {
         assert.expect(10);
 
