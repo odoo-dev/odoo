@@ -520,6 +520,39 @@ function factory(dependencies) {
         }
 
         /**
+         * Performs the `group_chat_create` RPC on `mail.channel`.
+         *
+         *
+         * @static
+         * @param {Object} param0
+         * @param {integer[]} param0.partnerIds
+         * @param {boolean} [param0.pinForCurrentPartner]
+         * @returns {mail.thread|undefined} the created or existing chat
+         */
+        static async performRpcCreateGroupChat({ partnerIds, pinForCurrentPartner }) {
+            const device = this.env.messaging.device;
+            const data = await this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'group_chat_create',
+                kwargs: {
+                    context: Object.assign({}, this.env.session.user_content, {
+                        // optimize the return value by avoiding useless queries
+                        // in non-mobile devices
+                        isMobile: device.isMobile,
+                    }),
+                    partners_to: partnerIds,
+                    pin: pinForCurrentPartner,
+                },
+            });
+            if (!data) {
+                return;
+            }
+            return this.env.models['mail.thread'].insert(
+                this.env.models['mail.thread'].convertData(data)
+            );
+        }
+
+        /**
          * Performs the `execute_command` RPC on `mail.channel`.
          *
          * @static
@@ -1167,6 +1200,9 @@ function factory(dependencies) {
             if (this.channel_type === 'chat' && this.correspondent) {
                 return this.custom_channel_name || this.correspondent.nameOrDisplayName;
             }
+            if (this.channel_type === 'group') {
+                return this.name || this.members.map(partner => partner.nameOrDisplayName).join(', ');
+            }
             return this.name;
         }
 
@@ -1183,10 +1219,7 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeHasInviteFeature() {
-            if (this.model !== 'mail.channel') {
-                return false;
-            }
-            return this.channel_type === 'channel';
+            return this.model === 'mail.channel';
         }
 
         /**
@@ -1207,7 +1240,7 @@ function factory(dependencies) {
         _computeIsChannelRenamable() {
             return (
                 this.model === 'mail.channel' &&
-                ['chat', 'channel'].includes(this.channel_type)
+                ['chat', 'channel', 'group'].includes(this.channel_type)
             );
         }
 
