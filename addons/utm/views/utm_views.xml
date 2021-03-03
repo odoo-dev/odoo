@@ -24,6 +24,7 @@
                 Campaigns are used to centralize your marketing efforts and track their results.
             </p>
         </field>
+        <field name="context">{'search_default_manually_created_campaigns': 1}</field>
     </record>
 
     <menuitem id="menu_utm_campaign_act"

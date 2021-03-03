@@ -8,12 +8,15 @@
                 <field name="name" string="Campaigns"/>
                 <field name="tag_ids"/>
                 <field name="user_id"/>
+                <field name="is_auto_campaign" string="Automatically generated campaigns"/>
                 <group expand="0" string="Group By">
                     <filter string="Stage" name="group_stage_id"
                         context="{'group_by': 'stage_id'}"/>
                     <filter string="Responsible" name="group_user_id"
                         context="{'group_by': 'user_id'}"/>
                 </group>
+                <filter string="Manually Created Campaigns" name="manually_created_campaigns"
+                        domain="[('is_auto_campaign', '=', False)]"/>
             </search>
         </field>
     </record>
