@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<div t-name="web_studio.Editor"
+    t-on-switch-tab="onSwitchTab"
+    t-on-studio-switch-view="switchView"
+    t-on-studio-edit-view="switchViewLegacy">
+
+    <EditorMenu studioBreadcrumbs="[{name: 'prout'}]"/>
+
+    <ActionContainer t-att-class="{o_hidden: studio.editorTab === 'views' or studio.editedReport}"/>
+
+    <t t-if="studio.editorTab === 'views'">
+        <!-- <ActionEditorSidebar/> -->
+        <EditorAdapter t-if="studio.editedViewType" Component="ActionEditorMain" params="{ action: studio.editedAction, viewType: studio.editedViewType }" t-key="key"/>
+        <EditorAdapter t-else="" Component="ActionEditor" params="studio.editedAction" class="o_web_studio_client_action" t-key="key"/>
+    </t>
+
+<!--         <t t-if="studio.editorTab === 'reports' and studio.editedReport">
+        <ReportEditorSidebar/>
+        <ReportEditor/>
+        <Pager/>
+    </t> -->
+</div>
+
+</templates>
