@@ -9,6 +9,7 @@ var BasicView = require("web.BasicView");
 var BasicRenderer = require("web.BasicRenderer");
 const AbstractRenderer = require('web.AbstractRendererOwl');
 const RendererWrapper = require('web.RendererWrapper');
+const createActionManager = testUtils.createActionManager;
 
 function getHtmlRenderer(html) {
     return BasicRenderer.extend({
@@ -133,6 +134,56 @@ QUnit.module("Views", {
         });
         assert.hasClass(document.activeElement, "o_searchview_input");
         view.destroy();
+    });
+
+    QUnit.test('foucus should be on search bar after changing view', async function (assert) {
+        assert.expect(2);
+
+        this.partnedata = {
+            partner: {
+                fields: {
+                    display_name: { string: "Displayed name", type: "char" },
+                },
+                records: [
+                    {id: 1, display_name: "gideon"},
+                ],
+            },
+        };
+        this.actions = [{
+            id: 1,
+            name: 'Partners Action 4',
+            res_model: 'partner',
+            type: 'ir.actions.act_window',
+            views: [[1, 'kanban'], [false, 'form']],
+        }];
+
+        this.archs = {
+            // kanban views
+            'partner,1,kanban': '<kanban><templates><t t-name="kanban-box">' +
+                    '<div class="oe_kanban_global_click">' +
+                    '<field name="display_name"/>' +
+                    '</div>' +
+                '</t></templates></kanban>',
+            // form views
+            'partner,false,form': '<form>' +
+                    '<group>' +
+                        '<field name="display_name"/>' +
+                    '</group>' +
+                '</form>',
+             // search views
+            'partner,false,search': '<search></search>',
+        };
+        var actionManager = await createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.partnedata,
+        });
+        await actionManager.doAction(1);
+        assert.hasClass(document.activeElement, "o_searchview_input");
+        await testUtils.dom.click(actionManager.$('.oe_kanban_global_click'));
+        await testUtils.dom.click(actionManager.$('.o_back_button'));
+        assert.hasClass(document.activeElement, "o_searchview_input");
+        actionManager.destroy();
     });
 
     QUnit.test('Owl Renderer mounted/willUnmount hooks are properly called', async function (assert) {
