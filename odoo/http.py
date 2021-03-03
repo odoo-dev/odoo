@@ -1470,8 +1470,8 @@ class Root(object):
 
             request_managers = [request]
 
-            if request.session.profile_session_id and db:
-                description = request.httprequest.base_url
+            if request.session.profile_session_id and db and request.httprequest.path != '/web/profiling':
+                description = request.httprequest.path
                 profile_session_id = request.session.profile_session_id
                 request_profiler = profiler.Profiler(db=db, profile_session_id=profile_session_id, description=description)
                 request_managers.append(request_profiler)

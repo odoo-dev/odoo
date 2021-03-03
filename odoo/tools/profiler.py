@@ -228,7 +228,10 @@ class Recorder():
         stack = []
         frame = sys._current_frames()[self.init_thread.ident]
         while frame is not None:
-            stack.append((frame, frame.f_lineno)) # needs to save lino since frame will be altered during execution
+
+            co = frame.f_code
+            frame_info = (co.co_filename, frame.f_lineno, co.co_name, '')
+            stack.append(frame_info) # needs to save lino since frame will be altered during execution
             frame = frame.f_back
         return stack
 
@@ -236,14 +239,15 @@ class Recorder():
         return [list(frame) for frame in stack]  # [(filename, lineno, name, linedesc),]
 
     def _post_process(self):
-        def format_frame(frame, lineno):
-            co = frame.f_code
-            frame_info = (co.co_filename, lineno, co.co_name, '') #TODO add real code
-            return frame_info
+        #def format_frame(frame, lineno):
+        #    co = frame.f_code
+        #    frame_info = (co.co_filename, lineno, co.co_name, inspect.getsource(co))
+        #    return frame_info
 
         for entry in self.result:
-            stack = reversed(entry['stack'][1:-self.init_stack_level])
-            entry['stack'] = [format_frame(*frame) for frame in stack]
+            #stack = reversed(entry['stack'][1:-self.init_stack_level])
+            #entry['stack'] = [format_frame(*frame) for frame in stack]
+            entry['stack'] = list(reversed(entry['stack'][1:-self.init_stack_level]))
 
 class SQLRecorder(Recorder):
     _row = 'sql'
@@ -376,19 +380,19 @@ class Profiler():
         if self.cr and self.profile_session_id:
             self.cr.execute("""
                 INSERT INTO 
-                    ir_profile_execution(description, profile_session_id, create_date, start_date) 
+                    ir_profile_execution(description, profile_session_id, create_date) 
                 VALUES 
-                    (%s, %s, %s, %s)
+                    (%s, %s, %s)
                 RETURNING id
             """, [
                 self.description,
                 self.profile_session_id,
                 fields.Datetime.now(),
-                fields.Datetime.now(),
             ])
             self.profile_execution_id = self.cr.fetchone()[0]
 
     def __enter__(self):
+        self.start = time.time()
         if self.cr:
             self.cr.__enter__()
             self._make_ir_profile_execution()
@@ -403,7 +407,7 @@ class Profiler():
 
         for recorder in self.recorders:
             recorder._post_process()
-
+        self.duration = time.time() - self.start
         if self.path:
             for row, result in self.results.items():
                 path = '%s_%s.json' % (self.path, row)
@@ -418,12 +422,12 @@ class Profiler():
                     self.cr.execute(
                         """
                             UPDATE ir_profile_execution
-                            SET {row_name} = %s, end_date = %s
+                            SET {row_name} = %s, duration = %s
                             WHERE id = %s
                         """.format(row_name=row),
                         [
                             json.dumps(result),
-                            fields.Datetime.now(),
+                            self.duration,
                             self.profile_execution_id
                         ])
                 self.cr.commit()
@@ -461,6 +465,7 @@ class TestProfiler(Profiler):
         test_method = getattr(test, '_testMethodName', 'Unknown test method')
         description = '%s %s %s' % (test_method, test.env.user.name, 'warm' if test.warm else 'cold')
         create_session_id(cr, test_method, user, on=test)
+        cr.commit()
         super().__init__(description=description, **kwargs, cr=cr, profile_session_id=test.profile_session_id)
 
 

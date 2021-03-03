@@ -91,8 +91,10 @@ class TestMassMailBlPerformance(TestMassMailPerformanceBase):
         })
 
         # runbot needs +62 compared to local
-        with self.assertQueryCount(__system__=1942, marketing=1942):
-            mailing.action_send_mail()
+        from odoo.tools.profiler import TestProfiler
+        with TestProfiler(self):
+            with self.assertQueryCount(__system__=1942, marketing=1942):
+                mailing.action_send_mail()
 
         self.assertEqual(mailing.sent, 50)
         self.assertEqual(mailing.delivered, 50)

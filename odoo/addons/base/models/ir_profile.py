@@ -25,7 +25,7 @@ class IrProfileSession(models.Model):
         return self.sudo().search(domain).unlink()
 
     def profiling_enabled(self):
-        return request.env['ir.config_parameter'].sudo().get_param('base.profiling_enable')
+        return request.env['ir.config_parameter'].sudo().get_param('base.profiling_enabled')
 
     def _update_profiling(self, profile=None, profile_sql=None, profile_traces_sync=None, profile_traces_async=None, **_kwargs):
         if profile:
@@ -59,9 +59,7 @@ class IrProfileExcecution(models.Model):
 
     description = fields.Char('Description')
     profile_session_id = fields.Many2one('ir.profile.session', ondelete='cascade')
-    start_date = fields.Datetime('Start')
-    end_date = fields.Datetime('End')
-    duration = fields.Float('Duration', compute='_compute_duration')
+    duration = fields.Float('Duration')
 
     # results slots
     sql = fields.Char('Sql', prefetch=False)
@@ -71,12 +69,6 @@ class IrProfileExcecution(models.Model):
     speedscope = fields.Binary('Speedscope', prefetch=False)
     speedscope_url = fields.Char('Open', compute='_compute_url')
 
-    def _compute_duration(self):
-        for profile in self:
-            profile.duration = 0
-            if profile.end_date and profile.start_date:
-                profile.duration = (profile.end_date - profile.start_date).total_seconds()
-
     def _compute_url(self):
         url_root = request.httprequest.url_root
         for profile in self:
@@ -84,7 +76,7 @@ class IrProfileExcecution(models.Model):
                 content_url = '%sweb/content/ir.profile.execution/%s/speedscope' % (url_root, profile.id)
                 profile.speedscope_url = '/base/static/lib/speedscope/index.html#profileURL=%s' % content_url
             else:
-                profile.speedscope_url = False
+                profile.speedscope_url = ''
 
     def _action_generate_speedscope(self):
         for profile in self:
