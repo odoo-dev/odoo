@@ -9,7 +9,7 @@ html {
     display: flex;
     flex-flow: column nowrap;
 
-    &.o_fullscreen > .o_main_navbar {
+    &.o_fullscreen > header > .o_main_navbar {
       display: none;
     }
 
