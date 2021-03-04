@@ -624,8 +624,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
             self.assertEqual(moves.mapped('name'), ['CT/2016/01/0001', 'CT/2016/01/0002', '/'])
             moves.button_draft()
-            moves.posted_before = False
-            moves.unlink()
+            moves.with_context(force_delete=True).unlink()
             journal.unlink()
             account.unlink()
             env0.cr.commit()
