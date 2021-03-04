@@ -1918,8 +1918,8 @@ class AccountMove(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_posted_before(self):
-        if not self._context.get('force_delete') and any(move.posted_before for move in self):
-            raise UserError(_("You cannot delete an entry which has been posted once."))
+        if not self._context.get('force_delete') and any(move._get_last_sequence(include_self=True) != move.name for move in self):
+            raise UserError(_("You cannot delete an entry which has already consumed a sequence number and is not the last one in the chain. Probably you should revert it instead."))
 
     def unlink(self):
         self.line_ids.unlink()

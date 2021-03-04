@@ -146,7 +146,7 @@ class SequenceMixin(models.AbstractModel):
         self.ensure_one()
         return "00000000"
 
-    def _get_last_sequence(self, relaxed=False):
+    def _get_last_sequence(self, relaxed=False, include_self=False):
         """Retrieve the previous sequence.
 
         This is done by taking the number with the greatest alphabetical value within
@@ -163,6 +163,7 @@ class SequenceMixin(models.AbstractModel):
         :param relaxed: this should be set to True when a previous request didn't find
             something without. This allows to find a pattern from a previous period, and
             try to adapt it for the new period.
+        :param include_self: Whether or not the search should include this record.
 
         :return: the string of the previous sequence or None if there wasn't any.
         """
@@ -170,7 +171,7 @@ class SequenceMixin(models.AbstractModel):
         if self._sequence_field not in self._fields or not self._fields[self._sequence_field].store:
             raise ValidationError(_('%s is not a stored field', self._sequence_field))
         where_string, param = self._get_last_sequence_domain(relaxed)
-        if self.id or self.id.origin:
+        if not include_self and (self.id or self.id.origin):
             where_string += " AND id != %(id)s "
             param['id'] = self.id or self.id.origin
 
