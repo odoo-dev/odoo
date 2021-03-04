@@ -743,7 +743,6 @@ class Message(models.Model):
 
         # notifies changes in messages through the bus.  To minimize the number of
         # notifications, we need to group the messages depending on their channel_ids
-        groups = []
         messages = notifications.mapped('mail_message_id')
         messages_channel = messages.filtered(lambda msg: msg.model == "mail.channel")
         if not messages_channel:
