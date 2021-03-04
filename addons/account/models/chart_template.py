@@ -84,8 +84,6 @@ class AccountChartTemplate(models.Model):
     _name = "account.chart.template"
     _description = "Account Chart Template"
 
-    #TODO OCO idée à discuter: l'installation du CoA setup le fiscal country sur le pays du CoA (comme ça, on évite le cas bizarre où ils ne correspondent pas) ==> compute éditable ?
-
     name = fields.Char(required=True)
     parent_id = fields.Many2one('account.chart.template', string='Parent Chart Template')
     code_digits = fields.Integer(string='# of Digits', required=True, default=6, help="No. of Digits to use for account code")
@@ -336,6 +334,7 @@ class AccountChartTemplate(models.Model):
         # set the default taxes on the company
         company.account_sale_tax_id = self.env['account.tax'].search([('type_tax_use', 'in', ('sale', 'all')), ('company_id', '=', company.id)], limit=1).id
         company.account_purchase_tax_id = self.env['account.tax'].search([('type_tax_use', 'in', ('purchase', 'all')), ('company_id', '=', company.id)], limit=1).id
+        company.account_tax_fiscal_country_id = self.country_id
 
         return {}
 

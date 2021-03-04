@@ -91,11 +91,16 @@ class AccountTax(models.Model):
         help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled ; at reconciliation, this amount cancelled on this account and put on the regular tax account.")
     invoice_repartition_line_ids = fields.One2many(string="Distribution for Invoices", comodel_name="account.tax.repartition.line", inverse_name="invoice_tax_id", copy=True, help="Distribution when the tax is used on an invoice")
     refund_repartition_line_ids = fields.One2many(string="Distribution for Refund Invoices", comodel_name="account.tax.repartition.line", inverse_name="refund_tax_id", copy=True, help="Distribution when the tax is used on a refund")
-    country_id = fields.Many2one(string="Country", required=True, comodel_name='res.country', default=lambda x: x.env.company.account_tax_fiscal_country_id, help="The country for which this tax is applicable.")
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', compute='_compute_country_id', readonly=False, store=True, help="The country for which this tax is applicable.")
 
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id, type_tax_use, tax_scope)', 'Tax names must be unique !'),
     ]
+
+    @api.depends('company_id.account_tax_fiscal_country_id')
+    def _compute_country_id(self):
+        for record in self:
+            record.country_id = record.company_id.account_tax_fiscal_country_id
 
     @api.model
     def default_get(self, fields_list):
@@ -655,7 +660,6 @@ class AccountTaxRepartitionLine(models.Model):
         for record in self:
             tag_countries = set(record.mapped('tag_ids.country_id'))
             if tag_countries and {record.tax_id.country_id} != tag_countries:
-                import pdb; pdb.set_trace()
                 raise ValidationError(_("A tax should only use tags from its country. You should use another tax and a fiscal position if you wish to uses the tags from foreign tax reports."))
 
     @api.depends('factor_percent')
