@@ -14,6 +14,7 @@ import binascii
 import enum
 import pytz
 import psycopg2
+from markupsafe import Markup
 
 from .tools import (
     float_repr, float_round, float_compare, float_is_zero, html_sanitize, human_size,
@@ -1749,6 +1750,14 @@ class Html(_String):
                 strip_style=self.strip_style,
                 strip_classes=self.strip_classes)
         return value
+
+    def convert_to_record(self, value, record):
+        r = super().convert_to_record(value, record)
+        return r and Markup(r)
+
+    def convert_to_read(self, value, record, use_name_get=True):
+        r = super().convert_to_read(value, record, use_name_get)
+        return r and Markup(r)
 
 
 class Date(Field):

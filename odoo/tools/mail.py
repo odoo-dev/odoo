@@ -4,6 +4,8 @@
 import base64
 import collections
 import logging
+
+import markupsafe
 from lxml.html import clean
 import random
 import re
@@ -249,7 +251,7 @@ def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=Fals
     if cleaned.startswith(u'<div>') and cleaned.endswith(u'</div>'):
         cleaned = cleaned[5:-6]
 
-    return cleaned
+    return markupsafe.Markup(cleaned)
 
 # ----------------------------------------------------------
 # HTML/Text management
