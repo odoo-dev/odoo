@@ -29,10 +29,10 @@ class BusWebTests(odoo.tests.HttpCase):
 
         sendones = []
         def patched_sendone(self, channel, message):
-            """
-            Control API and number of messages posted to the bus
-            """
-            sendones.append((channel, message))
+            """ Control API and number of messages posted to the bus linked to
+            bundle_changed events """
+            if channel[1] == 'bundle_changed':
+                sendones.append((channel, message))
 
         self.patch(type(self.env['bus.bus']), 'sendone', patched_sendone)
 
@@ -44,9 +44,7 @@ class BusWebTests(odoo.tests.HttpCase):
             4,
             'Received %s' % '\n'.join('%s - %s' % (tmp[0], tmp[1]) for tmp in sendones)
         )
-        for sent in sendones:
-            channel = sent[0]
-            message = sent[1]
+        for (channel, message) in sendones:
             self.assertEqual(channel, (db_name, 'bundle_changed'))
             self.assertEqual(len(message), 2)
             self.assertTrue(message[0] in bundle_xml_ids)
