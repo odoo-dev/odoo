@@ -79,3 +79,40 @@ class ResPartner(models.Model):
             if lowest_activation:
                 res['activation'] = lowest_activation.id
         return res
+
+    def _compute_opportunity_count(self):
+        res = super(ResPartner, self)._compute_opportunity_count()
+        all_partners = self.with_context(active_test=False).search([('id', 'child_of', self.ids)])
+        all_partners.read(['parent_id'])
+
+        opportunity_data = self.env['crm.lead'].read_group(
+            domain=['|', ('partner_id', 'in', all_partners.ids), ('partner_assigned_id', 'in', all_partners.ids)],
+            fields=['partner_id', 'partner_assigned_id'], groupby=['partner_id', 'partner_assigned_id'], lazy=False
+        )
+
+        self.opportunity_count = 0
+        for group in opportunity_data:
+            if self.browse(group['partner_id']):
+                partner = self.browse(group['partner_id'][0])
+                while partner:
+                    if partner in self:
+                        partner.opportunity_count += group['__count']
+                    partner = partner.parent_id
+            if self.browse(group['partner_assigned_id']):
+                partner = self.browse(group['partner_assigned_id'][0])
+                while partner:
+                    if partner in self:
+                        partner.opportunity_count += group['__count']
+                    partner = partner.parent_id
+        return res
+
+    def action_view_opportunity(self):
+        res = super(ResPartner, self).action_view_opportunity()
+        action = self.env['ir.actions.act_window']._for_xml_id('crm.crm_lead_opportunities')
+        if self.is_company:
+            action['domain'] = ['|', ('partner_id.commercial_partner_id.id', '=', self.id), ('partner_assigned_id.commercial_partner_id.id', '=', self.id)]
+            domain = action['domain']
+        else:
+            action['domain'] = ['|', ('partner_id.id', '=', self.id), ('partner_assigned_id', '=', self.id)]
+            domain = action['domain']
+        return dict(res, domain=domain)
