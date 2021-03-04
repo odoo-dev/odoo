@@ -1181,11 +1181,14 @@ class Channel(models.Model):
     def _send_transient_message(self, partner_to, content):
         """ Notifies partner_to that a message (not stored in DB) has been
             written in this channel """
-        self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', partner_to.id), {
-            'body': "<span class='o_mail_notification'>" + content + "</span>",
-            'channel_ids': [self.id],
-            'info': 'transient_message',
-        })
+        self.env['bus.bus'].sendone(
+            (self._cr.dbname, 'res.partner', partner_to.id),
+            {'body': "<span class='o_mail_notification'>" + content + "</span>",
+             'info': 'transient_message',
+             'model': self._name,
+             'res_id': self.id,
+            }
+        )
 
     def _define_command_help(self):
         return {'help': _("Show a helper message")}

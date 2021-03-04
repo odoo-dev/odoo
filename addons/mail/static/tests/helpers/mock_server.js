@@ -888,8 +888,9 @@ MockServer.include({
                     ["dbName", 'res.partner', this.currentPartnerId],
                     {
                         'body': `<span class="o_mail_notification">${message}</span>`,
-                        'channel_ids': [channel.id],
                         'info': 'transient_message',
+                        'model': 'mail.channel',
+                        'res_id': channel.id,
                     }
                 ];
                 this._widget.call('bus_service', 'trigger', 'notification', [notification]);
