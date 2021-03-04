@@ -1,3 +1,4 @@
+
 odoo.define('web.ErrorDialogRegistry', function (require) {
 "use strict";
 
@@ -24,9 +25,9 @@ var _lt = core._lt;
 
 // Register this eventlistener before qunit does.
 // Some errors needs to be negated by the crash_manager.
-window.addEventListener('unhandledrejection', ev =>
-    core.bus.trigger('crash_manager_unhandledrejection', ev)
-);
+window.addEventListener('unhandledrejection', ev => {
+    core.bus.trigger('crash_manager_unhandledrejection', ev);
+});
 
 let active = true;
 

@@ -1204,7 +1204,7 @@ body.editor_enable.editor_has_snippets {
                     td {
                         padding-bottom: $o-we-sidebar-content-field-spacing / 2;
 
-                        &:first-child, &:last-child {
+                        &:not(.o_we_list_record_name) {
                             width: 1px;
                         }
 
@@ -1416,6 +1416,10 @@ body.editor_enable.editor_has_snippets {
                 padding: ($o-we-sidebar-content-field-label-spacing / 4) ($o-we-sidebar-content-field-label-spacing / 2);
                 border-radius: 3px;
                 font-size: 0.85em;
+            }
+
+            &.o_we_tag_removable::after {
+                content: '×';
             }
         }
         .o_we_tag_wrapper {

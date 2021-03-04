@@ -941,8 +941,8 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             case 'toggleRequired':
                 return this.$target[0].classList.contains(params.activeValue) ? params.activeValue : 'false';
             case 'renderListItems': {
-                const values = this._getListItems().map(el => el.id);
-                return JSON.stringify(values);
+                // TODO: test that this still werks
+                return JSON.stringify(this._getListItems());
             }
         }
         return this._super(...arguments);

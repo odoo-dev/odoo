@@ -299,6 +299,12 @@ options.registry.BlogPostTagSelection = options.Class.extend({
         }
         this.rerender = true;
     },
+    /**
+     * @see this.selectClass for params
+     */
+    setTags(previewMode, widgetValue, params) {
+        this.tagIDs = JSON.parse(widgetValue);
+    },
 
     //--------------------------------------------------------------------------
     // Public
