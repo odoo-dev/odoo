@@ -61,7 +61,7 @@ def get_paths(path_def, extensions, manifest_cache=None):
 
     if addon_manifest:
         addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
-        full_path = os.path.normpath(os.path.join(addons_path, path_def))
+        full_path = os.path.normpath(os.path.join(addons_path, path_def[1:] if path_def[0] == '/' else path_def))
         # When fetching template file paths, we need the full paths since xml
         # files are read from the file system. But web assets (scripts and
         # stylesheets) must be loaded using relative paths, hence the trimming
