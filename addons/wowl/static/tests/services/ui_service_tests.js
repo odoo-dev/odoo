@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import { uiService } from "../../src/services/ui_service";
+import { uiService, useUIOwnership } from "../../src/services/ui_service";
 import { Registry } from "../../src/core/registry";
-import { getFixture, makeTestEnv, nextTick } from "../helpers/index";
+import { getFixture, makeTestEnv, mount, nextTick } from "../helpers/index";
 import { BlockUI } from "../../src/webclient/block_ui/block_ui";
-
-const { mount } = owl;
 
 let target;
 let serviceRegistry;
@@ -59,4 +57,49 @@ QUnit.test("use block and unblock several times to block ui with ui service", as
   await nextTick();
   blockUI = target.querySelector(".o_blockUI");
   assert.strictEqual(blockUI, null, "ui should not be blocked");
+});
+
+QUnit.test("a component can take ownership", async (assert) => {
+  class MyComponent extends Component {
+    setup() {
+      useUIOwnership();
+    }
+  }
+  MyComponent.template = owl.tags.xml`<div/>`;
+
+  const env = await makeTestEnv({ ...baseConfig });
+  const ui = env.services.ui;
+  assert.deepEqual(ui.getOwner(), document);
+
+  const comp = await mount(MyComponent, { env });
+  assert.deepEqual(ui.getOwner(), comp.el);
+
+  comp.unmount();
+  assert.deepEqual(ui.getOwner(), document);
+  comp.destroy();
+});
+
+QUnit.test("a component can take ownership: with t-ref delegation", async (assert) => {
+  class MyComponent extends Component {
+    setup() {
+      useUIOwnership("delegatedRef");
+    }
+  }
+  MyComponent.template = owl.tags.xml`
+    <div>
+      <h1>My Component</h1>
+      <div id="owner" t-ref="delegatedRef"/>
+    </div>
+  `;
+
+  const env = await makeTestEnv({ ...baseConfig });
+  const ui = env.services.ui;
+  assert.deepEqual(ui.getOwner(), document);
+
+  const comp = await mount(MyComponent, { env });
+  assert.deepEqual(ui.getOwner(), comp.el.querySelector("div#owner"));
+
+  comp.unmount();
+  assert.deepEqual(ui.getOwner(), document);
+  comp.destroy();
 });

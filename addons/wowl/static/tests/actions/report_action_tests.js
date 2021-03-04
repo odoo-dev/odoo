@@ -5,12 +5,12 @@ import { notificationService } from "../../src/notifications/notification_servic
 import {
   makeFakeDownloadService,
   makeFakeNotificationService,
-  makeFakeUIService,
 } from "../helpers/mocks";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
+import { uiService } from "../../src/services/ui_service";
 
 let testConfig;
 
@@ -288,14 +288,7 @@ QUnit.module("ActionManager", (hooks) => {
     );
     testConfig.serviceRegistry.add(
       "ui",
-      makeFakeUIService(
-        () => {
-          assert.step("block");
-        },
-        () => {
-          assert.step("unblock");
-        }
-      ),
+      uiService,
       true
     );
     const mockRPC = async (route, args) => {
@@ -304,6 +297,13 @@ QUnit.module("ActionManager", (hooks) => {
       }
     };
     const webClient = await createWebClient({ testConfig, mockRPC });
+    const ui = webClient.env.services.ui;
+    ui.bus.on("BLOCK", webClient, () => {
+      assert.step("block");
+    });
+    ui.bus.on("UNBLOCK", webClient, () => {
+      assert.step("unblock");
+    });
     await doAction(webClient, 7);
     try {
       await doAction(webClient, 7);
@@ -319,6 +319,8 @@ QUnit.module("ActionManager", (hooks) => {
       "unblock",
       "error caught",
     ]);
+    ui.bus.off("BLOCK", webClient);
+    ui.bus.off("UNBLOCK", webClient);
     webClient.destroy();
   });
 });

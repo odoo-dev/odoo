@@ -6,6 +6,7 @@ import { Dialog } from "../../src/components/dialog/dialog";
 import { notificationService } from "../../src/notifications/notification_service";
 import { errorService } from "../../src/errors/error_service";
 import { mainComponentRegistry } from "../../src/webclient/main_component_registry";
+import { uiService } from "../../src/services/ui_service";
 
 const { Component, mount, tags } = owl;
 
@@ -36,6 +37,7 @@ QUnit.module("DialogManager", {
     target = getFixture();
     serviceRegistry = new Registry();
     serviceRegistry.add(dialogService.name, dialogService);
+    serviceRegistry.add(uiService.name, uiService);
     const componentRegistry = new Registry();
     componentRegistry.add("DialogContainer", mainComponentRegistry.get("DialogContainer"));
     env = await makeTestEnv({ serviceRegistry, mainComponentRegistry: componentRegistry });

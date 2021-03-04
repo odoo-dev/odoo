@@ -7,6 +7,8 @@ import { debugService } from "../../src/debug/debug_service";
 import { modelService } from "../../src/services/model_service";
 import { useDebugManager } from "../../src/debug/debug_manager";
 import { click, getFixture, makeTestEnv } from "../helpers/index";
+import { hotkeyService } from "../../src/services/hotkey_service";
+import { uiService } from "../../src/services/ui_service";
 
 const { Component, hooks, mount, tags } = owl;
 const { useSubEnv } = hooks;
@@ -17,6 +19,8 @@ QUnit.module("DebugManager", (hooks) => {
   hooks.beforeEach(async () => {
     target = getFixture();
     const serviceRegistry = new Registry();
+    serviceRegistry.add(hotkeyService.name, hotkeyService);
+    serviceRegistry.add(uiService.name, uiService);
     serviceRegistry.add(modelService.name, modelService);
     serviceRegistry.add(debugService.name, debugService);
     const mockRPC = async (route, args) => {

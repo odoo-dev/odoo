@@ -323,25 +323,6 @@ export function makeFakeDownloadService(callback) {
   };
 }
 
-export function makeFakeUIService(blockCallback, unblockCallback) {
-  return {
-    name: "ui",
-    deploy() {
-      function block() {
-        if (blockCallback) {
-          blockCallback();
-        }
-      }
-      function unblock() {
-        if (unblockCallback) {
-          unblockCallback();
-        }
-      }
-      return { block, unblock };
-    },
-  };
-}
-
 export function makeFakeNotificationService(createMock, closeMock) {
   return {
     name: "notification",
@@ -373,6 +354,5 @@ export const mocks = {
   router: makeFakeRouterService,
   rpc: makeFakeRPCService,
   title: () => fakeTitleService,
-  ui: makeFakeUIService,
   user: makeFakeUserService,
 };

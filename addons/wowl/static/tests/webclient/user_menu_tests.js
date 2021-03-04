@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { hotkeyService } from "../../src/services/hotkey_service";
+import { uiService } from "../../src/services/ui_service";
 import { UserMenu } from "../../src/webclient/user_menu/user_menu";
 import { click, getFixture, makeFakeUserService, makeTestEnv } from "../helpers";
 import { Registry } from "./../../src/core/registry";
@@ -16,6 +18,8 @@ QUnit.module("UserMenu", {
   async beforeEach() {
     serviceRegistry = new Registry();
     serviceRegistry.add("user", makeFakeUserService({ name: "Sauron" }));
+    serviceRegistry.add(hotkeyService.name, hotkeyService);
+    serviceRegistry.add(uiService.name, uiService);
     target = getFixture();
     const browser = {
       location: {

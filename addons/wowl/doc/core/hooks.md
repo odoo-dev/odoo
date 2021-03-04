@@ -16,8 +16,8 @@ This hook ensures a bus is properly used by a component:
 > ```ts
 > useBus(bus: EventBus, eventName: string, callback: Callback): void
 > ```
->
-> where
+
+where
 
 - `bus` is the event bus to use.
 - `eventName` is the event name to register a callback for.
@@ -27,8 +27,7 @@ This hook ensures a bus is properly used by a component:
 
 ```js
 class MyComponent extends Component {
-  constructor() {
-    super(...arguments);
+  setup() {
     useBus(this.env.bus, "some-event", this.myCallback);
   }
   myCallback() {

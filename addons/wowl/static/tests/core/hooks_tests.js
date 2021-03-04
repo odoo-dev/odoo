@@ -29,4 +29,5 @@ QUnit.test("useBus", async function (assert) {
   comp.unmount();
   env.bus.trigger("test-event");
   await nextTick();
+  comp.destroy();
 });

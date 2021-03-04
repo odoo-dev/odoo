@@ -1,5 +1,4 @@
 /** @odoo-module **/
-
 import { useService } from "../../core/hooks";
 import { mainComponentRegistry } from "../main_component_registry";
 
@@ -31,7 +30,6 @@ export class BlockUI extends Component {
       blockUI: false,
       line1: "",
       line2: "",
-      count: 0,
     });
 
     const { bus } = useService("ui");
@@ -51,23 +49,15 @@ export class BlockUI extends Component {
   }
 
   block() {
-    if (this.state.count === 0) {
-      this.state.blockUI = true;
-      this.replaceMessage(0);
-    }
-    this.state.count++;
+    this.state.blockUI = true;
+    this.replaceMessage(0);
   }
 
   unblock() {
-    if (this.state.count > 0) {
-      this.state.count--;
-    }
-    if (this.state.count === 0) {
-      this.state.blockUI = false;
-      clearTimeout(this.msgTimer);
-      this.state.line1 = "";
-      this.state.line2 = "";
-    }
+    this.state.blockUI = false;
+    clearTimeout(this.msgTimer);
+    this.state.line1 = "";
+    this.state.line2 = "";
   }
 }
 

@@ -1,5 +1,7 @@
 /** @odoo-module **/
 import { Dialog } from "../../src/components/dialog/dialog";
+import { Registry } from "../../src/core/registry";
+import { uiService } from "../../src/services/ui_service";
 import { click, getFixture, makeTestEnv, nextTick } from "../helpers/index";
 
 const { hooks, mount } = owl;
@@ -15,7 +17,9 @@ QUnit.module("Dialog", {
     const dialogContainer = document.createElement("div");
     dialogContainer.classList.add("o_dialog_container");
     target.append(dialogContainer);
-    env = await makeTestEnv();
+    const serviceRegistry = new Registry();
+    serviceRegistry.add(uiService.name, uiService);
+    env = await makeTestEnv({ serviceRegistry });
   },
   async afterEach() {
     if (parent) {

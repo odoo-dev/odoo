@@ -2,22 +2,24 @@
 
 import { Dropdown } from "../../src/components/dropdown/dropdown";
 import { DropdownItem } from "../../src/components/dropdown/dropdown_item";
-import { click, getFixture, makeTestEnv, nextTick } from "../helpers/utility";
-import { makeDeferred } from "../helpers/index";
-
-const { mount } = owl;
+import { click, makeTestEnv, nextTick } from "../helpers/utility";
+import { Registry } from "./../../src/core/registry";
+import { makeDeferred, mount } from "../helpers/index";
+import { hotkeyService } from "../../src/services/hotkey_service";
+import { uiService } from "../../src/services/ui_service";
 
 let env;
 let parent;
-let target;
 
 QUnit.module("Dropdown", {
   async beforeEach() {
-    env = await makeTestEnv();
-    target = getFixture();
+    const serviceRegistry = new Registry();
+    serviceRegistry.add(hotkeyService.name, hotkeyService);
+    serviceRegistry.add(uiService.name, uiService);
+    env = await makeTestEnv({ serviceRegistry });
   },
   async afterEach() {
-    parent.unmount();
+    parent.destroy();
   },
 });
 
@@ -25,7 +27,7 @@ QUnit.test("can be rendered", async (assert) => {
   class Parent extends owl.Component {}
   Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`<Dropdown/>`;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   assert.containsOnce(parent.el, "button.o_dropdown_toggler");
   assert.containsNone(parent.el, "ul.o_dropdown_menu");
 });
@@ -40,7 +42,7 @@ QUnit.test("can be styled", async (assert) => {
         </t>
       </Dropdown>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler");
   assert.hasClass(parent.el, "o_dropdown one");
   const toggler = parent.el.querySelector("button");
@@ -65,7 +67,7 @@ QUnit.test("menu can be toggled", async (assert) => {
   }
   Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`<Dropdown beforeOpen="beforeOpen"/>`;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler");
   assert.verifySteps(["beforeOpen"]);
   assert.containsNone(parent.el, "ul.o_dropdown_menu");
@@ -88,7 +90,7 @@ QUnit.test("initial open state can be true", async (assert) => {
   }
   Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`<Dropdown startOpen="true" beforeOpen="beforeOpen"/>`;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   assert.verifySteps(["beforeOpen"]);
   assert.containsOnce(parent.el, "ul.o_dropdown_menu");
 });
@@ -102,7 +104,7 @@ QUnit.test("close on outside click", async (assert) => {
         <Dropdown/>
       </div>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler");
   assert.containsOnce(parent.el, "ul.o_dropdown_menu");
   await click(parent.el, "div.outside");
@@ -119,7 +121,7 @@ QUnit.test("close on item selection", async (assert) => {
         </t>
       </Dropdown>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler");
   await click(parent.el, "ul.o_dropdown_menu li");
   assert.containsNone(parent.el, "ul.o_dropdown_menu");
@@ -139,7 +141,7 @@ QUnit.test("payload received on item selection", async (assert) => {
         </t>
       </Dropdown>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler");
   await click(parent.el, "ul.o_dropdown_menu li");
 });
@@ -158,7 +160,7 @@ QUnit.test("multi-level dropdown: can be rendered and toggled", async (assert) =
         </t>
       </Dropdown>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   await click(parent.el, "button.o_dropdown_toggler:last-child");
@@ -179,7 +181,7 @@ QUnit.test("multi-level dropdown: initial open state can be true", async (assert
         </t>
       </Dropdown>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   assert.containsN(parent.el, "ul.o_dropdown_menu", 3);
 });
 
@@ -200,7 +202,7 @@ QUnit.test("multi-level dropdown: close on outside click", async (assert) => {
         </Dropdown>
       </div>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   await click(parent.el, "button.o_dropdown_toggler:last-child");
@@ -223,7 +225,7 @@ QUnit.test("multi-level dropdown: close on item selection", async (assert) => {
         </t>
       </Dropdown>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   assert.containsN(parent.el, "ul.o_dropdown_menu", 2);
@@ -248,7 +250,7 @@ QUnit.test("multi-level dropdown: parent closing modes on item selection", async
         </t>
       </Dropdown>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   // Open the 2-level dropdowns
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   await click(parent.el, "button.o_dropdown_toggler:last-child");
@@ -293,7 +295,7 @@ QUnit.test("multi-level dropdown: payload bubbles on item selection", async (ass
         </t>
       </Dropdown>
     `;
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   await click(parent.el, "button.o_dropdown_toggler:last-child");
   // As two listeners are defined in the template,
@@ -356,7 +358,7 @@ QUnit.test("multi-level dropdown: recursive template can be rendered", async (as
   }
   Parent.components = { Dropdown, DropdownItem };
   Parent.template = "recursive.Template";
-  parent = await mount(Parent, { env, target });
+  parent = await mount(Parent, { env });
   assert.deepEqual(
     [...parent.el.querySelectorAll("button,li")].map((el) => el.textContent),
     [
@@ -400,7 +402,7 @@ QUnit.test(
         <div class="outside">OUTSIDE</div>
       </div>
     `;
-    parent = await mount(Parent, { env, target });
+    parent = await mount(Parent, { env });
     // Click on ONE
     const one = parent.el.querySelector(".one");
     await click(one, "button");
@@ -448,7 +450,7 @@ QUnit.test(
         <Dropdown class="bar2" />
       </div>
     `;
-    parent = await mount(Parent, { env, target });
+    parent = await mount(Parent, { env });
     // Click on FOO
     await click(parent.el, ".foo button");
     assert.containsOnce(parent.el, "ul.o_dropdown_menu");
@@ -473,7 +475,7 @@ QUnit.test(
         <Dropdown class="bar2" />
       </div>
     `;
-    parent = await mount(Parent, { env, target });
+    parent = await mount(Parent, { env });
     // Click on BAR1
     await click(parent.el, ".bar1 button");
     assert.containsOnce(parent.el, "ul.o_dropdown_menu");
@@ -486,5 +488,81 @@ QUnit.test(
     await nextTick();
     assert.containsOnce(parent.el, "ul.o_dropdown_menu");
     assert.containsNone(bar1, "ul.o_dropdown_menu");
+  }
+);
+
+QUnit.test("dropdowns keynav",
+  async (assert) => {
+    assert.expect(20)
+    class Parent extends owl.Component {
+      onItemSelected(ev) {
+        const { payload } = ev.detail;
+        assert.step(payload.val.toString());
+      }
+    }
+    Parent.components = { Dropdown, DropdownItem };
+    Parent.template = owl.tags.xml`
+      <Dropdown togglerHotKey="'m'" t-on-dropdown-item-selected="onItemSelected">
+        <t t-set-slot="menu">
+          <DropdownItem class="item1" hotKey="'1'" payload="{val:1}" />
+          <DropdownItem class="item2" hotKey="'2'" payload="{val:2}" />
+          <DropdownItem class="item3" hotKey="'3'" payload="{val:3}" />
+        </t>
+      </Dropdown>
+    `;
+    parent = await mount(Parent, { env });
+    assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed at start");
+
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+    await nextTick();
+    assert.containsOnce(parent.el, ".o_dropdown_menu", "menu is opened after pressing the toggler hotkey");
+
+    // Navigate with arrows
+    assert.containsNone(parent.el, ".o_dropdown_menu > .o_dropdown_active", "menu should not have any active items");
+
+    const scenarioSteps = [
+      { evParams: { key: "arrowdown" }, expected: "item1" },
+      { evParams: { key: "arrowdown" }, expected: "item2" },
+      { evParams: { key: "arrowdown" }, expected: "item3" },
+      { evParams: { key: "arrowdown" }, expected: "item3" },
+      { evParams: { key: "arrowup" }, expected: "item2" },
+      { evParams: { key: "arrowup" }, expected: "item1" },
+      { evParams: { key: "arrowup" }, expected: "item1" },
+      { evParams: { key: "arrowdown", shiftKey: true }, expected: "item3" },
+      { evParams: { key: "arrowup", shiftKey: true }, expected: "item1" },
+    ];
+    
+    for (const step of scenarioSteps) {
+      window.dispatchEvent(new KeyboardEvent("keydown", step.evParams));
+      await nextTick();
+      assert.hasClass(parent.el.querySelector(".o_dropdown_menu > .o_dropdown_active"), step.expected);
+    }
+
+    // Select last one activated in previous scenario (item1)
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "enter" }));
+    await nextTick();
+    assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
+
+    // Reopen dropdown
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+    await nextTick();
+    assert.containsOnce(parent.el, ".o_dropdown_menu", "menu is opened after pressing the toggler hotkey");
+
+    // Select second item through data-hotkey attribute
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "2" }));
+    await nextTick();
+    assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
+
+    // Reopen dropdown
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+    await nextTick();
+    assert.containsOnce(parent.el, ".o_dropdown_menu", "menu is opened after pressing the toggler hotkey");
+
+    // Close dropdown with keynav
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "escape" }));
+    await nextTick();
+    assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
+
+    assert.verifySteps(["1", "2"], "items should have been selected in this order");
   }
 );

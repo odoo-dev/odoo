@@ -249,4 +249,5 @@ QUnit.test("useModel take proper reference to rpc service", async (assert) => {
   const target = getFixture();
   component = await mount(MyComponent, { env, target });
   await component.model("test").read([1], ["asfd"]);
+  component.destroy();
 });

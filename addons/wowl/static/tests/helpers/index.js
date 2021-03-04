@@ -13,11 +13,30 @@ owl.QWeb.dev = true;
 
 export async function setupTests() {
   const originalOdoo = odoo;
+  const originalWindowAddEventListener = window.addEventListener;
+  let windowListeners;
+
   QUnit.testStart(() => {
     odoo = makeTestOdoo();
+
+    // Here we keep track of listeners added on the window object.
+    // Some stuff with permanent state (e.g. services) may register
+    // those kind of listeners without removing them at some point.
+    // We manually remove them after each test (see below).
+    windowListeners = [];
+    window.addEventListener = function (eventName, callback) {
+      windowListeners.push({ eventName, callback });
+      originalWindowAddEventListener(...arguments);
+    }
   });
   QUnit.testDone(() => {
     odoo = originalOdoo;
+
+    // Cleanup the listeners added on window in the current test.
+    windowListeners.forEach(listener => {
+      window.removeEventListener(listener.eventName, listener.callback);
+    });
+    window.addEventListener = originalWindowAddEventListener;
   });
   const templatesUrl = `/wowl/templates/${new Date().getTime()}`;
   templates = await loadFile(templatesUrl);

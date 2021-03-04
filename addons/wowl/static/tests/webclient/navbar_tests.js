@@ -5,8 +5,10 @@ import { click } from "../helpers/index";
 import { getFixture, makeTestEnv, nextTick } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
 import { actionService } from "../../src/actions/action_service";
+import { hotkeyService } from "../../src/services/hotkey_service";
 import { menuService } from "./../../src/services/menu_service";
 import { notificationService } from "../../src/notifications/notification_service";
+import { uiService } from "../../src/services/ui_service";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
@@ -21,6 +23,8 @@ QUnit.module("Navbar", {
     serviceRegistry.add("menu", menuService);
     serviceRegistry.add(actionService.name, actionService);
     serviceRegistry.add(notificationService.name, notificationService);
+    serviceRegistry.add(hotkeyService.name, hotkeyService);
+    serviceRegistry.add(uiService.name, uiService);
     const menus = {
       root: { id: "root", children: [1], name: "root", appID: "root" },
       1: { id: 1, children: [], name: "App0", appID: 1 },

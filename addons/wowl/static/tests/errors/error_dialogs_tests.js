@@ -11,11 +11,13 @@ import {
 } from "../../src/errors/error_dialogs";
 import { Registry } from "../../src/core/registry";
 import OdooError from "../../src/errors/odoo_error";
+import { uiService } from "../../src/services/ui_service";
 
 const { Component, mount, tags } = owl;
 let target;
 let env;
 let parent;
+let baseConfig;
 
 QUnit.module("Error dialogs", {
   async beforeEach() {
@@ -23,7 +25,9 @@ QUnit.module("Error dialogs", {
     const dialogContainer = document.createElement("div");
     dialogContainer.classList.add("o_dialog_container");
     target.append(dialogContainer);
-    env = await makeTestEnv({});
+    const serviceRegistry = new Registry();
+    serviceRegistry.add(uiService.name, uiService);
+    baseConfig = { serviceRegistry };
   },
   async afterEach() {
     parent.unmount();
@@ -45,6 +49,7 @@ QUnit.test("ErrorDialog with traceback", async (assert) => {
   Parent.components = { ErrorDialog };
   Parent.template = tags.xml`<ErrorDialog traceback="traceback" name="name" message="message" data="data"/>`;
   assert.containsNone(target, ".o_dialog");
+  env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(
@@ -106,6 +111,7 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
   Parent.components = { ClientErrorDialog };
   Parent.template = tags.xml`<ClientErrorDialog traceback="traceback" name="name" message="message" data="data"/>`;
   assert.containsNone(target, ".o_dialog");
+  env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(
@@ -167,7 +173,7 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
       },
     },
   };
-  env = await makeTestEnv({ browser });
+  env = await makeTestEnv({...baseConfig, browser});
   class Parent extends Component {
     constructor() {
       super(...arguments);
@@ -198,6 +204,7 @@ QUnit.test("WarningDialog", async (assert) => {
   Parent.components = { WarningDialog };
   Parent.template = tags.xml`<WarningDialog exceptionName="name" message="message" data="data"/>`;
   assert.containsNone(target, ".o_dialog");
+  env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(
@@ -234,7 +241,6 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
   }
   Parent.components = { RedirectWarningDialog };
   Parent.template = tags.xml`<RedirectWarningDialog data="data" t-on-dialog-closed="onDialogClosed"/>`;
-  const serviceRegistry = new Registry();
   const faceActionService = {
     name: "action",
     deploy() {
@@ -245,8 +251,8 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
       };
     },
   };
-  serviceRegistry.add("action", faceActionService);
-  env = await makeTestEnv({ serviceRegistry });
+  baseConfig.serviceRegistry.add("action", faceActionService);
+  env = await makeTestEnv(baseConfig);
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
@@ -277,6 +283,7 @@ QUnit.test("Error504Dialog", async (assert) => {
   Parent.components = { Error504Dialog };
   Parent.template = tags.xml`<Error504Dialog/>`;
   assert.containsNone(target, ".o_dialog");
+  env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(
@@ -310,7 +317,7 @@ QUnit.test("SessionExpiredDialog", async (assert) => {
       },
     },
   };
-  env = await makeTestEnv({ browser });
+  env = await makeTestEnv({ ...baseConfig, browser });
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");

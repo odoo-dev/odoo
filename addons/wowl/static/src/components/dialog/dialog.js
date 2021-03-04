@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { useUIOwnership } from "../../services/ui_service";
+
 const { Component, hooks, misc } = owl;
 const { useRef, useExternalListener, useSubEnv } = hooks;
 const { Portal } = misc;
@@ -7,6 +9,7 @@ const { Portal } = misc;
 export class Dialog extends Component {
   setup() {
     this.modalRef = useRef("modal");
+    useUIOwnership("modal");
     useExternalListener(window, "keydown", this._onKeydown);
     useSubEnv({ inDialog: true });
   }

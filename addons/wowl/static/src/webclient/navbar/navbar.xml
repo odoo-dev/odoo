@@ -29,7 +29,7 @@
     </nav>
   </header>
 
-  <Dropdown t-name="wowl.NavBar.AppsMenu" class="o_navbar_apps_menu" owl="1">
+  <Dropdown t-name="wowl.NavBar.AppsMenu" togglerHotKey="'h'" class="o_navbar_apps_menu" owl="1">
     <i class="fa fa-th-large" />
     <t t-set-slot="menu">
       <DropdownItem
@@ -45,7 +45,17 @@
       t-foreach="sections"
       t-as="section"
       t-key="section.id">
-      <DropdownItem t-if="!section.childrenTree.length" payload="section">
+
+      <t t-set="sectionsVisibleCount" t-value="(sections.length - currentAppSectionsExtra.length)" />
+
+      <t t-if="section_index lt Math.min(10, sectionsVisibleCount)">
+        <t t-set="hotKey" t-value="((section_index + 1) % 10).toString()"/>
+      </t>
+      <t t-else="">
+        <t t-set="hotKey" t-value="undefined"/>
+      </t>
+
+      <DropdownItem t-if="!section.childrenTree.length" payload="section" hotKey="hotKey">
         <span t-esc="section.name" t-att-data-section="section.id" />
       </DropdownItem>
 
@@ -53,15 +63,21 @@
         <t t-set="sectionId" t-value="section.id" />
         <t t-set="name" t-value="section.name" />
         <t t-set="items" t-value="section.childrenTree" />
+        <t t-set="togglerHotKey" t-value="hotKey"/>
       </t>
 
     </t>
+
     <t t-call="wowl.NavBar.SectionsMenu.MoreDropdown">
       <t t-set="sections" t-value="currentAppSectionsExtra" />
+      <t t-if="sectionsVisibleCount lt 10">
+        <t t-set="togglerHotKey" t-value="(sectionsVisibleCount + 1 % 10).toString()"/>
+      </t>
     </t>
+
   </ul>
 
-  <Dropdown t-name="wowl.NavBar.SectionsMenu.Dropdown" owl="1">
+  <Dropdown t-name="wowl.NavBar.SectionsMenu.Dropdown" togglerHotKey="togglerHotKey" owl="1" >
     <span t-esc="name" t-att-data-section="sectionId" />
     <t t-set-slot="menu">
       <t t-call="wowl.NavBar.SectionsMenu.Dropdown.MenuSlot">
@@ -87,7 +103,7 @@
     </t>
   </t>
 
-  <Dropdown t-name="wowl.NavBar.SectionsMenu.MoreDropdown" class="o_menu_sections_more d-none" owl="1">
+  <Dropdown t-name="wowl.NavBar.SectionsMenu.MoreDropdown" class="o_menu_sections_more d-none" togglerHotKey="togglerHotKey" owl="1">
     <i class="fa fa-plus" />
     <t t-set-slot="menu">
       <t

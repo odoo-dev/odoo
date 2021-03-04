@@ -17,6 +17,7 @@ import { actionRegistry } from "../../src/actions/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
 import { uiService } from "../../src/services/ui_service";
 import { effectService } from "../../src/effects/effect_service";
+import { hotkeyService } from "../../src/services/hotkey_service";
 
 const { Component, tags } = owl;
 
@@ -166,6 +167,7 @@ export function getActionManagerTestConfig() {
     .add("user", makeFakeUserService())
     .add(notificationService.name, notificationService)
     .add(dialogService.name, dialogService)
+    .add(hotkeyService.name, hotkeyService)
     .add("menu", menuService)
     .add("action", actionService)
     .add("router", makeFakeRouterService())
