@@ -954,7 +954,7 @@ class TestMailHeavyPerformancePost(BaseMailPerformance):
         with self.assertQueryCount(emp=76):
             self.cr.sql_log = self.warm and self.cr.sql_log_count
             record.with_context({}).message_post(
-                body='<p>Test body <img src="cid:cid1"> <img src="cid:cid2"></p>',
+                body='<p>Test body <img src="cid:cid1"/> <img src="cid:cid2"/></p>',
                 subject='Test Subject',
                 message_type='notification',
                 subtype_xmlid=None,

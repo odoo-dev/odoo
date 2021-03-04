@@ -225,7 +225,7 @@ class TestBinaryExport(TestBasicExport):
         value = converter.value_to_html(encoded_content, {})
 
         self.assertEqual(
-            value, u'<img src="data:image/jpeg;base64,%s">' % encoded_content.decode('ascii'))
+            value, u'<img src="data:image/jpeg;base64,%s"/>' % encoded_content.decode('ascii'))
 
         with open(os.path.join(directory, 'test_vectors', 'pdf'), 'rb') as f:
             content = f.read()
