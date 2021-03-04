@@ -6,6 +6,7 @@ import pytz
 
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from markupsafe import Markup
 from werkzeug.urls import url_join
 
 from odoo import api, fields, models, tools, _
@@ -259,16 +260,15 @@ class Digest(models.Model):
         if self._context.get('digest_slowdown'):
             preferences.append(_("We have noticed you did not connect these last few days so we've automatically switched your preference to weekly Digests."))
         elif self.periodicity == 'daily' and user.has_group('base.group_erp_manager'):
-            preferences.append('<p>%s<br /><a href="/digest/%s/set_periodicity?periodicity=weekly" target="_blank" style="color:#875A7B; font-weight: bold;">%s</a></p>' % (
+            preferences.append(Markup('<p>%s<br /><a href="%s" target="_blank" style="color:#875A7B; font-weight: bold;">%s</a></p>') % (
                 _('Prefer a broader overview ?'),
-                self.id,
+                f'/digest/{self.id:d}/set_periodicity?periodicity=weekly',
                 _('Switch to weekly Digests')
             ))
         if user.has_group('base.group_erp_manager'):
-            preferences.append('<p>%s<br /><a href="/web#view_type=form&amp;model=%s&amp;id=%s" target="_blank" style="color:#875A7B; font-weight: bold;">%s</a></p>' % (
+            preferences.append(Markup('<p>%s<br /><a href="%s" target="_blank" style="color:#875A7B; font-weight: bold;">%s</a></p>') % (
                 _('Want to customize this email?'),
-                self._name,
-                self.id,
+                f'/web#view_type=form&amp;model={self._name}&amp;id={self.id:d}',
                 _('Choose the metrics you care about')
             ))
 

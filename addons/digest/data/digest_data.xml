@@ -355,7 +355,7 @@
 </div>
 
 <div style="background-color: #eeeeee;">
-<div t-foreach="tips" t-as="tip" t-raw="tip" class="global_layout" />
+<div t-foreach="tips" t-as="tip" t-esc="tip" class="global_layout" />
 
 <div t-if="kpi_data" class="global_layout" style="padding-bottom: 0;">
     <div t-foreach="kpi_data" t-as="kpi_info" class="kpi_row_footer">
@@ -397,7 +397,7 @@
     <div class="global_layout">
         <div class="preference_div">
             <div t-foreach="preferences" t-as="preference" class="preference">
-                <t t-raw="preference"/>
+                <t t-esc="preference"/>
             </div>
             <div class="by_odoo">
                 Sent by <a href="https://www.odoo.com" target="_blank" class="odoo_link"><span class="odoo_link_text">Odoo</span></a> –
@@ -407,7 +407,7 @@
     </div>
 </div>
 
-<t t-if="body" t-raw="body"/>
+<t t-if="body" t-esc="body"/>
 <div t-if="display_mobile_banner" t-call="digest.digest_section_mobile" />
 
 <div class="global_layout" id="footer">
