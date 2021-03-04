@@ -64,7 +64,12 @@ export class Editor extends Component {
   }
 
   determineTabAction(tab) {
-    return tab === "reports" ? 6 : 22; // LPE fixme: remove me, obviously
+    let action = 22;
+    if (tab === 'reports') {
+      const _action = this.studio.editedAction;
+      action = lpeReportAction(_action.res_model);
+    }
+    return action;
     // const action = this.studio.getEditedAction();
     // return this.rpc('/web_studio/get_studio_action', {
     //   action_name: tab,
@@ -86,3 +91,18 @@ Editor.components = {
   EditorAdapter, // to be replaced by ActionEditor
   ActionContainer,
 };
+
+
+function lpeReportAction(model) {
+  return {
+    'name': _('Reports'),
+    'type': 'ir.actions.act_window',
+    'res_model': 'ir.actions.report',
+    'views': [[false, 'kanban'], [false, 'form']],
+    'target': 'current',
+    'context': {
+        'default_model': model.model,
+        'search_default_model': model.model,
+    },
+  };
+}
