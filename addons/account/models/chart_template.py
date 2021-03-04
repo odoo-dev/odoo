@@ -105,7 +105,7 @@ class AccountChartTemplate(models.Model):
         string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
     expense_currency_exchange_account_id = fields.Many2one('account.account.template',
         string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
-    country_id = fields.Many2one(string="Country", comodel_name='res.country', help="The country this chart of accounts belongs to, if any.")
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True, help="The country this chart of accounts belongs to.")
 
     account_journal_suspense_account_id = fields.Many2one('account.account.template', string='Journal Suspense Account')
     account_journal_payment_debit_account_id = fields.Many2one('account.account.template', string='Journal Outstanding Receipts Account')
