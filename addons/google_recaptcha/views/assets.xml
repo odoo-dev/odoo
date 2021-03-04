@@ -8,7 +8,7 @@
     <xpath expr="//script[last()]" position="after">
         <t t-set="recaptcha_public_key" t-value="request.env['ir.config_parameter'].sudo().get_param('recaptcha_public_key')"/>
         <script t-if="recaptcha_public_key" type="text/javascript">
-            odoo.reCaptchaPublicKey = '<t t-raw="recaptcha_public_key"/>';
+            odoo.reCaptchaPublicKey = <t t-esc="json.dumps(recaptcha_public_key)"/>;
         </script>
         <script type="text/javascript" src="/google_recaptcha/static/src/js/recaptcha.js"/>
     </xpath>

@@ -2,7 +2,6 @@
 from __future__ import print_function
 import ast
 import copy
-import json
 import logging
 from collections import OrderedDict
 from time import time
@@ -12,6 +11,7 @@ from lxml import etree
 from werkzeug import urls
 
 from odoo import api, models, tools
+from odoo.tools.json import scriptsafe as json
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, _SAFE_OPCODES
 from odoo.tools.misc import get_lang
 from odoo.http import request

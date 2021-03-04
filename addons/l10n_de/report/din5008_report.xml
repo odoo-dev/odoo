@@ -87,7 +87,7 @@
                             </t>
                         </div>
                     </div>
-                        <t t-raw="0" />
+                        <t t-esc="0" />
                 </div>
 
                 <div class="footer o_background_footer din">
