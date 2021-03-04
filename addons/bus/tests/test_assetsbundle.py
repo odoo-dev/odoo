@@ -39,7 +39,11 @@ class BusWebTests(odoo.tests.HttpCase):
         self.start_tour('/web', "bundle_changed_notification", login='admin', timeout=180)
 
         # One sendone for each asset bundle and for each CSS / JS
-        self.assertEqual(len(sendones), 4)
+        self.assertEqual(
+            len(sendones),
+            4,
+            'Received %s' % '\n'.join('%s - %s' % (tmp[0], tmp[1]) for tmp in sendones)
+        )
         for sent in sendones:
             channel = sent[0]
             message = sent[1]
