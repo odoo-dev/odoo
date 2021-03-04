@@ -30,7 +30,7 @@ class BaseDocumentLayout(models.TransientModel):
     logo = fields.Binary(related='company_id.logo', readonly=False)
     preview_logo = fields.Binary(related='logo', string="Preview logo")
     report_header = fields.Text(related='company_id.report_header', readonly=False)
-    report_footer = fields.Text(related='company_id.report_footer', readonly=False)
+    report_footer = fields.Text(related='company_id.report_footer', readonly=False, default=lambda self: self._default_report_footer())
     company_details = fields.Text(related='company_id.company_details', readonly=False, default=lambda self: self._default_company_details())
 
     # The paper format changes won't be reflected in the preview.
@@ -70,8 +70,23 @@ class BaseDocumentLayout(models.TransientModel):
     name = fields.Char(related='company_id.name', readonly=True)
     country_id = fields.Many2one(related="company_id.country_id", readonly=True)
 
+    def _default_report_footer(self):
+        company = self.env.company
+        nl = '\n'
+        return f"""
+            {company.phone}{nl}
+            {company.email}{nl}
+            {company.website}{nl}
+            {company.vat}{nl}
+        """
     def _default_company_details(self):
-        return 'test'
+        company = self.env.company
+        return (
+            f'{company.name}\n'
+            f'{company.street}\n'
+            f'{company.city} {company.state_id.name} {company.zip}\n'
+            f'{company.country_id.name}\n'
+        )
 
     @api.depends('logo_primary_color', 'logo_secondary_color', 'primary_color', 'secondary_color',)
     def _compute_custom_colors(self):
@@ -96,7 +111,7 @@ class BaseDocumentLayout(models.TransientModel):
                 wizard_for_image = wizard
             wizard.logo_primary_color, wizard.logo_secondary_color = wizard_for_image._parse_logo_colors()
 
-    @api.depends('report_layout_id', 'logo', 'font', 'primary_color', 'secondary_color', 'report_header', 'report_footer', 'background', 'background_image')
+    @api.depends('report_layout_id', 'logo', 'font', 'primary_color', 'secondary_color', 'report_header', 'report_footer', 'background', 'background_image', 'company_details')
     def _compute_preview(self):
         """ compute a qweb based preview to display on the wizard """
 
