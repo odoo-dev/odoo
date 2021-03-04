@@ -1578,10 +1578,14 @@ class AccountMove(models.Model):
     @api.depends('company_id.account_tax_fiscal_country_id', 'fiscal_position_id.country_id', 'fiscal_position_id.foreign_vat')
     def compute_tax_country_id(self):
         for record in self:
-            if record.fiscal_position_id.foreign_vat:
-                record.tax_country_id = record.fiscal_position_id.country_id
-            else:
-                record.tax_country_id = record.company_id.account_tax_fiscal_country_id
+            record.tax_country_id = record._get_tax_country()
+
+    def _get_tax_country(self):
+        self.ensure_one()
+        if self.fiscal_position_id.foreign_vat:
+            return self.fiscal_position_id.country_id
+
+        return self.company_id.account_tax_fiscal_country_id
 
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
@@ -1717,7 +1721,7 @@ class AccountMove(models.Model):
         """
         for record in self:
             lines_tax_countries = set(record.mapped('line_ids.tax_ids.country_id'))
-            if lines_tax_countries and lines_tax_countries != {record.tax_country_id}:
+            if lines_tax_countries and lines_tax_countries != {record._get_tax_country()}:
                 raise ValidationError(_("This entry contains some tax from an unallowed country. Please check its fiscal position and your tax configuration."))
 
     # -------------------------------------------------------------------------
