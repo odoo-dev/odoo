@@ -185,12 +185,11 @@
             border-top: none;  // Override bootstrap for grouped list views
         }
 
+        // TODO: MSH: Need to discuss with ngr-odoo for community and enterprise color, so it may goes to list_view_extra.scss
+
         &, &.table-striped {
             tr:focus-within:not(.o_selected_row) {
                 background-color: rgba(#00a09d, 0.05);
-                &.o_selected_row {
-                    background-color: lighten($o-form-lightsecondary, 10%);
-                }
                 &, + tr {
                     th, td {
                         border-top-color: #00a09d !important;
@@ -200,7 +199,7 @@
         }
         thead th:focus-within,
         tbody.o_keyboard_navigation td:focus-within {
-            background-color: $o-form-lightsecondary;
+            background-color: rgba(#00a09d, 0.08);
             outline: none;
         }
 
@@ -274,6 +273,42 @@
         .o_data_row.o_selected_row > .o_data_cell:not(.o_readonly_modifier):not(.o_invisible_modifier) {
             position: relative; // for o_field_translate
             background-color: white;
+            &.o_active_cell:not(.o_invalid_cell) {
+                background-color: rgba(#00a09d, 0.05);
+                border-bottom-color: #00a09d;
+            }
+            .o_field_widget {
+                // TODO: MSH: Maybe removed duplication using mixin
+                &[type="text"], &[type="password"], &[type="number"] {
+                    &.o_active_field:not(.o_field_invalid) {
+                        background-color: transparent;
+                        border-color: none !important;
+                    }
+                }
+                &.o_field_monetary.o_active_field {
+                    border-color: none !important;
+                    .o_input {
+                        background-color: transparent;
+                    }
+                }
+                &.o_field_many2one.o_active_field .o_input, &.o_field_date.o_active_field .o_input {
+                    background-color: transparent;
+                    border-color: none !important;
+                }
+                &.o_field_many2manytags.o_active_field.o_input {
+                    border-color: none !important;
+                    .o_input {
+                        background-color: transparent;
+                    }
+                }
+            }
+            select.o_field_widget.o_active_field:not(.o_field_invalid) {
+                background-color: transparent;
+                border-color: #00a09d !important;
+            }
+            // .o_active_field {
+            //     background-color: transparent;
+            // }
             .o_input {
                 border: none;
                 padding: 0;

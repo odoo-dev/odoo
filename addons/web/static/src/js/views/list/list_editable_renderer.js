@@ -884,6 +884,12 @@ ListRenderer.include({
             return hasVisibleRecords;
         }
     },
+    _highlightActivated(widget) {
+        this._super(...arguments);
+        // TODO: MSH: Also removes this class when focus removed from cell
+        this.$('.o_selected_row .o_data_cell').removeClass('o_active_cell');
+        this.$('.o_selected_row .o_data_cell:has(> .o_active_field)').addClass('o_active_cell');
+    },
     /**
      * Returns whether a recordID is currently editable.
      *
@@ -1273,6 +1279,7 @@ ListRenderer.include({
                 inc: options.inc || 1,
                 wrap: wrap,
                 event: options && options.event,
+                ignoreHighlight: options && options.event && options.event.type === "click",
             });
             if (fieldIndex < 0) {
                 self.currentFieldIndex = oldFieldIndex;

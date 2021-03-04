@@ -515,6 +515,33 @@
         @include o-text-overflow;
         transition: none; // remove transition to prevent badges from flickering at reload
     }
+
+    // TODO: MSH: Need to discuss with ngr-odoo for community and enterprise color, so it may goes to fields_extra.scss
+    // Maybe create mixin and call it from list view as well with background color and border color as background color will be transparent in case of list
+
+    /* Highlight */
+    &[type="text"], &[type="password"], &[type="number"] {
+        &.o_active_field:not(.o_field_invalid) {
+            background-color: rgba(#00a09d, 0.05);
+            border-color: #00a09d !important;
+        }
+    }
+    &.o_field_monetary.o_active_field {
+        border-color: #00a09d !important;
+        .o_input {
+            background-color: rgba(#00a09d, 0.05);
+        }
+    }
+    &.o_field_many2one.o_active_field .o_input, &.o_field_date.o_active_field .o_input {
+        background-color: rgba(#00a09d, 0.05);
+        border-color: #00a09d !important;
+    }
+    &.o_field_many2manytags.o_active_field.o_input {
+        border-color: #00a09d !important;
+        .o_input {
+            background-color: rgba(#00a09d, 0.05);
+        }
+    }
 }
 
 span.o_field_copy:empty {
@@ -529,4 +556,9 @@ button.o_field_float_toggle {
 // Selection fields
 select.o_field_widget.o_input {
     padding: 1px;  // Other inputs get a 1px padding automatically added by the browsers but selects do not
+}
+// Highlight selection fields
+select.o_field_widget.o_active_field:not(.o_field_invalid) {
+    background-color: rgba(#00a09d, 0.05);
+    border-color: #00a09d !important;
 }
