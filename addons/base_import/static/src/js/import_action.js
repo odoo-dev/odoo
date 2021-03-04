@@ -217,6 +217,7 @@ var DataImport = AbstractAction.extend({
             width: '50%',
             data: _.map(('utf-8 utf-16 windows-1252 latin1 latin2 big5 gb18030 shift_jis windows-1251 koir8_r').split(/\s+/), _make_option),
             query: dataFilteredQuery,
+            minimumResultsForSearch: -1,
             initSelection: function ($e, c) {
                 return c(_make_option($e.val()));
             }
@@ -233,6 +234,7 @@ var DataImport = AbstractAction.extend({
             width: '50%',
             data: data,
             query: dataFilteredQuery,
+            minimumResultsForSearch: -1,
             // this is not provided to initSelection so can't use this.data
             initSelection: function ($e, c) {
                 c(_from_data(data, $e.val()) || _make_option($e.val()))
@@ -249,6 +251,7 @@ var DataImport = AbstractAction.extend({
             width: '50%',
             data: data_digits,
             query: dataFilteredQuery,
+            minimumResultsForSearch: -1,
             initSelection: function ($e, c) {
                 c(_from_data(data_digits, $e.val()) || _make_option($e.val()))
             }
@@ -257,6 +260,7 @@ var DataImport = AbstractAction.extend({
             width: '50%',
             data: data_decimal,
             query: dataFilteredQuery,
+            minimumResultsForSearch: -1,
             initSelection: function ($e, c) {
                 c(_from_data(data_decimal, $e.val()) || _make_option($e.val()))
             }
@@ -287,6 +291,7 @@ var DataImport = AbstractAction.extend({
             width: '50%',
             data: data,
             query: dataFilteredQuery,
+            minimumResultsForSearch: -1,
             initSelection: function ($e, c) {
                 c(_from_data(data, $e.val()) || _make_option($e.val()));
             }
@@ -298,10 +303,10 @@ var DataImport = AbstractAction.extend({
             width: '100%',
             data: data,
             query: dataFilteredQuery,
+            minimumResultsForSearch: -1,
             initSelection: function ($e, c) {
                 c(_from_data(data, $e.val()) || _make_option($e.val()))
             },
-            minimumResultsForSearch: 10,
         });
     },
 
