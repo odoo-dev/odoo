@@ -1,10 +1,9 @@
 # -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import defaultdict
 from datetime import datetime, date
 
-from odoo import api, fields, models, _
+from odoo import api, models, _
 from odoo.exceptions import ValidationError
 
 class HrLeave(models.Model):
