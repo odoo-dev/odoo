@@ -1342,9 +1342,7 @@ MockServer.include({
                     ),
                 },
             ]);
-            // NOTE server is sending grouped notifications per channel_ids but
-            // this optimization is not needed here.
-            const data = { type: 'mark_as_read', message_ids: [message.id], channel_ids: [message.res_id], needaction_inbox_counter: this._mockResPartnerGetNeedactionCount() };
+            const data = { type: 'mark_as_read', message_ids: [message.id], needaction_inbox_counter: this._mockResPartnerGetNeedactionCount() };
             const busNotifications = [[[false, 'res.partner', this.currentPartnerId], data]];
             this._widget.call('bus_service', 'trigger', 'notification', busNotifications);
         }
