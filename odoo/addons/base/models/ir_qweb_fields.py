@@ -374,7 +374,7 @@ class ImageConverter(models.AbstractModel):
         except: # image.verify() throws "suitable exceptions", I have no idea what they are
             raise ValueError("Invalid image content")
 
-        return u'<img src="data:%s;base64,%s">' % (Image.MIME[image.format], value.decode('ascii'))
+        return u'<img src="data:%s;base64,%s"/>' % (Image.MIME[image.format], value.decode('ascii'))
 
 class ImageUrlConverter(models.AbstractModel):
     """ ``image_url`` widget rendering, inserts an image tag in the
@@ -386,7 +386,7 @@ class ImageUrlConverter(models.AbstractModel):
 
     @api.model
     def value_to_html(self, value, options):
-        return u'<img src="%s">' % (value)
+        return u'<img src="%s"/>' % (value)
 
 class MonetaryConverter(models.AbstractModel):
     """ ``monetary`` converter, has a mandatory option
@@ -660,7 +660,7 @@ class BarcodeConverter(models.AbstractModel):
         if 'alt' not in img_attributes:
             img_attributes.update({'alt': 'Barcode %s' % value})
         attributes = ' '.join(['%s="%s"' % attrs for attrs in img_attributes.items()])
-        return u'<img src="data:png;base64,%s" %s>' % (base64.b64encode(barcode).decode('ascii'), attributes)
+        return u'<img src="data:png;base64,%s" %s/>' % (base64.b64encode(barcode).decode('ascii'), attributes)
 
 
 class Contact(models.AbstractModel):
