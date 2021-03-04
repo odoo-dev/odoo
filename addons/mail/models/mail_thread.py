@@ -2718,7 +2718,7 @@ class MailThread(models.AbstractModel):
             # fetch "parent" subscription data (aka: subtypes on project to propagate on task)
             doc_data = [(model, [updated_values[fname] for fname in fnames]) for model, fnames in updated_relation.items()]
             res = self.env['mail.followers']._get_subscription_data(doc_data, None, include_pshare=True, include_active=True)
-            for fid, rid, pid, subtype_ids, pshare, active in res:
+            for _, dummy, pid, subtype_ids, pshare, active in res:
                 # use project.task_new -> task.new link
                 sids = [parent[sid] for sid in subtype_ids if parent.get(sid)]
                 # add checked subtypes matching model_name
