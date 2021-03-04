@@ -8,6 +8,7 @@ import logging
 import re
 
 import dateutil.relativedelta as relativedelta
+from markupsafe import Markup
 from werkzeug import urls
 
 from odoo import _, api, fields, models, tools
@@ -167,6 +168,7 @@ class MailRenderMixin(models.AbstractModel):
         if not html:
             return html
 
+        wrapper = Markup if isinstance(html, Markup) else str
         html = tools.ustr(html)
 
         def _sub_relative2absolute(match):
@@ -181,7 +183,7 @@ class MailRenderMixin(models.AbstractModel):
         html = re.sub(r"""(<a(?=\s)[^>]*\shref=")(/[^/][^"]+)""", _sub_relative2absolute, html)
         html = re.sub(r"""(<[^>]+\bstyle="[^"]+\burl\('?)(/[^/'][^'")]+)""", _sub_relative2absolute, html)
 
-        return html
+        return wrapper(html)
 
     @api.model
     def _render_encapsulate(self, layout_xmlid, html, add_context=None, context_record=None):
@@ -220,11 +222,11 @@ class MailRenderMixin(models.AbstractModel):
             preview = preview.strip()
 
         if preview:
-            html_preview = f"""
+            html_preview = Markup("""
                 <div style="display:none;font-size:1px;height:0px;width:0px;opacity:0;">
-                  {tools.html_escape(preview)}
+                   {}
                 </div>
-            """
+            """).format(preview)
             return tools.prepend_html_content(html, html_preview)
         return html
 
@@ -342,7 +344,7 @@ class MailRenderMixin(models.AbstractModel):
                 raise UserError(_("Failed to render template : %s", e))
             if render_result == u"False":
                 render_result = u""
-            results[record.id] = render_result
+            results[record.id] = Markup(render_result)
 
         return results
 

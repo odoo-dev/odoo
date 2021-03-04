@@ -9,7 +9,9 @@ import os
 import subprocess
 import threading
 import time
+
 import urllib3
+from markupsafe import Markup
 
 from odoo import http
 from odoo.addons.hw_drivers.connection_manager import connection_manager
@@ -223,11 +225,11 @@ class DisplayController(http.Controller):
         if not display_identifier:
             display_identifier = DisplayDriver.get_default_display().device_identifier
 
-        return pos_display_template.render({
+        return Markup(pos_display_template.render({
             'title': "Odoo -- Point of Sale",
             'breadcrumb': 'POS Client display',
             'cust_js': cust_js,
             'display_ifaces': display_ifaces,
             'display_identifier': display_identifier,
             'pairing_code': connection_manager.pairing_code,
-        })
+        }))
