@@ -436,7 +436,6 @@ QUnit.test('rendering with multiple partner followers', async function (assert) 
     this.data['mail.followers'].records.push(
         {
             // simulate real return from RPC
-            // (the presence of the key and the falsy value need to be handled correctly)
             id: 1,
             name: "Jean Michang",
             partner_id: 12,
@@ -444,7 +443,6 @@ QUnit.test('rendering with multiple partner followers', async function (assert) 
             res_model: 'res.partner',
         }, {
             // simulate real return from RPC
-            // (the presence of the key and the falsy value need to be handled correctly)
             id: 2,
             name: "Eden Hazard",
             partner_id: 11,
