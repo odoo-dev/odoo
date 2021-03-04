@@ -749,28 +749,11 @@ class Message(models.Model):
         if not messages_channel:
             return
 
-        current_channel_ids = [messages_channel[0].res_id]
-        current_group = []
-        for record in messages_channel:
-            if record.res_id == current_channel_ids:
-                current_group.append(record.id)
-            else:
-                groups.append((current_group, current_channel_ids))
-                current_group = [record.id]
-                current_channel_ids = record.res_id
-
-        groups.append((current_group, current_channel_ids))
-        current_group = [record.id]
-        current_channel_ids = [record.res_id]
-
-        for (msg_ids, channel_ids) in groups:
-            # channel_ids in result is deprecated and will be removed in a future version
-            self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', partner_id.id), {
-                'type': 'mark_as_read',
-                'message_ids': msg_ids,
-                'channel_ids': channel_ids,
-                'needaction_inbox_counter': self.env.user.partner_id.get_needaction_count()
-            })
+        self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', partner_id.id), {
+            'type': 'mark_as_read',
+            'message_ids': messages_channel.ids,
+            'needaction_inbox_counter': self.env.user.partner_id.get_needaction_count()
+        })
 
     @api.model
     def unstar_all(self):

@@ -523,7 +523,6 @@ class Channel(models.Model):
         # When posting a message on a mail channel, manage moderation and postpone notify users
         if not msg_vals or msg_vals.get('moderation_status') != 'pending_moderation':
             # link message to channel
-            # message.write({'channel_ids': [(4, cid) for cid in self.ids]})
             rdata = super(Channel, self)._notify_thread(message, msg_vals=msg_vals, **kwargs)
 
             message_format_values = message.message_format()[0]
