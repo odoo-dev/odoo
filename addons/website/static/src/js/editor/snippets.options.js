@@ -2542,6 +2542,21 @@ options.registry.ScrollButton = options.Class.extend({
     // Options
     //--------------------------------------------------------------------------
 
+     /**
+     * @override
+     */
+     async selectClass(previewMode, widgetValue, params) {
+         await this._super(...arguments);
+         if (params.isFullHeight) {
+             this.$button.show();
+         } else {
+             if (previewMode) {
+                 this.$button.hide();
+             } else {
+                 this.$button.detach();
+             }
+         }
+     },
     /**
      * Toggles the scroll down button.
      */

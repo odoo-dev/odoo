@@ -999,23 +999,22 @@
         </we-button-group>
     </div>
 
-    <!-- Min height of section -->
-    <div data-option-name="minHeight" data-selector="section">
+    <!-- Scroll to next section button (only for full height) -->
+    <div data-js="ScrollButton" data-selector="section">
+        <!-- Min height of section -->
         <we-button-group string="Height">
             <we-button data-select-class="" title="Fit content">Auto</we-button>
             <we-button data-select-class="o_half_screen_height" title="Half screen">50%</we-button>
-            <we-button data-select-class="o_full_screen_height" title="Full screen">100%</we-button>
+            <we-button data-select-class="o_full_screen_height" title="Full screen"  data-name="full_height_opt" data-is-full-height="true">100%</we-button>
         </we-button-group>
-    </div>
 
-    <!-- Scroll to next section button (only for full height) -->
-    <div data-js="ScrollButton" data-selector="section">
-        <we-checkbox string="Scroll down button"
+        <we-checkbox string=" ⌙ Scroll down button"
                      data-toggle-button="true"
                      data-no-preview="true"
+                     data-dependencies="full_height_opt"
                      data-name="scroll_button_opt"/>
         <!-- &emsp; -->
-        <we-row string=" ⌙ Colors">
+        <we-row string="  ⌙ Colors">
             <we-colorpicker
                 data-select-style="true"
                 data-css-property="background-color"
@@ -1028,7 +1027,7 @@
                 data-apply-to=".o_scroll_button"
                 data-dependencies="scroll_button_opt"/>
         </we-row>
-        <we-select string=" ⌙ Spacing"
+        <we-select string="  ⌙ Spacing"
                    data-apply-to=".o_scroll_button"
                    data-dependencies="scroll_button_opt">
             <we-button data-select-class="">None</we-button>
