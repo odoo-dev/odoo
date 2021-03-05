@@ -7,7 +7,7 @@ export function computeAllowedCompanyIds(cidsFromHash) {
   const { user_companies } = odoo.session_info;
 
   let allowedCompanies = cidsFromHash || [];
-  const allowedCompaniesFromSession = user_companies.allowed_companies.map(([id, name]) => id);
+  const allowedCompaniesFromSession = user_companies.allowed_companies;
   const notReallyAllowedCompanies = allowedCompanies.filter(
     (id) => !(id in allowedCompaniesFromSession)
   );
@@ -73,7 +73,7 @@ export const userService = {
     router.replaceState({ "lock cids": cids });
     cookie.setCookie("cids", cids);
 
-    if (user_companies.allowed_companies.length > 1) {
+    if (Object.keys(user_companies.allowed_companies).length > 1) {
       odoo.systrayRegistry.add(switchCompanySystrayItem.name, switchCompanySystrayItem);
     }
 
@@ -88,7 +88,7 @@ export const userService = {
       isAdmin: is_admin,
       partnerId: partner_id,
       allowed_companies: user_companies.allowed_companies,
-      current_company: user_companies.allowed_companies.find(([id]) => id === allowedCompanies[0]),
+      current_company: user_companies.allowed_companies[allowedCompanies[0]],
       get lang() {
         return context.lang;
       },

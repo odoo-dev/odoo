@@ -27,11 +27,11 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
 
     const session_info = {
       user_companies: {
-        allowed_companies: [
-          [1, "Hermit"],
-          [2, "Herman's"],
-        ],
-        current_company: [1, "Hermit"],
+        allowed_companies: {
+          1: {id: 1, name: 'Hermit'},
+          2: {id: 2, name: "Herman's"}
+        },
+        current_company: 1,
       },
     };
     serviceRegistry.add("user", makeFakeUserService({ session_info }));

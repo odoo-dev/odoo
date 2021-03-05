@@ -10,7 +10,7 @@
         multiUpload="false"
         uploadParams="{
           model: 'res.company',
-          id: user.current_company[0],
+          id: user.current_company.id,
         }">
     </FileUploader>
     <Dropdown>

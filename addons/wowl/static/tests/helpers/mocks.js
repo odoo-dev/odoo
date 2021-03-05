@@ -77,7 +77,7 @@ export function makeFakeUserService(values) {
         partnerId: partner_id,
         allowed_companies: user_companies.allowed_companies,
         get current_company() {
-          return user_companies.allowed_companies.find(([id]) => id === allowedCompanies[0]);
+          return user_companies.allowed_companies[allowedCompanies[0]];
         },
         lang: user_context.lang,
         tz: "Europe/Brussels",
