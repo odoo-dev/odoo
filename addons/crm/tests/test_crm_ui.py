@@ -8,3 +8,6 @@ class TestUi(odoo.tests.HttpCase):
 
     def test_01_crm_tour(self):
         self.start_tour("/web", 'crm_tour', login="admin")
+
+    def test_02_optinal_fields(self):
+        self.start_tour("/web", 'optinal_fields', login="admin")

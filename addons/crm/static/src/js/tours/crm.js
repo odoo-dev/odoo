@@ -97,4 +97,47 @@ tour.register('crm_tour', {
     edition: 'enterprise'
 }]);
 
+tour.register('optinal_fields', {
+    url: "/web",
+    sequence: 10,
+}, [tour.STEPS.SHOW_APPS_MENU_ITEM, {
+    trigger: '.o_app[data-menu-xmlid="crm.crm_menu_root"]',
+}, {
+    trigger: '.o_menu_sections li:first a',
+}, {
+    extra_trigger: '.dropdown-menu.show',
+    trigger: '.dropdown-menu.show a:last',
+}, {
+    extra_trigger: '.o_res_partner_kanban',
+    trigger: 'button.o_cp_switch_list',
+}, {
+    extra_trigger: '.o_optional_columns_dropdown_toggle',
+    trigger: '.o_optional_columns_dropdown_toggle',
+}, {
+    extra_trigger: '.dropdown-menu.show .dropdown-item:last',
+    trigger: '.dropdown-menu.show .dropdown-item input[name="state_id"]',
+}, {
+    trigger: '.o_menu_sections li:first a',
+}, {
+    extra_trigger: '.dropdown-menu.show',
+    trigger: '.dropdown-menu.show a:first',
+}, {
+    extra_trigger: '.o_opportunity_kanban .o_kanban_record',
+    trigger: '.o_kanban_record',
+}, {
+    extra_trigger: 'div.o_cp_buttons .o_form_button_edit',
+    trigger: '.o_form_button_edit',
+}, {
+    extra_trigger: '.o_inner_group:not(.o_invisible_modifier) .o_field_widget[name="partner_id"]',
+    trigger: '.o_inner_group:not(.o_invisible_modifier) .o_field_widget[name="partner_id"] input',
+    run: 'click',
+    auto: true,
+}, {
+    extra_trigger: '.o_m2o_dropdown_option a',
+    trigger: '.o_m2o_dropdown_option a',
+}, {
+    extra_trigger: '.o_list_view th[data-name="state_id"]',
+    trigger: 'button.o_form_button_cancel',
+}]);
+
 });
