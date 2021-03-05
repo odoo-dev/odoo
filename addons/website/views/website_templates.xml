@@ -47,7 +47,12 @@
             'data-main-object': repr(main_object) if editable or translatable else None,
             'data-seo-object': repr(seo_object) if seo_object else None,
             'data-oe-company-name': res_company.name,
+            'data-utm-source': request.params.get('utm_source'),
+            'data-utm-medium': request.params.get('utm_medium'),
+            'data-utm-campaign': request.params.get('utm_campaign'),
+            'data-country': request.session.geoip.get('country-code') or request.params.get('country'),
         }"/>
+
     </xpath>
     <xpath expr="//head" position="before">
         <t t-if="not title">

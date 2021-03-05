@@ -2605,12 +2605,16 @@ options.registry.MobileVisibility = options.Class.extend({
 
 options.registry.ConditionalVisibility = options.Class.extend({
 
+
     /**
      * @overide
      */
     init: function () {
         this._super.apply(this, arguments);
-        this.campaigns = {};
+        if (!this.campaigns) {
+            this.campaigns = 1;
+            console.log('init campaign');
+        }
         // this.$target[0].style.display = "block";
     },
 
@@ -2634,7 +2638,8 @@ options.registry.ConditionalVisibility = options.Class.extend({
 
     cleanForSave: async function () {
         //const visibilityOptions = this.$target[0].visibilityOptions;
-        this.$target[0].style = this.$target[0].previousStyle // restoring the previous style if any
+        this.$target[0].style = this.$target[0].previousStyle; // restoring the previous style if any
+        delete this.$target[0].dataset["invisible"]; // we do not need to store "invisible as it is not determine by javascript";
         for (let attr of this.$target[0].attributes) {
             if (attr.name.startsWith('data-visibility-')) {
                 let shortName = attr.name.replace('data-visibility-', '');
@@ -2697,14 +2702,16 @@ options.registry.ConditionalVisibility = options.Class.extend({
      * @override
      * @param uiFragment 
      */
-    _renderCustomXML: async function (uiFragment) {
-        const campaigns = await this._fetchCampaignData();
-        for (let index in campaigns) {
-            this.campaigns[campaigns[index].id] = campaigns[index];
-        }
-        const filtersSelectorEl = uiFragment.querySelector('[data-name="campaign_opt"]');
-        await this._renderSelectUserValueWidgetButtons(filtersSelectorEl, this.campaigns);
-    },
+    // _renderCustomXML: async function (uiFragment) {
+    //     const r  = await this._rpc({model: 'utm.source', method: 'search_read', fields: ['name', 'id']});
+    //     console.log(r);
+    //     const campaigns = await this._fetchCampaignData();
+    //     for (let index in campaigns) {
+    //         this.campaigns[campaigns[index].id] = campaigns[index];
+    //     }
+    //     const filtersSelectorEl = uiFragment.querySelector('[data-name="campaign_opt"]');
+    //     await this._renderSelectUserValueWidgetButtons(filtersSelectorEl, this.campaigns);
+    // },
 
      /**
      * Renders we-buttons into a SelectUserValueWidget element according to provided data.
