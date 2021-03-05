@@ -57,7 +57,7 @@ export function makeFakeUserService(values) {
         partnerId: partner_id,
         allowed_companies: user_companies.allowed_companies,
         get current_company() {
-          return user_companies.allowed_companies.find(([id]) => id === allowedCompanies[0]);
+          return user_companies.allowed_companies[allowedCompanies[0]];
         },
         lang: user_context.lang,
         tz: "Europe/Brussels",
@@ -154,8 +154,8 @@ export function makeTestOdoo(config = {}) {
       is_admin: true,
       partner_id: 7,
       user_companies: {
-        allowed_companies: [[1, "Hermit"]],
-        current_company: [1, "Hermit"],
+        allowed_companies: {1: {id: 1, name: 'Hermit'}},
+        current_company: 1,
       },
       db: "test",
       server_version: "1.0",

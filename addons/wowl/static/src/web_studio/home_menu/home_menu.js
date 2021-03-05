@@ -13,7 +13,7 @@
 //   // }
 //   const { url } = urlBuilder();
 //   this.backgroundImageUrl = url('/web/image', {
-//     id: this.env.services.user.current_company[0],
+//     id: this.env.services.user.current_company.id,
 //     model: 'res.company',
 //     field: 'logo', // LPE FIXME; should be background_image
 //   });
