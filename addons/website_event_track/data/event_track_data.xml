@@ -16,26 +16,26 @@
             <field name="name">Announced</field>
             <field name="sequence">3</field>
             <field name="color">3</field>
-            <field name="is_accepted" eval="True"/>
+            <field name="status">announced</field>
         </record>
         <record id="event_track_stage3" model="event.track.stage">
             <field name="name">Published</field>
             <field name="sequence">4</field>
             <field name="color">4</field>
-            <field name="is_accepted" eval="True"/>
-            <field name="is_done" eval="True"/>
+            <field name="status">published</field>
         </record>
         <record id="event_track_stage4" model="event.track.stage">
             <field name="name">Refused</field>
             <field name="sequence">5</field>
             <field name="color">5</field>
+            <field name="status">refused</field>
             <field name="fold" eval="True"/>
         </record>
         <record id="event_track_stage5" model="event.track.stage">
             <field name="name">Cancelled</field>
             <field name="sequence">6</field>
             <field name="fold" eval="True"/>
-            <field name="is_cancel" eval="True"/>
+            <field name="status">cancelled</field>
         </record>
     </data>
 </odoo>

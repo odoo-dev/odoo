@@ -201,6 +201,15 @@
                     t-attf-id="collapse_session_list_{{ tracks_info_index }}">
                     <div t-foreach="tracks" t-as="track"
                         t-att-class="'o_wesession_list_item px-2 py-2 event_color_%d' % (track.color)">
+                        <div t-if="user_event_manager">
+                            <span t-if="track.is_published"
+                                t-att-class="'text-success' if track.stage_status in ['published'] else 'text-warning'">
+                                <i class="fa fa-check"/>Published
+                            </span>
+                            <span t-else="" class="text-danger">
+                                <i class="fa fa-exclamation-triangle"/>Unpublished
+                            </span>
+                        </div>
                         <!-- Side information in a floating div (desktop only) -->
                         <div t-if="not event.is_done and (not track.date or today_tz &lt;= tracks_date) and option_track_wishlist"
                             class="float-right d-none d-md-block ml-2">
@@ -220,8 +229,8 @@
                                         <t t-set="reminder_light" t-value="False"/>
                                     </t>
                                 </div>
-                                <span class="h5 mb0">
-                                    <a t-if="track.is_published or user_event_manager"
+                                <div class="h5 mb0">
+                                    <a t-if="(track.is_published and track.stage_status == 'published') or user_event_manager"
                                         class="mr-2"
                                         t-att-href="track.website_url">
                                         <span t-field="track.name"/>
@@ -229,11 +238,7 @@
                                     <t t-else="">
                                         <span class="mr-2" t-field="track.name"/>
                                     </t>
-                                    <span t-if="not track.is_published and user_event_manager"
-                                        class="badge badge-danger o_wevent_online_badge_unpublished">
-                                        Unpublished
-                                    </span>
-                                </span>
+                                </div>
                                 <div class="text-muted d-flex align-items-center">
                                     <span class="text-muted" t-esc="track.partner_tag_line" t-if="track.partner_tag_line"/>
                                     <t t-if="tracks_date and today_tz &lt;= tracks_date">

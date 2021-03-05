@@ -30,7 +30,7 @@ class EventTrackController(http.Controller):
         if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([
                 search_domain_base,
-                ['|', ('is_published', '=', True), ('is_accepted', '=', True)]
+                ['|', ('is_published', '=', True), ('stage_status', 'in', ['published', 'announced'])]
             ])
         return search_domain_base
 
@@ -247,7 +247,7 @@ class EventTrackController(http.Controller):
     def _event_agenda_get_tracks(self, event):
         tracks_sudo = event.sudo().track_ids.filtered(lambda track: track.date)
         if not request.env.user.has_group('event.group_event_manager'):
-            tracks_sudo = tracks_sudo.filtered(lambda track: track.is_published or track.stage_id.is_accepted)
+            tracks_sudo = tracks_sudo.filtered(lambda track: track.is_published or track.stage_status in ['published', 'announced'])
         return tracks_sudo
 
     def _get_locale_time(self, dt_time, lang_code):
@@ -436,7 +436,7 @@ class EventTrackController(http.Controller):
             track.check_access_rule('read')
         except exceptions.AccessError:
             track_sudo = track.sudo()
-            if allow_is_accepted and track_sudo.is_accepted:
+            if allow_is_accepted and track_sudo.stage_status in ['published', 'announced']:
                 track = track_sudo
             else:
                 raise Forbidden()

@@ -156,14 +156,14 @@
 <template id="agenda_main_track" name="Track Agenda: Track">
     <div class="d-flex flex-column h-100">
         <div class="d-flex">
-            <small t-if="not track.website_published and user_event_manager and track.stage_id.is_accepted"
-                   title="Unpublished"
-                   class="text-danger">
-                <i class="fa fa-warning mr-1"/>Unpublished
-            </small>
-            <small t-if="not track.stage_id.is_accepted" title="Not Accepted"
-                   class="text-warning">
-                <i class="fa fa-warning mr-1"/>Not Accepted
+            <small t-if="user_event_manager">
+                <span t-if="track.website_published and track.stage_status in ['published', 'announced']"
+                    t-att-class="'text-success' if track.stage_status == 'published' else 'text-warning'">
+                    <i class="fa fa-check mr-1"/>Published
+                </span>
+                <span t-else="" class="text-danger">
+                    <i class="fa fa-exclamation-triangle mr-1"/>Unpublished
+                </span>
             </small>
             <span t-if="option_track_wishlist"
                   class="d-flex flex-grow-1 justify-content-end">
@@ -177,7 +177,7 @@
 
         <div class="o_we_agenda_card_content d-flex flex-column justify-content-center my-1">
             <div class="o_we_agenda_card_title">
-                <t t-if="track.website_published or user_event_manager">
+                <t t-if="(track.website_published and track.stage_status != 'announced') or user_event_manager">
                     <a t-att-href="'/event/%s/track/%s' % (slug(event), slug(track))" class="text-black text-bold">
                         <t t-esc="track.name"/>
                     </a>

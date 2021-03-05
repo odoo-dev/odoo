@@ -19,14 +19,19 @@ class TrackStage(models.Model):
     fold = fields.Boolean(
         string='Folded in Kanban',
         help='This stage is folded in the kanban view when there are no records in that stage to display.')
-    is_accepted = fields.Boolean(
-        string='Accepted Stage',
-        help='Accepted tracks are displayed in agenda views but not accessible.')
-    is_done = fields.Boolean(
-        string='Done Stage',
-        help='Done tracks are automatically published so that they are available in frontend.')
-    is_cancel = fields.Boolean(string='Canceled Stage')
-    is_done = fields.Boolean()
+    status = fields.Selection([
+        ('new', 'New'),
+        ('announced', 'Announced'),
+        ('published', 'Published'),
+        ('refused', 'Refused'),
+        ('cancelled', 'Cancelled')
+    ], string='Track Status', required=True, default='new',
+        help="Impacts the visibility of your tracks"\
+        "\n - New tracks are not visible and need to be qualified by internal users."\
+        "\n - Announced tracks are visible but their description cannot be accessed as they are not ready yet."\
+        "\n - Published tracks are fully visible and all set."\
+        "\n - Refused tracks are not visible."\
+        "\n - Cancelled tracks are not visible.")
     color = fields.Integer(string='Color')
     legend_blocked = fields.Char(
         'Red Kanban Label', default=lambda s: _('Blocked'), translate=True, required=True,

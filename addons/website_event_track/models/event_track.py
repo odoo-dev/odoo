@@ -41,10 +41,10 @@ class Track(models.Model):
         index=True, copy=False, default=_get_default_stage_id,
         group_expand='_read_group_stage_ids',
         required=True, tracking=True)
+    stage_status = fields.Selection(related='stage_id.status', string='Stage status', readonly=True)
     legend_blocked = fields.Char(related='stage_id.legend_blocked', string='Kanban Blocked Explanation', readonly=True)
     legend_done = fields.Char(related='stage_id.legend_done', string='Kanban Valid Explanation', readonly=True)
     legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing Explanation', readonly=True)
-    is_accepted = fields.Boolean('Is Accepted', related='stage_id.is_accepted', readonly=True)
     kanban_state = fields.Selection([
         ('normal', 'Grey'),
         ('done', 'Green'),
@@ -388,8 +388,7 @@ class Track(models.Model):
         return stages.search([], order=order)
 
     def _synchronize_with_stage(self, stage):
-        if stage.is_done:
-            self.is_published = True
+        self.is_published = stage.status in ['announced', 'published']
 
     # ------------------------------------------------------------
     # MESSAGING
@@ -432,7 +431,7 @@ class Track(models.Model):
                 self.search([
                     ('partner_id', '=', False),
                     ('partner_email', '=', new_partner.email),
-                    ('stage_id.is_cancel', '=', False),
+                    ('stage_status', '!=', 'cancelled'),
                 ]).write({'partner_id': new_partner.id})
         return super(Track, self)._message_post_after_hook(message, msg_vals)
 

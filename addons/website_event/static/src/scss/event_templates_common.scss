@@ -88,10 +88,6 @@
      */
 
     .o_wevent_online {
-        // unpublished badge: put opacity to distinguish form other badges
-        .o_wevent_online_badge_unpublished{
-            opacity: 0.4;
-        }
 
         &.o_wevent_online_bg {
             @if (color('body') == $o-portal-default-body-bg) {
