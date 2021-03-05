@@ -120,8 +120,12 @@ function makeActionManager(env) {
     }
     return action;
   }
-  async function _loadAndProcessAction(action, reload=false, context={}) {
-    action = await _loadAction(action, reload, context);
+  async function _loadAndProcessAction(action, reload=false, context={}, shouldKeepLast=true) {
+    action = _loadAction(action, reload, context);
+    if (shouldKeepLast) {
+      action = keepLast.add(action);
+    }
+    action = await action;
     if (!action.jsId) {
       return _preprocessAction(action, context);
     }
@@ -716,8 +720,7 @@ function makeActionManager(env) {
    * @returns {Promise<void>}
    */
   async function doAction(actionRequest, options = {}) {
-    const actionProm = _loadAndProcessAction(actionRequest, false, options.additionalContext);
-    const action = await keepLast.add(actionProm);
+    const action = await _loadAndProcessAction(actionRequest, false, options.additionalContext, true);
     switch (action.type) {
       case "ir.actions.act_url":
         return _executeActURLAction(action);
@@ -1003,7 +1006,7 @@ function makeActionManager(env) {
     switchView,
     restore,
     loadState,
-    loadAction: _loadAndProcessAction,
+    loadAction: (action, reload, context) => _loadAndProcessAction(action, reload, context, false),
     get currentController() {
       const stack = controllerStack;
       if (!stack.length) {
