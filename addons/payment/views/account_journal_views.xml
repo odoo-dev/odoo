@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="view_account_journal_form_inherit" model="ir.ui.view">
+            <field name="name">account.journal.form.inherit</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='inbound_payment_method_ids']//tree//field[@name='method_type']" position="after">
+                    <field name="code" invisible="1"/>
+                    <field name="available_payment_acquirers_ids" invisible="1"/>
+                    <field name="payment_acquirer_id" attrs="{'required': [('code', '=', 'electronic')], 'readonly': [('code', '=', 'manual')]}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

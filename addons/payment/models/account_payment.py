@@ -9,6 +9,17 @@ from odoo.exceptions import ValidationError
 class AccountPaymentMethod(models.Model):
     _inherit = 'account.payment.method'
 
+    available_payment_acquirers_ids = fields.Many2many(
+        comodel_name='account.payment.method',
+        compute='_compute_available_acquirers_ids'
+    )
+    payment_acquirer_id = fields.Many2one(
+        comodel_name='payment.acquirer',
+        string='Payment Acquirer',
+        help='The payment acquirer linked to this payment method.',
+        domain="[('id', 'in', available_payment_acquirers_ids)]"
+    )
+
     @api.depends('method_type')
     def _compute_available_acquirers_ids(self):
         # Get all enabled acquirers, that have not yet been linked to a journal.
@@ -19,15 +30,6 @@ class AccountPaymentMethod(models.Model):
             elif method.method_type.code == 'electronic':
                 available_acquirers_ids = available_acquirers_ids.filtered(lambda a: a.provider != 'sepa_direct_debit')
             method.available_payment_acquirers_ids = available_acquirers_ids.ids
-
-    available_payment_acquirers_ids = fields.Many2many('account.payment.method', compute='_compute_available_acquirers_ids')
-
-    payment_acquirer_id = fields.Many2one(
-        comodel_name='payment.acquirer',
-        string='Payment Acquirer',
-        help='The payment acquirer linked to this payment method.',
-        domain="[('id', 'in', available_payment_acquirers_ids)]"
-    )
 
 
 class AccountPayment(models.Model):

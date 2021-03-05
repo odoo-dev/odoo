@@ -97,11 +97,31 @@
                                                attrs="{'required': [('id', '!=', False), ('type', 'in', ('bank', 'cash'))], 'invisible': [('type', 'not in', ('bank', 'cash'))]}"
                                                groups="account.group_account_readonly"/>
                                     </group>
-                                    <group>
-                                        <field name="inbound_payment_method_ids" string="Methods" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}" nolabel="1"/>
+                                    <group string="Payment Methods" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}" >
+                                        <field name="inbound_payment_method_ids" nolabel="1">
+                                            <tree string="Payment Methods" editable="bottom" decoration-muted="state == 'deactivated'">
+                                                <field name="state" invisible="1"/>
+                                                <field name="payment_type" invisible="1"/>
+                                                <field name="company_id" invisible="1"/>
+                                                <field name="sequence" widget="handle"/>
+                                                <field name="name"/>
+                                                <field name="method_type"/>
+                                                <field name="payment_account_id" placeholder="Let empty to use the default outstanding account" optional="hide"/>
+                                            </tree>
+                                        </field>
                                     </group>
-                                    <group>
-                                        <field name="outbound_payment_method_ids" string="Methods" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}" nolabel="1"/>
+                                    <group string="Payment Methods" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}" >
+                                        <field name="outbound_payment_method_ids" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}" nolabel="1">
+                                            <tree string="Payment Methods" editable="bottom" decoration-muted="state == 'deactivated'" nolabel="1">
+                                                <field name="state" invisible="1"/>
+                                                <field name="payment_type" invisible="1"/>
+                                                <field name="company_id" invisible="1"/>
+                                                <field name="sequence" widget="handle"/>
+                                                <field name="name"/>
+                                                <field name="method_type"/>
+                                                <field name="payment_account_id" placeholder="Let empty to use the default outstanding account" optional="hide"/>
+                                            </tree>
+                                        </field>
                                     </group>
                                     <group name="outgoing_payment" />
                                 </group>

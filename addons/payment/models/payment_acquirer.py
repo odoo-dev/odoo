@@ -170,10 +170,16 @@ class PaymentAcquirer(models.Model):
         ('s2s','Payment from Odoo')],
         default='form', required=True, string='Payment Flow',
         help="""Note: Subscriptions does not take this field in account, it uses server to server by default.""")
-    inbound_payment_method_ids = fields.One2many('account.payment.method', related='journal_id.inbound_payment_method_ids')
-    inbound_payment_method_id = fields.Many2one('account.payment.method', readonly=True,
-                                                help="""Used to store the payment method linked to this particular 
-                                                payment acquirer.""", copy=False)
+    inbound_payment_method_ids = fields.One2many(
+        comodel_name='account.payment.method',
+        related='journal_id.inbound_payment_method_ids'
+    )
+    inbound_payment_method_id = fields.Many2one(
+        comodel_name='account.payment.method',
+        readonly=True,
+        help="Used to store the payment method linked to this particular payment acquirer.",
+        copy=False
+    )
 
     @api.onchange('payment_flow')
     def _onchange_payment_flow(self):

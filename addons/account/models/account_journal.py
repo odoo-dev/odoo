@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
+from odoo import Command
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
 from odoo.addons.base.models.res_bank import sanitize_account_number
@@ -30,10 +31,18 @@ class AccountJournal(models.Model):
     _check_company_auto = True
 
     def _default_inbound_payment_methods(self):
-        return self._get_inbound_payment_methods()
+        method_type = self.env.ref('account.account_payment_method_type_manual_in')
+        return [Command.create({
+            'name': method_type.name,
+            'method_type': method_type.id
+        })]
 
     def _default_outbound_payment_methods(self):
-        return self._get_outbound_payment_methods()
+        method_type = self.env.ref('account.account_payment_method_type_manual_out')
+        return [Command.create({
+            'name': method_type.name,
+            'method_type': method_type.id
+        })]
 
     def __get_bank_statements_available_sources(self):
         return [('undefined', _('Undefined Yet'))]
@@ -130,6 +139,9 @@ class AccountJournal(models.Model):
     inbound_payment_method_ids = fields.One2many(
         comodel_name='account.payment.method',
         domain=[('payment_type', '=', 'inbound')],
+        compute='_compute_inbound_payment_method_ids',
+        readonly=False,
+        store=True,
         string='Inbound Payment Methods',
         inverse_name='journal_id',
         default=_default_inbound_payment_methods,
@@ -143,6 +155,9 @@ class AccountJournal(models.Model):
     outbound_payment_method_ids = fields.One2many(
         comodel_name='account.payment.method',
         domain=[('payment_type', '=', 'outbound')],
+        compute='_compute_outbound_payment_method_ids',
+        store=True,
+        readonly=False,
         string='Outbound Payment Methods',
         inverse_name='journal_id',
         default=_default_outbound_payment_methods,
@@ -206,19 +221,22 @@ class AccountJournal(models.Model):
         ('code_company_uniq', 'unique (code, company_id)', 'Journal codes must be unique per company.'),
     ]
 
-    def _get_inbound_payment_methods(self):
-        method_type = self.env.ref('account.account_payment_method_type_manual_in')
-        return self.env['account.payment.method'].create({
-            'name': method_type.name,
-            'method_type': method_type.id
-        })
+    @api.depends('type')
+    def _compute_outbound_payment_method_ids(self):
+        for journal in self:
+            if journal.type in ('bank', 'cash'):
+                cc = self._default_outbound_payment_methods()
+                journal.outbound_payment_method_ids = [Command.clear()] + self._default_outbound_payment_methods()
+            else:
+                journal.outbound_payment_method_ids = [Command.clear()]
 
-    def _get_outbound_payment_methods(self):
-        method_type = self.env.ref('account.account_payment_method_type_manual_out')
-        return self.env['account.payment.method'].create({
-            'name': method_type.name,
-            'method_type': method_type.id
-        })
+    @api.depends('type')
+    def _compute_inbound_payment_method_ids(self):
+        for journal in self:
+            if journal.type in ('bank', 'cash'):
+                journal.inbound_payment_method_ids = [Command.clear()] + self._default_inbound_payment_methods()
+            else:
+                journal.inbound_payment_method_ids = [Command.clear()]
 
     @api.depends('type')
     def _compute_default_account_type(self):
@@ -796,19 +814,18 @@ class AccountJournal(models.Model):
         last_st_line = self.env['account.bank.statement.line'].search(last_statement_domain, order='date desc, id desc', limit=1)
         return last_st_line.statement_id
 
-    @api.model
-    def _add_method_to_journals(self, journals, payment_method_type):
-        for journal in journals:
-            method = self.env['account.payment.method'].create({
-                'name': payment_method_type.name,
-                'method_type': payment_method_type.id
-            })
-            if payment_method_type.payment_type == "outbound":
-                journal.outbound_payment_method_ids += method
-            else:
-                journal.inbound_payment_method_ids += method
+    def _ensure_payment_method_type_on_journal(self, payment_method_type):
+        for journal in self:
+            methods = journal.outbound_payment_method_ids if payment_method_type.payment_type == "outbound" else journal.inbound_payment_method_ids
+            if not any(method.code == payment_method_type.code for method in methods):
+                method = self.env['account.payment.method'].create({
+                    'name': payment_method_type.name,
+                    'method_type': payment_method_type.id
+                })
 
-    def _has_method_of_type(self, payment_method_type):
-        self.ensure_one()
-        methods = self.outbound_payment_method_ids if payment_method_type.payment_type == "outbound" else self.inbound_payment_method_ids
-        return any(method.code == payment_method_type.code for method in methods)
+                if payment_method_type.payment_type == "outbound":
+                    journal.outbound_payment_method_ids += method
+                else:
+                    journal.inbound_payment_method_ids += method
+
+                print("yeet")

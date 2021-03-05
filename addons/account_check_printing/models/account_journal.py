@@ -3,10 +3,20 @@
 
 import re
 from odoo import models, fields, api, _
+from odoo import Command
 from odoo.exceptions import ValidationError
+
 
 class AccountJournal(models.Model):
     _inherit = "account.journal"
+
+    def _default_outbound_payment_methods(self):
+        res = super(AccountJournal, self)._default_outbound_payment_methods()
+        method_type = self.env.ref('account_check_printing.account_payment_method_type_check')
+        return res + [Command.create({
+            'name': method_type.name,
+            'method_type': method_type.id
+        })]
 
     check_manual_sequencing = fields.Boolean(
         string='Manual Numbering',
@@ -30,14 +40,6 @@ class AccountJournal(models.Model):
         compute='_compute_check_printing_payment_method_selected',
         help="Technical feature used to know whether check printing was enabled as payment method.",
     )
-
-    def _get_outbound_payment_methods(self):
-        res = super()._get_outbound_payment_methods()
-        method_type = self.env.ref('account_check_printing.account_payment_method_type_check')
-        return res + self.env['account.payment.method'].create({
-            'name': method_type.name,
-            'method_type': method_type.id
-        })
 
     @api.depends('check_manual_sequencing')
     def _compute_check_next_number(self):
@@ -101,8 +103,7 @@ class AccountJournal(models.Model):
         """
         self._create_check_sequence()
         method_type = self.env.ref('account_check_printing.account_payment_method_type_check')
-        journals = self.search([('type', '=', 'bank',)]).filtered(lambda j: not j.check_printing_payment_method_selected)
-        self._add_method_to_journals(journals=journals, payment_method_type=method_type)
+        self.search([('type', '=', 'bank',)])._ensure_payment_method_type_on_journal(payment_method_type=method_type)
 
     def get_journal_dashboard_datas(self):
         domain_checks_to_print = [

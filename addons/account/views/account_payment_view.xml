@@ -31,6 +31,7 @@
             <field name="arch" type="xml">
                 <tree string="Payment Methods" decoration-muted="state == 'deactivated'">
                     <field name="state" invisible="1"/>
+                    <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="method_type"/>
                     <field name="payment_account_id" placeholder="Let empty to use the default outstanding account" optional="hide"/>
