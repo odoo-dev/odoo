@@ -39,7 +39,7 @@ export function useModel(params = {}) {
 
   const model = new Model(env, config);
 
-  useBus(model, component, params.onUpdate || component.render);
+  useBus(model, "update", params.onUpdate || component.render);
 
   onWillStart(async () => {
     await model.load();
