@@ -1002,6 +1002,22 @@ var utils = {
             ['name', '=like', '%.assets\_%.js'],
         ];
     },
+    /**
+     * Merge multiple objects props ( including Getters and Setters )
+     * @param  {(Object|...Object)} sources
+     * @returns {Object} New object with sources objects props merged
+     */
+    mix : function (...sources) {
+        const result = {}
+        for (const source of sources) {
+          const props = Object.keys(source)
+          for (const prop of props) {
+            const descriptor = Object.getOwnPropertyDescriptor(source, prop)
+            Object.defineProperty(result, prop, descriptor)
+          }
+        }
+        return result
+      }
 };
 
 return utils;

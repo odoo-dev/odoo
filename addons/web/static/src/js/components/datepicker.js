@@ -26,6 +26,7 @@ odoo.define('web.DatePickerOwl', function (require) {
     class DatePicker extends Component {
         constructor() {
             super(...arguments);
+            this.props.locale = moment.locale();
 
             this.inputRef = useRef('input');
             this.state = useState({ warning: false });
@@ -52,6 +53,7 @@ odoo.define('web.DatePickerOwl', function (require) {
         }
 
         willUpdateProps(nextProps) {
+            nextProps.locale = moment.locale();
             for (const prop in nextProps) {
                 this._datetimepicker(prop, nextProps[prop]);
             }
