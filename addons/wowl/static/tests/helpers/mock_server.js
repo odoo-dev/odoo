@@ -6,6 +6,8 @@ import { Registry } from "../../src/core/registry";
 import { evaluateExpr } from "../../src/py_js/py";
 import { combineDomains, Domain } from "../../src/core/domain";
 
+const { DateTime } = luxon;
+
 // -----------------------------------------------------------------------------
 // Utils
 // -----------------------------------------------------------------------------
@@ -386,6 +388,10 @@ class MockServer {
         return Promise.resolve(this.mockOnchange(args.model, args.args, args.kwargs));
       case "read":
         return Promise.resolve(this.mockRead(args.model, args.args));
+      case "search_read":
+        return Promise.resolve(this.mockSearchRead(args.model, args.args, args.kwargs));
+      case "web_search_read":
+        return Promise.resolve(this.mockWebSearchRead(args.model, args.args, args.kwargs));
       case "read_group":
         return Promise.resolve(this.mockReadGroup(args.model, args.kwargs));
       case "web_read_group":
@@ -642,24 +648,25 @@ class MockServer {
       }
     }
     function formatValue(groupByField, val) {
-      const fieldName = groupByField.split(":")[0];
-      // var aggregateFunction = groupByField.split(':')[1] || 'month';
+      let [fieldName, aggregateFunction] = groupByField.split(":");
+      aggregateFunction = aggregateFunction || "month";
       if (fields[fieldName].type === "date") {
+        // what about datetime?
         if (!val) {
           return false;
         }
-        console.warn("MockServer: read group not fully implemented (moment stuff)");
-        // } else if (aggregateFunction === 'day') {
-        //     return moment(val).format('YYYY-MM-DD');
-        // } else if (aggregateFunction === 'week') {
-        //     return moment(val).format('ww YYYY');
-        // } else if (aggregateFunction === 'quarter') {
-        //     return 'Q' + moment(val).format('Q YYYY');
-        // } else if (aggregateFunction === 'year') {
-        //     return moment(val).format('Y');
-        // } else {
-        //     return moment(val).format('MMMM YYYY');
-        // }
+        const date = DateTime.fromISO(val);
+        if (aggregateFunction === "day") {
+          return date.toFormat("yyyy-MM-dd");
+        } else if (aggregateFunction === "week") {
+          return `W${date.toFormat("W yyyy")}`;
+        } else if (aggregateFunction === "quarter") {
+          return `Q${date.toFormat("q yyyy")}`;
+        } else if (aggregateFunction === "year") {
+          return date.toFormat("yyyy");
+        } else {
+          return date.toFormat("MMMM yyyy");
+        }
       } else {
         return val instanceof Array ? val[0] : val || false;
       }
@@ -785,6 +792,19 @@ class MockServer {
       context: kwargs.context,
     });
     return result.records;
+  }
+
+  mockWebSearchRead(modelName, args, kwargs) {
+    const result = this.mockSearchReadController({
+      model: modelName,
+      domain: kwargs.domain || args[0],
+      fields: kwargs.fields || args[1],
+      offset: kwargs.offset || args[2],
+      limit: kwargs.limit || args[3],
+      sort: kwargs.order || args[4],
+      context: kwargs.context,
+    });
+    return result;
   }
 
   mockSearchReadController(params) {

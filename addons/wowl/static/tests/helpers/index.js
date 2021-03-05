@@ -38,4 +38,12 @@ export async function setupTests() {
 
 export { makeFakeUserService, makeFakeRPCService, makeMockXHR, makeMockFetch } from "./mocks";
 
-export { getFixture, makeTestEnv, mount, nextTick, makeDeferred, click } from "./utility";
+export {
+  getFixture,
+  makeTestEnv,
+  nextTick,
+  makeDeferred,
+  click,
+  getTestServiceRegistry,
+  getTestViewRegistry,
+} from "./utility";

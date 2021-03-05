@@ -107,7 +107,7 @@ export class Model extends EventBus {
 
   async load() {
     // we could fetch extra domain here and pass it to searchModel
-    // for searchPanel part (think of lunch widget for location or 
+    // for searchPanel part (think of lunch widget for location or
     // click on aggregate with domain in dashboard view)
     // await this.searchModel.load(/** { extra_domain: ... ? } */);
     // the concrete model load data after that

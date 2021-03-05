@@ -15,7 +15,7 @@ export function useService(serviceName) {
   const component = Component.current;
   const env = component.env;
   const service = env.services[serviceName];
-  if (!service) {
+  if (service === undefined) {
     throw new Error(`Service ${serviceName} is not available`);
   }
   return typeof service === "function" ? service.bind(component) : service;

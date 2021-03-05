@@ -276,7 +276,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/action/load",
       "load_views",
       "read",
-      "/web/dataset/search_read",
+      "web_search_read",
     ]);
     webClient.destroy();
   });
@@ -392,7 +392,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read",
+      "web_search_read",
       "/web/dataset/search_read",
       "read",
     ]);
@@ -442,7 +442,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read",
+      "web_search_read",
       "read",
       "read",
     ]);
@@ -655,7 +655,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/search_read",
       "setItem session current_action",
       "getItem session current_action",
-      "/web/dataset/search_read",
+      "web_search_read",
       "setItem session current_action",
     ]);
     webClient.destroy();
