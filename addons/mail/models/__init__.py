@@ -6,6 +6,7 @@ from . import mail_tracking_value
 from . import mail_alias
 from . import mail_alias_mixin
 from . import mail_followers
+from . import mail_identity
 from . import mail_notification
 from . import mail_render_mixin
 from . import mail_message

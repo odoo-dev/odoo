@@ -97,6 +97,12 @@
         action="mail_blacklist_action"
         parent="mail.mail_menu_technical"
         sequence="22"/>
+    <menuitem name="Identities"
+        id="mail_identity_menu"
+        parent="mail.mail_menu_technical"
+        action="mail_identity_action"
+        sequence="23"
+        groups="base.group_no_one"/>
 
     <!--
         This menuitem will be activated by integrations modules (like github, twitter, ...). It
