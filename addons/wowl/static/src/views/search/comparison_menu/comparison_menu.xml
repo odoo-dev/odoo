@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.ComparisonMenu" owl="1">
+        <Dropdown t-on-dropdown-item-selected.stop="onDropdownItemSelected" class="o_comparison_menu" togglerClass="'btn btn-secondary'">
+            <i t-if="icon" t-att-class="icon"/>
+            <span class="o_dropdown_title" t-esc="title"/>
+            <t t-set-slot="menu">
+                <t t-set="currentGroup" t-value="null"/>
+                <t t-foreach="items" t-as="item" t-key="item.id">
+                    <div t-if="currentGroup !== null and currentGroup !== item.groupNumber" role="separator" class="dropdown-divider"/>           
+                    <DropdownItem payload="{ itemId: item.id }" class="o_menu_item" t-att-class="{ o_dropdown_active: item.isActive }">
+                        <t t-esc="item.description"/>
+                    </DropdownItem>
+                    <t t-set="currentGroup" t-value="item.groupNumber"/>
+                </t>
+            </t>
+        </Dropdown>
+    </t>
+
+</templates>

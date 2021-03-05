@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="wowl.CustomFavoriteItem" owl="1">
+    <Dropdown class="o_add_favorite">
+      Save current search
+      <t t-set-slot="menu">
+        <input type="text"
+            class="o_input"
+            autofocus=""
+            t-ref="description"
+            t-model.trim="state.description"
+            t-on-keydown="_onInputKeydown"
+        />
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox"
+                t-att-id="useByDefaultId"
+                class="custom-control-input"
+                t-att-checked="state.isDefault"
+                t-on-change="_onCheckboxChange"
+            />
+            <label class="custom-control-label" t-att-for="useByDefaultId">
+                <t>Use by default</t>
+            </label>
+        </div>
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox"
+                t-att-id="shareAllUsersId"
+                class="custom-control-input"
+                t-att-checked="state.isShared"
+                t-on-change="_onCheckboxChange"
+            />
+            <label class="custom-control-label" t-att-for="shareAllUsersId">
+                <t>Share with all users</t>
+                <i class="fa fa-users" role="img" aria-label="Users" title="Users"/>
+            </label>
+        </div>
+        <button type="button" class="o_save_favorite btn btn-primary" t-on-click="saveFavorite">Save</button>
+      </t>
+    </Dropdown>
+  </t>
+
+</templates>
