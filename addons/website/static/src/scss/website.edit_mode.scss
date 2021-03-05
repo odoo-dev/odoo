@@ -76,6 +76,8 @@ $-editor-messages-margin-x: 2%;
         &#wrap:empty, &#wrap > .oe_drop_zone.oe_insert:not(.oe_vertical):only-child {
             @extend %o-editor-messages;
             padding: 112px 0px;
+            pointer-events: none;
+            caret-color: transparent;
         }
         > .oe_drop_zone.oe_insert:not(.oe_vertical):only-child {
             @extend %o-editor-messages;
