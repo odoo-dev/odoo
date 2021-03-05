@@ -10,6 +10,7 @@ class MassMailingList(models.Model):
     _name = 'mailing.list'
     _order = 'name'
     _description = 'Mailing List'
+    _mailing_enabled = True
 
     name = fields.Char(string='Mailing List', required=True)
     active = fields.Boolean(default=True)
@@ -222,6 +223,13 @@ class MassMailingList(models.Model):
 
     def close_dialog(self):
         return {'type': 'ir.actions.act_window_close'}
+
+    # ------------------------------------------------------
+    # MAILING
+    # ------------------------------------------------------
+
+    def _mailing_get_default_domain(self, mailing):
+        return [('list_ids', 'in', mailing.contact_list_ids.ids)]
 
     # ------------------------------------------------------
     # UTILITY

@@ -10,7 +10,6 @@ import re
 import threading
 import werkzeug.urls
 from ast import literal_eval
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from werkzeug.urls import url_join
 
@@ -19,17 +18,6 @@ from odoo.exceptions import UserError
 from odoo.osv import expression
 
 _logger = logging.getLogger(__name__)
-
-MASS_MAILING_BUSINESS_MODELS = [
-    'crm.lead',
-    'event.registration',
-    'hr.applicant',
-    'res.partner',
-    'event.track',
-    'sale.order',
-    'mailing.list',
-    'mailing.contact'
-]
 
 # Syntax of the data URL Scheme: https://tools.ietf.org/html/rfc2397#section-3
 # Used to find inline images
@@ -124,7 +112,7 @@ class MassMailing(models.Model):
     mailing_model_real = fields.Char(string='Recipients Real Model', compute='_compute_model')
     mailing_model_id = fields.Many2one(
         'ir.model', string='Recipients Model', ondelete='cascade', required=True,
-        domain=[('model', 'in', MASS_MAILING_BUSINESS_MODELS)],
+        domain=[('is_mailing', '=', True)],
         default=lambda self: self.env.ref('mass_mailing.model_mailing_list').id)
     mailing_model_name = fields.Char(
         string='Recipients Model Name', related='mailing_model_id.model',
@@ -819,8 +807,8 @@ class MassMailing(models.Model):
 
     def _get_default_mailing_domain(self):
         mailing_domain = []
-        if self.mailing_model_name == 'mailing.list' and self.contact_list_ids:
-            mailing_domain = [('list_ids', 'in', self.contact_list_ids.ids)]
+        if hasattr(self.env[self.mailing_model_name], '_mailing_get_default_domain'):
+            mailing_domain = self.env[self.mailing_model_name]._mailing_get_default_domain(self)
 
         if self.mailing_type == 'mail' and 'is_blacklisted' in self.env[self.mailing_model_name]._fields:
             mailing_domain = expression.AND([[('is_blacklisted', '=', False)], mailing_domain])

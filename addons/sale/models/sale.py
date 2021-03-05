@@ -21,6 +21,7 @@ class SaleOrder(models.Model):
     _description = "Sales Order"
     _order = 'date_order desc, id desc'
     _check_company_auto = True
+    _mailing_enabled = True
 
     def _default_validity_date(self):
         if self.env['ir.config_parameter'].sudo().get_param('sale.use_quotation_validity_days'):

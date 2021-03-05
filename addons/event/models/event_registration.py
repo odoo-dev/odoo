@@ -13,6 +13,7 @@ class EventRegistration(models.Model):
     _description = 'Event Registration'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
+    _mailing_enabled = True
 
     # event
     event_id = fields.Many2one(
