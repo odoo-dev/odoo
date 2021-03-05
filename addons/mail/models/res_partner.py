@@ -20,6 +20,9 @@ class Partner(models.Model):
     ]
     _mail_flat_thread = False
 
+    # identity
+    mail_identity_ids = fields.One2many('mail.identity', 'partner_id', string='Identities', copy=False)
+    mail_identity_id = fields.Many2one('mail.identity', string='Main identity', compute='_compute_mail_identity_id')
     # channel
     channel_ids = fields.Many2many('mail.channel', 'mail_channel_partner', 'partner_id', 'channel_id', string='Channels', copy=False)
     # override fields to track the visibility of user
@@ -33,6 +36,11 @@ class Partner(models.Model):
         odoobot = self.env['res.partner'].browse(odoobot_id)
         if odoobot in self:
             odoobot.im_status = 'bot'
+
+    @api.depends('mail_identity_ids.partner_id')
+    def _compute_mail_identity_id(self):
+        for partner in self:
+            partner.mail_identity_id = partner.mail_identity_ids[0] if partner.mail_identity_ids else False
 
     # ------------------------------------------------------------
     # CRUD
