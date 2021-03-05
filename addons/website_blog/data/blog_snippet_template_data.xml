@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="dynamic_snippet_blog_post_filter" model="ir.filters">
+            <field name="name">Blog Posts</field>
+            <field name="model_id">blog.post</field>
+        </record>
+        <!-- Action Server for Dynamic Filter -->
+        <record id="dynamic_snippet_blog_posts_action" model="ir.actions.server">
+            <field name="name">Blog Posts Dynamic Snippet</field>
+            <field name="model_id" ref="model_blog_post"/>
+            <field name="state">code</field>
+            <field name="code">
+BlogPost = model.env['blog.post']
+FieldDate = model.env['ir.qweb.field.date']
+
+website = request.website.get_current_website()
+dynamic_filter = model.env.context.get('dynamic_filter')
+# limit = model.env.context.get('limit')
+# search_domain = model.env.context.get('search_domain')
+# order = model.env.context.get('order')
+order = request.params.get('order')
+meta_data = dynamic_filter._get_filter_meta_data()
+
+# domain = [('website_published', '=', True)] + website.website_domain() + (search_domain or [])
+# posts = BlogPost.search(domain, limit=limit, order=order)
+posts = dynamic_filter._get_blog_posts(website, order, model.env.context)
+
+res_posts = []
+for post in posts:
+    res_post = post._read_format(['id', 'name', 'website_url', 'subtitle', 'cover_properties', 'write_date', 'blog_id'])[0]
+
+    data = {}
+    for field_name in meta_data.keys():
+        field = BlogPost._fields.get(field_name)
+        if field:
+            data[field_name] = res_post[field_name]
+    data['call_to_action_url'] = res_post['website_url']
+    data['blog_name'] = post['blog_id'].name
+    data['blog_url'] = '/blog/%s' % post['blog_id'].id
+    data['_record'] = post
+    res_posts.append(data)
+
+response = res_posts
+            </field>
+        </record>
+        <!-- Dynamic Filter -->
+        <record id="dynamic_filter_blog_posts" model="website.snippet.filter">
+            <field name="action_server_id" ref="website_blog.dynamic_snippet_blog_posts_action"/>
+            <field name="field_names">id,name,subtitle,blog_name:text,blog_id:text,blog_url:text</field>
+            <field name="limit" eval="16"/>
+            <field name="name">Blog Posts</field>
+        </record>
+    </data>
+</odoo>

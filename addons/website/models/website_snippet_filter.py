@@ -2,6 +2,7 @@
 
 from ast import literal_eval
 from collections import OrderedDict
+import json
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, MissingError
 from odoo.osv import expression
@@ -159,6 +160,8 @@ class WebsiteSnippetFilter(models.Model):
                 value = record[field_name]
                 if field_widget in ('binary', 'image'):
                     data[field_name] = self.escape_falsy_as_empty(value)
+                elif field_widget == 'json':
+                    data[field_name] = json.loads(value)
                 elif field_widget == 'monetary':
                     FieldMonetary = self.env['ir.qweb.field.monetary']
                     website_currency = self._get_website_currency()
@@ -175,6 +178,7 @@ class WebsiteSnippetFilter(models.Model):
                 else:
                     data[field_name] = self.escape_falsy_as_empty(value)
             data['call_to_action_url'] = record.get('call_to_action_url')
+            data['_record'] = record.get('_record')
             result.append(data)
         return result
 
@@ -229,10 +233,11 @@ class WebsiteSnippetFilter(models.Model):
         model = self.env[self.filter_id.model_id] if self.filter_id else (
             self.action_server_id.model_id if self.action_server_id else None)
         sample_data = self._get_hardcoded_sample(model)
-        for index in range(0, length):
-            single_sample_data = sample_data[index % len(sample_data)].copy()
-            self._fill_sample(single_sample_data, index)
-            sample.append(single_sample_data)
+        if sample_data:
+            for index in range(0, length):
+                single_sample_data = sample_data[index % len(sample_data)].copy()
+                self._fill_sample(single_sample_data, index)
+                sample.append(single_sample_data)
         return sample
 
     def _fill_sample(self, sample, index):
@@ -309,6 +314,7 @@ class WebsiteSnippetFilter(models.Model):
                     data[field_name] = record[field_name]
 
             data['call_to_action_url'] = 'website_url' in record and record['website_url']
+            data['_record'] = record
             values.append(data)
         return values
 

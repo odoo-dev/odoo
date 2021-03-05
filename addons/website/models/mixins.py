@@ -103,6 +103,32 @@ class WebsiteCoverPropertiesMixin(models.AbstractModel):
     _description = 'Cover Properties Website Mixin'
 
     cover_properties = fields.Text('Cover Properties', default=lambda s: json.dumps(s._default_cover_properties()))
+    cover_properties_128 = fields.Text('Small Cover Properties 128', compute='_compute_cover_properties_128')
+    cover_properties_256 = fields.Text('Small Cover Properties 256', compute='_compute_cover_properties_256')
+    cover_properties_512 = fields.Text('Small Cover Properties 512', compute='_compute_cover_properties_512')
+
+    def _compute_small_cover_properties(self, size):
+        for record in self:
+            properties = json.loads(record.cover_properties)
+            image_url = properties.get('background-image')
+            if image_url:
+                parts = image_url.split('/')
+                if len(parts) == 5 and parts[1] == 'web' and parts[2] == 'image':
+                    # beware of static demo data
+                    properties['background-image'] = '/'.join(parts[:-1] + ["%sx%s" % (size, size)] + parts[-1:])
+            record['cover_properties_%s' % size] = json.dumps(properties)
+
+    @api.depends('cover_properties')
+    def _compute_cover_properties_128(self):
+        self._compute_small_cover_properties(128)
+
+    @api.depends('cover_properties')
+    def _compute_cover_properties_256(self):
+        self._compute_small_cover_properties(256)
+
+    @api.depends('cover_properties')
+    def _compute_cover_properties_512(self):
+        self._compute_small_cover_properties(512)
 
     def _default_cover_properties(self):
         return {

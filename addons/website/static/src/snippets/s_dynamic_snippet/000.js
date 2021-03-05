@@ -158,6 +158,14 @@ const DynamicSnippet = publicWidget.Widget.extend({
         }
     },
     /**
+     * Method to be overridden in child components in order to prepare content
+     * when there is no data to display.
+     * @private
+     */
+    _getEmptyContent: function () {
+        return '';
+    },
+    /**
      * Method to be overridden in child components in order to prepare QWeb
      * options.
      * @private
@@ -181,7 +189,7 @@ const DynamicSnippet = publicWidget.Widget.extend({
         if (this.data.length) {
             this._prepareContent();
         } else {
-            this.renderedContent = '';
+            this.renderedContent = this._getEmptyContent();
         }
         this._renderContent();
     },

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="website_blog.s_blog_posts.wrapper">
+        <div class="row s_col_no_bgcolor s_nb_column_fixed js_get_posts_dynamic">
+            <t t-foreach="data" t-as="record">
+                <t t-raw="record"/>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="website_blog.s_blog_posts.empty">
+        <div class="col-md-6 offset-md-3">
+            <div class="alert alert-warning alert-dismissible text-center">
+                No blog post was found. Make sure your posts are published.
+            </div>
+        </div>
+    </t>
+</templates>
