@@ -4,6 +4,7 @@
 from odoo.addons.crm.models.crm_lead import PARTNER_FIELDS_TO_SYNC, PARTNER_ADDRESS_FIELDS_TO_SYNC
 from odoo.addons.crm.tests.common import TestCrmCommon, INCOMING_EMAIL
 from odoo.addons.phone_validation.tools.phone_validation import phone_format
+from odoo.exceptions import UserError
 from odoo.tests.common import Form, users
 
 
@@ -365,3 +366,25 @@ class TestCRMLead(TestCrmCommon):
         new_lead._handle_partner_assignment(create_missing=True)
         self.assertEqual(new_lead.partner_id.email, 'unknown.sender@test.example.com')
         self.assertEqual(new_lead.partner_id.team_id, self.sales_team_1)
+
+    def test_phone_filter_input(self):
+        leads = self.env['crm.lead'].create([{
+            'name': 'Lead 1',
+            'phone': '+32499112233',
+        }, {
+            'name': 'Lead 2',
+            'phone': '0032499112233',
+        }])
+
+        with self.assertRaises(UserError):
+            # search term containing only characters and no digits should throw an error
+            self.env['crm.lead'].search([('phone_mobile_search', 'like', 'coucou')])
+
+        with self.assertRaises(UserError):
+            # search term containing less than 3 digits should throw an error
+            self.env['crm.lead'].search([('phone_mobile_search', 'like', '+32')])
+
+        self.assertEqual(
+            leads,
+            self.env['crm.lead'].search([('phone_mobile_search', 'like', '499112233')])
+        )

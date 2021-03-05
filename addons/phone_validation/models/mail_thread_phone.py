@@ -46,7 +46,8 @@ class PhoneMixin(models.AbstractModel):
 
     def _search_phone_mobile_search(self, operator, value):
 
-        if len(value) <= 2:
+        digits_count = len([char for char in value if char.isdigit()])
+        if digits_count <= 2:
             raise UserError(_('Please enter at least 3 digits when searching on phone / mobile.'))
 
         query = f"""
