@@ -133,6 +133,22 @@ $i: 1;
         }
     }
 
+    we-button.o_we_mobile {
+        & svg {
+            width: 12px;
+            height: 100%;
+            fill: $o-we-sidebar-content-field-color;
+
+            &:hover {
+                filter: brightness(110%);
+            }
+        }
+
+        &:not(.active) svg {
+            fill: $o-we-color-danger;
+        }
+    }
+
     //----------------------------------------------------------------------
     // 'Options' Tab Specific Components
     //----------------------------------------------------------------------
