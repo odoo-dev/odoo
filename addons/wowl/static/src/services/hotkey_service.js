@@ -1,4 +1,5 @@
 /** @odoo-module **/
+import { Dialog } from "../components/dialog/dialog";
 import { useService } from "../core/hooks";
 import { serviceRegistry } from "../webclient/service_registry";
 const { hooks } = owl;
@@ -21,6 +22,42 @@ export function useHotkey(subscription) {
   });
 }
 
+// TODO: HintDialog must evolve in a greater feature.
+// It has been decided that Future Odoo will include a "Command Palette" feature.
+// Taskid => ........
+class HintDialog extends Component {
+  getHotkeys(item) {
+    return item.hotkeys.map(k => k.split("-").map(x => {
+      switch (x) {
+        case "arrowleft": return "←";
+        case "arrowright": return "→";
+        case "arrowup": return "↑";
+        case "arrowdown": return "↓";
+        case "control": return "ctrl";
+        case "escape": return "esc";
+        default: return x;
+      }
+    }));
+  }
+}
+HintDialog.template = tags.xml`
+  <Dialog title="props.title">
+    <p t-foreach="props.items" t-as="item">
+      <span t-esc="item.description"/> :
+      <t t-foreach="getHotkeys(item)" t-as="hotkey">
+        <kbd>
+          <t t-foreach="hotkey" t-as="keycap">
+            <kbd class="text-uppercase" t-esc="keycap"/>
+            <t t-if="!keycap_last" t-esc="'+'"/>
+          </t>
+        </kbd>
+        <t t-if="!hotkey_last" t-esc="' - '"/>
+      </t>
+    </p>
+  </Dialog>
+`;
+HintDialog.components = { Dialog };
+
 const ALPHANUM_KEYS = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
 const NAV_KEYS = [
   "arrowleft", "arrowright", "arrowup", "arrowdown",
@@ -32,7 +69,7 @@ const AUTHORIZED_KEYS = new Set([...ALPHANUM_KEYS, ...NAV_KEYS]);
 
 export const hotkeyService = {
   name: "hotkey",
-  dependencies: ["ui"],
+  dependencies: ["dialog", "localization", "ui"],
   deploy(env) {
     const subscriptions = new Map();
     const interceptors = {};
@@ -58,6 +95,7 @@ export const hotkeyService = {
      * Rules sequence to forbid dispatching :
      * - UI is blocked
      * - key is held down (to avoid repeat)
+     * - special HintDialog asked (side effect: open the hint dialog) => TODO remove when "CommandPalette" will get introduced
      * - focus is on an editable element (rule is bypassed on "ALT" combo)
      * - an interceptor did intercept the event
      * - the pressed key is not whitelisted
@@ -75,6 +113,14 @@ export const hotkeyService = {
 
       // Do not dispatch if user holds down a key
       if (event.repeat) {
+        return false;
+      }
+
+      // Special HintDialog asked
+      // TODO replace this with the "Command Palette" feature
+      if (hotkey === "control-k") {
+        displayHintsDialog();
+        event.preventDefault();
         return false;
       }
 
@@ -132,6 +178,32 @@ export const hotkeyService = {
       if (dispatched) {
         event.preventDefault();
       }
+    }
+
+    /**
+     * Displays a dialog showing hints about activables hotkeys.
+     * TODO remove when "CommandPalette" will get introduced
+     */
+    function displayHintsDialog() {
+      const uiOwnerElement = env.services.ui.getOwner();
+
+      const activableSubs = Object.values(subscriptions)
+        .filter(sub => sub.contextOwner === uiOwnerElement)
+        .map(sub => ({
+          description: `${sub.hint || 'no hint provided'}`,
+          hotkeys: sub.hotkeys,
+        }));
+
+      const clickableElems = [...uiOwnerElement.querySelectorAll("[data-hotkey]")]
+        .map(el => ({
+          description: `${el.title || 'no title provided'}`,
+          hotkeys: [el.dataset.hotkey]
+        }));
+
+      env.services.dialog_manager.open(HintDialog, {
+        title: env._t("Active Hotkeys"),
+        items: [...activableSubs, ...clickableElems],
+      });
     }
 
     /**
