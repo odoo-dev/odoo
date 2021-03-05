@@ -10,6 +10,11 @@ class StockQuant(models.Model):
 
     value = fields.Monetary('Value', compute='_compute_value', groups='stock.group_stock_manager')
     currency_id = fields.Many2one('res.currency', compute='_compute_value', groups='stock.group_stock_manager')
+    accounting_date = fields.Date(
+        'Accounting Date',
+        help="Date at which the accounting entries will be created"
+             " in case of automated inventory valuation."
+             " If empty, the inventory date will be used.")
 
     @api.depends('company_id', 'location_id', 'owner_id', 'product_id', 'quantity')
     def _compute_value(self):
@@ -55,3 +60,12 @@ class StockQuant(models.Model):
                 quants = self.search(group['__domain'])
                 group['value'] = sum(quant.value for quant in quants)
         return res
+
+    def _apply_inventory(self):
+        acc_inventories = self.filtered(lambda quant: quant.accounting_date)
+        for inventory in acc_inventories:
+            super(StockQuant, self.with_context(force_period_date=inventory.accounting_date))._apply_inventory()
+            inventory.write({'accounting_date': False})
+        other_inventories = self - acc_inventories
+        if other_inventories:
+            super(StockQuant, other_inventories)._apply_inventory()
