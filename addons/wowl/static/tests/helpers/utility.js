@@ -86,6 +86,7 @@ function makeTestConfig(config = {}) {
     userMenuRegistry: config.userMenuRegistry || new Registry(),
     debugRegistry: config.debugRegistry || new Registry(),
     viewRegistry: config.viewRegistry || new Registry(),
+    favoriteMenuRegistry: config.favoriteMenuRegistry || new Registry(),
   });
 }
 

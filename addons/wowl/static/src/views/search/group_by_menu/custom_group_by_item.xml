@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="wowl.CustomGroupByItem" owl="1">
+    <Dropdown class="o_generator_menu"> 
+      Add Custom Group
+      <t t-set-slot="menu">
+        <select class="w-auto o_input o_group_by_selector" t-model="state.fieldName">
+          <option t-foreach="props.fields" t-as="field" t-key="field.name"
+              t-att-value="field.name"
+              t-esc="field.string"
+          />
+        </select>
+        <button type="button" class="btn btn-primary o_apply_group_by" t-on-click="onApply">
+          <t>Apply</t>
+        </button>
+      </t>
+    </Dropdown>
+  </t>
+
+</templates>
