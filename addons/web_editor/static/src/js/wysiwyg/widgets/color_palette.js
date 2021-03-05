@@ -54,6 +54,25 @@ const ColorPaletteWidget = Widget.extend({
         this.withCombinations = this.options.withCombinations;
 
         this.trigger_up('request_editable', {callback: val => this.options.$editable = val});
+
+        this.tabs = [{
+            section: 'theme-colors',
+            pickers: [
+                'theme',
+                'common',
+            ],
+        },
+        {
+            section: 'custom-colors',
+            pickers: [
+                'custom',
+                'transparent_grayscale',
+                'common_grays',
+            ],
+        }];
+
+        this.$sections = {};
+        this.$pickers = {};
     },
     /**
      * @override
@@ -68,10 +87,51 @@ const ColorPaletteWidget = Widget.extend({
     start: async function () {
         const res = this._super.apply(this, arguments);
 
-        const $colorSection = this.$('.o_colorpicker_sections[data-color-tab="theme-colors"]');
+        const $switchPaneButtons = this.$('.o_we_colorpicker_switch_pane_btn');
+
         const $clpicker = $(colorpickerArch || `<colorpicker><div class="o_colorpicker_section" data-name="common"></div></colorpicker>`);
         $clpicker.find('button').addClass('o_we_color_btn');
-        $clpicker.appendTo($colorSection);
+
+        // Populate tabs based on the tabs configuration indicated in this.tabs
+        _.each(this.tabs, (tab, index) => {
+            // Append pickers to section
+            const {section, pickers} = tab;
+            const $section = this.$(`.o_colorpicker_sections[data-color-tab="${section}"]`);
+            let sectionIsEmpty = true;
+            _.each(pickers, picker => {
+                let $picker;
+                switch (picker) {
+                    case 'common_grays':
+                        $picker = $clpicker.find('[data-name="common"]').clone();
+                        break;
+                    case 'custom':
+                        $picker = $('<div class="o_colorpicker_section" data-name="custom"/>');
+                        break;
+                    default:
+                        $picker = $clpicker.find(`[data-name="${picker}"]`).clone();
+                }
+                $section.append($picker);
+
+                if (!this.options.excluded.includes(picker)) {
+                    sectionIsEmpty = false;
+                }
+
+                this.$pickers[picker] = $picker;
+            });
+
+            // Hide section and associated button if empty
+            if (sectionIsEmpty) {
+                $section.addClass('d-none');
+                $switchPaneButtons[index].classList.add('d-none');
+            }
+            this.$sections[section] = $section;
+        });
+
+        // Remove the buttons display if there is only one
+        const $visibleButtons = $switchPaneButtons.filter((index, $button) => !$button.classList.contains('d-none'));
+        if ($visibleButtons.length === 1) {
+            $visibleButtons.addClass('d-none');
+        }
 
         // Remove excluded palettes (note: only hide them to still be able
         // to remove their related colors on the DOM target)
@@ -88,12 +148,11 @@ const ColorPaletteWidget = Widget.extend({
 
         // Render common colors
         if (!this.options.excluded.includes('common')) {
-            const $commonColorSection = this.$('[data-name="common"]');
             summernoteCustomColors.forEach((colorRow, i) => {
                 if (i === 0) {
                     return; // Ignore the summernote gray palette and use ours
                 }
-                const $div = $('<div/>', {class: 'clearfix'}).appendTo($commonColorSection);
+                const $div = $('<div/>', {class: 'clearfix'}).appendTo(this.$pickers['common']);
                 colorRow.forEach(color => {
                     $div.append(this._createColorButton(color, ['o_common_color']));
                 });
@@ -144,7 +203,7 @@ const ColorPaletteWidget = Widget.extend({
             this.colorPicker = new ColorpickerWidget(this, {
                 defaultColor: defaultColor,
             });
-            await this.colorPicker.prependTo($colorSection);
+            await this.colorPicker.appendTo(this.$sections['custom-colors']);
         }
 
         return res;
@@ -230,9 +289,8 @@ const ColorPaletteWidget = Widget.extend({
      */
     _addCustomColorButton: function (color, classes = []) {
         classes.push('o_custom_color');
-        const $themeSection = this.$('.o_colorpicker_section[data-name="theme"]');
         const $button = this._createColorButton(color, classes);
-        return $button.appendTo($themeSection);
+        return $button.appendTo(this.$pickers['custom']);
     },
     /**
      * Return a color button.
