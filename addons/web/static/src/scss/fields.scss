@@ -100,11 +100,17 @@
             padding-top: 0;
             padding-bottom: 0;
         }
+
+        &.o_field_many2one_avatar {
+            .o_field_many2one_selection {
+                width: calc(100% - 24px);
+            }
+        }
     }
 
     // Many2OneAvatar
     &.o_field_many2one_avatar {
-        > img.o_m2o_avatar {
+        .o_m2o_avatar > img {
             border-radius: 50%;
             width: 19px;
             height: 19px;
