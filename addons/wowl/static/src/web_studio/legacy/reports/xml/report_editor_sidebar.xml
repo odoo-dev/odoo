@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<div t-name="web_studio.ReportEditorSidebar" class="o_web_studio_sidebar o_web_studio_report_sidebar">
+    <!-- Header -->
+    <div class="o_web_studio_sidebar_header">
+        <div name="new" t-attf-class="o_web_studio_new #{widget.state.mode === 'new' ? 'active' : ''}">
+            <i class="fa fa-plus" aria-hidden="true"/> Add
+        </div>
+        <div name="report" t-attf-class="o_web_studio_view #{widget.state.mode === 'report' ? 'active' : ''}">
+            <i class="fa fa-television" aria-hidden="true"/> Report
+        </div>
+        <div name="options" t-attf-class="o_web_studio_properties #{widget.state.mode === 'properties' ? 'active' : 'inactive'}">
+            <i class="fa fa-cog" aria-hidden="true" /> Options
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div t-attf-class="o_web_studio_sidebar_content #{ widget.state.mode === 'properties' ? 'o_web_studio_sidebar_content_properties' : ''}">
+        <t t-if="widget.state.mode === 'report'">
+            <div class="o_web_studio_sidebar_text">
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" data-type="attributes"
+                    t-att-value="widget.report.name"/>
+            </div>
+            <div class="o_web_studio_sidebar_text" t-if="widget.debug">
+                <label for="print_report_name">Printed Report Name</label>
+                <input id="print_report_name" name="print_report_name" type="text" data-type="attributes"
+                    t-att-value="widget.report.print_report_name or ''"/>
+            </div>
+            <div class="o_web_studio_sidebar_tags">
+                <label for="paperformat_id">Paper format</label>
+                <div class="o_web_studio_paperformat_id"/>
+            </div>
+            <div class="o_web_studio_sidebar_checkbox">
+                <div class="custom-control custom-checkbox">
+                    <input id="display_in_print" name="display_in_print" type="checkbox" class="custom-control-input" t-att-checked="widget.report.binding_model_id ? 'checked' : undefined"/>
+                    <span/>
+                    <label for="display_in_print" class="custom-control-label">Add in the print menu</label>
+                </div>
+            </div>
+            <div class="o_web_studio_sidebar_checkbox" t-if="widget.debug">
+                <div class="custom-control custom-checkbox">
+                    <input id="attachment_use" name="attachment_use" type="checkbox" class="custom-control-input" t-att-checked="widget.report.attachment_use ? 'checked' : undefined"/>
+                    <span/>
+                    <label for="attachment_use" class="custom-control-label">Reload from attachment</label>
+                </div>
+            </div>
+            <t t-call="web_studio.Sidebar.Groups"/>
+            <t t-call="web_studio.Sidebar.Toolbox">
+                <t t-call="web_studio.Sidebar.Parameters" t-if="widget.debug"/>
+                <t t-call="web_studio.Sidebar.XMLEditor" t-if="widget.debug"/>
+            </t>
+        </t>
+        <t t-if="widget.state.mode === 'properties'">
+            <div id="accordion" class="o_web_studio_accordion mt16" role="tablist" aria-multiselectable="true">
+                <!-- the rest will be dynamically added -->
+            </div>
+        </t>
+        <t t-if="widget.state.mode === 'add'">
+            <div class="o_web_studio_sidebar_text">
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" data-type="attributes"
+                    t-att-value="widget.report.name"/>
+            </div>
+        </t>
+    </div>
+</div>
+
+
+<div t-name="web_studio.AccordionSection" class="card">
+    <div class="card-header" t-att-id="header">
+        <h5>
+            <button class="btn btn-link text-left w-100" data-toggle="collapse" t-attf-data-target="##{id}" aria-expanded="false" t-att-aria-controls="id">
+                <small t-attf-class="fa mt4 #{nodeIcon}"></small>
+                <span class="o_text">
+                    <b class="text-white"><t t-esc="nodeName"/></b>
+                    <small><t t-esc="nodeAttr"/></small>
+                </span>
+                <i class="fa fa-angle-left mt4"/>
+            </button>
+        </h5>
+    </div>
+    <div t-att-id="id" class="collapse card-body" t-att-aria-labelledby="header" data-parent="#accordion">
+    <!-- dynamically inserted here -->
+    </div>
+</div>
+
+<!-- edit components templates -->
+<div t-name="web_studio.ReportDirectiveTField" class="o_web_studio_sidebar_text">
+    <label>Field expression</label>
+    <div class="o_web_studio_tfield_fieldexpression" />
+</div>
+
+<div t-name="web_studio.ReportDirectiveTIf">
+    <div class="o_web_studio_sidebar_text">
+        <label for="if_expression">Visible if</label>
+        <div class="o_web_studio_tif_ifexpression">
+            <i class="o_field_domain_dialog_button fa fa-pencil"/>
+        </div>
+    </div>
+    <div class="o_web_studio_sidebar_text">
+    </div>
+</div>
+
+<div t-name="web_studio.ReportDirectiveTElse" class="o_web_studio_sidebar_text">
+    <label for="o_web_studio_telse_elseexpression">Else <span class="float-left o_web_studio_telse_elseexpression"/> (t-if="<t t-esc="widget.tIf"/>")</label>
+</div>
+
+<div t-name="web_studio.ReportDirectiveTEsc" class="o_web_studio_sidebar_text">
+    <label for="if_expression">Esc expression</label>
+    <div class="o_web_studio_tesc_escexpression" />
+</div>
+
+<div t-name="web_studio.ReportDirectiveTSet" class="o_web_studio_sidebar_text">
+    <label for="set_expression">Set expression</label>
+    <div class="o_web_studio_tset_setexpression" />
+    <label for="value_expression">Related expression</label>
+    <div class="o_web_studio_tset_valueexpression" />
+</div>
+
+<div t-name="web_studio.ReportDirectiveTForeach" class="o_web_studio_sidebar_text">
+    <label for="foreach_expression">Foreach expression</label>
+    <div class="o_web_studio_tforeach_foreachexpression" />
+    <label for="as_expression">As expression</label>
+    <div class="o_web_studio_tas_asexpression" />
+</div>
+
+<div t-name="web_studio.ReportDirectiveTOptions" class="o_web_studio_sidebar_select">
+    <label>Widget</label>
+    <div class="o_web_studio_toption_widget">
+        <select>
+            <option/>
+            <t t-foreach="widget.widgets" t-as="w">
+                <option t-att-value="w.key"><t t-esc="w.string"/></option>
+            </t>
+        </select>
+        <div class="o_studio_report_options_container"></div>
+    </div>
+</div>
+
+<div t-name="web_studio.BlockTotal">
+    <div class="o_web_studio_sidebar_text">
+        <label for="o_web_studio_report_currency_id">Currency</label>
+        <div class="o_web_studio_report_currency_id"/>
+        <label for="o_web_studio_report_amount_untaxed">Amount untaxed</label>
+        <div class="o_web_studio_report_amount_untaxed"/>
+        <label for="o_web_studio_report_amount_total">Amount total</label>
+        <div class="o_web_studio_report_amount_total"/>
+        <label for="o_web_studio_report_amount_by_groups">Taxes amount by groups</label>
+        <div class="o_web_studio_report_amount_by_groups"/>
+    </div>
+</div>
+
+<div t-name="web_studio.ReportColumn">
+    <div class="row no-gutters">
+        <div class="o_web_studio_sidebar_text col-6">
+            <label for="o_web_studio_size">Size</label>
+            <div class="input-group o_web_studio_size">
+                <span class="text-muted">/ 12</span>
+            </div>
+        </div>
+        <div class="o_web_studio_sidebar_text col-6">
+            <label for="o_web_studio_offset">Offset</label>
+            <div class="input-group o_web_studio_offset">
+                <span class="text-muted">/ 12</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div t-name="web_studio.ReportImage">
+    <div class="o_web_studio_sidebar_text">
+        <label for="o_web_studio_source">Source</label>
+        <div class="o_web_studio_source"/>
+    </div>
+</div>
+
+<div t-name="web_studio.ReportGroups" class="o_web_studio_sidebar_text">
+    <div class="o_web_studio_sidebar_tags">
+        <label for="groups">Visible for</label>
+        <div class="o_web_studio_groups"/>
+    </div>
+</div>
+
+<div t-name="web_studio.ReportText">
+    <div class="o_web_studio_sidebar_text">
+        <div class="o_web_studio_text"/>
+    </div>
+</div>
+
+<div t-name="web_studio.ReportLayoutEditable" class="o_web_studio_layout">
+    <div class="row no-gutters">
+        <div class="col-9 o_web_studio_sidebar_text o_web_studio_margin">
+            <label>Margins</label>
+            <input type="text" t-att-value="widget['margin-top']"
+                    data-margin="margin-top" placeholder="top" />
+            <input type="text" t-att-value="widget['margin-right']"
+                    data-margin="margin-right" placeholder="right" />
+            <input type="text" t-att-value="widget['margin-bottom']"
+                    data-margin="margin-bottom" placeholder="bottom" />
+            <input type="text" t-att-value="widget['margin-left']"
+                    data-margin="margin-left" placeholder="left" />
+            <span class="text-muted"> px</span>
+        </div>
+        <div t-if="widget.displayWidth" class="col-3 o_web_studio_sidebar_text o_web_studio_width">
+            <label>Width</label>
+            <input type="text" t-att-value="widget.width" />
+            <span class="text-muted"> px</span>
+        </div>
+    </div>
+    <div class="row no-gutters">
+        <div t-if="!widget.isNodeText" class="col-4 o_web_studio_sidebar_text o_web_studio_text_decoration">
+            <label>Text decoration</label>
+            <button type="button" title="Bold" data-property="bold" t-att-class="widget.bold ? 'btn btn-secondary o_bold active' : 'btn btn-secondary o_bold'"><i class="fa fa-bold"/></button>
+            <button type="button" title="Italic" data-property="italic" t-att-class="widget.italic ? 'btn btn-secondary o_italic active' : 'btn btn-secondary o_italic'"><i class="fa fa-italic"/></button>
+            <button type="button" title="Underline" data-property="underline" t-att-class="widget.underline ? 'btn btn-secondary o_underline active' : 'btn btn-secondary o_underline'"><i class="fa fa-underline"/></button>
+        </div>
+        <div t-if="widget.displayAlignment" class="col-4 o_web_studio_sidebar_text o_web_studio_text_alignment">
+            <label>Alignment</label>
+            <t t-foreach="['left', 'center', 'right']" t-as="alignment">
+                <button type="button" t-att-title="alignment" t-attf-data-property="text-#{alignment}" t-attf-class="btn btn-secondary #{widget.alignment === 'text-' + alignment ? 'active' : ''}">
+                    <i t-attf-class="fa fa-align-#{alignment}"/>
+                </button>
+            </t>
+        </div>
+        <div t-if="!widget.isNodeText" class="col-4 o_web_studio_font_size">
+            <label>Font style</label>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"><i class="fa fa-magic"/></button>
+                <div class="dropdown-menu" role="menu">
+                    <div t-attf-class="dropdown-item-text #{!widget.fontSize ? 'active' : null}">Normal</div>
+                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'small' ? 'active' : null}" data-value="small">
+                        <div class="small">Small</div>
+                    </div>
+                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h1' ? 'active' : null}" data-value="h1">
+                        <h1>Heading1</h1>
+                    </div>
+                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h2' ? 'active' : null}" data-value="h2">
+                        <h2>Heading2</h2>
+                    </div>
+                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h3' ? 'active' : null}" data-value="h3">
+                        <h3>Heading3</h3>
+                    </div>
+                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h4' ? 'active' : null}" data-value="h4">
+                        <h4>Heading4</h4>
+                    </div>
+                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h5' ? 'active' : null}" data-value="h5">
+                        <h5>Heading5</h5>
+                    </div>
+                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h6' ? 'active' : null}" data-value="h6">
+                        <h6>Heading6</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row no-gutters">
+        <div t-if="!widget.isNodeText" class="col-6 o_web_studio_sidebar_text o_web_studio_colors">
+            <label>Colors</label>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"><i class="fa fa-font"/></button>
+                <div class="dropdown-menu" role="menu">
+                    <div role="menuitem" class="dropdown-item o_web_studio_font_colorpicker">
+                        <button data-target="font" class="btn btn-block o_web_studio_reset_color">reset color</button>
+                        <div class="o_web_studio_color_palette"/>
+                        <button data-target="font" class="btn btn-block o_web_studio_custom_color">Custom color</button>
+                        <div class="o_web_studio_custom_colors"/>
+                    </div>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"><i class="fa fa-paint-brush"/></button>
+                <div class="dropdown-menu" role="menu">
+                    <div role="menuitem" class="dropdown-item o_web_studio_background_colorpicker">
+                        <button data-target="background" class="btn btn-block o_web_studio_reset_color">reset color</button>
+                        <div class="o_web_studio_color_palette"/>
+                        <button data-target="background" class="btn btn-block o_web_studio_custom_color">Custom color</button>
+                        <div class="o_web_studio_custom_colors"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div t-if="widget.isTable" class="col-6 o_web_studio_sidebar_select o_web_studio_table_style">
+            <label>Table style</label>
+            <select>
+                <option></option>
+                <option t-att-selected="widget.tableStyle == 'table-sm' or null" value="table-sm">Compact</option>
+                <option t-att-selected="widget.tableStyle == 'table-striped' or null" value="table-striped">Striped</option>
+                <option t-att-selected="widget.tableStyle == 'table-bordered' or null" value="table-bordered">Bordered</option>
+                <option t-att-selected="widget.tableStyle == 'table-borderless' or null" value="table-borderless">Borderless</option>
+            </select>
+        </div>
+    </div>
+    <div t-if="widget.debug" class="row no-gutters">
+        <div class="col o_web_studio_sidebar_text o_web_studio_classes">
+            <label>Class</label>
+            <input type="text" t-att-value="widget.allClasses" />
+        </div>
+    </div>
+</div>
+
+<t t-name="web_studio.ReportDirectiveTOptions.options">
+    <div t-attf-class="o_web_studio_toption_options o_web_studio_toption_#{widget.key}">
+        <t t-foreach="widget.options" t-as="o">
+            <div t-attf-class="o_web_studio_toption_option o_web_studio_toption_option_#{widget.key}_#{o.key} #{o.required ? 'o_web_studio_required_option' : ''}">
+                <label>
+                    <t t-esc="o.string"/>
+                    <i t-if="o.description" class="fa fa-question-circle" t-att-title="o.description"/>
+                </label>
+            </div>
+        </t>
+    </div>
+</t>
+
+</templates>

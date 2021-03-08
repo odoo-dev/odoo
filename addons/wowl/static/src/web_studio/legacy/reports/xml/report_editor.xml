@@ -1,0 +1,10 @@
+<template>
+    <div t-name="web_studio.ReportEditor" class="o_web_studio_report_editor">
+        <div class="o_web_studio_report_iframe_container">
+            <div class="o_web_studio_loader text-center" >
+                <i class="fa fa-2x fa-spin fa-circle-o-notch text-gray-light" role="img" aria-label="Loading..." title="Loading..."/>
+            </div>
+            <iframe class="o_web_studio_report_iframe" src="about:blank" />
+        </div>
+    </div>
+</template>

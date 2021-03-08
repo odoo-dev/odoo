@@ -19,6 +19,7 @@ Odoo Web core module written in Owl.
     'data': [
         'views/templates.xml',
         'views/ent_templates.xml',
+        'views/studio_templates.xml',
     ],
 
     'qweb': [

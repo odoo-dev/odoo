@@ -11,6 +11,27 @@ import { EditorAdapter } from "./editor_adapter";
 
 const { Component, core, hooks } = owl;
 
+
+const actionServiceStudio = {
+  name: 'action',
+  dependencies: ['studio'],
+  deploy(env) {
+    const action = actionService.deploy(env);
+    const _doAction = action.doAction;
+
+    function doAction(actionRequest) {
+      if (actionRequest === "web_studio.action_edit_report") {
+        debugger;
+        return;
+      }
+      return _doAction(...arguments);
+    }
+
+    return Object.assign(action, { doAction });
+  }
+};
+
+
 export class Editor extends Component {
   setup() {
     this.studio = useService("studio");
@@ -23,8 +44,8 @@ export class Editor extends Component {
     this.env.services.router = {
       pushState() {},
     };
-    this.env.services.action = actionService.deploy(this.env);
-
+    // Assuming synchronousness
+    this.env.services.action = actionServiceStudio.deploy(this.env);
     this.actionManager = useService("action");
 
     this.ActionEditorMain = ActionEditorMain; // to remove
