@@ -107,21 +107,23 @@ class ResCompany(models.Model):
     account_dashboard_onboarding_state = fields.Selection(DASHBOARD_ONBOARDING_STATES, string="State of the account dashboard onboarding panel", default='not_done')
     invoice_terms = fields.Text(string='Default Terms and Conditions', translate=True)
     terms_type = fields.Selection([('plain', 'Terms as Notes'), ('html', 'Terms as Web Page')],
-                                  string='Terms & Conditions format', default='plain')
+                                  string='Terms & Conditions format', default='plain'
+                                  )
 
-    # compute method To get "terms_default.xml" template and store in the invoice_terms_html field.
-    @api.depends('terms_type')
-    def default_get_terms_and_conditions(self):
-        if self.invoice_terms_html == False:
-            if(self.terms_type == 'html'):
-                term_template = self.env.ref("account.default_terms_and_conditions", False)
-                if term_template:
-                    rendered_body = term_template._render({'name': self.name, 'country': self.country_id.name}, engine='ir.qweb')
-                    self.invoice_terms_html = rendered_body
-
+    
+    
     invoice_terms_html = fields.Html(string='Default Terms and Conditions as a Web page', translate=True,
-                                     compute = 'default_get_terms_and_conditions', store = True, readonly=False)
-                           
+                                    compute = '_compute_invoice_terms_html' , store = True, readonly=False)
+    # compute method To get "terms_default.xml" template and store in the invoice_terms_html field.
+    @api.depends('terms_type','invoice_terms_html')
+    def _compute_invoice_terms_html(self):
+        term_template = self.env.ref("account.default_terms_and_conditions", False)
+        for terms in self:
+            if ((terms.invoice_terms_html == False) and (terms.terms_type == 'html') and (term_template)):    
+                terms.invoice_terms_html = term_template._render({'name': terms.name, 'country': terms.country_id.name}, engine='ir.qweb')
+            else:
+                terms.invoice_terms_html == False
+                       
    
     account_setup_bill_state = fields.Selection(ONBOARDING_STEP_STATES, string="State of the onboarding bill step", default='not_done')
 

@@ -40,18 +40,6 @@ class ResConfigSettings(models.TransientModel):
                                                   default=_default_recovery_mail_template, related='website_id.cart_recovery_mail_template_id', readonly=False)
     cart_abandoned_delay = fields.Float("Abandoned Delay", help="Number of hours after which the cart is considered abandoned.",
                                         default=1.0, related='website_id.cart_abandoned_delay', readonly=False)
-
-    has_rights= fields.Boolean(string="Has Web Builder Access?")
-    @api.depends()
-    def check_has_access_rights_web_builder(self):
-        print("Inside check_has_access_rights_web_builder",self.has_rights)
-        if self.user_has_groups('account.website_designer_edit_qweb'):
-            for record in self:
-                record.has_rights= True
-        else:
-            for record in self:
-                record.has_rights= False
-        print("Inside check_has_access_rights_web_builder",self.has_rights)
         
     @api.model
     def get_values(self):

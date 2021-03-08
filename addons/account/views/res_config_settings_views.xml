@@ -320,42 +320,8 @@
                                                 </div>
                                             </div>
                                             <field name="preview_ready" invisible="1"/>
-                                            <!-- <field name="module_website_installed" invisible="0"/> -->
                                             <div attrs="{'invisible': [('preview_ready', '=', False)]}">
-                                                <!-- attrs="{'invisible': [('module_website_installed', '=', True)]}" -->
-                                                <div>
-                                                    <div>
-                                                        <a href="/terms" >
-                                                            <i class="fa fa-arrow-right"></i>
-                                                                Edit in pop up
-                                                        </a>
-                                                    </div>
-                                                    <div>
-                                                        <a href="/terms">
-                                                            <i class="fa fa-arrow-right"></i>
-                                                                Preview
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                                <!-- <field name="module_website_installed" invisible="0"/> -->
-                                                <!-- attrs="{'invisible': [('module_website_installed', '=', False)]}" -->
-                                                <div>
-                                                    <div>
-                                                        <a href="/terms" >
-                                                            <i class="fa fa-arrow-right"></i>
-                                                                Edit in website builder
-                                                        </a>
-                                                    </div>
-                                                    <div>
-                                                        <a href="/terms">
-                                                            <i class="fa fa-arrow-right"></i>
-                                                                Preview
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <button name="action_term_popup" type="object" string ="Pop up"/>
-                                                </div>
+                                                <button name="action_term_popup" type="object" string ="Pop up"/>
                                             </div>
                                         </div>
                                     </div>
