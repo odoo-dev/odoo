@@ -3,6 +3,8 @@
 from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 from itertools import groupby
+
+from markupsafe import Markup
 from pytz import timezone, UTC
 from werkzeug.urls import url_encode
 
@@ -784,9 +786,9 @@ class PurchaseOrder(models.Model):
             line._update_date_planned(date)
 
     def _create_update_date_activity(self, updated_dates):
-        note = _('<p> %s modified receipt dates for the following products:</p>') % self.partner_id.name
+        note = Markup(_('<p> %s modified receipt dates for the following products:</p>')) % self.partner_id.name
         for line, date in updated_dates:
-            note += _('<p> &nbsp; - %s from %s to %s </p>') % (line.product_id.display_name, line.date_planned.date(), date.date())
+            note += Markup(_('<p> &nbsp; - %s from %s to %s </p>')) % (line.product_id.display_name, line.date_planned.date(), date.date())
         activity = self.activity_schedule(
             'mail.mail_activity_data_warning',
             summary=_("Date Updated"),
@@ -800,7 +802,7 @@ class PurchaseOrder(models.Model):
 
     def _update_update_date_activity(self, updated_dates, activity):
         for line, date in updated_dates:
-            activity.note += _('<p> &nbsp; - %s from %s to %s </p>') % (line.product_id.display_name, line.date_planned.date(), date.date())
+            activity.note += Markup(_('<p> &nbsp; - %s from %s to %s </p>')) % (line.product_id.display_name, line.date_planned.date(), date.date())
 
 
 class PurchaseOrderLine(models.Model):
