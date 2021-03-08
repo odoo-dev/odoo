@@ -25,6 +25,7 @@ class MailIdentity(models.Model):
         readonly=False, store=True)
     # link with other contact models
     partner_id = fields.Many2one('res.partner', string='Partner')
+    user_id = fields.Many2one('res.users', string='User')
     # security / access
     token = fields.Char(string='Token')
 

@@ -25,12 +25,20 @@ class Users(models.Model):
         help="Policy on how to handle Chatter notifications:\n"
              "- Handle by Emails: notifications are sent to your email address\n"
              "- Handle in Odoo: notifications appear in your Odoo Inbox")
+    # identity
+    mail_identity_ids = fields.One2many('mail.identity', 'user_id', string='Identities', copy=False)
+    mail_identity_id = fields.Many2one('mail.identity', string='Main identity', compute='_compute_mail_identity_id')
     # channel-specific: moderation
     is_moderator = fields.Boolean(string='Is moderator', compute='_compute_is_moderator')
     moderation_counter = fields.Integer(string='Moderation count', compute='_compute_moderation_counter')
     moderation_channel_ids = fields.Many2many(
         'mail.channel', 'mail_channel_moderator_rel',
         string='Moderated channels')
+
+    @api.depends('mail_identity_ids.partner_id')
+    def _compute_mail_identity_id(self):
+        for partner in self:
+            partner.mail_identity_id = partner.mail_identity_ids[0] if partner.mail_identity_ids else False
 
     @api.depends('moderation_channel_ids.moderation', 'moderation_channel_ids.moderator_ids')
     def _compute_is_moderator(self):
