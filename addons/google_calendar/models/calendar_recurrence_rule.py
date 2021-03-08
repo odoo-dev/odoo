@@ -77,11 +77,14 @@ class RecurrenceRule(models.Model):
             self.env["calendar.event"]._get_time_fields()
             | self.env["calendar.event"]._get_recurrent_fields()
         )
+        # We avoid to write time_fields because they are not shared between events.
+        # problem: if the start datetime is modified in google, we can't write it on all events.
+        # This behavior may be difficult to understand for users.
         self._write_events(dict({
             field: value
             for field, value in self.env["calendar.event"]._odoo_values(gevent).items()
             if field not in time_fields
-        }, need_sync= False))
+        }, need_sync=False))
 
     def _create_from_google(self, gevents, vals_list):
         for gevent, vals in zip(gevents, vals_list):

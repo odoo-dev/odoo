@@ -181,8 +181,7 @@ class GoogleSync(models.AbstractModel):
                 google_service.delete(google_id, token=token, timeout=timeout)
                 # When the record has been deleted on our side, we need to delete it on google but we don't want to raise
                 # an error because the record don't exists anymore.
-                if self.exists():
-                    self.need_sync = False
+                self.exists().need_sync = False
 
     @after_commit
     def _google_patch(self, google_service: GoogleCalendarService, google_id, values, timeout=TIMEOUT):
