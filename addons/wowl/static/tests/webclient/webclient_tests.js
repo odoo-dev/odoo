@@ -7,7 +7,7 @@ import { notificationService } from "../../src/notifications/notification_servic
 import { click, mount, makeTestEnv } from "../helpers/utility";
 import { menuService } from "../../src/services/menu_service";
 import { fakeTitleService } from "../helpers/mocks";
-import { createWebClient, doAction, getActionManagerTestConfig } from "../action_manager/helpers";
+import { createWebClient, doAction, getActionManagerTestConfig } from "../actions/helpers";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { WebClient } from "../../src/webclient/webclient";

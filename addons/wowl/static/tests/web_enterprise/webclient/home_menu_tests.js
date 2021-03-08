@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { HomeMenu } from "@wowl/web_enterprise/webclient/home_menu/home_menu";
-import { modelService } from "@wowl/services/model";
+import { modelService } from "@wowl/services/model_service";
 import { Registry } from "@wowl/core/registry";
 import testUtils from "web.test_utils";
 import { getFixture, makeTestEnv, mount } from "../../helpers/utility";
@@ -181,7 +181,7 @@ QUnit.module(
         },
       };
       const fakeMenuService = {
-        name: "menus",
+        name: "menu",
         deploy() {
           return {
             selectMenu(menu) {

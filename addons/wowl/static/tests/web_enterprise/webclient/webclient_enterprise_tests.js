@@ -8,11 +8,11 @@ import {
   doAction,
   getActionManagerTestConfig,
   loadState,
-} from "../../action_manager/helpers";
+} from "../../actions/helpers";
 import { homeMenuService } from "../../../src/web_enterprise/webclient/home_menu/home_menu_service";
-import { debugManagerService } from "../../../src/debug_manager/debug_manager_service";
+import { debugService } from "../../../src/debug/debug_service";
 import { Registry } from "../../../src/core/registry";
-import { debugManager } from "../../../src/debug_manager/debug_manager";
+import { debugManager } from "../../../src/debug/debug_manager";
 import { EnterpriseDebugManager } from "../../../src/web_enterprise/debug_manager/debug_manager";
 import { makeFakeDeviceService } from '../../helpers/mocks';
 import { burgerMenu } from '../../../src/web_enterprise/webclient/burger_menu/burger_menu';
@@ -389,7 +389,7 @@ QUnit.module("WebClient Enterprise", (hooks) => {
       assert.expect(9);
       const debugMgr = debugManager.Component;
       debugManager.Component = EnterpriseDebugManager;
-      testConfig.serviceRegistry.add(debugManagerService.name, debugManagerService);
+      testConfig.serviceRegistry.add(debugService.name, debugService);
       testConfig.systrayRegistry = new Registry();
       testConfig.debugManagerRegistry = new Registry();
       testConfig.debugManagerRegistry.add("item_1", () => {

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 import { ExpirationPanel } from "@wowl/web_enterprise/webclient/home_menu/expiration_panel";
 import { Registry } from "@wowl/core/registry";
-import { modelService } from "@wowl/services/model";
+import { modelService } from "@wowl/services/model_service";
 import { makeFakeUIService } from "../../helpers/mocks";
 import { makeTestEnv, mount } from "../../helpers/utility";
 import testUtils from "web.test_utils";
