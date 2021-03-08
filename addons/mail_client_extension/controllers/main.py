@@ -109,10 +109,11 @@ class MailClientExtensionController(http.Controller):
 
     @http.route('/mail_client_extension/modules/get', type="json", auth="outlook", csrf=False, cors="*")
     def modules_get(self,  **kwargs):
-        installed_modules = request.env['ir.module.module'].search([('state', '=', 'installed')])
-        modules = [module.name for module in installed_modules]
-        # TODO return modules having name = mail_client_extension without breaking older versions of the plugin
-        return {'modules': modules}
+        """
+            deprecated route, not needed for newer versions of the plugin but necessary
+            for supporting older versions
+        """
+        return {'modules': ['contacts', 'crm']}
 
     def _find_existing_company(self, normalized_email):
         sender_domain = normalized_email.split('@')[1]
@@ -190,9 +191,8 @@ class MailClientExtensionController(http.Controller):
         
         return new_company, {'type': 'company_created'}
 
-    @staticmethod
-    def _get_partner_dict(partner):
-        return {
+    def _get_partner_dict(self, partner, with_extra_info=False):
+        partner_dict = {
             'id': partner.id,
             'name': partner.name,
             'title': partner.function,
@@ -202,26 +202,35 @@ class MailClientExtensionController(http.Controller):
             'mobile': partner.mobile,
             'enrichment_info': None,
         }
+        if with_extra_info:
+            partner_dict['extra_info'] = self._get_partner_extra_info(partner.id)
+        return partner_dict
 
     @http.route('/mail_client_extension/partner/get', type="json", auth="outlook", cors="*")
-    def res_partner_get_by_email(self, email, name, partner_id=None, **kwargs):
-        response = {}
+    def res_partner_get(self, email=None, name=None, partner_id=None, **kwargs):
 
-        #compute the sender's domain
+        assert partner_id or (name and email)
+
+        response = {}
+        partner = None
+        if partner_id:
+            partner = request.env['res.partner'].browse(partner_id)
+            email = partner.email
+
         normalized_email = tools.email_normalize(email)
         if not normalized_email:
             response['error'] = 'Bad email.'
             return response
         sender_domain = normalized_email.split('@')[1]
 
-        if partner_id:
-            partner = request.env['res.partner'].browse(partner_id).exists()
-        else:
+        if not partner_id:
+
             # Search for the partner based on the email.
             # If multiple are found, take the first one.
             partner = request.env['res.partner'].search([('email', 'in', [normalized_email, email])], limit=1)
+
         if partner:
-            response['partner'] = self._get_partner_dict(partner)
+            response['partner'] = self._get_partner_dict(partner, True)
             if partner.company_type == 'company':
                 response['partner']['company'] = self._get_company_dict(partner)
             else:
@@ -229,12 +238,13 @@ class MailClientExtensionController(http.Controller):
                     response['partner']['company'] = self._get_company_dict(partner.parent_id)
                 else:
                     response['partner']['company'] = self._get_company_dict(None)
-        else: #no partner found, for maintaining older versions of the plugin
+        else: #no partner found
             response['partner'] = {
                 'id': -1,
                 'name': name,
                 'email': email,
-                'enrichment_info': None
+                'enrichment_info': None,
+                'extra_info': self._get_partner_extra_info(partner_id)
             }
             company = self._find_existing_company(normalized_email)
             if not company:  # create and enrich company
@@ -286,31 +296,27 @@ class MailClientExtensionController(http.Controller):
         partner.message_post(body=message)
 
     @http.route('/mail_client_extension/partner/enrich_company', type="json", auth="outlook", cors="*")
-    def res_partner_enrich_company(self, partner_email, partner_id=None, enrich_on_not_exists=False):
+    def res_partner_enrich_company(self, partner_id):
+        """
+        Route used when the user clicks on the enrich partner button
+        it will try to enrich the partner using IAP
+        """
         response = {}
 
-        normalized_email = tools.email_normalize(partner_email)
+        partner = request.env['res.partner'].browse(partner_id)
+
+        normalized_email = tools.email_normalize(partner.email)
         if not normalized_email:
             response['error'] = 'Bad email.'
             return response
         company_domain = normalized_email.split('@')[1]
 
-        if partner_id and partner_id > 0:
-            partner = request.env['res.partner'].browse(partner_id)
-            if partner.parent_id:
-                company = partner.parent_id
-            else:
-                company = self._find_existing_company(normalized_email)
-                if not company and enrich_on_not_exists:  # create and enrich company
-                    company, enrichment_info = self._create_company_from_iap(company_domain)
-                    response['enrichment_info'] = enrichment_info
-                    partner.write({'parent_id': company})
-        else:
-            company = self._find_existing_company(normalized_email)
-            if not company:  # create and enrich company
-                company, enrichment_info = self._create_company_from_iap(company_domain)
-                response['enrichment_info'] = enrichment_info
+        company, enrichment_info = self._create_company_from_iap(company_domain)
+
+        response['enrichment_info'] = enrichment_info
         response['company'] = self._get_company_dict(company)
+        if company:
+            partner.write({'parent_id': company})
 
         return response
 
@@ -320,3 +326,8 @@ class MailClientExtensionController(http.Controller):
         return werkzeug.utils.redirect(
             '/web#action=%s&model=res.partner&id=%s' % (server_action.id, int(partner_id)))
 
+    def _get_partner_extra_info(self, partner_id):
+        """
+        To override by other modules if extra information have to be returned
+        """
+        return {}

@@ -6,11 +6,13 @@ import werkzeug
 from odoo import http
 from odoo.http import request
 from odoo.tools.misc import formatLang
+from odoo.addons.mail_client_extension.controllers.main import MailClientExtensionController
+
 
 _logger = logging.getLogger(__name__)
 
 
-class MailClientExtensionController(http.Controller):
+class MailClientExtensionController(MailClientExtensionController):
 
     #log_single_mail_content route is in routes for maintaining the legacy version
     # of the plugin which relies on it
@@ -22,8 +24,27 @@ class MailClientExtensionController(http.Controller):
         crm_lead.message_post(body=message)
 
     @http.route('/mail_client_extension/lead/get_by_partner_id', type="json", auth="outlook", cors="*")
-    def crm_lead_get_by_partner_id(self, partner, limit=1000, offset=0, **kwargs):
-        partner_leads = request.env['crm.lead'].search([('partner_id', '=', partner)], offset=offset, limit=limit)
+    def crm_lead_get_by_partner_id(self, partner, limit=5, offset=0, **kwargs):
+        """
+            deprecated route, not needed for newer versions of the plugin but necessary
+            for supporting older versions
+        """
+        return {'leads': self._get_leads(partner, limit, offset)}
+
+    @http.route('/mail_client_extension/lead/view', type='http', auth='user', methods=['GET'])
+    def crm_lead_redirect_form_view(self, lead_id):
+        server_action = http.request.env.ref("crm_mail_client_extension.lead_view")
+        return werkzeug.utils.redirect(
+            '/web#action=%s&model=crm.lead&id=%s' % (server_action.id, int(lead_id)))
+
+    @http.route('/mail_client_extension/lead/create_from_partner', type='http', auth='user', methods=['GET'])
+    def crm_lead_redirect_create_form_view(self, partner_id):
+        server_action = http.request.env.ref("crm_mail_client_extension.lead_creation_prefilled_action")
+        return werkzeug.utils.redirect('/web#action=%s&model=crm.lead&partner_id=%s' % (server_action.id, int(partner_id)))
+
+    def _get_leads(self,partner, limit=5, offset=0):
+        partner_leads = request.env['crm.lead'].search([('partner_id', '=', partner)],
+                                                       offset=offset, limit=limit)
         leads = []
 
         recurring_revenues = request.env.user.has_group('crm.group_use_recurring_revenues')
@@ -46,15 +67,9 @@ class MailClientExtensionController(http.Controller):
 
             leads.append(lead_values)
 
-        return {'leads': leads}
+        return leads
 
-    @http.route('/mail_client_extension/lead/view', type='http', auth='user', methods=['GET'])
-    def crm_lead_redirect_form_view(self, lead_id):
-        server_action = http.request.env.ref("crm_mail_client_extension.lead_view")
-        return werkzeug.utils.redirect(
-            '/web#action=%s&model=crm.lead&id=%s' % (server_action.id, int(lead_id)))
-
-    @http.route('/mail_client_extension/lead/create_from_partner', type='http', auth='user', methods=['GET'])
-    def crm_lead_redirect_create_form_view(self, partner_id):
-        server_action = http.request.env.ref("crm_mail_client_extension.lead_creation_prefilled_action")
-        return werkzeug.utils.redirect('/web#action=%s&model=crm.lead&partner_id=%s' % (server_action.id, int(partner_id)))
+    def _get_partner_extra_info(self, partner_id):
+        extra_info = super(MailClientExtensionController, self)._get_partner_extra_info(partner_id)
+        extra_info['leads'] = self._get_leads(partner_id)
+        return extra_info
