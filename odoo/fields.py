@@ -1500,15 +1500,6 @@ class _String(Field):
 
         return translate
 
-    def check_trans_value(self, value):
-        """ Check and possibly sanitize the translated term `value`. """
-        if callable(self.translate):
-            # do a "no-translation" to sanitize the value
-            callback = lambda term: None
-            return self.translate(callback, value)
-        else:
-            return value
-
     def write(self, records, value):
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
@@ -1758,6 +1749,10 @@ class Html(_String):
     def convert_to_read(self, value, record, use_name_get=True):
         r = super().convert_to_read(value, record, use_name_get)
         return r and Markup(r)
+
+    def get_trans_terms(self, value):
+        # ensure the translation terms are stringified, otherwise we can break the PO file
+        return list(map(str, super().get_trans_terms(value)))
 
 
 class Date(Field):
