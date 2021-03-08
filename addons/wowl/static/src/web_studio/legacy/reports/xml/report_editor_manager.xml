@@ -1,0 +1,7 @@
+<templates>
+
+<t t-name="web_studio.PrintSection">
+    <button class="btn btn-primary o_web_studio_report_print">Print</button>
+</t>
+
+</templates>
