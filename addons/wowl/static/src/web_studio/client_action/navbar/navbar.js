@@ -3,7 +3,7 @@ import { EnterpriseNavBar } from "@wowl/web_enterprise/webclient/navbar/navbar";
 import { NotEditableActionError } from "../../studio_service";
 import { useService } from "@wowl/core/hooks";
 import { HomeMenuCustomizer } from "./home_menu_customizer/home_menu_customizer";
-import { EditMenuItem } from '../../legacy/edit_menu/edit_menu_adapters';
+import { EditMenuItem } from '../../legacy/edit_menu/edit_menu_adapter';
 
 export class StudioNavbar extends EnterpriseNavBar {
   constructor() {
