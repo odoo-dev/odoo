@@ -45,3 +45,39 @@ class MailIdentity(models.Model):
         for identity in self:
             if identity.partner_id.mobile or identity.partner_id.phone or not identity.phone:
                 identity.phone = identity.partner_id.mobile or identity.parnter_id.phone
+
+    def _find_or_create_from_email(self, email):
+        """ Find or create an identity based on a string holding an email.
+
+        :param str email: string hopefully holding an email. It is parsed to
+          try to find an email. If not it is used to populate an identity
+          name.
+
+        :return: recordset of identity: either the one matching ``email``
+          either a new one creted from ``email`` either void if ``email`` is
+          void.
+        """
+        if not email:
+            return self
+
+        parsed_name, parsed_email = self.env['res.partner']._parse_partner_name(email)
+        if not parsed_email:
+            parsed_email = self.default_get(['email'])['email']
+        related_partner = self.env['res.partner']
+
+        if parsed_email:
+            email_normalized = tools.email_normalize(parsed_email)
+            if email_normalized:
+                identity = self.search([('email_normalized', '=', email_normalized)], limit=1)
+                if identity:
+                    return identity
+                related_partner = self.env['res.partner'].search([('email_normalized', '=', email_normalized)], limit=1)
+
+        identity_values = {
+            'name': parsed_name or parsed_email,
+            'partner_id': related_partner.id,
+        }
+        if parsed_email:
+            identity_values['email'] = parsed_email
+
+        return self.create(identity_values)
