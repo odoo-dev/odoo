@@ -9,6 +9,8 @@ import ActionEditor from "web_studio.ActionEditor";
 import { ActionEditorMain } from '../../legacy/action_editor_main';
 import { EditorAdapter } from "./editor_adapter";
 
+import { ReportEditorAdapter } from './report_editor_adapter';
+
 const { Component, core, hooks } = owl;
 
 
@@ -19,9 +21,9 @@ const actionServiceStudio = {
     const action = actionService.deploy(env);
     const _doAction = action.doAction;
 
-    function doAction(actionRequest) {
+    function doAction(actionRequest, options) {
       if (actionRequest === "web_studio.action_edit_report") {
-        debugger;
+        env.services.studio.setParams({ editorTab: 'reports', editedReport: options.report });
         return;
       }
       return _doAction(...arguments);
@@ -111,6 +113,7 @@ Editor.components = {
   EditorMenu,
   EditorAdapter, // to be replaced by ActionEditor
   ActionContainer,
+  ReportEditorAdapter,
 };
 
 
@@ -122,8 +125,8 @@ function lpeReportAction(model) {
     'views': [[false, 'kanban'], [false, 'form']],
     'target': 'current',
     'context': {
-        'default_model': model.model,
-        'search_default_model': model.model,
+        'default_model': model,
+        'search_default_model': model,
     },
   };
 }

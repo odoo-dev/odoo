@@ -10,7 +10,7 @@
         <script type="text/javascript" src="/web_studio/static/src/js/web_client.js"></script>
  -->
         <!-- can not be in the lazy load bundle because the menu is an include and the menu is already created -->
-<!--         <script type="text/javascript" src="/web_studio/static/src/js/menu.js"></script>
+        <!-- <script type="text/javascript" src="/web_studio/static/src/js/menu.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/common_menu_dialog.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/edit_menu.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/new_model.js"></script>
@@ -20,13 +20,17 @@
         <script type="text/javascript" src="/web_studio/static/src/js/utils.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/tours/web_studio.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/model_configurator.js"></script>
+    </template> -->
+
+    <template id="studio_lazy_assets">
+        <t t-call="web_editor.compiled_assets_wysiwyg" />
     </template>
 
-    <template id="webclient_bootstrap" inherit_id="web.webclient_bootstrap">
-        <xpath expr="//t[@t-call-assets='web.assets_backend'][@t-css='false']" position="after">
-            <t t-call-assets="web_studio.assets" groups="base.group_system"/>
+    <template id="studio_root" inherit_id="wowl.ent_root">
+        <xpath expr="//t[@t-call-assets='wowl.ent_assets_backend'][@t-css='false']" position="after">
+            <t t-call-assets="wowl.studio_lazy_assets" groups="base.group_system" />
         </xpath>
-    </template> -->
+    </template>
 
     <record id="act_report_xml_view_kanban" model="ir.ui.view">
         <field name="name">ir.actions.report.kanban</field>

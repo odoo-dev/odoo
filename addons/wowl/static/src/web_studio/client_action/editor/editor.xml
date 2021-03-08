@@ -16,11 +16,9 @@
         <EditorAdapter t-else="" Component="ActionEditor" params="studio.editedAction" class="o_web_studio_client_action" t-key="key"/>
     </t>
 
-<!--         <t t-if="studio.editorTab === 'reports' and studio.editedReport">
-        <ReportEditorSidebar/>
-        <ReportEditor/>
-        <Pager/>
-    </t> -->
+    <t t-if="studio.editorTab === 'reports' and studio.editedReport">
+        <ReportEditorAdapter/>
+    </t>
 </div>
 
 </templates>
