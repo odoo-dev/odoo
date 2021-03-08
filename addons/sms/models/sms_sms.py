@@ -4,7 +4,7 @@
 import logging
 import threading
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 
 _logger = logging.getLogger(__name__)
 
@@ -57,6 +57,21 @@ class SmsSms(models.Model):
             # auto-commit if asked except in testing mode
             if auto_commit is True and not getattr(threading.currentThread(), 'testing', False):
                 self._cr.commit()
+
+    def retry(self):
+        self.state = 'outgoing'
+
+    def resend(self):
+        self.filtered(lambda sms: sms.state == 'error').send()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Success'),
+                'message': _('The selected SMS Text Messages are successfully being resent'),
+                'type': 'success'
+            }
+        }
 
     def cancel(self):
         self.state = 'canceled'
