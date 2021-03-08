@@ -3513,6 +3513,157 @@ QUnit.test('receive new needaction messages', async function (assert) {
     );
 });
 
+QUnit.test('display unfollow button when current user is follower of thread', async function (assert) {
+    assert.expect(10);
+    this.data['res.partner'].records.push({ id: 20, message_follower_ids: [1], name: 'Refactoring' });
+    this.data['mail.followers'].records.push({
+        id: 1,
+        is_active: true,
+        is_editable: true,
+        partner_id: this.data.currentPartnerId,
+        res_id: 20,
+        res_model: 'res.partner',
+    });
+    this.data['mail.message'].records.push({
+        body: "<p>Test</p>",
+        date: "2019-04-20 11:00:00",
+        id: 100, // random unique id, will be used to link notification to message
+        message_type: 'comment',
+        // needaction needs to be set here for message_fetch domain, because
+        // mocked models don't have computed fields
+        needaction: true,
+        model: 'res.partner',
+        record_name: 'Refactoring',
+        res_id: 20,
+    });
+    this.data['mail.notification'].records.push({
+        mail_message_id: 100, // id of related message
+        res_partner_id: this.data.currentPartnerId, // must be for current partner
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_post') {
+                assert.step('message_post');
+            }
+            if (route.includes('message_unsubscribe')) {
+                assert.step('rpc:message_unsubscribe');
+            }
+            return this._super(...arguments);
+        },
+    });
+    assert.strictEqual(
+        document.querySelectorAll('.o_Message').length,
+        1,
+        "should display a single message"
+    );
+    assert.strictEqual(
+        document.querySelector('.o_Message').dataset.messageLocalId,
+        this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId,
+        "should display message with ID 100"
+    );
+    assert.strictEqual(
+        document.querySelector('.o_Message_originThread').textContent,
+        " on Refactoring",
+        "should display message originates from record 'Refactoring'"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message_commandUnfollow',
+        "should have button unfollow"
+    );
+    await afterNextRender(() =>
+        document.querySelector('.o_Message_commandUnfollow').click()
+    );
+    assert.verifySteps([
+        'rpc:message_unsubscribe',
+    ]);
+    assert.containsNone(
+        document.body,
+        '.o_Message',
+        "inbox mailbox should have no message after clicking unfollow as it marked message as read"
+    );
+
+    await afterNextRender(() =>
+        document.querySelector(`
+            .o_DiscussSidebar_item[data-thread-local-id="${
+                this.env.messaging.history.localId
+            }"]
+        `).click()
+    );
+    assert.hasClass(
+        document.querySelector(`
+            .o_DiscussSidebar_item[data-thread-local-id="${
+                this.env.messaging.history.localId
+            }"]
+        `),
+        'o-active',
+        "history mailbox should be active after clicking on it"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "history mailbox should have message without unfollow button as partner will be removed from followers of thread"
+    );
+    // debugger;
+    // assert.containsNone(
+    //     document.body,
+    //     '.o_Message_commandUnfollow',
+    //     "should not have button unfollow"
+    // );
+});
+
+QUnit.test('should not display unfollow button when current user is not follower of thread', async function (assert) {
+    assert.expect(2);
+    this.data['res.partner'].records.push(
+        {
+            id: 20,
+            name: 'Refactoring'
+        },
+        {
+            id: 21,
+            message_follower_ids: [1],
+            name: 'System'
+        }
+    );
+    this.data['mail.followers'].records.push({
+        id: 1,
+        is_active: true,
+        is_editable: true,
+        partner_id: this.data.currentPartnerId,
+        res_id: 21,
+        res_model: 'res.partner',
+    });
+    this.data['mail.message'].records.push({
+        body: "<p>Test</p>",
+        date: "2019-04-20 11:00:00",
+        id: 100, // random unique id, will be used to link notification to message
+        message_type: 'comment',
+        // needaction needs to be set here for message_fetch domain, because
+        // mocked models don't have computed fields
+        needaction: true,
+        model: 'res.partner',
+        record_name: 'Refactoring',
+        res_id: 20,
+    });
+    this.data['mail.notification'].records.push({
+        mail_message_id: 100, // id of related message
+        res_partner_id: this.data.currentPartnerId, // must be for current partner
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_post') {
+                assert.step('message_post');
+            }
+            return this._super(...arguments);
+        },
+    });
+    assert.containsNone(
+        document.body,
+        '.o_Message_commandUnfollow',
+        "should not have button unfollow"
+    );
+});
+
 QUnit.test('reply to message from inbox (message linked to document)', async function (assert) {
     assert.expect(19);
 
