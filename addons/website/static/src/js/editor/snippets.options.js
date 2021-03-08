@@ -2605,49 +2605,51 @@ options.registry.MobileVisibility = options.Class.extend({
 
 options.registry.ConditionalVisibility = options.Class.extend({
 
-
-    /**
-     * @overide
-     */
-    init: function () {
-        this._super.apply(this, arguments);
-        if (!this.campaigns) {
-            this.campaigns = 1;
-            console.log('init campaign');
-        }
-        // this.$target[0].style.display = "block";
+    
+    // For the many2one widget to work after save, we need to save the recordId to get display_name
+    countryFilter: function (previewMode, widgetValue, params) {
+        const recordData = JSON.parse(params.recordData);
+        this._setDataAttribute('visibilityCountryId', recordData.id, recordData.code, params);
     },
 
-    /**
-     * @override
-     */
+    languageFilter: function (previewMode, widgetValue, params) {
+        const recordData = JSON.parse(params.recordData);
+        this._setDataAttribute('visibilityLangId', recordData.id, recordData.url_code, params);
+    },
 
-    selectDataAttribute: function (previewMode, widgetValue, params) {
-        // this.$target[0].visibilityOptions[params.attributeName] = widgetValue;
-        return this._super(...arguments);
+    utmMediumFilter: function (previewMode, widgetValue, params) {
+        const recordData = JSON.parse(params.recordData);
+        this._setDataAttribute('visibilityUtmMediumId', recordData.id, recordData.display_name, params);
+    },
+
+    utmSourceFilter: function (previewMode, widgetValue, params) {
+        const recordData = JSON.parse(params.recordData);
+        this._setDataAttribute('visibilityUtmSourceId', recordData.id, recordData.display_name, params);
+    },
+
+    utmCampaignFilter: function (previewMode, widgetValue, params) {
+        const recordData = JSON.parse(params.recordData);
+        this._setDataAttribute('visibilityUtmCampaignId', recordData.id, recordData.display_name, params);
     },
 
     onTargetShow: async function () {
         this.$target[0].style = this.$target[0].previousStyle; // restoring the previous style attribute if any
     },
 
-    onTargetHide: async function() {
+    onTargetHide: async function () {
         this.$target[0].previousStyle = this.$target.style; // we save the current style as we're going to modify it
         this.$target[0].style.display = 'none';
     },
 
     cleanForSave: async function () {
-        //const visibilityOptions = this.$target[0].visibilityOptions;
         this.$target[0].style = this.$target[0].previousStyle; // restoring the previous style if any
         delete this.$target[0].dataset["invisible"]; // we do not need to store "invisible as it is not determine by javascript";
         for (let attr of this.$target[0].attributes) {
-            if (attr.name.startsWith('data-visibility-')) {
+            if (attr.name.startsWith('data-visibility-') && !attr.name.endsWith('-id')) {
                 let shortName = attr.name.replace('data-visibility-', '');
                 if (shortName === 'lang') {
-                    console.log('applied style to dom for :', shortName);
                     this._applyStyleToDom(shortName, attr.name, attr.value);
                 } else {
-                    console.log('applied style to dom for :', shortName);
                     this._applyStyleToDom('data-' + shortName, attr.name, attr.value);
                 }
             }
@@ -2658,7 +2660,13 @@ options.registry.ConditionalVisibility = options.Class.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    _applyStyleToDom: function(htmlAttribute, dataAttribute, value) {
+    _setDataAttribute: function (dataIdName, id, dataValue, params) {
+        this.$target[0].dataset[dataIdName] = id;
+        const value = this._selectAttributeHelper(dataValue, params);
+        this.$target[0].dataset[params.attributeName] = value;
+    },
+
+    _applyStyleToDom: function (htmlAttribute, dataAttribute, value) {
         let style = document.getElementById('wrap').getElementsByTagName('style')[0];
         if (!style) {
             let body = document.getElementById('wrap');
@@ -2684,56 +2692,23 @@ options.registry.ConditionalVisibility = options.Class.extend({
         this.$target.addClass('o_snippet_invisible');
     },
 
-
-    _changeDataAttribute: function (attribute, value) {
-        if (!value) {
-            this.$target.removeAttr(attribute);
-        } else {
-            this.$target.attr(attribute, value);
+    _computeWidgetState: function (methodName, params) {
+        switch (methodName) {
+            case 'countryFilter':
+                return this.$target[0].dataset['visibilityCountryId'] | '';
+            case 'languageFilter':
+                return this.$target[0].dataset['visibilityLangId'] | '';
+            case 'utmMediumFilter':
+                return this.$target[0].dataset['visibilityUtmMediumId'] | '';
+            case 'utmSourceFilter':
+                return this.$target[0].dataset['visibilityUtmSourceId'] | '';
+            case 'utmCampaignFilter':
+                return this.$target[0].dataset['visibilityUtmCampaignId'] | '';
+                
         }
-    },
-
-    _fetchCampaignData: async function () {
-        const r = await this._rpc({route: '/web/dataset/search_read', params: {model: 'utm.campaign'}});
-        return r.records;
-    },
-
-    /**
-     * @override
-     * @param uiFragment 
-     */
-    // _renderCustomXML: async function (uiFragment) {
-    //     const r  = await this._rpc({model: 'utm.source', method: 'search_read', fields: ['name', 'id']});
-    //     console.log(r);
-    //     const campaigns = await this._fetchCampaignData();
-    //     for (let index in campaigns) {
-    //         this.campaigns[campaigns[index].id] = campaigns[index];
-    //     }
-    //     const filtersSelectorEl = uiFragment.querySelector('[data-name="campaign_opt"]');
-    //     await this._renderSelectUserValueWidgetButtons(filtersSelectorEl, this.campaigns);
-    // },
-
-     /**
-     * Renders we-buttons into a SelectUserValueWidget element according to provided data.
-     * @param {HTMLElement} selectUserValueWidgetElement the SelectUserValueWidget buttons
-     *   have to be created into.
-     * @param {JSON} data
-     * @private
-     */
-    _renderSelectUserValueWidgetButtons: async function (selectUserValueWidgetElement, data) {
-        for (let id in data) {
-            const button = document.createElement('we-button');
-            button.dataset.changeCampaignFilter = data[id].name;
-            button.innerHTML = data[id].name;
-            selectUserValueWidgetElement.appendChild(button);
-        }
-    },
-    /**
-     * @override
-     */ 
-    
+        return this._super(...arguments);
+    }
 });
-
 
 return {
     UrlPickerUserValueWidget: UrlPickerUserValueWidget,
