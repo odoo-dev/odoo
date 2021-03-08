@@ -375,6 +375,7 @@ class AccountTestInvoicingCommon(SavepointCase):
 
         for amount in amounts:
             with move_form.invoice_line_ids.new() as line_form:
+                line_form.name = "test line"
                 line_form.price_unit = amount
                 if taxes:
                     line_form.tax_ids.clear()
