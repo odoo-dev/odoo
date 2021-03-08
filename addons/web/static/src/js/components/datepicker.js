@@ -3,6 +3,7 @@ odoo.define('web.DatePickerOwl', function (require) {
 
     const field_utils = require('web.field_utils');
     const time = require('web.time');
+    const utils = require('web.utils');
     const { useAutofocus } = require('web.custom_hooks');
 
     const { Component, hooks } = owl;
@@ -26,7 +27,6 @@ odoo.define('web.DatePickerOwl', function (require) {
     class DatePicker extends Component {
         constructor() {
             super(...arguments);
-            this.props.locale = moment.locale();
 
             this.inputRef = useRef('input');
             this.state = useState({ warning: false });
@@ -53,7 +53,6 @@ odoo.define('web.DatePickerOwl', function (require) {
         }
 
         willUpdateProps(nextProps) {
-            nextProps.locale = moment.locale();
             for (const prop in nextProps) {
                 this._datetimepicker(prop, nextProps[prop]);
             }
@@ -180,7 +179,7 @@ odoo.define('web.DatePickerOwl', function (require) {
             today: 'fa fa-calendar-check-o',
             up: 'fa fa-chevron-up',
         },
-        locale: moment.locale(),
+        get locale() {return moment.locale()},
         maxDate: moment({ y: 9999, M: 11, d: 31 }),
         minDate: moment({ y: 1000 }),
         useCurrent: false,
@@ -250,7 +249,7 @@ odoo.define('web.DatePickerOwl', function (require) {
         }
     }
 
-    DateTimePicker.defaultProps = Object.assign({}, DatePicker.defaultProps, {
+    DateTimePicker.defaultProps = utils.mix({}, DatePicker.defaultProps, {
         buttons: {
             showClear: false,
             showClose: true,

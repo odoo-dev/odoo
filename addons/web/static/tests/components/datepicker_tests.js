@@ -4,6 +4,7 @@ odoo.define('web.datepicker_tests', function (require) {
     const { DatePicker, DateTimePicker } = require('web.DatePickerOwl');
     const testUtils = require('web.test_utils');
     const time = require('web.time');
+    const core = require('web.core');
 
     const { createComponent } = testUtils;
 
@@ -66,6 +67,40 @@ odoo.define('web.datepicker_tests', function (require) {
 
             assert.strictEqual(input.value, '02/08/1997');
             assert.verifySteps(['datetime-changed']);
+
+            picker.destroy();
+        });
+
+        QUnit.test("pick a date with locale", async function (assert) {
+            assert.expect(4);
+
+            var originalLocale = moment.locale();
+
+            moment.defineLocale('englishForTest', {
+                postformat: function (string) {
+                    return string.replace(/\//g, '!');
+                },
+            });
+            const picker = await createComponent(DatePicker, {
+                props: { date: moment('09!01!1997') },
+                intercepts: {
+                    'datetime-changed': ev => {
+                        assert.step('datetime-changed');
+                        assert.strictEqual(ev.detail.date.format('MM!DD!YYYY'), '09!02!1997',
+                            "Event should transmit the correct date");
+                    },
+                }
+            });
+            const input = picker.el.querySelector('.o_datepicker_input');
+            await testUtils.dom.click(input);
+
+            await testUtils.dom.click(document.querySelectorAll('.datepicker table td')[3]); // next day
+
+            assert.strictEqual(input.value,'09!02!1997');
+            assert.verifySteps(['datetime-changed']);
+
+            moment.locale(originalLocale);
+            moment.updateLocale('englishForTest', null);
 
             picker.destroy();
         });
@@ -190,6 +225,50 @@ odoo.define('web.datepicker_tests', function (require) {
 
             assert.strictEqual(input.value, '02/08/1997 15:45:05');
             assert.verifySteps(['datetime-changed']);
+
+            picker.destroy();
+        });
+
+        QUnit.test("pick a date and time with locale", async function (assert) {
+            assert.expect(5);
+
+            var originalLocale = moment.locale();
+
+            moment.defineLocale('englishForTest', {
+                postformat: function (string) {
+                    return string.replace(/\//g, '!');
+                },
+            });
+
+            const picker = await createComponent(DateTimePicker, {
+                props: { date: moment('09!01!1997 12:30:01') },
+                intercepts: {
+                    'datetime-changed': ev => {
+                        assert.step('datetime-changed');
+                        assert.strictEqual(ev.detail.date.format('MM!DD!YYYY HH:mm:ss'), '09!02!1997 15:45:05',
+                        "Event should transmit the correct date");
+                    },
+                }
+            });
+            const input = picker.el.querySelector('input.o_input.o_datepicker_input');
+            await testUtils.dom.click(input);
+            await testUtils.dom.click(document.querySelectorAll('.datepicker table td')[3]); // next day
+            await testUtils.dom.click(document.querySelector('a[title="Select Time"]'));
+            await testUtils.dom.click(document.querySelector('.timepicker .timepicker-hour'));
+            await testUtils.dom.click(document.querySelectorAll('.timepicker .hour')[15]); // 15h
+            await testUtils.dom.click(document.querySelector('.timepicker .timepicker-minute'));
+            await testUtils.dom.click(document.querySelectorAll('.timepicker .minute')[9]); // 45m
+            await testUtils.dom.click(document.querySelector('.timepicker .timepicker-second'));
+
+            assert.verifySteps([]);
+
+            await testUtils.dom.click(document.querySelectorAll('.timepicker .second')[1]); // 05s
+
+            assert.strictEqual(input.value, '09!02!1997 15:45:05');
+            assert.verifySteps(['datetime-changed']);
+
+            moment.locale(originalLocale);
+            moment.updateLocale('englishForTest', null);
 
             picker.destroy();
         });
