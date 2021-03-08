@@ -39,10 +39,6 @@ class StudioClientAction extends Component {
     this.studio.bus.off("UPDATE", this);
     document.body.classList.remove("o_in_studio");
   }
-
-  catchError(error) {
-    debugger;
-  }
 }
 StudioClientAction.template = "web_studio.StudioClientAction";
 StudioClientAction.components = {

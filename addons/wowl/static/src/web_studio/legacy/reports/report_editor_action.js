@@ -1,13 +1,15 @@
 odoo.define('web_studio.ReportEditorAction', function (require) {
 "use strict";
 
-var AbstractAction = require('web.AbstractAction');
-var core = require('web.core');
-var dom = require('web.dom');
-var session = require('web.session');
 
-var bus = require('web_studio.bus');
-var ReportEditorManager = require('web_studio.ReportEditorManager');
+return; 
+// var AbstractAction = require('web.AbstractAction');
+// var core = require('web.core');
+// var dom = require('web.dom');
+// var session = require('web.session');
+
+// var bus = require('web_studio.bus');
+// var ReportEditorManager = require('web_studio.ReportEditorManager');
 
 var _t = core._t;
 

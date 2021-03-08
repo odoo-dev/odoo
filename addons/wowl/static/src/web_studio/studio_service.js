@@ -205,6 +205,8 @@ export const studioService = {
         }
         if (state.editorTab !== 'reports') {
           state.editedReport = null;
+        } else if ('editedReport' in params) {
+          state.editedReport = params.editedReport;
         }
       }
       bus.trigger("UPDATE");
@@ -245,6 +247,9 @@ export const studioService = {
       },
       get editedViewType() {
         return state.editedViewType;
+      },
+      get editedReport() {
+        return state.editedReport;
       },
       get editorTab() {
         return state.editorTab;
