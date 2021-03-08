@@ -28,7 +28,7 @@
                             <field name="background_image" options="{'accepted_file_extensions': 'image/*'}" attrs="{'invisible': [('background', '!=', 'Custom')], 'required': [('background', '=', 'Custom')]}">Upload your file</field>
                             <field name="report_header" widget="char" placeholder="e.g. Global Business Solutions" />
                             <field name="company_details" string="Company Details" />
-                            <field name="report_footer" string="Footer" placeholder="e.g. Opening hours, bank accounts (one per line)" />
+                            <field name="report_footer" string="Footer" />
                             <field name="paperformat_id" widget="selection" required="1" />
                         </group>
                         <div>

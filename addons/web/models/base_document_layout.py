@@ -71,14 +71,11 @@ class BaseDocumentLayout(models.TransientModel):
     country_id = fields.Many2one(related="company_id.country_id", readonly=True)
 
     def _default_report_footer(self):
+        import pudb;pu.db
         company = self.env.company
-        nl = '\n'
-        return f"""
-            {company.phone}{nl}
-            {company.email}{nl}
-            {company.website}{nl}
-            {company.vat}{nl}
-        """
+        footer_fields = filter(None, [company.phone, company.email, company.website, company.vat])
+        return ' - '.join(footer_fields)
+
     def _default_company_details(self):
         company = self.env.company
         return (
