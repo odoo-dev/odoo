@@ -66,3 +66,56 @@ odoo.define('mail.Many2OneAvatarUser', function (require) {
         KanbanMany2OneAvatarUser,
     };
 });
+
+
+// TODO: MSH: Same code as above, make mixin and reuse same code
+odoo.define('mail.Many2ManyAvatarUser', function (require) {
+    "use strict";
+
+    const fieldRegistry = require('web.field_registry');
+    const { FieldMany2ManyTagsAvatar } = require('web.relational_fields');
+
+    const { Component } = owl;
+
+    const Many2ManyAvatarUser = FieldMany2ManyTagsAvatar.extend({
+        events: Object.assign({}, FieldMany2ManyTagsAvatar.prototype.events, {
+            'click .o_m2m_avatar': '_onAvatarClicked',
+        }),
+        // This widget is only supported on many2ones pointing to 'res.users'
+        supportedModels: ['res.users'],
+
+        init() {
+            this._super(...arguments);
+            if (!this.supportedModels.includes(this.field.relation)) {
+                throw new Error(`This widget is only supported on many2one fields pointing to ${JSON.stringify(this.supportedModels)}`);
+            }
+            if (this.mode === 'readonly') {
+                this.className += ' o_clickable_m2o_avatar';
+            }
+        },
+
+        //----------------------------------------------------------------------
+        // Handlers
+        //----------------------------------------------------------------------
+
+        /**
+         * When the avatar is clicked, open a DM chat window with the
+         * corresponding user.
+         *
+         * @private
+         * @param {MouseEvent} ev
+         */
+        async _onAvatarClicked(ev) {
+            ev.stopPropagation(); // in list view, prevent from opening the record
+            const env = Component.env;
+            const userId = parseInt(ev.target.getAttribute('data-id'));
+            await env.messaging.openChat({ userId: userId });
+        }
+    });
+
+    fieldRegistry.add('many2many_avatar_user', Many2ManyAvatarUser);
+
+    return {
+        Many2ManyAvatarUser,
+    };
+});
