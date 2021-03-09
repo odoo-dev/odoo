@@ -59,6 +59,7 @@ class MrpWorkorder(models.Model):
     is_produced = fields.Boolean(string="Has Been Produced",
         compute='_compute_is_produced')
     state = fields.Selection([
+        ('waiting', 'Waiting for components'),
         ('pending', 'Waiting for another WO'),
         ('ready', 'Ready'),
         ('progress', 'In Progress'),
@@ -409,6 +410,11 @@ class MrpWorkorder(models.Model):
         to_confirm._action_confirm()
         return res
 
+    def _action_assign(self):
+        if self.production_availability == 'assigned':
+            return self.write({'state': 'ready'})
+        return self.write({'state': 'waiting'})
+
     def _action_confirm(self):
         workorders_by_production = defaultdict(lambda: self.env['mrp.workorder'])
         for workorder in self:
@@ -451,8 +457,7 @@ class MrpWorkorder(models.Model):
                     })
 
             for workorders in workorders_by_bom.values():
-                if workorders[0].state == 'pending':
-                    workorders[0].state = 'ready'
+                workorders[0]._action_assign()
                 for workorder in workorders:
                     workorder._start_nextworkorder()
 
@@ -696,8 +701,8 @@ class MrpWorkorder(models.Model):
             FROM mrp_workorder wo1, mrp_workorder wo2
             WHERE
                 wo1.id IN %s
-                AND wo1.state IN ('pending','ready')
-                AND wo2.state IN ('pending','ready')
+                AND wo1.state IN ('waiting', 'pending','ready')
+                AND wo2.state IN ('waiting', 'pending','ready')
                 AND wo1.id != wo2.id
                 AND wo1.workcenter_id = wo2.workcenter_id
                 AND (DATE_TRUNC('second', wo2.date_planned_start), DATE_TRUNC('second', wo2.date_planned_finished))
