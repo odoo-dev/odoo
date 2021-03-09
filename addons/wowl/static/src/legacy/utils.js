@@ -58,11 +58,16 @@ export function makeLegacySessionService(legacyEnv, session) {
     dependencies: ["user"],
     deploy(env) {
       // userContext, Object.create is incompatible with legacy new Context
-      const userContext = Object.assign({}, env.services.user.context);
-      legacyEnv.session.userContext = userContext;
-      // usually core.session
-      session.user_context = userContext;
-    },
+      function mapContext() {
+        return Object.assign({}, env.services.user.context);
+      }
+      Object.defineProperty(legacyEnv.session, 'userContext', {
+        get: () => mapContext(),
+      });
+      Object.defineProperty(session, 'user_context', {
+        get: () => mapContext(),
+      });
+    }
   };
 }
 
