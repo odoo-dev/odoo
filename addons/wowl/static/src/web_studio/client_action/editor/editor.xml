@@ -17,7 +17,7 @@
     </t>
 
     <t t-if="studio.editorTab === 'reports' and studio.editedReport">
-        <ReportEditorAdapter/>
+        <ReportEditor class="o_web_studio_client_action"/>
     </t>
 </div>
 

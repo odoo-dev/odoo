@@ -1,4 +1,6 @@
-.o_web_studio_client_action .o_web_studio_editor_manager.o_web_studio_report_editor_manager {
+.o_web_studio_editor_manager.o_web_studio_report_editor_manager {
+    position: relative; // should be positioned to allow report_actions to be absolute
+
     .o_web_studio_sidebar {
         // make it bigger
         flex: 0 0 $o-web-studio-report-sidebar-width;
