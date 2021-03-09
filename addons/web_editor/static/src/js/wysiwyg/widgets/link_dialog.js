@@ -74,6 +74,7 @@ var LinkDialog = Dialog.extend({
             const endLink = $(this.data.range.endContainer).closest('a')[0];
             const isLink = startLink && (startLink === endLink);
             this.data.url = $link.attr('href') || '';
+            this.data.isNewWindow = isLink ? $link.attr('target') === '_blank' : this.data.isNewWindow;
             this.data.text = (isLink ? startLink.textContent : this.data.range.toString())
                 .replace(/[ \t\r\n]+/g, ' ');
         } else {
