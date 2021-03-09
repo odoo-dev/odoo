@@ -96,7 +96,7 @@ class StockQuant(models.Model):
 
     # Inventory Fields
     inventory_quantity = fields.Float(
-        'Inventoried Quantity', groups='stock.group_stock_manager')
+        'Inventoried Quantity', digits='Product Unit of Measure', groups='stock.group_stock_manager')
     inventory_diff_quantity = fields.Float(
         'Difference', compute='_compute_inventory_diff_quantity', store=True,
         help='Indicates the gap between the product\'s theoretical quantity and its newest quantity.',
