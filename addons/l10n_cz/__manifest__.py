@@ -7,8 +7,7 @@
     'website': 'http://www.26house.com',
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
-Czech accounting chart and localization.
-
+Czech accounting chart and localization.  With Chart of Accounts with taxes and basic fiscal positions.
 
 Tento modul definuje:
 
@@ -22,17 +21,16 @@ Tento modul definuje:
         'account',
         'base_iban',
         'base_vat',
-        'l10n_multilang',
     ],
     'data': [
-              'data/l10n_cz_coa_data.xml',
-              'data/account.account.template.csv',
-              'data/account.group.template.csv',
-              'data/l10n_cz_coa_post_data.xml',
-              'data/account_data.xml',
-              'data/account_tax_data.xml',
-              'data/account_fiscal_position_data.xml',
-              'data/account_chart_template_data.xml'
+          'data/l10n_cz_coa_data.xml',
+          'data/account.account.template.csv',
+          'data/account.group.template.csv',
+          'data/l10n_cz_coa_post_data.xml',
+          'data/account_data.xml',
+          'data/account_tax_data.xml',
+          'data/account_fiscal_position_data.xml',
+          'data/account_chart_template_data.xml'
     ],
-    'post_init_hook': '_preserve_tag_on_taxes',
+    'demo': ['data/demo_company.xml'],
 }

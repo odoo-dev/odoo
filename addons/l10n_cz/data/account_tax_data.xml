@@ -170,7 +170,7 @@
 
 
 
-    <!-- Eurpean Union -->
+    <!-- European Union -->
     <!-- =========================================================== -->
 
     <record id="vyc_dod_eu" model="account.tax.template">
