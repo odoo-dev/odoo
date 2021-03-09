@@ -19,9 +19,17 @@ export class NotEditableActionError extends Error {
   }
 }
 
+function studioContext(context, on=true) {
+  if (on) {
+    context.studio = 1;
+  } else {
+    delete context.studio;
+  }
+}
+
 export const studioService = {
   name: "studio",
-  dependencies: ["action", "home_menu", "router"],
+  dependencies: ["action", "home_menu", "router", 'user'],
   async deploy(env) {
     function _getCurrentAction() {
       const currentController = env.services.action.currentController;
@@ -61,7 +69,9 @@ export const studioService = {
 
     async function _loadParamsFromURL() {
       const currentHash = env.services.router.current.hash;
+      studioContext(env.services.user.context, false);
       if (currentHash.action === "studio") {
+        studioContext(env.services.user.context, true);
         state.studioMode = currentHash[URL_MODE_KEY];
         state.editedViewType = currentHash[URL_VIEW_KEY] || null;
         state.editorTab = currentHash[URL_TAB_KEY] || null;
@@ -118,6 +128,7 @@ export const studioService = {
         options.stackPosition = "replaceCurrentAction";
       }
       state.studioMode = targetMode;
+      studioContext(env.services.user.context, true);
       // LPE: we don't manage errors during do action.....
       return env.services.action.doAction("studio", options);
     }
@@ -149,6 +160,7 @@ export const studioService = {
       }
       let leaveToAction = state.studioMode === EDITOR ? state.editedAction : "menu";
       state.studioMode = null;
+      studioContext(env.services.user.context, false);
       leaveToAction = await env.services.action.loadAction(leaveToAction, true);
       return env.services.action.doAction(leaveToAction, {
         stackPosition: "replacePreviousAction", // If target is menu, then replaceCurrent, see comment above why we cannot do this
