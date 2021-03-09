@@ -41,7 +41,7 @@ class MailClientExtensionController(http.Controller):
             name = friendlyname if not info else f'{friendlyname}: {info}'
             auth_code = self._generate_auth_code(scope, name)
             # params is a MultiDict which does not support .update() with kwargs
-            params.update({'success': 1, 'auth_code': auth_code})
+            params.update({'success': 1, 'auth_code': auth_code, 'state': kw.get('state', '')})
         else:
             params['success'] = 0
         updated_redirect = parsed_redirect.replace(query=werkzeug.urls.url_encode(params))
