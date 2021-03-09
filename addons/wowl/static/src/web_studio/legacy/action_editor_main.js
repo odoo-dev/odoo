@@ -307,7 +307,7 @@ export const ActionEditorMain = Widget.extend({
         var self = this;
         // var res_model = this.action.res_model;
         return Promise.resolve().then(() => {
-            self.chatter_allowed = true;
+            self.chatter_allowed = false;
         // return this._rpc({
         //     route: '/web_studio/chatter_allowed',
         //     params: {
