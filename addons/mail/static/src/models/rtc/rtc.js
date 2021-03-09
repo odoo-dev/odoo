@@ -45,15 +45,16 @@ function factory(dependencies) {
 
         /**
          * @param {String} peerToken the token of the current user.
+         * @param {Object} [param1]
+         * @param {Object} [param1.mediaConstraints] MediaStreamTrack constraints
          */
-        async initSession(peerToken) {
+        async initSession(peerToken, { mediaConstraints }={}) {
             this.env.services.bus_service.addChannel('mail.rtc.partner:' + peerToken);
-            const stream = await this._getStream();
             const room = this.env.models['mail.chat_room'].get(this.env.messaging.chatRoomLocalId);
+            await this.loadStream(mediaConstraints);
             this.update({
                 peerToken,
-                stream,
-                activePeers: Object.assign({ [peerToken]: { token: peerToken, stream }}, this.activePeers),
+                activePeers: Object.assign({ [peerToken]: { token: peerToken, stream: this.stream }}, this.activePeers),
             });
 
             for (const token of room.peerTokens) {
@@ -61,6 +62,22 @@ function factory(dependencies) {
                     continue;
                 }
                 await this._callPeer(token);
+            }
+        }
+
+        /**
+         * gets the input of the audio/video devices (webcam, microphone).
+         * TODO for audio-only sessions, the audio stream can be fed to the srcObject of an <audio> element.
+         *
+         * @param {Object} constraints MediaStreamTrack constraints
+         */
+        async loadStream(constraints={ video: true, audio: true }) {
+            try {
+                await this._loadStream(constraints);
+            } catch (e) {
+                // fallback on Audio-only (happens if the device doesn't have a camera or doesn't allow its utilization.
+                const fallbackConstraints = Object.assign({}, constraints, { video: false });
+                await this._loadStream(fallbackConstraints);
             }
         }
 
@@ -267,26 +284,15 @@ function factory(dependencies) {
         }
 
         /**
-         * gets the input of the audio/video devices (webcam, microphone).
-         * TODO for audio-only sessions, the audio stream can be fed to the srcObject of an <audio> element.
-         *
          * @private
-         * @param {Object} param0
-         * @param {Boolean} [param0.video]
-         * @param {Boolean} [param0.audio]
-         * @returns {Stream} output from the media devices.
+         * @param {Object} constraints MediaStreamTrack constraints
          */
-        async _getStream({ video=true, audio=true } = {}) {
-            try {
-                return await navigator.mediaDevices.getUserMedia({
-                    video,
-                    audio,
-                });
-            } catch (e) {
-                // fallback on Audio-only (happens if the device doesn't have a camera or doesn't allow its utilization.
-                return await navigator.mediaDevices.getUserMedia({
-                    audio,
-                });
+        async _loadStream(constraints) {
+            if (!this.stream) {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                this.update({ stream });
+            } else {
+                await this.stream.applyConstraints(constraints);
             }
         }
 
