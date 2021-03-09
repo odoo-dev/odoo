@@ -502,11 +502,11 @@ QUnit.test("dropdowns keynav",
     }
     Parent.components = { Dropdown, DropdownItem };
     Parent.template = owl.tags.xml`
-      <Dropdown togglerHotKey="'m'" t-on-dropdown-item-selected="onItemSelected">
+      <Dropdown hotkey="'m'" t-on-dropdown-item-selected="onItemSelected">
         <t t-set-slot="menu">
-          <DropdownItem class="item1" hotKey="'1'" payload="{val:1}" />
-          <DropdownItem class="item2" hotKey="'2'" payload="{val:2}" />
-          <DropdownItem class="item3" hotKey="'3'" payload="{val:3}" />
+          <DropdownItem class="item1" hotkey="'1'" payload="{val:1}" />
+          <DropdownItem class="item2" hotkey="'2'" payload="{val:2}" />
+          <DropdownItem class="item3" hotkey="'3'" payload="{val:3}" />
         </t>
       </Dropdown>
     `;

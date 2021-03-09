@@ -33,7 +33,7 @@ DropdownItem.props = {
     type: ParentClosingMode,
     optional: true,
   },
-  hotKey: {
+  hotkey: {
     type: String,
     optional: true,
   },

@@ -6,8 +6,7 @@ import { ParentClosingMode } from "./dropdown_item";
 const { Component, core, hooks, useState } = owl;
 
 export class Dropdown extends Component {
-  constructor() {
-    super(...arguments);
+  setup() {
     this.hotkeyService = useService("hotkey");
     this.hotkeyTokens = [];
     this.state = useState({ open: this.props.startOpen, groupIsOpen: this.props.startOpen });
@@ -76,27 +75,27 @@ export class Dropdown extends Component {
 
     const subs = [
       {
-        hotkeys: ["arrowup"],
+        hotkey: "arrowup",
         hint: this.env._t("select the item above"),
         callback: () => this._setActiveItem("PREV")
       },
       {
-        hotkeys: ["arrowdown"],
+        hotkey: "arrowdown",
         hint: "select the item below",
         callback: () => this._setActiveItem("NEXT")
       },
       {
-        hotkeys: ["shift-arrowup"],
+        hotkey: "shift-arrowup",
         hint: "select the first item",
         callback: () => this._setActiveItem("FIRST")
       },
       {
-        hotkeys: ["shift-arrowdown"],
+        hotkey: "shift-arrowdown",
         hint: "select the last item",
         callback: () => this._setActiveItem("LAST")
       },
       {
-        hotkeys: ["enter"],
+        hotkey: "enter",
         hint: "click on the selected menu",
         callback: () => {
           const activeItem = this.el.querySelector(":scope > ul.o_dropdown_menu > .o_dropdown_item.o_dropdown_active");
@@ -106,7 +105,7 @@ export class Dropdown extends Component {
         }
       },
       {
-        hotkeys: ["escape"],
+        hotkey: "escape",
         hint: "close the dropdown",
         callback: this._close.bind(this)
       }];
@@ -224,7 +223,7 @@ Dropdown.props = {
     type: String,
     optional: true,
   },
-  togglerHotKey: {
+  hotkey: {
     type: String,
     optional: true,
   }

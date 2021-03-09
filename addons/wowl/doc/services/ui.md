@@ -38,7 +38,8 @@ In addition to that, you have access to some development helpers which are **gre
   take place/get released each time your component gets mounted/unmounted.
   By default, the element that will take the UI ownership is the component root's.
   It can be delegated to another element through the usage of a `t-ref` directive,
-  providing its value to this hook.
+  providing its value to this hook. In that case, **it is mandatory** that the referenced
+  element is fixed and not dynamically attached in/detached from the DOM (e.g. with t-if directive).
 
 ### Good to know
 

@@ -1,11 +1,12 @@
 /** @odoo-module **/
 import { Dialog } from "../../src/components/dialog/dialog";
+import { useService } from "../../src/core/hooks";
 import { Registry } from "../../src/core/registry";
 import { uiService } from "../../src/services/ui_service";
 import { click, getFixture, makeTestEnv, nextTick } from "../helpers/index";
 
 const { hooks, mount } = owl;
-const { useState } = hooks;
+const { useRef, useState } = hooks;
 
 let parent;
 let target;
@@ -24,6 +25,7 @@ QUnit.module("Dialog", {
   async afterEach() {
     if (parent) {
       parent.unmount();
+      parent = undefined;
     }
   },
 });
@@ -307,4 +309,38 @@ QUnit.test("Interactions between multiple dialogs", async function (assert) {
   assert.containsNone(target, ".o_dialog_container .modal");
   assert.doesNotHaveClass(target.querySelector(".o_dialog_container"), "modal-open");
   assert.verifySteps(["dialog_id=2_closed", "dialog_id=1_closed"]);
+});
+
+QUnit.test("can take UI ownership", async function (assert) {
+  assert.expect(3);
+  class Parent extends owl.Component {
+    setup() {
+      this.ui = useService("ui");
+      this.dialog = useRef("dialogRef");
+      assert.strictEqual(
+        this.ui.getOwner(),
+        document,
+        "UI owner should be the default (document) as Parent is not mounted yet"
+      );
+    }
+    mounted() {
+      const dialogModalEl = this.dialog.comp.modalRef.el;
+      assert.strictEqual(
+        this.ui.getOwner(),
+        dialogModalEl,
+        "UI owner should be the dialog modal"
+      );
+    }
+  }
+  Parent.components = { Dialog };
+  Parent.template = owl.tags.xml`<div><Dialog t-ref="dialogRef"/></div>`;
+  parent = await mount(Parent, { env, target });
+
+
+  parent.unmount();
+  assert.strictEqual(
+    env.services.ui.getOwner(),
+    document,
+    "UI owner should be reset to the default (document)"
+  );
 });

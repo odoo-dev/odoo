@@ -4,23 +4,27 @@ import { serviceRegistry } from "../webclient/service_registry";
 
 const { Component, core, hooks } = owl;
 const { EventBus } = core;
+const { onMounted, onWillUnmount, useRef } = hooks;
 
 /**
  * This hook will set the UI ownership
  * when the caller component will mount/unmount.
+ *
  * The caller component could pass a `t-ref` value of its template
  * to delegate the UI ownership to another element than itself.
+ * In that case, it is mandatory that the referenced element is fixed and
+ * not dynamically attached in/detached from the DOM (e.g. with t-if directive).
  *
  * @param {string?} refName
  */
 export function useUIOwnership(refName) {
   const uiService = useService("ui");
-  const owner = (refName && hooks.useRef(refName)) || Component.current;
+  const owner = refName ? useRef(refName) : Component.current;
   let uiOwnership = undefined;
-  hooks.onMounted(() => {
+  onMounted(() => {
     uiOwnership = uiService.takeOwnership(owner.el);
   });
-  hooks.onWillUnmount(() => {
+  onWillUnmount(() => {
     uiOwnership.release();
   });
 }

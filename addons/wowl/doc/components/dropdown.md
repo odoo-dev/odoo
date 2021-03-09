@@ -15,6 +15,8 @@ It contains all the logic you can usually expect a dropdown to behave.
 - Emits an event to inform which list item is clicked
 - Infinite multi-level support
 - SIY: style it yourself
+- Configurable hotkey to open/close a dropdown or select a dropdown item
+- Keyboard navigation (arrows, enter...)
 
 ## API
 
@@ -80,11 +82,13 @@ Doing so, **_when one sibling dropdown is open_**, the others will **_automatica
 
 #### `<Dropdown/>` props
 
-| Prop name      | Default Value | Value type | Description                                      |
-| -------------- | ------------- | ---------- | ------------------------------------------------ |
-| `startOpen`    | `false`       | boolean    | initial dropdown open state                      |
-| `menuClass`    | /             | string     | could be used to style the dropdown menu `<ul/>` |
-| `togglerClass` | /             | string     | could be used to style the toggler `<button/>`   |
+| Prop name      | Default Value | Value type | Description                                          |
+| -------------- | ------------- | ---------- | ---------------------------------------------------- |
+| `startOpen`    | `false`       | boolean    | initial dropdown open state                          |
+| `menuClass`    | /             | string     | could be used to style the dropdown menu `<ul/>`     |
+| `togglerClass` | /             | string     | could be used to style the toggler `<button/>`       |
+| `hotkey`       | /             | string     | could be used to toggle the opening through keyboard |
+| `beforeOpen`   | /             | function   | hook to execute logic just before opening            |
 
 #### `<DropdownItem/>` props
 
@@ -92,6 +96,7 @@ Doing so, **_when one sibling dropdown is open_**, the others will **_automatica
 | ------------------- | ------------- | ---------------------------- | -------------------------------------------------------------------------------------- |
 | `payload`           | null          | Object                       | item payload that will be part of the `dropdown-item-selected` event                   |
 | `parentClosingMode` | `all`         | `none` \| `closest` \| `all` | when item clicked, control which parent dropdown will get closed: none, closest or all |
+| `hotkey`            | /             | string                       | click on the item via an hotkey activation                                             |
 
 ### Z-Index
 

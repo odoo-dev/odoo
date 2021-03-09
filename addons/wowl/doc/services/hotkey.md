@@ -2,7 +2,7 @@
 
 | Technical name | Dependencies                           |
 | -------------- | -------------------------------------- |
-| `hotkey`       | `dialog_manager`, `localization`, `ui` |
+| `hotkey`       | `ui`                                   |
 
 ## Overview
 
@@ -21,7 +21,7 @@ It provides some very special features:
 - a `[data-hotkey]` attribute: it gives a JS-free way to make
   any HTML element "clickable" through an hotkey press.
 
-- a `useHotkeys` hook: it ensures your JS code executes only
+- a `useHotkey` hook: it ensures your JS code executes only
   when your component is alive and present in the DOM.
 
 - a **contextual hint dialog**: it shows the user all the activables
@@ -98,40 +98,34 @@ The `hotkey` service provides the following API:
 
 - `subscribe(sub: HotkeySubscription): number`:
   it ask the service to call the given callback when a matching hotkey is pressed.
-  The service returns a token you can use to unsubscribe later on.
   An `HotkeySubscription` object should take the form of:
-  `{ hotkeys: string[], callback: (hotkey:string)=>void, hint?: string }`.
+  `{ hotkey: string, callback: (hotkey:string)=>void, hint?: string }`.
   If defined, the `HotkeySubscription.hint` key must provide the subscription description.
+  This method returns a token you can use to unsubscribe later on.
 
 - `unsubscribe(token: number): void`:
   it ask the service to forget about the token matching subscription.
 
 In addition to that, you have access to some development helpers which are **greatly** recommended:
 
-- `useHotkeys(subs: HotkeySubscription[]): void`:
-  a hook that ensures your subscriptions exist only when your component is mounted.
-  It takes an array of subscription objects you would pass to the `hotkey.subscribe()` method.
+- `useHotkey(sub: HotkeySubscription): void`:
+  a hook that ensures your subscription exist only when your component is mounted.
+  It takes an `HotkeySubscription` object.
 
 - `[data-hotkey]`: an HTML attribute taking an hotkey definition.
   When the defined hotkey is pressed, the element gets clicked.
 
 ## Examples
 
-### `useHotkeys` hook
+### `useHotkey` hook
 ```js
 class MyComponent extends Component {
   setup() {
-    useHotkeys([
-      { hotkeys: ["a", "shift-a"], callback: this.callback },
-      { hotkeys: ["arrowleft", "pageup", "home"], callback: this.callback2 }
-    ]);
+    useHotkey({ hotkey: "a", callback: this.onAHotkey.bind(this) });
+    useHotkey({ hotkey: "home", callback: () => this.onHomeHotkey() });
   }
-  callback(arg) {
-    console.log(`callback:${arg}`);
-  }
-  callback2(arg) {
-    console.log(`callback2:${arg}`);
-  }
+  onAHotkey(arg) { ... }
+  onHomeHotkey(arg) { ... }
 }
 ```
 
@@ -155,7 +149,7 @@ MyComponent.template = xml`
       One!
     </button>
 
-    <button t-on-click="onButton2Clicked" t-att-data-hotkey="dynamicHotkey">
+    <button t-on-click="onButton2Clicked" t-att-data-hotkey="variableHotkey">
       Two!
     </button>
 
@@ -171,11 +165,11 @@ class MyComponent extends Component {
   }
   mounted() {
     this.hotkeyToken1 = this.hotkey.subscribe({
-      hotkeys: ["backspace", "control-backspace"],
-      callback: (key) => console.log(`"${key}" has been pressed`)
+      hotkey: "backspace",
+      callback: () => console.log('backspace has been pressed')
     });
     this.hotkeyToken2 = this.hotkey.subscribe({
-      hotkeys: ["shift"],
+      hotkey: "shift",
       callback: () => console.log('Someone pressed on "shift"!')
     });
   }
