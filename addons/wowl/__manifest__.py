@@ -47,10 +47,12 @@ Odoo Web core module written in Owl.
             'static/src/services/**/*',
             'static/src/utils/**/*',
             'static/src/views/**/*',
-            'static/src/web_enterprise/**/*',
             'static/src/webclient/**/*',
             'static/src/env.js',
             'static/tests/**/*',
+
+            'static/src/web_enterprise/**/*',
+            'static/src/web_studio/**/*',
         ],
         'owl_qweb': [
             'static/src/components/**/*',
