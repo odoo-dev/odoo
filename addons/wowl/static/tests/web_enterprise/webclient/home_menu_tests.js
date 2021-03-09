@@ -5,6 +5,7 @@ import { Registry } from "@wowl/core/registry";
 import testUtils from "web.test_utils";
 import { getFixture, makeTestEnv, mount } from "../../helpers/utility";
 import { makeFakeUIService } from "../../helpers/mocks";
+import { makeFakeEnterpriseService } from "../mocks";
 
 const { Component, core, hooks, tags } = owl;
 const { EventBus } = core;
@@ -158,17 +159,7 @@ QUnit.module(
       };
 
       const serviceRegistry = new Registry();
-      const fakeEnterpriseService = {
-        name: "enterprise",
-        deploy() {
-          return {
-            expirationDate: false,
-            expirationReason: false,
-            moduleList: [],
-            warning: false,
-          };
-        },
-      };
+      const fakeEnterpriseService = makeFakeEnterpriseService();
       bus = new EventBus();
       const fakeHomeMenuService = {
         name: "home_menu",

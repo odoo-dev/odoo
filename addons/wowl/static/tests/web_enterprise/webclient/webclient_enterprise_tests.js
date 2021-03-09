@@ -17,6 +17,8 @@ import { EnterpriseDebugManager } from "../../../src/web_enterprise/debug_manage
 import { makeFakeDeviceService } from '../../helpers/mocks';
 import { burgerMenu } from '../../../src/web_enterprise/webclient/burger_menu/burger_menu';
 
+import { makeFakeEnterpriseService } from '../mocks';
+
 function createEnterpriseWebClient(params) {
   params.WebClientClass = WebClientEnterprise;
   return createWebClient(params);
@@ -33,18 +35,7 @@ QUnit.module("WebClient Enterprise", (hooks) => {
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
     testConfig.serviceRegistry.add(homeMenuService.name, homeMenuService);
-    // TODO: extract this somewhere else
-    const fakeEnterpriseService = {
-      name: "enterprise",
-      dependencies: [],
-      deploy() {
-        return {
-          warning: false,
-          expirationDate: false,
-          expirationReason: false,
-        };
-      },
-    };
+    const fakeEnterpriseService = makeFakeEnterpriseService();
     testConfig.serviceRegistry.add(fakeEnterpriseService.name, fakeEnterpriseService);
   });
   QUnit.module("basic flow with home menu", (hooks) => {

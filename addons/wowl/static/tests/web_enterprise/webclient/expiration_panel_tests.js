@@ -3,6 +3,7 @@ import { ExpirationPanel } from "@wowl/web_enterprise/webclient/home_menu/expira
 import { Registry } from "@wowl/core/registry";
 import { modelService } from "@wowl/services/model_service";
 import { makeFakeUIService } from "../../helpers/mocks";
+import { makeFakeEnterpriseService } from "../mocks";
 import { makeTestEnv, mount } from "../../helpers/utility";
 import testUtils from "web.test_utils";
 
@@ -10,19 +11,6 @@ const patchDate = testUtils.mock.patchDate;
 
 async function createExpirationPanel(params = {}) {
   const serviceRegistry = new Registry();
-  const mockedEnterpriseService = {
-    name: "enterprise",
-    deploy() {
-      return (
-        params.enterprise || {
-          expirationDate: false,
-          expirationReason: false,
-          moduleList: [],
-          warning: false,
-        }
-      );
-    },
-  };
   const mockedCookieService = {
     name: "cookie",
     deploy() {
@@ -41,6 +29,7 @@ async function createExpirationPanel(params = {}) {
   const ui = params.ui || {};
   serviceRegistry.add("ui", makeFakeUIService(ui.block, ui.unblock));
   serviceRegistry.add("model", modelService);
+  const mockedEnterpriseService = makeFakeEnterpriseService(params.enterprise);
   serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService);
 
   const env = await makeTestEnv({
