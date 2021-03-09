@@ -537,7 +537,7 @@ class Team(models.Model):
         }
         action.domain = [
             '&', ('user_id', '=', self.env.user.id),  # TODO ABD: team_id ? Redundant with context ?
-            '&', ('type', '=', 'opportunity')
+            ('type', '=', 'opportunity')
         ]
         action = self.env['ir.actions.actions']._for_xml_id('crm.crm_lead_action_forecast')
         return self._your_pipeline(action)

@@ -92,93 +92,29 @@ odoo.define('crm.crm_forecast_kanban', function (require) {
         __load: async function (params) {
             this.forecast_domain = params.domain;
             this.forecast_field = params.context.forecast_field;
-            this.min_forecast_period = params.context.min_forecast_period || 4;
+            this.min_forecast_period = params.context.fill_temporal_min || 4;
             this.end_forecast_moment = this._computeEndForecastMoment(this.start_forecast_moment, this.min_forecast_period);
             params.domain = this._applyForecastDomain(params.domain);
-            var handle = await this._super(...arguments);
-            this.updateForecastGroups(handle); //TODO remove if forecast_field is not the first groupby
-            return handle;
+            params.context = {
+                ...params.context,
+                "fill_temporal_from": this.start_forecast_moment.format("YYYY-MM-DD"),
+                "fill_temporal_to": moment(this.end_forecast_moment).subtract(1, 'day').format("YYYY-MM-DD"),
+                "fill_temporal_min": this.min_forecast_period
+            };
+            return await this._super(...arguments);
         },
         /**
          * @override
          */
         __reload: async function (id, options) {
-            var reload = await this._super(...arguments);
-            this.updateForecastGroups(id); //TODO remove if forecast_field is not the first groupby
-            return reload;
-        },
-        /**
-         * can be totally deleted if backend sends all columns right away -> _read_group_fill_temporal update
-         */
-        updateForecastGroups: function (parentID) {
-            //TODO this function should never be called if forecast_field is not the first groupby
-            const self = this;
-            const parent = this.localData[parentID];
-            const groupBy = this.forecast_field;
-            const createGroupDataPoint = (model, parent, group_data) => {
-                const newGroup = model._makeDataPoint({
-                    modelName: parent.model,
-                    context: parent.context,
-                    domain: ['&', '&', [groupBy, ">=", group_data.start_date], [groupBy, "<", group_data.end_date]].concat(parent.domain),
-                    fields: parent.fields,
-                    fieldsInfo: parent.fieldsInfo,
-                    isOpen: true,
-                    limit: parent.limit,
-                    parentID: parent.id,
-                    openGroupByDefault: true,
-                    orderedBy: parent.orderedBy,
-                    value: group_data.name,
-                    viewType: parent.viewType,
-                });
-                if (parent.progressBar) {
-                    newGroup.progressBarValues = _.extend({
-                        counts: {},
-                    }, parent.progressBar);
-                }
-                return newGroup;
+            options.domain = this._applyForecastDomain(this.forecast_domain);
+            options.context = {
+                ...this.loadParams.context,
+                "fill_temporal_from": this.start_forecast_moment.format("YYYY-MM-DD"),
+                "fill_temporal_to": moment(this.end_forecast_moment).subtract(1, 'day').format("YYYY-MM-DD"),
+                "fill_temporal_min": this.min_forecast_period
             };
-            const missingColumns = (current_moment, count_displayed, index) => {
-                if (this.displayed_end_forecast_moment) {
-                    return moment(current_moment).add(1, 'months').isBefore(this.end_forecast_moment);
-                } else {
-                    return moment(current_moment).add(1, 'months').isBefore(this.end_forecast_moment) &&
-                        (count_displayed < this.min_forecast_period || index < count_displayed);
-                }
-            };
-            var columns_data = this.get(parentID, {raw: true}).data; // .data[x].value (can be false or a date (Month Year))
-            var months = new Set(columns_data.map(x => x.value).filter(value => value));
-            var newGroupsIds = [];
-            var groupBefore = [];
-            var current_moment;
-            var i = 0;
-            do {
-                current_moment = moment(this.start_forecast_moment).add(i, 'months');
-                var group_data = {
-                    name: current_moment.format("MMMM YYYY"),
-                    start_date: current_moment.format("YYYY-MM-DD"),
-                    end_date: moment(current_moment).add(1, 'months').format("YYYY-MM-DD")
-                };
-                if (!months.has(group_data.name)) {
-                    months.add(group_data.name);
-                    var newGroup = createGroupDataPoint(self, parent, group_data);
-                    if (i + 1 < months.size) {
-                        groupBefore.push(newGroup.id);
-                    } else {
-                        parent.data.push(newGroup.id);
-                    }
-                    newGroupsIds.push(newGroup.id);
-                }
-                else {
-                    i = months.size - 1;
-                    current_moment = moment(this.start_forecast_moment).add(i, 'months');
-                }
-            } while (missingColumns(current_moment, months.size, ++i));
-            parent.data = groupBefore.concat(parent.data);
-            if (!this.displayed_end_forecast_moment) {
-                this.displayed_end_forecast_moment = true;
-                this.end_forecast_moment = moment(this.start_forecast_moment).add(i, 'months');
-            }
-            return newGroupsIds;
+            return await this._super(...arguments);
         },
     });
 
@@ -192,6 +128,7 @@ odoo.define('crm.crm_forecast_kanban', function (require) {
             this.model.end_forecast_moment.add(1, 'months');
             var list = this.model.localData[this.handle];
             list.domain = this.model._applyForecastDomain(this.model.forecast_domain);
+            this.model.min_forecast_period += 1;
             const self = this;
             this.mutex.exec(function () {
                 return self.update({}, {reload: true});
