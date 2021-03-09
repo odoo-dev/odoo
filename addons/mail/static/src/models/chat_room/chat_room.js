@@ -20,6 +20,7 @@ function factory(dependencies) {
                 fields: ['id', 'name', 'room_token'],
                 args: [[]],
             }, { shadow: true });
+            const partnerData = undefined; // fetch all partners who have room_id.
             if (!roomData || roomData.length === 0) {
                 return;
             }
