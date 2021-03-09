@@ -158,14 +158,14 @@ export const studioService = {
       if (!inStudio) {
         throw new Error("leave when not in studio???");
       }
-      let leaveToAction = state.studioMode === EDITOR ? state.editedAction : "menu";
-      state.studioMode = null;
+      env.bus.trigger('CLEAR-CACHES');
+      let leaveToAction = state.studioMode === EDITOR ? state.editedAction.id : "menu";
       studioContext(env.services.user.context, false);
-      leaveToAction = await env.services.action.loadAction(leaveToAction, true);
-      return env.services.action.doAction(leaveToAction, {
+      await env.services.action.doAction(leaveToAction, {
         stackPosition: "replacePreviousAction", // If target is menu, then replaceCurrent, see comment above why we cannot do this
         viewType: state.editedViewType,
       });
+      state.studioMode = null;
     }
 
     function toggleHomeMenu() {

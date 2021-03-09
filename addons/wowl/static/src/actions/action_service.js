@@ -44,7 +44,11 @@ function makeActionManager(env) {
   let id = 0;
   let controllerStack = [];
   let dialogCloseProm = undefined;
-  const actionCache = {};
+  let actionCache = {};
+
+  env.bus.on('CLEAR-CACHES', null, () => {
+    actionCache = {};
+  });
 
   // ---------------------------------------------------------------------------
   // misc
@@ -59,7 +63,7 @@ function makeActionManager(env) {
    * @param {Context} [context={}]
    * @returns {Promise<Action>}
    */
-  async function _loadAction(actionRequest, reload=false, context = {}) {
+  async function _loadAction(actionRequest, context = {}) {
     let action;
     if (typeof actionRequest === "string" && odoo.actionRegistry.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
@@ -71,7 +75,7 @@ function makeActionManager(env) {
     } else if (typeof actionRequest === "string" || typeof actionRequest === "number") {
       // actionRequest is an id or an xmlid
       const key = JSON.stringify(actionRequest);
-      if (!actionCache[key] || reload) {
+      if (!actionCache[key]) {
         actionCache[key] = env.services.rpc("/web/action/load", {
           action_id: actionRequest,
           additional_context: {
@@ -82,8 +86,6 @@ function makeActionManager(env) {
         });
       }
       action = actionCache[key];
-    } else if (reload && actionRequest.id) {
-      action = _loadAction(actionRequest.id, reload, context);
     } else {
       // actionRequest is an object describing the action
       action = actionRequest;
@@ -121,8 +123,8 @@ function makeActionManager(env) {
     }
     return action;
   }
-  async function _loadAndProcessAction(action, reload=false, context={}, shouldKeepLast=true) {
-    action = _loadAction(action, reload, context);
+  async function _loadAndProcessAction(action, context = {}, shouldKeepLast = true) {
+    action = _loadAction(action, context);
     if (shouldKeepLast) {
       action = keepLast.add(action);
     }
@@ -721,7 +723,7 @@ function makeActionManager(env) {
    * @returns {Promise<void>}
    */
   async function doAction(actionRequest, options = {}) {
-    const action = await _loadAndProcessAction(actionRequest, false, options.additionalContext, true);
+    const action = await _loadAndProcessAction(actionRequest, options.additionalContext, true);
     switch (action.type) {
       case "ir.actions.act_url":
         return _executeActURLAction(action);
@@ -789,7 +791,7 @@ function makeActionManager(env) {
       context.active_id = params.recordId || null;
       context.active_ids = params.recordIds;
       context.active_model = params.model;
-      action = await keepLast.add(_loadAction(params.name, false, context));
+      action = await keepLast.add(_loadAction(params.name, context));
     }
     // filter out context keys that are specific to the current action, because:
     //  - wrong default_* and search_default_* values won't give the expected result
@@ -1007,7 +1009,7 @@ function makeActionManager(env) {
     switchView,
     restore,
     loadState,
-    loadAction: (action, reload, context) => _loadAndProcessAction(action, reload, context, false),
+    loadAction: (action, context) => _loadAndProcessAction(action, context, false),
     get currentController() {
       const stack = controllerStack;
       if (!stack.length) {

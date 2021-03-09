@@ -50,7 +50,12 @@ export const viewService = {
   dependencies: ["orm"],
   deploy(env) {
     const { orm } = env.services;
-    const cache = {};
+    let cache = {};
+
+    env.bus.on('CLEAR-CACHES', null, () => {
+      cache = {};
+    });
+
     /**
      * Loads various information concerning views: fields_view for each view,
      * fields of the corresponding model, and optionally the filters.
