@@ -12,7 +12,7 @@
 
     <t t-if="studio.editorTab === 'views'">
         <!-- <ActionEditorSidebar/> -->
-        <EditorAdapter t-if="studio.editedViewType" Component="ActionEditorMain" params="{ action: studio.editedAction, viewType: studio.editedViewType }" t-key="key"/>
+        <EditorAdapter t-if="studio.editedViewType" Component="ActionEditorMain" params="{ action: studio.editedAction, viewType: studio.editedViewType, controllerState: studio.editedControllerState }" t-key="key"/>
         <EditorAdapter t-else="" Component="ActionEditor" params="studio.editedAction" class="o_web_studio_client_action" t-key="key"/>
     </t>
 

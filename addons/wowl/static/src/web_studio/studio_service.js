@@ -63,6 +63,7 @@ export const studioService = {
       studioMode: null,
       editedViewType: null,
       editedAction: null,
+      editedControllerState: null,
       editorTab: "views",
       // editedReport: null,
     };
@@ -106,12 +107,15 @@ export const studioService = {
       const options = {};
       // clearBreadcrumbs: true, TODO
       if (targetMode === EDITOR) {
+        let controllerState;
         if (!action) {
           // systray open
           const currentController = env.services.action.currentController;
           if (currentController) {
+            env.bus.trigger('ACTION_MANAGER:EXPORT_CONTROLLER_STATE');
             action = currentController.action;
             viewType = currentController.view.type;
+            controllerState = currentController.exportedState;
           }
         }
         if (!_isStudioEditable(action)) {
@@ -123,6 +127,7 @@ export const studioService = {
         state.editedAction = action;
         state.editedViewType = viewType || action.views[0][1]; // fallback on first view of action
         state.editorTab = "views";
+        state.editedControllerState = controllerState || {};
       }
       if (inStudio) {
         options.stackPosition = "replaceCurrentAction";
@@ -259,6 +264,9 @@ export const studioService = {
       },
       get editedViewType() {
         return state.editedViewType;
+      },
+      get editedControllerState() {
+        return state.editedControllerState;
       },
       get editedReport() {
         return state.editedReport;

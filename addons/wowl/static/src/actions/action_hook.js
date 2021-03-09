@@ -56,16 +56,13 @@ export function useSetupAction(params) {
       component.props.__beforeLeave__(params.beforeLeave);
     }
     if (component.props.__exportState__) {
-      component.env.bus.on('ACTION_MANAGER:EXPORT_CONTROLLER_STATE', component, (fn) => {
+      component.env.bus.on('ACTION_MANAGER:EXPORT_CONTROLLER_STATE', component, () => {
         let state = {};
         state[scrollSymbol] = getScrollPosition(component);
         if (params.export) {
           Object.assign(state, params.export());
         }
         component.props.__exportState__(state);
-        if (fn) {
-          fn(state);
-        }
       });
     }
 
