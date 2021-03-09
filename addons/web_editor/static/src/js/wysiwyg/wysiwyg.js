@@ -679,7 +679,7 @@ const Wysiwyg = Widget.extend({
             }
             $image.transfo();
             const mouseup = () => {
-                $('.note-popover button[data-event="transform"]').toggleClass('active', $image.is('[style*="transform"]'));
+                $('#image-transform').toggleClass('active', $image.is('[style*="transform"]'));
             };
             $(this.odooEditor.document).on('mouseup', mouseup);
             const mousedown = mousedownEvent => {
@@ -687,7 +687,7 @@ const Wysiwyg = Widget.extend({
                     $image.transfo('destroy');
                     $(this.odooEditor.document).off('mousedown', mousedown).off('mouseup', mouseup);
                 }
-                if ($(mousedownEvent.target).closest('.note-popover').length) {
+                if ($(mousedownEvent.target).closest('#image-transform').length) {
                     $image.data('transfo-destroy', true).attr('style', ($image.attr('style') || '').replace(/[^;]*transform[\w:]*;?/g, ''));
                 }
                 $image.trigger('content_changed');
