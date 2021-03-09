@@ -7,6 +7,7 @@ import { makeFakeUIService } from "../../helpers/mocks";
 import { makeTestEnv, getFixture } from "../../helpers/utility";
 import { patch, unpatch } from "@wowl/utils/patch";
 import { registerCleanup } from "../../helpers/cleanup";
+import { makeFakeEnterpriseService } from "../mocks";
 import testUtils from "web.test_utils";
 
 const { mount } = owl;
@@ -14,19 +15,6 @@ const patchDate = testUtils.mock.patchDate;
 
 async function createExpirationPanel(params = {}) {
   const serviceRegistry = new Registry();
-  const mockedEnterpriseService = {
-    name: "enterprise",
-    deploy() {
-      return (
-        params.enterprise || {
-          expirationDate: false,
-          expirationReason: false,
-          moduleList: [],
-          warning: false,
-        }
-      );
-    },
-  };
   const mockedCookieService = {
     name: "cookie",
     deploy() {
@@ -44,6 +32,7 @@ async function createExpirationPanel(params = {}) {
   serviceRegistry.add(mockedCookieService.name, mockedCookieService);
   serviceRegistry.add("ui", makeFakeUIService(params.ui));
   serviceRegistry.add("orm", ormService);
+  const mockedEnterpriseService = makeFakeEnterpriseService(params.enterprise);
   serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService);
   patch(browser, 'mocked_browser', Object.assign({ location: "" }, params.browser));
   registerCleanup(() => unpatch(browser, 'mocked_browser'));
