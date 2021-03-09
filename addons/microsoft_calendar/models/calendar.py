@@ -6,7 +6,7 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 ATTENDEE_CONVERTER_O2M = {
     'needsAction': 'notresponded',
@@ -346,6 +346,23 @@ class Meeting(models.Model):
             }
 
         return values
+
+    def _ensure_attendees_have_email(self):
+        if self.env.context.get("_attendees_have_email", False):
+            return
+        invalid_events = ['\t- %s: %s' % (event.display_time, event.display_name)
+                          for event in self if any(not a.email for a in event.attendee_ids)]
+        if invalid_events:
+            invalid_events.sort()
+            list_length_limit = 50
+            limited_names_list = '\n'.join(invalid_events[:list_length_limit])
+            details = "(%d/%d)" % (list_length_limit, len(invalid_events)) if list_length_limit < len(invalid_events) else "(%d)" % len(invalid_events)
+            raise ValidationError(_("For a correct synchronization between Odoo and Outlook Calendar, "
+                                    "all attendees must have an email address."
+                                    "\nHowever, some events do not respect this condition %s:"
+                                    "\n%s"
+                                    "\nAs long as the events are incorrect, the calendars will not be synchronized. "
+                                    "Either update the events/attendees or archive these events.", details, limited_names_list))
 
     def _microsoft_values_occurence(self, initial_values={}):
         values = dict(initial_values)
