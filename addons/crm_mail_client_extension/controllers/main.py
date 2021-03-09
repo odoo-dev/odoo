@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 
 class MailClientExtensionController(MailClientExtensionController):
 
-    #log_single_mail_content route is in routes for maintaining the legacy version
+    # log_single_mail_content route is in routes for maintaining the legacy version
     # of the plugin which relies on it
     @http.route(route=['/mail_client_extension/lead/log_mail_content',
                        '/mail_client_extension/log_single_mail_content'],
@@ -42,7 +42,7 @@ class MailClientExtensionController(MailClientExtensionController):
         server_action = http.request.env.ref("crm_mail_client_extension.lead_creation_prefilled_action")
         return werkzeug.utils.redirect('/web#action=%s&model=crm.lead&partner_id=%s' % (server_action.id, int(partner_id)))
 
-    def _get_leads(self,partner, limit=5, offset=0):
+    def _get_leads(self, partner, limit=5, offset=0):
         partner_leads = request.env['crm.lead'].search([('partner_id', '=', partner)],
                                                        offset=offset, limit=limit)
         leads = []

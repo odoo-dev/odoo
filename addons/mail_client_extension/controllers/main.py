@@ -175,8 +175,8 @@ class MailClientExtensionController(http.Controller):
                 new_company_info['country_id'] = country.id
                 if iap_data.get('state_code'):
                     state = request.env['res.country.state'].search([
-                    ('code', '=', iap_data['state_code']),
-                    ('country_id', '=', country.id)
+                        ('code', '=', iap_data['state_code']),
+                        ('country_id', '=', country.id)
                     ])
                     if state:
                         new_company_info['state_id'] = state.id
@@ -188,11 +188,11 @@ class MailClientExtensionController(http.Controller):
             values=iap_data,
             subtype_id=request.env.ref('mail.mt_note').id,
         )
-        
+
         return new_company, {'type': 'company_created'}
 
-    def _get_partner_dict(self, partner, with_extra_info=False):
-        partner_dict = {
+    def _get_partner_dict(self, partner):
+        return {
             'id': partner.id,
             'name': partner.name,
             'title': partner.function,
@@ -202,9 +202,6 @@ class MailClientExtensionController(http.Controller):
             'mobile': partner.mobile,
             'enrichment_info': None,
         }
-        if with_extra_info:
-            partner_dict['extra_info'] = self._get_partner_extra_info(partner.id)
-        return partner_dict
 
     @http.route('/mail_client_extension/partner/get', type="json", auth="outlook", cors="*")
     def res_partner_get(self, email=None, name=None, partner_id=None, **kwargs):
@@ -230,7 +227,8 @@ class MailClientExtensionController(http.Controller):
             partner = request.env['res.partner'].search([('email', 'in', [normalized_email, email])], limit=1)
 
         if partner:
-            response['partner'] = self._get_partner_dict(partner, True)
+            response['partner'] = self._get_partner_dict(partner)
+            response['partner']['extra_info'] = self._get_partner_extra_info(partner.id)
             if partner.company_type == 'company':
                 response['partner']['company'] = self._get_company_dict(partner)
             else:
@@ -238,7 +236,7 @@ class MailClientExtensionController(http.Controller):
                     response['partner']['company'] = self._get_company_dict(partner.parent_id)
                 else:
                     response['partner']['company'] = self._get_company_dict(None)
-        else: #no partner found
+        else:  # no partner found
             response['partner'] = {
                 'id': -1,
                 'name': name,
@@ -260,20 +258,13 @@ class MailClientExtensionController(http.Controller):
         filter_domain = ['|', '|', ('display_name', 'ilike', query), ('ref', '=', query), ('email', 'ilike', query)]
         # Search for the partner based on the email.
         # If multiple are found, take the first one.
-        partners_response = []
         partners = request.env['res.partner'].search(filter_domain, limit=30)
-        for partner in partners:
-            response = self._get_partner_dict(partner)
-            #if the partner is a company we assign company directly
-            if partner.company_type == 'company':
-                response['company'] = self._get_company_dict(partner)
-            else:
-                if partner.parent_id:
-                    response['company'] = self._get_company_dict(partner.parent_id)
-                else:
-                    response['company'] = self._get_company_dict(company=None)
-            partners_response.append(response)
-        return {"partners": partners_response}
+
+        partners = [
+            self._get_partner_dict(partner)
+            for partner in partners
+        ]
+        return {"partners": partners}
 
     @http.route('/mail_client_extension/partner/create', type="json", auth="outlook", cors="*")
     def res_partner_create(self, email, name, company, **kwargs):
@@ -283,7 +274,7 @@ class MailClientExtensionController(http.Controller):
             'name': name,
             'email': email,
         }
-        if company > -1:
+        if company and company > -1:
             partner_info['parent_id'] = company
         partner = request.env['res.partner'].create(partner_info)
 
