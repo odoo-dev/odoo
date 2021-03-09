@@ -3,7 +3,7 @@ import { ComponentAdapter } from "web.OwlCompatibility";
 import ReportEditorManager from "web_studio.ReportEditorManager";
 import { useService } from '@wowl/core/hooks';
 
-export class ReportEditorAdapter extends ComponentAdapter {
+class ReportEditorAdapter extends ComponentAdapter {
     constructor(parent, props) {
         props.Component = ReportEditorManager;
         super(...arguments);
@@ -153,3 +153,9 @@ export class ReportEditorAdapter extends ComponentAdapter {
         });
     }
 }
+
+// We need this to wrap in a div
+// ViewEditor doesn't need this because it extends AbstractEditor, and defines a template
+export class ReportEditor extends owl.Component {};
+ReportEditor.template = owl.tags.xml`<div><ReportEditorAdapter /></div>`;
+ReportEditor.components = { ReportEditorAdapter };

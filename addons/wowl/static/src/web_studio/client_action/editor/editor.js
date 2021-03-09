@@ -9,7 +9,7 @@ import ActionEditor from "web_studio.ActionEditor";
 import { ActionEditorMain } from '../../legacy/action_editor_main';
 import { EditorAdapter } from "./editor_adapter";
 
-import { ReportEditorAdapter } from './report_editor_adapter';
+import { ReportEditor } from './report_editor_adapter';
 
 const { Component, core, hooks } = owl;
 
@@ -113,7 +113,7 @@ Editor.components = {
   EditorMenu,
   EditorAdapter, // to be replaced by ActionEditor
   ActionContainer,
-  ReportEditorAdapter,
+  ReportEditor,
 };
 
 
