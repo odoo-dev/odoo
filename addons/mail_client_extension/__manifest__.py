@@ -15,8 +15,7 @@
     ],
     'data': [
         'views/mail_client_extension_login.xml',
-        'views/mail_client_extension_views.xml'
-   ],
+    ],
     'installable': True,
     'application': False,
     'auto_install': False

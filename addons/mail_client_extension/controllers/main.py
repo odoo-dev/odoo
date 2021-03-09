@@ -311,12 +311,6 @@ class MailClientExtensionController(http.Controller):
 
         return response
 
-    @http.route('/mail_client_extension/partner/view', type='http', auth='user', methods=['GET'])
-    def partner_redirect_form_view(self, partner_id):
-        server_action = http.request.env.ref('mail_client_extension.partner_view')
-        return werkzeug.utils.redirect(
-            '/web#action=%s&model=res.partner&id=%s' % (server_action.id, int(partner_id)))
-
     def _get_partner_extra_info(self, partner_id):
         """
         To override by other modules if extra information have to be returned

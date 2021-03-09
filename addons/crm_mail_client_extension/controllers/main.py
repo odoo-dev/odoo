@@ -31,12 +31,6 @@ class MailClientExtensionController(MailClientExtensionController):
         """
         return {'leads': self._get_leads(partner, limit, offset)}
 
-    @http.route('/mail_client_extension/lead/view', type='http', auth='user', methods=['GET'])
-    def crm_lead_redirect_form_view(self, lead_id):
-        server_action = http.request.env.ref("crm_mail_client_extension.lead_view")
-        return werkzeug.utils.redirect(
-            '/web#action=%s&model=crm.lead&id=%s' % (server_action.id, int(lead_id)))
-
     @http.route('/mail_client_extension/lead/create_from_partner', type='http', auth='user', methods=['GET'])
     def crm_lead_redirect_create_form_view(self, partner_id):
         server_action = http.request.env.ref("crm_mail_client_extension.lead_creation_prefilled_action")
