@@ -38,6 +38,7 @@ export const hotkeyService = {
     let nextToken = 0;
 
     window.addEventListener("keydown", onKeydown);
+    window.addEventListener("keyup", onKeyup);
 
     /**
      * Handler for keydown events.
@@ -49,6 +50,12 @@ export const hotkeyService = {
       const infos = { hotkey, _originalEvent: ev };
       if (canDispatch(infos)) {
         dispatch(infos);
+      }
+    }
+
+    function onKeyup(ev) {
+      if (ev.key === 'Alt') {
+        removeHotkeyOverlays();
       }
     }
 
@@ -74,6 +81,10 @@ export const hotkeyService = {
       // Do not dispatch if user holds down a key
       if (event.repeat) {
         return false;
+      }
+
+      if (event.key === "Alt") {
+        addHotkeyOverlays();
       }
 
       // Is the active element editable ?
@@ -156,6 +167,38 @@ export const hotkeyService = {
       }
 
       return hotkey.join("-");
+    }
+
+    function addHotkeyOverlays() {
+      const hotkeyElements = document.querySelectorAll('[data-hotkey]');
+      hotkeyElements.forEach((elem) => {
+        const hotkey = elem.dataset.hotkey;
+        const overlay = document.createElement("div");
+        overlay.className = 'o_web_accesskey_overlay';
+        overlay.appendChild(document.createTextNode(hotkey.toUpperCase()));
+
+        let overlayParent;
+        if (elem.tagName.toUpperCase() === "INPUT") {
+          // special case for the search input that has an access key
+          // defined. We cannot set the overlay on the input itself,
+          // only on its parent.
+          overlayParent = elem.parentElement;
+        } else {
+          overlayParent = elem;
+        }
+
+        if (overlayParent.style.position !== 'absolute') {
+          overlayParent.style.position = 'relative';
+        }
+        overlayParent.appendChild(overlay);
+      });
+    }
+
+    function removeHotkeyOverlays() {
+      var overlays = document.querySelectorAll('.o_web_accesskey_overlay');
+      overlays.forEach((elem) =>{
+        elem.remove();
+      });
     }
 
     /**
