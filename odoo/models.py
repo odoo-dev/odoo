@@ -27,6 +27,7 @@ import datetime
 import dateutil
 import fnmatch
 import functools
+import heapq
 import itertools
 import io
 import logging
@@ -2006,6 +2007,20 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # existing non null datetimes
         existing = [d[groupby_name] for d in data if d[groupby_name]]
 
+        # fill temporal with minimal bounds
+        from_date = self.env.context.get('fill_temporal_from')
+        to_date = self.env.context.get('fill_temporal_to')
+        if from_date or to_date:
+            required_dates = set()
+            tz = next((date.tzinfo for date in existing if date.tzinfo), False)
+            for date_string in {from_date, to_date}:
+                if date_string:
+                    date = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+                    if tz:
+                        date = tz.localize(date)
+                    required_dates.add(date)
+            existing = sorted(set().union(existing, required_dates))
+
         if len(existing) < 2:
             return data
 
@@ -2021,9 +2036,29 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             grouped_data[d[groupby_name]].append(d)
 
         result = []
-
-        for dt in date_utils.date_range(first, last, interval):
+        min_groups = self.env.context.get('fill_temporal_min')
+        dates = [dt for dt in date_utils.date_range(first, last, interval)]
+        if min_groups:
+            # try to set #min_groups groups in the proposed range(first, last)
+            while len(result) < min_groups and len(dates):
+                dt = dates.pop(0)
+                result.extend(grouped_data[dt] or [dict(empty_item, **{groupby_name: dt})])
+            # if there are more dates than #min_groups, remove the empty groups at the end
+            while len(dates):
+                if not grouped_data[dates[-1]]:
+                    dates.pop()
+                else:
+                    break
+        # empty dates to set all remaining groups
+        while len(dates):
+            dt = dates.pop(0)
             result.extend(grouped_data[dt] or [dict(empty_item, **{groupby_name: dt})])
+        # if there are not enough dates in the proposed range(first, last), add more groups to get to #min_groups
+        if min_groups and len(result) < min_groups:
+            first = interval + last
+            last = (min_groups - len(result)) * interval + last
+            for dt in date_utils.date_range(first, last, interval):
+                result.extend([dict(empty_item, **{groupby_name: dt})])
 
         if False in grouped_data:
             result.extend(grouped_data[False])
