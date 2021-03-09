@@ -12,6 +12,7 @@ class WebsiteSurveyFeature(models.Model):
 
     title = fields.Char()
     description = fields.Char()
+    icon = fields.Char()
     code = fields.Char()
     website_type = fields.Char()
     type = fields.Selection([('page', 'Page'), ('app', 'App')])

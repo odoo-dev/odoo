@@ -352,17 +352,20 @@
           </div>
           <div class="o_survey_screen_content container d-flex h-100 align-items-lg-center">
             <div class="my-4">
-              <div class="o_survey_typing_text o_survey_show_fast">Add <b>Pages</b> or <b>Features</b></div>
+              <div class="o_survey_typing_text o_survey_show_fast p-2">Add <b class="text-info">Pages</b> or <b class="text-warning">Features</b></div>
               <div class="page_feature_selection o_survey_show">
-                <div class="w-100 page_feature_selection container d-flex flex-wrap bg-100 p2 p-lg-3">
+                <div class="w-100 page_feature_selection container d-flex flex-wrap py2 py-lg-3">
                   <t t-foreach="getters.getFeatures()" t-as="row" t-key="row_index">
                     <t t-foreach="row" t-as="feature" t-key="feature_index">
                       <div class="p-2 w-100 w-md-50 w-lg-25" t-if="feature.type != 'empty'">
                         <div t-attf-class="card h-100 {{feature.selected ? 'border-success' : ''}}" t-on-click="dispatch('toggleFeature', feature.id)">
-                          <div class="card-body">
-                            <i t-attf-class="fa {{feature.selected ? 'fa-check-circle text-success' : 'fa-circle-o text-300'}}" />
-                            <h5 class="card-title" t-esc="feature.title"/>
-                            <p class="card-text text-muted" t-esc="feature.description"/>
+                          <div class="card-body py-2">
+                            <i t-attf-class="o_survey_feature_status fa {{feature.selected ? 'fa-check-circle text-success' : 'fa-circle-o text-300'}}" />
+                            <h5 class="card-title d-flex align-items-center">
+                              <i t-attf-class="mr-2 small fa {{feature.icon}} {{feature.type == 'page' ? 'text-info' : 'text-warning' }}"/>
+                              <t t-esc="feature.title"/>
+                            </h5>
+                            <p class="card-text small text-muted" t-esc="feature.description"/>
                           </div>
                         </div>
                       </div>
@@ -662,7 +665,7 @@
               features: await rpc.query({
                 model: 'website.survey.feature',
                 method: 'search_read',
-                fields: ['title', 'description', 'type', 'website_type'],
+                fields: ['title', 'description', 'type', 'website_type', 'icon'],
               }).then(function (results) {
                 const features = {};
                 for (let i = 0; i < results.length; i += 1) {
@@ -672,6 +675,7 @@
                     description: results[i].description,
                     type: results[i].type,
                     websiteType: results[i].website_type,
+                    icon: results[i].icon,
                     selected: false
                   };
                 }
