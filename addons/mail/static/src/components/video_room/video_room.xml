@@ -3,7 +3,7 @@
 
     <t t-name="mail.VideoRoom" owl="1">
         <div class="o_VideoRoom">
-            <div class="o_VideoRoom_video_container">
+            <div class="o_VideoRoom_video_container" t-attf-style="--height:{{state.videoHeight}}px; --width:{{state.videoWidth}}px; --columns:{{state.columnCount}};">
                 <t t-if="room.peerTokens and room.peerTokens.length">
                     <t t-foreach="room.peerTokens" t-as="token" t-key="token">
                         <div class="o_VideoRoom_video_box" t-key="'video_box_'+token">

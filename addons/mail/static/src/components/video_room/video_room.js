@@ -25,18 +25,28 @@ class VideoRoom extends Component {
             };
             this.localToken = '';
         });
+        this.state = useState({
+            videoWidth: 0,
+            videoHeight: 0,
+            columnCount: 0,
+        });
         this._getRefs = useRefs();
+        this.aspectRatio = 16 / 9;
     }
 
     async willStart() {
+        // TODO move this logic to a new component for room, so it starts off as audio-only.
         this.localToken = await this.env.models['mail.chat_room'].get(this.props.roomLocalId).joinRoom();
         await this.env.mailRtc.initSession(this.localToken);
+
     }
 
     mounted() {
+        this._setVideoLayout();
         this._loadVideos();
     }
     patched() {
+        this._setVideoLayout();
         this._loadVideos();
     }
 
@@ -63,6 +73,55 @@ class VideoRoom extends Component {
     // Private
     //--------------------------------------------------------------------------
 
+    _computeOptimalLayout({ containerWidth, containerHeight }) {
+        let optimalLayout = {
+            area: 0,
+            cols: 0,
+            width: 0,
+            height: 0,
+        };
+
+        const videoCount = Object.keys(this.env.mailRtc.activePeers).length;
+        for (let columnCount = 1; columnCount <= videoCount; columnCount++) {
+            const rowCount = Math.ceil(videoCount / columnCount);
+            const videoHeight = containerWidth / (columnCount * this.aspectRatio);
+            const videoWidth = containerHeight / rowCount;
+            let width;
+            let height;
+            if (videoHeight > videoWidth) {
+                height = Math.floor(containerHeight / rowCount);
+                width = Math.floor(height * this.aspectRatio);
+            } else {
+                width = Math.floor(containerWidth / columnCount);
+                height = Math.floor(width / this.aspectRatio);
+            }
+            const area = height * width;
+            if (area <= optimalLayout.area) {
+                continue;
+            }
+            optimalLayout = {
+                area,
+                width,
+                height,
+                columnCount
+            };
+        }
+        return optimalLayout;
+    }
+
+    _setVideoLayout() {
+        const roomRect = this.el.getBoundingClientRect();
+
+        const { width, height, columnCount } = this._computeOptimalLayout({
+            containerWidth: roomRect.width,
+            containerHeight: roomRect.height,
+        });
+
+        this.state.videoWidth = width;
+        this.state.videoHeight = height;
+        this.state.columnCount = columnCount;
+
+    }
     /**
      * Since it is not possible to directly put a mediaStreamObject as the src or src-object of the template,
      * the video src is manually inserted into the DOM.
