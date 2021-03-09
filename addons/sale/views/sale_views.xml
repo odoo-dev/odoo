@@ -1184,6 +1184,7 @@
                         <field name="service_type" widget="radio" invisible="True"/>
                         <field name="visible_expense_policy" invisible="1"/>
                         <field name="expense_policy" widget="radio" attrs="{'invisible': [('visible_expense_policy', '=', False)]}"/>
+                        <field name="reinvoice_margin" widget="percentage" attrs="{'invisible': ['|', ('expense_policy', '!=', 'cost'), ('visible_expense_policy', '=', False)]}"/>
                     </group>
                 </xpath>
             </field>

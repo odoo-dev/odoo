@@ -31,6 +31,7 @@ class ProductTemplate(models.Model):
         default='no',
         help="If enabled, You can re-invoice products by selecting a customer sales order on the expense line"
              "or by matching the analytic account of the vendor bills line and analytic account of the customer sales order.")
+    reinvoice_margin = fields.Float(string='Re-Invoice Margin At Cost')
     visible_expense_policy = fields.Boolean("Re-Invoice Policy visible", compute='_compute_visible_expense_policy', default=lambda self: self._default_visible_expense_policy())
     sales_count = fields.Float(compute='_compute_sales_count', string='Sold')
     visible_qty_configurator = fields.Boolean("Quantity visible in configurator", compute='_compute_visible_qty_configurator')
