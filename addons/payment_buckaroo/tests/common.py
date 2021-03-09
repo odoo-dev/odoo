@@ -9,7 +9,7 @@ class BuckarooCommon(PaymentCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.buckaroo = cls._prepare_acquirer('buckaroo', values={
+        cls.buckaroo = cls._prepare_acquirer('buckaroo', update_values={
             'buckaroo_website_key': 'dummy',
             'buckaroo_secret_key': 'dummy',
         })

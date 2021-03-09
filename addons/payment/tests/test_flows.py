@@ -1,23 +1,30 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from freezegun import freeze_time
 from unittest.mock import patch
+
+from freezegun import freeze_time
 
 from odoo.tests import tagged
 from odoo.tools import mute_logger
 
 from odoo.addons.payment import utils as payment_utils
-
-from .common import PaymentCommon
-from .http_common import PaymentHttpCommon
+from odoo.addons.payment.tests.common import PaymentCommon
+from odoo.addons.payment.tests.http_common import PaymentHttpCommon
 
 
 @tagged('post_install', '-at_install')
 class TestFlows(PaymentCommon, PaymentHttpCommon):
 
+    # TODO ANVFE I'm not sure that this should test anything...
+    # TODO ANVFE maybe rename into _simulate_flow and test specific values on the tx ? partner_id when we pick a specific user for instance
     def _test_flow(self, flow):
-        self.reference = "Test Transaction (%s - %s)" % (
-            flow.title(), self.partner.name)
+        """ Simulate the given online payment flow and tests the tx values at each step.
+
+        :param str flow: The online payment flow to test ('direct', 'redirect', or 'token')
+        :return: The transaction created by the payment flow
+        :rtype: recordset of `payment.transaction`
+        """
+        self.reference = f"Test Transaction ({flow} - {self.partner.name})"
         route_values = self._prepare_pay_values()
 
         # /payment/pay
@@ -26,6 +33,7 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
             if key in route_values:
                 self.assertEqual(val, route_values[key])
 
+        # TODO ANVFE why are there several references to the validation operation while it's an online payment operation?
         # Route values for validation step are taken from tx_context result of /pay route
         # to correctly simulate the user flow.
         validation_values = {
@@ -60,7 +68,7 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
         self.assertEqual(tx_sudo.currency_id.id, self.currency.id)
         self.assertEqual(tx_sudo.partner_id.id, self.partner.id)
         self.assertEqual(tx_sudo.reference, self.reference)
-        # processing_values == given values
+        # processing_values == given values  TODO ANVFE shoudldn't this be a separate and unique test?
         self.assertEqual(processing_values['acquirer_id'], self.acquirer.id)
         self.assertEqual(processing_values['amount'], self.amount)
         self.assertEqual(processing_values['currency_id'], self.currency.id)
@@ -69,7 +77,7 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
 
         if flow == 'redirect':
             # In redirect flow, we verify the rendering of the dummy test form
-            redirect_form_info = self.get_form_info(
+            redirect_form_info = self._extract_values_from_html_form(
                 processing_values['redirect_form_html'])
 
             # Test content of rendered dummy redirect form
@@ -80,13 +88,13 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
                 str(self.user.id))
             self.assertEqual(
                 redirect_form_info['inputs']['view_id'],
-                str(self.dummy_redirect_form.id))
+                str(self.dummy_acquirer.redirect_form_view_id.id))
 
         return tx_sudo
 
     def test_10_direct_checkout_public(self):
         # No authentication needed, automatic fallback on public user
-        self.user = self.env.ref('base.public_user')
+        self.user = self.public_user
         self._test_flow('direct')
 
     def test_11_direct_checkout_portal(self):
@@ -195,6 +203,7 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
         self.assertEqual(processing_values['reference'], expected_reference)
 
         _send_refund_request = type(self.env['payment.transaction'])._send_refund_request
+
         def do_sthg_on_refund(self):
             self.state_message = "refund"
             return _send_refund_request(self)
@@ -239,7 +248,7 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
 
         # Pay without a partner specified --> redirection to login page
         response = self.portal_pay(**route_values)
-        self.assertTrue(response.url.startswith(self.build_url('/web/login?redirect=')))
+        self.assertTrue(response.url.startswith(self._build_url('/web/login?redirect=')))
 
         # Pay without a partner specified (but loggged) --> pay with the partner of current user.
         self.authenticate(self.portal_user.login, self.portal_user.login)
@@ -253,7 +262,7 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
 
         # Pay without a partner specified --> redirection to login page
         response = self.portal_pay(**route_values)
-        self.assertTrue(response.url.startswith(self.build_url('/web/login?redirect=')))
+        self.assertTrue(response.url.startswith(self._build_url('/web/login?redirect=')))
 
         # Pay without a partner specified (but loggged) --> pay with the partner of current user.
         self.authenticate(self.portal_user.login, self.portal_user.login)

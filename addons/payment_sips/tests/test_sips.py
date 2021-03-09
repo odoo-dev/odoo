@@ -45,13 +45,13 @@ class SipsTest(SipsCommon):
 
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx._get_processing_values()
-        form_info = self.get_form_info(processing_values['redirect_form_html'])
+        form_info = self._extract_values_from_html_form(processing_values['redirect_form_html'])
         form_inputs = form_info['inputs']
 
         self.assertEqual(form_info['action'], self.sips.sips_test_url)
         self.assertEqual(form_inputs['InterfaceVersion'], self.sips.sips_version)
-        return_url = self.build_url(SipsController._return_url)
-        notify_url = self.build_url(SipsController._notify_url)
+        return_url = self._build_url(SipsController._return_url)
+        notify_url = self._build_url(SipsController._notify_url)
         self.assertEqual(form_inputs['Data'],
             f'amount=111111|currencyCode=978|merchantId=dummy_mid|normalReturnUrl={return_url}|' \
             f'automaticResponseUrl={notify_url}|transactionReference={self.reference}|' \

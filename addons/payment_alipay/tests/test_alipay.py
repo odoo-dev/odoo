@@ -53,10 +53,10 @@ class AlipayTest(AlipayCommon):
 
         expected_values = {
             '_input_charset': 'utf-8',
-            'notify_url': self.build_url(AlipayController._notify_url),
+            'notify_url': self._build_url(AlipayController._notify_url),
             'out_trade_no': self.reference,
             'partner': self.alipay.alipay_merchant_partner_id,
-            'return_url': self.build_url(AlipayController._return_url),
+            'return_url': self._build_url(AlipayController._return_url),
             'subject': self.reference,
             'total_fee': str(self.amount), # Fees disabled by default
         }
@@ -77,7 +77,7 @@ class AlipayTest(AlipayCommon):
 
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx._get_processing_values()
-        redirect_form_data = self.get_form_info(processing_values['redirect_form_html'])
+        redirect_form_data = self._extract_values_from_html_form(processing_values['redirect_form_html'])
 
         expected_values.update({
             'sign': sign,
@@ -119,7 +119,7 @@ class AlipayTest(AlipayCommon):
         self.assertEqual(tx.fees, 7.09)
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx._get_processing_values()
-        redirect_form_data = self.get_form_info(processing_values['redirect_form_html'])
+        redirect_form_data = self._extract_values_from_html_form(processing_values['redirect_form_html'])
 
         self.assertEqual(redirect_form_data['inputs']['total_fee'], str(total_fee))
 

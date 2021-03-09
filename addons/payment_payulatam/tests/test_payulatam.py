@@ -43,7 +43,7 @@ class PayUlatamTest(PayulatamCommon):
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx._get_processing_values()
 
-        form_info = self.get_form_info(processing_values['redirect_form_html'])
+        form_info = self._extract_values_from_html_form(processing_values['redirect_form_html'])
         expected_values = {
             'merchantId': 'dummy',
             'accountId': 'dummy',
@@ -55,7 +55,7 @@ class PayUlatamTest(PayulatamCommon):
             'taxReturnBase': str(0),
             'buyerEmail': self.partner.email,
             'buyerFullName': self.partner.name,
-            'responseUrl': self.build_url(PayuLatamController._return_url),
+            'responseUrl': self._build_url(PayuLatamController._return_url),
             'test': str(1), # test is always done in test mode.
         }
         expected_values['signature'] = self.payulatam._payulatam_generate_sign(

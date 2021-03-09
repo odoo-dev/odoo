@@ -9,7 +9,7 @@ class AuthorizeCommon(PaymentCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.authorize = cls._prepare_acquirer('authorize', values={
+        cls.authorize = cls._prepare_acquirer('authorize', update_values={
             'authorize_login': 'dummy',
             'authorize_transaction_key': 'dummy',
             'authorize_signature_key': '00000000',

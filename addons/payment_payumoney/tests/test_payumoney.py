@@ -31,9 +31,9 @@ class PayumoneyTest(PayumoneyCommon):
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx._get_processing_values()
 
-        form_info = self.get_form_info(processing_values['redirect_form_html'])
+        form_info = self._extract_values_from_html_form(processing_values['redirect_form_html'])
         first_name, last_name = payment_utils.split_partner_name(self.partner.name)
-        return_url = self.build_url(PayUMoneyController._return_url)
+        return_url = self._build_url(PayUMoneyController._return_url)
         expected_values = {
             'key': self.payumoney.payumoney_merchant_key,
             'txnid': self.reference,

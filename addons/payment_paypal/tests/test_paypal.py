@@ -12,7 +12,7 @@ from ..controllers.main import PaypalController
 class PaypalForm(PaypalCommon):
 
     def _get_expected_values(self):
-        return_url = self.build_url(PaypalController._return_url)
+        return_url = self._build_url(PaypalController._return_url)
         values = {
             'address1': 'Huge Street 2/543',
             'amount': str(self.amount),
@@ -28,7 +28,7 @@ class PaypalForm(PaypalCommon):
             'item_number': self.reference,
             'last_name': 'Buyer',
             'lc': 'en_US',
-            'notify_url': self.build_url(PaypalController._notify_url),
+            'notify_url': self._build_url(PaypalController._notify_url),
             'return': return_url,
             'rm': '2',
             'zip': '1000',
@@ -47,7 +47,7 @@ class PaypalForm(PaypalCommon):
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx._get_processing_values()
 
-        form_info = self.get_form_info(processing_values['redirect_form_html'])
+        form_info = self._extract_values_from_html_form(processing_values['redirect_form_html'])
         self.assertEqual(
             form_info['action'],
             'https://www.sandbox.paypal.com/cgi-bin/webscr')
@@ -70,7 +70,7 @@ class PaypalForm(PaypalCommon):
         tx = self.create_transaction(flow='redirect')
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx._get_processing_values()
-        form_info = self.get_form_info(processing_values['redirect_form_html'])
+        form_info = self._extract_values_from_html_form(processing_values['redirect_form_html'])
 
         self.assertEqual(form_info['action'], 'https://www.sandbox.paypal.com/cgi-bin/webscr')
         self.assertDictEqual(

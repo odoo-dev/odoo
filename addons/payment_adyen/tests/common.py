@@ -8,7 +8,7 @@ class AdyenCommon(PaymentCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.adyen = cls._prepare_acquirer('adyen', values={
+        cls.adyen = cls._prepare_acquirer('adyen', update_values={
             'adyen_merchant_account': 'dummy',
             'adyen_api_key': 'dummy',
             'adyen_hmac_key': 'dummy',

@@ -8,7 +8,7 @@ class OgoneCommon(PaymentCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.ogone = cls._prepare_acquirer('ogone', values={
+        cls.ogone = cls._prepare_acquirer('ogone', update_values={
             'ogone_pspid': 'dummy',
             'ogone_userid': 'dummy',
             'ogone_password': 'dummy',

@@ -8,7 +8,7 @@ class PayulatamCommon(PaymentCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.payulatam = cls._prepare_acquirer('payulatam', values={
+        cls.payulatam = cls._prepare_acquirer('payulatam', update_values={
             'payulatam_account_id': 'dummy',
             'payulatam_merchant_id': 'dummy',
             'payulatam_api_key': 'dummy',

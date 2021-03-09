@@ -1,23 +1,24 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import json
+from uuid import uuid4
 
 from lxml import etree, objectify
-from uuid import uuid4
 
 from odoo import http
 from odoo.tests import HttpCase
 
-from .common import PaymentTestUtils
-from ..utils import generate_access_token
+from odoo.addons.payment import utils as payment_utils
+from odoo.addons.payment.tests.utils import PaymentTestUtils
 
 
 class PaymentHttpCommon(HttpCase, PaymentTestUtils):
-    """HttpCase common to build and simulate requests going through payment controllers.
+    """ HttpCase common to build and simulate requests going through payment controllers.
 
     Only use if you effectively want to test controllers.
     If you only want to test 'models' code, the PaymentCommon should be sufficient.
 
-    NOTE: This Common is expected to be used in parallel with the main PaymentCommon.
+    Note: This Common is expected to be used in parallel with the main PaymentCommon.
     """
 
     # Helpers #
@@ -118,7 +119,7 @@ class PaymentHttpCommon(HttpCase, PaymentTestUtils):
             'currency_id': currency.id,
             'reference': reference,
             'partner_id': partner.id,
-            'access_token': generate_access_token(
+            'access_token': payment_utils.generate_access_token(
                 self.db_secret, partner.id, amount, currency.id,
             ),
         }
@@ -130,7 +131,7 @@ class PaymentHttpCommon(HttpCase, PaymentTestUtils):
         Or an access_token should be specified in route_kwargs
         """
         uri = '/payment/pay'
-        url = self.build_url(uri)
+        url = self._build_url(uri)
         return self._make_http_get_request(url, route_kwargs)
 
     def get_tx_checkout_context(self, **route_kwargs):
@@ -150,7 +151,7 @@ class PaymentHttpCommon(HttpCase, PaymentTestUtils):
             validation flow is restricted to logged users
         """
         uri = '/my/payment_method'
-        url = self.build_url(uri)
+        url = self._build_url(uri)
         return self._make_http_get_request(url, {})
 
     def get_tx_manage_context(self, **route_kwargs):
@@ -169,7 +170,7 @@ class PaymentHttpCommon(HttpCase, PaymentTestUtils):
         :rtype: dict
         """
         uri = '/payment/transaction'
-        url = self.build_url(uri)
+        url = self._build_url(uri)
 
         return self._make_json_request(url, route_kwargs)
 
@@ -192,7 +193,7 @@ class PaymentHttpCommon(HttpCase, PaymentTestUtils):
         but it won't raise/log, the response will be a redirection to the login page.
         """
         uri = tx.validation_route
-        url = self.build_url(uri)
+        url = self._build_url(uri)
         # No params since all GET arguments are already specified in the validation route.
         # no returned value, validation response = redirect
         return self._make_http_get_request(url, {})

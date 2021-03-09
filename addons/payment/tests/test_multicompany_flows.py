@@ -1,10 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from .common import PaymentMultiCompanyCommon
-from .http_common import PaymentHttpCommon
-
 from odoo.tests import tagged
 from odoo.tools import mute_logger
+
+from odoo.addons.payment.tests.http_common import PaymentHttpCommon
+from odoo.addons.payment.tests.multicompany_common import PaymentMultiCompanyCommon
 
 
 @tagged('post_install', '-at_install')

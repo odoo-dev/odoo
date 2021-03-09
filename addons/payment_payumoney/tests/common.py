@@ -8,7 +8,7 @@ class PayumoneyCommon(PaymentCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.payumoney = cls._prepare_acquirer('payumoney', values={
+        cls.payumoney = cls._prepare_acquirer('payumoney', update_values={
             'payumoney_merchant_key': 'dummy',
             'payumoney_merchant_salt': 'dummy',
         })

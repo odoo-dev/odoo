@@ -35,7 +35,7 @@ class OgoneTest(OgoneCommon):
     # freeze time for consistent singularize_prefix behavior during the test
     @freeze_time("2011-11-02 12:00:21")
     def test_redirect_form_values(self):
-        return_url = self.build_url(OgoneController._flexcheckout_return_url)
+        return_url = self._build_url(OgoneController._flexcheckout_return_url)
         expected_values = {
             'ACCOUNT_PSPID': self.ogone.ogone_pspid,
             'ALIAS_ALIASID': payment_utils.singularize_reference_prefix(prefix='ODOO-ALIAS'),
@@ -54,7 +54,7 @@ class OgoneTest(OgoneCommon):
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx._get_processing_values()
 
-        form_info = self.get_form_info(processing_values['redirect_form_html'])
+        form_info = self._extract_values_from_html_form(processing_values['redirect_form_html'])
 
         self.assertEqual(form_info['action'], 'https://ogone.test.v-psp.com/Tokenization/HostedPage')
         inputs = form_info['inputs']

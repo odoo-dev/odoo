@@ -8,7 +8,7 @@ class StripeCommon(PaymentCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.stripe = cls._prepare_acquirer('stripe', values={
+        cls.stripe = cls._prepare_acquirer('stripe', update_values={
             'stripe_secret_key': 'sk_test_KJtHgNwt2KS3xM7QJPr4O5E8',
             'stripe_publishable_key': 'pk_test_QSPnimmb4ZhtkEy3Uhdm4S6J',
             'stripe_webhook_secret': 'whsec_vG1fL6CMUouQ7cObF2VJprLVXT5jBLxB',

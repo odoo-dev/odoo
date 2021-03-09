@@ -8,7 +8,7 @@ class PaypalCommon(PaymentCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.paypal = cls._prepare_acquirer('paypal', values={
+        cls.paypal = cls._prepare_acquirer('paypal', update_values={
             'paypal_email_account': 'dummy@test.mail.com',
             'fees_active': False,
         })

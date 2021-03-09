@@ -12,7 +12,7 @@ from ..controllers.main import BuckarooController
 class BuckarooTest(BuckarooCommon):
 
     def test_redirect_form_values(self):
-        return_url = self.build_url(BuckarooController._return_url)
+        return_url = self._build_url(BuckarooController._return_url)
         expected_values = {
             'Brq_websitekey': self.buckaroo.buckaroo_website_key,
             'Brq_amount': str(self.amount),
@@ -29,7 +29,7 @@ class BuckarooTest(BuckarooCommon):
         tx_sudo = self.create_transaction(flow='redirect')
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
             processing_values = tx_sudo._get_processing_values()
-        form_info = self.get_form_info(processing_values['redirect_form_html'])
+        form_info = self._extract_values_from_html_form(processing_values['redirect_form_html'])
 
         self.assertEqual(form_info['action'], "https://testcheckout.buckaroo.nl/html/")
         self.assertDictEqual(expected_values, form_info['inputs'],
