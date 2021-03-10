@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
   <header t-name="wowl.NavBar" owl="1">
-    <nav class="o_main_navbar" t-on-dropdown-item-selected="onNavBarDropdownItemSelection">
+    <nav class="o_main_navbar" t-on-dropdown-item-selected="onNavBarDropdownItemSelection" data-category="Top Menu">
       <!-- Apps Menu -->
       <t t-call="wowl.NavBar.AppsMenu">
         <t t-set="apps" t-value="menuService.getApps()" />
@@ -44,7 +44,7 @@
     </t>
   </Dropdown>
 
-  <ul t-name="wowl.NavBar.SectionsMenu" class="o_menu_sections" role="menu" owl="1">
+  <ul t-name="wowl.NavBar.SectionsMenu" class="o_menu_sections" data-category="App Sections" role="menu" owl="1">
     <t
       t-foreach="sections"
       t-as="section"

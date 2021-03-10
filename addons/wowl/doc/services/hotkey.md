@@ -1,8 +1,8 @@
 # Hotkey Service
 
-| Technical name | Dependencies                           |
-| -------------- | -------------------------------------- |
-| `hotkey`       | `ui`                                   |
+| Technical name | Dependencies            |
+| -------------- | ----------------------- |
+| `hotkey`       | `ui`, `command_palette` |
 
 ## Overview
 
@@ -99,7 +99,7 @@ The `hotkey` service provides the following API:
 - `subscribe(sub: HotkeySubscription): number`:
   it ask the service to call the given callback when a matching hotkey is pressed.
   An `HotkeySubscription` object should take the form of:
-  `{ hotkey: string, callback: (hotkey:string)=>void, hint?: string }`.
+  `{ hotkey: string, callback: ()=>void, hint?: string }`.
   If defined, the `HotkeySubscription.hint` key must provide the subscription description.
   This method returns a token you can use to unsubscribe later on.
 
@@ -124,8 +124,8 @@ class MyComponent extends Component {
     useHotkey({ hotkey: "a", callback: this.onAHotkey.bind(this) });
     useHotkey({ hotkey: "home", callback: () => this.onHomeHotkey() });
   }
-  onAHotkey(arg) { ... }
-  onHomeHotkey(arg) { ... }
+  onAHotkey() { ... }
+  onHomeHotkey() { ... }
 }
 ```
 

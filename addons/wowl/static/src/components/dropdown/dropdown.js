@@ -109,7 +109,7 @@ export class Dropdown extends Component {
         hint: "close the dropdown",
         callback: this._close.bind(this)
       }];
-    this.hotkeyTokens = subs.map(sub => this.hotkeyService.subscribe(sub));
+    this.hotkeyTokens = subs.map(sub => this.hotkeyService.subscribe({ ...sub, category: "Dropdown Navigation" }));
   }
 
   unsubscribeKeynav() {

@@ -1,22 +1,30 @@
 /** @odoo-module **/
 import { Dialog } from "../components/dialog/dialog";
-const { Component } = owl;
+const { Component, hooks } = owl;
+const { useExternalListener } = hooks;
 
 export class CommandPaletteDialog extends Component {
-  getHotkeyParts(item) {
-    return item.hotkey.split("-").map(hotkeyPart => {
-      switch (hotkeyPart) {
-        case "arrowleft": return "←";
-        case "arrowright": return "→";
-        case "arrowup": return "↑";
-        case "arrowdown": return "↓";
-        case "control": return "ctrl";
-        case "escape": return "esc";
-        default: return hotkeyPart;
-      }
-    });
+  setup() {
+    useExternalListener(window, "keydown", this._onKeydown);
+  }
+  _onKeydown(ev) {
+    switch (ev.key) {
+      case "Enter":
+        break;
+      case "ArrowUp":
+        break;
+      case "ArrowDown":
+        break;
+      // case "PageUp":
+      //   break;
+      // case "PageDown":
+      //   break;
+      // case "Home":
+      //   break;
+      // case "End":
+      //   break;
+    }
   }
 }
-
 CommandPaletteDialog.template = "wowl.CommandPaletteDialog";
 CommandPaletteDialog.components = { Dialog };

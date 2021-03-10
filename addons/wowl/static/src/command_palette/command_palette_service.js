@@ -7,7 +7,11 @@ export const commandPaletteService = {
   dependencies: ["dialog"],
   deploy(env) {
     function open(arg) {
-      env.services.dialog.open(CommandPaletteDialog, arg);
+      env.services.dialog.open(CommandPaletteDialog, {
+        ...arg,
+        title: "Command Palette",
+        placeholder: "Fuzzy Search..."
+      });
     }
     return {
       open

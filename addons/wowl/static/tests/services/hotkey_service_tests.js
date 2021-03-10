@@ -28,7 +28,7 @@ QUnit.test("subscribe / unsubscribe", async (assert) => {
   window.dispatchEvent(keydown);
   await nextTick();
 
-  let token = hotkey.subscribe({ hotkey: key, callback: (arg) => assert.step(arg) });
+  let token = hotkey.subscribe({ hotkey: key, callback: () => assert.step(key) });
   await nextTick();
 
   keydown = new KeyboardEvent("keydown", { key });
@@ -82,7 +82,7 @@ QUnit.test("hook", async (assert) => {
   const key = "q";
   class TestComponent extends Component {
     setup() {
-      useHotkey({ hotkey: key, callback: (arg) => assert.step(arg) });
+      useHotkey({ hotkey: key, callback: () => assert.step(key) });
     }
   }
   TestComponent.template = xml`<div/>`;
@@ -147,10 +147,10 @@ QUnit.test("component can subscribe many hotkeys", async (assert) => {
   class MyComponent extends Component {
     setup() {
       for (const hotkey of ["a", "b", "c"]) {
-        useHotkey({ hotkey, callback: (arg) => assert.step(`callback:${arg}`) })
+        useHotkey({ hotkey, callback: () => assert.step(`callback:${hotkey}`) })
       }
       for (const hotkey of ["d", "e", "f"]) {
-        useHotkey({ hotkey, callback: (arg) => assert.step(`callback2:${arg}`) })
+        useHotkey({ hotkey, callback: () => assert.step(`callback2:${hotkey}`) })
       }
     }
     onClick() {
@@ -193,7 +193,7 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
   class MyComponent1 extends Component {
     setup() {
       for (const hotkey of hotkeys) {
-        useHotkey({ hotkey, callback: (arg) => result.push(`comp1:${arg}`) })
+        useHotkey({ hotkey, callback: () => result.push(`comp1:${hotkey}`) })
       }
     }
     onClick() {
@@ -209,7 +209,7 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
   class MyComponent2 extends Component {
     setup() {
       for (const hotkey of hotkeys) {
-        useHotkey({ hotkey, callback: (arg) => result.push(`comp2:${arg}`) })
+        useHotkey({ hotkey, callback: () => result.push(`comp2:${hotkey}`) })
       }
     }
     onClick() {

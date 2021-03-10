@@ -8,7 +8,7 @@ const { onMounted, onWillUnmount } = hooks;
  * This hook will subscribe/unsubscribe the given subscription
  * when the caller component will mount/unmount.
  *
- * @param {{hotkey: string, callback: (hotkey:string)=>void, hint?: string}} subscription
+ * @param {{hotkey: string, callback: ()=>void, hint?: string}} subscription
  */
 export function useHotkey(subscription) {
   const hotkeyService = useService("hotkey");
@@ -104,7 +104,7 @@ export const hotkeyService = {
       // Dispatch actual hotkey to all matching subscriptions
       for (const [_, sub] of subscriptions) {
         if (sub.contextOwner === uiOwnerElement && sub.hotkey === hotkey) {
-          sub.callback(hotkey);
+          sub.callback();
           dispatched = true;
         }
       }
@@ -160,36 +160,58 @@ export const hotkeyService = {
     function openCommandPalette() {
       const uiOwnerElement = env.services.ui.getOwner();
 
-      const activables = [];
+      const activables = new Map();
       for (const [_, sub] of subscriptions) {
         if (sub.contextOwner === uiOwnerElement) {
-          activables.push({
-            description: `${sub.hint || 'no hint provided'}`,
+          const categoryLabel = sub.category ? sub.category : "Hotkeys";
+          const categoryItems = activables.get(categoryLabel) || [];
+          categoryItems.push({
+            name: `${sub.hint || 'no hint provided'}`,
             hotkey: sub.hotkey,
+            command: sub.callback,
           });
+          activables.set(categoryLabel, categoryItems);
         }
       }
 
       for (const el of uiOwnerElement.querySelectorAll("[data-hotkey]")) {
         const isVisible = el.offsetWidth > 0 && el.offsetHeight > 0;
         if (isVisible) {
-          activables.push({
-            description: `${el.title || el.innerText || 'no title provided'}`,
-            hotkey: el.dataset.hotkey
+          const categoryParent = el.closest("[data-category]");
+          const categoryLabel = categoryParent ? categoryParent.dataset.category : "Hotkeys";
+          const categoryItems = activables.get(categoryLabel) || [];
+          categoryItems.push({
+            name: `${el.title || el.innerText || 'no title provided'}`,
+            hotkey: el.dataset.hotkey,
+            command: el.click,
           });
+          activables.set(categoryLabel, categoryItems);
         }
       }
 
-      env.services.command_palette.open({
-        group: "hotkeyables",
-        items: activables,
-      });
+      const categories = [];
+      for (const [label, items] of activables) {
+        categories.push({ label, items });
+      }
+
+      env.services.command_palette.open({ categories });
+
+      // registrations
+      // env.services.command_palette.setGroupPriority("discuss_channels", 100);
+      // env.services.command_palette.register({
+      //   "parent1": activables,
+      //   "parent2": activables2,
+      // });
+      // env.services.command_palette.open({
+      //   "1": activables,
+      //   "2": activables2,
+      // });
     }
 
     /**
      * Registers a new subscription.
      *
-     * @param {{hotkey: string, callback: (hotkey:string)=>void, hint?: string}} sub
+     * @param {{hotkey: string, callback: ()=>void, hint?: string}} sub
      * @returns {number} subscription token
      */
     function subscribe(sub) {
