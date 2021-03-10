@@ -151,7 +151,6 @@ odoo.define('website_form.s_website_form', function (require) {
             this.manageVisibility(event.currentTarget.getAttribute('data-visibility-condition'), event.currentTarget);
         },
         manageVisibility: function (keyValue, input) {//Todo clean this function
-            
             const currentValue = input.type === 'checkbox' ? input.checked : input.value;
             keyValue = JSON.parse(keyValue);
             keyValue.elements.map((element) => {

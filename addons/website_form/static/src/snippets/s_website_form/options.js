@@ -992,8 +992,8 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         }
         currentInput.setAttribute('data-visibility-dependencies', value);
         //Todo fill the we-select after contains if it s a radio, select
-        if (this._getDependency().type === 'checkbox') {
-            const weSelect = document.querySelector('we-select[data-name="hidden_condition_checkbox_opt"]');
+        if (this._getDependency().type === 'radio') {
+            console.log('Lets fill the we-select with the existing data');
         }
     },
 
