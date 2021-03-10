@@ -169,6 +169,7 @@ export const studioService = {
       await env.services.action.doAction(leaveToAction, {
         stackPosition: "replacePreviousAction", // If target is menu, then replaceCurrent, see comment above why we cannot do this
         viewType: state.editedViewType,
+        resId: state.editedControllerState && state.editedControllerState.currentId,
       });
       state.studioMode = null;
     }
