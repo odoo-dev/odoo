@@ -2605,32 +2605,34 @@ options.registry.MobileVisibility = options.Class.extend({
 
 options.registry.ConditionalVisibility = options.Class.extend({
 
-    
-    // For the many2one widget to work after save, we need to save the recordId to get display_name
-    countryFilter: function (previewMode, widgetValue, params) {
-        const recordData = JSON.parse(params.recordData);
-        this._setDataAttribute('visibilityCountryId', recordData.id, recordData.code, params);
+    /**
+     * Triggering a visibility update to display in the invisible panel so that the user can play around hiding elements
+     * @override
+     */
+    selectClass: function (previewMode, widgetValue, params) {
+        this.trigger_up("snippet_option_visibility_update", {show: true});
+        return this._super(...arguments);
     },
 
-    languageFilter: function (previewMode, widgetValue, params) {
-        const recordData = JSON.parse(params.recordData);
-        this._setDataAttribute('visibilityLangId', recordData.id, recordData.url_code, params);
-    },
-
-    utmMediumFilter: function (previewMode, widgetValue, params) {
-        const recordData = JSON.parse(params.recordData);
-        this._setDataAttribute('visibilityUtmMediumId', recordData.id, recordData.display_name, params);
-    },
-
-    utmSourceFilter: function (previewMode, widgetValue, params) {
-        const recordData = JSON.parse(params.recordData);
-        this._setDataAttribute('visibilityUtmSourceId', recordData.id, recordData.display_name, params);
-    },
-
-    utmCampaignFilter: function (previewMode, widgetValue, params) {
-        const recordData = JSON.parse(params.recordData);
-        this._setDataAttribute('visibilityUtmCampaignId', recordData.id, recordData.display_name, params);
-    },
+   /**
+    * Because many2one widget uses id to display the name of the record we need to store extra informations in the dataset
+    * this way we can store both the data-call-with and the id 
+    * @override
+    */
+    selectDataAttribute(previewMode, widgetValue, params) {
+        if (params.recordData) {
+            const recordData = JSON.parse(params.recordData);
+            if (recordData.id) {
+                this.$target[0].dataset[params.attributeName + 'Id'] = recordData.id;
+                return this._super(...arguments);
+            } else {
+                delete this.$target[0].dataset[params.attributeName];     
+                delete this.$target[0].dataset[params.attributeName + 'Id'];
+            }
+        } else {
+            return this._super(...arguments);
+        }
+   },
 
     onTargetShow: async function () {
         this.$target[0].style = this.$target[0].previousStyle; // restoring the previous style attribute if any
@@ -2660,11 +2662,6 @@ options.registry.ConditionalVisibility = options.Class.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    _setDataAttribute: function (dataIdName, id, dataValue, params) {
-        this.$target[0].dataset[dataIdName] = id;
-        const value = this._selectAttributeHelper(dataValue, params);
-        this.$target[0].dataset[params.attributeName] = value;
-    },
 
     _applyStyleToDom: function (htmlAttribute, dataAttribute, value) {
         let style = document.getElementById('wrap').getElementsByTagName('style')[0];
@@ -2689,22 +2686,15 @@ options.registry.ConditionalVisibility = options.Class.extend({
                 style.innerHTML += `${rule} { display: none; }`;
             }
         }
-        this.$target.addClass('o_snippet_invisible');
     },
 
+    /**
+     * we override the stat widget to use the Id as the state rather than the code that we use
+     * @override
+     */
     _computeWidgetState: function (methodName, params) {
-        switch (methodName) {
-            case 'countryFilter':
-                return this.$target[0].dataset['visibilityCountryId'] | '';
-            case 'languageFilter':
-                return this.$target[0].dataset['visibilityLangId'] | '';
-            case 'utmMediumFilter':
-                return this.$target[0].dataset['visibilityUtmMediumId'] | '';
-            case 'utmSourceFilter':
-                return this.$target[0].dataset['visibilityUtmSourceId'] | '';
-            case 'utmCampaignFilter':
-                return this.$target[0].dataset['visibilityUtmCampaignId'] | '';
-                
+        if (methodName === 'selectDataAttribute' && params.attributeName !== 'visibility') {
+            return this.$target[0].dataset[params.attributeName + 'Id'] || '';
         }
         return this._super(...arguments);
     }

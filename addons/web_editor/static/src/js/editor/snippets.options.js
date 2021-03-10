@@ -2184,6 +2184,13 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
         searchEl.appendChild(this.inputEl);
         this.menuEl.appendChild(searchEl);
 
+        const emptyButton = new ButtonUserValueWidget(this, undefined, {
+            dataAttributes: Object.assign({recordData: '{}'}, this.options.dataAttributes),
+            childNodes: [document.createTextNode('/')],
+        }, this.$target);
+        this.registerSubWidget(emptyButton);
+        await emptyButton.appendTo(this.menuEl);
+
         this.searchMore = document.createElement('div');
         this.searchMore.classList.add('o_we_m2o_search_more');
         this.searchMore.textContent = _t("Search more...");
@@ -2288,11 +2295,12 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
      */
     async _getDisplayName(recordId) {
         if (!this.displayNameCache.hasOwnProperty(recordId)) {
-            this.displayNameCache[recordId] = (await this._rpc({
+            const record = (await this._rpc({
                 model: this.options.model,
                 method: 'read',
                 args: [[recordId], ['display_name']],
-            }))[0].display_name;
+            }))[0];
+            this.displayNameCache[recordId] = record ? record.display_name : "Unavailable"; 
         }
         return this.displayNameCache[recordId];
     },
