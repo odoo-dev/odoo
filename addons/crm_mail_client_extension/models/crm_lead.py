@@ -8,6 +8,10 @@ class Lead(models.Model):
 
     @api.model
     def _form_view_auto_fill(self):
+        """
+            deprecated method, not needed for newer versions of the plugin but necessary
+            for supporting older versions
+        """
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',

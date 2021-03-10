@@ -281,10 +281,14 @@ class MailClientExtensionController(http.Controller):
         response = {'id': partner.id}
         return response
 
-    @http.route('/mail_client_extension/partner/log_mail_content', type="json", auth="outlook", cors="*")
-    def log_single_mail_content(self, partner_id, message, **kw):
-        partner = request.env['res.partner'].browse(partner_id)
-        partner.message_post(body=message)
+    @http.route('/mail_client_extension/log_mail_content', type="json", auth="outlook", cors="*")
+    def log_mail_content(self, model, res_id, message):
+        assert model in self._get_loggable_modules()
+        record = request.env[model].browse(res_id)
+        record.message_post(body=message)
+
+    def _get_loggable_modules(self):
+        return ['res.partner']
 
     @http.route('/mail_client_extension/partner/enrich_company', type="json", auth="outlook", cors="*")
     def res_partner_enrich_company(self, partner_id):

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!--deprecated-->
     <record id="lead_creation_prefilled_action" model="ir.actions.server">
       <field name="name">Redirection to the lead creation form with prefilled info</field>
       <field name="type">ir.actions.server</field>
@@ -7,4 +8,18 @@
       <field name="state">code</field>
       <field name="code">action = model._form_view_auto_fill()</field>
     </record>
+
+    <record id="open_lead_edit_mode" model="ir.actions.act_window">
+      <field name="name">Redirection to the lead edit form</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">crm.lead</field>
+      <field name="view_mode">form</field>
+      <field name="view_id" ref="crm.crm_lead_view_form"/>
+      <field name="context">
+          {
+                'form_view_initial_mode': 'edit',
+          }
+      </field>
+    </record>
+
 </odoo>
