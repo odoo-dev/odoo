@@ -63,6 +63,12 @@ publicWidget.registry.websiteEventTrackReminder = publicWidget.Widget.extend({
                     type: 'info',
                     title: message
                 });
+                if (self.reminderOn) {
+                    core.bus.trigger('force_notification_request', {
+                        title: _t('Allow push notifications?'),
+                        body: _t('You will have to enable push notifications to receive reminder on your favorite tracks')
+                    });
+                }
             }
             if (result.visitor_uuid) {
                 utils.set_cookie('visitor_uuid', result.visitor_uuid);
