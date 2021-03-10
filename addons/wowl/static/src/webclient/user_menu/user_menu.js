@@ -2,6 +2,7 @@
 import { useService } from "../../core/hooks";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { Dropdown } from "../../components/dropdown/dropdown";
+import { systrayRegistry } from "../systray_registry";
 
 const { Component } = owl;
 
@@ -39,8 +40,4 @@ export class UserMenu extends Component {
 UserMenu.template = "wowl.UserMenu";
 UserMenu.components = { Dropdown, DropdownItem };
 
-export const userMenu = {
-  name: "wowl.user_menu",
-  Component: UserMenu,
-  sequence: 0,
-};
+systrayRegistry.add("wowl.user_menu", UserMenu, { sequence: 0 });

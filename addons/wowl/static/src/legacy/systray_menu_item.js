@@ -27,9 +27,5 @@ legacySystrayMenuItems.forEach((item, index) => {
   }
   SystrayItem.template = tags.xml`<SystrayItemAdapter Component="Widget" />`;
   SystrayItem.components = { SystrayItemAdapter };
-  systrayRegistry.add(name, {
-    name,
-    Component: SystrayItem,
-    sequence: item.prototype.sequence,
-  });
+  systrayRegistry.add(name, SystrayItem, { sequence: item.prototype.sequence });
 });

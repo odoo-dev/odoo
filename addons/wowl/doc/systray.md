@@ -9,18 +9,8 @@ user interact with them.
 
 ## Systray items
 
-A systray item is an object with the following properties:
-
-- `name (string)`: an unique string describing the systray item (technical name,
-  usually prefixed by the current module name)
-- `Component`: the Component class that will be used to display the item. Its root
-  node has to be a `<li>` tag!
-- sequence (number, optional): defaults to 50. If given, this number will be used
-  to order the items. The lowest sequence is on the right and the highest sequence
-  is on the left in the systray menu.
-
-Warning: the root node need to be a `<li>` tag. Otherwise, the systray item will
-not be styled properly.
+A systray item is simply a component, with a constraint: its root node should be
+a `<li>` tag! Otherwise, the systray item will not be styled properly.
 
 ## Adding a systray item
 
@@ -34,10 +24,15 @@ class MySystrayItem extends Component {
   // some component ...
 }
 
-const item = {
-  name: "myaddon.some_description",
-  Component: MySystrayItem,
-};
-
-systrayRegistry.add(item.name, Component);
+systrayRegistry.add("myaddon.some_description", MySystrayItem);
 ```
+
+The systray registry is an ordered registry, so one can add a sequence number:
+
+```js
+systrayRegistry.add("myaddon.some_description", MySystrayItem, { sequence: 43 });
+```
+
+The sequence number defaults to 50. If given, this number will be used
+to order the items. The lowest sequence is on the right and the highest sequence
+is on the left in the systray menu.

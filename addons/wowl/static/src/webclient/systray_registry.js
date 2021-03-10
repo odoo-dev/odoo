@@ -1,8 +1,5 @@
 /** @odoo-module **/
 
-import { Registry } from "../core/registry";
-import { userMenu } from "./user_menu/user_menu";
+import { OrderedRegistry } from "../core/ordered_registry";
 
-export const systrayRegistry = (odoo.systrayRegistry = new Registry());
-
-systrayRegistry.add("wowl.user_menu", userMenu);
+export const systrayRegistry = (odoo.systrayRegistry = new OrderedRegistry());

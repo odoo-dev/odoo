@@ -70,12 +70,6 @@ DebugManager.debugElementsId = 1;
 DebugManager.template = "wowl.DebugManager";
 DebugManager.components = { Dropdown, DropdownItem };
 
-export const debugManager = {
-  name: "wowl.debug_mode_menu",
-  Component: DebugManager,
-  sequence: 100,
-};
-
 export function useDebugManager(elementsFactory) {
   const elementsId = DebugManager.debugElementsId++;
   const component = Component.current;

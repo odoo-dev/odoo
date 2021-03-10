@@ -153,7 +153,7 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
 });
 
 QUnit.test("will let handlers from the registry handle errors first", async (assert) => {
-  errorHandlerRegistry.add("__test_handler__", env => err => {
+  errorHandlerRegistry.add("__test_handler__", (env) => (err) => {
     assert.strictEqual(err, error);
     assert.strictEqual(env.someValue, 14);
     assert.step("in handler");

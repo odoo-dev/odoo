@@ -9,6 +9,7 @@ import { hotkeyService } from "../../src/services/hotkey_service";
 import { menuService } from "./../../src/services/menu_service";
 import { notificationService } from "../../src/notifications/notification_service";
 import { uiService } from "../../src/services/ui_service";
+import { OrderedRegistry } from "../../src/core/ordered_registry";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
@@ -31,11 +32,7 @@ QUnit.module("Navbar", {
     };
     const serverData = { menus };
     const systrayRegistry = new Registry();
-    const item = {
-      name: "addon.myitem",
-      Component: MySystrayItem,
-    };
-    systrayRegistry.add(item.name, item);
+    systrayRegistry.add("addon.myitem", MySystrayItem);
     const browser = {
       setTimeout: (handler, delay, ...args) => handler(...args),
       clearTimeout: () => {},
@@ -109,35 +106,18 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
   MyItem3.template = xml`<li class="my-item-3">my item 3</li>`;
   class MyItem4 extends Component {}
   MyItem4.template = xml`<li class="my-item-4">my item 4</li>`;
-  const item1 = {
-    name: "addon.myitem1",
-    Component: MyItem1,
-    sequence: 0,
-  };
-  const item2 = {
-    name: "addon.myitem2",
-    Component: MyItem2,
-  };
-  const item3 = {
-    name: "addon.myitem3",
-    Component: MyItem3,
-    sequence: 100,
-  };
-  const item4 = {
-    name: "addon.myitem4",
-    Component: MyItem4,
-  };
-  const systrayRegistry = new Registry();
-  systrayRegistry.add(item2.name, item2);
-  systrayRegistry.add(item1.name, item1);
-  systrayRegistry.add(item3.name, item3);
-  systrayRegistry.add(item4.name, item4);
+
+  const systrayRegistry = new OrderedRegistry();
+  systrayRegistry.add("addon.myitem2", MyItem2);
+  systrayRegistry.add("addon.myitem1", MyItem1, { sequence: 0 });
+  systrayRegistry.add("addon.myitem3", MyItem3, { sequence: 100 });
+  systrayRegistry.add("addon.myitem4", MyItem4);
   const env = await makeTestEnv({ ...baseConfig, systrayRegistry });
   const target = getFixture();
   const navbar = await mount(NavBar, { env, target });
   const menuSystray = navbar.el.getElementsByClassName("o_menu_systray")[0];
   assert.containsN(menuSystray, "li", 4, "four systray items should be displayed");
-  assert.strictEqual(menuSystray.innerText, "my item 3\nmy item 2\nmy item 4\nmy item 1");
+  assert.strictEqual(menuSystray.innerText, "my item 3\nmy item 4\nmy item 2\nmy item 1");
   navbar.destroy();
 });
 

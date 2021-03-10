@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { serviceRegistry } from "../webclient/service_registry";
-import { debugManager } from "./debug_manager";
+import { DebugManager } from "./debug_manager";
 
 export function editModelDebug(env, title, model, id) {
   return env.services.action.doAction({
@@ -21,7 +21,7 @@ export const debugService = {
   async deploy(env) {
     let accessRightsProm;
     if (env.debug !== "") {
-      odoo.systrayRegistry.add("wowl.debug_mode_menu", debugManager);
+      odoo.systrayRegistry.add("wowl.debug_mode_menu", DebugManager, { sequence: 100 });
     }
 
     return {
