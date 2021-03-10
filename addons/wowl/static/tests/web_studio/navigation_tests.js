@@ -281,8 +281,8 @@ QUnit.module('web_studio', (hooks) => {
         webClient.destroy();
     });
 
-    QUnit.skip('keep action context when leaving Studio', async function (assert) {
-        assert.expect(2);
+    QUnit.test('keep action context when leaving Studio', async function (assert) {
+        assert.expect(5);
 
         let nbLoadAction = 0;
         const mockRPC = async (route, args) => {
@@ -293,9 +293,8 @@ QUnit.module('web_studio', (hooks) => {
             if (route === '/web/action/load') {
                 nbLoadAction++;
                 if (nbLoadAction === 2) {
-                    assert.deepEqual(args.additional_context, {
-                        active_id: 1,
-                    }, "the context should be correctly passed when leaving Studio");
+                    assert.strictEqual(args.additional_context.active_id, 1,
+                        "the context should be correctly passed when leaving Studio");
                 }
             }
         };
