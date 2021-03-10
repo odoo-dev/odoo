@@ -1077,16 +1077,16 @@
         <we-row class="o_we_theme_colors_selector">
             <we-colorpicker data-name="color_1_opt" title="Primary"
                             data-customize-website-color="" data-color="o-color-1"
-                            data-use-css-color="true"/>
+                            data-use-css-color="true" data-selected-tab="1"/>
             <we-colorpicker data-name="color_2_opt" title="Secondary"
                             data-customize-website-color="" data-color="o-color-2"
-                            data-use-css-color="true"/>
+                            data-use-css-color="true" data-selected-tab="1"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-3"
-                            data-use-css-color="true"/>
+                            data-use-css-color="true" data-selected-tab="1"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-4"
-                            data-use-css-color="true"/>
+                            data-use-css-color="true" data-selected-tab="1"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-5"
-                            data-use-css-color="true"/>
+                            data-use-css-color="true" data-selected-tab="1"/>
             <we-select data-icon="fa-lightbulb-o" class="o_we_theme_colors_select" data-variable="color-palettes-number"/>
         </we-row>
     </div>

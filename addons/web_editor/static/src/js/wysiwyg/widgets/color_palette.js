@@ -47,11 +47,13 @@ const ColorPaletteWidget = Widget.extend({
             excludeSectionOf: null,
             $editable: $(),
             withCombinations: false,
+            selectedTab: 0,
         }, options || {});
 
         this.selectedColor = '';
         this.resetButton = this.options.resetButton;
         this.withCombinations = this.options.withCombinations;
+        this.selectedTab = this.options.selectedTab;
 
         this.trigger_up('request_editable', {callback: val => this.options.$editable = val});
 
@@ -119,13 +121,20 @@ const ColorPaletteWidget = Widget.extend({
                 this.$pickers[picker] = $picker;
             });
 
-            // Hide section and associated button if empty
+            // If the section is empty, hide it and
+            // select the next tab if none is given in the options
             if (sectionIsEmpty) {
                 $section.addClass('d-none');
                 $switchPaneButtons[index].classList.add('d-none');
+                if (!this.options.selectedTab) {
+                    this.selectedTab = (index + 1) % this.tabs.length;
+                }
             }
             this.$sections[section] = $section;
         });
+
+        // Switch to the correct tab
+        this.$el.find(':button')[this.selectedTab].click();
 
         // Remove the buttons display if there is only one
         const $visibleButtons = $switchPaneButtons.filter((index, $button) => !$button.classList.contains('d-none'));
@@ -417,7 +426,10 @@ const ColorPaletteWidget = Widget.extend({
      */
     _onSwitchPaneButtonClick(ev) {
         ev.stopPropagation();
-        this.el.querySelectorAll('.o_we_colorpicker_switch_pane_btn').forEach(el => {
+        this.el.querySelectorAll('.o_we_colorpicker_switch_pane_btn').forEach((el, index) => {
+            if (el === ev.currentTarget) {
+                this.selectedTab = index;
+            }
             el.classList.remove('active');
         });
         ev.currentTarget.classList.add('active');
