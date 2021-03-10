@@ -1,8 +1,25 @@
 /** @odoo-module **/
-
-import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
-import { makeFakeDeviceService, makeFakeLocalizationService, makeTestOdoo, mocks } from "./mocks";
+import { Registry } from "../../src/core/registry";
+import { actionService } from "../../src/actions/action_service";
+import { effectService } from "../../src/effects/effect_service";
+import { notificationService } from "../../src/notifications/notification_service";
+import { dialogService } from "../../src/services/dialog_service";
+import { hotkeyService } from "../../src/services/hotkey_service";
+import { menuService } from "../../src/services/menu_service";
+import { modelService } from "../../src/services/model_service";
+import { uiService } from "../../src/services/ui_service";
+import { viewService } from "../../src/views/view_service";
+import { viewRegistry } from "../../src/views/view_registry";
+import {
+  fakeTitleService,
+  makeFakeDeviceService,
+  makeFakeLocalizationService,
+  makeFakeRouterService,
+  makeFakeUserService,
+  makeTestOdoo,
+  mocks,
+} from "./mocks";
 import { makeMockServer } from "./mock_server";
 
 const { Settings } = luxon;
@@ -16,6 +33,39 @@ export function patchDate(year, month, day, hours, minutes, seconds) {
   const timeInterval = actualDate.getTime() - fakeDate.getTime();
   Settings.now = () => Date.now() - timeInterval;
   return unpatchDate;
+}
+
+export function makeTestServiceRegistry() {
+  // build the service registry
+
+  // need activateMockServer or something like that for odoo.browser.fetch !!! something is bad
+  const testServiceRegistry = new Registry();
+  const fakeUserService = makeFakeUserService();
+  const fakeRouterService = makeFakeRouterService();
+
+  testServiceRegistry
+    .add(fakeUserService.name, fakeUserService)
+    .add(notificationService.name, notificationService)
+    .add(dialogService.name, dialogService)
+    .add(menuService.name, menuService)
+    .add(actionService.name, actionService)
+    .add(fakeRouterService.name, fakeRouterService)
+    .add(viewService.name, viewService)
+    .add(modelService.name, modelService)
+    .add(fakeTitleService.name, fakeTitleService)
+    .add(uiService.name, uiService)
+    .add(effectService.name, effectService)
+    .add(hotkeyService.name, hotkeyService);
+  return testServiceRegistry;
+}
+
+export function makeTestViewRegistry() {
+  // build a copy of the view registry
+  const testViewRegistry = new Registry();
+  for (const [key, view] of viewRegistry.getEntries()) {
+    testViewRegistry.add(key, view);
+  }
+  return testViewRegistry;
 }
 
 function makeTestConfig(config = {}) {

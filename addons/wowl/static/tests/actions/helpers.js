@@ -1,29 +1,26 @@
 /** @odoo-module **/
+
 import { WebClient } from "../../src/webclient/webclient";
 import { Registry } from "../../src/core/registry";
-import { makeFakeUserService, nextTick } from "../helpers/index";
-import { getFixture, legacyExtraNextTick, makeTestEnv } from "../helpers/utility";
-import { notificationService } from "../../src/notifications/notification_service";
-import { dialogService } from "../../src/services/dialog_service";
-import { menuService } from "../../src/services/menu_service";
-import { actionService } from "../../src/actions/action_service";
-import { makeFakeRouterService, fakeTitleService, makeFakeDeviceService } from "../helpers/mocks";
-import { viewService } from "../../src/views/view_service";
-import { modelService } from "../../src/services/model_service";
+import {
+  makeTestServiceRegistry,
+  makeTestViewRegistry,
+  getFixture,
+  makeTestEnv,
+  nextTick,
+} from "../helpers/index";
+import { legacyExtraNextTick } from "../helpers/utility";
 import { makeRAMLocalStorage } from "../../src/env";
 import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "../../src/legacy/utils";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
-import { viewRegistry } from "../../src/views/view_registry";
-import { uiService } from "../../src/services/ui_service";
-import { effectService } from "../../src/effects/effect_service";
-import { hotkeyService } from "../../src/services/hotkey_service";
 
 const { Component, mount, tags } = owl;
 
 // -----------------------------------------------------------------------------
 // Utils
 // -----------------------------------------------------------------------------
+
 export async function createWebClient(params) {
   const { AbstractAction, AbstractController, testUtils } = getLegacy();
   const { patch, unpatch } = testUtils.mock;
@@ -162,22 +159,7 @@ export function getActionManagerTestConfig() {
     localStorage: makeRAMLocalStorage(),
     sessionStorage: makeRAMLocalStorage(),
   };
-  // build the service registry
-  const serviceRegistry = new Registry();
-  serviceRegistry
-    .add("user", makeFakeUserService())
-    .add(notificationService.name, notificationService)
-    .add(dialogService.name, dialogService)
-    .add(hotkeyService.name, hotkeyService)
-    .add("menu", menuService)
-    .add("action", actionService)
-    .add("router", makeFakeRouterService())
-    .add("view_manager", viewService)
-    .add("model", modelService)
-    .add(fakeTitleService.name, fakeTitleService)
-    .add(uiService.name, uiService)
-    .add("device", makeFakeDeviceService())
-    .add(effectService.name, effectService);
+  const serviceRegistry = makeTestServiceRegistry();
   // build the action registry: copy the real action registry, and add an
   // additional basic client action
   const testActionRegistry = new Registry();
@@ -191,10 +173,7 @@ export function getActionManagerTestConfig() {
       </div>`;
   testActionRegistry.add("__test__client__action__", TestClientAction);
   // build a copy of the view registry
-  const testViewRegistry = new Registry();
-  for (const [key, view] of viewRegistry.getEntries()) {
-    testViewRegistry.add(key, view);
-  }
+  const testViewRegistry = makeTestViewRegistry();
   // build the mocked server data
   const menus = {
     root: { id: "root", children: [0, 1, 2], name: "root", appID: "root" },
