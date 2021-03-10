@@ -1,5 +1,5 @@
 /** @odoo-module **/
 
-import { OrderedRegistry } from "../core/ordered_registry";
+import { Registry } from "../core/registry";
 
-export const systrayRegistry = (odoo.systrayRegistry = new OrderedRegistry());
+export const systrayRegistry = (odoo.systrayRegistry = new Registry());

@@ -17,6 +17,16 @@ const { EventBus } = core;
  */
 export class Registry extends EventBus {
   content = {};
+  elements = null;
+  entries = null;
+
+  constructor() {
+    super();
+    this.on("UPDATE", this, () => {
+      this.elements = null;
+      this.entries = null;
+    });
+  }
 
   /**
    * Add an entry (key, value) to the registry if key is not already used. If
@@ -27,14 +37,15 @@ export class Registry extends EventBus {
    *
    * @param {string} key
    * @param {any} value
-   * @param {{force?: boolean}} [options]
+   * @param {{force?: boolean, sequence?: number}} [options]
    * @returns {Registry}
    */
-  add(key, value, { force } = {}) {
+  add(key, value, { force, sequence } = {}) {
     if (!force && key in this.content) {
       throw new Error(`Cannot add '${key}' in this registry: it already exists`);
     }
-    this.content[key] = value;
+    sequence = sequence === undefined ? 50 : sequence;
+    this.content[key] = [sequence, value];
     const payload = { operation: "add", key, value };
     this.trigger("UPDATE", payload);
     return this;
@@ -50,7 +61,7 @@ export class Registry extends EventBus {
     if (!(key in this.content)) {
       throw new Error(`Cannot find ${key} in this registry!`);
     }
-    return this.content[key];
+    return this.content[key][1];
   }
 
   /**
@@ -64,19 +75,30 @@ export class Registry extends EventBus {
   }
 
   /**
-   * Get a list of all elements in the registry
+   * Get a list of all elements in the registry. Note that it is ordered
+   * according to the sequence numbers.
    *
    * @returns {any[]}
    */
   getAll() {
-    return Object.values(this.content);
+    if (!this.elements) {
+      const content = Object.values(this.content).sort((el1, el2) => el1[0] - el2[0]);
+      this.elements = content.map((elem) => elem[1]);
+    }
+    return this.elements;
   }
 
   /**
+   * Return a list of all entries, ordered by sequence numbers.
+   * 
    * @returns {[string, any][]}
    */
   getEntries() {
-    return Object.entries(this.content);
+    if (!this.entries) {
+      const entries = Object.entries(this.content).sort((el1, el2) => el1[1][0] - el2[1][0]);
+      this.entries = entries.map(([str, elem]) => [str, elem[1]]);
+    }
+    return this.entries;
   }
 
   /**

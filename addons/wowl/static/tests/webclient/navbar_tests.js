@@ -9,7 +9,6 @@ import { hotkeyService } from "../../src/services/hotkey_service";
 import { menuService } from "./../../src/services/menu_service";
 import { notificationService } from "../../src/notifications/notification_service";
 import { uiService } from "../../src/services/ui_service";
-import { OrderedRegistry } from "../../src/core/ordered_registry";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
@@ -107,7 +106,7 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
   class MyItem4 extends Component {}
   MyItem4.template = xml`<li class="my-item-4">my item 4</li>`;
 
-  const systrayRegistry = new OrderedRegistry();
+  const systrayRegistry = new Registry();
   systrayRegistry.add("addon.myitem2", MyItem2);
   systrayRegistry.add("addon.myitem1", MyItem1, { sequence: 0 });
   systrayRegistry.add("addon.myitem3", MyItem3, { sequence: 100 });

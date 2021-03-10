@@ -1,5 +1,5 @@
 /** @odoo-module **/
 
-import { OrderedRegistry } from "../core/ordered_registry";
+import { Registry } from "../core/registry";
 
-export const errorHandlerRegistry = (odoo.errorHandlerRegistry = new OrderedRegistry());
+export const errorHandlerRegistry = (odoo.errorHandlerRegistry = new Registry());
