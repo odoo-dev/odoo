@@ -16,14 +16,9 @@ FieldDate = model.env['ir.qweb.field.date']
 
 website = request.website.get_current_website()
 dynamic_filter = model.env.context.get('dynamic_filter')
-# limit = model.env.context.get('limit')
-# search_domain = model.env.context.get('search_domain')
-# order = model.env.context.get('order')
 order = request.params.get('order')
 meta_data = dynamic_filter._get_filter_meta_data()
 
-# domain = [('website_published', '=', True)] + website.website_domain() + (search_domain or [])
-# posts = BlogPost.search(domain, limit=limit, order=order)
 posts = dynamic_filter._get_blog_posts(website, order, model.env.context)
 
 res_posts = []

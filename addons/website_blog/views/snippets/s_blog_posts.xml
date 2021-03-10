@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <!-- Snippet -->
-<template id="s_blog_posts" name="Dynamic Blog Posts">
+<template id="s_blog_posts" name="Blog Posts">
     <t t-call="website.s_dynamic_snippet_template">
         <t t-set="snippet_name" t-value="'s_blog_posts s_dynamic_snippet_blog_posts s_blog_posts_big_picture s_blog_posts_effect_marley'"/>
     </t>
