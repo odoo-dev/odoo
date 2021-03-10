@@ -164,13 +164,22 @@ export const studioService = {
         throw new Error("leave when not in studio???");
       }
       env.bus.trigger('CLEAR-CACHES');
-      let leaveToAction = state.studioMode === EDITOR ? state.editedAction.id : "menu";
-      studioContext(env.services.user.context, false);
-      await env.services.action.doAction(leaveToAction, {
+      const options = {
         stackPosition: "replacePreviousAction", // If target is menu, then replaceCurrent, see comment above why we cannot do this
-        viewType: state.editedViewType,
-        resId: state.editedControllerState && state.editedControllerState.currentId,
-      });
+      };
+      let actionId;
+      if (state.studioMode === EDITOR) {
+        actionId = state.editedAction.id;
+        options.additionalContext = state.editedAction.context;
+        options.viewType = state.editedViewType;
+        if (state.editedControllerState) {
+          options.resId = state.editedControllerState.currentId;
+        }
+      } else {
+        actionId = "menu";
+      }
+      studioContext(env.services.user.context, false);
+      await env.services.action.doAction(actionId, options);
       state.studioMode = null;
     }
 
