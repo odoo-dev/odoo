@@ -201,7 +201,7 @@ QUnit.module("ActionManager", (hooks) => {
           throw new Error("should not push state");
         },
       }),
-      true
+      { force: true }
     );
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 1001);

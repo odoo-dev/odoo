@@ -16,10 +16,7 @@ const { EventBus } = core;
  * 3. it provides a chained API to add items to the registry.
  */
 export class Registry extends EventBus {
-  constructor() {
-    super(...arguments);
-    this.content = {};
-  }
+  content = {};
 
   /**
    * Add an entry (key, value) to the registry if key is not already used. If
@@ -30,10 +27,10 @@ export class Registry extends EventBus {
    *
    * @param {string} key
    * @param {any} value
-   * @param {boolean} [force]
+   * @param {{force?: boolean}} [options]
    * @returns {Registry}
    */
-  add(key, value, force = false) {
+  add(key, value, { force } = {}) {
     if (!force && key in this.content) {
       throw new Error(`Cannot add '${key}' in this registry: it already exists`);
     }

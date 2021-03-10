@@ -215,7 +215,7 @@ QUnit.module("ActionManager", (hooks) => {
           assert.step("push_state");
         },
       }),
-      true
+      { force: true }
     );
     const webClient = await createWebClient({ testConfig });
     let currentTitle = webClient.env.services.title.current;

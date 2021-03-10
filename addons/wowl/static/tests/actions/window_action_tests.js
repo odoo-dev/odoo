@@ -658,7 +658,7 @@ QUnit.module("ActionManager", (hooks) => {
       makeFakeUserService({
         context: Object.assign({}, { some_key: 2 }),
       }),
-      true
+      { force: true }
     );
     const mockRPC = async (route, args) => {
       assert.step((args && args.method) || route);

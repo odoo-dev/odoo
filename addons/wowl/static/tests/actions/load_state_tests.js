@@ -460,7 +460,7 @@ QUnit.module("ActionManager", (hooks) => {
           assert.step("push_state");
         },
       }),
-      true
+      { force: true }
     );
     const webClient = await createWebClient({ testConfig });
     let currentHash = webClient.env.services.router.current.hash;
@@ -513,7 +513,7 @@ QUnit.module("ActionManager", (hooks) => {
           assert.step("push_state");
         },
       }),
-      true
+      { force: true }
     );
     const webClient = await createWebClient({ testConfig });
     let currentHash = webClient.env.services.router.current.hash;
@@ -564,7 +564,7 @@ QUnit.module("ActionManager", (hooks) => {
           assert.step(`push_state ${mode}`);
         },
       }),
-      true
+      { force: true }
     );
     const webClient = await createWebClient({ testConfig });
     let currentHash = webClient.env.services.router.current.hash;
@@ -739,7 +739,7 @@ QUnit.module("ActionManager", (hooks) => {
           hash: { home: "1" },
         },
       }),
-      true
+      { force: true }
     );
     const mockRPC = async function (route, args) {
       assert.step(route);
@@ -828,7 +828,7 @@ QUnit.module("ActionManager", (hooks) => {
     testConfig.serviceRegistry.add(
       "router",
       makeFakeRouterService({ onPushState: () => assert.step("hashSet") }),
-      true
+      { force: true }
     );
     const webClient = await createWebClient({ testConfig });
     assert.verifySteps([]);

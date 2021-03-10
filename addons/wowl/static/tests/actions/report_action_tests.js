@@ -125,7 +125,7 @@ QUnit.module("ActionManager", (hooks) => {
         },
         () => {}
       ),
-      true
+      { force: true }
     );
     testConfig.serviceRegistry.add(
       "download",
@@ -170,7 +170,7 @@ QUnit.module("ActionManager", (hooks) => {
           },
           () => {}
         ),
-        true
+        { force: true }
       );
       const mockRPC = async (route, args) => {
         assert.step(args.method || route);
@@ -231,9 +231,11 @@ QUnit.module("ActionManager", (hooks) => {
         },
         () => {}
       ),
-      true
+      { force: true }
     );
-    testConfig.serviceRegistry.add("user", makeFakeUserService({ context: { some_key: 2 } }), true);
+    testConfig.serviceRegistry.add("user", makeFakeUserService({ context: { some_key: 2 } }), {
+      force: true,
+    });
     const mockRPC = async (route, args) => {
       assert.step(args.method || route);
       if (route.includes("/report/html/some_report")) {
@@ -284,7 +286,7 @@ QUnit.module("ActionManager", (hooks) => {
           }
         })
       );
-      testConfig.serviceRegistry.add("ui", uiService, true);
+      testConfig.serviceRegistry.add("ui", uiService, { force: true });
       const mockRPC = async (route, args) => {
         if (route === "/report/check_wkhtmltopdf") {
           return Promise.resolve("ok");

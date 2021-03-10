@@ -65,7 +65,7 @@ QUnit.test("handle RPC_ERROR of type='server' and no associated dialog class", a
       traceback: error.stack,
     });
   }
-  serviceRegistry.add("dialog", makeFakeDialogService(open), true);
+  serviceRegistry.add("dialog", makeFakeDialogService(open), { force: true });
   await makeTestEnv({ serviceRegistry });
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   errorCb(errorEvent);
@@ -101,7 +101,7 @@ QUnit.test(
         traceback: error.stack,
       });
     }
-    serviceRegistry.add("dialog", makeFakeDialogService(open), true);
+    serviceRegistry.add("dialog", makeFakeDialogService(open), { force: true });
     await makeTestEnv({ serviceRegistry });
     odoo.errorDialogRegistry.add("strange_error", CustomDialog);
     const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
@@ -127,7 +127,9 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
     return 1234;
   };
   const mockClose = (id) => assert.step(`close (${id})`);
-  serviceRegistry.add("notification", makeFakeNotificationService(mockCreate, mockClose), true);
+  serviceRegistry.add("notification", makeFakeNotificationService(mockCreate, mockClose), {
+    force: true,
+  });
   const values = [false, true]; // simulate the 'back online status' after 2 'version_info' calls
   const mockRPC = async (route) => {
     if (route === "/web/webclient/version_info") {

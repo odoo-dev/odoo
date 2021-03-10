@@ -50,7 +50,9 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("rainbowman integrated to webClient", async function (assert) {
     assert.expect(10);
-    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), true);
+    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
+      force: true,
+    });
     const mainComponentRegistry = new Registry();
     mainComponentRegistry.add("EffectContainer", EffectContainer);
     testConfig.mainComponentRegistry = mainComponentRegistry;
@@ -102,7 +104,9 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("on close with effect from server", async function (assert) {
     assert.expect(1);
-    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), true);
+    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
+      force: true,
+    });
     const mockRPC = async (route, args) => {
       if (route === "/web/dataset/call_button") {
         return Promise.resolve({
@@ -135,7 +139,9 @@ QUnit.module("ActionManager", (hooks) => {
       </header>
       <field name="display_name"/>
     </form>`;
-    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), true);
+    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
+      force: true,
+    });
     const mockRPC = async (route, args) => {
       if (route === "/web/dataset/call_button") {
         return Promise.resolve(false);

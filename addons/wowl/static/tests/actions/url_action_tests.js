@@ -50,7 +50,7 @@ QUnit.module("ActionManager", (hooks) => {
               assert.step(url);
             },
           }),
-          true
+          { force: true }
         );
     const env = await makeTestEnv(testConfig);
     await doAction(env, {
