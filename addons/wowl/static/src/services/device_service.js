@@ -45,7 +45,7 @@ export const deviceService = {
     function updateSize() {
       device.size = getSize();
     }
-    MEDIAS.forEach((media) => media.addListener(debounce(updateSize, 100)));
+    MEDIAS.forEach((media) => media.addEventListener("change", debounce(updateSize, 100)));
     return device;
   },
 };
