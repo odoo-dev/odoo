@@ -93,7 +93,6 @@ QUnit.module(
             label: "Contacts",
             menuID: 4,
             parents: "Contacts",
-            webIcon: false,
             xmlid: "menu.4",
           },
           {
@@ -103,7 +102,6 @@ QUnit.module(
             label: "Configuration",
             menuID: 5,
             parents: "Contacts",
-            webIcon: false,
             xmlid: "menu.5",
           },
           {
@@ -113,7 +111,6 @@ QUnit.module(
             label: "Contact Tags",
             menuID: 6,
             parents: "Contacts / Configuration",
-            webIcon: false,
             xmlid: "menu.6",
           },
           {
@@ -123,7 +120,6 @@ QUnit.module(
             label: "Contact Titles",
             menuID: 7,
             parents: "Contacts / Configuration",
-            webIcon: false,
             xmlid: "menu.7",
           },
           {
@@ -133,7 +129,6 @@ QUnit.module(
             label: "Localization",
             menuID: 8,
             parents: "Contacts / Configuration",
-            webIcon: false,
             xmlid: "menu.8",
           },
           {
@@ -143,7 +138,6 @@ QUnit.module(
             label: "Countries",
             menuID: 9,
             parents: "Contacts / Configuration / Localization",
-            webIcon: false,
             xmlid: "menu.9",
           },
           {
@@ -153,7 +147,6 @@ QUnit.module(
             label: "Fed. States",
             menuID: 10,
             parents: "Contacts / Configuration / Localization",
-            webIcon: false,
             xmlid: "menu.10",
           },
         ],
@@ -589,7 +582,6 @@ QUnit.module(
             menuID: i + 1,
             label: `0${i}`,
             parents: "0",
-            webIcon: false,
             xmlid: `menu_${i}`,
           };
         }),
@@ -651,7 +643,6 @@ QUnit.module(
             label: `0${i}`,
             menuID: i,
             parents: "",
-            webIcon: false,
             xmlid: `menu_${i}`,
           };
         }),

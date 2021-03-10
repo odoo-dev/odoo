@@ -456,7 +456,6 @@ HomeMenu.props = {
         label: String,
         menuID: Number,
         parents: String,
-        webIcon: Boolean,
         xmlid: String,
       },
     },

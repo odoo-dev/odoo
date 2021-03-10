@@ -43,13 +43,12 @@ export function computeHomeMenuProps(menuTree) {
       xmlid: menuItem.xmlid,
       actionID: menuItem.actionID,
       appID: menuItem.appID,
-      webIcon: menuItem.webIcon,
     };
     if (isApp) {
       if (menuItem.webIconData) {
         item.webIconData = menuItem.webIconData;
       } else {
-        const [iconClass, color, backgroundColor] = (item.webIcon || "").split(",");
+        const [iconClass, color, backgroundColor] = (menuItem.webIcon || "").split(",");
         if (backgroundColor !== undefined) {
           // Could split in three parts?
           item.webIcon = { iconClass, color, backgroundColor };
