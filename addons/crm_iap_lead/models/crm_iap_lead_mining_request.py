@@ -32,12 +32,12 @@ class CRMLeadMiningRequest(models.Model):
         return self.env.user.company_id.country_id
 
     name = fields.Char(string='Request Number', required=True, readonly=True, default=lambda self: _('New'), copy=False)
-    state = fields.Selection([('draft', 'Draft'), ('done', 'Done'), ('error', 'Error')], string='Status', required=True, default='draft')
+    state = fields.Selection([('draft', 'Draft'), ('error', 'Error'), ('done', 'Done')], string='Status', required=True, default='draft')
 
     # Request Data
     lead_number = fields.Integer(string='Number of Leads', required=True, default=3)
     search_type = fields.Selection([('companies', 'Companies'), ('people', 'Companies and their Contacts')], string='Target', required=True, default='companies')
-    error = fields.Text(string='Error', readonly=True)
+    error_code = fields.Char(string='Error Code', readonly=True)
 
     # Lead / Opportunity Data
 
@@ -179,6 +179,7 @@ class CRMLeadMiningRequest(models.Model):
         This will perform the request and create the corresponding leads.
         The user will be notified if he hasn't enough credits.
         """
+        self.error_code = False
         server_payload = self._prepare_iap_payload()
         reveal_account = self.env['iap.account'].get('reveal')
         dbuuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
@@ -190,12 +191,16 @@ class CRMLeadMiningRequest(models.Model):
         }
         try:
             response = iap_tools.iap_jsonrpc(endpoint, params=params, timeout=300)
+            if response.get('data'):
+                return response['data']
+            else:
+                self.error_code = 'no_result'
+                return False
             return response['data']
         except iap_tools.InsufficientCreditError as e:
-            self.error = 'Insufficient credits. Recharge your account and retry.'
+            self.error_code = 'insufficient_credits'
             self.state = 'error'
-            self._cr.commit()
-            raise e
+            return False
 
     def _create_leads_from_response(self, result):
         """ This method will get the response from the service and create the leads accordingly """
@@ -242,15 +247,30 @@ class CRMLeadMiningRequest(models.Model):
         if self.name == _('New'):
             self.name = self.env['ir.sequence'].next_by_code('crm.iap.lead.mining.request') or _('New')
         results = self._perform_request()
-        if results:
+
+        if not self.error_code and results:
             self._create_leads_from_response(results)
             self.state = 'done'
             if self.lead_type == 'lead':
                 return self.action_get_lead_action()
             elif self.lead_type == 'opportunity':
                 return self.action_get_opportunity_action()
+        elif self.env.context.get('is_modal'):
+            # when we are inside a modal already, we re-open the same record
+            # that way, the form view is updated and the correct error message appears
+            # (sadly, there is no way to simply 'reload' a form view within a modal)
+            return {
+                'name': _('Generate Leads'),
+                'res_model': 'crm.iap.lead.mining.request',
+                'views': [[False, 'form']],
+                'target': 'new',
+                'type': 'ir.actions.act_window',
+                'res_id': self.id,
+                'context': dict(self.env.context, edit=True, form_view_initial_mode='edit')
+            }
         else:
-            return self._action_try_again()
+            # will reload the form view and show the error message on top
+            return False
 
     def action_get_lead_action(self):
         self.ensure_one()
@@ -258,39 +278,15 @@ class CRMLeadMiningRequest(models.Model):
         action['domain'] = [('id', 'in', self.lead_ids.ids), ('type', '=', 'lead')]
         return action
 
-    def _action_try_again(self):
-        last_mining_request = self.env['crm.iap.lead.mining.request'].search([('user_id', '=', self.env.uid)], order='create_date desc', limit=1)
-        return {
-            'name': _('Generate Leads'),
-            'res_model': 'crm.iap.lead.mining.request',
-            'views': [[False, 'form']],
-            'target': 'new',
-            'type': 'ir.actions.act_window',
-            'context': {
-                'show_warning': True,
-                'is_modal': True, 'default_state': 'draft',
-                'default_lead_type': last_mining_request.lead_type,
-                'default_lead_number':last_mining_request.lead_number,
-                'default_search_type': last_mining_request.search_type,
-                'default_country_ids':last_mining_request.country_ids.ids,
-                'default_state_ids': last_mining_request.state_ids.ids,
-                'default_industry_ids':last_mining_request.industry_ids.ids,
-                'default_filter_on_size':last_mining_request.filter_on_size,
-                'default_company_size_min':last_mining_request.company_size_min,
-                'default_company_size_max':last_mining_request.company_size_max,
-                'default_team_id':last_mining_request.team_id.id,
-                'default_user_id':last_mining_request.user_id.id,
-                'default_tag_ids':last_mining_request.tag_ids.ids,
-                'default_contact_number':last_mining_request.contact_number,
-                'default_contact_filter_type':last_mining_request.contact_filter_type,
-                'default_preferred_role_id':last_mining_request.preferred_role_id.id,
-                'default_role_ids':last_mining_request.role_ids.ids,
-                'default_seniority_id':last_mining_request.seniority_id.id,
-            }
-        }
-
     def action_get_opportunity_action(self):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("crm.crm_lead_opportunities")
         action['domain'] = [('id', 'in', self.lead_ids.ids), ('type', '=', 'opportunity')]
         return action
+
+    def action_buy_credits(self):
+        url = self.env['iap.account'].get_credits_url(service_name='reveal')
+        return {
+            'type': 'ir.actions.act_url',
+            'url': url,
+        }
