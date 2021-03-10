@@ -32,7 +32,7 @@ const AUTHORIZED_KEYS = new Set([...ALPHANUM_KEYS, ...NAV_KEYS]);
 
 export const hotkeyService = {
   name: "hotkey",
-  dependencies: ["ui"],
+  dependencies: ["ui", "command_palette"],
   deploy(env) {
     const subscriptions = new Map();
     let nextToken = 0;
@@ -41,18 +41,6 @@ export const hotkeyService = {
 
     /**
      * Handler for keydown events.
-     *
-     * @param {KeyboardEvent} ev
-     */
-    async function onKeydown(ev) {
-      const hotkey = getActiveHotkey(ev);
-      const infos = { hotkey, _originalEvent: ev };
-      if (canDispatch(infos)) {
-        dispatch(infos);
-      }
-    }
-
-    /**
      * Verifies if the keyboard event can be dispatched or not.
      * Rules sequence to forbid dispatching :
      * - UI is blocked
@@ -60,38 +48,46 @@ export const hotkeyService = {
      * - focus is on an editable element (rule is bypassed on "ALT" combo)
      * - the pressed key is not whitelisted
      *
-     * @param {{hotkey: string, _originalEvent: KeyboardEvent}} infos
-     * @returns {boolean} true if service can dispatch the actual hotkey
+     * @param {KeyboardEvent} ev
      */
-    function canDispatch(infos) {
-      const { hotkey, _originalEvent: event } = infos;
+    function onKeydown(event) {
+      const hotkey = getActiveHotkey(event);
+      const infos = { hotkey, _originalEvent: event };
 
       // Do not dispatch if UI is blocked
       if (env.services.ui.isBlocked) {
-        return false;
+        return;
       }
 
       // Do not dispatch if user holds down a key
       if (event.repeat) {
-        return false;
+        return;
+      }
+
+      // Special case: open command palette
+      if (hotkey === "control-k") {
+        openCommandPalette();
+        event.preventDefault();
+        return;
       }
 
       // Is the active element editable ?
       const inEditableElement =
         event.target.isContentEditable ||
         ["input", "textarea"].includes(event.target.nodeName);
-      const isAltCombo = hotkey !== "alt" && event.altKey;
-      if (inEditableElement && !isAltCombo) {
-        return false;
+      const isAltModified = event.altKey;
+      if (inEditableElement && !isAltModified) {
+        return;
       }
 
       // Is the pressed key NOT whitelisted ?
       const singleKey = hotkey.split("-").pop();
       if (!AUTHORIZED_KEYS.has(singleKey)) {
-        return false;
+        return;
       }
 
-      return true;
+      // Finally, dispatch.
+      dispatch(infos);
     }
 
     /**
@@ -156,6 +152,38 @@ export const hotkeyService = {
       }
 
       return hotkey.join("-");
+    }
+
+    /**
+    * Prepare and open the command palette.
+    */
+    function openCommandPalette() {
+      const uiOwnerElement = env.services.ui.getOwner();
+
+      const activables = [];
+      for (const [_, sub] of subscriptions) {
+        if (sub.contextOwner === uiOwnerElement) {
+          activables.push({
+            description: `${sub.hint || 'no hint provided'}`,
+            hotkey: sub.hotkey,
+          });
+        }
+      }
+
+      for (const el of uiOwnerElement.querySelectorAll("[data-hotkey]")) {
+        const isVisible = el.offsetWidth > 0 && el.offsetHeight > 0;
+        if (isVisible) {
+          activables.push({
+            description: `${el.title || el.innerText || 'no title provided'}`,
+            hotkey: el.dataset.hotkey
+          });
+        }
+      }
+
+      env.services.command_palette.open({
+        group: "hotkeyables",
+        items: activables,
+      });
     }
 
     /**

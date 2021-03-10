@@ -226,6 +226,10 @@ Dropdown.props = {
   hotkey: {
     type: String,
     optional: true,
-  }
+  },
+  title: {
+    type: String,
+    optional: true,
+  },
 };
 Dropdown.template = "wowl.Dropdown";

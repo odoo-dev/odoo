@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="wowl.CommandPaletteDialog" owl="1">
+    <Dialog title="props.group">
+      <p t-foreach="props.items" t-as="item">
+        <span t-esc="item.description" />
+        :
+        <kbd t-foreach="getHotkeyParts(item)" t-as="keycap">
+          <kbd class="text-uppercase" t-esc="keycap" />
+          <t t-if="!keycap_last" t-esc="'+'" />
+        </kbd>
+      </p>
+    </Dialog>
+  </t>
+
+</templates>

@@ -29,7 +29,11 @@
     </nav>
   </header>
 
-  <Dropdown t-name="wowl.NavBar.AppsMenu" hotkey="'h'" class="o_navbar_apps_menu" owl="1">
+  <Dropdown t-name="wowl.NavBar.AppsMenu" owl="1"
+    hotkey="'h'"
+    title="env._t('Home Menu')"
+    class="o_navbar_apps_menu"
+  >
     <i class="fa fa-th-large" />
     <t t-set-slot="menu">
       <DropdownItem

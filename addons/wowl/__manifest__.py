@@ -25,6 +25,7 @@ Odoo Web core module written in Owl.
         ],
         'tests_js': [
             'static/src/actions/**/*',
+            'static/src/command_palette/**/*',
             'static/src/components/**/*',
             'static/src/core/**/*',
             'static/src/download/**/*',
@@ -44,6 +45,7 @@ Odoo Web core module written in Owl.
         'owl_qweb': [
             'static/src/components/**/*',
             'static/src/actions/**/*',
+            'static/src/command_palette/**/*',
             'static/src/debug/**/*',
             'static/src/effects/**/*',
             'static/src/notifications/**/*',
@@ -55,6 +57,7 @@ Odoo Web core module written in Owl.
             'static/src/utils/**/*',
             'static/src/components/**/*',
             'static/src/actions/**/*',
+            'static/src/command_palette/**/*',
             'static/src/debug/**/*',
             'static/src/notifications/**/*',
             'static/src/effects/**/*',
