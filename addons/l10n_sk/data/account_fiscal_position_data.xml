@@ -24,7 +24,7 @@
         <record id="fiscal_position_template_2" model="account.fiscal.position.template">
             <field name="sequence">3</field>
             <field name="name">Obchody s EU</field>
-            <field name="chart_template_id" ref="cz_chart_template"/>
+            <field name="chart_template_id" ref="sk_chart_template"/>
             <field name="auto_apply" eval="True"/>
             <field name="vat_required" eval="True"/>
             <field name="country_group_id" ref="base.europe"/>
@@ -33,7 +33,7 @@
         <record id="fp_extra" model="account.fiscal.position.template">
             <field name="sequence">4</field>
             <field name="name">Extra komunita</field>
-            <field name="chart_template_id" ref="cz_chart_template"/>
+            <field name="chart_template_id" ref="sk_chart_template"/>
             <field name="auto_apply" eval="True"/>
         </record>
 
