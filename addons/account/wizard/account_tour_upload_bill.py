@@ -63,13 +63,13 @@ class AccountTourUploadBill(models.TransientModel):
                 'res_model': 'mail.compose.message',
                 'datas': self.sample_bill_preview,
             })
-            bill = purchase_journal.with_context(default_journal_id=purchase_journal.id, default_move_type='in_invoice').create_invoice_from_attachment(attachment.ids)
-            if self.selection == 'sample':
-                bill.write({
+            bill_list_action = purchase_journal.with_context(default_journal_id=purchase_journal.id, default_move_type='in_invoice').create_invoice_from_attachment(attachment.ids)
+            bills = self.env['account.move'].browse(bill_list_action['res_id'])
+            bills.write({
                     'partner_id': self.env.ref('base.main_partner').id,
                     'ref': 'INV/2020/0011'
                 })
-            return self._action_list_view_bill(bill.ids)
+            return self._action_list_view_bill(bills.ids)
         else:
             email_alias = '%s@%s' % (purchase_journal.alias_name, purchase_journal.alias_domain)
             new_wizard = self.env['account.tour.upload.bill.email.confirm'].create({'email_alias': email_alias})
