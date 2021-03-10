@@ -60,6 +60,8 @@ export { makeFakeUserService, makeFakeRPCService, makeMockXHR, makeMockFetch } f
 export {
   click,
   getFixture,
+  getTestServiceRegistry,
+  getTestViewRegistry,
   makeDeferred,
   makeTestEnv,
   nextTick,
