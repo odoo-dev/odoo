@@ -67,6 +67,13 @@
             overflow-y: auto;
         }
 
+        .o_survey_logo_wrapper {
+            @extend %o-preview-alpha-background;
+            img {
+                object-fit: contain;
+            }
+        }
+
         // ==== Screens
         &.o_welcome_screen {
             .o_survey_skip_desc {
@@ -163,13 +170,8 @@
 
         &.o_logo_validation_screen {
             .o_survey_logo_wrapper {
-                @extend %o-preview-alpha-background;
                 max-height: 350px; // <- Fallback
                 max-height: 40vh;
-            }
-
-            img {
-                object-fit: contain;
             }
         }
 
@@ -184,6 +186,20 @@
 
                 &:hover {
                     box-shadow: 0 0 0 1px #FFF, 0 0 0 3px theme-color("primary")
+                }
+            }
+
+            .o_survey_logo_wrapper {
+                transition: opacity .1s ease;
+
+                &:hover {
+                    transition: opacity .3s ease;
+                    opacity: .1;
+                }
+
+                img {
+                    height: 120px;
+                    max-width: 90%;
                 }
             }
 

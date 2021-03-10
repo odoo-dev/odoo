@@ -207,11 +207,7 @@
 
           checkDescriptionCompletion() {
             if (this.description.selectedType && this.description.selectedPurpose && this.description.selectedIndustry) {
-              if (this.logoValidation.logo !== false) {
-                this.env.router.navigate({to: 'SURVEY_LOGO_VALIDATION_SCREEN', params: this.env.router.currentParams});
-              } else {
-                this.env.router.navigate({to: 'SURVEY_PALETTE_SELECTION_SCREEN', params: this.env.router.currentParams});
-              }
+              this.env.router.navigate({to: 'SURVEY_PALETTE_SELECTION_SCREEN', params: this.env.router.currentParams});
             }
           }
         }
@@ -279,13 +275,30 @@
             <div class="d-flex flex-column flex-lg-row w-100 h-100 h-lg-auto align-self-md-center o_survey_show">
               <div class="w-100 w-lg-25 order-lg-3 my-4 my-md-0 d-flex flex-column">
                 <div class="h4 text-center"><b>Detect</b> from Logo</div>
-                <a href="#" t-on-click="uploadLogo" class="o_survey_logo_upload btn-link rounded bg-100 py-3 d-flex flex-grow-1 justify-content-center align-items-center text-decoration-none">
-                  <input type="file" class="logo_selection_input" t-on-change="changeLogo" style="display:none" name="logo_selection" accept="image/*"/>
-                  <div>
-                    <i class="fa fa-cloud-upload fa-6x"></i>
-                    <div class="text-center">Upload</div>
-                  </div>
-                </a>
+                <div class="d-flex flex-column flex-grow-1">
+                  <a href="#" t-on-click="uploadLogo" t-attf-class="o_survey_logo_upload position-relative btn-link rounded bg-100 overflow-hidden d-flex flex-grow-1 justify-content-center align-items-center text-decoration-none {{logoValidation.logo? 'h-50' : ''}}">
+                    <input type="file" class="logo_selection_input" t-on-change="changeLogo" style="display:none" name="logo_selection" accept="image/*"/>
+                    <div class="o_survey_logo_button text-center">
+                      <i t-attf-class="fa fa-cloud-upload {{logoValidation.logo? 'fa-4x' : 'fa-6x'}}"></i>
+                      <div class="text-center">Upload <span t-if="logoValidation.logo">a new image</span></div>
+                    </div>
+                    <div t-if="logoValidation.logo" class="o_survey_logo_wrapper position-absolute d-flex justify-content-center align-items-center w-100 h-100">
+                      <img style="height: 120px" t-attf-src="{{logoValidation.logo}}"/>
+                    </div>
+                  </a>
+                  <t t-foreach="getters.getPalettes()" t-as="row" t-key="row_index">
+                    <t t-foreach="row" t-as="palette" t-key="palette_index">
+                      <div t-if="palette.type == 'recommended'" class="w-75 mx-auto px-2 pt-3" style="max-width: 184px;">
+                        <h6 t-if="palette.type == 'recommended'" class="text-center text-success d-block badge mb-0 mt-n2">Detected Colors</h6>
+                        <div t-attf-class="palette_card rounded-pill overflow-hidden d-flex" t-on-click="selectPalette(palette.id)" t-attf-style="background-color: {{palette.color3}}">
+                          <div class="color_sample w-100 first" t-attf-style="background-color: {{palette.color1}}"/>
+                          <div class="color_sample w-100 second" t-attf-style="background-color: {{palette.color2}}"/>
+                          <div class="color_sample w-100 third" t-attf-style="background-color: {{palette.color3}}"/>
+                        </div>
+                      </div>
+                    </t>
+                  </t>
+                </div>
               </div>
               <div class="position-relative d-flex justify-content-center order-lg-2 w-100 w-lg-0 py-3 py-lg-0 px-lg-5 mb-4 mb-lg-0">
                 <div class="border-top w-100"></div>
@@ -297,7 +310,7 @@
                 <div class="d-flex flex-wrap align-items-end">
                   <t t-foreach="getters.getPalettes()" t-as="row" t-key="row_index">
                     <t t-foreach="row" t-as="palette" t-key="palette_index">
-                      <div t-if="palette.type != 'empty'" class="w-50 w-md-25 px-2 pt-3">
+                      <div t-if="palette.type != 'empty' &amp;&amp; palette.type != 'recommended'" class="w-50 w-md-25 px-2 pt-3">
                         <h6 t-if="palette.type == 'recommended'" class="text-center text-success d-block badge mb-0 mt-n2">Recommended</h6>
                         <div t-attf-class="palette_card rounded-pill overflow-hidden d-flex" t-on-click="selectPalette(palette.id)" t-attf-style="background-color: {{palette.color3}}">
                           <div class="color_sample w-100 first" t-attf-style="background-color: {{palette.color1}}"/>
@@ -318,6 +331,7 @@
         class PaletteSelectionScreen extends Component {
           static template = PaletteSelectionScreenTemplate;
           static components ={SkipButton};
+          logoValidation = useStore((state) => state.logoValidation);
           getters = useGetters();
           dispatch = useDispatch();
 
