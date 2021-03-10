@@ -137,7 +137,12 @@ class Website(Home):
 
     @http.route(['/robots.txt'], type='http', auth="public", website=True, sitemap=False)
     def robots(self, **kwargs):
-        return request.render('website.robots', {'url_root': request.httprequest.url_root}, mimetype='text/plain')
+        return request.make_response(f'''\
+User-agent: *
+Sitemap: {request.httprequest.url_root}sitemap.xml
+
+{request.website.sudo().robots_txt}
+''', headers=[('Content-Type', 'text/plain')])
 
     @http.route('/sitemap.xml', type='http', auth="public", website=True, multilang=False, sitemap=False)
     def sitemap_xml_index(self, **kwargs):
