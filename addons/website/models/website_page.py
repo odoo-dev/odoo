@@ -212,7 +212,7 @@ class Page(models.Model):
         # Always call me with super() AT THE END to have cache_key_expr appended as last element
         # It is the only way for end user to not use cache via expr.
         # E.g  (None if 'token' in request.params else 1,)  will bypass cache_time
-        cache_key = (req.website.id, req.lang, req.httprequest.path)
+        cache_key = (req.website.id, req.lang, req.session.geoip.get('country_code'), req.httprequest.path)
         if self.cache_key_expr:  # e.g. (request.session.geoip.get('country_code'),)
             cache_key += safe_eval(self.cache_key_expr, {'request': req})
         return cache_key

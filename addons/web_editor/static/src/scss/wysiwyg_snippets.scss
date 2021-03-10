@@ -1277,6 +1277,10 @@ body.editor_enable.editor_has_snippets {
             line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
         }
 
+        .o_we_m2o_delete_button {
+            margin-top: 0px;
+            margin-left: 3px;
+        }
         //----------------------------------------------------------------------
         // Layout Utils
         //----------------------------------------------------------------------

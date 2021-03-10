@@ -2139,10 +2139,11 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
         'input .o_we_m2o_search input': '_onSearchInput',
         'keydown .o_we_m2o_search input': '_onSearchKeydown',
         'click .o_we_m2o_search_more': '_onSearchMoreClick',
+        'click .o_we_m2o_delete_button': '_onDeleteButtonClick',
     }),
     // Data-attributes that will be read into `this.options` on init and not
     // transfered to inner buttons.
-    configAttributes: ['model', 'fields', 'limit', 'domain', 'callWith'],
+    configAttributes: ['model', 'fields', 'limit', 'domain', 'callWith', 'allowDelete'],
 
     /**
      * @override
@@ -2184,13 +2185,17 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
         searchEl.appendChild(this.inputEl);
         this.menuEl.appendChild(searchEl);
 
-        const emptyButton = new ButtonUserValueWidget(this, undefined, {
-            dataAttributes: Object.assign({recordData: '{}'}, this.options.dataAttributes),
-            childNodes: [document.createTextNode('/')],
-        }, this.$target);
-        this.registerSubWidget(emptyButton);
-        await emptyButton.appendTo(this.menuEl);
-
+        if (this.options.allowDelete) {
+            const delIcon = document.createElement('i');
+            delIcon.classList.add('fa', 'fa-times');
+            this.deleteButton = new ButtonUserValueWidget(this, undefined, {
+                dataAttributes: {},
+                childNodes: [delIcon],
+            }, this.$target);
+            this.registerSubWidget(this.deleteButton);
+            await this.deleteButton.appendTo(this.el);
+            this.deleteButton.el.classList.add('o_we_m2o_delete_button');
+        }
         this.searchMore = document.createElement('div');
         this.searchMore.classList.add('o_we_m2o_search_more');
         this.searchMore.textContent = _t("Search more...");
@@ -2300,7 +2305,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
                 method: 'read',
                 args: [[recordId], ['display_name']],
             }))[0];
-            this.displayNameCache[recordId] = record ? record.display_name : "Unavailable"; 
+            this.displayNameCache[recordId] = record ? record.display_name : "Unavailable";
         }
         return this.displayNameCache[recordId];
     },
@@ -2314,7 +2319,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
      */
     _onClick(ev) {
         // Prevent dropdown from closing if you click on the search or has_more
-        if (ev.target.closest('.o_we_m2o_search_more, .o_we_m2o_search')) {
+        if (ev.target.closest('.o_we_m2o_search_more, .o_we_m2o_search, .o_we_m2o_delete_button')) {
             ev.stopPropagation();
             return;
         }
@@ -2369,6 +2374,15 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
      */
     _onSearchMoreClick(ev) {
         this.inputEl.focus();
+    },
+
+    /**
+     * Handles the deletion of the current selected value
+     * @private
+     */
+    _onDeleteButtonClick(ev) {
+        this.setValue('');
+        this.notifyValueChange(false);
     },
 });
 

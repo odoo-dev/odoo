@@ -61,13 +61,12 @@
         <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/bootstrap_overridden.scss"/>
     </xpath>
 </template>
-
-<!-- 
+ 
 <template id="_assets_frontend_minimal_js" inherit_id="web._assets_frontend_minimal_js">
     <xpath expr="//script[last()]" position="after">
         <script type="text/javascript" src="/website/static/src/js/content/inject_dom.js"/>
     </xpath>
-</template> -->
+</template>
 
 <template id="_assets_frontend_helpers_user_custom" inherit_id="web._assets_frontend_helpers" priority="99">
     <xpath expr="//link" position="before">

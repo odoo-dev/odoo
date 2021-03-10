@@ -2616,7 +2616,7 @@ options.registry.ConditionalVisibility = options.Class.extend({
 
    /**
     * Because many2one widget uses id to display the name of the record we need to store extra informations in the dataset
-    * this way we can store both the data-call-with and the id 
+    * this way we can store both the data-call-with and the id
     * @override
     */
     selectDataAttribute(previewMode, widgetValue, params) {
@@ -2625,10 +2625,10 @@ options.registry.ConditionalVisibility = options.Class.extend({
             if (recordData.id) {
                 this.$target[0].dataset[params.attributeName + 'Id'] = recordData.id;
                 return this._super(...arguments);
-            } else {
-                delete this.$target[0].dataset[params.attributeName];     
-                delete this.$target[0].dataset[params.attributeName + 'Id'];
             }
+        } else if (params.attributeName !== 'visbility') {
+            delete this.$target[0].dataset[params.attributeName];
+            delete this.$target[0].dataset[params.attributeName + 'Id'];
         } else {
             return this._super(...arguments);
         }
@@ -2648,7 +2648,7 @@ options.registry.ConditionalVisibility = options.Class.extend({
         delete this.$target[0].dataset["invisible"]; // we do not need to store "invisible as it is not determine by javascript";
         for (let attr of this.$target[0].attributes) {
             if (attr.name.startsWith('data-visibility-') && !attr.name.endsWith('-id')) {
-                let shortName = attr.name.replace('data-visibility-', '');
+                const shortName = attr.name.replace('data-visibility-', '');
                 if (shortName === 'lang') {
                     this._applyStyleToDom(shortName, attr.name, attr.value);
                 } else {
@@ -2666,13 +2666,13 @@ options.registry.ConditionalVisibility = options.Class.extend({
     _applyStyleToDom: function (htmlAttribute, dataAttribute, value) {
         let style = document.getElementById('wrap').getElementsByTagName('style')[0];
         if (!style) {
-            let body = document.getElementById('wrap');
+            const body = document.getElementById('wrap');
             style = document.createElement('style');
             style.type = 'text/css';
             body.insertBefore(style, body.firstChild);
         }
         // Hide the elements if html does not have the attributes, the body is not in editable mode and the element have a conditional visibility as well as the value as its data attribute
-        let rule = `html:not([${htmlAttribute}*="${value}"]) body:not(.editor_enable) [data-visibility="conditional"][${dataAttribute}="${value}"]`;
+        const rule = `html:not([${htmlAttribute}*="${value}"]) body:not(.editor_enable) [data-visibility="conditional"][${dataAttribute}="${value}"]`;
         if (style.sheet.rules.length === 0) {
             style.sheet.insertRule(`${rule} { display: none; }`);
             style.innerHTML += `${rule} { display: none; }`;
@@ -2697,7 +2697,7 @@ options.registry.ConditionalVisibility = options.Class.extend({
             return this.$target[0].dataset[params.attributeName + 'Id'] || '';
         }
         return this._super(...arguments);
-    }
+    },
 });
 
 return {

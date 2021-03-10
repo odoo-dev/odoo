@@ -1065,7 +1065,12 @@
             <we-button data-select-data-attribute="conditional" data-select-class="o_snippet_invisible" data-name="visibility_conditional">Conditionally</we-button>
         </we-select>
 
-       <we-many2one string="⌙ Country" data-attribute-name="visibilityCountry" data-no-preview="true" data-dependencies="visibility_conditional" data-model="res.country" data-call-with="code" data-select-data-attribute="" data-fields="[&quot;code&quot;]"/>
+       <we-many2one string="⌙ Country" 
+                    data-attribute-name="visibilityCountry" 
+                    data-no-preview="true" 
+                    data-dependencies="visibility_conditional" 
+                    data-model="res.country" data-call-with="code" data-select-data-attribute="" data-fields="[&quot;code&quot;]" 
+                    data-allow-delete="true"/>
 
         <!-- <we-select string="⌙ Countries" data-attribute-name="visibilityCountry" data-no-preview="true" data-dependencies="visibility_conditional">
             <we-button data-select-data-attribute="">/</we-button>
@@ -1073,7 +1078,12 @@
             <we-button data-select-data-attribute="UK">Uninted Kingdom</we-button>
         </we-select> -->
 
-       <we-many2one string="⌙ Languages" data-attribute-name="visibilityLang" data-no-preview="true" data-dependencies="visibility_conditional" data-model="res.lang" data-call-with="url_code" data-select-data-attribute="" data-fields="[&quot;url_code&quot;]"/>
+       <we-many2one string="⌙ Languages" 
+                    data-attribute-name="visibilityLang"
+                    data-no-preview="true" 
+                    data-dependencies="visibility_conditional" 
+                    data-model="res.lang" data-call-with="url_code" data-select-data-attribute="" data-fields="[&quot;url_code&quot;]"
+                    data-allow-delete="true"/>
 
         <!-- <we-select string="⌙ Languages" data-attribute-name="visibilityLang" data-no-preview="true" data-dependencies="visibility_conditional">
             <we-button data-select-data-attribute="">/</we-button>
@@ -1081,7 +1091,12 @@
             <we-button data-select-data-attribute="fr">French</we-button>
         </we-select> -->
 
-       <we-many2one string="⌙ UTM Medium" data-attribute-name="visibilityUtmMedium" data-no-preview="true" data-dependencies="visibility_conditional" data-model="utm.medium" data-call-with="display_name" data-select-data-attribute="" />
+       <we-many2one string="⌙ UTM Medium" 
+                    data-attribute-name="visibilityUtmMedium" 
+                    data-no-preview="true" 
+                    data-dependencies="visibility_conditional" 
+                    data-model="utm.medium" data-call-with="display_name" data-select-data-attribute="" 
+                    data-allow-delete="true"/>
 
 
         <!-- <we-select string="⌙ UTM Medium" data-attribute-name="visibilityUtmMedium" data-no-preview="true" data-dependencies="visibility_conditional">
@@ -1091,7 +1106,12 @@
             </t>
         </we-select> -->
 
-        <we-many2one string="⌙ UTM Source" data-model="utm.source" data-attribute-name="visibilityUtmSource" data-no-preview="true" data-dependencies="visibility_conditional" data-call-with="display_name" data-select-data-attribute="" />
+       <we-many2one string="⌙ UTM Source" 
+                    data-model="utm.source" 
+                    data-attribute-name="visibilityUtmSource" 
+                    data-no-preview="true" 
+                    data-dependencies="visibility_conditional" data-call-with="display_name" data-select-data-attribute="" 
+                    data-allow-delete="true"/>
 
         <!-- <we-select string="⌙ UTM Source" data-attribute-name="visibilityUtmSource" data-no-preview="true" data-dependencies="visibility_conditional">
             <we-button data-select-data-attribute="">/</we-button>
@@ -1100,7 +1120,12 @@
             </t>
         </we-select> -->
 
-        <we-many2one string="⌙ UTM Campaign" data-model="utm.campaign" data-dependencies="visibility_conditional" data-no-preview="true" data-attribute-name="visibilityUtmCampaign" data-call-with="display_name" data-select-data-attribute="" />
+        <we-many2one string="⌙ UTM Campaign" 
+                    data-model="utm.campaign" 
+                    data-dependencies="visibility_conditional" 
+                    data-no-preview="true"
+                    data-attribute-name="visibilityUtmCampaign" data-call-with="display_name" data-select-data-attribute="" 
+                    data-allow-delete="true" />
 
         <!-- <we-select string="⌙ UTM Campaign" data-no-preview="true" data-attribute-name="visibilityUtmCampaign" data-dependencies="visibility_conditional">
             <we-button data-select-data-attribute="">/</we-button>
@@ -1108,7 +1133,7 @@
                 <we-button t-att="['data-select-data-attribute', obj.name]" t-field="obj.name" />
             </t>
         </we-select> -->
-    </div>>
+    </div>
 
     <!-- Cookies Bar -->
     <div data-selector="#website_cookies_bar" data-js="CookiesBar" data-target=".modal">
