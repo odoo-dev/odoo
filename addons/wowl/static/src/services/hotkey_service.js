@@ -26,7 +26,7 @@ const NAV_KEYS = [
   "arrowleft", "arrowright", "arrowup", "arrowdown",
   "pageup", "pagedown", "home", "end",
   "backspace", "enter", "escape",
-]
+];
 const MODIFIERS = new Set(["control", "shift"]);
 const AUTHORIZED_KEYS = new Set([...ALPHANUM_KEYS, ...NAV_KEYS]);
 
@@ -36,9 +36,10 @@ export const hotkeyService = {
   deploy(env) {
     const subscriptions = new Map();
     let nextToken = 0;
+    let overlaysVisible = false;
 
     window.addEventListener("keydown", onKeydown);
-    window.addEventListener("keyup", onKeyup);
+    window.addEventListener("keyup", removeHotkeyOverlays);
 
     /**
      * Handler for keydown events.
@@ -48,14 +49,10 @@ export const hotkeyService = {
     async function onKeydown(ev) {
       const hotkey = getActiveHotkey(ev);
       const infos = { hotkey, _originalEvent: ev };
-      if (canDispatch(infos)) {
+      if (hotkey === "alt") {
+        addHotkeyOverlays();
+      } else if (canDispatch(infos)) {
         dispatch(infos);
-      }
-    }
-
-    function onKeyup(ev) {
-      if (ev.key === 'Alt') {
-        removeHotkeyOverlays();
       }
     }
 
@@ -81,10 +78,6 @@ export const hotkeyService = {
       // Do not dispatch if user holds down a key
       if (event.repeat) {
         return false;
-      }
-
-      if (event.key === "Alt") {
-        addHotkeyOverlays();
       }
 
       // Is the active element editable ?
@@ -169,8 +162,16 @@ export const hotkeyService = {
       return hotkey.join("-");
     }
 
+
+    /**
+     * Add the hotkey overlays respecting the ui owner.
+     */
     function addHotkeyOverlays() {
-      const hotkeyElements = document.querySelectorAll('[data-hotkey]');
+      if (overlaysVisible) {
+        return;
+      }
+
+      const hotkeyElements = env.services.ui.getOwner().querySelectorAll('[data-hotkey]');
       hotkeyElements.forEach((elem) => {
         const hotkey = elem.dataset.hotkey;
         const overlay = document.createElement("div");
@@ -192,13 +193,21 @@ export const hotkeyService = {
         }
         overlayParent.appendChild(overlay);
       });
+      overlaysVisible = true;
     }
 
+    /**
+     * Remove all the hotkey overlays.
+     */
     function removeHotkeyOverlays() {
+      if (!overlaysVisible) {
+        return;
+      }
       var overlays = document.querySelectorAll('.o_web_accesskey_overlay');
-      overlays.forEach((elem) =>{
+      overlays.forEach((elem) => {
         elem.remove();
       });
+      overlaysVisible = false;
     }
 
     /**
