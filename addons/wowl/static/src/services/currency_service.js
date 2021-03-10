@@ -5,7 +5,7 @@ import { serviceRegistry } from "../webclient/service_registry";
 export const currencyService = {
   name: "currency",
   dependencies: ["localization"],
-  deploy: async (env) => {
+  deploy(env) {
     const { currencies } = odoo.session_info;
     const { localization: l10n } = env.services;
     const getAll = () => Object.values(currencies);

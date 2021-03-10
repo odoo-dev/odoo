@@ -46,14 +46,7 @@ async function _deployServices(env, toDeploy, timeoutId) {
     while ((service = findNext())) {
       let name = service.name;
       toDeploy.delete(service);
-      const serviceEnv = Object.create(env);
-      serviceEnv.services = {};
-      if (service.dependencies) {
-        for (let dep of service.dependencies) {
-          serviceEnv.services[dep] = env.services[dep];
-        }
-      }
-      const value = service.deploy(serviceEnv);
+      const value = service.deploy(env);
       if (value instanceof Promise) {
         proms.push(
           value.then((val) => {
