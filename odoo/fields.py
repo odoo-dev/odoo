@@ -1683,6 +1683,7 @@ class Html(_String):
     """
     type = 'html'
     column_type = ('text', 'text')
+    column_cast_from = ('varchar',)
 
     sanitize = True                     # whether value must be sanitized
     sanitize_tags = True                # whether to sanitize tags (only a white list of attributes is accepted)
