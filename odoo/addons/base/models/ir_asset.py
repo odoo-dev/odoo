@@ -6,7 +6,11 @@ import os
 from glob import glob
 from logging import getLogger
 
+from odoo.tools import config
+from odoo.tools.func import lazy
+from odoo.addons import __path__ as ADDONS_PATH
 from odoo import api, fields, http, models
+from odoo.modules.module import read_manifest
 
 
 _logger = getLogger(__name__)
@@ -38,7 +42,6 @@ DIRECTIVES_WITH_TARGET = [AFTER_DIRECTIVE, BEFORE_DIRECTIVE, REPLACE_DIRECTIVE]
 def fs2web(path):
     """Converts a file system path to a web path"""
     return '/'.join(os.path.split(path))
-
 
 def get_paths(path_def, extensions=None, manifest_cache=None):
     """
@@ -88,6 +91,20 @@ def get_paths(path_def, extensions=None, manifest_cache=None):
         if not extensions or path.split('.')[-1] in extensions
     ]
 
+if config['test_enable']:
+    def get_all_manifests_cache():
+        manifest_cache = {}
+        for addons_path in ADDONS_PATH:
+            for module in sorted(os.listdir(str(addons_path))):
+                if module not in manifest_cache:
+                    manifest = read_manifest(addons_path, module)
+                    if not manifest or not manifest.get('installable', True):
+                        continue
+                    manifest['addons_path'] = addons_path
+                    manifest_cache[module] = manifest
+        return manifest_cache
+
+    http.addons_manifest = lazy(get_all_manifests_cache)
 
 class IrAsset(models.Model):
     """This model contributes to two things:
