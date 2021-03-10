@@ -24,14 +24,30 @@ class BaseDocumentLayout(models.TransientModel):
     _name = 'base.document.layout'
     _description = 'Company Document Layout'
 
+    @api.model
+    def _default_report_footer(self):
+        company = self.env.company
+        footer_fields = filter(None, [company.phone, company.email, company.website, company.vat])
+        return ' - '.join(footer_fields)
+
+    @api.model
+    def _default_company_details(self):
+        company = self.env.company
+        return (
+            f'{company.name}\n'
+            f'{company.street}\n'
+            f'{company.city} {company.state_id.name} {company.zip}\n'
+            f'{company.country_id.name}\n'
+        )
+
     company_id = fields.Many2one(
         'res.company', default=lambda self: self.env.company, required=True)
 
     logo = fields.Binary(related='company_id.logo', readonly=False)
     preview_logo = fields.Binary(related='logo', string="Preview logo")
     report_header = fields.Text(related='company_id.report_header', readonly=False)
-    report_footer = fields.Text(related='company_id.report_footer', readonly=False, default=lambda self: self._default_report_footer())
-    company_details = fields.Text(related='company_id.company_details', readonly=False, default=lambda self: self._default_company_details())
+    report_footer = fields.Text(related='company_id.report_footer', readonly=False, default=_default_report_footer)
+    company_details = fields.Text(related='company_id.company_details', readonly=False, default=_default_company_details)
 
     # The paper format changes won't be reflected in the preview.
     paperformat_id = fields.Many2one(related='company_id.paperformat_id', readonly=False)
@@ -69,21 +85,6 @@ class BaseDocumentLayout(models.TransientModel):
     vat = fields.Char(related='company_id.vat', readonly=True)
     name = fields.Char(related='company_id.name', readonly=True)
     country_id = fields.Many2one(related="company_id.country_id", readonly=True)
-
-    def _default_report_footer(self):
-        import pudb;pu.db
-        company = self.env.company
-        footer_fields = filter(None, [company.phone, company.email, company.website, company.vat])
-        return ' - '.join(footer_fields)
-
-    def _default_company_details(self):
-        company = self.env.company
-        return (
-            f'{company.name}\n'
-            f'{company.street}\n'
-            f'{company.city} {company.state_id.name} {company.zip}\n'
-            f'{company.country_id.name}\n'
-        )
 
     @api.depends('logo_primary_color', 'logo_secondary_color', 'primary_color', 'secondary_color',)
     def _compute_custom_colors(self):
@@ -127,7 +128,7 @@ class BaseDocumentLayout(models.TransientModel):
         for wizard in self:
             wizard.logo = wizard.company_id.logo
             wizard.report_header = wizard.company_id.report_header
-            wizard.report_footer = wizard.company_id.report_footer
+            wizard.report_footer = wizard.company_id.report_footer if wizard.company_id.report_footer else wizard.report_footer
             wizard.paperformat_id = wizard.company_id.paperformat_id.filtered(lambda paperformat: not paperformat.report_ids)
             wizard.external_report_layout_id = wizard.company_id.external_report_layout_id
             wizard.font = wizard.company_id.font
