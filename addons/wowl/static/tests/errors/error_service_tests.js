@@ -9,6 +9,8 @@ import { makeFakeRPCService, makeFakeNotificationService } from "../helpers/mock
 import { ConnectionLostError, RPCError } from "../../src/services/rpc_service";
 import { nextTick } from "../helpers/utility";
 import { makeTestEnv } from "../helpers/index";
+import { errorHandlerRegistry } from "../../src/errors/error_handler_registry";
+import OdooError from "../../src/errors/odoo_error";
 
 const { Component, tags } = owl;
 
@@ -148,4 +150,20 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
     "close (1234)",
     "create (Connection restored. You are back online.)",
   ]);
+});
+
+QUnit.test("will let handlers from the registry handle errors first", async (assert) => {
+  errorHandlerRegistry.add("__test_handler__", env => err => {
+    assert.strictEqual(err, error);
+    assert.strictEqual(env.someValue, 14);
+    assert.step("in handler");
+  });
+  const testEnv = await makeTestEnv({ serviceRegistry });
+  testEnv.someValue = 14;
+  const error = new OdooError("boom");
+  const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
+  unhandledRejectionCb(errorEvent);
+  assert.verifySteps(["in handler"]);
+
+  errorHandlerRegistry.remove("__test_handler__");
 });

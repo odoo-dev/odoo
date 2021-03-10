@@ -2,112 +2,20 @@
 
 import { serviceRegistry } from "../webclient/service_registry";
 import { isBrowserChromium } from "../utils/misc";
-import {
-  ClientErrorDialog,
-  ErrorDialog,
-  NetworkErrorDialog,
-  RPCErrorDialog,
-} from "./error_dialogs";
 import OdooError from "./odoo_error";
+import { errorHandlerRegistry } from "./error_handler_registry";
 
 export const errorService = {
   name: "error",
   dependencies: ["dialog", "notification", "rpc"],
   deploy(env) {
-    let connectionLostNotifId;
+    const handlers = errorHandlerRegistry.getAll().map((builder) => builder(env));
 
     function handleError(error, env) {
-      switch (error.name) {
-        case "UNKNOWN_CORS_ERROR":
-          env.services.dialog.open(NetworkErrorDialog, {
-            traceback: error.traceback || error.stack,
-            message: error.message,
-            name: error.name,
-          });
-          break;
-        case "UNCAUGHT_CLIENT_ERROR":
-          env.services.dialog.open(ClientErrorDialog, {
-            traceback: error.traceback || error.stack,
-            message: error.message,
-            name: error.name,
-          });
-          break;
-        case "UNCAUGHT_EMPTY_REJECTION_ERROR":
-          env.services.dialog.open(ClientErrorDialog, {
-            message: error.message,
-            name: error.name,
-          });
-          break;
-        case "RPC_ERROR":
-          // When an error comes from the server, it can have an exeption name.
-          // (or any string truly). It is used as key in the error dialog from
-          // server registry to know which dialog component to use.
-          // It's how a backend dev can easily map its error to another component.
-          // Note that for a client side exception, we don't use this registry
-          // as we can directly assign a value to `component`.
-          // error is here a RPCError
-          const exceptionName = error.exceptionName;
-          let ErrorComponent = error.Component;
-          if (
-            !ErrorComponent &&
-            exceptionName &&
-            odoo.errorDialogRegistry.contains(exceptionName)
-          ) {
-            ErrorComponent = odoo.errorDialogRegistry.get(exceptionName);
-          }
-          env.services.dialog.open(ErrorComponent || RPCErrorDialog, {
-            traceback: error.traceback || error.stack,
-            message: error.message,
-            name: error.name,
-            exceptionName: error.exceptionName,
-            data: error.data,
-            subType: error.subType,
-            code: error.code,
-            type: error.type,
-          });
-          break;
-        case "CONNECTION_LOST_ERROR": {
-          if (connectionLostNotifId) {
-            // notification already displayed (can occur if there were several
-            // concurrent rpcs when the connection was lost)
-            break;
-          }
-          connectionLostNotifId = env.services.notification.create(
-            env._t("Connection lost. Trying to reconnect..."),
-            { sticky: true }
-          );
-          let delay = 2000;
-          odoo.browser.setTimeout(function checkConnection() {
-            env.services
-              .rpc("/web/webclient/version_info", {})
-              .then(function () {
-                env.services.notification.close(connectionLostNotifId);
-                connectionLostNotifId = null;
-                env.services.notification.create(
-                  env._t("Connection restored. You are back online."),
-                  { type: "info" }
-                );
-              })
-              .catch((e) => {
-                // exponential backoff, with some jitter
-                delay = delay * 1.5 + 500 * Math.random();
-                odoo.browser.setTimeout(checkConnection, delay);
-              });
-          }, delay);
+      for (let handler of handlers) {
+        if (handler(error, env)) {
           break;
         }
-        default:
-          let DialogComponent = ErrorDialog;
-          // If an error has been defined to have a custom dialog
-          if (error.Component) {
-            DialogComponent = error.Component;
-          }
-          env.services.dialog.open(DialogComponent, {
-            traceback: error.traceback || error.stack,
-            message: error.message,
-            name: error.name,
-          });
-          break;
       }
       env.bus.trigger("ERROR_DISPATCHED", error);
     }

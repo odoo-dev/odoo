@@ -34,6 +34,16 @@ function makeTestConfig(config = {}) {
   });
 }
 
+/**
+ * @typedef {import("../../src/env").OdooEnv} OdooEnv
+ */
+
+/**
+ * Create a test environment
+ *
+ * @param {*} config
+ * @returns {Promise<OdooEnv>}
+ */
 export async function makeTestEnv(config = {}) {
   const testConfig = makeTestConfig(config);
   if (config.serverData || config.mockRPC || config.activateMockServer) {
