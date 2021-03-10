@@ -123,7 +123,8 @@ const FormEditor = options.Class.extend({
      * @returns {Promise<HTMLElement>}
      */
     _renderField: function (field) {
-        field.id = Math.random().toString(36).substring(2, 15); // Big unique ID
+        const currentId = this.$target[0].querySelector('.s_website_form_input') ? this.$target[0].querySelector('.s_website_form_input').id : undefined;
+        field.id = currentId ? currentId : Math.random().toString(36).substring(2, 15); // Big unique ID
         const template = document.createElement('template');
         template.innerHTML = qweb.render("website_form.field_" + field.type, {field: field}).trim();
         if (field.description && field.description !== true) {
@@ -279,6 +280,46 @@ const FieldEditor = FormEditor.extend({
         field.hidden = classList.contains('s_website_form_field_hidden');
         field.formatInfo = this._getFieldFormat();
     },
+    /**
+     *  TODO set the condition on the field refered in data-visibility-dependencies attribute
+     *
+     * @private
+     * @param {string} value
+     */
+    _visibilityCondition: function (value) {
+        console.log('_visibilityCondition', value)
+        const currentinput = this.$target[0].querySelector('.s_website_form_input');
+        if (!currentinput) return;
+        const idOfDependency = currentinput.getAttribute('data-visibility-dependencies');
+        const inputOfDependency = document.getElementById(idOfDependency);
+        if (!inputOfDependency) return;
+
+        //eg : {idOfCurrentInput : value, idOfAnOtherInput : otherValue}
+        let currentValueOfDataVisibilityConditionOfDependency = inputOfDependency.getAttribute('data-visibility-condition');
+        if (currentValueOfDataVisibilityConditionOfDependency) {
+
+            //read it and update it
+            let updated = false;
+            currentValueOfDataVisibilityConditionOfDependency = JSON.parse(currentValueOfDataVisibilityConditionOfDependency);
+            currentValueOfDataVisibilityConditionOfDependency.elements.map((element) => {
+                if (element.id === currentinput.id) {
+                    element.value = value;
+                    updated = true;
+                }
+            });
+            if (!updated) {
+                currentValueOfDataVisibilityConditionOfDependency.elements.push({ id: currentinput.id, value: value });
+            }
+            console.log('VAL=>', JSON.stringify(currentValueOfDataVisibilityConditionOfDependency));
+        } else {
+            //create it
+            console.log('END')
+            currentValueOfDataVisibilityConditionOfDependency = { elements: [{ id: currentinput.id, value: value }] };
+        }
+
+        inputOfDependency.setAttribute('data-visibility-condition', JSON.stringify(currentValueOfDataVisibilityConditionOfDependency));
+        console.log('inputOfDependency after function=>', inputOfDependency)
+    },
 });
 
 options.registry.WebsiteFormEditor = FormEditor.extend({
@@ -408,6 +449,12 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             field.formatInfo.optionalMark = this._isOptionalMark();
             field.formatInfo.mark = this._getMark();
             const htmlField = this._renderField(field);
+            if (document.getElementById(htmlField.querySelector('.s_website_form_input').id) && htmlField.querySelector('.s_website_form_input').id === document.getElementById(htmlField.querySelector('.s_website_form_input').id).id) {
+                //avoid 2 times the same id
+                const newID = Math.random().toString(36).substring(2, 15);
+                htmlField.querySelector('.s_website_form_input').id = newID;
+                htmlField.querySelector('label').setAttribute('for', newID);
+            }
             data.$target.after(htmlField);
             this.trigger_up('activate_snippet', {
                 $snippet: $(htmlField),
@@ -717,6 +764,23 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      * @override
      */
     willStart: async function () {
+        //fill the we-select for data visibility only if...
+        const selectFormField = document.querySelector('we-select[data-name="hidden_condition_opt"]');
+        //selectFormField.innerHTML = '';
+        while (selectFormField.lastElementChild) {
+            selectFormField.removeChild(selectFormField.lastElementChild);
+        }
+        const formInputs = document.querySelectorAll('.s_website_form_input');
+        formInputs.forEach((field) => {
+            if (field.type !== 'hidden' && field.id !== this.$target[0].querySelector('.s_website_form_input').id) {
+                const button = document.createElement('we-button');
+                button.textContent = field.name;
+                button.setAttribute('data-visibility-dependencies', field.id);
+                //console.log('Field set as =>', field.name , '=>', field.id)
+                selectFormField.appendChild(button);
+            }
+        });
+        console.log('willStart:', selectFormField)
         const _super = this._super.bind(this);
         // Get the authorized existing fields for the form model
         const model = this.formEl.dataset.model_name;
@@ -906,11 +970,64 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         field.records = valueList.map(val => params.records.find(rec => rec.id === val));
         await this._replaceField(field);
     },
+    /**
+   * todo
+   */
+    visibilityCondition: function (previewMode, value, params) {
+        value = value ? value : ''
+        this._visibilityCondition(value);
+    },
+    /**
+     * todo 
+     */
+    visibilityDependencies: function (previewMode, value, params) {
+        if (!value) return;
+        const dependency = document.getElementById(value)
+        if (!dependency) return;
+        //check if a field already have a data-condition with the current input id, if yes remove it
+        const currentInput = this.$target[0].querySelector('.s_website_form_input')
+        const currentVisibilityDependency = currentInput.getAttribute('data-visibility-dependencies')
+        if (currentVisibilityDependency) {
+            //remove the data-condition
+            this._removeElementFromDataCondition(document.getElementById(currentVisibilityDependency), currentInput.id);
+        }
+        currentInput.setAttribute('data-visibility-dependencies', value);
+        //Todo fill the we-select after contains if it s a radio, select
+        if (this._getDependency().type === 'checkbox') {
+            const weSelect = document.querySelector('we-select[data-name="hidden_condition_checkbox_opt"]');
+            //selectFormField.innerHTML = '';
+            while (weSelect.lastElementChild) {
+                weSelect.removeChild(weSelect.lastElementChild);
+            }
+            //For the moment i fill it with check && uncheck
+            let button = document.createElement('we-button');
+            button.textContent = 'Hello World';
+            button.setAttribute('data-visibility-condition', 'checked');
+            weSelect.appendChild(button);
+            console.log('the we select :', weSelect)
+        }
+    },
 
     //----------------------------------------------------------------------
     // Private
     //----------------------------------------------------------------------
-
+    /**
+   * TODO 
+   * 
+   */
+    _removeElementFromDataCondition: function (dependencyInput, idToRemove) {
+        let visibilityCondition = JSON.parse(dependencyInput.getAttribute('data-visibility-condition'));
+        if (!visibilityCondition) return;
+        visibilityCondition.elements = visibilityCondition.elements.filter((e) => e.id !== idToRemove);
+        visibilityCondition.elements.length > 0 ? dependencyInput.setAttribute('data-visibility-condition', JSON.stringify(visibilityCondition)) : dependencyInput.removeAttribute('data-visibility-condition');
+    },
+    /**
+     * TODO 
+     * 
+     */
+    _getDependency: function () {
+        return document.getElementById(this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies'));
+    },
     /**
      * @override
      */
@@ -944,6 +1061,39 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 const values = this._getListItems().map(el => el.id);
                 return JSON.stringify(values);
             }
+            case 'visibilityCondition': {
+                try {
+                    const dependency = document.getElementById(this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies'));
+                    const visibilityCondition = JSON.parse(dependency.getAttribute('data-visibility-condition'));
+                    let value = '';
+                    if (!this.$target[0].classList.contains('s_website_form_field_hidden_if')) {
+                        //remove the dependency and the condition
+                        this._removeElementFromDataCondition(dependency, this.$target[0].querySelector('.s_website_form_input').id);
+                        this.$target[0].querySelector('.s_website_form_input').removeAttribute('data-visibility-dependencies');
+                        return;
+                    }
+                    if (dependency.type === 'checkbox') {
+                        console.log('computeWidgetVisibility 22', this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies'))
+                        this._visibilityCondition('unchecked');
+                        value = 'unchecked';
+                    }
+                    visibilityCondition.elements.map((element) => {
+                        if (element.id === this.$target[0].querySelector('.s_website_form_input').id.toString()) {
+                            value = element.value;
+                        }
+                    });
+                    return value;
+                } catch (e) {
+                    return '';
+                }
+            }
+            case 'visibilityDependencies': {
+                try {
+                    return this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies');
+                } catch (e) {
+                    return '';
+                }
+            }
         }
         return this._super(...arguments);
     },
@@ -952,6 +1102,16 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      */
     _computeWidgetVisibility: function (widgetName, params) {
         switch (widgetName) {
+            //Todo display the correct element depend of target.currentDependency
+            case 'hidden_condition_text_opt':
+                return !this._getDependency() && this.$target[0].classList.contains('s_website_form_field_hidden_if') ||
+                    this._getDependency() && (
+                        ['text', 'number', 'email', 'tel', 'url', 'search', 'range', 'password', 'color'].includes(this._getDependency().type) ||
+                        this._getDependency().nodeName === 'textarea');
+            case 'hidden_condition_checkbox_opt':
+                return this._getDependency() && this._getDependency().type === 'checkbox'
+            case 'hidden_condition_opt':
+                return this.$target[0].classList.contains('s_website_form_field_hidden_if');
             case 'char_input_type_opt':
                 return !this.$target[0].classList.contains('s_website_form_custom') && ['char', 'email', 'tel', 'url'].includes(this.$target[0].dataset.type);
             case 'multi_check_display_opt':
@@ -1014,6 +1174,8 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      * @returns {Promise}
      */
     _replaceField: async function (field) {
+        const dataDependency = this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies');
+        const dataCondition = this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-condition');
         await this._fetchFieldRecords(field);
         const activeField = this._getActiveField();
         if (activeField.type !== field.type) {
@@ -1025,6 +1187,12 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         [...htmlField.attributes].forEach(el => this.$target[0].removeAttribute(el.nodeName));
         [...htmlField.attributes].forEach(el => this.$target[0].setAttribute(el.nodeName, el.nodeValue));
         this.$target[0].querySelectorAll('input.datetimepicker-input').forEach(el => el.value = field.propertyValue);
+        if (dataCondition) {
+            this.$target[0].querySelector('.s_website_form_input').setAttribute('data-visibility-condition', dataCondition);
+        }
+        if (dataDependency) {
+            this.$target[0].querySelector('.s_website_form_input').setAttribute('data-visibility-dependencies', dataDependency);
+        }
     },
     /**
      * @private

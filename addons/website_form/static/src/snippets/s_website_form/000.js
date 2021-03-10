@@ -39,6 +39,7 @@ odoo.define('website_form.s_website_form', function (require) {
         xmlDependencies: ['/website_form/static/src/xml/website_form.xml'],
         events: {
             'click .s_website_form_send, .o_website_form_send': 'send', // !compatibility
+            'input [data-visibility-condition], [data-visibility-dependencies]': 'onChangeVisibilityDependencyInput', //Have to check this line
         },
 
         /**
@@ -51,6 +52,9 @@ odoo.define('website_form.s_website_form', function (require) {
         },
         willStart: function () {
             const res = this._super(...arguments);
+            this.$target[0].querySelectorAll('[data-visibility-condition]').forEach((input) => {
+                this.manageVisibility(input.getAttribute('data-visibility-condition'), input);
+            });
             if (!this.$target[0].classList.contains('s_website_form_no_recaptcha')) {
                 this._recaptchaLoaded = true;
                 this._recaptcha.loadLibs();
@@ -143,7 +147,30 @@ odoo.define('website_form.s_website_form', function (require) {
             // Reinitialize dates
             this.$allDates.removeClass('s_website_form_datepicker_initialized');
         },
-
+        onChangeVisibilityDependencyInput: function (event) {
+            this.manageVisibility(event.currentTarget.getAttribute('data-visibility-condition'), event.currentTarget);
+        },
+        manageVisibility: function (keyValue, input) {//Todo clean this function
+            const currentValue = input.type === 'checkbox' ? input.checked : input.value;
+            keyValue = JSON.parse(keyValue);
+            keyValue.elements.map((element) => {
+                const elementToHideOrToShow = document.getElementById(element.id);
+                if (input.type === 'checkbox') {
+                    console.log(currentValue, ' equals? ', element.value);
+                    if ((currentValue && element.value !== 'unchecked') || (!currentValue && element.value === 'unchecked')) {
+                        elementToHideOrToShow.parentElement.parentElement.parentElement.classList.remove('s_website_form_field_hidden');
+                    } else {
+                        elementToHideOrToShow.parentElement.parentElement.parentElement.classList.add('s_website_form_field_hidden');
+                    }
+                } else {
+                    if (currentValue.includes(element.value)) {
+                        elementToHideOrToShow.parentElement.parentElement.parentElement.classList.remove('s_website_form_field_hidden');
+                    } else {
+                        elementToHideOrToShow.parentElement.parentElement.parentElement.classList.add('s_website_form_field_hidden');
+                    }
+                }
+            });
+        },
         send: async function (e) {
             e.preventDefault(); // Prevent the default submit behavior
              // Prevent users from crazy clicking
