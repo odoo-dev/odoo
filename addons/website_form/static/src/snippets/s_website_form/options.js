@@ -766,7 +766,6 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
     willStart: async function () {
         //fill the we-select for data visibility only if...
         const selectFormField = document.querySelector('we-select[data-name="hidden_condition_opt"]');
-        //selectFormField.innerHTML = '';
         while (selectFormField.lastElementChild) {
             selectFormField.removeChild(selectFormField.lastElementChild);
         }
@@ -995,16 +994,6 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         //Todo fill the we-select after contains if it s a radio, select
         if (this._getDependency().type === 'checkbox') {
             const weSelect = document.querySelector('we-select[data-name="hidden_condition_checkbox_opt"]');
-            //selectFormField.innerHTML = '';
-            while (weSelect.lastElementChild) {
-                weSelect.removeChild(weSelect.lastElementChild);
-            }
-            //For the moment i fill it with check && uncheck
-            let button = document.createElement('we-button');
-            button.textContent = 'Hello World';
-            button.setAttribute('data-visibility-condition', 'checked');
-            weSelect.appendChild(button);
-            console.log('the we select :', weSelect)
         }
     },
 
