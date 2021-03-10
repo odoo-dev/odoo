@@ -102,3 +102,13 @@ class RecurrenceRule(models.Model):
                 values += [event_value]
 
         return values
+
+    def _notify_attendees(self):
+        recurrences = self.filtered(
+            lambda recurrence: recurrence.base_event_id.alarm_ids and (
+                not recurrence.until or recurrence.until >= fields.Date.today()
+            ) and max(recurrence.calendar_event_ids.mapped('stop')) >= fields.Datetime.now()
+        )
+        partners = recurrences.base_event_id.partner_ids
+        if partners:
+            self.env['calendar.alarm_manager']._notify_next_alarm(partners.ids)
