@@ -385,6 +385,8 @@ class MockServer {
     switch (args.method) {
       case "create":
         return Promise.resolve(this.mockCreate(args.model, args.args[0]));
+      case 'fields_get':
+        return Promise.resolve(this.mockFieldsGet(args.model));
       case "load_views":
         return Promise.resolve(this.mockLoadViews(args.model, args.kwargs));
       case "onchange":
