@@ -38,7 +38,7 @@
             <div style="color: #5F5F5F; text-align: center; font-size: 12px; font-weight: bold; border: 1px solid #875A7B;">
                 ${not object.event_id.allday and object.event_id.get_interval('time', tz=object.partner_id.tz) or ''}
             </div>
-            % if object.event_id.start_date != object.event_id.stop_date:
+            % if format_date(object.event_id.start) != format_date(object.event_id.stop):
                 % if object.event_id.allday:
                     <div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-right-radius: 3px; font-weight: bold; border: 1px solid #875A7B; border-bottom-left-radius: 3px;">
                         &#8594; ${object.event_id.get_interval('end_day', tz=object.partner_id.tz) or ''}
@@ -52,8 +52,7 @@
             % else
                 <div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; border-bottom-right-radius: 3px; border-bottom-left-radius: 3px; background-color: #875A7B;'>
                     %if not object.event_id.allday:
-                        &#8594; ${object.event_id.get_interval('end_day', tz=object.partner_id.tz) or ''}
-                        ${object.event_id.get_interval('end_time', tz=object.partner_id.tz) or ''}
+                        &#8594; ${object.event_id.get_interval('end_time', tz=object.partner_id.tz) or ''}
                     %endif
                 </div>
             % endif
@@ -139,7 +138,7 @@
     % set recurrent = object.recurrence_id and not ctx['ignore_recurrence']
     <p>
         Hello ${object.common_name},<br/><br/>
-        The date of the <strong>${object.event_id.name}</strong> meeting has been updated. It is now scheduled for the  ${object.event_id.get_display_time_tz(tz=object.partner_id.tz)}.
+        The date of the <strong>${object.event_id.name}</strong> meeting has been updated. It is now scheduled for the  ${object.event_id.get_display_time_tz(tz=object.partner_id.tz or 'UTC')}.
     </p>
     <table border="0" cellpadding="0" cellspacing="0"><tr>
         % if not recurrent:
@@ -162,7 +161,7 @@
             <div style="color: #5F5F5F; text-align: center; font-size: 12px; font-weight: bold; border: 1px solid #875A7B;">
                 ${not object.event_id.allday and object.event_id.get_interval('time', tz=object.partner_id.tz) or ''}
             </div>
-            % if object.event_id.start_date != object.event_id.stop_date:
+            % if format_date(object.event_id.start) != format_date(object.event_id.stop):
                 % if object.event_id.allday:
                     <div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-right-radius: 3px; font-weight: bold; border: 1px solid #875A7B; border-bottom-left-radius: 3px;">
                         &#8594; ${object.event_id.get_interval('end_day', tz=object.partner_id.tz) or ''}
@@ -176,8 +175,7 @@
             % else
                 <div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; border-bottom-right-radius: 3px; border-bottom-left-radius: 3px; background-color: #875A7B;'>
                     %if not object.event_id.allday:
-                        &#8594; ${object.event_id.get_interval('end_day', tz=object.partner_id.tz) or ''}
-                        ${object.event_id.get_interval('end_time', tz=object.partner_id.tz) or ''}
+                        &#8594; ${object.event_id.get_interval('end_time', tz=object.partner_id.tz) or ''}
                     %endif
                 </div>
             % endif
@@ -283,7 +281,7 @@
             <div style="color: #5F5F5F; text-align: center; font-size: 12px; font-weight: bold; border: 1px solid #875A7B;">
                 ${not event_id.allday and event_id.get_interval('time', tz=object.partner_id.tz) or ''}
             </div>
-            % if object.event_id.start_date != object.event_id.stop_date:
+            % if format_date(object.event_id.start) != format_date(object.event_id.stop):
                     % if object.event_id.allday:
                         <div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-right-radius: 3px; font-weight: bold; border: 1px solid #875A7B; border-bottom-left-radius: 3px;">
                             &#8594; ${object.event_id.get_interval('end_day', tz=object.partner_id.tz) or ''}
@@ -297,8 +295,7 @@
                 % else
                     <div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; border-bottom-right-radius: 3px; border-bottom-left-radius: 3px; background-color: #875A7B;'>
                         %if not object.event_id.allday:
-                            &#8594; ${object.event_id.get_interval('end_day', tz=object.partner_id.tz) or ''}
-                            ${object.event_id.get_interval('end_time', tz=object.partner_id.tz) or ''}
+                            &#8594; ${object.event_id.get_interval('end_time', tz=object.partner_id.tz) or ''}
                         %endif
                     </div>
                 % endif
@@ -403,7 +400,7 @@
             <div style="color: #5F5F5F; text-align: center; font-size: 12px; font-weight: bold; border: 1px solid #875A7B;">
                 ${not object.event_id.allday and object.event_id.get_interval('time', tz=object.partner_id.tz) or ''}
             </div>
-            % if object.event_id.start_date != object.event_id.stop_date:
+            % if format_date(object.event_id.start) != format_date(object.event_id.stop):
                 % if object.event_id.allday:
                     <div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-right-radius: 3px; font-weight: bold; border: 1px solid #875A7B; border-bottom-left-radius: 3px;">
                         &#8594; ${object.event_id.get_interval('end_day', tz=object.partner_id.tz) or ''}
@@ -417,8 +414,7 @@
             % else
                 <div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; border-bottom-right-radius: 3px; border-bottom-left-radius: 3px; background-color: #875A7B;'>
                     %if not object.event_id.allday:
-                        &#8594; ${object.event_id.get_interval('end_day', tz=object.partner_id.tz) or ''}
-                        ${object.event_id.get_interval('end_time', tz=object.partner_id.tz) or ''}
+                        &#8594; ${object.event_id.get_interval('end_time', tz=object.partner_id.tz) or ''}
                     %endif
                 </div>
             % endif
