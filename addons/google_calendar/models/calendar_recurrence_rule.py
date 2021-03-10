@@ -70,21 +70,39 @@ class RecurrenceRule(models.Model):
     def _write_from_google(self, gevent, vals):
         current_rrule = self.rrule
         super()._write_from_google(gevent, vals)
+
+
+        base_event_time_fields = ['start', 'stop', 'allday']
+        new_event_values = self.env["calendar.event"]._odoo_values(gevent)
+        old_event_values = self.base_event_id and self.base_event_id.read(base_event_time_fields)[0]
+        if old_event_values and any(new_event_values[key] != old_event_values[key] for key in base_event_time_fields):
+            # we need to recreate the recurrence, time_fields were modified.
+            base_event_id = self.base_event_id
+            # We archive the old events to recompute the recurrence
+            (self.calendar_event_ids - base_event_id).write({'need_sync': False, 'active': False})
+            base_event_id.write(dict(new_event_values, google_id=False))
+            # there are no detached event now
+            self._apply_recurrence()
+        else:
+            time_fields = (
+                    self.env["calendar.event"]._get_time_fields()
+                    | self.env["calendar.event"]._get_recurrent_fields()
+            )
+            # We avoid to write time_fields because they are not shared between events.
+            # problem: if the start datetime is modified in google, we can't write it on all events.
+            # This behavior may be difficult to understand for users.
+            self._write_events(dict({
+                field: value
+                for field, value in new_event_values.items()
+                if field not in time_fields
+                }, need_sync=False)
+            )
+
+        # We apply the rrule check after the time_field check because the google_id are generated according
+        # to base_event start datetime.
         if self.rrule != current_rrule:
             detached_events = self._apply_recurrence()
             detached_events.unlink()
-        time_fields = (
-            self.env["calendar.event"]._get_time_fields()
-            | self.env["calendar.event"]._get_recurrent_fields()
-        )
-        # We avoid to write time_fields because they are not shared between events.
-        # problem: if the start datetime is modified in google, we can't write it on all events.
-        # This behavior may be difficult to understand for users.
-        self._write_events(dict({
-            field: value
-            for field, value in self.env["calendar.event"]._odoo_values(gevent).items()
-            if field not in time_fields
-        }, need_sync=False))
 
     def _create_from_google(self, gevents, vals_list):
         for gevent, vals in zip(gevents, vals_list):

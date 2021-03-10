@@ -380,7 +380,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'updated': self.now,
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', google_id)])
         events = recurrence.calendar_event_ids.sorted('start')
         self.assertEqual(len(events), 2)
         self.assertEqual(recurrence.rrule, 'FREQ=WEEKLY;COUNT=2;BYDAY=WE')
@@ -388,7 +387,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(events[1].start_date, date(2020, 1, 15))
         self.assertEqual(events[0].google_id, '%s_20200108' % google_id)
         self.assertEqual(events[1].google_id, '%s_20200115' % google_id)
-        self.assertGoogleAPINotCalled()
+        # We ensure that our modifications are pushed
+        # self.assertGoogleAPINotCalled()
 
     @patch_api
     def test_recurrence_name_updated(self):
@@ -419,7 +419,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'updated': self.now,
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', google_id)])
         events = recurrence.calendar_event_ids.sorted('start')
         self.assertEqual(len(events), 2)
         self.assertEqual(recurrence.rrule, 'FREQ=WEEKLY;COUNT=2;BYDAY=MO')
@@ -462,13 +461,12 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'id': google_id,
             'summary': 'coucou again',
             'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=3;BYDAY=MO'],
-            'start': {'dateTime': '2021-02-15T08:00:00+01:00'},
-            'end': {'dateTime': '2021-02-15-T10:00:00+01:00'},
+            'start': {'dateTime': '2021-02-15T09:00:00+01:00'}, # 8:00 UTC
+            'end': {'dateTime': '2021-02-15-T11:00:00+01:00'},
             'reminders': {'useDefault': True},
             'updated': self.now,
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', google_id)])
         events = recurrence.calendar_event_ids.sorted('start')
         self.assertEqual(len(events), 3)
         self.assertEqual(recurrence.rrule, 'FREQ=WEEKLY;COUNT=3;BYDAY=MO')
@@ -482,3 +480,42 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(events[1].google_id, '%s_20210222T080000Z' % google_id)
         self.assertEqual(events[2].google_id, '%s_20210301T080000Z' % google_id)
         self.assertGoogleAPINotCalled()
+
+
+    @patch_api
+    def test_recurrence_write_time_fields(self):
+        google_id = 'oj44nep1ldf8a3ll02uip0c9aa'
+        base_event = self.env['calendar.event'].create({
+            'name': 'coucou',
+            'start': datetime(2021, 2, 15, 8, 0, 0),
+            'stop': datetime(2021, 2, 15, 10, 0, 0),
+            'need_sync': False,
+        })
+        recurrence = self.env['calendar.recurrence'].create({
+            'google_id': google_id,
+            'rrule': 'FREQ=WEEKLY;COUNT=3;BYDAY=MO',
+            'need_sync': False,
+            'base_event_id': base_event.id,
+            'calendar_event_ids': [(4, base_event.id)],
+        })
+        recurrence._apply_recurrence()
+        # Google modifies the start/stop of the base event
+        # When the start/stop or all day values are updated, the recurrence should reapplied.
+
+        values = {
+            'id': google_id,
+            'summary': "It's me again",
+            'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=3;BYDAY=MO'],
+            'start': {'dateTime': '2021-02-15T12:00:00+01:00'},  # 11:00 UTC
+            'end': {'dateTime': '2021-02-15-T15:00:00+01:00'},
+            'reminders': {'useDefault': True},
+            'updated': self.now,
+        }
+
+        self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
+        events = recurrence.calendar_event_ids.sorted('start')
+        self.assertEqual(events[0].start, datetime(2021, 2, 15, 11, 0, 0))
+        self.assertEqual(events[1].start, datetime(2021, 2, 22, 11, 0, 0))
+        self.assertEqual(events[2].start, datetime(2021, 3, 1, 11, 0, 0))
+        # We ensure that our modifications are pushed
+        # self.assertGoogleAPINotCalled()

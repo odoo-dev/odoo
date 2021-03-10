@@ -27,6 +27,7 @@ class Meeting(models.Model):
                 print("-- caca --")
                 print(event.google_id)
                 print(google_recurrence_id)
+                print("-- ---- --")
             if not event.google_id and google_recurrence_id:
                 event.google_id = google_recurrence_id
             elif not event.google_id:
