@@ -47,6 +47,10 @@
             }
         }
 
+        .o_survey_skip_desc {
+            display: none;
+        }
+
         .o_survey_hide {
             opacity: 0;
         }
@@ -64,16 +68,28 @@
         }
 
         // ==== Screens
-        &.o_welcome_screen {}
+        &.o_welcome_screen {
+            .o_survey_skip_desc {
+                display: inline;
+            }
+        }
 
         &.o_description_screen {
             .dropdown, .industry_selection, .custom-ui-autocomplete {
                 font-weight: 500;
                 cursor: pointer;
+            }
 
-                &:not(.o_step_completed) {
-                    min-width: 10ch;
-                }
+            .o_survey_type_dd.o_step_todo {
+                min-width: 13ch;
+            }
+
+            .industry_selection.o_step_todo {
+                min-width: 17ch;
+            }
+
+            .o_survey_purpose_dd.o_step_todo {
+                min-width: 12ch;
             }
 
             .dropdown {
@@ -103,7 +119,7 @@
             }
 
             .dropdown-menu, .custom-ui-autocomplete {
-                border-radius: 0 0 $border-radius $border-radius;
+                @include border-bottom-radius($border-radius);
                 font-size: inherit;
             }
 
@@ -114,7 +130,6 @@
 
             .industry_selection {
                 border: 1px solid $border-color;
-                font-size: 80%;
                 color: theme-color(primary);
 
                 &:focus {
@@ -125,30 +140,36 @@
             }
 
             .custom-ui-autocomplete {
-                max-height: 300px;
-                overflow-y: scroll;
-                overflow-x: hidden;
+                max-height: 300px; // <- Fallback
+                max-height: 35vh;
 
-                .ui-menu-item a {
-                    padding: $dropdown-item-padding-y $dropdown-item-padding-x;
-                    font-family: $font-family-base;
-                    text-decoration: none;
+                .ui-menu-item {
+                    list-style: none;
 
-                    &:hover, &.ui-state-active {
-                        background-color: $dropdown-link-hover-bg;
-                        color: $dropdown-link-color;
+                    a {
+                        padding: $dropdown-item-padding-y*3 $dropdown-item-padding-x;
+                        font-family: $font-family-base;
+                        text-decoration: none;
+                        line-height: 1;
+
+                        &:hover, &.ui-state-active {
+                            background-color: $dropdown-link-hover-bg;
+                            color: $dropdown-link-color;
+                        }
                     }
-                }
+                }   
             }
         }
 
         &.o_logo_validation_screen {
             .o_survey_logo_wrapper {
                 @extend %o-preview-alpha-background;
+                max-height: 350px; // <- Fallback
+                max-height: 40vh;
             }
 
             img {
-                max-height: 350px;
+                object-fit: contain;
             }
         }
 

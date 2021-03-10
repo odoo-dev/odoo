@@ -17,7 +17,9 @@
       const qweb = new QWeb({templates});
 
       const SkipButtonTemplate = xml`
-        <button class="btn btn-secondary px-4" t-on-click="skip()">Skip</button>
+        <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
+          <button class="btn btn-link" t-on-click="skip()">Skip wizard <span class="o_survey_skip_desc">and start from scratch</span></button>
+        </div>
         `;
 
       class SkipButton extends Component {
@@ -46,9 +48,7 @@
                   <button class="o_survey_show btn btn-primary btn-lg px-4 py-2" t-on-click="goToDescription()">Let's do it</button>
               </div>
           </div>
-          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
-            <SkipButton/>
-          </div>
+          <SkipButton/>
         </div>`;
 
         class WelcomeScreen extends Component {
@@ -70,14 +70,14 @@
               <div class="container align-self-center">
                   <div class="o_survey_typing_text d-inline d-md-block mb-md-2 mb-lg-4 o_survey_show">
                       <span>I want </span>
-                      <div t-attf-class="dropdown d-inline-block {{description.selectedType ? 'o_step_completed' : 'o_step_todo show'}}">
+                      <div t-attf-class="dropdown o_survey_type_dd d-inline-block {{description.selectedType ? 'o_step_completed' : 'o_step_todo show'}}">
                           <div class="w-100 px-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <a class="d-flex align-items-center">
                               <i class="text-primary" t-if="description.selectedType"><t t-esc="getters.getSelectedType(description.selectedType).label" /></i>
                               <i class="fa fa-angle-down text-black-50 ml-auto pl-2" title="dropdown_angle_down" role="img"/>
                             </a>
                           </div>
-                          <div t-attf-class="dropdown-menu border-0 shadow-lg {{description.selectedType ? 'o_step_completed' : 'o_step_todo show'}}" role="menu">
+                          <div t-attf-class="dropdown-menu w-100 border-0 shadow-lg {{description.selectedType ? 'o_step_completed' : 'o_step_todo show'}}" role="menu">
                             <t t-foreach="getters.getWebsiteTypes()" t-as="type" t-key="type.name">
                                 <a t-att-title="type.name"
                                     t-att-data-id="type.id"
@@ -91,20 +91,24 @@
                       <span t-att-class="!description.selectedType ? 'o_survey_hide' : 'o_survey_show'"> for my</span>
                   </div>
                   <div t-attf-class="o_survey_typing_text d-inline d-md-block o_survey_industry mb-md-2 mb-lg-4 {{!description.selectedType ? 'o_survey_hide' : 'o_survey_show'}}">
-                      <i class="industry_selection d-inline d-md-inline-block rounded bg-100 px-2 px-md-3 mx-2 mx-md-0" contenteditable="True" t-on-blur="blurIndustrySelection" t-on-input="inputIndustrySelection"/>
+                      <div class="o_survey_industry_wrapper position-relative d-inline">
+                        <i t-attf-class="industry_selection d-inline d-md-inline-block rounded bg-100 px-2 px-md-3 mx-2 mx-md-0 {{description.selectedIndustry ? 'o_step_completed' : 'o_step_todo show'}}"
+                           contenteditable="True" t-on-blur="blurIndustrySelection"
+                           t-on-input="inputIndustrySelection"/>
+                      </div>
                       <span> business</span>
-                      <span t-att-class="!description.selectedIndustry ? 'o_survey_hide' : 'o_survey_show'">, with the</span>
+                      <span t-att-class="!description.selectedIndustry ? 'o_survey_hide' : 'o_survey_show'">,</span>
                   </div>
                   <div t-attf-class="o_survey_typing_text d-inline d-md-block mb-md-2 mb-lg-4 {{!description.selectedIndustry ? 'o_survey_hide' : 'o_survey_show'}}">
-                      <span>main objective to </span>
-                      <div t-attf-class="dropdown d-inline-block {{description.selectedPurpose ? 'o_step_completed' : 'o_step_todo'}}">
+                      <span>with the main objective to </span>
+                      <div t-attf-class="dropdown d-inline-block o_survey_purpose_dd {{description.selectedPurpose ? 'o_step_completed' : 'o_step_todo'}}">
                           <div class="w-100 px-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <a class="d-flex align-items-center">
                               <t t-if="description.selectedPurpose"><t t-esc="getters.getSelectedPurpose(description.selectedPurpose).label" /></t>
                               <i class="fa fa-angle-down text-black-50 ml-auto pl-2" title="dropdown_angle_down" role="img"/>
                             </a>
                           </div>
-                          <div class="dropdown-menu border-0 shadow-lg" role="menu">
+                          <div class="dropdown-menu w-100 border-0 shadow-lg" role="menu">
                             <t t-foreach="getters.getWebsitePurpose()" t-as="type" t-key="type.name">
                                 <a t-att-title="type.name"
                                     t-att-data-id="type.id"
@@ -118,9 +122,7 @@
                   </div>
               </div>
           </div>
-          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
-            <SkipButton/>
-          </div>
+          <SkipButton/>
         </div>`;
 
         class DescriptionScreen extends Component {
@@ -135,7 +137,7 @@
           mounted() {
             this.dispatch('selectIndustry', undefined);
             $('.industry_selection').autocomplete({
-              appendTo: ".o_survey_industry",
+              appendTo: ".o_survey_industry_wrapper",
               delay: 400,
               minLength: 1,
               source: this.autocompleteSearch.bind(this),
@@ -223,19 +225,17 @@
             <div class="container d-flex flex-column align-items-center justify-content-center">
               <div class="o_survey_typing_text text-center mb-3">Is this your logo?</div>
               <div class="d-flex flex-column justify-content-center mx-auto">
-                <div class="o_survey_logo_wrapper border rounded d-inline-block">
+                <div class="o_survey_logo_wrapper border rounded d-flex">
                   <img class="website_logo " t-attf-src="{{logoValidation.logo}}"/>
                 </div>
-                <div class="d-flex justify-content-between border-top mt-4 pt-3">
-                    <button class="btn btn-lg btn-outline-secondary" t-on-click="validateLogo(false)">No</button>
-                    <button class="btn btn-lg btn-success px-5" t-on-click="validateLogo(true)">Yes</button>
+                <div class="border-top mt-4 pt-3">
+                    <button class="btn btn-lg btn-success px-5 mr-3" t-on-click="validateLogo(true)">Yes</button>
+                    <button class="btn btn-lg btn-light" t-on-click="validateLogo(false)">No</button>
                 </div>
               </div>
             </div>
           </div>
-          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
-            <SkipButton/>
-          </div>
+          <SkipButton/>
         </div>
         `;
 
@@ -311,9 +311,7 @@
               </div>
             </div>
           </div>
-          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
-            <SkipButton/>
-          </div>
+          <SkipButton/>
         </div>
         `;
 
@@ -352,7 +350,8 @@
           </div>
           <div class="o_survey_screen_content container d-flex h-100 align-items-lg-center">
             <div class="my-4">
-              <div class="o_survey_typing_text o_survey_show_fast p-2">Add <b class="text-info">Pages</b> or <b class="text-warning">Features</b></div>
+              <div class="o_survey_typing_text o_survey_show_fast p-2">Add <b class="text-info">Pages</b> &amp; <b class="text-warning">Features</b></div>
+              <h6 class="px-2">You can always change this later ( -- temporary copy --)</h6>
               <div class="page_feature_selection o_survey_show">
                 <div class="w-100 page_feature_selection container d-flex flex-wrap py2 py-lg-3">
                   <t t-foreach="getters.getFeatures()" t-as="row" t-key="row_index">
@@ -373,12 +372,13 @@
                   </t>
                 </div>
               </div>
+              <div class="text-right">
+                <button class="btn btn-primary btn-lg ml-3" t-on-click="buildWebsite()">Build my website</button>
+              </div>
+
             </div>
           </div>
-          <div class="container-fluid py-2 pb-md-3 text-right pr-lg-5">
-            <SkipButton/>
-            <button class="btn btn-primary btn-lg ml-3" t-on-click="buildWebsite()">Build my website</button>
-          </div>
+          <SkipButton/>
         </div>
         `;
 
