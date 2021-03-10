@@ -14,6 +14,7 @@ class Meeting(models.Model):
 
     google_id = fields.Char(
         'Google Calendar Event Id', compute='_compute_google_id', store=True, readonly=False)
+    sync_user_id = fields.Many2one('res.users', default=lambda self: self.env.user)
 
     @api.depends('recurrence_id.google_id')
     def _compute_google_id(self):
