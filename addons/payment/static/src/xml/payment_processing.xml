@@ -52,7 +52,7 @@
                             </h4>
                             <small class="list-group-item-text">
                                 <t t-if="tx['message_to_display']">
-                                    <t t-raw="tx['message_to_display']"/>
+                                    <t t-esc="tx['message_to_display']"/>
                                 </t>
                                 <t t-else="">
                                     Your payment is in pending state.<br/>
@@ -71,7 +71,7 @@
                             </h4>
                             <small class="list-group-item-text">
                                 <t t-if="tx['message_to_display']">
-                                    <t t-raw="tx['message_to_display']"/>
+                                    <t t-esc="tx['message_to_display']"/>
                                 </t>
                                 <t t-else="">
                                     Your payment has been received but need to be confirmed manually.<br/>
@@ -94,7 +94,7 @@
                             </h4>
                             <small class="list-group-item-text">
                                 <t t-if="tx['message_to_display']">
-                                    <t t-raw="tx['message_to_display']"/>
+                                    <t t-esc="tx['message_to_display']"/>
                                 </t>
                                 <t t-else="">
                                     We are waiting for the payment acquirer to confirm the payment.

@@ -93,7 +93,7 @@
                                 <t t-set="i" t-value="i+1"/>
                             </t>
                         </ul>
-                        <div t-raw="acq.pre_msg" class="text-muted ml-3"/>
+                        <div t-esc="acq.pre_msg" class="text-muted ml-3"/>
                     </div>
                     <t t-if="acq.payment_flow == 'form'">
                         <div t-attf-id="o_payment_form_acq_{{acq.id}}"
