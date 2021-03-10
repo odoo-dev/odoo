@@ -22,6 +22,8 @@ function makeFakeDialogService(open) {
 }
 
 let serviceRegistry;
+let errorCb;
+let unhandledRejectionCb;
 let windowAddEventListener = window.addEventListener;
 
 QUnit.module("Error Service", {
@@ -31,6 +33,14 @@ QUnit.module("Error Service", {
     serviceRegistry.add(dialogService.name, dialogService);
     serviceRegistry.add(notificationService.name, notificationService);
     serviceRegistry.add("rpc", makeFakeRPCService());
+    window.addEventListener = (type, cb) => {
+      if (type === "unhandledrejection") {
+        unhandledRejectionCb = cb;
+      }
+      if (type === "error") {
+        errorCb = cb;
+      }
+    };
   },
   afterEach() {
     window.addEventListener = windowAddEventListener;
@@ -39,12 +49,6 @@ QUnit.module("Error Service", {
 
 QUnit.test("handle RPC_ERROR of type='server' and no associated dialog class", async (assert) => {
   assert.expect(2);
-  let errorCb;
-  window.addEventListener = (type, cb) => {
-    if (type === "unhandledrejection") {
-      errorCb = cb;
-    }
-  };
   const error = new RPCError();
   error.code = 701;
   error.message = "Some strange error occured";
@@ -68,19 +72,13 @@ QUnit.test("handle RPC_ERROR of type='server' and no associated dialog class", a
   serviceRegistry.add("dialog", makeFakeDialogService(open), { force: true });
   await makeTestEnv({ serviceRegistry });
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
-  errorCb(errorEvent);
+  unhandledRejectionCb(errorEvent);
 });
 
 QUnit.test(
   "handle RPC_ERROR of type='server' and associated custom dialog class",
   async (assert) => {
     assert.expect(2);
-    let errorCb;
-    window.addEventListener = (type, cb) => {
-      if (type === "unhandledrejection") {
-        errorCb = cb;
-      }
-    };
     class CustomDialog extends Component {}
     CustomDialog.template = tags.xml`<RPCErrorDialog title="'Strange Error'"/>`;
     CustomDialog.components = { RPCErrorDialog };
@@ -105,17 +103,11 @@ QUnit.test(
     await makeTestEnv({ serviceRegistry });
     odoo.errorDialogRegistry.add("strange_error", CustomDialog);
     const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
-    errorCb(errorEvent);
+    unhandledRejectionCb(errorEvent);
   }
 );
 
 QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
-  let errorCb;
-  window.addEventListener = (type, cb) => {
-    if (type === "unhandledrejection") {
-      errorCb = cb;
-    }
-  };
   const mockBrowser = {
     setTimeout: (callback, delay) => {
       assert.step(`set timeout (${delay === 2000 ? delay : ">2000"})`);
@@ -145,7 +137,7 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
   await makeTestEnv({ serviceRegistry, mockRPC, browser: mockBrowser });
   const error = new ConnectionLostError();
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
-  errorCb(errorEvent);
+  unhandledRejectionCb(errorEvent);
   await nextTick(); // wait for mocked RPCs
   assert.verifySteps([
     "create (Connection lost. Trying to reconnect...)",
