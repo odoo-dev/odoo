@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <div t-name="web_studio.X2ManyEdit">
+        <button type="button" class="btn btn-secondary btn-primary o_web_studio_editX2Many" data-type="list">Edit List View</button>
+        <button type="button" class="btn btn-secondary btn-primary o_web_studio_editX2Many" data-type="form">Edit Form View</button>
+    </div>
+    <div t-name="web_studio.FieldOne2manyWarning">
+        There are no many2one fields related to the current model.<br/>
+        To create a one2many field on the current model, you must first create its many2one counterpart on the model you want to relate to.
+    </div>
+</templates>
