@@ -3,7 +3,7 @@
 import logging
 import werkzeug
 
-from odoo import http
+from odoo import http, _
 from odoo.http import request
 from odoo.tools.misc import formatLang
 from odoo.tools import html2plaintext
@@ -42,50 +42,55 @@ class MailClientExtensionController(main.MailClientExtensionController):
         server_action = http.request.env.ref("crm_mail_client_extension.lead_creation_prefilled_action")
         return werkzeug.utils.redirect('/web#action=%s&model=crm.lead&partner_id=%s' % (server_action.id, int(partner_id)))
 
-    def _get_leads(self, partner, limit=5, offset=0):
+    def _get_leads(self, partner_id, limit=5, offset=0):
+        if not partner_id or partner_id <= 0:
+            return []
+
+        partner_leads = request.env['crm.lead'].search(
+            [('partner_id', '=', partner_id)], offset=offset, limit=limit)
+        recurring_revenues = request.env.user.has_group('crm.group_use_recurring_revenues')
 
         leads = []
+        for lead in partner_leads:
+            lead_values = {
+                'id': lead.id,
+                'name': lead.name,
+                'expected_revenue': formatLang(request.env, lead.expected_revenue, monetary=True,
+                                               currency_obj=lead.company_currency),
+                'probability': lead.probability,
+            }
 
-        if partner and partner > 0:
-            partner_leads = request.env['crm.lead'].search([('partner_id', '=', partner)],
-                                                           offset=offset, limit=limit)
-            recurring_revenues = request.env.user.has_group('crm.group_use_recurring_revenues')
+            if recurring_revenues:
+                lead_values.update({
+                    'recurring_revenue': formatLang(request.env, lead.recurring_revenue, monetary=True,
+                                                    currency_obj=lead.company_currency),
+                    'recurring_plan': lead.recurring_plan.name,
+                })
 
-            for lead in partner_leads:
-                lead_values = {
-                    'id': lead.id,
-                    'name': lead.name,
-                    'expected_revenue': formatLang(request.env, lead.expected_revenue, monetary=True,
-                                                   currency_obj=lead.company_currency),
-                    'probability': lead.probability,
-                }
-
-                if recurring_revenues:
-                    lead_values.update({
-                        'recurring_revenue': formatLang(request.env, lead.recurring_revenue, monetary=True,
-                                                        currency_obj=lead.company_currency),
-                        'recurring_plan': lead.recurring_plan.name,
-                    })
-
-                leads.append(lead_values)
+            leads.append(lead_values)
 
         return leads
 
-    def _get_partner_extra_info(self, partner_id):
+    def _get_partner_extra_info(self, partner_id=None):
         extra_info = super(MailClientExtensionController, self)._get_partner_extra_info(partner_id)
         extra_info['leads'] = self._get_leads(partner_id)
         return extra_info
 
-    def _get_loggable_modules(self):
-        loggable_modules = super(MailClientExtensionController, self)._get_loggable_modules()
-        loggable_modules.append('crm.lead')
-        return loggable_modules
+    def _get_loggable_models(self):
+        loggable_models = super(MailClientExtensionController, self)._get_loggable_models()
+        loggable_models.append('crm.lead')
+        return loggable_models
 
     @http.route('/mail_client_extension/lead/create_from_email', type='json', auth='outlook', cors="*")
     def create_lead_from_email(self, partner_id, email_body):
-        record = request.env['crm.lead'].create(
-            {'name': 'Lead from email', 'partner_id': partner_id,
-             'description': html2plaintext(email_body)}
-        )
+        partner = request.env['res.partner'].browse(partner_id).exists()
+        if not partner:
+            return {'error': 'partner_not_found'}
+
+        record = request.env['crm.lead'].create({
+            'name': _("%s's opportunity", partner.name),
+            'partner_id': partner_id,
+            'description': html2plaintext(email_body),
+        })
 
         return {'created_id': record.id}

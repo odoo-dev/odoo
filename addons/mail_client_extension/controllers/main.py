@@ -241,7 +241,7 @@ class MailClientExtensionController(http.Controller):
                 'name': name,
                 'email': email,
                 'enrichment_info': None,
-                'extra_info': self._get_partner_extra_info(partner_id)
+                'extra_info': self._get_partner_extra_info()
             }
             company = self._find_existing_company(normalized_email)
             if not company:  # create and enrich company
@@ -282,11 +282,11 @@ class MailClientExtensionController(http.Controller):
 
     @http.route('/mail_client_extension/log_mail_content', type="json", auth="outlook", cors="*")
     def log_mail_content(self, model, res_id, message):
-        assert model in self._get_loggable_modules()
+        assert model in self._get_loggable_models()
         record = request.env[model].browse(res_id)
         record.message_post(body=message)
 
-    def _get_loggable_modules(self):
+    def _get_loggable_models(self):
         return ['res.partner']
 
     @http.route('/mail_client_extension/partner/enrich_company', type="json", auth="outlook", cors="*")
@@ -315,7 +315,7 @@ class MailClientExtensionController(http.Controller):
 
         return response
 
-    def _get_partner_extra_info(self, partner_id):
+    def _get_partner_extra_info(self, partner_id=None):
         """
         To override by other modules if extra information have to be returned with the partner (e.g., leads, ...)
         """
