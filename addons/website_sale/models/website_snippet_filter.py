@@ -13,39 +13,51 @@ class WebsiteSnippetFilter(models.Model):
         pricelist = self.env['website'].get_current_website().get_current_pricelist()
         return pricelist.currency_id
 
-    def _get_hardcoded_sample(self, model):
-        samples = super()._get_hardcoded_sample(model)
-        if model and model.model == 'product.product':
-            data = [{
-                'image_512': '/product/static/img/product_chair.png',
-                'display_name': _('Chair'),
-                'description_sale': _('Sit comfortably'),
-            }, {
-                'image_512': '/product/static/img/product_lamp.png',
-                'display_name': _('Lamp'),
-                'description_sale': _('Lightbulb sold separately'),
-            }, {
-                'image_512': '/product/static/img/product_product_20-image.png',
-                'display_name': _('Whiteboard'),
-                'description_sale': _('With three feet'),
-            }, {
-                'image_512': '/product/static/img/product_product_27-image.png',
-                'display_name': _('Drawer'),
-                'description_sale': _('On wheels'),
-            }]
-            merged = []
-            for index in range(0, max(len(samples), len(data))):
-                merged.append({**samples[index % len(samples)], **data[index % len(data)]})
-                # merge definitions
-            samples = merged
-        return samples
-
     def _get_products(self, website, product_selection, limit, context):
+        if context.get('is_sample'):
+            product_selection = "sample"
         handler = getattr(self, '_get_products_%s' % product_selection, self._get_products_newest)
         search_domain = context.get('search_domain')
         domain = [('website_published', '=', True)] + website.website_domain() + (search_domain or [])
         products = handler(website, limit, domain, context)
         return products
+
+    def _get_products_sample(self, website, limit, domain, context):
+        Product = self.env['product.product'].with_context(display_default_code=False)
+        template_id = self.env['product.template'].new()
+        return [Product.new({
+            'product_tmpl_id': template_id,
+            'default_code': 'SAMPLE_01',
+            'name': 'Chair',
+            'display_name': 'Chair',
+            'description_sale': 'Sit comfortably',
+            'price': 381.4,
+            'image_1920': b'product/static/img/product_chair.png',
+        }), Product.new({
+            'product_tmpl_id': template_id,
+            'default_code': 'SAMPLE_02',
+            'name': 'Lamp',
+            'display_name': 'Lamp',
+            'description_sale': 'Lightbulb sold separately',
+            'price': 250.9,
+            'image_1920': b'product/static/img/product_lamp.png',
+        }), Product.new({
+            'product_tmpl_id': template_id,
+            'default_code': 'SAMPLE_03',
+            'name': 'Whiteboard',
+            'display_name': 'Whiteboard',
+            'description_sale': 'With three feet',
+            'price': 182.3,
+            'image_1920': b'product/static/img/product_product_20-image.png',
+        }), Product.new({
+            'product_tmpl_id': template_id,
+            'default_code': 'SAMPLE_04',
+            'name': 'Drawer',
+            'display_name': 'Drawer',
+            'description_sale': 'On wheels',
+            'price': 220.3,
+            'image_1920': b'product/static/img/product_product_27-image.png',
+        })]
 
     def _get_products_newest(self, website, limit, domain, context):
         return self.env['product.product'].with_context(display_default_code=False).search(domain, limit=limit, order="create_date desc")

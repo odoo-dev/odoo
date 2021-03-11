@@ -179,6 +179,7 @@ class WebsiteSnippetFilter(models.Model):
                 else:
                     data[field_name] = self.escape_falsy_as_empty(value)
             data['call_to_action_url'] = record.get('call_to_action_url')
+            data['_record'] = record.get('_record')
             result.append(data)
         return result
 
@@ -228,6 +229,18 @@ class WebsiteSnippetFilter(models.Model):
         """
         if not length:
             return []
+
+        if self.action_server_id:
+            try:
+                return self.action_server_id.with_context(
+                    dynamic_filter=self,
+                    limit=length,
+                    search_domain=[],
+                    is_sample=True,
+                ).sudo().run() or []
+            except MissingError:
+                _logger.warning("The provided domain %s in 'ir.actions.server' generated a MissingError in '%s'", search_domain, self._name)
+                return []
 
         sample = []
         model = self.env[self.filter_id.model_id] if self.filter_id else (

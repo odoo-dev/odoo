@@ -3,24 +3,28 @@
     <data noupdate="1">
         <!-- Templates for Dynamic Snippet -->
         <template id="dynamic_filter_template_add_product_to_cart" name="Add Product to Cart">
-            <t t-foreach="records" t-as="record">
+            <t t-foreach="records" t-as="data">
+                <t t-set="record" t-value="data.get('_record')"/>
                 <div class="o_carousel_product_card card h-100">
                     <div t-if="is_sample" class="h5 o_ribbon_right bg-primary text-uppercase">Sample</div>
-                    <input type="hidden" name="product-id" t-att-data-product-id="record.get('id')"/>
-                    <a class="o_carousel_product_img_link" t-att-href="record.get('call_to_action_url')">
-                        <img class="o_carousel_product_card_img_top card-img-top" loading="lazy" t-att-src="record.get('image_512')"
-                            t-att-alt="record.get('display_name')"/>
+                    <input type="hidden" name="product-id" t-att-data-product-id="record.id"/>
+                    <a class="o_carousel_product_img_link" t-att-href="record.website_url">
+                        <img class="o_carousel_product_card_img_top card-img-top" loading="lazy" t-att-src="data.get('image_512')"
+                            t-att-alt="record.display_name"/>
                     </a>
-                    <i t-if="record.get('product_selection') == 'latest_viewed'" class="fa fa-trash o_carousel_product_remove js_remove"></i>
+                    <i t-if="data.get('product_selection') == 'latest_viewed'" class="fa fa-trash o_carousel_product_remove js_remove"></i>
                     <div class="o_carousel_product_card_body card-body border-top">
-                        <a t-att-href="record.get('call_to_action_url')" class="text-decoration-none">
-                            <div class="h6 card-title mb-0 text-truncate" t-raw="record.get('display_name')"/>
+                        <a t-att-href="record.website_url" class="text-decoration-none">
+                            <div class="h6 card-title mb-0 text-truncate" t-field="record.display_name"/>
                         </a>
-                        <t t-raw="record.get('rating')"/>
+                        <t t-if="data.get('rating')" t-call="portal_rating.rating_widget_stars_static">
+                            <t t-set="rating_avg" t-value="record.rating_avg"/>
+                            <t t-set="rating_count" t-value="record.rating_count"/>
+                        </t>
                     </div>
                     <div class="o_carousel_product_card_footer card-footer d-flex align-items-center">
-                        <div class="d-block font-weight-bold" t-raw="record.get('price')"/>
-                        <button t-if="'id' in record" type="button" role="button" class="btn btn-primary js_add_cart ml-auto" title="Add to Cart">
+                        <div class="d-block font-weight-bold" t-field="record.price"/>
+                        <button type="button" role="button" class="btn btn-primary js_add_cart ml-auto" title="Add to Cart">
                             <i class="fa fa-fw fa-shopping-cart"/>
                         </button>
                     </div>
