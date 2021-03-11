@@ -6,7 +6,7 @@ import sys
 import time
 import threading
 import traceback
-
+import base64
 from decorator import decorator
 
 import odoo
@@ -14,6 +14,13 @@ import odoo
 from odoo import fields
 
 _logger = logging.getLogger(__name__)
+
+#TOFIX
+# Buttons ?
+# Stroring speedscope in binary field is painfull
+#    cannot be easily filed without an env, (tests, loading, request)
+#    difference between storing it in file (speedscope compatible) and database
+#    -> difficult to optionnaly generate speedscope on the fly
 
 
 class _LogTracer(object):
@@ -100,7 +107,6 @@ def profile(method=None, whitelist=None, blacklist=(None,), files=None,
                         (Default: 0)
         :param int minimum_queries: minimum sql queries to display a method
                         (Default: 0)
-        
         .. code-block:: python
 
           from odoo.tools.profiler import profile
@@ -238,6 +244,13 @@ class Recorder():
     def _format_stack(self, stack):
         return [list(frame) for frame in stack]  # [(filename, lineno, name, linedesc),]
 
+
+    def _start(self):
+        pass
+
+    def _stop(self):
+        pass
+
     def _post_process(self):
         #def format_frame(frame, lineno):
         #    co = frame.f_code
@@ -248,6 +261,9 @@ class Recorder():
             #stack = reversed(entry['stack'][1:-self.init_stack_level])
             #entry['stack'] = [format_frame(*frame) for frame in stack]
             entry['stack'] = list(reversed(entry['stack'][1:-self.init_stack_level]))
+
+    def _to_sql_field(self):
+        return json.dumps(self.make_result())
 
 class SQLRecorder(Recorder):
     _row = 'sql'
@@ -331,6 +347,23 @@ class TracesSyncRecorder(Recorder):
         sys.settrace(None)
 
 
+#class SpeedscopeRecorder(Recorder):
+#    """
+#        Recorder to automatically combine other recorder in speedscope
+#        All other `recorders` must have been _ostprocessed before calling SpeedscopeRecorder _post_process
+#    """
+#    _row = "speedscope"#
+
+#    def __init__(self, recorders):
+#        self.recorders = recorders#
+
+#    def _post_process(self):
+#        profiles_raw = {recorder._row: recorder.result for recorder in self.recorders}
+#        self.result = SpeedscopeResult(**profiles_raw).make()#
+
+#    def _to_sql_field(self):
+#        return base64.b64encode(json.dumps(self.result).encode('utf-8'))
+
 class ExecutionContext():
     def __init__(self, context):
         self.init_stack_level = len(traceback.extract_stack())  # todo change
@@ -347,11 +380,12 @@ class ExecutionContext():
 
 
 class Profiler():
-    def __init__(self, db=True, cr=False, path=False, sql=True, traces=True, sync=False, interval=0.01, recorders=None, profile_session_id=False, description=False):
+    def __init__(self, db=True, cr=False, path=False, sql=True, traces=True, sync=False, speedscope=True, interval=0.01, recorders=None, profile_session_id=False, description=False):
         self.cr = None
+        self.start = 0
         self.path = path
         self.profile_session_id = profile_session_id
-        self.results = {}
+        #self.results = {}
         self.description = description
         self.profile_execution_id = False
         if cr:
@@ -374,6 +408,8 @@ class Profiler():
                     self.recorders.append(TracesSyncRecorder())
                 else:
                     self.recorders.append(TracesAsyncRecorder(interval=interval))
+            #if speedscope:
+            #    self.recorders.append(SpeedscopeRecorder(self.recorders[:]))
         self.result = {}
 
     def _make_ir_profile_execution(self):
@@ -398,7 +434,7 @@ class Profiler():
             self._make_ir_profile_execution()
         for recorder in self.recorders:
             recorder._start()
-            self.results[recorder._row] = recorder.make_result()
+            #self.results[recorder._row] = recorder.make_result()
         return self
 
     def __exit__(self, *args):
@@ -407,18 +443,21 @@ class Profiler():
 
         for recorder in self.recorders:
             recorder._post_process()
+
         self.duration = time.time() - self.start
         if self.path:
-            for row, result in self.results.items():
+            for recorder in recorder:
+                row = recorder._row
                 path = '%s_%s.json' % (self.path, row)
                 _logger.info('saving record to %s', path)
                 with open(path, 'w') as f:
-                    json.dump(result, f, indent=4)
+                    json.dump(recorder.result, f, indent=4)
 
         # todo auto speedscope
         if self.cr:
             if self.profile_execution_id:
-                for row, result in self.results.items():
+                for recorder in self.recorders:
+                    row = recorder._row
                     self.cr.execute(
                         """
                             UPDATE ir_profile_execution
@@ -426,7 +465,7 @@ class Profiler():
                             WHERE id = %s
                         """.format(row_name=row),
                         [
-                            json.dumps(result),
+                            recorder._to_sql_field(),
                             self.duration,
                             self.profile_execution_id
                         ])

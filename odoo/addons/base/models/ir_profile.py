@@ -62,6 +62,9 @@ class IrProfileExcecution(models.Model):
     duration = fields.Float('Duration')
 
     # results slots
+
+    init_stack = fields.Char('init_stack', prefetch=False)
+
     sql = fields.Char('Sql', prefetch=False)
     traces_async = fields.Char('Traces Async', prefetch=False)
     traces_sync = fields.Char('Traces Sync', prefetch=False)
@@ -88,5 +91,8 @@ class IrProfileExcecution(models.Model):
                 sql_result = json.loads(profile.sql)
             if profile.traces_async:
                 trace_result = json.loads(profile.traces_async)
+
+             # todo move init_stack to execution and give it to speedscope results
+
             result = SpeedscopeResult(profile=trace_result.get('result'), sql=sql_result.get('result')).make()
             profile.speedscope = base64.b64encode(json.dumps(result).encode('utf-8'))
