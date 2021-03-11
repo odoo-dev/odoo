@@ -12511,8 +12511,8 @@ QUnit.module('relational_fields', {
             model: 'partner',
             data: this.data,
             arch: '<form string="Partners">' +
-                        '<field name="product_id" widget="selection"/>' +
-                        '<field name="trululu" widget="selection"/>' +
+                        '<field name="product_id" options="{\'no_open\': True, \'no_create\': True}"/>' +
+                        '<field name="trululu" options="{\'no_open\': True, \'no_create\': True}"/>' +
                         '<field name="color" widget="selection"/>' +
                 '</form>',
             res_id: 1,
@@ -12625,7 +12625,7 @@ QUnit.module('relational_fields', {
             model: 'partner',
             data: this.data,
             arch: '<form string="Partners">' +
-                        '<field name="trululu" widget="selection"/>' +
+                        '<field name="trululu" options="{\'no_open\': True, \'no_create\': True}"/>' +
                 '</form>',
             mockRPC: function (route, args) {
                 if (args.method === 'write') {
@@ -12656,7 +12656,7 @@ QUnit.module('relational_fields', {
             model: 'partner',
             data: this.data,
             arch: '<form string="Partners">' +
-                        '<field name="trululu" widget="selection"/>' +
+                        '<field name="trululu" options="{\'no_open\': True, \'no_create\': True}"/>' +
                 '</form>',
             res_id: 1,
             viewOptions: {mode: 'edit'},
@@ -12680,7 +12680,7 @@ QUnit.module('relational_fields', {
             data: this.data,
             arch: '<form>' +
                     '<field name="int_field"/>' +
-                    '<field name="trululu" widget="selection"/>' +
+                    '<field name="trululu" options="{\'no_open\': True, \'no_create\': True}"/>' +
                 '</form>',
             res_id: 1,
             mockRPC: function (route, args) {

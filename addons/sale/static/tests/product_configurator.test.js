@@ -9,7 +9,7 @@ odoo.define('sale.product.configurator.tests', function (require) {
     var getArch = function (){
         return '<form>' +
         '<sheet>' +
-        '<field name="pricelist_id" widget="selection" />' +
+        '<field name="pricelist_id" options="{\'no_open\': True, \'no_create\': True}" />' +
         '<field name="sale_order_line" widget="section_and_note_one2many">' +
         '<tree editable="top"><control>' +
         '<create string="Add a product"/>' +
