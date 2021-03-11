@@ -3,8 +3,9 @@
 
   <t t-name="wowl.CommandPaletteDialog" owl="1">
     <Dialog title="props.title" renderFooter="false">
-      <input type="text" t-att-placeholder="props.placeholder" />
-      <t t-foreach="props.categories" t-as="category">
+      <input type="text" t-att-placeholder="props.placeholder" t-model="state.searchValue" t-on-keyup="_search"/>
+      <t t-esc="state.search"/>
+      <t t-foreach="state.filterCategories" t-as="category">
         <ul>
           <t t-foreach="category.items" t-as="item">
             <h6 t-if="item_first and category.label" t-esc="category.label" />
