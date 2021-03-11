@@ -657,8 +657,9 @@ class BarcodeConverter(models.AbstractModel):
             barcode_symbology,
             value,
             **{key: value for key, value in options.items() if key in ['width', 'height', 'humanreadable', 'quiet', 'mask']})
-        options['img_src'] = 'data:png;base64,' + base64.b64encode(barcode).decode()
-        img_attributes = {k[4:]: v for k, v in options.items() if k.startswith('img_')}
+
+        img_attributes = {'src': 'data:png;base64,' + base64.b64encode(barcode).decode(),}
+        img_attributes.update((k[4:], v) for k, v in options.items() if k.startswith('img_'))
         img_attributes.setdefault('alt', 'Barcode %s' % value)
 
         attributes = M(' ').join(
