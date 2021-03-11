@@ -31,6 +31,11 @@
             <t t-call-assets="wowl.studio_lazy_assets" groups="base.group_system" />
         </xpath>
     </template>
+    <template id="studio_test_assets" inherit_id="wowl.ent_test_assets">
+        <xpath expr="//t[@t-foreach='jsFiles']" position="after">
+            <t t-call-assets="wowl.studio_lazy_assets" groups="base.group_system" />
+        </xpath>
+    </template>
 
     <record id="act_report_xml_view_kanban" model="ir.ui.view">
         <field name="name">ir.actions.report.kanban</field>
