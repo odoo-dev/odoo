@@ -1,5 +1,6 @@
 /** @odoo-module **/
-const { Component, hooks } = owl;
+
+const { onMounted, onPatched, onWillUnmount, useComponent } = owl.hooks;
 
 // -----------------------------------------------------------------------------
 // Hook function
@@ -12,12 +13,12 @@ const { Component, hooks } = owl;
  * @returns {any}
  */
 export function useService(serviceName) {
-  const component = Component.current;
-  const env = component.env;
-  const service = env.services[serviceName];
-  if (!service) {
+  const component = useComponent();
+  const { services } = component.env;
+  if (!(serviceName in services)) {
     throw new Error(`Service ${serviceName} is not available`);
   }
+  const service = services[serviceName];
   return typeof service === "function" ? service.bind(component) : service;
 }
 
@@ -29,9 +30,9 @@ export function useService(serviceName) {
  * @param {Callback} callback
  */
 export function useBus(bus, eventName, callback) {
-  const component = Component.current;
-  hooks.onMounted(() => bus.on(eventName, component, callback));
-  hooks.onWillUnmount(() => bus.off(eventName, component));
+  const component = useComponent();
+  onMounted(() => bus.on(eventName, component, callback));
+  onWillUnmount(() => bus.off(eventName, component));
 }
 
 /**
@@ -45,7 +46,7 @@ export function useBus(bus, eventName, callback) {
  * @returns {Function} function that forces the focus on the next update if visible.
  */
 export function useAutofocus(params = {}) {
-  const comp = Component.current;
+  const comp = useComponent();
   // Prevent autofocus in mobile
   // FIXME: device not yet available in the env
   // if (comp.env.device.isMobile) {
@@ -64,8 +65,8 @@ export function useAutofocus(params = {}) {
       }
     }
   }
-  hooks.onMounted(autofocus);
-  hooks.onPatched(autofocus);
+  onMounted(autofocus);
+  onPatched(autofocus);
   return function focusOnUpdate() {
     target = null;
   };
