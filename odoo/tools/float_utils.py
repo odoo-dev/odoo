@@ -45,7 +45,7 @@ def float_round(value, precision_digits=None, precision_rounding=None, rounding_
        :param float value: the value to round
        :param int precision_digits: number of fractional digits to round to.
        :param float precision_rounding: decimal number representing the minimum
-           non-zero value at the desired precision (for example, 0.01 for a 
+           non-zero value at the desired precision (for example, 0.01 for a
            2-digit precision).
        :param rounding_method: the rounding method used: 'HALF-UP', 'UP' or 'DOWN',
            the first one rounding up to the closest number with the rule that
@@ -107,16 +107,16 @@ def float_is_zero(value, precision_digits=None, precision_rounding=None):
        is used as the zero *epsilon*: values less than that are considered
        to be zero.
        Precision must be given by ``precision_digits`` or ``precision_rounding``,
-       not both! 
+       not both!
 
        Warning: ``float_is_zero(value1-value2)`` is not equivalent to
        ``float_compare(value1,value2) == 0``, as the former will round after
        computing the difference, while the latter will round before, giving
-       different results for e.g. 0.006 and 0.002 at 2 digits precision. 
+       different results for e.g. 0.006 and 0.002 at 2 digits precision.
 
        :param int precision_digits: number of fractional digits to round to.
        :param float precision_rounding: decimal number representing the minimum
-           non-zero value at the desired precision (for example, 0.01 for a 
+           non-zero value at the desired precision (for example, 0.01 for a
            2-digit precision).
        :param float value: value to compare with the precision's zero
        :return: True if ``value`` is considered zero
@@ -139,14 +139,14 @@ def float_compare(value1, value2, precision_digits=None, precision_rounding=None
        because they respectively round to 0.01 and 0.0, even though
        0.006-0.002 = 0.004 which would be considered zero at 2 digits precision.
 
-       Warning: ``float_is_zero(value1-value2)`` is not equivalent to 
+       Warning: ``float_is_zero(value1-value2)`` is not equivalent to
        ``float_compare(value1,value2) == 0``, as the former will round after
        computing the difference, while the latter will round before, giving
-       different results for e.g. 0.006 and 0.002 at 2 digits precision. 
+       different results for e.g. 0.006 and 0.002 at 2 digits precision.
 
        :param int precision_digits: number of fractional digits to round to.
        :param float precision_rounding: decimal number representing the minimum
-           non-zero value at the desired precision (for example, 0.01 for a 
+           non-zero value at the desired precision (for example, 0.01 for a
            2-digit precision).
        :param float value1: first value to compare
        :param float value2: second value to compare
@@ -191,8 +191,8 @@ def float_split_str(value, precision_digits):
     """
     value = float_round(value, precision_digits=precision_digits)
     value_repr = float_repr(value, precision_digits)
-    units, cents = value_repr.split('.')
-    return units, cents
+    split_value = value_repr.split('.')
+    return split_value[0], split_value[1] if len(split_value) == 2 else ''
 
 def float_split(value, precision_digits):
     """ same as float_split_str() except that it returns the unitary and decimal

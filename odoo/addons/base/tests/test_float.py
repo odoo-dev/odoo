@@ -187,8 +187,8 @@ class TestFloatPrecision(TransactionCase):
         """ Test split method with 2 digits. """
         currency = self.env.ref('base.EUR')
 
-        def try_split(value, expected):
-            digits = max(0, -int(log10(currency.rounding)))
+        def try_split(value, expected, rounding=None):
+            digits = max(0, -int(log10(currency.rounding))) if rounding is None else rounding
             result = float_split_str(value, precision_digits=digits)
             self.assertEqual(result, expected, 'Split error: got %s, expected %s' % (result, expected))
 
@@ -197,6 +197,9 @@ class TestFloatPrecision(TransactionCase):
         try_split(-2.675, ('-2', '68')) # in Python 2.7.2, round(2.675,2) gives 2.67
         try_split(0.001, ('0', '00'))
         try_split(-0.001, ('-0', '00'))
+        try_split(42, ('42', '00'))
+        try_split(0.1, ('0', '10'))
+        try_split(13.0, ('13', ''), rounding=0)
 
     def test_rounding_invalid(self):
         """ verify that invalid parameters are forbidden """
