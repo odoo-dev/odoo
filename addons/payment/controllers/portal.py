@@ -87,7 +87,7 @@ class PaymentPortal(portal.CustomerPortal):
 
         user_sudo = request.env.user
         logged_in = not user_sudo._is_public()
-        # If the user is logged in, take his partner rather than the partner set in the params.
+        # If the user is logged in, take their partner rather than the partner set in the params.
         # This is something that we want, since security rules are based on the partner, and created
         # tokens should not be assigned to the public user. This should have no impact on the
         # transaction itself besides making reconciliation possibly more difficult (e.g. The
