@@ -2,7 +2,7 @@ odoo.define('mail/static/src/models/gif_manager/gif_manager.js', function (requi
 'use strict';
 
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr } = require('mail/static/src/model/model_field.js');
+    const { attr, one2one } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -30,6 +30,13 @@ function factory(dependencies) {
             return "5PFWYKTVK1VO";
         }
 
+        insertGif(gif) {
+            console.log(gif);
+            this.composer.update({
+                textInputContent: this.composer.textInputContent + ' ' + gif.itemurl
+            });
+        }
+
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -45,6 +52,9 @@ function factory(dependencies) {
     }
 
     GifManager.fields = {
+        composer: one2one('mail.composer', {
+            inverse: 'gifManager',
+        }),
         categories: attr({
             default: [],
         }),

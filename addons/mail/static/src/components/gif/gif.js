@@ -51,6 +51,10 @@ class Gif extends Component {
         this.gifManager.getCategories();
     }
 
+    _onClickGif(gif) {
+        this.gifManager.insertGif(gif);
+    }
+
 }
 
 Object.assign(Gif, {

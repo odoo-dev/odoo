@@ -16,7 +16,7 @@
             <div class="grid" t-if="gifManager.searchResult.length">
                 <t t-foreach="gifManager.searchResult" t-as="search" t-key="search.id">
                     <div class="grid-item">
-                        <img class="gif" t-att-src="search.media[0].nanogif.preview" t-on-load="_update" />
+                        <img class="gif" t-att-src="search.media[0].nanogif.preview" t-on-load="_update" t-on-click="_onClickGif(search)" />
                     </div>
                 </t>
             </div>

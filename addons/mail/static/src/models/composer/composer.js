@@ -1003,7 +1003,8 @@ function factory(dependencies) {
            default: "",
         }),
         gifManager: one2one('mail.gif_manager', {
-            default: [['create']]
+            inverse: 'composer',
+            default: [['create']],
         }),
         /**
          * This field determines whether some attachments linked to this
