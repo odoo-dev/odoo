@@ -131,6 +131,8 @@
                                data-apply-to=".s_website_form_datetime input"/>
             <we-datepicker t-att-string="default_value_label" data-select-attribute="" data-attribute-name="value" data-select-value-property=""
                            data-apply-to=".s_website_form_date input"/>
+            <we-checkbox string="Preset Country Code" data-name="preset_country_code_opt" data-no-preview="true"
+                data-preset-country-code="s_website_form_preset_country_code"/>
             <we-checkbox string="Required" data-name="required_opt" data-no-preview="true"
                 data-toggle-required="s_website_form_required"/>
             <we-checkbox string="Hidden" data-name="hidden_opt" data-no-preview="true"

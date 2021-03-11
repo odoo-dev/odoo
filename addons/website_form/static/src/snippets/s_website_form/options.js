@@ -90,6 +90,7 @@ const FormEditor = options.Class.extend({
         return {
             labelWidth: this.$target[0].querySelector('.s_website_form_label').style.width,
             labelPosition: 'left',
+            presetCountryCode: false,
             multiPosition: 'horizontal',
             requiredMark: this._isRequiredMark(),
             optionalMark: this._isOptionalMark(),
@@ -254,6 +255,15 @@ const FieldEditor = FormEditor.extend({
         return classList.contains('s_website_form_required') || classList.contains('s_website_form_model_required');
     },
     /**
+     * Returns true if the field type is telephone with preset country code.
+     *
+     * @private
+     * @returns {boolean}
+     */
+    _isPresetCountryCode: function () {
+        return this.$target[0].classList.contains('s_website_form_preset_country_code');
+    },
+    /**
      * Set the active field properties on the field Object
      *
      * @param {Object} field Field to complete with the active field info
@@ -278,6 +288,7 @@ const FieldEditor = FormEditor.extend({
         field.modelRequired = classList.contains('s_website_form_model_required');
         field.hidden = classList.contains('s_website_form_field_hidden');
         field.formatInfo = this._getFieldFormat();
+        field.presetCountryCode = this._isPresetCountryCode();
     },
 });
 
@@ -898,6 +909,13 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         });
     },
     /**
+     * Set the field's preset country code
+     */
+    presetCountryCode: function (previewMode, value, params) {
+        const isPresetCountryCode = this.$target[0].classList.contains(params.activeValue);
+        this.$target[0].classList.toggle(params.activeValue, !isPresetCountryCode);
+    },
+    /**
      * Apply the we-list on the target and rebuild the input(s)
      */
     renderListItems: async function (previewMode, value, params) {
@@ -944,6 +962,8 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 const values = this._getListItems().map(el => el.id);
                 return JSON.stringify(values);
             }
+            case 'presetCountryCode':
+                return this.$target[0].classList.contains(params.activeValue) ? params.activeValue : 'false';
         }
         return this._super(...arguments);
     },
@@ -960,6 +980,8 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             case 'hidden_opt':
             case 'type_opt':
                 return !this.$target[0].classList.contains('s_website_form_model_required');
+            case 'preset_country_code_opt':
+                return this.$target[0].dataset.type === 'tel';
         }
         return this._super(...arguments);
     },
