@@ -188,6 +188,7 @@ class Assets(models.AbstractModel):
                 'glob': custom_url,
                 'target': url,
                 'directive': 'replace',
+                **self._save_asset_hook(),
             }
             target_asset = self._get_custom_asset(url)
             if target_asset:
@@ -198,7 +199,6 @@ class Assets(models.AbstractModel):
                 path_parts = '/'.join(os.path.split(custom_url)).split('/')
                 new_asset['name'] = '%s: replace %s' % (bundle, path_parts[-1])
                 new_asset['bundle'] = IrAsset.get_related_bundle(url, bundle)
-            new_asset.update(self._save_asset_hook())
             IrAsset.create(new_asset)
 
         self.env["ir.qweb"].clear_caches()
