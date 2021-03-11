@@ -6,20 +6,20 @@ import werkzeug
 from odoo import http
 from odoo.http import request
 from odoo.tools.misc import formatLang
-from odoo.addons.mail_client_extension.controllers.main import MailClientExtensionController
 from odoo.tools import html2plaintext
 
+from odoo.addons.mail_client_extension.controllers import main
 
 _logger = logging.getLogger(__name__)
 
 
-class MailClientExtensionController(MailClientExtensionController):
+class MailClientExtensionController(main.MailClientExtensionController):
 
     @http.route(route='/mail_client_extension/log_single_mail_content',
                 type="json", auth="outlook", cors="*")
     def log_single_mail_content(self, lead, message, **kw):
         """
-            deprecated route, not needed for newer versions of the plugin but necessary
+            deprecated route, not needed for newer versions of the mail plugin but necessary
             for supporting older versions
         """
         crm_lead = request.env['crm.lead'].browse(lead)
@@ -28,7 +28,7 @@ class MailClientExtensionController(MailClientExtensionController):
     @http.route('/mail_client_extension/lead/get_by_partner_id', type="json", auth="outlook", cors="*")
     def crm_lead_get_by_partner_id(self, partner, limit=5, offset=0, **kwargs):
         """
-            deprecated route, not needed for newer versions of the plugin but necessary
+            deprecated route, not needed for newer versions of the mail plugin but necessary
             for supporting older versions
         """
         return {'leads': self._get_leads(partner, limit, offset)}
@@ -36,7 +36,7 @@ class MailClientExtensionController(MailClientExtensionController):
     @http.route('/mail_client_extension/lead/create_from_partner', type='http', auth='user', methods=['GET'])
     def crm_lead_redirect_create_form_view(self, partner_id):
         """
-            deprecated route, not needed for newer versions of the plugin but necessary
+            deprecated route, not needed for newer versions of the mail plugin but necessary
             for supporting older versions
         """
         server_action = http.request.env.ref("crm_mail_client_extension.lead_creation_prefilled_action")
@@ -81,8 +81,7 @@ class MailClientExtensionController(MailClientExtensionController):
         loggable_modules.append('crm.lead')
         return loggable_modules
 
-    @http.route('/mail_client_extension/lead/create_from_email', type='json', auth='outlook',
-                cors="*")
+    @http.route('/mail_client_extension/lead/create_from_email', type='json', auth='outlook', cors="*")
     def create_lead_from_email(self, partner_id, email_body):
         record = request.env['crm.lead'].create(
             {'name': 'Lead from email', 'partner_id': partner_id,

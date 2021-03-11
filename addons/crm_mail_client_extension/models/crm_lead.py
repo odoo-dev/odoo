@@ -3,13 +3,14 @@
 
 from odoo import api, models
 
+
 class Lead(models.Model):
     _inherit = 'crm.lead'
 
     @api.model
     def _form_view_auto_fill(self):
         """
-            deprecated method, not needed for newer versions of the plugin but necessary
+            deprecated method, not needed for newer versions of the mail plugin but necessary
             for supporting older versions
         """
         return {

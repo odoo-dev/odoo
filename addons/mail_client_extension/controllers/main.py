@@ -8,7 +8,6 @@ import logging
 import odoo
 import requests
 import werkzeug
-import time
 
 from odoo import http, tools
 from odoo.addons.iap.tools import iap_tools
@@ -110,7 +109,7 @@ class MailClientExtensionController(http.Controller):
     @http.route('/mail_client_extension/modules/get', type="json", auth="outlook", csrf=False, cors="*")
     def modules_get(self,  **kwargs):
         """
-            deprecated route, not needed for newer versions of the plugin but necessary
+            deprecated route, not needed for newer versions of the mail plugin but necessary
             for supporting older versions
         """
         return {'modules': ['contacts', 'crm']}
@@ -294,7 +293,8 @@ class MailClientExtensionController(http.Controller):
     def res_partner_enrich_company(self, partner_id):
         """
         Route used when the user clicks on the enrich partner button
-        it will try to enrich the partner using IAP
+        it will first try to find a related company in the database if none are found,
+        it will enrich using IAP
         """
         response = {}
 
@@ -317,6 +317,6 @@ class MailClientExtensionController(http.Controller):
 
     def _get_partner_extra_info(self, partner_id):
         """
-        To override by other modules if extra information have to be returned
+        To override by other modules if extra information have to be returned with the partner (e.g., leads, ...)
         """
         return {}
