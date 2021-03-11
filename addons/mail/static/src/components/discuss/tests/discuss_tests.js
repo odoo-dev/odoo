@@ -3268,7 +3268,14 @@ QUnit.test('do not post message on mailing channel with "Enter" keyboard shortcu
 
 QUnit.test('rendering of inbox message', async function (assert) {
     // AKU TODO: kinda message specific test
-    assert.expect(7);
+    assert.expect(8);
+
+    this.data['mail.followers'].records.push({
+        id: 1,
+        partner_id: this.data.currentPartnerId,
+        res_id: 20,
+        res_model: 'res.partner',
+    });
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -3297,8 +3304,8 @@ QUnit.test('rendering of inbox message', async function (assert) {
     );
     assert.strictEqual(
         message.querySelectorAll(`:scope .o_Message_command`).length,
-        3,
-        "should display 3 commands"
+        4,
+        "should display 4 commands"
     );
     assert.strictEqual(
         message.querySelectorAll(`:scope .o_Message_commandStar`).length,
@@ -3314,6 +3321,11 @@ QUnit.test('rendering of inbox message', async function (assert) {
         message.querySelectorAll(`:scope .o_Message_commandMarkAsRead`).length,
         1,
         "should display mark as read command"
+    );
+    assert.strictEqual(
+        message.querySelectorAll(`:scope .o_Message_commandUnfollow`).length,
+        1,
+        "should display unfollow command"
     );
 });
 
@@ -3514,21 +3526,25 @@ QUnit.test('receive new needaction messages', async function (assert) {
 });
 
 QUnit.test('display unfollow button when current user is follower of thread', async function (assert) {
-    assert.expect(10);
-    this.data['res.partner'].records.push({ id: 20, message_follower_ids: [1], name: 'Refactoring' });
-    this.data['mail.followers'].records.push({
-        id: 1,
-        is_active: true,
-        is_editable: true,
-        partner_id: this.data.currentPartnerId,
-        res_id: 20,
-        res_model: 'res.partner',
-    });
+    assert.expect(6);
+    this.data['res.partner'].records.push({ id: 20, message_follower_ids: [1, 2]});
+    this.data['mail.followers'].records.push(
+        {
+            id: 1,
+            partner_id: this.data.currentPartnerId,
+            res_id: 20,
+            res_model: 'res.partner',
+        },
+        {
+            id: 2,
+            partner_id: 11,
+            res_id: 20,
+            res_model: 'res.partner',
+        }
+    );
     this.data['mail.message'].records.push({
         body: "<p>Test</p>",
-        date: "2019-04-20 11:00:00",
         id: 100, // random unique id, will be used to link notification to message
-        message_type: 'comment',
         // needaction needs to be set here for message_fetch domain, because
         // mocked models don't have computed fields
         needaction: true,
@@ -3540,6 +3556,13 @@ QUnit.test('display unfollow button when current user is follower of thread', as
         mail_message_id: 100, // id of related message
         res_partner_id: this.data.currentPartnerId, // must be for current partner
     });
+    // await this.start({
+    //     discuss: {
+    //         params: {
+    //             default_active_id: 'mail.box_inbox',
+    //         },
+    //     },
+    // });
     await this.start({
         async mockRPC(route, args) {
             if (args.method === 'message_post') {
@@ -3551,21 +3574,6 @@ QUnit.test('display unfollow button when current user is follower of thread', as
             return this._super(...arguments);
         },
     });
-    assert.strictEqual(
-        document.querySelectorAll('.o_Message').length,
-        1,
-        "should display a single message"
-    );
-    assert.strictEqual(
-        document.querySelector('.o_Message').dataset.messageLocalId,
-        this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId,
-        "should display message with ID 100"
-    );
-    assert.strictEqual(
-        document.querySelector('.o_Message_originThread').textContent,
-        " on Refactoring",
-        "should display message originates from record 'Refactoring'"
-    );
     assert.containsOnce(
         document.body,
         '.o_Message_commandUnfollow',
@@ -3613,31 +3621,17 @@ QUnit.test('display unfollow button when current user is follower of thread', as
 });
 
 QUnit.test('should not display unfollow button when current user is not follower of thread', async function (assert) {
-    assert.expect(2);
-    this.data['res.partner'].records.push(
-        {
-            id: 20,
-            name: 'Refactoring'
-        },
-        {
-            id: 21,
-            message_follower_ids: [1],
-            name: 'System'
-        }
-    );
+    assert.expect(1);
+    this.data['res.partner'].records.push({ id: 21, message_follower_ids: [1]});
     this.data['mail.followers'].records.push({
         id: 1,
-        is_active: true,
-        is_editable: true,
         partner_id: this.data.currentPartnerId,
         res_id: 21,
         res_model: 'res.partner',
     });
     this.data['mail.message'].records.push({
         body: "<p>Test</p>",
-        date: "2019-04-20 11:00:00",
         id: 100, // random unique id, will be used to link notification to message
-        message_type: 'comment',
         // needaction needs to be set here for message_fetch domain, because
         // mocked models don't have computed fields
         needaction: true,
