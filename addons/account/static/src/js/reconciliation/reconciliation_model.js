@@ -264,9 +264,6 @@ var StatementModel = BasicModel.extend({
                 model: 'account.bank.statement.line',
                 method: 'button_confirm_bank',
                 args: [self.bank_statement_line_id.id],
-            })
-            .then(function () {
-                return self.bank_statement_line_id.id;
             });
     },
     /**

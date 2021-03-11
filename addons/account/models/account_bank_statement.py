@@ -874,3 +874,4 @@ class AccountBankStatementLine(models.Model):
 
     def button_confirm_bank(self):
         self.statement_id.button_confirm_bank()
+        return self.statement_id.id
