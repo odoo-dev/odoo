@@ -21,14 +21,15 @@ function write(rpc, env, model) {
 }
 
 function readGroup(rpc, env, model) {
-  return (domain, fields, groupby, options = {}, ctx = {}) => {
+  return async (domain, fields, groupby, options = {}, ctx = {}) => {
     const kwargs = {
       domain,
       groupby,
       fields,
       context: ctx,
     };
-    if (options.lazy) {
+    if ("lazy" in options) {
+      // adapt other tests below?
       kwargs.lazy = options.lazy;
     }
     if (options.offset) {
@@ -40,7 +41,14 @@ function readGroup(rpc, env, model) {
     if (options.limit) {
       kwargs.limit = options.limit;
     }
-    return callModel(rpc, env, model)("web_read_group", [], kwargs);
+    const result = await callModel(rpc, env, model)("web_read_group", [], kwargs);
+    if (result && result.length === 1) {
+      // hum, no result really?
+      // API correction of read_group
+      result.groups[0].__domain = result.groups[0].__domain || [];
+      result.groups[0].__count = result.groups[0].__count || 0;
+    }
+    return result;
   };
 }
 
