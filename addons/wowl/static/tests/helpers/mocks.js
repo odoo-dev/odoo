@@ -5,6 +5,8 @@ import { makePushState, routeToUrl } from "../../src/services/router_service";
 import { SIZES } from "../../src/services/device_service";
 import { makeLocalization } from "../../src/services/localization_service";
 
+const { Component } = owl;
+
 // -----------------------------------------------------------------------------
 // Mock Services
 // -----------------------------------------------------------------------------
@@ -82,7 +84,10 @@ export function makeFakeUserService(values) {
 }*/
 
 function buildMockRPC(mockRPC) {
-  return async (...args) => {
+  return async function (...args) {
+    if (this instanceof Component && this.__owl__.status === 5) {
+      return new Promise(() => {});
+    }
     if (mockRPC) {
       return mockRPC(...args);
     }
