@@ -16,15 +16,15 @@ odoo.define('web_tour.tour_manager_tests', async function (require) {
      * Create a widget and a TourManager instance with a list of given Tour objects.
      * @see TourManager.register() for more details on the Tours registry system.
      * @param {Object} params
-     * @param {boolean} [params.autoConsume]
      * @param {string[]} [params.consumed_tours]
      * @param {boolean} [params.debug]
+     * @param {boolean} [params.disabled]
      * @param {string} params.template inner HTML content of the widget
      * @param {Object[]} params.tours { {string} name, {Object} option, {Object[]} steps }
      */
-    async function createTourManager({ autoConsume, consumed_tours, debug, template, tours }) {
+    async function createTourManager({ consumed_tours, debug, disabled, template, tours }) {
         const parent = await testUtils.createParent({ debug });
-        const tourManager = new TourManager(parent, consumed_tours, autoConsume);
+        const tourManager = new TourManager(parent, consumed_tours, disabled);
         tourManager.running_step_delay = 0;
         for (const { name, options, steps } of tours) {
             tourManager.register(name, options, steps);

@@ -26,7 +26,7 @@ var do_before_unload = utils.do_before_unload;
 var get_jquery_element_from_selector = utils.get_jquery_element_from_selector;
 
 return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
-    init: function(parent, consumed_tours, autoConsume = false) {
+    init: function(parent, consumed_tours, disabled = false) {
         mixins.EventDispatcherMixin.init.call(this);
         this.setParent(parent);
 
@@ -37,7 +37,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         this.consumed_tours = (consumed_tours || []).filter(tourName => {
             return !local_storage.getItem(get_debugging_key(tourName));
         });
-        this.autoConsume = autoConsume;
+        this.disabled = disabled;
         this.running_tour = local_storage.getItem(get_running_key());
         this.running_step_delay = parseInt(local_storage.getItem(get_running_delay_key()), 10) || 0;
         this.edition = (_.last(session.server_version_info) === 'e') ? 'enterprise' : 'community';
@@ -100,7 +100,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             };
         }
         this.tours[tour.name] = tour;
-        if (this.autoConsume) {
+        if (this.disabled) {
             this.consumed_tours.push(tour.name);
         }
     },

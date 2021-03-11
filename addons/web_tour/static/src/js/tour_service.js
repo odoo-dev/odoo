@@ -33,8 +33,8 @@ return session.is_bound.then(function () {
     }
     return Promise.all(defs).then(function (results) {
         var consumed_tours = session.is_frontend ? results[0] : session.web_tours;
-        const autoConsume = session.tour_disable || device.isMobile;
-        var tour_manager = new TourManager(rootWidget, consumed_tours, autoConsume);
+        const disabled = session.tour_disable || device.isMobile;
+        var tour_manager = new TourManager(rootWidget, consumed_tours, disabled);
 
         function _isTrackedNode(node) {
             if (node.classList) {
