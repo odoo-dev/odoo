@@ -334,6 +334,12 @@ var exportVariable = (function (exports) {
         return list;
     }
 
+    function getAdjacents(node, predicat = n => n, includeSelf = true) {
+        const previous = getAdjacentPreviousSiblings(node, predicat);
+        const next = getAdjacentNextSiblings(node, predicat);
+        return includeSelf ? [...previous, node, ...next] : [...previous, ...next];
+    }
+
     //------------------------------------------------------------------------------
     // Cursor management
     //------------------------------------------------------------------------------
@@ -988,6 +994,19 @@ var exportVariable = (function (exports) {
         return node;
     }
 
+    function insertListAfter(afterNode, mode, content = []) {
+        const list = createList(mode);
+        afterNode.after(list);
+        list.append(
+            ...content.map(c => {
+                const li = document.createElement('LI');
+                li.append(...[].concat(c));
+                return li;
+            }),
+        );
+        return list;
+    }
+
     function toggleClass(node, className) {
         node.classList.toggle(className);
         if (!node.className) {
@@ -1190,11 +1209,6 @@ var exportVariable = (function (exports) {
     ) {
         if (selfClosingElementTags.includes(destinationEl.nodeName)) {
             throw new Error(`moveNodes: Invalid destination element ${destinationEl.nodeName}`);
-        }
-        // For table elements, there just cannot be a meaningful move, add them
-        // after the table.
-        if (['TBODY', 'THEAD', 'TFOOT', 'TR', 'TH', 'TD'].includes(destinationEl.tagName)) {
-            [destinationEl, destinationOffset] = rightPos(destinationEl);
         }
 
         const nodes = [];
@@ -2096,43 +2110,25 @@ var exportVariable = (function (exports) {
         if (inLI) {
             return inLI.oToggleList(0, mode);
         }
-
-        let main = createList(mode);
-        let li = document.createElement('LI');
-        main.append(li);
         const restoreCursor = preserveCursor(this.ownerDocument);
-
         // if `this` is the root editable
         if (this.oid === 1) {
             const callingNode = this.childNodes[offset];
-            const group = [
-                ...getAdjacentPreviousSiblings(callingNode, n => !isBlock(n)),
-                callingNode,
-                ...getAdjacentNextSiblings(callingNode, n => !isBlock(n)),
-            ];
-            callingNode.after(main);
-            li.append(...group);
+            const group = getAdjacents(callingNode, n => !isBlock(n));
+            insertListAfter(callingNode, mode, [group]);
             restoreCursor();
         } else {
-            this.after(main);
-            li.append(this);
-            restoreCursor(new Map([[this, li]]));
+            const list = insertListAfter(this, mode, [this]);
+            restoreCursor(new Map([[this, list.firstElementChild]]));
         }
     };
 
     HTMLParagraphElement.prototype.oToggleList = function (offset, mode = 'UL') {
-        let main = createList(mode);
-        let li = document.createElement('LI');
-        main.append(li);
-
         const restoreCursor = preserveCursor(this.ownerDocument);
-        while (this.firstChild) {
-            li.append(this.firstChild);
-        }
-        this.after(main);
+        const list = insertListAfter(this, mode, [[...this.childNodes]]);
         this.remove();
 
-        restoreCursor(new Map([[this, li]]));
+        restoreCursor(new Map([[this, list.firstChild]]));
         return true;
     };
 
@@ -2168,6 +2164,14 @@ var exportVariable = (function (exports) {
         }
         restoreCursor();
         return false;
+    };
+
+    HTMLTableCellElement.prototype.oToggleList = function (offset, mode) {
+        const restoreCursor = preserveCursor(this.ownerDocument);
+        const callingNode = this.childNodes[offset];
+        const group = getAdjacents(callingNode, n => !isBlock(n));
+        insertListAfter(callingNode, mode, [group]);
+        restoreCursor();
     };
 
     Text.prototype.oAlign = function (offset, mode) {
@@ -2753,8 +2757,8 @@ var exportVariable = (function (exports) {
         historyStep(skipRollback = false) {
             this.observerFlush();
             // check that not two unBreakables modified
-            if (this.torollback && !skipRollback) {
-                this.historyRollback();
+            if (this.torollback) {
+                if (!skipRollback) this.historyRollback();
                 this.torollback = false;
             }
 
@@ -3129,7 +3133,12 @@ var exportVariable = (function (exports) {
                 joinWith.textContent = oldText.replace(/ $/, '\u00A0');
             }
             // Rejoin blocks that extractContents may have split in two.
-            while (doJoin && next && !(next.previousSibling && next.previousSibling === joinWith)) {
+            while (
+                doJoin &&
+                next &&
+                !(next.previousSibling && next.previousSibling === joinWith) &&
+                this.dom.contains(next)
+            ) {
                 const restore = preserveCursor(this.document);
                 this.observerFlush();
                 const res = this._protect(() => {
@@ -3928,7 +3937,14 @@ var exportVariable = (function (exports) {
                 }
             } else if (ev.keyCode === 9) {
                 // Tab
-                if (this._applyCommand('indentList', ev.shiftKey ? 'outdent' : 'indent')) {
+                const sel = this.document.getSelection();
+                const closestTag = (closestElement(sel.anchorNode, 'li, table') || {}).tagName;
+
+                if (closestTag === 'LI') {
+                    this._applyCommand('indentList', ev.shiftKey ? 'outdent' : 'indent');
+                    ev.preventDefault();
+                } else if (closestTag === 'TABLE') {
+                    this._onTabulationInTable(ev);
                     ev.preventDefault();
                 }
             } else if (isUndo(ev)) {
@@ -4284,6 +4300,24 @@ var exportVariable = (function (exports) {
             table.remove();
             setCursor(p, 0);
         }
+        _onTabulationInTable(ev) {
+            const sel = this.document.getSelection();
+            const closestTable = closestElement(sel.anchorNode, 'table');
+            if (!closestTable) {
+                return;
+            }
+            const closestTd = closestElement(sel.anchorNode, 'td');
+            const tds = [...closestTable.querySelectorAll('td')];
+            const direction = ev.shiftKey ? DIRECTIONS.LEFT : DIRECTIONS.RIGHT;
+            const cursorDestination =
+                tds[tds.findIndex(td => closestTd === td) + (direction === DIRECTIONS.LEFT ? -1 : 1)];
+            if (cursorDestination) {
+                setCursor(...startPos(cursorDestination), ...endPos(cursorDestination), true);
+            } else if (direction === DIRECTIONS.RIGHT) {
+                this._addRowBelow();
+                this._onTabulationInTable(ev);
+            }
+        }
 
         /**
          * Fix the current selection range in case the range start or end inside a fontAwesome node
@@ -4370,6 +4404,7 @@ var exportVariable = (function (exports) {
     exports.firstChild = firstChild;
     exports.getAdjacentNextSiblings = getAdjacentNextSiblings;
     exports.getAdjacentPreviousSiblings = getAdjacentPreviousSiblings;
+    exports.getAdjacents = getAdjacents;
     exports.getCursorDirection = getCursorDirection;
     exports.getCursors = getCursors;
     exports.getDeepRange = getDeepRange;
@@ -4381,6 +4416,7 @@ var exportVariable = (function (exports) {
     exports.getSelectedNodes = getSelectedNodes;
     exports.getState = getState;
     exports.getTraversedNodes = getTraversedNodes;
+    exports.insertListAfter = insertListAfter;
     exports.insertText = insertText;
     exports.isBlock = isBlock;
     exports.isContentTextNode = isContentTextNode;
