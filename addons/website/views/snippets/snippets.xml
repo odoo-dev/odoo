@@ -1058,7 +1058,7 @@
         </we-button-group>
     </div>
 
-    <div data-js="ConditionalVisibility" data-option-name="conditionalVisibility" data-selector="section">
+    <div data-js="ConditionalVisibility" data-option-name="conditionalVisibility" data-selector="section, .btn">
         <we-select string="Visibility" data-attribute-name="visibility" data-no-preview="true">
             <we-button data-select-data-attribute="hidden">Hidden</we-button>
             <we-button data-select-data-attribute="">Always visible</we-button>

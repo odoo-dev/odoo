@@ -2626,7 +2626,7 @@ options.registry.ConditionalVisibility = options.Class.extend({
                 this.$target[0].dataset[params.attributeName + 'Id'] = recordData.id;
                 return this._super(...arguments);
             }
-        } else if (params.attributeName !== 'visbility') {
+        } else if (params.attributeName !== 'visibility') {
             delete this.$target[0].dataset[params.attributeName];
             delete this.$target[0].dataset[params.attributeName + 'Id'];
         } else {
@@ -2646,7 +2646,7 @@ options.registry.ConditionalVisibility = options.Class.extend({
     cleanForSave: async function () {
         this.$target[0].style = this.$target[0].previousStyle; // restoring the previous style if any
         delete this.$target[0].dataset["invisible"]; // we do not need to store "invisible as it is not determine by javascript";
-        for (let attr of this.$target[0].attributes) {
+        for (const attr of this.$target[0].attributes) {
             if (attr.name.startsWith('data-visibility-') && !attr.name.endsWith('-id')) {
                 const shortName = attr.name.replace('data-visibility-', '');
                 if (shortName === 'lang') {
