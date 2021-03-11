@@ -135,7 +135,7 @@ var exportVariable = (function (exports) {
         true,
     );
 
-    function findNode(domPath, findCallback = node => true, stopCallback = node => false) {
+    function findNode(domPath, findCallback = () => true, stopCallback = () => false) {
         for (const node of domPath) {
             if (findCallback(node)) {
                 return node;
@@ -332,6 +332,12 @@ var exportVariable = (function (exports) {
             next = next.nextSibling;
         }
         return list;
+    }
+
+    function getAdjacents(node, predicat = n => n, includeSelf = true) {
+        const previous = getAdjacentPreviousSiblings(node, predicat);
+        const next = getAdjacentNextSiblings(node, predicat);
+        return includeSelf ? [...previous, node, ...next] : [...previous, ...next];
     }
 
     //------------------------------------------------------------------------------
@@ -988,6 +994,19 @@ var exportVariable = (function (exports) {
         return node;
     }
 
+    function insertListAfter(afterNode, mode, content = []) {
+        const list = createList(mode);
+        afterNode.after(list);
+        list.append(
+            ...content.map(c => {
+                const li = document.createElement('LI');
+                li.append(...[].concat(c));
+                return li;
+            }),
+        );
+        return list;
+    }
+
     function toggleClass(node, className) {
         node.classList.toggle(className);
         if (!node.className) {
@@ -1191,11 +1210,6 @@ var exportVariable = (function (exports) {
         if (selfClosingElementTags.includes(destinationEl.nodeName)) {
             throw new Error(`moveNodes: Invalid destination element ${destinationEl.nodeName}`);
         }
-        // For table elements, there just cannot be a meaningful move, add them
-        // after the table.
-        if (['TBODY', 'THEAD', 'TFOOT', 'TR', 'TH', 'TD'].includes(destinationEl.tagName)) {
-            [destinationEl, destinationOffset] = rightPos(destinationEl);
-        }
 
         const nodes = [];
         for (let i = startIndex; i < endIndex; i++) {
@@ -1255,11 +1269,12 @@ var exportVariable = (function (exports) {
      *     that case, the positions should be given in the document node order.
      * @returns {function}
      */
-    function prepareUpdate(el, offset, ...args) {
-        const positions = [...arguments];
+    function prepareUpdate(...args) {
+        const positions = [...args];
 
         // Check the state in each direction starting from each position.
         const restoreData = [];
+        let el, offset;
         while (positions.length) {
             // Note: important to get the positions in reverse order to restore
             // right side before left side.
@@ -1929,7 +1944,7 @@ var exportVariable = (function (exports) {
     /**
      * Specific behavior for list items: deletion and unindentation in some cases.
      */
-    HTMLLIElement.prototype.oEnter = function (offset, firstSplit = true) {
+    HTMLLIElement.prototype.oEnter = function () {
         // If not last list item or not empty last item, regular block split
         if (this.nextElementSibling || this.textContent) {
             const node = HTMLElement.prototype.oEnter.call(this, ...arguments);
@@ -1943,7 +1958,7 @@ var exportVariable = (function (exports) {
     /**
      * Specific behavior for pre: insert newline (\n) in text or insert p at end.
      */
-    HTMLPreElement.prototype.oEnter = function (offset, firstSplit = true) {
+    HTMLPreElement.prototype.oEnter = function (offset) {
         if (offset < this.childNodes.length) {
             const lineBreak = document.createElement('br');
             this.insertBefore(lineBreak, this.childNodes[offset]);
@@ -1986,7 +2001,7 @@ var exportVariable = (function (exports) {
         }
     };
 
-    Text.prototype.oShiftTab = function (offset) {
+    Text.prototype.oShiftTab = function () {
         return this.parentElement.oShiftTab(0);
     };
 
@@ -1998,7 +2013,7 @@ var exportVariable = (function (exports) {
     };
 
     // returns: is still in a <LI> nested list
-    HTMLLIElement.prototype.oShiftTab = function (offset) {
+    HTMLLIElement.prototype.oShiftTab = function () {
         const li = this;
         if (li.nextElementSibling) {
             const ul = li.parentElement.cloneNode(false);
@@ -2055,7 +2070,7 @@ var exportVariable = (function (exports) {
         return false;
     };
 
-    Text.prototype.oTab = function (offset) {
+    Text.prototype.oTab = function () {
         return this.parentElement.oTab(0);
     };
 
@@ -2066,7 +2081,7 @@ var exportVariable = (function (exports) {
         return false;
     };
 
-    HTMLLIElement.prototype.oTab = function (offset) {
+    HTMLLIElement.prototype.oTab = function () {
         const lip = document.createElement('li');
         const destul =
             (this.previousElementSibling && this.previousElementSibling.querySelector('ol, ul')) ||
@@ -2096,43 +2111,25 @@ var exportVariable = (function (exports) {
         if (inLI) {
             return inLI.oToggleList(0, mode);
         }
-
-        const main = createList(mode);
-        const li = document.createElement('LI');
-        main.append(li);
         const restoreCursor = preserveCursor(this.ownerDocument);
-
         // if `this` is the root editable
         if (this.oid === 1) {
             const callingNode = this.childNodes[offset];
-            const group = [
-                ...getAdjacentPreviousSiblings(callingNode, n => !isBlock(n)),
-                callingNode,
-                ...getAdjacentNextSiblings(callingNode, n => !isBlock(n)),
-            ];
-            callingNode.after(main);
-            li.append(...group);
+            const group = getAdjacents(callingNode, n => !isBlock(n));
+            insertListAfter(callingNode, mode, [group]);
             restoreCursor();
         } else {
-            this.after(main);
-            li.append(this);
-            restoreCursor(new Map([[this, li]]));
+            const list = insertListAfter(this, mode, [this]);
+            restoreCursor(new Map([[this, list.firstElementChild]]));
         }
     };
 
     HTMLParagraphElement.prototype.oToggleList = function (offset, mode = 'UL') {
-        const main = createList(mode);
-        const li = document.createElement('LI');
-        main.append(li);
-
         const restoreCursor = preserveCursor(this.ownerDocument);
-        while (this.firstChild) {
-            li.append(this.firstChild);
-        }
-        this.after(main);
+        const list = insertListAfter(this, mode, [[...this.childNodes]]);
         this.remove();
 
-        restoreCursor(new Map([[this, li]]));
+        restoreCursor(new Map([[this, list.firstChild]]));
         return true;
     };
 
@@ -2140,34 +2137,39 @@ var exportVariable = (function (exports) {
         const pnode = this.closest('ul, ol');
         if (!pnode) return;
         const restoreCursor = preserveCursor(this.ownerDocument);
-        switch (getListMode(pnode) + mode) {
-            case 'OLCL':
-            case 'ULCL':
-                pnode.classList.add('o_checklist');
-                for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
-                    if (li.style.listStyle != 'none') {
-                        li.style.listStyle = null;
-                        if (!li.style.all) li.removeAttribute('style');
-                    }
+        const listMode = getListMode(pnode) + mode;
+        if (['OLCL', 'ULCL'].includes(listMode)) {
+            pnode.classList.add('o_checklist');
+            for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
+                if (li.style.listStyle != 'none') {
+                    li.style.listStyle = null;
+                    if (!li.style.all) li.removeAttribute('style');
                 }
-                setTagName(pnode, 'UL');
-                break;
-            case 'CLOL':
-            case 'CLUL':
-                toggleClass(pnode, 'o_checklist');
-            case 'OLUL':
-            case 'ULOL':
-                setTagName(pnode, mode);
-                break;
-            default:
-                // toggle => remove list
-                let node = this;
-                while (node) {
-                    node = node.oShiftTab(offset);
-                }
+            }
+            setTagName(pnode, 'UL');
+        } else if (['CLOL', 'CLUL'].includes(listMode)) {
+            toggleClass(pnode, 'o_checklist');
+            setTagName(pnode, mode);
+        } else if (['OLUL', 'ULOL'].includes(listMode)) {
+            setTagName(pnode, mode);
+        } else {
+            // toggle => remove list
+            let node = this;
+            while (node) {
+                node = node.oShiftTab(offset);
+            }
         }
+
         restoreCursor();
         return false;
+    };
+
+    HTMLTableCellElement.prototype.oToggleList = function (offset, mode) {
+        const restoreCursor = preserveCursor(this.ownerDocument);
+        const callingNode = this.childNodes[offset];
+        const group = getAdjacents(callingNode, n => !isBlock(n));
+        insertListAfter(callingNode, mode, [group]);
+        restoreCursor();
     };
 
     Text.prototype.oAlign = function (offset, mode) {
@@ -2368,11 +2370,22 @@ var exportVariable = (function (exports) {
 
     const isUndo = ev => ev.key === 'z' && (ev.ctrlKey || ev.metaKey);
     const isRedo = ev => ev.key === 'y' && (ev.ctrlKey || ev.metaKey);
+
+    function defaultOptions(defaultObject, object) {
+        const newObject = Object.assign({}, defaultObject, object);
+        for (const [key, value] of Object.entries(object)) {
+            if (typeof value === 'undefined') {
+                newObject[key] = defaultObject[key];
+            }
+        }
+        return newObject;
+    }
+
     class OdooEditor extends EventTarget {
         constructor(editable, options = {}) {
             super();
 
-            this.options = Object.assign(
+            this.options = defaultOptions(
                 {
                     controlHistoryFromDocument: false,
                     toSanitize: true,
@@ -2411,7 +2424,8 @@ var exportVariable = (function (exports) {
             this._isCollaborativeActive = false;
             this._collaborativeLastSynchronisedId = null;
 
-            this._torollback = false;
+            // Track if we need to rollback mutations in case unbreakable or unremovable are being added or removed.
+            this._toRollback = false;
 
             // -------------------
             // Alter the editable
@@ -2445,7 +2459,7 @@ var exportVariable = (function (exports) {
 
             this.addDomListener(this.document, 'selectionchange', this._onSelectionChange);
             this.addDomListener(this.document, 'keydown', this._onDocumentKeydown);
-            this.addDomListener(this.document, 'keyup', this._onDocumentKeydown);
+            this.addDomListener(this.document, 'keyup', this._onDocumentKeyup);
 
             // -------
             // Toolbar
@@ -2519,39 +2533,39 @@ var exportVariable = (function (exports) {
         }
 
         // Assign IDs to src, and dest if defined
-        idSet(src, testunbreak = false) {
-            if (!src.oid) {
-                src.oid = (Math.random() * 2 ** 31) | 0; // TODO: uuid4 or higher number
+        idSet(node, testunbreak = false) {
+            if (!node.oid) {
+                node.oid = (Math.random() * 2 ** 31) | 0; // TODO: uuid4 or higher number
             }
-            // Rollback if src.ouid changed. This ensures that nodes never change
+            // Rollback if node.ouid changed. This ensures that nodes never change
             // unbreakable ancestors.
-            src.ouid = src.ouid || getOuid(src, true);
+            node.ouid = node.ouid || getOuid(node, true);
             if (testunbreak) {
-                const ouid = getOuid(src);
-                if (!this._torollback && ouid && ouid !== src.ouid) {
-                    this._torollback = UNBREAKABLE_ROLLBACK_CODE;
+                const ouid = getOuid(node);
+                if (!this._toRollback && ouid && ouid !== node.ouid) {
+                    this._toRollback = UNBREAKABLE_ROLLBACK_CODE;
                 }
             }
 
-            let childsrc = src.firstChild;
-            while (childsrc) {
-                this.idSet(childsrc, testunbreak);
-                childsrc = childsrc.nextSibling;
+            let childNode = node.firstChild;
+            while (childNode) {
+                this.idSet(childNode, testunbreak);
+                childNode = childNode.nextSibling;
             }
         }
 
         // TODO: improve to avoid traversing the whole DOM just to find a node of an ID
-        idFind(dom, id, parentid) {
-            if (dom.oid === id && (!parentid || dom.parentNode.oid === parentid)) {
-                return dom;
+        idFind(node, id, parentId) {
+            if (node.oid === id && (!parentId || node.parentNode.oid === parentId)) {
+                return node;
             }
-            let cur = dom.firstChild;
-            while (cur) {
-                const result = this.idFind(cur, id, parentid);
+            let childNode = node.firstChild;
+            while (childNode) {
+                const result = this.idFind(childNode, id, parentId);
                 if (result) {
                     return result;
                 }
-                cur = cur.nextSibling;
+                childNode = childNode.nextSibling;
             }
         }
 
@@ -2630,31 +2644,31 @@ var exportVariable = (function (exports) {
                     }
                     case 'childList': {
                         record.addedNodes.forEach(added => {
-                            this._torollback =
-                                this._torollback ||
+                            this._toRollback =
+                                this._toRollback ||
                                 (containsUnremovable(added) && UNREMOVABLE_ROLLBACK_CODE);
-                            const action = {
+                            const mutation = {
                                 'type': 'add',
                             };
                             if (!record.nextSibling && record.target.oid) {
-                                action.append = record.target.oid;
+                                mutation.append = record.target.oid;
                             } else if (record.nextSibling.oid) {
-                                action.before = record.nextSibling.oid;
+                                mutation.before = record.nextSibling.oid;
                             } else if (!record.previousSibling && record.target.oid) {
-                                action.prepend = record.target.oid;
+                                mutation.prepend = record.target.oid;
                             } else if (record.previousSibling.oid) {
-                                action.after = record.previousSibling.oid;
+                                mutation.after = record.previousSibling.oid;
                             } else {
                                 return false;
                             }
                             this.idSet(added, this._checkStepUnbreakable);
-                            action.id = added.oid;
-                            action.node = this.serialize(added);
-                            this._historySteps[this._historySteps.length - 1].mutations.push(action);
+                            mutation.id = added.oid;
+                            mutation.node = this.serialize(added);
+                            this._historySteps[this._historySteps.length - 1].mutations.push(mutation);
                         });
-                        record.removedNodes.forEach((removed, index) => {
-                            if (!this._torollback && containsUnremovable(removed)) {
-                                this._torollback = UNREMOVABLE_ROLLBACK_CODE;
+                        record.removedNodes.forEach(removed => {
+                            if (!this._toRollback && containsUnremovable(removed)) {
+                                this._toRollback = UNREMOVABLE_ROLLBACK_CODE;
                             }
                             this._historySteps[this._historySteps.length - 1].mutations.push({
                                 'type': 'remove',
@@ -2714,7 +2728,7 @@ var exportVariable = (function (exports) {
                     id: undefined,
                 },
             ];
-            this._undos = new Map();
+            this._historyStepsState = new Map();
         }
         //
         // History
@@ -2724,9 +2738,9 @@ var exportVariable = (function (exports) {
         historyStep(skipRollback = false) {
             this.observerFlush();
             // check that not two unBreakables modified
-            if (this._torollback && !skipRollback) {
-                this.historyRollback();
-                this._torollback = false;
+            if (this._toRollback) {
+                if (!skipRollback) this.historyRollback();
+                this._toRollback = false;
             }
 
             // push history
@@ -2819,7 +2833,7 @@ var exportVariable = (function (exports) {
                         index--;
                     }
 
-                    for (const residx = 0; residx < result.length; residx++) {
+                    for (let residx = 0; residx < result.length; residx++) {
                         const record = result[residx];
                         this._collaborativeLastSynchronisedId = record.id;
                         if (
@@ -2855,7 +2869,7 @@ var exportVariable = (function (exports) {
                     this.observerActive();
                     this.historyFetch();
                 })
-                .catch(err => {
+                .catch(() => {
                     // TODO: change that. currently: if error on fetch, fault back to non collaborative mode.
                     this._isCollaborativeActive = false;
                 });
@@ -2877,18 +2891,18 @@ var exportVariable = (function (exports) {
         }
 
         historyRollback(until = 0) {
-            const hist = this._historySteps[this._historySteps.length - 1];
+            const step = this._historySteps[this._historySteps.length - 1];
             this.observerFlush();
-            this.historyRevert(hist, until);
+            this.historyRevert(step, until);
             this.observerFlush();
-            hist.mutations = hist.mutations.slice(0, until);
-            this._torollback = false;
+            step.mutations = step.mutations.slice(0, until);
+            this._toRollback = false;
         }
 
         /**
          * Undo a step of the history.
          *
-         * this.undos is a map from it's location (index) in this.history to a state.
+         * this._historyStepsState is a map from it's location (index) in this.history to a state.
          * The state can be on of:
          * undefined: the position has never been undo or redo.
          * 0: The position is considered as a redo of another.
@@ -2901,10 +2915,10 @@ var exportVariable = (function (exports) {
             const pos = this._getNextUndoIndex();
             if (pos >= 0) {
                 // Consider the position consumed.
-                this._undos.set(pos, 2);
+                this._historyStepsState.set(pos, 2);
                 this.historyRevert(this._historySteps[pos]);
                 // Consider the last position of the history as an undo.
-                this._undos.set(this._historySteps.length - 1, 1);
+                this._historyStepsState.set(this._historySteps.length - 1, 1);
                 this.historyStep(true);
                 this.dispatchEvent(new Event('historyUndo'));
             }
@@ -2918,9 +2932,9 @@ var exportVariable = (function (exports) {
         historyRedo() {
             const pos = this._getNextRedoIndex();
             if (pos >= 0) {
-                this._undos.set(pos, 2);
+                this._historyStepsState.set(pos, 2);
                 this.historyRevert(this._historySteps[pos]);
-                this._undos.set(this._historySteps.length - 1, 0);
+                this._historyStepsState.set(this._historySteps.length - 1, 0);
                 this.historySetCursor(this._historySteps[pos]);
                 this.historyStep(true);
                 this.dispatchEvent(new Event('historyRedo'));
@@ -2942,37 +2956,40 @@ var exportVariable = (function (exports) {
         historyRevert(step, until = 0) {
             // apply dom changes by reverting history steps
             for (let i = step.mutations.length - 1; i >= until; i--) {
-                const action = step.mutations[i];
-                if (!action) {
+                const mutation = step.mutations[i];
+                if (!mutation) {
                     break;
                 }
-                switch (action.type) {
+                switch (mutation.type) {
                     case 'characterData': {
-                        this.idFind(this.editable, action.id).textContent = action.oldValue;
+                        this.idFind(this.editable, mutation.id).textContent = mutation.oldValue;
                         break;
                     }
                     case 'attributes': {
-                        this.idFind(this.editable, action.id).setAttribute(
-                            action.attributeName,
-                            action.oldValue,
+                        this.idFind(this.editable, mutation.id).setAttribute(
+                            mutation.attributeName,
+                            mutation.oldValue,
                         );
                         break;
                     }
                     case 'remove': {
-                        const node = this.unserialize(action.node);
-                        if (action.nextId && this.idFind(this.editable, action.nextId)) {
-                            this.idFind(this.editable, action.nextId).before(node);
-                        } else if (action.previousId && this.idFind(this.editable, action.previousId)) {
-                            this.idFind(this.editable, action.previousId).after(node);
+                        const node = this.unserialize(mutation.node);
+                        if (mutation.nextId && this.idFind(this.editable, mutation.nextId)) {
+                            this.idFind(this.editable, mutation.nextId).before(node);
+                        } else if (
+                            mutation.previousId &&
+                            this.idFind(this.editable, mutation.previousId)
+                        ) {
+                            this.idFind(this.editable, mutation.previousId).after(node);
                         } else {
-                            this.idFind(this.editable, action.parentId).append(node);
+                            this.idFind(this.editable, mutation.parentId).append(node);
                         }
                         break;
                     }
                     case 'add': {
-                        const el = this.idFind(this.editable, action.id);
-                        if (el) {
-                            el.remove();
+                        const node = this.idFind(this.editable, mutation.id);
+                        if (node) {
+                            node.remove();
                         }
                     }
                 }
@@ -3001,8 +3018,8 @@ var exportVariable = (function (exports) {
             }
         }
         unbreakableStepUnactive() {
-            this._torollback =
-                this._torollback === UNBREAKABLE_ROLLBACK_CODE ? false : this._torollback;
+            this._toRollback =
+                this._toRollback === UNBREAKABLE_ROLLBACK_CODE ? false : this._toRollback;
             this._checkStepUnbreakable = false;
         }
 
@@ -3020,9 +3037,9 @@ var exportVariable = (function (exports) {
          * @param {string} method
          * @returns {?}
          */
-        execCommand(method) {
+        execCommand(...args) {
             this._computeHistoryCursor();
-            return this._applyCommand(...arguments);
+            return this._applyCommand(...args);
         }
 
         //--------------------------------------------------------------------------
@@ -3080,7 +3097,7 @@ var exportVariable = (function (exports) {
                 td.textContent = '';
             });
             this.observerFlush();
-            this._torollback = false; // Errors caught with observerFlush were already handled.
+            this._toRollback = false; // Errors caught with observerFlush were already handled.
             // If the end container was fully selected, extractContents may have
             // emptied it without removing it. Ensure it's gone.
             while (
@@ -3117,7 +3134,7 @@ var exportVariable = (function (exports) {
                 const res = this._protect(() => {
                     next.oDeleteBackward();
                     if (!this.editable.contains(joinWith)) {
-                        this._torollback = UNREMOVABLE_ROLLBACK_CODE; // tried to delete too far -> roll it back.
+                        this._toRollback = UNREMOVABLE_ROLLBACK_CODE; // tried to delete too far -> roll it back.
                     } else {
                         next = firstChild(next);
                     }
@@ -3139,11 +3156,11 @@ var exportVariable = (function (exports) {
          *
          * @param {string} color hexadecimal or bg-name/text-name class
          * @param {string} mode 'color' or 'backgroundColor'
-         * @param {Node} [target]
+         * @param {Element} [element]
          */
-        applyColor(color, mode, target) {
-            if (target) {
-                this._colorElement(target, color, mode);
+        applyColor(color, mode, element) {
+            if (element) {
+                this._colorElement(element, color, mode);
                 return;
             }
             const range = getDeepRange(this.editable, { splitText: true, select: true });
@@ -3275,7 +3292,7 @@ var exportVariable = (function (exports) {
          * Applies a css or class color (fore- or background-) to an element.
          * Replace the color that was already there if any.
          *
-         * @param {Node} element
+         * @param {Element} element
          * @param {string} color hexadecimal or bg-name/text-name class
          * @param {string} mode 'color' or 'backgroundColor'
          */
@@ -3296,7 +3313,7 @@ var exportVariable = (function (exports) {
          * Returns true if the given element has a visible color (fore- or
          * -background depending on the given mode).
          *
-         * @param {Node} element
+         * @param {Element} element
          * @param {string} mode 'color' or 'backgroundColor'
          * @returns {boolean}
          */
@@ -3330,7 +3347,7 @@ var exportVariable = (function (exports) {
             }
         }
 
-        _unlink(offset, content) {
+        _unlink() {
             const sel = this.document.defaultView.getSelection();
             // we need to remove the contentEditable isolation of links
             // before we apply the unlink, otherwise the command is not performed
@@ -3569,9 +3586,9 @@ var exportVariable = (function (exports) {
          * @param {string} method
          * @returns {?}
          */
-        _applyCommand(method) {
+        _applyCommand(...args) {
             this._recordHistoryCursor(true);
-            const result = this._protect(() => this._applyRawCommand(...arguments));
+            const result = this._protect(() => this._applyRawCommand(...args));
             this.sanitize();
             this.historyStep();
             return result;
@@ -3586,8 +3603,8 @@ var exportVariable = (function (exports) {
             try {
                 const result = callback.call(this);
                 this.observerFlush();
-                if (this._torollback) {
-                    const torollbackCode = this._torollback;
+                if (this._toRollback) {
+                    const torollbackCode = this._toRollback;
                     this.historyRollback(rollbackCounter);
                     return torollbackCode; // UNBREAKABLE_ROLLBACK_CODE || UNREMOVABLE_ROLLBACK_CODE
                 } else {
@@ -3606,6 +3623,7 @@ var exportVariable = (function (exports) {
         _activateContenteditable() {
             this.editable.setAttribute('contenteditable', this.options.isRootEditable);
 
+            debugger;
             for (const node of this.options.getContentEditableAreas()) {
                 if (!node.isContentEditable) {
                     node.setAttribute('contenteditable', true);
@@ -3659,7 +3677,7 @@ var exportVariable = (function (exports) {
         _getNextUndoIndex() {
             let index = this._historySteps.length - 2;
             // go back to first step that can be undoed (0 or undefined)
-            while (this._undos.get(index)) {
+            while (this._historyStepsState.get(index)) {
                 index--;
             }
             return index;
@@ -3673,12 +3691,12 @@ var exportVariable = (function (exports) {
             // We cannot redo more than what is consumed.
             // Check if we have no more 2 than 0 until we get to a 1
             let totalConsumed = 0;
-            while (this._undos.has(pos) && this._undos.get(pos) !== 1) {
-                // here this.undos.get(pos) can only be 2 (consumed) or 0 (undoed).
-                totalConsumed += this._undos.get(pos) === 2 ? 1 : -1;
+            while (this._historyStepsState.has(pos) && this._historyStepsState.get(pos) !== 1) {
+                // here ._historyStepsState.get(pos) can only be 2 (consumed) or 0 (undoed).
+                totalConsumed += this._historyStepsState.get(pos) === 2 ? 1 : -1;
                 pos--;
             }
-            const canRedo = this._undos.get(pos) === 1 && totalConsumed <= 0;
+            const canRedo = this._historyStepsState.get(pos) === 1 && totalConsumed <= 0;
             return canRedo ? pos : -1;
         }
 
@@ -3892,13 +3910,13 @@ var exportVariable = (function (exports) {
                     this.deleteRange(selection);
                 }
             }
-            if (ev.keyCode === 13) {
+            if (ev.key === 'Enter') {
                 // Enter
                 ev.preventDefault();
                 if (ev.shiftKey || this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
                     this._applyCommand('oShiftEnter');
                 }
-            } else if (ev.keyCode === 8 && !ev.ctrlKey && !ev.metaKey) {
+            } else if (ev.key === 'Backspace' && !ev.ctrlKey && !ev.metaKey) {
                 // backspace
                 // We need to hijack it because firefox doesn't trigger a
                 // deleteBackward input event with a collapsed cursor in front of a
@@ -3908,7 +3926,7 @@ var exportVariable = (function (exports) {
                     ev.preventDefault();
                     this._applyCommand('oDeleteBackward');
                 }
-            } else if (ev.keyCode === 9) {
+            } else if (ev.key === 'Tab') {
                 // Tab
                 const sel = this.document.getSelection();
                 const closestTag = (closestElement(sel.anchorNode, 'li, table') || {}).tagName;
@@ -4433,6 +4451,7 @@ var exportVariable = (function (exports) {
     exports.firstChild = firstChild;
     exports.getAdjacentNextSiblings = getAdjacentNextSiblings;
     exports.getAdjacentPreviousSiblings = getAdjacentPreviousSiblings;
+    exports.getAdjacents = getAdjacents;
     exports.getCursorDirection = getCursorDirection;
     exports.getCursors = getCursors;
     exports.getDeepRange = getDeepRange;
@@ -4444,6 +4463,7 @@ var exportVariable = (function (exports) {
     exports.getSelectedNodes = getSelectedNodes;
     exports.getState = getState;
     exports.getTraversedNodes = getTraversedNodes;
+    exports.insertListAfter = insertListAfter;
     exports.insertText = insertText;
     exports.isBlock = isBlock;
     exports.isContentTextNode = isContentTextNode;
