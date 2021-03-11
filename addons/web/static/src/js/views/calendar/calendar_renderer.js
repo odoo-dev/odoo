@@ -484,10 +484,25 @@ return AbstractRenderer.extend({
                             .find('.o_selected_range')
                             .removeClass('o_color o_selected_range');
         var $a;
+        const Element = this.el.querySelector('.ui-state-active');
         switch (this.state.scale) {
-            case 'month': $a = this.$small_calendar.find('td a'); break;
-            case 'week': $a = this.$small_calendar.find('tr:has(.ui-state-active) a'); break;
+            case 'month': $a = this.$small_calendar.find('td a');
+                        // debugger
+                        if (Element) {
+                            removeClass();
+                        }
+                        break;
+            case 'week': $a = this.$small_calendar.find('tr:has(.ui-state-active) a');
+                        // debugger
+                        if (Element) {
+                            removeClass();
+                        }
+                        break;
             case 'day': $a = this.$small_calendar.find('a.ui-state-active'); break;
+        }
+
+        function removeClass() {
+            Element.classList.remove('ui-state-active');
         }
         $a.addClass('o_selected_range');
         setTimeout(function () {

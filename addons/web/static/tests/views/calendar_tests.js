@@ -4,6 +4,7 @@ odoo.define('web.calendar_tests', function (require) {
 var AbstractStorageService = require('web.AbstractStorageService');
 var CalendarView = require('web.CalendarView');
 var CalendarRenderer = require('web.CalendarRenderer');
+var concurrency = require('web.concurrency');
 var Dialog = require('web.Dialog');
 var fieldUtils = require('web.field_utils');
 var mixins = require('web.mixins');
@@ -130,7 +131,7 @@ QUnit.module('Views', {
     };
 
     QUnit.test('simple calendar rendering', function (assert) {
-        assert.expect(24);
+        assert.expect(23);
         var done = assert.async();
 
         this.data.event.records.push({
@@ -173,8 +174,6 @@ QUnit.module('Views', {
 
             var $sidebar = calendar.$('.o_calendar_sidebar');
 
-            assert.strictEqual($sidebar.find('.ui-state-active').text(), "12", "should highlight the target day");
-
             // test view scales
 
             assert.strictEqual(calendar.$('.fc-event').length, 9, "should display 9 events on the week (4 event + 5 days event)");
@@ -183,6 +182,7 @@ QUnit.module('Views', {
             calendar.$buttons.find('.o_calendar_button_day').trigger('click'); // display only one day
             assert.strictEqual(calendar.$('.fc-event').length, 2, "should display 2 events on the day");
             assert.strictEqual($sidebar.find('.o_selected_range').length, 1, "should highlight the target day in mini calendar");
+
 
             calendar.$buttons.find('.o_calendar_button_month').trigger('click'); // display all the month
             assert.strictEqual(calendar.$('.fc-event').length, 7, "should display 7 events on the month (5 events + 2 week event - 1 'event 6' is filtered + 1 'Undefined event')");
@@ -227,6 +227,74 @@ QUnit.module('Views', {
             done();
         });
     });
+
+    // QUnit.test('check focus in mini calendar', function (assert) {
+    //     assert.expect(1);
+
+    //     var calendar = createView({
+    //         View: CalendarView,
+    //         model: 'event',
+    //         data: this.data,
+    //         arch:
+    //         '<calendar class="o_calendar_test" '+
+    //             'event_open_popup="true" '+
+    //             'date_start="start" '+
+    //             'date_stop="stop" '+
+    //             'all_day="allday" '+
+    //             'mode="week" '+
+    //             'readonly_form_view_id="1">'+
+    //                 '<field name="name"/>'+
+    //         '</calendar>',
+    //         archs: archs,
+    //         viewOptions: {
+    //             initialDate: initialDate,
+    //         },
+    //         session: {
+    //             getTZOffset: function () {
+    //                 return 120;
+    //             },
+    //         },
+    //     });
+    //     var $sidebar = calendar.$('.o_calendar_sidebar');
+
+    //     assert.strictEqual(calendar.$('.fc-agendaWeek-view').length, 1, "should be in week mode");
+
+    //     calendar.$buttons.find('.o_calendar_button_month').trigger('click'); // display all the month
+    //     concurrency.delay(0).then(function () {
+    //         //check focus while change mode using day, week, month button
+    //         assert.strictEqual(calendar.$('.fc-month-view').length, 1, "should be in month mode");
+    //         assert.strictEqual($sidebar.find('.ui-state-active').length, 0, "in moth mode, should not highlight the target day");
+    //         calendar.$buttons.find('.o_calendar_button_day').trigger('click');
+    //         return concurrency.delay(0);
+    //     }).then(function () {
+    //         assert.ok(calendar.$('.fc-agendaDay-view').length, "my should display in day mode");
+    //         assert.strictEqual($sidebar.find('.ui-state-active').length, 1, "in day mode, should highlight the target day");
+    //         calendar.$buttons.find('.o_calendar_button_week').trigger('click');
+    //         return concurrency.delay(0);
+    //     }).then(function () {
+    //         assert.strictEqual(calendar.$('.fc-agendaWeek-view').length, 1, "should be in week mode");
+    //         assert.strictEqual($sidebar.find('.ui-state-active').length, 0, "in week mode, should not highlight the target day");
+
+    //         //check focus while change mode by clicking on date in minicalendar
+    //         calendar.$('.o_calendar_mini a:contains(12)').click();
+    //         return concurrency.delay(0);
+    //     }).then(function () {
+    //         assert.ok(calendar.$('.fc-agendaDay-view').length, "my should display in day mode");
+    //         assert.strictEqual($sidebar.find('.ui-state-active').length, 1, "in day mode should highlight the target day");
+    //         calendar.$('.o_calendar_mini a:contains(12)').click();
+    //         return concurrency.delay();
+    //     }).then(function () {
+    //         assert.strictEqual(calendar.$('.fc-month-view').length, 1, "should be in month mode");
+    //         assert.strictEqual($sidebar.find('.ui-state-active').length, 0, "in moth mode should not highlight the target day");
+    //         calendar.$('.o_calendar_mini a:contains(12)').click();
+    //         return concurrency.delay(0);
+    //     }).then(function () {
+    //         assert.strictEqual(calendar.$('.fc-agendaWeek-view').length, 1, "should be in week mode");
+    //         assert.strictEqual($sidebar.find('.ui-state-active').length, 0, "in week mode should not highlight the target day");
+    //         return concurrency.delay(0);
+    //     });
+    //     calendar.destroy();
+    // });
 
     QUnit.test('breadcrumbs are updated with the displayed period', function (assert) {
         assert.expect(3);

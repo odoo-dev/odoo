@@ -106,7 +106,11 @@ var CalendarController = AbstractController.extend({
         _.each(['day', 'week', 'month'], function (scale) {
             self.$buttons.on('click', '.o_calendar_button_' + scale, function () {
                 self.model.setScale(scale);
-                self.reload();
+                self.reload().then(function () {
+                    if (scale !== 'day' && document.querySelector('.ui-state-active')) {
+                        document.querySelector('.ui-state-active').classList.remove('ui-state-active');
+                    }
+                });
             });
         });
 
@@ -188,7 +192,11 @@ var CalendarController = AbstractController.extend({
             this.model.setScale('week');
         }
         this.model.setDate(event.data.date);
-        this.reload();
+        this.reload().then(function () {
+            if (modelData.scale !== 'week' && document.querySelector('.ui-state-active')) {
+                document.querySelector('.ui-state-active').classList.remove('ui-state-active');
+            }
+        });
     },
     /**
      * @private
