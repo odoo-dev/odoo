@@ -13,7 +13,7 @@ let browser;
 let baseConfig;
 
 QUnit.module("UI", {
-  async beforeEach() {  
+  async beforeEach() {
     target = getFixture();
     serviceRegistry = new Registry();
     serviceRegistry.add(uiService.name, uiService);

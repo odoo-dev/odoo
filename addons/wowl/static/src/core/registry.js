@@ -90,7 +90,7 @@ export class Registry extends EventBus {
 
   /**
    * Return a list of all entries, ordered by sequence numbers.
-   * 
+   *
    * @returns {[string, any][]}
    */
   getEntries() {
