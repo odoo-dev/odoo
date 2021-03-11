@@ -1774,7 +1774,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 } else {
                     mergeWith.qty += line.qty;
                 }
-                order._extras.activeOrderlineId = mergeWith.id;
+                this.actionSelectOrderline(order, mergeWith.id)
                 return mergeWith;
             } else {
                 if (product.tracking === 'serial' || product.tracking === 'lot') {
@@ -1785,12 +1785,12 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     }
                 }
                 order.lines.push(line.id);
-                order._extras.activeOrderlineId = line.id;
+                this.actionSelectOrderline(order, line.id);
                 return line;
             }
         }
-        actionSelectOrderline(order, orderline) {
-            order._extras.activeOrderlineId = orderline.id;
+        actionSelectOrderline(order, lineID) {
+            order._extras.activeOrderlineId = lineID;
         }
         actionUpdateOrderline(orderline, vals) {
             if ('price_unit' in vals) {
@@ -1809,9 +1809,9 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             if (order.lines.length) {
                 // set as active the orderline with the same index as the deleted
                 if (indexOfDeleted === order.lines.length) {
-                    order._extras.activeOrderlineId = order.lines[order.lines.length - 1];
+                    this.actionSelectOrderline(order, order.lines[order.lines.length - 1]);
                 } else {
-                    order._extras.activeOrderlineId = order.lines[indexOfDeleted];
+                    this.actionSelectOrderline(order, order.lines[indexOfDeleted]);
                 }
             }
         }
@@ -1837,7 +1837,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     id: this._getNextId(),
                 });
                 order.lines.push(newLine.id);
-                this.actionSelectOrderline(order, newLine);
+                this.actionSelectOrderline(order, newLine.id);
             }
         }
         /**

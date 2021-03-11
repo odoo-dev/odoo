@@ -186,7 +186,7 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
         }
         onSelectOrderline({ detail: orderline }) {
             this.state.numpadMode = 'quantity';
-            this.env.actionHandler({ name: 'actionSelectOrderline', args: [this.props.activeOrder, orderline] });
+            this.env.actionHandler({ name: 'actionSelectOrderline', args: [this.props.activeOrder, orderline.id] });
             NumberBuffer.reset();
         }
         async _onSearchTermChange([searchTerm, key]) {
