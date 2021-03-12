@@ -12,7 +12,7 @@ import { StudioHomeMenu } from "./studio_home_menu/studio_home_menu";
 
 const { Component } = owl;
 
-class StudioClientAction extends Component {
+export class StudioClientAction extends Component {
   setup() {
     this.studio = useService("studio");
     this.menus = useService("menu");

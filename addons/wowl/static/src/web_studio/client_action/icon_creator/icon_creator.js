@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { COLORS, BG_COLORS, ICONS } from "../utils";
+import { FileInput } from "@wowl/components/file_input/file_input";
 import CustomFileInput from "web.CustomFileInput";
 import { useService } from "@wowl/core/hooks";
 
@@ -47,12 +48,16 @@ export class IconCreator extends Component {
     // FIXME: for now, the IconCreator can be spawned in a pure wowl environment (by clicking
     // on the 'edit' icon of an existing app) and in the legacy environment (through the app
     // creator)
+    this.FileInput = FileInput;
     try {
       const user = useService("user");
       this.userId = user.userId;
     } catch (e) {
       if (e.message === "Service user is not available") {
         this.userId = this.env.session.uid;
+        // we are in a legacy environment, so use the legacy CustomFileInput as
+        // the new one requires the new http service
+        this.FileInput = CustomFileInput;
       }
     }
 
@@ -155,7 +160,7 @@ export class IconCreator extends Component {
   }
 }
 
-IconCreator.components = { CustomFileInput };
+// IconCreator.components = { FileInput };
 IconCreator.defaultProps = DEFAULT_ICON;
 IconCreator.props = {
   backgroundColor: { type: String, optional: 1 },

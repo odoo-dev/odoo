@@ -36,7 +36,7 @@ export class StudioHomeMenu extends HomeMenu {
   constructor() {
     super(...arguments);
 
-    this.am = useService("action");
+    // this.am = useService("action");
     this.user = useService("user");
     this.studio = useService("studio");
     this.notifications = useService("notification");

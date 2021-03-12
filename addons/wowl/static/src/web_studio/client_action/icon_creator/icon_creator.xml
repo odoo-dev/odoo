@@ -76,7 +76,7 @@
         <div t-if="props.editable" class="o_web_studio_upload">
             <a t-if="props.type === 'base64'" href="#" t-on-click.prevent.stop="_onDesignIconClick">Design your Icon</a>
             <span class="text-muted"> or </span>
-            <CustomFileInput
+            <t t-component="FileInput"
                 action="'/web/binary/upload_attachment'"
                 id="userId"
                 model="'res.users'"
@@ -87,7 +87,7 @@
                     <t t-if="props.type === 'base64'">upload one</t>
                     <t t-else="">upload it</t>
                 </a>
-            </CustomFileInput>
+            </t>
         </div>
     </div>
 </t>

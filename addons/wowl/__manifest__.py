@@ -28,6 +28,7 @@ Odoo Web core module written in Owl.
         'static/src/web_studio/client_action/app_creator/app_creator.xml',
         'static/src/web_studio/client_action/icon_creator/icon_creator.xml',
         'static/src/web_studio/client_action/model_configurator/model_configurator.xml',
+        'static/src/components/file_input/file_input.xml',
     ],
 
     'assets': {

@@ -66,6 +66,14 @@ QUnit.module("Studio", (hooks) => {
             }
           },
           unblockUI: () => assert.step("UI unblocked"),
+          http: {
+            post(route) {
+              if (route === "/web/binary/upload_attachment") {
+                assert.step(route);
+                return Promise.resolve('[{ "id": 666 }]');
+              }
+            }
+          }
         },
       },
       events: {

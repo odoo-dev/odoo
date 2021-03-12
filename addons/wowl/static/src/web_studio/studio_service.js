@@ -8,9 +8,11 @@ const URL_ACTION_KEY = "_action";
 const URL_TAB_KEY = "_tab";
 const URL_MODE_KEY = "mode";
 
-const EDITOR = "editor";
-const HOME_MENU = "home_menu";
-const APP_CREATOR = "app_creator";
+export const MODES = {
+  EDITOR: "editor",
+  HOME_MENU: "home_menu",
+  APP_CREATOR: "app_creator",
+};
 
 export class NotEditableActionError extends Error {
   constructor() {
@@ -78,7 +80,7 @@ export const studioService = {
         state.editorTab = currentHash[URL_TAB_KEY] || null;
 
         const editedActionId = currentHash[URL_ACTION_KEY];
-        if (state.studioMode === EDITOR) {
+        if (state.studioMode === MODES.EDITOR) {
           if (editedActionId) {
             state.editedAction = await env.services.action.loadAction(editedActionId);
           } else {
@@ -86,7 +88,7 @@ export const studioService = {
           }
         }
         if (!state.editedAction || !_isStudioEditable(state.editedAction)) {
-          state.studioMode = state.studioMode || HOME_MENU;
+          state.studioMode = state.studioMode || MODES.HOME_MENU;
           state.editedAction = null;
           state.editedViewType = null;
           state.editorTab = null;
@@ -106,7 +108,7 @@ export const studioService = {
 
       const options = {};
       // clearBreadcrumbs: true, TODO
-      if (targetMode === EDITOR) {
+      if (targetMode === MODES.EDITOR) {
         let controllerState;
         if (!action) {
           // systray open
@@ -143,7 +145,7 @@ export const studioService = {
         throw new Error("can't already be in studio");
       }
       if (!mode) {
-        mode = env.services.home_menu.hasHomeMenu ? HOME_MENU : EDITOR;
+        mode = env.services.home_menu.hasHomeMenu ? MODES.HOME_MENU : MODES.EDITOR;
       }
       let action;
       if (actionId) {
@@ -168,7 +170,7 @@ export const studioService = {
         stackPosition: "replacePreviousAction", // If target is menu, then replaceCurrent, see comment above why we cannot do this
       };
       let actionId;
-      if (state.studioMode === EDITOR) {
+      if (state.studioMode === MODES.EDITOR) {
         actionId = state.editedAction.id;
         options.additionalContext = state.editedAction.context;
         options.viewType = state.editedViewType;
@@ -188,16 +190,16 @@ export const studioService = {
         throw new Error("is it possible?");
       }
       let targetMode;
-      if (state.studioMode === APP_CREATOR || state.studioMode === EDITOR) {
-        targetMode = HOME_MENU;
+      if (state.studioMode === MODES.APP_CREATOR || state.studioMode === MODES.EDITOR) {
+        targetMode = MODES.HOME_MENU;
       } else {
-        targetMode = EDITOR;
+        targetMode = MODES.EDITOR;
       }
-      const action = targetMode === EDITOR ? state.editedAction : null;
-      if (targetMode === EDITOR && !action) {
+      const action = targetMode === MODES.EDITOR ? state.editedAction : null;
+      if (targetMode === MODES.EDITOR && !action) {
         throw new Error("this button should not be clickable/visible");
       }
-      const viewType = targetMode === EDITOR ? state.editedViewType : null;
+      const viewType = targetMode === MODES.EDITOR ? state.editedViewType : null;
       return _openStudio(targetMode, action, viewType);
     }
 
@@ -207,7 +209,7 @@ export const studioService = {
       hash[URL_ACTION_KEY] = undefined;
       hash[URL_VIEW_KEY] = undefined;
       hash[URL_TAB_KEY] = undefined;
-      if (state.studioMode === EDITOR) {
+      if (state.studioMode === MODES.EDITOR) {
         hash[URL_ACTION_KEY] = JSON.stringify(state.editedAction.id);
         hash[URL_VIEW_KEY] = state.editedViewType || undefined;
         hash[URL_TAB_KEY] = state.editorTab;
@@ -248,11 +250,7 @@ export const studioService = {
     });
 
     return {
-      MODES: {
-        APP_CREATOR,
-        EDITOR,
-        HOME_MENU,
-      },
+      MODES,
       bus,
       isStudioEditable() {
         const action = _getCurrentAction();

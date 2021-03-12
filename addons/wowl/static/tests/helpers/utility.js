@@ -110,6 +110,7 @@ function makeTestConfig(config = {}) {
  * @returns {Promise<OdooEnv>}
  */
 export async function makeTestEnv(config = {}) {
+  debugger
   const testConfig = makeTestConfig(config);
   if (config.serverData || config.mockRPC || config.activateMockServer) {
     testConfig.serviceRegistry.remove("rpc");
