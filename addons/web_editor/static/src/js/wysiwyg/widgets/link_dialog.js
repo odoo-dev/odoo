@@ -252,7 +252,18 @@ var LinkDialog = Dialog.extend({
         }
         try {
             const Url = URL || window.URL || window.webkitURL;
-            const urlObj = url.startsWith('/') ? new Url(url, window.location.origin) : new Url(url);
+            const match = url.match(/^(\/)|^(\w+:)/);
+            let protocol;
+            if (match) {
+                protocol = match[0];
+            } else if (url.startsWith('/')) {
+                protocol = '';
+            } else if (url.includes('@')) {
+                protocol = 'mailto:';
+            } else {
+                protocol = 'https://';
+            }
+            const urlObj = new Url(protocol + url, window.location.origin);
             return (urlObj.origin !== window.location.origin);
         } catch (ignored) {
             return true;

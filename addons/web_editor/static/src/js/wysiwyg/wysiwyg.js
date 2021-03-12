@@ -568,7 +568,7 @@ const Wysiwyg = Widget.extend({
                     range.selectNode(anchor);
                     range.collapse();
                 };
-                getDeepRange(this.odooEditor.dom, { range, select: true });
+                getDeepRange(this.odooEditor.editable, { range, select: true });
             });
         }
     },
