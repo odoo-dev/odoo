@@ -4137,6 +4137,7 @@ var exportVariable = (function (exports) {
         }
 
         _onToolbarClick(ev) {
+            ev.preventDefault();
             const buttonEl = ev.target.closest(
                 'div.btn:not(.editor-ignore),a.dropdown-item:not(.editor-ignore)',
             );
@@ -4158,7 +4159,6 @@ var exportVariable = (function (exports) {
                 'unordered': 'UL',
                 'checklist': 'CL',
             };
-            ev.preventDefault();
             this._protect(() => {
                 if (buttonEl.classList.contains('tablepicker-cell')) {
                     this.execCommand('insertTable', {
