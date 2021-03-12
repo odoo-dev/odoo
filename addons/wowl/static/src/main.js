@@ -26,9 +26,6 @@ const { whenReady } = utils;
   // start web client
   await whenReady();
   const legacyEnv = await legacySetupProm;
-  // add legacy templates to the wowl qweb, and vice versa
-  env.qweb.addTemplates(legacyEnv.session.owlTemplates);
-  legacyEnv.qweb.addTemplates(templates);
   mapLegacyEnvToWowlEnv(legacyEnv, env);
   const root = await mount(WebClient, { env, target: document.body, position: "self" });
   delete odoo.debug;
