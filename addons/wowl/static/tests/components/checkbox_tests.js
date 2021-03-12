@@ -8,14 +8,16 @@ const { mount } = owl;
 let env;
 let target;
 
-QUnit.module("CheckBox", {
-  async beforeEach() {
+QUnit.module("Components", (hooks) => {
+  hooks.beforeEach(async () => {
     env = await makeTestEnv();
     target = getFixture();
-  },
-});
+  });
 
-QUnit.test("can be rendered", async (assert) => {
-  await mount(CheckBox, { env, target, props: {} });
-  assert.containsOnce(target, "div.custom-checkbox");
+  QUnit.module("CheckBox");
+
+  QUnit.test("can be rendered", async (assert) => {
+    await mount(CheckBox, { env, target, props: {} });
+    assert.containsOnce(target, "div.custom-checkbox");
+  });
 });
