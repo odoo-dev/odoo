@@ -158,7 +158,6 @@ export function makeLocalization(config) {
 }
 
 export const localizationService = {
-  name: "localization",
   dependencies: ["user"],
   deploy: async (env) => {
     const response = await (async function fetchLocalization() {

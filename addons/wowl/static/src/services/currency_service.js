@@ -3,7 +3,6 @@
 import { serviceRegistry } from "../webclient/service_registry";
 
 export const currencyService = {
-  name: "currency",
   dependencies: ["localization"],
   deploy(env) {
     const { currencies } = odoo.session_info;

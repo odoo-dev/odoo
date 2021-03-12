@@ -114,7 +114,6 @@ function callModel(rpc, env, model) {
  * const result = await this.model('res.partner').configure({shadow: true}).read([id]);
  */
 export const modelService = {
-  name: "model",
   dependencies: ["rpc", "user"],
   deploy(env) {
     return function (model) {

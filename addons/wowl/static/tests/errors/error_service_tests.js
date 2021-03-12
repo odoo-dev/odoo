@@ -33,9 +33,9 @@ let windowAddEventListener = window.addEventListener;
 QUnit.module("Error Service", {
   async beforeEach() {
     serviceRegistry = new Registry();
-    serviceRegistry.add(errorService.name, errorService);
-    serviceRegistry.add(dialogService.name, dialogService);
-    serviceRegistry.add(notificationService.name, notificationService);
+    serviceRegistry.add("error", errorService);
+    serviceRegistry.add("dialog", dialogService);
+    serviceRegistry.add("notification", notificationService);
     serviceRegistry.add("rpc", makeFakeRPCService());
     window.addEventListener = (type, cb) => {
       if (type === "unhandledrejection") {

@@ -16,7 +16,7 @@ QUnit.module("Title", {
   async beforeEach() {
     title = document.title;
     serviceRegistry = new Registry();
-    serviceRegistry.add(titleService.name, titleService);
+    serviceRegistry.add("title", titleService);
     env = await makeTestEnv({ serviceRegistry });
   },
   afterEach() {

@@ -58,7 +58,6 @@ DialogContainer.template = tags.xml`
 mainComponentRegistry.add("DialogContainer", DialogContainer);
 
 export const dialogService = {
-  name: "dialog",
   deploy(env) {
     const bus = new EventBus();
     function open(dialogClass, props) {

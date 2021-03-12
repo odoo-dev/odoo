@@ -113,7 +113,6 @@ export function makePushState(env, getCurrent, doPush) {
 }
 
 export const routerService = {
-  name: "router",
   deploy(env) {
     return makeRouter(env);
   },

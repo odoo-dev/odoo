@@ -14,7 +14,6 @@ export function convertRainBowMessage(message) {
 }
 
 export const effectService = {
-  name: "effect",
   dependencies: ["notification", "user"],
   deploy(env) {
     const bus = new EventBus();

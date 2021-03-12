@@ -8,7 +8,6 @@ const { EventBus } = owl.core;
 const AUTOCLOSE_DELAY = 4000;
 
 export const notificationService = {
-  name: "notification",
   deploy(env) {
     let notifId = 0;
     let notifications = [];

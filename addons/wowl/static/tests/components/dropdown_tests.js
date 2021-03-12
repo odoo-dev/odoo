@@ -15,8 +15,8 @@ let target;
 QUnit.module("Dropdown", {
   async beforeEach() {
     const serviceRegistry = new Registry();
-    serviceRegistry.add(hotkeyService.name, hotkeyService);
-    serviceRegistry.add(uiService.name, uiService);
+    serviceRegistry.add("hotkey", hotkeyService);
+    serviceRegistry.add("ui", uiService);
     env = await makeTestEnv({ serviceRegistry });
     target = getFixture();
   },

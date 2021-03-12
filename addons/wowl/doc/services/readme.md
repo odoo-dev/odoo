@@ -40,13 +40,11 @@ A service needs to follow the following interface:
 
 ```ts
 export interface Service<T = any> {
-  name: string;
   dependencies?: string[];
   deploy: (env: OdooEnv, odoo: Odoo) => Promise<T> | T;
 }
 ```
 
-The name is simply a short unique string representing the service, such as `rpc`.
 It may define some `dependencies`. In that case, the dependent services will be
 started first, and ready when the current service is started.
 
@@ -70,8 +68,7 @@ It could be defined like this:
 
 ```js
 const counterService = {
-  name: "counter",
-  start(env) {
+  deploy(env) {
     let value = 0;
     return {
       getValue() {
@@ -83,7 +80,7 @@ const counterService = {
     };
   },
 };
-serviceRegistry.add(counterService.name, counterService);
+serviceRegistry.add("counter", counterService);
 ```
 
 The services listed [above](./#list-of-all-services) are deployed before the web client is mounted but it

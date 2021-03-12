@@ -19,10 +19,10 @@ QUnit.module("DebugManager", (hooks) => {
   hooks.beforeEach(async () => {
     target = getFixture();
     const serviceRegistry = new Registry();
-    serviceRegistry.add(hotkeyService.name, hotkeyService);
-    serviceRegistry.add(uiService.name, uiService);
-    serviceRegistry.add(modelService.name, modelService);
-    serviceRegistry.add(debugService.name, debugService);
+    serviceRegistry.add("hotkey", hotkeyService);
+    serviceRegistry.add("ui", uiService);
+    serviceRegistry.add("model", modelService);
+    serviceRegistry.add("debug", debugService);
     const mockRPC = async (route, args) => {
       if (args.method === "check_access_rights") {
         return Promise.resolve(true);

@@ -6,7 +6,6 @@ import { errorHandlerRegistry } from "./error_handler_registry";
 import { isBrowserChrome } from "../core/browser";
 
 export const errorService = {
-  name: "error",
   dependencies: ["dialog", "notification", "rpc"],
   deploy(env) {
     const handlers = errorHandlerRegistry.getAll().map((builder) => builder(env));

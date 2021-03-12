@@ -82,7 +82,6 @@ function jsonrpc(env, url, params, rpcId, settings = {}) {
 // RPC service
 // -----------------------------------------------------------------------------
 export const rpcService = {
-  name: "rpc",
   deploy(env) {
     return async function (route, params = {}, settings) {
       if (this instanceof Component) {

@@ -23,10 +23,10 @@ QUnit.module("Navbar", {
   async beforeEach() {
     const serviceRegistry = new Registry();
     serviceRegistry.add("menu", menuService);
-    serviceRegistry.add(actionService.name, actionService);
-    serviceRegistry.add(notificationService.name, notificationService);
-    serviceRegistry.add(hotkeyService.name, hotkeyService);
-    serviceRegistry.add(uiService.name, uiService);
+    serviceRegistry.add("action", actionService);
+    serviceRegistry.add("notification", notificationService);
+    serviceRegistry.add("hotkey", hotkeyService);
+    serviceRegistry.add("ui", uiService);
     const menus = {
       root: { id: "root", children: [1], name: "root", appID: "root" },
       1: { id: 1, children: [], name: "App0", appID: 1 },

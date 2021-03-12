@@ -16,7 +16,6 @@ export function editModelDebug(env, title, model, id) {
 }
 
 export const debugService = {
-  name: "debug",
   dependencies: ["model"],
   async deploy(env) {
     let accessRightsProm;

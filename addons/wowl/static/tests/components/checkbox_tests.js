@@ -16,6 +16,6 @@ QUnit.module("CheckBox", {
 });
 
 QUnit.test("can be rendered", async (assert) => {
-  await mount(CheckBox, {env, target, props: {}});
+  await mount(CheckBox, { env, target, props: {} });
   assert.containsOnce(target, "div.custom-checkbox");
 });

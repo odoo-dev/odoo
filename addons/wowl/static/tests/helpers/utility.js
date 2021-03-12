@@ -44,18 +44,18 @@ export function makeTestServiceRegistry() {
   const fakeRouterService = makeFakeRouterService();
 
   testServiceRegistry
-    .add(fakeUserService.name, fakeUserService)
-    .add(notificationService.name, notificationService)
-    .add(dialogService.name, dialogService)
-    .add(menuService.name, menuService)
-    .add(actionService.name, actionService)
-    .add(fakeRouterService.name, fakeRouterService)
-    .add(viewService.name, viewService)
-    .add(modelService.name, modelService)
-    .add(fakeTitleService.name, fakeTitleService)
-    .add(uiService.name, uiService)
-    .add(effectService.name, effectService)
-    .add(hotkeyService.name, hotkeyService);
+    .add("user", fakeUserService)
+    .add("notification", notificationService)
+    .add("dialog", dialogService)
+    .add("menu", menuService)
+    .add("action", actionService)
+    .add("router", fakeRouterService)
+    .add("view", viewService)
+    .add("model", modelService)
+    .add("title", fakeTitleService)
+    .add("ui", uiService)
+    .add("effect", effectService)
+    .add("hotkey", hotkeyService);
   return testServiceRegistry;
 }
 

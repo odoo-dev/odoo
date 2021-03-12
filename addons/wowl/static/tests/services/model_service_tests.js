@@ -14,7 +14,7 @@ QUnit.module("Model Service", {
   async beforeEach() {
     serviceRegistry = new Registry();
     serviceRegistry.add("user", makeFakeUserService());
-    serviceRegistry.add(modelService.name, modelService);
+    serviceRegistry.add("model", modelService);
   },
 });
 

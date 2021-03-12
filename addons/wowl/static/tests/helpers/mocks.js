@@ -231,7 +231,6 @@ export function makeFakeRouterService(params) {
   }
   let current = getRoute(_current);
   return {
-    name: "router",
     deploy(env) {
       function loadState(hash) {
         current.hash = hash;
@@ -264,7 +263,6 @@ export function makeFakeRouterService(params) {
 
 export function makeFakeUIService() {
   return {
-    name: "ui",
     deploy() {
       return {
         isSmall: false,
@@ -276,7 +274,6 @@ export function makeFakeUIService() {
 }
 
 export const fakeCookieService = {
-  name: "cookie",
   deploy() {
     const cookie = {};
     return {
@@ -296,7 +293,6 @@ export const fakeCookieService = {
 };
 
 export const fakeTitleService = {
-  name: "title",
   deploy() {
     let current = {};
     return {
@@ -315,7 +311,6 @@ export const fakeTitleService = {
 
 export function makeFakeDownloadService(callback) {
   return {
-    name: "download",
     deploy() {
       return async function (options) {
         if (callback) {
@@ -328,7 +323,6 @@ export function makeFakeDownloadService(callback) {
 
 export function makeFakeNotificationService(createMock, closeMock) {
   return {
-    name: "notification",
     deploy() {
       function create() {
         if (createMock) {

@@ -28,7 +28,7 @@ QUnit.module("Error dialogs", {
     dialogContainer.classList.add("o_dialog_container");
     target.append(dialogContainer);
     const serviceRegistry = new Registry();
-    serviceRegistry.add(uiService.name, uiService);
+    serviceRegistry.add("ui", uiService);
     baseConfig = { serviceRegistry };
   },
   async afterEach() {

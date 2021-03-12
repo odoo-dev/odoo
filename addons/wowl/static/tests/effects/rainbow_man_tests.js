@@ -31,9 +31,9 @@ QUnit.module("RainbowMan", (hooks) => {
     target = getFixture();
     serviceRegistry = new Registry();
     const user = makeFakeUserService({ showEffect: true });
-    serviceRegistry.add(user.name, user);
-    serviceRegistry.add(effectService.name, effectService);
-    serviceRegistry.add(notificationService.name, notificationService);
+    serviceRegistry.add("user", user);
+    serviceRegistry.add("effect", effectService);
+    serviceRegistry.add("notification", notificationService);
   });
 
   QUnit.test("rendering a rainbowman destroy after animation", async function (assert) {

@@ -49,8 +49,8 @@ async function testRPC(route, params) {
 QUnit.module("RPC", {
   beforeEach() {
     serviceRegistry = new Registry();
-    serviceRegistry.add(notificationService.name, notificationService);
-    serviceRegistry.add(rpcService.name, rpcService);
+    serviceRegistry.add("notification", notificationService);
+    serviceRegistry.add("rpc", rpcService);
   },
   afterEach() {
     if (isXHRMocked) {
@@ -70,9 +70,7 @@ QUnit.test("can perform a simple rpc", async (assert) => {
 
   patch(browser, "mock.xhr", { XMLHttpRequest: MockXHR }, { pure: true });
 
-  const env = await makeTestEnv({
-    serviceRegistry,
-  });
+  const env = await makeTestEnv({ serviceRegistry });
   const result = await env.services.rpc("/test/");
   assert.deepEqual(result, { action_id: 123 });
   unpatch(browser, "mock.xhr");

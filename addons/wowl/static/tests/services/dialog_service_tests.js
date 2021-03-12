@@ -36,8 +36,8 @@ QUnit.module("DialogManager", {
   async beforeEach() {
     target = getFixture();
     serviceRegistry = new Registry();
-    serviceRegistry.add(dialogService.name, dialogService);
-    serviceRegistry.add(uiService.name, uiService);
+    serviceRegistry.add("dialog", dialogService);
+    serviceRegistry.add("ui", uiService);
     const componentRegistry = new Registry();
     componentRegistry.add("DialogContainer", mainComponentRegistry.get("DialogContainer"));
     env = await makeTestEnv({ serviceRegistry, mainComponentRegistry: componentRegistry });
@@ -55,7 +55,7 @@ QUnit.test("Simple rendering with a single dialog", async (assert) => {
   assert.containsOnce(target, ".o_dialog_manager");
   assert.containsNone(target, ".o_dialog_manager portal");
   assert.containsNone(target, ".o_dialog_container .o_dialog");
-  env.services[dialogService.name].open(CustomDialog);
+  env.services.dialog.open(CustomDialog);
   await nextTick();
   assert.containsOnce(target, ".o_dialog_manager portal");
   assert.containsOnce(target, ".o_dialog_container .o_dialog");
@@ -79,7 +79,7 @@ QUnit.test("rendering with two dialogs", async (assert) => {
   assert.containsOnce(target, ".o_dialog_manager");
   assert.containsNone(target, ".o_dialog_manager portal");
   assert.containsNone(target, ".o_dialog_container .o_dialog");
-  env.services[dialogService.name].open(CustomDialog, { title: "Hello" });
+  env.services.dialog.open(CustomDialog, { title: "Hello" });
   await nextTick();
   assert.containsOnce(target, ".o_dialog_manager portal");
   assert.containsOnce(target, ".o_dialog_container .o_dialog");
@@ -89,7 +89,7 @@ QUnit.test("rendering with two dialogs", async (assert) => {
       : _a.textContent,
     "Hello"
   );
-  env.services[dialogService.name].open(CustomDialog, { title: "Sauron" });
+  env.services.dialog.open(CustomDialog, { title: "Sauron" });
   await nextTick();
   assert.containsN(target, ".o_dialog_manager portal", 2);
   assert.containsN(target, ".o_dialog_container .o_dialog", 2);
@@ -119,9 +119,9 @@ QUnit.test("dialog component crashes", async (assert) => {
   FailingDialog.template = tags.xml`<Dialog title="'Error'"/>`;
 
   const rpc = makeFakeRPCService();
-  serviceRegistry.add(rpc.name, rpc);
-  serviceRegistry.add(notificationService.name, notificationService);
-  serviceRegistry.add(errorService.name, errorService);
+  serviceRegistry.add("rpc", rpc);
+  serviceRegistry.add("notification", notificationService);
+  serviceRegistry.add("error", errorService);
   const componentRegistry = new Registry();
   componentRegistry.add("DialogContainer", DialogContainer);
   env = await makeTestEnv({ serviceRegistry, mainComponentRegistry: componentRegistry });
@@ -133,7 +133,7 @@ QUnit.test("dialog component crashes", async (assert) => {
     assert.step("error");
   };
 
-  env.services[dialogService.name].open(FailingDialog);
+  env.services.dialog.open(FailingDialog);
   await nextTick();
   assert.verifySteps(["error"]);
   assert.containsOnce(pseudoWebClient, ".modal");

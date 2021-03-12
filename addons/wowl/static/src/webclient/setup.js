@@ -33,9 +33,10 @@ export async function deployServices(env) {
 
 async function _deployServices(env, toDeploy, timeoutId) {
   const services = env.services;
-  for (const service of odoo.serviceRegistry.getAll()) {
-    if (!(service.name in services)) {
-      toDeploy.add(service);
+  for (const [name, service] of odoo.serviceRegistry.getEntries()) {
+    if (!(name in services)) {
+      const namedService = Object.assign(Object.create(service), { name });
+      toDeploy.add(namedService);
     }
   }
 

@@ -60,7 +60,6 @@ function makeMenus(env, menusData) {
 }
 
 export const menuService = {
-  name: "menu",
   dependencies: ["action", "router"],
   async deploy(env) {
     const cacheHashes = odoo.session_info.cache_hashes;

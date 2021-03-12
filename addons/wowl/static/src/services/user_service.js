@@ -24,7 +24,6 @@ function computeAllowedCompanyIds(env) {
 }
 
 export const userService = {
-  name: "user",
   dependencies: ["router", "cookie"],
   deploy(env) {
     const info = odoo.session_info;

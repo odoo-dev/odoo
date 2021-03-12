@@ -13,8 +13,8 @@ let target;
 QUnit.module("Hotkey Service", {
   async beforeEach() {
     const serviceRegistry = new Registry();
-    serviceRegistry.add(hotkeyService.name, hotkeyService);
-    serviceRegistry.add(uiService.name, uiService);
+    serviceRegistry.add("hotkey", hotkeyService);
+    serviceRegistry.add("ui", uiService);
     env = await makeTestEnv({ serviceRegistry });
     target = getFixture();
   },

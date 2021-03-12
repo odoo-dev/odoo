@@ -19,7 +19,7 @@ QUnit.module("Dialog", {
     dialogContainer.classList.add("o_dialog_container");
     target.append(dialogContainer);
     const serviceRegistry = new Registry();
-    serviceRegistry.add(uiService.name, uiService);
+    serviceRegistry.add("ui", uiService);
     env = await makeTestEnv({ serviceRegistry });
   },
   async afterEach() {

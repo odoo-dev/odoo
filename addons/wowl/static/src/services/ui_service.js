@@ -33,7 +33,6 @@ export function useUIOwnership(refName) {
 }
 
 export const uiService = {
-  name: "ui",
   deploy(env) {
     let ui = {};
 

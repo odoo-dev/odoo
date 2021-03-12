@@ -39,7 +39,6 @@ const MODIFIERS = new Set(["control", "shift"]);
 const AUTHORIZED_KEYS = new Set([...ALPHANUM_KEYS, ...NAV_KEYS]);
 
 export const hotkeyService = {
-  name: "hotkey",
   dependencies: ["ui"],
   deploy(env) {
     const subscriptions = new Map();
@@ -232,4 +231,4 @@ export const hotkeyService = {
   },
 };
 
-serviceRegistry.add(hotkeyService.name, hotkeyService);
+serviceRegistry.add("hotkey", hotkeyService);

@@ -118,7 +118,7 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("should trigger a notification if wkhtmltopdf is to upgrade", async function (assert) {
     testConfig.serviceRegistry.add(
-      notificationService.name,
+      "notification",
       makeFakeNotificationService(
         () => {
           assert.step("notify");
@@ -163,7 +163,7 @@ QUnit.module("ActionManager", (hooks) => {
         })
       );
       testConfig.serviceRegistry.add(
-        notificationService.name,
+        "notification",
         makeFakeNotificationService(
           () => {
             assert.step("notify");
@@ -224,7 +224,7 @@ QUnit.module("ActionManager", (hooks) => {
       })
     );
     testConfig.serviceRegistry.add(
-      notificationService.name,
+      "notification",
       makeFakeNotificationService(
         (message, options) => {
           assert.step(options.type || "notification");

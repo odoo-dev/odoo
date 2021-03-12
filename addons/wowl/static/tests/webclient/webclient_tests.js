@@ -19,12 +19,12 @@ QUnit.module("Web Client", {
   async beforeEach() {
     const serviceRegistry = new Registry();
     serviceRegistry
-      .add(actionService.name, actionService)
-      .add(hotkeyService.name, hotkeyService)
-      .add(uiService.name, uiService)
-      .add(notificationService.name, notificationService)
-      .add(fakeTitleService.name, fakeTitleService)
-      .add(menuService.name, menuService);
+      .add("action", actionService)
+      .add("hotkey", hotkeyService)
+      .add("ui", uiService)
+      .add("notification", notificationService)
+      .add("title", fakeTitleService)
+      .add("menu", menuService);
     baseConfig = { serviceRegistry, activateMockServer: true };
   },
 });

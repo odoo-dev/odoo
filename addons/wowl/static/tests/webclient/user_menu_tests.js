@@ -20,8 +20,8 @@ QUnit.module("UserMenu", {
   async beforeEach() {
     serviceRegistry = new Registry();
     serviceRegistry.add("user", makeFakeUserService({ name: "Sauron" }));
-    serviceRegistry.add(hotkeyService.name, hotkeyService);
-    serviceRegistry.add(uiService.name, uiService);
+    serviceRegistry.add("hotkey", hotkeyService);
+    serviceRegistry.add("ui", uiService);
     target = getFixture();
     patch(browser, "usermenutest", {
       location: {

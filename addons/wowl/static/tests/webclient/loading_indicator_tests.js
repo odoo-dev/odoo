@@ -16,7 +16,7 @@ QUnit.module("LoadingIndicator", {
   async beforeEach() {
     target = getFixture();
     serviceRegistry = new Registry();
-    serviceRegistry.add(uiService.name, uiService);
+    serviceRegistry.add("ui", uiService);
     browser = { setTimeout: () => 1 };
     baseConfig = { serviceRegistry, browser };
   },

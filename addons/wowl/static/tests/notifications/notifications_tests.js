@@ -16,7 +16,7 @@ QUnit.module("Notifications", {
   async beforeEach() {
     target = getFixture();
     serviceRegistry = new Registry();
-    serviceRegistry.add(notificationService.name, notificationService);
+    serviceRegistry.add("notification", notificationService);
     patch(browser, "mock.settimeout", { setTimeout: () => 1 });
   },
   async afterEach() {
