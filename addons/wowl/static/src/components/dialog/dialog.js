@@ -2,7 +2,7 @@
 
 import { useUIOwnership } from "../../services/ui_service";
 
-const { Component, hooks, misc } = owl;
+const { Component, hooks, misc, QWeb } = owl;
 const { useRef, useExternalListener, useSubEnv } = hooks;
 const { Portal } = misc;
 
@@ -85,3 +85,5 @@ Dialog.defaultProps = {
   title: "Odoo",
 };
 Dialog.template = "wowl.Dialog";
+
+QWeb.registerComponent("Dialog", Dialog);

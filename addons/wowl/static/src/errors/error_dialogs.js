@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { Dialog } from "../components/dialog/dialog";
 import { useService } from "../core/hooks";
 import { capitalize } from "../utils/strings";
 import { _lt } from "../services/localization_service";
@@ -35,7 +34,6 @@ export class ErrorDialog extends Component {
   }
 }
 ErrorDialog.template = "wowl.ErrorDialog";
-ErrorDialog.components = { Dialog };
 
 // -----------------------------------------------------------------------------
 // Client Error Dialog
@@ -110,7 +108,6 @@ export class RPCErrorDialog extends Component {
   }
 }
 RPCErrorDialog.template = "wowl.ErrorDialog";
-RPCErrorDialog.components = { Dialog };
 
 // -----------------------------------------------------------------------------
 // Warning Dialog
@@ -134,7 +131,6 @@ export class WarningDialog extends Component {
   }
 }
 WarningDialog.template = "wowl.WarningDialog";
-WarningDialog.components = { Dialog };
 
 // -----------------------------------------------------------------------------
 // Redirect Warning Dialog
@@ -159,7 +155,6 @@ export class RedirectWarningDialog extends Component {
   }
 }
 RedirectWarningDialog.template = "wowl.RedirectWarningDialog";
-RedirectWarningDialog.components = { Dialog };
 
 // -----------------------------------------------------------------------------
 // Error 504 Dialog
@@ -171,7 +166,6 @@ export class Error504Dialog extends Component {
   }
 }
 Error504Dialog.template = "wowl.Error504Dialog";
-Error504Dialog.components = { Dialog };
 
 // -----------------------------------------------------------------------------
 // Expired Session Error Dialog
@@ -186,4 +180,3 @@ export class SessionExpiredDialog extends Component {
   }
 }
 SessionExpiredDialog.template = "wowl.SessionExpiredDialog";
-SessionExpiredDialog.components = { Dialog };

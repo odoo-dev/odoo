@@ -1,7 +1,5 @@
 /** @odoo-module **/
 
-import { Dropdown } from "../components/dropdown/dropdown";
-import { DropdownItem } from "../components/dropdown/dropdown_item";
 import { useService } from "../core/hooks";
 
 const { Component, hooks } = owl;
@@ -68,7 +66,6 @@ export class DebugManager extends Component {
 
 DebugManager.debugElementsId = 1;
 DebugManager.template = "wowl.DebugManager";
-DebugManager.components = { Dropdown, DropdownItem };
 
 export function useDebugManager(elementsFactory) {
   const elementsId = DebugManager.debugElementsId++;

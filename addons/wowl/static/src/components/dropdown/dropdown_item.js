@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-const { Component } = owl;
+const { Component, QWeb } = owl;
 
 export const ParentClosingMode = {
   None: "none",
@@ -41,3 +41,5 @@ DropdownItem.props = {
 DropdownItem.defaultProps = {
   parentClosingMode: ParentClosingMode.AllParents,
 };
+
+QWeb.registerComponent("DropdownItem", DropdownItem);

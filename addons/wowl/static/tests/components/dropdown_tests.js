@@ -1,7 +1,5 @@
 /** @odoo-module **/
 
-import { Dropdown } from "../../src/components/dropdown/dropdown";
-import { DropdownItem } from "../../src/components/dropdown/dropdown_item";
 import { click, getFixture, makeTestEnv, nextTick } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
 import { makeDeferred } from "../helpers/index";
@@ -29,7 +27,6 @@ QUnit.module("Dropdown", {
 
 QUnit.test("can be rendered", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`<Dropdown/>`;
   parent = await mount(Parent, { env, target });
   assert.containsOnce(parent.el, "button.o_dropdown_toggler");
@@ -38,7 +35,6 @@ QUnit.test("can be rendered", async (assert) => {
 
 QUnit.test("can be styled", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown, DropdownItem };
   Parent.template = owl.tags.xml`
       <Dropdown class="one" togglerClass="'two'" menuClass="'three'">
         <t t-set-slot="menu">
@@ -69,7 +65,6 @@ QUnit.test("menu can be toggled", async (assert) => {
       };
     }
   }
-  Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`<Dropdown beforeOpen="beforeOpen"/>`;
   parent = await mount(Parent, { env, target });
   await click(parent.el, "button.o_dropdown_toggler");
@@ -92,7 +87,6 @@ QUnit.test("initial open state can be true", async (assert) => {
       };
     }
   }
-  Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`<Dropdown startOpen="true" beforeOpen="beforeOpen"/>`;
   parent = await mount(Parent, { env, target });
   assert.verifySteps(["beforeOpen"]);
@@ -101,7 +95,6 @@ QUnit.test("initial open state can be true", async (assert) => {
 
 QUnit.test("close on outside click", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`
       <div>
         <div class="outside">outside</div>
@@ -117,7 +110,6 @@ QUnit.test("close on outside click", async (assert) => {
 
 QUnit.test("close on item selection", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown, DropdownItem };
   Parent.template = owl.tags.xml`
       <Dropdown>
         <t t-set-slot="menu">
@@ -137,7 +129,6 @@ QUnit.test("payload received on item selection", async (assert) => {
       assert.deepEqual(ev.detail.payload, { answer: 42 });
     }
   }
-  Parent.components = { Dropdown, DropdownItem };
   Parent.template = owl.tags.xml`
       <Dropdown t-on-dropdown-item-selected="onItemSelected">
         <t t-set-slot="menu">
@@ -152,7 +143,6 @@ QUnit.test("payload received on item selection", async (assert) => {
 
 QUnit.test("multi-level dropdown: can be rendered and toggled", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`
       <Dropdown>
         <t t-set-slot="menu">
@@ -173,7 +163,6 @@ QUnit.test("multi-level dropdown: can be rendered and toggled", async (assert) =
 
 QUnit.test("multi-level dropdown: initial open state can be true", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`
       <Dropdown startOpen="true">
         <t t-set-slot="menu">
@@ -191,7 +180,6 @@ QUnit.test("multi-level dropdown: initial open state can be true", async (assert
 
 QUnit.test("multi-level dropdown: close on outside click", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown };
   Parent.template = owl.tags.xml`
       <div>
         <div class="outside">outside</div>
@@ -217,7 +205,6 @@ QUnit.test("multi-level dropdown: close on outside click", async (assert) => {
 
 QUnit.test("multi-level dropdown: close on item selection", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown, DropdownItem };
   Parent.template = owl.tags.xml`
       <Dropdown>
         <t t-set-slot="menu">
@@ -239,7 +226,6 @@ QUnit.test("multi-level dropdown: close on item selection", async (assert) => {
 
 QUnit.test("multi-level dropdown: parent closing modes on item selection", async (assert) => {
   class Parent extends owl.Component {}
-  Parent.components = { Dropdown, DropdownItem };
   Parent.template = owl.tags.xml`
       <Dropdown>
         <t t-set-slot="menu">
@@ -287,7 +273,6 @@ QUnit.test("multi-level dropdown: payload bubbles on item selection", async (ass
       assert.deepEqual(ev.detail.payload, { answer: 42 });
     }
   }
-  Parent.components = { Dropdown, DropdownItem };
   Parent.template = owl.tags.xml`
       <Dropdown t-on-dropdown-item-selected="onItemSelected">
         <t t-set-slot="menu">
@@ -360,7 +345,6 @@ QUnit.test("multi-level dropdown: recursive template can be rendered", async (as
       ];
     }
   }
-  Parent.components = { Dropdown, DropdownItem };
   Parent.template = "recursive.Template";
   parent = await mount(Parent, { env, target });
   assert.deepEqual(
@@ -397,7 +381,6 @@ QUnit.test(
         };
       }
     }
-    Parent.components = { Dropdown };
     Parent.template = owl.tags.xml`
       <div>
         <Dropdown class="one" />
@@ -446,7 +429,6 @@ QUnit.test(
   "siblings dropdowns: when non-sibling is open, other must not be toggled on mouse-enter",
   async (assert) => {
     class Parent extends owl.Component {}
-    Parent.components = { Dropdown };
     Parent.template = owl.tags.xml`
       <div>
         <div><Dropdown class="foo" /></div>
@@ -471,7 +453,6 @@ QUnit.test(
   "siblings dropdowns: when one is open, then non-sibling toggled, siblings must not be toggled on mouse-enter",
   async (assert) => {
     class Parent extends owl.Component {}
-    Parent.components = { Dropdown };
     Parent.template = owl.tags.xml`
       <div>
         <div><Dropdown class="foo" /></div>
@@ -503,7 +484,6 @@ QUnit.test("dropdowns keynav", async (assert) => {
       assert.step(payload.val.toString());
     }
   }
-  Parent.components = { Dropdown, DropdownItem };
   Parent.template = owl.tags.xml`
       <Dropdown hotkey="'m'" t-on-dropdown-item-selected="onItemSelected">
         <t t-set-slot="menu">

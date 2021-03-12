@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { Dialog } from "../../components/dialog/dialog";
 import { browser } from "../../core/browser";
 
 const { Component } = owl;
@@ -33,7 +32,6 @@ export function supportItem(env) {
 
 class ShortCutsDialog extends Component {}
 ShortCutsDialog.template = "wowl.UserMenu.ShortCutsDialog";
-ShortCutsDialog.components = { Dialog };
 
 export function shortCutsItem(env) {
   return {

@@ -1,8 +1,6 @@
 /** @odoo-module **/
 
 import { useService } from "../../core/hooks";
-import { Dropdown } from "../../components/dropdown/dropdown";
-import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { debounce } from "../../utils/misc";
 
 const { Component, hooks } = owl;
@@ -126,4 +124,3 @@ export class NavBar extends Component {
   }
 }
 NavBar.template = "wowl.NavBar";
-NavBar.components = { Dropdown, DropdownItem };

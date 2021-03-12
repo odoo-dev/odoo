@@ -1,8 +1,8 @@
 /** @odoo-module **/
-import { click, getFixture, makeFakeRPCService, makeTestEnv, nextTick } from "../helpers/index";
+
+import { click, getFixture, makeFakeRPCService, makeTestEnv, nextTick } from "../helpers";
 import { Registry } from "../../src/core/registry";
 import { DialogContainer, dialogService } from "../../src/services/dialog_service";
-import { Dialog } from "../../src/components/dialog/dialog";
 import { notificationService } from "../../src/notifications/notification_service";
 import { errorService } from "../../src/errors/error_service";
 import { mainComponentRegistry } from "../../src/webclient/main_component_registry";
@@ -51,7 +51,6 @@ QUnit.test("Simple rendering with a single dialog", async (assert) => {
   assert.expect(9);
   class CustomDialog extends Component {}
   CustomDialog.template = tags.xml`<Dialog title="'Welcome'"/>`;
-  CustomDialog.components = { Dialog };
   pseudoWebClient = await mount(PseudoWebClient, { env, target });
   assert.containsOnce(target, ".o_dialog_manager");
   assert.containsNone(target, ".o_dialog_manager portal");
@@ -76,7 +75,6 @@ QUnit.test("rendering with two dialogs", async (assert) => {
   assert.expect(12);
   class CustomDialog extends Component {}
   CustomDialog.template = tags.xml`<Dialog title="props.title"/>`;
-  CustomDialog.components = { Dialog };
   pseudoWebClient = await mount(PseudoWebClient, { env, target });
   assert.containsOnce(target, ".o_dialog_manager");
   assert.containsNone(target, ".o_dialog_manager portal");
@@ -119,7 +117,6 @@ QUnit.test("dialog component crashes", async (assert) => {
     }
   }
   FailingDialog.template = tags.xml`<Dialog title="'Error'"/>`;
-  FailingDialog.components = { Dialog };
 
   const rpc = makeFakeRPCService();
   serviceRegistry.add(rpc.name, rpc);

@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Dialog } from "../../src/components/dialog/dialog";
+
 import { useService } from "../../src/core/hooks";
 import { Registry } from "../../src/core/registry";
 import { uiService } from "../../src/services/ui_service";
@@ -34,7 +34,6 @@ QUnit.test("simple rendering", async function (assert) {
   var _a, _b, _c;
   assert.expect(8);
   class Parent extends owl.Component {}
-  Parent.components = { Dialog };
   Parent.template = owl.tags.xml`
             <Dialog title="'Wow(l) Effect'">
                 Hello!
@@ -71,7 +70,6 @@ QUnit.test("simple rendering", async function (assert) {
 QUnit.test("simple rendering with two dialogs", async function (assert) {
   assert.expect(2);
   class Parent extends owl.Component {}
-  Parent.components = { Dialog };
   Parent.template = owl.tags.xml`
             <div>
                 <Dialog title="'First Title'">
@@ -102,7 +100,7 @@ QUnit.test(
         });
       }
     }
-    Parent.components = { Dialog };
+
     Parent.template = owl.tags.xml`
             <div t-on-dialog-closed="state.displayDialog = false">
                 <Dialog t-if="state.displayDialog">
@@ -129,7 +127,7 @@ QUnit.test(
         });
       }
     }
-    Parent.components = { Dialog };
+
     Parent.template = owl.tags.xml`
             <div t-on-dialog-closed="state.displayDialog = false">
                 <Dialog t-if="state.displayDialog">
@@ -154,7 +152,6 @@ QUnit.test("render custom footer buttons is possible", async function (assert) {
       });
     }
   }
-  Parent.components = { Dialog };
   Parent.template = owl.tags.xml`
             <div>
                 <Dialog t-if="state.displayDialog">
@@ -189,7 +186,7 @@ QUnit.test("embed an arbitrary component in a dialog is possible", async functio
       assert.step("message received by parent");
     }
   }
-  Parent.components = { Dialog, SubComponent };
+  Parent.components = { SubComponent };
   Parent.template = owl.tags.xml`
             <Dialog>
                 <SubComponent text="'Wow(l) Effect'" t-on-subcomponent-clicked="_onSubcomponentClicked"/>
@@ -211,7 +208,6 @@ QUnit.test("embed an arbitrary component in a dialog is possible", async functio
 QUnit.test("dialog without header/footer", async function (assert) {
   assert.expect(4);
   class Parent extends owl.Component {}
-  Parent.components = { Dialog };
   Parent.template = owl.tags.xml`
             <Dialog renderHeader="false" renderFooter="false"/>
         `;
@@ -225,7 +221,6 @@ QUnit.test("dialog without header/footer", async function (assert) {
 QUnit.test("dialog size can be chosen", async function (assert) {
   assert.expect(5);
   class Parent extends owl.Component {}
-  Parent.components = { Dialog };
   Parent.template = owl.tags.xml`
     <div>
       <Dialog contentClass="'xl'" size="'modal-xl'"/>
@@ -244,7 +239,6 @@ QUnit.test("dialog size can be chosen", async function (assert) {
 QUnit.test("dialog can be rendered on fullscreen", async function (assert) {
   assert.expect(2);
   class Parent extends owl.Component {}
-  Parent.components = { Dialog };
   Parent.template = owl.tags.xml`
             <div><Dialog fullscreen="true"/></div>
         `;
@@ -265,7 +259,6 @@ QUnit.test("Interactions between multiple dialogs", async function (assert) {
       delete this.dialogIds[id];
     }
   }
-  Parent.components = { Dialog };
   Parent.template = owl.tags.xml`
             <div>
               <Dialog t-foreach="Object.keys(dialogIds)" t-as="dialogId" t-key="dialogId"
@@ -329,7 +322,6 @@ QUnit.test("can take UI ownership", async function (assert) {
       assert.strictEqual(this.ui.getOwner(), dialogModalEl, "UI owner should be the dialog modal");
     }
   }
-  Parent.components = { Dialog };
   Parent.template = owl.tags.xml`<div><Dialog t-ref="dialogRef"/></div>`;
   parent = await mount(Parent, { env, target });
 

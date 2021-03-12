@@ -1,7 +1,6 @@
 /** @odoo-module **/
+
 import { useService } from "../../core/hooks";
-import { DropdownItem } from "../../components/dropdown/dropdown_item";
-import { Dropdown } from "../../components/dropdown/dropdown";
 import { systrayRegistry } from "../systray_registry";
 import { browser } from "../../core/browser";
 
@@ -38,6 +37,5 @@ export class UserMenu extends Component {
   }
 }
 UserMenu.template = "wowl.UserMenu";
-UserMenu.components = { Dropdown, DropdownItem };
 
 systrayRegistry.add("wowl.user_menu", UserMenu, { sequence: 0 });

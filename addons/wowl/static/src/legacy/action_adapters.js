@@ -3,7 +3,6 @@
 import { useService } from "../core/hooks";
 import { ViewNotFoundError } from "../actions/action_service";
 import { useDebugManager } from "../debug/debug_manager";
-import { Dialog } from "../components/dialog/dialog";
 import { objectToQuery } from "../services/router_service";
 import { ComponentAdapter } from "web.OwlCompatibility";
 import { mapDoActionOptionAPI } from "./utils";
@@ -98,7 +97,6 @@ class ActionAdapter extends ComponentAdapter {
               <t t-esc="props.message"/>
             </Dialog>
             `;
-        WarningDialog.components = { Dialog };
         this.dialogs.open(WarningDialog, { title: payload.title, message: payload.message });
       } else {
         this.notifications.create(payload.message, {

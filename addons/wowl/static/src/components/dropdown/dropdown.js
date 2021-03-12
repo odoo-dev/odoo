@@ -3,7 +3,7 @@ import { useBus } from "../../core/hooks";
 import { useService } from "../../core/hooks";
 import { ParentClosingMode } from "./dropdown_item";
 
-const { Component, core, hooks, useState } = owl;
+const { Component, core, hooks, useState, QWeb } = owl;
 
 export class Dropdown extends Component {
   setup() {
@@ -239,3 +239,5 @@ Dropdown.props = {
   },
 };
 Dropdown.template = "wowl.Dropdown";
+
+QWeb.registerComponent("Dropdown", Dropdown);

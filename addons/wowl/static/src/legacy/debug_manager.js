@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { editModelDebug } from "../debug/debug_service";
-import { Dialog } from "../components/dialog/dialog";
 import { json_node_to_xml } from "../utils/misc";
 import { formatMany2one } from "../utils/fields";
 
@@ -176,7 +175,6 @@ FieldViewGetDialog.template = tags.xml`
   <Dialog title="title">
     <pre t-esc="props.arch"/>
   </Dialog>`;
-FieldViewGetDialog.components = { Dialog };
 
 class GetMetadataDialog extends Component {
   setup() {
@@ -216,7 +214,6 @@ class GetMetadataDialog extends Component {
   }
 }
 GetMetadataDialog.template = "wowl.DebugManager.GetMetadata";
-GetMetadataDialog.components = { Dialog };
 
 class SetDefaultDialog extends Component {
   constructor() {
@@ -362,7 +359,6 @@ class SetDefaultDialog extends Component {
   }
 }
 SetDefaultDialog.template = "wowl.DebugManager.SetDefault";
-SetDefaultDialog.components = { Dialog };
 
 export function setupDebugView(accessRights, env, component, action) {
   const viewId = component.props.viewInfo.view_id;
