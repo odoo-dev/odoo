@@ -3,6 +3,7 @@
 import { setTemplates } from "./utility";
 import { legacyProm } from "wowl.test_legacy";
 import { makeTestOdoo } from "./mocks";
+import { registerCleanup } from "./cleanup";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -28,16 +29,17 @@ export async function setupTests() {
       windowListeners.push({ eventName, callback });
       originalWindowAddEventListener(...arguments);
     };
-  });
-  QUnit.testDone(() => {
-    odoo = originalOdoo;
+    registerCleanup(() => {
+      odoo = originalOdoo;
 
-    // Cleanup the listeners added on window in the current test.
-    windowListeners.forEach((listener) => {
-      window.removeEventListener(listener.eventName, listener.callback);
+      // Cleanup the listeners added on window in the current test.
+      windowListeners.forEach((listener) => {
+        window.removeEventListener(listener.eventName, listener.callback);
+      });
+      window.addEventListener = originalWindowAddEventListener;
     });
-    window.addEventListener = originalWindowAddEventListener;
   });
+
   const templatesUrl = `/wowl/templates/${new Date().getTime()}`;
   templates = await loadFile(templatesUrl);
   // as we currently have two qweb engines (owl and legacy), owl templates are

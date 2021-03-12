@@ -15,6 +15,7 @@ import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { patch, unpatch } from "../../src/utils/patch";
 import { browser, makeRAMLocalStorage } from "../../src/core/browser";
+import { registerCleanup } from "../helpers/cleanup";
 
 const { Component, mount, tags } = owl;
 
@@ -22,9 +23,16 @@ const { Component, mount, tags } = owl;
 // Utils
 // -----------------------------------------------------------------------------
 
+/**
+ * This method create a web client instance properly configured.
+ *
+ * Note that the returned web client will be automatically cleaned up after the
+ * end of the test.
+ *
+ * @param {*} params
+ */
 export async function createWebClient(params) {
-  const { AbstractAction, AbstractController, testUtils } = getLegacy();
-  const { patch, unpatch } = testUtils.mock;
+  const { AbstractAction, AbstractController } = getLegacy();
   // With the compatibility layer, the action manager keeps legacy alive if they
   // are still acessible from the breacrumbs. They are manually destroyed as soon
   // as they are no longer referenced in the stack. This works fine in production,
@@ -32,18 +40,23 @@ export async function createWebClient(params) {
   // we destroy the webclient and expect every legacy that has been instantiated
   // to be destroyed. We thus need to manually destroy them here.
   const controllers = [];
-  patch(AbstractAction, {
+  patch(AbstractAction.prototype, "abstractaction.test.patch", {
     init() {
       this._super(...arguments);
       controllers.push(this);
     },
   });
-  patch(AbstractController, {
+  patch(AbstractController.prototype, "abstractcontroller.test.patch", {
     init() {
       this._super(...arguments);
       controllers.push(this);
     },
   });
+  registerCleanup(() => {
+    unpatch(AbstractAction.prototype, "abstractaction.test.patch");
+    unpatch(AbstractController.prototype, "abstractcontroller.test.patch");
+  });
+
   const mockRPC = params.mockRPC || undefined;
   const env = await makeTestEnv({
     ...params.testConfig,
@@ -51,17 +64,14 @@ export async function createWebClient(params) {
   });
   const target = getFixture();
   const wc = await mount(WebClient, { env, target });
-  const _destroy = wc.destroy;
-  wc.destroy = () => {
-    _destroy.call(wc);
+  registerCleanup(() => {
     for (const controller of controllers) {
       if (!controller.isDestroyed()) {
         controller.destroy();
       }
     }
-    unpatch(AbstractAction);
-    unpatch(AbstractController);
-  };
+    wc.destroy();
+  });
   wc._____testname = QUnit.config.current.testName;
   addLegacyMockEnvironment(wc, params.testConfig, params.legacyParams);
   await legacyExtraNextTick();
@@ -72,7 +82,6 @@ export async function createWebClient(params) {
  * Remove this as soon as we drop the legacy support
  */
 function addLegacyMockEnvironment(comp, testConfig, legacyParams = {}) {
-  const cleanUps = [];
   const legacy = getLegacy();
   // setup a legacy env
   const dataManager = Object.assign(
@@ -124,13 +133,7 @@ function addLegacyMockEnvironment(comp, testConfig, legacyParams = {}) {
   const debouncedField = legacy.basicFields.DebouncedField;
   const initialDebouncedVal = debouncedField.prototype.DEBOUNCE;
   debouncedField.prototype.DEBOUNCE = 0;
-  cleanUps.push(() => (debouncedField.prototype.DEBOUNCE = initialDebouncedVal));
-  // clean up at end of test
-  const compDestroy = comp.destroy.bind(comp);
-  comp.destroy = () => {
-    cleanUps.forEach((fn) => fn());
-    compDestroy();
-  };
+  registerCleanup(() => (debouncedField.prototype.DEBOUNCE = initialDebouncedVal));
 }
 
 export async function doAction(env, ...args) {
@@ -153,30 +156,20 @@ export async function loadState(env, state) {
   await legacyExtraNextTick();
 }
 
-let isBrowserPatched = false;
-
-QUnit.testDone(() => {
-  if (isBrowserPatched) {
-    isBrowserPatched = false;
-    unpatch(browser, "actionmanager.config.patch");
-  }
-});
-
 export function getActionManagerTestConfig() {
-  if (!isBrowserPatched) {
-    patch(
-      browser,
-      "actionmanager.config.patch",
-      {
-        setTimeout: window.setTimeout.bind(window),
-        clearTimeout: window.clearTimeout.bind(window),
-        localStorage: makeRAMLocalStorage(),
-        sessionStorage: makeRAMLocalStorage(),
-      },
-      { pure: true }
-    );
-    isBrowserPatched = true;
-  }
+  patch(
+    browser,
+    "actionmanager.config.patch",
+    {
+      setTimeout: window.setTimeout.bind(window),
+      clearTimeout: window.clearTimeout.bind(window),
+      localStorage: makeRAMLocalStorage(),
+      sessionStorage: makeRAMLocalStorage(),
+    },
+    { pure: true }
+  );
+  registerCleanup(() => unpatch(browser, "actionmanager.config.patch"));
+
   const serviceRegistry = makeTestServiceRegistry();
   // build the action registry: copy the real action registry, and add an
   // additional basic client action

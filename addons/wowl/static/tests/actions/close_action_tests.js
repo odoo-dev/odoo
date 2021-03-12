@@ -62,7 +62,6 @@ QUnit.module("ActionManager", (hooks) => {
       type: "ir.actions.act_window_close",
     });
     assert.containsNone(document.body, ".o_technical_modal", "should have closed the modal");
-    webClient.destroy();
   });
 
   QUnit.test('execute "on_close" only if there is no dialog to close', async function (assert) {
@@ -82,7 +81,6 @@ QUnit.module("ActionManager", (hooks) => {
     // should call 'on_close' as there is no dialog to close
     await doAction(webClient, { type: "ir.actions.act_window_close" }, options);
     assert.verifySteps(["on_close"]);
-    webClient.destroy();
   });
 
   QUnit.test("close action with provided infos", async function (assert) {
@@ -101,7 +99,6 @@ QUnit.module("ActionManager", (hooks) => {
       },
       options
     );
-    webClient.destroy();
   });
 
   QUnit.test("history back calls on_close handler of dialog action", async function (assert) {
@@ -118,7 +115,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.verifySteps(["on_close"], "should have called the on_close handler");
     await nextTick();
     assert.containsNone(webClient.el, ".modal");
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -143,7 +139,6 @@ QUnit.module("ActionManager", (hooks) => {
       await legacyExtraNextTick();
       assert.containsOnce(webClient.el, ".o_list_view");
       assert.containsNone(webClient.el, ".modal");
-      webClient.destroy();
     }
   );
 
@@ -169,6 +164,5 @@ QUnit.module("ActionManager", (hooks) => {
     await legacyExtraNextTick();
     assert.containsNone(webClient, ".o_list_view", "there should not be a list view in dom");
     assert.containsOnce(webClient, ".o_form_view", "there should be a form view in dom");
-    webClient.destroy();
   });
 });

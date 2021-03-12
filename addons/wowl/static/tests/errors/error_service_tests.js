@@ -13,6 +13,7 @@ import { errorHandlerRegistry } from "../../src/errors/error_handler_registry";
 import OdooError from "../../src/errors/odoo_error";
 import { patch, unpatch } from "../../src/utils/patch";
 import { browser } from "../../src/core/browser";
+import { registerCleanup } from "../helpers/cleanup";
 
 const { Component, tags } = owl;
 
@@ -118,6 +119,7 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
       callback();
     },
   });
+  registerCleanup(() => unpatch(browser, "mock.settimeout"));
   const mockCreate = (message) => {
     assert.step(`create (${message})`);
     return 1234;
@@ -152,7 +154,6 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
     "close (1234)",
     "create (Connection restored. You are back online.)",
   ]);
-  unpatch(browser, "mock.settimeout");
 });
 
 QUnit.test("will let handlers from the registry handle errors first", async (assert) => {
@@ -161,12 +162,11 @@ QUnit.test("will let handlers from the registry handle errors first", async (ass
     assert.strictEqual(env.someValue, 14);
     assert.step("in handler");
   });
+  registerCleanup(() => errorHandlerRegistry.remove("__test_handler__"));
   const testEnv = await makeTestEnv({ serviceRegistry });
   testEnv.someValue = 14;
   const error = new OdooError("boom");
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
   assert.verifySteps(["in handler"]);
-
-  errorHandlerRegistry.remove("__test_handler__");
 });

@@ -8,6 +8,7 @@ import { viewRegistry } from "../../src/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 import { NotificationContainer } from "../../src/notifications/notification_container";
 import { Registry } from "../../src/core/registry";
+import { registerCleanup } from "../helpers/cleanup";
 
 const { Component, tags } = owl;
 
@@ -65,7 +66,6 @@ QUnit.module("ActionManager", (hooks) => {
     });
     assert.containsOnce(webClient, ".modal .test_client_action");
     assert.strictEqual(webClient.el.querySelector(".modal-title").textContent, "Dialog Test");
-    webClient.destroy();
   });
 
   QUnit.test("can display client actions as main, then in Dialog", async function (assert) {
@@ -80,7 +80,6 @@ QUnit.module("ActionManager", (hooks) => {
     });
     assert.containsOnce(webClient, ".o_action_manager .test_client_action");
     assert.containsOnce(webClient, ".modal .test_client_action");
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -98,7 +97,6 @@ QUnit.module("ActionManager", (hooks) => {
       await doAction(webClient, "__test__client__action__");
       assert.containsOnce(webClient, ".test_client_action");
       assert.containsNone(webClient, ".modal .test_client_action");
-      webClient.destroy();
     }
   );
 
@@ -116,6 +114,7 @@ QUnit.module("ActionManager", (hooks) => {
       assert.step((args && args.method) || route);
     };
     const webClient = await createWebClient({ testConfig, mockRPC });
+    registerCleanup(() => delete core.action_registry.map.HelloWorldTestLeg);
     await doAction(webClient, "HelloWorldTestLeg");
     assert.containsNone(
       document.body,
@@ -128,8 +127,6 @@ QUnit.module("ActionManager", (hooks) => {
       "should have correctly rendered the client action"
     );
     assert.verifySteps(["/wowl/load_menus"]);
-    webClient.destroy();
-    delete core.action_registry.map.HelloWorldTestLeg;
   });
 
   QUnit.test("can execute client actions from tag name", async function (assert) {
@@ -137,6 +134,8 @@ QUnit.module("ActionManager", (hooks) => {
     class ClientAction extends Component {}
     ClientAction.template = tags.xml`<div class="o_client_action_test">Hello World</div>`;
     testConfig.actionRegistry.add("HelloWorldTest", ClientAction);
+    registerCleanup(() => testConfig.actionRegistry.remove("HelloWorldTest"));
+
     const mockRPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
@@ -153,8 +152,6 @@ QUnit.module("ActionManager", (hooks) => {
       "should have correctly rendered the client action"
     );
     assert.verifySteps(["/wowl/load_menus"]);
-    webClient.destroy();
-    testConfig.actionRegistry.remove("HelloWorldTest");
   });
 
   QUnit.test("client action with control panel (legacy)", async function (assert) {
@@ -170,6 +167,7 @@ QUnit.module("ActionManager", (hooks) => {
       },
     });
     core.action_registry.add("HelloWorldTest", ClientAction);
+    registerCleanup(() => delete core.action_registry.map.HelloWorldTest);
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, "HelloWorldTest");
     assert.strictEqual(
@@ -193,8 +191,6 @@ QUnit.module("ActionManager", (hooks) => {
       "Hello World",
       "should have correctly rendered the client action"
     );
-    webClient.destroy();
-    delete core.action_registry.map.HelloWorldTest;
   });
 
   QUnit.test("state is pushed for client action (legacy)", async function (assert) {
@@ -217,6 +213,11 @@ QUnit.module("ActionManager", (hooks) => {
       }),
       { force: true }
     );
+    registerCleanup(() => {
+      delete core.action_registry.map.HelloWorldTest;
+      actionRegistry.remove("HelloWorldTest");
+    });
+
     const webClient = await createWebClient({ testConfig });
     let currentTitle = webClient.env.services.title.current;
     assert.strictEqual(currentTitle, '{"zopenerp":"Odoo"}');
@@ -231,9 +232,6 @@ QUnit.module("ActionManager", (hooks) => {
       foo: "baz",
     });
     assert.verifySteps(["push_state"]);
-    webClient.destroy();
-    delete core.action_registry.map.HelloWorldTest;
-    actionRegistry.remove("HelloWorldTest");
   });
 
   QUnit.test("action can use a custom control panel (legacy)", async function (assert) {
@@ -256,8 +254,6 @@ QUnit.module("ActionManager", (hooks) => {
       ".custom-control-panel",
       "should have a custom control panel"
     );
-    webClient.destroy();
-    delete core.action_registry.map.HelloWorldTest;
   });
 
   QUnit.test("breadcrumb is updated on title change (legacy)", async function (assert) {
@@ -277,6 +273,7 @@ QUnit.module("ActionManager", (hooks) => {
       },
     });
     core.action_registry.add("HelloWorldTest", ClientAction);
+    registerCleanup(() => delete core.action_registry.map.HelloWorldTest);
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, "HelloWorldTest");
     assert.strictEqual(
@@ -291,8 +288,6 @@ QUnit.module("ActionManager", (hooks) => {
       "new title",
       "should have updated title as breadcrumb content"
     );
-    webClient.destroy();
-    delete core.action_registry.map.HelloWorldTest;
   });
 
   QUnit.test("client actions can have breadcrumbs (legacy)", async function (assert) {
@@ -334,7 +329,6 @@ QUnit.module("ActionManager", (hooks) => {
       webClient.el.querySelector(".breadcrumb-item.active").textContent,
       "No time for sweetness"
     );
-    webClient.destroy();
     delete core.action_registry.map.ClientAction;
     delete core.action_registry.map.ClientAction2;
   });
@@ -368,7 +362,6 @@ QUnit.module("ActionManager", (hooks) => {
       webClient.el.querySelector(".breadcrumb").textContent,
       "Favorite PoniesnewOwlTitlePartners"
     );
-    webClient.destroy();
   });
 
   QUnit.test("test display_notification client action", async function (assert) {
@@ -404,6 +397,5 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsOnce(webClient, ".o_kanban_view");
     await testUtils.dom.click(notificationElement.querySelector(".o_notification_close"));
     assert.containsNone(document.body, notificationSelector, "the notification should be destroy ");
-    webClient.destroy();
   });
 });

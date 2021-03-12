@@ -21,18 +21,28 @@ import {
   mocks,
 } from "./mocks";
 import { makeMockServer } from "./mock_server";
+import { registerCleanup } from "./cleanup";
 
 const { Settings } = luxon;
 
-function unpatchDate() {
-  Settings.resetCaches();
-}
+/**
+ * Patch the native Date object
+ *
+ * Note that it will be automatically unpatched at the end of the test
+ *
+ * @param {number} [year]
+ * @param {number} [month]
+ * @param {number} [day]
+ * @param {number} [hours]
+ * @param {number} [minutes]
+ * @param {number} [seconds]
+ */
 export function patchDate(year, month, day, hours, minutes, seconds) {
   const actualDate = new Date();
   const fakeDate = new Date(year, month, day, hours, minutes, seconds);
   const timeInterval = actualDate.getTime() - fakeDate.getTime();
   Settings.now = () => Date.now() - timeInterval;
-  return unpatchDate;
+  registerCleanup(() => Settings.resetCaches());
 }
 
 export function makeTestServiceRegistry() {
