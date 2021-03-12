@@ -20,15 +20,14 @@ export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
  *
  * @param {string?} refName
  */
-export function useUIOwnership(refName) {
+export function useActiveElement(refName) {
   const uiService = useService("ui");
   const owner = refName ? useRef(refName) : Component.current;
-  let uiOwnership = undefined;
   onMounted(() => {
-    uiOwnership = uiService.takeOwnership(owner.el);
+    uiService.activateElement(owner.el);
   });
   onWillUnmount(() => {
-    uiOwnership.release();
+    uiService.deactivateElement(owner.el);
   });
 }
 
@@ -57,28 +56,32 @@ export const uiService = {
       bus,
       block,
       unblock,
-      get isBlocked() {
+    });
+
+    Object.defineProperty(ui, "isBlocked", {
+      get() {
         return blockCount > 0;
       },
     });
 
     // UI ownership code
-    let ownerStack = [document];
-    function takeOwnership(owner) {
-      ownerStack.push(owner);
-      return {
-        release() {
-          ownerStack = ownerStack.filter((x) => x !== owner);
-        },
-      };
+    let activeElems = [document];
+
+    function activateElement(el) {
+      activeElems.push(el);
     }
-    function getOwner() {
-      return ownerStack[ownerStack.length - 1];
+    function deactivateElement(el) {
+      activeElems = activeElems.filter((x) => x !== el);
     }
 
     Object.assign(ui, {
-      getOwner,
-      takeOwnership,
+      activateElement,
+      deactivateElement,
+    });
+    Object.defineProperty(ui, "activeElement", {
+      get() {
+        return activeElems[activeElems.length - 1];
+      },
     });
 
     // window size handling
@@ -103,7 +106,9 @@ export const uiService = {
 
     Object.assign(ui, {
       size: getSize(),
-      get isSmall() {
+    });
+    Object.defineProperty(ui, "isSmall", {
+      get() {
         return ui.size <= SIZES.SM;
       },
     });

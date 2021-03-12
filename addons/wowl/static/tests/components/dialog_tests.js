@@ -317,7 +317,7 @@ QUnit.module("Components", (hooks) => {
         this.ui = useService("ui");
         this.dialog = useRef("dialogRef");
         assert.strictEqual(
-          this.ui.getOwner(),
+          this.ui.activeElement,
           document,
           "UI owner should be the default (document) as Parent is not mounted yet"
         );
@@ -325,7 +325,7 @@ QUnit.module("Components", (hooks) => {
       mounted() {
         const dialogModalEl = this.dialog.comp.modalRef.el;
         assert.strictEqual(
-          this.ui.getOwner(),
+          this.ui.activeElement,
           dialogModalEl,
           "UI owner should be the dialog modal"
         );
@@ -336,7 +336,7 @@ QUnit.module("Components", (hooks) => {
 
     parent.unmount();
     assert.strictEqual(
-      env.services.ui.getOwner(),
+      env.services.ui.activeElement,
       document,
       "UI owner should be reset to the default (document)"
     );

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 import { Registry } from "../../src/core/registry";
 import { hotkeyService, useHotkey } from "../../src/services/hotkey_service";
-import { uiService, useUIOwnership } from "../../src/services/ui_service";
+import { uiService, useActiveElement } from "../../src/services/ui_service";
 import { getFixture, makeTestEnv, nextTick } from "../helpers";
 
 const { Component, mount, tags } = owl;
@@ -264,7 +264,7 @@ QUnit.test("subscriptions and elements belong to the correct UI owner", async (a
   class MyComponent2 extends Component {
     setup() {
       useHotkey({ hotkey: "a", callback: () => assert.step("MyComponent2 subscription") });
-      useUIOwnership();
+      useActiveElement();
     }
     onClick() {
       assert.step("MyComponent2 [data-hotkey]");

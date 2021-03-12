@@ -109,18 +109,18 @@ export const hotkeyService = {
     function dispatch(infos) {
       let dispatched = false;
       const { hotkey, _originalEvent: event } = infos;
-      const uiOwnerElement = env.services.ui.getOwner();
+      const activeElement = env.services.ui.activeElement;
 
       // Dispatch actual hotkey to all matching subscriptions
       for (const [_, sub] of subscriptions) {
-        if (sub.contextOwner === uiOwnerElement && sub.hotkey === hotkey) {
+        if (sub.contextOwner === activeElement && sub.hotkey === hotkey) {
           sub.callback(hotkey);
           dispatched = true;
         }
       }
 
       // Click on all elements having a data-hotkey attribute matching the actual hotkey.
-      const elems = uiOwnerElement.querySelectorAll(`[data-hotkey='${hotkey}']`);
+      const elems = activeElement.querySelectorAll(`[data-hotkey='${hotkey}']`);
       for (const el of elems) {
         el.click();
         dispatched = true;
@@ -209,7 +209,7 @@ export const hotkeyService = {
       // Due to the way elements are mounted in the DOM by Owl (bottom-to-top),
       // we need to wait the next micro task tick to set the context owner of the subscription.
       Promise.resolve().then(() => {
-        subscription.contextOwner = env.services.ui.getOwner();
+        subscription.contextOwner = env.services.ui.activeElement;
       });
 
       return token;

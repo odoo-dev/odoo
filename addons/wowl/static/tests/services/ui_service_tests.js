@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { uiService, useUIOwnership } from "../../src/services/ui_service";
+import { uiService, useActiveElement } from "../../src/services/ui_service";
 import { Registry } from "../../src/core/registry";
 import { getFixture, makeTestEnv, nextTick } from "../helpers";
 import { BlockUI } from "../../src/webclient/block_ui/block_ui";
@@ -64,27 +64,27 @@ QUnit.test("use block and unblock several times to block ui with ui service", as
 QUnit.test("a component can take ownership", async (assert) => {
   class MyComponent extends Component {
     setup() {
-      useUIOwnership();
+      useActiveElement();
     }
   }
   MyComponent.template = owl.tags.xml`<div/>`;
 
   const env = await makeTestEnv({ ...baseConfig });
   const ui = env.services.ui;
-  assert.deepEqual(ui.getOwner(), document);
+  assert.deepEqual(ui.activeElement, document);
 
   const comp = await mount(MyComponent, { env, target });
-  assert.deepEqual(ui.getOwner(), comp.el);
+  assert.deepEqual(ui.activeElement, comp.el);
 
   comp.unmount();
-  assert.deepEqual(ui.getOwner(), document);
+  assert.deepEqual(ui.activeElement, document);
   comp.destroy();
 });
 
 QUnit.test("a component can take ownership: with t-ref delegation", async (assert) => {
   class MyComponent extends Component {
     setup() {
-      useUIOwnership("delegatedRef");
+      useActiveElement("delegatedRef");
     }
   }
   MyComponent.template = owl.tags.xml`
@@ -96,12 +96,12 @@ QUnit.test("a component can take ownership: with t-ref delegation", async (asser
 
   const env = await makeTestEnv({ ...baseConfig });
   const ui = env.services.ui;
-  assert.deepEqual(ui.getOwner(), document);
+  assert.deepEqual(ui.activeElement, document);
 
   const comp = await mount(MyComponent, { env, target });
-  assert.deepEqual(ui.getOwner(), comp.el.querySelector("div#owner"));
+  assert.deepEqual(ui.activeElement, comp.el.querySelector("div#owner"));
 
   comp.unmount();
-  assert.deepEqual(ui.getOwner(), document);
+  assert.deepEqual(ui.activeElement, document);
   comp.destroy();
 });
