@@ -653,7 +653,9 @@ var exportVariable = (function (exports) {
 
     function getDeepestPosition(node, offset) {
         while (node.hasChildNodes()) {
-            node = node.childNodes[offset - 1] || node.firstChild;
+            const newNode = node.childNodes[offset - 1] || node.firstChild;
+            if (isEmptyBlock(newNode)) break;
+            node = newNode;
             offset = offset === 0 ? 0 : nodeSize(node);
         }
         let didMove = false;
