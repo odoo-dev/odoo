@@ -4,7 +4,7 @@ import { ActionDialog } from "../../src/actions/action_dialog";
 import { Registry } from "../../src/core/registry";
 import { DebugManager } from "../../src/debug/debug_manager";
 import { debugService } from "../../src/debug/debug_service";
-import { modelService } from "../../src/services/model_service";
+import { ormService } from "../../src/services/orm_service";
 import { useDebugManager } from "../../src/debug/debug_manager";
 import { click, getFixture, makeTestEnv } from "../helpers/index";
 import { hotkeyService } from "../../src/services/hotkey_service";
@@ -21,7 +21,7 @@ QUnit.module("DebugManager", (hooks) => {
     const serviceRegistry = new Registry();
     serviceRegistry.add("hotkey", hotkeyService);
     serviceRegistry.add("ui", uiService);
-    serviceRegistry.add("model", modelService);
+    serviceRegistry.add("orm", ormService);
     serviceRegistry.add("debug", debugService);
     const mockRPC = async (route, args) => {
       if (args.method === "check_access_rights") {

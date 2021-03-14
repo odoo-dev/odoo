@@ -4,6 +4,8 @@ import { serviceRegistry } from "./service_registry";
 
 const { loadFile } = owl.utils;
 
+export const SPECIAL_METHOD = Symbol("special_method");
+
 /**
  * Deploy all services registered in the service registry, while making sure
  * each service dependencies are properly fulfilled.
@@ -48,6 +50,9 @@ async function _deployServices(env, toDeploy, timeoutId) {
       let name = service.name;
       toDeploy.delete(service);
       const value = service.deploy(env);
+      if (value && "specializeForComponent" in service) {
+        value[SPECIAL_METHOD] = service.specializeForComponent;
+      }
       if (value instanceof Promise) {
         proms.push(
           value.then((val) => {

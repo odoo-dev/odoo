@@ -4,8 +4,6 @@ import { browser } from "../core/browser";
 import OdooError from "../errors/odoo_error";
 import { serviceRegistry } from "../webclient/service_registry";
 
-const { Component } = owl;
-
 // -----------------------------------------------------------------------------
 // Errors
 // -----------------------------------------------------------------------------
@@ -41,8 +39,7 @@ function makeErrorFromResponse(reponse) {
   return error;
 }
 
-let rpcId = 0;
-function jsonrpc(env, url, params, rpcId, settings = {}) {
+function jsonrpc(env, rpcId, url, params, settings = {}) {
   const bus = env.bus;
   const XHR = browser.XMLHttpRequest;
   const data = {
@@ -83,18 +80,18 @@ function jsonrpc(env, url, params, rpcId, settings = {}) {
 // -----------------------------------------------------------------------------
 export const rpcService = {
   deploy(env) {
-    return async function (route, params = {}, settings) {
-      if (this instanceof Component) {
-        if (this.__owl__.status === 5 /* DESTROYED */) {
-          throw new Error("A destroyed component should never initiate a RPC");
-        }
-        const result = await jsonrpc(env, route, params, rpcId++, settings);
-        if (this instanceof Component && this.__owl__.status === 5 /* DESTROYED */) {
-          return new Promise(() => {});
-        }
-        return result;
+    let rpcId = 0;
+    return (route, params = {}, settings) => {
+      return jsonrpc(env, rpcId++, route, params, settings);
+    };
+  },
+  specializeForComponent(component, rpc) {
+    return async (...args) => {
+      if (component.__owl__.status === 5 /* DESTROYED */) {
+        throw new Error("A destroyed component should never initiate a RPC");
       }
-      return jsonrpc(env, route, params, rpcId++, settings);
+      const result = await rpc(...args);
+      return component.__owl__.status === 5 ? new Promise(() => {}) : result;
     };
   },
 };

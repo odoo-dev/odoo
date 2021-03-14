@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { SPECIAL_METHOD } from "../webclient/setup";
+
 const { onMounted, onPatched, onWillUnmount, useComponent } = owl.hooks;
 
 // -----------------------------------------------------------------------------
@@ -19,7 +21,10 @@ export function useService(serviceName) {
     throw new Error(`Service ${serviceName} is not available`);
   }
   const service = services[serviceName];
-  return typeof service === "function" ? service.bind(component) : service;
+  if (service && SPECIAL_METHOD in service) {
+    return service[SPECIAL_METHOD](component, service);
+  }
+  return service;
 }
 
 /**

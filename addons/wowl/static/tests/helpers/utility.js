@@ -7,7 +7,7 @@ import { notificationService } from "../../src/notifications/notification_servic
 import { dialogService } from "../../src/services/dialog_service";
 import { hotkeyService } from "../../src/services/hotkey_service";
 import { menuService } from "../../src/services/menu_service";
-import { modelService } from "../../src/services/model_service";
+import { ormService } from "../../src/services/orm_service";
 import { uiService } from "../../src/services/ui_service";
 import { viewService } from "../../src/views/view_service";
 import { viewRegistry } from "../../src/views/view_registry";
@@ -61,7 +61,7 @@ export function makeTestServiceRegistry() {
     .add("action", actionService)
     .add("router", fakeRouterService)
     .add("view", viewService)
-    .add("model", modelService)
+    .add("orm", ormService)
     .add("title", fakeTitleService)
     .add("ui", uiService)
     .add("effect", effectService)

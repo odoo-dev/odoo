@@ -210,7 +210,6 @@ function useMagicLegacyReload() {
 export class ViewAdapter extends ActionAdapter {
   setup() {
     super.setup();
-    this.model = useService("model");
     this.actionService = useService("action");
     this.vm = useService("view");
     this.shouldUpdateWidget = true;

@@ -47,9 +47,9 @@ import { serviceRegistry } from "../webclient/service_registry";
 
 export const viewService = {
   name: "view",
-  dependencies: ["model"],
+  dependencies: ["orm"],
   deploy(env) {
-    const modelService = env.services.model;
+    const { orm } = env.services;
     const cache = {};
     /**
      * Loads various information concerning views: fields_view for each view,
@@ -62,7 +62,7 @@ export const viewService = {
     async function loadViews(params, options) {
       const key = JSON.stringify([params.model, params.views, params.context, options]);
       if (!cache[key]) {
-        const result = await modelService(params.model).call("load_views", [], {
+        const result = await orm.call(params.model, "load_views", [], {
           views: params.views,
           options: {
             action_id: options.actionId || false,

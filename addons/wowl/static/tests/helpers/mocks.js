@@ -4,6 +4,7 @@ import { effectService } from "../../src/effects/effect_service";
 import { makePushState, routeToUrl } from "../../src/services/router_service";
 import { SIZES } from "../../src/services/ui_service";
 import { makeLocalization } from "../../src/services/localization_service";
+import { rpcService } from "../../src/services/rpc_service";
 
 const { Component } = owl;
 
@@ -100,6 +101,7 @@ export function makeFakeRPCService(mockRPC) {
     deploy() {
       return buildMockRPC(mockRPC);
     },
+    specializeForComponent: rpcService.specializeForComponent,
   };
 }
 

@@ -16,7 +16,7 @@ export function editModelDebug(env, title, model, id) {
 }
 
 export const debugService = {
-  dependencies: ["model"],
+  dependencies: ["orm"],
   async deploy(env) {
     let accessRightsProm;
     if (env.debug !== "") {
@@ -25,6 +25,7 @@ export const debugService = {
 
     return {
       getAccessRights() {
+        const { orm } = env.services;
         if (!accessRightsProm) {
           accessRightsProm = new Promise((resolve, reject) => {
             const accessRights = {
@@ -32,17 +33,23 @@ export const debugService = {
               canSeeRecordRules: false,
               canSeeModelAccess: false,
             };
-            const canEditView = env.services
-              .model("ir.ui.view")
-              .call("check_access_rights", [], { operation: "write", raise_exception: false })
+            const canEditView = orm
+              .call("ir.ui.view", "check_access_rights", [], {
+                operation: "write",
+                raise_exception: false,
+              })
               .then((result) => (accessRights.canEditView = result));
-            const canSeeRecordRules = env.services
-              .model("ir.rule")
-              .call("check_access_rights", [], { operation: "read", raise_exception: false })
+            const canSeeRecordRules = orm
+              .call("ir.rule", "check_access_rights", [], {
+                operation: "read",
+                raise_exception: false,
+              })
               .then((result) => (accessRights.canSeeRecordRules = result));
-            const canSeeModelAccess = env.services
-              .model("ir.model.access")
-              .call("check_access_rights", [], { operation: "read", raise_exception: false })
+            const canSeeModelAccess = orm
+              .call("ir.model.access", "check_access_rights", [], {
+                operation: "read",
+                raise_exception: false,
+              })
               .then((result) => (accessRights.canSeeModelAccess = result));
             Promise.all([canEditView, canSeeRecordRules, canSeeModelAccess])
               .then(() => resolve(accessRights))
