@@ -900,7 +900,11 @@ const Wysiwyg = Widget.extend({
         this.toolbar.$el.find('.only_fa').toggleClass('d-none', !$target.is('.fa'));
         // Toggle the toolbar arrow.
         this.toolbar.$el.toggleClass('noarrow', isInMedia);
-
+        // open the link modal / tool when CTRL+K is pressed
+        if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            this.toggleLinkTools();
+        }
         // Unselect all media.
         this.$editable.find('.o_we_selected_image').removeClass('o_we_selected_image');
         if (isInMedia) {
