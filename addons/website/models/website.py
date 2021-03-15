@@ -668,6 +668,7 @@ class Website(models.Model):
             self.env['web_editor.assets'].make_scss_customization(url, custo)
 
         self.survey_state = 'done'
+        self.env['theme.utils'].enable_view('%s.survey_tour' % survey_data.get('theme_name'))
         logo = survey_data.get('logo')
         if logo:
             self.logo = logo.split(',', 1)[1]

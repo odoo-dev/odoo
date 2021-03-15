@@ -153,6 +153,8 @@ class Theme(models.AbstractModel):
     _auto = False
 
     def _post_copy(self, mod):
+        if 'common' not in mod.name:
+            self.disable_view('%s.survey_tour' % mod.name)
         # Call specific theme post copy
         theme_post_copy = '_%s_post_copy' % mod.name
         if hasattr(self, theme_post_copy):

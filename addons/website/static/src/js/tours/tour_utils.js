@@ -5,7 +5,6 @@ const core = require("web.core");
 const _t = core._t;
 
 var tour = require("web_tour.tour");
-var rpc = require('web.rpc');
 /**
 
 const snippets = [
@@ -253,31 +252,16 @@ function prepend_trigger(steps, prepend_text='') {
     return steps;
 }
 
-// TODO: use a generic tour when survey has been completed
-function getSurveyTourSteps() {
-    return [
-        goBackToBlocks(),
-        goToOptions(),
-    ];
+function registerThemeHomepageTour(name, steps) {
+    tour.register(name, {
+        url: "/?enable_editor=1",
+        sequence: 1010,
+        saveAs: "homepage",
+    }, prepend_trigger(
+        steps,
+        "html[data-view-xmlid='website.homepage'] "
+    ));
 }
-
-async function registerThemeHomepageTour(name, steps) {
-    await rpc.query({
-        model: 'website',
-        method: 'get_survey_state',
-    }).then((surveyState) => {
-        const tourSteps = surveyState === 'done' ? getSurveyTourSteps() : steps;
-        tour.register(name, {
-            url: "/?enable_editor=1",
-            sequence: 1010,
-            saveAs: "homepage",
-        }, prepend_trigger(
-            tourSteps,
-            "html[data-view-xmlid='website.homepage'] "
-        ));
-    });
-}
-
 
 return {
     addMedia,
