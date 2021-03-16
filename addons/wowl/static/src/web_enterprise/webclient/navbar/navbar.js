@@ -2,13 +2,13 @@
 const { hooks } = owl;
 import { NavBar } from "@wowl/webclient/navbar/navbar";
 import { useService } from "@wowl/core/hooks";
+import { isMobileOS } from "@wowl/core/browser";
 
 const { useRef } = hooks;
 export class EnterpriseNavBar extends NavBar {
   constructor() {
     super(...arguments);
     this.actionManager = useService("action");
-    this.device = useService("device");
     this.hm = useService("home_menu");
     this.menuAppsRef = useRef("menuApps");
     this.menuBrand = useRef('menuBrand');
@@ -21,7 +21,7 @@ export class EnterpriseNavBar extends NavBar {
     });
   }
   get currentApp() {
-    return !this.device.isMobileOS ? super.currentApp : undefined;
+    return !isMobileOS ? super.currentApp : undefined;
   }
   get hasBackgroundAction() {
     return this.hm.hasBackgroundAction;

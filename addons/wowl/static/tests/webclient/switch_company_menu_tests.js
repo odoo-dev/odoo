@@ -1,15 +1,19 @@
 /** @odoo-module **/
 import { Registry } from "../../src/core/registry";
 import { makeFakeUserService } from "../helpers/mocks";
-import { makeTestEnv } from "../helpers/index";
-import { click, mount } from "../helpers/utility";
+import { makeTestEnv, getFixture } from "../helpers/index";
+import { click } from "../helpers/utility";
 import { SwitchCompanyMenu } from '../../src/switch_company_menu/switch_company_menu';
+import { hotkeyService } from "../../src/services/hotkey_service";
+
+const { mount } = owl;
 
 QUnit.module("SwitchCompanyMenu", (hooks) => {
   let testConfig;
   async function createParent() {
     const env = await makeTestEnv(testConfig);
-    return mount(Parent, { env });
+    const target = getFixture();
+    return mount(Parent, { env, target });
   }
   class Parent extends owl.Component {
     get systrayItems() {
@@ -35,6 +39,7 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
       },
     };
     serviceRegistry.add("user", makeFakeUserService({ session_info }));
+    serviceRegistry.add("hotkey", hotkeyService);
     testConfig = { serviceRegistry };
   });
 

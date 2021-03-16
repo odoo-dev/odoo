@@ -13,7 +13,7 @@
         t-if="currentApp"
         class="o_menu_brand"
         payload="currentApp"
-        t-esc="currentApp.name" 
+        t-esc="currentApp.name"
         t-ref="menuBrand"/>
 
       <!-- Current App Sections -->

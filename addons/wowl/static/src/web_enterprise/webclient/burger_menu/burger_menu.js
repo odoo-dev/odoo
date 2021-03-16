@@ -10,7 +10,11 @@ import { MobileSwitchCompanyMenu } from "./mobile_switch_company_menu/mobile_swi
  * opens fullscreen and displays the user menu and the current app submenus.
  */
 
-class BurgerMenu extends owl.Component {
+export class BurgerMenu extends owl.Component {
+  static isDisplayed(env) {
+    return env.services.ui.isSmall;
+  }
+
   constructor() {
     super(...arguments);
     this.user = useService("user");
@@ -68,13 +72,4 @@ BurgerMenu.components = {
   DropdownItem,
   BurgerUserMenu,
   MobileSwitchCompanyMenu,
-};
-
-export const burgerMenu = {
-  name: "wowl.burger_menu",
-  Component: BurgerMenu,
-  sequence: 0,
-  isDisplayed(env) {
-    return env.services.device.isSmall;
-  },
 };

@@ -3,8 +3,8 @@
 
 <li t-name="wowl.SwitchCompanyMenu" class="o_switch_company_menu">
     <Dropdown>
-        <span t-attf-class="{{device.isSmall ? 'fa fa-building-o' : 'oe_topbar_name'}}">
-            <t t-if="!device.isSmall"><t t-esc="user.current_company.name"/></t>
+        <span t-attf-class="{{ui.isSmall ? 'fa fa-building-o' : 'oe_topbar_name'}}">
+            <t t-if="!ui.isSmall"><t t-esc="user.current_company.name"/></t>
         </span>
         <t t-set-slot="menu">
             <t t-foreach="user.allowed_companies" t-as="company_id">

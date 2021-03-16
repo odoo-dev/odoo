@@ -6,7 +6,7 @@ import { DropdownItem } from "../components/dropdown/dropdown_item";
 export class SwitchCompanyMenu extends owl.Component {
   constructor() {
     super(...arguments);
-    this.device = useService("device");
+    this.ui = useService("ui");
     this.user = useService("user");
   }
   toggleCompany(companyId) {
@@ -24,6 +24,6 @@ export const switchCompanySystrayItem = {
   Component: SwitchCompanyMenu,
   sequence: 1,
   isDisplayed(env) {
-    return !env.services.device.isSmall;
+    return !env.services.ui.isSmall;
   },
 };

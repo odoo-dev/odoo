@@ -8,7 +8,7 @@ const { Component } = owl;
 
 export class UserMenu extends Component {
   static isDisplayed(env) {
-    return !env.services.device.isSmall;
+    return !env.services.ui.isSmall;
   }
 
   setup() {

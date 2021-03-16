@@ -27,10 +27,4 @@ export class StudioSystray extends owl.Component {
 }
 StudioSystray.template = "web_studio.SystrayItem";
 
-const studioSystrayItem = {
-  name: "StudioSystrayItem",
-  Component: StudioSystray,
-  sequence: 1,
-};
-
-systrayRegistry.add(studioSystrayItem.name, studioSystrayItem);
+systrayRegistry.add("StudioSystrayItem", StudioSystray, { sequence: 1 });
