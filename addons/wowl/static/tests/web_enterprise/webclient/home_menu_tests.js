@@ -1,12 +1,12 @@
 /** @odoo-module **/
 import { HomeMenu } from "@wowl/web_enterprise/webclient/home_menu/home_menu";
-import { modelService } from "@wowl/services/model";
+import { ormService } from "@wowl/services/orm_service";
 import { Registry } from "@wowl/core/registry";
 import testUtils from "web.test_utils";
-import { getFixture, makeTestEnv, mount } from "../../helpers/utility";
+import { getFixture, makeTestEnv } from "../../helpers/utility";
 import { makeFakeUIService } from "../../helpers/mocks";
 
-const { Component, core, hooks, tags } = owl;
+const { Component, core, hooks, mount, tags } = owl;
 const { EventBus } = core;
 const patchDate = testUtils.mock.patchDate;
 
@@ -25,7 +25,8 @@ async function createHomeMenu(testConfig) {
   Parent.components = { HomeMenu };
   Parent.template = tags.xml`<HomeMenu t-ref="home-menu" t-props="homeMenuProps"/>`;
   const env = await makeTestEnv(testConfig);
-  const parent = await mount(Parent, { env });
+  const target = getFixture();
+  const parent = await mount(Parent, { env, target });
   return parent.homeMenuRef.comp;
 }
 
@@ -395,7 +396,7 @@ QUnit.module(
       testConfig.serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService, true);
       testConfig.serviceRegistry.add(mockedCookieService.name, mockedCookieService);
       testConfig.serviceRegistry.add("ui", makeFakeUIService());
-      testConfig.serviceRegistry.add("model", modelService);
+      testConfig.serviceRegistry.add("orm", ormService);
 
       const homeMenu = await createHomeMenu(testConfig);
 

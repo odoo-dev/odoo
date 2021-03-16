@@ -314,6 +314,8 @@ export function makeFakeRouterService(params) {
 
 export function makeFakeUIService(values) {
   const defaults = {
+    block: () => {},
+    unblock: () => {},
     isSmall: false,
     size: SIZES.LG,
     SIZES,

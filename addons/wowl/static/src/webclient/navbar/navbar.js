@@ -53,12 +53,10 @@ export class NavBar extends Component {
   }
 
   get systrayItems() {
-    const x = odoo.systrayRegistry
+    return odoo.systrayRegistry
       .getAll()
       .filter((Item) => ("isDisplayed" in Item ? Item.isDisplayed(this.env) : true))
       .reverse();
-      debugger
-      return x;
   }
 
   /**

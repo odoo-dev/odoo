@@ -26,7 +26,7 @@ export class ExpirationPanel extends Component {
     this.cookie = useService("cookie");
     this.ui = useService("ui");
     this.rpc = useService("rpc");
-    this.model = useService("model");
+    this.orm = useService("orm");
 
     let expirationDate;
     if (this.enterprise.expirationDate) {
@@ -143,7 +143,7 @@ export class ExpirationPanel extends Component {
         ["login_date", ">=", limitDate],
       ],
     ];
-    const nbUsers = await this.model("res.users").call("search_count", args);
+    const nbUsers = await this.orm.call("res.users", "search_count", args);
     odoo.browser.location = `https://www.odoo.com/odoo-enterprise/upgrade?num_users=${nbUsers}`;
   }
 
@@ -159,19 +159,18 @@ export class ExpirationPanel extends Component {
       input.setAttribute("placeholder", inputTitle);
       return;
     }
-    const irConfigParam = this.model("ir.config_parameter");
     const [oldDate, , linkedSubscriptionUrl, emailLinked] = await Promise.all([
-      irConfigParam.call("get_param", ["database.expiration_date"]),
-      irConfigParam.call("set_param", ["database.enterprise_code", enterpriseCode]),
-      irConfigParam.call("get_param", ["database.already_linked_subscription_url"]),
-      irConfigParam.call("get_param", ["database.already_linked_email"]),
+      this.orm.call("ir.config_parameter", "get_param", ["database.expiration_date"]),
+      this.orm.call("ir.config_parameter", "set_param", ["database.enterprise_code", enterpriseCode]),
+      this.orm.call("ir.config_parameter", "get_param", ["database.already_linked_subscription_url"]),
+      this.orm.call("ir.config_parameter", "get_param", ["database.already_linked_email"]),
     ]);
 
     this.cookie.setCookie("oe_instance_hide_panel", "", -1);
 
-    await this.model("publisher_warranty.contract").call("update_notification", [[]]);
+    await this.orm.call("publisher_warranty.contract", "update_notification", [[]]);
 
-    const expirationDate = await irConfigParam.call("get_param", ["database.expiration_date"]);
+    const expirationDate = await this.orm.call("ir.config_parameter", "get_param", ["database.expiration_date"]);
 
     this.ui.unblock();
 
@@ -200,17 +199,16 @@ export class ExpirationPanel extends Component {
    * @private
    */
   async _onCheckStatus() {
-    const irConfigParam = this.model("ir.config_parameter");
-    const oldDateStr = await irConfigParam.call("get_param", ["database.expiration_date"]);
+    const oldDateStr = await this.orm.call("ir.config_parameter", "get_param", ["database.expiration_date"]);
 
     const oldDate = this._parseExpirationDate(oldDateStr);
     if (this._computeDiffDays(oldDate) >= 30) {
       return;
     }
 
-    await this.model("publisher_warranty.contract").call("update_notification", [[]]);
+    await this.orm.call("publisher_warranty.contract", "update_notification", [[]]);
 
-    const expirationDateStr = await irConfigParam.call("get_param", ["database.expiration_date"]);
+    const expirationDateStr = await this.orm.call("ir.config_parameter", "get_param", ["database.expiration_date"]);
     const expirationDate = this._parseExpirationDate(expirationDateStr);
 
     if (expirationDateStr !== oldDateStr && expirationDate > new DateTime.local()) {
@@ -230,7 +228,7 @@ export class ExpirationPanel extends Component {
    */
   async _onSendUnlinkEmail() {
     const args = ["database.already_linked_send_mail_url"];
-    const unlink_mail_send_url = await this.model("ir.config_parameter").call("get_param", args);
+    const unlink_mail_send_url = await this.orm.call("ir.config_parameter", "get_param", args);
     this.state.emailDelivery = "ongoing";
     const { result, reason } = await this.rpc(unlink_mail_send_url, {});
     if (result) {
@@ -245,16 +243,15 @@ export class ExpirationPanel extends Component {
    * @private
    */
   async _onRenew() {
-    const irConfigParam = this.model("ir.config_parameter");
-    const oldDate = await irConfigParam.call("get_param", ["database.expiration_date"]);
+    const oldDate = await this.orm.call("ir.config_parameter", "get_param", ["database.expiration_date"]);
 
     this.cookie.setCookie("oe_instance_hide_panel", "", -1);
 
-    await this.model("publisher_warranty.contract").call("update_notification", [[]]);
+    await this.orm.call("publisher_warranty.contract", "update_notification", [[]]);
 
     const [expirationDateStr, enterpriseCode] = await Promise.all([
-      irConfigParam.call("get_param", ["database.expiration_date"]),
-      irConfigParam.call("get_param", ["database.enterprise_code"]),
+      this.orm.call("ir.config_parameter", "get_param", ["database.expiration_date"]),
+      this.orm.call("ir.config_parameter", "get_param", ["database.enterprise_code"]),
     ]);
 
     const expirationDate = this._parseExpirationDate(expirationDateStr);
@@ -279,8 +276,8 @@ export class ExpirationPanel extends Component {
   async _onUpsell() {
     const limitDate = new DateTime.local().minus({ days: 15 }).toFormat("yyyy-MM-dd");
     const [enterpriseCode, nbUsers] = await Promise.all([
-      this.model("ir.config_parameter").call("get_param", ["database.enterprise_code"]),
-      this.model("res.users").call("search_count", [
+      this.orm.call("ir.config_parameter", "get_param", ["database.enterprise_code"]),
+      this.orm.call("res.users", "search_count", [
         [
           ["share", "=", false],
           ["login_date", ">=", limitDate],

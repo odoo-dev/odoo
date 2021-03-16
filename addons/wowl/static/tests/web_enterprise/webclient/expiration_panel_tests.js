@@ -1,11 +1,12 @@
 /** @odoo-module **/
 import { ExpirationPanel } from "@wowl/web_enterprise/webclient/home_menu/expiration_panel";
 import { Registry } from "@wowl/core/registry";
-import { modelService } from "@wowl/services/model";
+import { ormService } from "@wowl/services/orm_service";
 import { makeFakeUIService } from "../../helpers/mocks";
-import { makeTestEnv, mount } from "../../helpers/utility";
+import { makeTestEnv, getFixture } from "../../helpers/utility";
 import testUtils from "web.test_utils";
 
+const { mount } = owl;
 const patchDate = testUtils.mock.patchDate;
 
 async function createExpirationPanel(params = {}) {
@@ -38,9 +39,8 @@ async function createExpirationPanel(params = {}) {
   };
 
   serviceRegistry.add(mockedCookieService.name, mockedCookieService);
-  const ui = params.ui || {};
-  serviceRegistry.add("ui", makeFakeUIService(ui.block, ui.unblock));
-  serviceRegistry.add("model", modelService);
+  serviceRegistry.add("ui", makeFakeUIService(params.ui));
+  serviceRegistry.add("orm", ormService);
   serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService);
 
   const env = await makeTestEnv({
@@ -54,7 +54,8 @@ async function createExpirationPanel(params = {}) {
     serviceRegistry,
   });
 
-  return mount(ExpirationPanel, { env });
+  const target = getFixture();
+  return mount(ExpirationPanel, { env, target });
 }
 
 QUnit.module("web_enterprise", {}, function () {

@@ -2041,7 +2041,7 @@ QUnit.module("ActionManager", (hooks) => {
   QUnit.test("debugManager is active for (legacy) views", async function (assert) {
     assert.expect(2);
 
-    testConfig.serviceRegistry.add(debugService.name, debugService);
+    testConfig.serviceRegistry.add('debug', debugService);
     testConfig.systrayRegistry = new Registry();
     testConfig.debug = "1";
     const mockRPC = async (route, args) => {

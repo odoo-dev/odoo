@@ -9,7 +9,7 @@ import { menuService } from "../../src/services/menu_service";
 import { fakeTitleService } from "../helpers/mocks";
 import { hotkeyService } from "../../src/services/hotkey_service";
 import { uiService } from "../../src/services/ui_service";
-import { createWebClient, doAction, getActionManagerTestConfig } from "../action_manager/helpers";
+import { createWebClient, doAction, getActionManagerTestConfig } from "../actions/helpers";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { WebClient } from "../../src/webclient/webclient";
