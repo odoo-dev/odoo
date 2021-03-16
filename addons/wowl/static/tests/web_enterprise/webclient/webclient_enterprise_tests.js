@@ -15,7 +15,7 @@ import { Registry } from "../../../src/core/registry";
 import { debugManager } from "../../../src/debug/debug_manager";
 import { EnterpriseDebugManager } from "../../../src/web_enterprise/debug_manager/debug_manager";
 import { makeFakeUIService } from '../../helpers/mocks';
-import { burgerMenu } from '../../../src/web_enterprise/webclient/burger_menu/burger_menu';
+import { BurgerMenu } from '../../../src/web_enterprise/webclient/burger_menu/burger_menu';
 
 function createEnterpriseWebClient(params) {
   params.WebClientClass = WebClientEnterprise;
@@ -570,7 +570,7 @@ QUnit.module("WebClient Enterprise", (hooks) => {
         origin: 'sweetwater'
       };
       testConfig.systrayRegistry = new Registry();
-      testConfig.systrayRegistry.add('burgerMenu', burgerMenu);
+      testConfig.systrayRegistry.add('burgerMenu', BurgerMenu);
       testConfig.serviceRegistry.add('ui', makeFakeUIService({ isSmall: true }), { force: true });
     });
 
