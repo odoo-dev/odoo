@@ -63,7 +63,7 @@ export async function createWebClient(params) {
     mockRPC,
   });
   const WcClass = params.WebClientClass || WebClient;
-  const target = getFixture();
+  const target = (params && params.target) ? params.target : getFixture();
   const wc = await mount(WcClass, { env, target });
   registerCleanup(() => {
     for (const controller of controllers) {
