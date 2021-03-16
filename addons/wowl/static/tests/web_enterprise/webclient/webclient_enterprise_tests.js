@@ -10,10 +10,9 @@ import {
   loadState,
 } from "../../actions/helpers";
 import { homeMenuService } from "../../../src/web_enterprise/webclient/home_menu/home_menu_service";
-import { debugManagerService } from "../../../src/debug/debug_service";
+import { debugService } from "../../../src/debug/debug_service";
 import { Registry } from "../../../src/core/registry";
-import { debugManager } from "../../../src/debug/debug_manager";
-import { EnterpriseDebugManager } from "../../../src/web_enterprise/debug_manager/debug_manager";
+import { DebugManager } from "@wowl/debug/debug_manager";
 import { makeFakeUIService } from '../../helpers/mocks';
 import { BurgerMenu } from '../../../src/web_enterprise/webclient/burger_menu/burger_menu';
 
@@ -387,12 +386,11 @@ QUnit.module("WebClient Enterprise", (hooks) => {
     "debug manager resets to global items when home menu is displayed",
     async function (assert) {
       assert.expect(9);
-      const debugMgr = debugManager.Component;
-      debugManager.Component = EnterpriseDebugManager;
-      testConfig.serviceRegistry.add(debugManagerService.name, debugManagerService);
+      testConfig.serviceRegistry.add("debug", debugService);
       testConfig.systrayRegistry = new Registry();
-      testConfig.debugManagerRegistry = new Registry();
-      testConfig.debugManagerRegistry.add("item_1", () => {
+      testConfig.systrayRegistry.add("debug", DebugManager);
+      testConfig.debugRegistry = new Registry();
+      testConfig.debugRegistry.add("item_1", () => {
         return {
           type: "item",
           description: "globalItem",
@@ -400,7 +398,7 @@ QUnit.module("WebClient Enterprise", (hooks) => {
           sequence: 10,
         };
       });
-      const mockRPC = async (route, args) => {
+      const mockRPC = async (route) => {
         if (route.includes("check_access_rights")) {
           return true;
         }
@@ -441,7 +439,6 @@ QUnit.module("WebClient Enterprise", (hooks) => {
         ".o_debug_manager .o_dropdown_item:contains('Edit View: Kanban')"
       );
       webClient.destroy();
-      debugManager.Component = debugMgr;
     }
   );
   QUnit.test(
