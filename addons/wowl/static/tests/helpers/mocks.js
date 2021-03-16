@@ -177,9 +177,11 @@ export function makeTestOdoo(config = {}) {
       username: "The wise",
       is_admin: true,
       partner_id: 7,
+      // Commit: 3e847fc8f499c96b8f2d072ab19f35e105fd7749
+      // to see what user_companies is
       user_companies: {
         allowed_companies: { 1: { id: 1, name: "Hermit" } },
-        current_company: { id: 1, name: "Hermit" },
+        current_company: 1,
       },
       db: "test",
       server_version: "1.0",
