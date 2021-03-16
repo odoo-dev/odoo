@@ -1,7 +1,6 @@
 /** @odoo-module **/
+
 import { useService } from "../core/hooks";
-import { Dropdown } from "../components/dropdown/dropdown";
-import { DropdownItem } from "../components/dropdown/dropdown_item";
 
 export class SwitchCompanyMenu extends owl.Component {
   constructor() {
@@ -17,7 +16,6 @@ export class SwitchCompanyMenu extends owl.Component {
   }
 }
 SwitchCompanyMenu.template = "wowl.SwitchCompanyMenu";
-SwitchCompanyMenu.components = { Dropdown, DropdownItem };
 
 export const switchCompanySystrayItem = {
   name: "switchCompanySystrayItem",
