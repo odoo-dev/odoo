@@ -14,7 +14,7 @@ import { debugManagerService } from "../../../src/debug/debug_service";
 import { Registry } from "../../../src/core/registry";
 import { debugManager } from "../../../src/debug/debug_manager";
 import { EnterpriseDebugManager } from "../../../src/web_enterprise/debug_manager/debug_manager";
-import { makeFakeDeviceService } from '../../helpers/mocks';
+import { makeFakeUIService } from '../../helpers/mocks';
 import { burgerMenu } from '../../../src/web_enterprise/webclient/burger_menu/burger_menu';
 
 function createEnterpriseWebClient(params) {
@@ -571,7 +571,7 @@ QUnit.module("WebClient Enterprise", (hooks) => {
       };
       testConfig.systrayRegistry = new Registry();
       testConfig.systrayRegistry.add('burgerMenu', burgerMenu);
-      testConfig.serviceRegistry.add('device', makeFakeDeviceService({isSmall: true}), true);
+      testConfig.serviceRegistry.add('ui', makeFakeUIService({ isSmall: true }), { force: true });
     });
 
     QUnit.test('Burger menu can be opened and closed', async function (assert) {

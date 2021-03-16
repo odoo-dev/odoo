@@ -182,7 +182,7 @@ QUnit.module(
         },
       };
       const fakeMenuService = {
-        name: "menus",
+        name: "menu",
         deploy() {
           return {
             selectMenu(menu) {
@@ -393,7 +393,7 @@ QUnit.module(
         },
       };
 
-      testConfig.serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService, true);
+      testConfig.serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService, { force: true });
       testConfig.serviceRegistry.add(mockedCookieService.name, mockedCookieService);
       testConfig.serviceRegistry.add("ui", makeFakeUIService());
       testConfig.serviceRegistry.add("orm", ormService);

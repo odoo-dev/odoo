@@ -4,7 +4,7 @@ import configure from "wowl.WebClientConfigure";
 import { Registry } from "../../src/core/registry";
 import { actionService } from "../../src/actions/action_service";
 import { notificationService } from "../../src/notifications/notification_service";
-import { click, mount, makeTestEnv } from "../helpers/utility";
+import { click, getFixture, makeTestEnv } from "../helpers/utility";
 import { menuService } from "../../src/services/menu_service";
 import { fakeTitleService } from "../helpers/mocks";
 import { hotkeyService } from "../../src/services/hotkey_service";
@@ -14,7 +14,7 @@ import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { WebClient } from "../../src/webclient/webclient";
 
-const { Component, tags, core } = owl;
+const { Component, tags, mount, core } = owl;
 const { xml } = tags;
 
 let baseConfig;
@@ -36,7 +36,8 @@ QUnit.module("Web Client", {
 QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
   const env = await makeTestEnv(baseConfig);
-  const webClient = await mount(WebClient, { env });
+  const target = getFixture();
+  const webClient = await mount(WebClient, { env, target });
   assert.containsOnce(webClient.el, "header > nav.o_main_navbar");
 });
 
@@ -47,7 +48,8 @@ QUnit.test("can render a main component", async (assert) => {
   const mainComponentRegistry = new Registry();
   mainComponentRegistry.add("mycomponent", MyComponent);
   const env = await makeTestEnv({ ...baseConfig, mainComponentRegistry });
-  const webClient = await mount(WebClient, { env });
+  const target = getFixture();
+  const webClient = await mount(WebClient, { env, target });
   assert.containsOnce(webClient.el, ".chocolate");
 });
 // Tests to be executed with the same WebClient class as currently in production
