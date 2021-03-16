@@ -1,5 +1,6 @@
 /** @odoo-module **/
-import { useService } from "../../../core/hooks";
+import { browser } from "@wowl/core/browser";
+import { useService } from "@wowl/core/hooks";
 
 const { Component, hooks } = owl;
 const { useState, useRef } = hooks;
@@ -144,7 +145,7 @@ export class ExpirationPanel extends Component {
       ],
     ];
     const nbUsers = await this.orm.call("res.users", "search_count", args);
-    odoo.browser.location = `https://www.odoo.com/odoo-enterprise/upgrade?num_users=${nbUsers}`;
+    browser.location = `https://www.odoo.com/odoo-enterprise/upgrade?num_users=${nbUsers}`;
   }
 
   /**
@@ -219,7 +220,7 @@ export class ExpirationPanel extends Component {
       this.state.expirationDate = expirationDate;
       this.state.diffDays = this._computeDiffDays(expirationDate);
     } else {
-      odoo.browser.location.reload();
+      browser.location.reload();
     }
   }
 
@@ -286,7 +287,7 @@ export class ExpirationPanel extends Component {
     ]);
     const url = "https://www.odoo.com/odoo-enterprise/upsell";
     const contractQueryString = enterpriseCode ? `&contract=${enterpriseCode}` : "";
-    odoo.browser.location = `${url}?num_users=${nbUsers}${contractQueryString}`;
+    browser.location = `${url}?num_users=${nbUsers}${contractQueryString}`;
   }
 }
 

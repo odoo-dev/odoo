@@ -1,9 +1,12 @@
 /** @odoo-module **/
 import { ExpirationPanel } from "@wowl/web_enterprise/webclient/home_menu/expiration_panel";
+import { browser } from "@wowl/core/browser";
 import { Registry } from "@wowl/core/registry";
 import { ormService } from "@wowl/services/orm_service";
 import { makeFakeUIService } from "../../helpers/mocks";
 import { makeTestEnv, getFixture } from "../../helpers/utility";
+import { patch, unpatch } from "@wowl/utils/patch";
+import { registerCleanup } from "../../helpers/cleanup";
 import testUtils from "web.test_utils";
 
 const { mount } = owl;
@@ -42,14 +45,10 @@ async function createExpirationPanel(params = {}) {
   serviceRegistry.add("ui", makeFakeUIService(params.ui));
   serviceRegistry.add("orm", ormService);
   serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService);
+  patch(browser, 'mocked_browser', Object.assign({ location: "" }, params.browser));
+  registerCleanup(() => unpatch(browser, 'mocked_browser'));
 
   const env = await makeTestEnv({
-    browser: Object.assign(
-      {
-        location: "",
-      },
-      params.browser
-    ),
     mockRPC: params.mockRPC,
     serviceRegistry,
   });
@@ -133,7 +132,7 @@ QUnit.module("web_enterprise", {}, function () {
     await testUtils.dom.click(panel.el.querySelector(".oe_instance_buy"));
 
     assert.strictEqual(
-      odoo.browser.location,
+      browser.location,
       "https://www.odoo.com/odoo-enterprise/upgrade?num_users=7"
     );
 
@@ -738,7 +737,7 @@ QUnit.module("web_enterprise", {}, function () {
 
     assert.verifySteps(["get_param", "search_count"]);
     assert.strictEqual(
-      odoo.browser.location,
+      browser.location,
       "https://www.odoo.com/odoo-enterprise/upsell?num_users=13&contract=ABC"
     );
 
