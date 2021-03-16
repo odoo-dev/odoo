@@ -325,25 +325,34 @@ QUnit.module("WebClient Enterprise", (hooks) => {
     // });
   });
   QUnit.test("clear unCommittedChanges when toggling home menu", async function (assert) {
-    assert.expect(8);
-    const webClient = await createEnterpriseWebClient({ testConfig });
+    assert.expect(7);
+    // Edit a form view, don't save, toggle home menu
+    // the autosave feature of the Form view is activated
+    // and relied upon by this test
+
+    const mockRPC = (route, args) => {
+      if (args.method === 'create') {
+        assert.strictEqual(args.model, 'partner');
+        assert.deepEqual(args.args, [{
+          display_name: "red right hand",
+          foo: false,
+        }]);
+      }
+    };
+
+    const webClient = await createEnterpriseWebClient({ testConfig , mockRPC });
     await doAction(webClient, 3, { viewType: "form" });
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_form_view.o_form_editable");
     const input = webClient.el.querySelector("input.o_input");
     await testUtils.fields.editInput(input, "red right hand");
+
     await click(webClient.el.querySelector(".o_menu_toggle"));
-    assert.containsOnce(document.body, ".modal");
-    await click(document.body.querySelectorAll(".modal footer button")[1]);
-    assert.containsOnce(webClient, ".o_form_view.o_form_editable");
-    assert.containsNone(document.body, ".modal");
-    await click(webClient.el.querySelector(".o_menu_toggle"));
-    assert.containsOnce(document.body, ".modal");
-    await click(document.body.querySelectorAll(".modal footer button")[0]);
     await nextTick();
     assert.isNotVisible(webClient.el.querySelector(".o_form_view"));
     assert.containsNone(document.body, ".modal");
     assert.containsOnce(webClient, ".o_home_menu");
+    assert.isVisible(webClient.el.querySelector(".o_home_menu"));
     webClient.destroy();
   });
   QUnit.test("can have HomeMenu and dialog action", async function (assert) {
