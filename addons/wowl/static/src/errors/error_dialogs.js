@@ -2,7 +2,7 @@
 
 import { useService } from "../core/hooks";
 import { capitalize } from "../utils/strings";
-import { _lt } from "../services/localization_service";
+import { _lt } from "../localization/translation";
 import { browser } from "../core/browser";
 
 const { Component, hooks } = owl;

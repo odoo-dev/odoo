@@ -3,8 +3,11 @@
 import { effectService } from "../../src/effects/effect_service";
 import { makePushState, routeToUrl } from "../../src/services/router_service";
 import { SIZES } from "../../src/services/ui_service";
-import { makeLocalization } from "../../src/services/localization_service";
 import { rpcService } from "../../src/services/rpc_service";
+import { localization } from "../../src/localization/localization_settings";
+import { patch, unpatch } from "../../src/utils/patch";
+import { registerCleanup } from "./cleanup";
+import { translatedTerms } from "../../src/localization/translation";
 
 const { Component } = owl;
 
@@ -12,14 +15,28 @@ const { Component } = owl;
 // Mock Services
 // -----------------------------------------------------------------------------
 
+export const defaultLocalization = {
+  dateFormat: "MM/dd/yyyy",
+  timeFormat: "HH:mm:ss",
+  dateTimeFormat: "MM/dd/yyyy HH:mm:ss",
+  decimalPoint: ".",
+  direction: "ltr",
+  grouping: [3, 0],
+  multiLang: false,
+  thousandsSep: ",",
+  weekStart: 7,
+};
+
 export function makeFakeLocalizationService(config) {
+  patch(localization, "localization.mock.patch", defaultLocalization);
+  registerCleanup(() => unpatch(localization, "localization.mock.patch"));
+
   return {
     name: "localization",
-    deploy: () => {
-      return makeLocalization({
-        langParams: (config && config.langParams) || {},
-        terms: (config && config.terms) || {},
-      });
+    deploy: async (env) => {
+      const _t = (str) => translatedTerms[str] || str;
+      env._t = _t;
+      env.qweb.translateFn = _t;
     },
   };
 }
@@ -348,7 +365,6 @@ export const mocks = {
   cookie: () => fakeCookieService,
   download: makeFakeDownloadService,
   effect: () => effectService,
-  localization: makeFakeLocalizationService,
   notifications: makeFakeNotificationService,
   router: makeFakeRouterService,
   rpc: makeFakeRPCService,

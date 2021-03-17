@@ -1,5 +1,9 @@
 /** @odoo-module **/
 
+import { localization } from "../localization/localization_settings";
+import { _lt } from "../localization/translation";
+import { sprintf } from "./strings";
+
 /** @type {any} */
 const { DateTime } = luxon;
 
@@ -23,10 +27,13 @@ export function formatDateTime(value, options = {}) {
   if (value === false) {
     return "";
   }
-  if (options.timezone === undefined || options.timezone) {
+  const timezone = "timezone" in options ? options.timezone : true;
+  const format = "format" in options ? options.format : localization.dateTimeFormat;
+
+  if (timezone) {
     value = value.minus({ minutes: value.toJSDate().getTimezoneOffset() });
   }
-  return options.format ? value.toFormat(options.format) : value.toJSON();
+  return value.toFormat(format);
 }
 
 // -----------------------------------------------------------------------------
@@ -35,11 +42,11 @@ export function formatDateTime(value, options = {}) {
  * @param {string} str
  * @returns {string}
  */
- function stripAlphaDupes(str) {
+function stripAlphaDupes(str) {
   // Removes any duplicated alphabetic characters in a given string.
   // Example: "aa-bb-CCcc-ddD xxxx-Yy-ZZ" -> "a-b-Cc-dD x-Yy-Z"
   return str.replace(/[a-zA-Z]/g, (letter, index, str) => {
-    return (letter === str[index - 1]) ? "" : letter;
+    return letter === str[index - 1] ? "" : letter;
   });
 }
 
@@ -78,10 +85,8 @@ export function parseDateTime(value, options = {}) {
   const smartDate = parseSmartDateInput(value);
   if (smartDate) {
     result = smartDate;
-  } else if (!options.format) {
-    result = DateTime.fromISO(value);
   } else {
-    const fmt = options.format;
+    const fmt = options.format || localization.dateTimeFormat;
     const fmtWoZero = stripAlphaDupes(fmt);
     // Luxon is not permissive regarding non alphabetical characters for
     // formatting strings. So if the value to parse has less characters than
@@ -99,11 +104,23 @@ export function parseDateTime(value, options = {}) {
       DateTime.fromISO(value) || // last try: ISO8601
       DateTime.invalid("mandatory but unused string");
   }
-  return options.timezone
-    ? result.minus({ minutes: result.toJSDate().getTimezoneOffset() })
-    : result;
+  const timezone = "timezone" in options ? options.timezone : false;
+  if (timezone) {
+    result = result.minus({ minutes: result.toJSDate().getTimezoneOffset() });
+  }
+
+  if (result && !result.isValid) {
+    throw new Error(sprintf(_lt("'%s' is not a correct date or datetime").toString(), value));
+  }
+  return result;
 }
 
+export function parseDate(value, options = {}) {
+  return parseDateTime(value, {
+    format: localization.dateFormat,
+    timezone: options.timezone,
+  });
+}
 // -----------------------------------------------------------------------------
 
 const dateUnits = {
@@ -142,63 +159,4 @@ export function parseSmartDateInput(value) {
     return date;
   }
   return false;
-}
-
-const normalizeFormatTable = {
-  // Python strftime to luxon.js conversion table
-  // See openerp/addons/base/views/res_lang_views.xml
-  // for details about supported directives
-  a: "ccc",
-  A: "cccc",
-  b: "LLL",
-  B: "LLLL",
-  d: "dd",
-  H: "HH",
-  I: "hh",
-  j: "o",
-  m: "LL",
-  M: "mm",
-  p: "a",
-  S: "ss",
-  W: "WW",
-  w: "c",
-  y: "yy",
-  Y: "yyyy",
-  c: "ccc LLL d HH:mm:ss yyyy",
-  x: "LL/dd/yy",
-  X: "HH:mm:ss",
-};
-
-const _normalize_format_cache = {};
-
-/**
- * Convert Python strftime to escaped luxon.js format.
- *
- * @param {string} value original format
- * @returns {string} valid Luxon format
- */
-export function strftimeToLuxonFormat(value) {
-  if (_normalize_format_cache[value] === undefined) {
-    const isletter = /[a-zA-Z]/,
-      output = [];
-    let inToken = false;
-    for (let index = 0; index < value.length; ++index) {
-      let character = value[index];
-      if (character === "%" && !inToken) {
-        inToken = true;
-        continue;
-      }
-      if (isletter.test(character)) {
-        if (inToken && normalizeFormatTable[character] !== undefined) {
-          character = normalizeFormatTable[character];
-        } else {
-          character = "[" + character + "]"; // moment.js escape
-        }
-      }
-      output.push(character);
-      inToken = false;
-    }
-    _normalize_format_cache[value] = output.join("");
-  }
-  return _normalize_format_cache[value];
 }

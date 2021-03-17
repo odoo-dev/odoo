@@ -32,6 +32,7 @@ Odoo Web core module written in Owl.
             'static/src/debug/**/*',
             'static/src/effects/**/*',
             'static/src/legacy/**/*',
+            'static/src/localization/**/*',
             'static/src/notifications/**/*',
             'static/src/py_js/**/*',
             'static/src/services/**/*',

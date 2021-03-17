@@ -2,6 +2,8 @@
 import { currencyService } from "../../src/services/currency_service";
 import { makeTestEnv } from "../helpers/index";
 import { Registry } from "../../src/core/registry";
+import { patch, unpatch } from "../../src/utils/patch";
+import { localization } from "../../src/localization/localization_settings";
 
 let env;
 let serviceRegistry;
@@ -26,6 +28,7 @@ QUnit.test("format", async (assert) => {
   serviceRegistry = new Registry();
   serviceRegistry.add("currency", currencyService);
   env = await makeTestEnv({ serviceRegistry });
+  patch(localization, "locpatch", { grouping: [] });
   const { currency: curSvc } = env.services;
   assert.deepEqual(curSvc.format(1234567.654, "USD"), "$ 1234567.65");
   assert.deepEqual(curSvc.format(1234567.654, "EUR"), "1234567.65 €");
@@ -43,6 +46,7 @@ QUnit.test("format", async (assert) => {
     "currency digits should take over options digits when both are defined"
   );
   assert.strictEqual(curSvc.format(false, "EUR"), "");
+  unpatch(localization, "locpatch");
 });
 
 // BOI: we do not have a parse method, but here are some tests if we want to add this at some point.

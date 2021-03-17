@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
+import { formatFloat, humanNumber } from "../utils/numbers";
 import { serviceRegistry } from "../webclient/service_registry";
 
 export const currencyService = {
   dependencies: ["localization"],
   deploy(env) {
     const { currencies } = odoo.session_info;
-    const { localization: l10n } = env.services;
     const getAll = () => Object.values(currencies);
     const get = (cid) => {
       if (typeof cid === "number") {
@@ -21,9 +21,10 @@ export const currencyService = {
       const currency = get(cid);
       const { noSymbol } = options || {};
       const digits = (currency && currency.digits) || options.digits;
+
       const formatted = options.humanReadable
-        ? l10n.humanNumber(value)
-        : l10n.formatFloat(value, { precision: digits && digits[1] });
+        ? humanNumber(value)
+        : formatFloat(value, { precision: digits && digits[1] });
       if (!currency || noSymbol) {
         return formatted;
       }

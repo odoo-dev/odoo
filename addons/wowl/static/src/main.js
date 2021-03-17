@@ -4,7 +4,6 @@ import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { legacySetupProm } from "./legacy/legacy_setup";
 import { WebClient } from "./webclient/webclient";
 import { loadTemplates } from "./webclient/setup";
-import { browser } from "./core/browser";
 
 const { mount, utils } = owl;
 const { whenReady } = utils;
@@ -21,6 +20,7 @@ const { whenReady } = utils;
   // setup environment
   const [env, templates] = await Promise.all([makeEnv(odoo.debug), loadTemplates()]);
   env.qweb.addTemplates(templates);
+
   // start web client
   await whenReady();
   const legacyEnv = await legacySetupProm;

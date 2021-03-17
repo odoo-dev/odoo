@@ -19,5 +19,5 @@ export class CheckBox extends Component {
   _id = `checkbox-comp-${CheckBox.nextId++}`;
 }
 
-CheckBox.template = "wowl.CheckBox"
-CheckBox.nextId = 1
+CheckBox.template = "wowl.CheckBox";
+CheckBox.nextId = 1;
