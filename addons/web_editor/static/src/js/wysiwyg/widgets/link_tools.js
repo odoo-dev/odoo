@@ -63,7 +63,7 @@ const LinkTools = Widget.extend({
         this.data.url = this.$link.attr('href');
         this.data.isNewWindow = this.$link.attr('target') === '_blank';
 
-        var allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
+        const allBtnShapes = /\s*(rounded-circle|flat)\s*/gi;
         this.data.className = this.data.iniClassName
             .replace(allBtnClassSuffixes, ' ')
             .replace(allBtnShapes, ' ');
@@ -82,15 +82,20 @@ const LinkTools = Widget.extend({
             const options = [
                 'we-selection-items[name="link_style_color"] > we-button',
                 'we-selection-items[name="link_style_size"] > we-button',
-                'we-selection[name="link_style_shape"] > we-button',
+                'we-selection-items[name="link_style_shape"] > we-button',
             ]
             for (const option of this.$(options.join(','))) {
                 const $option = $(option);
                 const value = $option.data('value');
                 let active = false;
                 if (value) {
-                    const classPrefix = new RegExp('(^|btn-| |btn-outline-)' + value);
-                    active = classPrefix.test(this.data.iniClassName);
+                    const subValues = value.split(',');
+                    let subActive = true;
+                    for (let subValue of subValues) {
+                        const classPrefix = new RegExp('(^|btn-| |btn-outline-)' + subValue);
+                        subActive = subActive && classPrefix.test(this.data.iniClassName);
+                    }
+                    active = subActive;
                 } else {
                     active = !this.data.iniClassName.includes('btn-');
                 }
@@ -233,6 +238,8 @@ const LinkTools = Widget.extend({
         $option.toggleClass('active', active);
         if (active) {
             $option.closest('we-select').find('we-toggler').text($option.text());
+            // ensure only one option is active in the dropdown
+            $option.siblings('we-button').removeClass("active");
         }
     },
     /**
