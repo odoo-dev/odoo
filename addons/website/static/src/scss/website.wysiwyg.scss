@@ -25,6 +25,8 @@
     justify-content: flex-end;
     width: $o-we-sidebar-width;
     height: $o-we-sidebar-top-height;
+    // Firefox css fix
+    min-height: $o-we-sidebar-top-height;
     background-color: $o-we-sidebar-tabs-bg;
 
     .btn-group, .btn {
