@@ -6,12 +6,12 @@ import { MODES } from "../../src/web_studio/studio_service";
 import { makeFakeEnterpriseService } from "../web_enterprise/mocks";
 
 import { makeFakeNotificationService, makeFakeUserService } from "@wowl/../tests/helpers/mocks";
-import { makeTestEnv, mount } from "@wowl/../tests/helpers/utility";
+import { makeTestEnv, getFixture } from "@wowl/../tests/helpers/utility";
 import { Registry } from "@wowl/core/registry";
 
 import testUtils from "web.test_utils";
 
-const { Component, core, hooks, tags } = owl;
+const { Component, core, hooks, mount, tags } = owl;
 const { EventBus } = core;
 
 // -----------------------------------------------------------------------------
@@ -33,7 +33,8 @@ async function createStudioHomeMenu(testConfig) {
             <div class="o_dialog_container"/>
         </div>`;
     const env = await makeTestEnv(testConfig);
-    const parent = await mount(Parent, { env });
+    const target = getFixture();
+    const parent = await mount(Parent, { env, target });
     return {
         studioHomeMenu: parent.homeMenuRef.comp,
         destroy: parent.destroy.bind(parent),
@@ -56,7 +57,6 @@ QUnit.module("Studio", (hooks) => {
         const fakeNotificationService = makeFakeNotificationService();
         const fakeUserService = makeFakeUserService();
         const fakeHomeMenuService = {
-            name: "home_menu",
             deploy() {
               return {
                 toggle() {},
@@ -64,7 +64,6 @@ QUnit.module("Studio", (hooks) => {
             },
         };
         const fakeMenuService = {
-            name: "menu",
             deploy() {
               return {
                 setCurrentMenu(menu) {
@@ -77,7 +76,6 @@ QUnit.module("Studio", (hooks) => {
             },
         };
         const fakeStudioService = {
-            name: "studio",
             deploy() {
               return {
                 MODES,
@@ -88,18 +86,17 @@ QUnit.module("Studio", (hooks) => {
             },
         };
         const fakeHTTPService = {
-            name: "http",
             deploy() {
                 return {};
             },
         };
-        serviceRegistry.add(fakeEnterpriseService.name, fakeEnterpriseService);
-        serviceRegistry.add(fakeHomeMenuService.name, fakeHomeMenuService);
-        serviceRegistry.add(fakeHTTPService.name, fakeHTTPService);
-        serviceRegistry.add(fakeMenuService.name, fakeMenuService);
-        serviceRegistry.add(fakeNotificationService.name, fakeNotificationService);
-        serviceRegistry.add(fakeUserService.name, fakeUserService);
-        serviceRegistry.add(fakeStudioService.name, fakeStudioService);
+        serviceRegistry.add('enterprise', fakeEnterpriseService);
+        serviceRegistry.add('home_menu', fakeHomeMenuService);
+        serviceRegistry.add('http', fakeHTTPService);
+        serviceRegistry.add('menu', fakeMenuService);
+        serviceRegistry.add('notification', fakeNotificationService);
+        serviceRegistry.add('user', fakeUserService);
+        serviceRegistry.add('studio', fakeStudioService);
 
         const homeMenuProps = {
             apps: [{

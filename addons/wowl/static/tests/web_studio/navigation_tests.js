@@ -41,11 +41,7 @@ QUnit.module("Studio", (hooks) => {
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
     testConfig.systrayRegistry = new Registry();
-    const item = {
-      name: "StudioSystrayItem",
-      Component: StudioSystray,
-    };
-    testConfig.systrayRegistry.add(item.name, item);
+    testConfig.systrayRegistry.add("StudioSystrayItem", StudioSystray);
     const fakeEnterpriseService = makeFakeEnterpriseService();
     testConfig.serviceRegistry.add(fakeEnterpriseService.name, fakeEnterpriseService);
     testConfig.serviceRegistry.add(homeMenuService.name, homeMenuService);
