@@ -16,8 +16,8 @@ const { Component } = owl;
  */
 
 export class CheckBox extends Component {
-  static template = "wowl.CheckBox";
-  static nextId = 1;
-
   _id = `checkbox-comp-${CheckBox.nextId++}`;
 }
+
+CheckBox.template = "wowl.CheckBox"
+CheckBox.nextId = 1

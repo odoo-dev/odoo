@@ -31,16 +31,16 @@ export function formatDateTime(value, options = {}) {
 
 // -----------------------------------------------------------------------------
 
-const stripAlphaDupesRegex = /([a-zA-Z])(?<=\1[^\1])/g;
-
 /**
  * @param {string} str
  * @returns {string}
  */
-function stripAlphaDupes(str) {
+ function stripAlphaDupes(str) {
   // Removes any duplicated alphabetic characters in a given string.
   // Example: "aa-bb-CCcc-ddD xxxx-Yy-ZZ" -> "a-b-Cc-dD x-Yy-Z"
-  return str.replace(stripAlphaDupesRegex, "");
+  return str.replace(/[a-zA-Z]/g, (letter, index, str) => {
+    return (letter === str[index - 1]) ? "" : letter;
+  });
 }
 
 /**

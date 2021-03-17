@@ -10,10 +10,10 @@ const patchMap = new WeakMap();
  *
  * @param {Object} obj Object to patch
  * @param {string} patchName
- * @param {Object} patch
+ * @param {Object} patchValue
  * @param {{pure?: boolean}} [options]
  */
-export function patch(obj, patchName, patch, options = {}) {
+export function patch(obj, patchName, patchValue, options = {}) {
   const pure = Boolean(options.pure);
   if (!patchMap.has(obj)) {
     patchMap.set(obj, {
@@ -27,11 +27,11 @@ export function patch(obj, patchName, patch, options = {}) {
   }
   objDesc.patches.push({
     name: patchName,
-    patch,
+    patchValue,
     pure,
   });
 
-  for (const k in patch) {
+  for (const k in patchValue) {
     let prevDesc = null;
     let proto = obj;
     do {
