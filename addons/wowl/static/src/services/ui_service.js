@@ -112,6 +112,11 @@ export const uiService = {
         return ui.size <= SIZES.SM;
       },
     });
+    Object.defineProperty(env, "isSmall", {
+      get() {
+        return ui.size <= SIZES.SM;
+      },
+    });
 
     return ui;
   },

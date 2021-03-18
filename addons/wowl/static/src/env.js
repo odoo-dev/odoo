@@ -32,18 +32,10 @@ export async function makeEnv(debug) {
     _t: () => {
       throw new Error("Translations are not ready yet. Maybe use _lt instead?");
     },
-  };
-
-  // todo: move this in ui_service
-  // define shortcut properties coming from some services
-  Object.defineProperty(env, "isSmall", {
-    get() {
-      if (!env.services.ui) {
-        throw new Error("UI service not initialized!");
-      }
-      return env.services.ui.isSmall;
+    isSmall: () => {
+      throw new Error("UI service not initialized!");
     },
-  });
+  };
 
   await deployServices(env);
   return env;

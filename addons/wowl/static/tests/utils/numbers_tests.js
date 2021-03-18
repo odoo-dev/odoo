@@ -9,7 +9,6 @@ QUnit.module("utils", {}, () => {
   QUnit.module("numbers");
 
   QUnit.test("humanNumber", async (assert) => {
-    // const { localization: } = (await makeTestEnv()).services;
     assert.strictEqual(humanNumber(1020, { decimals: 2, minDigits: 1 }), "1.02k");
     assert.strictEqual(humanNumber(1020000, { decimals: 2, minDigits: 2 }), "1020k");
     assert.strictEqual(humanNumber(10200000, { decimals: 2, minDigits: 2 }), "10.2M");
