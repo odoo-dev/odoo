@@ -1147,6 +1147,8 @@ var SnippetsMenu = Widget.extend({
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
         this._addToolbar();
+        this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this)
+        $(document.body).on('click', this._checkEditorToolbarVisibilityCallback);
 
         if (this.options.enableTranslation) {
             // Load the sidebar with the style tab only.
@@ -1357,6 +1359,7 @@ var SnippetsMenu = Widget.extend({
             this.$scrollingElement && this.$scrollingElement[0].removeEventListener('scroll', this._onScrollingElementScroll, {capture: true});
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
+        $(document.body).off('click', this._checkEditorToolbarVisibilityCallback);
         delete this.cacheSnippetTemplate[this.options.snippets];
     },
 
@@ -2942,12 +2945,30 @@ var SnippetsMenu = Widget.extend({
                 break;
         }
 
-        const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_jw_toolbar_container"/>');
+        const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
         const $title = $("<we-title><span>" + titleText + "</span></we-title>");
 
         customizeBlock.append($title);
         customizeBlock.append(this.options.wysiwyg.toolbar.$el);
         $(this.customizePanel).append(customizeBlock);
+    },
+    /**
+     * Update editor UI visibility based on the current range.
+     */
+    _checkEditorToolbarVisibility: function (e) {
+        const toolbarContainer = $('#o_we_editor_toolbar_container');
+        // Do not  toggle visibility if the target is inside the toolbar ( eg. during link edition).
+        if($(e.target).parents('#toolbar').length) {
+            return;
+        }
+
+        const selection = this.options.wysiwyg.odooEditor.document.getSelection();
+        const range = selection.rangeCount && selection.getRangeAt(0);
+        if(range && $(range.commonAncestorContainer).parents('#wrap').length === 0) {
+            toolbarContainer.hide();
+        } else {
+            toolbarContainer.show();
+        }
     },
     /**
      * On click on discard button.
