@@ -27,7 +27,7 @@ export function patch(obj, patchName, patchValue, options = {}) {
   }
   objDesc.patches.push({
     name: patchName,
-    patchValue,
+    patch: patchValue,
     pure,
   });
 
@@ -39,7 +39,7 @@ export function patch(obj, patchName, patchValue, options = {}) {
       proto = Object.getPrototypeOf(proto);
     } while (!prevDesc && proto);
 
-    const newDesc = Object.getOwnPropertyDescriptor(patch, k);
+    const newDesc = Object.getOwnPropertyDescriptor(patchValue, k);
     if (!objDesc.original.hasOwnProperty(k)) {
       objDesc.original[k] = Object.getOwnPropertyDescriptor(obj, k);
     }
