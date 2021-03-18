@@ -2,6 +2,7 @@
 
 import { browser } from "../core/browser";
 import { routeToUrl } from "../services/router_service";
+import { debugRegistry } from "./debug_registry";
 
 // Backend Debug Manager Items
 export function runJSTestsItem(env) {
@@ -135,14 +136,18 @@ export function leaveDebugMode(env) {
   };
 }
 
-export const backendDebugManagerItems = [
+const backendDebugManagerItems = [
   runJSTestsItem,
   runJSTestsMobileItem,
   runClickTestItem,
   openViewItem,
 ];
 
-export const globalDebugManagerItems = [
+for (let item of backendDebugManagerItems) {
+  debugRegistry.add(item.name, item);
+}
+
+const globalDebugManagerItems = [
   globalSeparator,
   activateAssetsDebugging,
   regenerateAssets,
@@ -150,3 +155,7 @@ export const globalDebugManagerItems = [
   leaveDebugMode,
   activateTestsAssetsDebugging,
 ];
+
+for (let item of globalDebugManagerItems) {
+  debugRegistry.add(item.name, item);
+}
