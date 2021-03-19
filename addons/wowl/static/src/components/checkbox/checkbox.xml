@@ -11,7 +11,7 @@
             t-att-checked="props.value"
             />
         <label t-att-for="props.id or _id" class="custom-control-label">
-            <t t-esc="props.text or '&#8203;'"/>
+            <t t-slot="default"/>
         </label>
     </div>
 </t>

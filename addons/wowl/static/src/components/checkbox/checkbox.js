@@ -1,16 +1,17 @@
 /** @odoo-module **/
 
-const { Component } = owl;
+const { Component, QWeb } = owl;
 
 /**
  * Custom checkbox
  *
- * <Checkbox
- *     value="boolean"
- *     disabled="boolean"
- *     text="'Change the label text'"
- *     t-on-change="_onValueChange"
- *     />
+ * <CheckBox
+ *    value="boolean"
+ *    disabled="boolean"
+ *    t-on-change="_onValueChange"
+ *    >
+ *    Change the label text
+ *  </CheckBox>
  *
  * @extends Component
  */
@@ -21,3 +22,5 @@ export class CheckBox extends Component {
 
 CheckBox.template = "wowl.CheckBox";
 CheckBox.nextId = 1;
+
+QWeb.registerComponent("CheckBox", CheckBox);
