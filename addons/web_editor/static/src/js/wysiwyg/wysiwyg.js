@@ -139,6 +139,7 @@ const Wysiwyg = Widget.extend({
             }, options));
             await this._insertSnippetMenu();
         }
+        $(this.options.getContentEditableAreas()).find('*').off('mousedown mouseup click');
         // The toolbar must be configured after the snippetMenu is loaded
         // because if snippetMenu is loaded in an iframe, binding of the color
         // buttons must use the jquery loaded in that iframe. See
