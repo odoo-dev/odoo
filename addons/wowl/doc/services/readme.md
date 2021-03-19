@@ -30,7 +30,7 @@ available to the interface (and to other services).
 | [`router`](router.md)                 | manage the url                                             |
 | [`rpc`](rpc.md)                       | perform a RPC (in other word, call the server)             |
 | [`title`](title.md)                   | allow to read/modify the document title                    |
-| [`ui`](ui.md)                         | miscellaneous ui features: ownership, block/unblock        |
+| [`ui`](ui.md)                         | miscellaneous ui features: active element, block/unblock   |
 | [`user`](user.md)                     | keep track of user main properties (lang, ...) and context |
 | [`view_manager`](view_manager.md)     | load (and keep in cache) views information                 |
 

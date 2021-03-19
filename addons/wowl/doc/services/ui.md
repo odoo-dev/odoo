@@ -8,9 +8,9 @@
 
 The `ui` service offers miscellaneous UI features:
 
-- ownership management.
-  The default UI owner is the `document` element, but the `ui` service
-  lets anyone claim the UI ownership. It is useful e.g. for dialogs.
+- active element management.
+  The default UI active element is the `document` element, but the `ui` service
+  lets anyone become  the UI active element. It is useful e.g. for dialogs.
 - block or unblock the UI.
   When the ui will be blocked, a loading screen blocking any action will cover the UI.
 
@@ -18,7 +18,8 @@ The `ui` service offers miscellaneous UI features:
 
 The `ui` service provides the following API:
 
-- `bus: EventBus`: a bus
+- `bus: EventBus`: a bus, on which are triggered
+  - `active-element-changed (activeElement: DOMElement)` when the UI active element has changed.
 
 - `block(): void`: this method will activate the loading screen to block the ui.
 
@@ -27,16 +28,17 @@ The `ui` service provides the following API:
 
 - `ìsBlocked (boolean)`: informs on the UI blocked state
 
-- `takeOwnership(owner: DOMElement): {release():void}`: applies an UI ownership and
-  returns an object containing a function to release it
+- `activateElement(activateElement: DOMElement): void`: applies an UI active element.
 
-- `getOwner(): DOMElement`: gives the actual UI owner element
+- `activeElement: DOMElement`: gives the actual UI active element
+
+- `getVisibleElements(selector: string)`: returns all elements matching the given selector that are displayed somewhere on the active element.
 
 In addition to that, you have access to some development helpers which are **greatly** recommended:
 
-- `useUIOwnership(refName?:string)`: a hook that ensures the UI ownership will
+- `useActiveElement(refName?:string)`: a hook that ensures the UI active element will
   take place/get released each time your component gets mounted/unmounted.
-  By default, the element that will take the UI ownership is the component root's.
+  By default, the element that will be the UI active element is the component root's.
   It can be delegated to another element through the usage of a `t-ref` directive,
   providing its value to this hook. In that case, **it is mandatory** that the referenced
   element is fixed and not dynamically attached in/detached from the DOM (e.g. with t-if directive).
@@ -45,26 +47,41 @@ In addition to that, you have access to some development helpers which are **gre
 
 If the `block()` method is called several times simultaneously, the same number of times the `unblock()` function must be used to unblock the UI.
 
-## Example: ownership management
+## Example: active element management
 
-Here is how one component could take the ownership of the UI
-
-### With `useUIOwnership` hook
-
+### Listen to active element changes
 ```js
 class MyComponent extends Component {
   setup() {
-    useUIOwnership();
+    const ui = useService("ui");
+    this.myActiveElement = ui.activeElement;
+    useBus(ui.bus, "active-element-changed", (activeElement) => {
+      if(activeElement !== this.myActiveElement) {
+        // do some stuff, like changing my state or keeping myActiveElement in sync...
+      }
+    });
   }
 }
 ```
 
-### With `useUIOwnership` hook: ref delegation
+### With `useActiveElement` hook
+Here is how one component could change the active element of the UI
 
 ```js
 class MyComponent extends Component {
   setup() {
-    useUIOwnership("delegatedRef");
+    useActiveElement();
+  }
+}
+```
+
+### With `useActiveElement` hook: ref delegation
+Here is how one component could change the active element of the UI
+
+```js
+class MyComponent extends Component {
+  setup() {
+    useActiveElement("delegatedRef");
   }
 }
 MyComponent.template = owl.tags.xml`
@@ -76,6 +93,7 @@ MyComponent.template = owl.tags.xml`
 ```
 
 ### Manually
+Here is how one component could change the active element of the UI
 
 ```js
 class MyComponent extends Component {
@@ -83,11 +101,11 @@ class MyComponent extends Component {
     this.uiService = useService("ui");
   }
   mounted() {
-    const ownerElement = this.el;
-    this.uiOwnership = this.uiService.takeOwnership(ownerElement);
+    const activateElement = this.el;
+    this.uiService.activateElement(activateElement);
   }
   willUnmount() {
-    this.uiOwnership.release();
+    this.uiService.deactivateElement(activateElement);
   }
 }
 ```

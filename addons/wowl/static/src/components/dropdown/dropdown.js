@@ -10,10 +10,16 @@ export class Dropdown extends Component {
     this.hotkeyService = useService("hotkey");
     this.hotkeyTokens = [];
     this.state = useState({ open: this.props.startOpen, groupIsOpen: this.props.startOpen });
+    this.ui = useService("ui")
+    this.myActiveEl = this.ui.activeElement
     // Close on outside click listener
-    hooks.useExternalListener(window, "click", this.onWindowClicked);
-    // Listen to siblings states
-    useBus(Dropdown.bus, "state-changed", this.onSiblingDropdownStateChanged);
+    hooks.useExternalListener(this.myActiveEl, "click", this.onWindowClicked);
+    // Listen to all dropdowns state changes
+    useBus(Dropdown.bus, "state-changed", this.onDropdownStateChanged);
+    useBus(this.ui.bus, "active-element-changed", (activeElement) => {
+      if (activeElement !== this.myActiveEl) this._close();
+    });
+
     hooks.onMounted(() => {
       if (this.state.open) {
         this.subscribeKeynav();
@@ -161,26 +167,27 @@ export class Dropdown extends Component {
   }
 
   /**
-   * When a sibling dropdown state has changed, update mine accordingly.
-   * To avoid loops, here it's the only place where
-   * we do not want to notify our state changes.
+   * Dropdowns react to each other state changes through this method.
    */
-  onSiblingDropdownStateChanged(args) {
-    var _a, _b;
+  onDropdownStateChanged(args) {
     // Do not listen to my own events
     if (args.emitter.el === this.el) return;
-    // Do not listen to events not emitted by direct siblings
-    if (
-      ((_a = args.emitter.el) === null || _a === void 0 ? void 0 : _a.parentElement) !==
-      ((_b = this.el) === null || _b === void 0 ? void 0 : _b.parentElement)
-    )
-      return;
-    // A direct sibling is now open ? Close myself.
-    if (args.newState.open) {
-      this.state.open = false;
+
+    // Emitted by direct siblings ?
+    if (args.emitter.el.parentElement === this.el.parentElement) {
+      // Sync the group status
+      this.state.groupIsOpen = args.newState.groupIsOpen;
+
+      // Another dropdown is now open ? Close myself without notifying siblings.
+      if (this.state.open && args.newState.open) {
+        this.state.open = false;
+      }
+    } else {
+      // Another dropdown is now open ? Close myself.
+      if (this.state.open && args.newState.open) {
+        this._close();
+      }
     }
-    // Sync the group status
-    this.state.groupIsOpen = args.newState.groupIsOpen;
   }
 
   onTogglerClick() {
@@ -197,19 +204,18 @@ export class Dropdown extends Component {
    * Used to close ourself on outside click.
    */
   onWindowClicked(ev) {
-    var _a;
     // Return if already closed
     if (!this.state.open) return;
+    // Return if it's a different ui active element
+    if (this.ui.activeElement !== this.myActiveEl) return;
+
     let element = ev.target;
     let gotClickedInside = false;
     do {
-      element =
-        (_a = element.parentElement) === null || _a === void 0 ? void 0 : _a.closest(".o_dropdown");
+      element = element.parentElement && element.parentElement.closest(".o_dropdown");
       gotClickedInside = element === this.el;
-    } while (
-      (element === null || element === void 0 ? void 0 : element.parentElement) &&
-      !gotClickedInside
-    );
+    } while (element && element.parentElement && !gotClickedInside);
+
     if (!gotClickedInside) {
       this._close();
     }
