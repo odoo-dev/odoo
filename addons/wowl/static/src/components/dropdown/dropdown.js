@@ -86,50 +86,30 @@ export class Dropdown extends Component {
       return;
     }
 
-    const subs = [
-      {
-        hotkey: "arrowup",
-        hint: this.env._t("select the item above"),
-        callback: () => this._setActiveItem("PREV"),
+    const subs = {
+      "arrowup": () => this._setActiveItem("PREV"),
+      "arrowdown": () => this._setActiveItem("NEXT"),
+      "shift+arrowup": () => this._setActiveItem("FIRST"),
+      "shift+arrowdown": () => this._setActiveItem("LAST"),
+      "enter": () => {
+        const activeItem = this.el.querySelector(
+          ":scope > ul.o_dropdown_menu > .o_dropdown_item.o_dropdown_active"
+        );
+        if (activeItem) {
+          activeItem.click();
+        }
       },
-      {
-        hotkey: "arrowdown",
-        hint: "select the item below",
-        callback: () => this._setActiveItem("NEXT"),
-      },
-      {
-        hotkey: "shift-arrowup",
-        hint: "select the first item",
-        callback: () => this._setActiveItem("FIRST"),
-      },
-      {
-        hotkey: "shift-arrowdown",
-        hint: "select the last item",
-        callback: () => this._setActiveItem("LAST"),
-      },
-      {
-        hotkey: "enter",
-        hint: "click on the selected menu",
-        callback: () => {
-          const activeItem = this.el.querySelector(
-            ":scope > ul.o_dropdown_menu > .o_dropdown_item.o_dropdown_active"
-          );
-          if (activeItem) {
-            activeItem.click();
-          }
-        },
-      },
-      {
-        hotkey: "escape",
-        hint: "close the dropdown",
-        callback: this._close.bind(this),
-      },
-    ];
-    this.hotkeyTokens = subs.map((sub) => this.hotkeyService.subscribe(sub));
+      "escape": this._close.bind(this),
+    }
+
+    this.hotkeyTokens = [];
+    for (const [hotkey, callback] of Object.entries(subs)) {
+      this.hotkeyTokens.push(this.hotkeyService.registerHotkey(hotkey, callback));
+    }
   }
 
   unsubscribeKeynav() {
-    this.hotkeyTokens.forEach((tokenId) => this.hotkeyService.unsubscribe(tokenId));
+    this.hotkeyTokens.forEach((tokenId) => this.hotkeyService.unregisterHotkey(tokenId));
     this.hotkeyTokens = [];
   }
 
@@ -173,6 +153,9 @@ export class Dropdown extends Component {
     // Do not listen to my own events
     if (args.emitter.el === this.el) return;
 
+    // Do not listen to events emitted by children
+    if (this.el.contains(args.emitter.el)) return;
+
     // Emitted by direct siblings ?
     if (args.emitter.el.parentElement === this.el.parentElement) {
       // Sync the group status
@@ -183,7 +166,7 @@ export class Dropdown extends Component {
         this.state.open = false;
       }
     } else {
-      // Another dropdown is now open ? Close myself.
+      // Another dropdown is now open ? Close myself and notify the world (i.e. siblings).
       if (this.state.open && args.newState.open) {
         this._close();
       }
@@ -195,7 +178,7 @@ export class Dropdown extends Component {
   }
 
   onTogglerMouseEnter() {
-    if (this.state.groupIsOpen) {
+    if (this.state.groupIsOpen && !this.state.open) {
       this._open();
     }
   }
@@ -240,6 +223,10 @@ Dropdown.props = {
     optional: true,
   },
   hotkey: {
+    type: String,
+    optional: true,
+  },
+  title: {
     type: String,
     optional: true,
   },

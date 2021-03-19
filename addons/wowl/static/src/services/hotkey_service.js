@@ -5,19 +5,22 @@ const { hooks } = owl;
 const { onMounted, onWillUnmount } = hooks;
 
 /**
- * This hook will subscribe/unsubscribe the given subscription
+ * This hook will register/unregister the given registration
  * when the caller component will mount/unmount.
  *
- * @param {{hotkey: string, callback: (hotkey:string)=>void, hint?: string}} subscription
+ * @param {string} hotkey
+ * @param {()=>void} callback
+ * @param {Object} options - additional options
+ * @param {boolean} options.allowInEditable - allow registration to perform even in editable element
  */
-export function useHotkey(subscription) {
+export function useHotkey(hotkey, callback, options = {}) {
   const hotkeyService = useService("hotkey");
   let token;
   onMounted(() => {
-    token = hotkeyService.subscribe(subscription);
+    token = hotkeyService.registerHotkey(hotkey, callback, options);
   });
   onWillUnmount(() => {
-    hotkeyService.unsubscribe(token);
+    hotkeyService.unregisterHotkey(token);
   });
 }
 
@@ -41,89 +44,90 @@ const AUTHORIZED_KEYS = new Set([...ALPHANUM_KEYS, ...NAV_KEYS]);
 export const hotkeyService = {
   dependencies: ["ui"],
   deploy(env) {
-    const subscriptions = new Map();
+    const registrations = new Map();
     let nextToken = 0;
 
     window.addEventListener("keydown", onKeydown);
 
     /**
      * Handler for keydown events.
-     *
-     * @param {KeyboardEvent} ev
-     */
-    async function onKeydown(ev) {
-      const hotkey = getActiveHotkey(ev);
-      const infos = { hotkey, _originalEvent: ev };
-      if (canDispatch(infos)) {
-        dispatch(infos);
-      }
-    }
-
-    /**
      * Verifies if the keyboard event can be dispatched or not.
      * Rules sequence to forbid dispatching :
      * - UI is blocked
      * - key is held down (to avoid repeat)
-     * - focus is on an editable element (rule is bypassed on "ALT" combo)
      * - the pressed key is not whitelisted
      *
-     * @param {{hotkey: string, _originalEvent: KeyboardEvent}} infos
-     * @returns {boolean} true if service can dispatch the actual hotkey
+     * @param {KeyboardEvent} ev
      */
-    function canDispatch(infos) {
-      const { hotkey, _originalEvent: event } = infos;
+    function onKeydown(event) {
+      const hotkey = getActiveHotkey(event);
 
       // Do not dispatch if UI is blocked
       if (env.services.ui.isBlocked) {
-        return false;
+        return;
       }
 
       // Do not dispatch if user holds down a key
       if (event.repeat) {
-        return false;
-      }
-
-      // Is the active element editable ?
-      const inEditableElement =
-        event.target.isContentEditable || ["input", "textarea"].includes(event.target.nodeName);
-      const isAltCombo = hotkey !== "alt" && event.altKey;
-      if (inEditableElement && !isAltCombo) {
-        return false;
+        return;
       }
 
       // Is the pressed key NOT whitelisted ?
-      const singleKey = hotkey.split("-").pop();
+      const singleKey = hotkey.split("+").pop();
       if (!AUTHORIZED_KEYS.has(singleKey)) {
-        return false;
+        return;
       }
 
-      return true;
+      // Finally, prepare and dispatch.
+      const isAlted = event.altKey;
+      const focusedElement = document.activeElement;
+      const focusedNodeName = focusedElement ? focusedElement.nodeName : "";
+      const inEditableElement =
+      focusedElement && (focusedElement.isContentEditable ||
+        ["input", "textarea"].includes(focusedNodeName.toLowerCase()));
+      const infos = {
+        hotkey,
+        isAlted,
+        inEditableElement,
+        _originalEvent: event,
+      };
+      dispatch(infos);
     }
 
     /**
-     * Dispatches an hotkey to all matching subscriptions and
-     * clicks on all elements having a data-hotkey attribute matching the hotkey.
+     * Dispatches an hotkey to all matching registrations and
+     * clicks on all elements having a aria-keyshortcuts attribute matching the hotkey.
      *
-     * @param {string} hotkey
+     * @param {{
+     *  hotkey: string,
+     *  isAlted: boolean,
+     *  inEditableElement: boolean,
+     *  _originalEvent: KeyboardEvent
+     * }} infos
      */
     function dispatch(infos) {
       let dispatched = false;
-      const { hotkey, _originalEvent: event } = infos;
+      const { hotkey, isAlted, inEditableElement, _originalEvent: event } = infos;
       const activeElement = env.services.ui.activeElement;
 
-      // Dispatch actual hotkey to all matching subscriptions
-      for (const [_, sub] of subscriptions) {
-        if (sub.contextOwner === activeElement && sub.hotkey === hotkey) {
-          sub.callback(hotkey);
-          dispatched = true;
+      // Dispatch actual hotkey to all matching registrations
+      for (const [_, reg] of registrations) {
+        if (reg.contextElement === activeElement && reg.hotkey.toLowerCase() === hotkey) {
+          if (!inEditableElement || isAlted || reg.allowInEditable) {
+            reg.callback();
+            dispatched = true;
+          }
         }
       }
 
-      // Click on all elements having a data-hotkey attribute matching the actual hotkey.
-      const elems = activeElement.querySelectorAll(`[data-hotkey='${hotkey}']`);
-      for (const el of elems) {
-        el.click();
-        dispatched = true;
+      if (!inEditableElement || isAlted) {
+        // Click on all elements having a aria-keyshortcuts attribute matching the actual hotkey.
+        const elems = activeElement.querySelectorAll(`[aria-keyshortcuts~='${hotkey}' i]`);
+        for (const el of elems) {
+          el.focus();
+          el.click();
+          dispatched = true;
+        }
       }
 
       // Prevent default on event if it has been handheld.
@@ -136,7 +140,7 @@ export const hotkeyService = {
      * Get the actual hotkey being pressed.
      *
      * @param {KeyboardEvent} ev
-     * @returns {string} the active hotkey
+     * @returns {string} the active hotkey, in lowercase
      */
     function getActiveHotkey(ev) {
       const hotkey = [];
@@ -161,34 +165,35 @@ export const hotkeyService = {
         hotkey.push(key);
       }
 
-      return hotkey.join("-");
+      return hotkey.join("+").toLowerCase();
     }
 
     /**
-     * Registers a new subscription.
+     * Registers a new hotkey.
      *
-     * @param {{hotkey: string, callback: (hotkey:string)=>void, hint?: string}} sub
-     * @returns {number} subscription token
+     * @param {string} hotkey
+     * @param {()=>void} callback
+     * @param {Object} options - additional options
+     * @param {boolean} options.allowInEditable - allow registration to perform even in editable element
+     * @returns {number} registration token
      */
-    function subscribe(sub) {
-      const { hotkey, callback } = sub;
+    function registerHotkey(hotkey, callback, options = {}) {
       // Validate some informations
       if (!hotkey || hotkey.length === 0) {
-        throw new Error("You must specify an hotkey when registering a subscription.");
+        throw new Error("You must specify an hotkey when registering a registration.");
       }
 
       if (!callback || typeof callback !== "function") {
-        throw new Error("You must specify a callback function when registering a subscription.");
+        throw new Error("You must specify a callback function when registering a registration.");
       }
 
       /**
        * An hotkey must comply to these rules:
        *  - all parts are whitelisted
        *  - single key part comes last
-       *  - each part is separated by the dash character: "-"
+       *  - each part is separated by the dash character: "+"
        */
-      const keys = hotkey.split("-").filter((k) => !MODIFIERS.has(k));
-
+      const keys = hotkey.toLowerCase().split("+").filter((k) => !MODIFIERS.has(k));
       if (keys.some((k) => !AUTHORIZED_KEYS.has(k))) {
         throw new Error(
           `You are trying to subscribe for an hotkey ('${hotkey}')
@@ -197,36 +202,41 @@ export const hotkeyService = {
       } else if (keys.length > 1) {
         throw new Error(
           `You are trying to subscribe for an hotkey ('${hotkey}')
-            that contains more than one single key part: ${keys.join("-")}`
+            that contains more than one single key part: ${keys.join("+")}`
         );
       }
 
-      // Add subscription
+      // Add registration
       const token = nextToken++;
-      const subscription = Object.assign({}, sub, { contextOwner: null });
-      subscriptions.set(token, subscription);
+      const registration = {
+        hotkey,
+        callback,
+        contextElement: null,
+        allowInEditable: options && options.allowInEditable,
+      };
+      registrations.set(token, registration);
 
       // Due to the way elements are mounted in the DOM by Owl (bottom-to-top),
-      // we need to wait the next micro task tick to set the context owner of the subscription.
+      // we need to wait the next micro task tick to set the context owner of the registration.
       Promise.resolve().then(() => {
-        subscription.contextOwner = env.services.ui.activeElement;
+        registration.contextElement = env.services.ui.activeElement;
       });
 
       return token;
     }
 
     /**
-     * Unsubscribes the token corresponding subscription.
+     * Unsubscribes the token corresponding registration.
      *
      * @param {number} token
      */
-    function unsubscribe(token) {
-      subscriptions.delete(token);
+    function unregisterHotkey(token) {
+      registrations.delete(token);
     }
 
     return {
-      subscribe,
-      unsubscribe,
+      registerHotkey,
+      unregisterHotkey,
     };
   },
 };

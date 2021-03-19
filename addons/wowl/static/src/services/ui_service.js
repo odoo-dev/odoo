@@ -18,9 +18,9 @@ export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
  * In that case, it is mandatory that the referenced element is fixed and
  * not dynamically attached in/detached from the DOM (e.g. with t-if directive).
  *
- * @param {string?} refName
+ * @param {string} refName
  */
-export function useActiveElement(refName) {
+export function useActiveElement(refName = null) {
   const uiService = useService("ui");
   const owner = refName ? useRef(refName) : Component.current;
   onMounted(() => {

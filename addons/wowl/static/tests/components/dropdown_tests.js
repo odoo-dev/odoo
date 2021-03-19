@@ -547,7 +547,7 @@ QUnit.module("Components", (hooks) => {
       "menu is opened after pressing the toggler hotkey"
     );
 
-    // Select second item through data-hotkey attribute
+    // Select second item through aria-keyshortcuts attribute
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "2" }));
     await nextTick();
     assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");

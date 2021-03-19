@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="wowl.CommandPalette" owl="1">
+    <Dialog title="props.title" renderHeader="false" renderFooter="false" t-ref="dialogRef" contentClass="'o_command_palette'">
+
+      <input type="text" class="o_command_palette_search" t-on-input="onSearchInput" t-ref="inputRef" placeholder="Type a command" />
+
+      <div class="o_command_palette_listbox" t-ref="listboxRef">
+        <div t-foreach="categories" t-as="category" class="o_command_category">
+          <span t-if="category.label" t-esc="category.label" class="o_command_category_label" />
+          <span
+            t-foreach="category.commands"
+            t-as="command"
+            t-attf-id="o_command_{{state.commands.indexOf(command)}}"
+            class="o_command"
+            t-att-class="{ focused: state.selectedCommand === command }"
+            t-on-click="executeCommand(command)"
+            t-on-mouseenter="onCommandMouseEnter(state.commands.indexOf(command))"
+          >
+            <span t-esc="command.name"/>
+            <kbd t-if="command.hotkey" t-esc="command.hotkey"/>
+          </span>
+          <hr t-if="!category_last" />
+        </div>
+      </div>
+
+    </Dialog>
+  </t>
+
+</templates>

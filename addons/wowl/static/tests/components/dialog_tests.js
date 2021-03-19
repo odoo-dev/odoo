@@ -310,7 +310,7 @@ QUnit.module("Components", (hooks) => {
     assert.verifySteps(["dialog_id=2_closed", "dialog_id=1_closed"]);
   });
 
-  QUnit.test("can take UI ownership", async function (assert) {
+  QUnit.test("can be the UI active element", async function (assert) {
     assert.expect(3);
     class Parent extends owl.Component {
       setup() {
@@ -319,7 +319,7 @@ QUnit.module("Components", (hooks) => {
         assert.strictEqual(
           this.ui.activeElement,
           document,
-          "UI owner should be the default (document) as Parent is not mounted yet"
+          "UI active element should be the default (document) as Parent is not mounted yet"
         );
       }
       mounted() {
@@ -327,7 +327,7 @@ QUnit.module("Components", (hooks) => {
         assert.strictEqual(
           this.ui.activeElement,
           dialogModalEl,
-          "UI owner should be the dialog modal"
+          "UI active element should be the dialog modal"
         );
       }
     }
