@@ -10,11 +10,11 @@ const { onMounted, onWillUnmount, useRef } = hooks;
 export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
 
 /**
- * This hook will set the UI ownership
+ * This hook will set the UI active element
  * when the caller component will mount/unmount.
  *
  * The caller component could pass a `t-ref` value of its template
- * to delegate the UI ownership to another element than itself.
+ * to delegate the UI active element to another element than itself.
  * In that case, it is mandatory that the referenced element is fixed and
  * not dynamically attached in/detached from the DOM (e.g. with t-if directive).
  *
@@ -64,19 +64,32 @@ export const uiService = {
       },
     });
 
-    // UI ownership code
+    // UI active element code
     let activeElems = [document];
 
     function activateElement(el) {
       activeElems.push(el);
+      bus.trigger("active-element-changed", el);
     }
     function deactivateElement(el) {
       activeElems = activeElems.filter((x) => x !== el);
+      bus.trigger("active-element-changed", ui.activeElement);
+    }
+    function getVisibleElements(selector) {
+      const visibleElements = [];
+      for (const el of ui.activeElement.querySelectorAll(selector)) {
+        const isVisible = el.offsetWidth > 0 && el.offsetHeight > 0;
+        if (isVisible) {
+          visibleElements.push(el);
+        }
+      }
+      return visibleElements;
     }
 
     Object.assign(ui, {
       activateElement,
       deactivateElement,
+      getVisibleElements,
     });
     Object.defineProperty(ui, "activeElement", {
       get() {

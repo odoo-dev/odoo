@@ -61,7 +61,7 @@ QUnit.test("use block and unblock several times to block ui with ui service", as
   assert.strictEqual(blockUI, null, "ui should not be blocked");
 });
 
-QUnit.test("a component can take ownership", async (assert) => {
+QUnit.test("a component can be the active element", async (assert) => {
   class MyComponent extends Component {
     setup() {
       useActiveElement();
@@ -81,7 +81,7 @@ QUnit.test("a component can take ownership", async (assert) => {
   comp.destroy();
 });
 
-QUnit.test("a component can take ownership: with t-ref delegation", async (assert) => {
+QUnit.test("a component can be the  UI active element: with t-ref delegation", async (assert) => {
   class MyComponent extends Component {
     setup() {
       useActiveElement("delegatedRef");

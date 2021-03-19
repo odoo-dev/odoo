@@ -108,6 +108,41 @@ QUnit.test("rendering with two dialogs", async (assert) => {
   );
 });
 
+QUnit.test("multiple dialogs can become the UI active element", async (assert) => {
+  assert.expect(3);
+  class CustomDialog extends Component { }
+  CustomDialog.template = tags.xml`<Dialog title="props.title"/>`;
+  pseudoWebClient = await mount(PseudoWebClient, { env, target });
+
+  env.services.dialog.open(CustomDialog, { title: "Hello" });
+  await nextTick();
+  let dialogModal = target.querySelector(".o_dialog_container .o_dialog .modal:not(.o_inactive_modal)");
+
+  assert.strictEqual(
+    dialogModal,
+    env.services.ui.activeElement,
+  );
+
+  env.services.dialog.open(CustomDialog, { title: "Sauron" });
+  await nextTick();
+  dialogModal = target.querySelector(".o_dialog_container .o_dialog .modal:not(.o_inactive_modal)");
+
+  assert.strictEqual(
+    dialogModal,
+    env.services.ui.activeElement,
+  );
+
+  env.services.dialog.open(CustomDialog, { title: "Rafiki" });
+  await nextTick();
+  dialogModal = target.querySelector(".o_dialog_container .o_dialog .modal:not(.o_inactive_modal)");
+
+  assert.strictEqual(
+    dialogModal,
+    env.services.ui.activeElement,
+  );
+
+});
+
 QUnit.test("dialog component crashes", async (assert) => {
   assert.expect(4);
 
