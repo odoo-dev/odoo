@@ -576,6 +576,7 @@ class Website(models.Model):
 
     def skip_survey(self):
         self.survey_state = 'skipped'
+        self.env['theme.utils'].disable_view('website.survey_tour')
         action_id = self.env['ir.model.data'].xmlid_to_res_id('website.theme_install_kanban_action')
         return '/web#action={}&model=ir.module.module&view_type=kanban&cids={}'.format(action_id, self.company_id.id)
 
@@ -668,6 +669,7 @@ class Website(models.Model):
             self.env['web_editor.assets'].make_scss_customization(url, custo)
 
         self.survey_state = 'done'
+        self.env['theme.utils'].enable_view('website.survey_tour')
         logo = survey_data.get('logo')
         if logo:
             self.logo = logo.split(',', 1)[1]
