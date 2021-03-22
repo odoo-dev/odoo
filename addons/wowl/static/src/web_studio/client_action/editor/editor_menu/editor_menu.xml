@@ -60,7 +60,7 @@
         </li>
         <li class="o_web_studio_menu_item"
             t-on-click="openTab('translations')"
-            t-if="i18n.multiLang">
+            t-if="l10n.multiLang">
             <a href="#">Translations</a>
         </li>
         <li class="o_web_studio_menu_item"
