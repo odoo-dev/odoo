@@ -9,7 +9,7 @@ class ReportEditorAdapter extends ComponentAdapter {
         super(...arguments);
         this.user = useService('user');
         this.rpc = useService('rpc');
-        this.model = useService('model');
+        this.orm = useService('orm');
         this.studio = useService('studio');
         this.reportEnv = {};
         this.env = owl.Component.env;
@@ -68,7 +68,8 @@ class ReportEditorAdapter extends ComponentAdapter {
             ];
         }
 
-        const result = await this.model(this.report.model).search(
+        const result = await this.orm.search(
+            this.report.model,
             domain,
             undefined,
             this.user.context,
@@ -84,7 +85,8 @@ class ReportEditorAdapter extends ComponentAdapter {
      * @returns {Promise}
      */
     async _readModels() {
-        const models = await this.model('ir.model').searchRead(
+        const models = await this.orm.searchRead(
+            'ir.model',
             [
                 ['transient', '=', false]
             ], // abstract is defined in studio:['abstract', '=', false]],
@@ -102,7 +104,8 @@ class ReportEditorAdapter extends ComponentAdapter {
      * @returns {Promise}
      */
     async _readReport() {
-        const result = await this.model('ir.actions.report').read(
+        const result = await this.orm.read(
+            'ir.actions.report',
             [this.handle.res_id],
             undefined,
             this.user.context
