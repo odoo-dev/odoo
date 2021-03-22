@@ -87,7 +87,7 @@
             o_web_studio_menu_item
             o_web_studio_submenu_icons">
             <div class="o_web_studio_views_icons">
-                <a href="#" t-foreach="activeViews" t-as="view" t-att-title="view.title" t-att-aria-label="view.title"
+                <a href="#" t-foreach="activeViews" t-as="view" t-key="view.type" t-att-title="view.title" t-att-aria-label="view.title"
                    t-on-click.prevent="trigger('studio-switch-view', {viewType: view.type})">
                     <i t-attf-class="{{ 'fa ' + view.faclass }}" />
                 </a>

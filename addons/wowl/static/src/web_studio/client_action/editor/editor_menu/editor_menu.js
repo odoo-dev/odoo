@@ -33,13 +33,13 @@ export class EditorMenu extends owl.Component {
 }
 EditorMenu.template = "wowl.studio.EditorMenu";
 EditorMenu.viewTypes = [{
-    title: _lt('List'),
-    type: 'list',
-    faclass: 'fa-list-ul',
-  }, {
     title: _lt('Form'),
     type: 'form',
     faclass: 'fa-address-card',
+  }, {
+    title: _lt('List'),
+    type: 'list',
+    faclass: 'fa-list-ul',
   }, {
     title: _lt('Kanban'),
     type: 'kanban',
