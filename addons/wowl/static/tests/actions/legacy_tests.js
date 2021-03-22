@@ -77,7 +77,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsOnce(document.body, ".o_notification.bg-warning");
     assert.strictEqual($(".o_notification_title").text(), "Warning!!!");
     assert.strictEqual($(".o_notification_content").text(), "This is a warning...");
-    webClient.destroy();
   });
 
   QUnit.test("display warning as modal", async function (assert) {
@@ -108,6 +107,5 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsOnce(document.body, ".modal");
     assert.strictEqual($(".modal-title").text(), "Warning!!!");
     assert.strictEqual($(".modal-body").text(), "This is a warning...");
-    webClient.destroy();
   });
 });
