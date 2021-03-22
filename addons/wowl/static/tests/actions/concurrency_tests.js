@@ -75,7 +75,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/call_kw/pony/load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("handle switching view and switching back on slow network", async function (assert) {
@@ -111,7 +110,6 @@ QUnit.module("ActionManager", (hooks) => {
     await testUtils.nextTick();
     assert.containsOnce(webClient, ".o_kanban_view", "there should be a kanban view in dom");
     assert.containsNone(webClient, ".o_list_view", "there should not be a list view in dom");
-    webClient.destroy();
   });
 
   QUnit.test("when an server action takes too much time...", async function (assert) {
@@ -134,7 +132,6 @@ QUnit.module("ActionManager", (hooks) => {
       "Partners Action 4",
       "action 4 should be loaded"
     );
-    webClient.destroy();
   });
 
   QUnit.test("clicking quickly on breadcrumbs...", async function (assert) {
@@ -170,7 +167,6 @@ QUnit.module("ActionManager", (hooks) => {
       "Partners Action 4",
       "action 4 should be loaded and visible"
     );
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -229,7 +225,6 @@ QUnit.module("ActionManager", (hooks) => {
         "should not display the kanban view of action 4"
       );
       assert.verifySteps([]);
-      webClient.destroy();
     }
   );
 
@@ -282,7 +277,6 @@ QUnit.module("ActionManager", (hooks) => {
     );
     assert.containsNone(webClient, ".o_kanban_view", "should not display action 1");
     assert.verifySteps([]);
-    webClient.destroy();
   });
 
   QUnit.test("execute a new action while switching to another controller", async function (assert) {
@@ -348,7 +342,6 @@ QUnit.module("ActionManager", (hooks) => {
       "should not display the form view of action 3"
     );
     assert.verifySteps([]);
-    webClient.destroy();
   });
 
   QUnit.test("execute a new action while loading views", async function (assert) {
@@ -398,7 +391,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("execute a new action while loading data of default view", async function (assert) {
@@ -449,7 +441,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("open a record while reloading the list view", async function (assert) {
@@ -485,7 +476,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsNone(webClient, ".o_list_view");
     assert.containsNone(webClient, ".o_control_panel .o_list_buttons");
     assert.containsOnce(webClient, ".o_control_panel .o_form_buttons_view");
-    webClient.destroy();
   });
 
   QUnit.test("properly drop client actions after new action is initiated", async function (assert) {
@@ -513,7 +503,6 @@ QUnit.module("ActionManager", (hooks) => {
     await testUtils.nextTick();
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_kanban_view", "should still display the kanban view");
-    webClient.destroy();
   });
 
   QUnit.test("switching when doing an action -- load_views slow", async function (assert) {
@@ -552,7 +541,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("switching when doing an action -- search_read slow", async function (assert) {
@@ -591,6 +579,5 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/search_read",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 });

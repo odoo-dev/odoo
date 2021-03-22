@@ -68,7 +68,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("sidebar is present in list view", async function (assert) {
@@ -91,7 +90,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.isVisible(
       $(webClient.el).find('.o_cp_action_menus button.o_dropdown_toggler_btn:contains("Action")')[0]
     );
-    webClient.destroy();
   });
 
   QUnit.test("can switch between views", async function (assert) {
@@ -137,7 +135,6 @@ QUnit.module("ActionManager", (hooks) => {
       "read",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -191,7 +188,6 @@ QUnit.module("ActionManager", (hooks) => {
       // Execute another action by clicking on the button within the form
       await testUtils.dom.click($(webClient.el).find("button[name=8]"));
       await legacyExtraNextTick();
-      webClient.destroy();
     }
   );
 
@@ -288,7 +284,6 @@ QUnit.module("ActionManager", (hooks) => {
       "Partners",
       "breadcrumbs should display the display_name of the action"
     );
-    webClient.destroy();
   });
 
   QUnit.test("switch buttons are updated when switching between views", async function (assert) {
@@ -376,7 +371,6 @@ QUnit.module("ActionManager", (hooks) => {
       "active",
       "list should be the active view"
     );
-    webClient.destroy();
   });
   QUnit.test("pager is updated when switching between views", async function (assert) {
     assert.expect(10);
@@ -444,7 +438,6 @@ QUnit.module("ActionManager", (hooks) => {
       "5",
       "limit should be correct for kanban"
     );
-    webClient.destroy();
   });
 
   QUnit.test("domain is kept when switching between views", async function (assert) {
@@ -470,7 +463,6 @@ QUnit.module("ActionManager", (hooks) => {
     await cpHelpers.switchView(webClient.el, "list");
     await legacyExtraNextTick();
     assert.containsN(webClient, ".o_data_row", 5);
-    webClient.destroy();
   });
 
   QUnit.test("there is no flickering when switching between views", async function (assert) {
@@ -551,7 +543,6 @@ QUnit.module("ActionManager", (hooks) => {
       ".o_control_panel .breadcrumb-item",
       "there should be one controller in the breadcrumbs"
     );
-    webClient.destroy();
   });
 
   QUnit.test("breadcrumbs are updated when display_name changes", async function (assert) {
@@ -590,7 +581,6 @@ QUnit.module("ActionManager", (hooks) => {
       "New name",
       "breadcrumbs should contain the display_name of the opened record"
     );
-    webClient.destroy();
   });
 
   QUnit.test('reverse breadcrumb works on accesskey "b"', async function (assert) {
@@ -618,7 +608,6 @@ QUnit.module("ActionManager", (hooks) => {
       "b",
       "previous breadcrumb should have accessKey 'b'"
     );
-    webClient.destroy();
   });
 
   QUnit.test("reload previous controller when discarding a new record", async function (assert) {
@@ -648,7 +637,6 @@ QUnit.module("ActionManager", (hooks) => {
       "onchange",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("requests for execute_action of type object are handled", async function (assert) {
@@ -707,7 +695,6 @@ QUnit.module("ActionManager", (hooks) => {
       "object",
       "read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -762,7 +749,6 @@ QUnit.module("ActionManager", (hooks) => {
         webClient.el.querySelector(".o_cp_buttons .o_form_button_edit").disabled,
         "control panel buttons should still be enabled"
       );
-      webClient.destroy();
     }
   );
 
@@ -784,7 +770,6 @@ QUnit.module("ActionManager", (hooks) => {
       await nextTick();
       await legacyExtraNextTick();
       assert.notOk(webClient.el.querySelector(".o_cp_buttons button").disabled);
-      webClient.destroy();
     }
   );
 
@@ -815,7 +800,6 @@ QUnit.module("ActionManager", (hooks) => {
       await legacyExtraNextTick();
       assert.containsOnce(webClient.el, ".modal .o_form_view");
       assert.notOk(webClient.el.querySelector(".modal footer button").disabled);
-      webClient.destroy();
     }
   );
 
@@ -859,7 +843,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("execute smart button and back", async function (assert) {
@@ -883,7 +866,6 @@ QUnit.module("ActionManager", (hooks) => {
     await legacyExtraNextTick();
     assert.containsOnce(webClient.el, ".o_form_view");
     assert.containsN(webClient.el, ".o_form_buttons_view button:not([disabled])", 2);
-    webClient.destroy();
   });
 
   QUnit.test("execute smart button and fails", async function (assert) {
@@ -911,7 +893,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/call_kw/partner/load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -951,7 +932,6 @@ QUnit.module("ActionManager", (hooks) => {
         undefined,
         "buttons should not be disabled anymore"
       );
-      webClient.destroy();
     }
   );
 
@@ -1000,7 +980,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/search_read",
       "read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("restore previous view state when switching back", async function (assert) {
@@ -1042,7 +1021,6 @@ QUnit.module("ActionManager", (hooks) => {
       "active",
       "line chart button is still active"
     );
-    webClient.destroy();
   });
 
   QUnit.test("view switcher is properly highlighted in graph view", async function (assert) {
@@ -1074,7 +1052,6 @@ QUnit.module("ActionManager", (hooks) => {
       "active",
       "graph button in control panel is active"
     );
-    webClient.destroy();
   });
 
   QUnit.test("can interact with search view", async function (assert) {
@@ -1104,7 +1081,6 @@ QUnit.module("ActionManager", (hooks) => {
       "o_list_table_grouped",
       "list view is now grouped"
     );
-    webClient.destroy();
   });
 
   QUnit.test("can open a many2one external window", async function (assert) {
@@ -1148,7 +1124,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/call_kw/partner",
       "/web/dataset/call_kw/partner/read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test('save when leaving a "dirty" view', async function (assert) {
@@ -1172,7 +1147,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsNone(document.body, ".modal", "should not display a modal dialog");
     assert.containsNone(webClient, ".o_form_view", "should no longer be in form view");
     assert.containsOnce(webClient, ".o_kanban_view", "should be in kanban view");
-    webClient.destroy();
   });
 
   QUnit.test("limit set in action is passed to each created controller", async function (assert) {
@@ -1185,7 +1159,6 @@ QUnit.module("ActionManager", (hooks) => {
     await cpHelpers.switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.containsN(webClient, ".o_kanban_record:not(.o_kanban_ghost)", 2);
-    webClient.destroy();
   });
 
   QUnit.test("go back to a previous action using the breadcrumbs", async function (assert) {
@@ -1260,7 +1233,6 @@ QUnit.module("ActionManager", (hooks) => {
       "Partners",
       "breadcrumbs should contain the name of the current action"
     );
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -1282,7 +1254,6 @@ QUnit.module("ActionManager", (hooks) => {
       await testUtils.dom.clickLast($(webClient.el).find(".o_control_panel .breadcrumb a"));
       await legacyExtraNextTick();
       assert.hasClass($(webClient.el).find(".o_form_view")[0], "o_form_readonly");
-      webClient.destroy();
     }
   );
 
@@ -1328,7 +1299,6 @@ QUnit.module("ActionManager", (hooks) => {
       2,
       "should be grouped by 'bar' (two groups) at reload"
     );
-    webClient.destroy();
   });
 
   QUnit.test("switch request to unknown view type", async function (assert) {
@@ -1360,7 +1330,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("save current search", async function (assert) {
@@ -1411,7 +1380,6 @@ QUnit.module("ActionManager", (hooks) => {
     await cpHelpers.saveFavorite(webClient.el);
     await legacyExtraNextTick();
     testUtils.mock.unpatch(ListController);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -1478,7 +1446,6 @@ QUnit.module("ActionManager", (hooks) => {
         "zoupyopplopgnapblip",
         "order of records should not be changed, after removing current filter"
       );
-      webClient.destroy();
     }
   );
 
@@ -1504,7 +1471,6 @@ QUnit.module("ActionManager", (hooks) => {
         webClient.el.querySelector(".o_search_options .o_dropdown.o_filter_menu"),
         "the search options should be available"
       );
-      webClient.destroy();
     }
   );
 
@@ -1530,7 +1496,6 @@ QUnit.module("ActionManager", (hooks) => {
     });
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 3);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -1575,7 +1540,6 @@ QUnit.module("ActionManager", (hooks) => {
         $(webClient.el).find(".o_form_view button:contains(Execute action)")
       );
       await legacyExtraNextTick();
-      webClient.destroy();
     }
   );
 
@@ -1603,7 +1567,6 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, 1, { clearBreadcrumbs: true });
     assert.containsNone(webClient, ".o_form_view");
     assert.containsOnce(webClient, ".o_kanban_view");
-    webClient.destroy();
   });
 
   QUnit.test("execute action from dirty, new record, and come back", async function (assert) {
@@ -1668,7 +1631,6 @@ QUnit.module("ActionManager", (hooks) => {
       "read",
       "read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("execute a contextual action from a form view", async function (assert) {
@@ -1696,7 +1658,6 @@ QUnit.module("ActionManager", (hooks) => {
     await cpHelpers.toggleMenuItem(webClient.el, "Favorite Ponies");
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_list_view");
-    webClient.destroy();
   });
 
   QUnit.test("go back to action with form view as main view, and res_id", async function (assert) {
@@ -1744,7 +1705,6 @@ QUnit.module("ActionManager", (hooks) => {
       webClient.el.querySelector(".o_control_panel .breadcrumb-item").textContent,
       "Second record"
     );
-    webClient.destroy();
   });
 
   QUnit.test("open a record, come back, and create a new record", async function (assert) {
@@ -1767,7 +1727,6 @@ QUnit.module("ActionManager", (hooks) => {
     await legacyExtraNextTick();
     assert.containsOnce(webClient.el, ".o_form_view");
     assert.hasClass(webClient.el.querySelector(".o_form_view"), "o_form_editable");
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -1804,7 +1763,6 @@ QUnit.module("ActionManager", (hooks) => {
         $(webClient.el).find(".o_field_widget[name=display_name]").text(),
         "Second record"
       );
-      webClient.destroy();
     }
   );
 
@@ -1839,7 +1797,6 @@ QUnit.module("ActionManager", (hooks) => {
         $(webClient.el).find(".o_field_widget[name=display_name]").text(),
         "another record"
       );
-      webClient.destroy();
     }
   );
 
@@ -1872,7 +1829,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.verifySteps(["init js class"]);
     delete legacyViewRegistry.map.test_view;
     delete legacyViewRegistry.map.test_jsClass;
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -1917,7 +1873,6 @@ QUnit.module("ActionManager", (hooks) => {
       assert.verifySteps(["onClose"]);
       await legacyExtraNextTick();
       assert.containsNone(webClient.el, ".modal");
-      webClient.destroy();
       delete legacyViewRegistry.map.test_view;
     }
   );
@@ -1965,7 +1920,6 @@ QUnit.module("ActionManager", (hooks) => {
       assert.verifySteps(["/web/dataset/call_button", "/web/dataset/call_kw/partner/read"]);
       assert.containsNone(document.body, ".tooltip"); // body different from webClient in tests !
       assert.containsN(webClient.el, ".o_form_buttons_view button:not([disabled])", 2);
-      webClient.destroy();
     }
   );
 
@@ -1998,7 +1952,6 @@ QUnit.module("ActionManager", (hooks) => {
     searchPromise.resolve();
     await cpHelpers.validateSearch(webClient.el);
     assert.verifySteps(["search_read |,foo,ilike,m,foo,ilike,o"]);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -2029,7 +1982,6 @@ QUnit.module("ActionManager", (hooks) => {
       await legacyExtraNextTick();
       assert.containsNone(document.body, ".modal");
       assert.strictEqual(writeCalls, 1);
-      webClient.destroy();
     }
   );
 });

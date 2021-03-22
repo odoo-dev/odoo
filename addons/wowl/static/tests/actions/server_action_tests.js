@@ -58,7 +58,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("handle server actions returning false", async function (assert) {
@@ -92,6 +91,5 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/action/run",
       "close handler",
     ]);
-    webClient.destroy();
   });
 });

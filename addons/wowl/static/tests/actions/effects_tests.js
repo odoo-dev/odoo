@@ -79,7 +79,6 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, 3);
     assert.containsOnce(webClient.el, ".o_reward");
     assert.containsOnce(webClient.el, ".o_list_view");
-    webClient.destroy();
   });
 
   QUnit.test("show effect notification instead of rainbow man", async function (assert) {
@@ -99,7 +98,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsOnce(webClient.el, ".o_kanban_view");
     assert.containsNone(webClient.el, ".o_reward");
     assert.containsOnce(webClient.el, ".o_notification");
-    webClient.destroy();
   });
 
   QUnit.test("on close with effect from server", async function (assert) {
@@ -125,7 +123,6 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, 6);
     await click(webClient.el.querySelector('button[name="object"]'));
     assert.containsOnce(webClient, ".o_reward");
-    webClient.destroy();
   });
 
   QUnit.test("on close with effect in xml", async function (assert) {
@@ -160,6 +157,5 @@ QUnit.module("ActionManager", (hooks) => {
       webClient.el.querySelector(".o_reward .o_reward_msg_content").textContent,
       "rainBowInXML"
     );
-    webClient.destroy();
   });
 });

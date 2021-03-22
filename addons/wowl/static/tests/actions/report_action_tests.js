@@ -76,7 +76,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/report/download",
       "on_close",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("report actions can close modals and reload views", async function (assert) {
@@ -113,7 +112,6 @@ QUnit.module("ActionManager", (hooks) => {
       "the modal should have been closed after the action report"
     );
     assert.verifySteps(["/report/download", "on_printed", "/report/download", "on_close"]);
-    webClient.destroy();
   });
 
   QUnit.test("should trigger a notification if wkhtmltopdf is to upgrade", async function (assert) {
@@ -149,7 +147,6 @@ QUnit.module("ActionManager", (hooks) => {
       "notify",
       "/report/download",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -209,7 +206,6 @@ QUnit.module("ActionManager", (hooks) => {
         // context={"lang":'en',"uid":7,"tz":'taht'}
         "/report/html/some_report?context=%7B%22lang%22%3A%22en%22%2C%22uid%22%3A7%2C%22tz%22%3A%22taht%22%7D",
       ]);
-      webClient.destroy();
       testUtils.mock.unpatch(ReportClientAction);
     }
   );
@@ -263,7 +259,6 @@ QUnit.module("ActionManager", (hooks) => {
       // context={"some_key":2}
       "/report/html/some_report?context=%7B%22some_key%22%3A2%7D",
     ]);
-    webClient.destroy();
     testUtils.mock.unpatch(ReportClientAction);
   });
 
@@ -317,7 +312,6 @@ QUnit.module("ActionManager", (hooks) => {
       ]);
       ui.bus.off("BLOCK", webClient);
       ui.bus.off("UNBLOCK", webClient);
-      webClient.destroy();
     }
   );
 });

@@ -20,6 +20,9 @@ export function registerCleanup(callback) {
 }
 
 QUnit.on("OdooAfterTestHook", (info) => {
+  if (QUnit.config.debug) {
+    return;
+  }
   let cleanup;
   // note that this calls the cleanup callbacks in reverse order!
   while ((cleanup = cleanups.pop())) {
@@ -66,6 +69,9 @@ const validElements = [
  * is used to indicate the test that left elements in the DOM, when it happens.
  */
 QUnit.on("OdooAfterTestHook", function (info) {
+  if (QUnit.config.debug) {
+    return;
+  }
   const toRemove = [];
   // check for leftover elements in the body
   for (const bodyChild of document.body.children) {
@@ -92,10 +98,8 @@ QUnit.on("OdooAfterTestHook", function (info) {
     toRemove.push(...qunitFixture.children);
   }
   // remove unwanted elements if not in debug
-  if (!QUnit.config.debug) {
-    for (const el of toRemove) {
-      el.remove();
-    }
-    document.body.classList.remove("modal-open");
+  for (const el of toRemove) {
+    el.remove();
   }
+  document.body.classList.remove("modal-open");
 });

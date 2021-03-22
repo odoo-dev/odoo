@@ -67,7 +67,6 @@ QUnit.module("ActionManager", (hooks) => {
       "ClientAction_Id 2"
     );
     assert.strictEqual(webClient.el.querySelector(".o_menu_brand").textContent, "App2");
-    webClient.destroy();
   });
 
   QUnit.test("do action keeps menu in url", async (assert) => {
@@ -96,7 +95,6 @@ QUnit.module("ActionManager", (hooks) => {
       "ClientAction_Id 1"
     );
     assert.strictEqual(webClient.el.querySelector(".o_menu_brand").textContent, "App2");
-    webClient.destroy();
   });
 
   QUnit.test("actions can push state", async (assert) => {
@@ -126,7 +124,6 @@ QUnit.module("ActionManager", (hooks) => {
     urlState = webClient.env.services.router.current;
     assert.strictEqual(urlState.hash.action, "client_action_pushes");
     assert.strictEqual(urlState.hash.arbitrary, "actionPushed");
-    webClient.destroy();
   });
 
   QUnit.test("actions override previous state", async (assert) => {
@@ -157,7 +154,6 @@ QUnit.module("ActionManager", (hooks) => {
     urlState = webClient.env.services.router.current;
     assert.strictEqual(urlState.hash.action, "1001");
     assert.strictEqual(urlState.hash.arbitrary, undefined);
-    webClient.destroy();
   });
 
   QUnit.test("actions override previous state from menu click", async (assert) => {
@@ -188,7 +184,6 @@ QUnit.module("ActionManager", (hooks) => {
     urlState = webClient.env.services.router.current;
     assert.strictEqual(urlState.hash.action, "1002");
     assert.strictEqual(urlState.hash.menu_id, "2");
-    webClient.destroy();
   });
 
   QUnit.test("action in target new do not push state", async (assert) => {
@@ -206,7 +201,6 @@ QUnit.module("ActionManager", (hooks) => {
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 1001);
     assert.containsOnce(webClient, ".modal .test_client_action");
-    webClient.destroy();
   });
 
   QUnit.test("properly push state", async function (assert) {
@@ -232,7 +226,6 @@ QUnit.module("ActionManager", (hooks) => {
       view_type: "form",
       id: "4",
     });
-    webClient.destroy();
   });
 
   QUnit.test("push state after action is loaded, not before", async function (assert) {
@@ -256,7 +249,6 @@ QUnit.module("ActionManager", (hooks) => {
       model: "partner",
       view_type: "kanban",
     });
-    webClient.destroy();
   });
 
   QUnit.test("do not push state when action fails", async function (assert) {
@@ -282,6 +274,5 @@ QUnit.module("ActionManager", (hooks) => {
       model: "pony",
       view_type: "list",
     });
-    webClient.destroy();
   });
 });

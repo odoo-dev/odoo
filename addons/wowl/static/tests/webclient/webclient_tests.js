@@ -35,7 +35,6 @@ QUnit.test("can be rendered", async (assert) => {
   const target = getFixture();
   const webClient = await mount(WebClient, { env, target });
   assert.containsOnce(webClient.el, "header > nav.o_main_navbar");
-  webClient.destroy();
 });
 
 QUnit.test("can render a main component", async (assert) => {
@@ -48,5 +47,4 @@ QUnit.test("can render a main component", async (assert) => {
   const target = getFixture();
   const webClient = await mount(WebClient, { env, target });
   assert.containsOnce(webClient.el, ".chocolate");
-  webClient.destroy();
 });

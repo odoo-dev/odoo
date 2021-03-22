@@ -74,7 +74,6 @@ QUnit.module("ActionManager", (hooks) => {
       "form view should be in edit mode"
     );
     assert.verifySteps(["/wowl/load_menus", "/web/action/load", "load_views", "onchange"]);
-    webClient.destroy();
   });
 
   QUnit.test("chained action on_close", async function (assert) {
@@ -91,7 +90,6 @@ QUnit.module("ActionManager", (hooks) => {
     // An act_window_close should trigger the on_close
     await doAction(webClient, { type: "ir.actions.act_window_close", infos: "smallCandle" });
     assert.verifySteps(["Close Action"]);
-    webClient.destroy();
   });
 
   QUnit.test("footer buttons are moved to the dialog footer", async function (assert) {
@@ -120,7 +118,6 @@ QUnit.module("ActionManager", (hooks) => {
       "button",
       "the modal footer should only contain one button"
     );
-    webClient.destroy();
   });
 
   QUnit.test("Button with `close` attribute closes dialog", async function (assert) {
@@ -193,7 +190,6 @@ QUnit.module("ActionManager", (hooks) => {
     ]);
     await legacyExtraNextTick();
     assert.strictEqual($(".modal").length, 0, "It should have closed the modal");
-    webClient.destroy();
   });
 
   QUnit.test('on_attach_callback is called for actions in target="new"', async function (assert) {
@@ -219,7 +215,6 @@ QUnit.module("ActionManager", (hooks) => {
       type: "ir.actions.client",
     });
     assert.verifySteps(["on_attach_callback"]);
-    webClient.destroy();
     delete core.action_registry.map.test;
   });
 
@@ -246,7 +241,6 @@ QUnit.module("ActionManager", (hooks) => {
       assert.containsNone(webClient.el, '.o_technical_modal .modal-body button[special="save"]');
       assert.containsOnce(webClient.el, '.o_technical_modal .modal-footer button[special="save"]');
       assert.containsOnce(webClient.el, ".o_technical_modal .modal-footer button");
-      webClient.destroy();
     }
   );
 
@@ -273,7 +267,6 @@ QUnit.module("ActionManager", (hooks) => {
       await doAction(webClient, 25);
       assert.containsNone(webClient.el, ".modal footer button.o_stagger_lee");
       assert.containsOnce(webClient.el, '.modal footer button[special="save"]');
-      webClient.destroy();
       delete core.action_registry.map.test;
     }
   );
@@ -294,7 +287,6 @@ QUnit.module("ActionManager", (hooks) => {
         "should have rendered a form view in edit mode"
       );
       assert.verifySteps(["/wowl/load_menus", "/web/action/load", "load_views", "read"]);
-      webClient.destroy();
     }
   );
 
@@ -313,7 +305,6 @@ QUnit.module("ActionManager", (hooks) => {
       "Partners Action 1",
       "should have only one current action visible in breadcrumbs"
     );
-    webClient.destroy();
   });
 
   QUnit.module('Actions in target="fullscreen"');
@@ -327,7 +318,6 @@ QUnit.module("ActionManager", (hooks) => {
       assert.containsOnce(webClient.el, ".o_control_panel", "should have rendered a control panel");
       assert.containsOnce(webClient, ".o_kanban_view", "should have rendered a kanban view");
       assert.isNotVisible(webClient.el.querySelector(".o_main_navbar"));
-      webClient.destroy();
     }
   );
 
@@ -346,7 +336,6 @@ QUnit.module("ActionManager", (hooks) => {
     await testUtils.dom.click($(webClient.el).find(".breadcrumb li a:first"));
     await legacyExtraNextTick();
     assert.isVisible(webClient.el.querySelector(".o_main_navbar"));
-    webClient.destroy();
   });
 
   QUnit.test('fullscreen on action change: all "fullscreen" actions', async function (assert) {
@@ -364,7 +353,6 @@ QUnit.module("ActionManager", (hooks) => {
     await testUtils.dom.click($(webClient.el).find(".breadcrumb li a:first"));
     await legacyExtraNextTick();
     assert.isNotVisible(webClient.el.querySelector(".o_main_navbar"));
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -395,7 +383,6 @@ QUnit.module("ActionManager", (hooks) => {
       assert.doesNotHaveClass(webClient.el, "o_fullscreen");
       assert.containsOnce(webClient, "nav .o_menu_brand");
       assert.strictEqual($(webClient.el).find("nav .o_menu_brand").text(), "MAIN APP");
-      webClient.destroy();
     }
   );
 });

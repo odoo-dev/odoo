@@ -63,7 +63,6 @@ QUnit.module("ActionManager", (hooks) => {
     });
     assert.containsOnce(webClient, ".test_client_action");
     assert.strictEqual(webClient.el.querySelector(".o_menu_brand").textContent, "App1");
-    webClient.destroy();
   });
 
   QUnit.test("menu loading", async (assert) => {
@@ -77,7 +76,6 @@ QUnit.module("ActionManager", (hooks) => {
       "ClientAction_Id 2"
     );
     assert.strictEqual(webClient.el.querySelector(".o_menu_brand").textContent, "App2");
-    webClient.destroy();
   });
 
   QUnit.test("action and menu loading", async (assert) => {
@@ -92,7 +90,6 @@ QUnit.module("ActionManager", (hooks) => {
       "ClientAction_Id 1"
     );
     assert.strictEqual(webClient.el.querySelector(".o_menu_brand").textContent, "App2");
-    webClient.destroy();
   });
 
   QUnit.test("supports action as xmlId", async (assert) => {
@@ -106,7 +103,6 @@ QUnit.module("ActionManager", (hooks) => {
       "ClientAction_xmlId"
     );
     assert.containsNone(webClient, ".o_menu_brand");
-    webClient.destroy();
   });
 
   QUnit.test("supports opening action in dialog", async (assert) => {
@@ -119,7 +115,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsOnce(webClient, ".test_client_action");
     assert.containsOnce(webClient, ".modal .test_client_action");
     assert.containsNone(webClient, ".o_menu_brand");
-    webClient.destroy();
   });
 
   QUnit.test("should not crash on invalid state", async function (assert) {
@@ -133,7 +128,6 @@ QUnit.module("ActionManager", (hooks) => {
     });
     assert.strictEqual($(webClient.el).text(), "", "should display nothing");
     assert.verifySteps(["/wowl/load_menus"]);
-    webClient.destroy();
   });
 
   QUnit.test("properly load client actions", async function (assert) {
@@ -155,7 +149,6 @@ QUnit.module("ActionManager", (hooks) => {
       "should have correctly rendered the client action"
     );
     assert.verifySteps(["/wowl/load_menus"]);
-    webClient.destroy();
     testConfig.actionRegistry.remove("HelloWorldTest");
   });
 
@@ -178,7 +171,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("properly load records", async function (assert) {
@@ -200,7 +192,6 @@ QUnit.module("ActionManager", (hooks) => {
       "should have opened the second record"
     );
     assert.verifySteps(["/wowl/load_menus", "load_views", "read"]);
-    webClient.destroy();
   });
 
   QUnit.test("properly load default record", async function (assert) {
@@ -219,7 +210,6 @@ QUnit.module("ActionManager", (hooks) => {
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_form_view");
     assert.verifySteps(["/wowl/load_menus", "/web/action/load", "load_views", "onchange"]);
-    webClient.destroy();
   });
 
   QUnit.test("load requested view for act window actions", async function (assert) {
@@ -242,7 +232,6 @@ QUnit.module("ActionManager", (hooks) => {
       "load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -280,7 +269,6 @@ QUnit.module("ActionManager", (hooks) => {
         "read",
         "/web/dataset/search_read",
       ]);
-      webClient.destroy();
     }
   );
 
@@ -327,7 +315,6 @@ QUnit.module("ActionManager", (hooks) => {
       "Partners Action 4Partners",
       "the breadcrumb elements should be correctly ordered"
     );
-    webClient.destroy();
   });
 
   QUnit.test("lazy loaded multi record view with failing mono record one", async function (assert) {
@@ -347,7 +334,6 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsNone(webClient, ".o_list_view");
     await doAction(webClient, 1);
     assert.containsOnce(webClient, ".o_kanban_view");
-    webClient.destroy();
   });
 
   QUnit.test("change the viewType of the current action", async function (assert) {
@@ -399,7 +385,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/search_read",
       "read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("change the id of the current action", async function (assert) {
@@ -449,7 +434,6 @@ QUnit.module("ActionManager", (hooks) => {
       "read",
       "read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("should push the correct state at the right time", async function (assert) {
@@ -485,7 +469,6 @@ QUnit.module("ActionManager", (hooks) => {
       view_type: "form",
     });
     assert.verifySteps(["push_state"], "should push the state of it changes afterwards");
-    webClient.destroy();
   });
 
   QUnit.test("should not push a loaded state of a legacy client action", async function (assert) {
@@ -534,7 +517,6 @@ QUnit.module("ActionManager", (hooks) => {
       action: "9",
       someValue: "X",
     });
-    webClient.destroy();
     delete core.action_registry.map.ClientAction;
   });
 
@@ -612,7 +594,6 @@ QUnit.module("ActionManager", (hooks) => {
       1,
       "there should still be one controller in the breadcrumbs"
     );
-    webClient.destroy();
     delete core.action_registry.map.ClientAction;
   });
 
@@ -660,7 +641,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/search_read",
       "setItem session current_action",
     ]);
-    webClient.destroy();
     unpatch(browser.sessionStorage, "mock.sessionstorage");
   });
 
@@ -692,7 +672,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/call_kw/partner/load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("load state supports #home", async function (assert) {
@@ -725,7 +704,6 @@ QUnit.module("ActionManager", (hooks) => {
       $(webClient.el).find(".o_control_panel .breadcrumb-item").text(),
       "Partners Action 1"
     );
-    webClient.destroy();
   });
 
   QUnit.test("load state supports #home as initial state", async function (assert) {
@@ -760,7 +738,6 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/call_kw/partner/load_views",
       "/web/dataset/search_read",
     ]);
-    webClient.destroy();
   });
 
   QUnit.test("load state: in a form view, remove the id from the state", async function (assert) {
@@ -800,7 +777,6 @@ QUnit.module("ActionManager", (hooks) => {
       $(webClient.el).find(".o_control_panel .breadcrumb-item.active").text(),
       "New"
     );
-    webClient.destroy();
   });
 
   QUnit.test("hashchange does not trigger canberemoved right away", async function (assert) {
@@ -841,7 +817,6 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, "ClientAction2");
     assert.containsOnce(webClient.el, ".o_client_action_test_2");
     assert.verifySteps(["canBeRemoved", "hashSet"]);
-    webClient.destroy();
     delete core.action_registry.map.ClientAction;
     delete core.action_registry.map.ClientAction2;
   });

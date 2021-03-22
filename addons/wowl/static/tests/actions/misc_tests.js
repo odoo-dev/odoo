@@ -110,7 +110,6 @@ QUnit.module("ActionManager", (hooks) => {
     await testUtils.dom.click(webClient.el.querySelector(".o_control_panel .breadcrumb a"));
     await legacyExtraNextTick();
     assert.strictEqual(delta, n, "should have properly destroyed all other widgets");
-    webClient.destroy();
     testUtils.mock.unpatch(Widget);
   });
 
@@ -134,7 +133,6 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, 5);
     await doAction(webClient, { type: "ir.actions.act_window_close" });
     assert.strictEqual(delta, n, "should have properly destroyed all widgets");
-    webClient.destroy();
     testUtils.mock.unpatch(Widget);
   });
 
@@ -172,7 +170,6 @@ QUnit.module("ActionManager", (hooks) => {
       def.resolve();
       await testUtils.nextTick();
       assert.strictEqual(n, delta, "all widgets of action 3 should have been destroyed");
-      webClient.destroy();
       testUtils.mock.unpatch(Widget);
     }
   );
@@ -213,7 +210,6 @@ QUnit.module("ActionManager", (hooks) => {
       await testUtils.nextTick();
       await legacyExtraNextTick();
       assert.strictEqual(n, delta, "all widgets of action 3 should have been destroyed");
-      webClient.destroy();
       testUtils.mock.unpatch(Widget);
     }
   );
@@ -254,7 +250,6 @@ QUnit.module("ActionManager", (hooks) => {
       await testUtils.nextTick();
       await legacyExtraNextTick();
       assert.strictEqual(n, delta, "all widgets of action 3 should have been destroyed");
-      webClient.destroy();
       testUtils.mock.unpatch(Widget);
     }
   );
@@ -270,7 +265,6 @@ QUnit.module("ActionManager", (hooks) => {
     // push another action flagged with 'no_breadcrumbs=true'
     await doAction(webClient, 4);
     assert.containsNone(webClient, ".o_control_panel .breadcrumb-item");
-    webClient.destroy();
   });
 
   QUnit.test("document's title is updated when an action is executed", async function (assert) {
@@ -306,7 +300,6 @@ QUnit.module("ActionManager", (hooks) => {
     });
     currentHash = webClient.env.services.router.current.hash;
     assert.deepEqual(currentHash, { action: "8", id: "4", model: "pony", view_type: "form" });
-    webClient.destroy();
   });
 
   QUnit.test("on_reverse_breadcrumb handler is correctly called (legacy)", async function (assert) {
@@ -339,7 +332,6 @@ QUnit.module("ActionManager", (hooks) => {
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".my_button");
     assert.verifySteps(["on_reverse_breadcrumb"]);
-    webClient.destroy();
     delete core.action_registry.map.ClientAction;
   });
 
@@ -360,7 +352,6 @@ QUnit.module("ActionManager", (hooks) => {
       "Partners Action 4",
       "breadcrumbs should display the display_name of the action"
     );
-    webClient.destroy();
   });
 
   QUnit.test("stores and restores scroll position", async function (assert) {
@@ -382,7 +373,6 @@ QUnit.module("ActionManager", (hooks) => {
     await testUtils.dom.click($(webClient.el).find(".o_control_panel .breadcrumb a"));
     await legacyExtraNextTick();
     assert.strictEqual(webClient.el.querySelector(".o_content").scrollTop, 100);
-    webClient.destroy();
   });
 
   QUnit.test(
@@ -407,7 +397,6 @@ QUnit.module("ActionManager", (hooks) => {
       assert.containsOnce(document.body, ".modal .o_form_view");
       await doAction(webClient, 1); // target != 'new'
       assert.containsNone(document.body, ".modal");
-      webClient.destroy();
     }
   );
 
@@ -433,7 +422,6 @@ QUnit.module("ActionManager", (hooks) => {
       assert.containsOnce(document.body, ".modal .o_form_view");
       await doAction(webClient, 5); // target 'new'
       assert.containsN(document.body, ".modal .o_form_view", 2);
-      webClient.destroy();
     }
   );
 });
