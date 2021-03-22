@@ -191,6 +191,7 @@ QUnit.module(
           };
         },
       };
+      serviceRegistry.add('ui', makeFakeUIService());
       serviceRegistry.add(fakeEnterpriseService.name, fakeEnterpriseService);
       serviceRegistry.add(fakeHomeMenuService.name, fakeHomeMenuService);
       serviceRegistry.add(fakeMenuService.name, fakeMenuService);
@@ -395,7 +396,6 @@ QUnit.module(
 
       testConfig.serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService, { force: true });
       testConfig.serviceRegistry.add(mockedCookieService.name, mockedCookieService);
-      testConfig.serviceRegistry.add("ui", makeFakeUIService());
       testConfig.serviceRegistry.add("orm", ormService);
 
       const homeMenu = await createHomeMenu(testConfig);

@@ -323,8 +323,14 @@ export function makeFakeUIService(values) {
     SIZES,
   };
   return {
-    deploy() {
-      return Object.assign(defaults, values);
+    deploy(env) {
+      const res = Object.assign(defaults, values);
+      Object.defineProperty(env, "isSmall", {
+        get() {
+          return res.isSmall;
+        },
+      });
+      return res;
     },
   };
 }
