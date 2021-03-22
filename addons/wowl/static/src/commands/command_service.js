@@ -17,12 +17,6 @@ export const commandService = {
     function displayPalette() {
       const commands = [...registeredCommands.values()];
 
-      // FIXME : this is a temporary hack. It forces [aria-keyshortcuts] on all [accesskey] elements.
-      const elementsWithoutAriaKeyshortcut = ui.getVisibleElements('[accesskey]:not([aria-keyshortcuts])');
-      for (const el of elementsWithoutAriaKeyshortcut) {
-        el.setAttribute('aria-keyshortcuts', el.accessKey);
-      }
-
       // Also retrieve all hotkeyables elements
       for (const el of ui.getVisibleElements("[aria-keyshortcuts]:not(:disabled)")) {
         const closest = el.closest("[data-command-category]");

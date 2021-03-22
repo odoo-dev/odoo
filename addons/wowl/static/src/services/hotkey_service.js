@@ -46,8 +46,11 @@ export const hotkeyService = {
   deploy(env) {
     const registrations = new Map();
     let nextToken = 0;
+    let overlaysVisible = false;
 
     window.addEventListener("keydown", onKeydown);
+    window.addEventListener("blur", removeHotkeyOverlays);
+    window.addEventListener("click", removeHotkeyOverlays);
 
     /**
      * Handler for keydown events.
@@ -72,6 +75,19 @@ export const hotkeyService = {
         return;
       }
 
+      // FIXME : this is a temporary hack. It forces [aria-keyshortcuts] on all [accesskey] elements.
+      const elementsWithoutAriaKeyshortcut = env.services.ui.getVisibleElements('[accesskey]:not([aria-keyshortcuts])');
+      for (const el of elementsWithoutAriaKeyshortcut) {
+        el.setAttribute('aria-keyshortcuts', el.accessKey);
+      }
+
+      // Special case: open hotkey overlays
+      if (hotkey === "alt") {
+        toggleHotkeyOverlays();
+        event.preventDefault();
+        return;
+      }
+
       // Is the pressed key NOT whitelisted ?
       const singleKey = hotkey.split("+").pop();
       if (!AUTHORIZED_KEYS.has(singleKey)) {
@@ -84,7 +100,7 @@ export const hotkeyService = {
       const focusedNodeName = focusedElement ? focusedElement.nodeName : "";
       const inEditableElement =
       focusedElement && (focusedElement.isContentEditable ||
-        ["input", "textarea"].includes(focusedNodeName.toLowerCase()));
+        ["input", "textarea"].includes(focusedNodeName.toLowerCase())) && !overlaysVisible;
       const infos = {
         hotkey,
         isAlted,
@@ -92,6 +108,7 @@ export const hotkeyService = {
         _originalEvent: event,
       };
       dispatch(infos);
+      removeHotkeyOverlays();
     }
 
     /**
@@ -166,6 +183,57 @@ export const hotkeyService = {
       }
 
       return hotkey.join("+").toLowerCase();
+    }
+
+    function toggleHotkeyOverlays() {
+      if (overlaysVisible) {
+        removeHotkeyOverlays();
+      } else {
+        addHotkeyOverlays();
+      }
+    }
+
+    /**
+     * Add the hotkey overlays respecting the ui active element.
+     */
+    function addHotkeyOverlays() {
+      const hotkeyElements = env.services.ui.getVisibleElements("[aria-keyshortcuts]:not(:disabled)");
+      hotkeyElements.forEach((elem) => {
+        const hotkey = elem.getAttribute("aria-keyshortcuts");
+        const overlay = document.createElement("div");
+        overlay.className = 'o_web_accesskey_overlay';
+        overlay.appendChild(document.createTextNode(hotkey.toUpperCase()));
+
+        let overlayParent;
+        if (elem.tagName.toUpperCase() === "INPUT") {
+          // special case for the search input that has an access key
+          // defined. We cannot set the overlay on the input itself,
+          // only on its parent.
+          overlayParent = elem.parentElement;
+        } else {
+          overlayParent = elem;
+        }
+
+        if (overlayParent.style.position !== 'absolute') {
+          overlayParent.style.position = 'relative';
+        }
+        overlayParent.appendChild(overlay);
+      });
+      overlaysVisible = true;
+    }
+
+    /**
+     * Remove all the hotkey overlays.
+     */
+    function removeHotkeyOverlays() {
+      if (!overlaysVisible) {
+        return;
+      }
+      var overlays = document.querySelectorAll('.o_web_accesskey_overlay');
+      overlays.forEach((elem) => {
+        elem.remove();
+      });
+      overlaysVisible = false;
     }
 
     /**

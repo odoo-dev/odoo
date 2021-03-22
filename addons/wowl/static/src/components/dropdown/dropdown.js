@@ -104,7 +104,7 @@ export class Dropdown extends Component {
 
     this.hotkeyTokens = [];
     for (const [hotkey, callback] of Object.entries(subs)) {
-      this.hotkeyTokens.push(this.hotkeyService.registerHotkey(hotkey, callback));
+      this.hotkeyTokens.push(this.hotkeyService.registerHotkey(hotkey, callback, { allowInEditable: true }));
     }
   }
 
