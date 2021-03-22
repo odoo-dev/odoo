@@ -940,7 +940,6 @@ function makeActionManager(env) {
 }
 
 export const actionService = {
-  name: "action",
   dependencies: [
     "download",
     "effect",
