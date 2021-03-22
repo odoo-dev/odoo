@@ -54,7 +54,7 @@ QUnit.module("utils", {}, () => {
     assert.throws(() => sortBy({}), /array.slice is not a function/);
     assert.throws(
       () => sortBy([Symbol("b"), Symbol("a")]),
-      /Cannot convert a Symbol value to a number/
+      /(Cannot convert a Symbol value to a number)|(can't convert symbol to number)/
     );
     assert.throws(
       () => sortBy([2, 1, 5], true),
