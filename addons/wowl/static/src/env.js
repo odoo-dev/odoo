@@ -32,7 +32,7 @@ export async function makeEnv(debug) {
     _t: () => {
       throw new Error("Translations are not ready yet. Maybe use _lt instead?");
     },
-    isSmall: () => {
+    get isSmall() {
       throw new Error("UI service not initialized!");
     },
   };
