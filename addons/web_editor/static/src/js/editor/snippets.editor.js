@@ -2946,19 +2946,18 @@ var SnippetsMenu = Widget.extend({
                 break;
         }
 
-        const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
+        const $customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_editor_toolbar_container"/>');
         const $title = $("<we-title><span>" + titleText + "</span></we-title>");
 
-        customizeBlock.append($title);
-        customizeBlock.append(this.options.wysiwyg.toolbar.$el);
-        $(this.customizePanel).append(customizeBlock);
-        this._checkEditorToolbarVisibility();
+        $customizeBlock.append($title);
+        $customizeBlock.append(this.options.wysiwyg.toolbar.$el);
+        $(this.customizePanel).append($customizeBlock);
     },
     /**
      * Update editor UI visibility based on the current range.
      */
     _checkEditorToolbarVisibility: function (e) {
-        const toolbarContainer = $('#o_we_editor_toolbar_container');
+        const $toolbarContainer = $('#o_we_editor_toolbar_container');
         // Do not  toggle visibility if the target is inside the toolbar ( eg. during link edition).
         if (e && $(e.target).parents('#toolbar').length) {
             return;
@@ -2967,9 +2966,9 @@ var SnippetsMenu = Widget.extend({
         const selection = this.options.wysiwyg.odooEditor.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
         if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
-            toolbarContainer.hide();
+            $toolbarContainer.hide();
         } else {
-            toolbarContainer.show();
+            $toolbarContainer.show();
         }
     },
     /**
