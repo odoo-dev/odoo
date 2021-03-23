@@ -126,7 +126,7 @@ weSnippetEditor.SnippetsMenu.include({
     /**
      * @override
      */
-    _updateLeftPanelContent: function ({content, tab}) {
+    _updateRightPanelContent: function ({content, tab}) {
         this._super(...arguments);
         this.$('.o_we_customize_theme_btn').toggleClass('active', tab === this.tabs.THEME);
     },
@@ -192,7 +192,7 @@ weSnippetEditor.SnippetsMenu.include({
             this.topFakeOptionEl.classList.add('d-none');
             editor.toggleOverlay(false);
 
-            this._updateLeftPanelContent({
+            this._updateRightPanelContent({
                 tab: this.tabs.THEME,
             });
         } catch (e) {

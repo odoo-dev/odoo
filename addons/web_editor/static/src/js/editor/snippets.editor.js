@@ -1448,7 +1448,7 @@ var SnippetsMenu = Widget.extend({
         });
     },
     activateCustomTab: function (content) {
-        this._updateLeftPanelContent({content: content, tab: this.tabs.CUSTOM});
+        this._updateRightPanelContent({content: content, tab: this.tabs.CUSTOM});
     },
 
     //--------------------------------------------------------------------------
@@ -2355,7 +2355,7 @@ var SnippetsMenu = Widget.extend({
      * the new content of the customizePanel
      * @param {this.tabs.VALUE} [tab='blocks'] - the tab to select
      */
-    _updateLeftPanelContent: function ({content, tab, ...options}) {
+    _updateRightPanelContent: function ({content, tab, ...options}) {
         clearTimeout(this._textToolsSwitchingTimeout);
         this._closeWidgets();
 
@@ -2465,7 +2465,7 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _activateEmptyOptionsTab() {
-        this._updateLeftPanelContent({
+        this._updateRightPanelContent({
             content: this.emptyOptionsTabContent,
             tab: this.tabs.OPTIONS,
             forceEmptyTab: true,
@@ -2644,7 +2644,7 @@ var SnippetsMenu = Widget.extend({
      */
     _onBlocksTabClick: function (ev) {
         this._activateSnippet(false).then(() => {
-            this._updateLeftPanelContent({
+            this._updateRightPanelContent({
                 content: [],
                 tab: this.tabs.BLOCKS,
             });
@@ -2903,7 +2903,7 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onUpdateCustomizeElements: function (ev) {
-        this._updateLeftPanelContent({
+        this._updateRightPanelContent({
             content: ev.data.customize$Elements,
             tab: ev.data.customize$Elements.length ? this.tabs.OPTIONS : this.tabs.BLOCKS,
         });
