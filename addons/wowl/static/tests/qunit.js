@@ -150,7 +150,6 @@
    * @returns {Promise<boolean>}
    */
   async function checkModules() {
-    return true; // TODO: unskip this
     // do not mark the suite as successful already, as we still need to ensure
     // that all modules have been correctly loaded
     document.querySelector("#qunit-banner").classList.remove("qunit-pass");
@@ -172,7 +171,7 @@
       errorMessages.unshift(error);
       return false;
     } else {
-      modulesAlert.classList.toggle("alert-danger");
+      modulesAlert.classList.toggle("alert-success");
       modulesAlert.classList.toggle("alert-info");
       modulesAlert.textContent = "All modules have been correctly loaded.";
       document.querySelector("#qunit-banner").classList.add("qunit-pass");
