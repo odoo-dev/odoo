@@ -4,6 +4,7 @@ import { setTemplates } from "./utility";
 import { legacyProm } from "wowl.test_legacy";
 import { makeTestOdoo } from "./mocks";
 import { registerCleanup } from "./cleanup";
+import { patch, unpatch } from "../../src/utils/patch";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -14,29 +15,38 @@ owl.QWeb.dev = true;
 
 export async function setupTests() {
   const originalOdoo = odoo;
-  const originalWindowAddEventListener = window.addEventListener;
-  let windowListeners;
+  const listeners = new Map();
+  const objectsToPatch = [window, document];
+  const listenerPatchName = "wowl/tests/helpers/custom listeners";
 
   QUnit.testStart(() => {
     odoo = makeTestOdoo();
 
-    // Here we keep track of listeners added on the window object.
+    // Here we keep track of listeners added on the window and document objects.
     // Some stuff with permanent state (e.g. services) may register
     // those kind of listeners without removing them at some point.
     // We manually remove them after each test (see below).
-    windowListeners = [];
-    window.addEventListener = function (eventName, callback) {
-      windowListeners.push({ eventName, callback });
-      originalWindowAddEventListener(...arguments);
-    };
+    for (const obj of objectsToPatch) {
+      listeners.set(obj, []);
+    }
+    for (const [obj, store] of listeners.entries()) {
+      patch(obj, listenerPatchName, {
+        addEventListener: function () {
+          store.push([...arguments]);
+          this._super(...arguments);
+        },
+      });
+    }
     registerCleanup(() => {
       odoo = originalOdoo;
 
       // Cleanup the listeners added on window in the current test.
-      windowListeners.forEach((listener) => {
-        window.removeEventListener(listener.eventName, listener.callback);
-      });
-      window.addEventListener = originalWindowAddEventListener;
+      for (const [obj, store] of listeners.entries()) {
+        for (const args of store) {
+          obj.removeEventListener(...args);
+        }
+        unpatch(obj, listenerPatchName);
+      }
     });
   });
 
