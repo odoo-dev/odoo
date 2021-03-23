@@ -4,7 +4,7 @@ odoo.define('wysiwyg.widgets.LinkDialog', function (require) {
 var core = require('web.core');
 var Dialog = require('wysiwyg.widgets.Dialog');
 const OdooEditorLib = require('web_editor.odoo-editor');
-
+const wysiwygUtils = require('@web_editor/js/wysiwyg/wysiwyg_utils');
 
 var _t = core._t;
 
@@ -85,15 +85,17 @@ var LinkDialog = Dialog.extend({
             }
             this.data.className = this.data.iniClassName.replace(/(^|\s+)btn(-[a-z0-9_-]*)?/gi, ' ');
 
-            if (link) {
-                this.data.text = link.textContent.replace(/[ \t\r\n]+/g, ' ');
-            } else {
+            let textLink = link;
+            if (!textLink) {
                 const startLink = $(this.data.range.startContainer).closest('a')[0];
                 const endLink = $(this.data.range.endContainer).closest('a')[0];
                 const isLink = startLink && (startLink === endLink);
-                this.data.text = (isLink ? startLink.textContent : this.data.range.toString())
-                    .replace(/[ \t\r\n]+/g, ' ');
+                textLink = isLink ? startLink : this.data.range.cloneContents();
             }
+            const [encodedText, images] = wysiwygUtils.encodeNodeToText(textLink);
+            this.data.originalText = wysiwygUtils.decodeText(encodedText, images);
+            this.data.text = encodedText;
+            this.data.images = images;
             this.data.url = $link.attr('href') || '';
         } else {
             this.data.text = this.data.text ? this.data.text.replace(/[ \t\r\n]+/g, ' ') : '';
@@ -216,9 +218,7 @@ var LinkDialog = Dialog.extend({
         var label = this.$('input[name="label"]').val() || url;
 
         if (label && this.data.images) {
-            for (var i = 0; i < this.data.images.length; i++) {
-                label = label.replace('<', "&lt;").replace('>', "&gt;").replace(/\[IMG\]/, this.data.images[i].outerHTML);
-            }
+            label = wysiwygUtils.decodeText(label, this.data.images);
         }
 
         if (!this.isButton && $url.prop('required') && (!url || !$url[0].checkValidity())) {

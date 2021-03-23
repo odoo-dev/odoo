@@ -29,6 +29,10 @@
         <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/bootstrap_overridden.scss"/>
     </t>
 
+    <!-- utils -->
+
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_utils.js"/>
+
     <!-- integration -->
 
     <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/wysiwyg.scss"/>

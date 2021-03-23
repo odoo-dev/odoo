@@ -4,6 +4,7 @@ odoo.define('wysiwyg.widgets.LinkTools', function (require) {
 const core = require('web.core');
 const OdooEditorLib = require('web_editor.odoo-editor');
 const Widget = require('web.Widget');
+const wysiwygUtils = require('@web_editor/js/wysiwyg/wysiwyg_utils');
 
 const getInSelection = OdooEditorLib.getInSelection;
 const getDeepRange = OdooEditorLib.getDeepRange;
@@ -61,7 +62,10 @@ const LinkTools = Widget.extend({
 
         const allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
         this.data.className = this.data.iniClassName.replace(allBtnClassSuffixes, ' ');
-        this.data.text = this.$link.text().replace(/[ \t\r\n]+/g, ' ');
+        const [encodedText, images] = wysiwygUtils.encodeNodeToText(this.$link[0]);
+        this.data.text = encodedText;
+        this.data.originalText = wysiwygUtils.decodeText(encodedText, images);
+        this.data.images = images;
         this.data.oldAttributes = this.$link.getAttributes();
         this.data.url = this.$link.attr('href');
         this.data.isNewWindow = this.$link.attr('target') === '_blank';
@@ -157,7 +161,7 @@ const LinkTools = Widget.extend({
         const $links = $('.oe_edited_link');
         $links.removeClass('oe_edited_link');
         this.$link.attr(attrs);
-        if (data.label !== this.data.text || data.url !== this.data.url) {
+        if (data.label !== this.data.originalText || data.url !== this.data.url) {
             const label = (data.label && data.label.length) ? data.label : data.url;
             this.$link.html(label);
         }
@@ -177,9 +181,7 @@ const LinkTools = Widget.extend({
         var label = this.$('input[name="label"]').val() || url;
 
         if (label && this.data.images) {
-            for (var i = 0; i < this.data.images.length; i++) {
-                label = label.replace('<', "&lt;").replace('>', "&gt;").replace(/\[IMG\]/, this.data.images[i].outerHTML);
-            }
+            label = wysiwygUtils.decodeText(label, this.data.images);
         }
 
         if (!this.isButton && $url.prop('required') && (!url || !$url[0].checkValidity())) {

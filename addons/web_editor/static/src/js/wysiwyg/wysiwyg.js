@@ -12,6 +12,7 @@ const OdooEditorLib = require('web_editor.odoo-editor');
 const snippetsEditor = require('web_editor.snippet.editor');
 const Toolbar = require('web_editor.toolbar');
 const weWidgets = require('wysiwyg.widgets');
+const wysiwygUtils = require('@web_editor/js/wysiwyg/wysiwyg_utils');
 
 var _t = core._t;
 
@@ -25,10 +26,6 @@ const preserveCursor = OdooEditorLib.preserveCursor;
 var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
 const mediaSelector = 'img, .fa, .o_image, .media_iframe_video';
-
-function isImg(node) {
-    return (node && (node.nodeName === "IMG" || (node.className && node.className.match(/(^|\s)(media_iframe_video|o_image|fa)(\s|$)/i))));
-}
 
 const Wysiwyg = Widget.extend({
     xmlDependencies: [
@@ -529,9 +526,9 @@ const Wysiwyg = Widget.extend({
                 const linkUrl = linkInfo.url;
                 const linkText = linkInfo.text;
                 const isNewWindow = linkInfo.isNewWindow;
+                const hasTextChanged = linkInfo.originalText !== linkText;
 
                 const range = linkInfo.range;
-                const hasTextChanged = range.toString() !== linkText;
 
                 const ancestorAnchor = $(range.startContainer).closest('a')[0];
                 let anchors = [];
@@ -602,7 +599,7 @@ const Wysiwyg = Widget.extend({
                 element.className += " " + params.htmlClass;
             }
             restoreSelection();
-            if (isImg($node[0])) {
+            if (wysiwygUtils.isImg($node[0])) {
                 $node.replaceWith(element);
                 this.odooEditor.unbreakableStepUnactive();
                 this.odooEditor.historyStep();
