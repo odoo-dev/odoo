@@ -2888,7 +2888,7 @@ var exportVariable = (function (exports) {
                     while (
                         index &&
                         this._historySteps[index - 1].id !== this._collaborativeLastSynchronisedId
-                        ) {
+                    ) {
                         index--;
                     }
 
@@ -3159,19 +3159,15 @@ var exportVariable = (function (exports) {
             this._toRollback = false; // Errors caught with observerFlush were already handled.
             // If the end container was fully selected, extractContents may have
             // emptied it without removing it. Ensure it's gone.
-            while (
-                end &&
-                end !== this.editable &&
-                !end.contains(range.endContainer) &&
-                !isVisible(end, false) &&
-                end.nodeName !== 'A'
-                ) {
+            const isRemovableInvisible = (node, noBlocks = true) =>
+                !isVisible(node, noBlocks) && !isUnremovable(node) && node.nodeName !== 'A';
+            while (end && isRemovableInvisible(end, false) && !end.contains(range.endContainer)) {
                 const parent = end.parentNode;
                 end.remove();
                 end = parent;
             }
             // Same with the start container
-            while (start && start !== this.editable && !isVisible(start) && start.nodeName !== 'A') {
+            while (start && isRemovableInvisible(start)) {
                 const parent = start.parentNode;
                 start.remove();
                 start = parent;
@@ -3194,7 +3190,7 @@ var exportVariable = (function (exports) {
                 next &&
                 !(next.previousSibling && next.previousSibling === joinWith) &&
                 this.editable.contains(next)
-                ) {
+            ) {
                 const restore = preserveCursor(this.document);
                 this.observerFlush();
                 const res = this._protect(() => {
@@ -3323,8 +3319,10 @@ var exportVariable = (function (exports) {
             const selection = this.document.defaultView.getSelection();
             const range = selection.getRangeAt(0);
             let startNode;
+            let insertBefore = false;
             if (selection.isCollapsed) {
                 if (range.startContainer.nodeType === Node.TEXT_NODE) {
+                    insertBefore = !range.startOffset;
                     splitTextNode(range.startContainer, range.startOffset, DIRECTIONS.LEFT);
                     startNode = range.startContainer;
                 }
@@ -3346,7 +3344,12 @@ var exportVariable = (function (exports) {
             let nodeToInsert;
             const insertedNodes = [...fakeEl.childNodes];
             while ((nodeToInsert = fakeEl.childNodes[0])) {
-                startNode.after(nodeToInsert);
+                if (insertBefore) {
+                    startNode.before(nodeToInsert);
+                    insertBefore = false;
+                } else {
+                    startNode.after(nodeToInsert);
+                }
                 startNode = nodeToInsert;
             }
 
@@ -4088,8 +4091,9 @@ var exportVariable = (function (exports) {
             this.automaticStepSkipStack();
             const link = closestElement(ev.target, 'a');
             if (link && !link.querySelector('div')) {
+                const editableChildren = link.querySelectorAll('[contenteditable=true]');
                 this._stopContenteditable();
-                link.setAttribute('contenteditable', 'true');
+                [...editableChildren, link].forEach(node => node.setAttribute('contenteditable', true));
             } else {
                 this._activateContenteditable();
             }
