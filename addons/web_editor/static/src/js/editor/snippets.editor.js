@@ -1436,7 +1436,7 @@ var SnippetsMenu = Widget.extend({
         }
         this._mutex.exec(() => {
             if (this._currentTab === this.tabs.OPTIONS && !this.snippetEditors.length) {
-                this._activeEmptyOptionsTab();
+                this._activateEmptyOptionsTab();
             }
         });
     },
@@ -2457,7 +2457,7 @@ var SnippetsMenu = Widget.extend({
      *
      * @private
      */
-    _activeEmptyOptionsTab() {
+    _activateEmptyOptionsTab() {
         this._updateLeftPanelContent({
             content: this.emptyOptionsTabContent,
             tab: this.tabs.OPTIONS,
@@ -2648,7 +2648,7 @@ var SnippetsMenu = Widget.extend({
      */
     _onOptionsTabClick: function (ev) {
         if (!ev.currentTarget.classList.contains('active')) {
-            this._activeEmptyOptionsTab();
+            this._activateEmptyOptionsTab();
         }
     },
     /**
