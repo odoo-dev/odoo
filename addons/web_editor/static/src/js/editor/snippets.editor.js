@@ -399,6 +399,7 @@ var SnippetEditor = Widget.extend({
      * @returns {Promise}
      */
     removeSnippet: async function () {
+        this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
         this.toggleOverlay(false);
         this.toggleOptions(false);
         // If it is an invisible element, we must close it before deleting it (e.g. modal)
