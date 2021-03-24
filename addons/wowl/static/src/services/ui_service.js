@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { useService } from "../core/hooks";
-import { debounce } from "../utils/misc";
+import { debounce } from "../utils/timing";
 import { serviceRegistry } from "../webclient/service_registry";
 
 const { Component, core, hooks } = owl;

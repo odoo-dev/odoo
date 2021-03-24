@@ -2,7 +2,7 @@
 
 import { useService } from "../../core/hooks";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
-import { debounce } from "../../utils/misc";
+import { debounce } from "../../utils/timing";
 
 const { Component, hooks } = owl;
 const { onMounted, useExternalListener } = hooks;
