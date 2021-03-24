@@ -155,6 +155,8 @@ const Wysiwyg = Widget.extend({
 
         $(this.odooEditor.editable).on('click', this._updateEditorUI.bind(this));
         $(this.odooEditor.editable).on('keydown', this._updateEditorUI.bind(this));
+        // Ensure the Toolbar always have the correct layout in note.
+        this._updateEditorUI();
 
         return _super.apply(this, arguments).then(() => {
             if (this.options.autohideToolbar) {
@@ -829,7 +831,7 @@ const Wysiwyg = Widget.extend({
      */
     _updateEditorUI: function (e) {
         this.odooEditor.automaticStepSkipStack();
-        const $target = $(e.target);
+        const $target = e ? $(e.target) : $();
         // Restore paragraph dropdown button's default ID.
         this.toolbar.$el.find('#mediaParagraphDropdownButton').attr('id', 'paragraphDropdownButton');
         // Remove the alt tools.
@@ -885,7 +887,7 @@ const Wysiwyg = Widget.extend({
         // Toggle the toolbar arrow.
         this.toolbar.$el.toggleClass('noarrow', isInMedia);
         // open the link modal / tool when CTRL+K is pressed
-        if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+        if (e && e.key === 'k' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
             this.toggleLinkTools();
         }
