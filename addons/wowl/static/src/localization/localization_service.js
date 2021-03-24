@@ -90,14 +90,15 @@ export const localizationService = {
     const dateFormat = strftimeToLuxonFormat(userLocalization.date_format);
     const timeFormat = strftimeToLuxonFormat(userLocalization.time_format);
     const dateTimeFormat = `${dateFormat} ${timeFormat}`;
+    const grouping = JSON.parse(userLocalization.grouping);
 
     Object.assign(localization, {
-      dateFormat: dateFormat,
-      timeFormat: timeFormat,
-      dateTimeFormat: dateTimeFormat,
+      dateFormat,
+      timeFormat,
+      dateTimeFormat,
       decimalPoint: userLocalization.decimal_point,
       direction: userLocalization.direction,
-      grouping: userLocalization.grouping,
+      grouping,
       multiLang: userLocalization.multi_lang,
       thousandsSep: userLocalization.thousands_sep,
       weekStart: userLocalization.week_start,
