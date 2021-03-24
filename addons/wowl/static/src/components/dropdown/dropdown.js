@@ -22,20 +22,22 @@ export class Dropdown extends Component {
     });
 
     hooks.onMounted(() => {
+      Promise.resolve().then(() => {
+        this.myActiveEl = this.ui.activeElement;
+      });
+    });
+
+    function autoSubscribeKeynav() {
       if (this.state.open) {
         this.subscribeKeynav();
       } else {
         this.unsubscribeKeynav();
       }
-    });
-    hooks.onPatched(() => {
-      if (this.state.open) {
-        this.subscribeKeynav();
-      } else {
-        this.unsubscribeKeynav();
-      }
-    });
-    hooks.onWillStart(() => {
+    }
+
+    onMounted(autoSubscribeKeynav.bind(this));
+    onPatched(autoSubscribeKeynav.bind(this));
+    onWillStart(() => {
       if ((this.state.open || this.state.groupIsOpen) && this.props.beforeOpen) {
         return this.props.beforeOpen();
       }
@@ -88,50 +90,30 @@ export class Dropdown extends Component {
       return;
     }
 
-    const subs = [
-      {
-        hotkey: "arrowup",
-        hint: this.env._t("select the item above"),
-        callback: () => this._setActiveItem("PREV"),
+    const subs = {
+      "arrowup": () => this._setActiveItem("PREV"),
+      "arrowdown": () => this._setActiveItem("NEXT"),
+      "shift+arrowup": () => this._setActiveItem("FIRST"),
+      "shift+arrowdown": () => this._setActiveItem("LAST"),
+      "enter": () => {
+        const activeItem = this.el.querySelector(
+          ":scope > ul.o_dropdown_menu > .o_dropdown_item.o_dropdown_active"
+        );
+        if (activeItem) {
+          activeItem.click();
+        }
       },
-      {
-        hotkey: "arrowdown",
-        hint: "select the item below",
-        callback: () => this._setActiveItem("NEXT"),
-      },
-      {
-        hotkey: "shift-arrowup",
-        hint: "select the first item",
-        callback: () => this._setActiveItem("FIRST"),
-      },
-      {
-        hotkey: "shift-arrowdown",
-        hint: "select the last item",
-        callback: () => this._setActiveItem("LAST"),
-      },
-      {
-        hotkey: "enter",
-        hint: "click on the selected menu",
-        callback: () => {
-          const activeItem = this.el.querySelector(
-            ":scope > ul.o_dropdown_menu > .o_dropdown_item.o_dropdown_active"
-          );
-          if (activeItem) {
-            activeItem.click();
-          }
-        },
-      },
-      {
-        hotkey: "escape",
-        hint: "close the dropdown",
-        callback: this._close.bind(this),
-      },
-    ];
-    this.hotkeyTokens = subs.map((sub) => this.hotkeyService.subscribe(sub));
+      "escape": this._close.bind(this),
+    }
+
+    this.hotkeyTokens = [];
+    for (const [hotkey, callback] of Object.entries(subs)) {
+      this.hotkeyTokens.push(this.hotkeyService.registerHotkey(hotkey, callback, { allowRepeat: true }));
+    }
   }
 
   unsubscribeKeynav() {
-    this.hotkeyTokens.forEach((tokenId) => this.hotkeyService.unsubscribe(tokenId));
+    this.hotkeyTokens.forEach((tokenId) => this.hotkeyService.unregisterHotkey(tokenId));
     this.hotkeyTokens = [];
   }
 

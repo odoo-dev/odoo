@@ -20,7 +20,7 @@ QUnit.module("Hotkey Service", {
   },
 });
 
-QUnit.test("subscribe / unsubscribe", async (assert) => {
+QUnit.test("register / unregister", async (assert) => {
   assert.expect(2);
 
   const hotkey = env.services.hotkey;
@@ -30,14 +30,14 @@ QUnit.test("subscribe / unsubscribe", async (assert) => {
   window.dispatchEvent(keydown);
   await nextTick();
 
-  let token = hotkey.subscribe({ hotkey: key, callback: (arg) => assert.step(arg) });
+  let token = hotkey.registerHotkey(key, () => assert.step(key));
   await nextTick();
 
   keydown = new KeyboardEvent("keydown", { key });
   window.dispatchEvent(keydown);
   await nextTick();
 
-  hotkey.unsubscribe(token);
+  hotkey.unregisterHotkey(token);
   keydown = new KeyboardEvent("keydown", { key });
   window.dispatchEvent(keydown);
   await nextTick();
@@ -45,7 +45,7 @@ QUnit.test("subscribe / unsubscribe", async (assert) => {
   assert.verifySteps([key]);
 });
 
-QUnit.test("data-hotkey", async (assert) => {
+QUnit.test("aria-keyshortcuts", async (assert) => {
   assert.expect(2);
 
   class MyComponent extends Component {
@@ -55,7 +55,7 @@ QUnit.test("data-hotkey", async (assert) => {
   }
   MyComponent.template = xml`
     <div>
-      <button t-on-click="onClick" data-hotkey="b" />
+      <button t-on-click="onClick" aria-keyshortcuts="b" />
     </div>
   `;
 
@@ -84,7 +84,7 @@ QUnit.test("hook", async (assert) => {
   const key = "q";
   class TestComponent extends Component {
     setup() {
-      useHotkey({ hotkey: key, callback: (arg) => assert.step(arg) });
+      useHotkey(key, () => assert.step(key));
     }
   }
   TestComponent.template = xml`<div/>`;
@@ -109,54 +109,187 @@ QUnit.test("hook", async (assert) => {
   comp.destroy();
 });
 
+QUnit.test("registration allowed in editable if specified", async (assert) => {
+  const allowInEditableKey = "a";
+  const disallowInEditableKey = "b";
+  const defaultBehaviourKey = "c";
+  class TestComponent extends Component {
+    setup() {
+      useHotkey(allowInEditableKey, () => assert.step(allowInEditableKey), { allowInEditable: true });
+      useHotkey(disallowInEditableKey, () => assert.step(disallowInEditableKey), { allowInEditable: false });
+      useHotkey(defaultBehaviourKey, () => assert.step(defaultBehaviourKey));
+    }
+  }
+  TestComponent.template = xml`<div><input/></div>`;
+
+  const comp = await mount(TestComponent, { env, target });
+
+  let keydown = new KeyboardEvent("keydown", { key: allowInEditableKey });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { key: disallowInEditableKey });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([
+    allowInEditableKey,
+    disallowInEditableKey,
+    defaultBehaviourKey,]);
+
+  const input = comp.el.querySelector("input");
+  input.focus();
+  keydown = new KeyboardEvent("keydown", { key: allowInEditableKey });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { key: disallowInEditableKey });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([
+    allowInEditableKey,
+  ]);
+
+  comp.destroy();
+});
+
+QUnit.test("[aria-keyshortcuts] never allowed in editable", async (assert) => {
+  const key = "a";
+  class TestComponent extends Component {
+    onClick() {
+      assert.step(key);
+    }
+  }
+  TestComponent.template = xml`<div><input/><button t-on-click="onClick" aria-keyshortcuts="${key}"/></div>`;
+
+  const comp = await mount(TestComponent, { env, target });
+
+  let keydown = new KeyboardEvent("keydown", { key });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([key]);
+
+  const input = comp.el.querySelector("input");
+  input.focus();
+  keydown = new KeyboardEvent("keydown", { key });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([]);
+
+  comp.destroy();
+});
+
+QUnit.test("registration allows repeat if specified", async (assert) => {
+  assert.expect(6);
+
+  const allowRepeatKey = "a";
+  const disallowRepeatKey = "b";
+  const defaultBehaviourKey = "c";
+
+  env.services.hotkey.registerHotkey(allowRepeatKey, () => assert.step(allowRepeatKey), { allowRepeat: true });
+  env.services.hotkey.registerHotkey(disallowRepeatKey, () => assert.step(disallowRepeatKey), { allowRepeat: false });
+  env.services.hotkey.registerHotkey(defaultBehaviourKey, () => assert.step(defaultBehaviourKey));
+  await nextTick();
+
+  // Dispatch the three keys without repeat:
+  let keydown = new KeyboardEvent("keydown", { key: allowRepeatKey });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { key: disallowRepeatKey });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([
+    allowRepeatKey,
+    disallowRepeatKey,
+    defaultBehaviourKey,]);
+
+  // Dispatch the three keys with repeat:
+  keydown = new KeyboardEvent("keydown", { key: allowRepeatKey, repeat: true });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { key: disallowRepeatKey, repeat: true });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey, repeat: true });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([
+    allowRepeatKey,
+  ]);
+});
+
+QUnit.test("[aria-keyshortcuts] never allow repeat", async (assert) => {
+  assert.expect(3);
+  const key = "a";
+  class TestComponent extends Component {
+    onClick() {
+      assert.step(key);
+    }
+  }
+  TestComponent.template = xml`<div><button t-on-click="onClick" aria-keyshortcuts="${key}"/></div>`;
+
+  const comp = await mount(TestComponent, { env, target });
+
+  let keydown = new KeyboardEvent("keydown", { key });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([key]);
+
+  keydown = new KeyboardEvent("keydown", { key, repeat: true });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([]);
+
+  comp.destroy();
+});
+
 QUnit.test("hotkeys evil 👹", async (assert) => {
   const hotkey = env.services.hotkey;
 
   assert.throws(function () {
-    hotkey.subscribe();
-  }, /is undefined/);
+    hotkey.registerHotkey();
+  }, /must specify an hotkey/);
   assert.throws(function () {
-    hotkey.subscribe({});
+    hotkey.registerHotkey(null);
   }, /must specify an hotkey/);
 
   function callback() {}
   assert.throws(function () {
-    hotkey.subscribe({ callback });
+    hotkey.registerHotkey(null, callback);
   }, /must specify an hotkey/);
   assert.throws(function () {
-    hotkey.subscribe({ hotkey: "" });
+    hotkey.registerHotkey("");
   }, /must specify an hotkey/);
   assert.throws(function () {
-    hotkey.subscribe({ hotkey: "crap", callback });
+    hotkey.registerHotkey("crap", callback);
   }, /not whitelisted/);
   assert.throws(function () {
-    hotkey.subscribe({ hotkey: "ctrl-o", callback });
+    hotkey.registerHotkey("ctrl+o", callback);
   }, /not whitelisted/);
-  assert.throws(
-    function () {
-      hotkey.subscribe({ hotkey: "Control-O", callback });
-    },
-    /not whitelisted/,
-    "should throw 'not whitelisted' when other than lowercase chars are used"
-  );
   assert.throws(function () {
-    hotkey.subscribe({ hotkey: "control-o" });
+    hotkey.registerHotkey("Control+o");
   }, /specify a callback/);
   assert.throws(function () {
-    hotkey.subscribe({ hotkey: "control-o-d", callback });
+    hotkey.registerHotkey("Control+o+d", callback);
   }, /more than one single key part/);
 });
 
-QUnit.test("component can subscribe many hotkeys", async (assert) => {
+QUnit.test("component can register many hotkeys", async (assert) => {
   assert.expect(8);
 
   class MyComponent extends Component {
     setup() {
       for (const hotkey of ["a", "b", "c"]) {
-        useHotkey({ hotkey, callback: (arg) => assert.step(`callback:${arg}`) });
+        useHotkey(hotkey, () => assert.step(`callback:${hotkey}`))
       }
       for (const hotkey of ["d", "e", "f"]) {
-        useHotkey({ hotkey, callback: (arg) => assert.step(`callback2:${arg}`) });
+        useHotkey(hotkey, () => assert.step(`callback2:${hotkey}`))
       }
     }
     onClick() {
@@ -165,7 +298,7 @@ QUnit.test("component can subscribe many hotkeys", async (assert) => {
   }
   MyComponent.template = xml`
     <div>
-      <button t-on-click="onClick" data-hotkey="b" />
+      <button t-on-click="onClick" aria-keyshortcuts="b" />
     </div>
   `;
 
@@ -190,7 +323,7 @@ QUnit.test("component can subscribe many hotkeys", async (assert) => {
   comp.destroy();
 });
 
-QUnit.test("many components can subscribe same hotkeys", async (assert) => {
+QUnit.test("many components can register same hotkeys", async (assert) => {
   assert.expect(1);
 
   const result = [];
@@ -199,7 +332,7 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
   class MyComponent1 extends Component {
     setup() {
       for (const hotkey of hotkeys) {
-        useHotkey({ hotkey, callback: (arg) => result.push(`comp1:${arg}`) });
+        useHotkey(hotkey, () => result.push(`comp1:${hotkey}`))
       }
     }
     onClick() {
@@ -208,14 +341,14 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
   }
   MyComponent1.template = xml`
     <div>
-      <button t-on-click="onClick" data-hotkey="b" />
+      <button t-on-click="onClick" aria-keyshortcuts="b" />
     </div>
   `;
 
   class MyComponent2 extends Component {
     setup() {
       for (const hotkey of hotkeys) {
-        useHotkey({ hotkey, callback: (arg) => result.push(`comp2:${arg}`) });
+        useHotkey(hotkey, () => result.push(`comp2:${hotkey}`))
       }
     }
     onClick() {
@@ -224,7 +357,7 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
   }
   MyComponent2.template = xml`
     <div>
-      <button t-on-click="onClick" data-hotkey="b" />
+      <button t-on-click="onClick" aria-keyshortcuts="b" />
     </div>
   `;
 
@@ -249,28 +382,28 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
   comp2.destroy();
 });
 
-QUnit.test("subscriptions and elements belong to the correct UI owner", async (assert) => {
+QUnit.test("registrations and elements belong to the correct UI owner", async (assert) => {
   assert.expect(7);
   class MyComponent1 extends Component {
     setup() {
-      useHotkey({ hotkey: "a", callback: () => assert.step("MyComponent1 subscription") });
+      useHotkey("a", () => assert.step("MyComponent1 subscription"));
     }
     onClick() {
-      assert.step("MyComponent1 [data-hotkey]");
+      assert.step("MyComponent1 [aria-keyshortcuts]");
     }
   }
-  MyComponent1.template = xml`<div><button data-hotkey="b" t-on-click="onClick()"/></div>`;
+  MyComponent1.template = xml`<div><button aria-keyshortcuts="b" t-on-click="onClick()"/></div>`;
 
   class MyComponent2 extends Component {
     setup() {
-      useHotkey({ hotkey: "a", callback: () => assert.step("MyComponent2 subscription") });
+      useHotkey("a", () => assert.step("MyComponent2 subscription"));
       useActiveElement();
     }
     onClick() {
-      assert.step("MyComponent2 [data-hotkey]");
+      assert.step("MyComponent2 [aria-keyshortcuts]");
     }
   }
-  MyComponent2.template = xml`<div><button data-hotkey="b" t-on-click="onClick()"/></div>`;
+  MyComponent2.template = xml`<div><button aria-keyshortcuts="b" t-on-click="onClick()"/></div>`;
 
   const comp1 = await mount(MyComponent1, { env, target });
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
@@ -289,11 +422,11 @@ QUnit.test("subscriptions and elements belong to the correct UI owner", async (a
 
   assert.verifySteps([
     "MyComponent1 subscription",
-    "MyComponent1 [data-hotkey]",
+    "MyComponent1 [aria-keyshortcuts]",
     "MyComponent2 subscription",
-    "MyComponent2 [data-hotkey]",
+    "MyComponent2 [aria-keyshortcuts]",
     "MyComponent1 subscription",
-    "MyComponent1 [data-hotkey]",
+    "MyComponent1 [aria-keyshortcuts]",
   ]);
 
   comp1.destroy();
