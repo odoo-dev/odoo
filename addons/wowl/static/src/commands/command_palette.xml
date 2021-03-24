@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <div t-name="wowl.CommandPalette" class="o_command_palette" owl="1">
+
+    <input type="text" class="o_command_palette_search" t-on-input="onSearchInput" autofocus="" placeholder="Type a command" />
+
+    <div class="o_command_palette_listbox">
+
+      <div t-foreach="categories" t-as="category" class="o_command_category">
+
+        <span t-if="category.label" t-esc="category.label" class="o_command_category_label" />
+
+        <t t-foreach="category.commands" t-as="command">
+          <t t-set="commandIndex" t-value="state.commands.indexOf(command)" />
+          <span t-attf-id="o_command_{{commandIndex}}" class="o_command" t-att-class="{ focused: state.selectedCommand === command }" t-on-click="onCommandClicked(commandIndex)" t-on-mouseenter="onCommandMouseEnter(commandIndex)">
+            <span t-esc="command.name" />
+            <kbd t-if="command.hotkey" t-esc="command.hotkey.toUpperCase()" />
+          </span>
+        </t>
+
+        <hr t-if="!category_last" />
+
+      </div>
+
+    </div>
+
+  </div>
+
+</templates>

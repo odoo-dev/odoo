@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
   <header t-name="wowl.NavBar" owl="1">
-    <nav class="o_main_navbar" t-on-dropdown-item-selected="onNavBarDropdownItemSelection">
+    <nav class="o_main_navbar" t-on-dropdown-item-selected="onNavBarDropdownItemSelection" data-command-category="navbar">
       <!-- Apps Menu -->
       <t t-call="wowl.NavBar.AppsMenu">
         <t t-set="apps" t-value="menuService.getApps()" />
@@ -29,7 +29,11 @@
     </nav>
   </header>
 
-  <Dropdown t-name="wowl.NavBar.AppsMenu" hotkey="'h'" class="o_navbar_apps_menu" owl="1">
+  <Dropdown t-name="wowl.NavBar.AppsMenu" owl="1"
+    hotkey="'h'"
+    title="'Home Menu'"
+    class="o_navbar_apps_menu"
+  >
     <i class="fa fa-th-large" />
     <t t-set-slot="menu">
       <MenuItem
@@ -55,7 +59,7 @@
         <t t-set="hotkey" t-value="undefined"/>
       </t>
 
-      <MenuItem t-if="!section.childrenTree.length" payload="section" hotkey="hotkey">
+      <MenuItem t-if="!section.childrenTree.length" title="section.name" payload="section" hotkey="hotkey">
         <span t-esc="section.name" t-att-data-section="section.id" />
       </MenuItem>
 
@@ -77,7 +81,7 @@
 
   </ul>
 
-  <Dropdown t-name="wowl.NavBar.SectionsMenu.Dropdown" hotkey="hotkey" owl="1" >
+  <Dropdown t-name="wowl.NavBar.SectionsMenu.Dropdown" hotkey="hotkey" title="name" owl="1" >
     <span t-esc="name" t-att-data-section="sectionId" />
     <t t-set-slot="menu">
       <t t-call="wowl.NavBar.SectionsMenu.Dropdown.MenuSlot">
@@ -103,8 +107,12 @@
     </t>
   </t>
 
-  <Dropdown t-name="wowl.NavBar.SectionsMenu.MoreDropdown" class="o_menu_sections_more d-none" hotkey="hotkey" owl="1">
-    <i class="fa fa-plus" />
+  <Dropdown t-name="wowl.NavBar.SectionsMenu.MoreDropdown"
+            class="o_menu_sections_more d-none"
+            title="'More Menu'"
+            hotkey="hotkey"
+            owl="1">
+    <i class="fa fa-plus"/>
     <t t-set-slot="menu">
       <t
         t-foreach="sections"

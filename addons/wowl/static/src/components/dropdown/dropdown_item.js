@@ -37,6 +37,10 @@ DropdownItem.props = {
     type: String,
     optional: true,
   },
+  title: {
+    type: String,
+    optional: true,
+  },
 };
 DropdownItem.defaultProps = {
   parentClosingMode: ParentClosingMode.AllParents,

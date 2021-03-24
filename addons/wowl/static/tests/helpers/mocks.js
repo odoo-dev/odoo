@@ -162,6 +162,7 @@ export function makeTestOdoo(config = {}) {
     userMenuRegistry: config.userMenuRegistry,
     debugRegistry: config.debugRegistry,
     viewRegistry: config.viewRegistry,
+    commandCategoryRegistry: config.commandCategoryRegistry,
   });
 }
 

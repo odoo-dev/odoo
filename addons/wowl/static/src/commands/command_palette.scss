@@ -1,0 +1,67 @@
+.o_command_palette {
+  > .modal-body {
+    display: grid;
+    grid-template-areas:
+      "search"
+      "listbox";
+    grid-template-rows:
+      min-content
+      auto;
+  }
+
+  &_search {
+    grid-area: search;
+    margin-bottom: 1em;
+  }
+
+  &_listbox {
+    grid-area: listbox;
+    max-height: 18em;
+    overflow-y: auto;
+    position: relative;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .o_command_category_label {
+      color: $gray-600;
+      font-size: $font-size-sm;
+    }
+
+    hr {
+      margin: 0;
+      padding: 0;
+    }
+
+    .o_command {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1em 0 1.5em;
+      position: relative;
+      line-height: 1.8em;
+
+      &.focused {
+        background: $o-brand-secondary;
+      }
+
+      kbd {
+        background-color: #f4f7f8;
+        border-radius: 3px;
+        border: 1px solid #b4b4b4;
+        $shadowvalue: 0px 1px 1px rgba(0, 0, 0, 0.2), inset 0px -1px 1px 1px rgba(230, 230, 230, 0.8),
+          inset 0px 2px 0px 0px rgba(255, 255, 255, 0.8);
+        box-shadow: $shadowvalue;
+        color: #4c4c4c;
+        display: inline-block;
+        font-family: Consolas, "Liberation Mono", Courier, monospace;
+        font-size: 0.85em;
+        padding: 0 0.5rem;
+        margin: 0.2rem 0;
+      }
+    }
+  }
+}

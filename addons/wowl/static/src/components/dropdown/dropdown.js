@@ -5,23 +5,23 @@ import { scrollTo } from "../../utils/scroll_to";
 import { ParentClosingMode } from "./dropdown_item";
 
 const { Component, core, hooks, useState, QWeb } = owl;
+const { useExternalListener, onMounted, onPatched, onWillStart }  = hooks;
 
 export class Dropdown extends Component {
   setup() {
     this.hotkeyService = useService("hotkey");
     this.hotkeyTokens = [];
     this.state = useState({ open: this.props.startOpen, groupIsOpen: this.props.startOpen });
-    this.ui = useService("ui")
-    this.myActiveEl = this.ui.activeElement
+    this.ui = useService("ui");
     // Close on outside click listener
-    hooks.useExternalListener(this.myActiveEl, "click", this.onWindowClicked);
+    useExternalListener(window, "click", this.onWindowClicked);
     // Listen to all dropdowns state changes
     useBus(Dropdown.bus, "state-changed", this.onDropdownStateChanged);
     useBus(this.ui.bus, "active-element-changed", (activeElement) => {
       if (activeElement !== this.myActiveEl) this._close();
     });
 
-    hooks.onMounted(() => {
+    onMounted(() => {
       Promise.resolve().then(() => {
         this.myActiveEl = this.ui.activeElement;
       });
@@ -157,6 +157,9 @@ export class Dropdown extends Component {
     // Do not listen to my own events
     if (args.emitter.el === this.el) return;
 
+    // Do not listen to events emitted by children
+    if (this.el.contains(args.emitter.el)) return;
+
     // Emitted by direct siblings ?
     if (args.emitter.el.parentElement === this.el.parentElement) {
       // Sync the group status
@@ -167,7 +170,7 @@ export class Dropdown extends Component {
         this.state.open = false;
       }
     } else {
-      // Another dropdown is now open ? Close myself.
+      // Another dropdown is now open ? Close myself and notify the world (i.e. siblings).
       if (this.state.open && args.newState.open) {
         this._close();
       }
@@ -179,7 +182,7 @@ export class Dropdown extends Component {
   }
 
   onTogglerMouseEnter() {
-    if (this.state.groupIsOpen) {
+    if (this.state.groupIsOpen && !this.state.open) {
       this._open();
     }
   }
@@ -224,6 +227,10 @@ Dropdown.props = {
     optional: true,
   },
   hotkey: {
+    type: String,
+    optional: true,
+  },
+  title: {
     type: String,
     optional: true,
   },
