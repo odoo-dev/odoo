@@ -1,6 +1,7 @@
 /** @odoo-module **/
 import { useBus } from "../../core/hooks";
 import { useService } from "../../core/hooks";
+import { scrollTo } from "../../utils/scroll_to";
 import { ParentClosingMode } from "./dropdown_item";
 
 const { Component, core, hooks, useState, QWeb } = owl;
@@ -78,6 +79,7 @@ export class Dropdown extends Component {
     if (nextActiveIndex !== undefined) {
       items.forEach((item) => item.classList.remove("o_dropdown_active"));
       items[nextActiveIndex].classList.add("o_dropdown_active");
+      scrollTo(items[nextActiveIndex], this.el.querySelector(".o_dropdown_menu"));
     }
   }
 
