@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { makeFakeUserService } from "../helpers/index";
-import { notificationService } from "../../src/notifications/notification_service";
 import { makeFakeDownloadService, makeFakeNotificationService } from "../helpers/mocks";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
@@ -62,7 +61,7 @@ QUnit.module("ActionManager", (hooks) => {
       })
     );
     const mockRPC = async (route, args) => {
-      assert.step((args === null || args === void 0 ? void 0 : args.method) || route);
+      assert.step(args && args.method || route);
       if (route === "/report/check_wkhtmltopdf") {
         return Promise.resolve("ok");
       }
@@ -133,7 +132,7 @@ QUnit.module("ActionManager", (hooks) => {
       })
     );
     const mockRPC = async (route, args) => {
-      assert.step((args === null || args === void 0 ? void 0 : args.method) || route);
+      assert.step(args && args.method || route);
       if (route === "/report/check_wkhtmltopdf") {
         return Promise.resolve("upgrade");
       }
@@ -154,7 +153,7 @@ QUnit.module("ActionManager", (hooks) => {
     async function (assert) {
       testConfig.serviceRegistry.add(
         "download",
-        makeFakeDownloadService((options) => {
+        makeFakeDownloadService(() => {
           assert.step("download"); // should not be called
           return Promise.resolve();
         })
@@ -214,7 +213,7 @@ QUnit.module("ActionManager", (hooks) => {
     assert.expect(5);
     testConfig.serviceRegistry.add(
       "download",
-      makeFakeDownloadService((options) => {
+      makeFakeDownloadService(() => {
         assert.step("download"); // should not be called
         return Promise.resolve();
       })
@@ -269,7 +268,7 @@ QUnit.module("ActionManager", (hooks) => {
       let timesDownloasServiceHasBeenCalled = 0;
       testConfig.serviceRegistry.add(
         "download",
-        makeFakeDownloadService((options) => {
+        makeFakeDownloadService(() => {
           if (timesDownloasServiceHasBeenCalled === 0) {
             assert.step("successful download");
             timesDownloasServiceHasBeenCalled++;
@@ -282,7 +281,7 @@ QUnit.module("ActionManager", (hooks) => {
         })
       );
       testConfig.serviceRegistry.add("ui", uiService, { force: true });
-      const mockRPC = async (route, args) => {
+      const mockRPC = async (route) => {
         if (route === "/report/check_wkhtmltopdf") {
           return Promise.resolve("ok");
         }
