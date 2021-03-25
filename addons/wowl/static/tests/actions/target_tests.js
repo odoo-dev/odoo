@@ -271,6 +271,56 @@ QUnit.module("ActionManager", (hooks) => {
     }
   );
 
+  QUnit.test(
+    'button with confirm attribute in act_window action in target="new"',
+    async function (assert) {
+      assert.expect(5);
+
+      testConfig.serverData.actions[999] = {
+        id: 999,
+        name: "A window action",
+        res_model: "partner",
+        target: "new",
+        type: "ir.actions.act_window",
+        views: [[999, "form"]],
+      };
+      testConfig.serverData.views["partner,999,form"] = `
+            <form>
+                <button name="method" string="Call method" type="object" confirm="Are you sure?"/>
+            </form>`;
+      testConfig.serverData.views["partner,1000,form"] = `<form>Another action</form>`;
+
+      const mockRPC = (route, args) => {
+        if (args.method === "method") {
+          return Promise.resolve({
+            id: 1000,
+            name: "Another window action",
+            res_model: "partner",
+            target: "new",
+            type: "ir.actions.act_window",
+            views: [[1000, "form"]],
+          });
+        }
+      };
+      const webClient = await createWebClient({ testConfig, mockRPC });
+
+      await doAction(webClient, 999);
+
+      assert.containsOnce(document.body, ".modal button[name=method]");
+
+      await testUtils.dom.click($(".modal button[name=method]"));
+
+      assert.containsN(document.body, ".modal", 2);
+      assert.strictEqual($(".modal:last .modal-body").text(), "Are you sure?");
+
+      await testUtils.dom.click($(".modal:last .modal-footer .btn-primary"));
+      assert.containsOnce(document.body, ".modal");
+      assert.strictEqual($(".modal:last .modal-body").text().trim(), "Another action");
+
+      webClient.destroy();
+    }
+  );
+
   QUnit.module('Actions in target="inline"');
   QUnit.test(
     'form views for actions in target="inline" open in edit mode',

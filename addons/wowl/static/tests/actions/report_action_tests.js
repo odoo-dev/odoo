@@ -61,7 +61,7 @@ QUnit.module("ActionManager", (hooks) => {
       })
     );
     const mockRPC = async (route, args) => {
-      assert.step(args && args.method || route);
+      assert.step((args && args.method) || route);
       if (route === "/report/check_wkhtmltopdf") {
         return Promise.resolve("ok");
       }
@@ -132,7 +132,7 @@ QUnit.module("ActionManager", (hooks) => {
       })
     );
     const mockRPC = async (route, args) => {
-      assert.step(args && args.method || route);
+      assert.step((args && args.method) || route);
       if (route === "/report/check_wkhtmltopdf") {
         return Promise.resolve("upgrade");
       }

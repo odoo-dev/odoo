@@ -6,6 +6,8 @@ import { getLegacy } from "wowl.test_legacy";
 import { clearUncommittedChanges } from "../../src/actions/action_service";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
+import { Registry } from "../../src/core/registry";
+import { DialogContainer } from "../../src/services/dialog_service";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
 
 let testConfig;
@@ -1982,6 +1984,52 @@ QUnit.module("ActionManager", (hooks) => {
       await legacyExtraNextTick();
       assert.containsNone(document.body, ".modal");
       assert.strictEqual(writeCalls, 1);
+    }
+  );
+
+  QUnit.test(
+    "executing a window action with onchange warning does not hide it",
+    async function (assert) {
+      assert.expect(2);
+
+      testConfig.mainComponentRegistry = new Registry();
+      testConfig.mainComponentRegistry.add("DialogContainer", DialogContainer);
+
+      testConfig.serverData.views["partner,false,form"] = `
+            <form>
+              <field name="foo"/>
+            </form>`;
+      const mockRPC = (route, args) => {
+        if (args.method === "onchange") {
+          return Promise.resolve({
+            value: {},
+            warning: {
+              title: "Warning",
+              message: "Everything is alright",
+              type: "dialog",
+            },
+          });
+        }
+      };
+      const webClient = await createWebClient({ testConfig, mockRPC });
+
+      await doAction(webClient, 3);
+
+      await testUtils.dom.click(webClient.el.querySelector(".o_list_button_add"));
+      assert.containsOnce(
+        document.body,
+        ".modal.o_technical_modal",
+        "Warning modal should be opened"
+      );
+
+      await testUtils.dom.click(document.querySelector(".modal.o_technical_modal button.close"));
+      assert.containsNone(
+        document.body,
+        ".modal.o_technical_modal",
+        "Warning modal should be closed"
+      );
+
+      webClient.destroy();
     }
   );
 });
