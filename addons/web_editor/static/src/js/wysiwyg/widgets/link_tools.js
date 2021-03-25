@@ -196,8 +196,8 @@ const LinkTools = Widget.extend({
         const shapeClasses = shapes.slice(style ? 1 : 0).join(' ');
         const classes = (this.data.className || '') +
             (type ? (` btn btn-${style}${type}`) : '') +
-            (shapeClasses ? (` ${shapeClasses}`) : '') +
-            (size ? (' btn-' + size) : '');
+            (type && shapeClasses ? (` ${shapeClasses}`) : '') +
+            (type && size ? (' btn-' + size) : '');
         var isNewWindow = this.$('we-checkbox[name="is_new_window"]').closest('we-button.o_we_checkbox_wrapper').hasClass('active');
         var doStripDomain = this.$('we-checkbox[name="do_strip_domain"]').closest('we-button.o_we_checkbox_wrapper').hasClass('active');
         if (url.indexOf('@') >= 0 && url.indexOf('mailto:') < 0 && !url.match(/^http[s]?/i)) {
