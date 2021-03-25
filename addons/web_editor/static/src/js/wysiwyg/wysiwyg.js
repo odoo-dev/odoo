@@ -543,7 +543,7 @@ const Wysiwyg = Widget.extend({
                 } else {
                     const anchor = $('<a>')[0];
                     anchor.appendChild(range.extractContents());
-                    range.insertNode(anchor)
+                    range.insertNode(anchor);
                     anchors.push(anchor);
                 }
                 linkDialog.insertedAnchors = [...anchors];
