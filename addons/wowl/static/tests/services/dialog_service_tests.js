@@ -47,7 +47,6 @@ QUnit.module("DialogManager", {
   },
 });
 QUnit.test("Simple rendering with a single dialog", async (assert) => {
-  var _a;
   assert.expect(9);
   class CustomDialog extends Component {}
   CustomDialog.template = tags.xml`<Dialog title="'Welcome'"/>`;
@@ -59,10 +58,7 @@ QUnit.test("Simple rendering with a single dialog", async (assert) => {
   await nextTick();
   assert.containsOnce(target, ".o_dialog_manager portal");
   assert.containsOnce(target, ".o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "Welcome"
   );
   await click(target.querySelector(".o_dialog_container .o_dialog footer button"));
@@ -71,7 +67,6 @@ QUnit.test("Simple rendering with a single dialog", async (assert) => {
   assert.containsNone(target, ".o_dialog_container .o_dialog");
 });
 QUnit.test("rendering with two dialogs", async (assert) => {
-  var _a, _b;
   assert.expect(12);
   class CustomDialog extends Component {}
   CustomDialog.template = tags.xml`<Dialog title="props.title"/>`;
@@ -83,10 +78,7 @@ QUnit.test("rendering with two dialogs", async (assert) => {
   await nextTick();
   assert.containsOnce(target, ".o_dialog_manager portal");
   assert.containsOnce(target, ".o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "Hello"
   );
   env.services.dialog.open(CustomDialog, { title: "Sauron" });
@@ -100,10 +92,7 @@ QUnit.test("rendering with two dialogs", async (assert) => {
   await click(target.querySelector(".o_dialog_container .o_dialog footer button"));
   assert.containsOnce(target, ".o_dialog_manager portal");
   assert.containsOnce(target, ".o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_b = target.querySelector("header .modal-title")) === null || _b === void 0
-      ? void 0
-      : _b.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "Sauron"
   );
 });
@@ -164,7 +153,7 @@ QUnit.test("dialog component crashes", async (assert) => {
   pseudoWebClient = await mount(PseudoWebClient, { env, target });
 
   const qunitUnhandledReject = QUnit.onUnhandledRejection;
-  QUnit.onUnhandledRejection = (reason) => {
+  QUnit.onUnhandledRejection = () => {
     assert.step("error");
   };
 

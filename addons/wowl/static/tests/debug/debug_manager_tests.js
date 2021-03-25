@@ -31,7 +31,6 @@ QUnit.module("DebugManager", (hooks) => {
     testConfig = { serviceRegistry, mockRPC };
   });
   QUnit.test("can be rendered", async (assert) => {
-    var _a, _b;
     testConfig.debugRegistry = new Registry();
     testConfig.debugRegistry.add("item_1", () => {
       return {
@@ -89,18 +88,12 @@ QUnit.module("DebugManager", (hooks) => {
     const env = await makeTestEnv(testConfig);
     const debugManager = await mount(DebugManager, { env, target });
     let debugManagerEl = debugManager.el;
-    await click(
-      (_a = debugManager.el) === null || _a === void 0
-        ? void 0
-        : _a.querySelector("button.o_dropdown_toggler")
-    );
+    await click(debugManager.el.querySelector("button.o_dropdown_toggler"));
     debugManagerEl = debugManager.el;
     assert.containsN(debugManagerEl, "ul.o_dropdown_menu li.o_dropdown_item", 3);
     assert.containsOnce(debugManagerEl, "div.dropdown-divider");
     const children = [
-      ...(((_b = debugManagerEl.querySelector("ul.o_dropdown_menu")) === null || _b === void 0
-        ? void 0
-        : _b.children) || []),
+      ...((debugManagerEl.querySelector("ul.o_dropdown_menu").children) || []),
     ];
     assert.deepEqual(
       children.map((el) => el.tagName),
@@ -120,7 +113,6 @@ QUnit.module("DebugManager", (hooks) => {
   });
 
   QUnit.test("Don't display the DebugManager if debug mode is disabled", async (assert) => {
-    var _a;
     const dialogContainer = document.createElement("div");
     dialogContainer.classList.add("o_dialog_container");
     target.append(dialogContainer);
@@ -129,15 +121,12 @@ QUnit.module("DebugManager", (hooks) => {
     assert.containsOnce(target, "div.o_dialog_container .o_dialog");
     assert.containsNone(target, ".o_dialog .o_debug_manager .fa-bug");
     actionDialog.destroy();
-    (_a = target.querySelector(".o_dialog_container")) === null || _a === void 0
-      ? void 0
-      : _a.remove();
+    target.querySelector(".o_dialog_container").remove();
   });
 
   QUnit.test(
     "Display the DebugManager correctly in a ActionDialog if debug mode is enabled",
     async (assert) => {
-      var _a;
       const dialogContainer = document.createElement("div");
       dialogContainer.classList.add("o_dialog_container");
       target.append(dialogContainer);
@@ -196,9 +185,7 @@ QUnit.module("DebugManager", (hooks) => {
       }
       assert.verifySteps(["callback item_1", "callback item_2"]);
       actionDialog.destroy();
-      (_a = target.querySelector(".o_dialog_container")) === null || _a === void 0
-        ? void 0
-        : _a.remove();
+      target.querySelector(".o_dialog_container").remove();
     }
   );
 });

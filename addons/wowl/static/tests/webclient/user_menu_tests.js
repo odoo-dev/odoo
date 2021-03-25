@@ -37,7 +37,6 @@ QUnit.module("UserMenu", {
 });
 
 QUnit.test("can be rendered", async (assert) => {
-  var _a, _b, _c;
   env = await makeTestEnv(baseConfig);
   odoo.userMenuRegistry.add("bad_item", function () {
     return {
@@ -91,26 +90,13 @@ QUnit.test("can be rendered", async (assert) => {
     "http://lordofthering/web/image?model=res.users&field=image_128&id=7"
   );
   assert.containsOnce(userMenuEl, "span.o_user_name");
-  assert.strictEqual(
-    (_a = userMenuEl.querySelector(".o_user_name")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
-    "Sauron"
-  );
+  assert.strictEqual(userMenuEl.querySelector(".o_user_name").textContent, "Sauron");
   assert.containsNone(userMenuEl, "ul.o_dropdown_menu li.o_dropdown_item");
-  await click(
-    (_b = userMenu.el) === null || _b === void 0
-      ? void 0
-      : _b.querySelector("button.o_dropdown_toggler")
-  );
+  await click(userMenu.el.querySelector("button.o_dropdown_toggler"));
   userMenuEl = userMenu.el;
   assert.containsN(userMenuEl, "ul.o_dropdown_menu li.o_dropdown_item", 3);
   assert.containsOnce(userMenuEl, "div.dropdown-divider");
-  const children = [
-    ...(((_c = userMenuEl.querySelector("ul.o_dropdown_menu")) === null || _c === void 0
-      ? void 0
-      : _c.children) || []),
-  ];
+  const children = [...(userMenuEl.querySelector("ul.o_dropdown_menu").children || [])];
   assert.deepEqual(
     children.map((el) => el.tagName),
     ["LI", "LI", "DIV", "LI"]
@@ -128,16 +114,12 @@ QUnit.test("can be rendered", async (assert) => {
 });
 
 QUnit.test("display the correct name in debug mode", async (assert) => {
-  var _a;
   env = await makeTestEnv(Object.assign(baseConfig, { debug: "1" }));
   userMenu = await mount(UserMenu, { env, target });
   let userMenuEl = userMenu.el;
   assert.containsOnce(userMenuEl, "img.o_user_avatar");
   assert.containsOnce(userMenuEl, "span.o_user_name");
-  assert.strictEqual(
-    (_a = userMenuEl.querySelector(".o_user_name")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(userMenuEl.querySelector(".o_user_name").textContent,
     "Sauron (test)"
   );
 });

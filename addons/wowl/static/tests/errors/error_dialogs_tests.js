@@ -37,7 +37,6 @@ QUnit.module("Error dialogs", {
 });
 
 QUnit.test("ErrorDialog with traceback", async (assert) => {
-  var _a, _b, _c;
   assert.expect(11);
   class Parent extends Component {
     constructor() {
@@ -54,10 +53,7 @@ QUnit.test("ErrorDialog with traceback", async (assert) => {
   env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "Odoo Error"
   );
   const mainButtons = target.querySelectorAll("main button");
@@ -70,10 +66,7 @@ QUnit.test("ErrorDialog with traceback", async (assert) => {
     ["An error occurred", "Please use the copy button to report the error to your support service."]
   );
   assert.containsNone(target, "div.o_error_detail");
-  assert.strictEqual(
-    (_b = target.querySelector(".o_dialog footer button")) === null || _b === void 0
-      ? void 0
-      : _b.textContent,
+  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent,
     "Ok"
   );
   click(mainButtons[1]);
@@ -91,23 +84,19 @@ QUnit.test("ErrorDialog with traceback", async (assert) => {
     ["ERROR_NAME"]
   );
   assert.containsOnce(target, "div.o_error_detail");
-  assert.strictEqual(
-    (_c = target.querySelector("div.o_error_detail")) === null || _c === void 0
-      ? void 0
-      : _c.textContent,
+  assert.strictEqual(target.querySelector("div.o_error_detail").textContent,
     "This is a tracback string"
   );
 });
 
 QUnit.test("Client ErrorDialog with traceback", async (assert) => {
-  var _a, _b, _c;
   assert.expect(11);
   class Parent extends Component {
     setup() {
       this.message = "Something bad happened";
       this.data = { debug: "Some strange unreadable stack" };
       this.name = "ERROR_NAME";
-      this.traceback = "This is a tracback string";
+      this.traceback = "This is a traceback string";
     }
   }
   Parent.components = { ClientErrorDialog };
@@ -116,10 +105,7 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
   env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "Odoo Client Error"
   );
   const mainButtons = target.querySelectorAll("main button");
@@ -132,10 +118,7 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
     ["An error occurred", "Please use the copy button to report the error to your support service."]
   );
   assert.containsNone(target, "div.o_error_detail");
-  assert.strictEqual(
-    (_b = target.querySelector(".o_dialog footer button")) === null || _b === void 0
-      ? void 0
-      : _b.textContent,
+  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent,
     "Ok"
   );
   click(mainButtons[1]);
@@ -153,11 +136,8 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
     ["ERROR_NAME"]
   );
   assert.containsOnce(target, "div.o_error_detail");
-  assert.strictEqual(
-    (_c = target.querySelector("div.o_error_detail")) === null || _c === void 0
-      ? void 0
-      : _c.textContent,
-    "This is a tracback string"
+  assert.strictEqual(target.querySelector("div.o_error_detail").textContent,
+    "This is a traceback string"
   );
 });
 
@@ -194,7 +174,6 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
 });
 
 QUnit.test("WarningDialog", async (assert) => {
-  var _a, _b, _c;
   assert.expect(5);
   class Parent extends Component {
     constructor() {
@@ -210,26 +189,18 @@ QUnit.test("WarningDialog", async (assert) => {
   env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "User Error"
   );
-  assert.strictEqual(
-    (_b = target.querySelector("main")) === null || _b === void 0 ? void 0 : _b.textContent,
+  assert.strictEqual(target.querySelector("main").textContent,
     "Some strange unreadable message"
   );
-  assert.strictEqual(
-    (_c = target.querySelector(".o_dialog footer button")) === null || _c === void 0
-      ? void 0
-      : _c.textContent,
+  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent,
     "Ok"
   );
 });
 
 QUnit.test("RedirectWarningDialog", async (assert) => {
-  var _a, _b;
   assert.expect(10);
   class Parent extends Component {
     constructor() {
@@ -259,14 +230,10 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "Odoo Warning"
   );
-  assert.strictEqual(
-    (_b = target.querySelector("main")) === null || _b === void 0 ? void 0 : _b.textContent,
+  assert.strictEqual(target.querySelector("main").textContent,
     "Some strange unreadable message"
   );
   let footerButtons = target.querySelectorAll("footer button");
@@ -282,7 +249,6 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
 });
 
 QUnit.test("Error504Dialog", async (assert) => {
-  var _a, _b, _c;
   assert.expect(5);
   class Parent extends Component {}
   Parent.components = { Error504Dialog };
@@ -291,26 +257,18 @@ QUnit.test("Error504Dialog", async (assert) => {
   env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "Request timeout"
   );
-  assert.strictEqual(
-    (_b = target.querySelector("main p")) === null || _b === void 0 ? void 0 : _b.textContent,
+  assert.strictEqual(target.querySelector("main p").textContent,
     " The operation was interrupted. This usually means that the current operation is taking too much time. "
   );
-  assert.strictEqual(
-    (_c = target.querySelector(".o_dialog footer button")) === null || _c === void 0
-      ? void 0
-      : _c.textContent,
+  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent,
     "Ok"
   );
 });
 
 QUnit.test("SessionExpiredDialog", async (assert) => {
-  var _a, _b;
   assert.expect(7);
   class Parent extends Component {}
   Parent.components = { SessionExpiredDialog };
@@ -326,14 +284,10 @@ QUnit.test("SessionExpiredDialog", async (assert) => {
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(
-    (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-      ? void 0
-      : _a.textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent,
     "Odoo Session Expired"
   );
-  assert.strictEqual(
-    (_b = target.querySelector("main p")) === null || _b === void 0 ? void 0 : _b.textContent,
+  assert.strictEqual(target.querySelector("main p").textContent,
     " Your Odoo session expired. The current page is about to be refreshed. "
   );
   const footerButton = target.querySelector(".o_dialog footer button");

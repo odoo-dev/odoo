@@ -32,7 +32,6 @@ QUnit.module("Components", (hooks) => {
   QUnit.module("Dialog");
 
   QUnit.test("simple rendering", async function (assert) {
-    var _a, _b, _c;
     assert.expect(8);
     class Parent extends owl.Component {}
     Parent.template = owl.tags.xml`
@@ -47,15 +46,11 @@ QUnit.module("Components", (hooks) => {
       ".o_dialog header .modal-title",
       "the header is rendered by default"
     );
-    assert.strictEqual(
-      (_a = target.querySelector("header .modal-title")) === null || _a === void 0
-        ? void 0
-        : _a.textContent,
+    assert.strictEqual(target.querySelector("header .modal-title").textContent,
       "Wow(l) Effect"
     );
     assert.containsOnce(target, ".o_dialog main", "a dialog has always a main node");
-    assert.strictEqual(
-      (_b = target.querySelector("main")) === null || _b === void 0 ? void 0 : _b.textContent,
+    assert.strictEqual(target.querySelector("main").textContent,
       " Hello! "
     );
     assert.containsOnce(target, ".o_dialog footer", "the footer is rendered by default");
@@ -64,10 +59,7 @@ QUnit.module("Components", (hooks) => {
       ".o_dialog footer button",
       "the footer is rendered with a single button 'Ok' by default"
     );
-    assert.strictEqual(
-      (_c = target.querySelector("footer button")) === null || _c === void 0
-        ? void 0
-        : _c.textContent,
+    assert.strictEqual(target.querySelector("footer button").textContent,
       "Ok"
     );
   });
@@ -175,7 +167,6 @@ QUnit.module("Components", (hooks) => {
   });
 
   QUnit.test("embed an arbitrary component in a dialog is possible", async function (assert) {
-    var _a;
     assert.expect(6);
     class SubComponent extends owl.Component {
       _onClick() {
@@ -200,10 +191,7 @@ QUnit.module("Components", (hooks) => {
     parent = await mount(Parent, { env, target });
     assert.containsOnce(target, ".o_dialog");
     assert.containsOnce(target, ".o_dialog main .o_subcomponent");
-    assert.strictEqual(
-      (_a = target.querySelector(".o_subcomponent")) === null || _a === void 0
-        ? void 0
-        : _a.textContent,
+    assert.strictEqual(target.querySelector(".o_subcomponent").textContent,
       "Wow(l) Effect"
     );
     await click(target.querySelector(".o_subcomponent"));
