@@ -230,7 +230,7 @@ QUnit.test("WarningDialog", async (assert) => {
 
 QUnit.test("RedirectWarningDialog", async (assert) => {
   var _a, _b;
-  assert.expect(8);
+  assert.expect(10);
   class Parent extends Component {
     constructor() {
       super(...arguments);
@@ -269,14 +269,16 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
     (_b = target.querySelector("main")) === null || _b === void 0 ? void 0 : _b.textContent,
     "Some strange unreadable message"
   );
-  const footerButtons = target.querySelectorAll("footer button");
+  let footerButtons = target.querySelectorAll("footer button");
   assert.deepEqual(
     [...footerButtons].map((el) => el.textContent),
     ["Buy book on cryptography", "Cancel"]
   );
-  click(footerButtons[0]);
-  click(footerButtons[1]);
+  await click(footerButtons[0]); // click on "Buy book on cryptography"
   assert.verifySteps(["buy_action_id", "dialog-closed"]);
+
+  await click(footerButtons[1]); // click on "Cancel"
+  assert.verifySteps(["dialog-closed"]);
 });
 
 QUnit.test("Error504Dialog", async (assert) => {

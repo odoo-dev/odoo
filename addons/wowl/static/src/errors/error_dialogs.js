@@ -147,8 +147,9 @@ export class RedirectWarningDialog extends Component {
     this.buttonText = buttonText;
     this.additionalContext = additional_context;
   }
-  onClick() {
-    this.actionService.doAction(this.actionId, { additionalContext: this.additionalContext });
+  async onClick() {
+    await this.actionService.doAction(this.actionId, { additionalContext: this.additionalContext });
+    this.trigger("dialog-closed");
   }
   onCancel() {
     this.trigger("dialog-closed");
