@@ -2965,8 +2965,12 @@ var SnippetsMenu = Widget.extend({
      */
     _checkEditorToolbarVisibility: function (e) {
         const $toolbarContainer = $('#o_we_editor_toolbar_container');
+        const docSelection = document.getSelection();
+        const $currentSelectionTarget = docSelection.rangeCount > 0 ? $(docSelection.getRangeAt(0).commonAncestorContainer) : $();
         // Do not  toggle visibility if the target is inside the toolbar ( eg. during link edition).
-        if (e && $(e.target).parents('#toolbar').length) {
+        if ($currentSelectionTarget.parents('#toolbar').length ||
+            (e && $(e.target).parents('#toolbar').length)
+        ) {
             return;
         }
 
