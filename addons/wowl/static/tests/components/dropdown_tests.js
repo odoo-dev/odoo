@@ -3,7 +3,7 @@
 import { click, getFixture, makeTestEnv, nextTick } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
 import { makeDeferred } from "../helpers/index";
-import { hotkeyService } from "../../src/services/hotkey_service";
+import { hotkeyService } from "../../src/hotkey/hotkey_service";
 import { uiService } from "../../src/services/ui_service";
 
 const { mount } = owl;
@@ -530,7 +530,7 @@ QUnit.module("Components", (hooks) => {
     parent = await mount(Parent, { env, target });
     assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed at start");
 
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m", altKey: true }));
     await nextTick();
     assert.containsOnce(
       parent.el,
@@ -572,7 +572,7 @@ QUnit.module("Components", (hooks) => {
     assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
 
     // Reopen dropdown
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m", altKey: true }));
     await nextTick();
     assert.containsOnce(
       parent.el,
@@ -580,13 +580,13 @@ QUnit.module("Components", (hooks) => {
       "menu is opened after pressing the toggler hotkey"
     );
 
-    // Select second item through aria-keyshortcuts attribute
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "2" }));
+    // Select second item through data-hotkey attribute
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "2", altKey: true }));
     await nextTick();
     assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
 
     // Reopen dropdown
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m", altKey: true }));
     await nextTick();
     assert.containsOnce(
       parent.el,

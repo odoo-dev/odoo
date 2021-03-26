@@ -30,19 +30,29 @@ export const browser = Object.assign({}, owl.browser, {
  *
  * @type {boolean}
  */
-export const isBrowserChrome = browser.navigator.userAgent.includes("Chrome");
+export function isBrowserChrome() {
+  return browser.navigator.userAgent.includes("Chrome");
+}
 
-export const isMobileOS = Boolean(
-  browser.navigator.userAgent.match(/Android/i) ||
-    browser.navigator.userAgent.match(/webOS/i) ||
-    browser.navigator.userAgent.match(/iPhone/i) ||
-    browser.navigator.userAgent.match(/iPad/i) ||
-    browser.navigator.userAgent.match(/iPod/i) ||
-    browser.navigator.userAgent.match(/BlackBerry/i) ||
-    browser.navigator.userAgent.match(/Windows Phone/i)
-);
+export function isMacOS() {
+  return Boolean(browser.navigator.platform.match(/Mac/i));
+}
 
-export const hasTouch = "ontouchstart" in window || "onmsgesturechange" in window;
+export function isMobileOS() {
+  return Boolean(
+    browser.navigator.userAgent.match(/Android/i) ||
+      browser.navigator.userAgent.match(/webOS/i) ||
+      browser.navigator.userAgent.match(/iPhone/i) ||
+      browser.navigator.userAgent.match(/iPad/i) ||
+      browser.navigator.userAgent.match(/iPod/i) ||
+      browser.navigator.userAgent.match(/BlackBerry/i) ||
+      browser.navigator.userAgent.match(/Windows Phone/i)
+  );
+}
+
+export function hasTouch() {
+  return "ontouchstart" in window || "onmsgesturechange" in window;
+}
 
 // -----------------------------------------------------------------------------
 // makeRAMLocalStorage

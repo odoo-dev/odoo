@@ -1,29 +1,16 @@
 /** @odoo-module **/
-import { useService } from "../core/hooks";
 import { serviceRegistry } from "../webclient/service_registry";
-const { hooks } = owl;
-const { onMounted, onWillUnmount } = hooks;
+import { isMacOS } from "../core/browser";
 
-/**
- * This hook will register/unregister the given registration
- * when the caller component will mount/unmount.
- *
- * @param {string} hotkey
- * @param {()=>void} callback
- * @param {Object} options - additional options
- * @param {boolean} options.allowInEditable - allow registration to perform even in editable element
- * @param {boolean} options.allowRepeat
- *    allow registration to perform multiple times when hotkey is held down
- */
-export function useHotkey(hotkey, callback, options = {}) {
-  const hotkeyService = useService("hotkey");
-  let token;
-  onMounted(() => {
-    token = hotkeyService.registerHotkey(hotkey, callback, options);
-  });
-  onWillUnmount(() => {
-    hotkeyService.unregisterHotkey(token);
-  });
+export function getHotkeyToPress(hotkey, altIsOptional = false) {
+  let result = hotkey.split("+");
+  if (isMacOS()) {
+    result = result.map((x) => x.replace("control", "command"));
+  }
+  if (!altIsOptional) {
+    result = isMacOS() ? ["control", ...result] : ["alt", ...result];
+  }
+  return result.join("+");
 }
 
 const ALPHANUM_KEYS = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
@@ -49,8 +36,12 @@ export const hotkeyService = {
     const { ui } = env.services;
     const registrations = new Map();
     let nextToken = 0;
+    let overlaysVisible = false;
 
     window.addEventListener("keydown", onKeydown);
+    window.addEventListener("keyup", removeHotkeyOverlays);
+    window.addEventListener("blur", removeHotkeyOverlays);
+    window.addEventListener("click", removeHotkeyOverlays);
 
     /**
      * Handler for keydown events.
@@ -59,7 +50,7 @@ export const hotkeyService = {
      * - UI is blocked
      * - the pressed key is not whitelisted
      *
-     * @param {KeyboardEvent} ev
+     * @param {KeyboardEvent} event
      */
     function onKeydown(event) {
       const hotkey = getActiveHotkey(event);
@@ -69,10 +60,18 @@ export const hotkeyService = {
         return;
       }
 
-      // FIXME : this is a temporary hack. It forces [aria-keyshortcuts] on all [accesskey] elements.
-      const elementsWithoutAriaKeyshortcut = ui.getVisibleElements('[accesskey]:not([aria-keyshortcuts])');
-      for (const el of elementsWithoutAriaKeyshortcut) {
-        el.setAttribute('aria-keyshortcuts', el.accessKey);
+      // FIXME : this is a temporary hack. It replaces all [accesskey] attrs by [data-hotkey] on all elements.
+      const elementsWithoutDataHotkey = ui.getVisibleElements("[accesskey]:not([data-hotkey])");
+      for (const el of elementsWithoutDataHotkey) {
+        el.dataset.hotkey = el.accessKey;
+        el.removeAttribute("accesskey");
+      }
+
+      // Special case: open hotkey overlays
+      if (isMacOS() ? hotkey === "control" : hotkey === "alt") {
+        addHotkeyOverlays();
+        event.preventDefault();
+        return;
       }
 
       // Is the pressed key NOT whitelisted ?
@@ -82,47 +81,40 @@ export const hotkeyService = {
       }
 
       // Finally, prepare and dispatch.
-      const focusedElement = document.activeElement;
-      const focusedTagName = focusedElement ? focusedElement.tagName : "";
-      const inEditableElement =
-        focusedElement && (focusedElement.isContentEditable ||
-          ["INPUT", "TEXTAREA"].includes(focusedTagName));
       const infos = {
         hotkey,
-        inEditableElement,
         _originalEvent: event,
       };
       dispatch(infos);
+      removeHotkeyOverlays();
     }
 
     /**
      * Dispatches an hotkey to all matching registrations and
-     * clicks on all elements having a aria-keyshortcuts attribute matching the hotkey.
+     * clicks on all elements having a data-hotkey attribute matching the hotkey.
      *
      * @param {{
      *  hotkey: string,
-     *  inEditableElement: boolean,
      *  _originalEvent: KeyboardEvent
      * }} infos
      */
     function dispatch(infos) {
       let dispatched = false;
-      const { hotkey, inEditableElement, _originalEvent: event } = infos;
-      const isAlted = event.altKey;
+      const { hotkey, _originalEvent: event } = infos;
+      const isAlted = isMacOS() ? event.ctrlKey : event.altKey;
       const activeElement = ui.activeElement;
 
       // Dispatch actual hotkey to all matching registrations
       for (const [_, reg] of registrations) {
-
-        if (reg.activeElement !== activeElement) {
+        if (!reg.global && reg.activeElement !== activeElement) {
           continue;
         }
 
-        if (reg.hotkey.toLowerCase() !== hotkey) {
+        if (reg.hotkey !== hotkey) {
           continue;
         }
 
-        if (!reg.allowInEditable && inEditableElement && !isAlted) {
+        if (!reg.altIsOptional && !isAlted) {
           continue;
         }
 
@@ -134,9 +126,9 @@ export const hotkeyService = {
         dispatched = true;
       }
 
-      if (!event.repeat && (!inEditableElement || isAlted)) {
-        // Click on all elements having a aria-keyshortcuts attribute matching the actual hotkey.
-        const elems = activeElement.querySelectorAll(`[aria-keyshortcuts~='${hotkey}' i]`);
+      if (!event.repeat && isAlted) {
+        // Click on all elements having a data-hotkey attribute matching the actual hotkey.
+        const elems = activeElement.querySelectorAll(`[data-hotkey='${hotkey}' i]`);
         for (const el of elems) {
           // AAB: not sure it is enough, we might need to trigger all events that occur when you actually click
           el.focus();
@@ -152,6 +144,50 @@ export const hotkeyService = {
     }
 
     /**
+     * Add the hotkey overlays respecting the ui active element.
+     */
+    function addHotkeyOverlays() {
+      if (overlaysVisible) {
+        return;
+      }
+      for (const el of env.services.ui.getVisibleElements("[data-hotkey]:not(:disabled)")) {
+        const hotkey = el.dataset.hotkey;
+        const overlay = document.createElement("div");
+        overlay.className = "o_web_hotkey_overlay";
+        overlay.appendChild(document.createTextNode(hotkey.toUpperCase()));
+
+        let overlayParent;
+        if (el.tagName.toUpperCase() === "INPUT") {
+          // special case for the search input that has an access key
+          // defined. We cannot set the overlay on the input itself,
+          // only on its parent.
+          overlayParent = el.parentElement;
+        } else {
+          overlayParent = el;
+        }
+
+        if (overlayParent.style.position !== "absolute") {
+          overlayParent.style.position = "relative";
+        }
+        overlayParent.appendChild(overlay);
+      }
+      overlaysVisible = true;
+    }
+
+    /**
+     * Remove all the hotkey overlays.
+     */
+    function removeHotkeyOverlays() {
+      if (!overlaysVisible) {
+        return;
+      }
+      for (const overlay of document.querySelectorAll(".o_web_hotkey_overlay")) {
+        overlay.remove();
+      }
+      overlaysVisible = false;
+    }
+
+    /**
      * Get the actual hotkey being pressed.
      *
      * @param {KeyboardEvent} ev
@@ -162,7 +198,7 @@ export const hotkeyService = {
 
       // ------- Modifiers -------
       // Modifiers are pushed in ascending order to the hotkey.
-      if (ev.ctrlKey) {
+      if (isMacOS() ? ev.metaKey : ev.ctrlKey) {
         hotkey.push("control");
       }
       if (ev.shiftKey) {
@@ -180,7 +216,7 @@ export const hotkeyService = {
         hotkey.push(key);
       }
 
-      return hotkey.join("+").toLowerCase();
+      return hotkey.join("+");
     }
 
     /**
@@ -188,10 +224,13 @@ export const hotkeyService = {
      *
      * @param {string} hotkey
      * @param {()=>void} callback
-     * @param {Object} options - additional options
-     * @param {boolean} options.allowInEditable - allow registration to perform even in editable element
-     * @param {boolean} options.allowRepeat
-     *    allow registration to perform multiple times when hotkey is held down
+     * @param {Object} options additional options
+     * @param {boolean} [options.altIsOptional=false]
+     *  allow registration to perform even without pressing the ALT key
+     * @param {boolean} [options.allowRepeat=false]
+     *  allow registration to perform multiple times when hotkey is held down
+     * @param {boolean} [options.global=false]
+     *  allow registration to perform no matter the UI active element
      * @returns {number} registration token
      */
     function registerHotkey(hotkey, callback, options = {}) {
@@ -210,7 +249,10 @@ export const hotkeyService = {
        *  - single key part comes last
        *  - each part is separated by the dash character: "+"
        */
-      const keys = hotkey.toLowerCase().split("+").filter((k) => !MODIFIERS.has(k));
+      const keys = hotkey
+        .toLowerCase()
+        .split("+")
+        .filter((k) => !MODIFIERS.has(k));
       if (keys.some((k) => !AUTHORIZED_KEYS.has(k))) {
         throw new Error(
           `You are trying to subscribe for an hotkey ('${hotkey}')
@@ -226,11 +268,12 @@ export const hotkeyService = {
       // Add registration
       const token = nextToken++;
       const registration = {
-        hotkey,
+        hotkey: hotkey.toLowerCase(),
         callback,
         activeElement: null,
-        allowInEditable: options && options.allowInEditable,
+        altIsOptional: options && options.altIsOptional,
         allowRepeat: options && options.allowRepeat,
+        global: options && options.global,
       };
       registrations.set(token, registration);
 

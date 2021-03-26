@@ -11,8 +11,9 @@ The `command` service offers a way to register commands.
 A Command Palette could then be displayed through the hotkey `Control+K`.
 
 This palette displays a list including :
+
 - the commands registered in the service
-- any visible elements in the `ui.activeElement` that are accessible through an `[aria-keyshortcuts]` attribute.
+- any visible elements in the `ui.activeElement` that are accessible through an `[data-hotkey]` attribute.
 
 ## API
 
@@ -34,13 +35,20 @@ In addition to that, you have access to some development helpers which are **gre
 ```js
 class MyComponent extends Component {
   setup() {
-    useCommand({ name: "My Command 1", action: () => {
-      // code when command 1 is executed
-    }});
-    useCommand({ name: "My Super Command", hotkey: "shift-home", action: () => {
-      // code when super command is executed
-      // note that the super command can also get executed with the hotkey "shift-home"
-    }});
+    useCommand({
+      name: "My Command 1",
+      action: () => {
+        // code when command 1 is executed
+      },
+    });
+    useCommand({
+      name: "My Super Command",
+      hotkey: "shift-home",
+      action: () => {
+        // code when super command is executed
+        // note that the super command can also get executed with the hotkey "shift-home"
+      },
+    });
   }
 }
 ```

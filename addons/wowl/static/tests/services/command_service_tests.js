@@ -3,7 +3,7 @@ import { useCommand } from "../../src/commands/command_hook";
 import { commandService } from "../../src/commands/command_service";
 import { Registry } from "../../src/core/registry";
 import { dialogService } from "../../src/services/dialog_service";
-import { hotkeyService } from "../../src/services/hotkey_service";
+import { hotkeyService } from "../../src/hotkey/hotkey_service";
 import { uiService } from "../../src/services/ui_service";
 import { mainComponentRegistry } from "../../src/webclient/main_component_registry";
 import { click, getFixture, makeTestEnv, nextTick } from "../helpers";
@@ -15,7 +15,7 @@ let env;
 let target;
 let testComponent;
 
-class TestComponent extends Component { }
+class TestComponent extends Component {}
 TestComponent.components = { DialogContainer: mainComponentRegistry.get("DialogContainer") };
 TestComponent.template = xml`
   <div>
@@ -49,9 +49,6 @@ QUnit.module("Command", {
 QUnit.test("palette dialog can be rendered and closed on outside click", async (assert) => {
   testComponent = await mount(TestComponent, { env, target });
 
-  // the palette won't open if no registrations
-  env.services.command.registerCommand({ name: "dummy", action: () => {}});
-
   // invoke command palette through hotkey control+k
   let keydown = new KeyboardEvent("keydown", { key: "k", ctrlKey: true });
   window.dispatchEvent(keydown);
@@ -65,7 +62,7 @@ QUnit.test("palette dialog can be rendered and closed on outside click", async (
 
 QUnit.test("commands evilness 👹", async (assert) => {
   const command = env.services.command;
-  function action() { }
+  function action() {}
 
   assert.throws(function () {
     command.registerCommand();
@@ -85,7 +82,6 @@ QUnit.test("commands evilness 👹", async (assert) => {
   assert.throws(function () {
     command.registerCommand({ name: "", action });
   }, /A Command must have a name and an action function/);
-
 });
 
 QUnit.test("useCommand hook", async (assert) => {
@@ -94,7 +90,12 @@ QUnit.test("useCommand hook", async (assert) => {
   class MyComponent extends TestComponent {
     setup() {
       super.setup();
-      useCommand({ name: "Take the throne", action: () => { assert.step("Hodor"); } });
+      useCommand({
+        name: "Take the throne",
+        action: () => {
+          assert.step("Hodor");
+        },
+      });
     }
   }
   testComponent = await mount(MyComponent, { env, target });
@@ -123,7 +124,8 @@ QUnit.test("command with hotkey", async (assert) => {
   env.services.command.registerCommand({
     name: "test",
     action: () => assert.step(hotkey),
-    hotkey
+    hotkey,
+    hotkeyOptions: { altIsOptional: true },
   });
   await nextTick();
 
@@ -132,7 +134,7 @@ QUnit.test("command with hotkey", async (assert) => {
   assert.verifySteps([hotkey]);
 });
 
-QUnit.test("aria-keyshortcuts added to command palette", async (assert) => {
+QUnit.test("data-hotkey added to command palette", async (assert) => {
   assert.expect(8);
 
   class MyComponent extends Component {
@@ -143,8 +145,8 @@ QUnit.test("aria-keyshortcuts added to command palette", async (assert) => {
   MyComponent.components = { TestComponent };
   MyComponent.template = xml`
     <div>
-      <button title="Aria Stark" aria-keyshortcuts="a" t-on-click="onClick" />
-      <input title="Bran Stark" type="text" aria-keyshortcuts="b" />
+      <button title="Aria Stark" data-hotkey="a" t-on-click="onClick" />
+      <input title="Bran Stark" type="text" data-hotkey="b" />
       <TestComponent />
     </div>
   `;
@@ -155,9 +157,9 @@ QUnit.test("aria-keyshortcuts added to command palette", async (assert) => {
   window.dispatchEvent(keydown);
   await nextTick();
 
-  assert.containsN(target, ".o_command", 2, "must contains two commands");
+  assert.containsN(target, ".o_command", 2);
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command span")].map(el => el.textContent),
+    [...target.querySelectorAll(".o_command span:first-child")].map((el) => el.textContent),
     ["Aria Stark", "Bran Stark"]
   );
 
@@ -194,13 +196,8 @@ QUnit.test("can be searched", async (assert) => {
   testComponent = await mount(TestComponent, { env, target });
 
   // Register some commands
-  function action() { }
-  const names = [
-    "Cersei Lannister",
-    "Jaime Lannister",
-    "Tyrion Lannister",
-    "Tywin Lannister",
-  ];
+  function action() {}
+  const names = ["Cersei Lannister", "Jaime Lannister", "Tyrion Lannister", "Tywin Lannister"];
   for (const name of names) {
     env.services.command.registerCommand({ name, action });
   }
@@ -212,25 +209,25 @@ QUnit.test("can be searched", async (assert) => {
   await nextTick();
 
   assert.deepEqual(
-    target.querySelector(".o_command_palette_search").value,
+    target.querySelector(".o_command_palette_search input").value,
     "",
     "search input is empty"
   );
 
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command")].map(el => el.textContent),
+    [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
     names,
     "all commands are present"
   );
 
   // Search something
-  let search = target.querySelector(".o_command_palette_search");
+  let search = target.querySelector(".o_command_palette_search input");
   search.value = "jl";
   search.dispatchEvent(new InputEvent("input"));
   await nextTick();
 
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command")].map(el => el.textContent),
+    [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
     ["Jaime Lannister"],
     "only search matches are present"
   );
@@ -241,7 +238,7 @@ QUnit.test("can be searched", async (assert) => {
   await nextTick();
 
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command")].map(el => el.textContent),
+    [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
     names,
     "all commands are again present"
   );
@@ -251,7 +248,7 @@ QUnit.test("command categories", async (assert) => {
   testComponent = await mount(TestComponent, { env, target });
 
   // Register some commands
-  function action() { }
+  function action() {}
   env.services.command.registerCommand({ name: "a", action, category: "custom-nolabel" });
   env.services.command.registerCommand({ name: "b", action, category: "custom" });
   env.services.command.registerCommand({ name: "c", action });
@@ -263,34 +260,27 @@ QUnit.test("command categories", async (assert) => {
   window.dispatchEvent(keydown);
   await nextTick();
 
-  assert.containsN(target, ".o_command", 4);
+  assert.containsN(target, ".o_command_category", 3);
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command_category > span")].map(el => el.textContent),
-    [
-      "a",
-      "Custom",
-      "b",
-      "Other commands",
-      "c",
-      "d"
-    ]
+    [...target.querySelectorAll(".o_command_category")].map((el) => el.textContent),
+    ["a", "b", "cd"]
   );
 });
 
 QUnit.test("data-command-category", async (assert) => {
-  assert.expect(2);
+  assert.expect(3);
 
-  class MyComponent extends Component { }
+  class MyComponent extends Component {}
   MyComponent.components = { TestComponent };
   MyComponent.template = xml`
     <div>
       <div>
-        <button title="Aria Stark" aria-keyshortcuts="a" />
-        <button title="Bran Stark" aria-keyshortcuts="b" />
+        <button title="Aria Stark" data-hotkey="a" />
+        <button title="Bran Stark" data-hotkey="b" />
       </div>
       <div data-command-category="custom">
-        <button title="Robert Baratheon" aria-keyshortcuts="r" />
-        <button title="Joffrey Baratheon" aria-keyshortcuts="j" />
+        <button title="Robert Baratheon" data-hotkey="r" />
+        <button title="Joffrey Baratheon" data-hotkey="j" />
       </div>
       <TestComponent />
     </div>
@@ -304,14 +294,19 @@ QUnit.test("data-command-category", async (assert) => {
 
   assert.containsN(target, ".o_command", 4);
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command_category_label, .o_command > span")].map(el => el.textContent),
     [
-      "Custom",
-      "Robert Baratheon",
-      "Joffrey Baratheon",
-      "Other commands",
-      "Aria Stark",
-      "Bran Stark"
-    ]
+      ...target.querySelectorAll(
+        ".o_command_category:nth-of-type(1) .o_command > span:first-child"
+      ),
+    ].map((el) => el.textContent),
+    ["Robert Baratheon", "Joffrey Baratheon"]
+  );
+  assert.deepEqual(
+    [
+      ...target.querySelectorAll(
+        ".o_command_category:nth-of-type(2) .o_command > span:first-child"
+      ),
+    ].map((el) => el.textContent),
+    ["Aria Stark", "Bran Stark"]
   );
 });

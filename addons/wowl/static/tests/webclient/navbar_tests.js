@@ -5,7 +5,7 @@ import { click } from "../helpers/index";
 import { getFixture, makeTestEnv, nextTick } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
 import { actionService } from "../../src/actions/action_service";
-import { hotkeyService } from "../../src/services/hotkey_service";
+import { hotkeyService } from "../../src/hotkey/hotkey_service";
 import { menuService } from "./../../src/services/menu_service";
 import { notificationService } from "../../src/notifications/notification_service";
 import { uiService } from "../../src/services/ui_service";

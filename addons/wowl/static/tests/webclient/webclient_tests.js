@@ -7,7 +7,7 @@ import { notificationService } from "../../src/notifications/notification_servic
 import { getFixture, makeTestEnv } from "../helpers/index";
 import { menuService } from "../../src/services/menu_service";
 import { fakeTitleService } from "../helpers/mocks";
-import { hotkeyService } from "../../src/services/hotkey_service";
+import { hotkeyService } from "../../src/hotkey/hotkey_service";
 import { uiService } from "../../src/services/ui_service";
 
 const { Component, tags, mount } = owl;

@@ -4,7 +4,7 @@ const { hooks } = owl;
 const { onMounted, onWillUnmount } = hooks;
 
 /**
- * @typedef {import("./command_service").Command} Command 
+ * @typedef {import("./command_service").Command} Command
  */
 
 /**

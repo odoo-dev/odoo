@@ -36,7 +36,7 @@ export const errorService = {
           return;
         }
         let stack = eventError ? eventError.stack : "";
-        if (!isBrowserChrome) {
+        if (!isBrowserChrome()) {
           // transforms the stack into a chromium stack
           // Chromium stack example:
           // Error: Mock: Can't write value

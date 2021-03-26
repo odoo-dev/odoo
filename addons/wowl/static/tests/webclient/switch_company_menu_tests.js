@@ -4,7 +4,7 @@ import { makeFakeUserService, makeFakeUIService } from "../helpers/mocks";
 import { makeTestEnv, getFixture } from "../helpers/index";
 import { click } from "../helpers/utility";
 import { SwitchCompanyMenu } from "../../src/webclient/switch_company_menu/switch_company_menu";
-import { hotkeyService } from "../../src/services/hotkey_service";
+import { hotkeyService } from "../../src/hotkey/hotkey_service";
 import { registerCleanup } from "../helpers/cleanup";
 
 const { mount } = owl;

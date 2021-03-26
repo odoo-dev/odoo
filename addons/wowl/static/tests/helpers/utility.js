@@ -5,7 +5,7 @@ import { actionService } from "../../src/actions/action_service";
 import { effectService } from "../../src/effects/effect_service";
 import { notificationService } from "../../src/notifications/notification_service";
 import { dialogService } from "../../src/services/dialog_service";
-import { hotkeyService } from "../../src/services/hotkey_service";
+import { hotkeyService } from "../../src/hotkey/hotkey_service";
 import { menuService } from "../../src/services/menu_service";
 import { ormService } from "../../src/services/orm_service";
 import { uiService } from "../../src/services/ui_service";

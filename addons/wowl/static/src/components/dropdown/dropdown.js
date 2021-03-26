@@ -114,7 +114,10 @@ export class Dropdown extends Component {
     this.hotkeyTokens = [];
     for (const [hotkey, callback] of Object.entries(subs)) {
       this.hotkeyTokens.push(
-        this.hotkeyService.registerHotkey(hotkey, callback, { allowRepeat: true })
+        this.hotkeyService.registerHotkey(hotkey, callback, {
+          altIsOptional: true,
+          allowRepeat: true,
+        })
       );
     }
   }

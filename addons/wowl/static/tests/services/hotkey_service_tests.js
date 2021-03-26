@@ -1,8 +1,11 @@
 /** @odoo-module **/
 import { Registry } from "../../src/core/registry";
-import { hotkeyService, useHotkey } from "../../src/services/hotkey_service";
+import { hotkeyService } from "../../src/hotkey/hotkey_service";
+import { useHotkey } from "../../src/hotkey/hotkey_hook";
 import { uiService, useActiveElement } from "../../src/services/ui_service";
-import { getFixture, makeTestEnv, nextTick } from "../helpers";
+import { getFixture, makeTestEnv, nextTick } from "../helpers/index";
+import { patch, unpatch } from "../../src/utils/patch";
+import { browser } from "../../src/core/browser";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
@@ -26,26 +29,27 @@ QUnit.test("register / unregister", async (assert) => {
   const hotkey = env.services.hotkey;
 
   const key = "q";
-  let keydown = new KeyboardEvent("keydown", { key });
+  const eventArgs = { key, altKey: true };
+  let keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
   let token = hotkey.registerHotkey(key, () => assert.step(key));
   await nextTick();
 
-  keydown = new KeyboardEvent("keydown", { key });
+  keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
   hotkey.unregisterHotkey(token);
-  keydown = new KeyboardEvent("keydown", { key });
+  keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
   assert.verifySteps([key]);
 });
 
-QUnit.test("aria-keyshortcuts", async (assert) => {
+QUnit.test("data-hotkey", async (assert) => {
   assert.expect(2);
 
   class MyComponent extends Component {
@@ -55,24 +59,25 @@ QUnit.test("aria-keyshortcuts", async (assert) => {
   }
   MyComponent.template = xml`
     <div>
-      <button t-on-click="onClick" aria-keyshortcuts="b" />
+      <button t-on-click="onClick" data-hotkey="b" />
     </div>
   `;
 
   const key = "b";
-  let keydown = new KeyboardEvent("keydown", { key });
+  const eventArgs = { key, altKey: true };
+  let keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
   const comp = await mount(MyComponent, { env, target });
 
-  keydown = new KeyboardEvent("keydown", { key });
+  keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
   comp.unmount();
 
-  keydown = new KeyboardEvent("keydown", { key });
+  keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
@@ -89,19 +94,20 @@ QUnit.test("hook", async (assert) => {
   }
   TestComponent.template = xml`<div/>`;
 
-  let keydown = new KeyboardEvent("keydown", { key });
+  const eventArgs = { key, altKey: true };
+  let keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
   const comp = await mount(TestComponent, { env, target });
 
-  keydown = new KeyboardEvent("keydown", { key });
+  keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
   comp.unmount();
 
-  keydown = new KeyboardEvent("keydown", { key });
+  keydown = new KeyboardEvent("keydown", eventArgs);
   window.dispatchEvent(keydown);
   await nextTick();
 
@@ -109,70 +115,106 @@ QUnit.test("hook", async (assert) => {
   comp.destroy();
 });
 
-QUnit.test("registration allowed in editable if specified", async (assert) => {
-  const allowInEditableKey = "a";
-  const disallowInEditableKey = "b";
+QUnit.test("MacOS usability", async (assert) => {
+  assert.expect(6);
+
+  patch(browser, "test.macOS", {
+    navigator: {
+      platform: "Mac",
+    },
+  });
+
+  const hotkey = env.services.hotkey;
+  const key = "q";
+
+  // On MacOS, ALT is replaced by CONTROL key
+  let token = hotkey.registerHotkey(key, () => assert.step(key), { altIsOptional: false });
+  await nextTick();
+  let keydown = new KeyboardEvent("keydown", { key, altKey: true });
+  window.dispatchEvent(keydown);
+  await nextTick();
+  assert.verifySteps([]);
+  keydown = new KeyboardEvent("keydown", { key, ctrlKey: true });
+  window.dispatchEvent(keydown);
+  await nextTick();
+  assert.verifySteps([key]);
+  hotkey.unregisterHotkey(token);
+
+  // On MacOS, CONTROL is replaced by COMMAND key (= metaKey)
+  token = hotkey.registerHotkey(`control+${key}`, () => assert.step(`control+${key}`), {
+    altIsOptional: true,
+  });
+  await nextTick();
+  keydown = new KeyboardEvent("keydown", { key, ctrlKey: true });
+  window.dispatchEvent(keydown);
+  await nextTick();
+  assert.verifySteps([]);
+  keydown = new KeyboardEvent("keydown", { key, metaKey: true });
+  window.dispatchEvent(keydown);
+  await nextTick();
+  assert.verifySteps([`control+${key}`]);
+  hotkey.unregisterHotkey(token);
+
+  unpatch(browser, "test.macOS");
+});
+
+QUnit.test("alt is optional parameter", async (assert) => {
+  const altIsOptionalKey = "a";
+  const altIsRequiredKey = "b";
   const defaultBehaviourKey = "c";
   class TestComponent extends Component {
     setup() {
-      useHotkey(allowInEditableKey, () => assert.step(allowInEditableKey), { allowInEditable: true });
-      useHotkey(disallowInEditableKey, () => assert.step(disallowInEditableKey), { allowInEditable: false });
+      useHotkey(altIsOptionalKey, () => assert.step(altIsOptionalKey), { altIsOptional: true });
+      useHotkey(altIsRequiredKey, () => assert.step(altIsRequiredKey), { altIsOptional: false });
       useHotkey(defaultBehaviourKey, () => assert.step(defaultBehaviourKey));
     }
   }
-  TestComponent.template = xml`<div><input/></div>`;
+  TestComponent.template = xml`<div/>`;
 
   const comp = await mount(TestComponent, { env, target });
 
-  let keydown = new KeyboardEvent("keydown", { key: allowInEditableKey });
+  // Dispatch keys without ALT
+  let keydown = new KeyboardEvent("keydown", { key: altIsOptionalKey });
   window.dispatchEvent(keydown);
-  keydown = new KeyboardEvent("keydown", { key: disallowInEditableKey });
-  window.dispatchEvent(keydown);
-  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey });
-  window.dispatchEvent(keydown);
-  await nextTick();
-
-  assert.verifySteps([
-    allowInEditableKey,
-    disallowInEditableKey,
-    defaultBehaviourKey,]);
-
-  const input = comp.el.querySelector("input");
-  input.focus();
-  keydown = new KeyboardEvent("keydown", { key: allowInEditableKey });
-  window.dispatchEvent(keydown);
-  keydown = new KeyboardEvent("keydown", { key: disallowInEditableKey });
+  keydown = new KeyboardEvent("keydown", { key: altIsRequiredKey });
   window.dispatchEvent(keydown);
   keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey });
   window.dispatchEvent(keydown);
   await nextTick();
 
-  assert.verifySteps([
-    allowInEditableKey,
-  ]);
+  assert.verifySteps([altIsOptionalKey]);
+
+  // Dispatch keys with ALT
+  keydown = new KeyboardEvent("keydown", { altKey: true, key: altIsOptionalKey });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { altKey: true, key: altIsRequiredKey });
+  window.dispatchEvent(keydown);
+  keydown = new KeyboardEvent("keydown", { altKey: true, key: defaultBehaviourKey });
+  window.dispatchEvent(keydown);
+  await nextTick();
+
+  assert.verifySteps([altIsOptionalKey, altIsRequiredKey, defaultBehaviourKey]);
 
   comp.destroy();
 });
 
-QUnit.test("[aria-keyshortcuts] never allowed in editable", async (assert) => {
+QUnit.test("[data-hotkey] alt is required", async (assert) => {
   const key = "a";
   class TestComponent extends Component {
     onClick() {
       assert.step(key);
     }
   }
-  TestComponent.template = xml`<div><input/><button t-on-click="onClick" aria-keyshortcuts="${key}"/></div>`;
+  TestComponent.template = xml`<div><button t-on-click="onClick" data-hotkey="${key}"/></div>`;
 
   const comp = await mount(TestComponent, { env, target });
 
-  let keydown = new KeyboardEvent("keydown", { key });
+  let keydown = new KeyboardEvent("keydown", { key, altKey: true });
   window.dispatchEvent(keydown);
   await nextTick();
 
   assert.verifySteps([key]);
 
-  const input = comp.el.querySelector("input");
-  input.focus();
   keydown = new KeyboardEvent("keydown", { key });
   window.dispatchEvent(keydown);
   await nextTick();
@@ -189,40 +231,39 @@ QUnit.test("registration allows repeat if specified", async (assert) => {
   const disallowRepeatKey = "b";
   const defaultBehaviourKey = "c";
 
-  env.services.hotkey.registerHotkey(allowRepeatKey, () => assert.step(allowRepeatKey), { allowRepeat: true });
-  env.services.hotkey.registerHotkey(disallowRepeatKey, () => assert.step(disallowRepeatKey), { allowRepeat: false });
+  env.services.hotkey.registerHotkey(allowRepeatKey, () => assert.step(allowRepeatKey), {
+    allowRepeat: true,
+  });
+  env.services.hotkey.registerHotkey(disallowRepeatKey, () => assert.step(disallowRepeatKey), {
+    allowRepeat: false,
+  });
   env.services.hotkey.registerHotkey(defaultBehaviourKey, () => assert.step(defaultBehaviourKey));
   await nextTick();
 
   // Dispatch the three keys without repeat:
-  let keydown = new KeyboardEvent("keydown", { key: allowRepeatKey });
+  let keydown = new KeyboardEvent("keydown", { key: allowRepeatKey, altKey: true });
   window.dispatchEvent(keydown);
-  keydown = new KeyboardEvent("keydown", { key: disallowRepeatKey });
+  keydown = new KeyboardEvent("keydown", { key: disallowRepeatKey, altKey: true });
   window.dispatchEvent(keydown);
-  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey });
+  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey, altKey: true });
   window.dispatchEvent(keydown);
   await nextTick();
 
-  assert.verifySteps([
-    allowRepeatKey,
-    disallowRepeatKey,
-    defaultBehaviourKey,]);
+  assert.verifySteps([allowRepeatKey, disallowRepeatKey, defaultBehaviourKey]);
 
   // Dispatch the three keys with repeat:
-  keydown = new KeyboardEvent("keydown", { key: allowRepeatKey, repeat: true });
+  keydown = new KeyboardEvent("keydown", { key: allowRepeatKey, repeat: true, altKey: true });
   window.dispatchEvent(keydown);
-  keydown = new KeyboardEvent("keydown", { key: disallowRepeatKey, repeat: true });
+  keydown = new KeyboardEvent("keydown", { key: disallowRepeatKey, repeat: true, altKey: true });
   window.dispatchEvent(keydown);
-  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey, repeat: true });
+  keydown = new KeyboardEvent("keydown", { key: defaultBehaviourKey, repeat: true, altKey: true });
   window.dispatchEvent(keydown);
   await nextTick();
 
-  assert.verifySteps([
-    allowRepeatKey,
-  ]);
+  assert.verifySteps([allowRepeatKey]);
 });
 
-QUnit.test("[aria-keyshortcuts] never allow repeat", async (assert) => {
+QUnit.test("[data-hotkey] never allow repeat", async (assert) => {
   assert.expect(3);
   const key = "a";
   class TestComponent extends Component {
@@ -230,17 +271,17 @@ QUnit.test("[aria-keyshortcuts] never allow repeat", async (assert) => {
       assert.step(key);
     }
   }
-  TestComponent.template = xml`<div><button t-on-click="onClick" aria-keyshortcuts="${key}"/></div>`;
+  TestComponent.template = xml`<div><button t-on-click="onClick" data-hotkey="${key}"/></div>`;
 
   const comp = await mount(TestComponent, { env, target });
 
-  let keydown = new KeyboardEvent("keydown", { key });
+  let keydown = new KeyboardEvent("keydown", { key, altKey: true });
   window.dispatchEvent(keydown);
   await nextTick();
 
   assert.verifySteps([key]);
 
-  keydown = new KeyboardEvent("keydown", { key, repeat: true });
+  keydown = new KeyboardEvent("keydown", { key, repeat: true, altKey: true });
   window.dispatchEvent(keydown);
   await nextTick();
 
@@ -286,10 +327,10 @@ QUnit.test("component can register many hotkeys", async (assert) => {
   class MyComponent extends Component {
     setup() {
       for (const hotkey of ["a", "b", "c"]) {
-        useHotkey(hotkey, () => assert.step(`callback:${hotkey}`))
+        useHotkey(hotkey, () => assert.step(`callback:${hotkey}`));
       }
       for (const hotkey of ["d", "e", "f"]) {
-        useHotkey(hotkey, () => assert.step(`callback2:${hotkey}`))
+        useHotkey(hotkey, () => assert.step(`callback2:${hotkey}`));
       }
     }
     onClick() {
@@ -298,17 +339,17 @@ QUnit.test("component can register many hotkeys", async (assert) => {
   }
   MyComponent.template = xml`
     <div>
-      <button t-on-click="onClick" aria-keyshortcuts="b" />
+      <button t-on-click="onClick" data-hotkey="b" />
     </div>
   `;
 
   const comp = await mount(MyComponent, { env, target });
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "c" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "d" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "e" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "f" }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "c", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "d", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "e", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "f", altKey: true }));
   await nextTick();
 
   assert.verifySteps([
@@ -332,7 +373,7 @@ QUnit.test("many components can register same hotkeys", async (assert) => {
   class MyComponent1 extends Component {
     setup() {
       for (const hotkey of hotkeys) {
-        useHotkey(hotkey, () => result.push(`comp1:${hotkey}`))
+        useHotkey(hotkey, () => result.push(`comp1:${hotkey}`));
       }
     }
     onClick() {
@@ -341,14 +382,14 @@ QUnit.test("many components can register same hotkeys", async (assert) => {
   }
   MyComponent1.template = xml`
     <div>
-      <button t-on-click="onClick" aria-keyshortcuts="b" />
+      <button t-on-click="onClick" data-hotkey="b" />
     </div>
   `;
 
   class MyComponent2 extends Component {
     setup() {
       for (const hotkey of hotkeys) {
-        useHotkey(hotkey, () => result.push(`comp2:${hotkey}`))
+        useHotkey(hotkey, () => result.push(`comp2:${hotkey}`));
       }
     }
     onClick() {
@@ -357,15 +398,15 @@ QUnit.test("many components can register same hotkeys", async (assert) => {
   }
   MyComponent2.template = xml`
     <div>
-      <button t-on-click="onClick" aria-keyshortcuts="b" />
+      <button t-on-click="onClick" data-hotkey="b" />
     </div>
   `;
 
   const comp1 = await mount(MyComponent1, { env, target });
   const comp2 = await mount(MyComponent2, { env, target });
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "c" }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "c", altKey: true }));
   await nextTick();
 
   assert.deepEqual(result.sort(), [
@@ -389,10 +430,10 @@ QUnit.test("registrations and elements belong to the correct UI owner", async (a
       useHotkey("a", () => assert.step("MyComponent1 subscription"));
     }
     onClick() {
-      assert.step("MyComponent1 [aria-keyshortcuts]");
+      assert.step("MyComponent1 [data-hotkey]");
     }
   }
-  MyComponent1.template = xml`<div><button aria-keyshortcuts="b" t-on-click="onClick()"/></div>`;
+  MyComponent1.template = xml`<div><button data-hotkey="b" t-on-click="onClick()"/></div>`;
 
   class MyComponent2 extends Component {
     setup() {
@@ -400,33 +441,33 @@ QUnit.test("registrations and elements belong to the correct UI owner", async (a
       useActiveElement();
     }
     onClick() {
-      assert.step("MyComponent2 [aria-keyshortcuts]");
+      assert.step("MyComponent2 [data-hotkey]");
     }
   }
-  MyComponent2.template = xml`<div><button aria-keyshortcuts="b" t-on-click="onClick()"/></div>`;
+  MyComponent2.template = xml`<div><button data-hotkey="b" t-on-click="onClick()"/></div>`;
 
   const comp1 = await mount(MyComponent1, { env, target });
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b", altKey: true }));
   await nextTick();
 
   const comp2 = await mount(MyComponent2, { env, target });
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b", altKey: true }));
   await nextTick();
 
   comp2.unmount();
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "a", altKey: true }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "b", altKey: true }));
   await nextTick();
 
   assert.verifySteps([
     "MyComponent1 subscription",
-    "MyComponent1 [aria-keyshortcuts]",
+    "MyComponent1 [data-hotkey]",
     "MyComponent2 subscription",
-    "MyComponent2 [aria-keyshortcuts]",
+    "MyComponent2 [data-hotkey]",
     "MyComponent1 subscription",
-    "MyComponent1 [aria-keyshortcuts]",
+    "MyComponent1 [data-hotkey]",
   ]);
 
   comp1.destroy();

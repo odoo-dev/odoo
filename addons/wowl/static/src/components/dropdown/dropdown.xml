@@ -7,7 +7,7 @@
       t-on-click="onTogglerClick"
       t-on-mouseenter="onTogglerMouseEnter"
       t-att-title="props.title"
-      t-att-aria-keyshortcuts="props.hotkey">
+      t-att-data-hotkey="props.hotkey">
       <span>
         <t t-slot="default" />
       </span>

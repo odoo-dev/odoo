@@ -10,7 +10,7 @@ The `ui` service offers miscellaneous UI features:
 
 - active element management.
   The default UI active element is the `document` element, but the `ui` service
-  lets anyone become  the UI active element. It is useful e.g. for dialogs.
+  lets anyone become the UI active element. It is useful e.g. for dialogs.
 - block or unblock the UI.
   When the ui will be blocked, a loading screen blocking any action will cover the UI.
 
@@ -19,6 +19,7 @@ The `ui` service offers miscellaneous UI features:
 The `ui` service provides the following API:
 
 - `bus: EventBus`: a bus, on which are triggered
+
   - `active-element-changed (activeElement: DOMElement)` when the UI active element has changed.
 
 - `block(): void`: this method will activate the loading screen to block the ui.
@@ -52,6 +53,7 @@ If the `block()` method is called several times simultaneously, the same number 
 Due to the way components are mounted by the Owl engine (from the bottom to the top), you should be aware that if nested components try to all become the UI active element, only the topmost of them will be.
 
 E.g.:
+
 ```js
 class A extends Component {
   setup() {
@@ -59,7 +61,7 @@ class A extends Component {
   }
 }
 A.components = { B };
-A.template = xml`<div id="a"><B/></div>`
+A.template = xml`<div id="a"><B/></div>`;
 
 class B extends Component {
   setup() {
@@ -76,13 +78,14 @@ B.template = xml`<div id="b"/>`;
 ## Example: active element management
 
 ### Listen to active element changes
+
 ```js
 class MyComponent extends Component {
   setup() {
     const ui = useService("ui");
     this.myActiveElement = ui.activeElement;
     useBus(ui.bus, "active-element-changed", (activeElement) => {
-      if(activeElement !== this.myActiveElement) {
+      if (activeElement !== this.myActiveElement) {
         // do some stuff, like changing my state or keeping myActiveElement in sync...
       }
     });
@@ -91,6 +94,7 @@ class MyComponent extends Component {
 ```
 
 ### With `useActiveElement` hook
+
 Here is how one component could change the active element of the UI
 
 ```js
@@ -102,6 +106,7 @@ class MyComponent extends Component {
 ```
 
 ### With `useActiveElement` hook: ref delegation
+
 Here is how one component could change the active element of the UI
 
 ```js
@@ -119,6 +124,7 @@ MyComponent.template = owl.tags.xml`
 ```
 
 ### Manually
+
 Here is how one component could change the active element of the UI
 
 ```js

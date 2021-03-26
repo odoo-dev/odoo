@@ -7,7 +7,7 @@ import { debugService } from "../../src/debug/debug_service";
 import { ormService } from "../../src/services/orm_service";
 import { useDebugManager } from "../../src/debug/debug_manager";
 import { click, getFixture, makeTestEnv } from "../helpers/index";
-import { hotkeyService } from "../../src/services/hotkey_service";
+import { hotkeyService } from "../../src/hotkey/hotkey_service";
 import { uiService } from "../../src/services/ui_service";
 
 const { Component, hooks, mount, tags } = owl;

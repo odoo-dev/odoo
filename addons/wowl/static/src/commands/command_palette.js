@@ -1,12 +1,12 @@
 /** @odoo-module **/
 import { useAutofocus } from "../core/hooks";
-import { useHotkey } from "../services/hotkey_service";
+import { useHotkey } from "../hotkey/hotkey_hook";
 import { scrollTo } from "../utils/scrolling";
 const { Component, hooks } = owl;
 const { onPatched, useState } = hooks;
 
 /**
- * @typedef {import("./command_service").Command} Command 
+ * @typedef {import("./command_service").Command} Command
  */
 
 /**
@@ -17,11 +17,12 @@ const { onPatched, useState } = hooks;
  * @returns an array filter predicate
  */
 function commandsWithinCategory(categoryName) {
-  return cmd => {
+  return (cmd) => {
     const inCurrentCategory = categoryName === cmd.category;
-    const fallbackCategory = categoryName === "default" && !odoo.commandCategoryRegistry.contains(cmd.category);
+    const fallbackCategory =
+      categoryName === "default" && !odoo.commandCategoryRegistry.contains(cmd.category);
     return inCurrentCategory || fallbackCategory;
-  }
+  };
 }
 
 export class CommandPalette extends Component {
@@ -52,23 +53,35 @@ export class CommandPalette extends Component {
       const command = listbox.querySelector(`#o_command_${index}`);
       scrollTo(command, listbox);
     });
-    useHotkey("Enter", () => {
-      this.executeSelectedCommand();
-    }, { allowInEditable: true });
-    useHotkey("ArrowUp", () => {
-      this.mouseSelectionActive = false;
-      const index = this.state.commands.indexOf(this.state.selectedCommand);
-      if (index > 0) {
-        this.selectCommand(index - 1);
-      }
-    }, { allowInEditable: true, allowRepeat: true });
-    useHotkey("ArrowDown", () => {
-      this.mouseSelectionActive = false;
-      const index = this.state.commands.indexOf(this.state.selectedCommand);
-      if (index < this.state.commands.length - 1) {
-        this.selectCommand(index + 1);
-      }
-    }, { allowInEditable: true, allowRepeat: true });
+    useHotkey(
+      "Enter",
+      () => {
+        this.executeSelectedCommand();
+      },
+      { altIsOptional: true }
+    );
+    useHotkey(
+      "ArrowUp",
+      () => {
+        this.mouseSelectionActive = false;
+        const index = this.state.commands.indexOf(this.state.selectedCommand);
+        if (index > 0) {
+          this.selectCommand(index - 1);
+        }
+      },
+      { altIsOptional: true, allowRepeat: true }
+    );
+    useHotkey(
+      "ArrowDown",
+      () => {
+        this.mouseSelectionActive = false;
+        const index = this.state.commands.indexOf(this.state.selectedCommand);
+        if (index < this.state.commands.length - 1) {
+          this.selectCommand(index + 1);
+        }
+      },
+      { altIsOptional: true, allowRepeat: true }
+    );
   }
 
   get categories() {
