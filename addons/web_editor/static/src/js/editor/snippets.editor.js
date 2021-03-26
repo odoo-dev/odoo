@@ -1038,13 +1038,15 @@ function checkEditorToolbarVisibility (doc, e) {
     if ($currentSelectionTarget.parents('#toolbar').length ||
         (e && $(e.target).parents('#toolbar').length)
     ) {
-        $toolbarContainer.hide();
         return false;
     }
 
     const selection = doc.getSelection();
     const range = selection.rangeCount && selection.getRangeAt(0);
-    if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
+    if (!range ||
+        !$(range.commonAncestorContainer).parents('#wrapwrap').length ||
+        $(range.commonAncestorContainer).parent('[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"])').length
+    ) {
         $toolbarContainer.hide();
         return false;
     } else {
@@ -2985,6 +2987,7 @@ var SnippetsMenu = Widget.extend({
         $customizeBlock.append($title);
         $customizeBlock.append(this.options.wysiwyg.toolbar.$el);
         $(this.customizePanel).append($customizeBlock);
+        checkEditorToolbarVisibility(this.options.wysiwyg.odooEditor.document);
     },
     /**
      * On click on discard button.
