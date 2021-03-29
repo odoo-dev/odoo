@@ -48,7 +48,7 @@ function addMedia(position = "right") {
 
 function changeBackground(snippet, position = "bottom") {
     return {
-        trigger: ".o_we_customize_panel .o_we_edit_image",
+        trigger: ".o_we_customize_panel .o_we_bg_success",
         content: _t("<b>Customize</b> any block through this menu. Try to change the background image of this block."),
         position: position,
         run: "click",
