@@ -37,6 +37,7 @@
         <xpath expr="//script[@src='/web/static/src/js/chrome/user_menu.js']" position="replace"/>
         <xpath expr="//script[@src='/web/static/src/js/chrome/web_client.js']" position="replace"/>
         <xpath expr="//script[@src='/web/static/src/js/services/crash_manager_service.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/widgets/switch_company_menu.js']" position="replace"/>
         <xpath expr="//script[@src='/web/static/src/js/tools/test_menus_loader.js']" position="replace"/>
 
 

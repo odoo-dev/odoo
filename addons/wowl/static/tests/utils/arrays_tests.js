@@ -2,13 +2,16 @@
 
 import { groupBy, sortBy } from "../../src/utils/arrays";
 
-QUnit.module("utils", {}, () => {
+QUnit.module("utils", () => {
   QUnit.module("Arrays");
 
   QUnit.test("groupBy parameter validations", function (assert) {
     // Safari: TypeError: undefined is not a function
     // Other navigator: array is not iterable
-    assert.throws(() => groupBy({}), /array is not iterable|TypeError: undefined is not a function/);
+    assert.throws(
+      () => groupBy({}),
+      /array is not iterable|TypeError: undefined is not a function/
+    );
     assert.throws(
       () => groupBy([], true),
       /Expected criterion of type 'string' or 'function' and got 'boolean'/

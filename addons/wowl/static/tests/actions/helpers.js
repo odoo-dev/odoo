@@ -196,6 +196,7 @@ export function getActionManagerTestConfig() {
   const actionsArray = [
     {
       id: 1,
+      xml_id: "action_1",
       name: "Partners Action 1",
       res_model: "partner",
       type: "ir.actions.act_window",
@@ -203,10 +204,12 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 2,
+      xml_id: "action_2",
       type: "ir.actions.server",
     },
     {
       id: 3,
+      xml_id: "action_3",
       name: "Partners",
       res_model: "partner",
       type: "ir.actions.act_window",
@@ -218,6 +221,7 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 4,
+      xml_id: "action_4",
       name: "Partners Action 4",
       res_model: "partner",
       type: "ir.actions.act_window",
@@ -229,6 +233,7 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 5,
+      xml_id: "action_5",
       name: "Create a Partner",
       res_model: "partner",
       target: "new",
@@ -237,6 +242,7 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 6,
+      xml_id: "action_6",
       name: "Partner",
       res_id: 2,
       res_model: "partner",
@@ -246,6 +252,7 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 7,
+      xml_id: "action_7",
       name: "Some Report",
       report_name: "some_report",
       report_type: "qweb-pdf",
@@ -253,6 +260,7 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 8,
+      xml_id: "action_8",
       name: "Favorite Ponies",
       res_model: "pony",
       type: "ir.actions.act_window",
@@ -263,6 +271,7 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 9,
+      xml_id: "action_9",
       name: "A Client Action",
       tag: "ClientAction",
       type: "ir.actions.client",
@@ -273,6 +282,7 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 11,
+      xml_id: "action_11",
       name: "Another Report",
       report_name: "another_report",
       report_type: "qweb-pdf",
@@ -281,6 +291,7 @@ export function getActionManagerTestConfig() {
     },
     {
       id: 12,
+      xml_id: "action_12",
       name: "Some HTML Report",
       report_name: "some_report",
       report_type: "qweb-html",

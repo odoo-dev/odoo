@@ -75,9 +75,9 @@ QUnit.test("can parse URI encoded strings", (assert) => {
 QUnit.test("routeToUrl encodes URI compatible strings", (assert) => {
   const route = { pathname: "/asf", search: {}, hash: {} };
   assert.strictEqual(routeToUrl(route), "/asf");
-  route.search = { a: "11", f: undefined, g: "summer wine" };
+  route.search = { a: "11", g: "summer wine" };
   assert.strictEqual(routeToUrl(route), "/asf?a=11&g=summer%20wine");
-  route.hash = { b: "2", c: "", d: undefined, e: "kloug,gloubi" };
+  route.hash = { b: "2", c: "", e: "kloug,gloubi" };
   assert.strictEqual(routeToUrl(route), "/asf?a=11&g=summer%20wine#b=2&c&e=kloug%2Cgloubi");
 });
 
@@ -113,3 +113,9 @@ QUnit.test("can redirect an URL", async (assert) => {
   assert.verifySteps(["1000", "250", "/my/test/url/2"]);
   unpatch(browser, "test.location");
 });
+
+// TODO: test
+//  - push/replaceState requests occuring in the same tick are aggregated
+//  - we don't push twice the same url (different key orders)
+//  - undefined keys are not pushed in the url
+//  - lock stuff

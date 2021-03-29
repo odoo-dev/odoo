@@ -8,7 +8,7 @@ import { defaultLocalization } from "../helpers/mocks";
 
 const { DateTime, Settings } = luxon;
 
-QUnit.module("utils", {}, () => {
+QUnit.module("utils", () => {
   QUnit.module("dates");
 
   QUnit.test("formatDateTime", async (assert) => {

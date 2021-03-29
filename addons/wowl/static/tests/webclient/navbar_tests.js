@@ -100,11 +100,11 @@ QUnit.test("data-menu-xmlid attribute on AppsMenu items", async (assert) => {
   // check menus
   env.services.menu.setCurrentMenu(1);
   await nextTick();
-  assert.containsOnce(navbar, '.o_menu_sections .o_dropdown_item[data-menu-xmlid=menu_3]');
+  assert.containsOnce(navbar, ".o_menu_sections .o_dropdown_item[data-menu-xmlid=menu_3]");
 
   // check sub menus
-  await click(navbar.el.querySelector('.o_menu_sections .o_dropdown_toggler'));
-  assert.containsOnce(navbar, '.o_menu_sections .o_dropdown_item[data-menu-xmlid=menu_5]');
+  await click(navbar.el.querySelector(".o_menu_sections .o_dropdown_toggler"));
+  assert.containsOnce(navbar, ".o_menu_sections .o_dropdown_item[data-menu-xmlid=menu_5]");
 
   navbar.destroy();
 });

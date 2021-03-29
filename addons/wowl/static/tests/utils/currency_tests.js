@@ -5,7 +5,7 @@ import { patch, unpatch } from "../../src/utils/patch";
 import { localization } from "../../src/localization/localization_settings";
 import { defaultLocalization } from "../helpers/mocks";
 
-QUnit.module("utils", {}, () => {
+QUnit.module("utils", () => {
   QUnit.module("Currency");
 
   QUnit.test("format", async (assert) => {

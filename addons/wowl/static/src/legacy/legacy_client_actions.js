@@ -28,7 +28,7 @@ function registerClientAction(name, action) {
         this.widget = this.props.state && this.props.state.__legacy_widget__;
         this.onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
         const { scrollTo } = useSetupAction({
-          beforeLeave: () => this.controllerRef.comp.widget.canBeRemoved(),
+          beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
           export: () => this.controllerRef.comp.exportState(),
         });
         this.onScrollTo = (ev) => {
@@ -43,6 +43,7 @@ function registerClientAction(name, action) {
     `;
     Action.components = { ClientActionAdapter };
     Action.isLegacy = true;
+    Action.forceFullscreen = action.prototype.forceFullscreen;
     actionRegistry.add(name, Action);
   } else {
     // the action is either a Component or a function, register it directly

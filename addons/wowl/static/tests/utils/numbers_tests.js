@@ -5,7 +5,7 @@ import { humanNumber, formatFloat, parseFloat } from "../../src/utils/numbers";
 import { patch, unpatch } from "../../src/utils/patch";
 import { defaultLocalization } from "../helpers/mocks";
 
-QUnit.module("utils", {}, () => {
+QUnit.module("utils", () => {
   QUnit.module("numbers");
 
   QUnit.test("humanNumber", async (assert) => {

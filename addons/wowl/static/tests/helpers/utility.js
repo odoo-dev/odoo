@@ -146,10 +146,13 @@ export async function nextTick() {
 
 export function makeDeferred() {
   let resolve;
-  let prom = new Promise((_r) => {
-    resolve = _r;
+  let reject;
+  let prom = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
   });
   prom.resolve = resolve;
+  prom.reject = reject;
   return prom;
 }
 
@@ -167,7 +170,7 @@ export function click(el, selector) {
     }
     target = els[0];
   }
-  const ev = new MouseEvent("click", { bubbles: true });
+  const ev = new MouseEvent("click", { bubbles: true, cancelable: true });
   target.dispatchEvent(ev);
   return nextTick();
 }

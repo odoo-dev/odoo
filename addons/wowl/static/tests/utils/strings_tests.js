@@ -2,7 +2,7 @@
 
 import { escapeRegExp, intersperse, sprintf } from "../../src/utils/strings";
 
-QUnit.module("utils", {}, () => {
+QUnit.module("utils", () => {
   QUnit.module("strings");
 
   QUnit.test("escapeRegExp", (assert) => {

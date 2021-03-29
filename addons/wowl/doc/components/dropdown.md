@@ -82,13 +82,14 @@ Doing so, **_when one sibling dropdown is open_**, the others will **_automatica
 
 #### `<Dropdown/>` props
 
-| Prop name      | Default Value | Value type | Description                                          |
-| -------------- | ------------- | ---------- | ---------------------------------------------------- |
-| `startOpen`    | `false`       | boolean    | initial dropdown open state                          |
-| `menuClass`    | /             | string     | could be used to style the dropdown menu `<ul/>`     |
-| `togglerClass` | /             | string     | could be used to style the toggler `<button/>`       |
-| `hotkey`       | /             | string     | could be used to toggle the opening through keyboard |
-| `beforeOpen`   | /             | function   | hook to execute logic just before opening            |
+| Prop name      | Default Value | Value type | Description                                                     |
+| -------------- | ------------- | ---------- | --------------------------------------------------------------- |
+| `startOpen`    | `false`       | boolean    | initial dropdown open state                                     |
+| `menuClass`    | /             | string     | could be used to style the dropdown menu `<ul/>`                |
+| `togglerClass` | /             | string     | could be used to style the toggler `<button/>`                  |
+| `hotkey`       | /             | string     | could be used to toggle the opening through keyboard            |
+| `beforeOpen`   | /             | function   | hook to execute logic just before opening                       |
+| `manualOnly`   | `false`       | boolean    | if true, only toggle the dropdown when the button is clicked on |
 
 #### `<DropdownItem/>` props
 

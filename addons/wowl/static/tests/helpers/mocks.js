@@ -1,13 +1,14 @@
 /** @odoo-module **/
 
 import { effectService } from "../../src/effects/effect_service";
-import { makePushState, routeToUrl } from "../../src/services/router_service";
+import { makePreProcessQuery, makePushState, routeToUrl } from "../../src/services/router_service";
 import { SIZES } from "../../src/services/ui_service";
 import { rpcService } from "../../src/services/rpc_service";
 import { localization } from "../../src/localization/localization_settings";
 import { patch, unpatch } from "../../src/utils/patch";
 import { registerCleanup } from "./cleanup";
 import { translatedTerms } from "../../src/localization/translation";
+import { computeAllowedCompanyIds, makeSetCompanies } from "../../src/services/user_service";
 
 const { Component } = owl;
 
@@ -45,24 +46,46 @@ export function makeFakeLocalizationService(config) {
  * Simulate a fake user service.
  */
 export function makeFakeUserService(values) {
-  const { uid, name, username, is_admin, user_companies, partner_id, db } = odoo.session_info;
-  const { user_context } = odoo.session_info;
+  const sessionInfo = {};
+  Object.assign(sessionInfo, odoo.session_info, values && values.session_info);
+  const { uid, name, username, is_admin, user_companies, partner_id, user_context } = sessionInfo;
   return {
     name: "user",
-    deploy() {
+    deploy(env) {
+      let allowedCompanies = computeAllowedCompanyIds();
+      const setCompanies = makeSetCompanies(() => allowedCompanies);
+      const context = {
+        ...user_context,
+        get allowed_company_ids() {
+          return allowedCompanies;
+        },
+      };
       const result = {
-        context: user_context,
+        context,
         userId: uid,
         name: name,
         userName: username,
         isAdmin: is_admin,
         partnerId: partner_id,
         allowed_companies: user_companies.allowed_companies,
-        current_company: user_companies.current_company,
+        get current_company() {
+          return user_companies.allowed_companies[allowedCompanies[0]];
+        },
         lang: user_context.lang,
         tz: "Europe/Brussels",
-        db: db,
+        get db() {
+          const res = {
+            name: sessionInfo.db,
+          };
+          if ("dbuuid" in sessionInfo) {
+            res.uuid = sessionInfo.dbuuid;
+          }
+          return res;
+        },
         showEffect: false,
+        setCompanies(mode, companyId) {
+          allowedCompanies = setCompanies(mode, companyId);
+        },
       };
       Object.assign(result, values);
       return result;
@@ -146,9 +169,11 @@ export function makeTestOdoo(config = {}) {
       username: "The wise",
       is_admin: true,
       partner_id: 7,
+      // Commit: 3e847fc8f499c96b8f2d072ab19f35e105fd7749
+      // to see what user_companies is
       user_companies: {
         allowed_companies: { 1: { id: 1, name: "Hermit" } },
-        current_company: { id: 1, name: "Hermit" },
+        current_company: 1,
       },
       db: "test",
       server_version: "1.0",
@@ -269,26 +294,39 @@ export function makeFakeRouterService(params) {
         }
         current = newRoute;
       }
+      const preProcessQuery = makePreProcessQuery(getCurrent);
       return {
         get current() {
           return getCurrent();
         },
-        pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
-        replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
+        pushState: makePushState(getCurrent, doPush.bind(null, "push"), preProcessQuery),
+        replaceState: makePushState(getCurrent, doPush.bind(null, "replace"), preProcessQuery),
         redirect: (params && params.redirect) || (() => {}),
       };
     },
   };
 }
 
-export function makeFakeUIService() {
+export function makeFakeUIService(values) {
+  const defaults = {
+    bus: new owl.core.EventBus(),
+    activateElement: () => {},
+    deactivateElement: () => {},
+    block: () => {},
+    unblock: () => {},
+    isSmall: false,
+    size: SIZES.LG,
+    SIZES,
+  };
   return {
-    deploy() {
-      return {
-        isSmall: false,
-        size: SIZES.LG,
-        SIZES,
-      };
+    deploy(env) {
+      const res = Object.assign(defaults, values);
+      Object.defineProperty(env, "isSmall", {
+        get() {
+          return res.isSmall;
+        },
+      });
+      return res;
     },
   };
 }

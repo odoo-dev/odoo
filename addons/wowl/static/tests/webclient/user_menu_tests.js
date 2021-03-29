@@ -119,7 +119,5 @@ QUnit.test("display the correct name in debug mode", async (assert) => {
   let userMenuEl = userMenu.el;
   assert.containsOnce(userMenuEl, "img.o_user_avatar");
   assert.containsOnce(userMenuEl, "span.o_user_name");
-  assert.strictEqual(userMenuEl.querySelector(".o_user_name").textContent,
-    "Sauron (test)"
-  );
+  assert.strictEqual(userMenuEl.querySelector(".o_user_name").textContent, "Sauron (test)");
 });

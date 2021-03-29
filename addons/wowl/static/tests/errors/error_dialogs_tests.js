@@ -53,9 +53,7 @@ QUnit.test("ErrorDialog with traceback", async (assert) => {
   env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(target.querySelector("header .modal-title").textContent,
-    "Odoo Error"
-  );
+  assert.strictEqual(target.querySelector("header .modal-title").textContent, "Odoo Error");
   const mainButtons = target.querySelectorAll("main button");
   assert.deepEqual(
     [...mainButtons].map((el) => el.textContent),
@@ -66,9 +64,7 @@ QUnit.test("ErrorDialog with traceback", async (assert) => {
     ["An error occurred", "Please use the copy button to report the error to your support service."]
   );
   assert.containsNone(target, "div.o_error_detail");
-  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent,
-    "Ok"
-  );
+  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent, "Ok");
   click(mainButtons[1]);
   await nextTick();
   assert.deepEqual(
@@ -84,7 +80,8 @@ QUnit.test("ErrorDialog with traceback", async (assert) => {
     ["ERROR_NAME"]
   );
   assert.containsOnce(target, "div.o_error_detail");
-  assert.strictEqual(target.querySelector("div.o_error_detail").textContent,
+  assert.strictEqual(
+    target.querySelector("div.o_error_detail").textContent,
     "This is a tracback string"
   );
 });
@@ -105,9 +102,7 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
   env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(target.querySelector("header .modal-title").textContent,
-    "Odoo Client Error"
-  );
+  assert.strictEqual(target.querySelector("header .modal-title").textContent, "Odoo Client Error");
   const mainButtons = target.querySelectorAll("main button");
   assert.deepEqual(
     [...mainButtons].map((el) => el.textContent),
@@ -118,9 +113,7 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
     ["An error occurred", "Please use the copy button to report the error to your support service."]
   );
   assert.containsNone(target, "div.o_error_detail");
-  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent,
-    "Ok"
-  );
+  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent, "Ok");
   click(mainButtons[1]);
   await nextTick();
   assert.deepEqual(
@@ -136,7 +129,8 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
     ["ERROR_NAME"]
   );
   assert.containsOnce(target, "div.o_error_detail");
-  assert.strictEqual(target.querySelector("div.o_error_detail").textContent,
+  assert.strictEqual(
+    target.querySelector("div.o_error_detail").textContent,
     "This is a traceback string"
   );
 });
@@ -189,15 +183,9 @@ QUnit.test("WarningDialog", async (assert) => {
   env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(target.querySelector("header .modal-title").textContent,
-    "User Error"
-  );
-  assert.strictEqual(target.querySelector("main").textContent,
-    "Some strange unreadable message"
-  );
-  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent,
-    "Ok"
-  );
+  assert.strictEqual(target.querySelector("header .modal-title").textContent, "User Error");
+  assert.strictEqual(target.querySelector("main").textContent, "Some strange unreadable message");
+  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent, "Ok");
 });
 
 QUnit.test("RedirectWarningDialog", async (assert) => {
@@ -230,12 +218,8 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(target.querySelector("header .modal-title").textContent,
-    "Odoo Warning"
-  );
-  assert.strictEqual(target.querySelector("main").textContent,
-    "Some strange unreadable message"
-  );
+  assert.strictEqual(target.querySelector("header .modal-title").textContent, "Odoo Warning");
+  assert.strictEqual(target.querySelector("main").textContent, "Some strange unreadable message");
   let footerButtons = target.querySelectorAll("footer button");
   assert.deepEqual(
     [...footerButtons].map((el) => el.textContent),
@@ -257,15 +241,12 @@ QUnit.test("Error504Dialog", async (assert) => {
   env = await makeTestEnv(baseConfig);
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(target.querySelector("header .modal-title").textContent,
-    "Request timeout"
-  );
-  assert.strictEqual(target.querySelector("main p").textContent,
+  assert.strictEqual(target.querySelector("header .modal-title").textContent, "Request timeout");
+  assert.strictEqual(
+    target.querySelector("main p").textContent,
     " The operation was interrupted. This usually means that the current operation is taking too much time. "
   );
-  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent,
-    "Ok"
-  );
+  assert.strictEqual(target.querySelector(".o_dialog footer button").textContent, "Ok");
 });
 
 QUnit.test("SessionExpiredDialog", async (assert) => {
@@ -284,10 +265,12 @@ QUnit.test("SessionExpiredDialog", async (assert) => {
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
-  assert.strictEqual(target.querySelector("header .modal-title").textContent,
+  assert.strictEqual(
+    target.querySelector("header .modal-title").textContent,
     "Odoo Session Expired"
   );
-  assert.strictEqual(target.querySelector("main p").textContent,
+  assert.strictEqual(
+    target.querySelector("main p").textContent,
     " Your Odoo session expired. The current page is about to be refreshed. "
   );
   const footerButton = target.querySelector(".o_dialog footer button");

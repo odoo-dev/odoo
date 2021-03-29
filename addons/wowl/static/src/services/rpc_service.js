@@ -55,7 +55,8 @@ function jsonrpc(env, rpcId, url, params, settings = {}) {
     }
     // handle success
     request.addEventListener("load", () => {
-      if (request.status === 502) { // If Odoo is behind another server (eg.: nginx)
+      if (request.status === 502) {
+        // If Odoo is behind another server (eg.: nginx)
         bus.trigger("RPC:RESPONSE", data.id);
         reject(new ConnectionLostError());
         return;

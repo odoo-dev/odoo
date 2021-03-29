@@ -10,10 +10,10 @@ The `user` service is a very simple service, that aims to just keep track of a
 few important values related to the current user. It simply provides an object
 with a few keys:
 
-- `allowed_companies ([number, string][])`: the list of companies that can be
+- `allowed_companies ({[id: number] : {id: number, name: string} })`: the list of companies that can be
   accessed by the user. Each element is a pair `id, name`
 - `context (object)`: the user main context (see below for a description)
-- `current_company ([number, string])`: the currently active company. It is a
+- `current_company ({id: number, name: string})`: the currently active company. It is a
   pair `[id, name]`.
 - `dateFormat`: preferred format when formatting "dates"
 - `decimalPoint`: decimal separator

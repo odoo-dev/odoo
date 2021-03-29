@@ -46,22 +46,16 @@ QUnit.module("Components", (hooks) => {
       ".o_dialog header .modal-title",
       "the header is rendered by default"
     );
-    assert.strictEqual(target.querySelector("header .modal-title").textContent,
-      "Wow(l) Effect"
-    );
+    assert.strictEqual(target.querySelector("header .modal-title").textContent, "Wow(l) Effect");
     assert.containsOnce(target, ".o_dialog main", "a dialog has always a main node");
-    assert.strictEqual(target.querySelector("main").textContent,
-      " Hello! "
-    );
+    assert.strictEqual(target.querySelector("main").textContent, " Hello! ");
     assert.containsOnce(target, ".o_dialog footer", "the footer is rendered by default");
     assert.containsOnce(
       target,
       ".o_dialog footer button",
       "the footer is rendered with a single button 'Ok' by default"
     );
-    assert.strictEqual(target.querySelector("footer button").textContent,
-      "Ok"
-    );
+    assert.strictEqual(target.querySelector("footer button").textContent, "Ok");
   });
 
   QUnit.test("simple rendering with two dialogs", async function (assert) {
@@ -191,9 +185,7 @@ QUnit.module("Components", (hooks) => {
     parent = await mount(Parent, { env, target });
     assert.containsOnce(target, ".o_dialog");
     assert.containsOnce(target, ".o_dialog main .o_subcomponent");
-    assert.strictEqual(target.querySelector(".o_subcomponent").textContent,
-      "Wow(l) Effect"
-    );
+    assert.strictEqual(target.querySelector(".o_subcomponent").textContent, "Wow(l) Effect");
     await click(target.querySelector(".o_subcomponent"));
     assert.verifySteps(["subcomponent-clicked", "message received by parent"]);
   });

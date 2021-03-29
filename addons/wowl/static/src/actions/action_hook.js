@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { useBus } from "../core/hooks";
+
 const { useComponent, onMounted, onWillUnmount } = owl.hooks;
 
 // -----------------------------------------------------------------------------
@@ -28,7 +30,7 @@ function getScrollPosition(component) {
  * Set top and left scroll positions to the given values. By default, the
  * scrolling area is the '.o_content' main div. In mobile, it is the body.
  */
-function setScrollPosition(component, offset) {
+export function setScrollPosition(component, offset) {
   let scrollingEl;
   if (component.env.isSmall) {
     scrollingEl = document.body;
@@ -48,15 +50,8 @@ function setScrollPosition(component, offset) {
  */
 export function useSetupAction(params) {
   const component = useComponent();
-  onMounted(() => {
-    if (component.props.state) {
-      setScrollPosition(component, component.props.state[scrollSymbol]);
-    }
-    if (params.beforeLeave && component.props.__beforeLeave__) {
-      component.props.__beforeLeave__(params.beforeLeave);
-    }
-  });
-  onWillUnmount(() => {
+
+  function exportState() {
     if (component.props.__exportState__) {
       let state = {};
       state[scrollSymbol] = getScrollPosition(component);
@@ -65,7 +60,20 @@ export function useSetupAction(params) {
       }
       component.props.__exportState__(state);
     }
+  }
+
+  onMounted(() => {
+    if (component.props.state) {
+      setScrollPosition(component, component.props.state[scrollSymbol]);
+    }
+    if (params.beforeLeave && component.props.__beforeLeave__) {
+      component.props.__beforeLeave__(params.beforeLeave);
+    }
   });
+  onWillUnmount(exportState);
+
+  useBus(component.env.bus, "ACTION_MANAGER:EXPORT_CONTROLLER_STATE", exportState);
+
   return {
     scrollTo(offset) {
       setScrollPosition(component, offset);

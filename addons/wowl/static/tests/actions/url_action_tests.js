@@ -41,14 +41,14 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("execute an 'ir.actions.act_url' action with target 'self'", async (assert) => {
     testConfig.serviceRegistry.add(
-          "router",
-          makeFakeRouterService({
-            redirect: (url) => {
-              assert.step(url);
-            },
-          }),
-          { force: true }
-        );
+      "router",
+      makeFakeRouterService({
+        redirect: (url) => {
+          assert.step(url);
+        },
+      }),
+      { force: true }
+    );
     const env = await makeTestEnv(testConfig);
     await doAction(env, {
       type: "ir.actions.act_url",

@@ -375,6 +375,8 @@ class MockServer {
         return Promise.resolve(this.mockLoadAction(args));
       case "/web/dataset/search_read":
         return Promise.resolve(this.mockSearchReadController(args));
+      case "/web/dataset/search":
+        return Promise.resolve(this.mockSearchController(args));
     }
     if (
       route.indexOf("/web/image") >= 0 ||
@@ -385,12 +387,16 @@ class MockServer {
     switch (args.method) {
       case "create":
         return Promise.resolve(this.mockCreate(args.model, args.args[0]));
+      case "fields_get":
+        return Promise.resolve(this.mockFieldsGet(args.model));
       case "load_views":
         return Promise.resolve(this.mockLoadViews(args.model, args.kwargs));
       case "onchange":
         return Promise.resolve(this.mockOnchange(args.model, args.args, args.kwargs));
       case "read":
         return Promise.resolve(this.mockRead(args.model, args.args));
+      case "search":
+        return Promise.resolve(this.mockSearch(args.model, args.args, args.kwargs));
       case "search_read":
         return Promise.resolve(this.mockSearchRead(args.model, args.args, args.kwargs));
       case "web_search_read":
@@ -784,6 +790,19 @@ class MockServer {
     };
   }
 
+  mockSearch(modelName, args, kwargs) {
+    const result = this.mockSearchController({
+      model: modelName,
+      domain: kwargs.domain || args[0],
+      fields: kwargs.fields || args[1],
+      offset: kwargs.offset || args[2],
+      limit: kwargs.limit || args[3],
+      sort: kwargs.order || args[4],
+      context: kwargs.context,
+    });
+    return result.records;
+  }
+
   mockSearchRead(modelName, args, kwargs) {
     const result = this.mockSearchReadController({
       model: modelName,
@@ -810,7 +829,7 @@ class MockServer {
     return result;
   }
 
-  mockSearchReadController(params) {
+  mockSearchController(params) {
     const model = this.models[params.model];
     let fieldNames = params.fields;
     const offset = params.offset || 0;
@@ -829,7 +848,16 @@ class MockServer {
     const nbRecords = records.length;
     records = records.slice(offset, params.limit ? offset + params.limit : nbRecords);
     return {
+      fieldNames,
       length: nbRecords,
+      records,
+    };
+  }
+
+  mockSearchReadController(params) {
+    const { fieldNames, length, records } = this.mockSearchController(params);
+    return {
+      length,
       records: this.mockRead(params.model, [records.map((r) => r.id), fieldNames]),
     };
   }

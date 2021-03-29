@@ -25,6 +25,13 @@ export class ViewNotFoundError extends Error {
   }
 }
 
+export class ControllerNotFoundError extends Error {
+  constructor() {
+    super(...arguments);
+    this.name = "ControllerNotFoundError";
+  }
+}
+
 // -----------------------------------------------------------------------------
 // ActionManager (Service)
 // -----------------------------------------------------------------------------
@@ -36,8 +43,12 @@ function makeActionManager(env) {
   const keepLast = new KeepLast();
   let id = 0;
   let controllerStack = [];
-  let dialogCloseProm = undefined;
-  const actionCache = {};
+  let dialogCloseProm;
+  let actionCache = {};
+
+  env.bus.on("CLEAR-CACHES", null, () => {
+    actionCache = {};
+  });
 
   // ---------------------------------------------------------------------------
   // misc
@@ -74,7 +85,7 @@ function makeActionManager(env) {
           },
         });
       }
-      action = await keepLast.add(actionCache[key]);
+      action = actionCache[key];
     } else {
       // actionRequest is an object describing the action
       action = actionRequest;
@@ -97,11 +108,18 @@ function makeActionManager(env) {
     action = JSON.parse(originalAction); // manipulate a deep copy
     action._originalAction = originalAction;
     action.jsId = jsId;
-    if (action.type === "ir.actions.act_window") {
-      action.controllers = {};
-    }
     if (action.type === "ir.actions.act_window" || action.type === "ir.actions.client") {
       action.target = action.target || "current";
+    }
+    if (action.type === "ir.actions.act_window") {
+      action.controllers = {};
+      const target = action.target;
+      if (target !== "inline" && !(target === "new" && action.views[0][1] === "form")) {
+        // FIXME: search view arch is already sent with load_action, so either remove it
+        // from there or load all fieldviews alongside the action for the sake of consistency
+        const searchViewId = action.search_view_id ? action.search_view_id[0] : false;
+        action.views.push([searchViewId, "search"]);
+      }
     }
     return action;
   }
@@ -194,6 +212,46 @@ function makeActionManager(env) {
   }
 
   /**
+   * Computes the position of the controller in the nextStack according to options
+   * @param {Object} options
+   * @param {boolean} [options.clearBreadcrumbs=false]
+   * @param {'replaceLast' | 'replaceLastAction'} [options.stackPosition]
+   * @param {number} [options.index]
+   */
+  function _computeStackIndex(options) {
+    let index = null;
+    if (options.clearBreadcrumbs) {
+      index = 0;
+    } else if (options.stackPosition === "replaceCurrentAction") {
+      const currentController = controllerStack[controllerStack.length - 1];
+      if (currentController) {
+        index = controllerStack.findIndex((ct) => ct.action.jsId === currentController.action.jsId);
+      }
+    } else if (options.stackPosition === "replacePreviousAction") {
+      let last;
+      for (let i = controllerStack.length - 1; i >= 0; i--) {
+        const action = controllerStack[i].action.jsId;
+        if (!last) {
+          last = action;
+        }
+        if (action !== last) {
+          last = action;
+          break;
+        }
+      }
+      if (last) {
+        index = controllerStack.findIndex((ct) => ct.action.jsId === last);
+      }
+      // TODO: throw if there is no previous action?
+    } else if ("index" in options) {
+      index = options.index;
+    } else {
+      index = controllerStack.length;
+    }
+    return index;
+  }
+
+  /**
    * Triggers a re-rendering with respect to the given controller.
    *
    * @private
@@ -213,8 +271,7 @@ function makeActionManager(env) {
     const action = controller.action;
 
     class ControllerComponent extends Component {
-      constructor() {
-        super(...arguments);
+      setup() {
         this.Component = controller.Component;
         this.componentProps = this.props;
         this.componentRef = hooks.useRef("component");
@@ -236,6 +293,10 @@ function makeActionManager(env) {
       catchError(error) {
         // The above component should truely handle the error
         reject(error);
+        // Re-throw in case it is a programming error
+        if (error && error.name) {
+          throw error;
+        }
       }
       mounted() {
         let mode;
@@ -326,14 +387,7 @@ function makeActionManager(env) {
       });
       return currentActionProm;
     }
-    let index = null;
-    if (options.clearBreadcrumbs) {
-      index = 0;
-    } else if ("index" in options) {
-      index = options.index;
-    } else {
-      index = controllerStack.length + 1;
-    }
+    const index = _computeStackIndex(options);
     const controllerArray = [controller];
     if (options.lazyController) {
       controllerArray.unshift(options.lazyController);
@@ -400,15 +454,10 @@ function makeActionManager(env) {
     if (!views.length) {
       throw new Error(`No view found for act_window action ${action.id}`);
     }
-    const target = action.target;
-    if (target !== "inline" && !(target === "new" && action.views[0][1] === "form")) {
-      // FIXME: search view arch is already sent with load_action, so either remove it
-      // from there or load all fieldviews alongside the action for the sake of consistency
-      const searchViewId = action.search_view_id ? action.search_view_id[0] : false;
-      action.views.push([searchViewId, "search"]);
-    }
+
     let view = options.viewType && views.find((v) => v.type === options.viewType);
     let lazyController;
+
     if (view && !view.multiRecord) {
       const lazyView = views[0].multiRecord ? views[0] : undefined;
       if (lazyView) {
@@ -437,10 +486,12 @@ function makeActionManager(env) {
       props: _getViewProps(view, action, views, viewOptions),
     };
     action.controllers[view.type] = controller;
+
     return _updateUI(controller, {
       clearBreadcrumbs: options.clearBreadcrumbs,
       lazyController,
       onClose: options.onClose,
+      stackPosition: options.stackPosition,
     });
   }
 
@@ -458,6 +509,9 @@ function makeActionManager(env) {
   async function _executeClientAction(action, options) {
     const clientAction = odoo.actionRegistry.get(action.tag);
     if (clientAction.prototype instanceof Component) {
+      if (action.target !== "new" && clientAction.forceFullscreen) {
+        action.target = "fullscreen";
+      }
       const controller = {
         jsId: `controller_${++id}`,
         Component: clientAction,
@@ -466,6 +520,7 @@ function makeActionManager(env) {
       };
       return _updateUI(controller, {
         clearBreadcrumbs: options.clearBreadcrumbs,
+        stackPosition: options.stackPosition,
         onClose: options.onClose,
       });
     } else {
@@ -655,7 +710,8 @@ function makeActionManager(env) {
    * @returns {Promise<void>}
    */
   async function doAction(actionRequest, options = {}) {
-    let action = await _loadAction(actionRequest, options.additionalContext);
+    const actionProm = _loadAction(actionRequest, options.additionalContext);
+    let action = await keepLast.add(actionProm);
     action = _preprocessAction(action, options.additionalContext);
     switch (action.type) {
       case "ir.actions.act_url":
@@ -724,7 +780,7 @@ function makeActionManager(env) {
       context.active_id = params.recordId || null;
       context.active_ids = params.recordIds;
       context.active_model = params.model;
-      action = await _loadAction(params.name, context);
+      action = await keepLast.add(_loadAction(params.name, context));
     }
     // filter out context keys that are specific to the current action, because:
     //  - wrong default_* and search_default_* values won't give the expected result
@@ -798,14 +854,21 @@ function makeActionManager(env) {
 
   /**
    * Restores a controller from the controller stack given its id. Typically,
-   * this function is called when clicking on the breadcrumbs.
+   * this function is called when clicking on the breadcrumbs. If no id is given
+   * restores the previous controller from the stack (penultimate).
    *
    * @param {string} jsId
    */
   async function restore(jsId) {
-    const index = controllerStack.findIndex((controller) => controller.jsId === jsId);
+    let index;
+    if (!jsId) {
+      index = controllerStack.length - 2;
+    } else {
+      index = controllerStack.findIndex((controller) => controller.jsId === jsId);
+    }
     if (index < 0) {
-      throw new Error("invalid controller to restore");
+      const msg = jsId ? "Invalid controller to restore" : "No controller to restore";
+      throw new ControllerNotFoundError(msg);
     }
     const controller = controllerStack[index];
     if (controller.action.type === "ir.actions.act_window") {
@@ -936,6 +999,14 @@ function makeActionManager(env) {
     switchView,
     restore,
     loadState,
+    async loadAction(actionRequest, context) {
+      let action = await _loadAction(actionRequest, context);
+      return _preprocessAction(action, context);
+    },
+    get currentController() {
+      const stack = controllerStack;
+      return stack.length ? stack[stack.length - 1] : null;
+    },
   };
 }
 
