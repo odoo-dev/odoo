@@ -15,7 +15,7 @@ export async function deployServices(env) {
   const toDeploy = new Set();
   let timeoutId;
   odoo.serviceRegistry.on("UPDATE", null, async (payload) => {
-    const { operation, value } = payload;
+    const { operation, key: name, value: service } = payload;
     if (operation === "delete") {
       // We hardly see why it would be usefull to remove a service.
       // Furthermore we could encounter problems with dependencies.
@@ -23,7 +23,8 @@ export async function deployServices(env) {
       return;
     }
     if (toDeploy.size) {
-      toDeploy.add(value);
+      const namedService = Object.assign(Object.create(service), { name });
+      toDeploy.add(namedService);
     } else {
       timeoutId = await _deployServices(env, toDeploy, timeoutId);
     }
