@@ -478,37 +478,36 @@ QUnit.module("Components", (hooks) => {
   );
 
   QUnit.test("siblings dropdowns with manualOnly props", async (assert) => {
-      assert.expect(7);
-      class Parent extends owl.Component {}
-      Parent.template = owl.tags.xml`
+    assert.expect(7);
+    class Parent extends owl.Component {}
+    Parent.template = owl.tags.xml`
         <div>
           <Dropdown class="one" manualOnly="true"/>
           <Dropdown class="two" manualOnly="true"/>
           <div class="outside">OUTSIDE</div>
         </div>
       `;
-      parent = await mount(Parent, { env, target });
-      // Click on one
-      await click(parent.el, ".one button");
-      assert.containsOnce(parent.el, "ul.o_dropdown_menu");
-      // Click on two
-      await click(parent.el, ".two button");
-      assert.containsN(parent.el, "ul.o_dropdown_menu", 2);
-      // Click on one again
-      await click(parent.el, ".one button");
-      assert.containsOnce(parent.el, "ul.o_dropdown_menu");
-      assert.containsNone(parent.el.querySelector(".one"), "ul.o_dropdown_menu");
-      // Hover on one
-      const one = parent.el.querySelector(".one");
-      one.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
-      await nextTick();
-      assert.containsOnce(parent.el, "ul.o_dropdown_menu");
-      assert.containsNone(parent.el.querySelector(".one"), "ul.o_dropdown_menu");
-      // Click outside
-      await click(parent.el, "div.outside");
-      assert.containsOnce(parent.el, "ul.o_dropdown_menu");
-    }
-  );
+    parent = await mount(Parent, { env, target });
+    // Click on one
+    await click(parent.el, ".one button");
+    assert.containsOnce(parent.el, "ul.o_dropdown_menu");
+    // Click on two
+    await click(parent.el, ".two button");
+    assert.containsN(parent.el, "ul.o_dropdown_menu", 2);
+    // Click on one again
+    await click(parent.el, ".one button");
+    assert.containsOnce(parent.el, "ul.o_dropdown_menu");
+    assert.containsNone(parent.el.querySelector(".one"), "ul.o_dropdown_menu");
+    // Hover on one
+    const one = parent.el.querySelector(".one");
+    one.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
+    await nextTick();
+    assert.containsOnce(parent.el, "ul.o_dropdown_menu");
+    assert.containsNone(parent.el.querySelector(".one"), "ul.o_dropdown_menu");
+    // Click outside
+    await click(parent.el, "div.outside");
+    assert.containsOnce(parent.el, "ul.o_dropdown_menu");
+  });
 
   QUnit.test("dropdowns keynav", async (assert) => {
     assert.expect(20);

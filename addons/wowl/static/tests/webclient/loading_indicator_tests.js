@@ -138,10 +138,6 @@ QUnit.test("loading indicator blocks UI", async (assert) => {
   await nextTick();
   env.bus.trigger("RPC:RESPONSE", 1);
   await nextTick();
-  assert.verifySteps([
-    "set timeout 3000",
-    "block",
-    "unblock"
-  ]);
+  assert.verifySteps(["set timeout 3000", "block", "unblock"]);
   unpatch(originalBrowser, "mock.settimeout");
 });
