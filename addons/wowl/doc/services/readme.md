@@ -28,6 +28,7 @@ available to the interface (and to other services).
 | [`menus`](menus.md)                         | keep track of all menu items (app and submenus)            |
 | [`model`](model.md)                         | interact with (python) models                              |
 | [`notifications`](notifications.md)         | display a notification (or error)                          |
+| [`popover`](popover.md)                     | add/remove popover                                         |
 | [`router`](router.md)                       | manage the url                                             |
 | [`rpc`](rpc.md)                             | perform a RPC (in other word, call the server)             |
 | [`title`](title.md)                         | allow to read/modify the document title                    |

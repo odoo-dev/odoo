@@ -8,6 +8,7 @@ import { dialogService } from "../../src/services/dialog_service";
 import { hotkeyService } from "../../src/services/hotkey_service";
 import { menuService } from "../../src/services/menu_service";
 import { ormService } from "../../src/services/orm_service";
+import { popoverService } from "../../src/services/popover_service";
 import { uiService } from "../../src/services/ui_service";
 import { viewService } from "../../src/views/view_service";
 import { viewRegistry } from "../../src/views/view_registry";
@@ -65,7 +66,8 @@ export function makeTestServiceRegistry() {
     .add("title", fakeTitleService)
     .add("ui", uiService)
     .add("effect", effectService)
-    .add("hotkey", hotkeyService);
+    .add("hotkey", hotkeyService)
+    .add("popover", popoverService);
   return testServiceRegistry;
 }
 
