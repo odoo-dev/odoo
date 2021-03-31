@@ -20,17 +20,18 @@ export class DialogContainer extends Component {
     this.dialogs = useState({});
     this.dialogId = 1;
     const { bus } = useService("dialog");
-    bus.on("UPDATE", this, (dialogClass, props) => {
-      this.addDialog(dialogClass, props);
+    bus.on("UPDATE", this, (dialogClass, props, options) => {
+      this.addDialog(dialogClass, props, options);
     });
   }
 
-  addDialog(dialogClass, props) {
+  addDialog(dialogClass, props, options) {
     const id = this.dialogId++;
     this.dialogs[id] = {
       id,
       class: dialogClass,
       props,
+      options,
     };
   }
 
@@ -39,6 +40,9 @@ export class DialogContainer extends Component {
   }
 
   _doCloseDialog(id) {
+    if (this.dialogs[id].options && this.dialogs[id].options.onCloseCallback) {
+      this.dialogs[id].options.onCloseCallback();
+    }
     delete this.dialogs[id];
   }
 
@@ -60,8 +64,8 @@ mainComponentRegistry.add("DialogContainer", DialogContainer);
 export const dialogService = {
   deploy(env) {
     const bus = new EventBus();
-    function open(dialogClass, props) {
-      bus.trigger("UPDATE", dialogClass, props);
+    function open(dialogClass, props, options) {
+      bus.trigger("UPDATE", dialogClass, props, options);
     }
     return { open, bus };
   },
