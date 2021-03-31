@@ -1,7 +1,7 @@
 /** @odoo-module **/
 import { useBus } from "../../core/hooks";
 import { useService } from "../../core/hooks";
-import { scrollTo } from "../../utils/scroll_to";
+import { scrollTo } from "../../utils/scrolling";
 import { ParentClosingMode } from "./dropdown_item";
 
 const { Component, core, hooks, useState, QWeb } = owl;

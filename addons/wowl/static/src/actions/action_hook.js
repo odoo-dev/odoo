@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { useBus } from "../core/hooks";
+import { getScrollPosition, setScrollPosition } from "../utils/scrolling";
 
 const { useComponent, onMounted, onWillUnmount } = owl.hooks;
 
@@ -8,40 +9,6 @@ const { useComponent, onMounted, onWillUnmount } = owl.hooks;
 // Action hook
 // -----------------------------------------------------------------------------
 const scrollSymbol = Symbol("scroll");
-
-/**
- * Retrieve the current top and left scroll position. By default, the scrolling
- * area is the '.o_content' main div. In mobile, it is the body.
- */
-function getScrollPosition(component) {
-  let scrollingEl;
-  if (component.env.isSmall) {
-    scrollingEl = document.body;
-  } else {
-    scrollingEl = component.el.querySelector(".o_action_manager .o_content");
-  }
-  return {
-    left: scrollingEl ? scrollingEl.scrollLeft : 0,
-    top: scrollingEl ? scrollingEl.scrollTop : 0,
-  };
-}
-
-/**
- * Set top and left scroll positions to the given values. By default, the
- * scrolling area is the '.o_content' main div. In mobile, it is the body.
- */
-export function setScrollPosition(component, offset) {
-  let scrollingEl;
-  if (component.env.isSmall) {
-    scrollingEl = document.body;
-  } else {
-    scrollingEl = component.el.querySelector(".o_action_manager .o_content");
-  }
-  if (scrollingEl) {
-    scrollingEl.scrollLeft = offset.left || 0;
-    scrollingEl.scrollTop = offset.top || 0;
-  }
-}
 
 /**
  * This hooks should be used by Action Components (client actions or views). It
@@ -73,10 +40,4 @@ export function useSetupAction(params) {
   onWillUnmount(exportState);
 
   useBus(component.env.bus, "ACTION_MANAGER:EXPORT_CONTROLLER_STATE", exportState);
-
-  return {
-    scrollTo(offset) {
-      setScrollPosition(component, offset);
-    },
-  };
 }

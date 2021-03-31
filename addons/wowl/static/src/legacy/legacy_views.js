@@ -8,6 +8,7 @@ import legacyViewRegistry from "web.view_registry";
 import { ViewAdapter } from "./action_adapters";
 import Widget from "web.Widget";
 import { breadcrumbsToLegacy } from "./utils";
+import { setScrollPosition } from "../utils/scrolling";
 
 function getJsClassWidget(fieldsInfo) {
   const parsedXML = new DOMParser().parseFromString(fieldsInfo.arch, "text/xml");
@@ -44,12 +45,12 @@ function registerView(name, LegacyView) {
       };
       this.widget = this.props.state && this.props.state.__legacy_widget__;
       this.onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
-      const { scrollTo } = useSetupAction({
+      useSetupAction({
         beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
         export: () => this.controllerRef.comp.exportState(),
       });
       this.onScrollTo = (ev) => {
-        scrollTo({ left: ev.detail.left, top: ev.detail.top });
+        setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });
       };
     }
 

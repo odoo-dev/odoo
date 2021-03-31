@@ -6,6 +6,7 @@ import { ClientActionAdapter } from "./action_adapters";
 import Widget from "web.Widget";
 import { breadcrumbsToLegacy } from "./utils";
 import { useSetupAction } from "../actions/action_hook";
+import { setScrollPosition } from "../utils/scrolling";
 
 const { Component, hooks, tags } = owl;
 
@@ -27,12 +28,12 @@ function registerClientAction(name, action) {
         ];
         this.widget = this.props.state && this.props.state.__legacy_widget__;
         this.onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
-        const { scrollTo } = useSetupAction({
+        useSetupAction({
           beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
           export: () => this.controllerRef.comp.exportState(),
         });
         this.onScrollTo = (ev) => {
-          scrollTo({ left: ev.detail.left, top: ev.detail.top });
+          setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });
         };
       }
     }
