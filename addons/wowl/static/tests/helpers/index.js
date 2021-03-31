@@ -78,4 +78,5 @@ export {
   makeTestEnv,
   nextTick,
   patchDate,
+  triggerEvent,
 } from "./utility";

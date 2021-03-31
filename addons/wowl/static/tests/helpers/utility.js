@@ -156,23 +156,29 @@ export function makeDeferred() {
   return prom;
 }
 
-export function click(el, selector) {
+function findElement(el, selector) {
   let target = el;
   if (selector) {
     const els = el.querySelectorAll(selector);
     if (els.length === 0) {
-      throw new Error(`Found no element to click on (selector: ${selector})`);
+      throw new Error(`No element found (selector: ${selector})`);
     }
     if (els.length > 1) {
-      throw new Error(
-        `Found ${els.length} elements to click on, instead of 1 (selector: ${selector})`
-      );
+      throw new Error(`Found ${els.length} elements, instead of 1 (selector: ${selector})`);
     }
     target = els[0];
   }
-  const ev = new MouseEvent("click", { bubbles: true, cancelable: true });
-  target.dispatchEvent(ev);
+  return target;
+}
+
+export function triggerEvent(el, selector, eventType, eventAttrs) {
+  const target = findElement(el, selector);
+  target.dispatchEvent(new Event(eventType, eventAttrs));
   return nextTick();
+}
+
+export function click(el, selector) {
+  return triggerEvent(el, selector, "click", { bubbles: true, cancelable: true });
 }
 
 // -----------------------------------------------------------------------------
