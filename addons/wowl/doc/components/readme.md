@@ -6,4 +6,5 @@ This section regroups links to the components that aim to be useful throughout t
 
 - [Dialog](dialog.md)
 - [Dropdown](dropdown.md)
+- [Popover](popover.md)
 - ...
