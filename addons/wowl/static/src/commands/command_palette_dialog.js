@@ -10,14 +10,14 @@ const { useExternalListener, onWillUnmount, useRef } = hooks;
 export class CommandPaletteDialog extends Component {
   setup() {
     this.dialogRef = useRef("dialogRef");
-    useExternalListener(window, "click", this.onWindowClicked);
+    useExternalListener(window, "mousedown", this.onWindowMouseDown);
     onWillUnmount(this.props.close);
   }
 
   /**
    * Used to close ourself on outside click.
    */
-  onWindowClicked(ev) {
+  onWindowMouseDown(ev) {
     const element = ev.target.parentElement;
     const gotClickedInside = this.dialogRef.comp.modalRef.el.contains(element);
     if (!gotClickedInside) {

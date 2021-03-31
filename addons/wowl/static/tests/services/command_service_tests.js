@@ -56,7 +56,8 @@ QUnit.test("palette dialog can be rendered and closed on outside click", async (
   assert.containsOnce(target, ".o_command_palette");
 
   // Close on outside click
-  await click(window);
+  window.dispatchEvent(new MouseEvent("mousedown"));
+  await nextTick();
   assert.containsNone(target, ".o_command_palette");
 });
 
