@@ -266,7 +266,7 @@ export function evaluate(ast, context = {}) {
           // this is a dictionary => need to apply dict methods
           return DICT[ast.key](left);
         }
-        if (left instanceof Date) {
+        if (left instanceof PyDate || left instanceof PyDateTime) {
           const result = left[ast.key];
           return typeof result === "function" ? result.bind(left) : result;
         }

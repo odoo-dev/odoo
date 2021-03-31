@@ -761,6 +761,7 @@ QUnit.module("py", {}, () => {
       const d0 = new Date();
       const result = evaluateExpr(expr);
       const d1 = new Date();
+      debugger;
       return fn(d0) <= result && result <= fn(d1);
     }
     const format = (n) => String(n).padStart(2, "0");
@@ -786,7 +787,6 @@ QUnit.module("py", {}, () => {
     QUnit.module("datetime.datetime");
 
     QUnit.test("datetime.datetime.now", (assert) => {
-      console.log(evaluateExpr("datetime.datetime.now().month"));
       assert.ok(check("datetime.datetime.now().year", (d) => d.getUTCFullYear()));
       assert.ok(check("datetime.datetime.now().month", (d) => d.getUTCMonth() + 1));
       assert.ok(check("datetime.datetime.now().day", (d) => d.getUTCDate()));
@@ -810,6 +810,7 @@ QUnit.module("py", {}, () => {
         "datetime.datetime.combine(context_today(), datetime.time(23,59,59)).strftime('%Y-%m-%d %H:%M:%S')";
       assert.ok(
         check(expr, (d) => {
+          debugger;
           return formatDate(d) + " 23:59:59";
         })
       );

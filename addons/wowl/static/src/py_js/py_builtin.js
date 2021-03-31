@@ -23,20 +23,20 @@ export const BUILTINS = {
 
   time: {
     strftime(format) {
-      return new PyDateTime().strftime(format);
+      return PyDateTime.now().strftime(format);
     },
   },
 
   context_today() {
-    return new PyDate();
+    return PyDate.today();
   },
 
   get today() {
-    return new PyDate().strftime("%Y-%m-%d");
+    return PyDate.today().strftime("%Y-%m-%d");
   },
 
   get now() {
-    return new PyDateTime().strftime("%Y-%m-%d %H:%M:%S");
+    return PyDateTime.now().strftime("%Y-%m-%d %H:%M:%S");
   },
 
   datetime: {
