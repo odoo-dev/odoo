@@ -55,13 +55,16 @@ export const commandService = {
       }
 
       // Open palette dialog
-      dialog.open(CommandPaletteDialog, {
-        commands,
-        close: () => {
-          isPaletteOpened = false;
-        },
-      });
       isPaletteOpened = true;
+      dialog.open(
+        CommandPaletteDialog,
+        { commands },
+        {
+          onCloseCallback: () => {
+            isPaletteOpened = false;
+          },
+        }
+      );
     }
 
     /**

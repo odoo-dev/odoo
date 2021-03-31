@@ -1,7 +1,7 @@
 /** @odoo-module **/
 import { CommandPalette } from "./command_palette";
 const { Component, hooks } = owl;
-const { useExternalListener, onWillUnmount, useRef } = hooks;
+const { useExternalListener, useRef } = hooks;
 
 /**
  * @typedef {import("./command_service").Command} Command
@@ -11,7 +11,6 @@ export class CommandPaletteDialog extends Component {
   setup() {
     this.dialogRef = useRef("dialogRef");
     useExternalListener(window, "mousedown", this.onWindowMouseDown);
-    onWillUnmount(this.props.close);
   }
 
   /**
