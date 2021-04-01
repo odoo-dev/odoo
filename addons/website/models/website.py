@@ -1343,6 +1343,7 @@ class Website(models.Model):
         return {
             'user_id': self.user_id.id,
             'company_id': self.company_id.id,
+            'homepage_id': self.homepage_id.id,
             'default_lang_id': self.default_lang_id.id,
         }
 

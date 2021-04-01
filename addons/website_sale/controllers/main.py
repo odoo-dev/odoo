@@ -155,13 +155,16 @@ class WebsiteSale(http.Controller):
 
     def _get_pricelist_context(self):
         pricelist_context = dict(request.env.context)
+        Pricelist = request.env['product.pricelist']
         pricelist = False
-        if not pricelist_context.get('pricelist'):
+        if pricelist_context.get('pricelist'):
+            pricelist = Pricelist.browse(pricelist_context['pricelist'])
+        elif 'website_sale_current_pl' in request.session:
+            pricelist = Pricelist.browse(request.session['website_sale_current_pl'])
+        if not pricelist:
             pricelist = request.website.get_current_pricelist()
-            pricelist_context['pricelist'] = pricelist.id
-        else:
-            pricelist = request.env['product.pricelist'].browse(pricelist_context['pricelist'])
-
+        pricelist_context['pricelist'] = pricelist.id
+        request.session['website_sale_current_pl'] = pricelist.id
         return pricelist_context, pricelist
 
     def _get_search_order(self, post):
@@ -257,11 +260,11 @@ class WebsiteSale(http.Controller):
         attributes_ids = {v[0] for v in attrib_values}
         attrib_set = {v[1] for v in attrib_values}
 
-        keep = QueryURL('/shop', category=category and int(category), search=search, attrib=attrib_list, min_price=min_price, max_price=max_price, order=post.get('order'))
+        keep = tools.lazy(lambda: QueryURL('/shop', category=category and int(category), search=search, attrib=attrib_list, min_price=min_price, max_price=max_price, order=post.get('order')))
 
         pricelist_context, pricelist = self._get_pricelist_context()
 
-        request.context = dict(request.context, pricelist=pricelist.id, partner=request.env.user.partner_id)
+        request.context = dict(pricelist_context, partner=tools.lazy(lambda: request.env.user.partner_id))
 
         filter_by_price_enabled = request.website.is_view_active('website_sale.filter_products_price')
         if filter_by_price_enabled:
@@ -325,16 +328,12 @@ class WebsiteSale(http.Controller):
                     post['max_price'] = max_price
 
         website_domain = request.website.website_domain()
-        categs_domain = [('parent_id', '=', False)] + website_domain
-        if search:
-            search_categories = Category.search([('product_tmpl_ids', 'in', search_product.ids)] + website_domain).parents_and_self
-            categs_domain.append(('id', 'in', search_categories.ids))
-        else:
-            search_categories = Category
-        categs = Category.search(categs_domain)
+        search_categories = tools.lazy(lambda: Category.search([('product_tmpl_ids', 'in', search_product.ids)] + website_domain).parents_and_self) if search else Category
+        categs_domain = tools.lazy(lambda: [('parent_id', '=', False)] + website_domain + ([('id', 'in', search_categories.ids)] if search else []))
+        categs = tools.lazy(lambda: Category.search(categs_domain))
 
         if category:
-            url = "/shop/category/%s" % slug(category)
+            url = tools.lazy(lambda: "/shop/category/%s" % slug(category))
 
         pager = request.website.pager(url=url, total=product_count, page=page, step=ppg, scope=7, url_args=post)
         offset = pager['offset']
@@ -350,12 +349,9 @@ class WebsiteSale(http.Controller):
         else:
             attributes = ProductAttribute.browse(attributes_ids)
 
+        if 'website_sale_shop_layout_mode' not in request.session:
+            request.session['website_sale_shop_layout_mode'] = 'list' if request.website.viewref('website_sale.products_list_view').active else 'grid'
         layout_mode = request.session.get('website_sale_shop_layout_mode')
-        if not layout_mode:
-            if request.website.viewref('website_sale.products_list_view').active:
-                layout_mode = 'list'
-            else:
-                layout_mode = 'grid'
 
         values = {
             'search': fuzzy_search_term or search,
@@ -363,19 +359,22 @@ class WebsiteSale(http.Controller):
             'category': category,
             'attrib_values': attrib_values,
             'attrib_set': attrib_set,
+            'page': page,
             'pager': pager,
             'pricelist': pricelist,
             'add_qty': add_qty,
             'products': products,
             'search_count': product_count,  # common for all searchbox
-            'bins': TableCompute().process(products, ppg, ppr),
+            'bins': tools.lazy(lambda: TableCompute().process(products, ppg, ppr)),
             'ppg': ppg,
             'ppr': ppr,
             'categories': categs,
             'attributes': attributes,
             'keep': keep,
-            'search_categories_ids': search_categories.ids,
+            'search_categories_ids': tools.lazy(lambda: search_categories.ids),
             'layout_mode': layout_mode,
+            'cache_key_products_item': lambda product: (product, pricelist, page),
+            'cache_key_pricelist_list': lambda product: (pricelist),
         }
         if filter_by_price_enabled:
             values['min_price'] = min_price or available_min_price
@@ -398,45 +397,44 @@ class WebsiteSale(http.Controller):
     def _prepare_product_values(self, product, category, search, **kwargs):
         add_qty = int(kwargs.get('add_qty', 1))
 
-        product_context = dict(request.env.context, quantity=add_qty,
-                               active_id=product.id,
-                               partner=request.env.user.partner_id)
-        ProductCategory = request.env['product.public.category']
+        # pricelist in context
+        pricelist_context, pricelist = self._get_pricelist_context()
+        request.context = dict(pricelist_context,
+                        quantity=add_qty,
+                        active_id=product.id,
+                        partner=tools.lazy(lambda: request.env.user.partner_id))
+        product = product.with_context(request.context)
 
-        if category:
-            category = ProductCategory.browse(int(category)).exists()
-
+        # attributes
         attrib_list = request.httprequest.args.getlist('attrib')
         min_price = request.params.get('min_price')
         max_price = request.params.get('max_price')
         attrib_values = [[int(x) for x in v.split("-")] for v in attrib_list if v]
         attrib_set = {v[1] for v in attrib_values}
 
-        keep = QueryURL('/shop', category=category and category.id, search=search, attrib=attrib_list, min_price=min_price, max_price=max_price)
-
-        categs = ProductCategory.search([('parent_id', '=', False)])
-
-        pricelist = request.website.get_current_pricelist()
-
-        if not product_context.get('pricelist'):
-            product_context['pricelist'] = pricelist.id
-            product = product.with_context(product_context)
+        # category and categories
+        category = category and int(category) or None
+        ProductCategory = request.env['product.public.category']
+        category_record = category and tools.lazy(lambda: ProductCategory.browse(category).exists())
+        categories = tools.lazy(lambda: ProductCategory.search([('parent_id', '=', False)]))
+        keep = QueryURL('/shop', category=category, search=search, attrib=attrib_list)
 
         # Needed to trigger the recently viewed product rpc
-        view_track = request.website.viewref("website_sale.product").track
+        view_track = tools.lazy(lambda: request.website.viewref("website_sale.product").track)
 
         return {
             'search': search,
-            'category': category,
+            'category': category_record,
             'pricelist': pricelist,
             'attrib_values': attrib_values,
             'attrib_set': attrib_set,
             'keep': keep,
-            'categories': categs,
+            'categories': categories,
             'main_object': product,
             'product': product,
             'add_qty': add_qty,
             'view_track': view_track,
+            'cache_key_products_item': lambda product: (product, pricelist, kwargs.get('order'), kwargs.get('page')),
         }
 
     @http.route(['/shop/change_pricelist/<model("product.pricelist"):pl_id>'], type='http', auth="public", website=True, sitemap=False)

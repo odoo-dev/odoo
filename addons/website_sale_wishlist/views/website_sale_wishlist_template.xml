@@ -40,7 +40,7 @@
 
     <template id="template_header_default" inherit_id="website_sale.template_header_default">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item mr-lg-3'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -50,7 +50,7 @@
 
     <template id="template_header_hamburger" inherit_id="website_sale.template_header_hamburger">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_text" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -60,7 +60,7 @@
 
     <template id="template_header_vertical" inherit_id="website_sale.template_header_vertical">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item ml-lg-3'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -70,7 +70,7 @@
 
     <template id="template_header_sidebar" inherit_id="website_sale.template_header_sidebar">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_text" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item'"/>
@@ -81,7 +81,7 @@
 
     <template id="template_header_slogan" inherit_id="website_sale.template_header_slogan">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item ml-lg-3'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -91,7 +91,7 @@
 
     <template id="template_header_contact" inherit_id="website_sale.template_header_contact">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item ml-lg-3'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -101,7 +101,7 @@
 
     <template id="template_header_boxed" inherit_id="website_sale.template_header_boxed">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_text" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item ml-lg-3'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -111,7 +111,7 @@
 
     <template id="template_header_centered_logo" inherit_id="website_sale.template_header_centered_logo">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item ml-1'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -121,7 +121,7 @@
 
     <template id="template_header_image" inherit_id="website_sale.template_header_image">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item ml-lg-2'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -131,7 +131,7 @@
 
     <template id="template_header_hamburger_full" inherit_id="website_sale.template_header_hamburger_full">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item ml-lg-2'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>
@@ -141,7 +141,7 @@
 
     <template id="template_header_magazine" inherit_id="website_sale.template_header_magazine">
         <xpath expr="//t[@t-call='website_sale.header_cart_link']" position="after">
-            <t t-call="website_sale_wishlist.header_wishlist_link">
+            <t t-cache="None" t-call="website_sale_wishlist.header_wishlist_link">
                 <t t-set="_text" t-value="True"/>
                 <t t-set="_item_class" t-value="'nav-item'"/>
                 <t t-set="_link_class" t-value="'nav-link'"/>

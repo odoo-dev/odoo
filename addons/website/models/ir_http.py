@@ -227,7 +227,9 @@ class Http(models.AbstractModel):
         # If the company of the website is not in the allowed companies of the user, set the main
         # company of the user.
         website_company_id = request.website._get_cached('company_id')
-        if website_company_id in request.env.user.company_ids.ids:
+        if request.env.user.id == request.website._get_cached('user_id'):
+            context['allowed_company_ids'] = [website_company_id]
+        elif website_company_id in request.env.user.company_ids.ids:
             context['allowed_company_ids'] = [website_company_id]
         else:
             context['allowed_company_ids'] = request.env.user.company_id.ids
@@ -260,13 +262,15 @@ class Http(models.AbstractModel):
         return mods + [mod for mod in installed if mod.startswith('website')]
 
     @classmethod
-    def _serve_page(cls):
+    def _serve_page(cls, page=None):
         req_page = request.httprequest.path
-        page_domain = [('url', '=', req_page)] + request.website.website_domain()
 
-        published_domain = page_domain
-        # specific page first
-        page = request.env['website.page'].sudo().search(published_domain, order='website_id asc', limit=1)
+        if not page:
+            page_domain = [('url', '=', req_page)] + request.website.website_domain()
+
+            published_domain = page_domain
+            # specific page first
+            page = request.env['website.page'].sudo().search(published_domain, order='website_id asc', limit=1)
 
         # redirect withtout trailing /
         if not page and req_page != "/" and req_page.endswith("/"):
@@ -278,47 +282,12 @@ class Http(models.AbstractModel):
                 path += '?' + request.httprequest.query_string.decode('utf-8')
             return request.redirect(path, code=301)
 
-        if page:
-            # prefetch all menus (it will prefetch website.page too)
-            request.website.menu_id
-
         if page and (request.website.is_publisher() or page.is_visible):
-            need_to_cache = False
-            cache_key = page._get_cache_key(request)
-            if (
-                page.cache_time  # cache > 0
-                and request.httprequest.method == "GET"
-                and request.env.user._is_public()    # only cache for unlogged user
-                and 'nocache' not in request.params  # allow bypass cache / debug
-                and not request.session.debug
-                and len(cache_key) and cache_key[-1] is not None  # nocache via expr
-            ):
-                need_to_cache = True
-                try:
-                    r = page._get_cache_response(cache_key)
-                    if r['time'] + page.cache_time > time.time():
-                        response = odoo.http.Response(r['content'], mimetype=r['contenttype'])
-                        response._cached_template = r['template']
-                        response._cached_page = page
-                        return response
-                except KeyError:
-                    pass
-
             _, ext = os.path.splitext(req_page)
-            response = request.render(page.view_id.id, {
+            return request.render(page.view_id.id, {
                 'deletable': True,
                 'main_object': page,
             }, mimetype=_guess_mimetype(ext))
-
-            if need_to_cache and response.status_code == 200:
-                r = response.render()
-                page._set_cache_response(cache_key, {
-                    'content': r,
-                    'contenttype': response.headers['Content-Type'],
-                    'time': time.time(),
-                    'template': getattr(response, 'qcontext', {}).get('response_template')
-                })
-            return response
         return False
 
     @classmethod

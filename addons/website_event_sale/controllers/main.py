@@ -12,7 +12,12 @@ class WebsiteEventSaleController(WebsiteEventController):
     def event_register(self, event, **post):
         event = event.with_context(pricelist=request.website.id)
         if not request.context.get('pricelist'):
-            pricelist = request.website.get_current_pricelist()
+            pricelist = None
+            if 'website_sale_current_pl' in request.session:
+                pricelist = request.env['product.pricelist'].browse(request.session['website_sale_current_pl'])
+            if not pricelist:
+                pricelist = request.website.get_current_pricelist()
+                request.session['website_sale_current_pl'] = pricelist.id
             if pricelist:
                 event = event.with_context(pricelist=pricelist.id)
         return super(WebsiteEventSaleController, self).event_register(event, **post)

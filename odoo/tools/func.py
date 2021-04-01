@@ -140,6 +140,10 @@ class lazy(object):
             object.__setattr__(self, '_cached_value', value)
         return self._cached_value
 
+    @property
+    def __class__(self):
+        return self._value.__class__
+
     def __getattr__(self, name): return getattr(self._value, name)
     def __setattr__(self, name, value): return setattr(self._value, name, value)
     def __delattr__(self, name): return delattr(self._value, name)

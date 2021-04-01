@@ -26,7 +26,7 @@ from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError, AccessError
 from odoo.http import request
 from odoo.modules.module import get_resource_from_path, get_resource_path
-from odoo.tools import config, ConstantMapping, get_diff, pycompat, apply_inheritance_specs, locate_node
+from odoo.tools import config, ConstantMapping, get_diff, pycompat, apply_inheritance_specs, locate_node, lazy
 from odoo.tools.convert import _fix_multiple_roots
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools import safe_eval, lazy_property, frozendict
@@ -1982,9 +1982,10 @@ actual arch.
             to render website layout template)
         """
         qcontext = dict(
+            user_id=lazy(lambda: self.env["res.users"].browse(self.env.user.id)),
+            res_company=lazy(self.env.company.sudo),
+            xmlid=lazy(lambda: self.sudo().key),
             env=self.env,
-            user_id=self.env["res.users"].browse(self.env.user.id),
-            res_company=self.env.company.sudo(),
             keep_query=keep_query,
             request=request,  # might be unbound if we're not in an httprequest context
             debug=request.session.debug if request else '',
@@ -1994,7 +1995,6 @@ actual arch.
             time=safe_eval.time,
             datetime=safe_eval.datetime,
             relativedelta=relativedelta,
-            xmlid=self.sudo().key,
             viewid=self.id,
             to_text=pycompat.to_text,
             image_data_uri=image_data_uri,

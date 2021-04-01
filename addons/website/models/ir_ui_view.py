@@ -12,6 +12,7 @@ from odoo.addons import website
 from odoo.exceptions import AccessError
 from odoo.osv import expression
 from odoo.http import request
+from odoo.tools import lazy
 
 _logger = logging.getLogger(__name__)
 
@@ -104,14 +105,6 @@ class View(models.Model):
                 view.with_context(no_cow=True).key = 'website.key_%s' % str(uuid.uuid4())[:6]
 
             pages = view.page_ids
-
-            # Disable cache of page if we guess some dynamic content (form with csrf, ...)
-            if vals.get('arch'):
-                to_invalidate = pages.filtered(
-                    lambda p: p.cache_time and not p._can_be_cached(vals['arch'])
-                )
-                to_invalidate and _logger.info('Disable cache for page %s', to_invalidate)
-                to_invalidate.cache_time = 0
 
             # No need of COW if the view is already specific
             if view.website_id:
@@ -460,14 +453,14 @@ class View(models.Model):
                     for comp in self.env.user.company_ids if comp != cur_company
                 ]
 
-            qcontext.update(dict(
+            qcontext.update(
                 main_object=self,
                 website=request.website,
                 is_view_active=request.website.is_view_active,
-                res_company=request.website.company_id.sudo(),
+                res_company=lazy(request.website.company_id.sudo),
                 translatable=translatable,
                 editable=editable,
-            ))
+            )
 
         return qcontext
 
