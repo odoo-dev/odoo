@@ -6,8 +6,12 @@ import { parseArgs } from "./py_utils";
 // helpers
 // -----------------------------------------------------------------------------
 
-const fmt2 = (n) => String(n).padStart(2, "0");
-const fmt4 = (n) => String(n).padStart(4, "0");
+function fmt2(n) {
+  return String(n).padStart(2, "0");
+}
+function fmt4(n) { 
+  return String(n).padStart(4, "0");
+}
 
 /**
  * computes (Math.floor(a/b), a%b and passes that to the callback.
@@ -33,47 +37,47 @@ function assert(bool) {
 const DAYS_IN_MONTH = [null, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const DAYS_BEFORE_MONTH = [null];
 
-for (var dbm = 0, i = 1; i < DAYS_IN_MONTH.length; ++i) {
+for (let dbm = 0, i = 1; i < DAYS_IN_MONTH.length; ++i) {
   DAYS_BEFORE_MONTH.push(dbm);
   dbm += DAYS_IN_MONTH[i];
 }
 
-function days_in_month(year, month) {
-  if (month === 2 && is_leap(year)) {
+function daysInMonth(year, month) {
+  if (month === 2 && isLeap(year)) {
     return 29;
   }
   return DAYS_IN_MONTH[month];
 }
 
-function is_leap(year) {
+function isLeap(year) {
   return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 }
 
-function days_before_year(year) {
-  var y = year - 1;
+function daysBeforeYear(year) {
+  const y = year - 1;
   return y * 365 + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400);
 }
 
-function days_before_month(year, month) {
-  var post_leap_feb = month > 2 && is_leap(year);
-  return DAYS_BEFORE_MONTH[month] + (post_leap_feb ? 1 : 0);
+function daysBeforeMonth(year, month) {
+  const postLeapFeb = month > 2 && isLeap(year);
+  return DAYS_BEFORE_MONTH[month] + (postLeapFeb ? 1 : 0);
 }
 
 function ymd2ord(year, month, day) {
-  var dim = days_in_month(year, month);
+  const dim = daysInMonth(year, month);
   if (!(1 <= day && day <= dim)) {
     throw new Error("ValueError: day must be in 1.." + dim);
   }
-  return days_before_year(year) + days_before_month(year, month) + day;
+  return daysBeforeYear(year) + daysBeforeMonth(year, month) + day;
 }
 
-const DI400Y = days_before_year(401);
-const DI100Y = days_before_year(101);
-const DI4Y = days_before_year(5);
+const DI400Y = daysBeforeYear(401);
+const DI100Y = daysBeforeYear(101);
+const DI4Y = daysBeforeYear(5);
 
 function ord2ymd(n) {
   --n;
-  var n400, n100, n4, n1, n0;
+  let n400, n100, n4, n1, n0;
   divmod(n, DI400Y, function (_n400, n) {
     n400 = _n400;
     divmod(n, DI100Y, function (_n100, n) {
@@ -99,10 +103,10 @@ function ord2ymd(n) {
     };
   }
 
-  var leapyear = n1 === 3 && (n4 !== 24 || n100 == 3);
-  assert(leapyear == is_leap(year));
-  var month = (n + 50) >> 5;
-  var preceding = DAYS_BEFORE_MONTH[month] + (month > 2 && leapyear ? 1 : 0);
+  let leapyear = n1 === 3 && (n4 !== 24 || n100 == 3);
+  assert(leapyear == isLeap(year));
+  let month = (n + 50) >> 5;
+  let preceding = DAYS_BEFORE_MONTH[month] + (month > 2 && leapyear ? 1 : 0);
   if (preceding > n) {
     --month;
     preceding -= DAYS_IN_MONTH[month] + (month === 2 && leapyear ? 1 : 0);
@@ -119,7 +123,6 @@ function ord2ymd(n) {
  * Converts the stuff passed in into a valid date, applying overflows as needed
  */
 function tmxxx(year, month, day, hour, minute, second, microsecond) {
-  debugger;
   hour = hour || 0;
   minute = minute || 0;
   second = second || 0;
@@ -165,7 +168,7 @@ function tmxxx(year, month, day, hour, minute, second, microsecond) {
   // for a datetime object, but we don't care about that here).
   // If day is out of bounds, what to do is arguable, but at least the
   // method here is principled and explainable.
-  var dim = days_in_month(year, month);
+  let dim = daysInMonth(year, month);
   if (day < 1 || day > dim) {
     // Move day-1 days from the first of the month.  First try to
     // get off cheap if we're only one day out of range (adjustments
@@ -173,7 +176,7 @@ function tmxxx(year, month, day, hour, minute, second, microsecond) {
     if (day === 0) {
       --month;
       if (month > 0) {
-        day = days_in_month(year, month);
+        day = daysInMonth(year, month);
       } else {
         --year;
         month = 12;
@@ -187,8 +190,7 @@ function tmxxx(year, month, day, hour, minute, second, microsecond) {
         ++year;
       }
     } else {
-      debugger;
-      var r = ord2ymd(ymd2ord(year, month, 1) + (day - 1));
+      let r = ord2ymd(ymd2ord(year, month, 1) + (day - 1));
       year = r.year;
       month = r.month;
       day = r.day;
@@ -225,7 +227,6 @@ export class PyDate {
     this.year = year;
     this.month = month; // 1-indexed => 1 = january, 2 = february, ...
     this.day = day; // 1-indexed => 1 = first day of month, ...
-    debugger;
   }
 
   /**
