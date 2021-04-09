@@ -1,0 +1,44 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_RtcActivityNotice_indicator {
+    animation: o_indicator_pulse 2s infinite;
+}
+
+.o_RtcActivityNotice_button_content {
+    max-width: 150px;
+    align-items: center;
+    display: flex;
+}
+
+.o_RtcActivityNotice_button_title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+@keyframes o_indicator_pulse {
+    50% {
+        opacity: 1;
+    }
+    0%, 100% {
+        opacity: 0.2;
+    }
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_RtcActivityNotice {
+    cursor: pointer;
+    &:hover {
+        background-color: rgba(black, 0.1);
+    }
+}
+
+.o_RtcActivityNotice_button {
+    font-weight: bold;
+    user-select: none;
+}

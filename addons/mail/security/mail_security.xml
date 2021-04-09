@@ -82,4 +82,14 @@
             <field name="perm_unlink" eval="True"/>
         </record>
 
+        <record id="mail_user_setting_rule" model="ir.rule">
+            <field name="name">Mail User Setting Rule</field>
+            <field name="model_id" ref="model_mail_user_setting"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
 </odoo>

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.ChatWindowHeader" owl="1">
-        <div class="o_ChatWindowHeader" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClick">
+        <div class="o_ChatWindowHeader" t-att-class="{ 'o-mobile': env.messaging.device.isMobile, 'o-isActiveVoiceThread': chatWindow?.thread?.localId === env.messaging.activeCallThreadLocalId }" t-on-click="_onClick">
             <t t-if="chatWindow">
                 <t t-if="props.hasCloseAsBackButton">
                     <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandBack o_ChatWindowHeader_commandClose" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickClose" title="Close conversation">
@@ -28,6 +28,37 @@
                 </t>
                 <div class="o-autogrow"/>
                 <div class="o_ChatWindowHeader_item o_ChatWindowHeader_rightArea">
+                    <t t-if="chatWindow.thread and ['channel', 'chat'].includes(chatWindow.thread.channel_type)">
+                        <t t-if="chatWindow.thread.localId === env.messaging.activeCallThreadLocalId">
+                            <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandMicrophone" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickMicrophone" title="Mute/Unmute">
+                                <i class="fa" t-att-class="{
+                                    'fa-microphone': env.mailRtc.sendSound,
+                                    'fa-microphone-slash': !env.mailRtc.sendSound,
+                                    'text-danger': !env.mailRtc.sendSound,
+                                }"/>
+                            </div>
+                            <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandDeafen" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickDeafen" title="Deafen">
+                                <i class="fa" t-att-class="{
+                                    'fa-headphones': !env.mailRtc.isDeaf,
+                                    'fa-deaf': env.mailRtc.isDeaf,
+                                    'text-danger': env.mailRtc.isDeaf,
+                                }"/>
+                            </div>
+                            <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandCamera" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickCamera" title="Webcam">
+                                <i class="fa fa-video-camera" t-att-class="{
+                                    'text-danger': !env.mailRtc.sendUserVideo,
+                                }"/>
+                            </div>
+                            <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandScreen" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickScreen" title="Share Screen">
+                                <i class="fa fa-desktop" t-att-class="{
+                                    'text-danger': !env.mailRtc.sendDisplay,
+                                }"/>
+                            </div>
+                        </t>
+                        <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandPhone" t-att-class="{ 'o-mobile': env.messaging.device.isMobile, 'o-activeCall': chatWindow.thread.localId === env.messaging.activeCallThreadLocalId }" t-on-click="_onClickPhone" title="Call">
+                            <i class="fa fa-phone"/>
+                        </div>
+                    </t>
                     <t t-if="chatWindow.hasShiftPrev">
                         <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandShiftPrev" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickShiftPrev" t-att-title="shiftPrevText">
                             <!-- this is reversed automatically when language is rtl -->

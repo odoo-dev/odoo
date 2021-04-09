@@ -45,6 +45,12 @@ function factory(dependencies) {
             if ('id' in data) {
                 data2.id = data.id;
             }
+            if ('is_muted' in data) {
+                data2.isMuted = data.is_muted;
+            }
+            if ('peer_token' in data) {
+                data2.peerToken = data.peer_token;
+            }
             if ('im_status' in data) {
                 data2.im_status = data.im_status;
             }
@@ -441,6 +447,14 @@ function factory(dependencies) {
             return this.name || this.display_name;
         }
 
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computePeerToken() {
+            return String(this.id);
+        }
+
     }
 
     Partner.fields = {
@@ -481,7 +495,19 @@ function factory(dependencies) {
         id: attr({
             required: true,
         }),
+        peerToken: attr({
+            compute: '_computePeerToken',
+            dependencies: [
+                'id',
+            ],
+        }),
+        activeCallChannel: many2one('mail.thread', {
+            inverse: 'callParticipants',
+        }),
         im_status: attr(),
+        isMuted: attr({
+            default: false,
+        }),
         memberThreads: many2many('mail.thread', {
             inverse: 'members',
         }),

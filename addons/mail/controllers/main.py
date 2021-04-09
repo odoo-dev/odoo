@@ -271,6 +271,7 @@ class MailController(http.Controller):
             'current_partner': request.env.user.partner_id.mail_partner_format(),
             'current_user_id': request.env.user.id,
             'current_user_settings': request.env['mail.user.settings'].find_or_create_for_user(request.env.user).mail_user_settings_format(),
+            'user_settings': request.env['mail.user.setting'].mail_setting_format(),
         }
         return values
 
@@ -293,3 +294,13 @@ class MailController(http.Controller):
         except:
             return {}
         return records._message_get_suggested_recipients()
+
+    @http.route('/mail/notify_peers', type="json", auth="user")
+    def notify_peers(self, targets, content):
+        notifications = []
+        for target in targets:
+            notifications.append([
+                (request._cr.dbname, 'res.partner', int(target)),
+                {'type': 'rtc_peer_notification', 'sender': request.env.user.partner_id.id, 'content': content},
+            ])
+        return request.env['bus.bus'].sendmany(notifications)

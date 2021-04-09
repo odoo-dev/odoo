@@ -23,12 +23,19 @@ class ChatWindowHeader extends Component {
         useStore(props => {
             const chatWindow = this.env.models['mail.chat_window'].get(props.chatWindowLocalId);
             const thread = chatWindow && chatWindow.thread;
+            const mailRtc = this.env.mailRtc;
+            const messaging = this.env.messaging;
             return {
+                activeCallThreadLocalId: messaging.activeCallThreadLocalId,
                 chatWindow,
                 chatWindowHasShiftNext: chatWindow && chatWindow.hasShiftNext,
                 chatWindowHasShiftPrev: chatWindow && chatWindow.hasShiftPrev,
                 chatWindowName: chatWindow && chatWindow.name,
-                isDeviceMobile: this.env.messaging.device.isMobile,
+                isDeviceMobile: messaging.device.isMobile,
+                isDeaf: mailRtc.isDeaf,
+                sendDisplay: mailRtc.sendDisplay,
+                sendSound: mailRtc.sendSound,
+                sendUserVideo: mailRtc.sendUserVideo,
                 thread,
                 threadLocalMessageUnreadCounter: thread && thread.localMessageUnreadCounter,
                 threadMassMailing: thread && thread.mass_mailing,
@@ -97,6 +104,33 @@ class ChatWindowHeader extends Component {
             return;
         }
         this.chatWindow.close();
+    }
+
+    _onClickDeafen(ev) {
+        ev.stopPropagation();
+        this.env.mailRtc.toggleDeaf();
+    }
+
+    _onClickMicrophone(ev) {
+        ev.stopPropagation();
+        this.env.mailRtc.toggleMicrophone();
+    }
+
+    _onClickCamera(ev) {
+        ev.stopPropagation();
+        this.env.mailRtc.toggleUserVideo();
+    }
+
+    _onClickScreen(ev) {
+        ev.stopPropagation();
+        this.env.mailRtc.toggleScreenShare();
+    }
+
+    async _onClickPhone(ev) {
+        ev.stopPropagation();
+        const ringChannelTypes = new Set(['chat']);
+        const ringMembers = ringChannelTypes.has(this.chatWindow.thread.channel_type);
+        await this.env.messaging.toggleCall({ threadLocalId: this.chatWindow.thread.localId, ringMembers });
     }
 
     /**

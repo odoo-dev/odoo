@@ -84,6 +84,7 @@ function factory(dependencies) {
          * @param {Object[]} param0.public_partners
          * @param {Object[]} [param0.shortcodes=[]]
          * @param {integer} [param0.starred_counter=0]
+         * @param {integer} [param0.user_settings=[]]
          */
         async _init({
             channel_slots,
@@ -100,7 +101,8 @@ function factory(dependencies) {
             partner_root,
             public_partners,
             shortcodes = [],
-            starred_counter = 0
+            starred_counter = 0,
+            user_settings = [],
         }) {
             const discuss = this.messaging.discuss;
             // partners first because the rest of the code relies on them
@@ -124,6 +126,7 @@ function factory(dependencies) {
             // various suggestions in no particular order
             this._initCannedResponses(shortcodes);
             this._initCommands(commands);
+            this._initSettings(user_settings);
             this._initMentionPartnerSuggestions(mention_partner_suggestions);
             // channels when the rest of messaging is ready
             await this.async(() => this._initChannels(channel_slots));
@@ -313,6 +316,13 @@ function factory(dependencies) {
                     publicPartner => this.env.models['mail.partner'].convertData(publicPartner)
                 ))
             });
+        }
+
+        _initSettings(userSettings) {
+            if (!userSettings) {
+                return;
+            }
+            this.messaging.userSetting.update(this.env.models['mail.user_setting'].convertData(userSettings));
         }
 
     }

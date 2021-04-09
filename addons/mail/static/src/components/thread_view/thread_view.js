@@ -5,11 +5,12 @@ import useStore from '@mail/component_hooks/use_store/use_store';
 import useUpdate from '@mail/component_hooks/use_update/use_update';
 import Composer from '@mail/components/composer/composer';
 import MessageList from '@mail/components/message_list/message_list';
+import VideoRoom from '@mail/components/video_room/video_room';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { Composer, MessageList };
+const components = { Composer, MessageList, VideoRoom };
 
 class ThreadView extends Component {
 
@@ -127,7 +128,10 @@ class ThreadView extends Component {
         const thread = threadView ? threadView.thread : undefined;
         const threadCache = threadView ? threadView.threadCache : undefined;
         const correspondent = thread && thread.correspondent;
+        const mailRtc = this.env.mailRtc;
         return {
+            activeCallThreadLocalId: this.env.messaging.activeCallThreadLocalId,
+            activeVideoStreams: mailRtc.activeVideoStreams,
             composer: thread && thread.composer,
             correspondentId: correspondent && correspondent.id,
             isDeviceMobile: this.env.messaging.device.isMobile,

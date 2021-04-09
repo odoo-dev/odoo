@@ -228,6 +228,14 @@ function factory(dependencies) {
                     ))];
                 }
             }
+            if ('rtc_ringing_partner' in data) {
+                data2.rtcRingingPartner = [['insert', data.rtc_ringing_partner]];
+            }
+            if ('channel_call_participants' in data) {
+                data2.callParticipants = [['insert', data.channel_call_participants.map((id) => {
+                    return { id };
+                })]];
+            }
             if ('seen_partners_info' in data) {
                 if (!data.seen_partners_info) {
                     data2.partnerSeenInfos = unlinkAll();
@@ -755,6 +763,100 @@ function factory(dependencies) {
             this.fetchAndUpdateSuggestedRecipients();
         }
 
+        async inviteThreadMembers() {
+            if (this.model !== 'mail.channel') {
+                return;
+            }
+            await this.async(() => this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'invite_members_to_rtc',
+                args: [[this.id]],
+            }));
+        }
+
+        /**
+         * @returns {Object} [param0]
+         * @returns {boolean} [param0.ringMembers] true if we send invitations to thread members
+         */
+        async joinCall({ ringMembers } = {}) {
+            if (this.model !== 'mail.channel') {
+                return;
+            }
+            if (!this.env.mailRtc.isClientRtcCompatible) {
+                this.env.services['notification'].notify({
+                    message: this.env._t("Your browser does not support webRTC."),
+                    type: 'warning',
+                });
+                return;
+            }
+            /**
+             * TODO other tabs should be logged out of the room we are joining.
+             */
+            const { callParticipants, iceServers } = await this.async(() => this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'join_call',
+                args: [[this.id]],
+            }));
+            this.updateCallParticipants(callParticipants);
+            this.update({ rtcRingingPartner: [['unlink']] });
+            await this.async(() => this.env.mailRtc.initSession({
+                callees: this.callParticipants,
+                sessionToken: this.uuid,
+                iceServers,
+                onSessionEnd: async () => {
+                    await this._leaveCall();
+                },
+            }));
+            await this.open();
+            if (callParticipants.length > 1) {
+                // we do not ring if the call is already populated
+                return;
+            }
+            if (!ringMembers) {
+                return;
+            }
+            await this.async(() => this.inviteThreadMembers());
+        }
+
+        async leaveCall() {
+            if (this.model !== 'mail.channel') {
+                return;
+            }
+            if (this.env.mailRtc.sessionToken === this.uuid) {
+                await this.async(() => this.env.mailRtc.disconnectSession());
+            } else {
+                // since the onSessionEnd callback already calls this._leaveCall(), it is only necessary to call it
+                // if the session is not disconnected.
+                await this.async(() => this._leaveCall());
+            }
+        }
+
+        async fetchCallParticipants() {
+            if (this.model !== 'mail.channel') {
+                return;
+            }
+            if (this.localId === this.env.messaging.activeCallThreadLocalId) {
+                /**
+                 * There is no need to fetch the call participants of the active call thread
+                 * since they are already updated through the bus.
+                 */
+                return;
+            }
+            const callParticipants = await this.async(() => this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'get_call_participants_data',
+                args: [[this.id]],
+            }));
+            this.updateCallParticipants(callParticipants);
+        }
+
+        updateCallParticipants(callParticipants) {
+            this.update({ callParticipants: [
+                ['insert-and-replace', callParticipants.map(record => this.env.models['mail.partner'].convertData(record))],
+            ]});
+            this.env.mailRtc.filterCallees(this.callParticipants, { sessionToken: this.uuid });
+        }
+
         /**
          * Returns the text that identifies this thread in a mention.
          *
@@ -1130,6 +1232,7 @@ function factory(dependencies) {
          * Unsubscribe current user from provided channel.
          */
         unsubscribe() {
+            this._leaveCall();
             this.env.messaging.chatWindowManager.closeThread(this);
             this.unpin();
         }
@@ -1137,6 +1240,17 @@ function factory(dependencies) {
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
+
+        async _leaveCall() {
+            this.update({ rtcRingingPartner: [['unlink']] });
+            this.env.messaging.currentPartner.update({ activeCallChannel: [['unlink']] });
+
+            await this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'leave_call',
+                args: [[this.id]],
+            });
+        }
 
         /**
          * @override
@@ -1780,6 +1894,9 @@ function factory(dependencies) {
         attachments: many2many('mail.attachment', {
             inverse: 'threads',
         }),
+        callParticipants: one2many('mail.partner', {
+            inverse: 'activeCallChannel',
+        }),
         channel_type: attr(),
         /**
          * States the `mail.chat_window` related to `this`. Serves as compute
@@ -2233,6 +2350,10 @@ function factory(dependencies) {
          */
         pendingSeenMessageId: attr(),
         public: attr(),
+        /**
+         * The partner that rings the current user
+         */
+        rtcRingingPartner: many2one('mail.partner'),
         /**
          * Determine the last fold state known by the server, which is the fold
          * state displayed after initialization or when the last pending
