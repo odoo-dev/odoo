@@ -24,6 +24,9 @@ class ChannelPartner(models.Model):
     is_minimized = fields.Boolean("Conversation is minimized")
     is_pinned = fields.Boolean("Is pinned on the interface", default=True)
     last_meaningful_action_time = fields.Datetime('Last action time for the thread', default=fields.Datetime.now)
+    is_in_rtc_call = fields.Boolean("Is in a RTC session", default=False)
+    is_muted = fields.Boolean("Is the microphone muted", default=False)
+    rtc_ringing_partner_id = fields.Many2one('res.partner', string='Ringing partner')
 
     @api.model_create_multi
     def create(self, vals_list):

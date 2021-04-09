@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.VideoRoom" owl="1">
+        <div class="o_VideoRoom" t-att-class="{ 'o-fullScreen': state.isFullScreen }">
+            <div class="o_VideoRoom_video_container"
+                t-ref="videoContainer"
+                 t-attf-style="--height:{{state.videoHeight}}px; --width:{{state.videoWidth}}px; --columns:{{state.columnCount}};">
+                <t t-if="thread">
+                    <t t-foreach="thread.callParticipants" t-as="partner" t-if="env.mailRtc.activeVideoStreams[partner.peerToken]" t-key="partner.id">
+                        <t t-if="!env.messaging.focusedVideoPartner or env.messaging.focusedVideoPartner.id === partner.id">
+                            <div class="o_VideoRoom_video_box"
+                                 t-key="'video_box_'+partner.peerToken"
+                                 t-on-click="_onClickVideo(partner.id)">
+                                <video class="o_VideoRoom_video"
+                                       t-att-class="{ 'o-focused-video': !!env.messaging.focusedVideoPartner }"
+                                       t-key="'video_'+partner.peerToken"
+                                       t-att-muted="localToken === partner.peerToken"
+                                       t-att-token="partner.peerToken"
+                                       t-ref="video_{{ partner.peerToken }}"
+                                       t-on-loadedmetadata="_onVideoLoadedMetaData"/>
+                                <div class="o_VideoRoom_video_info">
+                                    <span class="o_VideoRoom_video_name" t-esc="partner.name"/>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+                <div class="o_VideoRoom_fullScreenButton" title="Full Screen" t-on-click="_onClickFullScreen"><i class="fa fa-lg fa-arrows-alt"/></div>
+            </div>
+            <t t-if="state.isFullScreen">
+                <div class="o_VideoRoom_control_overlay">
+                    <div class="o_VideoRoom_control_overlay_container">
+                        <RtcController threadLocalId="thread.localId" showMembersButton="true"/>
+                    </div>
+                </div>
+                <t t-if="env.messaging.showMemberList">
+                    <RtcCallParticipants class="o_VideoRoom_callParticipants" threadLocalId="thread.localId"/>
+                </t>
+            </t>
+        </div>
+    </t>
+
+</templates>

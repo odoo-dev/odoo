@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.RtcCallParticipants" owl="1">
+        <div class="o_RtcCallParticipants">
+            <div t-if="env.messaging.userSetting.isOpen">
+                <UserSettingWindow/>
+            </div>
+            <div class="o_RtcCallParticipants_memberList">
+                <t t-foreach="thread.callParticipants" t-as="partner" t-key="partner.id">
+                    <span class="o_RtcCallParticipants_member">
+                        <img alt="Avatar"
+                             class="o_RtcCallParticipants_member_avatar rounded-circle"
+                             t-att-class="{ 'o-is-talking': env.mailRtc.isPartnerTalking(partner.peerToken) }"
+                             t-attf-src="/web/image/res.partner/{{ partner.id }}/avatar_128"
+                        />
+                        <span class="o_RtcCallParticipants_member_name" t-esc="partner.name"/>
+                        <t t-if="env.mailRtc.activeVideoStreams[partner.peerToken]">
+                            <span class="o_RtcCallParticipants_member_live_indicator ml-2 badge-pill"
+                                  t-att-class="{ 'o-not-viewed': !!env.messaging.focusedVideoPartner and env.messaging.focusedVideoPartner.id !== partner.id }"
+                                  t-on-click="_onLiveClick(partner.id)">
+                                LIVE
+                            </span>
+                        </t>
+                        <t t-if="env.mailRtc.isPartnerMute(partner.peerToken)">
+                            <i class="fa fa-lg fa-microphone-slash ml-2"/>
+                        </t>
+                        <t t-if="env.messaging.currentPartner.peerToken !== partner.peerToken">
+                            <t t-if="!['connected', 'completed'].includes(env.mailRtc.connectionStates[partner.peerToken])">
+                                <i class="fa fa-lg fa-signal ml-2 o_RtcCallParticipants_member_signal"
+                                   t-att-title="env.mailRtc.connectionStates[partner.peerToken]"/>
+                            </t>
+                        </t>
+                    </span>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

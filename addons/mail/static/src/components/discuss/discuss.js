@@ -10,6 +10,8 @@ import MobileMessagingNavbar from '@mail/components/mobile_messaging_navbar/mobi
 import NotificationList from '@mail/components/notification_list/notification_list';
 import PartnerListing from '@mail/components/partner_listing/partner_listing';
 import PartnerSelector from '@mail/components/partner_selector/partner_selector';
+import RtcCallParticipants from '@mail/components/rtc_call_participants/rtc_call_participants';
+import RtcController from '@mail/components/rtc_controller/rtc_controller';
 import ThreadIcon from '@mail/components/thread_icon/thread_icon';
 import ThreadView from '@mail/components/thread_view/thread_view';
 import { link, unlink } from '@mail/model/model_field_command';
@@ -26,6 +28,8 @@ const components = {
     NotificationList,
     PartnerListing,
     PartnerSelector,
+    RtcCallParticipants,
+    RtcController,
     ThreadIcon,
     ThreadView,
 };
@@ -172,6 +176,8 @@ class Discuss extends Component {
         const replyingToMessage = discuss && discuss.replyingToMessage;
         const replyingToMessageOriginThread = replyingToMessage && replyingToMessage.originThread;
         return {
+            activeCallThreadLocalId: this.env.messaging.activeCallThreadLocalId,
+            callParticipants: thread && thread.callParticipants,
             discuss,
             discussActiveId: discuss && discuss.activeId, // for widget
             discussActiveMobileNavbarTabId: discuss && discuss.activeMobileNavbarTabId,
@@ -184,7 +190,9 @@ class Discuss extends Component {
             isDeviceMobile: this.env.messaging && this.env.messaging.device.isMobile,
             isMessagingInitialized: this.env.isMessagingInitialized(),
             replyingToMessage,
+            showMemberList: this.env.messaging.showMemberList,
             starred: this.env.messaging.starred,
+            activeCallThreadLocalId: this.env.messaging.activeCallThreadLocalId,
             thread,
             threadCache: threadView && threadView.threadCache,
             threadChannelType: thread && thread.channel_type,

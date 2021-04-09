@@ -440,9 +440,60 @@ function factory(dependencies) {
                 return this._handleNotificationPartnerUnsubscribe(data.id);
             } else if (type === 'user_connection') {
                 return this._handleNotificationPartnerUserConnection(data);
+            } else if (type === 'rtc_peer_notification') {
+                return this._handleNotificationRtcPeerToPeer(data);
+            } else if (type === 'rtc_invitation') {
+                return this._handleNotificationRtcInvitation(data);
+            } else if (type === 'rtc_update') {
+                return this._handleNotificationRtcUpdate(data);
             } else if (!type) {
                 return this._handleNotificationPartnerChannel(data);
             }
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {string} [data.channelId]
+         * @param {string} [data.remove]
+         * @param {string} [data.partner]
+         */
+        async _handleNotificationRtcInvitation({ channelId, remove, partner }) {
+            const channel = this.env.models['mail.thread'].all().filter((thread) => thread.model === 'mail.channel' && thread.id === channelId)[0];
+            if (!channel) {
+                return;
+            }
+            if (channel.localId === this.env.messaging.activeCallThreadLocalId) {
+                return;
+            }
+            if (remove) {
+                channel.update({ rtcRingingPartner: [['unlink']] });
+            } else {
+                channel.update({ rtcRingingPartner: [['insert', partner]] });
+            }
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {string} [data.content]
+         */
+        _handleNotificationRtcPeerToPeer({ sender, content }) {
+            this.env.mailRtc.handleNotification(sender, content);
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {string} [data.channelId]
+         * @param {string} [data.callParticipants]
+         */
+        async _handleNotificationRtcUpdate({ channelId, callParticipants }) {
+            const channel = this.env.models['mail.thread'].all().filter((thread) => thread.model === 'mail.channel' && thread.id === channelId)[0];
+            if (!channel) {
+                return;
+            }
+            channel.updateCallParticipants(callParticipants);
         }
 
         /**

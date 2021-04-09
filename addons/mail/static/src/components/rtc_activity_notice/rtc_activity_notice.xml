@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.RtcActivityNotice" owl="1">
+        <li class="o_RtcActivityNotice">
+            <RtcInvitations/>
+            <t t-if="env.messaging.activeCallThreadLocalId">
+                <t t-set="title">Open conference: <t t-esc="thread.name"/></t>
+                <a class="o_RtcActivityNotice_button" t-att-title="title" role="button" t-on-click="_onClick">
+                    <div class="o_RtcActivityNotice_button_content">
+                        <span class="o_RtcActivityNotice_button_title" t-esc="thread.name"/>
+                        <i class="o_RtcActivityNotice_indicator fa fa-circle text-danger ml-2"/>
+                    </div>
+                </a>
+            </t>
+        </li>
+    </t>
+
+</templates>

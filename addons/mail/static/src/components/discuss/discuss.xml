@@ -108,23 +108,28 @@
         </div>
         <div class="o_Discuss_topbarBottomSeparator"/>
         <t t-if="discuss.threadView">
-            <ThreadView
-                class="o_Discuss_thread"
-                t-att-class="{ 'o-mobile': env.messaging.device.isMobile }"
-                composerAttachmentsDetailsMode="'card'"
-                hasComposer="discuss.thread.model !== 'mail.box'"
-                hasComposerCurrentPartnerAvatar="!env.messaging.device.isMobile"
-                hasComposerThreadTyping="true"
-                hasMessageCheckbox="true"
-                hasSquashCloseMessages="discuss.thread.model !== 'mail.box'"
-                haveMessagesMarkAsReadIcon="discuss.thread === env.messaging.inbox"
-                haveMessagesReplyIcon="discuss.thread === env.messaging.inbox"
-                isDoFocus="discuss.isDoFocus"
-                threadViewLocalId="discuss.threadView.localId"
-                t-on-o-focusin-composer="_onFocusinComposer"
-                t-on-o-rendered="_onThreadRendered"
-                t-ref="threadView"
-            />
+            <div class="o_Discuss_thread_container">
+                <ThreadView
+                    class="o_Discuss_thread"
+                    t-att-class="{ 'o-mobile': env.messaging.device.isMobile }"
+                    composerAttachmentsDetailsMode="'card'"
+                    hasComposer="discuss.thread.model !== 'mail.box'"
+                    hasComposerCurrentPartnerAvatar="!env.messaging.device.isMobile"
+                    hasComposerThreadTyping="true"
+                    hasMessageCheckbox="true"
+                    hasSquashCloseMessages="discuss.thread.model !== 'mail.box'"
+                    haveMessagesMarkAsReadIcon="discuss.thread === env.messaging.inbox"
+                    haveMessagesReplyIcon="discuss.thread === env.messaging.inbox"
+                    isDoFocus="discuss.isDoFocus"
+                    threadViewLocalId="discuss.threadView.localId"
+                    t-on-o-focusin-composer="_onFocusinComposer"
+                    t-on-o-rendered="_onThreadRendered"
+                    t-ref="threadView"
+                />
+                <t t-if="env.messaging.showMemberList and discuss.thread and ['channel', 'chat'].includes(discuss.thread.channel_type)"> <!-- TODO toggle and hide empty once topbar is merged -->
+                    <RtcCallParticipants class="o_Discuss_thread_callParticipants" threadLocalId="discuss.thread.localId"/>
+                </t>
+            </div>
         </t>
         <t t-if="!discuss.thread and (!env.messaging.device.isMobile or discuss.activeMobileNavbarTabId === 'mailbox')">
             <div class="o_Discuss_noThread">

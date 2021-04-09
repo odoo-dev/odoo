@@ -1,0 +1,85 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_RtcCallParticipants {
+    position: relative;
+    display: flex;
+    flex-flow: column;
+    width: $o-mail-chat-sidebar-width;
+}
+
+.o_RtcCallParticipants_memberList {
+    display: flex;
+    overflow-y: auto;
+    flex-direction: column;
+    margin-left: map-get($spacers, 2);
+}
+
+.o_RtcCallParticipants_member {
+    height: map-get($sizes, 100);
+    padding: map-get($spacers, 1);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.o_RtcCallParticipants_member_avatar {
+    width: 50px;
+}
+
+.o_RtcCallParticipants_member_name {
+    white-space: nowrap;
+    overflow: hidden;
+    margin-left: map-get($spacers, 2);
+}
+
+.o_RtcCallParticipants_member_live_indicator {
+    padding-left: map-get($spacers, 2);
+    padding-right: map-get($spacers, 2);
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_RtcCallParticipants {
+    background-color: $o-mail-discuss-bg;
+    border-left: 1px solid $border-color;
+}
+
+.o_RtcCallParticipants_member_avatar {
+    border: 2px solid gray;
+
+    &.o-is-talking {
+        border: 3px solid theme-color('success');
+    }
+}
+
+.o_RtcCallParticipants_member_name {
+    text-overflow: ellipsis;
+    font-weight: bold;
+    font-size: $font-size-lg;
+    opacity: 0.8;
+}
+
+.o_RtcCallParticipants_member_signal {
+    color: theme-color('warning');
+}
+
+.o_RtcCallParticipants_member_live_indicator {
+    user-select: none;
+    font-weight: bold;
+    color: white;
+    background-color: theme-color('danger');
+    cursor: pointer;
+
+    &.o-not-viewed {
+        background-color: gray('600');
+    }
+
+    &:hover {
+        background-color: rgba(theme-color('danger'), 0.5);
+    }
+}
