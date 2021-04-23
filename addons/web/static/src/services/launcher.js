@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { serviceRegistry } from "../webclient/service_registry";
+
 // -----------------------------------------------------------------------------
 // startServices
 // -----------------------------------------------------------------------------
@@ -16,7 +18,7 @@ export const SPECIAL_METHOD = Symbol("special_method");
 export async function startServices(env) {
   const toStart = new Set();
   let timeoutId;
-  odoo.serviceRegistry.on("UPDATE", null, async (payload) => {
+  serviceRegistry.on("UPDATE", null, async (payload) => {
     const { operation, key: name, value: service } = payload;
     if (operation === "delete") {
       // We hardly see why it would be usefull to remove a service.
@@ -36,7 +38,7 @@ export async function startServices(env) {
 
 async function _startServices(env, toStart, timeoutId) {
   const services = env.services;
-  for (const [name, service] of odoo.serviceRegistry.getEntries()) {
+  for (const [name, service] of serviceRegistry.getEntries()) {
     if (!(name in services)) {
       const namedService = Object.assign(Object.create(service), { name });
       toStart.add(namedService);

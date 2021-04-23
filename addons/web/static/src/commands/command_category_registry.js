@@ -1,8 +1,9 @@
 /** @odoo-module **/
+
 import { Registry } from "../core/registry";
 import { _lt } from "../localization/translation";
 
-const commandCategoryRegistry = (odoo.commandCategoryRegistry = new Registry());
+export const commandCategoryRegistry = new Registry();
 commandCategoryRegistry.add("app", { label: _lt("Current App Commands") }, { sequence: 10 });
 commandCategoryRegistry.add("mail", { label: _lt("Discuss") }, { sequence: 20 });
 commandCategoryRegistry.add("actions", { label: _lt("More Actions") }, { sequence: 30 });

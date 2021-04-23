@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { EffectContainer } from "@web/effects/effect_container";
 import { effectService } from "@web/effects/effect_service";
 import { RainbowMan } from "@web/effects/rainbow_man";
@@ -23,14 +23,13 @@ Parent.template = tags.xml`
   `;
 
 QUnit.module("RainbowMan", (hooks) => {
-  let rainbowManDefault, serviceRegistry, target;
+  let rainbowManDefault, target;
   hooks.beforeEach(async () => {
     rainbowManDefault = {
       message: "<div>Congrats!</div>",
       fadeout: "nextTick",
     };
     target = getFixture();
-    serviceRegistry = new Registry();
     const user = makeFakeUserService({ showEffect: true });
     serviceRegistry.add("user", user);
     serviceRegistry.add("effect", effectService);

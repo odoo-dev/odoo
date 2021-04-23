@@ -1,7 +1,8 @@
 /** @odoo-module **/
 import { useCommand } from "@web/commands/command_hook";
 import { commandService } from "@web/commands/command_service";
-import { Registry } from "@web/core/registry";
+import { commandCategoryRegistry } from "@web/commands/command_category_registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { dialogService } from "@web/services/dialog_service";
 import { uiService } from "@web/services/ui_service";
@@ -26,17 +27,15 @@ TestComponent.template = xml`
 
 QUnit.module("Command", {
   async beforeEach() {
-    const serviceRegistry = new Registry();
     serviceRegistry.add("ui", uiService);
     serviceRegistry.add("dialog", dialogService);
     serviceRegistry.add("hotkey", hotkeyService);
     serviceRegistry.add("command", commandService);
 
-    const commandCategoryRegistry = new Registry();
     commandCategoryRegistry.add("custom-nolabel", {});
     commandCategoryRegistry.add("custom", { label: "Custom" });
     commandCategoryRegistry.add("default", { label: "Other commands" });
-    env = await makeTestEnv({ serviceRegistry, commandCategoryRegistry });
+    env = await makeTestEnv();
     target = getFixture();
   },
   afterEach() {

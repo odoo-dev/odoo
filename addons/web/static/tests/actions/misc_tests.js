@@ -3,7 +3,6 @@
 import { legacyExtraNextTick } from "../helpers/utils";
 import { getLegacy } from "web.test_legacy";
 import { actionRegistry } from "@web/actions/action_registry";
-import { viewRegistry } from "@web/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 import { makeTestEnv } from "../helpers/mock_env";
 
@@ -25,30 +24,6 @@ QUnit.module("ActionManager", (hooks) => {
     Widget = legacy.Widget;
   });
 
-  // Remove this as soon as we drop the legacy support.
-  // This is necessary as some tests add actions/views in the legacy registries,
-  // which are in turned wrapped and added into the real wowl registries. We
-  // add those actions/views in the test registries, and remove them from the
-  // real ones (directly, as we don't need them in the test).
-  const owner = Symbol("owner");
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-        actionRegistry.remove(payload.key);
-      }
-    });
-    viewRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.viewRegistry) {
-        testConfig.viewRegistry.add(payload.key, payload.value);
-        viewRegistry.remove(payload.key);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-    viewRegistry.off("UPDATE", owner);
-  });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
   });
@@ -67,7 +42,7 @@ QUnit.module("ActionManager", (hooks) => {
       target: "main",
       type: "ir.actions.client",
     };
-    testConfig.actionRegistry
+    actionRegistry
       .add("client_action_by_db_id", () => assert.step("client_action_db_id"))
       .add("client_action_by_xml_id", () => assert.step("client_action_xml_id"))
       .add("client_action_by_object", () => assert.step("client_action_object"));

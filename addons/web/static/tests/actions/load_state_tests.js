@@ -4,7 +4,7 @@ import { legacyExtraNextTick, patchWithCleanup } from "../helpers/utils";
 import { makeFakeRouterService } from "../helpers/mock_services";
 import { getLegacy } from "web.test_legacy";
 import { actionRegistry } from "@web/actions/action_registry";
-import { viewRegistry } from "@web/views/view_registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
 import { browser } from "@web/core/browser";
 
@@ -24,30 +24,6 @@ QUnit.module("ActionManager", (hooks) => {
     testUtils = legacy.testUtils;
   });
 
-  // Remove this as soon as we drop the legacy support.
-  // This is necessary as some tests add actions/views in the legacy registries,
-  // which are in turned wrapped and added into the real wowl registries. We
-  // add those actions/views in the test registries, and remove them from the
-  // real ones (directly, as we don't need them in the test).
-  const owner = Symbol("owner");
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-        actionRegistry.remove(payload.key);
-      }
-    });
-    viewRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.viewRegistry) {
-        testConfig.viewRegistry.add(payload.key, payload.value);
-        viewRegistry.remove(payload.key);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-    viewRegistry.off("UPDATE", owner);
-  });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
   });
@@ -134,7 +110,7 @@ QUnit.module("ActionManager", (hooks) => {
     assert.expect(3);
     class ClientAction extends Component {}
     ClientAction.template = tags.xml`<div class="o_client_action_test">Hello World</div>`;
-    testConfig.actionRegistry.add("HelloWorldTest", ClientAction);
+    actionRegistry.add("HelloWorldTest", ClientAction);
     const mockRPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
@@ -149,7 +125,6 @@ QUnit.module("ActionManager", (hooks) => {
       "should have correctly rendered the client action"
     );
     assert.verifySteps(["/web/webclient/load_menus"]);
-    testConfig.actionRegistry.remove("HelloWorldTest");
   });
 
   QUnit.test("properly load act window actions", async function (assert) {
@@ -439,7 +414,7 @@ QUnit.module("ActionManager", (hooks) => {
   QUnit.test("should push the correct state at the right time", async function (assert) {
     // formerly "should not push a loaded state"
     assert.expect(7);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "router",
       makeFakeRouterService({
         onPushState() {
@@ -490,8 +465,7 @@ QUnit.module("ActionManager", (hooks) => {
         return this._super.apply(this, arguments);
       },
     });
-    core.action_registry.add("ClientAction", ClientAction);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "router",
       makeFakeRouterService({
         onPushState() {
@@ -500,6 +474,7 @@ QUnit.module("ActionManager", (hooks) => {
       }),
       { force: true }
     );
+    core.action_registry.add("ClientAction", ClientAction);
     const webClient = await createWebClient({ testConfig });
     let currentHash = webClient.env.services.router.current.hash;
     assert.deepEqual(currentHash, {});
@@ -540,8 +515,7 @@ QUnit.module("ActionManager", (hooks) => {
         return this._super.apply(this, arguments);
       },
     });
-    core.action_registry.add("ClientAction", ClientAction);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "router",
       makeFakeRouterService({
         onPushState(mode) {
@@ -550,6 +524,7 @@ QUnit.module("ActionManager", (hooks) => {
       }),
       { force: true }
     );
+    core.action_registry.add("ClientAction", ClientAction);
     const webClient = await createWebClient({ testConfig });
     let currentHash = webClient.env.services.router.current.hash;
     assert.deepEqual(currentHash, {});
@@ -711,7 +686,7 @@ QUnit.module("ActionManager", (hooks) => {
       root: { id: "root", children: [1], name: "root", appID: "root" },
       1: { id: 1, children: [], name: "App1", appID: 1, actionID: 1 },
     };
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "router",
       makeFakeRouterService({
         initialRoute: {
@@ -790,7 +765,6 @@ QUnit.module("ActionManager", (hooks) => {
         return this._super.apply(this, arguments);
       },
     });
-    core.action_registry.add("ClientAction", ClientAction);
     const ClientAction2 = AbstractAction.extend({
       start() {
         this.$el.text("Hello World");
@@ -801,12 +775,13 @@ QUnit.module("ActionManager", (hooks) => {
         return this._super.apply(this, arguments);
       },
     });
-    core.action_registry.add("ClientAction2", ClientAction2);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "router",
       makeFakeRouterService({ onPushState: () => assert.step("hashSet") }),
       { force: true }
     );
+    core.action_registry.add("ClientAction", ClientAction);
+    core.action_registry.add("ClientAction2", ClientAction2);
     const webClient = await createWebClient({ testConfig });
     assert.verifySteps([]);
     await doAction(webClient, 9);

@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { makeFakeLocalizationService } from "../helpers/mock_services";
 import {
   ClientErrorDialog,
   Error504Dialog,
@@ -20,7 +21,6 @@ const { Component, mount, tags } = owl;
 let target;
 let env;
 let parent;
-let baseConfig;
 
 QUnit.module("Error dialogs", {
   async beforeEach() {
@@ -28,10 +28,9 @@ QUnit.module("Error dialogs", {
     const dialogContainer = document.createElement("div");
     dialogContainer.classList.add("o_dialog_container");
     target.append(dialogContainer);
-    const serviceRegistry = new Registry();
     serviceRegistry.add("ui", uiService);
     serviceRegistry.add("hotkey", hotkeyService);
-    baseConfig = { serviceRegistry };
+    serviceRegistry.add("localization", makeFakeLocalizationService());
   },
   async afterEach() {
     parent.unmount();
@@ -52,7 +51,7 @@ QUnit.test("ErrorDialog with traceback", async (assert) => {
   Parent.components = { ErrorDialog };
   Parent.template = tags.xml`<ErrorDialog traceback="traceback" name="name" message="message" data="data"/>`;
   assert.containsNone(target, ".o_dialog");
-  env = await makeTestEnv(baseConfig);
+  env = await makeTestEnv();
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(target.querySelector("header .modal-title").textContent, "Odoo Error");
@@ -101,7 +100,7 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
   Parent.components = { ClientErrorDialog };
   Parent.template = tags.xml`<ClientErrorDialog traceback="traceback" name="name" message="message" data="data"/>`;
   assert.containsNone(target, ".o_dialog");
-  env = await makeTestEnv(baseConfig);
+  env = await makeTestEnv();
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(target.querySelector("header .modal-title").textContent, "Odoo Client Error");
@@ -151,7 +150,7 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
       },
     },
   });
-  env = await makeTestEnv({ ...baseConfig });
+  env = await makeTestEnv();
   class Parent extends Component {
     constructor() {
       super(...arguments);
@@ -181,7 +180,7 @@ QUnit.test("WarningDialog", async (assert) => {
   Parent.components = { WarningDialog };
   Parent.template = tags.xml`<WarningDialog exceptionName="name" message="message" data="data"/>`;
   assert.containsNone(target, ".o_dialog");
-  env = await makeTestEnv(baseConfig);
+  env = await makeTestEnv();
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(target.querySelector("header .modal-title").textContent, "User Error");
@@ -214,8 +213,8 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
       };
     },
   };
-  baseConfig.serviceRegistry.add("action", faceActionService);
-  env = await makeTestEnv(baseConfig);
+  serviceRegistry.add("action", faceActionService);
+  env = await makeTestEnv();
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
@@ -239,7 +238,7 @@ QUnit.test("Error504Dialog", async (assert) => {
   Parent.components = { Error504Dialog };
   Parent.template = tags.xml`<Error504Dialog/>`;
   assert.containsNone(target, ".o_dialog");
-  env = await makeTestEnv(baseConfig);
+  env = await makeTestEnv();
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(target.querySelector("header .modal-title").textContent, "Request timeout");
@@ -262,7 +261,7 @@ QUnit.test("SessionExpiredDialog", async (assert) => {
       },
     },
   });
-  env = await makeTestEnv({ ...baseConfig });
+  env = await makeTestEnv();
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");

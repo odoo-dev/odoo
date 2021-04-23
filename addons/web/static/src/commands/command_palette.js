@@ -1,4 +1,5 @@
 /** @odoo-module **/
+import { commandCategoryRegistry } from "./command_category_registry";
 import { useAutofocus } from "../utils/hooks";
 import { useHotkey } from "../hotkeys/hotkey_hook";
 import { scrollTo } from "../utils/scrolling";
@@ -21,7 +22,7 @@ function commandsWithinCategory(categoryName) {
   return (cmd) => {
     const inCurrentCategory = categoryName === cmd.category;
     const fallbackCategory =
-      categoryName === "default" && !odoo.commandCategoryRegistry.contains(cmd.category);
+      categoryName === "default" && !commandCategoryRegistry.contains(cmd.category);
     return inCurrentCategory || fallbackCategory;
   };
 }
@@ -32,7 +33,7 @@ export class CommandPalette extends Component {
      * @type Command[]
      */
     this.initialCommands = [];
-    for (const [key, _] of odoo.commandCategoryRegistry.getEntries()) {
+    for (const [key, _] of commandCategoryRegistry.getEntries()) {
       const commands = this.props.commands.filter(commandsWithinCategory(key));
       this.initialCommands = this.initialCommands.concat(commands);
     }
@@ -87,7 +88,7 @@ export class CommandPalette extends Component {
 
   get categories() {
     const categories = [];
-    for (const [key, value] of odoo.commandCategoryRegistry.getEntries()) {
+    for (const [key, value] of commandCategoryRegistry.getEntries()) {
       const commands = this.state.commands.filter(commandsWithinCategory(key));
       if (commands.length) {
         categories.push({

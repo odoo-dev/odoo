@@ -8,4 +8,4 @@ import { Registry } from "../core/registry";
 
 // Components registered in this registry will be rendered inside the root node
 // of the webclient.
-export const mainComponentRegistry = (odoo.mainComponentRegistry = new Registry());
+export const mainComponentRegistry = new Registry();

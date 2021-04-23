@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry }  from "@web/webclient/service_registry";
 import { RPCErrorDialog } from "@web/errors/error_dialogs";
 import { errorHandlerRegistry } from "@web/errors/error_handler_registry";
 import { errorService } from "@web/errors/error_service";
@@ -9,9 +9,10 @@ import OdooError from "@web/errors/odoo_error";
 import { notificationService } from "@web/notifications/notification_service";
 import { dialogService } from "@web/services/dialog_service";
 import { ConnectionLostError, RPCError } from "@web/services/rpc_service";
+import { errorDialogRegistry } from "@web/errors/error_dialog_registry";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
-import { makeFakeNotificationService, makeFakeRPCService } from "../helpers/mock_services";
+import { makeFakeLocalizationService, makeFakeNotificationService, makeFakeRPCService } from "../helpers/mock_services";
 import { nextTick, patchWithCleanup } from "../helpers/utils";
 
 const { Component, tags } = owl;
@@ -25,18 +26,17 @@ function makeFakeDialogService(open) {
   };
 }
 
-let serviceRegistry;
-let errorCb;
+let errorCb; // unused ?
 let unhandledRejectionCb;
-let windowAddEventListener = window.addEventListener;
 
 QUnit.module("Error Service", {
   async beforeEach() {
-    serviceRegistry = new Registry();
     serviceRegistry.add("error", errorService);
     serviceRegistry.add("dialog", dialogService);
     serviceRegistry.add("notification", notificationService);
     serviceRegistry.add("rpc", makeFakeRPCService());
+    serviceRegistry.add("localization", makeFakeLocalizationService());
+    const windowAddEventListener = window.addEventListener;
     window.addEventListener = (type, cb) => {
       if (type === "unhandledrejection") {
         unhandledRejectionCb = cb;
@@ -45,9 +45,9 @@ QUnit.module("Error Service", {
         errorCb = cb;
       }
     };
-  },
-  afterEach() {
-    window.addEventListener = windowAddEventListener;
+    registerCleanup(() => {
+      window.addEventListener = windowAddEventListener;
+    });
   },
 });
 
@@ -74,7 +74,7 @@ QUnit.test("handle RPC_ERROR of type='server' and no associated dialog class", a
     });
   }
   serviceRegistry.add("dialog", makeFakeDialogService(open), { force: true });
-  await makeTestEnv({ serviceRegistry });
+  await makeTestEnv();
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
 });
@@ -104,8 +104,8 @@ QUnit.test(
       });
     }
     serviceRegistry.add("dialog", makeFakeDialogService(open), { force: true });
-    await makeTestEnv({ serviceRegistry });
-    odoo.errorDialogRegistry.add("strange_error", CustomDialog);
+    await makeTestEnv();
+    errorDialogRegistry.add("strange_error", CustomDialog);
     const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
     unhandledRejectionCb(errorEvent);
   }
@@ -138,7 +138,7 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
       }
     }
   };
-  await makeTestEnv({ serviceRegistry, mockRPC });
+  await makeTestEnv({ mockRPC });
   const error = new ConnectionLostError();
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
@@ -160,8 +160,7 @@ QUnit.test("will let handlers from the registry handle errors first", async (ass
     assert.strictEqual(env.someValue, 14);
     assert.step("in handler");
   });
-  registerCleanup(() => errorHandlerRegistry.remove("__test_handler__"));
-  const testEnv = await makeTestEnv({ serviceRegistry });
+  const testEnv = await makeTestEnv();
   testEnv.someValue = 14;
   const error = new OdooError("boom");
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });

@@ -4,11 +4,12 @@ import { click, legacyExtraNextTick } from "../helpers/utils";
 import { makeFakeRouterService } from "../helpers/mock_services";
 import { getLegacy } from "web.test_legacy";
 import { actionRegistry } from "@web/actions/action_registry";
-import { viewRegistry } from "@web/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 import { NotificationContainer } from "@web/notifications/notification_container";
-import { Registry } from "@web/core/registry";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import { registerCleanup } from "../helpers/cleanup";
+import { clearRegistryWithCleanup } from "../helpers/mock_env";
+import { serviceRegistry } from "@web/webclient/service_registry";
 
 const { Component, tags } = owl;
 
@@ -24,30 +25,6 @@ QUnit.module("ActionManager", (hooks) => {
     AbstractAction = legacy.AbstractAction;
     core = legacy.core;
     testUtils = legacy.testUtils;
-  });
-  // Remove this as soon as we drop the legacy support.
-  // This is necessary as some tests add actions/views in the legacy registries,
-  // which are in turned wrapped and added into the real wowl registries. We
-  // add those actions/views in the test registries, and remove them from the
-  // real ones (directly, as we don't need them in the test).
-  const owner = Symbol("owner");
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-        actionRegistry.remove(payload.key);
-      }
-    });
-    viewRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.viewRegistry) {
-        testConfig.viewRegistry.add(payload.key, payload.value);
-        viewRegistry.remove(payload.key);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-    viewRegistry.off("UPDATE", owner);
   });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
@@ -109,12 +86,12 @@ QUnit.module("ActionManager", (hooks) => {
         this.$el.addClass("o_client_action_test");
       },
     });
-    core.action_registry.add("HelloWorldTestLeg", ClientAction);
     const mockRPC = async function (route, args) {
       assert.step((args && args.method) || route);
     };
-    const webClient = await createWebClient({ testConfig, mockRPC });
+    core.action_registry.add("HelloWorldTestLeg", ClientAction);
     registerCleanup(() => delete core.action_registry.map.HelloWorldTestLeg);
+    const webClient = await createWebClient({ testConfig, mockRPC });
     await doAction(webClient, "HelloWorldTestLeg");
     assert.containsNone(
       document.body,
@@ -133,8 +110,7 @@ QUnit.module("ActionManager", (hooks) => {
     assert.expect(4);
     class ClientAction extends Component {}
     ClientAction.template = tags.xml`<div class="o_client_action_test">Hello World</div>`;
-    testConfig.actionRegistry.add("HelloWorldTest", ClientAction);
-    registerCleanup(() => testConfig.actionRegistry.remove("HelloWorldTest"));
+    actionRegistry.add("HelloWorldTest", ClientAction);
 
     const mockRPC = async function (route, args) {
       assert.step((args && args.method) || route);
@@ -203,8 +179,7 @@ QUnit.module("ActionManager", (hooks) => {
         return { foo: "baz" };
       },
     });
-    core.action_registry.add("HelloWorldTest", ClientAction);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "router",
       makeFakeRouterService({
         onPushState() {
@@ -213,11 +188,9 @@ QUnit.module("ActionManager", (hooks) => {
       }),
       { force: true }
     );
-    registerCleanup(() => {
-      delete core.action_registry.map.HelloWorldTest;
-      actionRegistry.remove("HelloWorldTest");
-    });
 
+    core.action_registry.add("HelloWorldTest", ClientAction);
+    registerCleanup(() => delete core.action_registry.map.HelloWorldTest);
     const webClient = await createWebClient({ testConfig });
     let currentTitle = webClient.env.services.title.current;
     assert.strictEqual(currentTitle, '{"zopenerp":"Odoo"}');
@@ -246,8 +219,9 @@ QUnit.module("ActionManager", (hooks) => {
         ControlPanel: CustomControlPanel,
       },
     });
-    const webClient = await createWebClient({ testConfig });
     core.action_registry.add("HelloWorldTest", ClientAction);
+    registerCleanup(() => delete core.action_registry.map.HelloWorldTest);
+    const webClient = await createWebClient({ testConfig });
     await doAction(webClient, "HelloWorldTest");
     assert.containsOnce(
       webClient.el,
@@ -303,7 +277,6 @@ QUnit.module("ActionManager", (hooks) => {
         return this._super.apply(this, arguments);
       },
     });
-    core.action_registry.add("ClientAction", ClientAction);
     const ClientAction2 = AbstractAction.extend({
       hasControlPanel: true,
       init(parent, action) {
@@ -315,6 +288,7 @@ QUnit.module("ActionManager", (hooks) => {
         return this._super.apply(this, arguments);
       },
     });
+    core.action_registry.add("ClientAction", ClientAction);
     core.action_registry.add("ClientAction2", ClientAction2);
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, "ClientAction");
@@ -351,7 +325,7 @@ QUnit.module("ActionManager", (hooks) => {
       }
     }
     ClientAction.template = tags.xml`<div class="my_owl_action" t-on-click="onClick">owl client action</div>`;
-    testConfig.actionRegistry.add("OwlClientAction", ClientAction);
+    actionRegistry.add("OwlClientAction", ClientAction);
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 8);
     await doAction(webClient, "OwlClientAction");
@@ -366,9 +340,8 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("test display_notification client action", async function (assert) {
     assert.expect(6);
-    const componentRegistry = new Registry();
-    componentRegistry.add("NotificationContainer", NotificationContainer);
-    testConfig.mainComponentRegistry = componentRegistry;
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add("NotificationContainer", NotificationContainer);
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 1);
     assert.containsOnce(webClient, ".o_kanban_view");

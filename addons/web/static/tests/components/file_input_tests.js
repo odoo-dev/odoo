@@ -2,7 +2,7 @@
 
 import testUtils from "web.test_utils";
 import { FileInput } from "@web/components/file_input/file_input";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture } from "../helpers/utils";
 
@@ -13,7 +13,6 @@ const { mount } = owl;
 // -----------------------------------------------------------------------------
 
 async function createFileInput(config) {
-  const serviceRegistry = new Registry();
   const fakeHTTPService = {
     start() {
       return {
@@ -23,7 +22,7 @@ async function createFileInput(config) {
   };
   serviceRegistry.add("http", fakeHTTPService);
 
-  const env = await makeTestEnv({ serviceRegistry });
+  const env = await makeTestEnv();
   const target = getFixture();
   if (config.onUploaded) {
     target.addEventListener("uploaded", config.onUploaded);

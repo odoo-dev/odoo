@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { browser } from "@web/core/browser";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { useHotkey } from "@web/hotkeys/hotkey_hook";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { uiService, useActiveElement } from "@web/services/ui_service";
@@ -15,10 +15,9 @@ let target;
 
 QUnit.module("Hotkey Service", {
   async beforeEach() {
-    const serviceRegistry = new Registry();
     serviceRegistry.add("hotkey", hotkeyService);
     serviceRegistry.add("ui", uiService);
-    env = await makeTestEnv({ serviceRegistry });
+    env = await makeTestEnv();
     target = getFixture();
   },
 });

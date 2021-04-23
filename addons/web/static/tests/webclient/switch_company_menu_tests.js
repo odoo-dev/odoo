@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { SwitchCompanyMenu } from "@web/webclient/switch_company_menu/switch_company_menu";
 import { registerCleanup } from "../helpers/cleanup";
@@ -11,11 +11,8 @@ import { click, getFixture } from "../helpers/utils";
 const { mount } = owl;
 
 QUnit.module("SwitchCompanyMenu", (hooks) => {
-  let testConfig;
 
   hooks.beforeEach(() => {
-    const serviceRegistry = new Registry();
-
     const session_info = {
       user_companies: {
         allowed_companies: {
@@ -29,13 +26,12 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
     serviceRegistry.add("ui", makeFakeUIService());
     serviceRegistry.add("user", makeFakeUserService({ session_info }));
     serviceRegistry.add("hotkey", hotkeyService);
-    testConfig = { serviceRegistry };
   });
 
   QUnit.test("basic rendering", async (assert) => {
     assert.expect(10);
 
-    const env = await makeTestEnv(testConfig);
+    const env = await makeTestEnv();
     const target = getFixture();
     const scMenu = await mount(SwitchCompanyMenu, { env, target });
     registerCleanup(() => scMenu.destroy());
@@ -66,7 +62,7 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
   QUnit.test("companies can be toggled and logged in", async (assert) => {
     assert.expect(20);
 
-    const env = await makeTestEnv(testConfig);
+    const env = await makeTestEnv();
     const target = getFixture();
     const scMenu = await mount(SwitchCompanyMenu, { env, target });
     registerCleanup(() => scMenu.destroy());

@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
 import { ActionDialog } from "@web/actions/action_dialog";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { debugRegistry } from "@web/debug/debug_registry";
 import { DebugManager } from "@web/debug/debug_manager";
 import { debugService } from "@web/debug/debug_service";
 import { ormService } from "@web/services/orm_service";
@@ -19,7 +20,6 @@ let testConfig;
 QUnit.module("DebugManager", (hooks) => {
   hooks.beforeEach(async () => {
     target = getFixture();
-    const serviceRegistry = new Registry();
     serviceRegistry.add("hotkey", hotkeyService);
     serviceRegistry.add("ui", uiService);
     serviceRegistry.add("orm", ormService);
@@ -29,11 +29,10 @@ QUnit.module("DebugManager", (hooks) => {
         return Promise.resolve(true);
       }
     };
-    testConfig = { serviceRegistry, mockRPC };
+    testConfig = { mockRPC };
   });
   QUnit.test("can be rendered", async (assert) => {
-    testConfig.debugRegistry = new Registry();
-    testConfig.debugRegistry.add("item_1", () => {
+    debugRegistry.add("item_1", () => {
       return {
         type: "item",
         description: "Item 1",
@@ -43,7 +42,7 @@ QUnit.module("DebugManager", (hooks) => {
         sequence: 10,
       };
     });
-    testConfig.debugRegistry.add("item_2", () => {
+    debugRegistry.add("item_2", () => {
       return {
         type: "item",
         description: "Item 2",
@@ -53,7 +52,7 @@ QUnit.module("DebugManager", (hooks) => {
         sequence: 5,
       };
     });
-    testConfig.debugRegistry.add("item_3", () => {
+    debugRegistry.add("item_3", () => {
       return {
         type: "item",
         description: "Item 3",
@@ -62,20 +61,20 @@ QUnit.module("DebugManager", (hooks) => {
         },
       };
     });
-    testConfig.debugRegistry.add("separator", () => {
+    debugRegistry.add("separator", () => {
       return {
         type: "separator",
         sequence: 20,
       };
     });
-    testConfig.debugRegistry.add("separator_2", () => {
+    debugRegistry.add("separator_2", () => {
       return {
         type: "separator",
         sequence: 7,
         hide: true,
       };
     });
-    testConfig.debugRegistry.add("item_4", () => {
+    debugRegistry.add("item_4", () => {
       return {
         type: "item",
         description: "Item 4",
@@ -129,8 +128,7 @@ QUnit.module("DebugManager", (hooks) => {
       const dialogContainer = document.createElement("div");
       dialogContainer.classList.add("o_dialog_container");
       target.append(dialogContainer);
-      testConfig.debugRegistry = new Registry();
-      testConfig.debugRegistry.add("global", () => {
+      debugRegistry.add("global", () => {
         return {
           type: "item",
           description: "Global 1",

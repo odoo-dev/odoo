@@ -2,7 +2,7 @@
 
 import * as utils from "@web/utils/arrays";
 import { makeFakeRPCService, makeMockFetch } from "./mock_services";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { evaluateExpr } from "@web/py_js/py";
 import { Domain } from "@web/core/domain";
 import { browser } from "@web/core/browser";
@@ -1053,7 +1053,7 @@ class MockServer {
 // MockServer deployment helper
 // -----------------------------------------------------------------------------
 
-export function makeMockServer(config, serverData, mockRPC) {
+export function makeMockServer(serverData, mockRPC) {
   serverData = serverData || {};
   const mockServer = new MockServer(serverData, {
     debug: QUnit.config.debug,
@@ -1072,6 +1072,6 @@ export function makeMockServer(config, serverData, mockRPC) {
   patchWithCleanup(browser, {
     fetch: makeMockFetch(_mockRPC),
   });
-  config.serviceRegistry = config.serviceRegistry || new Registry();
-  config.serviceRegistry.add("rpc", rpcService);
+  // Replace RPC service
+  serviceRegistry.add("rpc", rpcService, { force: true });
 }

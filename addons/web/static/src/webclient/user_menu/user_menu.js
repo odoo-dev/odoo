@@ -3,6 +3,7 @@
 import { useService } from "../../services/service_hook";
 import { systrayRegistry } from "../systray_registry";
 import { browser } from "../../core/browser";
+import { userMenuRegistry } from "../user_menu_registry";
 
 const { Component } = owl;
 
@@ -19,7 +20,7 @@ export class UserMenu extends Component {
   }
 
   getElements() {
-    const sortedItems = odoo.userMenuRegistry
+    const sortedItems = userMenuRegistry
       .getAll()
       .map((element) => element(this.env))
       .sort((x, y) => {

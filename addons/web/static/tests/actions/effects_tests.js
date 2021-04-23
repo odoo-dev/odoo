@@ -2,13 +2,13 @@
 
 import { click, legacyExtraNextTick, nextTick } from "../helpers/utils";
 import { getLegacy } from "web.test_legacy";
-import { actionRegistry } from "@web/actions/action_registry";
-import { viewRegistry } from "@web/views/view_registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
-import { Registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/notifications/notification_container";
 import { EffectContainer } from "@web/effects/effect_container";
 import { makeFakeUserService } from "../helpers/mock_services";
+import { clearRegistryWithCleanup } from "../helpers/mock_env";
 
 let testConfig;
 // legacy stuff
@@ -19,30 +19,6 @@ QUnit.module("ActionManager", (hooks) => {
     const legacy = getLegacy();
     testUtils = legacy.testUtils;
   });
-  // Remove this as soon as we drop the legacy support.
-  // This is necessary as some tests add actions/views in the legacy registries,
-  // which are in turned wrapped and added into the real wowl registries. We
-  // add those actions/views in the test registries, and remove them from the
-  // real ones (directly, as we don't need them in the test).
-  const owner = Symbol("owner");
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-        actionRegistry.remove(payload.key);
-      }
-    });
-    viewRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.viewRegistry) {
-        testConfig.viewRegistry.add(payload.key, payload.value);
-        viewRegistry.remove(payload.key);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-    viewRegistry.off("UPDATE", owner);
-  });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
   });
@@ -51,12 +27,11 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("rainbowman integrated to webClient", async function (assert) {
     assert.expect(10);
-    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
+    serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
       force: true,
     });
-    const mainComponentRegistry = new Registry();
+    clearRegistryWithCleanup(mainComponentRegistry);
     mainComponentRegistry.add("EffectContainer", EffectContainer);
-    testConfig.mainComponentRegistry = mainComponentRegistry;
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 1);
     assert.containsOnce(webClient.el, ".o_kanban_view");
@@ -84,9 +59,8 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("show effect notification instead of rainbow man", async function (assert) {
     assert.expect(6);
-    const componentRegistry = new Registry();
-    componentRegistry.add("NotificationContainer", NotificationContainer);
-    testConfig.mainComponentRegistry = componentRegistry;
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add("NotificationContainer", NotificationContainer);
 
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 1);
@@ -103,7 +77,7 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("on close with effect from server", async function (assert) {
     assert.expect(1);
-    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
+    serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
       force: true,
     });
     const mockRPC = async (route, args) => {
@@ -117,9 +91,8 @@ QUnit.module("ActionManager", (hooks) => {
         });
       }
     };
-    const mainComponentRegistry = new Registry();
+    clearRegistryWithCleanup(mainComponentRegistry);
     mainComponentRegistry.add("EffectContainer", EffectContainer);
-    testConfig.mainComponentRegistry = mainComponentRegistry;
     const webClient = await createWebClient({ testConfig, mockRPC });
     await doAction(webClient, 6);
     await click(webClient.el.querySelector('button[name="object"]'));
@@ -137,7 +110,7 @@ QUnit.module("ActionManager", (hooks) => {
       </header>
       <field name="display_name"/>
     </form>`;
-    testConfig.serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
+    serviceRegistry.add("user", makeFakeUserService({ showEffect: true }), {
       force: true,
     });
     const mockRPC = async (route, args) => {
@@ -145,9 +118,8 @@ QUnit.module("ActionManager", (hooks) => {
         return Promise.resolve(false);
       }
     };
-    const mainComponentRegistry = new Registry();
+    clearRegistryWithCleanup(mainComponentRegistry);
     mainComponentRegistry.add("EffectContainer", EffectContainer);
-    testConfig.mainComponentRegistry = mainComponentRegistry;
 
     const webClient = await createWebClient({ testConfig, mockRPC });
     await doAction(webClient, 6);

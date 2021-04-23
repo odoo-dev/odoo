@@ -1,25 +1,25 @@
 /** @odoo-module **/
 
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { uiService, useActiveElement } from "@web/services/ui_service";
 import { BlockUI } from "@web/webclient/block_ui/block_ui";
 import { makeTestEnv } from "../helpers/mock_env";
+import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { getFixture, nextTick } from "../helpers/utils";
 
 const { Component, mount } = owl;
 
 let target;
-let serviceRegistry;
 let browser;
 let baseConfig;
 
 QUnit.module("UI", {
   async beforeEach() {
     target = getFixture();
-    serviceRegistry = new Registry();
     serviceRegistry.add("ui", uiService);
+    serviceRegistry.add("localization", makeFakeLocalizationService());
     browser = { setTimeout: () => 1 };
-    baseConfig = { serviceRegistry, browser };
+    baseConfig = { browser };
   },
 });
 

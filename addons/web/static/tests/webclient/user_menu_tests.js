@@ -5,22 +5,20 @@ import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { uiService } from "@web/services/ui_service";
 import { patch, unpatch } from "@web/utils/patch";
 import { UserMenu } from "@web/webclient/user_menu/user_menu";
+import { userMenuRegistry } from "@web/webclient/user_menu_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeUserService } from "../helpers/mock_services";
 import { click, getFixture } from "../helpers/utils";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 
 const { mount } = owl;
 
 let target;
 let env;
-let serviceRegistry;
 let userMenu;
-let baseConfig;
 
 QUnit.module("UserMenu", {
   async beforeEach() {
-    serviceRegistry = new Registry();
     serviceRegistry.add("user", makeFakeUserService({ name: "Sauron" }));
     serviceRegistry.add("hotkey", hotkeyService);
     serviceRegistry.add("ui", uiService);
@@ -30,7 +28,6 @@ QUnit.module("UserMenu", {
         origin: "http://lordofthering",
       },
     });
-    baseConfig = { serviceRegistry };
   },
   afterEach() {
     userMenu.unmount();
@@ -39,8 +36,8 @@ QUnit.module("UserMenu", {
 });
 
 QUnit.test("can be rendered", async (assert) => {
-  env = await makeTestEnv(baseConfig);
-  odoo.userMenuRegistry.add("bad_item", function () {
+  env = await makeTestEnv();
+  userMenuRegistry.add("bad_item", function () {
     return {
       type: "item",
       description: "Bad",
@@ -50,7 +47,7 @@ QUnit.test("can be rendered", async (assert) => {
       sequence: 10,
     };
   });
-  odoo.userMenuRegistry.add("ring_item", function () {
+  userMenuRegistry.add("ring_item", function () {
     return {
       type: "item",
       description: "Ring",
@@ -60,13 +57,13 @@ QUnit.test("can be rendered", async (assert) => {
       sequence: 5,
     };
   });
-  odoo.userMenuRegistry.add("separator", function () {
+  userMenuRegistry.add("separator", function () {
     return {
       type: "separator",
       sequence: 15,
     };
   });
-  odoo.userMenuRegistry.add("invisible_item", function () {
+  userMenuRegistry.add("invisible_item", function () {
     return {
       type: "item",
       description: "Hidden Power",
@@ -75,7 +72,7 @@ QUnit.test("can be rendered", async (assert) => {
       hide: true,
     };
   });
-  odoo.userMenuRegistry.add("eye_item", function () {
+  userMenuRegistry.add("eye_item", function () {
     return {
       type: "item",
       description: "Eye",
@@ -116,7 +113,7 @@ QUnit.test("can be rendered", async (assert) => {
 });
 
 QUnit.test("display the correct name in debug mode", async (assert) => {
-  env = await makeTestEnv(Object.assign(baseConfig, { debug: "1" }));
+  env = await makeTestEnv({ debug: "1" });
   userMenu = await mount(UserMenu, { env, target });
   let userMenuEl = userMenu.el;
   assert.containsOnce(userMenuEl, "img.o_user_avatar");

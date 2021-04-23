@@ -5,12 +5,12 @@ import { browser } from "@web/core/browser";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { notificationService } from "@web/notifications/notification_service";
 import { uiService } from "@web/services/ui_service";
-import { patch, unpatch } from "@web/utils/patch";
-import { NavBar } from "@web/webclient/navbar/navbar";
-import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture, nextTick } from "../helpers/utils";
-import { Registry } from "@web/core/registry";
 import { menuService } from "@web/services/menu_service";
+import { NavBar } from "@web/webclient/navbar/navbar";
+import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
+import { click, getFixture, nextTick, patchWithCleanup } from "../helpers/utils";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { systrayRegistry } from "@web/webclient/systray_registry";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
@@ -21,27 +21,22 @@ let baseConfig;
 
 QUnit.module("Navbar", {
   async beforeEach() {
-    const serviceRegistry = new Registry();
     serviceRegistry.add("menu", menuService);
     serviceRegistry.add("action", actionService);
     serviceRegistry.add("notification", notificationService);
     serviceRegistry.add("hotkey", hotkeyService);
     serviceRegistry.add("ui", uiService);
+    systrayRegistry.add("addon.myitem", MySystrayItem);
+    patchWithCleanup(browser, {
+      setTimeout: (handler, delay, ...args) => handler(...args),
+      clearTimeout: () => {},
+    });
     const menus = {
       root: { id: "root", children: [1], name: "root", appID: "root" },
       1: { id: 1, children: [], name: "App0", appID: 1 },
     };
     const serverData = { menus };
-    const systrayRegistry = new Registry();
-    systrayRegistry.add("addon.myitem", MySystrayItem);
-    patch(browser, "mock.navbar_tests", {
-      setTimeout: (handler, delay, ...args) => handler(...args),
-      clearTimeout: () => {},
-    });
-    baseConfig = { serviceRegistry, serverData, systrayRegistry };
-  },
-  afterEach() {
-    unpatch(browser, "mock.navbar_tests");
+    baseConfig = { serverData };
   },
 });
 
@@ -151,12 +146,12 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
   class MyItem4 extends Component {}
   MyItem4.template = xml`<li class="my-item-4">my item 4</li>`;
 
-  const systrayRegistry = new Registry();
+  clearRegistryWithCleanup(systrayRegistry);
   systrayRegistry.add("addon.myitem2", MyItem2);
   systrayRegistry.add("addon.myitem1", MyItem1, { sequence: 0 });
   systrayRegistry.add("addon.myitem3", MyItem3, { sequence: 100 });
   systrayRegistry.add("addon.myitem4", MyItem4);
-  const env = await makeTestEnv({ ...baseConfig, systrayRegistry });
+  const env = await makeTestEnv(baseConfig);
   const target = getFixture();
   const navbar = await mount(NavBar, { env, target });
   const menuSystray = navbar.el.getElementsByClassName("o_menu_systray")[0];

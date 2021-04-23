@@ -5,4 +5,4 @@ import { Registry } from "../core/registry";
 // -----------------------------------------------------------------------------
 // Default UserMenu items
 // -----------------------------------------------------------------------------
-export const userMenuRegistry = (odoo.userMenuRegistry = new Registry());
+export const userMenuRegistry = new Registry();

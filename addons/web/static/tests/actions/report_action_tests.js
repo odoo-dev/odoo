@@ -1,15 +1,16 @@
 /** @odoo-module **/
 
 import { getLegacy } from "web.test_legacy";
-import { actionRegistry } from "@web/actions/action_registry";
 import { uiService } from "@web/services/ui_service";
-import { viewRegistry } from "@web/views/view_registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import {
   makeFakeDownloadService,
   makeFakeNotificationService,
   makeFakeUserService,
 } from "../helpers/mock_services";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
+import { clearRegistryWithCleanup } from "../helpers/mock_env";
 
 let testConfig;
 
@@ -24,39 +25,16 @@ QUnit.module("ActionManager", (hooks) => {
     ReportClientAction = legacy.ReportClientAction;
   });
 
-  // Remove this as soon as we drop the legacy support.
-  // This is necessary as some tests add actions/views in the legacy registries,
-  // which are in turned wrapped and added into the real wowl registries. We
-  // add those actions/views in the test registries, and remove them from the
-  // real ones (directly, as we don't need them in the test).
-  const owner = Symbol("owner");
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-        actionRegistry.remove(payload.key);
-      }
-    });
-    viewRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.viewRegistry) {
-        testConfig.viewRegistry.add(payload.key, payload.value);
-        viewRegistry.remove(payload.key);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-    viewRegistry.off("UPDATE", owner);
-  });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
+    clearRegistryWithCleanup(mainComponentRegistry);
   });
 
   QUnit.module("Report actions");
 
   QUnit.test("can execute report actions from db ID", async function (assert) {
     assert.expect(6);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "download",
       makeFakeDownloadService((options) => {
         assert.step(options.url);
@@ -82,7 +60,7 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("report actions can close modals and reload views", async function (assert) {
     assert.expect(8);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "download",
       makeFakeDownloadService((options) => {
         assert.step(options.url);
@@ -117,7 +95,7 @@ QUnit.module("ActionManager", (hooks) => {
   });
 
   QUnit.test("should trigger a notification if wkhtmltopdf is to upgrade", async function (assert) {
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "notification",
       makeFakeNotificationService(
         () => {
@@ -127,7 +105,7 @@ QUnit.module("ActionManager", (hooks) => {
       ),
       { force: true }
     );
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "download",
       makeFakeDownloadService((options) => {
         assert.step(options.url);
@@ -154,14 +132,14 @@ QUnit.module("ActionManager", (hooks) => {
   QUnit.test(
     "should open the report client action if wkhtmltopdf is broken",
     async function (assert) {
-      testConfig.serviceRegistry.add(
+      serviceRegistry.add(
         "download",
         makeFakeDownloadService(() => {
           assert.step("download"); // should not be called
           return Promise.resolve();
         })
       );
-      testConfig.serviceRegistry.add(
+      serviceRegistry.add(
         "notification",
         makeFakeNotificationService(
           () => {
@@ -214,14 +192,14 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("send context in case of html report", async function (assert) {
     assert.expect(5);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "download",
       makeFakeDownloadService(() => {
         assert.step("download"); // should not be called
         return Promise.resolve();
       })
     );
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "notification",
       makeFakeNotificationService(
         (message, options) => {
@@ -231,7 +209,7 @@ QUnit.module("ActionManager", (hooks) => {
       ),
       { force: true }
     );
-    testConfig.serviceRegistry.add("user", makeFakeUserService({ context: { some_key: 2 } }), {
+    serviceRegistry.add("user", makeFakeUserService({ context: { some_key: 2 } }), {
       force: true,
     });
     const mockRPC = async (route, args) => {
@@ -269,7 +247,7 @@ QUnit.module("ActionManager", (hooks) => {
     async function (assert) {
       assert.expect(8);
       let timesDownloasServiceHasBeenCalled = 0;
-      testConfig.serviceRegistry.add(
+      serviceRegistry.add(
         "download",
         makeFakeDownloadService(() => {
           if (timesDownloasServiceHasBeenCalled === 0) {
@@ -283,7 +261,7 @@ QUnit.module("ActionManager", (hooks) => {
           }
         })
       );
-      testConfig.serviceRegistry.add("ui", uiService, { force: true });
+      serviceRegistry.add("ui", uiService, { force: true });
       const mockRPC = async (route) => {
         if (route === "/report/check_wkhtmltopdf") {
           return Promise.resolve("ok");

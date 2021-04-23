@@ -2,7 +2,7 @@
 
 import { legacyProm } from "web.test_legacy";
 import { registerCleanup } from "./helpers/cleanup";
-import { makeTestOdoo } from "./helpers/mock_env";
+import { prepareRegistriesWithCleanup, setTestOdooWithCleanup } from "./helpers/mock_env";
 import { patchWithCleanup } from "./helpers/utils";
 
 const { whenReady, loadFile } = owl.utils;
@@ -10,44 +10,44 @@ const { whenReady, loadFile } = owl.utils;
 owl.config.enableTransitions = false;
 owl.QWeb.dev = true;
 
+function forceLocaleAndTimezoneWithCleanup() {
+  const originalLocale = luxon.Settings.defaultLocale;
+  luxon.Settings.defaultLocale = "en";
+  const originalZoneName = luxon.Settings.defaultZoneName;
+  luxon.Settings.defaultZoneName = "Europe/Brussels";
+  registerCleanup(() => {
+    luxon.Settings.defaultLocale = originalLocale;
+    luxon.Settings.defaultZoneName = originalZoneName;
+  });
+}
+
+function trackAddedEventListenersWithCleanup(objectToPatch) {
+  const listeners = [];
+  // Here we keep track of listeners added on the object to patch.
+  // Some stuff with permanent state (e.g. services) may register
+  // those kind of listeners without removing them at some point.
+  // We manually remove them after each test (see below).
+  patchWithCleanup(objectToPatch, {
+    addEventListener: function () {
+      listeners.push([...arguments]);
+      this._super(...arguments);
+    },
+  });
+  registerCleanup((info) => {
+    // Cleanup the listeners added during the current test.
+    for (const listenerArgs of listeners) {
+        objectToPatch.removeEventListener(...listenerArgs);
+    }
+  });
+}
+
 export async function setupTests() {
-  const originalOdoo = odoo;
-  const listeners = new Map();
-  const objectsToPatch = [window, document];
-
   QUnit.testStart(() => {
-    odoo = makeTestOdoo();
-    const originalLocale = luxon.Settings.defaultLocale;
-    luxon.Settings.defaultLocale = "en";
-    const originalZoneName = luxon.Settings.defaultZoneName;
-    luxon.Settings.defaultZoneName = "Europe/Brussels";
-
-    // Here we keep track of listeners added on the window and document objects.
-    // Some stuff with permanent state (e.g. services) may register
-    // those kind of listeners without removing them at some point.
-    // We manually remove them after each test (see below).
-    for (const obj of objectsToPatch) {
-      listeners.set(obj, []);
-    }
-    for (const [obj, store] of listeners.entries()) {
-      patchWithCleanup(obj, {
-        addEventListener: function () {
-          store.push([...arguments]);
-          this._super(...arguments);
-        },
-      });
-    }
-    registerCleanup(() => {
-      odoo = originalOdoo;
-      luxon.Settings.defaultLocale = originalLocale;
-      luxon.Settings.defaultZoneName = originalZoneName;
-      // Cleanup the listeners added on window in the current test.
-      for (const [obj, store] of listeners.entries()) {
-        for (const args of store) {
-          obj.removeEventListener(...args);
-        }
-      }
-    });
+    setTestOdooWithCleanup();
+    prepareRegistriesWithCleanup();
+    forceLocaleAndTimezoneWithCleanup();
+    trackAddedEventListenersWithCleanup(window);
+    trackAddedEventListenersWithCleanup(document);
   });
 
   const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}`;

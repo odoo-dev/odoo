@@ -3,6 +3,7 @@
 import { ActionContainer } from "../actions/action_container";
 import { NavBar } from "./navbar/navbar";
 import { useService } from "../services/service_hook";
+import { mainComponentRegistry } from "./main_component_registry";
 
 const { Component, hooks } = owl;
 
@@ -13,7 +14,7 @@ export class WebClient extends Component {
     this.title = useService("title");
     this.router = useService("router");
     this.user = useService("user");
-    this.Components = odoo.mainComponentRegistry.getEntries();
+    this.Components = mainComponentRegistry.getEntries();
     this.title.setParts({ zopenerp: "Odoo" }); // zopenerp is easy to grep
     hooks.onMounted(() => {
       this.env.bus.on("ROUTE_CHANGE", this, this.loadRouterState);

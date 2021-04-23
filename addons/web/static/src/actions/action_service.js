@@ -7,6 +7,8 @@ import { sprintf } from "../utils/strings";
 import { serviceRegistry } from "../webclient/service_registry";
 import { browser } from "../core/browser";
 import { useBus } from "../utils/hooks";
+import { actionRegistry } from "./action_registry";
+import { viewRegistry } from "../views/view_registry";
 
 const { Component, hooks, tags } = owl;
 
@@ -76,7 +78,7 @@ function makeActionManager(env) {
    */
   async function _loadAction(actionRequest, context = {}) {
     let action;
-    if (typeof actionRequest === "string" && odoo.actionRegistry.contains(actionRequest)) {
+    if (typeof actionRequest === "string" && actionRegistry.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
       return {
         target: "current",
@@ -465,8 +467,8 @@ function makeActionManager(env) {
   function _executeActWindowAction(action, options) {
     const views = [];
     for (const [, type] of action.views) {
-      if (odoo.viewRegistry.contains(type)) {
-        views.push(odoo.viewRegistry.get(type));
+      if (viewRegistry.contains(type)) {
+        views.push(viewRegistry.get(type));
       }
     }
     if (!views.length) {
@@ -549,7 +551,7 @@ function makeActionManager(env) {
    * @param {ActionOptions} options
    */
   async function _executeClientAction(action, options) {
-    const clientAction = odoo.actionRegistry.get(action.tag);
+    const clientAction = actionRegistry.get(action.tag);
     if (clientAction.prototype instanceof Component) {
       if (action.target !== "new" && clientAction.forceFullscreen) {
         action.target = "fullscreen";
@@ -937,7 +939,7 @@ function makeActionManager(env) {
     let action;
     if (state.action) {
       // ClientAction
-      if (odoo.actionRegistry.contains(state.action)) {
+      if (actionRegistry.contains(state.action)) {
         action = {
           params: state,
           tag: state.action,

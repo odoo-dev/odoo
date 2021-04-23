@@ -1,9 +1,7 @@
 /** @odoo-module **/
-import { Registry } from "@web/core/registry";
 import { nextTick, legacyExtraNextTick } from "../helpers/utils";
 import { getLegacy } from "web.test_legacy";
 import { actionRegistry } from "@web/actions/action_registry";
-import { viewRegistry } from "@web/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 
 const { Component, tags } = owl;
@@ -20,30 +18,6 @@ QUnit.module("ActionManager", (hooks) => {
     cpHelpers = testUtils.controlPanel;
   });
 
-  // Remove this as soon as we drop the legacy support.
-  // This is necessary as some tests add actions/views in the legacy registries,
-  // which are in turned wrapped and added into the real wowl registries. We
-  // add those actions/views in the test registries, and remove them from the
-  // real ones (directly, as we don't need them in the test).
-  const owner = Symbol("owner");
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-        actionRegistry.remove(payload.key);
-      }
-    });
-    viewRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.viewRegistry) {
-        testConfig.viewRegistry.add(payload.key, payload.value);
-        viewRegistry.remove(payload.key);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-    viewRegistry.off("UPDATE", owner);
-  });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
   });
@@ -76,7 +50,7 @@ QUnit.module("ActionManager", (hooks) => {
     ]);
   });
 
-  QUnit.test("handle switching view and switching back on slow network", async function (assert) {
+  QUnit.debug("handle switching view and switching back on slow network", async function (assert) {
     assert.expect(9);
     let def = testUtils.makeTestPromise();
     const defs = [Promise.resolve(), def, Promise.resolve()];
@@ -481,15 +455,13 @@ QUnit.module("ActionManager", (hooks) => {
   QUnit.test("properly drop client actions after new action is initiated", async function (assert) {
     assert.expect(3);
     const slowWillStartDef = testUtils.makeTestPromise();
-    const actionsRegistry = new Registry();
     class ClientAction extends Component {
       willStart() {
         return slowWillStartDef;
       }
     }
     ClientAction.template = tags.xml`<div class="client_action">ClientAction</div>`;
-    actionsRegistry.add("slowAction", ClientAction);
-    testConfig.actionRegistry = actionsRegistry;
+    actionRegistry.add("slowAction", ClientAction);
     const webClient = await createWebClient({ testConfig });
     doAction(webClient, "slowAction");
     await nextTick();

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { titleService } from "@web/services/title_service";
 import { makeTestEnv } from "../helpers/mock_env";
 
@@ -9,15 +9,13 @@ import { makeTestEnv } from "../helpers/mock_env";
 // -----------------------------------------------------------------------------
 
 let env;
-let serviceRegistry;
 let title;
 
 QUnit.module("Title", {
   async beforeEach() {
     title = document.title;
-    serviceRegistry = new Registry();
     serviceRegistry.add("title", titleService);
-    env = await makeTestEnv({ serviceRegistry });
+    env = await makeTestEnv();
   },
   afterEach() {
     document.title = title;

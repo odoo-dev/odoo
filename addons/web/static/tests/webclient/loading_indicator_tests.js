@@ -3,7 +3,7 @@
 import { browser as originalBrowser } from "@web/core/browser";
 import { LoadingIndicator } from "@web/webclient/loading_indicator/loading_indicator";
 import { uiService } from "@web/services/ui_service";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { getFixture, nextTick } from "../helpers/utils";
 import { patch, unpatch } from "@web/utils/patch";
 import { makeTestEnv } from "../helpers/mock_env";
@@ -11,17 +11,15 @@ import { makeTestEnv } from "../helpers/mock_env";
 const { mount } = owl;
 
 let target;
-let serviceRegistry;
 let browser;
 let baseConfig;
 
 QUnit.module("LoadingIndicator", {
   async beforeEach() {
     target = getFixture();
-    serviceRegistry = new Registry();
     serviceRegistry.add("ui", uiService);
     browser = { setTimeout: () => 1 };
-    baseConfig = { serviceRegistry, browser };
+    baseConfig = { browser };
   },
 });
 

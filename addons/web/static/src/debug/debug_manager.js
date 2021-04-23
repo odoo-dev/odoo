@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "../services/service_hook";
+import { debugRegistry } from "./debug_registry";
 
 const { Component, hooks } = owl;
 
@@ -29,7 +30,7 @@ export class DebugManager extends Component {
     });
     if (!this.isInDialog) {
       this.debugFactories.global = () =>
-        odoo.debugRegistry.getAll().map((elFactory) => elFactory(this.env));
+        debugRegistry.getAll().map((elFactory) => elFactory(this.env));
     }
   }
 

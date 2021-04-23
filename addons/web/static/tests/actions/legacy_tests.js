@@ -1,12 +1,11 @@
 /** @odoo-module **/
 import { legacyExtraNextTick, patchWithCleanup } from "../helpers/utils";
 import { getLegacy } from "web.test_legacy";
-import { actionRegistry } from "@web/actions/action_registry";
-import { viewRegistry } from "@web/views/view_registry";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
-import { Registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/notifications/notification_container";
 import { DialogContainer } from "@web/services/dialog_service";
+import { clearRegistryWithCleanup } from "../helpers/mock_env";
 
 let testConfig;
 // legacy stuff
@@ -18,31 +17,6 @@ QUnit.module("ActionManager", (hooks) => {
     const legacy = getLegacy();
     ListController = legacy.ListController;
     testUtils = legacy.testUtils;
-  });
-
-  // Remove this as soon as we drop the legacy support.
-  // This is necessary as some tests add actions/views in the legacy registries,
-  // which are in turned wrapped and added into the real wowl registries. We
-  // add those actions/views in the test registries, and remove them from the
-  // real ones (directly, as we don't need them in the test).
-  const owner = Symbol("owner");
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-        actionRegistry.remove(payload.key);
-      }
-    });
-    viewRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.viewRegistry) {
-        testConfig.viewRegistry.add(payload.key, payload.value);
-        viewRegistry.remove(payload.key);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-    viewRegistry.off("UPDATE", owner);
   });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
@@ -61,9 +35,8 @@ QUnit.module("ActionManager", (hooks) => {
       },
     });
 
-    const componentRegistry = new Registry();
-    componentRegistry.add("NotificationContainer", NotificationContainer);
-    testConfig.mainComponentRegistry = componentRegistry;
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add("NotificationContainer", NotificationContainer);
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 3);
     assert.containsOnce(webClient, ".o_list_view");
@@ -89,9 +62,8 @@ QUnit.module("ActionManager", (hooks) => {
         list = this;
       },
     });
-    const componentRegistry = new Registry();
-    componentRegistry.add("DialogContainer", DialogContainer);
-    testConfig.mainComponentRegistry = componentRegistry;
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add("DialogContainer", DialogContainer);
 
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 3);

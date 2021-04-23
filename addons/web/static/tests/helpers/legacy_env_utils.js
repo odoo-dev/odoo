@@ -2,10 +2,10 @@
 
 import makeTestEnvironment from "web.test_env";
 import core from "web.core";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { uiService } from "@web/services/ui_service";
-import { makeTestEnv } from "@web/../tests/helpers/mock_env";
+import { makeTestEnv } from "./mock_env";
 import { makeLegacyDialogMappingService } from "@web/legacy/utils";
 import { registerCleanup } from "./cleanup";
 import { patch, unpatch } from "@web/utils/patch";
@@ -20,12 +20,11 @@ export async function makeLegacyDialogMappingTestEnv() {
   });
 
   const legacyEnv = makeTestEnvironment({ bus: core.bus });
-  const serviceRegistry = new Registry();
   serviceRegistry.add("ui", uiService);
   serviceRegistry.add("hotkey", hotkeyService);
   serviceRegistry.add("legacy_dialog_mapping", makeLegacyDialogMappingService(legacyEnv));
 
-  const env = await makeTestEnv({ serviceRegistry });
+  const env = await makeTestEnv();
 
   registerCleanup(() => {
     for (const listener of coreBusListeners) {

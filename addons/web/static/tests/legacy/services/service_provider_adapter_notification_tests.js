@@ -1,10 +1,7 @@
 /** @odoo-module **/
 import { getLegacy } from "web.test_legacy";
 import { createWebClient, doAction, getActionManagerTestConfig } from "../../actions/helpers";
-import { actionRegistry } from "@web/actions/action_registry";
 import { registerCleanup } from "../../helpers/cleanup";
-import { Registry } from "@web/core/registry";
-import { NotificationContainer } from "@web/notifications/notification_container";
 import * as LegacyRegistry from "web.Registry";
 import { nextTick } from "../../helpers/utils";
 import { patch, unpatch } from "@web/utils/patch";
@@ -21,23 +18,8 @@ QUnit.module("Service Provider Adapter Notification", (hooks) => {
     AbstractAction = legacy.AbstractAction;
     core = legacy.core;
   });
-
-  const owner = Symbol("owner");
-
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-  });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
-    testConfig.mainComponentRegistry = new Registry();
-    testConfig.mainComponentRegistry.add("NotificationContainer", NotificationContainer);
     legacyParams = {
       serviceRegistry: new LegacyRegistry(),
     };

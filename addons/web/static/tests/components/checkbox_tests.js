@@ -4,6 +4,8 @@ import { CheckBox } from "@web/components/checkbox/checkbox";
 import { translatedTerms } from "@web/localization/translation";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, patchWithCleanup } from "../helpers/utils";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { makeFakeLocalizationService } from "../helpers/mock_services";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
@@ -29,6 +31,8 @@ QUnit.module("Components", (hooks) => {
 
     class Parent extends Component {}
     Parent.template = xml`<CheckBox>ragabadabadaba</CheckBox>`;
+
+    serviceRegistry.add("localization", makeFakeLocalizationService());
 
     const parent = await mount(Parent, { env, target });
     assert.containsOnce(target, "div.custom-checkbox");

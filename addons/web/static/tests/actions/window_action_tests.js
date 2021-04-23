@@ -4,12 +4,12 @@ import { makeFakeUserService } from "../helpers/mock_services";
 import { click, legacyExtraNextTick, nextTick } from "../helpers/utils";
 import { getLegacy } from "web.test_legacy";
 import { clearUncommittedChanges } from "@web/actions/action_service";
-import { actionRegistry } from "@web/actions/action_registry";
-import { viewRegistry } from "@web/views/view_registry";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import { DialogContainer } from "@web/services/dialog_service";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
 import { debugService } from "@web/debug/debug_service";
+import { clearRegistryWithCleanup } from "../helpers/mock_env";
 
 let testConfig;
 
@@ -24,31 +24,6 @@ QUnit.module("ActionManager", (hooks) => {
     ListController = legacy.ListController;
     testUtils = legacy.testUtils;
     cpHelpers = testUtils.controlPanel;
-  });
-
-  // Remove this as soon as we drop the legacy support.
-  // This is necessary as some tests add actions/views in the legacy registries,
-  // which are in turned wrapped and added into the real wowl registries. We
-  // add those actions/views in the test registries, and remove them from the
-  // real ones (directly, as we don't need them in the test).
-  const owner = Symbol("owner");
-  hooks.beforeEach(() => {
-    actionRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.actionRegistry) {
-        testConfig.actionRegistry.add(payload.key, payload.value);
-        actionRegistry.remove(payload.key);
-      }
-    });
-    viewRegistry.on("UPDATE", owner, (payload) => {
-      if (payload.operation === "add" && testConfig.viewRegistry) {
-        testConfig.viewRegistry.add(payload.key, payload.value);
-        viewRegistry.remove(payload.key);
-      }
-    });
-  });
-  hooks.afterEach(() => {
-    actionRegistry.off("UPDATE", owner);
-    viewRegistry.off("UPDATE", owner);
   });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
@@ -644,7 +619,7 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("requests for execute_action of type object are handled", async function (assert) {
     assert.expect(11);
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "user",
       makeFakeUserService({
         context: Object.assign({}, { some_key: 2 }),
@@ -1811,14 +1786,12 @@ QUnit.module("ActionManager", (hooks) => {
     const TestView = AbstractView.extend({
       viewType: "test_view",
     });
-    legacyViewRegistry.add("test_view", TestView);
     const TestJsClassView = TestView.extend({
       init() {
         this._super.call(this, ...arguments);
         assert.step("init js class");
       },
     });
-    legacyViewRegistry.add("test_jsClass", TestJsClassView);
     testConfig.serverData.views["partner,false,test_view"] = `
       <div js_class="test_jsClass"></div>
     `;
@@ -1829,6 +1802,8 @@ QUnit.module("ActionManager", (hooks) => {
       type: "ir.actions.act_window",
       views: [[false, "test_view"]],
     };
+    legacyViewRegistry.add("test_view", TestView);
+    legacyViewRegistry.add("test_jsClass", TestJsClassView);
     const webClient = await createWebClient({ testConfig });
     await doAction(webClient, 9999);
     assert.verifySteps(["init js class"]);
@@ -1995,8 +1970,8 @@ QUnit.module("ActionManager", (hooks) => {
     async function (assert) {
       assert.expect(2);
 
-      testConfig.mainComponentRegistry = new Registry();
-      testConfig.mainComponentRegistry.add("DialogContainer", DialogContainer);
+      clearRegistryWithCleanup(mainComponentRegistry);
+      mainComponentRegistry.add("DialogContainer", DialogContainer);
 
       testConfig.serverData.views["partner,false,form"] = `
             <form>
@@ -2091,8 +2066,7 @@ QUnit.module("ActionManager", (hooks) => {
   QUnit.test("debugManager is active for (legacy) views", async function (assert) {
     assert.expect(2);
 
-    testConfig.serviceRegistry.add("debug", debugService);
-    testConfig.systrayRegistry = new Registry();
+    serviceRegistry.add("debug", debugService);
     testConfig.debug = "1";
     const mockRPC = async (route, args) => {
       if (route.includes("check_access_rights")) {

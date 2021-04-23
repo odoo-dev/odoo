@@ -1,14 +1,15 @@
 /** @odoo-module **/
 
 import { Popover } from "@web/components/popover/popover";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import {
   KeyAlreadyExistsError,
   KeyNotFoundError,
   PopoverManager,
   popoverService,
 } from "@web/services/popover_service";
-import { makeTestEnv } from "../helpers/mock_env";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
+import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick } from "../helpers/utils";
 
 const { Component, mount } = owl;
@@ -19,7 +20,7 @@ let target;
 
 class PseudoWebClient extends Component {
   setup() {
-    this.Components = odoo.mainComponentRegistry.getEntries();
+    this.Components = mainComponentRegistry.getEntries();
   }
 }
 PseudoWebClient.template = xml`
@@ -38,14 +39,10 @@ PseudoWebClient.template = xml`
 QUnit.module("PopoverManager", {
   async beforeEach() {
     target = getFixture();
-    const serviceRegistry = new Registry();
     serviceRegistry.add("popover", popoverService);
-    const componentRegistry = new Registry();
-    componentRegistry.add("PopoverManager", PopoverManager);
-    env = await makeTestEnv({
-      serviceRegistry,
-      mainComponentRegistry: componentRegistry,
-    });
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add("PopoverManager", PopoverManager);
+    env = await makeTestEnv();
   },
 });
 

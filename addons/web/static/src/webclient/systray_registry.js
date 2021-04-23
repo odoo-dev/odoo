@@ -2,4 +2,4 @@
 
 import { Registry } from "../core/registry";
 
-export const systrayRegistry = (odoo.systrayRegistry = new Registry());
+export const systrayRegistry = new Registry();

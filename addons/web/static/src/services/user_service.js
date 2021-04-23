@@ -3,6 +3,7 @@
 import { browser } from "../core/browser";
 import { serviceRegistry } from "../webclient/service_registry";
 import { SwitchCompanyMenu } from "../webclient/switch_company_menu/switch_company_menu";
+import { systrayRegistry } from "../webclient/systray_registry";
 
 export function computeAllowedCompanyIds(cidsFromHash) {
   const { user_companies } = odoo.session_info;
@@ -82,7 +83,7 @@ export const userService = {
     router.replaceState({ "lock cids": cids });
     cookie.setCookie("cids", cids);
 
-    odoo.systrayRegistry.add("SwitchCompanyMenu", SwitchCompanyMenu, { sequence: 1 });
+    systrayRegistry.add("SwitchCompanyMenu", SwitchCompanyMenu, { sequence: 1 });
 
     const setCompanies = makeSetCompanies(() => allowedCompanies);
     return {

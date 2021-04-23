@@ -3,12 +3,27 @@
 import { getLegacy } from "web.test_legacy";
 import { actionRegistry } from "@web/actions/action_registry";
 import { browser, makeRAMLocalStorage } from "@web/core/browser";
-import { Registry } from "@web/core/registry";
 import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "@web/legacy/utils";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { actionService } from "@web/actions/action_service";
+import { effectService } from "@web/effects/effect_service";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { notificationService } from "@web/notifications/notification_service";
+import { dialogService } from "@web/services/dialog_service";
+import { menuService } from "@web/services/menu_service";
+import { ormService } from "@web/services/orm_service";
+import { popoverService } from "@web/services/popover_service";
+import { viewService } from "@web/views/view_service";
 import { WebClient } from "@web/webclient/webclient";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
-import { makeTestServiceRegistry, makeTestViewRegistry } from "../helpers/mock_registries";
+import {
+  fakeTitleService,
+  makeFakeLocalizationService,
+  makeFakeRouterService,
+  makeFakeUIService,
+  makeFakeUserService,
+} from "../helpers/mock_services";
 import { getFixture, legacyExtraNextTick, nextTick, patchWithCleanup } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
@@ -134,7 +149,7 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
   mapLegacyEnvToWowlEnv(legacyEnv, env);
   // deploy the legacyActionManagerService (in Wowl env)
   const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
-  testConfig.serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
+  serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
   // patch DebouncedField delay
   const debouncedField = legacy.basicFields.DebouncedField;
   const initialDebouncedVal = debouncedField.prototype.DEBOUNCE;
@@ -174,21 +189,38 @@ export function getActionManagerTestConfig() {
     { pure: true }
   );
 
-  const serviceRegistry = makeTestServiceRegistry();
-  // build the action registry: copy the real action registry, and add an
+  // build the service registry
+
+  // need activateMockServer or something like that for odoo.browser.fetch !!! something is bad
+  const fakeLocalizationService = makeFakeLocalizationService();
+  const fakeUserService = makeFakeUserService();
+  const fakeUIService = makeFakeUIService();
+  const fakeRouterService = makeFakeRouterService();
+
+  serviceRegistry.add("action", actionService);
+  serviceRegistry.add("dialog", dialogService);
+  serviceRegistry.add("effect", effectService);
+  serviceRegistry.add("hotkey", hotkeyService);
+  serviceRegistry.add("localization", fakeLocalizationService);
+  serviceRegistry.add("menu", menuService);
+  serviceRegistry.add("notification", notificationService);
+  serviceRegistry.add("orm", ormService);
+  serviceRegistry.add("popover", popoverService);
+  serviceRegistry.add("router", fakeRouterService);
+  serviceRegistry.add("title", fakeTitleService);
+  serviceRegistry.add("ui", fakeUIService);
+  serviceRegistry.add("user", fakeUserService);
+  serviceRegistry.add("view", viewService);
+
+
   // additional basic client action
-  const testActionRegistry = new Registry();
-  for (const [key, action] of actionRegistry.getEntries()) {
-    testActionRegistry.add(key, action);
-  }
   class TestClientAction extends Component {}
   TestClientAction.template = tags.xml`
       <div class="test_client_action">
         ClientAction_<t t-esc="props.action.params?.description"/>
       </div>`;
-  testActionRegistry.add("__test__client__action__", TestClientAction);
-  // build a copy of the view registry
-  const testViewRegistry = makeTestViewRegistry();
+  actionRegistry.add("__test__client__action__", TestClientAction);
+
   // build the mocked server data
   const menus = {
     root: { id: "root", children: [0, 1, 2], name: "root", appID: "root" },
@@ -426,10 +458,7 @@ export function getActionManagerTestConfig() {
     menus,
   };
   return {
-    actionRegistry: testActionRegistry,
     browser,
     serverData,
-    serviceRegistry,
-    viewRegistry: testViewRegistry,
   };
 }

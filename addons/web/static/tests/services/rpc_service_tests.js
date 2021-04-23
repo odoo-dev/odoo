@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser";
 import { useService } from "@web/services/service_hook";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { notificationService } from "@web/notifications/notification_service";
 import { rpcService } from "@web/services/rpc_service";
 import { patch, unpatch } from "@web/utils/patch";
@@ -12,8 +12,6 @@ import { getFixture, makeDeferred, nextTick } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
-
-let serviceRegistry;
 
 let isXHRMocked = false;
 
@@ -50,7 +48,6 @@ async function testRPC(route, params) {
 
 QUnit.module("RPC", {
   beforeEach() {
-    serviceRegistry = new Registry();
     serviceRegistry.add("notification", notificationService);
     serviceRegistry.add("rpc", rpcService);
   },

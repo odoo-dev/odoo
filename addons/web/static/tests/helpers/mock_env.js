@@ -1,31 +1,62 @@
 /** @odoo-module **/
 import FormController from "web.FormController";
-import { Registry } from "@web/core/registry";
 import { makeEnv } from "@web/env";
-import { startServices } from "@web/services/launcher";
 import { registerCleanup } from "./cleanup";
+import { patchWithCleanup } from "./utils";
 import { makeMockServer } from "./mock_server";
-import { makeFakeLocalizationService, makeFakeUIService, mocks } from "./mock_services";
+import { mocks } from "./mock_services";
 
-function makeTestConfig(config = {}) {
-  const serviceRegistry = config.serviceRegistry || new Registry();
-  if (!serviceRegistry.contains("ui")) {
-    serviceRegistry.add("ui", makeFakeUIService());
-  }
-  if (!serviceRegistry.contains("localization")) {
-    serviceRegistry.add("localization", makeFakeLocalizationService());
-  }
-  return Object.assign(config, {
-    debug: config.debug || "",
-    serviceRegistry,
-    mainComponentRegistry: config.mainComponentRegistry || new Registry(),
-    actionRegistry: config.actionRegistry || new Registry(),
-    systrayRegistry: config.systrayRegistry || new Registry(),
-    errorDialogRegistry: config.errorDialogRegistry || new Registry(),
-    userMenuRegistry: config.userMenuRegistry || new Registry(),
-    debugRegistry: config.debugRegistry || new Registry(),
-    viewRegistry: config.viewRegistry || new Registry(),
-  });
+import { actionRegistry } from "@web/actions/action_registry";
+import { commandCategoryRegistry } from "@web/commands/command_category_registry";
+import { debugRegistry } from "@web/debug/debug_registry";
+import { errorDialogRegistry } from "@web/errors/error_dialog_registry";
+import { errorHandlerRegistry } from "@web/errors/error_handler_registry";
+import { viewRegistry } from "@web/views/view_registry";
+
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
+import { systrayRegistry } from "@web/webclient/systray_registry";
+import { userMenuRegistry } from "@web/webclient/user_menu_registry";
+import { startServices } from "@web/services/launcher";
+
+export function clearRegistryWithCleanup(registry) {
+  const patch = {
+    content: {},
+    elements: null,
+    entries: null,
+    // Preserve OnUpdate handlers
+    subscriptions: { "UPDATE": [...registry.subscriptions.UPDATE] },
+  };
+  patchWithCleanup(registry, patch);
+}
+
+function cloneRegistryWithCleanup(registry) {
+  const patch = {
+    content: { ...registry.content },
+    elements: null,
+    entries: null,
+    // Preserve OnUpdate handlers
+    subscriptions: { "UPDATE": [...registry.subscriptions.UPDATE] },
+  };
+  patchWithCleanup(registry, patch);
+}
+
+export function prepareRegistriesWithCleanup() {
+  // Clone registries
+  cloneRegistryWithCleanup(actionRegistry);
+  cloneRegistryWithCleanup(viewRegistry);
+  cloneRegistryWithCleanup(errorHandlerRegistry);
+
+  cloneRegistryWithCleanup(mainComponentRegistry);
+
+  // Clear registries
+  clearRegistryWithCleanup(commandCategoryRegistry);
+  clearRegistryWithCleanup(debugRegistry);
+  clearRegistryWithCleanup(errorDialogRegistry);
+
+  clearRegistryWithCleanup(serviceRegistry);
+  clearRegistryWithCleanup(systrayRegistry);
+  clearRegistryWithCleanup(userMenuRegistry);
 }
 
 /**
@@ -39,10 +70,19 @@ function makeTestConfig(config = {}) {
  * @returns {Promise<OdooEnv>}
  */
 export async function makeTestEnv(config = {}) {
-  const testConfig = makeTestConfig(config);
+  // add all missing dependencies if necessary
+  for (let service of serviceRegistry.getAll()) {
+    if (service.dependencies) {
+      for (let dep of service.dependencies) {
+        if (dep in mocks && !serviceRegistry.contains(dep)) {
+          serviceRegistry.add(dep, mocks[dep]());
+        }
+      }
+    }
+  }
+
   if (config.serverData || config.mockRPC || config.activateMockServer) {
-    testConfig.serviceRegistry.remove("rpc");
-    makeMockServer(testConfig, config.serverData, config.mockRPC);
+    makeMockServer(config.serverData, config.mockRPC);
   }
 
   // remove the multi-click delay for the quick edit in form views
@@ -53,27 +93,19 @@ export async function makeTestEnv(config = {}) {
     FormController.prototype.multiClickTime = initialQuickEditDelay;
   });
 
-  // add all missing dependencies if necessary
-  for (let service of testConfig.serviceRegistry.getAll()) {
-    if (service.dependencies) {
-      for (let dep of service.dependencies) {
-        if (dep in mocks && !testConfig.serviceRegistry.contains(dep)) {
-          testConfig.serviceRegistry.add(dep, mocks[dep]());
-        }
-      }
-    }
-  }
-  odoo = makeTestOdoo(testConfig);
+  setTestOdooWithCleanup(config);
   const env = makeEnv(odoo.debug);
   await startServices(env);
   env.qweb.addTemplates(window.__ODOO_TEMPLATES__);
   return env;
 }
 
-export function makeTestOdoo(config = {}) {
-  return Object.assign({}, odoo, {
+export function setTestOdooWithCleanup(config = {}) {
+  const originalOdoo = odoo;
+  registerCleanup(() => { odoo = originalOdoo; });
+  odoo = Object.assign({}, originalOdoo, {
     browser: {},
-    debug: config.debug,
+    debug: config.debug || "",
     session_info: {
       cache_hashes: {
         load_menus: "161803",
@@ -104,14 +136,5 @@ export function makeTestOdoo(config = {}) {
       server_version: "1.0",
       server_version_info: ["1.0"],
     },
-    serviceRegistry: config.serviceRegistry,
-    mainComponentRegistry: config.mainComponentRegistry,
-    actionRegistry: config.actionRegistry,
-    systrayRegistry: config.systrayRegistry,
-    errorDialogRegistry: config.errorDialogRegistry,
-    userMenuRegistry: config.userMenuRegistry,
-    debugRegistry: config.debugRegistry,
-    viewRegistry: config.viewRegistry,
-    commandCategoryRegistry: config.commandCategoryRegistry,
   });
 }

@@ -3,6 +3,7 @@
 import { useService } from "../../services/service_hook";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { debounce } from "../../utils/timing";
+import { systrayRegistry } from "../systray_registry";
 
 const { Component, hooks } = owl;
 const { onMounted, useExternalListener } = hooks;
@@ -33,12 +34,12 @@ export class NavBar extends Component {
       await this.render();
       await this.adapt();
     };
-    odoo.systrayRegistry.on("UPDATE", this, renderAndAdapt);
+    systrayRegistry.on("UPDATE", this, renderAndAdapt);
     this.env.bus.on("MENUS:APP-CHANGED", this, renderAndAdapt);
   }
 
   willUnmount() {
-    odoo.systrayRegistry.off("UPDATE", this);
+    systrayRegistry.off("UPDATE", this);
     this.env.bus.off("MENUS:APP-CHANGED", this);
   }
 
@@ -53,7 +54,7 @@ export class NavBar extends Component {
   }
 
   get systrayItems() {
-    return odoo.systrayRegistry
+    return systrayRegistry
       .getAll()
       .filter((Item) => ("isDisplayed" in Item ? Item.isDisplayed(this.env) : true))
       .reverse();

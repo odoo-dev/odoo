@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { NotificationContainer } from "@web/notifications/notification_container";
 import { notificationService } from "@web/notifications/notification_service";
 import { patch, unpatch } from "@web/utils/patch";
@@ -11,12 +11,10 @@ import { click, getFixture, nextTick } from "../helpers/utils";
 const { mount } = owl;
 
 let target;
-let serviceRegistry;
 
 QUnit.module("Notifications", {
   async beforeEach() {
     target = getFixture();
-    serviceRegistry = new Registry();
     serviceRegistry.add("notification", notificationService);
     patch(browser, "mock.settimeout", { setTimeout: () => 1 });
   },

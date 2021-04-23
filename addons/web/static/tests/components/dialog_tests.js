@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "@web/services/service_hook";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
@@ -20,10 +20,9 @@ QUnit.module("Components", (hooks) => {
     const dialogContainer = document.createElement("div");
     dialogContainer.classList.add("o_dialog_container");
     target.append(dialogContainer);
-    const serviceRegistry = new Registry();
     serviceRegistry.add("hotkey", hotkeyService);
     serviceRegistry.add("ui", uiService);
-    env = await makeTestEnv({ serviceRegistry });
+    env = await makeTestEnv();
   });
   hooks.afterEach(() => {
     if (parent) {

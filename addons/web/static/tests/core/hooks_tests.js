@@ -2,7 +2,7 @@
 
 import { useService } from "@web/services/service_hook";
 import { useBus } from "@web/utils/hooks";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, nextTick } from "../helpers/utils";
 
@@ -59,7 +59,6 @@ QUnit.test("useService: service that returns null", async function (assert) {
   }
   MyComponent.template = tags.xml`<div/>`;
 
-  const serviceRegistry = new Registry();
   serviceRegistry.add("toy_service", {
     name: "toy_service",
     start: () => {
@@ -67,7 +66,7 @@ QUnit.test("useService: service that returns null", async function (assert) {
     },
   });
 
-  const env = await makeTestEnv({ serviceRegistry });
+  const env = await makeTestEnv();
   const target = getFixture();
 
   const comp = await mount(MyComponent, { env, target });

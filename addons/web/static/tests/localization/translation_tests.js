@@ -2,7 +2,9 @@
 
 import { translatedTerms } from "@web/localization/translation";
 import { patch, unpatch } from "@web/utils/patch";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
+import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { getFixture } from "../helpers/utils";
 
 const { mount } = owl;
@@ -16,6 +18,7 @@ QUnit.module("Translations");
 QUnit.test("can translate a text node", async (assert) => {
   assert.expect(1);
   TestComponent.template = owl.tags.xml`<div>Hello</div>`;
+  serviceRegistry.add("localization", makeFakeLocalizationService());
   const env = await makeTestEnv();
   patch(translatedTerms, "add translations", terms);
   const target = getFixture();
@@ -27,6 +30,7 @@ QUnit.test("can translate a text node", async (assert) => {
 QUnit.test("_t is in env", async (assert) => {
   assert.expect(1);
   TestComponent.template = owl.tags.xml`<div><t t-esc="env._t('Hello')"/></div>`;
+  serviceRegistry.add("localization", makeFakeLocalizationService());
   const env = await makeTestEnv();
   patch(translatedTerms, "add translations", terms);
   const target = getFixture();

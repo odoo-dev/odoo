@@ -1,13 +1,14 @@
 /** @odoo-module **/
 
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { clearRegistryWithCleanup } from "../helpers/mock_env";
 import { errorService } from "@web/errors/error_service";
 import { notificationService } from "@web/notifications/notification_service";
 import { DialogContainer, dialogService } from "@web/services/dialog_service";
 import { uiService } from "@web/services/ui_service";
 import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import { makeTestEnv } from "../helpers/mock_env";
-import { makeFakeRPCService } from "../helpers/mock_services";
+import { makeFakeLocalizationService, makeFakeRPCService } from "../helpers/mock_services";
 import { click, getFixture, makeDeferred, nextTick, patchWithCleanup } from "../helpers/utils";
 import { registerCleanup } from "../helpers/cleanup";
 import { ErrorDialog } from "@web/errors/error_dialogs";
@@ -16,13 +17,12 @@ import { hotkeyService } from "@web/hotkeys/hotkey_service";
 const { Component, mount, tags } = owl;
 
 let env;
-let serviceRegistry;
 let target;
 let pseudoWebClient;
 
 class PseudoWebClient extends Component {
   setup() {
-    this.Components = odoo.mainComponentRegistry.getEntries();
+    this.Components = mainComponentRegistry.getEntries();
   }
 }
 PseudoWebClient.template = tags.xml`
@@ -39,13 +39,12 @@ PseudoWebClient.template = tags.xml`
 QUnit.module("DialogManager", {
   async beforeEach() {
     target = getFixture();
-    serviceRegistry = new Registry();
     serviceRegistry.add("dialog", dialogService);
     serviceRegistry.add("ui", uiService);
     serviceRegistry.add("hotkey", hotkeyService);
-    const componentRegistry = new Registry();
-    componentRegistry.add("DialogContainer", mainComponentRegistry.get("DialogContainer"));
-    env = await makeTestEnv({ serviceRegistry, mainComponentRegistry: componentRegistry });
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add("DialogContainer", DialogContainer);
+    env = await makeTestEnv();
   },
   afterEach() {
     pseudoWebClient.destroy();
@@ -155,6 +154,7 @@ QUnit.test("dialog component crashes", async (assert) => {
   serviceRegistry.add("rpc", rpc);
   serviceRegistry.add("notification", notificationService);
   serviceRegistry.add("error", errorService);
+  serviceRegistry.add("localization", makeFakeLocalizationService());
 
   pseudoWebClient = await mount(PseudoWebClient, { env, target });
 

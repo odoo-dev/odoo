@@ -264,6 +264,8 @@ export function makeFakeUIService(values) {
     bus: new owl.core.EventBus(),
     activateElement: () => {},
     deactivateElement: () => {},
+    activeElement: document,
+    getVisibleElements: () => ([]),
     block: () => {},
     unblock: () => {},
     isSmall: false,
@@ -355,7 +357,9 @@ export function makeFakeNotificationService(createMock, closeMock) {
 export const mocks = {
   cookie: () => fakeCookieService,
   download: makeFakeDownloadService,
-  effect: () => effectService,
+  effect: () => effectService, // BOI The real service ? Is this what we want ?
+  localization: makeFakeLocalizationService,
+  ui: makeFakeUIService,
   notifications: makeFakeNotificationService,
   router: makeFakeRouterService,
   rpc: makeFakeRPCService,

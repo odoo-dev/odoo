@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { click, getFixture, nextTick, makeDeferred, triggerHotkey } from "../helpers/utils";
-import { Registry } from "@web/core/registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
@@ -14,10 +14,9 @@ let target;
 
 QUnit.module("Components", (hooks) => {
   hooks.beforeEach(async () => {
-    const serviceRegistry = new Registry();
     serviceRegistry.add("hotkey", hotkeyService);
     serviceRegistry.add("ui", uiService);
-    env = await makeTestEnv({ serviceRegistry });
+    env = await makeTestEnv();
     target = getFixture();
   });
   hooks.afterEach(() => {
@@ -520,9 +519,9 @@ QUnit.module("Components", (hooks) => {
     Parent.template = owl.tags.xml`
         <Dropdown hotkey="'m'" t-on-dropdown-item-selected="onItemSelected">
           <t t-set-slot="menu">
-            <DropdownItem class="item1" hotkey="'1'" payload="{val:1}" />
+            <DropdownItem class="item1" payload="{val:1}" />
             <DropdownItem class="item2" hotkey="'2'" payload="{val:2}" />
-            <DropdownItem class="item3" hotkey="'3'" payload="{val:3}" />
+            <DropdownItem class="item3" payload="{val:3}" />
           </t>
         </Dropdown>
       `;
