@@ -6,6 +6,7 @@ import { KeepLast } from "../utils/concurrency";
 import { sprintf } from "../utils/strings";
 import { serviceRegistry } from "../webclient/service_registry";
 import { browser } from "../core/browser";
+import { useBus } from "../utils/hooks";
 
 const { Component, hooks, tags } = owl;
 
@@ -53,6 +54,16 @@ function makeActionManager(env) {
   // ---------------------------------------------------------------------------
   // misc
   // ---------------------------------------------------------------------------
+
+  /**
+   * Returns the last controller of the current controller stack.
+   *
+   * @returns {Controller|null}
+   */
+  function _getCurrentController() {
+    const stack = controllerStack;
+    return stack.length ? stack[stack.length - 1] : null;
+  }
 
   /**
    * Given an id, xmlid, tag (key of the client action registry) or directly an
@@ -204,10 +215,6 @@ function makeActionManager(env) {
     if (options.searchPanel) {
       props.searchPanel = options.searchPanel;
     }
-    if (action.controllers[view.type]) {
-      // this controller has already been used, re-import its exported state
-      props.state = action.controllers[view.type].exportedState;
-    }
     return props;
   }
 
@@ -270,23 +277,36 @@ function makeActionManager(env) {
     });
     const action = controller.action;
 
+    const currentController = _getCurrentController();
+    if (currentController && currentController.getState) {
+      currentController.exportedState = currentController.getState();
+    }
+
+    if (controller.exportedState) {
+      controller.props.state = controller.exportedState;
+    }
+
     class ControllerComponent extends Component {
       setup() {
         this.Component = controller.Component;
-        this.componentProps = this.props;
         this.componentRef = hooks.useRef("component");
-        this.exportState = null;
-        this.beforeLeave = null;
+        this.registerCallback = null;
         if (action.target !== "new") {
-          this.exportState = (state) => {
-            controller.exportedState = state;
+          let beforeLeaveFn;
+          this.registerCallback = (type, fn) => {
+            switch (type) {
+              case "export":
+                controller.getState = fn;
+                break;
+              case "beforeLeave":
+                beforeLeaveFn = fn;
+                break;
+            }
           };
-          const beforeLeaveFns = [];
-          this.beforeLeave = (callback) => {
-            beforeLeaveFns.push(callback);
-          };
-          this.env.bus.on("CLEAR-UNCOMMITTED-CHANGES", this, (callbacks) => {
-            beforeLeaveFns.forEach((fn) => callbacks.push(fn));
+          useBus(env.bus, "CLEAR-UNCOMMITTED-CHANGES", (callbacks) => {
+            if (beforeLeaveFn) {
+              callbacks.push(beforeLeaveFn);
+            }
           });
         }
       }
@@ -346,7 +366,6 @@ function makeActionManager(env) {
         if (action.target === "new" && dialogCloseResolve) {
           dialogCloseResolve();
         }
-        this.env.bus.off("CLEAR-UNCOMMITTED-CHANGES", this);
       }
       onHistoryBack() {
         const previousController = controllerStack[controllerStack.length - 2];
@@ -362,8 +381,7 @@ function makeActionManager(env) {
     }
 
     ControllerComponent.template = tags.xml`<t t-component="Component" t-props="props"
-        __exportState__="exportState"
-        __beforeLeave__="beforeLeave"
+          registerCallback="registerCallback"
           t-ref="component"
           t-on-history-back="onHistoryBack"
           t-on-controller-title-updated.stop="onTitleUpdated"/>`;
@@ -858,6 +876,7 @@ function makeActionManager(env) {
       views: controller.views,
       view,
     };
+
     newController.props = _getViewProps(view, controller.action, controller.views, options);
     controller.action.controllers[viewType] = newController;
     let index;
@@ -897,8 +916,6 @@ function makeActionManager(env) {
     const controller = controllerStack[index];
     if (controller.action.type === "ir.actions.act_window") {
       controller.props = _getViewProps(controller.view, controller.action, controller.views);
-    } else if (controller.exportedState) {
-      controller.props.state = controller.exportedState;
     }
     await clearUncommittedChanges(env);
     return _updateUI(controller, { index });
@@ -1028,8 +1045,7 @@ function makeActionManager(env) {
       return _preprocessAction(action, context);
     },
     get currentController() {
-      const stack = controllerStack;
-      return stack.length ? stack[stack.length - 1] : null;
+      return _getCurrentController();
     },
   };
 }

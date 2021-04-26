@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
-import { useBus } from "../utils/hooks";
 import { getScrollPosition, setScrollPosition } from "../utils/scrolling";
 
-const { useComponent, onMounted, onWillUnmount } = owl.hooks;
+const { useComponent, onMounted } = owl.hooks;
 
 // -----------------------------------------------------------------------------
 // Action hook
@@ -18,26 +17,22 @@ const scrollSymbol = Symbol("scroll");
 export function useSetupAction(params) {
   const component = useComponent();
 
-  function exportState() {
-    if (component.props.__exportState__) {
-      let state = {};
-      state[scrollSymbol] = getScrollPosition(component);
-      if (params.export) {
-        Object.assign(state, params.export());
-      }
-      component.props.__exportState__(state);
-    }
-  }
-
   onMounted(() => {
+    if (component.props.registerCallback) {
+      if (params.beforeLeave) {
+        component.props.registerCallback("beforeLeave", params.beforeLeave);
+      }
+      component.props.registerCallback("export", () => {
+        const state = {};
+        state[scrollSymbol] = getScrollPosition(component);
+        if (params.export) {
+          Object.assign(state, params.export());
+        }
+        return state;
+      });
+    }
     if (component.props.state) {
       setScrollPosition(component, component.props.state[scrollSymbol]);
     }
-    if (params.beforeLeave && component.props.__beforeLeave__) {
-      component.props.__beforeLeave__(params.beforeLeave);
-    }
   });
-  onWillUnmount(exportState);
-
-  useBus(component.env.bus, "ACTION_MANAGER:EXPORT_CONTROLLER_STATE", exportState);
 }
