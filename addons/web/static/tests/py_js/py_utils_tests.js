@@ -1,6 +1,7 @@
 /** @odoo-module **/
-import { evaluateExpr, formatAST, parseExpr } from "../../src/py_js/py";
-import { toPyValue } from "../../src/py_js/py_utils";
+
+import { evaluateExpr, formatAST, parseExpr } from "@web/py_js/py";
+import { toPyValue } from "@web/py_js/py_utils";
 
 QUnit.module("py", {}, () => {
   QUnit.module("formatAST");

@@ -1,16 +1,16 @@
 /** @odoo-module **/
 
-import { actionService } from "../../src/actions/action_service";
-import { browser } from "../../src/core/browser";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
-import { notificationService } from "../../src/notifications/notification_service";
-import { uiService } from "../../src/services/ui_service";
-import { patch, unpatch } from "../../src/utils/patch";
-import { NavBar } from "../../src/webclient/navbar/navbar";
+import { actionService } from "@web/actions/action_service";
+import { browser } from "@web/core/browser";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { notificationService } from "@web/notifications/notification_service";
+import { uiService } from "@web/services/ui_service";
+import { patch, unpatch } from "@web/utils/patch";
+import { NavBar } from "@web/webclient/navbar/navbar";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick } from "../helpers/utils";
-import { Registry } from "./../../src/core/registry";
-import { menuService } from "./../../src/services/menu_service";
+import { Registry } from "@web/core/registry";
+import { menuService } from "@web/services/menu_service";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;

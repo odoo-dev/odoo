@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import { strftimeToLuxonFormat } from "../../src/utils/dates";
-import { localization } from "../../src/localization/localization_settings";
-import { parseDateTime, formatDateTime, parseDate } from "../../src/utils/dates";
-import { patch, unpatch } from "../../src/utils/patch";
+import { strftimeToLuxonFormat } from "@web/utils/dates";
+import { localization } from "@web/localization/localization_settings";
+import { parseDateTime, formatDateTime, parseDate } from "@web/utils/dates";
+import { patch, unpatch } from "@web/utils/patch";
 import { defaultLocalization } from "../helpers/mock_services";
 import { patchWithCleanup } from "../helpers/utils";
 import { registerCleanup } from "../helpers/cleanup";

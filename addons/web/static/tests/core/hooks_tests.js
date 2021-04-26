@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { useService } from "../../src/services/service_hook";
-import { useBus } from "../../src/utils/hooks";
-import { Registry } from "../../src/core/registry";
+import { useService } from "@web/services/service_hook";
+import { useBus } from "@web/utils/hooks";
+import { Registry } from "@web/core/registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, nextTick } from "../helpers/utils";
 

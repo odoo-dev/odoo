@@ -1,17 +1,17 @@
 /** @odoo-module **/
 
-import { Registry } from "../../src/core/registry";
-import { errorService } from "../../src/errors/error_service";
-import { notificationService } from "../../src/notifications/notification_service";
-import { DialogContainer, dialogService } from "../../src/services/dialog_service";
-import { uiService } from "../../src/services/ui_service";
-import { mainComponentRegistry } from "../../src/webclient/main_component_registry";
+import { Registry } from "@web/core/registry";
+import { errorService } from "@web/errors/error_service";
+import { notificationService } from "@web/notifications/notification_service";
+import { DialogContainer, dialogService } from "@web/services/dialog_service";
+import { uiService } from "@web/services/ui_service";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeRPCService } from "../helpers/mock_services";
 import { click, getFixture, makeDeferred, nextTick, patchWithCleanup } from "../helpers/utils";
 import { registerCleanup } from "../helpers/cleanup";
 import { ErrorDialog } from "@web/errors/error_dialogs";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
 
 const { Component, mount, tags } = owl;
 

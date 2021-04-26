@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { useService } from "../../src/services/service_hook";
-import { Registry } from "../../src/core/registry";
-import { ormService } from "../../src/services/orm_service";
+import { useService } from "@web/services/service_hook";
+import { Registry } from "@web/core/registry";
+import { ormService } from "@web/services/orm_service";
 import { getFixture } from "../helpers/utils";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeUserService } from "../helpers/mock_services";

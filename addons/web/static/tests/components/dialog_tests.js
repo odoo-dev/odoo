@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import { useService } from "../../src/services/service_hook";
-import { Registry } from "../../src/core/registry";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
-import { uiService } from "../../src/services/ui_service";
+import { useService } from "@web/services/service_hook";
+import { Registry } from "@web/core/registry";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick } from "../helpers/utils";
 

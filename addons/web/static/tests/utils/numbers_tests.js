@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { localization } from "../../src/localization/localization_settings";
-import { humanNumber, formatFloat, parseFloat } from "../../src/utils/numbers";
-import { patch, unpatch } from "../../src/utils/patch";
+import { localization } from "@web/localization/localization_settings";
+import { humanNumber, formatFloat, parseFloat } from "@web/utils/numbers";
+import { patch, unpatch } from "@web/utils/patch";
 import { defaultLocalization } from "../helpers/mock_services";
 
 QUnit.module("utils", () => {

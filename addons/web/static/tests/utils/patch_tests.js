@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { patch, unpatch } from "../../src/utils/patch";
+import { patch, unpatch } from "@web/utils/patch";
 
 function makeBaseClass(assert, assertInSetup) {
   class BaseClass {

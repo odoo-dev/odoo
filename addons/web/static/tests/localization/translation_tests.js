@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { translatedTerms } from "../../src/localization/translation";
-import { patch, unpatch } from "../../src/utils/patch";
+import { translatedTerms } from "@web/localization/translation";
+import { patch, unpatch } from "@web/utils/patch";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture } from "../helpers/utils";
 

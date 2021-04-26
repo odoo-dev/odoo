@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-import { ActionDialog } from "../../src/actions/action_dialog";
-import { Registry } from "../../src/core/registry";
-import { DebugManager } from "../../src/debug/debug_manager";
-import { debugService } from "../../src/debug/debug_service";
-import { ormService } from "../../src/services/orm_service";
-import { useDebugManager } from "../../src/debug/debug_manager";
+import { ActionDialog } from "@web/actions/action_dialog";
+import { Registry } from "@web/core/registry";
+import { DebugManager } from "@web/debug/debug_manager";
+import { debugService } from "@web/debug/debug_service";
+import { ormService } from "@web/services/orm_service";
+import { useDebugManager } from "@web/debug/debug_manager";
 import { click, getFixture } from "../helpers/utils";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
-import { uiService } from "../../src/services/ui_service";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
 
 const { Component, hooks, mount, tags } = owl;

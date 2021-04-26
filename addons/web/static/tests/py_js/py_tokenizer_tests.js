@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { tokenize } from "../../src/py_js/py";
+import { tokenize } from "@web/py_js/py";
 
 QUnit.module("py", {}, () => {
   QUnit.module("tokenizer");

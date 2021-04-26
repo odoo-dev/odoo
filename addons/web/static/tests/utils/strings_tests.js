@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { escapeRegExp, intersperse, sprintf } from "../../src/utils/strings";
+import { escapeRegExp, intersperse, sprintf } from "@web/utils/strings";
 
 QUnit.module("utils", () => {
   QUnit.module("strings");

@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { effectService } from "../../src/effects/effect_service";
-import { makePreProcessQuery, makePushState, routeToUrl } from "../../src/services/router_service";
-import { SIZES } from "../../src/services/ui_service";
-import { rpcService } from "../../src/services/rpc_service";
-import { localization } from "../../src/localization/localization_settings";
-import { translatedTerms } from "../../src/localization/translation";
-import { computeAllowedCompanyIds, makeSetCompanies } from "../../src/services/user_service";
+import { effectService } from "@web/effects/effect_service";
+import { makePreProcessQuery, makePushState, routeToUrl } from "@web/services/router_service";
+import { SIZES } from "@web/services/ui_service";
+import { rpcService } from "@web/services/rpc_service";
+import { localization } from "@web/localization/localization_settings";
+import { translatedTerms } from "@web/localization/translation";
+import { computeAllowedCompanyIds, makeSetCompanies } from "@web/services/user_service";
 import { patchWithCleanup } from "./utils";
 
 const { Component } = owl;

@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
-import { Popover } from "../../src/components/popover/popover";
-import { Registry } from "../../src/core/registry";
+import { Popover } from "@web/components/popover/popover";
+import { Registry } from "@web/core/registry";
 import {
   KeyAlreadyExistsError,
   KeyNotFoundError,
   PopoverManager,
   popoverService,
-} from "../../src/services/popover_service";
+} from "@web/services/popover_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick } from "../helpers/utils";
 

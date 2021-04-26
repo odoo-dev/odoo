@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { groupBy, sortBy } from "../../src/utils/arrays";
+import { groupBy, sortBy } from "@web/utils/arrays";
 
 QUnit.module("utils", () => {
   QUnit.module("Arrays");

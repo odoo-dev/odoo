@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { CheckBox } from "../../src/components/checkbox/checkbox";
-import { translatedTerms } from "../../src/localization/translation";
+import { CheckBox } from "@web/components/checkbox/checkbox";
+import { translatedTerms } from "@web/localization/translation";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, patchWithCleanup } from "../helpers/utils";
 

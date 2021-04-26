@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-import { browser } from "../../src/core/browser";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
-import { uiService } from "../../src/services/ui_service";
-import { patch, unpatch } from "../../src/utils/patch";
-import { UserMenu } from "../../src/webclient/user_menu/user_menu";
+import { browser } from "@web/core/browser";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { uiService } from "@web/services/ui_service";
+import { patch, unpatch } from "@web/utils/patch";
+import { UserMenu } from "@web/webclient/user_menu/user_menu";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeUserService } from "../helpers/mock_services";
 import { click, getFixture } from "../helpers/utils";
-import { Registry } from "./../../src/core/registry";
+import { Registry } from "@web/core/registry";
 
 const { mount } = owl;
 

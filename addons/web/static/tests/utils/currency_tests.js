@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { formatCurrency } from "../../src/utils/currency";
-import { patch, unpatch } from "../../src/utils/patch";
-import { localization } from "../../src/localization/localization_settings";
+import { formatCurrency } from "@web/utils/currency";
+import { patch, unpatch } from "@web/utils/patch";
+import { localization } from "@web/localization/localization_settings";
 import { defaultLocalization } from "../helpers/mock_services";
 
 QUnit.module("utils", () => {

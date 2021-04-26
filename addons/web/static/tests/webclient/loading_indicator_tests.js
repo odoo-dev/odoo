@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
-import { browser as originalBrowser } from "../../src/core/browser";
-import { LoadingIndicator } from "../../src/webclient/loading_indicator/loading_indicator";
-import { uiService } from "../../src/services/ui_service";
-import { Registry } from "../../src/core/registry";
+import { browser as originalBrowser } from "@web/core/browser";
+import { LoadingIndicator } from "@web/webclient/loading_indicator/loading_indicator";
+import { uiService } from "@web/services/ui_service";
+import { Registry } from "@web/core/registry";
 import { getFixture, nextTick } from "../helpers/utils";
-import { patch, unpatch } from "../../src/utils/patch";
+import { patch, unpatch } from "@web/utils/patch";
 import { makeTestEnv } from "../helpers/mock_env";
 
 const { mount } = owl;

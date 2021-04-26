@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { actionService } from "../../src/actions/action_service";
-import { Registry } from "../../src/core/registry";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
-import { notificationService } from "../../src/notifications/notification_service";
-import { menuService } from "../../src/services/menu_service";
-import { uiService } from "../../src/services/ui_service";
-import { WebClient } from "../../src/webclient/webclient";
+import { actionService } from "@web/actions/action_service";
+import { Registry } from "@web/core/registry";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { notificationService } from "@web/notifications/notification_service";
+import { menuService } from "@web/services/menu_service";
+import { uiService } from "@web/services/ui_service";
+import { WebClient } from "@web/webclient/webclient";
 import { makeTestEnv } from "../helpers/mock_env";
 import { fakeTitleService } from "../helpers/mock_services";
 import { getFixture } from "../helpers/utils";

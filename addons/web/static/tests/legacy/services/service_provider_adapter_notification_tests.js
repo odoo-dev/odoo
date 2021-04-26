@@ -1,14 +1,14 @@
 /** @odoo-module **/
 import { getLegacy } from "web.test_legacy";
 import { createWebClient, doAction, getActionManagerTestConfig } from "../../actions/helpers";
-import { actionRegistry } from "../../../src/actions/action_registry";
+import { actionRegistry } from "@web/actions/action_registry";
 import { registerCleanup } from "../../helpers/cleanup";
 import { Registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/notifications/notification_container";
 import * as LegacyRegistry from "web.Registry";
 import { nextTick } from "../../helpers/utils";
-import { patch, unpatch } from "../../../src/utils/patch";
-import { browser } from "../../../src/core/browser";
+import { patch, unpatch } from "@web/utils/patch";
+import { browser } from "@web/core/browser";
 
 let testConfig;
 let AbstractAction;

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { makeContext } from "../../src/core/context";
+import { makeContext } from "@web/core/context";
 
 QUnit.module("utils", {}, () => {
   QUnit.module("makeContext");

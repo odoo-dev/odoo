@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Mutex, KeepLast } from "../../src/utils/concurrency";
+import { Mutex, KeepLast } from "@web/utils/concurrency";
 import { nextTick, makeDeferred } from "../helpers/utils";
 
 QUnit.module("utils", () => {

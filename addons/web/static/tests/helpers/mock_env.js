@@ -1,8 +1,8 @@
 /** @odoo-module **/
 import FormController from "web.FormController";
-import { Registry } from "../../src/core/registry";
-import { makeEnv } from "../../src/env";
-import { startServices } from "../../src/services/launcher";
+import { Registry } from "@web/core/registry";
+import { makeEnv } from "@web/env";
+import { startServices } from "@web/services/launcher";
 import { registerCleanup } from "./cleanup";
 import { makeMockServer } from "./mock_server";
 import { makeFakeLocalizationService, makeFakeUIService, mocks } from "./mock_services";
@@ -29,7 +29,7 @@ function makeTestConfig(config = {}) {
 }
 
 /**
- * @typedef {import("../../src/env").OdooEnv} OdooEnv
+ * @typedef {import("@web/env").OdooEnv} OdooEnv
  */
 
 /**

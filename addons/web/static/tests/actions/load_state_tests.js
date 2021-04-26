@@ -3,10 +3,10 @@
 import { legacyExtraNextTick, patchWithCleanup } from "../helpers/utils";
 import { makeFakeRouterService } from "../helpers/mock_services";
 import { getLegacy } from "web.test_legacy";
-import { actionRegistry } from "../../src/actions/action_registry";
-import { viewRegistry } from "../../src/views/view_registry";
+import { actionRegistry } from "@web/actions/action_registry";
+import { viewRegistry } from "@web/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
-import { browser } from "../../src/core/browser";
+import { browser } from "@web/core/browser";
 
 const { Component, tags } = owl;
 

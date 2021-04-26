@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
-import * as utils from "../../src/utils/arrays";
+import * as utils from "@web/utils/arrays";
 import { makeFakeRPCService, makeMockFetch } from "./mock_services";
-import { Registry } from "../../src/core/registry";
-import { evaluateExpr } from "../../src/py_js/py";
-import { Domain } from "../../src/core/domain";
-import { browser } from "../../src/core/browser";
+import { Registry } from "@web/core/registry";
+import { evaluateExpr } from "@web/py_js/py";
+import { Domain } from "@web/core/domain";
+import { browser } from "@web/core/browser";
 import { patchWithCleanup } from "./utils";
 
 const { DateTime } = luxon;

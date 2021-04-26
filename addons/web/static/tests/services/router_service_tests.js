@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
-import { browser } from "../../src/core/browser";
+import { browser } from "@web/core/browser";
 import {
   parseHash,
   parseSearchQuery,
   redirect,
   routeToUrl,
-} from "../../src/services/router_service";
-import { patch, unpatch } from "../../src/utils/patch";
+} from "@web/services/router_service";
+import { patch, unpatch } from "@web/utils/patch";
 import { makeTestEnv } from "../helpers/mock_env";
 import { nextTick } from "../helpers/utils";
 

@@ -8,7 +8,7 @@ import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { makeLegacyDialogMappingService } from "@web/legacy/utils";
 import { registerCleanup } from "./cleanup";
-import { patch, unpatch } from "../../src/utils/patch";
+import { patch, unpatch } from "@web/utils/patch";
 
 export async function makeLegacyDialogMappingTestEnv() {
   const coreBusListeners = [];

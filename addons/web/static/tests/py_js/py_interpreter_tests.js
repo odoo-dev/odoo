@@ -1,6 +1,6 @@
 /** @odoo-module **/
-import { evaluateExpr } from "../../src/py_js/py";
-import { toPyDict } from "../../src/py_js/py_utils";
+import { evaluateExpr } from "@web/py_js/py";
+import { toPyDict } from "@web/py_js/py_utils";
 
 QUnit.module("py", {}, () => {
   QUnit.module("interpreter", () => {

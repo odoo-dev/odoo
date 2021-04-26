@@ -2,12 +2,12 @@
 
 import { click, legacyExtraNextTick, nextTick } from "../helpers/utils";
 import { getLegacy } from "web.test_legacy";
-import { actionRegistry } from "../../src/actions/action_registry";
-import { viewRegistry } from "../../src/views/view_registry";
+import { actionRegistry } from "@web/actions/action_registry";
+import { viewRegistry } from "@web/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
-import { Registry } from "../../src/core/registry";
-import { NotificationContainer } from "../../src/notifications/notification_container";
-import { EffectContainer } from "../../src/effects/effect_container";
+import { Registry } from "@web/core/registry";
+import { NotificationContainer } from "@web/notifications/notification_container";
+import { EffectContainer } from "@web/effects/effect_container";
 import { makeFakeUserService } from "../helpers/mock_services";
 
 let testConfig;

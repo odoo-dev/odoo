@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { evaluateExpr } from "../../src/py_js/py";
+import { evaluateExpr } from "@web/py_js/py";
 
 QUnit.module("py", {}, () => {
   QUnit.module("date stuff", () => {

@@ -2,8 +2,8 @@
 
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeRouterService } from "../helpers/mock_services";
-import { actionRegistry } from "../../src/actions/action_registry";
-import { viewRegistry } from "../../src/views/view_registry";
+import { actionRegistry } from "@web/actions/action_registry";
+import { viewRegistry } from "@web/views/view_registry";
 import { doAction, getActionManagerTestConfig } from "./helpers";
 
 let testConfig;

@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
 import { getLegacy } from "web.test_legacy";
-import { actionRegistry } from "../../src/actions/action_registry";
-import { browser, makeRAMLocalStorage } from "../../src/core/browser";
-import { Registry } from "../../src/core/registry";
-import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "../../src/legacy/utils";
-import { WebClient } from "../../src/webclient/webclient";
+import { actionRegistry } from "@web/actions/action_registry";
+import { browser, makeRAMLocalStorage } from "@web/core/browser";
+import { Registry } from "@web/core/registry";
+import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "@web/legacy/utils";
+import { WebClient } from "@web/webclient/webclient";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeTestServiceRegistry, makeTestViewRegistry } from "../helpers/mock_registries";

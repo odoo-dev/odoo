@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Domain } from "../../src/core/domain";
+import { Domain } from "@web/core/domain";
 
 QUnit.module("domain", {}, () => {
   // ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Registry } from "../../src/core/registry";
+import { Registry } from "@web/core/registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeDeferred, nextTick } from "../helpers/utils";
 

@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { getLegacy } from "web.test_legacy";
-import { actionRegistry } from "../../src/actions/action_registry";
-import { uiService } from "../../src/services/ui_service";
-import { viewRegistry } from "../../src/views/view_registry";
+import { actionRegistry } from "@web/actions/action_registry";
+import { uiService } from "@web/services/ui_service";
+import { viewRegistry } from "@web/views/view_registry";
 import {
   makeFakeDownloadService,
   makeFakeNotificationService,

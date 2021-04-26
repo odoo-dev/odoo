@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { Popover } from "../../src/components/popover/popover";
-import { browser } from "../../src/core/browser";
+import { Popover } from "@web/components/popover/popover";
+import { browser } from "@web/core/browser";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick, patchWithCleanup, triggerEvent } from "../helpers/utils";

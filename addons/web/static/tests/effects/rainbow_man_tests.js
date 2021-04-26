@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { Registry } from "../../src/core/registry";
-import { EffectContainer } from "../../src/effects/effect_container";
-import { effectService } from "../../src/effects/effect_service";
-import { RainbowMan } from "../../src/effects/rainbow_man";
-import { notificationService } from "../../src/notifications/notification_service";
+import { Registry } from "@web/core/registry";
+import { EffectContainer } from "@web/effects/effect_container";
+import { effectService } from "@web/effects/effect_service";
+import { RainbowMan } from "@web/effects/rainbow_man";
+import { notificationService } from "@web/notifications/notification_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeUserService } from "../helpers/mock_services";
 import { click, getFixture, nextTick } from "../helpers/utils";

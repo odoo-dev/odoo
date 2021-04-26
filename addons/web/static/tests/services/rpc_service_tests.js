@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
-import { browser } from "../../src/core/browser";
-import { useService } from "../../src/services/service_hook";
-import { Registry } from "../../src/core/registry";
-import { notificationService } from "../../src/notifications/notification_service";
-import { rpcService } from "../../src/services/rpc_service";
-import { patch, unpatch } from "../../src/utils/patch";
+import { browser } from "@web/core/browser";
+import { useService } from "@web/services/service_hook";
+import { Registry } from "@web/core/registry";
+import { notificationService } from "@web/notifications/notification_service";
+import { rpcService } from "@web/services/rpc_service";
+import { patch, unpatch } from "@web/utils/patch";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeMockXHR } from "../helpers/mock_services";
 import { getFixture, makeDeferred, nextTick } from "../helpers/utils";

@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { browser } from "../../src/core/browser";
-import { Registry } from "../../src/core/registry";
-import { NotificationContainer } from "../../src/notifications/notification_container";
-import { notificationService } from "../../src/notifications/notification_service";
-import { patch, unpatch } from "../../src/utils/patch";
+import { browser } from "@web/core/browser";
+import { Registry } from "@web/core/registry";
+import { NotificationContainer } from "@web/notifications/notification_container";
+import { notificationService } from "@web/notifications/notification_service";
+import { patch, unpatch } from "@web/utils/patch";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick } from "../helpers/utils";
 

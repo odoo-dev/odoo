@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { browser } from "../../src/core/browser";
-import { Registry } from "../../src/core/registry";
+import { browser } from "@web/core/browser";
+import { Registry } from "@web/core/registry";
 import {
   ClientErrorDialog,
   Error504Dialog,
@@ -9,12 +9,12 @@ import {
   RedirectWarningDialog,
   SessionExpiredDialog,
   WarningDialog,
-} from "../../src/errors/error_dialogs";
-import OdooError from "../../src/errors/odoo_error";
-import { uiService } from "../../src/services/ui_service";
+} from "@web/errors/error_dialogs";
+import OdooError from "@web/errors/odoo_error";
+import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick, patchWithCleanup } from "../helpers/utils";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
 
 const { Component, mount, tags } = owl;
 let target;

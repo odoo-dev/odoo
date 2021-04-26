@@ -1,11 +1,11 @@
 /** @odoo-module **/
-import { useCommand } from "../../src/commands/command_hook";
-import { commandService } from "../../src/commands/command_service";
-import { Registry } from "../../src/core/registry";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
-import { dialogService } from "../../src/services/dialog_service";
-import { uiService } from "../../src/services/ui_service";
-import { mainComponentRegistry } from "../../src/webclient/main_component_registry";
+import { useCommand } from "@web/commands/command_hook";
+import { commandService } from "@web/commands/command_service";
+import { Registry } from "@web/core/registry";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { dialogService } from "@web/services/dialog_service";
+import { uiService } from "@web/services/ui_service";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick, triggerHotkey } from "../helpers/utils";
 const { Component, mount, tags } = owl;

@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { click, getFixture, nextTick, makeDeferred, triggerHotkey } from "../helpers/utils";
-import { Registry } from "./../../src/core/registry";
-import { hotkeyService } from "../../src/hotkeys/hotkey_service";
-import { uiService } from "../../src/services/ui_service";
+import { Registry } from "@web/core/registry";
+import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
 
 const { mount } = owl;

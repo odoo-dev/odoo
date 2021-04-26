@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { parseExpr } from "../../src/py_js/py";
+import { parseExpr } from "@web/py_js/py";
 
 QUnit.module("py", {}, () => {
   QUnit.module("parser");

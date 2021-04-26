@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-import { browser } from "../../src/core/browser";
-import { Registry } from "../../src/core/registry";
-import { RPCErrorDialog } from "../../src/errors/error_dialogs";
-import { errorHandlerRegistry } from "../../src/errors/error_handler_registry";
-import { errorService } from "../../src/errors/error_service";
-import OdooError from "../../src/errors/odoo_error";
-import { notificationService } from "../../src/notifications/notification_service";
-import { dialogService } from "../../src/services/dialog_service";
-import { ConnectionLostError, RPCError } from "../../src/services/rpc_service";
+import { browser } from "@web/core/browser";
+import { Registry } from "@web/core/registry";
+import { RPCErrorDialog } from "@web/errors/error_dialogs";
+import { errorHandlerRegistry } from "@web/errors/error_handler_registry";
+import { errorService } from "@web/errors/error_service";
+import OdooError from "@web/errors/odoo_error";
+import { notificationService } from "@web/notifications/notification_service";
+import { dialogService } from "@web/services/dialog_service";
+import { ConnectionLostError, RPCError } from "@web/services/rpc_service";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeNotificationService, makeFakeRPCService } from "../helpers/mock_services";

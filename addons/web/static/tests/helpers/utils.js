@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { isMacOS } from "../../src/core/browser";
-import { patch, unpatch } from "../../src/utils/patch";
+import { isMacOS } from "@web/core/browser";
+import { patch, unpatch } from "@web/utils/patch";
 import { registerCleanup } from "./cleanup";
 
 const { Settings } = luxon;

@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { Registry } from "../../src/core/registry";
-import { uiService, useActiveElement } from "../../src/services/ui_service";
-import { BlockUI } from "../../src/webclient/block_ui/block_ui";
+import { Registry } from "@web/core/registry";
+import { uiService, useActiveElement } from "@web/services/ui_service";
+import { BlockUI } from "@web/webclient/block_ui/block_ui";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, nextTick } from "../helpers/utils";
 

@@ -3,13 +3,13 @@
 import { makeFakeUserService } from "../helpers/mock_services";
 import { click, legacyExtraNextTick, nextTick } from "../helpers/utils";
 import { getLegacy } from "web.test_legacy";
-import { clearUncommittedChanges } from "../../src/actions/action_service";
-import { actionRegistry } from "../../src/actions/action_registry";
-import { viewRegistry } from "../../src/views/view_registry";
-import { Registry } from "../../src/core/registry";
-import { DialogContainer } from "../../src/services/dialog_service";
+import { clearUncommittedChanges } from "@web/actions/action_service";
+import { actionRegistry } from "@web/actions/action_registry";
+import { viewRegistry } from "@web/views/view_registry";
+import { Registry } from "@web/core/registry";
+import { DialogContainer } from "@web/services/dialog_service";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
-import { debugService } from "../../src/debug/debug_service";
+import { debugService } from "@web/debug/debug_service";
 
 let testConfig;
 

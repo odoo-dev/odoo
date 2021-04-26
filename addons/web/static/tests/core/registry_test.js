@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Registry } from "../../src/core/registry";
+import { Registry } from "@web/core/registry";
 
 QUnit.module("Registry");
 

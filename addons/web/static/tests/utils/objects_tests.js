@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { shallowEqual } from "../../src/utils/objects";
+import { shallowEqual } from "@web/utils/objects";
 
 QUnit.module("utils", () => {
   QUnit.module("Objects");
