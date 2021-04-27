@@ -16,12 +16,13 @@ const { EventBus } = core;
  * 3. it provides a chained API to add items to the registry.
  */
 export class Registry extends EventBus {
-  content = {};
-  elements = null;
-  entries = null;
 
   constructor() {
     super();
+    this.content = {};
+    this.elements = null;
+    this.entries = null;
+
     this.on("UPDATE", this, () => {
       this.elements = null;
       this.entries = null;

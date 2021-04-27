@@ -17,7 +17,9 @@ const { Component, QWeb } = owl;
  */
 
 export class CheckBox extends Component {
-  _id = `checkbox-comp-${CheckBox.nextId++}`;
+  setup() {
+    this.id = `checkbox-comp-${CheckBox.nextId++}`;
+  }
 }
 
 CheckBox.template = "web.CheckBox";
