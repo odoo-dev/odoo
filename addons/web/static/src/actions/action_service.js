@@ -877,6 +877,18 @@ function makeActionManager(env) {
       view,
     };
 
+    // LEGACY CODE COMPATIBILITY: remove when controllers will be written in owl
+    if (view.isLegacy && newController.jsId === controller.jsId ) {
+      // case where a legacy view is reloaded via the view switcher
+      const { __legacy_widget__ } = controller.getState();
+      const params = {};
+      if ("recordId" in options) {
+        params.currentId = options.recordId;
+      }
+      return __legacy_widget__.reload(params);
+    }
+    // END LEGACY CODE COMPATIBILITY
+
     newController.props = _getViewProps(view, controller.action, controller.views, options);
     controller.action.controllers[viewType] = newController;
     let index;
@@ -944,10 +956,9 @@ function makeActionManager(env) {
       ) {
         // only when we already have an action in dom
         try {
-          const viewOptions = {};
-          if (state.id) {
-            viewOptions.recordId = parseInt(state.id, 10);
-          }
+          const viewOptions = {
+            recordId: state.id ? parseInt(state.id, 10) : false,
+          };
           let viewType = state.view_type || currentController.view.type;
           await switchView(viewType, viewOptions);
           return true;

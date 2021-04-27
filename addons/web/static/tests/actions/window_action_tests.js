@@ -2112,4 +2112,27 @@ QUnit.module("ActionManager", (hooks) => {
     );
     webClient.destroy();
   });
+
+  QUnit.test("reload a view via the view switcher keep state", async function (assert) {
+    assert.expect(6);
+    testConfig.serverData.actions[3].views.unshift([false, "pivot"]);
+    testConfig.serverData.views["partner,false,pivot"] = "<pivot/>";
+    const mockRPC = async (route, args) => {
+      if (args.method === "read_group") {
+        assert.step(args.method);
+      }
+    };
+    const webClient = await createWebClient({ testConfig, mockRPC });
+    await doAction(webClient, 3);
+    assert.doesNotHaveClass(webClient.el.querySelector(".o_pivot_measure_row"), "o_pivot_sort_order_asc");
+    await click(webClient.el.querySelector(".o_pivot_measure_row"));
+    assert.hasClass(webClient.el.querySelector(".o_pivot_measure_row"), "o_pivot_sort_order_asc");
+    await cpHelpers.switchView(webClient.el, "pivot");
+    await legacyExtraNextTick();
+    assert.hasClass(webClient.el.querySelector(".o_pivot_measure_row"), "o_pivot_sort_order_asc");
+    assert.verifySteps([
+      "read_group", // initial read_group
+      "read_group"  // read_group at reload after switch view
+    ]);
+  });
 });
