@@ -23,6 +23,7 @@ export async function startWebClient (Webclient) {
     server_version: sessionInfo.server_version,
     server_version_info: sessionInfo.server_version_info,
   };
+  odoo.isReady = false;
 
   // setup environment
   const loadTemplates = odoo.loadTemplatesPromise.then(processTemplates);
@@ -36,6 +37,7 @@ export async function startWebClient (Webclient) {
   const root = await mount(Webclient, { env, target: document.body, position: "self" });
   delete odoo.debug;
   odoo.__WOWL_DEBUG__ = { root };
+  odoo.isReady = true;
 }
 
 /**
