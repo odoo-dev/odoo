@@ -1,15 +1,15 @@
 /** @odoo-module **/
 
-import { evaluateExpr } from "../py_js/py";
-import { makeContext } from "../core/context";
-import { KeepLast } from "../utils/concurrency";
-import { sprintf } from "../utils/strings";
-import { serviceRegistry } from "../webclient/service_registry";
 import { browser } from "../core/browser";
-import { useBus } from "../utils/hooks";
-import { actionRegistry } from "./action_registry";
-import { viewRegistry } from "../views/view_registry";
+import { makeContext } from "../core/context";
+import { evaluateExpr } from "../py_js/py";
+import { KeepLast } from "../utils/concurrency";
 import { download } from "../utils/download";
+import { useBus } from "../utils/hooks";
+import { sprintf } from "../utils/strings";
+import { viewRegistry } from "../views/view_registry";
+import { serviceRegistry } from "../webclient/service_registry";
+import { actionRegistry } from "./action_registry";
 
 const { Component, hooks, tags } = owl;
 
@@ -49,6 +49,14 @@ function makeActionManager(env) {
   let controllerStack = [];
   let dialogCloseProm;
   let actionCache = {};
+
+  // The state action (or default user action if none) is loaded as soon as possible
+  // so that the next "doAction" will have its action ready when needed.
+  const actionParams = _getActionParams(_getHashState());
+  if (actionParams) {
+    const { actionRequest, options } = actionParams;
+    _loadAction(actionRequest, options.additionalContext);
+  }
 
   env.bus.on("CLEAR-CACHES", null, () => {
     actionCache = {};
@@ -139,6 +147,57 @@ function makeActionManager(env) {
   }
 
   /**
+   * @private
+   * @param {string} viewType
+   * @throws {Error} if the current controller is not a view
+   * @returns {View | null}
+   */
+  function _getView(viewType) {
+    const currentController = controllerStack[controllerStack.length - 1];
+    if (currentController.action.type !== "ir.actions.act_window") {
+      throw new Error(`switchView called but the current controller isn't a view`);
+    }
+    const view = currentController.views.find((view) => view.type === viewType);
+    return view || null;
+  }
+
+  /**
+   * Parses and returns the current hash state.
+   *
+   * @private
+   * @returns {HashState}
+   */
+  function _getHashState() {
+    const hashState = Object.assign({}, env.services.router.current.hash);
+    for (const key in hashState) {
+      const value = hashState[key];
+      switch (key) {
+        case "action": {
+          if (value && !isNaN(value)) {
+            hashState[key] = Number(value);
+          }
+          break;
+        }
+        case "active_id":
+        case "id":
+        case "view_id": {
+          if (!isNaN(value)) {
+            hashState[key] = Number(value);
+          }
+          break;
+        }
+        case "active_ids": {
+          if (value) {
+            hashState[key] = value.split(",").map(Number);
+          }
+          break;
+        }
+      }
+    }
+    return hashState;
+  }
+
+  /**
    * Given a controller stack, returns the list of breadcrumb items.
    *
    * @private
@@ -152,6 +211,66 @@ function makeActionManager(env) {
         name: controller.title || controller.action.name || env._t("Undefined"),
       };
     });
+  }
+
+  /**
+   * @private
+   * @param {any} state
+   * @returns {ActionParams | null}
+   */
+  function _getActionParams(state) {
+    const options = { clearBreadcrumbs: true };
+    let actionRequest = null;
+    if (state.action) {
+      // ClientAction
+      if (actionRegistry.contains(state.action)) {
+        actionRequest = {
+          params: state,
+          tag: state.action,
+          type: "ir.actions.client",
+        };
+      } else {
+        // The action to load isn't the current one => executes it
+        actionRequest = state.action;
+        const context = { params: state };
+        if (state.active_id) {
+          context.active_id = state.active_id;
+        }
+        if (state.active_ids) {
+          context.active_ids = state.active_ids;
+        } else if (state.active_id) {
+          context.active_ids = [state.active_id];
+        }
+        Object.assign(options, {
+          additionalContext: context,
+          resId: state.id,
+          viewType: state.view_type,
+        });
+      }
+    } else if (state.model) {
+      if (state.id) {
+        actionRequest = {
+          res_model: state.model,
+          res_id: state.id,
+          type: "ir.actions.act_window",
+          views: [[state.view_id ? state.view_id : false, "form"]],
+        };
+      } else if (state.view_type) {
+        // This is a window action on a multi-record view => restores it from
+        // the session storage
+        const storedAction = browser.sessionStorage.getItem("current_action");
+        const lastAction = JSON.parse(storedAction || "{}");
+        if (lastAction.res_model === state.model) {
+          actionRequest = lastAction;
+          options.viewType = state.view_type;
+        }
+      }
+    }
+    // If no action => falls back on the user default action (if any).
+    if (!actionRequest && env.services.user.home_action_id) {
+      actionRequest = env.services.user.home_action_id;
+    }
+    return actionRequest ? { actionRequest, options } : null;
   }
 
   /**
@@ -172,6 +291,32 @@ function makeActionManager(env) {
    */
   function _getClientActionProps(action, options) {
     return Object.assign({}, _getActionProps(action), { options });
+  }
+
+  /**
+   * @private
+   * @param {any} state
+   * @returns {SwitchViewParams | null}
+   */
+  function _getSwitchViewParams(state) {
+    if (state.action && !actionRegistry.contains(state.action)) {
+      const currentController = controllerStack[controllerStack.length - 1];
+      const currentActionId =
+        currentController && currentController.action && currentController.action.id;
+      // Window Action: determines model, viewType etc....
+      if (
+        currentController &&
+        currentController.action.type === "ir.actions.act_window" &&
+        currentActionId === state.action
+      ) {
+        const viewOptions = {
+          recordId: state.id || false,
+        };
+        const viewType = state.view_type || currentController.view.type;
+        return { viewType, viewOptions };
+      }
+    }
+    return null;
   }
 
   /**
@@ -860,13 +1005,13 @@ function makeActionManager(env) {
    * stack. This action must be of type 'ir.actions.act_window'.
    *
    * @param {ViewType} viewType
+   * @param {any} [options={}]
+   * @throws {ViewNotFoundError} if the viewType is not found on the current action
+   * @returns {Promise<any>}
    */
-  async function switchView(viewType, options) {
+  async function switchView(viewType, options = {}) {
     const controller = controllerStack[controllerStack.length - 1];
-    if (controller.action.type !== "ir.actions.act_window") {
-      throw new Error(`switchView called but the current controller isn't a view`);
-    }
-    const view = controller.views.find((view) => view.type === viewType);
+    const view = _getView(viewType);
     if (!view) {
       throw new ViewNotFoundError(
         sprintf(env._t("No view of type '%s' could be found in the current action."), viewType)
@@ -899,8 +1044,8 @@ function makeActionManager(env) {
       index = controllerStack.findIndex((ct) => ct.action.jsId === controller.action.jsId);
       index = index > -1 ? index : controllerStack.length - 1;
     } else {
-      // This case would mostly happen when one changes the view_type in the URL
-      // via loadState. Also, I guess we may need it when we have other monoRecord views
+      // This case would mostly happen when loadState detects a change in the URL.
+      // Also, I guess we may need it when we have other monoRecord views
       index = controllerStack.findIndex(
         (ct) => ct.action.jsId === controller.action.jsId && !ct.view.multiRecord
       );
@@ -936,90 +1081,35 @@ function makeActionManager(env) {
     return _updateUI(controller, { index });
   }
 
-  async function loadState(state, options) {
-    let action;
-    if (state.action) {
-      // ClientAction
-      if (actionRegistry.contains(state.action)) {
-        action = {
-          params: state,
-          tag: state.action,
-          type: "ir.actions.client",
-        };
+  /**
+   * Performs a "doAction" or a "switchView" according to the current content of
+   * the URL. The current action (id or object) will be returned if one of these
+   * operations has successfully started.
+   *
+   * @returns {Action | null}
+   */
+  function loadState() {
+    const state = _getHashState();
+    const switchViewParams = _getSwitchViewParams(state);
+    if (switchViewParams) {
+      // only when we already have an action in dom
+      const { viewType, viewOptions } = switchViewParams;
+      const view = _getView(viewType);
+      if (view) {
+        // Params valid and view found => performs a "switchView"
+        switchView(viewType, viewOptions);
+        return state.action;
       }
-      const currentController = controllerStack[controllerStack.length - 1];
-      const currentActionId =
-        currentController && currentController.action && currentController.action.id;
-      // Window Action: determine model, viewType etc....
-      if (
-        !action &&
-        currentController &&
-        currentController.action.type === "ir.actions.act_window" &&
-        currentActionId === parseInt(state.action, 10)
-      ) {
-        // only when we already have an action in dom
-        try {
-          const viewOptions = {
-            recordId: state.id ? parseInt(state.id, 10) : false,
-          };
-          let viewType = state.view_type || currentController.view.type;
-          await switchView(viewType, viewOptions);
-          return true;
-        } catch (e) {
-          if (e instanceof ViewNotFoundError) {
-            return false;
-          }
-          throw e;
-        }
-      }
-      if (!action) {
-        // the action to load isn't the current one, so execute it
-        const context = {};
-        if (state.active_id) {
-          context.active_id = state.active_id;
-        }
-        if (state.active_ids) {
-          // jQuery's BBQ plugin does some parsing on values that are valid integers
-          // which means that if there's only one item, it will do parseInt() on it,
-          // otherwise it will keep the comma seperated list as string
-          context.active_ids = state.active_ids.split(",").map(function (id) {
-            return parseInt(id, 10) || id;
-          });
-        } else if (state.active_id) {
-          context.active_ids = [state.active_id];
-        }
-        context.params = state;
-        action = state.action;
-        options = Object.assign(options, {
-          additionalContext: context,
-          resId: state.id ? parseInt(state.id, 10) : undefined,
-          viewType: state.view_type,
-        });
-      }
-    } else if (state.model && (state.view_type || state.id)) {
-      if (state.id) {
-        action = {
-          res_model: state.model,
-          res_id: parseInt(state.id, 10),
-          type: "ir.actions.act_window",
-          views: [[state.view_id ? parseInt(state.view_id, 10) : false, "form"]],
-        };
-      } else if (state.view_type) {
-        // this is a window action on a multi-record view, so restore it
-        // from the session storage
-        const storedAction = browser.sessionStorage.getItem("current_action");
-        const lastAction = JSON.parse(storedAction || "{}");
-        if (lastAction.res_model === state.model) {
-          action = lastAction;
-          options.viewType = state.view_type;
-        }
+    } else {
+      const actionParams = _getActionParams(state);
+      if (actionParams) {
+        // Params valid => performs a "doAction"
+        const { actionRequest, options } = actionParams;
+        doAction(actionRequest, options);
+        return actionRequest;
       }
     }
-    if (action) {
-      await doAction(action, options);
-      return true;
-    }
-    return false;
+    return null;
   }
 
   function pushState(controller) {

@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { ActionContainer } from "../actions/action_container";
-import { NavBar } from "./navbar/navbar";
 import { useService } from "../services/service_hook";
 import { mainComponentRegistry } from "./main_component_registry";
+import { NavBar } from "./navbar/navbar";
 
 const { Component, hooks } = owl;
 
@@ -33,51 +33,40 @@ export class WebClient extends Component {
     this.env.bus.trigger("WEB_CLIENT_READY");
   }
 
-  async loadRouterState() {
-    const options = {
-      clearBreadcrumbs: true,
-    };
-    const state = this.router.current.hash;
-    let action = state.action;
-    if (action && !Number.isNaN(action)) {
-      action = parseInt(action, 10);
-    }
-    let menuId = state.menu_id ? parseInt(state.menu_id, 10) : undefined;
-    const actionManagerHandles = await this.actionService.loadState(state, options);
-    if (!actionManagerHandles) {
-      if (!action && menuId) {
-        // determine action from menu_id key
-        const menu = this.menuService.getAll().find((m) => menuId === m.id);
-        action = menu && menu.actionID;
-      }
+  loadRouterState() {
+    let action = this.actionService.loadState();
+    let menuId = Number(this.router.current.hash.menu_id || 0);
+
+    if (!action && menuId) {
+      // Determines the current action based on the current menu
+      const menu = this.menuService.getAll().find((m) => menuId === m.id);
+      action = menu && menu.actionID;
       if (action) {
-        await this.actionService.doAction(action, options);
+        this.actionService.doAction(action, { clearBreadcrumbs: true });
       }
     }
-    // Determine the app we are in
+    if (!action) {
+      // If no action => falls back to the default app
+      this._loadDefaultApp();
+    }
+
     if (!menuId && typeof action === "number") {
+      // Determines the current menu based on the current action
       const menu = this.menuService.getAll().find((m) => m.actionID === action);
       menuId = menu && menu.appID;
     }
     if (menuId) {
+      // Sets the menu according to the current action
       this.menuService.setCurrentMenu(menuId);
-    }
-    if (!actionManagerHandles && !action) {
-      return this._loadDefaultApp();
     }
   }
 
-  async _loadDefaultApp() {
-    const action = this.user.home_action_id;
-    if (action) {
-      // Don't know what to do here: should we set the menu
-      // even if it's a guess ?
-      return this.actionService.doAction(action, { clearBreadcrumbs: true });
-    }
+  _loadDefaultApp() {
+    // Selects the first root menu if any
     const root = this.menuService.getMenu("root");
     const firstApp = root.children[0];
     if (firstApp) {
-      return this.menuService.selectMenu(firstApp);
+      this.menuService.selectMenu(firstApp);
     }
   }
 }

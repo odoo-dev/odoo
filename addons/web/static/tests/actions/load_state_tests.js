@@ -1,14 +1,17 @@
 /** @odoo-module **/
 
-import { legacyExtraNextTick, patchWithCleanup } from "../helpers/utils";
-import { makeFakeRouterService } from "../helpers/mock_services";
 import { getLegacy } from "web.test_legacy";
-import { actionRegistry } from "@web/actions/action_registry";
-import { serviceRegistry } from "@web/webclient/service_registry";
+import { actionRegistry } from "../../src/actions/action_registry";
+import { browser } from "../../src/core/browser";
+import { serviceRegistry } from "../../src/webclient/service_registry";
+import { WebClient } from "../../src/webclient/webclient";
+import { registerCleanup } from "../helpers/cleanup";
+import { makeTestEnv } from "../helpers/mock_env";
+import { makeFakeRouterService, makeFakeUserService } from "../helpers/mock_services";
+import { getFixture, legacyExtraNextTick, patchWithCleanup } from "../helpers/utils";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
-import { browser } from "@web/core/browser";
 
-const { Component, tags } = owl;
+const { Component, mount, tags } = owl;
 
 let testConfig;
 // legacy stuff
@@ -66,6 +69,60 @@ QUnit.module("ActionManager", (hooks) => {
     );
     assert.strictEqual(webClient.el.querySelector(".o_menu_brand").textContent, "App2");
     assert.deepEqual(webClient.env.services.router.current.hash, { action: "1001", menu_id: "2" });
+  });
+
+  QUnit.test("initial action loading", async (assert) => {
+    assert.expect(4);
+    const hash = { action: "1001" };
+    serviceRegistry.add("router", makeFakeRouterService({ initialRoute: { hash } }), {
+      force: true,
+    });
+    const mockRPC = (route) => assert.step(route);
+    const env = await makeTestEnv({ ...testConfig, mockRPC });
+
+    assert.verifySteps(["/web/action/load", "/web/webclient/load_menus"]);
+
+    const wc = await mount(WebClient, { env, target: getFixture() });
+    registerCleanup(() => wc.destroy());
+
+    assert.verifySteps([]);
+  });
+
+  QUnit.test("fallback on home action if not action found", async (assert) => {
+    assert.expect(2);
+    serviceRegistry.add("user", makeFakeUserService({ home_action_id: 1001 }), {
+      force: true,
+    });
+
+    const wc = await createWebClient({ testConfig });
+
+    assert.containsOnce(wc, ".test_client_action");
+    assert.strictEqual(wc.el.querySelector(".o_menu_brand").innerText, "App1");
+  });
+
+  QUnit.test("correctly sends additional context", async (assert) => {
+    assert.expect(1);
+    const hash = {
+      action: "1001",
+      active_id: "4",
+      active_ids: "4,8",
+    };
+    serviceRegistry.add("router", makeFakeRouterService({ initialRoute: { hash } }), {
+      force: true,
+    });
+    function mockRPC(route, params) {
+      if (route === "/web/action/load") {
+        assert.deepEqual(params, {
+          action_id: 1001,
+          additional_context: {
+            active_id: 4,
+            active_ids: [4, 8],
+            active_model: undefined,
+          },
+        });
+      }
+    }
+    await createWebClient({ testConfig, mockRPC });
   });
 
   QUnit.test("supports action as xmlId", async (assert) => {
@@ -627,7 +684,7 @@ QUnit.module("ActionManager", (hooks) => {
       appID: 1,
       actionID: 1,
     };
-    const mockRPC = async function (route, args) {
+    const mockRPC = async function (route) {
       assert.step(route);
     };
     const webClient = await createWebClient({ testConfig, mockRPC });
@@ -655,7 +712,6 @@ QUnit.module("ActionManager", (hooks) => {
       1: { id: 1, children: [], name: "App1", appID: 1, actionID: 1 },
     };
     const webClient = await createWebClient({ testConfig });
-    await testUtils.nextTick(); // wait for the load state (default app)
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_kanban_view"); // action 1 (default app)
     assert.strictEqual(
@@ -695,11 +751,10 @@ QUnit.module("ActionManager", (hooks) => {
       }),
       { force: true }
     );
-    const mockRPC = async function (route, args) {
+    const mockRPC = async function (route) {
       assert.step(route);
     };
     const webClient = await createWebClient({ testConfig, mockRPC });
-    await testUtils.nextTick(); // wait for the load state (default app)
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_kanban_view", "should display a kanban view");
     assert.strictEqual(
@@ -726,7 +781,7 @@ QUnit.module("ActionManager", (hooks) => {
         [666, "form"],
       ],
     };
-    const mockRPC = async (route, args) => {
+    const mockRPC = async (route) => {
       assert.step(route);
     };
     const webClient = await createWebClient({ testConfig, mockRPC });
