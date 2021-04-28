@@ -1,22 +1,31 @@
-odoo.define('google_drive.MockServer', function (require) {
-    'use strict';
+/** @odoo-module */
 
-    var MockServer = require('web.MockServer');
+import LegacyMockServer from "web.MockServer";
+import { MockServer } from "@web/../tests/helpers/mock_server";
+import { patch } from "@web/utils/patch";
 
-    MockServer.include({
-        //--------------------------------------------------------------------------
-        // Private
-        //--------------------------------------------------------------------------
+LegacyMockServer.include({
+  //--------------------------------------------------------------------------
+  // Private
+  //--------------------------------------------------------------------------
 
-        /**
-         * @override
-         * @private
-         */
-        async _performRpc(route, args) {
-            if (args.method === 'get_google_drive_config') {
-                return [];
-            }
-            return this._super(...arguments);
-        },
-    });
+  /**
+   * @override
+   * @private
+   */
+  async _performRpc(route, args) {
+    if (args.method === "get_google_drive_config") {
+      return [];
+    }
+    return this._super(...arguments);
+  },
+});
+
+patch(MockServer.prototype, "google_drive.MockServer", {
+  async _performRPC(route, args) {
+    if (args.method === "get_google_drive_config") {
+      return [];
+    }
+    return this._super(...arguments);
+  },
 });

@@ -13,15 +13,18 @@ const { DateTime } = luxon;
 // -----------------------------------------------------------------------------
 // Utils
 // -----------------------------------------------------------------------------
+
 function traverseElementTree(tree, cb) {
   if (cb(tree)) {
     Array.from(tree.children).forEach((c) => traverseElementTree(c, cb));
   }
 }
+
 // -----------------------------------------------------------------------------
 // MockServer
 // -----------------------------------------------------------------------------
-class MockServer {
+
+export class MockServer {
   constructor(data, options = {}) {
     this.models = data.models || {};
     this.actions = data.actions || {};
