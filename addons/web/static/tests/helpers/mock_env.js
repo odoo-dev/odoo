@@ -2,6 +2,7 @@
 import FormController from "web.FormController";
 import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
+import { startServices } from "../../src/services/launcher";
 import { registerCleanup } from "./cleanup";
 import { makeMockServer } from "./mock_server";
 import { makeFakeLocalizationService, makeFakeUIService, mocks } from "./mock_services";
@@ -63,7 +64,8 @@ export async function makeTestEnv(config = {}) {
     }
   }
   odoo = makeTestOdoo(testConfig);
-  const env = await makeEnv(odoo.debug);
+  const env = makeEnv(odoo.debug);
+  await startServices(env);
   env.qweb.addTemplates(window.__ODOO_TEMPLATES__);
   return env;
 }

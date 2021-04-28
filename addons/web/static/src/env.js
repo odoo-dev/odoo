@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { startServices } from "./services/launcher";
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -7,7 +7,8 @@ import { startServices } from "./services/launcher";
 /**
  * @typedef {Object} OdooEnv
  * @property {Object} services
- * @property {EventBus} bus
+ * @property {owl.core.EventBus} bus
+ * @property {owl.QWeb} qweb
  * @property {string} debug
  * @property {(str: string) => string} _t
  * @property {boolean} [isSmall]
@@ -21,10 +22,10 @@ import { startServices } from "./services/launcher";
  * Return a value Odoo Env object
  *
  * @param {string} debug
- * @returns {Promise<OdooEnv>}
+ * @returns {OdooEnv}
  */
-export async function makeEnv(debug) {
-  const env = {
+export function makeEnv(debug) {
+  return {
     qweb: new owl.QWeb(),
     bus: new owl.core.EventBus(),
     services: {},
@@ -36,7 +37,4 @@ export async function makeEnv(debug) {
       throw new Error("UI service not initialized!");
     },
   };
-
-  await startServices(env);
-  return env;
 }
