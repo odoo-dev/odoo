@@ -26,7 +26,6 @@ export function makeLegacyActionManagerService(legacyEnv) {
   // add a service to redirect 'do-action' events triggered on the bus in the
   // legacy env to the action-manager service in the wowl env
   return {
-    name: "legacy_action_manager",
     dependencies: ["action"],
     start(env) {
       legacyEnv.bus.on("do-action", null, (payload) => {
@@ -39,7 +38,6 @@ export function makeLegacyActionManagerService(legacyEnv) {
 
 export function makeLegacyRpcService(legacyEnv) {
   return {
-    name: "legacy_rpc",
     start(env) {
       legacyEnv.bus.on("rpc_request", null, (rpcId) => {
         env.bus.trigger("RPC:REQUEST", rpcId);
@@ -113,7 +111,6 @@ export function makeLegacyDialogMappingService(legacyEnv) {
 
 export function makeLegacySessionService(legacyEnv, session) {
   return {
-    name: "legacy_session",
     dependencies: ["user"],
     start(env) {
       // userContext, Object.create is incompatible with legacy new Context

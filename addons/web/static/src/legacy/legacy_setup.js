@@ -27,15 +27,15 @@ export const legacySetupProm = new Promise((resolve) => {
   AbstractService.prototype.deployServices(legacyEnv);
   Component.env = legacyEnv;
   const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
-  serviceRegistry.add(legacyActionManagerService.name, legacyActionManagerService);
+  serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
   // add a service to redirect rpc events triggered on the bus in the
   // legacy env on the bus in the wowl env
   const legacyRpcService = makeLegacyRpcService(legacyEnv);
-  serviceRegistry.add(legacyRpcService.name, legacyRpcService);
+  serviceRegistry.add("legacy_rpc", legacyRpcService);
   const legacySessionService = makeLegacySessionService(legacyEnv, session);
-  serviceRegistry.add(legacySessionService.name, legacySessionService);
+  serviceRegistry.add("legacy_session", legacySessionService);
   const legacyWebClientService = makeLegacyWebClientService(legacyEnv);
-  serviceRegistry.add(legacyWebClientService.name, legacyWebClientService);
+  serviceRegistry.add("legacy_web_client", legacyWebClientService);
   const legacyDialogMappingService = makeLegacyDialogMappingService(legacyEnv);
   serviceRegistry.add("legacy_dialog_mapping", legacyDialogMappingService);
   await Promise.all([whenReady(), session.is_bound]);
