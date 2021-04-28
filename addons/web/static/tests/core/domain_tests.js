@@ -172,6 +172,17 @@ QUnit.module("domain", {}, () => {
     assert.notOk(new Domain(`[('a', '==', 1 + 2)]`).contains({ a: 2 }));
   });
 
+  QUnit.test("Check that there is no dependency between two domains", function (assert) {
+    // The purpose of this test is to verify that a domain created on the basis
+    // of another one does not share any dependency.
+    const domain1 = new Domain(`[('date', '!=', False)]`);
+    const domain2 = new Domain(domain1);
+    assert.strictEqual(domain1.toString(), domain2.toString());
+
+    domain2.ast.value.unshift({ type: 1, value: "!" })
+    assert.notEqual(domain1.toString(), domain2.toString());
+  });
+
   // ---------------------------------------------------------------------------
   // Normalization
   // ---------------------------------------------------------------------------
@@ -274,6 +285,77 @@ QUnit.module("domain", {}, () => {
         "OR"
       ).toString(),
       `["|", "&", ("a", "=", "1"), ("c", "in", [4, 5]), "|", ("b", "<=", 3), "!", ("uid", "=", uid)]`
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // OPERATOR AND / OR / NOT
+  // ---------------------------------------------------------------------------
+  QUnit.module("Operator and/or/not");
+
+  QUnit.test("combining two domains with and/or", function (assert) {
+    const domain = new Domain("[('a', '=', 1)]")
+    assert.strictEqual(
+      domain.and("[]").toString(),
+      `[("a", "=", 1)]`
+    );
+    assert.strictEqual(
+      domain.and([]).toString(),
+      `[("a", "=", 1)]`
+    );
+    assert.strictEqual(
+      domain.and(new Domain("[]")).toString(),
+      `[("a", "=", 1)]`
+    );
+    assert.strictEqual(
+      domain.and( "[('uid', '<=', uid)]").toString(),
+      `["&", ("a", "=", 1), ("uid", "<=", uid)]`
+    );
+    assert.strictEqual(
+      domain.and([["b", "<=", 3]]).toString(),
+      `["&", ("a", "=", 1), ("b", "<=", 3)]`
+    );
+
+    assert.strictEqual(
+      domain.or("[]").toString(),
+      `[("a", "=", 1)]`
+    );
+    assert.strictEqual(
+      domain.or([]).toString(),
+      `[("a", "=", 1)]`
+    );
+    assert.strictEqual(
+      domain.or(new Domain("[]")).toString(),
+      `[("a", "=", 1)]`
+    );
+    assert.strictEqual(
+      domain.or( "[('uid', '<=', uid)]").toString(),
+      `["|", ("a", "=", 1), ("uid", "<=", uid)]`
+    );
+    assert.strictEqual(
+      domain.or([["b", "<=", 3]]).toString(),
+      `["|", ("a", "=", 1), ("b", "<=", 3)]`
+    );
+  });
+
+  QUnit.test("apply `NOT` on a Domain", function (assert) {
+    let domain = new Domain("[('a', '=', 1)]")
+    assert.strictEqual(
+      domain.not().toString(),
+      `["!", ("a", "=", 1)]`
+    );
+    assert.strictEqual(
+      domain.toString(),
+      `[("a", "=", 1)]`
+    );
+    domain = new Domain('[("uid", "<=", uid)]')
+    assert.strictEqual(
+      domain.not().toString(),
+      `["!", ("uid", "<=", uid)]`
+    );
+    assert.strictEqual(
+      domain.toString(),
+      `[("uid", "<=", uid)]`
     );
   });
 });

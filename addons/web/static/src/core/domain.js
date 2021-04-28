@@ -20,7 +20,7 @@ export class Domain {
   constructor(descr = []) {
     if (descr instanceof Domain) {
       /** @type {AST} */
-      this.ast = descr.ast;
+      return new Domain(descr.toString());
     } else {
       const rawAST = typeof descr === "string" ? parseExpr(descr) : toAST(descr);
       this.ast = normalizeDomainAST(rawAST);
@@ -60,6 +60,34 @@ export class Domain {
     const combinedAST = { type: 4 /* List */, value: astValues1.concat(astValues2) };
     result.ast = normalizeDomainAST(combinedAST, op);
     return result;
+  }
+
+  /**
+   * Combine domain and this with the `AND` operator
+   * @param {DomainRepr} domain
+   * @returns {Domain}
+   */
+   and(domain) {
+    return Domain.combine([this, domain], "AND");
+  }
+
+  /**
+   * Combine domain and this with the `OR` operator
+   * @param {DomainRepr} domain
+   * @returns {Domain}
+   */
+  or(domain) {
+    return Domain.combine([this, domain], "OR");
+  }
+
+  /**
+   * Return the negation of the Domain
+   * @returns {Domain}
+   */
+  not() {
+    const domain = new Domain(this);
+    domain.ast.value.unshift({ type: 1, value: "!" });
+    return domain;
   }
 
   /**
