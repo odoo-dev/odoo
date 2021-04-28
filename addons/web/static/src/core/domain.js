@@ -15,30 +15,6 @@ import { toPyValue } from "../py_js/py_utils";
  */
 export class Domain {
   /**
-   * @param {DomainRepr} [descr]
-   */
-  constructor(descr = []) {
-    if (descr instanceof Domain) {
-      /** @type {AST} */
-      return new Domain(descr.toString());
-    } else {
-      const rawAST = typeof descr === "string" ? parseExpr(descr) : toAST(descr);
-      this.ast = normalizeDomainAST(rawAST);
-    }
-  }
-
-  /**
-   * Check if the set of records represented by a domain contains a record
-   *
-   * @param {Object} record
-   * @returns {boolean}
-   */
-  contains(record) {
-    const expr = evaluate(this.ast, record);
-    return matchDomain(record, expr);
-  }
-
-  /**
    * Combine various domains together with a given operator
    * @param {DomainRepr[]} domains
    * @param {"AND" | "OR"} operator
@@ -63,31 +39,55 @@ export class Domain {
   }
 
   /**
-   * Combine domain and this with the `AND` operator
-   * @param {DomainRepr} domain
+   * Combine various domains together with `AND` operator
+   * @param {DomainRepr} domains
    * @returns {Domain}
    */
-   and(domain) {
-    return Domain.combine([this, domain], "AND");
+  static and(domains) {
+    return Domain.combine(domains, "AND");
   }
 
   /**
-   * Combine domain and this with the `OR` operator
-   * @param {DomainRepr} domain
+   * Combine various domains together with `OR` operator
+   * @param {DomainRepr} domains
    * @returns {Domain}
    */
-  or(domain) {
-    return Domain.combine([this, domain], "OR");
+  static or(domains) {
+    return Domain.combine(domains, "OR");
   }
 
   /**
-   * Return the negation of the Domain
+   * Return the negation of the domain
    * @returns {Domain}
    */
-  not() {
-    const domain = new Domain(this);
-    domain.ast.value.unshift({ type: 1, value: "!" });
-    return domain;
+  static not(domain) {
+    const result = new Domain(domain);
+    result.ast.value.unshift({ type: 1, value: "!" });
+    return result;
+  }
+
+  /**
+   * @param {DomainRepr} [descr]
+   */
+  constructor(descr = []) {
+    if (descr instanceof Domain) {
+      /** @type {AST} */
+      return new Domain(descr.toString());
+    } else {
+      const rawAST = typeof descr === "string" ? parseExpr(descr) : toAST(descr);
+      this.ast = normalizeDomainAST(rawAST);
+    }
+  }
+
+  /**
+   * Check if the set of records represented by a domain contains a record
+   *
+   * @param {Object} record
+   * @returns {boolean}
+   */
+  contains(record) {
+    const expr = evaluate(this.ast, record);
+    return matchDomain(record, expr);
   }
 
   /**
@@ -105,6 +105,15 @@ export class Domain {
     return evaluate(this.ast, context);
   }
 }
+
+const TRUE_LEAF = [1, '=', 1];
+const FALSE_LEAF = [0, '=', 1];
+const TRUE_DOMAIN = new Domain([TRUE_LEAF]);
+const FALSE_DOMAIN = new Domain([FALSE_LEAF]);
+
+Domain.TRUE = TRUE_DOMAIN;
+Domain.FALSE = FALSE_DOMAIN;
+
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
@@ -177,7 +186,7 @@ function matchDomain(record, domain) {
     default:
       const condition = domain[0];
       const field = condition[0];
-      const fieldValue = record[field];
+      const fieldValue = typeof field === "number" ? field : record[field];
       const value = condition[2];
       switch (condition[1]) {
         case "=":
