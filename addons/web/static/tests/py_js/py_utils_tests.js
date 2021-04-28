@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { evaluateExpr, formatAST, parseExpr } from "../../src/py_js/py";
+import { toPyValue } from "../../src/py_js/py_utils";
 
 QUnit.module("py", {}, () => {
   QUnit.module("formatAST");
@@ -120,5 +121,9 @@ QUnit.module("py", {}, () => {
     // using single quote delimiters *unless* they contain single quotes and
     // no double quotes, then they're delimited with double quotes.
     assert.strictEqual(b, String.raw`"foo\\abc\"'"`);
+  });
+
+  QUnit.test("null value", function (assert) {
+    assert.strictEqual(formatAST(toPyValue(null)), "None");
   });
 });

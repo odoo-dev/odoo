@@ -27,7 +27,7 @@ import { binaryOperators, comparators } from "./py_tokenizer";
  * @typedef {{type: 14, op: string, left: AST, right: AST}} ASTBooleanOperator
  * @typedef {{type: 15, obj: AST, key: string}} ASTObjLookup
  *
- * @typedef { ASTNumber | ASTString | ASTBoolean | ASTList | ASTName | ASTUnaryOperator | ASTBinaryOperator | ASTFunctionCall | ASTAssignment | ASTTuple | ASTDictionary |ASTLookup | ASTIf | ASTBooleanOperator | ASTObjLookup} AST
+ * @typedef { ASTNumber | ASTString | ASTBoolean | ASTNone | ASTList | ASTName | ASTUnaryOperator | ASTBinaryOperator | ASTFunctionCall | ASTAssignment | ASTTuple | ASTDictionary |ASTLookup | ASTIf | ASTBooleanOperator | ASTObjLookup} AST
  */
 
 // -----------------------------------------------------------------------------

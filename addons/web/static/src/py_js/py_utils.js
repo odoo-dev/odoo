@@ -45,6 +45,8 @@ export function toPyValue(value) {
     case "object":
       if (Array.isArray(value)) {
         return { type: 4 /* List */, value: value.map(toPyValue) };
+      } else if (value === null) {
+        return { type: 3 /* None */ };
       } else {
         const content = {};
         for (let key in value) {
@@ -60,7 +62,7 @@ export function toPyValue(value) {
 /**
  * @param {AST} ast
  * @param {number} [lbp] left binding power
- * @returns {string}
+ * @return {string}
  */
 export function formatAST(ast, lbp = 0) {
   switch (ast.type) {
