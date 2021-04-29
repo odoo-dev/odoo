@@ -39,7 +39,6 @@ This module provides the core of the Odoo Web Client.
         'web.assets_qweb': [
             'web/static/src/components/dialog/dialog.xml',
 
-            'web/static/src/actions/**/*.xml',
             'web/static/src/commands/**/*.xml',
             'web/static/src/components/**/*.xml',
             'web/static/src/debug/**/*.xml',
@@ -61,6 +60,10 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/xml/web_calendar.xml',
             'web/static/src/legacy/xml/graph.xml',
             'web/static/src/legacy/xml/week_days.xml',
+        ],
+        'web.assets_action_dialog': [
+            'web/static/src/components/dialog/dialog.xml',
+            'web/static/src/actions/action_dialog.xml',
         ],
         'web.assets_common_minimal': [
             'web/static/lib/es6-promise/es6-promise-polyfill.js',
