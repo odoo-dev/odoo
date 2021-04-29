@@ -9,6 +9,7 @@ import { browser } from "../core/browser";
 import { useBus } from "../utils/hooks";
 import { actionRegistry } from "./action_registry";
 import { viewRegistry } from "../views/view_registry";
+import { download } from "../utils/download";
 
 const { Component, hooks, tags } = owl;
 
@@ -642,7 +643,7 @@ function makeActionManager(env) {
     const url = _getReportUrl(action, type);
     env.services.ui.block();
     try {
-      await env.services.download({
+      await download({
         url: "/report/download",
         data: {
           data: JSON.stringify([url, action.report_type]),
@@ -880,7 +881,7 @@ function makeActionManager(env) {
     };
 
     // LEGACY CODE COMPATIBILITY: remove when controllers will be written in owl
-    if (view.isLegacy && newController.jsId === controller.jsId ) {
+    if (view.isLegacy && newController.jsId === controller.jsId) {
       // case where a legacy view is reloaded via the view switcher
       const { __legacy_widget__ } = controller.getState();
       const params = {};

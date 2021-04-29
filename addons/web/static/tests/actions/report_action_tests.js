@@ -18,7 +18,7 @@ let testConfig;
 let testUtils;
 let ReportClientAction;
 
-QUnit.module("ActionManager", (hooks) => {
+QUnit.skip("ActionManager", (hooks) => {
   hooks.before(() => {
     const legacy = getLegacy();
     testUtils = legacy.testUtils;
