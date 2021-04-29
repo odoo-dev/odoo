@@ -6,6 +6,7 @@ odoo.define("web.test_legacy", async (require) => {
     await session.is_bound; // await for templates from server
     Object.assign(legacyExports, {
       AbstractService: require("web.AbstractService"),
+      ActionMenus: require("web.ActionMenus"),
       makeTestEnvironment: require("web.test_env"),
       testUtils: require("web.test_utils"),
       basicFields: require("web.basic_fields"),
@@ -18,6 +19,7 @@ odoo.define("web.test_legacy", async (require) => {
       AbstractView: require("web.AbstractView"),
       legacyViewRegistry: require("web.view_registry"),
       FormView: require("web.FormView"),
+      Registry: require("web.Registry"),
     });
     const LegacyCrashManager = require("web.CrashManager");
     LegacyCrashManager.disable();

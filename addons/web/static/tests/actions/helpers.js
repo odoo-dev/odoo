@@ -131,6 +131,11 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
     legacyParams.dataManager
   );
 
+  // clear the ActionMenus registry to prevent external code from doing unknown rpcs
+  const actionMenusRegistry = legacy.ActionMenus.registry;
+  legacy.ActionMenus.registry = new legacy.Registry();
+  registerCleanup(() => (legacy.ActionMenus.registry = actionMenusRegistry));
+
   const legacyEnv = legacy.makeTestEnvironment({ dataManager, bus: legacy.core.bus });
 
   if (legacyParams.serviceRegistry) {
@@ -211,7 +216,6 @@ export function getActionManagerTestConfig() {
   serviceRegistry.add("ui", fakeUIService);
   serviceRegistry.add("user", fakeUserService);
   serviceRegistry.add("view", viewService);
-
 
   // additional basic client action
   class TestClientAction extends Component {}
