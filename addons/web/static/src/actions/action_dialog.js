@@ -1,6 +1,7 @@
 /** @odoo-module **/
 import { Dialog } from "../components/dialog/dialog";
 import { DebugManager } from "../debug/debug_manager";
+import { useAssets } from "../core/assets";
 
 const { hooks } = owl;
 
@@ -20,6 +21,11 @@ class ActionDialog extends Dialog {
     const actionProps = this.props && this.props.actionProps;
     const action = actionProps && actionProps.action;
     this.actionType = action && action.type;
+    useAssets({
+      bundles: {
+        'web.assets_action_dialog': { templates: true },
+      },
+    });
   }
 }
 ActionDialog.components = { ...Dialog.components, DebugManager };
