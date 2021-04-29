@@ -4,13 +4,11 @@ import { getLegacy } from "web.test_legacy";
 import { uiService } from "@web/services/ui_service";
 import { serviceRegistry } from "@web/webclient/service_registry";
 import { mainComponentRegistry } from "@web/webclient/main_component_registry";
-import {
-  makeFakeDownloadService,
-  makeFakeNotificationService,
-  makeFakeUserService,
-} from "../helpers/mock_services";
+import { makeFakeNotificationService, makeFakeUserService } from "../helpers/mock_services";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 import { clearRegistryWithCleanup } from "../helpers/mock_env";
+import { download } from "../../src/utils/download";
+import { patchWithCleanup } from "../helpers/utils";
 
 let testConfig;
 
@@ -18,7 +16,11 @@ let testConfig;
 let testUtils;
 let ReportClientAction;
 
-QUnit.skip("ActionManager", (hooks) => {
+function mockDownload(cb) {
+  patchWithCleanup(download, { _download: cb });
+}
+
+QUnit.module("ActionManager", (hooks) => {
   hooks.before(() => {
     const legacy = getLegacy();
     testUtils = legacy.testUtils;
@@ -34,13 +36,10 @@ QUnit.skip("ActionManager", (hooks) => {
 
   QUnit.test("can execute report actions from db ID", async function (assert) {
     assert.expect(6);
-    serviceRegistry.add(
-      "download",
-      makeFakeDownloadService((options) => {
-        assert.step(options.url);
-        return Promise.resolve();
-      })
-    );
+    mockDownload((options) => {
+      assert.step(options.url);
+      return Promise.resolve();
+    });
     const mockRPC = async (route, args) => {
       assert.step((args && args.method) || route);
       if (route === "/report/check_wkhtmltopdf") {
@@ -60,13 +59,10 @@ QUnit.skip("ActionManager", (hooks) => {
 
   QUnit.test("report actions can close modals and reload views", async function (assert) {
     assert.expect(8);
-    serviceRegistry.add(
-      "download",
-      makeFakeDownloadService((options) => {
-        assert.step(options.url);
-        return Promise.resolve();
-      })
-    );
+    mockDownload((options) => {
+      assert.step(options.url);
+      return Promise.resolve();
+    });
     const mockRPC = async (route) => {
       if (route === "/report/check_wkhtmltopdf") {
         return Promise.resolve("ok");
@@ -105,13 +101,10 @@ QUnit.skip("ActionManager", (hooks) => {
       ),
       { force: true }
     );
-    serviceRegistry.add(
-      "download",
-      makeFakeDownloadService((options) => {
-        assert.step(options.url);
-        return Promise.resolve();
-      })
-    );
+    mockDownload((options) => {
+      assert.step(options.url);
+      return Promise.resolve();
+    });
     const mockRPC = async (route, args) => {
       assert.step((args && args.method) || route);
       if (route === "/report/check_wkhtmltopdf") {
@@ -132,13 +125,10 @@ QUnit.skip("ActionManager", (hooks) => {
   QUnit.test(
     "should open the report client action if wkhtmltopdf is broken",
     async function (assert) {
-      serviceRegistry.add(
-        "download",
-        makeFakeDownloadService(() => {
-          assert.step("download"); // should not be called
-          return Promise.resolve();
-        })
-      );
+      mockDownload(() => {
+        assert.step("download"); // should not be called
+        return Promise.resolve();
+      });
       serviceRegistry.add(
         "notification",
         makeFakeNotificationService(
@@ -192,13 +182,10 @@ QUnit.skip("ActionManager", (hooks) => {
 
   QUnit.test("send context in case of html report", async function (assert) {
     assert.expect(5);
-    serviceRegistry.add(
-      "download",
-      makeFakeDownloadService(() => {
-        assert.step("download"); // should not be called
-        return Promise.resolve();
-      })
-    );
+    mockDownload(() => {
+      assert.step("download"); // should not be called
+      return Promise.resolve();
+    });
     serviceRegistry.add(
       "notification",
       makeFakeNotificationService(
@@ -247,20 +234,17 @@ QUnit.skip("ActionManager", (hooks) => {
     async function (assert) {
       assert.expect(8);
       let timesDownloasServiceHasBeenCalled = 0;
-      serviceRegistry.add(
-        "download",
-        makeFakeDownloadService(() => {
-          if (timesDownloasServiceHasBeenCalled === 0) {
-            assert.step("successful download");
-            timesDownloasServiceHasBeenCalled++;
-            return Promise.resolve();
-          }
-          if (timesDownloasServiceHasBeenCalled === 1) {
-            assert.step("failed download");
-            return Promise.reject();
-          }
-        })
-      );
+      mockDownload(() => {
+        if (timesDownloasServiceHasBeenCalled === 0) {
+          assert.step("successful download");
+          timesDownloasServiceHasBeenCalled++;
+          return Promise.resolve();
+        }
+        if (timesDownloasServiceHasBeenCalled === 1) {
+          assert.step("failed download");
+          return Promise.reject();
+        }
+      });
       serviceRegistry.add("ui", uiService, { force: true });
       const mockRPC = async (route) => {
         if (route === "/report/check_wkhtmltopdf") {

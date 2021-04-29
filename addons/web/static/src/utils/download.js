@@ -439,7 +439,7 @@ function _download(data, filename, mimetype) {
 // Exported download function
 // -----------------------------------------------------------------------------
 
-export async function download(options) {
+async function _download(options) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     let data;
@@ -504,3 +504,18 @@ export async function download(options) {
     xhr.send(data);
   });
 }
+
+/**
+ * Download a file
+ *
+ * Note: the actual implementation is certainly unconventional, but sadly
+ * necessary to be able to test code using the download function
+ *
+ * @param {*} options
+ * @returns {Promise<any>}
+ */
+export function download(options) {
+  return download._download(options);
+}
+
+download._download = _download;

@@ -265,7 +265,7 @@ export function makeFakeUIService(values) {
     activateElement: () => {},
     deactivateElement: () => {},
     activeElement: document,
-    getVisibleElements: () => ([]),
+    getVisibleElements: () => [],
     block: () => {},
     unblock: () => {},
     isSmall: false,
@@ -321,18 +321,6 @@ export const fakeTitleService = {
   },
 };
 
-export function makeFakeDownloadService(callback) {
-  return {
-    start() {
-      return async function (options) {
-        if (callback) {
-          return await callback(options);
-        }
-      };
-    },
-  };
-}
-
 export function makeFakeNotificationService(createMock, closeMock) {
   return {
     start() {
@@ -356,7 +344,6 @@ export function makeFakeNotificationService(createMock, closeMock) {
 
 export const mocks = {
   cookie: () => fakeCookieService,
-  download: makeFakeDownloadService,
   effect: () => effectService, // BOI The real service ? Is this what we want ?
   localization: makeFakeLocalizationService,
   ui: makeFakeUIService,
