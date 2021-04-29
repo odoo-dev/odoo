@@ -304,12 +304,13 @@ QUnit.test("Target click", async function (assert) {
 });
 
 QUnit.test("close popover when target is removed", async function (assert) {
-  assert.expect(3);
+  assert.expect(4);
 
   class Parent extends Component {}
   Parent.components = { Popover };
   Parent.template = xml`
     <div class="d-flex h-25 justify-content-around align-items-start">
+      <button id="siblingTarget">SiblingTarget</button>
       <button id="target">target</button>
       <Popover target="'#target'">
         <t t-set-slot="content">
@@ -324,6 +325,10 @@ QUnit.test("close popover when target is removed", async function (assert) {
 
   await click(target, "#target");
   assert.containsOnce(target, ".o_popover", "Should contain one popover");
+
+  target.querySelector("#siblingTarget").remove();
+  await nextTick();
+  assert.containsOnce(target, ".o_popover", "When a target sibling is removed the popover should be shown");
 
   target.querySelector("#target").remove();
   await nextTick();

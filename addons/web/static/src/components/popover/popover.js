@@ -247,20 +247,9 @@ export class Popover extends Component {
    * Closes the popover when the target is removed from dom.
    */
   onTargetMutate() {
-    const target = this.target;
-    if (!target) {
+    if (!this.target) {
       this.disconnectTargetObserver();
       this.trigger("popover-closed");
-    } else {
-      for (const mutation of mutations) {
-        for (const node of mutation.removedNodes) {
-          if (node === target) {
-            this.disconnectTargetObserver();
-            this.trigger("popover-closed");
-            break;
-          }
-        }
-      }
     }
   }
 }
