@@ -3,6 +3,7 @@
 import { makeEnv, startServices } from "./env";
 import { legacySetupProm } from "./legacy/legacy_setup";
 import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
+import { processTemplates } from "./core/assets";
 
 const { mount, utils } = owl;
 const { whenReady } = utils;
@@ -41,27 +42,4 @@ export async function startWebClient(Webclient) {
     delete odoo.debug;
     odoo.__WOWL_DEBUG__ = { root };
     odoo.isReady = true;
-}
-
-/**
- * Process the qweb templates to obtain only the owl templates. This method
- * does NOT register the templates into Owl.
- *
- * @param {String} templates
- * @returns {String} returns a strings containing only owl templates
- */
-export function processTemplates(templates) {
-    // as we currently have two qweb engines (owl and legacy), owl templates are
-    // flagged with attribute `owl="1"`. The following lines removes the 'owl'
-    // attribute from the templates, so that it doesn't appear in the DOM. For now,
-    // we make the assumption that 'templates' only contains owl templates. We
-    // might need at some point to handle the case where we have both owl and
-    // legacy templates. At the end, we'll get rid of all this.
-    const doc = new DOMParser().parseFromString(templates, "text/xml");
-    const owlTemplates = [];
-    for (let child of doc.querySelectorAll("templates > [owl]")) {
-        child.removeAttribute("owl");
-        owlTemplates.push(child.outerHTML);
-    }
-    return `<templates> ${owlTemplates.join("\n")} </templates>`;
 }
