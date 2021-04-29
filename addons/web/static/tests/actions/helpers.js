@@ -1,20 +1,20 @@
 /** @odoo-module **/
 
-import { getLegacy } from "web.test_legacy";
 import { actionRegistry } from "@web/actions/action_registry";
-import { browser, makeRAMLocalStorage } from "@web/core/browser";
-import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "@web/legacy/utils";
-import { serviceRegistry } from "@web/webclient/service_registry";
 import { actionService } from "@web/actions/action_service";
+import { browser, makeRAMLocalStorage } from "@web/core/browser";
 import { effectService } from "@web/effects/effect_service";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "@web/legacy/utils";
 import { notificationService } from "@web/notifications/notification_service";
 import { dialogService } from "@web/services/dialog_service";
 import { menuService } from "@web/services/menu_service";
 import { ormService } from "@web/services/orm_service";
 import { popoverService } from "@web/services/popover_service";
 import { viewService } from "@web/views/view_service";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { WebClient } from "@web/webclient/webclient";
+import { getLegacy } from "web.test_legacy";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import {
@@ -80,7 +80,6 @@ export async function createWebClient(params) {
     }
     wc.destroy();
   });
-  wc._____testname = QUnit.config.current.testName;
   await legacyExtraNextTick();
   return wc;
 }
@@ -111,7 +110,7 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
           model: params.model,
         });
         const views = result.fields_views;
-        for (const [_, viewType] of params.views_descr) {
+        for (const [, viewType] of params.views_descr) {
           const fvg = views[viewType];
           fvg.viewFields = fvg.fields;
           fvg.fields = result.fields;

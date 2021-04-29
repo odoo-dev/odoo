@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../webclient/service_registry";
 import { setScrollPosition } from "../utils/scrolling";
+import { serviceRegistry } from "../webclient/service_registry";
 
 export const scrollerService = {
-  async start() {
+  start() {
     /**
      * Listen to click event to allow having links with href towards an anchor.
      * Since odoo use hashtag to represent the current state of the view, we can't

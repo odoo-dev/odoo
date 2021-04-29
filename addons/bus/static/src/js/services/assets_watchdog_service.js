@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "@web/webclient/service_registry";
 import { browser } from "@web/core/browser";
+import { serviceRegistry } from "@web/webclient/service_registry";
 
 export const assetsWatchdogService = {
-  async start(env) {
+  start(env) {
     const assets = {};
     let assetsChangedNotificationId = null;
     let bundleNotifTimerID = null;
@@ -13,9 +13,7 @@ export const assetsWatchdogService = {
       const legacyEnv = owl.Component.env;
 
       document.querySelectorAll("*[data-asset-bundle]").forEach((el) => {
-        assets[el.getAttribute("data-asset-bundle")] = el.getAttribute(
-          "data-asset-version"
-        );
+        assets[el.getAttribute("data-asset-bundle")] = el.getAttribute("data-asset-version");
       });
 
       legacyEnv.services.bus_service.onNotification(this, onNotification);
