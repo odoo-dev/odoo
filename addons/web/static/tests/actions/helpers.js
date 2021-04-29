@@ -80,7 +80,8 @@ export async function createWebClient(params) {
     }
     wc.destroy();
   });
-  await legacyExtraNextTick();
+  // Wait for visual changes caused by a potential loadState
+  await nextTick();
   return wc;
 }
 
