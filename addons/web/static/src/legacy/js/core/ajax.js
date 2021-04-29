@@ -592,6 +592,65 @@ async function loadOdooModules(moduleIds) {
     return moduleIds.map(moduleId => odoo.__DEBUG__.services[moduleId]);
 }
 
+// TODO: move this somewhere it makes more sense
+/**
+ * Loads the qweb templates from a given bundle id
+ *
+ * @param {String} bundleId the id of the bundle as declared in the manifest.
+ * @returns {Promise<{legacyTemplates: string, owlTemplates: string}>} A Promise
+ *      of an object containing two strings with the xml of the owl templates
+ *      and the xml of the legacy templates.
+ */
+const loadTemplatesFromBundle = (() => {
+    const loadedBundles = {};
+    return async function _loadTemplatesFromBundle(bundleId) {
+        if (!loadedBundles[bundleId]) {
+            // TODO: quid of the "unique" in the URL? We can't have one cache_hash
+            // for each and every bundle I'm guessing.
+            const bundleURL = new URL(`/web/webclient/qweb/${Date.now()}`, window.location.origin);
+            bundleURL.searchParams.set('bundle', bundleId);
+            const templates = await (await fetch(bundleURL.href)).text();
+            const doc = new DOMParser().parseFromString(templates, "text/xml");
+
+            const owlTemplates = [];
+            for (const child of doc.querySelectorAll("templates > [owl]")) {
+                child.removeAttribute('owl');
+                owlTemplates.push(child);
+                child.remove();
+            }
+
+            loadedBundles[bundleId] = {
+                legacyTemplates: Array.from(doc.querySelectorAll("templates")),
+                owlTemplates: owlTemplates,
+            };
+        }
+        return loadedBundles[bundleId];
+    };
+})();
+
+// TODO: move this somewhere it makes more sense
+const { useEnv, onWillStart } = owl.hooks;
+/**
+ * Loads owl templates from a given bundle inside the environment's qweb
+ * instance
+ *
+ * @param {String} bundleId the id of the bundle as declared in the manifest.
+ */
+function useBundleTemplates(bundleId) {
+    const env = useEnv();
+    onWillStart(async () => {
+        const { owlTemplates } = await loadTemplatesFromBundle(bundleId);
+        // Some templates might already be defined by another bundle, but need
+        // to be included in the current bundle for primary inherits to work.
+        // We don't want to add those again.
+        const toAdd = owlTemplates.filter(template => {
+            const templateName = template.getAttribute('t-name');
+            return !(templateName in env.qweb.templates);
+        });
+        env.qweb.addTemplates(`<templates>${toAdd.map(t => t.outerHTML).join('\n')}</templates>`);
+    });
+}
+
 _.extend(ajax, {
     jsonRpc: jsonRpc,
     rpc: rpc,
@@ -601,6 +660,8 @@ _.extend(ajax, {
     loadAsset: loadAsset,
     loadLibs: loadLibs,
     loadOdooModules: loadOdooModules,
+    loadTemplatesFromBundle: loadTemplatesFromBundle,
+    useBundleTemplates: useBundleTemplates,
     get_file: get_file,
     post: post,
 });
