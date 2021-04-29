@@ -50,7 +50,7 @@ QUnit.module("ActionManager", (hooks) => {
     ]);
   });
 
-  QUnit.debug("handle switching view and switching back on slow network", async function (assert) {
+  QUnit.test("handle switching view and switching back on slow network", async function (assert) {
     assert.expect(9);
     let def = testUtils.makeTestPromise();
     const defs = [Promise.resolve(), def, Promise.resolve()];

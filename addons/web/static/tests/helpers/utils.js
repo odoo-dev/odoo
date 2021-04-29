@@ -6,29 +6,6 @@ import { registerCleanup } from "./cleanup";
 
 const { Settings } = luxon;
 
-// /**
-//  * Adds a key/value to the given registry.
-//  * A cleanup is automatically registered.
-//  *
-//  * @param {import("@web/core/registry").Registry} registry
-//  * @param {string} key
-//  * @param {any} value
-//  * @param {number} sequence
-//  */
-// export function addToRegistry(registry, key, value, sequence = undefined) {
-//   let originalElem;
-//   if (registry.contains(key)) {
-//     originalElem = registry.content[key];
-//   }
-//   registry.add(key, value, { force: true, sequence });
-//   registerCleanup(() => {
-//     registry.remove(key);
-//     if (originalElem) {
-//       registry.add(key, originalElem[1], { sequence: originalElem[0] });
-//     }
-//   });
-// }
-
 /**
  * Patch the native Date object
  *
