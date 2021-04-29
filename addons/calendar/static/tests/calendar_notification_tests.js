@@ -12,8 +12,10 @@ import {
 import { calendarNotificationService } from "@calendar/js/services/calendar_notification_service";
 import { click, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { NotificationContainer } from "@web/notifications/notification_container";
-import { Registry } from "@web/core/registry";
 import { browser } from "@web/core/browser";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { clearRegistryWithCleanup } from "@web/../tests/helpers/mock_env";
+import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 
 const LocalStorageService = AbstractStorageService.extend({
   storage: new RamStorage(),
@@ -28,13 +30,13 @@ QUnit.module("Calendar Notification", (hooks) => {
     legacyServicesRegistry.add("local_storage", LocalStorageService);
 
     testConfig = getActionManagerTestConfig();
-    testConfig.serviceRegistry.add(
+    serviceRegistry.add(
       "calendarNotification",
       calendarNotificationService
     );
 
-    testConfig.mainComponentRegistry = new Registry();
-    testConfig.mainComponentRegistry.add(
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add(
       "NotificationContainer",
       NotificationContainer
     );
@@ -155,8 +157,7 @@ QUnit.module("Calendar Notification", (hooks) => {
           };
         },
       };
-      testConfig.serviceRegistry.remove("action");
-      testConfig.serviceRegistry.add("action", fakeActionService);
+      serviceRegistry.add("action", fakeActionService, { force: true });
 
       const webClient = await createWebClient({
         testConfig,
