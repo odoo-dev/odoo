@@ -1065,16 +1065,7 @@ function makeActionManager(env) {
 }
 
 export const actionService = {
-  dependencies: [
-    "download",
-    "effect",
-    "localization",
-    "notification",
-    "router",
-    "rpc",
-    "ui",
-    "user",
-  ],
+  dependencies: ["effect", "localization", "notification", "router", "rpc", "ui", "user"],
   start(env) {
     return makeActionManager(env);
   },
