@@ -33,10 +33,9 @@ export function useBus(bus, eventName, callback) {
 export function useAutofocus(params = {}) {
   const comp = useComponent();
   // Prevent autofocus in mobile
-  // FIXME: device not yet available in the env
-  // if (comp.env.device.isMobile) {
-  //     return () => {};
-  // }
+  if (comp.env.isSmall) {
+    return () => {};
+  }
   const selector = params.selector || "[autofocus]";
   let target = null;
   function autofocus() {
