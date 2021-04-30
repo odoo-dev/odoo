@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import FormController from "web.FormController";
-import { makeEnv } from "@web/env";
+import { makeEnv, startServices } from "@web/env";
 import { registerCleanup } from "./cleanup";
 import { patchWithCleanup } from "./utils";
 import { makeMockServer } from "./mock_server";
@@ -17,7 +17,6 @@ import { serviceRegistry } from "@web/webclient/service_registry";
 import { mainComponentRegistry } from "@web/webclient/main_component_registry";
 import { systrayRegistry } from "@web/webclient/systray_registry";
 import { userMenuRegistry } from "@web/webclient/user_menu_registry";
-import { startServices } from "@web/services/launcher";
 
 export function clearRegistryWithCleanup(registry) {
   const patch = {
@@ -25,7 +24,7 @@ export function clearRegistryWithCleanup(registry) {
     elements: null,
     entries: null,
     // Preserve OnUpdate handlers
-    subscriptions: { "UPDATE": [...registry.subscriptions.UPDATE] },
+    subscriptions: { UPDATE: [...registry.subscriptions.UPDATE] },
   };
   patchWithCleanup(registry, patch);
 }
@@ -36,7 +35,7 @@ function cloneRegistryWithCleanup(registry) {
     elements: null,
     entries: null,
     // Preserve OnUpdate handlers
-    subscriptions: { "UPDATE": [...registry.subscriptions.UPDATE] },
+    subscriptions: { UPDATE: [...registry.subscriptions.UPDATE] },
   };
   patchWithCleanup(registry, patch);
 }
@@ -102,7 +101,9 @@ export async function makeTestEnv(config = {}) {
 
 export function setTestOdooWithCleanup(config = {}) {
   const originalOdoo = odoo;
-  registerCleanup(() => { odoo = originalOdoo; });
+  registerCleanup(() => {
+    odoo = originalOdoo;
+  });
   odoo = Object.assign({}, originalOdoo, {
     browser: {},
     debug: config.debug || "",

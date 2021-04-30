@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
-import { makeEnv } from "./env";
+import { makeEnv, startServices } from "./env";
 import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { legacySetupProm } from "./legacy/legacy_setup";
-import { startServices } from "./services/launcher";
 
 const { mount, utils } = owl;
 const { whenReady } = utils;

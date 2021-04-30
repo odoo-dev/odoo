@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { SPECIAL_METHOD } from "./launcher";
+import { SPECIAL_METHOD } from "../env";
 
 const { useComponent } = owl.hooks;
 
@@ -10,7 +10,7 @@ const { useComponent } = owl.hooks;
  * @param {string} serviceName
  * @returns {any}
  */
- export function useService(serviceName) {
+export function useService(serviceName) {
   const component = useComponent();
   const { services } = component.env;
   if (!(serviceName in services)) {
