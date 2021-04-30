@@ -16,13 +16,14 @@ try {
 }
 
 export const browser = Object.assign({}, owl.browser, {
+  alert: window.alert.bind(window), // Alert needs the window context
   console: window.console,
+  localStorage,
   location: window.location,
   navigator: navigator,
   open: window.open.bind(window),
-  XMLHttpRequest: window.XMLHttpRequest,
-  localStorage,
   sessionStorage,
+  XMLHttpRequest: window.XMLHttpRequest,
 });
 
 // -----------------------------------------------------------------------------

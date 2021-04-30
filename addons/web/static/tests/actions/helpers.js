@@ -186,8 +186,7 @@ export function getActionManagerTestConfig() {
   patchWithCleanup(
     browser,
     {
-      setTimeout: window.setTimeout.bind(window),
-      clearTimeout: window.clearTimeout.bind(window),
+      alert: browser.console.warn,
       localStorage: makeRAMLocalStorage(),
       sessionStorage: makeRAMLocalStorage(),
     },

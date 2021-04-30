@@ -1,18 +1,21 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser";
-import { serviceRegistry }  from "@web/webclient/service_registry";
 import { RPCErrorDialog } from "@web/errors/error_dialogs";
+import { errorDialogRegistry } from "@web/errors/error_dialog_registry";
 import { errorHandlerRegistry } from "@web/errors/error_handler_registry";
 import { errorService } from "@web/errors/error_service";
 import OdooError from "@web/errors/odoo_error";
 import { notificationService } from "@web/notifications/notification_service";
 import { dialogService } from "@web/services/dialog_service";
 import { ConnectionLostError, RPCError } from "@web/services/rpc_service";
-import { errorDialogRegistry } from "@web/errors/error_dialog_registry";
-import { registerCleanup } from "../helpers/cleanup";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
-import { makeFakeLocalizationService, makeFakeNotificationService, makeFakeRPCService } from "../helpers/mock_services";
+import {
+  makeFakeLocalizationService,
+  makeFakeNotificationService,
+  makeFakeRPCService,
+} from "../helpers/mock_services";
 import { nextTick, patchWithCleanup } from "../helpers/utils";
 
 const { Component, tags } = owl;
@@ -26,7 +29,6 @@ function makeFakeDialogService(open) {
   };
 }
 
-let errorCb; // unused ?
 let unhandledRejectionCb;
 
 QUnit.module("Error Service", {
@@ -36,17 +38,15 @@ QUnit.module("Error Service", {
     serviceRegistry.add("notification", notificationService);
     serviceRegistry.add("rpc", makeFakeRPCService());
     serviceRegistry.add("localization", makeFakeLocalizationService());
-    const windowAddEventListener = window.addEventListener;
-    window.addEventListener = (type, cb) => {
-      if (type === "unhandledrejection") {
-        unhandledRejectionCb = cb;
-      }
-      if (type === "error") {
-        errorCb = cb;
-      }
+    unhandledRejectionCb = () => {
+      throw new Error(`No "unhandledrejection" event listener has been bound to window.`);
     };
-    registerCleanup(() => {
-      window.addEventListener = windowAddEventListener;
+    patchWithCleanup(window, {
+      addEventListener(type, cb) {
+        if (type === "unhandledrejection") {
+          unhandledRejectionCb = cb;
+        }
+      },
     });
   },
 });
@@ -114,8 +114,9 @@ QUnit.test(
 QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
   patchWithCleanup(browser, {
     setTimeout: (callback, delay) => {
-      assert.step(`set timeout (${delay === 2000 ? delay : ">2000"})`);
+      assert.step(`set timeout (${delay > 2000 ? ">2000" : delay})`);
       callback();
+      return 1;
     },
   });
   const mockCreate = (message) => {
@@ -154,11 +155,26 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
   ]);
 });
 
+QUnit.test("default handler", async (assert) => {
+  assert.expect(2);
+  patchWithCleanup(browser, {
+    alert: (message) => assert.step(`alert ${message}`),
+  });
+  await makeTestEnv();
+  const error = new OdooError("boom");
+  error.message = "boom :)";
+  const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
+  unhandledRejectionCb(errorEvent);
+  assert.verifySteps(["alert boom :)"]);
+});
+
 QUnit.test("will let handlers from the registry handle errors first", async (assert) => {
+  assert.expect(4);
   errorHandlerRegistry.add("__test_handler__", (env) => (err) => {
     assert.strictEqual(err, error);
     assert.strictEqual(env.someValue, 14);
     assert.step("in handler");
+    return true;
   });
   const testEnv = await makeTestEnv();
   testEnv.someValue = 14;

@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../webclient/service_registry";
-import OdooError from "./odoo_error";
-import { errorHandlerRegistry } from "./error_handler_registry";
 import { isBrowserChrome } from "../core/browser";
+import { serviceRegistry } from "../webclient/service_registry";
+import { errorHandlerRegistry } from "./error_handler_registry";
+import OdooError from "./odoo_error";
 
 export const errorService = {
   dependencies: ["dialog", "notification", "rpc"],
@@ -23,7 +23,7 @@ export const errorService = {
       const { colno, error: eventError, filename, lineno, message } = ev;
       let err;
       if (!filename && !lineno && !colno) {
-        err = new OdooError("UNKNOWN_CORS_ERROR");
+        err = new OdooError("UNKNOWN_CORS_ERROR", eventError);
         err.traceback = env._t(
           `Unknown CORS error\n\n` +
             `An unknown CORS error occured.\n` +
@@ -44,44 +44,35 @@ export const errorService = {
           //     ...
           stack = `${message}\n${stack}`.replace(/\n/g, "\n    ");
         }
-        err = new OdooError("UNCAUGHT_CLIENT_ERROR");
+        err = new OdooError("UNCAUGHT_CLIENT_ERROR", eventError);
         err.traceback = `${message}\n\n${filename}:${lineno}\n${env._t("Traceback")}:\n${stack}`;
       }
       handleError(err, env);
     });
 
     window.addEventListener("unhandledrejection", (ev) => {
-      const handledError = ev.reason;
-      const isPrototypeOf = Object.prototype.isPrototypeOf;
-      if (isPrototypeOf.call(OdooError.prototype, handledError)) {
+      let err;
+      if (ev.reason instanceof OdooError) {
         // the thrown error was originally an instance of "OdooError" or subtype.
-        handleError(handledError, env);
-      } else if (isPrototypeOf.call(Error.prototype, handledError)) {
+        err = ev.reason;
+      } else if (ev.reason instanceof Error) {
         // the thrown error was originally an instance of "Error"
-        const error = new OdooError("DEFAULT_ERROR");
-        error.message = ev.reason.message;
-        error.traceback = ev.reason.stack;
-        handleError(error, env);
-      } else {
+        err = new OdooError("DEFAULT_ERROR", ev.reason);
         // @legacy
         // In the future, we probably don't want to use Promises as async if/else structures
         // rather, we should always consider a rejected Promise as an error
         // For the time being, this is not possible, as Odoo code intensively relies on guardedCatch
-        // } else if (handledError && handledError.message) {
+        // } else if (ev.reason && ev.reason.message) {
         //   // the thrown value was originally a non-Error instance or a raw js object
-        //   const error = new OdooError("UNCAUGHT_OBJECT_REJECTION_ERROR");
-        //   error.message = handledError.message;
-        //   error.traceback = JSON.stringify(
-        //     handledError,
-        //     Object.getOwnPropertyNames(handledError),
-        //     4
-        //   );
-        //   handleError(error, env);
+        //   err = new OdooError("UNCAUGHT_OBJECT_REJECTION_ERROR", ev.reason);
+        //   err.traceback = JSON.stringify(ev.reason, Object.getOwnPropertyNames(ev.reason), 4);
         // } else {
-        // const error = new OdooError("UNCAUGHT_EMPTY_REJECTION_ERROR");
-        // error.message = env._t("A Promise reject call with no argument is not getting caught.");
-        // handleError(error, env);
+        //   err = new OdooError("UNCAUGHT_EMPTY_REJECTION_ERROR", ev.reason);
+        //   err.message = env._t("A Promise reject call with no argument is not getting caught.");
         // }
+      }
+      if (err) {
+        handleError(err, env);
       }
       ev.stopPropagation();
       ev.stopImmediatePropagation();

@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-import { errorDialogRegistry } from "./error_dialog_registry";
+import { browser } from "../core/browser";
 import {
   ClientErrorDialog,
   ErrorDialog,
   NetworkErrorDialog,
   RPCErrorDialog,
 } from "./error_dialogs";
+import { errorDialogRegistry } from "./error_dialog_registry";
 import { errorHandlerRegistry } from "./error_handler_registry";
-import { browser } from "../core/browser";
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv
@@ -153,7 +153,7 @@ function lostConnectionHandler(env) {
               type: "info",
             });
           })
-          .catch((e) => {
+          .catch(() => {
             // exponential backoff, with some jitter
             delay = delay * 1.5 + 500 * Math.random();
             browser.setTimeout(checkConnection, delay);
@@ -175,12 +175,17 @@ errorHandlerRegistry.add("lostConnectionHandler", lostConnectionHandler, { seque
  */
 function defaultHandler(env) {
   return (error) => {
-    const DialogComponent = error.Component || ErrorDialog;
-    env.services.dialog.open(DialogComponent, {
-      traceback: error.traceback || error.stack,
-      message: error.message,
-      name: error.name,
-    });
+    if (env.services.dialog.isReady) {
+      const DialogComponent = error.Component || ErrorDialog;
+      env.services.dialog.open(DialogComponent, {
+        traceback: error.traceback || error.stack,
+        message: error.message,
+        name: error.name,
+      });
+    } else {
+      browser.alert(error.message);
+    }
+    browser.console.error(error.originalError);
     return true;
   };
 }
