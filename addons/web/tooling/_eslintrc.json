@@ -15,6 +15,7 @@
   },
   "globals": {
     "odoo": "writable",
-    "owl": "readonly"
-  }  
+    "owl": "readonly",
+    "luxon": "readonly"
+  }
 }
