@@ -70,7 +70,7 @@ QUnit.test("data-menu-xmlid attribute on AppsMenu items", async (assert) => {
     1: { id: 1, children: [3, 4], name: "App0 with xmlid", appID: 1, xmlid: "wowl" },
     2: { id: 2, children: [], name: "App1 without xmlid", appID: 2 },
     3: { id: 3, children: [], name: "Menu without children", appID: 1, xmlid: "menu_3" },
-    4: { id: 4, children: [5], name: "Menu with children", appID: 1 },
+    4: { id: 4, children: [5], name: "Menu with children", appID: 1, xmlid: "menu_4" },
     5: { id: 5, children: [], name: "Sub menu", appID: 1, xmlid: "menu_5" },
   };
   const env = await makeTestEnv(baseConfig);
@@ -96,6 +96,9 @@ QUnit.test("data-menu-xmlid attribute on AppsMenu items", async (assert) => {
   env.services.menu.setCurrentMenu(1);
   await nextTick();
   assert.containsOnce(navbar, ".o_menu_sections .o_dropdown_item[data-menu-xmlid=menu_3]");
+
+  // check sub menus toggler
+  assert.containsOnce(navbar, ".o_menu_sections button.o_dropdown_toggler[data-menu-xmlid=menu_4]");
 
   // check sub menus
   await click(navbar.el.querySelector(".o_menu_sections .o_dropdown_toggler"));

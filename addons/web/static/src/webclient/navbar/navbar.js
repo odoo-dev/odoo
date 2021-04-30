@@ -1,12 +1,29 @@
 /** @odoo-module **/
 
 import { useService } from "../../services/service_hook";
+import { Dropdown } from "../../components/dropdown/dropdown";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { debounce } from "../../utils/timing";
 import { systrayRegistry } from "../systray_registry";
 
 const { Component, hooks } = owl;
 const { onMounted, useExternalListener } = hooks;
+
+class MenuDropdown extends Dropdown {
+  setup() {
+    super.setup();
+    onMounted(() => {
+      if (this.props.xmlid) {
+        const toggler = this.el.querySelector("button.o_dropdown_toggler");
+        toggler.dataset.menuXmlid = this.props.xmlid;
+      }
+    });
+  }
+}
+MenuDropdown.props.xmlid = {
+  type: String,
+  optional: true,
+};
 
 class MenuItem extends DropdownItem {
   setup() {
@@ -140,4 +157,4 @@ export class NavBar extends Component {
   }
 }
 NavBar.template = "web.NavBar";
-NavBar.components = { MenuItem };
+NavBar.components = { MenuDropdown, MenuItem };

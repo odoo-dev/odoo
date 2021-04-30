@@ -64,11 +64,15 @@
             <span t-esc="section.name" t-att-data-section="section.id" />
           </MenuItem>
         </t>
-        <t t-else="" t-call="web.NavBar.SectionsMenu.Dropdown">
-          <t t-set="sectionId" t-value="section.id" />
-          <t t-set="name" t-value="section.name" />
-          <t t-set="items" t-value="section.childrenTree" />
-          <t t-set="hotkey" t-value="hotkey"/>
+        <t t-else="">
+          <MenuDropdown hotkey="hotkey" title="section.name" xmlid="section.xmlid">
+            <span t-esc="section.name" t-att-data-section="section.id" />
+            <t t-set-slot="menu">
+              <t t-call="web.NavBar.SectionsMenu.Dropdown.MenuSlot">
+                <t t-set="items" t-value="section.childrenTree" />
+              </t>
+            </t>
+          </MenuDropdown>
         </t>
       </t>
 
@@ -80,17 +84,6 @@
       </t>
 
     </ul>
-  </t>
-
-  <t t-name="web.NavBar.SectionsMenu.Dropdown" owl="1">
-    <Dropdown hotkey="hotkey" title="name">
-      <span t-esc="name" t-att-data-section="sectionId" />
-      <t t-set-slot="menu">
-        <t t-call="web.NavBar.SectionsMenu.Dropdown.MenuSlot">
-          <t t-set="items" t-value="items" />
-        </t>
-      </t>
-    </Dropdown>
   </t>
 
   <t t-name="web.NavBar.SectionsMenu.Dropdown.MenuSlot" owl="1">
@@ -130,7 +123,6 @@
               <t t-set="items" t-value="section.childrenTree" />
             </t>
           </t>
- 
         </t>
       </t>
     </Dropdown>
