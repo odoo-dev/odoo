@@ -439,16 +439,27 @@ function _download(data, filename, mimetype) {
 // Exported download function
 // -----------------------------------------------------------------------------
 
-async function _download(options) {
+/**
+ * Download a file
+ *
+ * Note: the actual implementation is certainly unconventional, but sadly
+ * necessary to be able to test code using the download function
+ *
+ * @param {*} options
+ * @returns {Promise<any>}
+ */
+export function download(options) {
+  return download._download(options);
+}
+
+download._download = (options) => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     let data;
-    if (options.hasOwnProperty("form")) {
-      options = options;
+    if (Object.prototype.hasOwnProperty.call(options, "form")) {
       xhr.open(options.form.method, options.form.action);
       data = new FormData(options.form);
     } else {
-      options = options;
       xhr.open("POST", options.url);
       data = new FormData();
       Object.entries(options.data).forEach((entry) => {
@@ -503,19 +514,4 @@ async function _download(options) {
     };
     xhr.send(data);
   });
-}
-
-/**
- * Download a file
- *
- * Note: the actual implementation is certainly unconventional, but sadly
- * necessary to be able to test code using the download function
- *
- * @param {*} options
- * @returns {Promise<any>}
- */
-export function download(options) {
-  return download._download(options);
-}
-
-download._download = _download;
+};
