@@ -153,7 +153,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/components/**/*',
             'web/static/src/core/**/*',
             'web/static/src/debug/**/*',
-            'web/static/src/download/**/*',
             'web/static/src/effects/**/*',
             'web/static/src/errors/**/*',
             'web/static/src/hotkeys/**/*',
