@@ -3,7 +3,7 @@
 
     <t t-name="web.WarningDialog" owl="1">
       <Dialog title="title">
-        <div role="alert">
+        <div role="alert" class="o_dialog_warning">
           <p t-esc="message" style="white-space: pre-wrap;"/>
         </div>
       </Dialog>

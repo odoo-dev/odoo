@@ -168,7 +168,7 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
 });
 
 QUnit.test("WarningDialog", async (assert) => {
-  assert.expect(5);
+  assert.expect(6);
   class Parent extends Component {
     constructor() {
       super(...arguments);
@@ -184,6 +184,7 @@ QUnit.test("WarningDialog", async (assert) => {
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
   assert.strictEqual(target.querySelector("header .modal-title").textContent, "User Error");
+  assert.containsOnce(target, "main .o_dialog_warning");
   assert.strictEqual(target.querySelector("main").textContent, "Some strange unreadable message");
   assert.strictEqual(target.querySelector(".o_dialog footer button").textContent, "Ok");
 });
