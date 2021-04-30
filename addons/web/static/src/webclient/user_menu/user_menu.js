@@ -1,11 +1,23 @@
 /** @odoo-module **/
 
+import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { useService } from "../../services/service_hook";
 import { systrayRegistry } from "../systray_registry";
 import { browser } from "../../core/browser";
 import { userMenuRegistry } from "../user_menu_registry";
 
-const { Component } = owl;
+const { Component, hooks } = owl;
+
+class UserMenuItem extends DropdownItem {
+  setup() {
+    super.setup();
+    hooks.onMounted(() => {
+      if (this.props.payload.id) {
+        this.el.dataset.menu = this.props.payload.id;
+      }
+    });
+  }
+}
 
 export class UserMenu extends Component {
   static isDisplayed(env) {
@@ -42,5 +54,6 @@ export class UserMenu extends Component {
   }
 }
 UserMenu.template = "web.UserMenu";
+UserMenu.components = { UserMenuItem };
 
 systrayRegistry.add("web.user_menu", UserMenu, { sequence: 0 });

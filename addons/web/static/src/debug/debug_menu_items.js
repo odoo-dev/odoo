@@ -99,8 +99,8 @@ export function regenerateAssets(env) {
         ["name", "=like", "%.assets_%.css"],
         ["name", "=like", "%.assets_%.js"],
       ];
-      const ids = await env.services.model("ir.attachment").search(domain);
-      await env.services.model("ir.attachment").unlink(ids);
+      const ids = await env.services.orm.search("ir.attachment", domain);
+      await env.services.orm.unlink("ir.attachment", ids);
       browser.location.reload();
     },
     sequence: 430,

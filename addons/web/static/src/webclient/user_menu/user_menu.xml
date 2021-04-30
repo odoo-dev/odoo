@@ -8,10 +8,10 @@
                 <t t-foreach="getElements()" t-as="element" t-key="element_index">
                     <t t-if="!element.hide">
                         <t t-if="element.type == 'item'">
-                            <DropdownItem payload="{ callback: element.callback }">
+                            <UserMenuItem payload="{ callback: element.callback, id: element.id }">
                                 <a t-if="element.href" t-att-href="element.href" t-esc="element.description" t-on-click="onClickOnTagA"/>
                                 <t t-else="" t-esc="element.description"/>
-                            </DropdownItem>
+                            </UserMenuItem>
                         </t>
                         <div t-if="element.type == 'separator'" role="separator" class="dropdown-divider"/>
                     </t>

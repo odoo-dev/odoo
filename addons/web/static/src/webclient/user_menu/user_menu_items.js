@@ -9,6 +9,7 @@ function documentationItem(env) {
   const documentationURL = "https://www.odoo.com/documentation/user";
   return {
     type: "item",
+    id: "documentation",
     description: env._t("Documentation"),
     href: documentationURL,
     callback: () => {
@@ -22,6 +23,7 @@ function supportItem(env) {
   const buyEnterpriseURL = "https://www.odoo.com/buy";
   return {
     type: "item",
+    id: "support",
     description: env._t("Support"),
     href: buyEnterpriseURL,
     callback: () => {
@@ -37,6 +39,7 @@ ShortCutsDialog.template = "web.UserMenu.ShortCutsDialog";
 function shortCutsItem(env) {
   return {
     type: "item",
+    id: "shortcuts",
     description: env._t("Shortcuts"),
     callback: () => {
       const title = env._t("Shortcuts");
@@ -56,9 +59,10 @@ function separator(env) {
 function preferencesItem(env) {
   return {
     type: "item",
+    id: "settings",
     description: env._t("Preferences"),
     callback: async function () {
-      const actionDescription = await env.services.model("res.users").call("action_get");
+      const actionDescription = await env.services.orm.call("res.users", "action_get");
       actionDescription.res_id = env.services.user.userId;
       env.services.action.doAction(actionDescription);
     },
@@ -69,6 +73,7 @@ function preferencesItem(env) {
 function odooAccountItem(env) {
   return {
     type: "item",
+    id: "account",
     description: env._t("My Odoo.com.account"),
     callback: () => {
       env.services
@@ -88,6 +93,7 @@ function logOutItem(env) {
   const route = "/web/session/logout";
   return {
     type: "item",
+    id: "logout",
     description: env._t("Log out"),
     href: `${browser.location.origin}${route}`,
     callback: () => {

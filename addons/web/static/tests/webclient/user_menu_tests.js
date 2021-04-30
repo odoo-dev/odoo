@@ -40,6 +40,7 @@ QUnit.test("can be rendered", async (assert) => {
   userMenuRegistry.add("bad_item", function () {
     return {
       type: "item",
+      id: "bad",
       description: "Bad",
       callback: () => {
         assert.step("callback bad_item");
@@ -50,6 +51,7 @@ QUnit.test("can be rendered", async (assert) => {
   userMenuRegistry.add("ring_item", function () {
     return {
       type: "item",
+      id: "ring",
       description: "Ring",
       callback: () => {
         assert.step("callback ring_item");
@@ -66,6 +68,7 @@ QUnit.test("can be rendered", async (assert) => {
   userMenuRegistry.add("invisible_item", function () {
     return {
       type: "item",
+      id: "hidden",
       description: "Hidden Power",
       callback: () => {},
       sequence: 5,
@@ -75,6 +78,7 @@ QUnit.test("can be rendered", async (assert) => {
   userMenuRegistry.add("eye_item", function () {
     return {
       type: "item",
+      id: "eye",
       description: "Eye",
       callback: () => {
         assert.step("callback eye_item");
@@ -100,10 +104,15 @@ QUnit.test("can be rendered", async (assert) => {
     children.map((el) => el.tagName),
     ["LI", "LI", "DIV", "LI"]
   );
-  const items =
+  const items = [...userMenuEl.querySelectorAll("ul.o_dropdown_menu li.o_dropdown_item")] || [];
+  assert.deepEqual(
+    items.map((el) => el.dataset.menu),
+    ["ring", "bad", "eye"]
+  );
+  const spans =
     [...userMenuEl.querySelectorAll("ul.o_dropdown_menu li.o_dropdown_item span")] || [];
   assert.deepEqual(
-    items.map((el) => el.textContent),
+    spans.map((el) => el.textContent),
     ["Ring", "Bad", "Eye"]
   );
   for (const item of items) {
