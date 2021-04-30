@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { ActionDialog } from "./action_dialog";
-import { setScrollPosition } from "./action_hook";
 
 const { Component, tags } = owl;
 

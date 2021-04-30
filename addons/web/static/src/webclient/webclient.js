@@ -33,31 +33,32 @@ export class WebClient extends Component {
     this.env.bus.trigger("WEB_CLIENT_READY");
   }
 
-  loadRouterState() {
-    let action = this.actionService.loadState();
+  async loadRouterState() {
+    let actionId = await this.actionService.loadState();
     let menuId = Number(this.router.current.hash.menu_id || 0);
 
-    if (!action && menuId) {
-      // Determines the current action based on the current menu
+    if (!actionId && menuId) {
+      // Determines the current actionId based on the current menu
       const menu = this.menuService.getAll().find((m) => menuId === m.id);
-      action = menu && menu.actionID;
-      if (action) {
-        this.actionService.doAction(action, { clearBreadcrumbs: true });
+      actionId = menu && menu.actionID;
+      if (actionId) {
+        this.actionService.doAction(actionId, { clearBreadcrumbs: true });
       }
     }
-    if (!action) {
-      // If no action => falls back to the default app
-      this._loadDefaultApp();
-    }
 
-    if (!menuId && typeof action === "number") {
+    if (!menuId && actionId) {
       // Determines the current menu based on the current action
-      const menu = this.menuService.getAll().find((m) => m.actionID === action);
+      const menu = this.menuService.getAll().find((m) => m.actionID === actionId);
       menuId = menu && menu.appID;
     }
     if (menuId) {
       // Sets the menu according to the current action
       this.menuService.setCurrentMenu(menuId);
+    }
+
+    if (!actionId) {
+      // If no action => falls back to the default app
+      await this._loadDefaultApp();
     }
   }
 
@@ -66,7 +67,7 @@ export class WebClient extends Component {
     const root = this.menuService.getMenu("root");
     const firstApp = root.children[0];
     if (firstApp) {
-      this.menuService.selectMenu(firstApp);
+      return this.menuService.selectMenu(firstApp);
     }
   }
 }

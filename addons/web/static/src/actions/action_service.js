@@ -414,6 +414,7 @@ function makeActionManager(env) {
    * @param {UpdateStackOptions} options
    * @param {boolean} [options.clearBreadcrumbs=false]
    * @param {number} [options.index]
+   * @returns {Promise<Number>}
    */
   async function _updateUI(controller, options = {}) {
     let resolve;
@@ -507,7 +508,7 @@ function makeActionManager(env) {
           });
           mode = "new";
         }
-        resolve();
+        resolve(controller.action.id);
         env.bus.trigger("ACTION_MANAGER:UI-UPDATED", mode);
       }
       willUnmount() {
@@ -897,7 +898,7 @@ function makeActionManager(env) {
    *
    * @param {ActionRequest} actionRequest
    * @param {ActionOptions} options
-   * @returns {Promise<void>}
+   * @returns {Promise<Number>}
    */
   async function doAction(actionRequest, options = {}) {
     const actionProm = _loadAction(actionRequest, options.additionalContext);
@@ -1007,7 +1008,7 @@ function makeActionManager(env) {
    * @param {ViewType} viewType
    * @param {any} [options={}]
    * @throws {ViewNotFoundError} if the viewType is not found on the current action
-   * @returns {Promise<any>}
+   * @returns {Promise<Number>}
    */
   async function switchView(viewType, options = {}) {
     const controller = controllerStack[controllerStack.length - 1];
@@ -1083,33 +1084,32 @@ function makeActionManager(env) {
 
   /**
    * Performs a "doAction" or a "switchView" according to the current content of
-   * the URL. The current action (id or object) will be returned if one of these
+   * the URL. The id of the underlying action is be returned if one of these
    * operations has successfully started.
    *
-   * @returns {Action | null}
+   * @returns {Promise<Number|null>}
    */
-  function loadState() {
+  async function loadState() {
     const state = _getHashState();
     const switchViewParams = _getSwitchViewParams(state);
+    let actionId = null;
     if (switchViewParams) {
       // only when we already have an action in dom
       const { viewType, viewOptions } = switchViewParams;
       const view = _getView(viewType);
       if (view) {
         // Params valid and view found => performs a "switchView"
-        switchView(viewType, viewOptions);
-        return state.action;
+        actionId = await switchView(viewType, viewOptions);
       }
     } else {
       const actionParams = _getActionParams(state);
       if (actionParams) {
         // Params valid => performs a "doAction"
         const { actionRequest, options } = actionParams;
-        doAction(actionRequest, options);
-        return actionRequest;
+        actionId = await doAction(actionRequest, options);
       }
     }
-    return null;
+    return actionId;
   }
 
   function pushState(controller) {

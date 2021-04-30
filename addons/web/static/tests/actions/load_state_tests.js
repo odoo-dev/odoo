@@ -88,13 +88,14 @@ QUnit.module("ActionManager", (hooks) => {
     assert.verifySteps([]);
   });
 
-  QUnit.test("fallback on home action if not action found", async (assert) => {
+  QUnit.test("fallback on home action if no action found", async (assert) => {
     assert.expect(2);
     serviceRegistry.add("user", makeFakeUserService({ home_action_id: 1001 }), {
       force: true,
     });
 
     const wc = await createWebClient({ testConfig });
+    await testUtils.nextTick(); // wait for the navbar to be updated
 
     assert.containsOnce(wc, ".test_client_action");
     assert.strictEqual(wc.el.querySelector(".o_menu_brand").innerText, "App1");
