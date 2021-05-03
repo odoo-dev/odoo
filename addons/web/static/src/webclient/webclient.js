@@ -34,29 +34,33 @@ export class WebClient extends Component {
   }
 
   async loadRouterState() {
-    let actionId = await this.actionService.loadState();
+    let stateLoaded = await this.actionService.loadState();
     let menuId = Number(this.router.current.hash.menu_id || 0);
 
-    if (!actionId && menuId) {
+    if (!stateLoaded && menuId) {
       // Determines the current actionId based on the current menu
       const menu = this.menuService.getAll().find((m) => menuId === m.id);
-      actionId = menu && menu.actionID;
+      const actionId = menu && menu.actionID;
       if (actionId) {
-        this.actionService.doAction(actionId, { clearBreadcrumbs: true });
+        await this.actionService.doAction(actionId, { clearBreadcrumbs: true });
+        stateLoaded = true;
       }
     }
 
-    if (!menuId && actionId) {
+    if (stateLoaded && !menuId) {
       // Determines the current menu based on the current action
+      const currentController = this.actionService.currentController;
+      const actionId = currentController && currentController.action.id;
       const menu = this.menuService.getAll().find((m) => m.actionID === actionId);
       menuId = menu && menu.appID;
     }
+
     if (menuId) {
       // Sets the menu according to the current action
       this.menuService.setCurrentMenu(menuId);
     }
 
-    if (!actionId) {
+    if (!stateLoaded) {
       // If no action => falls back to the default app
       await this._loadDefaultApp();
     }

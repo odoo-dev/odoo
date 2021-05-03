@@ -508,7 +508,7 @@ function makeActionManager(env) {
           });
           mode = "new";
         }
-        resolve(controller.action.id);
+        resolve();
         env.bus.trigger("ACTION_MANAGER:UI-UPDATED", mode);
       }
       willUnmount() {
@@ -1087,29 +1087,30 @@ function makeActionManager(env) {
    * the URL. The id of the underlying action is be returned if one of these
    * operations has successfully started.
    *
-   * @returns {Promise<Number|null>}
+   * @returns {Promise<boolean>} true iff the state could have been loaded
    */
   async function loadState() {
     const state = _getHashState();
     const switchViewParams = _getSwitchViewParams(state);
-    let actionId = null;
     if (switchViewParams) {
       // only when we already have an action in dom
       const { viewType, viewOptions } = switchViewParams;
       const view = _getView(viewType);
       if (view) {
         // Params valid and view found => performs a "switchView"
-        actionId = await switchView(viewType, viewOptions);
+        await switchView(viewType, viewOptions);
+        return true;
       }
     } else {
       const actionParams = _getActionParams(state);
       if (actionParams) {
         // Params valid => performs a "doAction"
         const { actionRequest, options } = actionParams;
-        actionId = await doAction(actionRequest, options);
+        await doAction(actionRequest, options);
+        return true;
       }
     }
-    return actionId;
+    return false;
   }
 
   function pushState(controller) {
