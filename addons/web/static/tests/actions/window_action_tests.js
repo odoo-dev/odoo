@@ -115,6 +115,54 @@ QUnit.module("ActionManager", (hooks) => {
     ]);
   });
 
+  QUnit.skip("switching into a view with mode=edit lands in edit mode", async function (assert) {
+    debugger;
+    assert.expect(19);
+    const mockRPC = async (route, args) => {
+      assert.step((args && args.method) || route);
+    };
+    const webClient = await createWebClient({ testConfig, mockRPC });
+    await doAction(webClient, 1);
+    assert.containsOnce(webClient, ".o_kanban_view", "should display the kanban view");
+    // quick create record
+    await testUtils.dom.click(webClient.el.querySelector(".o-kanban-button-new"));
+    await new Promise(res => setTimeout(res, 10000));
+    await legacyExtraNextTick();
+    await testUtils.dom.click(webClient.el.querySelector(".o_kanban_edit"));
+
+    assert.containsNone(webClient, ".o_list_view", "should no longer display the list view");
+    assert.containsOnce(webClient, ".o_kanban_view", "should display the kanban view");
+    // switch back to list view
+    await cpHelpers.switchView(webClient.el, "list");
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient, ".o_list_view", "should display the list view");
+    assert.containsNone(webClient.el, ".o_kanban_view", "should no longer display the kanban view");
+    // open a record in form view
+    await legacyExtraNextTick();
+    assert.containsNone(webClient, ".o_list_view", "should no longer display the list view");
+    assert.containsOnce(webClient, ".o_form_view", "should display the form view");
+    assert.strictEqual(
+      $(webClient.el).find(".o_field_widget[name=foo]").text(),
+      "yop",
+      "should have opened the correct record"
+    );
+    // go back to list view using the breadcrumbs
+    await testUtils.dom.click(webClient.el.querySelector(".o_control_panel .breadcrumb a"));
+    await legacyExtraNextTick();
+    assert.containsOnce(webClient, ".o_list_view", "should display the list view");
+    assert.containsNone(webClient, ".o_form_view", "should no longer display the form view");
+    assert.verifySteps([
+      "/web/webclient/load_menus",
+      "/web/action/load",
+      "load_views",
+      "/web/dataset/search_read",
+      "/web/dataset/search_read",
+      "/web/dataset/search_read",
+      "read",
+      "/web/dataset/search_read",
+    ]);
+  });
+
   QUnit.test(
     "orderedBy in context is not propagated when executing another action",
     async function (assert) {

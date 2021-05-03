@@ -43,6 +43,10 @@ function registerView(name, LegacyView) {
           searchPanel: this.props.searchPanel || (this.props.state && this.props.state.searchPanel),
         },
       };
+      // Only add mode to viewParams if it is specified to avoid overwriting the default mode in some view (eg graph)
+      if (this.props.mode) {
+        this.viewParams.mode = this.props.mode;
+      }
       this.widget = this.props.state && this.props.state.__legacy_widget__;
       this.onReverseBreadcrumb = this.props.state && this.props.state.__on_reverse_breadcrumb__;
       useSetupAction({
