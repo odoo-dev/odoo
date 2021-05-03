@@ -7,7 +7,11 @@ import { DebugManager } from "@web/debug/debug_manager";
 import { debugService } from "@web/debug/debug_service";
 import { ormService } from "@web/services/orm_service";
 import { useDebugManager } from "@web/debug/debug_manager";
-import { click, getFixture } from "../helpers/utils";
+import { regenerateAssets } from "@web/debug/debug_menu_items";
+import { makeFakeLocalizationService } from "../helpers/mock_services";
+import { browser } from "@web/core/browser";
+import { registerCleanup } from "../helpers/cleanup";
+import { click, getFixture, patchWithCleanup } from "../helpers/utils";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
@@ -17,6 +21,7 @@ const { useSubEnv } = hooks;
 
 let target;
 let testConfig;
+
 QUnit.module("DebugManager", (hooks) => {
   hooks.beforeEach(async () => {
     target = getFixture();
@@ -87,6 +92,7 @@ QUnit.module("DebugManager", (hooks) => {
     });
     const env = await makeTestEnv(testConfig);
     const debugManager = await mount(DebugManager, { env, target });
+    registerCleanup(() => debugManager.destroy());
     let debugManagerEl = debugManager.el;
     await click(debugManager.el.querySelector("button.o_dropdown_toggler"));
     debugManagerEl = debugManager.el;
@@ -107,7 +113,6 @@ QUnit.module("DebugManager", (hooks) => {
       click(item);
     }
     assert.verifySteps(["callback item_2", "callback item_1", "callback item_3"]);
-    debugManager.destroy();
   });
 
   QUnit.test("Don't display the DebugManager if debug mode is disabled", async (assert) => {
@@ -116,10 +121,12 @@ QUnit.module("DebugManager", (hooks) => {
     target.append(dialogContainer);
     const env = await makeTestEnv(testConfig);
     const actionDialog = await mount(ActionDialog, { env, target });
+    registerCleanup(() => {
+      actionDialog.destroy();
+      target.querySelector(".o_dialog_container").remove();
+    });
     assert.containsOnce(target, "div.o_dialog_container .o_dialog");
     assert.containsNone(target, ".o_dialog .o_debug_manager .fa-bug");
-    actionDialog.destroy();
-    target.querySelector(".o_dialog_container").remove();
   });
 
   QUnit.test(
@@ -165,6 +172,10 @@ QUnit.module("DebugManager", (hooks) => {
       testConfig.debug = "1";
       const env = await makeTestEnv(testConfig);
       const actionDialog = await mount(Parent, { env, target });
+      registerCleanup(() => {
+        actionDialog.destroy();
+        target.querySelector(".o_dialog_container").remove();
+      });
       assert.containsOnce(target, "div.o_dialog_container .o_dialog");
       assert.containsOnce(target, ".o_dialog .o_debug_manager .fa-bug");
       await click(target, ".o_dialog .o_debug_manager button");
@@ -181,8 +192,39 @@ QUnit.module("DebugManager", (hooks) => {
         click(item);
       }
       assert.verifySteps(["callback item_1", "callback item_2"]);
-      actionDialog.destroy();
-      target.querySelector(".o_dialog_container").remove();
     }
   );
+
+  QUnit.test("can regenerate assets bundles", async (assert) => {
+    const mockRPC = async (route, args) => {
+      if (args.method === "check_access_rights") {
+        return Promise.resolve(true);
+      }
+      if (route === "/web/dataset/call_kw/ir.attachment/search") {
+        assert.step("ir.attachment/search");
+        return [1, 2, 3];
+      }
+      if (route === "/web/dataset/call_kw/ir.attachment/unlink") {
+        assert.step("ir.attachment/unlink");
+        return Promise.resolve(true);
+      }
+    };
+    testConfig = { mockRPC };
+    patchWithCleanup(browser, {
+      location: {
+        reload: () => assert.step("reloadPage"),
+      },
+    });
+    serviceRegistry.add("localization", makeFakeLocalizationService());
+    debugRegistry.add("regenerateAssets", regenerateAssets);
+    const env = await makeTestEnv(testConfig);
+    const debugManager = await mount(DebugManager, { env, target });
+    registerCleanup(() => debugManager.destroy());
+    await click(debugManager.el.querySelector("button.o_dropdown_toggler"));
+    assert.containsOnce(debugManager.el, "ul.o_dropdown_menu li.o_dropdown_item");
+    const item = debugManager.el.querySelector("ul.o_dropdown_menu li.o_dropdown_item span");
+    assert.strictEqual(item.textContent, "Regenerate Assets Bundles");
+    await click(item);
+    assert.verifySteps(["ir.attachment/search", "ir.attachment/unlink", "reloadPage"]);
+  });
 });
