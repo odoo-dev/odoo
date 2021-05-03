@@ -56,7 +56,7 @@ function separator(env) {
   };
 }
 
-function preferencesItem(env) {
+export function preferencesItem(env) {
   return {
     type: "item",
     id: "settings",

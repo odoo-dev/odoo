@@ -5,9 +5,12 @@ import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { uiService } from "@web/services/ui_service";
 import { patch, unpatch } from "@web/utils/patch";
 import { UserMenu } from "@web/webclient/user_menu/user_menu";
+import { preferencesItem } from "@web/webclient/user_menu/user_menu_items";
 import { userMenuRegistry } from "@web/webclient/user_menu_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeUserService } from "../helpers/mock_services";
+import { makeFakeLocalizationService } from "../helpers/mock_services";
+import { ormService } from "@web/services/orm_service";
 import { click, getFixture } from "../helpers/utils";
 import { serviceRegistry } from "@web/webclient/service_registry";
 
@@ -128,4 +131,41 @@ QUnit.test("display the correct name in debug mode", async (assert) => {
   assert.containsOnce(userMenuEl, "img.o_user_avatar");
   assert.containsOnce(userMenuEl, "span.oe_topbar_name");
   assert.strictEqual(userMenuEl.querySelector(".oe_topbar_name").textContent, "Sauron (test)");
+});
+
+QUnit.test("can execute the callback of settings", async (assert) => {
+  const mockRPC = (route) => {
+    if (route === "/web/dataset/call_kw/res.users/action_get") {
+      return Promise.resolve({
+        name: "Change My Preferences",
+        res_id: 0,
+      });
+    }
+  };
+  const testConfig = { mockRPC };
+  serviceRegistry.add("localization", makeFakeLocalizationService());
+  serviceRegistry.add("orm", ormService);
+  const fakeActionService = {
+    name: "action",
+    start() {
+      return {
+        doAction(actionId) {
+          assert.step("" + actionId.res_id);
+          assert.step(actionId.name);
+          return Promise.resolve(true);
+        },
+      };
+    },
+  };
+  serviceRegistry.add("action", fakeActionService, { force: true });
+
+  env = await makeTestEnv(testConfig);
+  userMenuRegistry.add("profile", preferencesItem);
+  userMenu = await mount(UserMenu, { env, target });
+  await click(userMenu.el.querySelector("button.o_dropdown_toggler"));
+  assert.containsOnce(userMenu.el, "ul.o_dropdown_menu li.o_dropdown_item");
+  const item = userMenu.el.querySelector("ul.o_dropdown_menu li.o_dropdown_item");
+  assert.strictEqual(item.textContent, "Preferences");
+  await click(item);
+  assert.verifySteps(["7", "Change My Preferences"]);
 });
