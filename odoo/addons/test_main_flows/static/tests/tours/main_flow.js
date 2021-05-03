@@ -778,7 +778,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
 {
     trigger: '.o_form_button_edit',
     content: _t('Edit the vendor bill'),
-    extra_trigger: 'body.o_web_client:not(.oe_wait)',
+    extra_trigger: '.o_loading_indicator:not(.o_loading)',
 }, {
     trigger:".o_field_widget[name=invoice_date] input",
     content: _t('Set the invoice date'),
@@ -835,7 +835,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing
 {
     trigger: '.o_form_button_edit',
     content: _t('Edit the production order'),
-    extra_trigger: 'body.o_web_client:not(.oe_wait)',
+    extra_trigger: '.o_loading_indicator:not(.o_loading)',
 }, {
     trigger: "input[name=qty_producing]",
     position: 'left',

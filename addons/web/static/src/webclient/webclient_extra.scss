@@ -29,7 +29,7 @@ select {
 // Loading
 //------------------------------------------------------------------------------
 
-.o_loading {
+.o_loading > span {
   background-color: $o-brand-odoo;
   color: white;
   padding: 4px;
