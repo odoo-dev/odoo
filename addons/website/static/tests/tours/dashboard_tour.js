@@ -12,7 +12,7 @@ odoo.define("website.tour.backend_dashboard", function (require) {
     [
       tour.stepUtils.showAppsMenuItem(),
       {
-        trigger: 'li[data-menu-xmlid="website.menu_website_configuration"]',
+        trigger: '.o_app[data-menu-xmlid="website.menu_website_configuration"]',
       },
       {
         trigger: 'button[data-menu-xmlid="website.menu_dashboard"]',
