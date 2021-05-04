@@ -86,7 +86,6 @@ function makeActionManager(env) {
    * @returns {Promise<Action>}
    */
   async function _loadAction(actionRequest, context = {}) {
-    let action;
     if (typeof actionRequest === "string" && actionRegistry.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
       return {
@@ -94,25 +93,28 @@ function makeActionManager(env) {
         tag: actionRequest,
         type: "ir.actions.client",
       };
-    } else if (typeof actionRequest === "string" || typeof actionRequest === "number") {
+    }
+
+    if (typeof actionRequest === "string" || typeof actionRequest === "number") {
       // actionRequest is an id or an xmlid
-      const key = JSON.stringify(actionRequest);
+      const additional_context = {
+        active_id: context.active_id,
+        active_ids: context.active_ids,
+        active_model: context.active_model,
+      };
+      const key = `${JSON.stringify(actionRequest)},${JSON.stringify(additional_context)}`;
       if (!actionCache[key]) {
         actionCache[key] = env.services.rpc("/web/action/load", {
           action_id: actionRequest,
-          additional_context: {
-            active_id: context.active_id,
-            active_ids: context.active_ids,
-            active_model: context.active_model,
-          },
+          additional_context,
         });
       }
-      action = actionCache[key];
-    } else {
-      // actionRequest is an object describing the action
-      action = actionRequest;
+      const action = await actionCache[key];
+      return Object.assign({}, action);
     }
-    return action;
+
+    // actionRequest is an object describing the action
+    return actionRequest;
   }
 
   /**
