@@ -59,6 +59,96 @@ QUnit.module("ActionManager", (hooks) => {
     assert.verifySteps(["client_action_object"]);
   });
 
+  QUnit.test("actions can be cached", async function (assert) {
+    assert.expect(8);
+
+    const mockRPC = async (route, args) => {
+      if (route === "/web/action/load") {
+        assert.step(JSON.stringify(args));
+      }
+    };
+
+    const env = await makeTestEnv({ ...testConfig, mockRPC });
+
+    const loadAction = env.services.action.loadAction;
+
+    // With no additional params
+    await loadAction(3);
+    await loadAction(3);
+
+    // With specific additionalContext
+    await loadAction(3, { additionalContext: { configuratorMode: "add" } });
+    await loadAction(3, { additionalContext: { configuratorMode: "edit" } });
+
+    // With same active_id
+    await loadAction(3, { active_id: 1 });
+    await loadAction(3, { active_id: 1 });
+
+    // With active_id change
+    await loadAction(3, { active_id: 2 });
+
+    // With same active_ids
+    await loadAction(3, { active_ids: [1, 2] });
+    await loadAction(3, { active_ids: [1, 2] });
+
+    // With active_ids change
+    await loadAction(3, { active_ids: [1, 2, 3] });
+
+    // With same active_model
+    await loadAction(3, { active_model: "a" });
+    await loadAction(3, { active_model: "a" });
+
+    // With active_model change
+    await loadAction(3, { active_model: "b" });
+
+    assert.verifySteps([
+      "{\"action_id\":3,\"additional_context\":{}}",
+      "{\"action_id\":3,\"additional_context\":{\"active_id\":1}}",
+      "{\"action_id\":3,\"additional_context\":{\"active_id\":2}}",
+      "{\"action_id\":3,\"additional_context\":{\"active_ids\":[1,2]}}",
+      "{\"action_id\":3,\"additional_context\":{\"active_ids\":[1,2,3]}}",
+      "{\"action_id\":3,\"additional_context\":{\"active_model\":\"a\"}}",
+      "{\"action_id\":3,\"additional_context\":{\"active_model\":\"b\"}}",
+    ], "should load from server once per active_id/active_ids/active_model change, nothing else");
+  });
+
+  QUnit.test("action cache: additionalContext is respected", async function (assert) {
+    assert.expect(5);
+
+    const mockRPC = async (route, args) => {
+      if (route === "/web/action/load") {
+        assert.step("server loaded");
+      }
+    };
+
+    const env = await makeTestEnv({ ...testConfig, mockRPC });
+    const { loadAction } = env.services.action;
+    const actionParams = {
+      additionalContext: {
+        some: { deep: { nested: "Robert" } }
+      }
+    };
+
+    let action = await loadAction(3, actionParams);
+    assert.verifySteps(["server loaded"]);
+    const baseContext = {
+      allowed_company_ids: [1],
+      lang: "en",
+      tz: "taht",
+      uid: 7,
+    };
+    assert.deepEqual(action.context, { ...baseContext, ...actionParams });
+
+    // Modify the action in place
+    action.context.additionalContext.some.deep.nested = "Nesta";
+
+    // Change additionalContext and reload from cache
+    actionParams.additionalContext.some.deep.nested = "Marley";
+    action = await loadAction(3, actionParams);
+    assert.verifySteps([], "loaded from cache");
+    assert.deepEqual(action.context, { ...baseContext, ...actionParams });
+  });
+
   QUnit.test("no widget memory leaks when doing some action stuff", async function (assert) {
     assert.expect(1);
     let delta = 0;
