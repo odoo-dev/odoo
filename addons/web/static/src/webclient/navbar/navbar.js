@@ -9,7 +9,7 @@ import { systrayRegistry } from "../systray_registry";
 const { Component, hooks } = owl;
 const { onMounted, useExternalListener } = hooks;
 
-class MenuDropdown extends Dropdown {
+export class MenuDropdown extends Dropdown {
   setup() {
     super.setup();
     onMounted(() => {
@@ -25,7 +25,7 @@ MenuDropdown.props.xmlid = {
   optional: true,
 };
 
-class MenuItem extends DropdownItem {
+export class MenuItem extends DropdownItem {
   setup() {
     super.setup();
     onMounted(() => {
