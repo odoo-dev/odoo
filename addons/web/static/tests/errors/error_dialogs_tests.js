@@ -1,8 +1,6 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser";
-import { serviceRegistry } from "@web/webclient/service_registry";
-import { makeFakeLocalizationService } from "../helpers/mock_services";
 import {
   ClientErrorDialog,
   Error504Dialog,
@@ -11,11 +9,13 @@ import {
   SessionExpiredDialog,
   WarningDialog,
 } from "@web/errors/error_dialogs";
-import OdooError from "@web/errors/odoo_error";
-import { uiService } from "@web/services/ui_service";
-import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture, nextTick, patchWithCleanup } from "../helpers/utils";
+import { OdooError } from "@web/errors/odoo_error";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
+import { uiService } from "@web/services/ui_service";
+import { serviceRegistry } from "@web/webclient/service_registry";
+import { makeTestEnv } from "../helpers/mock_env";
+import { makeFakeLocalizationService } from "../helpers/mock_services";
+import { click, getFixture, nextTick, patchWithCleanup } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
 let target;
@@ -138,8 +138,7 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
 
 QUnit.test("button clipboard copy error traceback", async (assert) => {
   assert.expect(1);
-  const error = new OdooError("ERROR_NAME");
-  error.message = "This is the message";
+  const error = new OdooError("ERROR_NAME", "This is the message");
   error.traceback = "This is a traceback";
   patchWithCleanup(browser, {
     navigator: {
@@ -155,7 +154,7 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
     constructor() {
       super(...arguments);
       this.message = error.message;
-      this.name = "ERROR_NAME";
+      this.name = error.name;
       this.traceback = "This is a traceback";
     }
   }

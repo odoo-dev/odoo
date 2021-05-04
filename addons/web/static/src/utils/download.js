@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { NetworkErrorDialog, ServerErrorDialog } from "../errors/error_dialogs";
-import OdooError from "../errors/odoo_error";
+import { OdooError } from "../errors/odoo_error";
 
 // -----------------------------------------------------------------------------
 // Content Disposition Library
@@ -487,21 +487,21 @@ download._download = (options) => {
           const contents = decoder.result;
           const doc = new DOMParser().parseFromString(contents, "text/html");
           const nodes = doc.body.children.length === 0 ? doc.body.childNodes : doc.body.children;
-          const error = new OdooError("XHR_SERVER_ERROR");
-          error.Component = ServerErrorDialog;
+          let error;
           try {
             // Case of a serialized Odoo Exception: It is Json Parsable
             const node = nodes[1] || nodes[0];
-            error.message = "Serialized Python Exception";
+            error = new OdooError("XHR_SERVER_ERROR", "Serialized Python Exception");
             error.traceback = JSON.parse(node.textContent);
           } catch (e) {
             // Arbitrary uncaught python side exception
-            error.message = "Arbitrary Uncaught Python Exception";
+            error = new OdooError("XHR_SERVER_ERROR", "Arbitrary Uncaught Python Exception");
             error.traceback = `${xhr.status}
                         ${nodes.length > 0 ? nodes[0].textContent : ""}
                         ${nodes.length > 1 ? nodes[1].textContent : ""}
                     `;
           }
+          error.Component = ServerErrorDialog;
           reject(error);
         };
         decoder.readAsText(xhr.response);

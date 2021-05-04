@@ -10,7 +10,7 @@ Note: if you're a backend dev just willing to display a different dialog from an
 
 ## The net and the dispatcher
 
-Any error that is not caugh (meaning that is is not handled by a try / catch block for example) will eventually bubble up all the way until it reaches what we call the net. The net is made of event listeners on the global window object, listening for errors and rejected promises. The net is an analogy to a safety net that would catch things at the last moment. Once caught, the error is cast if needed to an instance of OdooError and send with the bus to the error dispatcher.
+Any error that is not caught (meaning that is is not handled by a try / catch block for example) will eventually bubble up all the way until it reaches what we call the net. The net is made of event listeners on the global window object, listening for errors and rejected promises. The net is an analogy to a safety net that would catch things at the last moment. Once caught, the error is cast if needed to an instance of OdooError and send with the bus to the error dispatcher.
 
 ```js
 // this is pseudo code

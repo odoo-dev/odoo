@@ -5,7 +5,7 @@ import { RPCErrorDialog } from "@web/errors/error_dialogs";
 import { errorDialogRegistry } from "@web/errors/error_dialog_registry";
 import { errorHandlerRegistry } from "@web/errors/error_handler_registry";
 import { errorService } from "@web/errors/error_service";
-import OdooError from "@web/errors/odoo_error";
+import { OdooError } from "@web/errors/odoo_error";
 import { notificationService } from "@web/notifications/notification_service";
 import { dialogService } from "@web/services/dialog_service";
 import { ConnectionLostError, RPCError } from "@web/services/rpc_service";
@@ -53,9 +53,8 @@ QUnit.module("Error Service", {
 
 QUnit.test("handle RPC_ERROR of type='server' and no associated dialog class", async (assert) => {
   assert.expect(2);
-  const error = new RPCError();
+  const error = new RPCError("Some strange error occured");
   error.code = 701;
-  error.message = "Some strange error occured";
   error.data = { debug: "somewhere" };
   error.subType = "strange_error";
   function open(dialogClass, props) {
@@ -86,9 +85,8 @@ QUnit.test(
     class CustomDialog extends Component {}
     CustomDialog.template = tags.xml`<RPCErrorDialog title="'Strange Error'"/>`;
     CustomDialog.components = { RPCErrorDialog };
-    const error = new RPCError();
+    const error = new RPCError("Some strange error occured");
     error.code = 701;
-    error.message = "Some strange error occured";
     error.Component = CustomDialog;
     function open(dialogClass, props) {
       assert.strictEqual(dialogClass, CustomDialog);
@@ -161,8 +159,7 @@ QUnit.test("default handler", async (assert) => {
     alert: (message) => assert.step(`alert ${message}`),
   });
   await makeTestEnv();
-  const error = new OdooError("boom");
-  error.message = "boom :)";
+  const error = new OdooError("BOOM", "boom :)");
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
   assert.verifySteps(["alert boom :)"]);
@@ -171,15 +168,36 @@ QUnit.test("default handler", async (assert) => {
 QUnit.test("will let handlers from the registry handle errors first", async (assert) => {
   assert.expect(4);
   errorHandlerRegistry.add("__test_handler__", (env) => (err) => {
-    assert.strictEqual(err, error);
+    assert.strictEqual(String(err), "Error: boom");
     assert.strictEqual(env.someValue, 14);
     assert.step("in handler");
     return true;
   });
   const testEnv = await makeTestEnv();
   testEnv.someValue = 14;
-  const error = new OdooError("boom");
+  const error = new Error("boom");
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
   assert.verifySteps(["in handler"]);
+});
+
+QUnit.test("error in error handler", async (assert) => {
+  assert.expect(4);
+  patchWithCleanup(browser, {
+    console: Object.assign({}, window.console, {
+      error: (err) => assert.step(String(err)),
+    }),
+  });
+  errorHandlerRegistry.add("__test_handler__", () => () => {
+    throw new Error("Handler broke");
+  });
+  await makeTestEnv();
+  const error = new OdooError("BOOM");
+  const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
+  unhandledRejectionCb(errorEvent);
+  assert.verifySteps([
+    "BOOM",
+    "An additional error occurred while handling the error above:",
+    "Error: Handler broke",
+  ]);
 });

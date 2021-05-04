@@ -10,6 +10,7 @@ import { sprintf } from "../utils/strings";
 import { viewRegistry } from "../views/view_registry";
 import { serviceRegistry } from "../webclient/service_registry";
 import { actionRegistry } from "./action_registry";
+import { OdooError } from "../errors/odoo_error";
 
 const { Component, hooks, tags } = owl;
 
@@ -22,17 +23,15 @@ export function clearUncommittedChanges(env) {
 // -----------------------------------------------------------------------------
 // Errors
 // -----------------------------------------------------------------------------
-export class ViewNotFoundError extends Error {
+export class ViewNotFoundError extends OdooError {
   constructor() {
-    super(...arguments);
-    this.name = "ViewNotFoundError";
+    super("ViewNotFoundError", ...arguments);
   }
 }
 
-export class ControllerNotFoundError extends Error {
+export class ControllerNotFoundError extends OdooError {
   constructor() {
-    super(...arguments);
-    this.name = "ControllerNotFoundError";
+    super("ControllerNotFoundError", ...arguments);
   }
 }
 

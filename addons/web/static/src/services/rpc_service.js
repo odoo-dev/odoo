@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../core/browser";
-import OdooError from "../errors/odoo_error";
+import { OdooError } from "../errors/odoo_error";
 import { serviceRegistry } from "../webclient/service_registry";
 
 // -----------------------------------------------------------------------------
@@ -9,14 +9,14 @@ import { serviceRegistry } from "../webclient/service_registry";
 // -----------------------------------------------------------------------------
 export class RPCError extends OdooError {
   constructor() {
-    super("RPC_ERROR");
+    super("RPC_ERROR", ...arguments);
     this.type = "server";
   }
 }
 
 export class ConnectionLostError extends OdooError {
   constructor() {
-    super("CONNECTION_LOST_ERROR");
+    super("CONNECTION_LOST_ERROR", ...arguments);
   }
 }
 
@@ -30,11 +30,10 @@ function makeErrorFromResponse(reponse) {
   const { context: data_context, name: data_name } = errorData || {};
   const { exception_class } = data_context || {};
   const exception_class_name = exception_class || data_name;
-  const error = new RPCError();
+  const error = new RPCError(message);
   error.exceptionName = exception_class_name;
   error.subType = subType;
   error.data = errorData;
-  error.message = message;
   error.code = code;
   return error;
 }

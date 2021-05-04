@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../core/browser";
+import { ConnectionLostError, RPCError } from "../services/rpc_service";
 import {
   ClientErrorDialog,
   ErrorDialog,
@@ -12,7 +13,8 @@ import { errorHandlerRegistry } from "./error_handler_registry";
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv
- * @typedef {(error: any) => boolean | void} ErrorHandler
+ * @typedef {import("./odoo_error").OdooError} OdooError
+ * @typedef {(error: OdooError) => boolean | void} ErrorHandler
  */
 
 // -----------------------------------------------------------------------------
@@ -92,7 +94,7 @@ errorHandlerRegistry.add("emptyRejectionErrorHandler", emptyRejectionErrorHandle
  */
 function rpcErrorHandler(env) {
   return (error) => {
-    if (error.name === "RPC_ERROR") {
+    if (error instanceof RPCError) {
       // When an error comes from the server, it can have an exeption name.
       // (or any string truly). It is used as key in the error dialog from
       // server registry to know which dialog component to use.
@@ -132,7 +134,7 @@ errorHandlerRegistry.add("rpcErrorHandler", rpcErrorHandler, { sequence: 98 });
 function lostConnectionHandler(env) {
   let connectionLostNotifId;
   return (error) => {
-    if (error.name === "CONNECTION_LOST_ERROR") {
+    if (error instanceof ConnectionLostError) {
       if (connectionLostNotifId) {
         // notification already displayed (can occur if there were several
         // concurrent rpcs when the connection was lost)
@@ -185,7 +187,6 @@ function defaultHandler(env) {
     } else {
       browser.alert(error.message);
     }
-    browser.console.error(error.originalError);
     return true;
   };
 }

@@ -138,7 +138,7 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
       const [route, params, settings] = args;
       wowlEnv.services.rpc(route, params, settings).then(resolve).catch((reason) => {
         error = reason;
-        if (isPrototypeOf.call(RPCError.prototype, reason)) {
+        if (reason instanceof RPCError) {
           event = $.Event();
           reject({ message: reason, event });
         }
