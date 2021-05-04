@@ -71,7 +71,7 @@ QUnit.module("ActionManager", (hooks) => {
     assert.deepEqual(webClient.env.services.router.current.hash, { action: "1001", menu_id: "2" });
   });
 
-  QUnit.test("initial action loading", async (assert) => {
+  QUnit.test("initial loading with action id", async (assert) => {
     assert.expect(4);
     const hash = { action: "1001" };
     serviceRegistry.add("router", makeFakeRouterService({ initialRoute: { hash } }), {
@@ -81,6 +81,23 @@ QUnit.module("ActionManager", (hooks) => {
     const env = await makeTestEnv({ ...testConfig, mockRPC });
 
     assert.verifySteps(["/web/action/load", "/web/webclient/load_menus"]);
+
+    const wc = await mount(WebClient, { env, target: getFixture() });
+    registerCleanup(() => wc.destroy());
+
+    assert.verifySteps([]);
+  });
+
+  QUnit.test("initial loading with action tag", async (assert) => {
+    assert.expect(3);
+    const hash = { action: "__test__client__action__" };
+    serviceRegistry.add("router", makeFakeRouterService({ initialRoute: { hash } }), {
+      force: true,
+    });
+    const mockRPC = (route) => assert.step(route);
+    const env = await makeTestEnv({ ...testConfig, mockRPC });
+
+    assert.verifySteps(["/web/webclient/load_menus"]);
 
     const wc = await mount(WebClient, { env, target: getFixture() });
     registerCleanup(() => wc.destroy());

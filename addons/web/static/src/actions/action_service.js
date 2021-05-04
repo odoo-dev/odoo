@@ -53,7 +53,7 @@ function makeActionManager(env) {
   // The state action (or default user action if none) is loaded as soon as possible
   // so that the next "doAction" will have its action ready when needed.
   const actionParams = _getActionParams(_getHashState());
-  if (actionParams) {
+  if (actionParams && typeof actionParams.actionRequest === "number") {
     const { actionRequest, options } = actionParams;
     _loadAction(actionRequest, options.additionalContext);
   }
