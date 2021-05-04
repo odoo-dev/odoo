@@ -236,9 +236,6 @@ var Dialog = Widget.extend({
      *   `on_close` handler.
      */
     destroy: function (options) {
-        // Notifies new webclient to adjust UI active element
-        core.bus.trigger("legacy_dialog_destroyed", this);
-
         // Need to trigger before real destroy but if 'closed' handler destroys
         // the widget again, we want to avoid infinite recursion
         if (!this.__closed) {
@@ -254,6 +251,9 @@ var Dialog = Widget.extend({
         // Only has to be done if the dialog has been opened (has an el).
         if (this.el) {
             OwlDialog.hide(this);
+
+            // Notifies new webclient to adjust UI active element
+            core.bus.trigger("legacy_dialog_destroyed", this);
         }
 
         // Triggers the onForceClose event if the callback is defined
@@ -273,7 +273,7 @@ var Dialog = Widget.extend({
             this.$modal.remove();
         }
 
-        var modals = $('body > .modal').filter(':visible');
+        var modals = $('.modal[role="dialog"]').filter(':visible');
         if (modals.length) {
             if (!isFocusSet) {
                 modals.last().focus();

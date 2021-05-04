@@ -283,8 +283,12 @@ odoo.define('web.test_utils_create', function (require) {
         const actionManager = Object.assign(document.createElement('div'), {
             className: 'o_action_manager',
         });
+        const dialogContainer = Object.assign(document.createElement('div'), {
+            className: 'o_dialog_container',
+        });
         target.prepend(webClient);
         webClient.append(actionManager);
+        webClient.append(dialogContainer);
 
         // add mock environment: mock server, session, fieldviewget, ...
         const mockServer = await testUtilsMock.addMockEnvironment(widget, params);

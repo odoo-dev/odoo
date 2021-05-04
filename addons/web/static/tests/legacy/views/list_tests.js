@@ -8495,7 +8495,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('editable list: edit many2one from external link', async function (assert) {
-        assert.expect(2);
+        assert.expect(7);
 
         const list = await createView({
             arch: `
@@ -8516,9 +8516,18 @@ QUnit.module('Views', {
             View: ListView,
         });
 
+        assert.strictEqual(list.mode, "readonly", "is in readonly mode");
         await testUtils.dom.click(list.$('thead .o_list_record_selector:first input'));
         await testUtils.dom.click(list.$('.o_data_row:first .o_data_cell:eq(0)'));
+        assert.strictEqual(list.mode, "edit", "is in edit mode");
         await testUtils.dom.click(list.$('.o_external_button:first'));
+
+        // Clicking somewhere on the form dialog should not close it
+        // and should not leave edit mode
+        assert.containsOnce(document.body, ".modal[role='dialog']");
+        await testUtils.dom.click(document.body.querySelector(".modal[role='dialog']"));
+        assert.containsOnce(document.body, ".modal[role='dialog']");
+        assert.strictEqual(list.mode, "edit", "is still in edit mode");
 
         // Change the M2O value in the Form dialog
         await testUtils.fields.editInput($('.modal input:first'), "OOF");
@@ -8577,7 +8586,7 @@ QUnit.module('Views', {
         // mouseup and click events
         assert.expect(5);
 
-        this.data.bar.fields.m2o = {string: "M2O field", type: "many2one", relation: "foo"};
+        this.data.bar.fields.m2o = { string: "M2O field", type: "many2one", relation: "foo" };
 
         const form = await createView({
             View: FormView,
