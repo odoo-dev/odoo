@@ -164,6 +164,22 @@
         ],
         'point_of_sale.pos_assets_backend': [
             ('include', 'web.assets_backend'),
+            ('remove', 'web/static/src/services/menu_service.js'),
+            ('remove', 'web/static/src/errors/error_handlers.js'),
+        ],
+        'point_of_sale.tests_assets': [
+            ('include', 'web.tests_assets'),
+        ],
+        'point_of_sale.qunit_suite_tests': [
+            'web/static/tests/legacy/component_extension_tests.js',
+            'point_of_sale/static/tests/unit/**/*',
+            ('remove', 'point_of_sale/static/tests/unit/helpers/test_main.js')
+        ],
+        'point_of_sale.assets_backend_prod_only': [
+            'point_of_sale/static/src/js/chrome_adapter.js',
+            'point_of_sale/static/src/js/main.js',
+            'web/static/src/setup.js',
+            'web/static/src/legacy/legacy_setup.js',
         ],
         'web.assets_qweb': [
             'point_of_sale/static/src/xml/**/*',

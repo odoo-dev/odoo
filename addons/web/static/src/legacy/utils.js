@@ -28,10 +28,15 @@ export function makeLegacyActionManagerService(legacyEnv) {
   return {
     dependencies: ["action"],
     start(env) {
+      function do_action(action, options) {
+        const legacyOptions = mapDoActionOptionAPI(options);
+        return env.services.action.doAction(action, legacyOptions);
+      }
       legacyEnv.bus.on("do-action", null, (payload) => {
-        const legacyOptions = mapDoActionOptionAPI(payload.options);
-        env.services.action.doAction(payload.action, legacyOptions);
+        const {action, options} = payload;
+        do_action(action, options);
       });
+      return { do_action };
     },
   };
 }
