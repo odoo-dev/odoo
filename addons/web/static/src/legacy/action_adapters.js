@@ -137,6 +137,16 @@ class ActionAdapter extends ComponentAdapter {
   canBeRemoved() {
     return this.__widget.canBeRemoved();
   }
+
+  /**
+   * @override
+   */
+  willUnmount() {
+    if (this.__widget && this.__widget.on_detach_callback) {
+        this.__widget.on_detach_callback();
+    }
+    super.willUnmount();
+  }
 }
 
 export class ClientActionAdapter extends ActionAdapter {
