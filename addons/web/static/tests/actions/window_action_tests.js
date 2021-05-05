@@ -115,51 +115,53 @@ QUnit.module("ActionManager", (hooks) => {
     ]);
   });
 
-  QUnit.skip("switching into a view with mode=edit lands in edit mode", async function (assert) {
-    debugger;
-    assert.expect(19);
+  QUnit.test("switching into a view with mode=edit lands in edit mode", async function (assert) {
+    testConfig.serverData.views["partner,1,kanban"] = `
+    <kanban on_create="quick_create" default_group_by="m2o">
+      <templates>
+        <t t-name="kanban-box">
+          <div class="oe_kanban_global_click"><field name="foo"/></div>
+        </t>
+      </templates>
+    </kanban>
+    `;
+    testConfig.serverData.actions[1] = {
+      id: 1,
+      xml_id: "action_1",
+      name: "Partners Action 1 patched",
+      res_model: "partner",
+      type: "ir.actions.act_window",
+      views: [[false, "kanban"], [false, "form"]],
+    };
     const mockRPC = async (route, args) => {
       assert.step((args && args.method) || route);
     };
+    assert.expect(14);
     const webClient = await createWebClient({ testConfig, mockRPC });
     await doAction(webClient, 1);
     assert.containsOnce(webClient, ".o_kanban_view", "should display the kanban view");
     // quick create record
     await testUtils.dom.click(webClient.el.querySelector(".o-kanban-button-new"));
-    await new Promise(res => setTimeout(res, 10000));
-    await legacyExtraNextTick();
-    await testUtils.dom.click(webClient.el.querySelector(".o_kanban_edit"));
-
-    assert.containsNone(webClient, ".o_list_view", "should no longer display the list view");
-    assert.containsOnce(webClient, ".o_kanban_view", "should display the kanban view");
-    // switch back to list view
-    await cpHelpers.switchView(webClient.el, "list");
-    await legacyExtraNextTick();
-    assert.containsOnce(webClient, ".o_list_view", "should display the list view");
-    assert.containsNone(webClient.el, ".o_kanban_view", "should no longer display the kanban view");
-    // open a record in form view
-    await legacyExtraNextTick();
-    assert.containsNone(webClient, ".o_list_view", "should no longer display the list view");
-    assert.containsOnce(webClient, ".o_form_view", "should display the form view");
-    assert.strictEqual(
-      $(webClient.el).find(".o_field_widget[name=foo]").text(),
-      "yop",
-      "should have opened the correct record"
+    await testUtils.fields.editInput(
+      webClient.el.querySelector(".o_field_widget[name=display_name]"),
+      "New name",
     );
-    // go back to list view using the breadcrumbs
-    await testUtils.dom.click(webClient.el.querySelector(".o_control_panel .breadcrumb a"));
     await legacyExtraNextTick();
-    assert.containsOnce(webClient, ".o_list_view", "should display the list view");
-    assert.containsNone(webClient, ".o_form_view", "should no longer display the form view");
+    // edit quick-created record
+    await testUtils.dom.click(webClient.el.querySelector(".o_kanban_edit"));
+    assert.containsOnce(webClient, ".o_form_view.o_form_editable", "should display the form view in edit mode");
     assert.verifySteps([
       "/web/webclient/load_menus",
       "/web/action/load",
       "load_views",
+      "web_read_group",
       "/web/dataset/search_read",
       "/web/dataset/search_read",
-      "/web/dataset/search_read",
+      "onchange",
+      "name_create",
       "read",
-      "/web/dataset/search_read",
+      "onchange",
+      "read",
     ]);
   });
 
