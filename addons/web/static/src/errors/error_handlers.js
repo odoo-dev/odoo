@@ -1,7 +1,13 @@
 /** @odoo-module **/
 
 import { browser } from "../core/browser";
-import { ConnectionLostError, RPCError } from "../services/rpc_service";
+import {
+  ConnectionLostError,
+  RPCError,
+  UncaughtClientError,
+  UncaughtEmptyRejectionError,
+  UnknownCorsError,
+} from "../errors/odoo_error";
 import {
   ClientErrorDialog,
   ErrorDialog,
@@ -13,8 +19,7 @@ import { errorHandlerRegistry } from "./error_handler_registry";
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv
- * @typedef {import("./odoo_error").OdooError} OdooError
- * @typedef {(error: OdooError) => boolean | void} ErrorHandler
+ * @typedef {(error: Error) => boolean | void} ErrorHandler
  */
 
 // -----------------------------------------------------------------------------
@@ -27,9 +32,9 @@ import { errorHandlerRegistry } from "./error_handler_registry";
  */
 function corsErrorHandler(env) {
   return (error) => {
-    if (error.name === "UNKNOWN_CORS_ERROR") {
+    if (error instanceof UnknownCorsError) {
       env.services.dialog.open(NetworkErrorDialog, {
-        traceback: error.traceback || error.stack,
+        traceback: error.traceback,
         message: error.message,
         name: error.name,
       });
@@ -49,9 +54,9 @@ errorHandlerRegistry.add("corsErrorHandler", corsErrorHandler, { sequence: 95 })
  */
 function clientErrorHandler(env) {
   return (error) => {
-    if (error.name === "UNCAUGHT_CLIENT_ERROR") {
+    if (error instanceof UncaughtClientError) {
       env.services.dialog.open(ClientErrorDialog, {
-        traceback: error.traceback || error.stack,
+        traceback: error.traceback,
         message: error.message,
         name: error.name,
       });
@@ -71,7 +76,7 @@ errorHandlerRegistry.add("clientErrorHandler", clientErrorHandler, { sequence: 9
  */
 function emptyRejectionErrorHandler(env) {
   return (error) => {
-    if (error.name === "UNCAUGHT_EMPTY_REJECTION_ERROR") {
+    if (error instanceof UncaughtEmptyRejectionError) {
       env.services.dialog.open(ClientErrorDialog, {
         message: error.message,
         name: error.name,
@@ -108,7 +113,7 @@ function rpcErrorHandler(env) {
         ErrorComponent = errorDialogRegistry.get(exceptionName);
       }
       env.services.dialog.open(ErrorComponent || RPCErrorDialog, {
-        traceback: error.traceback || error.stack,
+        traceback: error.traceback,
         message: error.message,
         name: error.name,
         exceptionName: error.exceptionName,
@@ -177,16 +182,12 @@ errorHandlerRegistry.add("lostConnectionHandler", lostConnectionHandler, { seque
  */
 function defaultHandler(env) {
   return (error) => {
-    if (env.services.dialog.isReady) {
-      const DialogComponent = error.Component || ErrorDialog;
-      env.services.dialog.open(DialogComponent, {
-        traceback: error.traceback || error.stack,
-        message: error.message,
-        name: error.name,
-      });
-    } else {
-      browser.alert(error.message);
-    }
+    const DialogComponent = error.Component || ErrorDialog;
+    env.services.dialog.open(DialogComponent, {
+      traceback: error.traceback,
+      message: error.message,
+      name: error.name,
+    });
     return true;
   };
 }

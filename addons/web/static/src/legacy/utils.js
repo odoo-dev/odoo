@@ -2,7 +2,7 @@
 
 import { browser } from "../core/browser";
 import AbstractStorageService from "web.AbstractStorageService";
-import { RPCError } from "../services/rpc_service";
+import { RPCError } from "../errors/odoo_error";
 
 export function mapDoActionOptionAPI(legacyOptions) {
   legacyOptions = Object.assign(legacyOptions || {});

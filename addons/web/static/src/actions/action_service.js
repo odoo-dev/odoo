@@ -2,6 +2,7 @@
 
 import { browser } from "../core/browser";
 import { makeContext } from "../core/context";
+import { ControllerNotFoundError, ViewNotFoundError } from "../errors/odoo_error";
 import { evaluateExpr } from "../py_js/py";
 import { KeepLast } from "../utils/concurrency";
 import { download } from "../utils/download";
@@ -10,7 +11,6 @@ import { sprintf } from "../utils/strings";
 import { viewRegistry } from "../views/view_registry";
 import { serviceRegistry } from "../webclient/service_registry";
 import { actionRegistry } from "./action_registry";
-import { OdooError } from "../errors/odoo_error";
 
 const { Component, hooks, tags } = owl;
 
@@ -18,21 +18,6 @@ export function clearUncommittedChanges(env) {
   const callbacks = [];
   env.bus.trigger("CLEAR-UNCOMMITTED-CHANGES", callbacks);
   return Promise.all(callbacks.map((fn) => fn()));
-}
-
-// -----------------------------------------------------------------------------
-// Errors
-// -----------------------------------------------------------------------------
-export class ViewNotFoundError extends OdooError {
-  constructor() {
-    super("ViewNotFoundError", ...arguments);
-  }
-}
-
-export class ControllerNotFoundError extends OdooError {
-  constructor() {
-    super("ControllerNotFoundError", ...arguments);
-  }
 }
 
 // -----------------------------------------------------------------------------

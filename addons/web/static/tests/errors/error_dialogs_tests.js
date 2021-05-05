@@ -9,7 +9,6 @@ import {
   SessionExpiredDialog,
   WarningDialog,
 } from "@web/errors/error_dialogs";
-import { OdooError } from "@web/errors/odoo_error";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
 import { uiService } from "@web/services/ui_service";
 import { serviceRegistry } from "@web/webclient/service_registry";
@@ -138,7 +137,7 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
 
 QUnit.test("button clipboard copy error traceback", async (assert) => {
   assert.expect(1);
-  const error = new OdooError("ERROR_NAME", "This is the message");
+  const error = new Error("This is the message");
   error.traceback = "This is a traceback";
   patchWithCleanup(browser, {
     navigator: {

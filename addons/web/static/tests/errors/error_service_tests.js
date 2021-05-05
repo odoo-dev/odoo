@@ -5,10 +5,9 @@ import { RPCErrorDialog } from "@web/errors/error_dialogs";
 import { errorDialogRegistry } from "@web/errors/error_dialog_registry";
 import { errorHandlerRegistry } from "@web/errors/error_handler_registry";
 import { errorService } from "@web/errors/error_service";
-import { OdooError } from "@web/errors/odoo_error";
+import { ConnectionLostError, RPCError } from "@web/errors/odoo_error";
 import { notificationService } from "@web/notifications/notification_service";
 import { dialogService } from "@web/services/dialog_service";
-import { ConnectionLostError, RPCError } from "@web/services/rpc_service";
 import { serviceRegistry } from "@web/webclient/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import {
@@ -159,10 +158,10 @@ QUnit.test("default handler", async (assert) => {
     alert: (message) => assert.step(`alert ${message}`),
   });
   await makeTestEnv();
-  const error = new OdooError("BOOM", "boom :)");
+  const error = new Error("boom");
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
-  assert.verifySteps(["alert boom :)"]);
+  assert.verifySteps(["alert boom"]);
 });
 
 QUnit.test("will let handlers from the registry handle errors first", async (assert) => {
@@ -192,11 +191,11 @@ QUnit.test("error in error handler", async (assert) => {
     throw new Error("Handler broke");
   });
   await makeTestEnv();
-  const error = new OdooError("BOOM");
+  const error = new Error("boom");
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
   assert.verifySteps([
-    "BOOM",
+    "Error: boom",
     "An additional error occurred while handling the error above:",
     "Error: Handler broke",
   ]);

@@ -67,13 +67,7 @@ export const dialogService = {
     function open(dialogClass, props, options) {
       bus.trigger("UPDATE", dialogClass, props, options);
     }
-    return {
-      open,
-      bus,
-      get isReady() {
-        return document.getElementsByClassName("o_dialog_manager").length;
-      },
-    };
+    return { bus, open };
   },
 };
 

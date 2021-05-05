@@ -1,7 +1,24 @@
 /** @odoo-module **/
 
 import { NetworkErrorDialog, ServerErrorDialog } from "../errors/error_dialogs";
-import { OdooError } from "../errors/odoo_error";
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+class XHRServerError extends Error {
+  constructor() {
+    super(...arguments);
+    this.name = "XHR_SERVER_ERROR";
+  }
+}
+
+class XHRNetworkError extends Error {
+  constructor() {
+    super(...arguments);
+    this.name = "XHR_NETWORK_ERROR";
+  }
+}
 
 // -----------------------------------------------------------------------------
 // Content Disposition Library
@@ -491,11 +508,11 @@ download._download = (options) => {
           try {
             // Case of a serialized Odoo Exception: It is Json Parsable
             const node = nodes[1] || nodes[0];
-            error = new OdooError("XHR_SERVER_ERROR", "Serialized Python Exception");
+            error = new XHRServerError("Serialized Python Exception");
             error.traceback = JSON.parse(node.textContent);
           } catch (e) {
             // Arbitrary uncaught python side exception
-            error = new OdooError("XHR_SERVER_ERROR", "Arbitrary Uncaught Python Exception");
+            error = new XHRServerError("Arbitrary Uncaught Python Exception");
             error.traceback = `${xhr.status}
                         ${nodes.length > 0 ? nodes[0].textContent : ""}
                         ${nodes.length > 1 ? nodes[1].textContent : ""}
@@ -508,7 +525,7 @@ download._download = (options) => {
       }
     };
     xhr.onerror = () => {
-      const error = new OdooError("XHR_NETWORK_ERROR");
+      const error = new XHRNetworkError();
       error.Component = NetworkErrorDialog;
       reject(error);
     };
