@@ -416,6 +416,10 @@ function makeActionManager(env) {
             index = options.index;
         } else {
             index = controllerStack.length;
+            const currentCt = controllerStack[index - 1];
+            if (currentCt && currentCt.action.tag === "menu") {
+                index = index - 1;
+            }
         }
         return index;
     }
