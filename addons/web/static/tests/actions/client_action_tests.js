@@ -371,4 +371,35 @@ QUnit.module("ActionManager", (hooks) => {
     await testUtils.dom.click(notificationElement.querySelector(".o_notification_close"));
     assert.containsNone(document.body, notificationSelector, "the notification should be destroy ");
   });
+
+  QUnit.test("test next action on display_notification client action", async function (assert) {
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add("NotificationContainer", NotificationContainer);
+    const webClient = await createWebClient({ testConfig });
+    const options = {
+      onClose: function (infos) {
+        assert.step("onClose");
+      },
+    };
+    await doAction(
+      webClient,
+      {
+        type: "ir.actions.client",
+        tag: "display_notification",
+        params: {
+          title: "title",
+          message: "message",
+          sticky: true,
+          next: {
+            type: "ir.actions.act_window_close",
+          },
+        },
+      },
+      options
+    );
+    const notificationSelector = ".o_notification_manager .o_notification";
+    assert.containsOnce(document.body, notificationSelector, "a notification should be present");
+    const notificationElement = document.body.querySelector(notificationSelector);
+    assert.verifySteps(["onClose"]);
+  });
 });
