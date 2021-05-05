@@ -259,7 +259,7 @@ export function makeFakeRouterService(params) {
   };
 }
 
-export function makeFakeUIService(values) {
+export function makeFakeUIService(values = {}) {
   const defaults = {
     bus: new owl.core.EventBus(),
     activateElement: () => {},
@@ -268,10 +268,20 @@ export function makeFakeUIService(values) {
     getVisibleElements: () => [],
     block: () => {},
     unblock: () => {},
-    isSmall: false,
-    size: SIZES.LG,
     SIZES,
   };
+  if ("isSmall" in values || "size" in values) {
+    throw new Error(
+      "Can't manually assign UI size properties. Resize your actual window to set the desired environment."
+    );
+  }
+  if (window.matchMedia("(max-width: 767px)").matches) {
+    defaults.isSmall = true;
+    defaults.size = SIZES.SM;
+  } else {
+    defaults.isSmall = false;
+    defaults.size = SIZES.LG;
+  }
   return {
     start(env) {
       const res = Object.assign(defaults, values);
