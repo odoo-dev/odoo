@@ -2082,8 +2082,8 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("do not restore after action button clicked", async function (assert) {
     assert.expect(5);
-    const mockRPC = async (route) => {
-      if (route.includes("do_something")) {
+    const mockRPC = async (route, args) => {
+      if (route === "/web/dataset/call_button" && args.method === "do_something") {
         return true;
       }
     };
@@ -2146,7 +2146,10 @@ QUnit.module("ActionManager", (hooks) => {
     };
     const webClient = await createWebClient({ testConfig, mockRPC });
     await doAction(webClient, 3);
-    assert.doesNotHaveClass(webClient.el.querySelector(".o_pivot_measure_row"), "o_pivot_sort_order_asc");
+    assert.doesNotHaveClass(
+      webClient.el.querySelector(".o_pivot_measure_row"),
+      "o_pivot_sort_order_asc"
+    );
     await click(webClient.el.querySelector(".o_pivot_measure_row"));
     assert.hasClass(webClient.el.querySelector(".o_pivot_measure_row"), "o_pivot_sort_order_asc");
     await cpHelpers.switchView(webClient.el, "pivot");
@@ -2154,7 +2157,7 @@ QUnit.module("ActionManager", (hooks) => {
     assert.hasClass(webClient.el.querySelector(".o_pivot_measure_row"), "o_pivot_sort_order_asc");
     assert.verifySteps([
       "read_group", // initial read_group
-      "read_group"  // read_group at reload after switch view
+      "read_group", // read_group at reload after switch view
     ]);
   });
 });

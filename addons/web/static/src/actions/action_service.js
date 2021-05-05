@@ -974,7 +974,8 @@ function makeActionManager(env) {
         model: params.model,
       });
       action = await keepLast.add(callProm);
-      action = action || { type: "ir.actions.act_window_close" };
+      action =
+        action && typeof action === "object" ? action : { type: "ir.actions.act_window_close" };
     } else if (params.type === "action") {
       // execute a given action, so load it first
       context.active_id = params.recordId || null;
