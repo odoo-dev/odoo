@@ -11,7 +11,6 @@ import {
   SessionExpiredDialog,
   WarningDialog,
 } from "@web/errors/error_dialogs";
-import OdooError from "@web/errors/odoo_error";
 import { uiService } from "@web/services/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick, patchWithCleanup } from "../helpers/utils";
@@ -138,7 +137,8 @@ QUnit.test("Client ErrorDialog with traceback", async (assert) => {
 
 QUnit.test("button clipboard copy error traceback", async (assert) => {
   assert.expect(1);
-  const error = new OdooError("ERROR_NAME");
+  const error = new Error();
+  error.name = "ERROR_NAME";
   error.message = "This is the message";
   error.traceback = "This is a traceback";
   patchWithCleanup(browser, {

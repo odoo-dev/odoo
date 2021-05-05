@@ -1,22 +1,23 @@
 /** @odoo-module **/
 
 import { browser } from "../core/browser";
-import OdooError from "../errors/odoo_error";
 import { serviceRegistry } from "../webclient/service_registry";
 
 // -----------------------------------------------------------------------------
 // Errors
 // -----------------------------------------------------------------------------
-export class RPCError extends OdooError {
+export class RPCError extends Error {
   constructor() {
-    super("RPC_ERROR");
+    super(...arguments);
+    this.name = "RPC_ERROR";
     this.type = "server";
   }
 }
 
-export class ConnectionLostError extends OdooError {
+export class ConnectionLostError extends Error {
   constructor() {
-    super("CONNECTION_LOST_ERROR");
+    super(...arguments);
+    this.name = "CONNECTION_LOST_ERROR";
   }
 }
 

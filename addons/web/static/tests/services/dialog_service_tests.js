@@ -140,14 +140,16 @@ QUnit.test("dialog component crashes", async (assert) => {
     },
   });
 
-  const qunitUnhandledReject = QUnit.onUnhandledRejection;
-  const windowUnhandledReject = window.onunhandledrejection;
-  QUnit.onUnhandledRejection = () => {
+  const handler = (ev) => {
     assert.step("error");
+    // need to preventDefault to remove error from console (so python test pass)
+    ev.preventDefault();
   };
-  registerCleanup(() => {
-    QUnit.onUnhandledRejection = qunitUnhandledReject;
-    window.onunhandledrejection = windowUnhandledReject;
+
+  window.addEventListener("unhandledrejection", handler);
+  registerCleanup(() => window.removeEventListener("unhandledrejection", handler));
+  patchWithCleanup(QUnit, {
+    onUnhandledRejection: () => {},
   });
 
   const rpc = makeFakeRPCService();

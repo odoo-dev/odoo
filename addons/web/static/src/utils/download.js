@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { NetworkErrorDialog, ServerErrorDialog } from "../errors/error_dialogs";
-import OdooError from "../errors/odoo_error";
 
 // -----------------------------------------------------------------------------
 // Content Disposition Library
@@ -487,7 +486,8 @@ download._download = (options) => {
           const contents = decoder.result;
           const doc = new DOMParser().parseFromString(contents, "text/html");
           const nodes = doc.body.children.length === 0 ? doc.body.childNodes : doc.body.children;
-          const error = new OdooError("XHR_SERVER_ERROR");
+          const error = new Error();
+          error.name = "XHR_SERVER_ERROR";
           error.Component = ServerErrorDialog;
           try {
             // Case of a serialized Odoo Exception: It is Json Parsable
@@ -508,7 +508,8 @@ download._download = (options) => {
       }
     };
     xhr.onerror = () => {
-      const error = new OdooError("XHR_NETWORK_ERROR");
+      const error = new Error();
+      error.name = "XHR_NETWORK_ERROR";
       error.Component = NetworkErrorDialog;
       reject(error);
     };
