@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { setScrollPosition } from "../utils/scrolling";
+import { scrollTo } from "../utils/scrolling";
 import { serviceRegistry } from "../webclient/service_registry";
 
 export const scrollerService = {
@@ -42,8 +42,7 @@ export const scrollerService = {
           }
           if (matchingEl) {
             ev.preventDefault();
-            const offset = matchingEl.getBoundingClientRect();
-            setScrollPosition(offset);
+            scrollTo(matchingEl);
           }
         }
       }

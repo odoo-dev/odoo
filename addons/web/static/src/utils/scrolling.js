@@ -7,6 +7,19 @@
  * @param {HTMLElement} scrollable
  */
 export function scrollTo(element, scrollable) {
+  function _getScrollParent(node) {
+    if (node == null) {
+      return null;
+    }
+
+    if (node.scrollHeight > node.clientHeight) {
+      return node;
+    } else {
+      return _getScrollParent(node.parentNode);
+    }
+  }
+  scrollable = scrollable ? scrollable : _getScrollParent(element);
+
   // Scrollbar is present ?
   if (scrollable.scrollHeight > scrollable.clientHeight) {
     const scrollBottom = scrollable.clientHeight + scrollable.scrollTop;
