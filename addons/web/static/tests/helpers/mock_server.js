@@ -393,6 +393,8 @@ export class MockServer {
         return Promise.resolve(this.mockFieldsGet(args.model));
       case "load_views":
         return Promise.resolve(this.mockLoadViews(args.model, args.kwargs));
+      case "name_create":
+        return Promise.resolve(this.mockNameCreate(args.model, args.args[0]));
       case "onchange":
         return Promise.resolve(this.mockOnchange(args.model, args.args, args.kwargs));
       case "read":
@@ -507,6 +509,23 @@ export class MockServer {
       result.filters = this.models[modelName].filters || [];
     }
     return result;
+  }
+
+  /**
+   * Simulate a 'name_create' operation
+   *
+   * @private
+   * @param {string} model
+   * @param {string} name
+   * @returns {Array} a couple [id, name]
+   */
+   mockNameCreate(modelName, name) {
+    const values = {
+        name: name,
+        display_name: name,
+    };
+    const id = this.mockCreate(modelName, values);
+    return [id, name];
   }
 
   mockOnchange(modelName, args, kwargs) {
