@@ -138,7 +138,10 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
   legacyEnv.session.rpc = (...args) => {
     let rejection;
     const prom = new Promise((resolve, reject) => {
-      rejection = () => reject();
+      rejection = () => reject({
+        message: "XmlHttpRequestError abort",
+        event: $.Event('abort')
+    });
       const [route, params, settings] = args;
       wowlEnv.services.rpc(route, params, settings).then(resolve)
       .catch((reason) => {
