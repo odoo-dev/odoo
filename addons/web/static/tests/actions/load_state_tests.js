@@ -244,6 +244,35 @@ QUnit.module("ActionManager", (hooks) => {
     assert.verifySteps(["/web/webclient/load_menus", "load_views", "read"]);
   });
 
+  QUnit.test("properly load records with existing first APP", async function (assert) {
+    assert.expect(7);
+    const mockRPC = async function (route, args) {
+      assert.step((args && args.method) || route);
+    };
+    // simulate a real scenario with a first app (e.g. Discuss), to ensure that we don't
+    // fallback on that first app when only a model and res_id are given in the url
+    testConfig.serverData.menus = {
+      root: { id: "root", children: [1, 2], name: "root", appID: "root" },
+      1: { id: 1, children: [], name: "App1", appID: 1, actionID: 1001, xmlid: "menu_1" },
+      2: { id: 2, children: [], name: "App2", appID: 2, actionID: 1002, xmlid: "menu_2" },
+    };
+    const hash = { id: "2", model: "partner" };
+    serviceRegistry.add("router", makeFakeRouterService({ initialRoute: { hash } }), {
+      force: true,
+    });
+    const webClient = await createWebClient({ testConfig, mockRPC });
+
+    await testUtils.nextTick();
+    assert.containsOnce(webClient, ".o_form_view");
+    assert.strictEqual(
+      $(webClient.el).find(".o_control_panel .breadcrumb-item").text(),
+      "Second record",
+      "should have opened the second record"
+    );
+    assert.containsNone(webClient.el, ".o_menu_brand");
+    assert.verifySteps(["/web/webclient/load_menus", "load_views", "read"]);
+  });
+
   QUnit.test("properly load default record", async function (assert) {
     assert.expect(6);
     const mockRPC = async function (route, args) {
