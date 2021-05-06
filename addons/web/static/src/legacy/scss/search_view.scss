@@ -80,35 +80,11 @@
     }
 }
 
-.o_search_options .o_dropdown_toggler_btn:first-child {
-    // apply the padding to the first element so that when the `favorites` menu goes under
-    // the `filters` menu, they're still aligned
-    margin-right: 15px;
-}
-
 // Dropdowns
 .o_search_options .o_dropdown {
-    color: $o-main-text-color;
-    cursor: pointer;
-    display: inline-block;
-    user-select: none;  // Prevent text selection when toggling the dropdowns
-    white-space: nowrap;  // prevent the arrow from going under the dropdown when too little space
-
-    .o_dropdown_title {
-        padding: 0 0.3rem;
-    }
-
     .o_dropdown_caret {
         font-size: 12px;
         width: 1rem;
-    }
-
-    &:hover,
-    &.show {
-
-        .o_dropdown_toggler_btn {
-            color: darken($o-main-text-color, 10%);
-        }
     }
 
     .o_dropdown_menu {
@@ -120,7 +96,6 @@
         a.dropdown-item {
             align-items: center;
             display: flex;
-            position: relative;
 
             .o_item_description {
                 flex: 1;
