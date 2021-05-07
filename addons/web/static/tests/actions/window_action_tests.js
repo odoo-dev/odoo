@@ -131,7 +131,10 @@ QUnit.module("ActionManager", (hooks) => {
       name: "Partners Action 1 patched",
       res_model: "partner",
       type: "ir.actions.act_window",
-      views: [[false, "kanban"], [false, "form"]],
+      views: [
+        [false, "kanban"],
+        [false, "form"],
+      ],
     };
     const mockRPC = async (route, args) => {
       assert.step((args && args.method) || route);
@@ -144,12 +147,16 @@ QUnit.module("ActionManager", (hooks) => {
     await testUtils.dom.click(webClient.el.querySelector(".o-kanban-button-new"));
     await testUtils.fields.editInput(
       webClient.el.querySelector(".o_field_widget[name=display_name]"),
-      "New name",
+      "New name"
     );
     await legacyExtraNextTick();
     // edit quick-created record
     await testUtils.dom.click(webClient.el.querySelector(".o_kanban_edit"));
-    assert.containsOnce(webClient, ".o_form_view.o_form_editable", "should display the form view in edit mode");
+    assert.containsOnce(
+      webClient,
+      ".o_form_view.o_form_editable",
+      "should display the form view in edit mode"
+    );
     assert.verifySteps([
       "/web/webclient/load_menus",
       "/web/action/load",
@@ -1577,8 +1584,8 @@ QUnit.module("ActionManager", (hooks) => {
     assert.expect(6);
     const webClient = await createWebClient({ testConfig });
     await loadState(webClient, {
-      action: "3",
-      id: "2",
+      action: 3,
+      id: 2,
       view_type: "form",
     });
     assert.containsNone(webClient, ".o_list_view");

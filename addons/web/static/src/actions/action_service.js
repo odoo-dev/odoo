@@ -20,6 +20,16 @@ export function clearUncommittedChanges(env) {
   return Promise.all(callbacks.map((fn) => fn()));
 }
 
+function parseActiveIds(ids) {
+  const activeIds = [];
+  if (typeof ids === "string") {
+    activeIds.push(...ids.split(",").map(Number));
+  } else if (typeof ids === "number") {
+    activeIds.push(ids);
+  }
+  return activeIds;
+}
+
 // -----------------------------------------------------------------------------
 // Errors
 // -----------------------------------------------------------------------------
@@ -53,7 +63,7 @@ function makeActionManager(env) {
 
   // The state action (or default user action if none) is loaded as soon as possible
   // so that the next "doAction" will have its action ready when needed.
-  const actionParams = _getActionParams(_getHashState());
+  const actionParams = _getActionParams();
   if (actionParams && typeof actionParams.actionRequest === "number") {
     const { actionRequest, options } = actionParams;
     _loadAction(actionRequest, options.additionalContext);
@@ -163,42 +173,6 @@ function makeActionManager(env) {
   }
 
   /**
-   * Parses and returns the current hash state.
-   *
-   * @private
-   * @returns {HashState}
-   */
-  function _getHashState() {
-    const hashState = Object.assign({}, env.services.router.current.hash);
-    for (const key in hashState) {
-      const value = hashState[key];
-      switch (key) {
-        case "action": {
-          if (value && !isNaN(value)) {
-            hashState[key] = Number(value);
-          }
-          break;
-        }
-        case "active_id":
-        case "id":
-        case "view_id": {
-          if (!isNaN(value)) {
-            hashState[key] = Number(value);
-          }
-          break;
-        }
-        case "active_ids": {
-          if (value) {
-            hashState[key] = value.split(",").map(Number);
-          }
-          break;
-        }
-      }
-    }
-    return hashState;
-  }
-
-  /**
    * Given a controller stack, returns the list of breadcrumb items.
    *
    * @private
@@ -216,10 +190,10 @@ function makeActionManager(env) {
 
   /**
    * @private
-   * @param {any} state
    * @returns {ActionParams | null}
    */
-  function _getActionParams(state) {
+  function _getActionParams() {
+    const state = env.services.router.current.hash;
     const options = { clearBreadcrumbs: true };
     let actionRequest = null;
     if (state.action) {
@@ -238,7 +212,7 @@ function makeActionManager(env) {
           context.active_id = state.active_id;
         }
         if (state.active_ids) {
-          context.active_ids = state.active_ids;
+          context.active_ids = parseActiveIds(state.active_ids);
         } else if (state.active_id) {
           context.active_ids = [state.active_id];
         }
@@ -296,10 +270,10 @@ function makeActionManager(env) {
 
   /**
    * @private
-   * @param {any} state
    * @returns {SwitchViewParams | null}
    */
-  function _getSwitchViewParams(state) {
+  function _getSwitchViewParams() {
+    const state = env.services.router.current.hash;
     if (state.action && !actionRegistry.contains(state.action)) {
       const currentController = controllerStack[controllerStack.length - 1];
       const currentActionId =
@@ -723,7 +697,6 @@ function makeActionManager(env) {
       if (next) {
         return doAction(next, options);
       }
-      return Promise.resolve();
     }
   }
 
@@ -906,7 +879,7 @@ function makeActionManager(env) {
    *
    * @param {ActionRequest} actionRequest
    * @param {ActionOptions} options
-   * @returns {Promise<Number>}
+   * @returns {Promise<number | undefined>}
    */
   async function doAction(actionRequest, options = {}) {
     const actionProm = _loadAction(actionRequest, options.additionalContext);
@@ -1104,8 +1077,7 @@ function makeActionManager(env) {
    * @returns {Promise<boolean>} true iff the state could have been loaded
    */
   async function loadState() {
-    const state = _getHashState();
-    const switchViewParams = _getSwitchViewParams(state);
+    const switchViewParams = _getSwitchViewParams();
     if (switchViewParams) {
       // only when we already have an action in dom
       const { viewType, viewOptions } = switchViewParams;
@@ -1116,7 +1088,7 @@ function makeActionManager(env) {
         return true;
       }
     } else {
-      const actionParams = _getActionParams(state);
+      const actionParams = _getActionParams();
       if (actionParams) {
         // Params valid => performs a "doAction"
         const { actionRequest, options } = actionParams;

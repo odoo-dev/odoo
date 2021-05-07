@@ -5,10 +5,20 @@ import { serviceRegistry } from "../webclient/service_registry";
 import { SwitchCompanyMenu } from "../webclient/switch_company_menu/switch_company_menu";
 import { systrayRegistry } from "../webclient/systray_registry";
 
-export function computeAllowedCompanyIds(cidsFromHash) {
+function parseCompanyIds(cidsFromHash) {
+  const cids = [];
+  if (typeof cidsFromHash === "string") {
+    cids.push(...cidsFromHash.split(",").map(Number));
+  } else if (typeof cidsFromHash === "number") {
+    cids.push(cidsFromHash);
+  }
+  return cids;
+}
+
+export function computeAllowedCompanyIds(cids) {
   const { user_companies } = odoo.session_info;
 
-  let allowedCompanies = cidsFromHash || [];
+  let allowedCompanies = cids || [];
   const allowedCompaniesFromSession = user_companies.allowed_companies;
   const notReallyAllowedCompanies = allowedCompanies.filter(
     (id) => !(id in allowedCompaniesFromSession)
@@ -65,13 +75,11 @@ export const userService = {
 
     let cids;
     if ("cids" in router.current.hash) {
-      cids = router.current.hash.cids;
+      cids = parseCompanyIds(router.current.hash.cids);
     } else if ("cids" in cookie.current) {
-      cids = cookie.current.cids;
+      cids = parseCompanyIds(cookie.current.cids);
     }
-    const allowedCompanies = computeAllowedCompanyIds(
-      cids && cids.split(",").map((id) => parseInt(id, 10))
-    );
+    const allowedCompanies = computeAllowedCompanyIds(cids);
     let context = {
       lang: user_context.lang,
       tz: user_context.tz,
@@ -79,9 +87,9 @@ export const userService = {
       allowed_company_ids: allowedCompanies,
     };
 
-    cids = allowedCompanies.join(",");
-    router.replaceState({ "lock cids": cids });
-    cookie.setCookie("cids", cids);
+    const stringCIds = allowedCompanies.join(",");
+    router.replaceState({ "lock cids": stringCIds });
+    cookie.setCookie("cids", stringCIds);
 
     systrayRegistry.add("SwitchCompanyMenu", SwitchCompanyMenu, { sequence: 1 });
 

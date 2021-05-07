@@ -36,7 +36,7 @@ Notification.template = "web.NotificationWowl";
 Notification.props = {
   id: { type: Number },
   message: { type: String },
-  title: { type: String, optional: true },
+  title: { type: [String, Boolean], optional: true },
   type: {
     type: String,
     optional: true,

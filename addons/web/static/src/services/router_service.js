@@ -1,22 +1,23 @@
 /** @odoo-module **/
 
 import { browser } from "../core/browser";
-import { serviceRegistry } from "../webclient/service_registry";
 import { shallowEqual } from "../utils/objects";
 import { objectToUrlEncodedString } from "../utils/urls";
+import { serviceRegistry } from "../webclient/service_registry";
 
 function parseString(str) {
   const parts = str.split("&");
   const result = {};
   for (let part of parts) {
     const [key, value] = part.split("=");
-    result[key] = decodeURIComponent(value || "");
+    const decoded = decodeURIComponent(value || "");
+    result[key] = !decoded || isNaN(decoded) ? decoded : Number(decoded);
   }
   return result;
 }
 
 function sanitizeHash(hash) {
-  return Object.fromEntries(Object.entries(hash).filter(([_, v]) => v !== undefined));
+  return Object.fromEntries(Object.entries(hash).filter(([, v]) => v !== undefined));
 }
 
 export function parseHash(hash) {
