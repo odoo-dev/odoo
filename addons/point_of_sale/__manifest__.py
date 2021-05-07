@@ -166,6 +166,7 @@
             ('include', 'web.assets_backend'),
             ('remove', 'web/static/src/services/menu_service.js'),
             ('remove', 'web/static/src/errors/error_handlers.js'),
+            ('remove', 'web/static/src/legacy/legacy_rpc_error_handler.js'),
         ],
         'point_of_sale.tests_assets': [
             ('include', 'web.tests_assets'),
