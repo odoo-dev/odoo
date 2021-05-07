@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import Context from "web.Context";
 import { useService } from "../services/service_hook";
 import { ViewNotFoundError } from "../actions/action_service";
 import { useDebugManager } from "../debug/debug_manager";
@@ -57,14 +58,8 @@ class ActionAdapter extends ComponentAdapter {
   _trigger_up(ev) {
     const payload = ev.data;
     if (ev.name === "do_action") {
-      const actionContext = payload.action.context;
-      // The context needs to be evaluated if it comes from the legacy compound context class.
-      if (
-        typeof actionContext == "object" &&
-        actionContext.__ref &&
-        actionContext.__ref === "compound_context"
-      ) {
-        payload.action.context = actionContext.eval();
+      if (payload.action.context) {
+        payload.action.context = new Context(payload.action.context).eval();
       }
       this.onReverseBreadcrumb = ev.data.options && ev.data.options.on_reverse_breadcrumb;
       const legacyOptions = mapDoActionOptionAPI(ev.data.options);
@@ -326,11 +321,13 @@ export class ViewAdapter extends ActionAdapter {
       }
     } else if (ev.name === "execute_action") {
       const onSuccess = payload.on_success || (() => {});
+      const buttonContext = new Context(payload.action_data.context).eval();
+      const envContext = new Context(payload.env.context).eval();
       this.actionService
         .doActionButton({
           args: payload.action_data.args,
-          buttonContext: payload.action_data.context,
-          context: payload.env.context,
+          buttonContext: buttonContext,
+          context: envContext,
           close: payload.action_data.close,
           model: payload.env.model,
           name: payload.action_data.name,
