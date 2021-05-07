@@ -37,6 +37,13 @@ export class ControllerNotFoundError extends Error {
   }
 }
 
+export class InvalidButtonParamsError extends Error {
+  constructor() {
+    super(...arguments);
+    this.name = "InvalidButtonParamsError";
+  }
+}
+
 // -----------------------------------------------------------------------------
 // ActionManager (Service)
 // -----------------------------------------------------------------------------
@@ -986,6 +993,8 @@ function makeActionManager(env) {
       context.active_ids = params.recordIds;
       context.active_model = params.model;
       action = await keepLast.add(_loadAction(params.name, context));
+    } else {
+      throw new InvalidButtonParamsError("Missing type for doActionButton request");
     }
     // filter out context keys that are specific to the current action, because:
     //  - wrong default_* and search_default_* values won't give the expected result
