@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { errorHandlerRegistry } from "../errors/error_handler_registry";
+import { errorHandlerRegistry } from "../core/errors/error_handler_registry";
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv
- * @typedef {import("../errors/error_service").UncaughtError} UncaughError
+ * @typedef {import("../core/errors/error_service").UncaughtError} UncaughError
  * @typedef {(error: UncaughError) => boolean | void} ErrorHandler
  */
 

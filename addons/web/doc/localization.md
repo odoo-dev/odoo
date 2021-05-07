@@ -39,7 +39,7 @@ If the current user language is `fr_FR` and `Hello` has translation `Bonjour`,
 
 ```ts
 {
-  toString: () => "Bonjour";
+    toString: () => "Bonjour";
 }
 ```
 

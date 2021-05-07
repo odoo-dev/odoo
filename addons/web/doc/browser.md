@@ -15,15 +15,15 @@ console.log(env.browser); // display the content of browser
 
 Here is a list of all entities available in the `browser` object:
 
-- `Date`
-- `XMLHTTPRequest`
-- `clearInterval`
-- `clearTimeout`
-- `console`
-- `fetch`
-- `localStorage`
-- `location`
-- `random`
-- `requestAnimationFrame`
-- `setInterval`
-- `setTimeout`
+-   `Date`
+-   `XMLHTTPRequest`
+-   `clearInterval`
+-   `clearTimeout`
+-   `console`
+-   `fetch`
+-   `localStorage`
+-   `location`
+-   `random`
+-   `requestAnimationFrame`
+-   `setInterval`
+-   `setTimeout`

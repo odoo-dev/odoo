@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.legacySetup **/
 
-import { serviceRegistry } from "../webclient/service_registry";
+import { serviceRegistry } from "../core/service_registry";
 import {
   makeLegacyNotificationService,
   makeLegacyActionManagerService,

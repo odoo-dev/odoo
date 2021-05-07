@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import { editModelDebug } from "../debug/debug_service";
+import { editModelDebug } from "../core/debug/debug_service";
 import { json_node_to_xml } from "../views/view_utils";
-import { formatMany2one } from "../utils/fields";
-import { parseDateTime, formatDateTime } from "../utils/dates";
+import { formatMany2one } from "../fields/fields";
+import { parseDateTime, formatDateTime } from "../core/l10n/dates";
 
 const { Component, hooks, tags } = owl;
 const { useState } = hooks;

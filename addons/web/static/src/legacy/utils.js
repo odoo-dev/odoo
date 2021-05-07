@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { browser } from "../core/browser";
+import { browser } from "../core/browser/browser";
 import AbstractStorageService from "web.AbstractStorageService";
-import { ConnectionAbortedError, RPCError } from "../services/rpc_service";
+import { ConnectionAbortedError, RPCError } from "../core/network/rpc_service";
 import legacyConfig  from "web.config";
 
 export function mapDoActionOptionAPI(legacyOptions) {

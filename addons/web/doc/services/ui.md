@@ -8,41 +8,41 @@
 
 The `ui` service offers miscellaneous UI features:
 
-- active element management.
-  The default UI active element is the `document` element, but the `ui` service
-  lets anyone become the UI active element. It is useful e.g. for dialogs.
-- block or unblock the UI.
-  When the ui will be blocked, a loading screen blocking any action will cover the UI.
+-   active element management.
+    The default UI active element is the `document` element, but the `ui` service
+    lets anyone become the UI active element. It is useful e.g. for dialogs.
+-   block or unblock the UI.
+    When the ui will be blocked, a loading screen blocking any action will cover the UI.
 
 ## API
 
 The `ui` service provides the following API:
 
-- `bus: EventBus`: a bus, on which are triggered
+-   `bus: EventBus`: a bus, on which are triggered
 
-  - `active-element-changed (activeElement: DOMElement)` when the UI active element has changed.
+    -   `active-element-changed (activeElement: DOMElement)` when the UI active element has changed.
 
-- `block(): void`: this method will activate the loading screen to block the ui.
+-   `block(): void`: this method will activate the loading screen to block the ui.
 
-- `unblock(): void`: This method will disable the loading screen in order to unblock the ui.
-  if it was not already disable.
+-   `unblock(): void`: This method will disable the loading screen in order to unblock the ui.
+    if it was not already disable.
 
-- `ìsBlocked (boolean)`: informs on the UI blocked state
+-   `ìsBlocked (boolean)`: informs on the UI blocked state
 
-- `activateElement(activateElement: DOMElement): void`: applies an UI active element.
+-   `activateElement(activateElement: DOMElement): void`: applies an UI active element.
 
-- `activeElement: DOMElement`: gives the actual UI active element
+-   `activeElement: DOMElement`: gives the actual UI active element
 
-- `getVisibleElements(selector: string)`: returns all elements matching the given selector that are displayed somewhere on the active element.
+-   `getVisibleElements(selector: string)`: returns all elements matching the given selector that are displayed somewhere on the active element.
 
 In addition to that, you have access to some development helpers which are **greatly** recommended:
 
-- `useActiveElement(refName?:string)`: a hook that ensures the UI active element will
-  take place/get released each time your component gets mounted/unmounted.
-  By default, the element that will be the UI active element is the component root's.
-  It can be delegated to another element through the usage of a `t-ref` directive,
-  providing its value to this hook. In that case, **it is mandatory** that the referenced
-  element is fixed and not dynamically attached in/detached from the DOM (e.g. with t-if directive).
+-   `useActiveElement(refName?:string)`: a hook that ensures the UI active element will
+    take place/get released each time your component gets mounted/unmounted.
+    By default, the element that will be the UI active element is the component root's.
+    It can be delegated to another element through the usage of a `t-ref` directive,
+    providing its value to this hook. In that case, **it is mandatory** that the referenced
+    element is fixed and not dynamically attached in/detached from the DOM (e.g. with t-if directive).
 
 ### Good to know: UI blocking
 
@@ -56,17 +56,17 @@ E.g.:
 
 ```js
 class A extends Component {
-  setup() {
-    useActiveElement();
-  }
+    setup() {
+        useActiveElement();
+    }
 }
 A.components = { B };
 A.template = xml`<div id="a"><B/></div>`;
 
 class B extends Component {
-  setup() {
-    useActiveElement();
-  }
+    setup() {
+        useActiveElement();
+    }
 }
 B.template = xml`<div id="b"/>`;
 
@@ -81,15 +81,15 @@ B.template = xml`<div id="b"/>`;
 
 ```js
 class MyComponent extends Component {
-  setup() {
-    const ui = useService("ui");
-    this.myActiveElement = ui.activeElement;
-    useBus(ui.bus, "active-element-changed", (activeElement) => {
-      if (activeElement !== this.myActiveElement) {
-        // do some stuff, like changing my state or keeping myActiveElement in sync...
-      }
-    });
-  }
+    setup() {
+        const ui = useService("ui");
+        this.myActiveElement = ui.activeElement;
+        useBus(ui.bus, "active-element-changed", (activeElement) => {
+            if (activeElement !== this.myActiveElement) {
+                // do some stuff, like changing my state or keeping myActiveElement in sync...
+            }
+        });
+    }
 }
 ```
 
@@ -99,9 +99,9 @@ Here is how one component could change the active element of the UI
 
 ```js
 class MyComponent extends Component {
-  setup() {
-    useActiveElement();
-  }
+    setup() {
+        useActiveElement();
+    }
 }
 ```
 
@@ -111,9 +111,9 @@ Here is how one component could change the active element of the UI
 
 ```js
 class MyComponent extends Component {
-  setup() {
-    useActiveElement("delegatedRef");
-  }
+    setup() {
+        useActiveElement("delegatedRef");
+    }
 }
 MyComponent.template = owl.tags.xml`
   <div>
@@ -129,16 +129,16 @@ Here is how one component could change the active element of the UI
 
 ```js
 class MyComponent extends Component {
-  setup() {
-    this.uiService = useService("ui");
-  }
-  mounted() {
-    const activateElement = this.el;
-    this.uiService.activateElement(activateElement);
-  }
-  willUnmount() {
-    this.uiService.deactivateElement(activateElement);
-  }
+    setup() {
+        this.uiService = useService("ui");
+    }
+    mounted() {
+        const activateElement = this.el;
+        this.uiService.activateElement(activateElement);
+    }
+    willUnmount() {
+        this.uiService.deactivateElement(activateElement);
+    }
 }
 ```
 

@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-import { errorDialogRegistry } from "../errors/error_dialog_registry";
+import { errorDialogRegistry } from "../core/errors/error_dialog_registry";
 import {
   RPCErrorDialog,
-} from "../errors/error_dialogs";
-import { errorHandlerRegistry } from "../errors/error_handler_registry";
+} from "../core/errors/error_dialogs";
+import { errorHandlerRegistry } from "../core/errors/error_handler_registry";
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv
- * @typedef {import("../errors/error_service").UncaughtError} UncaughError
+ * @typedef {import("../core/errors/error_service").UncaughtError} UncaughError
  * @typedef {(error: UncaughError) => boolean | void} ErrorHandler
  */
 

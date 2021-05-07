@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser";
-import { ConnectionLostError } from "@web/services/rpc_service";
-import { serviceRegistry } from "@web/webclient/service_registry";
+import { browser } from "@web/core/browser/browser";
+import { ConnectionLostError } from "@web/core/network/rpc_service";
+import { serviceRegistry } from "@web/core/service_registry";
 
 export const calendarNotificationService = {
   start(env) {

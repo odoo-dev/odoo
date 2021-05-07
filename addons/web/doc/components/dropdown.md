@@ -8,15 +8,15 @@ It contains all the logic you can usually expect a dropdown to behave.
 
 ### Features
 
-- Toggle the list on click
-- Direct siblings dropdowns: when one is open, toggle others on hover
-- Close on outside click
-- Close the list when an item is selected
-- Emits an event to inform which list item is clicked
-- Infinite multi-level support
-- SIY: style it yourself
-- Configurable hotkey to open/close a dropdown or select a dropdown item
-- Keyboard navigation (arrows, enter...)
+-   Toggle the list on click
+-   Direct siblings dropdowns: when one is open, toggle others on hover
+-   Close on outside click
+-   Close the list when an item is selected
+-   Emits an event to inform which list item is clicked
+-   Infinite multi-level support
+-   SIY: style it yourself
+-   Configurable hotkey to open/close a dropdown or select a dropdown item
+-   Keyboard navigation (arrows, enter...)
 
 ## API
 
@@ -30,18 +30,18 @@ Illustration of what the final DOM could look like:
 
 ```html
 <div class="o_dropdown">
-  <button class="o_dropdown_toggler">
-    <span>Click me to toggle the dropdown menu !</span>
-  </button>
-  <!-- following <ul/> list will or won't appear in the DOM depending on the state controlled by the button -->
-  <ul class="o_dropdown_menu">
-    <li class="o_dropdown_item">
-      <span>Menu Item 1</span>
-    </li>
-    <li class="o_dropdown_item">
-      <span>Menu Item 2</span>
-    </li>
-  </ul>
+    <button class="o_dropdown_toggler">
+        <span>Click me to toggle the dropdown menu !</span>
+    </button>
+    <!-- following <ul/> list will or won't appear in the DOM depending on the state controlled by the button -->
+    <ul class="o_dropdown_menu">
+        <li class="o_dropdown_item">
+            <span>Menu Item 1</span>
+        </li>
+        <li class="o_dropdown_item">
+            <span>Menu Item 2</span>
+        </li>
+    </ul>
 </div>
 ```
 
@@ -105,7 +105,7 @@ As Odoo previous dropdown menus made use of Bootstrap dropdowns, we added the sa
 
 ```scss
 .o_dropdown_menu {
-  z-index: 1000;
+    z-index: 1000;
 }
 ```
 
@@ -183,49 +183,49 @@ Now that you understand the basics of the Dropdown Component, all you need to do
 
 Default CSS classes are:
 
-- `.o_dropdown` : the whole dropdown
-- `.o_dropdown_toggler` : the dropdown button
-- `.o_dropdown_menu` : the dropdown menu list
-- `.o_dropdown_item` : a dropdown item
+-   `.o_dropdown` : the whole dropdown
+-   `.o_dropdown_toggler` : the dropdown button
+-   `.o_dropdown_menu` : the dropdown menu list
+-   `.o_dropdown_item` : a dropdown item
 
 But you can go even further by extending them:
 
-- `<Dropdown class="my_class"/>` will become
-  ```xml
-  <div class="o_dropdown my_class">...</div>
-  ```
-- `<Dropdown togglerClass="my_class"/>` will become
-  ```xml
-  <div class="o_dropdown">
-    <button class="o_dropdown_toggler my_class">
+-   `<Dropdown class="my_class"/>` will become
+    ```xml
+    <div class="o_dropdown my_class">...</div>
+    ```
+-   `<Dropdown togglerClass="my_class"/>` will become
+    ```xml
+    <div class="o_dropdown">
+      <button class="o_dropdown_toggler my_class">
+        <span>...</span>
+      </button>
+      ...
+    </div>
+    ```
+-   `<Dropdown menuClass="my_class"/>` will become
+    ```xml
+    <div class="o_dropdown">
+      <button>...</button>
+      <ul class="o_dropdown_menu my_class">...</ul>
+    </div>
+    ```
+-   `<DropdownItem class="my_class"/>` will become
+    ```xml
+    <li class="o_dropdown_item my_class">
       <span>...</span>
-    </button>
-    ...
-  </div>
-  ```
-- `<Dropdown menuClass="my_class"/>` will become
-  ```xml
-  <div class="o_dropdown">
-    <button>...</button>
-    <ul class="o_dropdown_menu my_class">...</ul>
-  </div>
-  ```
-- `<DropdownItem class="my_class"/>` will become
-  ```xml
-  <li class="o_dropdown_item my_class">
-    <span>...</span>
-  </li>
-  ```
+    </li>
+    ```
 
 #### You can also make dropdown right aligned by passing 'o_dropdown_menu_right' in menuClass
 
-- `<Dropdown menuClass="'o_dropdown_menu_right'"/>` will become
-  ```xml
-  <div class="o_dropdown">
-    <button>...</button>
-    <ul class="o_dropdown_menu o_dropdown_menu_right">...</ul>
-  </div>
-  ```
+-   `<Dropdown menuClass="'o_dropdown_menu_right'"/>` will become
+    ```xml
+    <div class="o_dropdown">
+      <button>...</button>
+      <ul class="o_dropdown_menu o_dropdown_menu_right">...</ul>
+    </div>
+    ```
 
 ## More Examples
 

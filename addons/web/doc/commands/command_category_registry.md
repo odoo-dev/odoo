@@ -8,12 +8,12 @@ The `commandCategoryRegistry` gathers the command categories.
 
 The keys in this registry can be used in two differents ways in order to organize the command palette:
 
-- when registering a new command: `useCommand({ category: "key", ... })`.
+-   when registering a new command: `useCommand({ category: "key", ... })`.
 
-- applied as an attribute in the document: `[data-command-category="key"]`.
-  N.B.: if an element should appear in the command palette
-  (e.g. it has a `[data-hotkey]` attribute), the closest parent (including itself)
-  having a `[data-command-category]` will provide the category key to seek for in the registry.
+-   applied as an attribute in the document: `[data-command-category="key"]`.
+    N.B.: if an element should appear in the command palette
+    (e.g. it has a `[data-hotkey]` attribute), the closest parent (including itself)
+    having a `[data-command-category]` will provide the category key to seek for in the registry.
 
 ## Value Type
 

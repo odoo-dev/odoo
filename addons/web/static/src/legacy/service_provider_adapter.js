@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { useService } from "@web/services/service_hook";
-import { patch } from "@web/utils/patch";
+import { useService } from "@web/core/service_hook";
+import { patch } from "@web/core/utils/patch";
 import { WebClient } from "@web/webclient/webclient";
 import { useListener } from "web.custom_hooks";
 import { bus } from "web.core";

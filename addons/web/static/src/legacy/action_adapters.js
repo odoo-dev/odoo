@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
 import Context from "web.Context";
-import { useService } from "../services/service_hook";
-import { ViewNotFoundError } from "../actions/action_service";
-import { useDebugManager } from "../debug/debug_manager";
-import { objectToQuery } from "../services/router_service";
+import { useService } from "../core/service_hook";
+import { ViewNotFoundError } from "../webclient/actions/action_service";
+import { useDebugManager } from "../core/debug/debug_menu";
+import { objectToQuery } from "../core/browser/router_service";
 import { ComponentAdapter } from "web.OwlCompatibility";
 import { mapDoActionOptionAPI } from "./utils";
 import { setupDebugAction, setupDebugViewForm, setupDebugView } from "./debug_manager";
-import { cleanDomFromBootstrap } from '@web/legacy/utils';
+import { cleanDomFromBootstrap } from './utils';
 
 const { Component, hooks, tags } = owl;
 

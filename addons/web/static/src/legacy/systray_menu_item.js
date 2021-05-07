@@ -2,7 +2,7 @@
 
 import { ComponentAdapter } from "web.OwlCompatibility";
 import * as legacySystrayMenu from "web.SystrayMenu";
-import { systrayRegistry } from "../webclient/systray_registry";
+import { systrayRegistry } from "../core/systray_registry";
 
 const { Component, tags } = owl;
 

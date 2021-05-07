@@ -15,6 +15,6 @@ informations on the menu items.
 
 Here is a description of all exported methods:
 
-- `get(menuId)`
-- `apps`
-- `getMenusAsTree(...)`
+-   `get(menuId)`
+-   `apps`
+-   `getMenusAsTree(...)`

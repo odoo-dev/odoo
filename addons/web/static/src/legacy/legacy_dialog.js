@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { Dialog } from "../components/dialog/dialog";
-import { patch } from "@web/utils/patch";
+import { Dialog } from "../core/dialog/dialog";
+import { patch } from "@web/core/utils/patch";
 import OwlDialog from "web.OwlDialog";
 
 const { hooks } = owl;

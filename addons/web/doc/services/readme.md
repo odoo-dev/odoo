@@ -7,10 +7,10 @@ to have a need to perform tasks or obtain some information outside of itself.
 
 For example:
 
-- performing an RPC
-- displaying a notification
-- asking the web client to change the current action/view
-- ...
+-   performing an RPC
+-   displaying a notification
+-   asking the web client to change the current action/view
+-   ...
 
 These kind of features are represented in the web client under the name _service_.
 A service is basically a piece of code that is started with the web client, and
@@ -42,8 +42,8 @@ A service needs to follow the following interface:
 
 ```ts
 export interface Service<T = any> {
-  dependencies?: string[];
-  deploy: (env: OdooEnv, odoo: Odoo) => Promise<T> | T;
+    dependencies?: string[];
+    deploy: (env: OdooEnv, odoo: Odoo) => Promise<T> | T;
 }
 ```
 
@@ -70,17 +70,17 @@ It could be defined like this:
 
 ```js
 const counterService = {
-  start(env) {
-    let value = 0;
-    return {
-      getValue() {
-        return value;
-      },
-      increment() {
-        value++;
-      },
-    };
-  },
+    start(env) {
+        let value = 0;
+        return {
+            getValue() {
+                return value;
+            },
+            increment() {
+                value++;
+            }
+        };
+    }
 };
 serviceRegistry.add("counter", counterService);
 ```

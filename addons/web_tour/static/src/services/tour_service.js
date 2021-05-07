@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "@web/webclient/service_registry";
+import { serviceRegistry } from "@web/core/service_registry";
 import tourManager from "web_tour.tour";
 
 export const tourService = {

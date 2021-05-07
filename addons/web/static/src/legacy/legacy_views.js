@@ -1,14 +1,14 @@
 /** @odoo-module **/
 const { Component, hooks, tags } = owl;
 
-import { useService } from "../services/service_hook";
-import { useSetupAction } from "../actions/action_hook";
+import { useService } from "../core/service_hook";
+import { useSetupAction } from "../webclient/actions/action_hook";
 import { viewRegistry } from "../views/view_registry";
 import legacyViewRegistry from "web.view_registry";
 import { ViewAdapter } from "./action_adapters";
 import Widget from "web.Widget";
 import { breadcrumbsToLegacy } from "./utils";
-import { setScrollPosition } from "../utils/scrolling";
+import { setScrollPosition } from "../core/utils/scrolling";
 
 function getJsClassWidget(fieldsInfo) {
   const parsedXML = new DOMParser().parseFromString(fieldsInfo.arch, "text/xml");

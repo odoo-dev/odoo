@@ -1,7 +1,8 @@
 /** @odoo-module **/
+
 import { setupTests } from "./setup";
 
 (async () => {
-  await setupTests();
-  QUnit.start();
+    await setupTests();
+    QUnit.start();
 })();

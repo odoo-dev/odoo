@@ -21,7 +21,7 @@ For example:
 
 ```js
 class MySystrayItem extends Component {
-  // some component ...
+    // some component ...
 }
 
 systrayRegistry.add("myaddon.some_description", MySystrayItem);

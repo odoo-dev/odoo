@@ -13,8 +13,8 @@ informations (such as the arch, the `id` and other view informations).
 
 The `view_manager` service provide a single method:
 
-- `loadView(model: string, type: ViewType, viewId?: number | false): Promise<ViewDefinition>`
-  This method loads from the server the description for a view.
+-   `loadView(model: string, type: ViewType, viewId?: number | false): Promise<ViewDefinition>`
+    This method loads from the server the description for a view.
 
 A `ViewDefinition` object contains the following information:
 

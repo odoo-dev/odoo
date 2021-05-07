@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser";
-import { serviceRegistry } from "@web/webclient/service_registry";
+import { browser } from "@web/core/browser/browser";
+import { serviceRegistry } from "@web/core/service_registry";
 
 export const assetsWatchdogService = {
   start(env) {

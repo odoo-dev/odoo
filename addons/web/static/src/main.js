@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { startWebClient } from "./setup";
+import { startWebClient } from "./start";
 import { WebClient } from "./webclient/webclient";
 
 /**

@@ -1,11 +1,12 @@
 /** @odoo-module **/
-import { getLegacy } from "web.test_legacy";
-import { createWebClient, doAction, getActionManagerTestConfig } from "../../actions/helpers";
-import { registerCleanup } from "../../helpers/cleanup";
+
+import { browser } from "@web/core/browser/browser";
+import { patch, unpatch } from "@web/core/utils/patch";
 import * as LegacyRegistry from "web.Registry";
+import { getLegacy } from "web.test_legacy";
+import { registerCleanup } from "../../helpers/cleanup";
 import { nextTick } from "../../helpers/utils";
-import { patch, unpatch } from "@web/utils/patch";
-import { browser } from "@web/core/browser";
+import { createWebClient, doAction, getActionManagerTestConfig } from "../../webclient/actions/helpers";
 
 let testConfig;
 let AbstractAction;

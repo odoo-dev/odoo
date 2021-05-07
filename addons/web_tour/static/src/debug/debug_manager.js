@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { browser } from "@web/core/browser";
-import { debugRegistry } from "@web/debug/debug_registry";
+import { browser } from "@web/core/browser/browser";
+import { debugRegistry } from "@web/core/debug/debug_registry";
 import ToursDialog from "@web_tour/debug/tour_dialog_component";
 import utils from "web_tour.utils";
 

@@ -15,8 +15,8 @@ Any error that is not caugh (meaning that is is not handled by a try / catch blo
 ```js
 // this is pseudo code
 window.addEventListener((bubbledUpErrorEvent) => {
-  const error: OdooError = someCodeThatCastTheError(bubbledUpErrorEvent.error);
-  bus.trigger("ERROR_DISPATCH", error);
+    const error: OdooError = someCodeThatCastTheError(bubbledUpErrorEvent.error);
+    bus.trigger("ERROR_DISPATCH", error);
 });
 ```
 
@@ -25,23 +25,23 @@ The dispatcher will then use the error type to take action. Most of the time, it
 ```js
 // this is pseudo code
 bus.on(ERROR_DISPATCH, (error) => {
-  switch (error.type) {
-    case "SERVER_ERROR":
-      dialog_service.open(ServerErrorDialog, {
-        // props ...
-      });
-      break;
-    case "CORS_ERROR":
-      dialog_service.open(ClientErrorDialog, {
-        // props ...
-      });
-      break;
-    default:
-      dialog_service.open(ErrorDialog, {
-        // props ...
-      });
-      break;
-  }
+    switch (error.type) {
+        case "SERVER_ERROR":
+            dialog_service.open(ServerErrorDialog, {
+                // props ...
+            });
+            break;
+        case "CORS_ERROR":
+            dialog_service.open(ClientErrorDialog, {
+                // props ...
+            });
+            break;
+        default:
+            dialog_service.open(ErrorDialog, {
+                // props ...
+            });
+            break;
+    }
 });
 ```
 
@@ -105,13 +105,13 @@ However, the `RPCError` has a property called `exception_class`. This would cont
 ```js
 export const errorDialogRegistry: Registry<Type<Component>> = new Registry();
 errorDialogRegistry
-  // ...
-  .add("odoo.exceptions.AccessDenied", WarningDialog)
-  .add("odoo.exceptions.AccessError", WarningDialog)
-  .add("odoo.exceptions.RedirectWarning", RedirectWarningDialog)
-  .add("odoo.http.SessionExpiredException", SessionExpiredDialog)
-  .add("werkzeug.exceptions.Forbidden", SessionExpiredDialog)
-  .add("504", Error504Dialog);
+    // ...
+    .add("odoo.exceptions.AccessDenied", WarningDialog)
+    .add("odoo.exceptions.AccessError", WarningDialog)
+    .add("odoo.exceptions.RedirectWarning", RedirectWarningDialog)
+    .add("odoo.http.SessionExpiredException", SessionExpiredDialog)
+    .add("werkzeug.exceptions.Forbidden", SessionExpiredDialog)
+    .add("504", Error504Dialog);
 // ...
 ```
 

@@ -12,10 +12,10 @@ typescript, it features a livereload server, and more.
 The first and essential task is to install the dependencies defined in the project:
 to do that, one need to do the following:
 
-- have `npm` installed (the `node` package manager, which comes with `node`),
-- open a terminal and move to the `addons/wowl` folder (because it is the root
-  of the web project
-- type `npm install`
+-   have `npm` installed (the `node` package manager, which comes with `node`),
+-   open a terminal and move to the `addons/wowl` folder (because it is the root
+    of the web project
+-   type `npm install`
 
 Once this is done, the commands `npm run build` and `npm run dev` are available
 (see next section for more detail).
@@ -35,22 +35,22 @@ working well, make sure no other is installed.
 
 ## Main scripts
 
-- `npm run build`: build all the assets, which includes the following steps:
+-   `npm run build`: build all the assets, which includes the following steps:
 
-  - compile the typescript `src` files into javascript (output: `static/dist/js/src`)
-  - bundle the js files in a single iife bundle (output: `static/dist/app.js`)
-  - compile the typescript `tests` files into javascript (output: `static/dist/js/tests`)
-  - bundle the test files into a single iife bundle (output: `static/dist/app_tests.ts`)
+    -   compile the typescript `src` files into javascript (output: `static/dist/js/src`)
+    -   bundle the js files in a single iife bundle (output: `static/dist/app.js`)
+    -   compile the typescript `tests` files into javascript (output: `static/dist/js/tests`)
+    -   bundle the test files into a single iife bundle (output: `static/dist/app_tests.ts`)
 
-- `npm run dev`: main command for developing on this project.
+-   `npm run dev`: main command for developing on this project.
 
-  - build all the assets
-  - watch the filesystem and rebuild assets if necessary
-  - start a livereload server (port 8070, hardcoded) to make sure that each
-    connected browser is refreshed whenever necessary
+    -   build all the assets
+    -   watch the filesystem and rebuild assets if necessary
+    -   start a livereload server (port 8070, hardcoded) to make sure that each
+        connected browser is refreshed whenever necessary
 
-- `npm run prettier`: autoformat all the typescript, scss and markdown files
-  located in `static/src`, `static/tests` and `doc`.
+-   `npm run prettier`: autoformat all the typescript, scss and markdown files
+    located in `static/src`, `static/tests` and `doc`.
 
 ## Templates
 

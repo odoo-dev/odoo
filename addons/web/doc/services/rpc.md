@@ -18,11 +18,11 @@ be done with the following code:
 
 ```ts
 class MyComponent extends Component {
-  rpc = useService("rpc");
+    rpc = useService("rpc");
 
-  async someMethod() {
-    const result = await this.rpc("/some/route");
-  }
+    async someMethod() {
+        const result = await this.rpc("/some/route");
+    }
 }
 ```
 
@@ -42,54 +42,54 @@ const result = await this.rpc("/my/route", { some: "value" });
 
 ## Technical notes
 
-- The `rpc` service communicates with the server by using a `XMLHTTPRequest` object,
-  configured to work with `application/json` content type.
-- So clearly the content of the request should be JSON serializable.
-- Each request done by this service uses the `POST` http method
-- Server errors actually return the response with an http code 200. But the `rpc`
-  service will treat them as error (see below)
+-   The `rpc` service communicates with the server by using a `XMLHTTPRequest` object,
+    configured to work with `application/json` content type.
+-   So clearly the content of the request should be JSON serializable.
+-   Each request done by this service uses the `POST` http method
+-   Server errors actually return the response with an http code 200. But the `rpc`
+    service will treat them as error (see below)
 
 ## Error Handling
 
 An rpc can fail for two main reasons:
 
-- either the odoo server returns an error (so, we call this a `server` error).
-  In that case the http request will return with am http code 200 BUT with a
-  response object containing an `error` key.
-- or there is some other kind of network error
+-   either the odoo server returns an error (so, we call this a `server` error).
+    In that case the http request will return with am http code 200 BUT with a
+    response object containing an `error` key.
+-   or there is some other kind of network error
 
 When a rpc fails, then:
 
-- the promise representing the rpc is rejected, so the calling code will crash,
-  unless it handles the situation
-- an event `RPC_ERROR` is triggered on the main application bus. The event payload
-  contains a description of the cause of the error:
+-   the promise representing the rpc is rejected, so the calling code will crash,
+    unless it handles the situation
+-   an event `RPC_ERROR` is triggered on the main application bus. The event payload
+    contains a description of the cause of the error:
 
-  If it is a server error (the server code threw an exception). In that case
-  the event payload will be an object with the following keys:
+    If it is a server error (the server code threw an exception). In that case
+    the event payload will be an object with the following keys:
 
-  - `type = 'server'`
-  - `message(string)`
-  - `code(number)`
+    -   `type = 'server'`
+    -   `message(string)`
+    -   `code(number)`
 
-  - `name(string)` (optional, used by the crash manager to look for an appropriate
-    dialog to use when handling the error)
-  - `subType(string)` (optional, often used to determine the dialog title)
-  - `data(object)` (optional object that can contain various keys among which
-    `debug`: the main debug information, with the call stack)
+    -   `name(string)` (optional, used by the crash manager to look for an appropriate
+        dialog to use when handling the error)
+    -   `subType(string)` (optional, often used to determine the dialog title)
+    -   `data(object)` (optional object that can contain various keys among which
+        `debug`: the main debug information, with the call stack)
 
-  If it is a network error, then the error description is simply an object
-  `{type: 'network'}`.
-  When a network error occurs, a notification is displayed and the server is regularly
-  contacted until it responds. The notification is closed as soon as the server responds.
+    If it is a network error, then the error description is simply an object
+    `{type: 'network'}`.
+    When a network error occurs, a notification is displayed and the server is regularly
+    contacted until it responds. The notification is closed as soon as the server responds.
 
 ## Specialized behaviour for components
 
 The `rpc` service has a specific optimization to make using it with component safer. It
 does two things:
 
-- if a component is destroyed at the moment an rpc is initiated, an error will
-  be thrown. This is considered an error, a destroyed component should be inert.
-- if a component is destroyed when a rpc is completed, which is a normal situation
-  in an application, then the promise is simply left pending, to prevent any
-  followup code to execute.
+-   if a component is destroyed at the moment an rpc is initiated, an error will
+    be thrown. This is considered an error, a destroyed component should be inert.
+-   if a component is destroyed when a rpc is completed, which is a normal situation
+    in an application, then the promise is simply left pending, to prevent any
+    followup code to execute.

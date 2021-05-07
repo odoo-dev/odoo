@@ -22,8 +22,8 @@ add them to a `div` inside its template.
 
 Notes:
 
-- like usual, it is a convention to prefix the registry keys with the name of
-  the odoo addon that register it, in order to lessen the risk of name collision.
-- Since these components are rendered when the Web client is started, they can
-  actually delay the rendering (if they implement `willStart`). Therefore, one
-  need to be cautious. If possible, try to keep them synchronous.
+-   like usual, it is a convention to prefix the registry keys with the name of
+    the odoo addon that register it, in order to lessen the risk of name collision.
+-   Since these components are rendered when the Web client is started, they can
+    actually delay the rendering (if they implement `willStart`). Therefore, one
+    need to be cautious. If possible, try to keep them synchronous.

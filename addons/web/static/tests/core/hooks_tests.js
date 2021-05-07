@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { useService } from "@web/services/service_hook";
-import { useBus } from "@web/utils/hooks";
-import { serviceRegistry } from "@web/webclient/service_registry";
+import { useBus } from "@web/core/bus_hook";
+import { useService } from "@web/core/service_hook";
+import { serviceRegistry } from "@web/core/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, nextTick } from "../helpers/utils";
 
@@ -11,65 +11,65 @@ const { Component, mount, tags } = owl;
 QUnit.module("hooks");
 
 QUnit.test("useBus", async function (assert) {
-  // The callback should only get called once.
-  class MyComponent extends Component {
-    setup() {
-      useBus(this.env.bus, "test-event", this.myCallback);
+    // The callback should only get called once.
+    class MyComponent extends Component {
+        setup() {
+            useBus(this.env.bus, "test-event", this.myCallback);
+        }
+        myCallback() {
+            assert.ok(true);
+        }
     }
-    myCallback() {
-      assert.ok(true);
-    }
-  }
-  MyComponent.template = tags.xml`<div/>`;
+    MyComponent.template = tags.xml`<div/>`;
 
-  const env = await makeTestEnv();
-  const target = getFixture();
-  const comp = await mount(MyComponent, { env, target });
-  env.bus.trigger("test-event");
-  await nextTick();
+    const env = await makeTestEnv();
+    const target = getFixture();
+    const comp = await mount(MyComponent, { env, target });
+    env.bus.trigger("test-event");
+    await nextTick();
 
-  comp.unmount();
-  env.bus.trigger("test-event");
-  await nextTick();
-  comp.destroy();
+    comp.unmount();
+    env.bus.trigger("test-event");
+    await nextTick();
+    comp.destroy();
 });
 
 QUnit.test("useService: unavailable service", async function (assert) {
-  class MyComponent extends Component {
-    setup() {
-      useService("toy_service");
+    class MyComponent extends Component {
+        setup() {
+            useService("toy_service");
+        }
     }
-  }
-  MyComponent.template = tags.xml`<div/>`;
+    MyComponent.template = tags.xml`<div/>`;
 
-  const env = await makeTestEnv();
-  const target = getFixture();
-  try {
-    const comp = await mount(MyComponent, { env, target });
-  } catch (e) {
-    assert.strictEqual(e.message, "Service toy_service is not available");
-  }
+    const env = await makeTestEnv();
+    const target = getFixture();
+    try {
+        const comp = await mount(MyComponent, { env, target });
+    } catch (e) {
+        assert.strictEqual(e.message, "Service toy_service is not available");
+    }
 });
 
 QUnit.test("useService: service that returns null", async function (assert) {
-  class MyComponent extends Component {
-    setup() {
-      this.toyService = useService("toy_service");
+    class MyComponent extends Component {
+        setup() {
+            this.toyService = useService("toy_service");
+        }
     }
-  }
-  MyComponent.template = tags.xml`<div/>`;
+    MyComponent.template = tags.xml`<div/>`;
 
-  serviceRegistry.add("toy_service", {
-    name: "toy_service",
-    start: () => {
-      return null;
-    },
-  });
+    serviceRegistry.add("toy_service", {
+        name: "toy_service",
+        start: () => {
+            return null;
+        },
+    });
 
-  const env = await makeTestEnv();
-  const target = getFixture();
+    const env = await makeTestEnv();
+    const target = getFixture();
 
-  const comp = await mount(MyComponent, { env, target });
-  assert.strictEqual(comp.toyService, null);
-  comp.unmount();
+    const comp = await mount(MyComponent, { env, target });
+    assert.strictEqual(comp.toyService, null);
+    comp.unmount();
 });

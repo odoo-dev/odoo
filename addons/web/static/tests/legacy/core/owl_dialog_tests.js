@@ -8,7 +8,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
     const testUtils = require('web.test_utils');
 
     const { makeLegacyDialogMappingTestEnv } = require('@web/../tests/helpers/legacy_env_utils');
-    const { Dialog: WowlDialog } = require("@web/components/dialog/dialog");
+    const { Dialog: WowlDialog } = require("@web/core/dialog/dialog");
     const { getFixture, nextTick, patchWithCleanup } = require("@web/../tests/helpers/utils");
 
     const { Component, tags, useState, mount } = owl;

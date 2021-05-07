@@ -12,15 +12,15 @@ The `title service` offers a simple API that allows to read/modify the document 
 
 The `title service` exports two methods and a value:
 
-- `current (string)`,
-- `getParts(): Parts`,
-- `setParts(parts: Parts): void`,
+-   `current (string)`,
+-   `getParts(): Parts`,
+-   `setParts(parts: Parts): void`,
 
 where the type `Parts` is:
 
 ```ts
 interface Parts {
-  [key: string]: string | null;
+    [key: string]: string | null;
 }
 ```
 
@@ -47,9 +47,9 @@ with `current` value being `Odoo - Import`,
 
 ```ts
 setParts({
-  odoo: "Open ERP",
-  action: null,
-  chat: "Sauron",
+    odoo: "Open ERP",
+    action: null,
+    chat: "Sauron"
 });
 ```
 

@@ -1,5 +1,6 @@
 /** @odoo-module **/
-import { serviceRegistry } from "../webclient/service_registry";
+
+import { serviceRegistry } from "../core/service_registry";
 
 /**
  * @typedef {Object} Fields
@@ -46,52 +47,56 @@ import { serviceRegistry } from "../webclient/service_registry";
  */
 
 export const viewService = {
-  name: "view",
-  dependencies: ["orm"],
-  start(env, { orm }) {
-    let cache = {};
+    name: "view",
+    dependencies: ["orm"],
+    start(env, { orm }) {
+        let cache = {};
 
-    env.bus.on("CLEAR-CACHES", null, () => {
-      cache = {};
-    });
-
-    /**
-     * Loads various information concerning views: fields_view for each view,
-     * fields of the corresponding model, and optionally the filters.
-     *
-     * @param {LoadViewsParams} params
-     * @param {LoadViewsOptions} options
-     * @returns {Promise<ViewDescriptions>}
-     */
-    async function loadViews(params, options) {
-      const key = JSON.stringify([params.model, params.views, params.context, options]);
-      if (!cache[key]) {
-        const result = await orm.call(params.model, "load_views", [], {
-          views: params.views,
-          options: {
-            action_id: options.actionId || false,
-            load_filters: options.withFilters || false,
-            toolbar: options.withActionMenus || false,
-          },
-          context: params.context,
+        env.bus.on("CLEAR-CACHES", null, () => {
+            cache = {};
         });
-        const viewDescriptions = result; // for legacy purpose, keys in result are left in viewDescriptions
 
-        for (const [_, viewType] of params.views) {
-          const viewDescription = result.fields_views[viewType];
-          viewDescription.fields = Object.assign({}, result.fields, viewDescription.fields); // before a deep freeze was done.
-          if (viewType === "search" && options.withFilters) {
-            viewDescription.irFilters = result.filters;
-          }
-          viewDescriptions[viewType] = viewDescription;
+        /**
+         * Loads various information concerning views: fields_view for each view,
+         * fields of the corresponding model, and optionally the filters.
+         *
+         * @param {LoadViewsParams} params
+         * @param {LoadViewsOptions} options
+         * @returns {Promise<ViewDescriptions>}
+         */
+        async function loadViews(params, options) {
+            const key = JSON.stringify([params.model, params.views, params.context, options]);
+            if (!cache[key]) {
+                const result = await orm.call(params.model, "load_views", [], {
+                    views: params.views,
+                    options: {
+                        action_id: options.actionId || false,
+                        load_filters: options.withFilters || false,
+                        toolbar: options.withActionMenus || false,
+                    },
+                    context: params.context,
+                });
+                const viewDescriptions = result; // for legacy purpose, keys in result are left in viewDescriptions
+
+                for (const [_, viewType] of params.views) {
+                    const viewDescription = result.fields_views[viewType];
+                    viewDescription.fields = Object.assign(
+                        {},
+                        result.fields,
+                        viewDescription.fields
+                    ); // before a deep freeze was done.
+                    if (viewType === "search" && options.withFilters) {
+                        viewDescription.irFilters = result.filters;
+                    }
+                    viewDescriptions[viewType] = viewDescription;
+                }
+
+                cache[key] = viewDescriptions;
+            }
+            return cache[key];
         }
-
-        cache[key] = viewDescriptions;
-      }
-      return cache[key];
-    }
-    return { loadViews };
-  },
+        return { loadViews };
+    },
 };
 
 serviceRegistry.add("view", viewService);

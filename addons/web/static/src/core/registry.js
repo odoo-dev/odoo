@@ -16,106 +16,105 @@ const { EventBus } = core;
  * 3. it provides a chained API to add items to the registry.
  */
 export class Registry extends EventBus {
+    constructor() {
+        super();
+        this.content = {};
+        this.elements = null;
+        this.entries = null;
 
-  constructor() {
-    super();
-    this.content = {};
-    this.elements = null;
-    this.entries = null;
-
-    this.on("UPDATE", this, () => {
-      this.elements = null;
-      this.entries = null;
-    });
-  }
-
-  /**
-   * Add an entry (key, value) to the registry if key is not already used. If
-   * the parameter force is set to true, an entry with same key (if any) is replaced.
-   *
-   * Note that this also returns the registry, so another add method call can
-   * be chained
-   *
-   * @param {string} key
-   * @param {any} value
-   * @param {{force?: boolean, sequence?: number}} [options]
-   * @returns {Registry}
-   */
-  add(key, value, { force, sequence } = {}) {
-    if (!force && key in this.content) {
-      throw new Error(`Cannot add '${key}' in this registry: it already exists`);
+        this.on("UPDATE", this, () => {
+            this.elements = null;
+            this.entries = null;
+        });
     }
-    let previousSequence;
-    if (force) {
-      const elem = this.content[key];
-      previousSequence = elem && elem[0];
+
+    /**
+     * Add an entry (key, value) to the registry if key is not already used. If
+     * the parameter force is set to true, an entry with same key (if any) is replaced.
+     *
+     * Note that this also returns the registry, so another add method call can
+     * be chained
+     *
+     * @param {string} key
+     * @param {any} value
+     * @param {{force?: boolean, sequence?: number}} [options]
+     * @returns {Registry}
+     */
+    add(key, value, { force, sequence } = {}) {
+        if (!force && key in this.content) {
+            throw new Error(`Cannot add '${key}' in this registry: it already exists`);
+        }
+        let previousSequence;
+        if (force) {
+            const elem = this.content[key];
+            previousSequence = elem && elem[0];
+        }
+        sequence = sequence === undefined ? previousSequence || 50 : sequence;
+        this.content[key] = [sequence, value];
+        const payload = { operation: "add", key, value };
+        this.trigger("UPDATE", payload);
+        return this;
     }
-    sequence = sequence === undefined ? previousSequence || 50 : sequence;
-    this.content[key] = [sequence, value];
-    const payload = { operation: "add", key, value };
-    this.trigger("UPDATE", payload);
-    return this;
-  }
 
-  /**
-   * Get an item from the registry
-   *
-   * @param {string} key
-   * @returns {any}
-   */
-  get(key) {
-    if (!(key in this.content)) {
-      throw new Error(`Cannot find ${key} in this registry!`);
+    /**
+     * Get an item from the registry
+     *
+     * @param {string} key
+     * @returns {any}
+     */
+    get(key) {
+        if (!(key in this.content)) {
+            throw new Error(`Cannot find ${key} in this registry!`);
+        }
+        return this.content[key][1];
     }
-    return this.content[key][1];
-  }
 
-  /**
-   * Check the presence of a key in the registry
-   *
-   * @param {string} key
-   * @returns {boolean}
-   */
-  contains(key) {
-    return key in this.content;
-  }
-
-  /**
-   * Get a list of all elements in the registry. Note that it is ordered
-   * according to the sequence numbers.
-   *
-   * @returns {any[]}
-   */
-  getAll() {
-    if (!this.elements) {
-      const content = Object.values(this.content).sort((el1, el2) => el1[0] - el2[0]);
-      this.elements = content.map((elem) => elem[1]);
+    /**
+     * Check the presence of a key in the registry
+     *
+     * @param {string} key
+     * @returns {boolean}
+     */
+    contains(key) {
+        return key in this.content;
     }
-    return this.elements;
-  }
 
-  /**
-   * Return a list of all entries, ordered by sequence numbers.
-   *
-   * @returns {[string, any][]}
-   */
-  getEntries() {
-    if (!this.entries) {
-      const entries = Object.entries(this.content).sort((el1, el2) => el1[1][0] - el2[1][0]);
-      this.entries = entries.map(([str, elem]) => [str, elem[1]]);
+    /**
+     * Get a list of all elements in the registry. Note that it is ordered
+     * according to the sequence numbers.
+     *
+     * @returns {any[]}
+     */
+    getAll() {
+        if (!this.elements) {
+            const content = Object.values(this.content).sort((el1, el2) => el1[0] - el2[0]);
+            this.elements = content.map((elem) => elem[1]);
+        }
+        return this.elements;
     }
-    return this.entries;
-  }
 
-  /**
-   * Remove an item from the registry
-   *
-   * @param {string} key
-   */
-  remove(key) {
-    const value = this.content[key];
-    delete this.content[key];
-    const payload = { operation: "delete", key, value };
-    this.trigger("UPDATE", payload);
-  }
+    /**
+     * Return a list of all entries, ordered by sequence numbers.
+     *
+     * @returns {[string, any][]}
+     */
+    getEntries() {
+        if (!this.entries) {
+            const entries = Object.entries(this.content).sort((el1, el2) => el1[1][0] - el2[1][0]);
+            this.entries = entries.map(([str, elem]) => [str, elem[1]]);
+        }
+        return this.entries;
+    }
+
+    /**
+     * Remove an item from the registry
+     *
+     * @param {string} key
+     */
+    remove(key) {
+        const value = this.content[key];
+        delete this.content[key];
+        const payload = { operation: "delete", key, value };
+        this.trigger("UPDATE", payload);
+    }
 }

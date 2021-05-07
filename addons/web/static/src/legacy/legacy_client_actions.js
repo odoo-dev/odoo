@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { actionRegistry } from "../actions/action_registry";
+import { actionRegistry } from "../webclient/actions/action_registry";
 import { action_registry as legacyActionRegistry } from "web.core";
 import { ClientActionAdapter } from "./action_adapters";
 import Widget from "web.Widget";
 import { breadcrumbsToLegacy } from "./utils";
-import { useSetupAction } from "../actions/action_hook";
-import { setScrollPosition } from "../utils/scrolling";
+import { useSetupAction } from "../webclient/actions/action_hook";
+import { setScrollPosition } from "../core/utils/scrolling";
 
 const { Component, hooks, tags } = owl;
 

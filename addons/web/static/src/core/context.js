@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { evaluateExpr } from "../py_js/py";
+import { evaluateExpr } from "./py_js/py";
 
 /**
  * @typedef {{[key: string]: any}} Context
@@ -14,10 +14,10 @@ import { evaluateExpr } from "../py_js/py";
  * @returns {Context}
  */
 export function makeContext(...contexts) {
-  let context = {};
-  for (let ctx of contexts) {
-    const subCtx = typeof ctx === "string" ? evaluateExpr(ctx, context) : ctx;
-    Object.assign(context, subCtx);
-  }
-  return context;
+    let context = {};
+    for (let ctx of contexts) {
+        const subCtx = typeof ctx === "string" ? evaluateExpr(ctx, context) : ctx;
+        Object.assign(context, subCtx);
+    }
+    return context;
 }

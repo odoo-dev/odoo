@@ -14,8 +14,8 @@ dialog by using a Dialog tag in a component template.
 
 The dialog_manager service exports one method:
 
-- `open(dialogClass: Type<Component>, props?: object): void`: the `dialog class` given as
-  first parameter is instantiated with the optional props given (or with `{}`).
+-   `open(dialogClass: Type<Component>, props?: object): void`: the `dialog class` given as
+    first parameter is instantiated with the optional props given (or with `{}`).
 
 By `dialog class`, we mean a class extending `owl.Component` and having as root node `Dialog`:
 

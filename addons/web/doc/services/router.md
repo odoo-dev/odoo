@@ -8,19 +8,19 @@
 
 The `router` service provides three features:
 
-- information about the current route
-- provides a way for the application to update the url, depending on its state
-- listens to every hash change, and notifies the rest of the application
+-   information about the current route
+-   provides a way for the application to update the url, depending on its state
+-   listens to every hash change, and notifies the rest of the application
 
 ## Current route
 
 The current route can be accessed with the `current` key. It contains the following
 information:
 
-- `pathname (string)`: the path for the current location (most likely `/web`)
-- `search (object)`: a dictionary mapping each search keyword from the url to
-  its value. An empty string is the value if no value was explicitely given
-- `hash (object)`: same as above, but for values described in the hash.
+-   `pathname (string)`: the path for the current location (most likely `/web`)
+-   `search (object)`: a dictionary mapping each search keyword from the url to
+    its value. An empty string is the value if no value was explicitely given
+-   `hash (object)`: same as above, but for values described in the hash.
 
 For example:
 

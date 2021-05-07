@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { browser } from "../../core/browser";
-import { useService } from "../../services/service_hook";
-import { mainComponentRegistry } from "../main_component_registry";
+import { browser } from "../../core/browser/browser";
+import { mainComponentRegistry } from "../../core/main_component_registry";
+import { useService } from "../../core/service_hook";
 
 const { Component, useState } = owl;
 
@@ -17,35 +17,35 @@ const { Component, useState } = owl;
  * After a delay of 3s, if a rpc is still not completed, we also block the UI.
  */
 export class LoadingIndicator extends Component {
-  setup() {
-    this.state = useState({
-      count: 0,
-      show: false,
-    });
-    this.rpcIds = new Set();
-    this.env.bus.on("RPC:REQUEST", this, this.requestCall);
-    this.env.bus.on("RPC:RESPONSE", this, this.responseCall);
-    this.uiService = useService("ui");
-  }
-
-  requestCall(rpcId) {
-    if (this.state.count === 0) {
-      this.state.show = true;
-      this.blockUITimer = browser.setTimeout(this.uiService.block, 3000);
+    setup() {
+        this.state = useState({
+            count: 0,
+            show: false,
+        });
+        this.rpcIds = new Set();
+        this.env.bus.on("RPC:REQUEST", this, this.requestCall);
+        this.env.bus.on("RPC:RESPONSE", this, this.responseCall);
+        this.uiService = useService("ui");
     }
-    this.rpcIds.add(rpcId);
-    this.state.count++;
-  }
 
-  responseCall(rpcId) {
-    this.rpcIds.delete(rpcId);
-    this.state.count = this.rpcIds.size;
-    if (this.state.count === 0) {
-      clearTimeout(this.blockUITimer);
-      this.uiService.unblock();
-      this.state.show = false;
+    requestCall(rpcId) {
+        if (this.state.count === 0) {
+            this.state.show = true;
+            this.blockUITimer = browser.setTimeout(this.uiService.block, 3000);
+        }
+        this.rpcIds.add(rpcId);
+        this.state.count++;
     }
-  }
+
+    responseCall(rpcId) {
+        this.rpcIds.delete(rpcId);
+        this.state.count = this.rpcIds.size;
+        if (this.state.count === 0) {
+            clearTimeout(this.blockUITimer);
+            this.uiService.unblock();
+            this.state.show = false;
+        }
+    }
 }
 
 LoadingIndicator.template = "web.LoadingIndicator";
