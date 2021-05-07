@@ -123,16 +123,14 @@ function makeActionManager(env) {
    * with a unique jsId.
    */
   function _preprocessAction(action, context = {}) {
-    const jsId = `action_${++id}`;
     action.context = makeContext(env.services.user.context, context, action.context);
     if (action.domain) {
       const domain = action.domain || [];
       action.domain = typeof domain === "string" ? evaluateExpr(domain, action.context) : domain;
     }
-    const originalAction = JSON.stringify(action);
-    action = JSON.parse(originalAction); // manipulate a deep copy
-    action._originalAction = originalAction;
-    action.jsId = jsId;
+    action = Object.assign({}, action); // manipulate a copy
+    action._originalAction = JSON.stringify(action);
+    action.jsId = `action_${++id}`;
     if (action.type === "ir.actions.act_window" || action.type === "ir.actions.client") {
       action.target = action.target || "current";
     }
