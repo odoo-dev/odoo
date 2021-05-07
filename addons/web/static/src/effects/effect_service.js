@@ -21,7 +21,7 @@ export function convertRainBowMessage(message) {
 
 export const effectService = {
   dependencies: ["notification", "user"],
-  start(env) {
+  start(env, { notification, user }) {
     const bus = new EventBus();
     let effectId = 0;
 
@@ -32,8 +32,8 @@ export const effectService = {
      * @param {Object} effect The effect to display
      */
     function applyEffect(effect) {
-      if (!env.services.user.showEffect) {
-        env.services.notification.create(effect.message, { sticky: false });
+      if (!user.showEffect) {
+        notification.create(effect.message, { sticky: false });
       } else {
         bus.trigger("UPDATE", effect);
       }

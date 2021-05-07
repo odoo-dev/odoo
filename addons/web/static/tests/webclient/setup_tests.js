@@ -4,7 +4,6 @@ import { serviceRegistry } from "@web/webclient/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeDeferred, nextTick } from "../helpers/utils";
 
-
 QUnit.module("deployServices");
 
 QUnit.test("can start a service", async (assert) => {
@@ -116,4 +115,19 @@ QUnit.test("can start a service with a dependency", async (assert) => {
   });
   await makeTestEnv();
   assert.verifySteps(["appa", "aang"]);
+});
+
+QUnit.test("get an object containing dependencies as second arg", async (assert) => {
+  serviceRegistry.add("aang", {
+    dependencies: ["appa"],
+    start(env, deps) {
+      assert.deepEqual(deps, { appa: "flying bison" });
+    },
+  });
+  serviceRegistry.add("appa", {
+    start() {
+      return "flying bison";
+    },
+  });
+  await makeTestEnv();
 });

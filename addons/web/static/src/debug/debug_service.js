@@ -18,7 +18,7 @@ export function editModelDebug(env, title, model, id) {
 
 export const debugService = {
   dependencies: ["orm"],
-  start(env) {
+  start(env, { orm }) {
     let accessRightsProm;
     if (env.debug !== "") {
       systrayRegistry.add("web.debug_mode_menu", DebugManager, { sequence: 100 });
@@ -26,7 +26,6 @@ export const debugService = {
 
     return {
       getAccessRights() {
-        const { orm } = env.services;
         if (!accessRightsProm) {
           accessRightsProm = new Promise((resolve, reject) => {
             const accessRights = {

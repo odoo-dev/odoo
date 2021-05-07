@@ -48,8 +48,7 @@ import { serviceRegistry } from "../webclient/service_registry";
 export const viewService = {
   name: "view",
   dependencies: ["orm"],
-  start(env) {
-    const { orm } = env.services;
+  start(env, { orm }) {
     let cache = {};
 
     env.bus.on("CLEAR-CACHES", null, () => {

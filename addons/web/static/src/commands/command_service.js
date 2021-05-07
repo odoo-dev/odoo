@@ -15,8 +15,7 @@ import { CommandPaletteDialog } from "./command_palette_dialog";
 
 export const commandService = {
   dependencies: ["dialog", "hotkey", "ui"],
-  start(env) {
-    const { dialog, hotkey: hotkeyService, ui } = env.services;
+  start(env, { dialog, hotkey: hotkeyService, ui }) {
     const registeredCommands = new Map();
     let nextToken = 0;
     let isPaletteOpened = false;

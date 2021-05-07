@@ -91,7 +91,9 @@ async function _startServices(env, toStart, timeoutId) {
     while ((service = findNext())) {
       let name = service.name;
       toStart.delete(service);
-      const value = service.start(env);
+      const entries = (service.dependencies || []).map((dep) => [dep, services[dep]]);
+      const dependencies = Object.fromEntries(entries);
+      const value = service.start(env, dependencies);
       if (value && "specializeForComponent" in service) {
         value[SPECIAL_METHOD] = service.specializeForComponent;
       }

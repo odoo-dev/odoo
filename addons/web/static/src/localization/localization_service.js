@@ -8,10 +8,10 @@ import { strftimeToLuxonFormat } from "../utils/dates";
 
 export const localizationService = {
   dependencies: ["user"],
-  start: async (env) => {
+  start: async (env, { user }) => {
     const cacheHashes = odoo.session_info.cache_hashes;
     const translationsHash = cacheHashes.translations || new Date().getTime().toString();
-    const lang = env.services.user.lang || null;
+    const lang = user.lang || null;
     let url = `/web/webclient/translations/${translationsHash}`;
     if (lang) {
       url += `?lang=${lang}`;

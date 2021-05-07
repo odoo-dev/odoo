@@ -104,8 +104,7 @@ class ORM {
  */
 export const ormService = {
   dependencies: ["rpc", "user"],
-  start(env) {
-    const { rpc, user } = env.services;
+  start(env, { rpc, user }) {
     return new ORM(rpc, user);
   },
   specializeForComponent() {
