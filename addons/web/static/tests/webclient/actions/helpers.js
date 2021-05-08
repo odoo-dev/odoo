@@ -5,18 +5,17 @@ import { dialogService } from "@web/core/dialog/dialog_service";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
-import { menuService } from "@web/webclient/menu_service";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import {
     makeLegacyActionManagerService,
     makeLegacyNotificationService,
     mapLegacyEnvToWowlEnv,
 } from "@web/legacy/utils";
 import { viewService } from "@web/views/view_service";
-import { actionRegistry } from "@web/webclient/actions/action_registry";
 import { actionService } from "@web/webclient/actions/action_service";
 import { effectService } from "@web/webclient/effects/effect_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
+import { menuService } from "@web/webclient/menu_service";
 import { WebClient } from "@web/webclient/webclient";
 import { getLegacy } from "web.test_legacy";
 import { registerCleanup } from "../../helpers/cleanup";
@@ -32,6 +31,8 @@ import { getFixture, legacyExtraNextTick, nextTick, patchWithCleanup } from "../
 
 const { Component, mount, tags } = owl;
 
+const actionRegistry = registry.category("actions");
+const serviceRegistry = registry.category("services");
 // -----------------------------------------------------------------------------
 // Utils
 // -----------------------------------------------------------------------------

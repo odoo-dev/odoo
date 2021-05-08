@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { mainComponentRegistry } from "../../core/main_component_registry";
+import { registry } from "../../core/registry";
 import { useService } from "../../core/service_hook";
 import { RainbowMan } from "./rainbow_man";
 
@@ -27,4 +27,4 @@ EffectContainer.template = tags.xml`
   </div>`;
 EffectContainer.components = { RainbowMan };
 
-mainComponentRegistry.add("EffectContainer", EffectContainer);
+registry.category("main_components").add("EffectContainer", EffectContainer);

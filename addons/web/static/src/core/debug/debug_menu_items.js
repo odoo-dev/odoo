@@ -2,7 +2,9 @@
 
 import { browser } from "../browser/browser";
 import { routeToUrl } from "../browser/router_service";
-import { debugRegistry } from "./debug_registry";
+import { registry } from "../registry";
+
+const debugRegistry = registry.category("debug");
 
 // Backend Debug Manager Items
 export function runJSTestsItem(env) {

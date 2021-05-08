@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../service_registry";
+import { registry } from "../registry";
 
 export const titleService = {
     start() {
@@ -35,4 +35,4 @@ export const titleService = {
     },
 };
 
-serviceRegistry.add("title", titleService);
+registry.category("services").add("title", titleService);

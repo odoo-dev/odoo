@@ -1,12 +1,13 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, makeDeferred, nextTick, triggerHotkey } from "../helpers/utils";
 
 const { mount } = owl;
+const serviceRegistry = registry.category("services");
 
 let env;
 let parent;

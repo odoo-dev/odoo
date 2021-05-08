@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../service_registry";
+import { registry } from "../registry";
 import { shallowEqual } from "../utils/objects";
 import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
@@ -166,4 +166,4 @@ export function objectToQuery(obj) {
     return query;
 }
 
-serviceRegistry.add("router", routerService);
+registry.category("services").add("router", routerService);

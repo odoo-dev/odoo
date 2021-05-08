@@ -2,11 +2,12 @@
 
 import { useBus } from "@web/core/bus_hook";
 import { useService } from "@web/core/service_hook";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, nextTick } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
+const serviceRegistry = registry.category("services");
 
 QUnit.module("hooks");
 

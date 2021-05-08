@@ -9,7 +9,7 @@ import {
     SessionExpiredDialog,
     WarningDialog,
 } from "@web/core/errors/error_dialogs";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
 import { makeTestEnv } from "../../helpers/mock_env";
@@ -20,6 +20,7 @@ const { Component, mount, tags } = owl;
 let target;
 let env;
 let parent;
+const serviceRegistry = registry.category("services");
 
 QUnit.module("Error dialogs", {
     async beforeEach() {

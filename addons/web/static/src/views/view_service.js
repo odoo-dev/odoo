@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../core/service_registry";
+import { registry } from "../core/registry";
 
 /**
  * @typedef {Object} Fields
@@ -99,4 +99,4 @@ export const viewService = {
     },
 };
 
-serviceRegistry.add("view", viewService);
+registry.category("services").add("view", viewService);

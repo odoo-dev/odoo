@@ -2,19 +2,19 @@
 
 import { browser } from "@web/core/browser/browser";
 import { ormService } from "@web/core/orm_service";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
 import { UserMenu } from "@web/webclient/user_menu/user_menu";
 import { preferencesItem } from "@web/webclient/user_menu/user_menu_items";
-import { userMenuRegistry } from "@web/webclient/user_menu/user_menu_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService, makeFakeUserService } from "../helpers/mock_services";
 import { click, getFixture } from "../helpers/utils";
 
 const { mount } = owl;
-
+const serviceRegistry = registry.category("services");
+const userMenuRegistry = registry.category("user_menuitems");
 let target;
 let env;
 let userMenu;

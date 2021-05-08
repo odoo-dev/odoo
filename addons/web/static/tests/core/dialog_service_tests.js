@@ -3,9 +3,8 @@
 import { DialogContainer, dialogService } from "@web/core/dialog/dialog_service";
 import { ErrorDialog } from "@web/core/errors/error_dialogs";
 import { errorService } from "@web/core/errors/error_service";
-import { mainComponentRegistry } from "@web/core/main_component_registry";
+import { registry } from "@web/core/registry";
 import { notificationService } from "@web/core/notifications/notification_service";
-import { serviceRegistry } from "@web/core/service_registry";
 import { uiService } from "@web/core/ui_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
 import { registerCleanup } from "../helpers/cleanup";
@@ -18,6 +17,8 @@ const { Component, mount, tags } = owl;
 let env;
 let target;
 let pseudoWebClient;
+const serviceRegistry = registry.category("services");
+const mainComponentRegistry = registry.category("main_components");
 
 class PseudoWebClient extends Component {
     setup() {

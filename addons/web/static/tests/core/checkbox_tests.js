@@ -2,13 +2,14 @@
 
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { translatedTerms } from "@web/core/l10n/translation";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { getFixture, patchWithCleanup } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
+const serviceRegistry = registry.category("services");
 
 let env;
 let target;

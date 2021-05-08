@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
-import { mainComponentRegistry } from "../main_component_registry";
+import { registry } from "../registry";
 import { useService } from "../service_hook";
-import { serviceRegistry } from "../service_registry";
 
 const { Component, core, tags, useState } = owl;
 const { EventBus } = core;
@@ -59,7 +58,7 @@ DialogContainer.template = tags.xml`
     </div>
     `;
 
-mainComponentRegistry.add("DialogContainer", DialogContainer);
+registry.category("main_components").add("DialogContainer", DialogContainer);
 
 export const dialogService = {
     start(env) {
@@ -71,4 +70,4 @@ export const dialogService = {
     },
 };
 
-serviceRegistry.add("dialog", dialogService);
+registry.category("services").add("dialog", dialogService);

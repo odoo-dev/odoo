@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "./service_hook";
-import { serviceRegistry } from "./service_registry";
+import { registry } from "./registry";
 
 /**
  * This ORM service is the standard way to interact with the ORM in python from
@@ -114,4 +114,4 @@ export const ormService = {
     },
 };
 
-serviceRegistry.add("orm", ormService);
+registry.category("services").add("orm", ormService);

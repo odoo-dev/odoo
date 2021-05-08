@@ -3,12 +3,10 @@
 import { browser } from "@web/core/browser/browser";
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { RPCErrorDialog } from "@web/core/errors/error_dialogs";
-import { errorDialogRegistry } from "@web/core/errors/error_dialog_registry";
-import { errorHandlerRegistry } from "@web/core/errors/error_handler_registry";
 import { errorService } from "@web/core/errors/error_service";
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc_service";
 import { notificationService } from "@web/core/notifications/notification_service";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { registerCleanup } from "../../helpers/cleanup";
 import { makeTestEnv } from "../../helpers/mock_env";
 import {
@@ -19,6 +17,9 @@ import {
 import { nextTick, patchWithCleanup } from "../../helpers/utils";
 
 const { Component, tags } = owl;
+const errorDialogRegistry = registry.category("error_dialogs");
+const errorHandlerRegistry = registry.category("error_handlers");
+const serviceRegistry = registry.category("services");
 
 function makeFakeDialogService(open) {
     return {

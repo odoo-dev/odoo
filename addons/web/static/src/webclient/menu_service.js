@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../core/browser/browser";
-import { serviceRegistry } from "../core/service_registry";
+import { registry } from "../core/registry";
 
 const loadMenusUrl = `/web/webclient/load_menus`;
 
@@ -85,4 +85,4 @@ export const menuService = {
     },
 };
 
-serviceRegistry.add("menu", menuService);
+registry.category("services").add("menu", menuService);

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../../core/service_registry";
+import { registry } from "../../core/registry";
 import { getHotkeyToPress } from "../hotkeys/hotkey_service";
 import { CommandPaletteDialog } from "./command_palette_dialog";
 
@@ -124,4 +124,4 @@ export const commandService = {
     },
 };
 
-serviceRegistry.add("command", commandService);
+registry.category("services").add("command", commandService);

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { isMacOS } from "../../core/browser/feature_detection";
-import { serviceRegistry } from "../../core/service_registry";
+import { registry } from "../../core/registry";
 
 export function getHotkeyToPress(hotkey, altIsOptional = false) {
     let result = hotkey.split("+");
@@ -313,4 +313,4 @@ export const hotkeyService = {
     },
 };
 
-serviceRegistry.add("hotkey", hotkeyService);
+registry.category("services").add("hotkey", hotkeyService);

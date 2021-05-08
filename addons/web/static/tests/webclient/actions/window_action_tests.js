@@ -2,8 +2,7 @@
 
 import { debugService } from "@web/core/debug/debug_service";
 import { DialogContainer } from "@web/core/dialog/dialog_service";
-import { mainComponentRegistry } from "@web/core/main_component_registry";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { clearUncommittedChanges } from "@web/webclient/actions/action_service";
 import { getLegacy } from "web.test_legacy";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
@@ -12,6 +11,7 @@ import { click, legacyExtraNextTick, nextTick } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
 
 let testConfig;
+const serviceRegistry = registry.category("services");
 
 // legacy stuff
 let cpHelpers;
@@ -2096,6 +2096,7 @@ QUnit.module("ActionManager", (hooks) => {
         async function (assert) {
             assert.expect(2);
 
+            const mainComponentRegistry = registry.category("main_components");
             clearRegistryWithCleanup(mainComponentRegistry);
             mainComponentRegistry.add("DialogContainer", DialogContainer);
 

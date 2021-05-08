@@ -13,13 +13,14 @@ import { assetsWatchdogService } from "@bus/js/services/assets_watchdog_service"
 import { click, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
 import { browser } from "@web/core/browser/browser";
-import { serviceRegistry } from "@web/core/service_registry";
-import { mainComponentRegistry } from "@web/core/main_component_registry";
+import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup } from "@web/../tests/helpers/mock_env";
 
 const LocalStorageService = AbstractStorageService.extend({
     storage: new RamStorage(),
 });
+const mainComponentRegistry = registry.category("main_components");
+const serviceRegistry = registry.category("services");
 
 QUnit.module("Bus Assets WatchDog", (hooks) => {
     let legacyServicesRegistry;

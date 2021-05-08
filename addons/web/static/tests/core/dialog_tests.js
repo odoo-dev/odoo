@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
+import { registry } from "@web/core/registry";
 import { useService } from "@web/core/service_hook";
-import { serviceRegistry } from "@web/core/service_registry";
 import { uiService } from "@web/core/ui_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
 import { makeTestEnv } from "../helpers/mock_env";
@@ -9,7 +9,7 @@ import { click, getFixture, nextTick } from "../helpers/utils";
 
 const { hooks, mount } = owl;
 const { useRef, useState } = hooks;
-
+const serviceRegistry = registry.category("services");
 let parent;
 let target;
 let env;

@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 import { useHotkey } from "@web/core/hotkey_hook";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { uiService, useActiveElement } from "@web/core/ui_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
 import { makeTestEnv } from "../../helpers/mock_env";
@@ -10,6 +10,7 @@ import { getFixture, nextTick, patchWithCleanup, triggerHotkey } from "../../hel
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
+const serviceRegistry = registry.category("services");
 
 let env;
 let target;

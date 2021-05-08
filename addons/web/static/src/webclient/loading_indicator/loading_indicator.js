@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../../core/browser/browser";
-import { mainComponentRegistry } from "../../core/main_component_registry";
+import { registry } from "../../core/registry";
 import { useService } from "../../core/service_hook";
 
 const { Component, useState } = owl;
@@ -50,4 +50,4 @@ export class LoadingIndicator extends Component {
 
 LoadingIndicator.template = "web.LoadingIndicator";
 
-mainComponentRegistry.add("LoadingIndicator", LoadingIndicator);
+registry.category("main_components").add("LoadingIndicator", LoadingIndicator);

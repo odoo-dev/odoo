@@ -1,20 +1,22 @@
 /** @odoo-module **/
 
 import { browser } from "../browser/browser";
+import { registry } from "../registry";
 import {
     ClientErrorDialog,
     ErrorDialog,
     NetworkErrorDialog,
     RPCErrorDialog,
 } from "./error_dialogs";
-import { errorDialogRegistry } from "./error_dialog_registry";
-import { errorHandlerRegistry } from "./error_handler_registry";
 
 /**
  * @typedef {import("../../env").OdooEnv} OdooEnv
  * @typedef {import("./error_service").UncaughtError} UncaughError
  * @typedef {(error: UncaughError) => boolean | void} ErrorHandler
  */
+
+const errorHandlerRegistry = registry.category("error_handlers");
+const errorDialogRegistry = registry.category("error_dialogs");
 
 // -----------------------------------------------------------------------------
 // CORS errors

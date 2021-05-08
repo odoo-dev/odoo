@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
 import { notificationService } from "@web/core/notifications/notification_service";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { click, getFixture, nextTick } from "../../helpers/utils";
@@ -11,6 +11,7 @@ import { click, getFixture, nextTick } from "../../helpers/utils";
 const { mount } = owl;
 
 let target;
+const serviceRegistry = registry.category("services");
 
 QUnit.module("Notifications", {
     async beforeEach() {

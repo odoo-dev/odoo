@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../../core/service_registry";
+import { registry } from "../../core/registry";
 
 const { EventBus } = owl.core;
 
@@ -99,4 +99,4 @@ export const effectService = {
     },
 };
 
-serviceRegistry.add("effect", effectService);
+registry.category("services").add("effect", effectService);

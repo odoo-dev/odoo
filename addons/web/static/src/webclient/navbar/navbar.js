@@ -3,11 +3,12 @@
 import { Dropdown } from "../../core/dropdown/dropdown";
 import { DropdownItem } from "../../core/dropdown/dropdown_item";
 import { useService } from "../../core/service_hook";
-import { systrayRegistry } from "../../core/systray_registry";
+import { registry } from "../../core/registry";
 import { debounce } from "../../core/utils/timing";
 
 const { Component, hooks } = owl;
 const { onMounted, useExternalListener } = hooks;
+const systrayRegistry = registry.category("systray");
 
 export class MenuDropdown extends Dropdown {
     setup() {

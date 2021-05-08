@@ -1,10 +1,12 @@
 /** @odoo-module **/
 
-import { errorDialogRegistry } from "../core/errors/error_dialog_registry";
+import { registry } from "@web/core/registry";
 import {
   RPCErrorDialog,
 } from "../core/errors/error_dialogs";
-import { errorHandlerRegistry } from "../core/errors/error_handler_registry";
+
+const errorDialogRegistry = registry.category("error_dialogs");
+const errorHandlerRegistry = registry.category("error_handlers");
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv

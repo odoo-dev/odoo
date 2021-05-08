@@ -1,6 +1,6 @@
 /** @odoo-module alias=web.clickEverywhere **/
 
-import { debugRegistry } from "../../core/debug/debug_registry";
+import { registry } from "../../core/registry";
 
 const { loadJS } = owl.utils;
 
@@ -20,4 +20,4 @@ function runClickTestItem(env) {
     };
 }
 
-debugRegistry.add("runClickTestItem", runClickTestItem);
+registry.category("debug").add("runClickTestItem", runClickTestItem);

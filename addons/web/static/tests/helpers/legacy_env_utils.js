@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { makeLegacyDialogMappingService } from "@web/legacy/utils";
@@ -9,6 +9,8 @@ import core from "web.core";
 import makeTestEnvironment from "web.test_env";
 import { registerCleanup } from "./cleanup";
 import { makeTestEnv } from "./mock_env";
+
+const serviceRegistry = registry.category("services");
 
 export async function makeLegacyDialogMappingTestEnv() {
     const coreBusListeners = [];

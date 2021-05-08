@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { uiService, useActiveElement } from "@web/core/ui_service";
 import { BlockUI } from "@web/webclient/block_ui/block_ui";
 import { makeTestEnv } from "../helpers/mock_env";
@@ -8,6 +8,7 @@ import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { getFixture, nextTick } from "../helpers/utils";
 
 const { Component, mount } = owl;
+const serviceRegistry = registry.category("services");
 
 let target;
 let browser;

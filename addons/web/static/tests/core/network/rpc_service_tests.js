@@ -3,8 +3,8 @@
 import { browser } from "@web/core/browser/browser";
 import { rpcService } from "@web/core/network/rpc_service";
 import { notificationService } from "@web/core/notifications/notification_service";
+import { registry } from "@web/core/registry";
 import { useService } from "@web/core/service_hook";
-import { serviceRegistry } from "@web/core/service_registry";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { makeMockXHR } from "../../helpers/mock_services";
@@ -14,6 +14,7 @@ const { Component, mount, tags } = owl;
 const { xml } = tags;
 
 let isXHRMocked = false;
+const serviceRegistry = registry.category("services");
 
 async function testRPC(route, params) {
     let url = "";

@@ -2,7 +2,7 @@
 
 import { ComponentAdapter } from "web.OwlCompatibility";
 import * as legacySystrayMenu from "web.SystrayMenu";
-import { systrayRegistry } from "../core/systray_registry";
+import { registry } from "../core/registry";
 
 const { Component, tags } = owl;
 
@@ -27,5 +27,7 @@ legacySystrayMenuItems.forEach((item, index) => {
   }
   SystrayItem.template = tags.xml`<SystrayItemAdapter Component="Widget" />`;
   SystrayItem.components = { SystrayItemAdapter };
-  systrayRegistry.add(name, SystrayItem, { sequence: item.prototype.sequence });
+  registry
+    .category("systray")
+    .add(name, SystrayItem, { sequence: item.prototype.sequence });
 });

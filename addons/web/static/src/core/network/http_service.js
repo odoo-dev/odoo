@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../service_registry";
+import { registry } from "../registry";
 
 export const httpService = {
     start() {
@@ -32,4 +32,4 @@ export const httpService = {
     },
 };
 
-serviceRegistry.add("http", httpService);
+registry.category("services").add("http", httpService);

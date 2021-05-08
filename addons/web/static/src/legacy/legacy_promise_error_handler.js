@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { errorHandlerRegistry } from "../core/errors/error_handler_registry";
+import { registry } from "@web/core/registry";
+
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv
@@ -32,5 +33,6 @@ import { errorHandlerRegistry } from "../core/errors/error_handler_registry";
     }
   };
 }
-errorHandlerRegistry.add("legacyRejectPromiseHandler", legacyRejectPromiseHandler, { sequence: 1 });
+
+registry.category("error_handlers").add("legacyRejectPromiseHandler", legacyRejectPromiseHandler, { sequence: 1 });
 

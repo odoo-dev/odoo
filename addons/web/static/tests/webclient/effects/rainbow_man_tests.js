@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { notificationService } from "@web/core/notifications/notification_service";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { EffectContainer } from "@web/webclient/effects/effect_container";
 import { effectService } from "@web/webclient/effects/effect_service";
 import { RainbowMan } from "@web/webclient/effects/rainbow_man";
@@ -10,6 +10,7 @@ import { makeFakeUserService } from "../../helpers/mock_services";
 import { click, getFixture, nextTick } from "../../helpers/utils";
 
 const { Component, mount, tags } = owl;
+const serviceRegistry = registry.category("services");
 
 class Parent extends Component {
     setup() {

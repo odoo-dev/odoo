@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../../core/browser/browser";
-import { userMenuRegistry } from "../user_menu/user_menu_registry";
+import { registry } from "../../core/registry";
 
 const { Component } = owl;
 
@@ -103,7 +103,8 @@ function logOutItem(env) {
     };
 }
 
-userMenuRegistry
+registry
+    .category("user_menuitems")
     .add("documentation", documentationItem)
     .add("support", supportItem)
     .add("shortcuts", shortCutsItem)

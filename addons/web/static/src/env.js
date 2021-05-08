@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "./core/service_registry";
+import { registry } from "./core/registry";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -44,6 +44,8 @@ export function makeEnv(debug) {
 // -----------------------------------------------------------------------------
 // Service Launcher
 // -----------------------------------------------------------------------------
+
+const serviceRegistry = registry.category("services");
 
 export const SPECIAL_METHOD = Symbol("special_method");
 

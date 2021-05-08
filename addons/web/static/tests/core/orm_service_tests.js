@@ -1,14 +1,15 @@
 /** @odoo-module **/
 
 import { ormService } from "@web/core/orm_service";
+import { registry } from "@web/core/registry";
 import { useService } from "@web/core/service_hook";
-import { serviceRegistry } from "@web/core/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeUserService } from "../helpers/mock_services";
 import { getFixture } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
+const serviceRegistry = registry.category("services");
 
 QUnit.module("ORM Service", {
     async beforeEach() {

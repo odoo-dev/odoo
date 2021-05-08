@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "./browser/browser";
-import { serviceRegistry } from "./service_registry";
+import { registry } from "./registry";
 
 function parseCompanyIds(cidsFromHash) {
     const cids = [];
@@ -128,4 +128,4 @@ export const userService = {
     },
 };
 
-serviceRegistry.add("user", userService);
+registry.category("services").add("user", userService);

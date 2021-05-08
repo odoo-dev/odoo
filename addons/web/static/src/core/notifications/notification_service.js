@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../browser/browser";
-import { serviceRegistry } from "../service_registry";
+import { registry } from "../registry";
 
 const { EventBus } = owl.core;
 
@@ -45,4 +45,4 @@ export const notificationService = {
     },
 };
 
-serviceRegistry.add("notification", notificationService);
+registry.category("services").add("notification", notificationService);

@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
-import { mainComponentRegistry } from "@web/core/main_component_registry";
+import { registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
-import { serviceRegistry } from "@web/core/service_registry";
 import { EffectContainer } from "@web/webclient/effects/effect_container";
 import { getLegacy } from "web.test_legacy";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
@@ -13,6 +12,8 @@ import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers
 let testConfig;
 // legacy stuff
 let testUtils;
+const mainComponentRegistry = registry.category("main_components");
+const serviceRegistry = registry.category("services");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.before(() => {

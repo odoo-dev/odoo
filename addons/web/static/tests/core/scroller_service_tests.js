@@ -1,11 +1,12 @@
 /** @odoo-module **/
 
+import { registry } from "@web/core/registry";
 import { scrollerService } from "@web/core/scroller_service";
-import { serviceRegistry } from "@web/core/service_registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
+const serviceRegistry = registry.category("services");
 
 let env;
 let comp;

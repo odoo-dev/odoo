@@ -4,13 +4,13 @@ import { startWebClient } from "@web/start";
 
 import { ChromeAdapter } from "@point_of_sale/js/chrome_adapter";
 import Registries from "point_of_sale.Registries";
-import { mainComponentRegistry } from "@web/core/main_component_registry";
+import { registry } from "@web/core/registry";
 
 // For consistency's sake, we should trigger"WEB_CLIENT_READY" on the bus when PosApp is mounted
 // But we can't since mail and some other poll react on that cue, and we don't want those services started
 class PosApp extends owl.Component {
     setup() {
-        this.Components = mainComponentRegistry.getEntries();
+        this.Components = registry.category("main_components").getEntries();
     }
 }
 PosApp.template = owl.tags.xml`

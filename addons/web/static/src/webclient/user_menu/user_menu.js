@@ -3,10 +3,11 @@
 import { browser } from "../../core/browser/browser";
 import { DropdownItem } from "../../core/dropdown/dropdown_item";
 import { useService } from "../../core/service_hook";
-import { systrayRegistry } from "../../core/systray_registry";
-import { userMenuRegistry } from "./user_menu_registry";
+import { registry } from "../../core/registry";
 
 const { Component, hooks } = owl;
+
+const userMenuRegistry = registry.category("user_menuitems");
 
 class UserMenuItem extends DropdownItem {
     setup() {
@@ -56,4 +57,4 @@ export class UserMenu extends Component {
 UserMenu.template = "web.UserMenu";
 UserMenu.components = { UserMenuItem };
 
-systrayRegistry.add("web.user_menu", UserMenu, { sequence: 0 });
+registry.category("systray").add("web.user_menu", UserMenu, { sequence: 0 });

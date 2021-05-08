@@ -1,13 +1,14 @@
 /** @odoo-module **/
 
+import { registry } from "@web/core/registry";
 import { useAutofocus } from "../../core/autofocus_hook";
 import { useHotkey } from "../../core/hotkey_hook";
 import { scrollTo } from "../../core/utils/scrolling";
-import { commandCategoryRegistry } from "./command_category_registry";
 
 const { Component, hooks } = owl;
 const { onPatched, useState } = hooks;
 
+const commandCategoryRegistry = registry.category("command_categories");
 /**
  * @typedef {import("./command_service").Command} Command
  */

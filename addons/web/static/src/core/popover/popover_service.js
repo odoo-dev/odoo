@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
 import { useBus } from "../bus_hook";
-import { mainComponentRegistry } from "../main_component_registry";
-import { serviceRegistry } from "../service_registry";
+import { registry } from "../registry";
 import { Popover } from "./popover";
 
 const { Component } = owl;
@@ -97,7 +96,7 @@ PopoverManager.template = xml`
   </div>
 `;
 
-mainComponentRegistry.add("PopoverManager", PopoverManager);
+registry.category("main_components").add("PopoverManager", PopoverManager);
 
 export const popoverService = {
     start(env) {
@@ -128,4 +127,4 @@ export const popoverService = {
     },
 };
 
-serviceRegistry.add("popover", popoverService);
+registry.category("services").add("popover", popoverService);

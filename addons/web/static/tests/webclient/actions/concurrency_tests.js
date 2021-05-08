@@ -1,11 +1,12 @@
 /** @odoo-module **/
 
-import { actionRegistry } from "@web/webclient/actions/action_registry";
+import { registry } from "@web/core/registry";
 import { getLegacy } from "web.test_legacy";
 import { legacyExtraNextTick, nextTick } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 
 const { Component, tags } = owl;
+const actionRegistry = registry.category("actions");
 
 let testConfig;
 // legacy stuff

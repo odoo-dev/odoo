@@ -1,10 +1,8 @@
 /** @odoo-module **/
 
 import { dialogService } from "@web/core/dialog/dialog_service";
-import { mainComponentRegistry } from "@web/core/main_component_registry";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
-import { commandCategoryRegistry } from "@web/webclient/commands/command_category_registry";
 import { useCommand } from "@web/webclient/commands/command_hook";
 import { commandService } from "@web/webclient/commands/command_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
@@ -17,9 +15,13 @@ const { xml } = tags;
 let env;
 let target;
 let testComponent;
+const serviceRegistry = registry.category("services");
+const commandCategoryRegistry = registry.category("command_categories");
 
 class TestComponent extends Component {}
-TestComponent.components = { DialogContainer: mainComponentRegistry.get("DialogContainer") };
+TestComponent.components = {
+    DialogContainer: registry.category("main_components").get("DialogContainer"),
+};
 TestComponent.template = xml`
   <div>
     <div class="o_dialog_container"/>

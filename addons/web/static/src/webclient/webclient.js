@@ -1,11 +1,12 @@
 /** @odoo-module **/
 
-import { mainComponentRegistry } from "../core/main_component_registry";
+import { registry } from "../core/registry";
 import { useService } from "../core/service_hook";
 import { ActionContainer } from "./actions/action_container";
 import { NavBar } from "./navbar/navbar";
 
 const { Component, hooks } = owl;
+const mainComponentRegistry = registry.category("main_components");
 
 export class WebClient extends Component {
     setup() {

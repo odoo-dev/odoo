@@ -1,12 +1,13 @@
 /** @odoo-module **/
 
 import { FileInput } from "@web/core/file_input/file_input";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import testUtils from "web.test_utils";
 import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture } from "../helpers/utils";
 
 const { mount } = owl;
+const serviceRegistry = registry.category("services");
 
 // -----------------------------------------------------------------------------
 // Helpers

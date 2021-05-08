@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { actionRegistry } from "@web/webclient/actions/action_registry";
+import { registry } from "@web/core/registry";
 import { getLegacy } from "web.test_legacy";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { legacyExtraNextTick } from "../../helpers/utils";
@@ -13,6 +13,7 @@ let cpHelpers;
 let core;
 let testUtils;
 let Widget;
+const actionRegistry = registry.category("actions");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.before(() => {

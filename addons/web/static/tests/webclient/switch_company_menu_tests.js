@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
 import { SwitchCompanyMenu } from "@web/webclient/switch_company_menu/switch_company_menu";
 import { registerCleanup } from "../helpers/cleanup";
@@ -9,6 +9,7 @@ import { makeFakeUIService, makeFakeUserService } from "../helpers/mock_services
 import { click, getFixture } from "../helpers/utils";
 
 const { mount } = owl;
+const serviceRegistry = registry.category("services");
 
 QUnit.module("SwitchCompanyMenu", (hooks) => {
     hooks.beforeEach(() => {

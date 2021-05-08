@@ -1,7 +1,9 @@
 /** @odoo-module **/
 
 import { useService } from "../service_hook";
-import { debugRegistry } from "./debug_registry";
+import { registry } from "../registry";
+
+const debugRegistry = registry.category("debug");
 
 const { Component, hooks } = owl;
 

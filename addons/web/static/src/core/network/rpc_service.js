@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../browser/browser";
-import { serviceRegistry } from "../service_registry";
+import { registry } from "../registry";
 
 // -----------------------------------------------------------------------------
 // Errors
@@ -119,4 +119,4 @@ export const rpcService = {
     },
 };
 
-serviceRegistry.add("rpc", rpcService);
+registry.category("services").add("rpc", rpcService);

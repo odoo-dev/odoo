@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser as originalBrowser } from "@web/core/browser/browser";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { LoadingIndicator } from "@web/webclient/loading_indicator/loading_indicator";
@@ -9,6 +9,7 @@ import { makeTestEnv } from "../helpers/mock_env";
 import { getFixture, nextTick } from "../helpers/utils";
 
 const { mount } = owl;
+const serviceRegistry = registry.category("services");
 
 let target;
 let browser;

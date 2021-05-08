@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "../../core/service_hook";
-import { systrayRegistry } from "../../core/systray_registry";
+import { registry } from "../../core/registry";
 
 export class SwitchCompanyMenu extends owl.Component {
     static isDisplayed(env) {
@@ -23,4 +23,4 @@ export class SwitchCompanyMenu extends owl.Component {
 }
 SwitchCompanyMenu.template = "web.SwitchCompanyMenu";
 
-systrayRegistry.add("SwitchCompanyMenu", SwitchCompanyMenu, { sequence: 1 });
+registry.category("systray").add("SwitchCompanyMenu", SwitchCompanyMenu, { sequence: 1 });

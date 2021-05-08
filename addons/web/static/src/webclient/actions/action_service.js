@@ -5,14 +5,15 @@ import { useBus } from "../../core/bus_hook";
 import { makeContext } from "../../core/context";
 import { download } from "../../core/network/download";
 import { evaluateExpr } from "../../core/py_js/py";
-import { serviceRegistry } from "../../core/service_registry";
+import { registry } from "../../core/registry";
 import { KeepLast } from "../../core/utils/concurrency";
 import { sprintf } from "../../core/utils/strings";
-import { viewRegistry } from "../../views/view_registry";
-import { actionHandlersRegistry } from "./action_handlers_registry";
-import { actionRegistry } from "./action_registry";
 
 const { Component, hooks, tags } = owl;
+
+const viewRegistry = registry.category("views");
+const actionHandlersRegistry = registry.category("action_handlers");
+const actionRegistry = registry.category("actions");
 
 export function clearUncommittedChanges(env) {
     const callbacks = [];
@@ -1172,4 +1173,4 @@ export const actionService = {
     },
 };
 
-serviceRegistry.add("action", actionService);
+registry.category("services").add("action", actionService);

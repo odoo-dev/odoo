@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { mainComponentRegistry } from "@web/core/main_component_registry";
+import { registry } from "@web/core/registry";
 import { Popover } from "@web/core/popover/popover";
 import {
     KeyAlreadyExistsError,
@@ -8,7 +8,6 @@ import {
     PopoverManager,
     popoverService,
 } from "@web/core/popover/popover_service";
-import { serviceRegistry } from "@web/core/service_registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick } from "../helpers/utils";
 
@@ -17,6 +16,8 @@ const { xml } = owl.tags;
 
 let env;
 let target;
+const mainComponentRegistry = registry.category("main_components");
+const serviceRegistry = registry.category("services");
 
 class PseudoWebClient extends Component {
     setup() {

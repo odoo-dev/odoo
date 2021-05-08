@@ -1,16 +1,7 @@
 /** @odoo-module **/
 
-import { debugRegistry } from "@web/core/debug/debug_registry";
-import { errorDialogRegistry } from "@web/core/errors/error_dialog_registry";
-import { errorHandlerRegistry } from "@web/core/errors/error_handler_registry";
-import { mainComponentRegistry } from "@web/core/main_component_registry";
-import { serviceRegistry } from "@web/core/service_registry";
-import { systrayRegistry } from "@web/core/systray_registry";
+import { registry } from "@web/core/registry";
 import { makeEnv, startServices } from "@web/env";
-import { viewRegistry } from "@web/views/view_registry";
-import { actionRegistry } from "@web/webclient/actions/action_registry";
-import { commandCategoryRegistry } from "@web/webclient/commands/command_category_registry";
-import { userMenuRegistry } from "@web/webclient/user_menu/user_menu_registry";
 import FormController from "web.FormController";
 import { registerCleanup } from "./cleanup";
 import { makeMockServer } from "./mock_server";
@@ -41,20 +32,22 @@ function cloneRegistryWithCleanup(registry) {
 
 export function prepareRegistriesWithCleanup() {
     // Clone registries
-    cloneRegistryWithCleanup(actionRegistry);
-    cloneRegistryWithCleanup(viewRegistry);
-    cloneRegistryWithCleanup(errorHandlerRegistry);
+    cloneRegistryWithCleanup(registry.category("actions"));
+    cloneRegistryWithCleanup(registry.category("views"));
+    cloneRegistryWithCleanup(registry.category("error_handlers"));
 
-    cloneRegistryWithCleanup(mainComponentRegistry);
+    cloneRegistryWithCleanup(registry.category("main_components"));
 
     // Clear registries
-    clearRegistryWithCleanup(commandCategoryRegistry);
-    clearRegistryWithCleanup(debugRegistry);
-    clearRegistryWithCleanup(errorDialogRegistry);
+    clearRegistryWithCleanup(registry.category("command_categories"));
+    clearRegistryWithCleanup(registry.category("debug"));
+    clearRegistryWithCleanup(registry.category("error_dialogs"));
 
-    clearRegistryWithCleanup(serviceRegistry);
-    clearRegistryWithCleanup(systrayRegistry);
-    clearRegistryWithCleanup(userMenuRegistry);
+    clearRegistryWithCleanup(registry.category("services"));
+    clearRegistryWithCleanup(registry.category("systray"));
+    clearRegistryWithCleanup(registry.category("user_menuitems"));
+    // fun fact: at least one registry is missing... this shows that we need a
+    // better design for the way we clear these registries...
 }
 
 /**
@@ -69,6 +62,7 @@ export function prepareRegistriesWithCleanup() {
  */
 export async function makeTestEnv(config = {}) {
     // add all missing dependencies if necessary
+    const serviceRegistry = registry.category("services");
     for (let service of serviceRegistry.getAll()) {
         if (service.dependencies) {
             for (let dep of service.dependencies) {

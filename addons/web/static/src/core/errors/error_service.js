@@ -3,8 +3,7 @@
 import { browser } from "../browser/browser";
 import { isBrowserChrome } from "../browser/feature_detection";
 import { _lt } from "../l10n/translation";
-import { serviceRegistry } from "../service_registry";
-import { errorHandlerRegistry } from "./error_handler_registry";
+import { registry } from "../registry";
 
 /**
  * Uncaught Errors have 4 properties:
@@ -44,7 +43,10 @@ class UncaughtCorsError extends UncaughtError {
 
 export const errorService = {
     start(env) {
-        const handlers = errorHandlerRegistry.getAll().map((builder) => builder(env));
+        const handlers = registry
+            .category("error_handlers")
+            .getAll()
+            .map((builder) => builder(env));
 
         function handleError(error, retry = true) {
             const services = env.services;
@@ -115,4 +117,4 @@ export const errorService = {
     },
 };
 
-serviceRegistry.add("error", errorService, { sequence: 1 });
+registry.category("services").add("error", errorService, { sequence: 1 });

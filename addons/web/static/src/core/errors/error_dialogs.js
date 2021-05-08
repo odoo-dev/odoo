@@ -2,6 +2,7 @@
 
 import { browser } from "../browser/browser";
 import { _lt } from "../l10n/translation";
+import { registry } from "../registry";
 import { useService } from "../service_hook";
 import { capitalize } from "../utils/strings";
 
@@ -183,3 +184,15 @@ export class SessionExpiredDialog extends Component {
     }
 }
 SessionExpiredDialog.template = "web.SessionExpiredDialog";
+
+registry
+    .category("error_dialogs")
+    .add("odoo.exceptions.AccessDenied", WarningDialog)
+    .add("odoo.exceptions.AccessError", WarningDialog)
+    .add("odoo.exceptions.MissingError", WarningDialog)
+    .add("odoo.exceptions.UserError", WarningDialog)
+    .add("odoo.exceptions.ValidationError", WarningDialog)
+    .add("odoo.exceptions.RedirectWarning", RedirectWarningDialog)
+    .add("odoo.http.SessionExpiredException", SessionExpiredDialog)
+    .add("werkzeug.exceptions.Forbidden", SessionExpiredDialog)
+    .add("504", Error504Dialog);

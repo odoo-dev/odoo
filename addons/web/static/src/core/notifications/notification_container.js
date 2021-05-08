@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { mainComponentRegistry } from "../main_component_registry";
+import { registry } from "../registry";
 import { useService } from "../service_hook";
 import { Notification as NotificationComponent } from "./notification";
 
@@ -25,4 +25,4 @@ NotificationContainer.template = tags.xml`
     </div>`;
 NotificationContainer.components = { NotificationComponent };
 
-mainComponentRegistry.add("NotificationContainer", NotificationContainer);
+registry.category("main_components").add("NotificationContainer", NotificationContainer);

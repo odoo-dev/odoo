@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { translatedTerms } from "@web/core/l10n/translation";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { makeFakeLocalizationService } from "../../helpers/mock_services";
@@ -10,7 +10,7 @@ import { getFixture } from "../../helpers/utils";
 const { mount } = owl;
 
 const terms = { Hello: "Bonjour" };
-
+const serviceRegistry = registry.category("services");
 class TestComponent extends owl.Component {}
 
 QUnit.module("Translations");

@@ -1,10 +1,9 @@
 /** @odoo-module **/
 
 import { dialogService } from "@web/core/dialog/dialog_service";
-import { mainComponentRegistry } from "@web/core/main_component_registry";
+import { registry } from "@web/core/registry";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { menuService } from "@web/webclient/menu_service";
-import { serviceRegistry } from "@web/core/service_registry";
 import { uiService } from "@web/core/ui_service";
 import { actionService } from "@web/webclient/actions/action_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
@@ -15,6 +14,8 @@ import { getFixture } from "../helpers/utils";
 
 const { Component, tags, mount } = owl;
 const { xml } = tags;
+const mainComponentRegistry = registry.category("main_components");
+const serviceRegistry = registry.category("services");
 
 let baseConfig;
 

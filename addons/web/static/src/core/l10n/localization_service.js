@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../browser/browser";
-import { serviceRegistry } from "../service_registry";
+import { registry } from "../registry";
 import { strftimeToLuxonFormat } from "./dates";
 import { localization } from "./localization";
 import { translatedTerms } from "./translation";
@@ -57,4 +57,4 @@ export const localizationService = {
     },
 };
 
-serviceRegistry.add("localization", localizationService);
+registry.category("services").add("localization", localizationService);

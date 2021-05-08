@@ -87,3 +87,10 @@ QUnit.test("can override element with sequence 2 ", function (assert) {
         ["foo1", "foo3"],
     ]);
 });
+
+QUnit.test("can recursively open sub registry", function (assert) {
+    const registry = new Registry();
+
+    registry.category("sub").add("a", "b");
+    assert.deepEqual(registry.category("sub").get("a"), "b");
+});

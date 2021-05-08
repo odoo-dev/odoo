@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../service_registry";
-import { systrayRegistry } from "../systray_registry";
+import { registry } from "../registry";
 import { DebugManager } from "./debug_menu";
 
 export function editModelDebug(env, title, model, id) {
@@ -22,7 +21,9 @@ export const debugService = {
     start(env, { orm }) {
         let accessRightsProm;
         if (env.debug !== "") {
-            systrayRegistry.add("web.debug_mode_menu", DebugManager, { sequence: 100 });
+            registry
+                .category("systray")
+                .add("web.debug_mode_menu", DebugManager, { sequence: 100 });
         }
 
         return {
@@ -66,4 +67,4 @@ export const debugService = {
     },
 };
 
-serviceRegistry.add("debug", debugService);
+registry.category("services").add("debug", debugService);

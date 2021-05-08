@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { DialogContainer } from "@web/core/dialog/dialog_service";
-import { mainComponentRegistry } from "@web/core/main_component_registry";
+import { registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
 import { getLegacy } from "web.test_legacy";
 import { legacyExtraNextTick, patchWithCleanup } from "../../helpers/utils";
@@ -12,6 +12,7 @@ let testConfig;
 // legacy stuff
 let ListController;
 let testUtils;
+const mainComponentRegistry = registry.category("main_components");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.before(() => {

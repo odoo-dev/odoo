@@ -1,8 +1,10 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeDeferred, nextTick } from "../helpers/utils";
+
+const serviceRegistry = registry.category("services");
 
 QUnit.module("deployServices");
 

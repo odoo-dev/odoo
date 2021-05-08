@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "../service_registry";
+import { registry } from "../registry";
 
 /**
  * Service to make use of document.cookie
@@ -56,4 +56,4 @@ export const cookieService = {
     },
 };
 
-serviceRegistry.add("cookie", cookieService);
+registry.category("services").add("cookie", cookieService);

@@ -3,10 +3,9 @@
 import { browser } from "@web/core/browser/browser";
 import { DebugManager, useDebugManager } from "@web/core/debug/debug_menu";
 import { regenerateAssets } from "@web/core/debug/debug_menu_items";
-import { debugRegistry } from "@web/core/debug/debug_registry";
+import { registry } from "@web/core/registry";
 import { debugService } from "@web/core/debug/debug_service";
 import { ormService } from "@web/core/orm_service";
-import { serviceRegistry } from "@web/core/service_registry";
 import { uiService } from "@web/core/ui_service";
 import { ActionDialog } from "@web/webclient/actions/action_dialog";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
@@ -18,16 +17,19 @@ import { click, getFixture, patchWithCleanup } from "../../helpers/utils";
 const { Component, hooks, mount, tags } = owl;
 const { useSubEnv } = hooks;
 
+const debugRegistry = registry.category("debug");
 let target;
 let testConfig;
 
 QUnit.module("DebugManager", (hooks) => {
     hooks.beforeEach(async () => {
         target = getFixture();
-        serviceRegistry.add("hotkey", hotkeyService);
-        serviceRegistry.add("ui", uiService);
-        serviceRegistry.add("orm", ormService);
-        serviceRegistry.add("debug", debugService);
+        registry
+            .category("services")
+            .add("hotkey", hotkeyService)
+            .add("ui", uiService)
+            .add("orm", ormService)
+            .add("debug", debugService);
         const mockRPC = async (route, args) => {
             if (args.method === "check_access_rights") {
                 return Promise.resolve(true);
@@ -219,7 +221,7 @@ QUnit.module("DebugManager", (hooks) => {
                 reload: () => assert.step("reloadPage"),
             },
         });
-        serviceRegistry.add("localization", makeFakeLocalizationService());
+        registry.category("services").add("localization", makeFakeLocalizationService());
         debugRegistry.add("regenerateAssets", regenerateAssets);
         const env = await makeTestEnv(testConfig);
         const debugManager = await mount(DebugManager, { env, target });

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { useService } from "./service_hook";
-import { serviceRegistry } from "./service_registry";
+import { registry } from "./registry";
 import { debounce } from "./utils/timing";
 
 const { Component, core, hooks } = owl;
@@ -136,4 +136,4 @@ export const uiService = {
     },
 };
 
-serviceRegistry.add("ui", uiService);
+registry.category("services").add("ui", uiService);

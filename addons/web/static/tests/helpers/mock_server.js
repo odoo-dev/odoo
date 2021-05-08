@@ -3,12 +3,13 @@
 import { browser } from "@web/core/browser/browser";
 import { Domain } from "@web/core/domain";
 import { evaluateExpr } from "@web/core/py_js/py";
-import { serviceRegistry } from "@web/core/service_registry";
+import { registry } from "@web/core/registry";
 import * as utils from "@web/core/utils/arrays";
 import { makeFakeRPCService, makeMockFetch } from "./mock_services";
 import { patchWithCleanup } from "./utils";
 
 const { DateTime } = luxon;
+const serviceRegistry = registry.category("services");
 
 // -----------------------------------------------------------------------------
 // Utils

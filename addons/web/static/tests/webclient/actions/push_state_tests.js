@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
+import { registry } from "@web/core/registry";
 import { useService } from "@web/core/service_hook";
-import { serviceRegistry } from "@web/core/service_registry";
-import { actionRegistry } from "@web/webclient/actions/action_registry";
 import { getLegacy } from "web.test_legacy";
 import { makeFakeRouterService } from "../../helpers/mock_services";
 import { click, legacyExtraNextTick, nextTick } from "../../helpers/utils";
@@ -13,6 +12,8 @@ const { Component, tags } = owl;
 let testConfig;
 // legacy stuff
 let testUtils;
+const actionRegistry = registry.category("actions");
+const serviceRegistry = registry.category("services");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.before(() => {

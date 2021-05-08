@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import { serviceRegistry } from "@web/core/service_registry";
-import { actionRegistry } from "@web/webclient/actions/action_registry";
+import { registry } from "@web/core/registry";
 import { WebClient } from "@web/webclient/webclient";
 import { getLegacy } from "web.test_legacy";
 import { registerCleanup } from "../../helpers/cleanup";
@@ -18,6 +17,8 @@ let testConfig;
 let AbstractAction;
 let core;
 let testUtils;
+const actionRegistry = registry.category("actions");
+const serviceRegistry = registry.category("services");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.before(() => {

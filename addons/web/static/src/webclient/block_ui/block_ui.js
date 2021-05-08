@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../../core/browser/browser";
-import { mainComponentRegistry } from "../../core/main_component_registry";
+import { registry } from "../../core/registry";
 import { useService } from "../../core/service_hook";
 
 const { Component, tags, useState } = owl;
@@ -86,4 +86,4 @@ BlockUI.template = tags.xml`
       </t>
     </div>`;
 
-mainComponentRegistry.add("BlockUI", BlockUI);
+registry.category("main_components").add("BlockUI", BlockUI);

@@ -19,6 +19,7 @@ export class Registry extends EventBus {
     constructor() {
         super();
         this.content = {};
+        this.subRegistries = {};
         this.elements = null;
         this.entries = null;
 
@@ -117,4 +118,19 @@ export class Registry extends EventBus {
         const payload = { operation: "delete", key, value };
         this.trigger("UPDATE", payload);
     }
+
+    /**
+     * Open a sub registry (and create it if necessary)
+     *
+     * @param {string} subcategory
+     * @returns {Registry}
+     */
+    category(subcategory) {
+        if (!(subcategory in this.subRegistries)) {
+            this.subRegistries[subcategory] = new Registry();
+        }
+        return this.subRegistries[subcategory];
+    }
 }
+
+export const registry = new Registry();

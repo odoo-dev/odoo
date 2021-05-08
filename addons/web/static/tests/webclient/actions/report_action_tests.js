@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
-import { mainComponentRegistry } from "@web/core/main_component_registry";
+import { registry } from "@web/core/registry";
 import { download } from "@web/core/network/download";
-import { serviceRegistry } from "@web/core/service_registry";
 import { uiService } from "@web/core/ui_service";
 import { getLegacy } from "web.test_legacy";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
@@ -15,6 +14,8 @@ let testConfig;
 // legacy stuff
 let testUtils;
 let ReportClientAction;
+const mainComponentRegistry = registry.category("main_components");
+const serviceRegistry = registry.category("services");
 
 function mockDownload(cb) {
     patchWithCleanup(download, { _download: cb });

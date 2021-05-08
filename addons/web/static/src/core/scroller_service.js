@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { serviceRegistry } from "./service_registry";
+import { registry } from "./registry";
 import { scrollTo } from "./utils/scrolling";
 
 export const scrollerService = {
@@ -50,4 +50,4 @@ export const scrollerService = {
     },
 };
 
-serviceRegistry.add("scroller", scrollerService);
+registry.category("services").add("scroller", scrollerService);

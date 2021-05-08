@@ -3,8 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { menuService } from "@web/webclient/menu_service";
-import { serviceRegistry } from "@web/core/service_registry";
-import { systrayRegistry } from "@web/core/systray_registry";
+import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
 import { actionService } from "@web/webclient/actions/action_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
@@ -14,6 +13,8 @@ import { click, getFixture, nextTick, patchWithCleanup } from "../helpers/utils"
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
+const systrayRegistry = registry.category("systray");
+const serviceRegistry = registry.category("services");
 
 class MySystrayItem extends Component {}
 MySystrayItem.template = xml`<li class="my-item">my item</li>`;
