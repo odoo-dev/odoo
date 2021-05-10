@@ -2,8 +2,9 @@
 
 import { registry } from "@web/core/registry";
 import { scrollerService } from "@web/core/scroller_service";
+import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture } from "../helpers/utils";
+import { click, getFixture, nextTick } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
 const serviceRegistry = registry.category("services");
@@ -12,8 +13,61 @@ let env;
 let comp;
 let target;
 
-class MyComponent extends Component {}
-MyComponent.template = tags.xml/* xml */ `
+QUnit.module("ScrollerService", {
+    async beforeEach() {
+        serviceRegistry.add("scroller", scrollerService);
+        env = await makeTestEnv();
+        target = getFixture();
+
+        registerCleanup(() => comp && comp.destroy());
+    },
+});
+
+QUnit.test("Ignore empty hrefs", async (assert) => {
+    assert.expect(1);
+
+    class MyComponent extends Component {}
+    MyComponent.template = tags.xml/* xml */ `
+        <div class="my_component">
+            <a href="#" class="inactive_link">This link does nothing</a>
+            <button class="btn btn-secondary">
+                <a href="#">
+                    <i class="fa fa-trash"/>
+                </a>
+            </button>
+        </div>`;
+
+    comp = await mount(MyComponent, { env, target });
+
+    /**
+     * To determine whether the hash changed we need to use a custom hash for
+     * this test. Note that changing the hash does not reload the page and is
+     * rollbacked after the test so it should not not interfere with the test suite.
+     */
+    const initialHash = location.hash;
+    const testHash = initialHash ? `${initialHash}&testscroller` : "#testscroller";
+    location.hash = testHash;
+    registerCleanup(() => (location.hash = initialHash));
+
+    comp.el.querySelector(".inactive_link").click();
+    await nextTick();
+
+    comp.el.querySelector(".fa.fa-trash").click();
+    await nextTick();
+
+    assert.strictEqual(location.hash, testHash);
+});
+
+QUnit.test("Simple rendering with a scroll", async (assert) => {
+    assert.expect(2);
+    const scrollableParent = document.createElement("div");
+    scrollableParent.style.overflow = "scroll";
+    scrollableParent.style.height = "150px";
+    scrollableParent.style.width = "400px";
+    target.append(scrollableParent);
+
+    class MyComponent extends Component {}
+    MyComponent.template = tags.xml/* xml */ `
         <div class="o_content">
             <a href="#scrollToHere"  class="btn btn-primary">sroll to ...</a>
             <p>
@@ -51,27 +105,9 @@ MyComponent.template = tags.xml/* xml */ `
             <div id="scrollToHere">sroll here!</div>
         </div>
     `;
-
-QUnit.module("ScrollerService", {
-    async beforeEach() {
-        serviceRegistry.add("scroller", scrollerService);
-        env = await makeTestEnv();
-        target = getFixture();
-    },
-    afterEach() {
-        comp.destroy();
-    },
-});
-QUnit.test("Simple rendering with a scroll", async (assert) => {
-    assert.expect(2);
-    const scrollableParent = document.createElement("div");
-    scrollableParent.style.overflow = "scroll";
-    scrollableParent.style.height = "150px";
-    scrollableParent.style.width = "400px";
-    target.append(scrollableParent);
     comp = await mount(MyComponent, { env, target: scrollableParent });
 
     assert.strictEqual(scrollableParent.scrollTop, 0);
-    await click(scrollableParent.querySelector(".btn"));
+    await click(scrollableParent, ".btn.btn-primary");
     assert.ok(scrollableParent.scrollTop !== 0);
 });

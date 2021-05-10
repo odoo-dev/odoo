@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { KeyNotFoundError } from "@web/core/registry";
 import { browser } from "../../core/browser/browser";
 import { useBus } from "../../core/bus_hook";
 import { makeContext } from "../../core/context";
@@ -8,7 +9,9 @@ import { evaluateExpr } from "../../core/py_js/py";
 import { registry } from "../../core/registry";
 import { KeepLast } from "../../core/utils/concurrency";
 import { sprintf } from "../../core/utils/strings";
-import { KeyNotFoundError } from "@web/core/registry";
+
+/**
+ * @typedef {"current" | "fullscreen" | "new" | "self" | "inline"} ActionMode */
 
 const { Component, hooks, tags } = owl;
 
@@ -279,6 +282,30 @@ function makeActionManager(env) {
     }
 
     /**
+     * @param {Action} action
+     * @returns {ActionMode}
+     */
+    function _getActionMode(action) {
+        if (action.target === "new") {
+            // No possible override for target="new"
+            return "new";
+        }
+        if (action.type === "ir.actions.client") {
+            const clientAction = actionRegistry.get(action.tag);
+            if (clientAction.target) {
+                // Target is forced by the definition of the client action
+                return clientAction.target;
+            }
+        }
+        if (controllerStack.some((c) => c.action.target === "fullscreen")) {
+            // Force fullscreen when one of the controllers is set to fullscreen
+            return "fullscreen";
+        }
+        // Default: current
+        return "current";
+    }
+
+    /**
      * @private
      * @returns {SwitchViewParams | null}
      */
@@ -458,8 +485,13 @@ function makeActionManager(env) {
                 }
             }
             mounted() {
-                let mode;
-                if (action.target !== "new") {
+                if (action.target === "new") {
+                    dialogCloseProm = new Promise((_r) => {
+                        dialogCloseResolve = _r;
+                    }).then(() => {
+                        dialogCloseProm = undefined;
+                    });
+                } else {
                     // LEGACY CODE COMPATIBILITY: remove when controllers will be written in owl
                     // we determine here which actions no longer occur in the nextStack,
                     // and we manually destroy all their controller's widgets
@@ -485,21 +517,10 @@ function makeActionManager(env) {
                     controllerStack = nextStack; // the controller is mounted, commit the new stack
                     // wait Promise callbacks to be executed
                     pushState(controller);
-                    mode = "current";
-                    if (controllerStack.some((c) => c.action.target === "fullscreen")) {
-                        mode = "fullscreen";
-                    }
                     browser.sessionStorage.setItem("current_action", action._originalAction);
-                } else {
-                    dialogCloseProm = new Promise((_r) => {
-                        dialogCloseResolve = _r;
-                    }).then(() => {
-                        dialogCloseProm = undefined;
-                    });
-                    mode = "new";
                 }
                 resolve();
-                env.bus.trigger("ACTION_MANAGER:UI-UPDATED", mode);
+                env.bus.trigger("ACTION_MANAGER:UI-UPDATED", _getActionMode(action));
             }
             willUnmount() {
                 if (action.target === "new" && dialogCloseResolve) {
@@ -690,8 +711,8 @@ function makeActionManager(env) {
     async function _executeClientAction(action, options) {
         const clientAction = actionRegistry.get(action.tag);
         if (clientAction.prototype instanceof Component) {
-            if (action.target !== "new" && clientAction.forceFullscreen) {
-                action.target = "fullscreen";
+            if (action.target !== "new" && clientAction.target) {
+                action.target = clientAction.target;
             }
             const controller = {
                 jsId: `controller_${++id}`,

@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { action_registry as legacyActionRegistry } from "web.core";
-import { ClientActionAdapter } from "./action_adapters";
-import Widget from "web.Widget";
-import { breadcrumbsToLegacy } from "./utils";
-import { useSetupAction } from "../webclient/actions/action_hook";
-import { setScrollPosition } from "../core/utils/scrolling";
 import { registry } from "@web/core/registry";
+import { action_registry as legacyActionRegistry } from "web.core";
+import Widget from "web.Widget";
+import { setScrollPosition } from "../core/utils/scrolling";
+import { useSetupAction } from "../webclient/actions/action_hook";
+import { ClientActionAdapter } from "./action_adapters";
+import { breadcrumbsToLegacy } from "./utils";
 
 const { Component, hooks, tags } = owl;
 const actionRegistry = registry.category("actions");
@@ -46,7 +46,7 @@ function registerClientAction(name, action) {
     `;
         Action.components = { ClientActionAdapter };
         Action.isLegacy = true;
-        Action.forceFullscreen = action.prototype.forceFullscreen;
+        Action.target = action.prototype.target;
         actionRegistry.add(name, Action);
     } else {
         // the action is either a Component or a function, register it directly

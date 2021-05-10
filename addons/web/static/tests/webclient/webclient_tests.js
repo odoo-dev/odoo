@@ -1,12 +1,13 @@
 /** @odoo-module **/
 
 import { dialogService } from "@web/core/dialog/dialog_service";
-import { registry } from "@web/core/registry";
 import { notificationService } from "@web/core/notifications/notification_service";
-import { menuService } from "@web/webclient/menu_service";
+import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
+import { legacyServiceProvider } from "@web/legacy/legacy_service_provider";
 import { actionService } from "@web/webclient/actions/action_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
+import { menuService } from "@web/webclient/menu_service";
 import { WebClient } from "@web/webclient/webclient";
 import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { fakeTitleService } from "../helpers/mock_services";
@@ -25,10 +26,11 @@ QUnit.module("Web Client", {
             .add("action", actionService)
             .add("dialog", dialogService)
             .add("hotkey", hotkeyService)
-            .add("ui", uiService)
+            .add("legacy_service_provider", legacyServiceProvider)
+            .add("menu", menuService)
             .add("notification", notificationService)
             .add("title", fakeTitleService)
-            .add("menu", menuService);
+            .add("ui", uiService);
         baseConfig = { activateMockServer: true };
     },
 });

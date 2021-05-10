@@ -6,6 +6,7 @@ import { notificationService } from "@web/core/notifications/notification_servic
 import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
+import { legacyServiceProvider } from "@web/legacy/legacy_service_provider";
 import {
     makeLegacyActionManagerService,
     makeLegacyNotificationService,
@@ -213,6 +214,7 @@ export function getActionManagerTestConfig() {
     serviceRegistry.add("dialog", dialogService);
     serviceRegistry.add("effect", effectService);
     serviceRegistry.add("hotkey", hotkeyService);
+    serviceRegistry.add("legacy_service_provider", legacyServiceProvider);
     serviceRegistry.add("localization", fakeLocalizationService);
     serviceRegistry.add("menu", menuService);
     serviceRegistry.add("notification", notificationService);

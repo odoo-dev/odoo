@@ -20,15 +20,15 @@ export const scrollerService = {
          * @param {MouseEvent} ev
          */
         browser.addEventListener("click", (ev) => {
-            const target = ev.target;
-            if (target.tagName.toUpperCase() !== "A") {
+            const link = ev.target.closest("a");
+            if (!link) {
                 return;
             }
-            const disableAnchor = target.attributes.getNamedItem("disable_anchor");
+            const disableAnchor = link.attributes.getNamedItem("disable_anchor");
             if (disableAnchor && disableAnchor.value === "true") {
                 return;
             }
-            const href = target.attributes.getNamedItem("href");
+            const href = link.attributes.getNamedItem("href");
             if (href) {
                 if (href.value[0] === "#") {
                     if (href.value.length === 1) {
