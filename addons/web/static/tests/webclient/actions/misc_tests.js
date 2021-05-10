@@ -14,6 +14,7 @@ let core;
 let testUtils;
 let Widget;
 const actionRegistry = registry.category("actions");
+const actionHandlersRegistry = registry.category("action_handlers");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.before(() => {
@@ -58,6 +59,37 @@ QUnit.module("ActionManager", (hooks) => {
             type: "ir.actions.client",
         });
         assert.verifySteps(["client_action_object"]);
+    });
+
+    QUnit.test("action doesn't exists", async (assert) => {
+        assert.expect(1);
+        const env = await makeTestEnv(testConfig);
+        try {
+            await doAction(env, {
+                tag: "this_is_a_tag",
+                target: "current",
+                type: "ir.not_action.error",
+            });
+        } catch (e) {
+            assert.strictEqual(
+                e.message,
+                "The ActionManager service can't handle actions of type ir.not_action.error"
+            );
+        }
+    });
+
+    QUnit.test("action in handler registry", async (assert) => {
+        assert.expect(2);
+        const env = await makeTestEnv(testConfig);
+        actionHandlersRegistry.add("ir.action_in_handler_registry", ({ env, action, options }) =>
+            assert.step(action.type)
+        );
+        await doAction(env, {
+            tag: "this_is_a_tag",
+            target: "current",
+            type: "ir.action_in_handler_registry",
+        });
+        assert.verifySteps(["ir.action_in_handler_registry"]);
     });
 
     QUnit.test("actions can be cached", async function (assert) {

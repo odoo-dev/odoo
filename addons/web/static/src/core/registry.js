@@ -3,6 +3,23 @@
 const { core } = owl;
 const { EventBus } = core;
 
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+export class KeyNotFoundError extends Error {
+    constructor() {
+        super(...arguments);
+        this.name = "KeyNotFoundError";
+    }
+}
+
+export class DuplicatedKeyError extends Error {
+    constructor() {
+        super(...arguments);
+        this.name = "DuplicatedKeyError";
+    }
+}
+
 /**
  * Registry
  *
@@ -43,7 +60,7 @@ export class Registry extends EventBus {
      */
     add(key, value, { force, sequence } = {}) {
         if (!force && key in this.content) {
-            throw new Error(`Cannot add '${key}' in this registry: it already exists`);
+            throw new DuplicatedKeyError(`Cannot add '${key}' in this registry: it already exists`);
         }
         let previousSequence;
         if (force) {
@@ -65,7 +82,7 @@ export class Registry extends EventBus {
      */
     get(key) {
         if (!(key in this.content)) {
-            throw new Error(`Cannot find ${key} in this registry!`);
+            throw new KeyNotFoundError(`Cannot find ${key} in this registry!`);
         }
         return this.content[key][1];
     }

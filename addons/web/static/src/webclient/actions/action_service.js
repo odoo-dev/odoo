@@ -8,6 +8,7 @@ import { evaluateExpr } from "../../core/py_js/py";
 import { registry } from "../../core/registry";
 import { KeepLast } from "../../core/utils/concurrency";
 import { sprintf } from "../../core/utils/strings";
+import { KeyNotFoundError } from "@web/core/registry";
 
 const { Component, hooks, tags } = owl;
 
@@ -921,7 +922,14 @@ function makeActionManager(env) {
             case "ir.actions.server":
                 return _executeServerAction(action, options);
             default: {
-                const handler = actionHandlersRegistry.get(action.type);
+                let handler;
+                try {
+                    handler = actionHandlersRegistry.get(action.type);
+                } catch (e) {
+                    if (!(e instanceof KeyNotFoundError)) {
+                        throw e;
+                    }
+                }
                 if (handler) {
                     return handler({ env, action, options });
                 }
