@@ -10,10 +10,10 @@
  */
 export function memoize(func) {
     const cache = new Map();
-    return function (arg) {
-        if (!cache.has(arg)) {
-            cache.set(arg, func(arg));
+    return function (...args) {
+        if (!cache.has(args[0])) {
+            cache.set(args[0], func(...args));
         }
-        return cache.get(arg);
+        return cache.get(...args);
     };
 }

@@ -104,7 +104,7 @@ function jsonrpc(env, rpcId, url, params, settings = {}) {
 export const rpcService = {
     start(env) {
         let rpcId = 0;
-        return (route, params = {}, settings) => {
+        return function rpc(route, params = {}, settings) {
             return jsonrpc(env, rpcId++, route, params, settings);
         };
     },

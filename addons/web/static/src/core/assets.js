@@ -39,7 +39,13 @@ import { browser } from "./browser/browser";
 // Helpers
 //------------------------------------------------------------------------------
 
-function _loadJS(url) {
+/**
+ * Loads the given url inside a script tag.
+ *
+ * @param {string} url the url of the script
+ * @returns {Promise} resolved when the script has been loaded
+ */
+const loadJS = memoize(function _loadJS(url) {
     if (document.querySelector(`script[src="${url}"]`)) {
         // Already in the DOM and wasn't loaded through this function
         // Unfortunately there is no way to check whether a script has loaded
@@ -55,16 +61,14 @@ function _loadJS(url) {
         scriptEl.addEventListener("load", resolve);
         scriptEl.addEventListener("error", reject);
     });
-}
+});
 /**
- * Loads the given url inside a script tag.
+ * Loads the given url as a stylesheet.
  *
- * @param {string} url the url of the script
- * @returns {Promise} resolved when the script has been loaded
+ * @param {string} url the url of the stylesheet
+ * @returns {Promise} resolved when the stylesheet has been loaded
  */
-const loadJS = memoize(_loadJS);
-
-function _loadCSS(url) {
+const loadCSS = memoize(function _loadCSS(url) {
     if (document.querySelector(`link[href="${url}"]`)) {
         // Already in the DOM and wasn't loaded through this function
         // Unfortunately there is no way to check whether a link has loaded
@@ -81,23 +85,7 @@ function _loadCSS(url) {
         linkEl.addEventListener("load", resolve);
         linkEl.addEventListener("error", reject);
     });
-}
-/**
- * Loads the given url as a stylesheet.
- *
- * @param {string} url the url of the stylesheet
- * @returns {Promise} resolved when the stylesheet has been loaded
- */
-const loadCSS = memoize(_loadCSS);
-
-async function _loadBundleTemplates(name) {
-    // TODO: quid of the "unique" in the URL? We can"t have one cache_hash
-    // for each and every bundle I"m guessing.
-    const bundleURL = new URL(`/web/webclient/qweb/${Date.now()}`, window.location.origin);
-    bundleURL.searchParams.set("bundle", name);
-    const templates = await (await browser.fetch(bundleURL.href)).text();
-    return processTemplates(templates);
-}
+});
 /**
  * Loads the qweb templates from a given bundle name.
  *
@@ -105,7 +93,14 @@ async function _loadBundleTemplates(name) {
  * @returns {Promise<XMLDocument>} A Promise of an XML document containing the
  *      owl templates.
  */
-const loadBundleTemplates = memoize(_loadBundleTemplates);
+const loadBundleTemplates = memoize(async function _loadBundleTemplates(name) {
+    // TODO: quid of the "unique" in the URL? We can"t have one cache_hash
+    // for each and every bundle I"m guessing.
+    const bundleURL = new URL(`/web/webclient/qweb/${Date.now()}`, window.location.origin);
+    bundleURL.searchParams.set("bundle", name);
+    const templates = await (await browser.fetch(bundleURL.href)).text();
+    return processTemplates(templates);
+});
 
 const bundlesCache = {};
 /**
@@ -159,6 +154,25 @@ export function processTemplates(templates) {
     }
     return doc;
 }
+/**
+ * Renders a public asset template and loads the libraries defined inside of it.
+ * Only loads js and css, template declarations will be ignored. Only loads
+ * scripts and styles that are defined in script src and link href, ignores
+ * inline scripts and styles.
+ *
+ * @deprecated
+ * @param {string} xmlid The xmlid of the template that defines the public asset
+ * @param {ORM} orm An ORM object capable of calling methods on models
+ * @returns {Promise} Resolved when the contents of the asset is loaded
+ */
+export const loadPublicAsset = memoize(async function _loadPublicAsset(xmlid, orm) {
+    const xml = await orm.call("ir.ui.view", "render_public_asset", [xmlid]);
+    const doc = new DOMParser().parseFromString(`<xml>${xml}</xml>`, "text/xml");
+    return loadAssets({
+        cssLibs: [...doc.querySelectorAll("link[href]")].map(node => node.getAttribute("href")),
+        jsLibs: [...doc.querySelectorAll("script[src]")].map(node => node.getAttribute("src")),
+    });
+});
 /**
  * Loads the given assets. Currently, when passing bundles, only the templates
  * key is supported, as loading a bundle's JS/CSS asynchronously requires some
