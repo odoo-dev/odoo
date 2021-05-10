@@ -159,6 +159,46 @@ export function processTemplates(templates) {
     }
     return doc;
 }
+
+async function _loadPublicAsset(xmlid) {
+    // This is an RPC. Maybe we shouldn't be doing it "by hand"?
+    const request = await fetch('/web/dataset/call_kw/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id: Date.now(),
+            jsonrpc: "2.0",
+            method: "call",
+            params: {
+                model: 'ir.ui.view',
+                method: 'render_public_asset',
+                args: [xmlid],
+                kwargs: {},
+            },
+        }),
+    });
+    const { result: xml } = JSON.parse(await request.text());
+
+    const doc = new DOMParser().parseFromString(`<xml>${xml}</xml>`, "text/xml");
+    return loadAssets({
+        cssLibs: [...doc.querySelectorAll('link[href]')].map(node => node.getAttribute('href')),
+        jsLibs: [...doc.querySelectorAll('script[src]')].map(node => node.getAttribute('src')),
+    });
+}
+/**
+ * Renders a public asset template and loads the libraries defined inside of it.
+ * Only loads js and css, template declarations will be ignored. Only loads
+ * scripts and styles that are defined in script src and link href, ignores
+ * inline scripts and styles.
+ *
+ * @deprecated
+ * @param {string} xmlid The xmlid of the template that defines the public asset
+ * @returns {Promise} Resolved when the contents of the asset is loaded
+ */
+export const loadPublicAsset = memoize(_loadPublicAsset);
+
 /**
  * Loads the given assets. Currently, when passing bundles, only the templates
  * key is supported, as loading a bundle's JS/CSS asynchronously requires some
