@@ -96,7 +96,7 @@ export function makePreProcessQuery(getCurrent) {
 function makeRouter(env) {
     let bus = env.bus;
     let current = getRoute();
-    window.addEventListener("hashchange", () => {
+    browser.addEventListener("hashchange", () => {
         current = getRoute();
         bus.trigger("ROUTE_CHANGE");
     });

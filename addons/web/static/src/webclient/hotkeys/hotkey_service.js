@@ -2,6 +2,7 @@
 
 import { isMacOS } from "../../core/browser/feature_detection";
 import { registry } from "../../core/registry";
+import { browser } from "../../core/browser/browser";
 
 export function getHotkeyToPress(hotkey, altIsOptional = false) {
     let result = hotkey.split("+");
@@ -38,10 +39,10 @@ export const hotkeyService = {
         let nextToken = 0;
         let overlaysVisible = false;
 
-        window.addEventListener("keydown", onKeydown);
-        window.addEventListener("keyup", removeHotkeyOverlays);
-        window.addEventListener("blur", removeHotkeyOverlays);
-        window.addEventListener("click", removeHotkeyOverlays);
+        browser.addEventListener("keydown", onKeydown);
+        browser.addEventListener("keyup", removeHotkeyOverlays);
+        browser.addEventListener("blur", removeHotkeyOverlays);
+        browser.addEventListener("click", removeHotkeyOverlays);
 
         /**
          * Handler for keydown events.

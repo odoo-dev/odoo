@@ -98,7 +98,6 @@ export function setTestOdooWithCleanup(config = {}) {
         odoo = originalOdoo;
     });
     odoo = Object.assign({}, originalOdoo, {
-        browser: {},
         debug: config.debug || "",
         session_info: {
             cache_hashes: {

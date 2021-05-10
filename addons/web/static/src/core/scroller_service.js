@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { browser } from "./browser/browser";
 import { registry } from "./registry";
 import { scrollTo } from "./utils/scrolling";
 
@@ -18,7 +19,7 @@ export const scrollerService = {
          *
          * @param {MouseEvent} ev
          */
-        document.addEventListener("click", (ev) => {
+        browser.addEventListener("click", (ev) => {
             const target = ev.target;
             if (target.tagName.toUpperCase() !== "A") {
                 return;

@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
+import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { legacyProm } from "web.test_legacy";
 import { registerCleanup } from "./helpers/cleanup";
 import { prepareRegistriesWithCleanup, setTestOdooWithCleanup } from "./helpers/mock_env";
-import { patchWithCleanup } from "./helpers/utils";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -21,23 +22,18 @@ function forceLocaleAndTimezoneWithCleanup() {
     });
 }
 
-function trackAddedEventListenersWithCleanup(objectToPatch) {
-    const listeners = [];
-    // Here we keep track of listeners added on the object to patch.
-    // Some stuff with permanent state (e.g. services) may register
-    // those kind of listeners without removing them at some point.
-    // We manually remove them after each test (see below).
-    patchWithCleanup(objectToPatch, {
-        addEventListener: function () {
-            listeners.push([...arguments]);
-            this._super(...arguments);
+function patchBrowserWithCleanup() {
+    // patch addEventListner to automatically remove listeners bound (via browser.addEventListener)
+    // during a test (e.g. during the deployment of a service)
+    const originalAddEventListener = browser.addEventListener;
+    const originalRemoveEventListener = browser.removeEventListener;
+    patchWithCleanup(browser, {
+        addEventListener() {
+            originalAddEventListener(...arguments);
+            registerCleanup(() => {
+                originalRemoveEventListener(...arguments);
+            });
         },
-    });
-    registerCleanup((info) => {
-        // Cleanup the listeners added during the current test.
-        for (const listenerArgs of listeners) {
-            objectToPatch.removeEventListener(...listenerArgs);
-        }
     });
 }
 
@@ -46,8 +42,7 @@ export async function setupTests() {
         setTestOdooWithCleanup();
         prepareRegistriesWithCleanup();
         forceLocaleAndTimezoneWithCleanup();
-        trackAddedEventListenersWithCleanup(window);
-        trackAddedEventListenersWithCleanup(document);
+        patchBrowserWithCleanup();
     });
 
     const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}`;
