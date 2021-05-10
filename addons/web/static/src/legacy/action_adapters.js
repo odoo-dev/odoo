@@ -12,6 +12,19 @@ import { cleanDomFromBootstrap } from './utils';
 
 const { Component, hooks, tags } = owl;
 
+function wrapSuccessOrFail(promise, { on_success, on_fail } = {}) {
+  return promise
+    .then(on_success || (() => {}))
+    .catch((reason) => {
+      if (on_fail) {
+        on_fail(reason);
+      }
+      if (reason instanceof Error) {
+        throw reason;
+      }
+    });
+}
+
 class ActionAdapter extends ComponentAdapter {
   setup() {
     super.setup();
@@ -63,7 +76,7 @@ class ActionAdapter extends ComponentAdapter {
       }
       this.onReverseBreadcrumb = ev.data.options && ev.data.options.on_reverse_breadcrumb;
       const legacyOptions = mapDoActionOptionAPI(ev.data.options);
-      this.actionService.doAction(payload.action, legacyOptions);
+      wrapSuccessOrFail(this.actionService.doAction(payload.action, legacyOptions), payload);
     } else if (ev.name === "breadcrumb_clicked") {
       this.actionService.restore(payload.controllerID);
     } else if (ev.name === "push_state") {
@@ -320,10 +333,9 @@ export class ViewAdapter extends ActionAdapter {
         throw e;
       }
     } else if (ev.name === "execute_action") {
-      const onSuccess = payload.on_success || (() => {});
       const buttonContext = new Context(payload.action_data.context).eval();
       const envContext = new Context(payload.env.context).eval();
-      this.actionService
+      wrapSuccessOrFail(this.actionService
         .doActionButton({
           args: payload.action_data.args,
           buttonContext: buttonContext,
@@ -337,16 +349,7 @@ export class ViewAdapter extends ActionAdapter {
           type: payload.action_data.type,
           onClose: payload.on_closed,
           effect: payload.action_data.effect,
-        })
-        .then(onSuccess)
-        .catch((error) => {
-          if (payload.on_fail) {
-            payload.on_fail(error);
-          }
-          if (error instanceof Error) {
-            throw error;
-          }
-        });
+        }), payload);
     } else {
       super._trigger_up(ev);
     }
