@@ -60,7 +60,7 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
     });
 
     QUnit.test("companies can be toggled and logged in", async (assert) => {
-        assert.expect(20);
+        assert.expect(22);
 
         const env = await makeTestEnv();
         const target = getFixture();
@@ -86,20 +86,30 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
         assert.strictEqual(scMenu.env.services.user.current_company.id, 1);
 
         await click(scMenu.el.querySelector(".o_dropdown_toggler"));
-        await click(scMenu.el.querySelectorAll(".toggle_company")[0]);
-        /**
-         *   [ ] Company 1       -> toggle
-         *   [x] **Company 2**
-         *   [ ] Company 3
-         */
-        assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [2]);
-        assert.strictEqual(scMenu.env.services.user.current_company.id, 2);
-
-        await click(scMenu.el.querySelector(".o_dropdown_toggler"));
         await click(scMenu.el.querySelectorAll(".toggle_company")[1]);
         /**
+         *   [x] **Company 1**
+         *   [ ] Company 2       -> toggle
+         *   [ ] Company 3
+         */
+        assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1]);
+        assert.strictEqual(scMenu.env.services.user.current_company.id, 1);
+
+        await click(scMenu.el.querySelector(".o_dropdown_toggler"));
+        await click(scMenu.el.querySelectorAll(".toggle_company")[0]);
+        /**
+         *   [x] **Company 1**  -> tried to toggle
+         *   [ ] Company 2
+         *   [ ] Company 3
+         */
+        assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1]);
+        assert.strictEqual(scMenu.env.services.user.current_company.id, 1);
+
+        await click(scMenu.el.querySelector(".o_dropdown_toggler"));
+        await click(scMenu.el.querySelectorAll(".log_into")[1]);
+        /**
          *   [ ] Company 1
-         *   [x] **Company 2**  -> tried to toggle
+         *   [x] **Company 2**   -> click label (log into)
          *   [ ] Company 3
          */
         assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [2]);

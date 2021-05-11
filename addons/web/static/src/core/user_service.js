@@ -45,10 +45,16 @@ export function makeSetCompanies(getAllowedCompanyIds) {
                 nextCompanyIds.push(companyId);
             }
         } else if (mode === "loginto") {
-            if (nextCompanyIds.includes(companyId)) {
-                nextCompanyIds = nextCompanyIds.filter((id) => id !== companyId);
+            if (nextCompanyIds.length === 1) {
+                // 1 enabled company: stay in single company mode
+                nextCompanyIds = [companyId];
+            } else {
+                // multi company mode
+                if (nextCompanyIds.includes(companyId)) {
+                    nextCompanyIds = nextCompanyIds.filter((id) => id !== companyId);
+                }
+                nextCompanyIds.unshift(companyId);
             }
-            nextCompanyIds.unshift(companyId);
         }
         return nextCompanyIds.length ? nextCompanyIds : [companyId];
     };
