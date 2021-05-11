@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="web.GraphView.CustomTooltip" owl="1">
+    <div class="o_graph_custom_tooltip">
+      <table>
+        <thead>
+          <tr>
+            <th class="o_measure" t-esc="measure"/>
+          </tr>
+        </thead>
+        <tbody>
+          <tr t-foreach="tooltipItems" t-as="tooltipItem" t-key="tooltipItem.id">
+            <td>
+              <span class="o_square" t-attf-style="background-color: {{ tooltipItem.boxColor }}"/>
+              <span class="o_label" t-attf-style="max-width: {{ maxWidth }}" t-esc="tooltipItem.label"/>
+            </td>
+            <td class="o_value" t-esc="tooltipItem.value"/>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </t>
+
+  <t t-name="web.GraphView.MeasureMenu" owl="1">
+    <Dropdown t-on-dropdown-item-selected="onMeasureSelected">
+      Measures
+      <t t-set-slot="menu">
+        <t t-foreach="model.metaData.measures" t-as="measure" t-key="measure.fieldName">
+          <DropdownItem class="o_menu_item dropdown-item"
+            t-att-class="{ active: measure.fieldName === model.metaData.measure }"
+            payload="{ measure: measure.fieldName }"
+            parentClosingMode="'none'"
+            >
+            <t t-esc="measure.description"/>
+          </DropdownItem>
+          <div t-if="measure_last" role="separator" class="dropdown-divider"/>
+        </t>
+        <DropdownItem class="o_menu_item dropdown-item"
+          t-att-class="{ active: '__count' ===  model.metaData.measure }"
+          payload="{ measure: '__count' }"
+          parentClosingMode="'none'"
+          >
+          Count
+        </DropdownItem>   
+      </t>
+    </Dropdown>
+  </t>
+
+  <t t-name="web.GraphView.Buttons" owl="1">
+    <div class="btn-group" role="toolbar" aria-label="Main actions">
+        <t t-call="web.GraphView.MeasureMenu"/>
+        <GroupByMenu t-if="controlPanelProps.display and controlPanelProps.display['bottom-right'] === false"/>
+    </div>
+    <div class="btn-group" role="toolbar" aria-label="Change graph">
+      <button class="btn btn-secondary fa fa-bar-chart-o o_graph_button" title="Bar Chart" aria-label="Bar Chart" data-mode="bar"
+        t-on-click="onModeSelected('bar')"
+        t-att-class="{ active: model.metaData.mode === 'bar' }"
+      />
+      <button class="btn btn-secondary fa fa-area-chart o_graph_button" title="Line Chart" aria-label="Line Chart" data-mode="line"
+        t-on-click="onModeSelected('line')"
+        t-att-class="{ active: model.metaData.mode === 'line' }"
+      />
+      <button class="btn btn-secondary fa fa-pie-chart o_graph_button" title="Pie Chart" aria-label="Pie Chart" data-mode="pie"
+        t-on-click="onModeSelected('pie')"
+        t-att-class="{ active: model.metaData.mode === 'pie' }"
+      />
+    </div>
+    <div t-if="model.metaData.mode === 'bar'" class="btn-group" role="toolbar" aria-label="Change graph">
+      <button class="btn btn-secondary fa fa-database o_graph_button" title="Stacked" aria-label="Stacked"
+        t-on-click="toggleStacked"
+        t-att-class="{ active: model.metaData.stacked }"
+      />
+    </div>
+    <div t-if="model.metaData.mode !== 'pie' and env.searchModel.domains.length === 1" class="btn-group" role="toolbar" aria-label="Sort graph">
+      <button class="btn btn-secondary fa fa-sort-amount-desc o_graph_button" title="Descending" aria-label="Descending"
+        t-on-click="toggleOrder('DESC')"
+        t-att-class="{ active: model.metaData.order === 'DESC' }"
+      />
+      <button class="btn btn-secondary fa fa-sort-amount-asc o_graph_button" title="Ascending" aria-label="Ascending"
+        t-on-click="toggleOrder('ASC')"
+        t-att-class="{ active: model.metaData.order === 'ASC' }"
+      />
+    </div>
+  </t>
+
+  <t t-name="web.GraphView" owl="1">
+    <div class="o_graph_view" t-att-class="{ o_view_sample_data: model.metaData.useSampleModel }">
+      <ControlPanel t-props="controlPanelProps" t-if="props.display.controlPanel !== false">
+        <t t-set-slot="control-panel-bottom-left">
+          <t t-call="{{ buttonTemplate }}"/>
+        </t>
+      </ControlPanel>
+      <div class="o_content">
+        <!-- <label t-if="model.metaData.title" t-esc="model.metaData.title"/> -->
+        <t t-if="model.data">
+          <t t-if="model.metaData.useSampleModel and model.metaData.noContentHelp" t-call="web.ActionHelper">
+            <t t-set="noContentHelp" t-value="model.metaData.noContentHelp"/>
+          </t>
+          <div class="o_graph_canvas_container"
+            t-att-class="{ o_sample_data_disabled: model.metaData.useSampleModel }"
+            t-ref="container">
+            <canvas t-ref="canvas"/>
+          </div>
+        </t>
+        <t t-else="" t-call="web.NoContentHelper">
+          <t t-set="title">Invalid data</t>
+          <t t-set="description">Pie chart cannot mix positive and negative numbers. Try to change your domain to only display positive results</t>
+        </t>
+      </div>
+    </div>
+  </t>
+
+</templates>
