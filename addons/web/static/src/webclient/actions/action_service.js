@@ -443,15 +443,6 @@ function makeActionManager(env) {
         });
         const action = controller.action;
 
-        const currentController = _getCurrentController();
-        if (currentController && currentController.getState) {
-            currentController.exportedState = currentController.getState();
-        }
-
-        if (controller.exportedState) {
-            controller.props.state = controller.exportedState;
-        }
-
         class ControllerComponent extends Component {
             setup() {
                 this.Component = controller.Component;
@@ -565,6 +556,16 @@ function makeActionManager(env) {
             });
             return currentActionProm;
         }
+
+        const currentController = _getCurrentController();
+        if (currentController && currentController.getState) {
+            currentController.exportedState = currentController.getState();
+        }
+
+        if (controller.exportedState) {
+            controller.props.state = controller.exportedState;
+        }
+
         const index = _computeStackIndex(options);
         const controllerArray = [controller];
         if (options.lazyController) {
