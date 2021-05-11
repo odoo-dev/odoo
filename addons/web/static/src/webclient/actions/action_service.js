@@ -1,25 +1,41 @@
 /** @odoo-module **/
 
-import { KeyNotFoundError } from "@web/core/registry";
-import { cleanDomFromBootstrap } from "@web/legacy/utils";
+import { ActionDialog } from "./action_dialog";
 import { browser } from "../../core/browser/browser";
-import { useBus } from "../../core/bus_hook";
-import { makeContext } from "../../core/context";
+import { CallbackRecorder } from "./action_hook";
+import { cleanDomFromBootstrap } from "@web/legacy/utils";
 import { download } from "../../core/network/download";
 import { evaluateExpr } from "../../core/py_js/py";
-import { registry } from "../../core/registry";
 import { KeepLast } from "../../core/utils/concurrency";
+import { makeContext } from "../../core/context";
+import { registry } from "@web/core/registry";
 import { sprintf } from "../../core/utils/strings";
-import { ActionDialog } from "./action_dialog";
-
-/**
- * @typedef {"current" | "fullscreen" | "new" | "self" | "inline"} ActionMode */
+import { useBus } from "../../core/bus_hook";
+import { View } from "@web/views/view_utils/view/view";
 
 const { Component, hooks, tags } = owl;
 
-const viewRegistry = registry.category("views");
 const actionHandlersRegistry = registry.category("action_handlers");
 const actionRegistry = registry.category("actions");
+const viewRegistry = registry.category("views");
+
+/** @typedef {"current" | "fullscreen" | "new" | "self" | "inline"} ActionMode */
+/** @typedef {number} ActionId */
+/** @typedef {string} ActionXMLId  */
+/** @typedef {string} ActionTag  */
+/** @typedef {any} ActionDescription  */
+/** @typedef {ActionId|ActionXMLId|ActionTag|ActionDescription} ActionRequest  */
+/** @typedef {Object} Context review this  */
+/** @typedef {Function} CallableFunction review this  */
+
+/**
+ * @typedef {Object} ActionOptions
+ * @property {Context} [additionalContext]
+ * @property {boolean} [clearBreadcrumbs]
+ * @property {ViewType} [viewType]
+ * @property {number} [resId]
+ * @property {CallableFunction} [onClose]
+ */
 
 export function clearUncommittedChanges(env) {
     const callbacks = [];
@@ -331,7 +347,7 @@ function makeActionManager(env) {
     /**
      * @param {BaseView} view
      * @param {ActWindowAction} action
-     * @param {BaseView[]} views
+     * @param {View[]} views
      * @returns {ViewProps}
      */
     function _getViewProps(view, action, views, options = {}) {
@@ -339,26 +355,61 @@ function makeActionManager(env) {
         const viewSwitcherEntries = views
             .filter((v) => v.multiRecord === view.multiRecord)
             .map((v) => {
-                return {
-                    // FIXME: missing accesskey
+                const viewSwitcherEntry = {
                     icon: v.icon,
-                    name: v.display_name,
-                    type: v.type,
-                    multiRecord: v.multiRecord,
+                    name: v.display_name.toString(),
+                    type: v.type, // prefere jsID like in breadcrumbs and call array switcherEntries?
+                    multiRecord: v.multiRecord, // remove?
                 };
+                if (view.type === v.type) {
+                    viewSwitcherEntry.active = true;
+                }
+                return viewSwitcherEntry;
             });
         const flags = action.flags || {};
-        const props = Object.assign({}, _getActionProps(action), {
-            actionFlags: Object.assign({}, flags, flags[view.type]),
-            context: action.context,
-            domain: action.domain || [],
-            model: action.res_model,
-            type: view.type,
-            views: action.views,
-            viewSwitcherEntries,
-            withActionMenus: target !== "new" && target !== "inline",
-            withFilters: action.views.some((v) => v[1] === "search"),
-        });
+        const props = Object.assign(
+            {},
+            {
+                actionFlags: Object.assign({}, flags, flags[view.type]), // review system
+                actionId: action.id || false,
+                context: action.context,
+                displayName: action.display_name || action.name,
+                domain: action.domain || [],
+                groupBy: action.context.group_by || [],
+                loadActionMenus: target !== "new" && target !== "inline",
+                loadIrFilters: action.views.some((v) => v[1] === "search"),
+                modelName: action.res_model,
+                type: view.type,
+                views: action.views,
+                viewSwitcherEntries,
+            }
+        );
+
+        if (target === "inline") {
+            props.searchMenuTypes = [];
+        }
+
+        if ("help" in action) {
+            props.noContentHelp = action.help;
+        }
+
+        if ("useSampleModel" in action) {
+            props.useSampleModel = action.useSampleModel;
+        }
+
+        if (
+            action.context.active_id ||
+            action.context.active_ids ||
+            action.context.search_disable_custom_filters
+        ) {
+            props.activateFavorite = false; // not sure --> check logic
+        }
+
+        props.display = {
+            mode: target === "new" ? "inDialog" : target,
+        };
+
+        // view specific
         if (action.res_id) {
             props.recordId = action.res_id;
         }
@@ -368,15 +419,33 @@ function makeActionManager(env) {
         if (options.recordIds) {
             props.recordIds = options.recordIds;
         }
-        if (options.searchModel) {
-            props.searchModel = options.searchModel;
+        if ("limit" in action) {
+            props.limit = action.limit;
         }
-        if (options.searchPanel) {
-            props.searchPanel = options.searchPanel;
+        if ("count" in action) {
+            props.count = action.count;
         }
         if (options.mode) {
             props.mode = options.mode;
         }
+        // LEGACY CODE COMPATIBILITY: remove when all views will be written in owl
+        if (view.isLegacy) {
+            Object.assign(props, _getActionProps(action), { View: view });
+            if (options.searchModel) {
+                props.searchModel = options.searchModel;
+            }
+            if (options.searchPanel) {
+                props.searchPanel = options.searchPanel;
+            }
+        } else {
+            // make the conversion? (from legacy to wowl)
+            if (options.searchModel) {
+            }
+            if (options.searchPanel) {
+            }
+        }
+        // END LEGACY CODE COMPATIBILITY
+
         return props;
     }
 
@@ -430,6 +499,7 @@ function makeActionManager(env) {
      * @param {UpdateStackOptions} options
      * @param {boolean} [options.clearBreadcrumbs=false]
      * @param {number} [options.index]
+     * @param {Object} [options.shareSearchState]
      * @returns {Promise<Number>}
      */
     async function _updateUI(controller, options = {}) {
@@ -446,23 +516,28 @@ function makeActionManager(env) {
             setup() {
                 this.Component = controller.Component;
                 this.componentRef = hooks.useRef("component");
-                this.registerCallback = null;
+                this.__beforeLeave__ = null;
+                this.__exportState__ = null;
+                this.__exportSearchState__ = null;
                 if (action.target !== "new") {
-                    let beforeLeaveFn;
-                    this.registerCallback = (type, fn) => {
-                        switch (type) {
-                            case "export":
-                                controller.getState = fn;
-                                break;
-                            case "beforeLeave":
-                                beforeLeaveFn = fn;
-                                break;
+                    this.__beforeLeave__ = new CallbackRecorder();
+                    this.__exportState__ = new CallbackRecorder();
+                    this.__exportSearchState__ = new CallbackRecorder();
+                    controller.getState = () => {
+                        const exportFns = this.__exportState__.callbacks;
+                        if (exportFns.length) {
+                            return Object.assign({}, ...exportFns.map((fn) => fn()));
+                        }
+                    };
+                    controller.getSearchState = () => {
+                        const exportFns = this.__exportSearchState__.callbacks;
+                        if (exportFns.length) {
+                            return Object.assign({}, ...exportFns.map((fn) => fn()));
                         }
                     };
                     useBus(env.bus, "CLEAR-UNCOMMITTED-CHANGES", (callbacks) => {
-                        if (beforeLeaveFn) {
-                            callbacks.push(beforeLeaveFn);
-                        }
+                        const beforeLeaveFns = this.__beforeLeave__.callbacks;
+                        callbacks.push(...beforeLeaveFns);
                     });
                 }
             }
@@ -491,7 +566,10 @@ function makeActionManager(env) {
                         if (!nextStackActionIds.includes(c.action.jsId)) {
                             if (c.action.type === "ir.actions.act_window") {
                                 for (const viewType in c.action.controllers) {
-                                    toDestroy.add(c.action.controllers[viewType]);
+                                    const controller = c.action.controllers[viewType];
+                                    if (controller.Component.isLegacy) {
+                                        toDestroy.add(controller);
+                                    }
                                 }
                             } else {
                                 toDestroy.add(c);
@@ -499,7 +577,7 @@ function makeActionManager(env) {
                         }
                     }
                     for (const c of toDestroy) {
-                        if (c.exportedState) {
+                        if (c.exportedState && c.exportedState.__legacy_widget__) {
                             c.exportedState.__legacy_widget__.destroy();
                         }
                     }
@@ -531,10 +609,12 @@ function makeActionManager(env) {
         }
 
         ControllerComponent.template = tags.xml`<t t-component="Component" t-props="props"
-          registerCallback="registerCallback"
-          t-ref="component"
-          t-on-history-back="onHistoryBack"
-          t-on-controller-title-updated.stop="onTitleUpdated"/>`;
+            __beforeLeave__="__beforeLeave__"
+            __exportState__="__exportState__"
+            __exportSearchState__="__exportSearchState__"
+            t-ref="component"
+            t-on-history-back="onHistoryBack"
+            t-on-controller-title-updated.stop="onTitleUpdated"/>`;
 
         ControllerComponent.Component = controller.Component;
 
@@ -573,12 +653,22 @@ function makeActionManager(env) {
         }
 
         const currentController = _getCurrentController();
+        let searchState;
         if (currentController && currentController.getState) {
             currentController.exportedState = currentController.getState();
+        }
+        if (currentController && currentController.getSearchState) {
+            searchState = currentController.getSearchState();
+            currentController.exportedSearchState = searchState;
         }
 
         if (controller.exportedState) {
             controller.props.state = controller.exportedState;
+        }
+        if (options.shareSearchState && searchState) {
+            controller.props.searchState = searchState;
+        } else if (controller.exportedSearchState) {
+            controller.props.searchState = controller.exportedSearchState;
         }
 
         const index = _computeStackIndex(options);
@@ -680,7 +770,7 @@ function makeActionManager(env) {
         }
         const controller = {
             jsId: `controller_${++id}`,
-            Component: view,
+            Component: view.isLegacy ? view : View,
             action,
             view,
             views,
@@ -697,7 +787,7 @@ function makeActionManager(env) {
         if (lazyView) {
             updateUIOptions.lazyController = {
                 jsId: `controller_${++id}`,
-                Component: lazyView,
+                Component: lazyView.isLegacy ? lazyView : View,
                 action,
                 view: lazyView,
                 views,
@@ -1092,7 +1182,7 @@ function makeActionManager(env) {
         }
         const newController = controller.action.controllers[viewType] || {
             jsId: `controller_${++id}`,
-            Component: view,
+            Component: view.isLegacy ? view : View,
             action: controller.action,
             views: controller.views,
             view,
@@ -1125,7 +1215,7 @@ function makeActionManager(env) {
             index = index > -1 ? index : controllerStack.length;
         }
         await clearUncommittedChanges(env);
-        return _updateUI(newController, { index });
+        return _updateUI(newController, { index, shareSearchState: true });
     }
 
     /**
@@ -1204,7 +1294,7 @@ function makeActionManager(env) {
         }
         if (action.type === "ir.actions.act_window") {
             const props = controller.props;
-            newState.model = props.model;
+            newState.model = props.modelName;
             newState.view_type = props.type;
             newState.id = props.recordId ? `${props.recordId}` : undefined;
         }

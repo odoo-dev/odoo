@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { registry } from "../core/registry";
+import { registry } from "@web/core/registry";
 
 /**
  * @typedef {Object} Fields
@@ -8,6 +8,12 @@ import { registry } from "../core/registry";
 
 /**
  * @typedef {string} ViewType // to define
+ */
+
+/**
+ * @typedef {Object} Toolbar // to precise
+ * @property {?} print
+ * @property {?} action
  */
 
 /**
@@ -26,10 +32,13 @@ import { registry } from "../core/registry";
 /**
  * @typedef {Object} ViewDescription
  * @property {string} arch
- * @property {Fields} fields
+ * @property {Fields} [fields]
+ * @property {string} model
+ * @property {string} [name] is returned by the server ("default" or real name)
  * @property {ViewType} type
- * @property {number} view_id
- * @property {IrFilter[]} [irFilters]
+ * @property {number} [viewId]
+ * @property {Object} [toolbar] // for views other than search
+ * @property {IrFilter[]} [irFilters] // for search view
  */
 
 /**
@@ -42,8 +51,8 @@ import { registry } from "../core/registry";
 /**
  * @typedef {Object} LoadViewsOptions
  * @property {number} actionId
- * @property {boolean} withActionMenus
- * @property {boolean} withFilters
+ * @property {boolean} loadActionMenus
+ * @property {boolean} loadIrFilters
  */
 
 export const viewService = {
@@ -67,37 +76,45 @@ export const viewService = {
         async function loadViews(params, options) {
             const key = JSON.stringify([params.model, params.views, params.context, options]);
             if (!cache[key]) {
-                cache[key] = orm
-                    .call(params.model, "load_views", [], {
-                        views: params.views,
-                        options: {
-                            action_id: options.actionId || false,
-                            load_filters: options.withFilters || false,
-                            toolbar: options.withActionMenus || false,
-                        },
-                        context: params.context,
-                    })
-                    .then((result) => {
-                        const viewDescriptions = result; // for legacy purpose, keys in result are left in viewDescriptions
+                // .catch((error) => {
+                //     delete cache[key];
+                //     return Promise.reject(error);
+                // });
+                const result = await orm.call(params.model, "load_views", [], {
+                    views: params.views,
+                    options: {
+                        action_id: options.actionId || false,
+                        load_filters: options.loadIrFilters || false,
+                        toolbar: options.loadActionMenus || false,
+                    },
+                    context: params.context,
+                });
+                const viewDescriptions = result; // for legacy purpose, keys in result are left in viewDescriptions
 
-                        for (const [_, viewType] of params.views) {
-                            const viewDescription = result.fields_views[viewType];
-                            viewDescription.fields = Object.assign(
-                                {},
-                                result.fields,
-                                viewDescription.fields
-                            ); // before a deep freeze was done.
-                            if (viewType === "search" && options.withFilters) {
-                                viewDescription.irFilters = result.filters;
-                            }
-                            viewDescriptions[viewType] = viewDescription;
-                        }
-                        return viewDescriptions;
-                    })
-                    .catch((error) => {
-                        delete cache[key];
-                        return Promise.reject(error);
-                    });
+                for (const [_, viewType] of params.views) {
+                    const viewDescription = JSON.parse(
+                        JSON.stringify(result.fields_views[viewType])
+                    );
+                    viewDescription.viewId = viewDescription.view_id;
+                    delete viewDescription.view_id;
+                    if (viewDescription.toolbar) {
+                        viewDescription.actionMenus = viewDescription.toolbar;
+                        delete viewDescription.toolbar;
+                    }
+                    viewDescription.fields = Object.assign(
+                        {},
+                        result.fields,
+                        viewDescription.fields
+                    ); // before a deep freeze was done.
+                    delete viewDescription.base_model; // unused
+                    delete viewDescription.field_parent; // unused
+                    if (viewType === "search" && options.loadIrFilters) {
+                        viewDescription.irFilters = result.filters;
+                    }
+                    viewDescriptions[viewType] = viewDescription;
+                }
+
+                cache[key] = viewDescriptions;
             }
             return cache[key];
         }
