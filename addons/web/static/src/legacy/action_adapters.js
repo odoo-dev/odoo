@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import core from "web.core";
 import Context from "web.Context";
 import { useService } from "../core/service_hook";
 import { ViewNotFoundError } from "../webclient/actions/action_service";
@@ -59,6 +60,8 @@ class ActionAdapter extends ComponentAdapter {
             };
             await Promise.resolve(); // see https://github.com/odoo/owl/issues/809
             this.trigger("controller-title-updated", this.__widget.getTitle());
+
+            core.bus.trigger('DOM_updated');
         });
         hooks.onWillUnmount(() => {
             this.__widget.updateControlPanel = originalUpdateControlPanel;
