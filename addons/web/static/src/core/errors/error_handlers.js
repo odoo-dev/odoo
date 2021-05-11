@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "../browser/browser";
+import { ConnectionLostError } from "../network/rpc_service";
 import { registry } from "../registry";
 import {
     ClientErrorDialog,
@@ -8,6 +9,7 @@ import {
     NetworkErrorDialog,
     RPCErrorDialog,
 } from "./error_dialogs";
+import { UncaughtClientError, UncaughtCorsError, UncaughtPromiseError } from "./error_service";
 
 /**
  * @typedef {import("../../env").OdooEnv} OdooEnv
@@ -28,7 +30,7 @@ const errorDialogRegistry = registry.category("error_dialogs");
  */
 function corsErrorHandler(env) {
     return (error) => {
-        if (error.name === "UNKNOWN_CORS_ERROR") {
+        if (error instanceof UncaughtCorsError) {
             env.services.dialog.open(NetworkErrorDialog, {
                 traceback: error.traceback || error.stack,
                 message: error.message,
@@ -50,7 +52,7 @@ errorHandlerRegistry.add("corsErrorHandler", corsErrorHandler, { sequence: 95 })
  */
 function clientErrorHandler(env) {
     return (error) => {
-        if (error.name === "UNCAUGHT_CLIENT_ERROR") {
+        if (error instanceof UncaughtClientError) {
             env.services.dialog.open(ClientErrorDialog, {
                 traceback: error.traceback || error.stack,
                 message: error.message,
@@ -72,7 +74,7 @@ errorHandlerRegistry.add("clientErrorHandler", clientErrorHandler, { sequence: 9
  */
 function emptyRejectionErrorHandler(env) {
     return (error) => {
-        if (error.name === "UNCAUGHT_EMPTY_REJECTION_ERROR") {
+        if (error instanceof UncaughtPromiseError) {
             env.services.dialog.open(ClientErrorDialog, {
                 message: error.message,
                 name: error.name,
@@ -139,7 +141,7 @@ function lostConnectionHandler(env) {
     let connectionLostNotifId;
     return (uncaughtError) => {
         const error = uncaughtError.originalError;
-        if (error && error.name === "CONNECTION_LOST_ERROR") {
+        if (error instanceof ConnectionLostError) {
             if (connectionLostNotifId) {
                 // notification already displayed (can occur if there were several
                 // concurrent rpcs when the connection was lost)

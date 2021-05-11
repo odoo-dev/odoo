@@ -14,19 +14,9 @@ export class RPCError extends Error {
     }
 }
 
-export class ConnectionLostError extends Error {
-    constructor() {
-        super(...arguments);
-        this.name = "CONNECTION_LOST_ERROR";
-    }
-}
+export class ConnectionLostError extends Error {}
 
-export class ConnectionAbortedError extends Error {
-    constructor() {
-        super(...arguments);
-        this.name = "CONNECTION_ABORTED_ERROR";
-    }
-}
+export class ConnectionAbortedError extends Error {}
 
 // -----------------------------------------------------------------------------
 // Main RPC method
