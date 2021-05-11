@@ -455,6 +455,7 @@ This module provides the core of the Odoo Web Client.
 
             # 'web/static/tests/legacy/main_tests.js',
             'web/static/tests/helpers/**/*.js',
+            'web/static/tests/webclient/**/helpers.js',
             'web/static/tests/qunit.js',
             'web/static/tests/main.js',
             'web/static/tests/setup.js',
@@ -472,19 +473,17 @@ This module provides the core of the Odoo Web Client.
             'base/static/tests/base_settings_tests.js',
             'web/static/tests/core/**/*.js',
             'web/static/tests/webclient/**/*.js',
+            ('remove', 'web/static/tests/webclient/**/helpers.js'),
             'web/static/tests/legacy/**/*.js',
             ('remove', 'web/static/tests/legacy/**/*_mobile_tests.js'),
             ('remove', 'web/static/tests/legacy/**/*_benchmarks.js'),
             ('remove', 'web/static/tests/legacy/helpers/**/*.js'),
             ('remove', 'web/static/tests/legacy/legacy_setup.js'),
 
-            'web/static/tests/webclient/**/*.js',
-
             ('include', 'web.frontend_legacy_tests'),
         ],
         'web.qunit_mobile_suite_tests': [
             'web/static/lib/jquery.touchSwipe/jquery.touchSwipe.js',
-            'web/static/tests/webclient/actions/helpers.js',
 
             'web/static/tests/legacy/fields/basic_fields_mobile_tests.js',
             'web/static/tests/legacy/fields/relational_fields_mobile_tests.js',
