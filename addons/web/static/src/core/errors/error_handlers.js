@@ -72,20 +72,20 @@ errorHandlerRegistry.add("clientErrorHandler", clientErrorHandler, { sequence: 9
  * @param {OdooEnv} env
  * @returns {ErrorHandler}
  */
-function emptyRejectionErrorHandler(env) {
-    return (error) => {
-        if (error instanceof UncaughtPromiseError) {
-            env.services.dialog.open(ClientErrorDialog, {
-                message: error.message,
-                name: error.name,
-            });
-            return true;
-        }
-    };
-}
-errorHandlerRegistry.add("emptyRejectionErrorHandler", emptyRejectionErrorHandler, {
-    sequence: 97,
-});
+// function emptyRejectionErrorHandler(env) {
+//     return (error) => {
+//         if (error instanceof UncaughtPromiseError) {
+//             env.services.dialog.open(ClientErrorDialog, {
+//                 message: error.message,
+//                 name: error.name,
+//             });
+//             return true;
+//         }
+//     };
+// }
+// errorHandlerRegistry.add("emptyRejectionErrorHandler", emptyRejectionErrorHandler, {
+//     sequence: 97,
+// });
 
 // -----------------------------------------------------------------------------
 // RPC errors
