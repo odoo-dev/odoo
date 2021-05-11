@@ -13,6 +13,18 @@ QUnit.test("key set and get", function (assert) {
     assert.strictEqual(registry.get("foo"), foo);
 });
 
+QUnit.test("can get a default value when missing key", function (assert) {
+    const registry = new Registry();
+    assert.strictEqual(registry.get("missing", "default"), "default");
+    assert.strictEqual(registry.get("missing", null), null);
+    assert.strictEqual(registry.get("missing", false), false);
+});
+
+QUnit.test("throws if key is missing", function (assert) {
+    const registry = new Registry();
+    assert.throws(() => registry.get("missing"));
+});
+
 QUnit.test("contains method", function (assert) {
     const registry = new Registry();
 
