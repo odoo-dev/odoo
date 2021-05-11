@@ -48,7 +48,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/xml/kanban.xml',
             'web/static/src/legacy/xml/pivot.xml',
             'web/static/src/legacy/xml/report.xml',
-            'web/static/src/legacy/xml/search_panel.xml',
             'web/static/src/legacy/xml/web_calendar.xml',
             'web/static/src/legacy/xml/graph.xml',
             'web/static/src/legacy/xml/week_days.xml',
@@ -88,6 +87,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/core/utils/transitions.scss',
             'web/static/src/core/**/*',
             'web/static/src/fields/**/*',
+            'web/static/src/search/**/*',
             'web/static/src/views/**/*',
             'web/static/src/webclient/**/*',
             ('remove', 'web/static/src/webclient/clickbot/clickbot.js'), # lazy loaded
@@ -468,6 +468,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/tests/core/**/*.js',
             'web/static/tests/fields/**/*.js',
             'web/static/tests/views/**/*.js',
+            'web/static/tests/search/**/*.js',
             'web/static/tests/webclient/**/*.js',
             ('remove', 'web/static/tests/webclient/**/helpers.js'),
             'web/static/tests/legacy/**/*.js',
