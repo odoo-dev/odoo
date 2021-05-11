@@ -398,6 +398,8 @@ export class MockServer {
                 return Promise.resolve(this.mockLoadViews(args.model, args.kwargs));
             case "name_create":
                 return Promise.resolve(this.mockNameCreate(args.model, args.args[0]));
+            case "name_search":
+                return Promise.resolve(this.mockNameSearch(args.model, args.args, args.kwargs));
             case "onchange":
                 return Promise.resolve(this.mockOnchange(args.model, args.args, args.kwargs));
             case "read":
@@ -529,6 +531,32 @@ export class MockServer {
         };
         const id = this.mockCreate(modelName, values);
         return [id, name];
+    }
+
+    /**
+     * Simulate a 'name_search' operation.
+     *
+     * @param {string} model
+     * @param {Array} args
+     * @param {string} args[0]
+     * @param {Array} args[1], search domain
+     * @param {Object} kwargs
+     * @param {number} [kwargs.limit=100] server-side default limit
+     * @returns {Array[]} a list of [id, display_name]
+     */
+    mockNameSearch(model, args, kwargs) {
+        const str = args && typeof args[0] === "string" ? args[0] : kwargs.name;
+        const limit = kwargs.limit || 100;
+        const domain = (args && args[1]) || kwargs.args || [];
+        let { records } = this.models[model];
+        const result = [];
+        for (const r of records) {
+            const isInDomain = this.evaluateDomain(domain, r);
+            if (isInDomain && (!str.length || r.display_name.includes(str))) {
+                result.push([r.id, r.display_name]);
+            }
+        }
+        return result.slice(0, limit);
     }
 
     mockOnchange(modelName, args, kwargs) {
