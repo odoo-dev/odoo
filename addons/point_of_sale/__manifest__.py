@@ -169,7 +169,27 @@
             ('remove', 'web/static/src/legacy/legacy_rpc_error_handler.js'),
         ],
         'point_of_sale.tests_assets': [
-            ('include', 'web.tests_assets'),
+            'web/static/lib/daterangepicker/daterangepicker.css',
+            'web/static/lib/qunit/qunit-2.9.1.css',
+            'web/static/lib/qunit/qunit-2.9.1.js',
+            'web/static/tests/legacy/helpers/**/*',
+            ('remove', 'web/static/tests/legacy/helpers/test_utils_tests.js'),
+
+            'web/static/tests/legacy/legacy_setup.js',
+
+            'web/static/tests/helpers/**/*.js',
+            'web/static/tests/qunit.js',
+            'web/static/tests/main.js',
+            'web/static/tests/setup.js',
+
+            # These 2 lines below are taken from web.assets_frontend
+            # They're required for the web.frontend_legacy to work properly
+            # It is expected to add other lines coming from the web.assets_frontend
+            # if we need to add more and more legacy stuff that would require other scss or js.
+            ('include', 'web._assets_helpers'),
+            'web/static/lib/bootstrap/scss/_variables.scss',
+
+            ('include', 'web.frontend_legacy'),
         ],
         'point_of_sale.qunit_suite_tests': [
             'web/static/tests/legacy/component_extension_tests.js',
