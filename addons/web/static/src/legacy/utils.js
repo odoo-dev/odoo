@@ -168,8 +168,6 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
     legacyEnv.bus.on("clear_cache", null, () => {
         wowlEnv.bus.trigger("CLEAR-CACHES");
     });
-
-    legacyConfig.isDebug = () => wowlEnv.debug;
 }
 
 export function breadcrumbsToLegacy(breadcrumbs) {
