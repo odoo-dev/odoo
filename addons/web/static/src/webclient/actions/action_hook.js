@@ -2,7 +2,7 @@
 
 import { getScrollPosition, setScrollPosition } from "../../core/utils/scrolling";
 
-const { useComponent, onMounted } = owl.hooks;
+const { useComponent, onMounted, onWillUnmount } = owl.hooks;
 
 // -----------------------------------------------------------------------------
 // Action hook
@@ -33,6 +33,15 @@ export function useSetupAction(params) {
         }
         if (component.props.state) {
             setScrollPosition(component, component.props.state[scrollSymbol]);
+        }
+    });
+
+    onWillUnmount(() => {
+        if (component.props.registerCallback) {
+            if (params.beforeLeave) {
+                component.props.registerCallback("beforeLeave", null);
+            }
+            component.props.registerCallback("export", null);
         }
     });
 }
