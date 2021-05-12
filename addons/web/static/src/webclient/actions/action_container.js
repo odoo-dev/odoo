@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { ActionDialog } from "./action_dialog";
+import { useBus } from "@web/core/bus_hook";
 
 const { Component, tags } = owl;
 
@@ -11,7 +12,7 @@ export class ActionContainer extends Component {
     setup() {
         this.main = {};
         this.dialog = {};
-        this.env.bus.on("ACTION_MANAGER:UPDATE", this, (info) => {
+        useBus(this.env.bus, "ACTION_MANAGER:UPDATE", (info) => {
             switch (info.type) {
                 case "MAIN":
                     this.main = info;
