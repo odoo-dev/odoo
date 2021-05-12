@@ -3,6 +3,8 @@
 import { useService } from "./service_hook";
 import { registry } from "./registry";
 
+const { useEnv } = owl.hooks;
+
 /**
  * This ORM service is the standard way to interact with the ORM in python from
  * the javascript codebase.
@@ -109,8 +111,8 @@ export const ormService = {
     },
     specializeForComponent() {
         const rpc = useService("rpc");
-        const user = useService("user");
-        return new ORM(rpc, user);
+        const env = useEnv();
+        return new ORM(rpc, env.user);
     },
 };
 

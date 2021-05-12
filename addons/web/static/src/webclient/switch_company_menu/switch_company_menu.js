@@ -5,7 +5,7 @@ import { registry } from "../../core/registry";
 
 export class SwitchCompanyMenu extends owl.Component {
     static isDisplayed(env) {
-        const allowedCompanies = env.services.user.allowed_companies;
+        const allowedCompanies = env.user.allowed_companies;
         return Object.keys(allowedCompanies).length > 1 && !env.isSmall;
     }
 

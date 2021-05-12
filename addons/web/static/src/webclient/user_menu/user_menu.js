@@ -2,7 +2,6 @@
 
 import { browser } from "../../core/browser/browser";
 import { DropdownItem } from "../../core/dropdown/dropdown_item";
-import { useService } from "../../core/service_hook";
 import { registry } from "../../core/registry";
 
 const { Component, hooks } = owl;
@@ -26,9 +25,8 @@ export class UserMenu extends Component {
     }
 
     setup() {
-        this.user = useService("user");
         const { origin } = browser.location;
-        const { userId } = this.user;
+        const { userId } = this.env.user;
         this.source = `${origin}/web/image?model=res.users&field=image_128&id=${userId}`;
     }
 

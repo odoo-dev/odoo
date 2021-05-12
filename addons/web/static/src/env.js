@@ -36,7 +36,10 @@ export function makeEnv(debug) {
             throw new Error("Translations are not ready yet. Maybe use _lt instead?");
         },
         get isSmall() {
-            throw new Error("UI service not initialized!");
+            throw new Error("'ui' service not initialized yet!");
+        },
+        get user() {
+            throw new Error("'user' service not initialized yet!");
         },
     };
 }

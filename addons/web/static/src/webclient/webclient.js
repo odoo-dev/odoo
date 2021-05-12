@@ -14,7 +14,6 @@ export class WebClient extends Component {
         this.actionService = useService("action");
         this.title = useService("title");
         this.router = useService("router");
-        this.user = useService("user");
         useService("legacy_service_provider");
         this.Components = mainComponentRegistry.getEntries();
         this.title.setParts({ zopenerp: "Odoo" }); // zopenerp is easy to grep
