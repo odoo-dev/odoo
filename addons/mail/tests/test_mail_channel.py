@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import Command
+from datetime import datetime
+from unittest.mock import patch
+
+from odoo import Command, fields
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.exceptions import AccessError, ValidationError, UserError
@@ -155,6 +158,11 @@ class TestChannelInternals(MailCommon):
             'alias_name': 'test',
             'public': 'public',
         })
+        cls.test_chat = cls.env['mail.channel'].with_context(cls._test_context).create({
+            'name': 'Test Chat Channel',
+            'channel_type': 'chat',
+            'public': 'private',
+        })
         cls.test_partner = cls.env['res.partner'].with_context(cls._test_context).create({
             'name': 'Test Partner',
             'email': 'test_customer@example.com',
@@ -196,6 +204,28 @@ class TestChannelInternals(MailCommon):
         channel.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
         self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
+
+    @users('employee')
+    @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
+    def test_channel_chat_message_post_should_update_last_meaningful_action_time(self):
+        chat = self.env['mail.channel'].browse(self.test_chat.ids)
+        chat._action_add_members(self.partner_employee | self.partner_admin)
+        post_time = fields.Datetime.now()
+        # Mocks the return value of field.Datetime.now(),
+        # so we can see if the `last_meaningful_action_time` is updated correctly
+        with patch.object(fields.Datetime, 'now', lambda: post_time):
+            with self.mock_mail_gateway():
+                chat.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
+        channel_partner_employee = self.env['mail.channel.partner'].search([
+            ('partner_id', '=', self.partner_employee.id),
+            ('channel_id', '=', chat.id),
+        ])
+        channel_partner_admin = self.env['mail.channel.partner'].search([
+            ('partner_id', '=', self.partner_admin.id),
+            ('channel_id', '=', chat.id),
+        ])
+        self.assertEqual(channel_partner_employee.last_meaningful_action_time, post_time)
+        self.assertEqual(channel_partner_admin.last_meaningful_action_time, post_time)
 
     @users('employee')
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
@@ -314,6 +344,19 @@ class TestChannelInternals(MailCommon):
         # `channel_get` should return the existing channel every time the current partner is given
         same_solo_channel_info = self.env['mail.channel'].channel_get(partners_to=self.partner_employee_nomail.ids)
         self.assertEqual(same_solo_channel_info['id'], solo_channel_info['id'])
+
+    # `channel_get` will pin the channel by default and thus last meaningful action time will be updated.
+    @users('employee')
+    def test_channel_info_get_should_update_last_meaningful_action_time(self):
+        # create the channel via `channel_get`
+        self.env['mail.channel'].channel_get(partners_to=self.partner_admin.ids)
+
+        retrive_time = datetime(2021, 1, 1, 0, 0)
+        with patch.object(fields.Datetime, 'now', lambda: retrive_time):
+            # `last_meaningful_action_time` should be updated again when `channel_get` is called
+            # because `channel_pin` is called.
+            channel_info = self.env['mail.channel'].channel_get(partners_to=self.partner_admin.ids)
+        self.assertEqual(channel_info['last_meaningful_action_time'], retrive_time)
 
     @users('employee')
     def test_channel_info_seen(self):

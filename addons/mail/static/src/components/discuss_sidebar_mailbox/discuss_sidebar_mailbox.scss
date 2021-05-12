@@ -1,0 +1,57 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_DiscussSidebarMailBox {
+    display: flex;
+    align-items: center;
+    padding: map-get($spacers, 1) 0;
+}
+
+
+.o_DiscussSidebarMailBox_item {
+    margin-left: $o-mail-discuss-sidebar-category-item-margin;
+    margin-right: $o-mail-discuss-sidebar-category-item-margin;
+
+    &:first-child {
+        margin-left: $o-mail-discuss-sidebar-category-item-avatar-left-margin;
+    }
+
+    &:last-child {
+        margin-right: $o-mail-discuss-sidebar-scrollbar-width;
+    }
+}
+
+
+.o_DiscussSidebarMailBox_name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_DiscussSidebarMailBox {
+    cursor: pointer;
+
+    &.o-active {
+        background-color: lighten(gray('900'), 5%);
+    }
+
+    &:hover {
+        background-color: darken(gray('900'), 5%);
+    }
+
+    &.o-starred-box {
+        .o_DiscussSidebarMailBox_counter {
+            border-color: gray('600');
+            background-color: gray('600');
+        }
+    }
+}
+
+.o_DiscussSidebarMailBox_counter {
+    background-color: $o-brand-primary;
+}
