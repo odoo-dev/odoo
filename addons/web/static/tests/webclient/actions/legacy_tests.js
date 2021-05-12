@@ -3,7 +3,8 @@
 import { DialogContainer } from "@web/core/dialog/dialog_service";
 import { registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
-import { getLegacy } from "web.test_legacy";
+import testUtils from "web.test_utils";
+import ListController from "web.ListController";
 import { click, legacyExtraNextTick, patchWithCleanup } from "../../helpers/utils";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
@@ -16,17 +17,10 @@ import core from "web.core";
 import AbstractAction from "web.AbstractAction";
 
 let testConfig;
-// legacy stuff
-let ListController;
-let testUtils;
+
 const mainComponentRegistry = registry.category("main_components");
 
 QUnit.module("ActionManager", (hooks) => {
-    hooks.before(() => {
-        const legacy = getLegacy();
-        ListController = legacy.ListController;
-        testUtils = legacy.testUtils;
-    });
     hooks.beforeEach(() => {
         testConfig = getActionManagerTestConfig();
     });

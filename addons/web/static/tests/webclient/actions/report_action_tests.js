@@ -3,7 +3,8 @@
 import { registry } from "@web/core/registry";
 import { download } from "@web/core/network/download";
 import { uiService } from "@web/core/ui_service";
-import { getLegacy } from "web.test_legacy";
+import testUtils from "web.test_utils";
+import ReportClientAction from "report.client_action";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { makeFakeNotificationService, makeFakeUserService } from "../../helpers/mock_services";
 import { patchWithCleanup } from "../../helpers/utils";
@@ -11,9 +12,6 @@ import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers
 
 let testConfig;
 
-// legacy stuff
-let testUtils;
-let ReportClientAction;
 const mainComponentRegistry = registry.category("main_components");
 const serviceRegistry = registry.category("services");
 
@@ -22,12 +20,6 @@ function mockDownload(cb) {
 }
 
 QUnit.module("ActionManager", (hooks) => {
-    hooks.before(() => {
-        const legacy = getLegacy();
-        testUtils = legacy.testUtils;
-        ReportClientAction = legacy.ReportClientAction;
-    });
-
     hooks.beforeEach(() => {
         testConfig = getActionManagerTestConfig();
         clearRegistryWithCleanup(mainComponentRegistry);

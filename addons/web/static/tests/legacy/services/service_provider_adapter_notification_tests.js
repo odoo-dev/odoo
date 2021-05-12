@@ -3,22 +3,16 @@
 import { browser } from "@web/core/browser/browser";
 import { patch, unpatch } from "@web/core/utils/patch";
 import * as LegacyRegistry from "web.Registry";
-import { getLegacy } from "web.test_legacy";
+import core from "web.core";
+import AbstractAction from "web.AbstractAction";
 import { registerCleanup } from "../../helpers/cleanup";
 import { nextTick } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerTestConfig } from "../../webclient/actions/helpers";
 
 let testConfig;
-let AbstractAction;
-let core;
 let legacyParams;
 
 QUnit.module("Service Provider Adapter Notification", (hooks) => {
-  hooks.before(() => {
-    const legacy = getLegacy();
-    AbstractAction = legacy.AbstractAction;
-    core = legacy.core;
-  });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
     legacyParams = {

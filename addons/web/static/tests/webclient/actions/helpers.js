@@ -18,7 +18,18 @@ import { effectService } from "@web/webclient/effects/effect_service";
 import { hotkeyService } from "@web/webclient/hotkeys/hotkey_service";
 import { menuService } from "@web/webclient/menu_service";
 import { WebClient } from "@web/webclient/webclient";
-import { getLegacy } from "web.test_legacy";
+// This import is needed because of it's sideeffects, for exemple :
+// web.test_utils easyload xml templates at line : 124:130.
+// Also it set the autocomplete delay time for the field Many2One at 0 for the tests at line : 132:137
+import "web.test_legacy";
+import AbstractAction from "web.AbstractAction";
+import AbstractController from "web.AbstractController";
+import AbstractService from "web.AbstractService";
+import ActionMenus from "web.ActionMenus";
+import basicFields from "web.basic_fields";
+import Registry from "web.Registry";
+import core from "web.core";
+import makeTestEnvironment from "web.test_env";
 import { registerCleanup } from "../../helpers/cleanup";
 import { makeTestEnv } from "../../helpers/mock_env";
 import {
@@ -48,7 +59,6 @@ const serviceRegistry = registry.category("services");
  * @param {*} params
  */
 export async function createWebClient(params) {
-    const { AbstractAction, AbstractController } = getLegacy();
     // With the compatibility layer, the action manager keeps legacy alive if they
     // are still acessible from the breacrumbs. They are manually destroyed as soon
     // as they are no longer referenced in the stack. This works fine in production,
@@ -101,7 +111,6 @@ export async function createWebClient(params) {
  * Remove this as soon as we drop the legacy support
  */
 function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
-    const legacy = getLegacy();
     // setup a legacy env
     const dataManager = Object.assign(
         {
@@ -144,21 +153,21 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
     );
 
     // clear the ActionMenus registry to prevent external code from doing unknown rpcs
-    const actionMenusRegistry = legacy.ActionMenus.registry;
-    legacy.ActionMenus.registry = new legacy.Registry();
-    registerCleanup(() => (legacy.ActionMenus.registry = actionMenusRegistry));
+    const actionMenusRegistry = ActionMenus.registry;
+    ActionMenus.registry = new Registry();
+    registerCleanup(() => (ActionMenus.registry = actionMenusRegistry));
 
-    const legacyEnv = legacy.makeTestEnvironment({ dataManager, bus: legacy.core.bus });
+    const legacyEnv = makeTestEnvironment({ dataManager, bus: core.bus });
 
     if (legacyParams.serviceRegistry) {
-        const legacyServiceMap = legacy.core.serviceRegistry.map;
-        legacy.core.serviceRegistry.map = legacyParams.serviceRegistry.map;
+        const legacyServiceMap = core.serviceRegistry.map;
+        core.serviceRegistry.map = legacyParams.serviceRegistry.map;
         // notification isn't a deployed service, but it is added by `makeTestEnvironment`.
         // Here, we want full control on the deployed services, so we simply remove it.
         delete legacyEnv.services.notification;
-        legacy.AbstractService.prototype.deployServices(legacyEnv);
+        AbstractService.prototype.deployServices(legacyEnv);
         registerCleanup(() => {
-            legacy.core.serviceRegistry.map = legacyServiceMap;
+            core.serviceRegistry.map = legacyServiceMap;
         });
     }
 
@@ -170,7 +179,7 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
 
     serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
     // patch DebouncedField delay
-    const debouncedField = legacy.basicFields.DebouncedField;
+    const debouncedField = basicFields.DebouncedField;
     const initialDebouncedVal = debouncedField.prototype.DEBOUNCE;
     debouncedField.prototype.DEBOUNCE = 0;
     registerCleanup(() => (debouncedField.prototype.DEBOUNCE = initialDebouncedVal));
