@@ -778,7 +778,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
 {
     trigger: '.o_form_button_edit',
     content: _t('Edit the vendor bill'),
-    extra_trigger: '.o_loading_indicator:not(.o_loading)',
+    extra_trigger: ".o_form_label .o_field_widget:contains('Vendor Bill')",
 }, {
     trigger:".o_field_widget[name=invoice_date] input",
     content: _t('Set the invoice date'),
@@ -833,9 +833,8 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing
 },
 ...tour.stepUtils.statusbarButtonsSteps('Check availability', _t("Check availability")),
 {
-    trigger: '.o_form_button_edit',
+    trigger: ".o_form_button_edit:not(:disabled)",
     content: _t('Edit the production order'),
-    extra_trigger: '.o_loading_indicator:not(.o_loading)',
 }, {
     trigger: "input[name=qty_producing]",
     position: 'left',
