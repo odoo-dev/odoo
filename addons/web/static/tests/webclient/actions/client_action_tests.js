@@ -2,7 +2,9 @@
 
 import { registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
-import { getLegacy } from "web.test_legacy";
+import core from "web.core";
+import AbstractAction from "web.AbstractAction";
+import testUtils from "web.test_utils";
 import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { makeFakeRouterService } from "../../helpers/mock_services";
@@ -12,21 +14,11 @@ import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers
 const { Component, tags } = owl;
 
 let testConfig;
-// legacy stuff
-let AbstractAction;
-let core;
-let testUtils;
 const mainComponentRegistry = registry.category("main_components");
 const serviceRegistry = registry.category("services");
 const actionRegistry = registry.category("actions");
 
 QUnit.module("ActionManager", (hooks) => {
-    hooks.before(() => {
-        const legacy = getLegacy();
-        AbstractAction = legacy.AbstractAction;
-        core = legacy.core;
-        testUtils = legacy.testUtils;
-    });
     hooks.beforeEach(() => {
         testConfig = getActionManagerTestConfig();
     });

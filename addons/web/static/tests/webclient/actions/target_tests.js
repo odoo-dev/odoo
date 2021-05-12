@@ -1,24 +1,14 @@
 /** @odoo-module **/
 
-import { getLegacy } from "web.test_legacy";
+import testUtils from "web.test_utils";
+import core from "web.core";
+import AbstractAction from "web.AbstractAction";
 import { legacyExtraNextTick } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 
 let testConfig;
 
-// legacy stuff
-let AbstractAction;
-let core;
-let testUtils;
-
 QUnit.module("ActionManager", (hooks) => {
-    hooks.before(() => {
-        const legacy = getLegacy();
-        AbstractAction = legacy.AbstractAction;
-        core = legacy.core;
-        testUtils = legacy.testUtils;
-    });
-
     hooks.beforeEach(() => {
         testConfig = getActionManagerTestConfig();
     });

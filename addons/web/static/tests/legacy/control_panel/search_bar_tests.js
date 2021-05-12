@@ -1,6 +1,6 @@
 /** @odoo-module alias="web.search_bar_tests" **/
 
-import { getLegacy } from "web.test_legacy";
+import testUtils from "web.test_utils";
 import {
     createWebClient,
     doAction,
@@ -13,13 +13,10 @@ import SearchBar from "web.SearchBar";
 let testConfig;
 
 // legacy stuff
-let testUtils;
 let cpHelpers;
 
 QUnit.module("Search Bar (legacy)", (hooks) => {
     hooks.before(() => {
-        const legacy = getLegacy();
-        testUtils = legacy.testUtils;
         cpHelpers = testUtils.controlPanel;
     });
     hooks.beforeEach(() => {

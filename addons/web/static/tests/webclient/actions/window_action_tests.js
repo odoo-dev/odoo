@@ -4,7 +4,11 @@ import { debugService } from "@web/core/debug/debug_service";
 import { DialogContainer } from "@web/core/dialog/dialog_service";
 import { registry } from "@web/core/registry";
 import { clearUncommittedChanges } from "@web/webclient/actions/action_service";
-import { getLegacy } from "web.test_legacy";
+import testUtils from "web.test_utils";
+import ListController from "web.ListController";
+import AbstractView from "web.AbstractView";
+import legacyViewRegistry from "web.view_registry";
+import FormView from "web.FormView";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { makeFakeUserService } from "../../helpers/mock_services";
 import { click, legacyExtraNextTick, nextTick } from "../../helpers/utils";
@@ -15,14 +19,9 @@ const serviceRegistry = registry.category("services");
 
 // legacy stuff
 let cpHelpers;
-let ListController;
-let testUtils;
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.before(() => {
-        const legacy = getLegacy();
-        ListController = legacy.ListController;
-        testUtils = legacy.testUtils;
         cpHelpers = testUtils.controlPanel;
     });
     hooks.beforeEach(() => {
@@ -1905,7 +1904,6 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("view with js_class attribute (legacy)", async function (assert) {
         assert.expect(2);
-        const { AbstractView, legacyViewRegistry } = getLegacy();
         const TestView = AbstractView.extend({
             viewType: "test_view",
         });
@@ -1943,7 +1941,6 @@ QUnit.module("ActionManager", (hooks) => {
             // Now it is possible that the dialog action wants to do something of its own at closing time, to, for instance
             // update the main action behind it, with specific parameters.
             // This test ensures that this flow is supported in legacy,
-            const { FormView, legacyViewRegistry } = await getLegacy();
             const TestCustoFormController = FormView.prototype.config.Controller.extend({
                 async saveRecord() {
                     await this._super.apply(this, arguments);

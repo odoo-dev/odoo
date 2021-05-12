@@ -3,23 +3,18 @@
 import { registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
 import { EffectContainer } from "@web/webclient/effects/effect_container";
-import { getLegacy } from "web.test_legacy";
+import testUtils from "web.test_utils";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { makeFakeUserService } from "../../helpers/mock_services";
 import { click, legacyExtraNextTick, nextTick } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 
 let testConfig;
-// legacy stuff
-let testUtils;
+
 const mainComponentRegistry = registry.category("main_components");
 const serviceRegistry = registry.category("services");
 
 QUnit.module("ActionManager", (hooks) => {
-    hooks.before(() => {
-        const legacy = getLegacy();
-        testUtils = legacy.testUtils;
-    });
     hooks.beforeEach(() => {
         testConfig = getActionManagerTestConfig();
     });

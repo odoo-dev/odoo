@@ -1,29 +1,23 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { getLegacy } from "web.test_legacy";
+import testUtils from "web.test_utils";
+import core from "web.core";
+import Widget from "web.Widget";
+import AbstractAction from "web.AbstractAction";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { legacyExtraNextTick } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
 
 let testConfig;
 // legacy stuff
-let AbstractAction;
 let cpHelpers;
-let core;
-let testUtils;
-let Widget;
 const actionRegistry = registry.category("actions");
 const actionHandlersRegistry = registry.category("action_handlers");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.before(() => {
-        const legacy = getLegacy();
-        AbstractAction = legacy.AbstractAction;
-        core = legacy.core;
-        testUtils = legacy.testUtils;
         cpHelpers = testUtils.controlPanel;
-        Widget = legacy.Widget;
     });
 
     hooks.beforeEach(() => {

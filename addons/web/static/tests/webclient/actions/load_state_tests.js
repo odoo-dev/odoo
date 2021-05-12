@@ -3,7 +3,9 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { WebClient } from "@web/webclient/webclient";
-import { getLegacy } from "web.test_legacy";
+import testUtils from "web.test_utils";
+import core from "web.core";
+import AbstractAction from "web.AbstractAction";
 import { registerCleanup } from "../../helpers/cleanup";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { makeFakeRouterService, makeFakeUserService } from "../../helpers/mock_services";
@@ -13,21 +15,11 @@ import { createWebClient, doAction, getActionManagerTestConfig, loadState } from
 const { Component, mount, tags } = owl;
 
 let testConfig;
-// legacy stuff
-let AbstractAction;
-let core;
-let testUtils;
+
 const actionRegistry = registry.category("actions");
 const serviceRegistry = registry.category("services");
 
 QUnit.module("ActionManager", (hooks) => {
-    hooks.before(() => {
-        const legacy = getLegacy();
-        AbstractAction = legacy.AbstractAction;
-        core = legacy.core;
-        testUtils = legacy.testUtils;
-    });
-
     hooks.beforeEach(() => {
         testConfig = getActionManagerTestConfig();
     });
