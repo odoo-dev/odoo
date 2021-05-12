@@ -39,7 +39,7 @@ export async function startWebClient(Webclient) {
     const legacyEnv = await legacySetupProm;
     mapLegacyEnvToWowlEnv(legacyEnv, env);
     const root = await mount(Webclient, { env, target: document.body, position: "self" });
-    delete odoo.debug;
+    // delete odoo.debug; // FIXME: some legacy code rely on this
     odoo.__WOWL_DEBUG__ = { root };
     odoo.isReady = true;
 }
