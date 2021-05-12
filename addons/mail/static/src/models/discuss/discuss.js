@@ -237,6 +237,18 @@ function factory(dependencies) {
             return `${thread.model}_${thread.id}`;
         }
 
+        /**
+         * @param {String} value
+         */
+         onInputQuickSearch(value) {
+            // Opens all categories only when user starts to search from empty search value.
+            if (!this.sidebarQuickSearchValue) {
+                this.categoryChat.open();
+                this.categoryChannel.open();
+            }
+            this.update({ sidebarQuickSearchValue: value });
+        }
+
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -403,6 +415,18 @@ function factory(dependencies) {
             compute: '_computeAddingChannelValue',
             default: "",
             dependencies: ['isOpen'],
+        }),
+        /**
+         * Discuss sidebar category for `channel` type channel threads.
+         */
+        categoryChannel: one2one('mail.discuss_sidebar_category', {
+            isCausal: true,
+        }),
+        /**
+         * Discuss sidebar category for `chat` type channel threads.
+         */
+        categoryChat: one2one('mail.discuss_sidebar_category', {
+            isCausal: true,
         }),
         /**
          * Serves as compute dependency.

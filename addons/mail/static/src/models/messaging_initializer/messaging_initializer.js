@@ -74,6 +74,7 @@ function factory(dependencies) {
          * @param {Array} [param0.commands=[]]
          * @param {Object} param0.current_partner
          * @param {integer} param0.current_user_id
+         * @param {Object} param0.current_user_settings
          * @param {Object} [param0.mail_failures={}]
          * @param {Object[]} [param0.mention_partner_suggestions=[]]
          * @param {Object[]} [param0.moderation_channel_ids=[]]
@@ -89,6 +90,7 @@ function factory(dependencies) {
             commands = [],
             current_partner,
             current_user_id,
+            current_user_settings,
             mail_failures = {},
             mention_partner_suggestions = [],
             menu_id,
@@ -117,6 +119,8 @@ function factory(dependencies) {
                 needaction_inbox_counter,
                 starred_counter,
             });
+            // init mail user settings
+            this._initMailUserSettings(current_user_settings);
             // various suggestions in no particular order
             this._initCannedResponses(shortcodes);
             this._initCommands(commands);
@@ -223,6 +227,28 @@ function factory(dependencies) {
                 }
             }));
             this.messaging.notificationGroupManager.computeGroups();
+        }
+
+        /**
+         * @param {object} mailUserSettings
+         * @param {integer} mailUserSettings.id
+         * @param {boolean} mailUserSettings.is_discuss_sidebar_category_channel_open
+         * @param {boolean} mailUserSettings.is_discuss_sidebar_category_chat_open
+         */
+        _initMailUserSettings({ id, is_discuss_sidebar_category_channel_open, is_discuss_sidebar_category_chat_open }) {
+            this.messaging.update({
+                mailUserSettingsId: id,
+            })
+            this.messaging.discuss.update({
+                categoryChannel: create({
+                    supportedChannelType: 'channel',
+                    isServerOpen: is_discuss_sidebar_category_channel_open,
+                }),
+                categoryChat: create({
+                    supportedChannelType: 'chat',
+                    isServerOpen: is_discuss_sidebar_category_chat_open,
+                }),
+            });
         }
 
         /**
