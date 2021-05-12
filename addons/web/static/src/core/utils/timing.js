@@ -11,10 +11,10 @@ import { browser } from "../browser/browser";
  * Inspired by https://davidwalsh.name/javascript-debounce-function
  * @param {Function} func
  * @param {number} wait
- * @param {boolean} immediate
+ * @param {boolean} [immediate=false]
  * @returns {Function}
  */
-export function debounce(func, wait, immediate) {
+export function debounce(func, wait, immediate = false) {
     let timeout;
     return function () {
         const context = this;
