@@ -4,7 +4,7 @@
 import re
 import odoo.tests
 
-RE_ONLY = re.compile('QUnit\.(only|debug)\(')
+RE_ONLY = re.compile(r'QUnit\.(only|debug)\(')
 
 
 @odoo.tests.tagged('post_install', '-at_install')
