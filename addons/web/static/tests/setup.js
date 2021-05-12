@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import core from "web.core";
 import { browser } from "@web/core/browser/browser";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { legacyProm } from "web.test_legacy";
@@ -37,12 +38,28 @@ function patchBrowserWithCleanup() {
     });
 }
 
+function patchLegacyCoreBus() {
+    // patch core.bus.on to automatically remove listners bound on the legacy bus
+    // during a test (e.g. during the deployment of a service)
+    const originalOn = core.bus.on.bind(core.bus);
+    const originalOff = core.bus.off.bind(core.bus);
+    patchWithCleanup(core.bus, {
+        on() {
+            originalOn(...arguments);
+            registerCleanup(() => {
+                originalOff(...arguments);
+            });
+        }
+    });
+}
+
 export async function setupTests() {
     QUnit.testStart(() => {
         setTestOdooWithCleanup();
         prepareRegistriesWithCleanup();
         forceLocaleAndTimezoneWithCleanup();
         patchBrowserWithCleanup();
+        patchLegacyCoreBus();
     });
 
     const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}`;
