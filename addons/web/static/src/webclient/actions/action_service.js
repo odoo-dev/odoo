@@ -278,7 +278,7 @@ function makeActionManager(env) {
      * @returns {ActionProps}
      */
     function _getClientActionProps(action, options) {
-        return Object.assign({}, _getActionProps(action), { options });
+        return Object.assign({}, options.props, _getActionProps(action), { options });
     }
 
     /**
