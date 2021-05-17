@@ -2,7 +2,7 @@
 
 import { useService } from "../service_hook";
 
-const { Component, hooks } = owl;
+const { Component, hooks, QWeb } = owl;
 const { useRef } = hooks;
 
 /**
@@ -83,3 +83,5 @@ FileInput.props = {
     multi_upload: { type: Boolean, optional: 1 },
 };
 FileInput.template = "web.FileInput";
+
+QWeb.registerComponent("FileInput", FileInput);

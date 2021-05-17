@@ -1,7 +1,5 @@
 /** @odoo-module */
 
-import { Dialog } from "../dialog/dialog";
-
 export class ConfirmationDialog extends owl.Component {
     _close() {
         this.trigger("dialog-closed");
@@ -37,4 +35,3 @@ ConfirmationDialog.props = {
 };
 
 ConfirmationDialog.template = "web.ConfirmationDialog";
-ConfirmationDialog.components = { Dialog };
