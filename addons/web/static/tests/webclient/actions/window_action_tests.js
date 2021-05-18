@@ -1950,8 +1950,11 @@ QUnit.module("ActionManager", (hooks) => {
                     });
                 },
             });
-            const TestCustoFormView = FormView.extend({});
-            TestCustoFormView.prototype.config.Controller = TestCustoFormController;
+            const TestCustoFormView = FormView.extend({
+                config: Object.assign({}, FormView.prototype.config, {
+                    Controller: TestCustoFormController,
+                }),
+            });
             legacyViewRegistry.add("test_view", TestCustoFormView);
             testConfig.serverData.views["partner,1,form"] = `
       <form js_class="test_view">
