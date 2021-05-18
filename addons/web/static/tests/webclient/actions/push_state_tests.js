@@ -80,7 +80,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
         ClientActionPushes.template = tags.xml`
       <div class="test_client_action" t-on-click="_actionPushState">
-        ClientAction_<t t-esc="props.params?.description" />
+        ClientAction_<t t-esc="props.params and props.params.description" />
       </div>`;
         actionRegistry.add("client_action_pushes", ClientActionPushes);
         const webClient = await createWebClient({ testConfig });
@@ -109,7 +109,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
         ClientActionPushes.template = tags.xml`
       <div class="test_client_action" t-on-click="_actionPushState">
-        ClientAction_<t t-esc="props.params?.description" />
+        ClientAction_<t t-esc="props.params and props.params.description" />
       </div>`;
         actionRegistry.add("client_action_pushes", ClientActionPushes);
         const webClient = await createWebClient({ testConfig });
@@ -139,7 +139,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
         ClientActionPushes.template = tags.xml`
       <div class="test_client_action" t-on-click="_actionPushState">
-        ClientAction_<t t-esc="props.params?.description" />
+        ClientAction_<t t-esc="props.params and props.params.description" />
       </div>`;
         actionRegistry.add("client_action_pushes", ClientActionPushes);
         const webClient = await createWebClient({ testConfig });
