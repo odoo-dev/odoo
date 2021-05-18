@@ -5,10 +5,10 @@ import { memoize } from "@web/core/utils/functions";
 QUnit.module("utils", () => {
     QUnit.module("Functions");
 
-    QUnit.test("memoize", function (assert) {
+    QUnit.test("memoize (function with one argument)", function (assert) {
         let callCount = 0;
         let lastReceivedArgs;
-        const func = function () {
+        const func = function (arg) {
             lastReceivedArgs = [...arguments];
             return callCount++;
         };
@@ -59,5 +59,38 @@ QUnit.module("utils", () => {
             3,
             "Subsequent calls to memoized function with more than one argument do not call the original function again even if the arguments other than the first have changed"
         );
+    });
+
+    QUnit.test("memoize (function with no argument)", function (assert) {
+        let i = 0;
+        let f = memoize(() => {
+            i++;
+            return i;
+        });
+        assert.strictEqual(i, 0);
+        assert.strictEqual(f(), 1);
+        assert.strictEqual(i, 1);
+        assert.strictEqual(f(), 1);
+        assert.strictEqual(i, 1);
+    });
+
+    QUnit.test("memoize on a function with no argument, returning false", function (assert) {
+        let i = 0;
+        let f = memoize(() => {
+            i++;
+            return false;
+        });
+        assert.strictEqual(i, 0);
+        assert.strictEqual(f(), false);
+        assert.strictEqual(i, 1);
+        assert.strictEqual(f(), false);
+        assert.strictEqual(i, 1);
+    });
+
+    QUnit.test("memoized functions have a name", function (assert) {
+        const f1 = memoize(() => {});
+        assert.strictEqual(f1.name, "memoized");
+        const f2 = memoize((someArg) => {});
+        assert.strictEqual(f2.name, "memoized");
     });
 });
