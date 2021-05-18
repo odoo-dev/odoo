@@ -79,30 +79,6 @@
 // Style
 // ------------------------------------------------------------------
 
-$o-mail-activity-default-color: gray('300') !default;
-$o-mail-activity-overdue-color: darken(theme-color('danger'), 10%) !default;
-$o-mail-activity-planned-color: darken(theme-color('success'), 10%) !default;
-$o-mail-activity-today-color: darken(theme-color('warning'), 10%) !default;
-
-
-.o_Activity_deadlineDateText {
-   &.o-default {
-       color: $o-mail-activity-default-color;
-   }
-
-   &.o-overdue {
-       color: $o-mail-activity-overdue-color;
-   }
-
-   &.o-planned {
-       color: $o-mail-activity-planned-color;
-   }
-
-   &.o-today {
-    color: $o-mail-activity-today-color;
-   }
-}
-
 .o_Activity_details {
     color: gray('500');
 }
@@ -117,22 +93,6 @@ $o-mail-activity-today-color: darken(theme-color('warning'), 10%) !default;
 
 .o_Activity_dueDateText {
     font-weight: bolder;
-
-   &.o-default {
-       color: $o-mail-activity-default-color;
-   }
-
-   &.o-overdue {
-       color: $o-mail-activity-overdue-color;
-   }
-
-   &.o-planned {
-       color: $o-mail-activity-planned-color;
-   }
-
-   &.o-today {
-    color: $o-mail-activity-today-color;
-   }
 }
 
 /* Needed specifity to counter default bootstrap style */

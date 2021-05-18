@@ -28,6 +28,9 @@
                                 'o-overdue': activity.state === 'overdue',
                                 'o-planned': activity.state === 'planned',
                                 'o-today': activity.state === 'today',
+                                'text-danger': activity.state === 'overdue',
+                                'text-success': activity.state === 'planned',
+                                'text-warning': activity.state === 'today',
                             }"
                         >
                             <t t-esc="delayLabel"/>
@@ -86,6 +89,9 @@
                                             'o-overdue': activity.state === 'overdue',
                                             'o-planned': activity.state === 'planned',
                                             'o-today': activity.state === 'today',
+                                            'text-danger': activity.state === 'overdue',
+                                            'text-success': activity.state === 'planned',
+                                            'text-warning': activity.state === 'today',
                                         }"
                                     >
                                         <t t-esc="formattedDeadlineDate"/>

@@ -366,7 +366,6 @@
     font-style: italic;
 
     &.o-author {
-        color: theme-color('danger');
         font-weight: bold;
     }
 }
@@ -374,10 +373,6 @@
 .o_Message_notificationIconClickable {
     color: gray('600');
     cursor: pointer;
-
-    &.o-error {
-        color: $red;
-    }
 }
 
 .o_Message_sidebarCommands {

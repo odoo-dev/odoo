@@ -36,11 +36,6 @@
 }
 
 .o_PartnerImStatusIcon_icon {
-
-    &.o-away {
-        color: theme-color('warning');
-    }
-
     &.o-bot {
         color: $o-enterprise-primary-color;
     }

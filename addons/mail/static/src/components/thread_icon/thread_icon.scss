@@ -12,15 +12,3 @@
 .o_ThreadIcon_typing {
     flex: 1 1 auto;
 }
-
-// ------------------------------------------------------------------
-// Style
-// ------------------------------------------------------------------
-
-.o_ThreadIcon_away {
-    color: theme-color('warning');
-}
-
-.o_ThreadIcon_online {
-    color: $o-enterprise-primary-color;
-}
