@@ -222,8 +222,9 @@
             document.querySelector("#qunit-banner").classList.add("qunit-fail");
             modulesAlert.classList.toggle("alert-danger");
             modulesAlert.classList.toggle("alert-info");
-            const failingModules = info.missing.concat(info.failed);
-            const error = `Some modules couldn't be started: ${failingModules.join(", ")}.`;
+            let error = `Some modules couldn't be started: ${info.failed.join(", ")}.`;
+            error += `\nMissing dependencies: ${info.missing.join(", ")}.`;
+
             modulesAlert.textContent = error;
             errorMessages.unshift(error);
             return false;
@@ -278,13 +279,13 @@
         if (result.result) {
             return;
         }
-        let info = '"QUnit test failed: "'; // + result.module + ' > ' + result.name + '"';
-        info += ' [message: "' + result.message + '"';
+        let info = `QUnit test failed: ${result.module} > ${result.name}`;
+        info += ` [message: "${result.message}"`;
         if (result.actual !== null) {
-            info += ', actual: "' + result.actual + '"';
+            info += `, actual: "${result.actual}"`;
         }
         if (result.expected !== null) {
-            info += ', expected: "' + result.expected + '"';
+            info += `, expected: "${result.expected}"`;
         }
         info += "]";
         errorMessages.push(info);
