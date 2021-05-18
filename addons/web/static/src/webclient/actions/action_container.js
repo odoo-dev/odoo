@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { ActionDialog } from "./action_dialog";
-import { useBus } from "@web/core/bus_hook";
 
 const { Component, tags } = owl;
 
@@ -12,7 +11,7 @@ export class ActionContainer extends Component {
     setup() {
         this.main = {};
         this.dialog = {};
-        useBus(this.env.bus, "ACTION_MANAGER:UPDATE", (info) => {
+        this.env.bus.on("ACTION_MANAGER:UPDATE", this, (info) => {
             switch (info.type) {
                 case "MAIN":
                     this.main = info;
@@ -42,6 +41,11 @@ export class ActionContainer extends Component {
             }
             this.render();
         });
+    }
+
+    destroy() {
+        this.env.bus.off("ACTION_MANAGER:UPDATE", this);
+        super.destroy();
     }
 
     onDialogClosed() {
