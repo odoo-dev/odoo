@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.Modal" owl="1">
+        <Portal target="'.o_dialog_container'">
+            <div class="o_dialog">
+                <div role="dialog" class="modal"
+                    tabindex="-1"
+                    t-att-class="{ o_technical_modal: modalParams.technical, o_modal_full: modalParams.fullscreen }"
+                    t-ref="modal"
+                    >
+                    <div class="modal-dialog" t-att-class="modalParams.size">
+                        <div class="modal-content" t-att-class="modalParams.contentClass">
+                            <header t-if="modalParams.renderHeader" class="modal-header">
+                                <h4 class="modal-title">
+                                    <t t-esc="modalParams.title"/>
+                                </h4>
+                                <button type="button" class="close" aria-label="Close" tabindex="-1" t-on-click="close">×</button>
+                            </header>
+                            <main class="modal-body">
+                            </main>
+                            <footer t-if="modalParams.renderFooter" class="modal-footer">
+                                <button t-foreach="modalParams.buttons" t-as="button" type="button"
+                                t-attf-class="btn {{button.primary ? 'btn-primary' : 'btn-link'}}" t-on-click="button.onClick()">
+                                    <t t-if="button.icon">
+                                        <i t-if="button.icon.indexOf('fa-') === 0" role="img"
+                                        t-att-aria-label="button.name" t-att-title="button.name"
+                                        t-attf-class="fa fa-fw o_button_icon {{button.icon}}"/>
+                                        <img t-else="" t-att-src="button.icon" t-att-alt="button.name"/>
+                                    </t>
+                                    <span t-esc="button.name"/>
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Portal>
+    </t>
+
+</templates>
