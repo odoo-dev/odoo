@@ -346,6 +346,10 @@
             flex: 0 0 auto;
         }
 
+        .o_form_label:after {
+            transform: translate(5%, 5%) scale(1.3);
+        }
+
         &.o_horizontal {
             .o_radio_item {
                 margin-right: $o-form-spacing-unit * 2;
