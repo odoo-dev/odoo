@@ -204,17 +204,24 @@ function matchCondition(record, condition) {
             }
             return !value.includes(fieldValue);
         case "like":
-            return fieldValue.toLowerCase().indexOf(value.toLowerCase()) >= 0;
-        case "=like":
-            return new RegExp(
-                value
-                    .toLowerCase()
-                    .replace(/([.[]\{\}\+\*])/g, "\\$1")
-                    .replace(/%/g, ".*")
-            ).test(fieldValue.toLowerCase());
-        case "ilike":
+            if (fieldValue === false) {
+                return false;
+            }
             return fieldValue.indexOf(value) >= 0;
+        case "=like":
+            if (fieldValue === false) {
+                return false;
+            }
+            return new RegExp(value.replace(/%/g, '.*')).test(fieldValue);
+        case "ilike":
+            if (fieldValue === false) {
+                return false;
+            }
+            return fieldValue.toLowerCase().indexOf(value.toLowerCase()) >= 0;
         case "=ilike":
+            if (fieldValue === false) {
+                return false;
+            }
             return new RegExp(value.replace(/%/g, ".*"), "i").test(fieldValue);
     }
     throw new Error("could not match domain");
