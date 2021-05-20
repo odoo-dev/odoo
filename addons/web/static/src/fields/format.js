@@ -2,19 +2,17 @@
 
 /**
  * Returns a string representing an many2one.  If the value is false, then we
- * return an empty string.  Note that it accepts two types of input parameters:
+ * return an empty string. Note that it accepts two types of input parameters:
  * an array, in that case we assume that the many2one value is of the form
  * [id, nameget], and we return the nameget, or it can be an object, and in that
  * case, we assume that it is a record datapoint from a BasicModel.
  *
  * @param {Array|Object|false} value
- * @param {Object} [field]
- *        a description of the field (note: this parameter is ignored)
  * @param {{escape?: boolean}} [options] additional options
  * @param {boolean} [options.escape=false] if true, escapes the formatted value
  * @returns {string}
  */
-export function formatMany2one(value, field, options) {
+export function formatMany2one(value, options) {
     if (!value) {
         value = "";
     } else if (Array.isArray(value)) {
