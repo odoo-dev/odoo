@@ -13,8 +13,8 @@
     @extend .font-weight-bold;
 
     &:before {
-      @include o-position-absolute(0, $left: $dropdown-item-padding-x * .25);
-      transform: translateY(90%);
+      @include o-position-absolute(0);
+      transform: translate(-1.5em, 90%);
       font: .7em/1em FontAwesome;
       color: $primary;
       content: "\f00c";
@@ -93,10 +93,6 @@
 button.o_dropdown_toggler, button.o_dropdown_toggler_btn {
   > span {
     min-width: max-content;
-  }
-
-  .fa + .o_dropdown_title, .o_dropdown_title + .fa {
-    margin-left: .4em;
   }
 
   &%--state-active {
