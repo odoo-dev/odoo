@@ -4,7 +4,9 @@ import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 export const assetsWatchdogService = {
-    start(env) {
+    dependencies: ["notification"],
+
+    start(env, { notification }) {
         const assets = {};
         let assetsChangedNotificationId = null;
         let bundleNotifTimerID = null;
@@ -32,7 +34,7 @@ export const assetsWatchdogService = {
                 // We wait until things settle down
                 browser.clearTimeout(bundleNotifTimerID);
                 bundleNotifTimerID = browser.setTimeout(() => {
-                    assetsChangedNotificationId = env.services.notification.create(
+                    assetsChangedNotificationId = notification.create(
                         env._t("The page appears to be out of date."),
                         {
                             title: env._t("Refresh"),
