@@ -5,7 +5,9 @@ import { ConnectionLostError } from "@web/core/network/rpc_service";
 import { registry } from "@web/core/registry";
 
 export const calendarNotificationService = {
-    start(env) {
+    dependencies: ["action", "notification", "rpc"],
+
+    start(env, { action, notification, rpc }) {
         let calendarNotifTimeouts = {};
         let nextCalendarNotifTimeout = null;
         const calendarNotif = {};
@@ -40,7 +42,7 @@ export const calendarNotificationService = {
                     return;
                 }
                 calendarNotifTimeouts[key] = browser.setTimeout(function () {
-                    const notificationID = env.services.notification.create(notif.message, {
+                    const notificationID = notification.create(notif.message, {
                         title: notif.title,
                         type: "warning",
                         sticky: true,
@@ -52,26 +54,26 @@ export const calendarNotificationService = {
                                 name: env._t("OK"),
                                 primary: true,
                                 onClick: async () => {
-                                    await env.services.rpc("/calendar/notify_ack");
-                                    env.services.notification.close(calendarNotif[key]);
+                                    await rpc("/calendar/notify_ack");
+                                    notification.close(calendarNotif[key]);
                                 },
                             },
                             {
                                 name: env._t("Details"),
                                 onClick: async () => {
-                                    await env.services.action.doAction(
+                                    await action.doAction(
                                         "calendar.action_calendar_event_notify",
                                         {
                                             resId: notif.event_id,
                                         }
                                     );
-                                    env.services.notification.close(calendarNotif[key]);
+                                    notification.close(calendarNotif[key]);
                                 },
                             },
                             {
                                 name: env._t("Snooze"),
                                 onClick: () => {
-                                    env.services.notification.close(calendarNotif[key]);
+                                    notification.close(calendarNotif[key]);
                                 },
                             },
                         ],
@@ -92,7 +94,7 @@ export const calendarNotificationService = {
 
         async function getNextCalendarNotif() {
             try {
-                const result = await env.services.rpc("/calendar/notify", {}, { shadow: true });
+                const result = await rpc("/calendar/notify", {}, { shadow: true });
                 displayCalendarNotification(result);
             } catch (error) {
                 if (!(error instanceof ConnectionLostError)) {
