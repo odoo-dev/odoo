@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.IntegerField" owl="1">
+        <div class="o_integer_field" t-att-class="{'text-secondary': props.mode === 'read'}">
+            <t t-if="props.mode === 'read'">
+                <t t-esc="props.value" />
+            </t>
+            <t t-else="">
+                <input type="number" t-att-id="props.key" t-att-value="props.value" t-on-change.stop.prevent="onChange" />
+            </t>
+        </div>
+    </t>
+
+</templates>

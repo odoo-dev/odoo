@@ -13,10 +13,7 @@ QUnit.module("Format Fields", {}, () => {
             "A M2O value"
         );
 
-        assert.strictEqual(
-            formatMany2one([1, "A M2O value"], { escape: true }),
-            "A%20M2O%20value"
-        );
+        assert.strictEqual(formatMany2one([1, "A M2O value"], { escape: true }), "A%20M2O%20value");
         assert.strictEqual(
             formatMany2one(
                 {
@@ -24,7 +21,7 @@ QUnit.module("Format Fields", {}, () => {
                 },
                 { escape: true }
             ),
-            "A%20M2O%20value",
+            "A%20M2O%20value"
         );
     });
 });

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="SandBoxView" owl="1">
+        <div>
+            <div class="border-bottom">
+                <t t-if="state.mode === 'read'">
+                    <button class="btn btn-primary" t-on-click="reset('write')">Edit</button>
+                </t>
+                <t t-elif="state.mode === 'write'">
+                    <button class="btn btn-primary" t-att-disabled="!isDirty" t-on-click="save">Save</button>
+                    <button class="btn btn-secondary" t-on-click="discard">Discard</button>
+                </t>
+            </div>
+            <div class="d-flex rows">
+                <div class="col h-100 p-4 border-right" t-on-changes="addChanges">
+                    <t t-foreach="fieldsInfo" t-as="field" t-key="field.key">
+                        <div class="d-flex">
+                            <label class="w-25" t-att-for="field.key" t-esc="field.label" />
+                            <Field t-props="field" />
+                        </div>
+                    </t>
+                </div>
+                <div class="col h-100 p-4">
+                    <div>Logs</div>
+                    <t t-foreach="state.changes" t-as="change" t-key="change_index">
+                        <div class="border-top">
+                            <span t-esc="change.fieldName"/>: "<span t-esc="change.previous"/>" &gt; "<span t-esc="change.current"/>"
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

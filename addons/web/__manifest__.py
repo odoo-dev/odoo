@@ -89,6 +89,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/fields/**/*',
             'web/static/src/views/**/*',
             'web/static/src/webclient/**/*',
+            'web/static/src/poc/**/*',
             ('remove', 'web/static/src/webclient/clickbot/clickbot.js'), # lazy loaded
             'web/static/src/env.js',
 
@@ -142,6 +143,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/legacy_service_provider.js',
             'web/static/src/legacy/legacy_client_actions.js',
             'web/static/src/legacy/legacy_dialog.js',
+            'web/static/src/legacy/legacy_fields.js',
             'web/static/src/legacy/legacy_views.js',
             'web/static/src/legacy/legacy_promise_error_handler.js',
             'web/static/src/legacy/legacy_rpc_error_handler.js',

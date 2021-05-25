@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.Many2OneField" owl="1">
+        <div class="o_many2one_field">
+            <a href="#" t-esc="props.value[1]" />
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.BooleanField" owl="1">
+        <CheckBox class="o_checkbox_field"
+            t-att-class="{'text-secondary': props.mode === 'read'}"
+            id="props.key"
+            value="props.value"
+            disabled="props.mode === 'read'"
+            t-on-change.stop.prevent="toggle"
+        />
+    </t>
+
+</templates>

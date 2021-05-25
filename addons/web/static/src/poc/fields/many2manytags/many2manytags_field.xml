@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.Many2ManyTagsField" owl="1">
+        <div class="o_many2many_field">
+            <t t-foreach="dataPoint.data" t-as="record" t-key="record.id">
+                <span class="mr-1 p-2 rounded-pill bg-info" t-esc="record.display_name" />
+            </t>
+        </div>
+    </t>
+
+</templates>
