@@ -82,7 +82,7 @@ QUnit.test('dashboard basic rendering', async function (assert) {
         "with a dashboard, the renderer should have the proper css class");
     assert.containsOnce(form, '.o_dashboard .o_view_nocontent',
         "should have a no content helper");
-    assert.strictEqual(form.$('.o_control_panel .breadcrumb-item').text(), "My Dashboard",
+    assert.strictEqual(form.getTitle(), "My Dashboard",
         "should have the correct title");
     form.destroy();
 });
