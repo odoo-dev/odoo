@@ -138,6 +138,30 @@ class SandBoxView extends Component {
         });
     }
 
+    get fieldsInfo2() {
+        const dp = this.model.findDataPoint(this.dpId);
+        return this.fieldsInfo.map((fieldInfo) => {
+            let value = dp.data[fieldInfo.name];
+            if (dp.changes && fieldInfo.name in dp.changes) {
+                value = dp.changes[fieldInfo.name];
+            }
+            return {
+                name: fieldInfo.name,
+                id: fieldInfo.key,
+                label: fieldInfo.label,
+                props: {
+                    type: fieldInfo.as || this.fields[fieldInfo.name].type,
+                    value,
+                    mode: this.state.mode,
+                    id: fieldInfo.key,
+                },
+            };
+        });
+    }
+    onFieldChanged(name, ev) {
+        this.model.notifyChanges(this.dpId, { [name]: ev.detail });
+    }
+
     get isDirty() {
         return this.model.isDirty(this.dpId);
     }

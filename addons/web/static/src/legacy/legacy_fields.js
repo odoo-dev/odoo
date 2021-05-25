@@ -112,10 +112,10 @@ function createAdapter(LegacyField) {
 }
 
 function register(name, LegacyField) {
-    if (fieldsRegistry.contains(name)) {
-        return;
-    }
-    fieldsRegistry.add(name, createAdapter(LegacyField));
+    // if (fieldsRegistry.contains(name)) {
+    //     return;
+    // }
+    // fieldsRegistry.add(name, createAdapter(LegacyField));
 }
 
 for (const [name, LegacyField] of Object.entries(legacyFieldRegistryOwl.entries())) {

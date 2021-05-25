@@ -29,8 +29,6 @@ BooleanTextField.template = owl.tags.xml`
     <div class="o_boolean_field"
         t-att-class="{
             'text-secondary': props.mode === 'read',
-            'text-success': props.decorations.success,
-            'text-danger': props.decorations.danger,
         }"
         t-on-click.stop.prevent="toggle"
     >

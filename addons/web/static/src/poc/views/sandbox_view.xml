@@ -14,10 +14,22 @@
             </div>
             <div class="d-flex rows">
                 <div class="col h-100 p-4 border-right" t-on-changes="addChanges">
-                    <t t-foreach="fieldsInfo" t-as="field" t-key="field.key">
+                    <!-- <t t-foreach="fieldsInfo" t-as="field" t-key="field.key">
                         <div class="d-flex">
                             <label class="w-25" t-att-for="field.key" t-esc="field.label" />
                             <Field t-props="field" />
+                        </div>
+                    </t> -->
+                    <t t-foreach="fieldsInfo2" t-as="field" t-key="field.id">
+                        <div class="d-flex">
+                            <label class="w-25" t-att-for="field.id" t-esc="field.label" />
+                            <Field
+                                type="field.props.type"
+                                value="field.props.value"
+                                mode="field.props.mode"
+                                id="field.props.id"
+                                t-on-field-changed="onFieldChanged(field.name)"
+                            />
                         </div>
                     </t>
                 </div>
