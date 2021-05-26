@@ -34,6 +34,8 @@ class ThreadIcon extends Component {
                 threadPublic: thread && thread.public,
                 threadTypingStatusText: thread && thread.typingStatusText,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

@@ -9,13 +9,14 @@
  *
  * @param {function} selector function passed as selector of original `useStore`
  *   with 1st parameter extended as store state. @see owl.hooks.useStore
- * @param {object} [options={}] @see owl.hooks.useStore
+ * @param {Object} options @see owl.hooks.useStore
+ * @param {Object} options.store
  * @param {number|object} [options.compareDepth=0] the comparison depth, either
  *  as number (applies to all keys) or as an object (depth for specific keys)
  * @returns {Proxy} @see owl.hooks.useStore
  */
-function useStore(selector, options = {}) {
-    const store = options.store || owl.Component.current.env.store;
+function useStore(selector, options) {
+    const store = options.store;
     const hashFn = store.observer.revNumber.bind(store.observer);
     const isEqual = options.isEqual || ((a, b) => a === b);
 

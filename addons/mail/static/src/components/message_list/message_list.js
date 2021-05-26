@@ -45,6 +45,7 @@ class MessageList extends Component {
                 threadCacheOrderedMessages: 1,
                 threadViewComponentHintList: 1,
             },
+            store: this.env.store,
         });
         this._getRefs = useRefs();
         /**

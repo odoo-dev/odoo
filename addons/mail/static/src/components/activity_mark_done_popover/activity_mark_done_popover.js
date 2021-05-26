@@ -19,6 +19,8 @@ class ActivityMarkDonePopover extends Component {
             return {
                 activity: activity ? activity.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
         this._feedbackTextareaRef = useRef('feedbackTextarea');
     }

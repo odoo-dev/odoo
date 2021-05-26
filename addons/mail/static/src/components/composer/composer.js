@@ -65,6 +65,7 @@ class Composer extends Component {
             compareDepth: {
                 composerAttachments: 1,
             },
+            store: this.env.store,
         });
         useUpdate({ func: () => this._update() });
         /**

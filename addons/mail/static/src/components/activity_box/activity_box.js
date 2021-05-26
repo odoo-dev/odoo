@@ -23,6 +23,8 @@ class ActivityBox extends Component {
                 chatter: chatter ? chatter.__state : undefined,
                 thread: thread && thread.__state,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

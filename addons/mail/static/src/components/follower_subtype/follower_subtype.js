@@ -16,6 +16,8 @@ class FollowerSubtype extends Component {
         useStore(props => {
             const followerSubtype = this.env.models['mail.follower_subtype'].get(props.followerSubtypeLocalId);
             return [followerSubtype ? followerSubtype.__state : undefined];
+        }, {
+            store: this.env.store,
         });
     }
 

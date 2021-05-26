@@ -34,6 +34,7 @@ class AttachmentBox extends Component {
             compareDepth: {
                 threadAllAttachments: 1,
             },
+            store: this.env.store,
         });
         /**
          * Reference of the file uploader.

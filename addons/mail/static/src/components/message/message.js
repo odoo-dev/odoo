@@ -91,6 +91,7 @@ class Message extends Component {
                 attachments: 1,
                 notifications: 1,
             },
+            store: this.env.store,
         });
         useUpdate({ func: () => this._update() });
         /**

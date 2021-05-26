@@ -38,6 +38,8 @@ class ComposerSuggestedRecipient extends Component {
                 partner: partner && partner.__state,
                 suggestedRecipientInfo: suggestedRecipientInfo && suggestedRecipientInfo.__state,
             };
+        }, {
+            store: this.env.store,
         });
         useUpdate({ func: () => this._update() });
         /**

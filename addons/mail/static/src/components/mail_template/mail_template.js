@@ -20,6 +20,8 @@ class MailTemplate extends Component {
                 activity: activity ? activity.__state : undefined,
                 mailTemplate: mailTemplate ? mailTemplate.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

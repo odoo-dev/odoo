@@ -25,6 +25,8 @@ class ComposerSuggestion extends Component {
                 composerHasToScrollToActiveSuggestion: composer && composer.hasToScrollToActiveSuggestion,
                 record: record ? record.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
         useUpdate({ func: () => this._update() });
     }

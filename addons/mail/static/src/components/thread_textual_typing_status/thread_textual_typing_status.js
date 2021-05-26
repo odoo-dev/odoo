@@ -22,6 +22,8 @@ class ThreadTextualTypingStatus extends Component {
                 threadOrderedOtherTypingMembersLength: thread && thread.orderedOtherTypingMembersLength,
                 threadTypingStatusText: thread && thread.typingStatusText,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

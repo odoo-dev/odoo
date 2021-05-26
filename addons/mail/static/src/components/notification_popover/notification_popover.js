@@ -28,6 +28,7 @@ class NotificationPopover extends Component {
             compareDepth: {
                 notifications: 1,
             },
+            store: this.env.store,
         });
     }
 

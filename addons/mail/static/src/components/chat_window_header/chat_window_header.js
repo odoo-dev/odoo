@@ -34,6 +34,8 @@ class ChatWindowHeader extends Component {
                 threadMassMailing: thread && thread.mass_mailing,
                 threadModel: thread && thread.model,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

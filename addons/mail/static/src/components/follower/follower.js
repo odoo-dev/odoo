@@ -19,6 +19,8 @@ class Follower extends Component {
         useStore(props => {
             const follower = this.env.models['mail.follower'].get(props.followerLocalId);
             return [follower ? follower.__state : undefined];
+        }, {
+            store: this.env.store,
         });
     }
 

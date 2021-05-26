@@ -37,6 +37,8 @@ class AttachmentViewer extends Component {
                 deviceIsMobile: device && device.isMobile,
                 deviceSizeClass: device && device.sizeClass,
             };
+        }, {
+            store: this.env.store,
         });
         /**
          * Used to ensure that the ref is always up to date, which seems to be needed if the element

@@ -29,6 +29,7 @@ class ComposerSuggestedRecipientList extends Component {
             compareDepth: {
                 threadSuggestedRecipientInfoList: 1,
             },
+            store: this.env.store,
         });
     }
 

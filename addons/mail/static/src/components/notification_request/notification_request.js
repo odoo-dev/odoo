@@ -23,6 +23,8 @@ class NotificationRequest extends Component {
                     ? this.env.messaging.partnerRoot.__state
                     : undefined,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

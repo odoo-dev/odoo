@@ -53,6 +53,8 @@ QUnit.test("compare keys, no depth, primitives", async function (assert) {
                 return {
                     res: obj.use1 ? obj.subObj1 : obj.subObj2,
                 };
+            }, {
+                store: this.env.store,
             });
             onPatched(() => {
                 count++;
@@ -133,6 +135,7 @@ QUnit.test("compare keys, depth 1, proxy", async function (assert) {
                 compareDepth: {
                     array: 1,
                 },
+                store: this.env.store,
             });
             onPatched(() => {
                 count++;

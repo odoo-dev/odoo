@@ -25,6 +25,8 @@ class Attachment extends Component {
             return {
                 attachment: attachment ? attachment.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
         this.state = useState({
             hasDeleteConfirmDialog: false,

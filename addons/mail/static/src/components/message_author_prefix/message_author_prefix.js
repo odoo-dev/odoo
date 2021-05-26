@@ -27,6 +27,8 @@ class MessageAuthorPrefix extends Component {
                 message: message ? message.__state : undefined,
                 thread: thread ? thread.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

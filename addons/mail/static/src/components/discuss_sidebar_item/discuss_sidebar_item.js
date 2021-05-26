@@ -39,6 +39,8 @@ class DiscussSidebarItem extends Component {
                 threadMessageNeedactionCounter: thread && thread.message_needaction_counter,
                 threadModel: thread && thread.model,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

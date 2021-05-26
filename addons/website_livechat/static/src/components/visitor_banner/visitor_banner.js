@@ -19,6 +19,8 @@ class VisitorBanner extends Component {
                 country: country && country.__state,
                 visitor: visitor ? visitor.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

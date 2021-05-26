@@ -34,6 +34,7 @@ class ChatWindowManager extends Component {
                 allOrderedVisible: 1,
                 allOrderedVisibleThread: 1,
             },
+            store: this.env.store,
         });
     }
 

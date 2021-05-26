@@ -27,6 +27,8 @@ class ChatterTopbar extends Component {
                 composerIsLog: chatter && chatter.composer && chatter.composer.isLog,
                 threadAttachmentsAmount: threadAttachments.length,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

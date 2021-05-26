@@ -20,6 +20,8 @@ class PartnerImStatusIcon extends Component {
                 partnerImStatus: partner && partner.im_status,
                 partnerRoot: this.env.messaging.partnerRoot,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

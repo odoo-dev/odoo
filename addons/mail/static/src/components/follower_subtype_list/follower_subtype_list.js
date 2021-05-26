@@ -33,6 +33,7 @@ class FollowerSubtypeList extends Component {
             compareDepth: {
                 followerSubtypes: 1,
             },
+            store: this.env.store,
         });
     }
 

@@ -21,7 +21,10 @@ class DiscussSidebar extends Component {
         useShouldUpdateBasedOnProps();
         useStore(
             (...args) => this._useStoreSelector(...args),
-            { compareDepth: this._useStoreCompareDepth() }
+            {
+                compareDepth: this._useStoreCompareDepth(),
+                store: this.env.store,
+            },
         );
         useUpdate({ func: () => this._update() });
         /**

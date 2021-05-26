@@ -23,6 +23,8 @@ class AttachmentDeleteConfirmDialog extends Component {
             return {
                 attachment: attachment ? attachment.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
         // to manually trigger the dialog close event
         this._dialogRef = useRef('dialog');

@@ -25,6 +25,8 @@ class MessageSeenIndicator extends Component {
             return {
                 messageSeenIndicator: messageSeenIndicator ? messageSeenIndicator.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

@@ -29,6 +29,7 @@ class NotificationList extends Component {
                 // list + notification object created in useStore
                 notifications: 2,
             },
+            store: this.env.store,
         });
     }
 

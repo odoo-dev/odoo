@@ -39,6 +39,7 @@ class ComposerSuggestionList extends Component {
                 extraSuggestedRecords: 1,
                 mainSuggestedRecords: 1,
             },
+            store: this.env.store,
         });
     }
 

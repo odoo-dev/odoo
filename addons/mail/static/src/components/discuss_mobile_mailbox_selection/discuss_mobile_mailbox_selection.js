@@ -24,6 +24,7 @@ class DiscussMobileMailboxSelection extends Component {
             compareDepth: {
                 allOrderedAndPinnedMailboxes: 1,
             },
+            store: this.env.store,
         });
     }
 

@@ -35,6 +35,8 @@ class MessagingMenu extends Component {
                 isMessagingInitialized: this.env.isMessagingInitialized(),
                 messagingMenu: this.env.messaging && this.env.messaging.messagingMenu.__state,
             };
+        }, {
+            store: this.env.store,
         });
 
         // bind since passed as props

@@ -21,6 +21,8 @@ class DialogManager extends Component {
             return {
                 dialogManager: dialogManager ? dialogManager.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

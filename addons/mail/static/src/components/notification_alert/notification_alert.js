@@ -19,6 +19,8 @@ class NotificationAlert extends Component {
                 isMessagingInitialized,
                 isNotificationBlocked: this.isNotificationBlocked,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

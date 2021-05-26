@@ -25,6 +25,8 @@ class Dialog extends Component {
             return {
                 dialog: dialog ? dialog.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
         this._constructor();
     }

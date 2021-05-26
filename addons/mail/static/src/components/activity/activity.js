@@ -42,6 +42,8 @@ class Activity extends Component {
                     activity.assignee.nameOrDisplayName
                 ),
             };
+        }, {
+            store: this.env.store,
         });
         /**
          * Reference of the file uploader.

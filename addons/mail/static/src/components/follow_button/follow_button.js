@@ -24,6 +24,8 @@ class FollowButton extends Component {
             return {
                 threadIsCurrentPartnerFollowing: thread && thread.isCurrentPartnerFollowing,
             };
+        }, {
+            store: this.env.store,
         });
     }
 

@@ -32,6 +32,7 @@ class ModerationDiscardDialog extends Component {
             compareDepth: {
                 messages: 1,
             },
+            store: this.env.store,
         });
         // to manually trigger the dialog close event
         this._dialogRef = useRef('dialog');

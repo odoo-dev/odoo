@@ -39,6 +39,7 @@ class Discuss extends Component {
                 checkedMessages: 1,
                 uncheckedMessages: 1,
             },
+            store: this.env.store,
         });
         this._updateLocalStoreProps();
         /**

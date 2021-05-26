@@ -19,6 +19,8 @@ class NotificationGroup extends Component {
             return {
                 group: group ? group.__state : undefined,
             };
+        }, {
+            store: this.env.store,
         });
         /**
          * Reference of the "mark as read" button. Useful to disable the

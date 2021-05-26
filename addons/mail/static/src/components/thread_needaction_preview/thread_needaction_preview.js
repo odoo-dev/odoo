@@ -43,6 +43,8 @@ class ThreadNeedactionPreview extends Component {
                     ? threadCorrespondent.__state
                     : undefined,
             };
+        }, {
+            store: this.env.store,
         });
         /**
          * Reference of the "mark as read" button. Useful to disable the

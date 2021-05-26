@@ -24,6 +24,8 @@ class ChatWindowHiddenMenu extends Component {
                 device: device ? device.__state : undefined,
                 localeTextDirection: locale ? locale.textDirection : undefined,
             };
+        }, {
+            store: this.env.store,
         });
         this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);
         /**

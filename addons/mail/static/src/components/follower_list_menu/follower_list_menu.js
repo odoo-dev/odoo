@@ -33,6 +33,7 @@ class FollowerListMenu extends Component {
             compareDepth: {
                 followers: 1,
             },
+            store: this.env.store,
         });
         this._dropdownRef = useRef('dropdown');
         this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);

@@ -42,6 +42,8 @@ class ComposerTextInput extends Component {
                 threadDisplayName: thread && thread.displayName,
                 threadModel: thread && thread.model,
             };
+        }, {
+            store: this.env.store,
         });
         /**
          * Updates the composer text input content when composer is mounted

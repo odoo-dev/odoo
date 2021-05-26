@@ -23,6 +23,7 @@ class ThreadView extends Component {
             compareDepth: {
                 threadTextInputSendShortcuts: 1,
             },
+            store: this.env.store,
         });
         useUpdate({ func: () => this._update() });
         /**

@@ -976,6 +976,8 @@ QUnit.test('activity click on cancel', async function (assert) {
                 return {
                     activity: activity ? activity.__state : undefined,
                 };
+            }, {
+                store: this.env.store,
             });
         }
 

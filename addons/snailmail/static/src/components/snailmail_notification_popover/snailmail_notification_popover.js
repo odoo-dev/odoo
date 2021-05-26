@@ -22,6 +22,7 @@ class SnailmailNotificationPopover extends Component {
             compareDepth: {
                 notifications: 1,
             },
+            store: this.env.store,
         });
     }
 

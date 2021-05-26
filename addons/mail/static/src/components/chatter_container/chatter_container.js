@@ -38,6 +38,8 @@ class ChatterContainer extends Component {
                 this._insertFromProps(props);
             }
             return { chatter: this.chatter };
+        }, {
+            store: this.env.store,
         });
         useUpdate({ func: () => this._update() });
     }

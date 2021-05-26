@@ -33,6 +33,7 @@ class AttachmentList extends Component {
             compareDepth: {
                 attachments: 1,
             },
+            store: this.env.store,
         });
     }
 
