@@ -1,10 +1,12 @@
 /** @odoo-module **/
 
+import MessagingMenu from '@mail/components/messaging_menu/messaging_menu';
 import ModelManager from '@mail/model/model_manager';
 import MessagingService from '@mail/services/messaging/messaging';
 
 import env from 'web.commonEnv';
 import { serviceRegistry } from 'web.core';
+import { registry } from "@web/core/registry";
 
 const { Store } = owl;
 const { EventBus } = owl.core;
@@ -123,3 +125,6 @@ env.bus.on(
 );
 
 serviceRegistry.add('messaging', MessagingService);
+
+// const systrayRegistry = registry.category("systray");
+// systrayRegistry.add("MessagingMenu", MessagingMenu, { sequence: 30 });
