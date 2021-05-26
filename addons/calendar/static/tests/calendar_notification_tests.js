@@ -98,8 +98,6 @@ QUnit.module("Calendar Notification", (hooks) => {
             await click(webClient.el.querySelector(".o_notification_buttons .btn"));
             assert.verifySteps(["notifyAck"]);
             assert.containsNone(webClient.el, ".o_notification");
-
-            webClient.destroy();
         }
     );
 
@@ -171,8 +169,6 @@ QUnit.module("Calendar Notification", (hooks) => {
             await click(webClient.el.querySelectorAll(".o_notification_buttons .btn")[1]);
             assert.verifySteps(["calendar.action_calendar_event_notify"]);
             assert.containsNone(webClient.el, ".o_notification");
-
-            webClient.destroy();
         }
     );
 
@@ -232,8 +228,6 @@ QUnit.module("Calendar Notification", (hooks) => {
             await click(webClient.el.querySelectorAll(".o_notification_buttons .btn")[2]);
             assert.verifySteps([], "should only close the notification withtout calling a rpc");
             assert.containsNone(webClient.el, ".o_notification");
-
-            webClient.destroy();
         }
     );
 });

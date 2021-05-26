@@ -82,6 +82,5 @@ QUnit.module("Bus Assets WatchDog", (hooks) => {
         // reload by clicking on the reload button
         await click(webClient.el, ".o_notification_buttons .btn-primary");
         assert.verifySteps(["reloadPage"]);
-        webClient.destroy();
     });
 });
