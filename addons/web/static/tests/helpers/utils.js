@@ -3,6 +3,7 @@
 import { isMacOS } from "@web/core/browser/feature_detection";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { registerCleanup } from "./cleanup";
+import { download } from "@web/core/network/download";
 
 const { Settings } = luxon;
 
@@ -127,4 +128,8 @@ export function triggerHotkey(hotkey, altIsOptional = false, eventAttrs = {}) {
 
 export async function legacyExtraNextTick() {
     return nextTick();
+}
+
+export function mockDownload(cb) {
+    patchWithCleanup(download, { _download: cb });
 }

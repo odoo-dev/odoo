@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import core from "web.core";
+import session from "web.session";
 import { browser } from "@web/core/browser/browser";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { legacyProm } from "web.test_legacy";
@@ -53,6 +54,13 @@ function patchLegacyCoreBus() {
     });
 }
 
+function patchLegacySession() {
+    const userContext = Object.getOwnPropertyDescriptor(session, "user_context");
+    registerCleanup(() => {
+        Object.defineProperty(session, "user_context", userContext);
+    });
+}
+
 export async function setupTests() {
     QUnit.testStart(() => {
         setTestOdooWithCleanup();
@@ -60,6 +68,7 @@ export async function setupTests() {
         forceLocaleAndTimezoneWithCleanup();
         patchBrowserWithCleanup();
         patchLegacyCoreBus();
+        patchLegacySession();
     });
 
     const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}?bundle=web.assets_qweb`;

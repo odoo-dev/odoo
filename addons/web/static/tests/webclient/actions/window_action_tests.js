@@ -2168,8 +2168,6 @@ QUnit.module("ActionManager", (hooks) => {
                 ".modal.o_technical_modal",
                 "Warning modal should be closed"
             );
-
-            webClient.destroy();
         }
     );
 
@@ -2190,7 +2188,6 @@ QUnit.module("ActionManager", (hooks) => {
             await legacyExtraNextTick();
             assert.containsOnce(webClient, ".o_dialog");
             assert.containsOnce(webClient, ".o_dialog .o_act_window .o_view_controller");
-            webClient.destroy();
         }
     );
 
@@ -2224,7 +2221,6 @@ QUnit.module("ActionManager", (hooks) => {
         await click(webClient.el.querySelector(".o_form_buttons_edit .o_form_button_save"));
         await legacyExtraNextTick();
         assert.isVisible(webClient.el.querySelector(".o_form_buttons_view .o_form_button_edit"));
-        webClient.destroy();
     });
 
     QUnit.test("debugManager is active for (legacy) views", async function (assert) {
@@ -2248,7 +2244,6 @@ QUnit.module("ActionManager", (hooks) => {
             webClient.el,
             ".o_debug_manager .o_dropdown_item:contains('Edit View: Kanban')"
         );
-        webClient.destroy();
     });
 
     QUnit.test("reload a view via the view switcher keep state", async function (assert) {

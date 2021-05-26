@@ -1,23 +1,18 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { download } from "@web/core/network/download";
 import { uiService } from "@web/core/ui_service";
 import testUtils from "web.test_utils";
 import ReportClientAction from "report.client_action";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { makeFakeNotificationService, makeFakeUserService } from "../../helpers/mock_services";
-import { patchWithCleanup } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
+import { mockDownload } from "@web/../tests/helpers/utils";
 
 let testConfig;
 
 const mainComponentRegistry = registry.category("main_components");
 const serviceRegistry = registry.category("services");
-
-function mockDownload(cb) {
-    patchWithCleanup(download, { _download: cb });
-}
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.beforeEach(() => {

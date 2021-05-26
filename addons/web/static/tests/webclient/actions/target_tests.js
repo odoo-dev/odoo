@@ -294,8 +294,6 @@ QUnit.module("ActionManager", (hooks) => {
             await testUtils.dom.click($(".modal:last .modal-footer .btn-primary"));
             assert.containsOnce(document.body, ".modal");
             assert.strictEqual($(".modal:last .modal-body").text().trim(), "Another action");
-
-            webClient.destroy();
         }
     );
 

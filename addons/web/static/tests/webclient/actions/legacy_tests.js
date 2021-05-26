@@ -13,6 +13,7 @@ import { ClientActionAdapter } from "@web/legacy/action_adapters";
 import { useDebugManager } from "@web/core/debug/debug_menu";
 import { debugService } from "@web/core/debug/debug_service";
 
+import ControlPanel from "web.ControlPanel";
 import core from "web.core";
 import AbstractAction from "web.AbstractAction";
 
@@ -134,6 +135,55 @@ QUnit.module("ActionManager", (hooks) => {
 
         await click(webClient.el, ".o_debug_manager button");
         assert.verifySteps(["debugItems executed"]);
+        delete core.action_registry.map.customLegacy;
+    });
+
+    QUnit.test("willUnmount is called down the legacy layers", async (assert) => {
+        assert.expect(7);
+
+        let mountCount = 0;
+        patchWithCleanup(ControlPanel.prototype, {
+            mounted() {
+                mountCount = mountCount + 1;
+                this.__uniqueId = mountCount;
+                assert.step(`mounted ${this.__uniqueId}`);
+                this._super(...arguments);
+            },
+            willUnmount() {
+                assert.step(`willUnmount ${this.__uniqueId}`);
+                this._super(...arguments);
+            },
+        });
+
+        const LegacyAction = AbstractAction.extend({
+            hasControlPanel: true,
+            start() {
+                const ret = this._super(...arguments);
+                const el = document.createElement("div");
+                el.classList.add("custom-action");
+                this.el.append(el);
+                return ret;
+            },
+        });
+        core.action_registry.add("customLegacy", LegacyAction);
+
+        const webClient = await createWebClient({ testConfig });
+        await doAction(webClient, 1);
+        await doAction(webClient, "customLegacy");
+        await click(webClient.el.querySelectorAll(".breadcrumb-item")[0]);
+        await legacyExtraNextTick();
+
+        webClient.destroy();
+
+        assert.verifySteps([
+            "mounted 1",
+            "willUnmount 1",
+            "mounted 2",
+            "willUnmount 2",
+            "mounted 3",
+            "willUnmount 3",
+        ]);
+
         delete core.action_registry.map.customLegacy;
     });
 });

@@ -94,37 +94,6 @@ export function makeFakeUserService(values) {
     };
 }
 
-/*export function makeFakeMenusService(menuData?: MenuData): Service<MenuService> {
-  const _menuData = menuData || {
-    root: { id: "root", children: [1], name: "root" },
-    1: { id: 1, children: [], name: "App0" },
-  };
-  return {
-    name: "menus",
-    start() {
-      const menusService = {
-        getMenu(menuId: keyof MenuData) {
-          return _menuData![menuId];
-        },
-        getApps() {
-          return this.getMenu("root").children.map((mid) => this.getMenu(mid));
-        },
-        getAll() {
-          return Object.values(_menuData);
-        },
-        getMenuAsTree(menuId: keyof MenuData) {
-          const menu = this.getMenu(menuId) as MenuTree;
-          if (!menu.childrenTree) {
-            menu.childrenTree = menu.children.map((mid: Menu["id"]) => this.getMenuAsTree(mid));
-          }
-          return menu;
-        },
-      };
-      return menusService;
-    },
-  };
-}*/
-
 function buildMockRPC(mockRPC) {
     return async function (...args) {
         if (this instanceof Component && this.__owl__.status === 5) {

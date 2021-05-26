@@ -11,6 +11,7 @@ import {
     makeLegacyActionManagerService,
     makeLegacyNotificationService,
     mapLegacyEnvToWowlEnv,
+    makeLegacySessionService,
 } from "@web/legacy/utils";
 import { viewService } from "@web/views/view_service";
 import { actionService } from "@web/webclient/actions/action_service";
@@ -41,6 +42,9 @@ import {
 } from "../../helpers/mock_services";
 import { getFixture, legacyExtraNextTick, nextTick, patchWithCleanup } from "../../helpers/utils";
 import session from "web.session";
+import { ComponentAdapter } from "web.OwlCompatibility";
+import LegacyMockServer from "web.MockServer";
+import Widget from "web.Widget";
 
 const { Component, mount, tags } = owl;
 
@@ -78,9 +82,17 @@ export async function createWebClient(params) {
             controllers.push(this);
         },
     });
-    if (params.legacyParams && params.legacyParams.getTZOffset) {
-        patchWithCleanup(session, {
-            getTZOffset: params.legacyParams.getTZOffset,
+
+    const legacyParams = params.legacyParams;
+    const models = params.testConfig.serverData.models;
+    if (legacyParams && legacyParams.withLegacyMockServer && models) {
+        legacyParams.models = Object.assign({}, models);
+        // In lagacy, data may not be sole models, but can contain some other variables
+        // So we filter them out for our WOWL mockServer
+        Object.entries(legacyParams.models).forEach(([k, v]) => {
+            if (!(v instanceof Object) || !("fields" in v)) {
+                delete models[k];
+            }
         });
     }
 
@@ -89,7 +101,7 @@ export async function createWebClient(params) {
         ...params.testConfig,
         mockRPC,
     });
-    addLegacyMockEnvironment(env, params.testConfig, params.legacyParams);
+    addLegacyMockEnvironment(env, params.testConfig, legacyParams);
 
     const WebClientClass = params.WebClientClass || WebClient;
     const target = params && params.target ? params.target : getFixture();
@@ -157,7 +169,15 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
     ActionMenus.registry = new Registry();
     registerCleanup(() => (ActionMenus.registry = actionMenusRegistry));
 
-    const legacyEnv = makeTestEnvironment({ dataManager, bus: core.bus });
+    let localSession;
+    if (legacyParams && legacyParams.getTZOffset) {
+        patchWithCleanup(session, {
+            getTZOffset: legacyParams.getTZOffset,
+        });
+        localSession = { getTZOffset: legacyParams.getTZOffset };
+    }
+
+    const legacyEnv = makeTestEnvironment({ dataManager, bus: core.bus, session: localSession });
 
     if (legacyParams.serviceRegistry) {
         const legacyServiceMap = core.serviceRegistry.map;
@@ -173,6 +193,7 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
 
     Component.env = legacyEnv;
     mapLegacyEnvToWowlEnv(legacyEnv, env);
+    serviceRegistry.add("legacy_session", makeLegacySessionService(legacyEnv, session));
     // deploy the legacyActionManagerService (in Wowl env)
     const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
     serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
@@ -183,6 +204,26 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
     const initialDebouncedVal = debouncedField.prototype.DEBOUNCE;
     debouncedField.prototype.DEBOUNCE = 0;
     registerCleanup(() => (debouncedField.prototype.DEBOUNCE = initialDebouncedVal));
+
+    if (legacyParams.withLegacyMockServer) {
+        const adapter = new ComponentAdapter(null, { Component: owl.Component });
+        adapter.env = legacyEnv;
+        const W = Widget.extend({ do_push_state() {} });
+        const widget = new W(adapter);
+        const legacyMockServer = new LegacyMockServer(legacyParams.models, { widget });
+        const originalRPC = env.services.rpc;
+        env.services.rpc = async (...args) => {
+            try {
+                return await originalRPC(...args);
+            } catch (e) {
+                if (e.message.includes("Unimplemented")) {
+                    return legacyMockServer._performRpc(...args);
+                } else {
+                    throw e;
+                }
+            }
+        };
+    }
 }
 
 export async function doAction(env, ...args) {
