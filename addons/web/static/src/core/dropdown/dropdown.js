@@ -80,7 +80,7 @@ export class Dropdown extends Component {
                 items.forEach((item) => item.classList.remove("o_dropdown_active"));
                 items[nextActiveIndex].classList.add("o_dropdown_active");
                 scrollTo(items[nextActiveIndex], this.el.querySelector(".o_dropdown_menu"));
-            }
+            };
         }
 
         const hotkeyCallbacks = {
@@ -115,8 +115,7 @@ export class Dropdown extends Component {
                         })
                     );
                 }
-            }
-            else {
+            } else {
                 // Unsubscribe keynav
                 for (const token of this.hotkeyTokens) {
                     this.hotkeyService.unregisterHotkey(token);
