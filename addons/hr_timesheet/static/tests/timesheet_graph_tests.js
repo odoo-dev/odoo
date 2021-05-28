@@ -19,7 +19,7 @@ QUnit.module('Timesheet UOM Widgets', function (hooks) {
         sessionUOMIdsBackup = session.uom_ids || false;
         sessionUIDBackup = session.uid || false;
     });
-    hooks.after(function (assert) {
+    hooks.after(async function (assert) {
         // Restores the session
         const sessionToApply = Object.assign(
             { },
@@ -35,12 +35,10 @@ QUnit.module('Timesheet UOM Widgets', function (hooks) {
             sessionUIDBackup && {
                 uid: sessionUIDBackup,
             } || { });
-        env.triggerAbstractWebClientInit(sessionToApply, true);
+        await env.patchSessionAndStartServices(sessionToApply, true);
     });
     QUnit.module('GraphView', function (hooks) {
-        QUnit.skip('the timesheet_graph view data are multiplied by a factor that is company related', async function (assert) {
-            // This test relies on commented code using AbstractWebclient, which needs to be adapted
-            // See timesheet_uom_common.js
+        QUnit.test('the timesheet_graph view data are multiplied by a factor that is company related', async function (assert) {
             assert.expect(2);
 
             let options = {
