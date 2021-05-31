@@ -2,7 +2,7 @@
 
 /**
  * Creates a version of the function that's memoized on the value of its first
- * argument.
+ * argument, if any.
  *
  * @template T, U
  * @param {(arg: T) => U} func the function to memoize
@@ -10,7 +10,7 @@
  */
 export function memoize(func) {
     const cache = new Map();
-    return function (...args) {
+    return function memoized(...args) {
         if (!cache.has(args[0])) {
             cache.set(args[0], func(...args));
         }
