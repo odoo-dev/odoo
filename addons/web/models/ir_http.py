@@ -51,6 +51,7 @@ class Http(models.AbstractModel):
             'profile_collectors': request.session.profile_collectors,
             'profile_params': request.session.profile_params,
             "max_file_upload_size": max_file_upload_size,
+            "home_action_id": user.action_id.id,
         }
         if self.env.user.has_group('base.group_user'):
             # the following is only useful in the context of a webclient bootstrapping
