@@ -23,7 +23,7 @@ var _t = core._t;
 const cpHelpers = testUtils.controlPanel;
 var createView = testUtils.createView;
 
-const { legacyExtraNextTick } = require("@web/../tests/helpers/utils");
+const { legacyExtraNextTick, patchWithCleanup } = require("@web/../tests/helpers/utils");
 const { createWebClient, doAction, getActionManagerTestConfig } = require('@web/../tests/webclient/actions/helpers');
 
 let testConfig;
@@ -6813,14 +6813,8 @@ QUnit.module('Views', {
         _t.database.multi_lang = multi_lang;
     });
 
-    // LPE: map translationService to session
-    // with loading translations only once
-    QUnit.skip('translation alerts preseved on reverse breadcrumb', async function (assert) {
+    QUnit.test('translation alerts preserved on reverse breadcrumb', async function (assert) {
         assert.expect(2);
-
-        testConfig.localizationParameters = {
-            multiLang: true,
-        };
 
         testConfig.serverData.models['ir.translation'] = {
             fields: {
@@ -6868,9 +6862,12 @@ QUnit.module('Views', {
         };
 
         const webClient = await createWebClient({ testConfig });
+        patchWithCleanup(_t.database, {
+            multi_lang: true,
+        });
         await doAction(webClient, 1);
         $(webClient.el).find('input[name="foo"]').val("test").trigger("input");
-        //await new Promise(() => {});
+
         await testUtils.dom.click(webClient.el.querySelector('.o_form_button_save'));
         await legacyExtraNextTick();
 
