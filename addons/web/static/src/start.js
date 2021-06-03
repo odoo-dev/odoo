@@ -16,9 +16,7 @@ const { whenReady } = utils;
  *
  * @param {owl.Component} Webclient
  */
-export async function startWebClient(Webclient) {
-    // delete (odoo as any).session_info; // FIXME: some legacy code rely on this (e.g. ajax.js)
-    const sessionInfo = odoo.session_info;
+export async function startWebClient(Webclient, sessionInfo) {
     odoo.info = {
         db: sessionInfo.db,
         server_version: sessionInfo.server_version,
@@ -29,7 +27,7 @@ export async function startWebClient(Webclient) {
     // setup environment
     const env = makeEnv();
     const [, templates] = await Promise.all([
-        startServices(env),
+        startServices(env, sessionInfo),
         odoo.loadTemplatesPromise.then(processTemplates),
     ]);
     env.qweb.addTemplates(templates);

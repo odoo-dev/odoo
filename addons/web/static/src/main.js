@@ -9,4 +9,5 @@ import { WebClient } from "./webclient/webclient";
  * which is a subclass of the above Webclient.
  */
 
-startWebClient(WebClient);
+startWebClient(WebClient, odoo.session_info);
+//delete odoo.session_info; Uncoment this line when legacy is removed

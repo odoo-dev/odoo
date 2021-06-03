@@ -5,8 +5,7 @@ import { registry } from "./registry";
 export const userService = {
     dependencies: ["rpc"],
     async: ["hasGroup"],
-    start(env, { rpc }) {
-        const sessionInfo = odoo.session_info;
+    start(env, { rpc }, sessionInfo) {
         const groupProms = {};
 
         const context = {

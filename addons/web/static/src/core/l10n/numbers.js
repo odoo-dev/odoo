@@ -144,20 +144,14 @@ export function parseInteger(value) {
  * symbol of the currency whose id is passed in options.
  *
  * @param {string} value
+ * @param {Object} currency
  * @param {Object} [options={}]
- * @param {number} [options.currencyId]
  * @returns {number} float
  */
-export function parseMonetary(value, options = {}) {
+export function parseMonetary(value, currency, options = {}) {
     let values = value.split("&nbsp;");
     if (values.length === 1) {
         return parseFloat(value);
-    }
-    let currency;
-    if (options.currencyId) {
-        currency = odoo.session_info.currencies[options.currencyId];
-    } else {
-        currency = Object.values(odoo.session_info.currencies)[0];
     }
     const symbolIndex = values.findIndex((v) => v === currency.symbol);
     if (symbolIndex === -1) {

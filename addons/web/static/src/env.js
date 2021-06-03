@@ -55,7 +55,7 @@ export const SERVICES_METADATA = {};
  * @param {OdooEnv} env
  * @returns {Promise<void>}
  */
-export async function startServices(env) {
+export async function startServices(env, sessionInfo) {
     const toStart = new Set();
     serviceRegistry.on("UPDATE", null, async (payload) => {
         // Wait for all synchronous code so that if new services that depend on
@@ -73,13 +73,13 @@ export async function startServices(env) {
             const namedService = Object.assign(Object.create(service), { name });
             toStart.add(namedService);
         } else {
-            await _startServices(env, toStart);
+            await _startServices(env, toStart, sessionInfo);
         }
     });
-    await _startServices(env, toStart);
+    await _startServices(env, toStart, sessionInfo);
 }
 
-async function _startServices(env, toStart, timeoutId) {
+async function _startServices(env, toStart, sessionInfo) {
     const services = env.services;
     for (const [name, service] of serviceRegistry.getEntries()) {
         if (!(name in services)) {
@@ -99,7 +99,7 @@ async function _startServices(env, toStart, timeoutId) {
             const dependencies = Object.fromEntries(entries);
             let value;
             try {
-                value = service.start(env, dependencies);
+                value = service.start(env, dependencies, sessionInfo);
             } catch (e) {
                 value = e;
                 console.error(e);

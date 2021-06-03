@@ -7,6 +7,7 @@ import { registerCleanup } from "./cleanup";
 import { makeMockServer } from "./mock_server";
 import { mocks } from "./mock_services";
 import { patchWithCleanup } from "./utils";
+import { getMockSessionInfo } from "./mock_session_info";
 
 export function clearRegistryWithCleanup(registry) {
     const patch = {
@@ -92,7 +93,7 @@ export async function makeTestEnv(config = {}) {
     });
 
     const env = makeEnv();
-    await startServices(env);
+    await startServices(env, getMockSessionInfo());
     env.qweb.addTemplates(window.__ODOO_TEMPLATES__);
     return env;
 }

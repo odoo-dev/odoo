@@ -6,7 +6,7 @@ import { formatFloat, humanNumber } from "./numbers";
  * Formats a value as a currency.
  *
  * @param {number|false} value currency value number
- * @param {string} cid currency id
+ * @param {Object} currency
  * @param {Object} [options={}] formatting options
  * @param {boolean} [options.noSymbol] this currency has not a sympbol
  * @param {boolean} [options.humanReadable] this currency needs to be human readable
@@ -16,11 +16,10 @@ import { formatFloat, humanNumber } from "./numbers";
  *    The first number is always ignored (legacy constraint)
  * @returns The formatted currency
  */
-export function formatCurrency(value, cid, options = {}) {
+export function formatCurrency(value, currency, options = {}) {
     if (value === false) {
         return "";
     }
-    const currency = odoo.session_info.currencies[cid];
     const { noSymbol } = options || {};
     const digits = (currency && currency.digits) || options.digits;
 

@@ -14,8 +14,7 @@ function parseCompanyIds(cidsFromHash) {
     return cids;
 }
 
-function computeAllowedCompanyIds(cids) {
-    const { user_companies } = odoo.session_info;
+function computeAllowedCompanyIds(cids, user_companies) {
     let allowedCompanyIds = cids || [];
     const availableCompaniesFromSession = user_companies.allowed_companies;
     const notReallyAllowedCompanies = allowedCompanyIds.filter(
@@ -30,21 +29,21 @@ function computeAllowedCompanyIds(cids) {
 
 export const companyService = {
     dependencies: ["user", "router", "cookie"],
-    start(env, { user, router, cookie }) {
+    start(env, { user, router, cookie },  { user_companies }) {
         let cids;
         if ("cids" in router.current.hash) {
             cids = parseCompanyIds(router.current.hash.cids);
         } else if ("cids" in cookie.current) {
             cids = parseCompanyIds(cookie.current.cids);
         }
-        let allowedCompanyIds = computeAllowedCompanyIds(cids);
+        let allowedCompanyIds = computeAllowedCompanyIds(cids, user_companies);
 
         const stringCIds = allowedCompanyIds.join(",");
         router.replaceState({ cids: stringCIds }, { lock: true });
         cookie.setCookie("cids", stringCIds);
 
         user.updateContext({ allowed_company_ids: allowedCompanyIds });
-        const availableCompanies = odoo.session_info.user_companies.allowed_companies;
+        const availableCompanies = user_companies.allowed_companies;
 
         return {
             availableCompanies,

@@ -132,41 +132,36 @@ QUnit.module("utils", (hooks) => {
     QUnit.test("parseMonetary", function (assert) {
         assert.expect(17);
 
-        patchWithCleanup(odoo.session_info, {
-            currencies: {
-                1: {
-                    digits: [69, 2],
-                    position: "after",
-                    symbol: "€",
-                },
-                3: {
-                    digits: [69, 2],
-                    position: "before",
-                    symbol: "$",
-                },
-            },
-        });
+        const currency_euro = {
+            digits: [69, 2],
+            position: "after",
+            symbol: "€",
+        };
+        const currency_dollar = {
+            digits: [69, 2],
+            position: "before",
+            symbol: "$",
+        }
+        assert.strictEqual(parseMonetary("", currency_euro), 0);
+        assert.strictEqual(parseMonetary("0", currency_euro), 0);
+        assert.strictEqual(parseMonetary("100.00&nbsp;€", currency_euro), 100);
+        assert.strictEqual(parseMonetary("-100.00", currency_euro), -100);
+        assert.strictEqual(parseMonetary("1,000.00", currency_euro), 1000);
+        assert.strictEqual(parseMonetary("1,000,000.00", currency_euro), 1000000);
+        assert.strictEqual(parseMonetary("$&nbsp;125.00", currency_dollar), 125);
+        assert.strictEqual(parseMonetary("1,000.00&nbsp;€", currency_euro), 1000);
 
-        assert.strictEqual(parseMonetary(""), 0);
-        assert.strictEqual(parseMonetary("0"), 0);
-        assert.strictEqual(parseMonetary("100.00&nbsp;€"), 100);
-        assert.strictEqual(parseMonetary("-100.00"), -100);
-        assert.strictEqual(parseMonetary("1,000.00"), 1000);
-        assert.strictEqual(parseMonetary("1,000,000.00"), 1000000);
-        assert.strictEqual(parseMonetary("$&nbsp;125.00", { currencyId: 3 }), 125);
-        assert.strictEqual(parseMonetary("1,000.00&nbsp;€", { currencyId: 1 }), 1000);
+        expectInvalidNumberError(assert, parseMonetary, "&nbsp;", currency_dollar);
+        expectInvalidNumberError(assert, parseMonetary, "1&nbsp;", currency_dollar);
+        expectInvalidNumberError(assert, parseMonetary, "&nbsp;1", currency_dollar);
 
-        expectInvalidNumberError(assert, parseMonetary, "&nbsp;", { currencyId: 3 });
-        expectInvalidNumberError(assert, parseMonetary, "1&nbsp;", { currencyId: 3 });
-        expectInvalidNumberError(assert, parseMonetary, "&nbsp;1", { currencyId: 3 });
+        expectInvalidNumberError(assert, parseMonetary, "12.00 €", currency_euro);
+        expectInvalidNumberError(assert, parseMonetary, "$ 12.00", currency_dollar);
+        expectInvalidNumberError(assert, parseMonetary, "1&nbsp;$", currency_euro);
+        expectInvalidNumberError(assert, parseMonetary, "$&nbsp;1", currency_euro); // "€" is the default currency here
 
-        expectInvalidNumberError(assert, parseMonetary, "12.00 €");
-        expectInvalidNumberError(assert, parseMonetary, "$ 12.00", { currencyId: 3 });
-        expectInvalidNumberError(assert, parseMonetary, "1&nbsp;$", { currencyId: 1 });
-        expectInvalidNumberError(assert, parseMonetary, "$&nbsp;1"); // "€" is the default currency here
-
-        expectInvalidNumberError(assert, parseMonetary, "1$&nbsp;1", { currencyId: 1 });
-        expectInvalidNumberError(assert, parseMonetary, "$&nbsp;12.00&nbsp;34", { currencyId: 3 });
+        expectInvalidNumberError(assert, parseMonetary, "1$&nbsp;1", currency_euro);
+        expectInvalidNumberError(assert, parseMonetary, "$&nbsp;12.00&nbsp;34", currency_dollar);
     });
 
     QUnit.test("parsePercentage", function (assert) {

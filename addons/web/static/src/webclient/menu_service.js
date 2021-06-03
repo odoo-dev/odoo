@@ -5,9 +5,8 @@ import { registry } from "../core/registry";
 
 const loadMenusUrl = `/web/webclient/load_menus`;
 
-function makeFetchLoadMenus() {
-    const cacheHashes = odoo.session_info.cache_hashes;
-    let loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
+function makeFetchLoadMenus(cache_hashes) {
+    let loadMenusHash = cache_hashes.load_menus || new Date().getTime().toString();
     return async function fetchLoadMenus(reload) {
         if (reload) {
             loadMenusHash = new Date().getTime().toString();
@@ -76,8 +75,8 @@ function makeMenus(env, menusData, fetchLoadMenus) {
 
 export const menuService = {
     dependencies: ["action", "router"],
-    async start(env) {
-        const fetchLoadMenus = makeFetchLoadMenus();
+    async start(env, dependencies, { cache_hashes }) {
+        const fetchLoadMenus = makeFetchLoadMenus(cache_hashes);
         const menusData = await fetchLoadMenus();
         return makeMenus(env, menusData, fetchLoadMenus);
     },

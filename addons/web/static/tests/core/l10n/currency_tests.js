@@ -10,22 +10,26 @@ QUnit.module("utils", () => {
 
     QUnit.test("format", async (assert) => {
         patch(localization, "locpatch", defaultLocalization);
-        assert.deepEqual(formatCurrency(1234567.654, 1), "$ 1,234,567.65");
-        assert.deepEqual(formatCurrency(1234567.654, 2), "1,234,567.65 €");
+
+        const currency_usd = { name: "USD", digits: [69, 2], position: "before", symbol: "$" };
+        const currency_eur = { name: "EUR", digits: [69, 2], position: "after", symbol: "€" };
+
+        assert.deepEqual(formatCurrency(1234567.654, currency_usd), "$ 1,234,567.65");
+        assert.deepEqual(formatCurrency(1234567.654, currency_eur), "1,234,567.65 €");
         assert.deepEqual(
-            formatCurrency(1234567.654, 44),
+            formatCurrency(1234567.654, undefined),
             "1,234,567.65",
             "undefined currency should be fine too"
         );
-        assert.deepEqual(formatCurrency(1234567.654, 2, { noSymbol: true }), "1,234,567.65");
-        assert.deepEqual(formatCurrency(1234567.654, 2, { humanReadable: true }), "1M €");
-        assert.deepEqual(formatCurrency(1234567.654, 44, { digits: [69, 1] }), "1,234,567.7");
+        assert.deepEqual(formatCurrency(1234567.654, currency_eur, { noSymbol: true }), "1,234,567.65");
+        assert.deepEqual(formatCurrency(1234567.654, currency_eur, { humanReadable: true }), "1M €");
+        assert.deepEqual(formatCurrency(1234567.654, undefined, { digits: [69, 1] }), "1,234,567.7");
         assert.deepEqual(
-            formatCurrency(1234567.654, 1, { digits: [69, 1] }),
+            formatCurrency(1234567.654, currency_usd, { digits: [69, 1] }),
             "$ 1,234,567.65",
             "currency digits should take over options digits when both are defined"
         );
-        assert.strictEqual(formatCurrency(false, 2), "");
+        assert.strictEqual(formatCurrency(false, currency_eur), "");
         unpatch(localization, "locpatch");
     });
 

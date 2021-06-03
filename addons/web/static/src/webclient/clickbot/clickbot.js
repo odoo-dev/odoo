@@ -14,7 +14,7 @@
         "pos_adyen.menu_pos_adyen_account",
     ];
 
-    const isEnterprise = odoo.session_info.server_version_info[5] === "e";
+    const isEnterprise = odoo.info.server_version_info[5] === "e";
     let appsMenusOnly = false;
     let actionCount = 0;
     let viewUpdateCount = 0;

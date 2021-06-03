@@ -8,9 +8,8 @@ import { translatedTerms } from "./translation";
 
 export const localizationService = {
     dependencies: ["user"],
-    start: async (env, { user }) => {
-        const cacheHashes = odoo.session_info.cache_hashes;
-        const translationsHash = cacheHashes.translations || new Date().getTime().toString();
+    start: async (env, { user }, { cache_hashes }) => {
+        const translationsHash = cache_hashes.translations || new Date().getTime().toString();
         const lang = user.lang || null;
         let url = `/web/webclient/translations/${translationsHash}`;
         if (lang) {
