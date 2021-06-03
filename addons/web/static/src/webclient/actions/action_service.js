@@ -444,25 +444,6 @@ function makeActionManager(env) {
             setup() {
                 this.Component = controller.Component;
                 this.componentRef = hooks.useRef("component");
-                this.registerCallback = null;
-                if (action.target !== "new") {
-                    let beforeLeaveFn;
-                    this.registerCallback = (type, fn) => {
-                        switch (type) {
-                            case "export":
-                                controller.getState = fn;
-                                break;
-                            case "beforeLeave":
-                                beforeLeaveFn = fn;
-                                break;
-                        }
-                    };
-                    useBus(env.bus, "CLEAR-UNCOMMITTED-CHANGES", (callbacks) => {
-                        if (beforeLeaveFn) {
-                            callbacks.push(beforeLeaveFn);
-                        }
-                    });
-                }
             }
             catchError(error) {
                 // The above component should truely handle the error
@@ -526,9 +507,12 @@ function makeActionManager(env) {
             onTitleUpdated(ev) {
                 controller.title = ev.detail;
             }
+            get componentProps() {
+                return { ...this.props, controller, action };
+            }
         }
 
-        ControllerComponent.template = tags.xml`<t t-component="Component" t-props="props"
+        ControllerComponent.template = tags.xml`<t t-component="Component" t-props="componentProps"
           registerCallback="registerCallback"
           t-ref="component"
           t-on-history-back="onHistoryBack"

@@ -2,8 +2,9 @@
 
 import { getScrollPosition, setScrollPosition } from "../../core/utils/scrolling";
 import { useEffect } from "../../core/effect_hook";
+import { useBus } from "../../core/bus_hook";
 
-const { useComponent } = owl.hooks;
+const { useComponent, useEnv } = owl.hooks;
 
 // -----------------------------------------------------------------------------
 // Action hook
@@ -15,23 +16,27 @@ const scrollSymbol = Symbol("scroll");
  * allows to implement the 'export' feature which aims at restoring the state
  * of the Component when we come back to it (e.g. using the breadcrumbs).
  */
-export function useSetupAction(params) {
+export function useSetupAction({ beforeLeave, export: exportMethod }) {
     const component = useComponent();
+    const env = useEnv();
 
-    useEffect(() => {
-        if (component.props.registerCallback) {
-            if (params.beforeLeave) {
-                component.props.registerCallback("beforeLeave", params.beforeLeave);
+    const { action, controller } = component.props;
+    if (action.target !== "new") {
+        controller.getState = () => {
+            const state = {};
+            state[scrollSymbol] = getScrollPosition(component);
+            if (exportMethod) {
+                Object.assign(state, exportMethod());
             }
-            component.props.registerCallback("export", () => {
-                const state = {};
-                state[scrollSymbol] = getScrollPosition(component);
-                if (params.export) {
-                    Object.assign(state, params.export());
-                }
-                return state;
+            return state;
+        };
+        if (beforeLeave) {
+            useBus(env.bus, "CLEAR-UNCOMMITTED-CHANGES", (callbacks) => {
+                callbacks.push(beforeLeave);
             });
         }
+    }
+    useEffect(() => {
         if (component.props.state) {
             setScrollPosition(component, component.props.state[scrollSymbol]);
         }
