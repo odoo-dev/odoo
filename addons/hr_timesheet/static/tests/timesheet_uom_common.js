@@ -168,7 +168,8 @@ function SetupTimesheetUOMWidgetsTestEnvironment () {
         }
         const serviceRegistry = registry.category("services");
         if (!serviceRegistry.contains("timesheet_uom")) {
-            serviceRegistry.add("timesheet_uom", timesheetUomService);
+            // Remove dependency on legacy_session since we're patching the session directly
+            serviceRegistry.add("timesheet_uom", Object.assign({}, timesheetUomService, { dependencies: [] }));
         }
         await makeTestEnv(); // Start services
     };
