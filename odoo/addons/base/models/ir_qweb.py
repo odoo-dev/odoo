@@ -6,7 +6,10 @@ import logging
 import re
 import markupsafe
 from time import time
-from lxml import html, etree
+import threading
+
+from lxml import html
+from lxml import etree
 
 from odoo import api, models, tools
 from odoo.tools.safe_eval import check_values, assert_valid_codeobj, _BUILTINS, to_opcodes, _EXPR_OPCODES, _BLACKLIST
@@ -70,10 +73,54 @@ class IrQWeb(models.AbstractModel, QWeb):
         context = dict(self.env.context, dev_mode='qweb' in tools.config['dev_mode'])
         context.update(options)
 
+        current_thread = threading.current_thread()
+        has_profile_collectors = hasattr(current_thread, 'qweb_hooks')
+
+        if has_profile_collectors:
+            # optionnal hooks for performance and tracing analysis
+            context['profile'] = True
+
+            def __start_directive_profiling(xpath, directive, values, options):
+                ec = None
+                if directive:
+                    ec = tools.profiler.ExecutionContext(directive=directive, xpath=xpath, adjust_level=1)
+                    ec.__enter__()
+                return (time(), self.env.cr.sql_log_count, ec)
+            values['__start_directive_profiling'] = __start_directive_profiling
+
+            log_profiling_arch = {}
+            log_profiling_results = []
+            def __stop_directive_profiling(xpath, directive, values, options, loginfo):
+                now, query, ec = loginfo
+                if directive:
+                    ec.__exit__()
+
+                view_id = options.get('ref')
+                delay = (time() - now) * 1000
+                dquery = self.env.cr.sql_log_count - query
+
+                if not view_id in log_profiling_arch:
+                    log_profiling_arch[view_id] = options.get('document')
+                log_profiling_results.append({
+                    'view_id': view_id,
+                    'xpath': xpath,
+                    'directive': directive,
+                    'now': now,
+                    'delay': delay,
+                    'query': dquery,
+                })
+            values['__stop_directive_profiling'] = __stop_directive_profiling
+
         result = super(IrQWeb, self)._render(template, values=values, **context)
 
         if not values or not values.get('__keep_empty_lines'):
             result = markupsafe.Markup(IrQWeb._empty_lines.sub('\n', result.strip()))
+
+        if has_profile_collectors:
+            if has_profile_collectors:
+                # optionnal hooks for performance and tracing analysis
+                for hook in current_thread.qweb_hooks:
+                    hook({'archs': log_profiling_arch, 'data': log_profiling_results})
 
         if 'data-pagebreak=' not in result:
             return result
@@ -109,7 +156,7 @@ class IrQWeb(models.AbstractModel, QWeb):
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_get_template``. """
-        return ['lang', 'inherit_branding', 'editable', 'translatable', 'edit_translations', 'website_id']
+        return ['lang', 'inherit_branding', 'editable', 'translatable', 'edit_translations', 'website_id', 'profile']
 
     # apply ormcache_context decorator unless in dev mode...
     @tools.conditional(
@@ -176,8 +223,11 @@ class IrQWeb(models.AbstractModel, QWeb):
         part that wrap the rest of the compiled code of this element.
         """
         groups = el.attrib.pop('t-groups')
+        directive = f'groups="{groups}"'
         code = self._flushText(options, indent)
+        code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
         code.append(self._indent(f"if self.user_has_groups({repr(groups)}):", indent))
+        code.extend(self._compile_stop_directive_profiling(el, repr(directive), options, indent + 1))
         code.extend(self._compile_directives(el, options, indent + 1) + self._flushText(options, indent + 1) or [self._indent('pass', indent + 1)])
         return code
 
@@ -190,7 +240,9 @@ class IrQWeb(models.AbstractModel, QWeb):
         if len(el):
             raise SyntaxError("t-call-assets cannot contain children nodes")
 
+        directive = 't-call-assets="%s"' % el.get('t-call-assets')
         code = self._flushText(options, indent)
+        code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
         code.append(self._indent(dedent("""
             t_call_assets_nodes = self._get_asset_nodes(%(xmlid)s, compile_options, css=%(css)s, js=%(js)s, debug=values.get("debug"), async_load=%(async_load)s, defer_load=%(defer_load)s, lazy_load=%(lazy_load)s, media=%(media)s)
             for index, (tagName, attrs, content) in enumerate(t_call_assets_nodes):
@@ -219,6 +271,7 @@ class IrQWeb(models.AbstractModel, QWeb):
                     yield tagName
                     yield '>'
                 """).strip(), indent + 1))
+        code.extend(self._compile_stop_directive_profiling(el, repr(directive), options, indent))
 
         return code
 
@@ -354,6 +407,26 @@ class IrQWeb(models.AbstractModel, QWeb):
         attributes['data-oe-expression'] = field_options['expression']
 
         return (attributes, content, None)
+
+    def _start_directive_profiling(self, xpath, directive, values, options):
+        if '__start_directive_profiling' in values:
+            return values['__start_directive_profiling'](xpath, directive, values, options)
+        return (time(), self.env.cr.sql_log_count)
+
+    def _stop_directive_profiling(self, xpath, directive, values, options, loginfo):
+        if '__stop_directive_profiling' in values:
+            return values['__stop_directive_profiling'](xpath, directive, values, options, loginfo)
+        now, query = loginfo
+        delay = (time() - now) * 1000
+        dquery = self.env.cr.sql_log_count - query
+        _logger.debug("Qweb profile: %s", {
+            'view_id': options.get('ref'),
+            'xpath': xpath,
+            'directive': directive,
+            'now': now,
+            'delay': delay,
+            'query': dquery,
+        })
 
     def _prepare_values(self, values, options):
         """ Prepare the context that will be sent to the evaluated function.

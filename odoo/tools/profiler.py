@@ -242,6 +242,45 @@ class SyncCollector(Collector):
         super().post_process()
 
 
+class QwebCollector(Collector):
+    """
+    Record qweb execution with directive trace.
+    """
+    name = 'qweb'
+
+    def __init__(self):
+        super().__init__()
+        def hook(results):
+            """
+            param data: {
+                    'archs': {view_id: string},
+                    'data': [{
+                        'view_id': number
+                        'arch': html
+                        'xpath': string
+                        'directive': string
+                        'time': float
+                        'delay': float
+                        'query': number
+                    }]
+                }
+            """
+            self.add({'results': results})
+        self.hook = hook
+
+    def start(self):
+        init_thread = self.profiler.init_thread
+        if not hasattr(init_thread, 'qweb_hooks'):
+            init_thread.qweb_hooks = []
+        if self.hook in init_thread.qweb_hooks:
+            _logger.warning('record qweb recursive call')
+        else:
+            init_thread.qweb_hooks.append(self.hook)
+
+    def stop(self):
+        self.profiler.init_thread.qweb_hooks.remove(self.hook)
+
+
 class ExecutionContext:
     """
     Add some context on thread at current call stack level.
@@ -249,6 +288,7 @@ class ExecutionContext:
     to add a level to the stack with this information.
     """
     def __init__(self, **context):
+        self.adjust_level = context.pop('adjust_level', 0)
         self.context = context
         self.stack_trace_level = None
 
@@ -257,10 +297,10 @@ class ExecutionContext:
         self.stack_trace_level = stack_size()
         if not hasattr(current_thread, 'exec_context'):
             current_thread.exec_context = {}
-        current_thread.exec_context[self.stack_trace_level] = self.context
+        current_thread.exec_context[self.stack_trace_level - self.adjust_level] = self.context
 
     def __exit__(self, *_args):
-        threading.current_thread().exec_context.pop(self.stack_trace_level)
+        threading.current_thread().exec_context.pop(self.stack_trace_level - self.adjust_level)
 
 
 class Profiler:

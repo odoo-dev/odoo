@@ -9,6 +9,7 @@ import token
 import tokenize
 import io
 
+from time import time
 from markupsafe import Markup, escape
 from collections.abc import Sized, Mapping
 from itertools import count, chain
@@ -391,6 +392,11 @@ class QWeb(object):
         elif t_options:
             code.append(self._indent(f"{varname} = {self._compile_expr(t_options)}", indent))
 
+        if code:
+            return (self._compile_start_directive_profiling(el, repr(directive), options, indent) +
+                code +
+                self._compile_stop_directive_profiling(el, repr(directive), options, indent))
+
         return code
 
     def _compile_format(self, expr):
@@ -638,6 +644,22 @@ class QWeb(object):
 
     # compile
 
+    def _compile_start_directive_profiling(self, el, directive, options, indent):
+        if 'profile' not in options:
+            return []
+
+        path = el is not None and options['root'].getpath(el) or ""
+        loginfo = _VARNAME_REGEX.sub('_', f'loginfo_{path}_{directive}')
+        return [self._indent(f"{loginfo} = self._start_directive_profiling({repr(path)}, {repr(directive or '')}, values, compile_options)", indent)]
+
+    def _compile_stop_directive_profiling(self, el, directive, options, indent):
+        if 'profile' not in options:
+            return []
+
+        path = el is not None and options['root'].getpath(el) or ""
+        loginfo = _VARNAME_REGEX.sub('_', f'loginfo_{path}_{directive}')
+        return [self._indent(f"self._stop_directive_profiling({repr(path)}, {repr(directive or '')}, values, compile_options, {loginfo})", indent)]
+
     def _compile_static_node(self, el, options, indent):
         """ Compile a purely static element into a list of string. """
         if not el.nsmap:
@@ -744,6 +766,8 @@ class QWeb(object):
         """
         code = []
         for name, value in el.attrib.items():
+            directive = f'{name}="{value}"'
+            code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
 
             if name.startswith('t-attf-'):
                 code.append(self._indent(f"attrs[{repr(name[7:])}] = {self._compile_format(value)}", indent))
@@ -759,6 +783,8 @@ class QWeb(object):
                     elif isinstance(atts_value, (list, tuple)):
                         attrs.update(dict(atts_value))
                     """), indent))
+
+            code.extend(self._compile_stop_directive_profiling(el, repr(directive), options, indent))
         return code
 
     def _compile_all_attributes(self, el, options, indent, attr_already_created=False):
@@ -775,7 +801,13 @@ class QWeb(object):
             code.extend(self._compile_dynamic_attributes(el, options, indent))
         if attr_already_created:
             code.append(self._indent(f"tagName = {repr(el.tag)}", indent))
+            key_hook = self._make_name('post_processing')
+            hook = self._compile_start_directive_profiling(el, repr(key_hook), options, indent)
+            if hook:
+                code.append(self._indent(f'{key_hook} = "post_processing:  %s" % repr(attrs)', indent))
+                code.extend(hook)
             code.extend(self._compile_attributes(options, indent))
+            code.extend(self._compile_stop_directive_profiling(el, repr(key_hook), options, indent))
         return code
 
     def _compile_tag_open(self, el, options, indent, attr_already_created=False):
@@ -881,17 +913,20 @@ class QWeb(object):
         The code will contain the assignment of the dynamically generated value.
         """
         varname = el.attrib.pop('t-set')
+        directive = f't-set="{varname}"'
         code = self._flushText(options, indent)
 
         if 't-value' in el.attrib:
             if varname == '0':
                 raise ValueError('t-set="0" should not contains t-value or t-valuef')
             expr = el.attrib.pop('t-value') or 'None'
+            directive = f'{directive} t-value="{expr}"'
             expr = self._compile_expr(expr)
         elif 't-valuef' in el.attrib:
             if varname == '0':
                 raise ValueError('t-set="0" should not contains t-value or t-valuef')
             exprf = el.attrib.pop('t-valuef')
+            directive = f'{directive} t-valuef="{exprf}"'
             expr = self._compile_format(exprf)
         else:
             # set the content as value
@@ -904,7 +939,9 @@ class QWeb(object):
             else:
                 expr = "''"
 
+        code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
         code.append(self._indent(f"values[{repr(varname)}] = {expr}", indent))
+        code.extend(self._compile_stop_directive_profiling(el, repr(directive), options, indent))
         return code
 
     def _compile_directive_content(self, el, options, indent):
@@ -968,8 +1005,10 @@ class QWeb(object):
         """
         if 't-elif' in el.attrib:
             expr = el.attrib.pop('t-elif')
+            directive = f't-elif="{expr}"'
         else:
             expr = el.attrib.pop('t-if')
+            directive = f't-if="{expr}"'
 
         code = self._flushText(options, indent)
         content_if = self._compile_directives(el, options, indent + 1) + self._flushText(options, indent + 1)
@@ -989,10 +1028,13 @@ class QWeb(object):
             el.tail = None
             orelse = self._compile_node(next_el, dict(options, t_if=True), indent + 1) + self._flushText(options, indent + 1)
 
+        code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
         code.append(self._indent(f"if {self._compile_expr(expr)}:", indent))
+        code.extend(self._compile_stop_directive_profiling(el, repr(directive), options, indent + 1))
         code.extend(content_if or [self._indent('pass', indent + 1)])
-        if orelse:
+        if orelse or 'profile' in options:
             code.append(self._indent("else:", indent))
+            code.extend(self._compile_stop_directive_profiling(el, repr(directive), options, indent + 1))
             code.extend(orelse)
         return code
 
@@ -1011,9 +1053,12 @@ class QWeb(object):
         """
         expr_foreach = el.attrib.pop('t-foreach')
         expr_as = el.attrib.pop('t-as')
+        directive = f't-foreach="{expr_foreach}" t-as="{expr_as}"'
 
         code = self._flushText(options, indent)
         content_foreach = self._compile_directives(el, options, indent + 1) + self._flushText(options, indent + 1)
+        code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
+        stop_profiling = self._compile_stop_directive_profiling(el, repr(directive), options, 0)
 
         t_foreach = self._make_name('t_foreach')
         size = self._make_name('size')
@@ -1056,8 +1101,18 @@ class QWeb(object):
                     values[{repr(expr_as + '_parity')}] = 'odd' if values[{repr(expr_as + '_odd')}] else 'even'
             """), indent))
 
+        if stop_profiling:
+            code.append(self._indent(f'if values[{repr(expr_as + "_first")}]:', indent + 1))
+            for line in stop_profiling:
+                code.append(self._indent(line, indent + 2))
+
         code.append(self._indent(f'log["last_path_node"] = {repr(options["root"].getpath(el))} ', indent + 1))
         code.extend(content_foreach or self._indent('continue', indent + 1))
+
+        if stop_profiling:
+            code.append(self._indent(f'if not {t_foreach}:', indent))
+            for line in stop_profiling:
+                code.append(self._indent(line, indent + 1))
 
         return code
 
@@ -1075,17 +1130,21 @@ class QWeb(object):
         """
         ttype = 't-out'
         expr = el.attrib.pop('t-out', None)
+        directive = f't-out="{expr}"'
         if expr is None:
             # deprecated use.
             ttype = 't-esc'
             expr = el.attrib.pop('t-esc', None)
+            directive = f't-esc="{expr}"'
             if expr is None:
                 ttype = 't-raw'
                 expr = el.attrib.pop('t-raw')
+                directive = f't-raw="{expr}"'
 
         code = self._flushText(options, indent)
         code_options = self._compile_options(el, 't_out_t_options', options, indent)
         code.extend(code_options)
+        code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
 
         if expr == "0":
             if code_options:
@@ -1094,7 +1153,9 @@ class QWeb(object):
                 code.extend(code_options)
                 code.extend(self._compile_tag_open(el, options, indent))
                 code.extend(self._flushText(options, indent))
+                code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
                 code.append(self._indent("yield from values.get('0', [])", indent))
+                code.extend(self._compile_stop_directive_profiling(el, repr(directive), options, indent))
                 code.extend(self._compile_tag_close(el, options))
                 return code
         else:
@@ -1104,7 +1165,6 @@ class QWeb(object):
             code.append(self._indent(f"attrs, content, force_display = self._get_widget(content, {repr(expr)}, {repr(el.tag)}, t_out_t_options, compile_options, values)", indent))
         else:
             code.append(self._indent("force_display = None", indent))
-
             if ttype == 't-esc':
                 # deprecated use.
                 code.append(self._indent(dedent("""
@@ -1118,7 +1178,8 @@ class QWeb(object):
                         content = Markup(content)
                 """), indent))
 
-        code.extend(self._compile_widget_value(el, options, indent, without_attributes=not code_options))
+        code.extend(self._compile_widget_value(el, directive, options, indent, without_attributes=not code_options))
+
         return code
 
     def _compile_directive_esc(self, el, options, indent):
@@ -1167,6 +1228,7 @@ class QWeb(object):
             "t-field must have at least a dot like 'record.field_name'"
 
         expression = el.attrib.pop('t-field')
+        directive = f't-field="{expression}"'
         record, field_name = expression.rsplit('.', 1)
 
         code = []
@@ -1176,12 +1238,13 @@ class QWeb(object):
         else:
             code.append(self._indent('t_field_t_options = {}', indent))
 
+        code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
         code.append(self._indent(f"attrs, content, force_display = self._get_field({self._compile_expr(record, raise_on_missing=True)}, {repr(field_name)}, {repr(expression)}, {repr(tagName)}, t_field_t_options, compile_options, values)", indent))
         code.append(self._indent("content = self._compile_to_str(content)", indent))
-        code.extend(self._compile_widget_value(el, options, indent))
+        code.extend(self._compile_widget_value(el, directive, options, indent))
         return code
 
-    def _compile_widget_value(self, el, options, indent=0, without_attributes=False):
+    def _compile_widget_value(self, el, directive, options, indent=0, without_attributes=False):
         """Take care of part of the compilation of `t-out` and `t-field` (and
         the technical directive `t-tag). This is the part that takes care of
         whether or not created the tags and the default content of the element.
@@ -1190,31 +1253,37 @@ class QWeb(object):
 
         code = self._flushText(options, indent)
         code.append(self._indent("if content is not None and content is not False:", indent))
+        hook_after = self._compile_stop_directive_profiling(el, repr(directive), options, indent + 1)
+        code.extend(hook_after)
         code.extend(self._compile_tag_open(el, options, indent + 1, not without_attributes))
         code.extend(self._flushText(options, indent + 1))
         # Use str to avoid the escaping of the other html content.
         code.append(self._indent("yield str(escape(content))", indent + 1))
         code.extend(self._compile_tag_close(el, options))
         code.extend(self._flushText(options, indent + 1))
+        code.append(self._indent("else:", indent))
+        if hook_after:
+            code.extend(hook_after)
 
         default_body = self._compile_directive_content(el, options, indent + 1)
         if default_body or options['_text_concat']:
             # default content
             _text_concat = list(options['_text_concat'])
             options['_text_concat'].clear()
-            code.append(self._indent("else:", indent))
             code.extend(self._compile_tag_open(el, options, indent + 1, not without_attributes))
             code.extend(default_body)
             options['_text_concat'].extend(_text_concat)
             code.extend(self._compile_tag_close(el, options))
             code.extend(self._flushText(options, indent + 1))
         else:
-            content = (self._compile_tag_open(el, options, indent + 1, not without_attributes) +
+            content = (self._compile_tag_open(el, options, indent + 2, not without_attributes) +
                 self._compile_tag_close(el, options) +
                 self._flushText(options, indent + 2))
             if content:
-                code.append(self._indent("elif force_display:", indent))
+                code.append(self._indent("if force_display:", indent +1))
                 code.extend(content)
+            else:
+                code.append(self._indent("pass", indent + 1))
 
         return code
 
@@ -1233,6 +1302,7 @@ class QWeb(object):
         compilation of the content of this element.
         """
         expr = el.attrib.pop('t-call')
+        directive = f't-call="{expr}"'
         _values = self._make_name('values_copy')
 
         if el.attrib.get('t-call-options'): # retro-compatibility
@@ -1243,6 +1313,7 @@ class QWeb(object):
         code = self._flushText(options, indent)
         code_options = self._compile_options(el, 't_call_t_options', options, indent)
         code.extend(code_options)
+        code.extend(self._compile_start_directive_profiling(el, repr(directive), options, indent))
 
         # content (t-out="0" and variables)
         def_name = "t_call_content"
@@ -1290,6 +1361,7 @@ class QWeb(object):
         else:
             code.append(self._indent(f"yield from self._compile({template}, t_call_options)(self, t_call_values)", indent))
 
+        code.extend(self._compile_stop_directive_profiling(el, repr(directive), options, indent))
 
         return code
 
@@ -1333,3 +1405,16 @@ class QWeb(object):
             __import__(debugger).set_trace()
         else:
             raise QWebException(f"unsupported t-debug value: {debugger}", self, options)
+
+    def _start_directive_profiling(self, xpath, directive, values, options, indent):
+        return time()
+
+    def _stop_directive_profiling(self, xpath, directive, values, options, loginfo):
+        dt = (time() - loginfo) * 1000
+        _logger.debug("QWeb profile: %s", {
+            'ref': options.get('ref'),
+            'xpath': xpath,
+            'directive': directive,
+            'time': loginfo,
+            'delay': dt,
+        })

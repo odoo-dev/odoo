@@ -32,6 +32,7 @@ class IrProfile(models.Model):
     sql = fields.Text('Sql', prefetch=False)
     traces_async = fields.Text('Traces Async', prefetch=False)
     traces_sync = fields.Text('Traces Sync', prefetch=False)
+    qweb = fields.Text('Qweb', prefetch=False)
     entry_count = fields.Integer('Entry count')
 
     speedscope = fields.Binary('Speedscope', compute='_compute_speedscope')
@@ -52,6 +53,8 @@ class IrProfile(models.Model):
                 sp.add('frames', json.loads(execution.traces_async))
             if execution.traces_sync:
                 sp.add('settrace', json.loads(execution.traces_sync))
+            if execution.qweb:
+                sp.add('qweb', json.loads(execution.qweb))
 
             result = json.dumps(sp.add_default().make())
             execution.speedscope = base64.b64encode(result.encode('utf-8'))
