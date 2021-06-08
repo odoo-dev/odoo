@@ -3,6 +3,8 @@
 import { registry } from "@web/core/registry";
 import { makeEnv, startServices } from "@web/env";
 import FormController from "web.FormController";
+import { patch } from "../../src/core/utils/patch";
+import { SERVICES_METADATA } from "../../src/env";
 import { registerCleanup } from "./cleanup";
 import { makeMockServer } from "./mock_server";
 import { mocks } from "./mock_services";
@@ -46,6 +48,13 @@ export function prepareRegistriesWithCleanup() {
     clearRegistryWithCleanup(registry.category("error_dialogs"));
 
     clearRegistryWithCleanup(registry.category("services"));
+    // Empty services metadata
+    const servicesMetadata = Object.assign({}, SERVICES_METADATA);
+    for (const key of Object.keys(SERVICES_METADATA)) {
+        delete SERVICES_METADATA[key];
+    }
+    registerCleanup(() => patch(SERVICES_METADATA, servicesMetadata));
+
     clearRegistryWithCleanup(registry.category("systray"));
     clearRegistryWithCleanup(registry.category("user_menuitems"));
     // fun fact: at least one registry is missing... this shows that we need a
