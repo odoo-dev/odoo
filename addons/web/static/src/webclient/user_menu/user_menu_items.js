@@ -41,6 +41,7 @@ function shortCutsItem(env) {
     return {
         type: "item",
         id: "shortcuts",
+        hide: env.isSmall,
         description: env._t("Shortcuts"),
         callback: () => {
             env.services.dialog.open(ShortCutsDialog);
@@ -49,7 +50,7 @@ function shortCutsItem(env) {
     };
 }
 
-function separator(env) {
+function separator() {
     return {
         type: "separator",
         sequence: 40,
