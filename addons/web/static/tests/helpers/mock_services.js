@@ -5,13 +5,13 @@ import { routerService } from "@web/core/browser/router_service";
 import { localization } from "@web/core/l10n/localization";
 import { translatedTerms } from "@web/core/l10n/translation";
 import { rpcService } from "@web/core/network/rpc_service";
-import { SIZES } from "@web/core/ui_service";
 import { userService } from "@web/core/user_service";
 import { effectService } from "@web/webclient/effects/effect_service";
 import { objectToUrlEncodedString } from "@web/core/utils/urls";
 import { registerCleanup } from "./cleanup";
 import { patchWithCleanup } from "./utils";
 import { companyService } from "@web/webclient/company_service";
+import { uiService } from "@web/core/ui_service";
 
 const { Component } = owl;
 
@@ -212,5 +212,6 @@ export const mocks = {
     router: makeFakeRouterService,
     rpc: makeFakeRPCService,
     title: () => fakeTitleService,
+    ui: () => uiService,
     user: () => userService,
 };
