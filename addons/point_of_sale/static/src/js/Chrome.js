@@ -5,7 +5,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const { debounce } = owl.utils;
     const { loadCSS } = require('web.ajax');
     const { useListener } = require('web.custom_hooks');
-    const { CrashManager } = require('web.CrashManager');
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
     const PosComponent = require('point_of_sale.PosComponent');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
