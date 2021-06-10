@@ -186,7 +186,7 @@
 }
 
 .o_Composer {
-    background-color: lighten(gray('300'), 7%);
+    background-color: $o-mail-discuss-bg;
 }
 
 .o_Composer_actionButton.o-last.o-has-current-partner-avatar.o-composer-is-compact {

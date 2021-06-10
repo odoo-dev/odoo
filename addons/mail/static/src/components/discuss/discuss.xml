@@ -21,12 +21,6 @@
                         <t t-call="mail.Discuss.content"/>
                     </div>
                 </t>
-                <t t-if="discuss.hasModerationDiscardDialog">
-                    <ModerationDiscardDialog messageLocalIds="discuss.threadView.checkedMessages.map(message => message.localId)" t-on-dialog-closed="_onDialogClosedModerationDiscard"/>
-                </t>
-                <t t-if="discuss.hasModerationRejectDialog">
-                    <ModerationRejectDialog messageLocalIds="discuss.threadView.checkedMessages.map(message => message.localId)" t-on-dialog-closed="_onDialogClosedModerationReject"/>
-                </t>
             </t>
         </div>
     </t>
@@ -48,6 +42,47 @@
                 />
             </div>
         </t>
+        <div class="o_Discuss_topbar">
+            <div class="o_Discuss_topbarTitle">
+                <t t-if="discuss.thread">
+                    <ThreadIcon class="o_Discuss_topbarThreadIcon" threadLocalId="discuss.thread.localId"/>
+                    <div class="o_Discuss_topbarThreadName" t-att-title="discuss.thread.displayName">
+                        <t t-esc="discuss.thread.displayName"/>
+                    </div>
+                </t>
+                <t t-if="!discuss.thread">
+                    <div class="o_Discuss_topbarThreadName" title="Discuss">
+                        Discuss
+                    </div>
+                </t>
+                <t t-if="discuss.thread and discuss.thread.description">
+                    <div class="o_Discuss_topbarThreadDescriptionSeparator"/>
+                    <div class="o_Discuss_topbarThreadDescription" t-att-title="discuss.thread.description">
+                        <t t-esc="discuss.thread.description"/>
+                    </div>
+                </t>
+            </div>
+            <div class="o_Discuss_topbarActions">
+                <t t-if="discuss.hasInviteButton">
+                    <button class="o_Discuss_inviteButton btn btn-primary" t-on-click="_onClickInvite">Invite</button>
+                </t>
+                <t t-if="discuss.thread and discuss.threadView and discuss.thread === env.messaging.inbox">
+                    <button class="o_Discuss_markAllReadButton btn btn-secondary" t-att-disabled="discuss.threadView.messages.length === 0" t-on-click="_onClickMarkAllAsRead">Mark all read</button>
+                </t>
+                <t t-if="discuss.thread and discuss.threadView and discuss.thread === env.messaging.starred">
+                    <button class="o_Discuss_unstarAllButton btn btn-secondary" t-att-disabled="discuss.threadView.messages.length === 0" t-on-click="_onClickUnstarAll">Unstar all</button>
+                </t>
+                <t t-if="env.messaging.device.isMobile">
+                    <t t-if="discuss.activeMobileNavbarTabId === 'chat'">
+                        <button class="o_Discuss_mobileNewMessageButton btn btn-secondary" t-on-click="_onClickMobileNewMessageButton">New Message</button>
+                    </t>
+                    <t t-if="discuss.activeMobileNavbarTabId === 'channel'">
+                        <button class="o_Discuss_mobileNewChannelButton btn btn-secondary" t-on-click="_onClickMobileNewChannelButton">New Channel</button>
+                    </t>
+                </t>
+            </div>
+        </div>
+        <div class="o_Discuss_topbarBottomSeparator"/>
         <t t-if="discuss.threadView">
             <ThreadView
                 class="o_Discuss_thread"

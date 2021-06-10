@@ -18,16 +18,6 @@ function factory(dependencies) {
 
         /**
          * @static
-         * @param {mail.thread} thread
-         * @param {string} threadStringifiedDomain
-         */
-        static checkAll(thread, threadStringifiedDomain) {
-            const threadCache = thread.cache(threadStringifiedDomain);
-            threadCache.update({ checkedMessages: link(threadCache.messages) });
-        }
-
-        /**
-         * @static
          * @param {Object} data
          * @return {Object}
          */
@@ -228,16 +218,6 @@ function factory(dependencies) {
         }
 
         /**
-         * @static
-         * @param {mail.thread} thread
-         * @param {string} threadStringifiedDomain
-         */
-        static uncheckAll(thread, threadStringifiedDomain) {
-            const threadCache = thread.cache(threadStringifiedDomain);
-            threadCache.update({ checkedMessages: unlink(threadCache.messages) });
-        }
-
-        /**
          * Unstar all starred messages of current user.
          */
         static async unstarAll() {
@@ -245,22 +225,6 @@ function factory(dependencies) {
                 model: 'mail.message',
                 method: 'unstar_all',
             });
-        }
-
-        /**
-         * @param {mail.thread} thread
-         * @param {string} threadStringifiedDomain
-         * @returns {boolean}
-         */
-        isChecked(thread, threadStringifiedDomain) {
-            // aku todo
-            const relatedCheckedThreadCache = this.checkedThreadCaches.find(
-                threadCache => (
-                    threadCache.thread === thread &&
-                    threadCache.stringifiedDomain === threadStringifiedDomain
-                )
-            );
-            return !!relatedCheckedThreadCache;
         }
 
         /**
@@ -319,22 +283,6 @@ function factory(dependencies) {
         }
 
         /**
-         * Toggle check state of this message in the context of the provided
-         * thread and its stringifiedDomain.
-         *
-         * @param {mail.thread} thread
-         * @param {string} threadStringifiedDomain
-         */
-        toggleCheck(thread, threadStringifiedDomain) {
-            const threadCache = thread.cache(threadStringifiedDomain);
-            if (threadCache.checkedMessages.includes(this)) {
-                threadCache.update({ checkedMessages: unlink(this) });
-            } else {
-                threadCache.update({ checkedMessages: link(this) });
-            }
-        }
-
-        /**
          * Toggle the starred status of the provided message.
          */
         async toggleStar() {
@@ -373,14 +321,6 @@ function factory(dependencies) {
             return replace(this.notifications.filter(notifications =>
                 ['exception', 'bounce'].includes(notifications.notification_status)
             ));
-        }
-
-        /**
-         * @private
-         * @returns {boolean}
-         */
-        _computeHasCheckbox() {
-            return this.isModeratedByCurrentPartner;
         }
 
         /**
@@ -582,10 +522,6 @@ function factory(dependencies) {
         body: attr({
             default: "",
         }),
-        checkedThreadCaches: many2many('mail.thread_cache', {
-            inverse: 'checkedMessages',
-            readonly: true,
-        }),
         /**
          * Determines the date of the message as a moment object.
          */
@@ -603,11 +539,6 @@ function factory(dependencies) {
         failureNotifications: one2many('mail.notification', {
             compute: '_computeFailureNotifications',
             dependencies: ['notificationsStatus'],
-        }),
-        hasCheckbox: attr({
-            compute: '_computeHasCheckbox',
-            default: false,
-            dependencies: ['isModeratedByCurrentPartner'],
         }),
         id: attr({
             required: true,

@@ -98,6 +98,62 @@
     width: 100%;
     flex: 1 1 auto;
 }
+
+.o_Discuss_topbar {
+    display: flex;
+    min-height: $o-statusbar-height * 2;
+    width: map-get($sizes, 100);
+}
+
+.o_Discuss_topbarActions {
+    display: flex;
+    align-items: center;
+    margin-inline-start: map-get($spacers, 4);
+    margin-inline-end: map-get($spacers, 4);
+}
+
+.o_Discuss_topbarBottomSeparator {
+    min-height: $border-width;
+    width: map-get($sizes, 100);
+}
+
+.o_Discuss_topbarThreadDescription {
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_Discuss_topbarThreadName {
+    flex: 0 0 auto; // no shrink to let the name have priority over description
+    max-width: map-get($sizes, 75); // but always leave at least a bit of space for the description
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_Discuss_topbarThreadDescriptionSeparator {
+    flex: 0 0 auto;
+    min-width: $border-width;
+    height: $font-size-sm;
+    margin-inline-start: map-get($spacers, 2);
+    margin-inline-end: map-get($spacers, 2);
+}
+
+.o_Discuss_topbarThreadIcon {
+    margin-inline-end: map-get($spacers, 2);
+}
+
+.o_Discuss_topbarTitle {
+    flex: 1 1 auto;
+    display: flex;
+    align-self: center; // cancel stretch from parent, the current element and its children don't want to use the whole height but use baseline instead
+    align-items: baseline;
+    min-width: 0; // allow flex shrink to work on children that have content
+    margin-inline-start: map-get($spacers, 4);
+    margin-inline-end: map-get($spacers, 4);
+}
+
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------
@@ -111,4 +167,21 @@
     border: 1px solid gray('400');
     border-radius: 5px;
     outline: none;
+}
+
+.o_Discuss_topbar {
+    background-color: $o-mail-discuss-bg;
+}
+
+.o_Discuss_topbarBottomSeparator {
+    background-color: $border-color;
+}
+
+.o_Discuss_topbarThreadDescriptionSeparator {
+    background-color: $border-color;
+}
+
+.o_Discuss_topbarThreadName {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
 }

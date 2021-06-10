@@ -267,6 +267,17 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
+        _computeHasInviteButton() {
+            if (!this.thread) {
+                return false;
+            }
+            return this.thread.channel_type === 'channel';
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
         _computeHasThreadView() {
             if (!this.thread || !this.isOpen) {
                 return false;
@@ -361,7 +372,6 @@ function factory(dependencies) {
             const threadViewerData = {
                 hasThreadView: this.hasThreadView,
                 selectedMessage: this.replyingToMessage ? link(this.replyingToMessage) : unlink(),
-                stringifiedDomain: this.stringifiedDomain,
                 thread: this.thread ? link(this.thread) : unlink(),
             };
             if (!this.threadViewer) {
@@ -407,16 +417,13 @@ function factory(dependencies) {
             related: 'device.isMobile',
         }),
         /**
-         * Determine if the moderation discard dialog is displayed.
+         * States whether the invite button should be displayed.
          */
-        hasModerationDiscardDialog: attr({
-            default: false,
-        }),
-        /**
-         * Determine if the moderation reject dialog is displayed.
-         */
-        hasModerationRejectDialog: attr({
-            default: false,
+        hasInviteButton: attr({
+            compute: '_computeHasInviteButton',
+            dependencies: [
+                'threadChannelType',
+            ],
         }),
         /**
          * Determines whether `this.thread` should be displayed.
@@ -531,13 +538,6 @@ function factory(dependencies) {
             default: "",
         }),
         /**
-         * Determines the domain to apply when fetching messages for `this.thread`.
-         * This value should only be written by the control panel.
-         */
-        stringifiedDomain: attr({
-            default: '[]',
-        }),
-        /**
          * Determines the `mail.thread` that should be displayed by `this`.
          */
         thread: many2one('mail.thread', {
@@ -551,6 +551,12 @@ function factory(dependencies) {
                 'thread',
                 'threadModel',
             ],
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        threadChannelType: attr({
+            related: 'thread.channel_type',
         }),
         threadId: attr({
             related: 'thread.id',
@@ -572,7 +578,6 @@ function factory(dependencies) {
             dependencies: [
                 'hasThreadView',
                 'replyingToMessage',
-                'stringifiedDomain',
                 'thread',
             ],
             isCausal: true,

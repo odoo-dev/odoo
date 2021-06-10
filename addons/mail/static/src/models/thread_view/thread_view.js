@@ -198,9 +198,6 @@ function factory(dependencies) {
     }
 
     ThreadView.fields = {
-        checkedMessages: many2many('mail.message', {
-            related: 'threadCache.checkedMessages',
-        }),
         /**
          * List of component hints. Hints contain information that help
          * components make UI/UX decisions based on their UI state.
@@ -328,12 +325,6 @@ function factory(dependencies) {
             isOnChange: true,
         }),
         /**
-         * Determines the domain to apply when fetching messages for `this.thread`.
-         */
-        stringifiedDomain: attr({
-            related: 'threadViewer.stringifiedDomain',
-        }),
-        /**
          * Determines the keyboard shortcuts that are available to send a message
          * from the composer of this thread viewer.
          */
@@ -430,9 +421,6 @@ function factory(dependencies) {
         threadViewer: one2one('mail.thread_viewer', {
             inverse: 'threadView',
             readonly: true,
-        }),
-        uncheckedMessages: many2many('mail.message', {
-            related: 'threadCache.uncheckedMessages',
         }),
     };
 

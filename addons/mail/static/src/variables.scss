@@ -15,3 +15,5 @@ $o-mail-message-sidebar-width: 50px;
 
 $o-mail-moderation-accept-color: theme-color('success') !default;
 $o-mail-moderation-reject-color: theme-color('danger') !default;
+
+$o-mail-discuss-bg: lighten(gray('300'), 7%);

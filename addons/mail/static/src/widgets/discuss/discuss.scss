@@ -20,17 +20,17 @@
     }
 
     .o_Discuss_content {
-        border-top: 1px solid darken($o-control-panel-background-color, 20%);
+        border-top: 1px solid $border-color;
     }
 
     .o_Discuss.o-mobile {
 
         &:not(.o-adding-item) {
-            border-top: 1px solid darken($o-control-panel-background-color, 20%);
+            border-top: 1px solid $border-color;
         }
 
         &.o-adding-item .o_Discuss_mobileAddItemHeader {
-            border-bottom: 1px solid darken($o-control-panel-background-color, 20%);
+            border-bottom: 1px solid $border-color;
         }
     }
 }
