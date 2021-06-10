@@ -7,10 +7,10 @@ import Composer from '@mail/components/composer/composer';
 import DiscussMobileMailboxSelection from '@mail/components/discuss_mobile_mailbox_selection/discuss_mobile_mailbox_selection';
 import DiscussSidebar from '@mail/components/discuss_sidebar/discuss_sidebar';
 import MobileMessagingNavbar from '@mail/components/mobile_messaging_navbar/mobile_messaging_navbar';
-import ModerationDiscardDialog from '@mail/components/moderation_discard_dialog/moderation_discard_dialog';
-import ModerationRejectDialog from '@mail/components/moderation_reject_dialog/moderation_reject_dialog';
 import NotificationList from '@mail/components/notification_list/notification_list';
+import ThreadIcon from '@mail/components/thread_icon/thread_icon';
 import ThreadView from '@mail/components/thread_view/thread_view';
+import { link, unlink } from '@mail/model/model_field_command';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
@@ -21,9 +21,8 @@ const components = {
     DiscussMobileMailboxSelection,
     DiscussSidebar,
     MobileMessagingNavbar,
-    ModerationDiscardDialog,
-    ModerationRejectDialog,
     NotificationList,
+    ThreadIcon,
     ThreadView,
 };
 
@@ -34,12 +33,7 @@ class Discuss extends Component {
     constructor(...args) {
         super(...args);
         useShouldUpdateBasedOnProps();
-        useStore((...args) => this._useStoreSelector(...args), {
-            compareDepth: {
-                checkedMessages: 1,
-                uncheckedMessages: 1,
-            },
-        });
+        useStore((...args) => this._useStoreSelector(...args));
         this._updateLocalStoreProps();
         /**
          * Reference of the composer. Useful to focus it.
@@ -173,15 +167,11 @@ class Discuss extends Component {
         const threadView = discuss && discuss.threadView;
         const replyingToMessage = discuss && discuss.replyingToMessage;
         const replyingToMessageOriginThread = replyingToMessage && replyingToMessage.originThread;
-        const checkedMessages = threadView ? threadView.checkedMessages : [];
         return {
-            checkedMessages,
-            checkedMessagesIsModeratedByCurrentPartner: checkedMessages && checkedMessages.some(message => message.isModeratedByCurrentPartner), // for widget
             discuss,
             discussActiveId: discuss && discuss.activeId, // for widget
             discussActiveMobileNavbarTabId: discuss && discuss.activeMobileNavbarTabId,
-            discussHasModerationDiscardDialog: discuss && discuss.hasModerationDiscardDialog,
-            discussHasModerationRejectDialog: discuss && discuss.hasModerationRejectDialog,
+            discussHasInviteButton: discuss && discuss.hasInviteButton,
             discussIsAddingChannel: discuss && discuss.isAddingChannel,
             discussIsAddingChat: discuss && discuss.isAddingChat,
             discussIsDoFocus: discuss && discuss.isDoFocus,
@@ -190,17 +180,16 @@ class Discuss extends Component {
             isDeviceMobile: this.env.messaging && this.env.messaging.device.isMobile,
             isMessagingInitialized: this.env.isMessagingInitialized(),
             replyingToMessage,
-            starred: this.env.messaging.starred, // for widget
+            starred: this.env.messaging.starred,
             thread,
             threadCache: threadView && threadView.threadCache,
-            threadChannelType: thread && thread.channel_type, // for widget
-            threadDisplayName: thread && thread.displayName, // for widget
+            threadChannelType: thread && thread.channel_type,
+            threadDescription: thread && thread.description,
+            threadDisplayName: thread && thread.displayName,
             threadCounter: thread && thread.counter,
             threadModel: thread && thread.model,
-            threadPublic: thread && thread.public, // for widget
             threadView,
-            threadViewMessagesLength: threadView && threadView.messages.length, // for widget
-            uncheckedMessages: threadView ? threadView.uncheckedMessages : [], // for widget
+            threadViewMessagesLength: threadView && threadView.messages.length,
         };
     }
 
@@ -211,15 +200,41 @@ class Discuss extends Component {
     /**
      * @private
      */
-    _onDialogClosedModerationDiscard() {
-        this.discuss.update({ hasModerationDiscardDialog: false });
+    _onClickInvite() {
+        // TODO ADD new invite popover instead of this
+        window.alert('not yet implemented');
+        // new InvitePartnerDialog(this, {
+        //     activeThreadLocalId: this.discuss.thread.localId,
+        //     messagingEnv: this.env,
+        // }).open();
     }
 
     /**
      * @private
      */
-    _onDialogClosedModerationReject() {
-        this.discuss.update({ hasModerationRejectDialog: false });
+    _onClickMarkAllAsRead() {
+        this.env.models['mail.message'].markAllAsRead();
+    }
+
+    /**
+     * @private
+     */
+    _onClickMobileNewChannelButton() {
+        this.discuss.update({ isAddingChannel: true });
+    }
+
+    /**
+     * @private
+     */
+    _onClickMobileNewMessageButton() {
+        this.discuss.update({ isAddingChat: true });
+    }
+
+    /**
+     * @private
+     */
+    _onClickUnstarAll() {
+        this.env.models['mail.message'].unstarAll();
     }
 
     /**
@@ -296,6 +311,14 @@ class Discuss extends Component {
         }
         this.discuss.clearReplyingToMessage();
         this.discuss.update({ activeMobileNavbarTabId: ev.detail.tabId });
+        const isMailboxSelected = this.discuss.activeMobileNavbarTabId === 'mailbox';
+        const isThreadMailbox = this.discuss.thread && this.discuss.thread.model === 'mailbox';
+        if (isMailboxSelected && !isThreadMailbox) {
+            this.discuss.update({ thread: link(this.env.messaging.inbox) });
+        }
+        if (!isMailboxSelected) {
+            this.discuss.update({ thread: unlink() });
+        }
     }
 
     /**

@@ -431,8 +431,8 @@ QUnit.test('invite button should be present on livechat', async function (assert
     });
     assert.containsOnce(
         document.body,
-        '.o_widget_Discuss_controlPanelButtonInvite',
-        "Invite button should be visible in control panel when livechat is active thread"
+        '.o_Discuss_inviteButton',
+        "Invite button should be visible in top bar when livechat is active thread"
     );
 });
 

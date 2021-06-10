@@ -74,7 +74,6 @@
                         <Message
                             class="o_MessageList_item o_MessageList_message"
                             hasMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
-                            hasCheckbox="props.hasMessageCheckbox"
                             hasReplyIcon="props.haveMessagesReplyIcon"
                             isSquashed="isMessageSquashed"
                             messageLocalId="message.localId"

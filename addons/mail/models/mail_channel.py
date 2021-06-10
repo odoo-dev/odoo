@@ -807,6 +807,7 @@ class Channel(models.Model):
             info = {
                 'id': channel.id,
                 'name': channel.name,
+                'description': channel.description,
                 'uuid': channel.uuid,
                 'state': 'open',
                 'is_minimized': False,

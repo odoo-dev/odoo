@@ -140,6 +140,9 @@ function factory(dependencies) {
          */
         static convertData(data) {
             const data2 = {};
+            if ('description' in data) {
+                data2.description = data.description;
+            }
             if ('model' in data) {
                 data2.model = data.model;
             }
@@ -648,17 +651,6 @@ function factory(dependencies) {
                 thread.name &&
                 cleanSearchTerm(thread.name).includes(cleanedSearchTerm)
             )];
-        }
-
-        /**
-         * @param {string} [stringifiedDomain='[]']
-         * @returns {mail.thread_cache}
-         */
-        cache(stringifiedDomain = '[]') {
-            return this.env.models['mail.thread_cache'].insert({
-                stringifiedDomain,
-                thread: link(this),
-            });
         }
 
         /**
@@ -1348,7 +1340,6 @@ function factory(dependencies) {
          */
         _computeMainCache() {
             return insert({
-                stringifiedDomain: '[]',
                 thread: link(this),
             });
         }
@@ -1736,10 +1727,6 @@ function factory(dependencies) {
         attachments: many2many('mail.attachment', {
             inverse: 'threads',
         }),
-        caches: one2many('mail.thread_cache', {
-            inverse: 'thread',
-            isCausal: true,
-        }),
         channel_type: attr(),
         /**
          * States the `mail.chat_window` related to `this`. Serves as compute
@@ -1778,6 +1765,10 @@ function factory(dependencies) {
         }),
         creator: many2one('mail.user'),
         custom_channel_name: attr(),
+        /**
+         * Determines the description of this thread. Only applies to channels.
+         **/
+        description: attr(),
         displayName: attr({
             compute: '_computeDisplayName',
             dependencies: [
@@ -1964,6 +1955,7 @@ function factory(dependencies) {
         }),
         mainCache: one2one('mail.thread_cache', {
             compute: '_computeMainCache',
+            inverse: 'thread',
         }),
         mass_mailing: attr({
             default: false,
