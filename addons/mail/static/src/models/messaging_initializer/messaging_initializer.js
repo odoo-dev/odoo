@@ -238,15 +238,32 @@ function factory(dependencies) {
         _initMailUserSettings({ id, is_discuss_sidebar_category_channel_open, is_discuss_sidebar_category_chat_open }) {
             this.messaging.update({
                 mailUserSettingsId: id,
-            })
+            });
             this.messaging.discuss.update({
                 categoryChannel: create({
-                    supportedChannelType: 'channel',
+                    autocompleteMethod: 'channel',
+                    commandAddTitleText: this.env._t("Add or join a channel"),
+                    counterComputeMethod: 'needaction',
+                    displayName: this.env._t("Channels"),
+                    hasAddCommand: true,
+                    hasViewCommand: true,
                     isServerOpen: is_discuss_sidebar_category_channel_open,
+                    newItemPlaceholderText: this.env._t("Find or create a channel..."),
+                    serverStateKey: 'is_discuss_sidebar_category_channel_open',
+                    sortComputeMethod: 'name',
+                    supportedChannelTypes: ['channel'],
                 }),
                 categoryChat: create({
-                    supportedChannelType: 'chat',
+                    autocompleteMethod: 'chat',
+                    commandAddTitleText: this.env._t("Start a conversation"),
+                    counterComputeMethod: 'unread',
+                    displayName: this.env._t("Direct Messages"),
+                    hasAddCommand: true,
                     isServerOpen: is_discuss_sidebar_category_chat_open,
+                    newItemPlaceholderText: this.env._t("Find or start a conversation..."),
+                    serverStateKey: 'is_discuss_sidebar_category_chat_open',
+                    sortComputeMethod: 'last_action',
+                    supportedChannelTypes: ['chat'],
                 }),
             });
         }
