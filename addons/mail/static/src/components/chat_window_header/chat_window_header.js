@@ -128,9 +128,7 @@ class ChatWindowHeader extends Component {
 
     async _onClickPhone(ev) {
         ev.stopPropagation();
-        const ringChannelTypes = new Set(['chat']);
-        const ringMembers = ringChannelTypes.has(this.chatWindow.thread.channel_type);
-        await this.env.messaging.toggleCall({ threadLocalId: this.chatWindow.thread.localId, ringMembers });
+        await this.env.messaging.toggleCall({ threadLocalId: this.chatWindow.thread.localId });
     }
 
     /**

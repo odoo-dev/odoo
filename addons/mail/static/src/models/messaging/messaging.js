@@ -175,9 +175,8 @@ function factory(dependencies) {
         /**
          * @param {Object} param0
          * @param {String} param0.threadLocalId
-         * @param {boolean} param0.ringMembers true if we want to send invitations to members of the thread
          */
-        async toggleCall({ threadLocalId='', ringMembers=false } = {}) {
+        async toggleCall({ threadLocalId='' } = {}) {
             let activeCallThreadLocalId = threadLocalId;
             if (this.activeCallThreadLocalId) {
                 await this.async(() => {
@@ -191,7 +190,7 @@ function factory(dependencies) {
 
             if (this.activeCallThreadLocalId) {
                 await this.async(() => {
-                    this.env.models['mail.thread'].get(this.activeCallThreadLocalId).joinCall({ ringMembers });
+                    this.env.models['mail.thread'].get(this.activeCallThreadLocalId).joinCall();
                 });
             }
         }

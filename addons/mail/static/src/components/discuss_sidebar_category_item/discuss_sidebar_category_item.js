@@ -130,7 +130,6 @@ export class DiscussSidebarCategoryItem extends Component {
         ev.stopPropagation();
         await this.env.messaging.toggleCall({
             threadLocalId: this.props.threadLocalId,
-            ringMembers: this.thread.channel_type === 'chat',
         });
     }
 

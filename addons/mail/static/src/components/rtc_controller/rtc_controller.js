@@ -78,7 +78,6 @@ class RtcController extends Component {
     async _onClickPhone(ev) {
         await this.env.messaging.toggleCall({
             threadLocalId: this.props.threadLocalId,
-            ringMembers: this.thread.channel_type === 'chat'
         });
     }
 }
