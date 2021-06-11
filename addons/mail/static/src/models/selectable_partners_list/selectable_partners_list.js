@@ -2,7 +2,7 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_field';
-import { link, unlink, unlinkAll } from '@mail/model/model_field_command';
+import { link, replace, unlink, unlinkAll } from '@mail/model/model_field_command';
 import { cleanSearchTerm } from '@mail/utils/utils';
 
 function factory(dependencies) {
@@ -145,7 +145,7 @@ function factory(dependencies) {
             const sortedPartners = partners.concat(this.selectedPartners).sort(this.env.models['mail.partner'].getSuggestionSortFunction(this.inputSearch, {
                 thread: this.thread,
             }));
-            return [link(sortedPartners), unlink(this.env.messaging.currentPartner)];
+            return [replace(sortedPartners), unlink(this.env.messaging.currentPartner)];
         }
 
         /**
