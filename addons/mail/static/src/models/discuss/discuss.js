@@ -282,17 +282,6 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
-        _computeHasInviteButton() {
-            if (!this.thread) {
-                return false;
-            }
-            return this.thread.channel_type === 'channel';
-        }
-
-        /**
-         * @private
-         * @returns {boolean}
-         */
         _computeHasThreadView() {
             if (!this.thread || !this.isOpen) {
                 return false;
@@ -442,15 +431,6 @@ function factory(dependencies) {
          */
         deviceIsMobile: attr({
             related: 'device.isMobile',
-        }),
-        /**
-         * States whether the invite button should be displayed.
-         */
-        hasInviteButton: attr({
-            compute: '_computeHasInviteButton',
-            dependencies: [
-                'threadChannelType',
-            ],
         }),
         /**
          * Determines whether `this.thread` should be displayed.

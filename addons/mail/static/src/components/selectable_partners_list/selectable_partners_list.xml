@@ -3,23 +3,17 @@
 
     <t t-name="mail.SelectablePartnersList" owl="1">
         <div class="o_SelectablePartnersList">
-            <t t-foreach="partners" t-as="partner" t-key="partner.id">
-                <t t-if="!partner.isInitialMember">
+            <t t-if="invitePartnerList.selectablePartners.length > 0">
+                <t t-foreach="invitePartnerList.selectablePartners" t-as="selectabledPartner" t-key="selectabledPartner.localId">
                     <SelectablePartner
-                        isSelected="partner.isSelected"
-                        partnerLocalId="partner.localId"
-                        t-on-o-selected-partner="_onSelectedPartner"
+                        invitePartnerListLocalId="invitePartnerList.localId"
+                        partnerLocalId="selectabledPartner.localId"
                     />
                 </t>
             </t>
-            <button t-on-click="_onClickCreateGroupChat">
-                <t t-if="props.initialMembers.length > 2">
-                    Invite in Group Chat
-                </t>
-                <t t-else="">
-                   Create Group Chat
-                </t>
-            </button>
+            <t t-if="invitePartnerList.selectablePartners.length === 0">
+                <div class="o_SelectablePartnersList_noResult">No partner found that is not already a member of this group.</div>
+            </t>
         </div>
     </t>
 

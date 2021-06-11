@@ -63,38 +63,34 @@
                 </t>
             </div>
             <div class="o_Discuss_topbarActions">
-                <t t-if="discuss.hasInviteButton">
-                    <button class="o_Discuss_inviteButton btn btn-primary" t-on-click="_onClickInvite">Invite</button>
+                <t t-if="discuss.thread and discuss.thread.model === 'mail.channel'">
+                    <Popover popoverExtraClass="'o_Discuss_invitePopover'" position="'bottom'">
+                        <button class="o_Discuss_InviteButton btn btn-secondary">
+                            <i class="fa fa-user-plus"/>
+                        </button>
+                        <t t-set="opened">
+                            <PartnerSelector
+                                invitePartnerListLocalId="discuss.thread.invitePartnerList.localId"
+                            />
+                        </t>
+                    </Popover>
+                    <Popover popoverExtraClass="'o_Discuss_memberListPopover'" position="'bottom'">
+                        <button class="o_Discuss_InviteButton btn btn-secondary">
+                            <i class="fa fa-chevron-circle-down"/>
+                        </button>
+                        <t t-set="opened">
+                            <PartnerListing
+                                members="discuss.thread.members"
+                                threadLocalId="discuss.thread.localId"
+                            />
+                        </t>
+                    </Popover>
                 </t>
                 <t t-if="discuss.thread and discuss.threadView and discuss.thread === env.messaging.inbox">
                     <button class="o_Discuss_markAllReadButton btn btn-secondary" t-att-disabled="discuss.threadView.messages.length === 0" t-on-click="_onClickMarkAllAsRead">Mark all read</button>
                 </t>
                 <t t-if="discuss.thread and discuss.threadView and discuss.thread === env.messaging.starred">
                     <button class="o_Discuss_unstarAllButton btn btn-secondary" t-att-disabled="discuss.threadView.messages.length === 0" t-on-click="_onClickUnstarAll">Unstar all</button>
-                </t>
-                <t t-if="discuss.thread and discuss.threadView and (discuss.threadView.thread.isChatChannel || discuss.threadView.thread.channel_type === 'group')">
-                    <Popover position="'bottom'">
-                        <button class="o_Discuss_InviteButton btn btn-secondary" t-on-click="_onClickInviteButton">
-                            <i class="fa fa-user-plus"/>
-                        </button>
-                        <t t-set="opened">
-                            <PartnerSelector
-                                initialMembers="discuss.threadView.thread.members"
-                                threadLocalId="discuss.threadView.thread.localId"
-                            />
-                        </t>
-                    </Popover>
-                    <Popover position="'bottom'">
-                            <button class="o_Discuss_InviteButton btn btn-secondary" t-on-click="">
-                                <i class="fa fa-chevron-circle-down"/>
-                            </button>
-                            <t t-set="opened">
-                                <PartnerListing
-                                    members="discuss.threadView.thread.members"
-                                    threadLocalId="discuss.threadView.thread.localId"
-                                />
-                            </t>
-                    </Popover>
                 </t>
                 <t t-if="discuss.thread and discuss.thread.model === 'mail.channel'">
                     <RtcController threadLocalId="discuss.thread.localId" showMembersButton="true"/>

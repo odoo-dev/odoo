@@ -181,7 +181,6 @@ class Discuss extends Component {
             discuss,
             discussActiveId: discuss && discuss.activeId, // for widget
             discussActiveMobileNavbarTabId: discuss && discuss.activeMobileNavbarTabId,
-            discussHasInviteButton: discuss && discuss.hasInviteButton,
             discussIsAddingChannel: discuss && discuss.isAddingChannel,
             discussIsAddingChat: discuss && discuss.isAddingChat,
             discussIsDoFocus: discuss && discuss.isDoFocus,
@@ -192,7 +191,6 @@ class Discuss extends Component {
             replyingToMessage,
             showMemberList: this.env.messaging.showMemberList,
             starred: this.env.messaging.starred,
-            activeCallThreadLocalId: this.env.messaging.activeCallThreadLocalId,
             thread,
             threadCache: threadView && threadView.threadCache,
             threadChannelType: thread && thread.channel_type,
@@ -208,28 +206,6 @@ class Discuss extends Component {
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onClickInvite() {
-        // TODO ADD new invite popover instead of this
-        window.alert('not yet implemented');
-        // new InvitePartnerDialog(this, {
-        //     activeThreadLocalId: this.discuss.thread.localId,
-        //     messagingEnv: this.env,
-        // }).open();
-    }
-
-    /**
-     * @private
-     */
-    _onClickInviteButton() {
-        this.env.messaging.selectablePartnersList.update({
-            inputSearch: "",
-            isOpened: true,
-        });
-    }
 
     /**
      * @private
