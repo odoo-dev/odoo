@@ -98,7 +98,9 @@ function factory(dependencies) {
          */
         async handleNotification(sender, content) {
             const { event, sessionToken, payload } = JSON.parse(content);
-            console.log(`RECEIVED - ${event} from: ${sender}`);
+            if (event !== 'trackChange') {
+                console.log(`RECEIVED - ${event} from: ${sender}`);
+            }
             if (!this.hasActiveSession) {
                 // notifications from a previous session can linger on the bus
                 return;
@@ -414,7 +416,6 @@ function factory(dependencies) {
                 });
             };
             peerConnection.ontrack = ({ transceiver, track }) => {
-                console.log(peerConnection.getTransceivers());
                 this._updateDisplayableStreams(track, token);
             };
             const dataChannel = peerConnection.createDataChannel("notifications", { negotiated: true, id: 1 });
@@ -676,8 +677,9 @@ function factory(dependencies) {
             if (!targetTokens?.length) {
                 return;
             }
-            console.log(`SEND - ${event} to: [${targetTokens}] (${type})`);
-
+            if (event !== 'trackChange') {
+                console.log(`SEND - ${event} to: [${targetTokens}] (${type})`);
+            }
             const content = JSON.stringify({
                 event,
                 sessionToken: this.sessionToken,
