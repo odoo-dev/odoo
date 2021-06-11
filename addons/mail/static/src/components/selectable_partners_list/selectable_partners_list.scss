@@ -3,9 +3,15 @@
 // ------------------------------------------------------------------
 
 .o_SelectablePartnersList {
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    width: 100%;
+    overflow-y: auto;
+}
+
+.o_SelectablePartnersList_noResult {
+    margin-left: map-get($spacers, 3);
+    margin-right: map-get($spacers, 3);
 }
 
 // ------------------------------------------------------------------

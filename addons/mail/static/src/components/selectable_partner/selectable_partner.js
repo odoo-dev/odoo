@@ -1,9 +1,12 @@
 /** @odoo-module **/
 
 import useStore from '@mail/component_hooks/use_store/use_store';
+import PartnerImStatusIcon from '@mail/components/partner_im_status_icon/partner_im_status_icon';
 
 const { useRef } = owl.hooks;
 const { Component } = owl;
+
+const components = { PartnerImStatusIcon };
 
 class SelectablePartner extends Component {
 
@@ -14,8 +17,10 @@ class SelectablePartner extends Component {
         super(...args);
         this.selectionStatusRef = useRef('selection-status');
         useStore(props => {
+            const invitePartnerList = this.env.models['mail.selectable_partners_list'].get(this.props.invitePartnerListLocalId);
             const partner = this.env.models['mail.partner'].get(props.partnerLocalId);
             return {
+                invitePartnerList: invitePartnerList.__state,
                 partner: partner && partner.__state,
             };
         });
@@ -25,51 +30,41 @@ class SelectablePartner extends Component {
     // Public
     //--------------------------------------------------------------------------
 
+    get invitePartnerList() {
+        return this.env.models['mail.selectable_partners_list'].get(this.props.invitePartnerListLocalId);
+    }
+
     get partner() {
         return this.env.models['mail.partner'].get(this.props.partnerLocalId);
-    }
-
-    get partner_name() {
-        return this._getPartnerName(this.partner.nameOrDisplayName);
-    }
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {string} partnerName
-     *
-     * @returns {string}
-     */
-    _getPartnerName(partnerName) {
-        const commaIndex = partnerName.lastIndexOf(",");
-        if (commaIndex !== -1) {
-            return partnerName.substring(commaIndex + 2, partnerName.length);
-        }
-        return partnerName;
     }
 
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
-    _onChange() {
-        this.trigger("o-selected-partner", {
-            id: this.partner.id,
-            selected: this.selectionStatusRef.el.checked,
-        });
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onClick(ev) {
+        this.invitePartnerList.onClickPartner(ev, this.partner);
     }
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onInput(ev) {
+        this.invitePartnerList.onInputPartnerCheckbox(ev, this.partner);
+    }
+
 }
 
 Object.assign(SelectablePartner, {
-    defaultProps: {
-        isSelected: false,
-    },
+    components,
     props: {
-        isSelected: {
-            type: Boolean,
+        invitePartnerListLocalId: {
+            type: String,
         },
         partnerLocalId: {
             type: String,

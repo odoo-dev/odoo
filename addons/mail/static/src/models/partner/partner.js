@@ -5,8 +5,6 @@ import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_
 import { insert, link, unlinkAll } from '@mail/model/model_field_command';
 import { cleanSearchTerm } from '@mail/utils/utils';
 
-import utils from 'web.utils';
-
 function factory(dependencies) {
 
     class Partner extends dependencies['mail.model'] {
@@ -519,6 +517,7 @@ function factory(dependencies) {
          */
         messaging: many2one('mail.messaging', {
             compute: '_computeMessaging',
+            inverse: 'allPartners',
         }),
         messagingPartnerRoot: many2one('mail.partner', {
             related: 'messaging.partnerRoot',

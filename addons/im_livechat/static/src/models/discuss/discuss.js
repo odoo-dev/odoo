@@ -23,19 +23,6 @@ registerInstancePatchModel('mail.discuss', 'im_livechat/static/src/models/discus
         return this._super(value);
     },
 
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-    /**
-     * @override
-     */
-    _computeHasInviteButton() {
-        if (this.thread && this.thread.channel_type === 'livechat') {
-            return true;
-        }
-        return this._super();
-    },
-
 });
 
 registerFieldPatchModel('mail.discuss', 'im_livechat/static/src/models/discuss/discuss.js', {

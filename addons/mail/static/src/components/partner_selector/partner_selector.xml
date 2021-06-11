@@ -2,14 +2,23 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.PartnerSelector" owl="1">
-        <div class="o_PartnerSelector_popover">
-            Invite people
-            <input type="text" t-ref="search-input" placeholder="Type the name of a person" t-on-keyup="_onKeyUp()"/>
+        <div class="o_PartnerSelector">
+            <h3 class="o_PartnerSelector_title">Invite people</h3>
+            <div class="o_PartnerSelector_searchInputContainer">
+                <input type="text" t-att-value="invitePartnerList.inputSearch" placeholder="Type the name of a person" t-on-input="_onInputSearch"/>
+            </div>
             <SelectablePartnersList
-                initialMembers="initial_members_id"
-                inputSearch="state.searchInput"
-                threadLocalId="props.threadLocalId"
+                class="o_PartnerSelector_partnerList"
+                invitePartnerListLocalId="invitePartnerList.localId"
             />
+            <div class="o_PartnerSelector_actionsContainer">
+                <t t-if="!invitePartnerList.thread or invitePartnerList.thread.channel_type === 'chat'">
+                    <button class="btn btn-primary" t-on-click="_onClickCreateGroupChat">Create Group Chat</button>
+                </t>
+                <t t-if="invitePartnerList.thread and invitePartnerList.thread.channel_type !== 'chat'">
+                    <button class="btn btn-primary" t-on-click="_onClickInviteGroupChat">Invite in Group Chat</button>
+                </t>
+            </div>
         </div>
     </t>
 

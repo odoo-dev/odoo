@@ -2,10 +2,29 @@
 // Layout
 // ------------------------------------------------------------------
 
-.o_PartnerSelector_popover {
+.o_PartnerSelector {
     display: flex;
-    flex-flow: row wrap;
-    max-width: 200px;
+    flex-direction: column;
+    width: Min(95vw, 400px);
+    max-height: Min(calc(100vh - 140px), 630px);
+}
+
+.o_PartnerSelector_actionsContainer {
+    margin: map-get($spacers, 3);
+    margin-top: map-get($spacers, 2);
+}
+
+.o_PartnerSelector_searchInputContainer {
+    margin: map-get($spacers, 2) map-get($spacers, 3);
+}
+
+.o_PartnerSelector_partnerList {
+    margin: map-get($spacers, 2) 0;
+}
+
+.o_PartnerSelector_title {
+    margin: map-get($spacers, 3);
+    margin-bottom: map-get($spacers, 2);
 }
 
 // ------------------------------------------------------------------

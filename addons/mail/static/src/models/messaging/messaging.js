@@ -57,13 +57,13 @@ function factory(dependencies) {
         }
 
          /**
-          * @param {integer[]} partnerIds
+          * @param {mail.partner[]} partners
           * @returns {mail.thread|undefined}
           */
-        async createGroupChat(partnerIds) {
+        async createGroupChat(partners) {
             const chat = await this.async(() =>
                 this.env.models['mail.thread'].performRpcCreateGroupChat({
-                    partnerIds: partnerIds,
+                    partnerIds: partners.map(partner => partner.id),
                 })
             );
             return chat;
@@ -113,12 +113,12 @@ function factory(dependencies) {
         /**
          * Opens a group chat with the provided persons and returns it.
          *
-         * @param {mail.partner[]} persons forwarded to @see `createGroupChat()`
+         * @param {mail.partner[]} partners forwarded to @see `createGroupChat()`
          * @param {Object} [options] forwarded to @see `mail.thread:open()`
          * @returns {mail.thread|undefined}
          */
-        async openGroupChat(persons, options) {
-            const chat = await this.async(() => this.createGroupChat(persons));
+        async openGroupChat(partners, options) {
+            const chat = await this.async(() => this.createGroupChat(partners));
             if (!chat) {
                 return;
             }
@@ -268,6 +268,13 @@ function factory(dependencies) {
             related: 'allChannels.isPinned',
         }),
         /**
+         * States all known partners.
+         */
+        allPartners: one2many('mail.partner', {
+            inverse: 'messaging',
+            readonly: true,
+        }),
+        /**
          * States all known pinned channels.
          */
         allPinnedChannels: one2many('mail.thread', {
@@ -339,6 +346,15 @@ function factory(dependencies) {
             isCausal: true,
             readonly: true,
         }),
+        /**
+         * States which invite partner list is operating for creating a new group.
+         */
+        invitePartnersList: one2one('mail.selectable_partners_list', {
+            default: [['create']],
+            inverse: 'messagingAsInvitePartnerList',
+            isCausal: true,
+            readonly: true,
+        }),
         isInitialized: attr({
             default: false,
         }),
@@ -389,12 +405,6 @@ function factory(dependencies) {
          * which are special partners notably used in livechat.
          */
         publicPartners: many2many('mail.partner'),
-        selectablePartnersList: one2one('mail.selectable_partners_list', {
-            default: [['create']],
-            inverse: 'messaging',
-            isCausal: true,
-            readonly: true,
-        }),
         /**
          * Tue if displaying the list of thread members.
          */

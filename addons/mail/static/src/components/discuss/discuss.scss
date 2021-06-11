@@ -35,6 +35,12 @@
     flex-flow: column;
 }
 
+.o_Discuss_invitePopover {
+    .popover-body {
+        padding: 0; // remove unwanted padding from popover-body
+    }
+}
+
 .o_Discuss_messagingNotInitialized {
     flex: 1 1 auto;
     display: flex;
