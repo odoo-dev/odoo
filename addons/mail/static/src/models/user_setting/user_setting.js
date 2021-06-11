@@ -100,16 +100,19 @@ function factory(dependencies) {
          */
         async saveSettings() {
             debounce(async () => {
-                await this.async(() => this.env.services.rpc({
-                    model: 'mail.user.setting',
-                    method: 'set_setting',
-                    args: [[], {
-                        push_to_talk_key: this.pushToTalkKey,
-                        use_push_to_talk: this.usePushToTalk,
-                        voice_active_duration: this.voiceActiveDuration,
-                    }],
-                }));
-            }, 5000);
+                await this.async(() => this.env.services.rpc(
+                    {
+                        model: 'mail.user.settings',
+                        method: 'set_mail_user_settings',
+                        args: [[this.env.messaging.mailUserSettingsId], {
+                            push_to_talk_key: this.pushToTalkKey,
+                            use_push_to_talk: this.usePushToTalk,
+                            voice_active_duration: this.voiceActiveDuration,
+                        }],
+                    },
+                    { shadow: true },
+                ));
+            }, 2000);
         }
     }
 

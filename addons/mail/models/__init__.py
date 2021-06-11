@@ -23,7 +23,6 @@ from . import mail_channel
 from . import mail_template
 from . import mail_shortcode
 from . import mail_ice_server
-from . import mail_user_setting
 from . import mail_user_settings
 from . import models
 from . import res_partner

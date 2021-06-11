@@ -374,8 +374,22 @@ function factory(dependencies) {
          * @param {object} payload
          * @param {boolean} payload.is_discuss_sidebar_category_channel_open
          * @param {boolean} payload.is_discuss_sidebar_category_chat_open
+         * @param {boolean} payload.use_push_to_talk
+         * @param {String} payload.push_to_talk_key
+         * @param {number} payload.voice_active_duration
          */
-         _handleNotificationMailUserSettings({ is_discuss_sidebar_category_channel_open, is_discuss_sidebar_category_chat_open }) {
+         _handleNotificationMailUserSettings({
+            is_discuss_sidebar_category_channel_open,
+            is_discuss_sidebar_category_chat_open,
+            use_push_to_talk,
+            push_to_talk_key,
+            voice_active_duration,
+         }) {
+            this.env.messaging.userSetting.update({
+                usePushToTalk: use_push_to_talk,
+                pushToTalkKey: push_to_talk_key,
+                voiceActiveDuration: voice_active_duration,
+            });
             this.env.messaging.discuss.categoryChannel.update({
                 isServerOpen: is_discuss_sidebar_category_channel_open,
             });
