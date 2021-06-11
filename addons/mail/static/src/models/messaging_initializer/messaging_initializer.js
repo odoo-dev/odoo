@@ -102,7 +102,6 @@ function factory(dependencies) {
             public_partners,
             shortcodes = [],
             starred_counter = 0,
-            user_settings = [],
         }) {
             const discuss = this.messaging.discuss;
             // partners first because the rest of the code relies on them
@@ -126,7 +125,6 @@ function factory(dependencies) {
             // various suggestions in no particular order
             this._initCannedResponses(shortcodes);
             this._initCommands(commands);
-            this._initSettings(user_settings);
             this._initMentionPartnerSuggestions(mention_partner_suggestions);
             // channels when the rest of messaging is ready
             await this.async(() => this._initChannels(channel_slots));
@@ -238,10 +236,25 @@ function factory(dependencies) {
          * @param {integer} mailUserSettings.id
          * @param {boolean} mailUserSettings.is_discuss_sidebar_category_channel_open
          * @param {boolean} mailUserSettings.is_discuss_sidebar_category_chat_open
+         * @param {boolean} payload.use_push_to_talk
+         * @param {String} payload.push_to_talk_key
+         * @param {number} payload.voice_active_duration
          */
-        _initMailUserSettings({ id, is_discuss_sidebar_category_channel_open, is_discuss_sidebar_category_chat_open }) {
+        _initMailUserSettings({
+            id,
+            is_discuss_sidebar_category_channel_open,
+            is_discuss_sidebar_category_chat_open,
+            use_push_to_talk,
+            push_to_talk_key,
+            voice_active_duration,
+        }) {
             this.messaging.update({
                 mailUserSettingsId: id,
+            });
+            this.env.messaging.userSetting.update({
+                usePushToTalk: use_push_to_talk,
+                pushToTalkKey: push_to_talk_key,
+                voiceActiveDuration: voice_active_duration,
             });
             this.messaging.discuss.update({
                 categoryChannel: create({
@@ -317,14 +330,6 @@ function factory(dependencies) {
                 ))
             });
         }
-
-        _initSettings(userSettings) {
-            if (!userSettings) {
-                return;
-            }
-            this.messaging.userSetting.update(this.env.models['mail.user_setting'].convertData(userSettings));
-        }
-
     }
 
     MessagingInitializer.fields = {

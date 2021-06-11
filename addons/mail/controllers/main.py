@@ -271,7 +271,6 @@ class MailController(http.Controller):
             'current_partner': request.env.user.partner_id.mail_partner_format(),
             'current_user_id': request.env.user.id,
             'current_user_settings': request.env['mail.user.settings'].find_or_create_for_user(request.env.user).mail_user_settings_format(),
-            'user_settings': request.env['mail.user.setting'].mail_setting_format(),
         }
         return values
 
