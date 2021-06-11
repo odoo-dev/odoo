@@ -46,7 +46,7 @@ QUnit.test('livechat - counter: should not have a counter if the category is unf
         document.querySelectorAll(`.o_DiscussSidebar_categoryLivechat .o_DiscussSidebarCategory_counter`).length,
         0,
         "should not have a counter if the category is unfolded and without unread messages",
-    )
+    );
 });
 
 QUnit.test('livechat - counter: should not have a counter if the category is unfolded and with unread messages', async function (assert) {
@@ -74,7 +74,7 @@ QUnit.test('livechat - counter: should not have a counter if the category is unf
         document.querySelectorAll(`.o_DiscussSidebar_categoryLivechat .o_DiscussSidebarCategory_counter`).length,
         0,
         "should not have a counter if the category is unfolded and with unread messages",
-    )
+    );
 });
 
 QUnit.test('livechat - counter: should not have a counter if category is folded and without unread messages', async function (assert) {
@@ -161,7 +161,7 @@ QUnit.test('livechat - states: open and close manually by clicking the title', a
     // fold the livechat category
     await afterNextRender(() =>
         document.querySelector(`.o_DiscussSidebarCategory[data-category-local-id="${
-            this.env.messaging.discuss.categoryLivechat.localId }"]
+            this.env.messaging.discuss.categoryLivechat.localId}"]
             .o_DiscussSidebarCategory_title
         `).click()
     );
@@ -179,7 +179,7 @@ QUnit.test('livechat - states: open and close manually by clicking the title', a
     // unfold the livechat category
     await afterNextRender(() =>
         document.querySelector(`.o_DiscussSidebarCategory[data-category-local-id="${
-            this.env.messaging.discuss.categoryLivechat.localId }"]
+            this.env.messaging.discuss.categoryLivechat.localId}"]
             .o_DiscussSidebarCategory_title
         `).click()
     );
@@ -220,18 +220,18 @@ QUnit.test('livechat - states: open and close should call rpc', async function (
                 );
                 assert.deepEqual(
                     args.kwargs.new_settings,
-                    { 'is_discuss_sidebar_category_livechat_open': args.kwargs.new_settings['is_discuss_sidebar_category_livechat_open'] },
+                    { is_discuss_sidebar_category_livechat_open: args.kwargs.new_settings.is_discuss_sidebar_category_livechat_open },
                     "Correct category states should be sent to the server side."
                 );
             }
             return this._super(...arguments);
-        }
+        },
     });
 
     // fold the livechat category
     await afterNextRender(() =>
         document.querySelector(`.o_DiscussSidebarCategory[data-category-local-id="${
-            this.env.messaging.discuss.categoryLivechat.localId }"]
+            this.env.messaging.discuss.categoryLivechat.localId}"]
             .o_DiscussSidebarCategory_title
         `).click()
     );
@@ -243,7 +243,7 @@ QUnit.test('livechat - states: open and close should call rpc', async function (
     // unfold the livechat category
     await afterNextRender(() =>
         document.querySelector(`.o_DiscussSidebarCategory[data-category-local-id="${
-            this.env.messaging.discuss.categoryLivechat.localId }"]
+            this.env.messaging.discuss.categoryLivechat.localId}"]
             .o_DiscussSidebarCategory_title
         `).click()
     );
@@ -254,7 +254,7 @@ QUnit.test('livechat - states: open and close should call rpc', async function (
 });
 
 QUnit.test('livechat - states: open and close from the bus', async function (assert) {
-    assert.expect(3)
+    assert.expect(3);
 
     // prepare a random livechat for livechat category
     this.data['mail.channel'].records.push({
@@ -283,8 +283,8 @@ QUnit.test('livechat - states: open and close from the bus', async function (ass
                 type: "mail_user_settings",
                 payload: {
                     is_discuss_sidebar_category_livechat_open: false,
-                }
-            }
+                },
+            },
         ];
         this.env.services.bus_service.trigger('notification', [notif]);
     });
@@ -306,8 +306,8 @@ QUnit.test('livechat - states: open and close from the bus', async function (ass
                 type: "mail_user_settings",
                 payload: {
                     is_discuss_sidebar_category_livechat_open: true,
-                }
-            }
+                },
+            },
         ];
         this.env.services.bus_service.trigger('notification', [notif]);
     });
@@ -321,7 +321,6 @@ QUnit.test('livechat - states: open and close from the bus', async function (ass
         }"]`,
         "Category livechat should be open and the content should be visible"
     );
-
 });
 
 QUnit.test('livechat - states: the active category item should be visble even if the category is closed', async function (assert) {
@@ -353,7 +352,7 @@ QUnit.test('livechat - states: the active category item should be visble even if
             id: 11,
             model: 'mail.channel',
         }).localId
-    }"]`)
+    }"]`);
     await afterNextRender(() => {
         livechat.click();
     });
@@ -362,7 +361,7 @@ QUnit.test('livechat - states: the active category item should be visble even if
     // close the category
     await afterNextRender(() =>
         document.querySelector(`.o_DiscussSidebarCategory[data-category-local-id="${
-            this.env.messaging.discuss.categoryLivechat.localId }"]
+            this.env.messaging.discuss.categoryLivechat.localId}"]
             .o_DiscussSidebarCategory_title
         `).click()
     );

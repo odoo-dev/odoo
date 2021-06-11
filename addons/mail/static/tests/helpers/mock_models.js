@@ -83,9 +83,11 @@ class MockModels {
                     // In python this belongs to mail.channel.partner. Here for simplicity.
                     is_pinned: { string: "isPinned", type: "boolean", default: true },
                     // In python this belongs to mail.channel.partner. Here for simplicity.
-                    last_meaningful_action_time: { string: "Last meaningful action time of the thread", type: "datetime", default() {
-                        return datetime_to_str(new Date());
-                    }},
+                    last_meaningful_action_time: {
+                        string: "Last meaningful action time of the thread",
+                        type: "datetime",
+                        default() { return datetime_to_str(new Date()); },
+                    },
                     // In python: email_send.
                     mass_mailing: { string: "Send messages by email", type: "boolean", default: false },
                     members: { string: "Members", type: 'many2many', relation: 'res.partner', default() { return [this.currentPartnerId]; } },
@@ -204,9 +206,9 @@ class MockModels {
             },
             'mail.user.settings': {
                 fields: {
-                    'is_discuss_sidebar_category_channel_open': { string: "Is Discuss Sidebar Category Channel Open?", type: 'boolean', default: true },
-                    'is_discuss_sidebar_category_chat_open': { string: "Is Discuss Sidebar Category Chat Open?", type: 'boolean', default: true },
-                    'user_id': { string: "User Id", type: 'many2one', relation: 'res.users' },
+                    is_discuss_sidebar_category_channel_open: { string: "Is Discuss Sidebar Category Channel Open?", type: 'boolean', default: true },
+                    is_discuss_sidebar_category_chat_open: { string: "Is Discuss Sidebar Category Chat Open?", type: 'boolean', default: true },
+                    user_id: { string: "User Id", type: 'many2one', relation: 'res.users' },
                 },
                 records: [],
             },

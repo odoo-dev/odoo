@@ -266,7 +266,7 @@ QUnit.test('livechats are sorted by last activity time in the sidebar: most rece
             id: 11,
             livechat_operator_id: this.data.currentPartnerId,
             members: [this.data.currentPartnerId, this.data.publicPartnerId],
-            last_meaningful_action_time: datetime_to_str(new Date(2021, 0, 1)),  // less recent one
+            last_meaningful_action_time: datetime_to_str(new Date(2021, 0, 1)), // less recent one
         },
         {
             anonymous_name: "Visitor 12",
@@ -274,7 +274,7 @@ QUnit.test('livechats are sorted by last activity time in the sidebar: most rece
             id: 12,
             livechat_operator_id: this.data.currentPartnerId,
             members: [this.data.currentPartnerId, this.data.publicPartnerId],
-            last_meaningful_action_time: datetime_to_str(new Date(2021, 0 ,2)),  // more recent one
+            last_meaningful_action_time: datetime_to_str(new Date(2021, 0, 2)), // more recent one
         },
     );
     await this.start();
@@ -307,7 +307,7 @@ QUnit.test('livechats are sorted by last activity time in the sidebar: most rece
     // update livechat 11 with a more recent last activity time
     await afterNextRender(() => {
         livechat11.update({
-            lastMeaningfulActionTime: new Date(2021, 0 ,3),
+            lastMeaningfulActionTime: new Date(2021, 0, 3),
         });
     });
     const newLivechats = document.querySelectorAll('.o_DiscussSidebar_categoryLivechat .o_DiscussSidebarCategoryItem');

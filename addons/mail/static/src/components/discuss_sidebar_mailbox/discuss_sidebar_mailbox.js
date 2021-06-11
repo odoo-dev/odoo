@@ -4,7 +4,6 @@ import useShouldUpdateBasedOnProps from '@mail/component_hooks/use_should_update
 import useStore from '@mail/component_hooks/use_store/use_store';
 import ThreadIcon from '@mail/components/thread_icon/thread_icon';
 
-
 const { Component } = owl;
 
 const components = { ThreadIcon };
@@ -25,8 +24,8 @@ export class DiscussSidebarMailBox extends Component {
                 mailboxCounter: mailbox && mailbox.counter,
                 mailBoxDisplayName: mailbox && mailbox.displayName,
                 starred: this.env.messaging.starred,
-            }
-        })
+            };
+        });
     }
 
     //--------------------------------------------------------------------------
@@ -47,16 +46,15 @@ export class DiscussSidebarMailBox extends Component {
     /**
      * @private
      */
-     _onClick() {
+    _onClick() {
         this.mailbox.open();
     }
- }
+}
 
- Object.assign(DiscussSidebarMailBox, {
-     components,
-     props: {
+Object.assign(DiscussSidebarMailBox, {
+    components,
+    props: {
         threadLocalId: String,
-     },
-     template: 'mail.DiscussSidebarMailBox',
- });
-
+    },
+    template: 'mail.DiscussSidebarMailBox',
+});

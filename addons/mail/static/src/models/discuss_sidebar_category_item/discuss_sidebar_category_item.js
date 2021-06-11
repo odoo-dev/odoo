@@ -14,7 +14,7 @@ function factory(dependencies) {
         /**
          * @override
          */
-         static _createRecordLocalId(data) {
+        static _createRecordLocalId(data) {
             return `${this.modelName}_${data.channelId}`;
         }
 
@@ -71,7 +71,7 @@ function factory(dependencies) {
         _computeHasLeaveCommand() {
             return this.channelType === 'channel' &&
                 !this.channelMessageNeedactionCounter &&
-                !this.channelGroupBasedSubscription
+                !this.channelGroupBasedSubscription;
         }
 
         /**
@@ -151,7 +151,7 @@ function factory(dependencies) {
                     res_model: this.channel.model,
                     res_id: this.channel.id,
                     views: [[false, 'form']],
-                    target: 'current'
+                    target: 'current',
                 },
             });
         }
@@ -336,7 +336,7 @@ function factory(dependencies) {
          */
         channelType: attr({
             related: 'channel.channel_type',
-        })
+        }),
     };
 
     DiscussSidebarCategoryItem.modelName = 'mail.discuss_sidebar_category_item';

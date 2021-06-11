@@ -31,7 +31,7 @@ patch(MockModels, 'im_livechat/static/tests/helpers/mock_models.js', {
         });
         Object.assign(data['mail.user.settings'].fields, {
             is_discuss_sidebar_category_livechat_open: { string: "Is Discuss Sidebar Category Livechat Open?", type: 'boolean', default: true },
-        })
+        });
         Object.assign(data['res.users'].fields, {
             livechat_username: { string: 'Livechat Username', type: 'string' },
         });

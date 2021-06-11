@@ -33,14 +33,14 @@ QUnit.test('channel - counter: should not have a counter if the category is unfo
     assert.expect(1);
 
     // Create a channel without needaction messages
-    this.data['mail.channel'].records.push({ id: 20});
+    this.data['mail.channel'].records.push({ id: 20 });
 
     await this.start();
     assert.strictEqual(
         document.querySelectorAll(`.o_DiscussSidebar_categoryChannel .o_DiscussSidebarCategory_counter`).length,
         0,
-        "should not have a counter if the category is unfolded and without unread messages",
-    )
+        "should not have a counter if the category is unfolded and without unread messages"
+    );
 });
 
 QUnit.test('channel - counter: should not have a counter if the category is unfolded and with needaction messagens', async function (assert) {
@@ -56,7 +56,7 @@ QUnit.test('channel - counter: should not have a counter if the category is unfo
         id: 100,
         model: "mail.channel",
         res_id: 20,
-    },{
+    }, {
         body: "message_2",
         id: 200,
         model: "mail.channel",
@@ -74,7 +74,7 @@ QUnit.test('channel - counter: should not have a counter if the category is unfo
         document.querySelectorAll(`.o_DiscussSidebar_categoryChannel .o_DiscussSidebarCategory_counter`).length,
         0,
         "should not have a counter if the category is unfolded and with needaction messages",
-    )
+    );
 });
 
 QUnit.test('channel - counter: should not have a counter if category is folded and without needaction messages', async function (assert) {
@@ -109,7 +109,7 @@ QUnit.test('channel - counter: should have correct value of needaction threads i
         id: 100,
         model: "mail.channel",
         res_id: 20,
-    },{
+    }, {
         body: "message_2",
         id: 200,
         model: "mail.channel",
@@ -254,15 +254,15 @@ QUnit.test('channel - states: open and close should call rpc', async function (a
                     args.args[0],
                     [mailUserSettingsId],
                     "Correct mail user settings id should be sent to the server side"
-                )
+                );
                 assert.deepEqual(
                     args.kwargs.new_settings,
-                    { 'is_discuss_sidebar_category_channel_open': args.kwargs.new_settings['is_discuss_sidebar_category_channel_open'] },
+                    { is_discuss_sidebar_category_channel_open: args.kwargs.new_settings.is_discuss_sidebar_category_channel_open },
                     "Correct category states should be sent to the server side."
                 );
             }
             return this._super(...arguments);
-        }
+        },
     });
 
     // fold the channel category
@@ -286,7 +286,7 @@ QUnit.test('channel - states: open and close should call rpc', async function (a
 });
 
 QUnit.test('channel - states: open and close from the bus', async function (assert) {
-    assert.expect(3)
+    assert.expect(3);
 
     // create a channel thread
     this.data['mail.channel'].records.push({ id: 20 });
@@ -309,8 +309,8 @@ QUnit.test('channel - states: open and close from the bus', async function (asse
                 type: "mail_user_settings",
                 payload: {
                     is_discuss_sidebar_category_channel_open: false,
-                }
-            }
+                },
+            },
         ];
         this.env.services.bus_service.trigger('notification', [notif]);
     });
@@ -332,8 +332,8 @@ QUnit.test('channel - states: open and close from the bus', async function (asse
                 type: "mail_user_settings",
                 payload: {
                     is_discuss_sidebar_category_channel_open: true,
-                }
-            }
+                },
+            },
         ];
         this.env.services.bus_service.trigger('notification', [notif]);
     });
@@ -372,7 +372,7 @@ QUnit.test('channel - states: the active category item should be visble even if 
             id: 20,
             model: 'mail.channel',
         }).localId
-    }"]`)
+    }"]`);
     await afterNextRender(() => {
         channel.click();
     });
@@ -429,7 +429,7 @@ QUnit.test('chat - counter: should not have a counter if the category is unfolde
         document.querySelectorAll(`.o_DiscussSidebar_categoryChat .o_DiscussSidebarCategory_counter`).length,
         0,
         "should not have a counter if the category is unfolded and without unread messages",
-    )
+    );
 });
 
 QUnit.test('chat - counter: should not have a counter if the category is unfolded and with unread messagens', async function (assert) {
@@ -447,7 +447,7 @@ QUnit.test('chat - counter: should not have a counter if the category is unfolde
         document.querySelectorAll(`.o_DiscussSidebar_categoryChat .o_DiscussSidebarCategory_counter`).length,
         0,
         "should not have a counter if the category is unfolded and with unread messages",
-    )
+    );
 });
 
 QUnit.test('chat - counter: should not have a counter if category is folded and without unread messages', async function (assert) {
@@ -483,7 +483,7 @@ QUnit.test('chat - counter: should have correct value of unread threads if categ
         id: 10,
         message_unread_counter: 10,
         public: 'private',
-    },{
+    }, {
         channel_type: 'chat',
         id: 20,
         message_unread_counter: 20,
@@ -599,15 +599,15 @@ QUnit.test('chat - states: open and close should call rpc', async function (asse
                     args.args[0],
                     [mailUserSettingsId],
                     "Correct mail user settings id should be sent to the server side"
-                )
+                );
                 assert.deepEqual(
                     args.kwargs.new_settings,
-                    { 'is_discuss_sidebar_category_chat_open': args.kwargs.new_settings['is_discuss_sidebar_category_chat_open'] },
+                    { is_discuss_sidebar_category_chat_open: args.kwargs.new_settings.is_discuss_sidebar_category_chat_open },
                     "Correct catergory states should be sent to the server side."
                 );
             }
             return this._super(...arguments);
-        }
+        },
     });
 
     // fold the chat category
@@ -631,7 +631,7 @@ QUnit.test('chat - states: open and close should call rpc', async function (asse
 });
 
 QUnit.test('chat - states: open and close from the bus', async function (assert) {
-    assert.expect(3)
+    assert.expect(3);
 
     // create a chat thread
     this.data['mail.channel'].records.push({
@@ -659,8 +659,8 @@ QUnit.test('chat - states: open and close from the bus', async function (assert)
                 type: "mail_user_settings",
                 payload: {
                     is_discuss_sidebar_category_chat_open: false,
-                }
-            }
+                },
+            },
         ];
         this.env.services.bus_service.trigger('notification', [notif]);
     });
@@ -680,10 +680,10 @@ QUnit.test('chat - states: open and close from the bus', async function (assert)
             ["dbName", "res.partner", this.env.messaging.currentPartner.id],
             {
                 type: "mail_user_settings",
-                payload:{
+                payload: {
                     is_discuss_sidebar_category_chat_open: true,
-                }
-            }
+                },
+            },
         ];
         this.env.services.bus_service.trigger('notification', [notif]);
     });
@@ -727,7 +727,7 @@ QUnit.test('chat - states: the active category item should be visble even if the
             id: 10,
             model: 'mail.channel',
         }).localId
-    }"]`)
+    }"]`);
     await afterNextRender(() => {
         chat.click();
     });
