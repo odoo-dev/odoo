@@ -25,6 +25,7 @@ function factory(dependencies) {
         _computeAvatarUrl() {
             switch (this.channelType) {
                 case 'channel':
+                case 'group':
                     return `/web/image/mail.channel/${this.channelId}/image_128`;
                 case 'chat':
                     return this.correspondentAvatarUrl;
@@ -129,6 +130,7 @@ function factory(dependencies) {
             switch (this.channelType) {
                 case 'channel':
                 case 'chat':
+                case 'group':
                     return true;
             }
         }
