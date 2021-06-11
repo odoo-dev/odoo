@@ -72,7 +72,7 @@ class DiscussSidebar extends Component {
             moderation: messaging.moderation,
             moderationIsPinned: messaging.moderation && messaging.moderation.isPinned,
             starred: messaging.starred,
-        }
+        };
     }
 
     //--------------------------------------------------------------------------

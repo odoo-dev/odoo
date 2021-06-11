@@ -324,7 +324,7 @@
             'mail/static/src/components/attachment/attachment_tests.js',
             'mail/static/src/components/attachment_box/attachment_box_tests.js',
             'mail/static/src/components/discuss_sidebar_category/discuss_sidebar_category_tests.js',
-            'mail/static/src/components/discuss_sidebar_category_item/discuss_sidebar_category_item_test.js',
+            'mail/static/src/components/discuss_sidebar_category_item/discuss_sidebar_category_item_tests.js',
             'mail/static/src/components/chat_window_manager/chat_window_manager_tests.js',
             'mail/static/src/components/chatter/chatter_tests.js',
             'mail/static/src/components/chatter/chatter_suggested_recipient_tests.js',

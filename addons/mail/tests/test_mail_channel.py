@@ -214,8 +214,7 @@ class TestChannelInternals(MailCommon):
         # Mocks the return value of field.Datetime.now(),
         # so we can see if the `last_meaningful_action_time` is updated correctly
         with patch.object(fields.Datetime, 'now', lambda: post_time):
-            with self.mock_mail_gateway():
-                chat.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
+            chat.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
         channel_partner_employee = self.env['mail.channel.partner'].search([
             ('partner_id', '=', self.partner_employee.id),
             ('channel_id', '=', chat.id),

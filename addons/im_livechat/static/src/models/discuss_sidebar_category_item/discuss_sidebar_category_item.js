@@ -18,7 +18,6 @@ registerInstancePatchModel('mail.discuss_sidebar_category_item', 'im_livechat/st
                 return this.correspondentAvatarUrl;
             }
             return '/mail/static/src/img/smiley/avatar.jpg';
-
         }
         return this._super();
     },
@@ -54,6 +53,6 @@ registerInstancePatchModel('mail.discuss_sidebar_category_item', 'im_livechat/st
             return false;
         }
         return this._super();
-    }
+    },
 
 });

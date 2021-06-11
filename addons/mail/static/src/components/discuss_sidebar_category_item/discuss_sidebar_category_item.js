@@ -13,7 +13,7 @@ import Dialog from 'web.Dialog';
 
 const { Component, useState } = owl;
 
-const components = { EditableText, GroupChatLeaveConfirmDialog, PartnerImStatusIcon, ThreadIcon }
+const components = { EditableText, GroupChatLeaveConfirmDialog, PartnerImStatusIcon, ThreadIcon };
 
 export class DiscussSidebarCategoryItem extends Component {
 
@@ -29,7 +29,7 @@ export class DiscussSidebarCategoryItem extends Component {
             return {
                 categoryItem: categoryItem && categoryItem.__state,
                 correspondentName: correspondent && correspondent.name,
-            }
+            };
         });
         this.state = useState({
             hasDeleteConfirmDialog: false,
@@ -65,13 +65,13 @@ export class DiscussSidebarCategoryItem extends Component {
                             text: this.env._t("Leave"),
                             classes: 'btn-primary',
                             close: true,
-                            click: resolve
+                            click: resolve,
                         },
                         {
                             text: this.env._t("Discard"),
-                            close: true
-                        }
-                    ]
+                            close: true,
+                        },
+                    ],
                 }
             );
         });

@@ -34,7 +34,7 @@ QUnit.module('discuss_sidebar_category_item_tests.js', {
 QUnit.test('channel - avatar: should have correct avatar', async function (assert) {
     assert.expect(2);
 
-    this.data['mail.channel'].records.push({ id: 20 })
+    this.data['mail.channel'].records.push({ id: 20 });
     await this.start();
 
     const channelItem = document.querySelector(`
@@ -50,7 +50,6 @@ QUnit.test('channel - avatar: should have correct avatar', async function (asser
         1,
         "channel should have an avatar"
     );
-    assert
 
     assert.strictEqual(
         channelItem.querySelector(`:scope .o_DiscussSidebarCategoryItem_image`).dataset.src,
@@ -84,7 +83,6 @@ QUnit.test('chat - avatar: should have correct avatar', async function (assert) 
         1,
         "chat should have an avatar"
     );
-    assert
 
     assert.strictEqual(
         chatItem.querySelector(`:scope .o_DiscussSidebarCategoryItem_image`).dataset.src,
@@ -100,12 +98,12 @@ QUnit.test('chat - sorting: should be sorted by last activity time', async funct
         channel_type: 'chat',
         id: 10,
         public: 'private',
-        last_meaningful_action_time: datetime_to_str(new Date(2021, 0, 1)),  // less recent one
+        last_meaningful_action_time: datetime_to_str(new Date(2021, 0, 1)), // less recent one
     }, {
         channel_type: 'chat',
         id: 20,
         public: 'private',
-        last_meaningful_action_time: datetime_to_str(new Date(2021, 0 ,2)),  // more recent one
+        last_meaningful_action_time: datetime_to_str(new Date(2021, 0, 2)), // more recent one
     });
     await this.start();
 
@@ -137,7 +135,7 @@ QUnit.test('chat - sorting: should be sorted by last activity time', async funct
     // update livechat 11 with a more recent last activity time
     await afterNextRender(() => {
         chat10.update({
-            lastMeaningfulActionTime: new Date(2021, 0 ,3),
+            lastMeaningfulActionTime: new Date(2021, 0, 3),
         });
     });
     const newChats = document.querySelectorAll('.o_DiscussSidebar_categoryChat .o_DiscussSidebarCategoryItem');
