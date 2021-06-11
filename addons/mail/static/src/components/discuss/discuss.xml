@@ -96,6 +96,9 @@
                             </t>
                     </Popover>
                 </t>
+                <t t-if="discuss.thread and discuss.thread.model === 'mail.channel'">
+                    <RtcController threadLocalId="discuss.thread.localId" showMembersButton="true"/>
+                </t>
                 <t t-if="env.messaging.device.isMobile">
                     <t t-if="discuss.activeMobileNavbarTabId === 'chat'">
                         <button class="o_Discuss_mobileNewMessageButton btn btn-secondary" t-on-click="_onClickMobileNewMessageButton">New Message</button>
