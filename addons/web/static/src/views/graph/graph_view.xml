@@ -23,8 +23,8 @@
   </t>
 
   <t t-name="web.GraphView.MeasureMenu" owl="1">
-    <Dropdown t-on-dropdown-item-selected="onMeasureSelected">
-      Measures
+    <Dropdown t-on-dropdown-item-selected="onMeasureSelected" togglerClass="'btn btn-primary'">
+      Measures <i class="fa fa-caret-down ml-1"/>
       <t t-set-slot="menu">
         <t t-foreach="model.metaData.measures" t-as="measure" t-key="measure.fieldName">
           <DropdownItem class="o_menu_item dropdown-item"
@@ -42,7 +42,7 @@
           parentClosingMode="'none'"
           >
           Count
-        </DropdownItem>   
+        </DropdownItem>
       </t>
     </Dropdown>
   </t>
@@ -52,7 +52,7 @@
         <t t-call="web.GraphView.MeasureMenu"/>
         <GroupByMenu t-if="controlPanelProps.display and controlPanelProps.display['bottom-right'] === false"/>
     </div>
-    <div class="btn-group" role="toolbar" aria-label="Change graph">
+    <div class="btn-group ml-4" role="toolbar" aria-label="Change graph">
       <button class="btn btn-secondary fa fa-bar-chart-o o_graph_button" title="Bar Chart" aria-label="Bar Chart" data-mode="bar"
         t-on-click="onModeSelected('bar')"
         t-att-class="{ active: model.metaData.mode === 'bar' }"
@@ -66,13 +66,13 @@
         t-att-class="{ active: model.metaData.mode === 'pie' }"
       />
     </div>
-    <div t-if="model.metaData.mode === 'bar'" class="btn-group" role="toolbar" aria-label="Change graph">
+    <div t-if="model.metaData.mode === 'bar'" class="btn-group ml-3" role="toolbar" aria-label="Change graph">
       <button class="btn btn-secondary fa fa-database o_graph_button" title="Stacked" aria-label="Stacked"
         t-on-click="toggleStacked"
         t-att-class="{ active: model.metaData.stacked }"
       />
     </div>
-    <div t-if="model.metaData.mode !== 'pie' and env.searchModel.domains.length === 1" class="btn-group" role="toolbar" aria-label="Sort graph">
+    <div t-if="model.metaData.mode !== 'pie' and env.searchModel.domains.length === 1" class="btn-group ml-3" role="toolbar" aria-label="Sort graph">
       <button class="btn btn-secondary fa fa-sort-amount-desc o_graph_button" title="Descending" aria-label="Descending"
         t-on-click="toggleOrder('DESC')"
         t-att-class="{ active: model.metaData.order === 'DESC' }"
