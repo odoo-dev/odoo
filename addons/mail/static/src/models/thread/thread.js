@@ -775,10 +775,9 @@ function factory(dependencies) {
         }
 
         /**
-         * @returns {Object} [param0]
-         * @returns {boolean} [param0.ringMembers] true if we send invitations to thread members
+         *
          */
-        async joinCall({ ringMembers } = {}) {
+        async joinCall() {
             if (this.model !== 'mail.channel') {
                 return;
             }
@@ -812,7 +811,8 @@ function factory(dependencies) {
                 // we do not ring if the call is already populated
                 return;
             }
-            if (!ringMembers) {
+            if (!['chat', 'group'].includes(this.channel_type)) {
+                // todo could take an argument to ring specific member(s).
                 return;
             }
             await this.async(() => this.inviteThreadMembers());
