@@ -47,8 +47,7 @@ class TestMailUserSettings(MailCommon):
             'is_discuss_sidebar_category_chat_open': False,
             'user_id': self.user_employee.id,
         })
-        with self.mock_bus():
-            settings.set_mail_user_settings({'is_discuss_sidebar_category_chat_open': True})
+        settings.set_mail_user_settings({'is_discuss_sidebar_category_chat_open': True})
         self.assertEqual(
             settings.is_discuss_sidebar_category_chat_open,
             True,
