@@ -3,10 +3,10 @@
 
     <t t-name="wowl.FavoriteMenu" owl="1">
         <Dropdown class="btn-group o_favorite_menu"
-            togglerClass="'o_dropdown_toggler_btn btn btn-secondary'"
+            togglerClass="'o_dropdown_toggler btn btn-secondary'"
             t-on-dropdown-item-selected="onFavoriteSelected"
             >
-            <i t-att-class="icon"/>
+            <i class="mr-1" t-att-class="icon"/>
             <span class="o_dropdown_title">Favorites</span>
             <t t-set-slot="menu">
                 <t t-set="currentGroup" t-value="null"/>

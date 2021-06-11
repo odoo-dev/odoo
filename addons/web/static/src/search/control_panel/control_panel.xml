@@ -27,6 +27,9 @@
                             </t>
                         </div>
                     </t>
+
+                    <div class="o_cp_pager"/>
+
                     <t t-if="props.viewSwitcherEntries and props.viewSwitcherEntries.length > 1">
                         <nav class="btn-group o_cp_switch_buttons">
                             <t t-foreach="props.viewSwitcherEntries" t-as="view" t-key="view.type">
@@ -38,7 +41,6 @@
                             </t>
                         </nav>
                     </t>
-                    <div class="o_cp_pager"/>
                 </div>
             </div>
         </div>
