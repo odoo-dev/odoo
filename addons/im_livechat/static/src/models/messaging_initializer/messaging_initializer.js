@@ -18,8 +18,12 @@ registerInstancePatchModel('mail.messaging_initializer', 'im_livechat/static/src
      _initMailUserSettings({ is_discuss_sidebar_category_livechat_open }) {
         this.messaging.discuss.update({
             categoryLivechat: create({
-                supportedChannelType: 'livechat',
+                counterComputeMethod: 'unread',
+                displayName: this.env._t("Livechat"),
                 isServerOpen: is_discuss_sidebar_category_livechat_open,
+                serverStateKey: 'is_discuss_sidebar_category_livechat_open',
+                sortComputeMethod: 'last_action',
+                supportedChannelTypes: ['livechat'],
             })
         });
         this._super(...arguments);

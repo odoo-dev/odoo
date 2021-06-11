@@ -20,8 +20,8 @@ export class DiscussSidebarCategory extends Component {
             const category = this.env.models['mail.discuss_sidebar_category'].get(this.props.categoryLocalId);
             return {
                 category: category ? category.__state : undefined,
-            }
-        })
+            };
+        });
 
         // bind since passed as props
         this._onAddItemAutocompleteSelect = this._onAddItemAutocompleteSelect.bind(this);
@@ -50,7 +50,7 @@ export class DiscussSidebarCategory extends Component {
      * @param {Object} ui.item
      * @param {integer} ui.item.id
      */
-    _onAddItemAutocompleteSelect(ev, ui){
+    _onAddItemAutocompleteSelect(ev, ui) {
         this.category._onAddItemAutocompleteSelect(ev, ui);
     }
 
@@ -68,7 +68,7 @@ export class DiscussSidebarCategory extends Component {
      * @private
      * @param {MouseEvent} ev
      */
-    _onClickView(ev){
+    _onClickView(ev) {
         ev.stopPropagation();
         return this.category._onClickViewCommand();
     }
@@ -86,7 +86,7 @@ export class DiscussSidebarCategory extends Component {
      * @private
      * @param {CustomEvent} ev
      */
-    _onHideAddingItem(ev){
+    _onHideAddingItem(ev) {
         ev.stopPropagation();
         this.category.update({ isAddingItem: false });
     }

@@ -62,7 +62,7 @@ function factory(dependencies) {
          */
         _computeActiveItem() {
             const thread = this.env.messaging.discuss.thread;
-            if (thread && thread.channel_type === this.supportedChannelType ){
+            if (thread && this.supportedChannelTypes.includes(thread.channel_type)) {
                 return insertAndReplace({ channelId: thread.id });
             }
             return clear();
@@ -72,7 +72,7 @@ function factory(dependencies) {
          * @private
          * @returns {mail.discuss_sidebar_category_item[]}
          */
-        _computeCategoryItems(){
+        _computeCategoryItems() {
             let channels = this.selectedSortedChannels;
             const searchValue = this.env.messaging.discuss.sidebarQuickSearchValue;
             if (searchValue) {
@@ -87,57 +87,15 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {string}
-         */
-        _computeCommandAddTitleText() {
-            switch(this.supportedChannelType) {
-                case 'channel':
-                    return this.env._t("Add or join a channel");
-                case 'chat':
-                    return this.env._t("Start a conversation");
-            }
-        }
-
-        /**
-         * @private
          * @returns {integer}
          */
         _computeCounter() {
-            switch (this.supportedChannelType) {
-                case 'channel':
+            switch (this.counterComputeMethod) {
+                case 'needaction':
                     return this.selectedChannels.filter(thread => thread.message_needaction_counter > 0).length;
-                case 'chat':
+                case 'unread':
                     return this.selectedChannels.filter(thread => thread.localMessageUnreadCounter > 0).length;
             }
-        }
-
-        /**
-         * @private
-         * @returns {string}
-         */
-        _computeDisplayName() {
-            switch (this.supportedChannelType) {
-                case 'channel':
-                    return this.env._t('Channels');
-                case 'chat':
-                    return this.env._t('Direct Messages');
-            }
-        }
-
-        /**
-         * @private
-         * @returns {boolean}
-         */
-        _computeHasAddCommand() {
-            return this.isOpen && (this.supportedChannelType === 'chat' || this.supportedChannelType === 'channel');
-        }
-
-        /**
-         * @private
-         * @returns {boolean}
-         */
-        _computeHasViewCommand() {
-            return this.supportedChannelType === 'channel';
         }
 
         /**
@@ -158,23 +116,10 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {string}
-         */
-        _computeNewItemPlaceholderText() {
-            switch(this.supportedChannelType) {
-                case 'channel':
-                    return this.env._t('Find or create a channel...');
-                case 'chat':
-                    return this.env._t('Find or start a conversation...');
-            }
-        }
-
-        /**
-         * @private
          * @returns {mail.thread[]}
          */
         _computeSelectedChannels() {
-            return replace(this.allPinnedChannels.filter(thread => thread.channel_type === this.supportedChannelType));
+            return replace(this.allPinnedChannels.filter(channel => this.supportedChannelTypes.includes(channel.channel_type)));
         }
 
          /**
@@ -182,27 +127,12 @@ function factory(dependencies) {
          * @private
          * @returns {mail.thread[]}
          */
-          _computeSelectedSortedChannels() {
-            switch (this.supportedChannelType) {
-                case 'channel':
+        _computeSelectedSortedChannels() {
+            switch (this.sortComputeMethod) {
+                case 'name':
                     return replace(this._sortByDisplayName());
-                case 'chat':
+                case 'last_action':
                     return replace(this._sortByLastMeaningfulActionTime());
-            }
-        }
-
-        /**
-         * Returns the key used in server side for the category states.
-         *
-         * @private
-         * @returns {string}
-         */
-        _computeServerStateKey() {
-            switch (this.supportedChannelType) {
-                case 'channel':
-                    return 'is_discuss_sidebar_category_channel_open';
-                case 'chat':
-                    return 'is_discuss_sidebar_category_chat_open';
             }
         }
 
@@ -236,31 +166,16 @@ function factory(dependencies) {
          */
         _sortByLastMeaningfulActionTime() {
             return this.selectedChannels.sort((t1, t2) => {
-                if(t1.lastMeaningfulActionTime && !t2.lastMeaningfulActionTime) {
+                if (t1.lastMeaningfulActionTime && !t2.lastMeaningfulActionTime) {
                     return -1;
-                } else if(!t1.lastMeaningfulActionTime && t2.lastMeaningfulActionTime) {
+                } else if (!t1.lastMeaningfulActionTime && t2.lastMeaningfulActionTime) {
                     return 1;
-                } else if(t1.lastMeaningfulActionTime && t2.lastMeaningfulActionTime && t1.lastMeaningfulActionTime !== t2.lastMeaningfulActionTime) {
+                } else if (t1.lastMeaningfulActionTime && t2.lastMeaningfulActionTime && t1.lastMeaningfulActionTime !== t2.lastMeaningfulActionTime) {
                     return t2.lastMeaningfulActionTime - t1.lastMeaningfulActionTime;
                 } else {
                     return t2.id - t1.id;
                 }
             });
-        }
-
-        /**
-         * Validates if `supportedChannelType` is legit
-         *
-         * @private
-         * @returns {undefined}
-         * @throws {Error}
-         */
-        _validateSupportedChannelType() {
-            if (this.supportedChannelType === 'channel' ||
-                this.supportedChannelType === 'chat') {
-                    return;
-            }
-            throw Error(`Unsupported channel type in mail.discuss_sidebar_category: ${this.supportedChannelType}`);
         }
 
         //--------------------------------------------------------------------------
@@ -273,7 +188,7 @@ function factory(dependencies) {
          * @private
          */
         async _onClick() {
-            if(this.isOpen) {
+            if (this.isOpen) {
                 await this.close();
             } else {
                 await this.open();
@@ -288,7 +203,7 @@ function factory(dependencies) {
          * @param {integer} ui.item.id
          */
         _onAddItemAutocompleteSelect(ev, ui) {
-            switch (this.supportedChannelType) {
+            switch (this.autocompleteMethod) {
                 case 'channel':
                     this.discuss.handleAddChannelAutocompleteSelect(ev, ui);
                     break;
@@ -305,7 +220,7 @@ function factory(dependencies) {
          * @param {function} res
          */
         _onAddItemAutocompleteSource(req, res) {
-            switch (this.supportedChannelType) {
+            switch (this.autocompleteMethod) {
                 case 'channel':
                     this.discuss.handleAddChannelAutocompleteSource(req, res);
                     break;
@@ -353,23 +268,32 @@ function factory(dependencies) {
         activeItem: one2one('mail.discuss_sidebar_category_item', {
             compute: '_computeActiveItem',
             dependencies: [
-                'supportedChannelType',
                 'discussThread',
+                'discussThreadChannelType',
+                'supportedChannelTypes',
             ],
         }),
         /**
+         * Determines how the autocomplete of this category should behave.
+         * Must be one of: 'channel', 'chat'.
+         */
+        autocompleteMethod: attr(),
+        /**
          * The title text in UI for command `add`
          */
-        commandAddTitleText: attr({
-            compute: '_computeCommandAddTitleText',
-            dependencies: ['supportedChannelType'],
-        }),
+        commandAddTitleText: attr(),
         /**
          * The thread which is active in discuss.
          * Serves as compute dependency.
          */
-        discussThread: one2one('mail.thread', {
+        discussThread: many2one('mail.thread', {
             related: 'discuss.thread'
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        discussThreadChannelType: attr({
+            related: 'discussThread.channel_type',
         }),
         /**
          * Serves as compute dependency.
@@ -397,8 +321,15 @@ function factory(dependencies) {
                 'selectedChannels',
                 'selectedChannelsLocalMessageUnreadCounter',
                 'selectedChannelsMessageNeedactionCounter',
-                'supportedChannelType',
+                'counterComputeMethod',
             ],
+        }),
+        /**
+         * Determines how the counter of this category should be computed.
+         * Supported methods: 'needaction', 'unread'.
+         */
+        counterComputeMethod: attr({
+            required: true,
         }),
         /**
          * Serves as compute dependency.
@@ -409,26 +340,18 @@ function factory(dependencies) {
         /**
          * Display name of the category.
          */
-        displayName: attr({
-            compute: '_computeDisplayName',
-            dependencies: ['supportedChannelType'],
-        }),
+        displayName: attr(),
         /**
          * Boolean that determines whether this category has a 'add' command.
          */
         hasAddCommand: attr({
-            compute: '_computeHasAddCommand',
-            dependencies: [
-                'supportedChannelType',
-                'isOpen'
-            ],
+            default: false,
         }),
         /**
          * Boolean that determines whether this category has a 'view' command.
          */
         hasViewCommand: attr({
-            compute: '_computeHasViewCommand',
-            dependencies: ['supportedChannelType'],
+            default: false,
         }),
         /**
          * Boolean that determines whether discuss is adding a new category item.
@@ -464,10 +387,7 @@ function factory(dependencies) {
         /**
          * The placeholder text used when a new item is being added in UI.
          */
-        newItemPlaceholderText: attr({
-            compute: '_computeNewItemPlaceholderText',
-            dependencies: ['supportedChannelType'],
-        }),
+        newItemPlaceholderText: attr(),
         /**
          * Not a real field, used to trigger `_onIsServerOpenChanged`.
          */
@@ -483,8 +403,8 @@ function factory(dependencies) {
             compute: '_computeSelectedChannels',
             dependencies: [
                 'allPinnedChannels',
-                'supportedChannelType',
-            ]
+                'supportedChannelTypes',
+            ],
         }),
         /**
          * Serves as compute dependency.
@@ -520,16 +440,13 @@ function factory(dependencies) {
                 'selectedChannels',
                 'selectedChannelsDisplayName',
                 'selectedChannelsLastMeaningfulActionTime',
-                'supportedChannelType',
+                'sortComputeMethod',
             ],
         }),
         /**
          * The key used in the server side for the category state
          */
-        serverStateKey: attr({
-            compute: '_computeServerStateKey',
-            dependencies: ['supportedChannelType'],
-        }),
+        serverStateKey: attr(),
         /**
          * The value of discuss sidebar quick search input.
          * Serves as compute dependency.
@@ -538,12 +455,18 @@ function factory(dependencies) {
             related: 'discuss.sidebarQuickSearchValue',
         }),
         /**
+         * Determines the sorting method of channels in this category.
+         * Must be one of: 'name', 'last_action'.
+         */
+        sortComputeMethod: attr({
+            required: true,
+        }),
+        /**
          * Channel type which is supported by the category.
          */
-        supportedChannelType: attr({
+        supportedChannelTypes: attr({
             required: true,
             readonly: true,
-            compute: '_validateSupportedChannelType',
         }),
     };
 

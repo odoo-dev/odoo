@@ -13,7 +13,7 @@
                     <t t-if="category.hasViewCommand">
                         <div class="o_DiscussSidebarCategory_command o_DiscussSidebarCategory_commandView fa fa-cog" title="View or join channels" t-on-click="_onClickView" role="img"/>
                     </t>
-                    <t t-if="category.hasAddCommand">
+                    <t t-if="category.hasAddCommand and category.isOpen">
                         <div class="o_DiscussSidebarCategory_command o_DiscussSidebarCategory_commandAdd fa fa-plus" t-on-click="_onClickAdd" t-att-title="category.commandAddTitleText" role="img"/>
                     </t>
                 </div>
@@ -29,7 +29,7 @@
                         <div class="o_DiscussSidebarCategory_newItem">
                             <AutocompleteInput
                                 class="o_DiscussSidebarCategory_itemNewInput"
-                                customClass="category.supportedChannelType === 'channel' ? 'o_DiscussSidebarCategory_newChannelAutocompleteSuggestions' : ''"
+                                customClass="'o_DiscussSidebarCategory_newChannelAutocompleteSuggestions'"
                                 isFocusOnMount="true"
                                 isHtml="true"
                                 placeholder="category.newItemPlaceholderText"

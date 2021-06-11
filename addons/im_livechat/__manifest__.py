@@ -51,7 +51,6 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/components/notification_list/notification_list.js',
             'im_livechat/static/src/components/thread_needaction_preview/thread_needaction_preview.js',
             'im_livechat/static/src/components/thread_preview/thread_preview.js',
-            'im_livechat/static/src/models/discuss_sidebar_category/discuss_sidebar_category.js',
             'im_livechat/static/src/models/discuss_sidebar_category_item/discuss_sidebar_category_item.js',
             'im_livechat/static/src/models/chat_window/chat_window.js',
             'im_livechat/static/src/models/discuss/discuss.js',
