@@ -129,7 +129,7 @@
                     t-on-o-rendered="_onThreadRendered"
                     t-ref="threadView"
                 />
-                <t t-if="env.messaging.showMemberList and discuss.thread and ['channel', 'chat'].includes(discuss.thread.channel_type)"> <!-- TODO toggle and hide empty once topbar is merged -->
+                <t t-if="env.messaging.showMemberList and discuss.thread and ['channel', 'chat', 'group'].includes(discuss.thread.channel_type)">
                     <RtcCallParticipants class="o_Discuss_thread_callParticipants" threadLocalId="discuss.thread.localId"/>
                 </t>
             </div>
