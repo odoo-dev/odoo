@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
 import { registry } from "./registry";
+import { sessionInfo } from "@web/session";
 
 export const userService = {
     dependencies: ["rpc"],
     async: ["hasGroup"],
     start(env, { rpc }) {
-        const sessionInfo = odoo.session_info;
         const groupProms = {};
 
         const context = {

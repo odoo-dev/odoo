@@ -2,13 +2,13 @@
 
 import { registry } from "@web/core/registry";
 import { ProfilingItem } from "./profiling_item";
+import { sessionInfo } from "@web/session";
 
 const { core } = owl;
 
 const profilingService = {
     dependencies: ["orm"],
     start(env, { orm }) {
-        const sessionInfo = odoo.session_info;
         const state = {
             session: sessionInfo.profile_session || false,
             collectors: sessionInfo.profile_collectors || ["sql", "traces_async"],

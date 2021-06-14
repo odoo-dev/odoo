@@ -8,8 +8,8 @@ import core from "web.core";
 import AbstractAction from "web.AbstractAction";
 import { registerCleanup } from "../../helpers/cleanup";
 import { makeTestEnv } from "../../helpers/mock_env";
-import { makeFakeRouterService } from "../../helpers/mock_services";
 import { getFixture, legacyExtraNextTick, patchWithCleanup } from "../../helpers/utils";
+import { sessionInfo } from "@web/session";
 import {
     createWebClient,
     doAction,
@@ -23,7 +23,6 @@ const { Component, mount, tags } = owl;
 let serverData;
 
 const actionRegistry = registry.category("actions");
-const serviceRegistry = registry.category("services");
 
 QUnit.module("ActionManager", (hooks) => {
     hooks.beforeEach(() => {
@@ -105,7 +104,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("fallback on home action if no action found", async (assert) => {
         assert.expect(2);
-        patchWithCleanup(odoo.session_info, { home_action_id: 1001 });
+        patchWithCleanup(sessionInfo, { home_action_id: 1001 });
 
         const wc = await createWebClient({ serverData });
         await testUtils.nextTick(); // wait for the navbar to be updated

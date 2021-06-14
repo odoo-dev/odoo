@@ -6,6 +6,7 @@ import testUtils from 'web.test_utils';
 import { legacyExtraNextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { registry } from "@web/core/registry";
+import { sessionInfo } from '@web/session';
 
 let serverData;
 
@@ -391,7 +392,7 @@ QUnit.test("activity view: no group_by_menu and no comparison_menu", async funct
         }
     };
 
-    patchWithCleanup(odoo.session_info.user_context, { lang: "zz_ZZ" });
+    patchWithCleanup(sessionInfo.user_context, { lang: "zz_ZZ" });
 
     const webClient = await createWebClient({ serverData, mockRPC , legacyParams: {withLegacyMockServer: true}});
 

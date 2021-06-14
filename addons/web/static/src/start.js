@@ -4,6 +4,7 @@ import { makeEnv, startServices } from "./env";
 import { legacySetupProm } from "./legacy/legacy_setup";
 import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { processTemplates } from "./core/assets";
+import { sessionInfo } from "@web/session";
 
 const { mount, utils } = owl;
 const { whenReady } = utils;
@@ -17,8 +18,6 @@ const { whenReady } = utils;
  * @param {owl.Component} Webclient
  */
 export async function startWebClient(Webclient) {
-    // delete (odoo as any).session_info; // FIXME: some legacy code rely on this (e.g. ajax.js)
-    const sessionInfo = odoo.session_info;
     odoo.info = {
         db: sessionInfo.db,
         server_version: sessionInfo.server_version,
