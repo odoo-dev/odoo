@@ -1430,27 +1430,27 @@ QUnit.module("Views", (hooks) => {
                 ],
             }
         );
-        checkLabels(assert, graph, ["1", "2", "3", "4"]);
+        checkLabels(assert, graph, ["1", "2", "4"]);
         checkDatasets(
             assert,
             graph,
             ["backgroundColor", "borderColor", "data", "label"],
             [
                 {
-                    backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8", "#ffbb78"],
+                    backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
                     borderColor: BORDER_WHITE,
-                    data: [14, 0, 0, 0],
+                    data: [14, 0, 0],
                     label: "True group",
                 },
                 {
-                    backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8", "#ffbb78"],
+                    backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
                     borderColor: BORDER_WHITE,
-                    data: [12, 5, 0, 2],
+                    data: [12, 5, 2],
                     label: "False group",
                 },
             ]
         );
-        checkLegend(assert, graph, ["1", "2", "3", "4"]);
+        checkLegend(assert, graph, ["1", "2", "4"]);
         checkTooltip(
             assert,
             graph,
@@ -1488,7 +1488,7 @@ QUnit.module("Views", (hooks) => {
                 title: "Revenue",
                 lines: [{ label: "False group / 4", value: "2" }],
             },
-            3,
+            2,
             1
         );
     });
@@ -1667,37 +1667,27 @@ QUnit.module("Views", (hooks) => {
                     domains,
                 }
             );
-            checkLabels(assert, graph, [
-                "true / W5 2021",
-                "false / W7 2021",
-                "true / W1 2021",
-                "false / W2 2021",
-            ]);
+            checkLabels(assert, graph, ["true / W5 2021", "true / W1 2021", "false / W2 2021"]);
             checkDatasets(
                 assert,
                 graph,
                 ["backgroundColor", "borderColor", "data", "label"],
                 [
                     {
-                        backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8", "#ffbb78"],
+                        backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
                         borderColor: BORDER_WHITE,
-                        data: [14, 0, 0, 0],
+                        data: [14, 0, 0],
                         label: "February 2021",
                     },
                     {
-                        backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8", "#ffbb78"],
+                        backgroundColor: ["#1f77b4", "#ff7f0e", "#aec7e8"],
                         borderColor: BORDER_WHITE,
-                        data: [0, 0, 12, 5],
+                        data: [0, 12, 5],
                         label: "January 2021",
                     },
                 ]
             );
-            checkLegend(assert, graph, [
-                "true / W5 2021",
-                "false / W7 2021",
-                "true / W1 2021",
-                "false / W2 2021",
-            ]);
+            checkLegend(assert, graph, ["true / W5 2021", "true / W1 2021", "false / W2 2021"]);
             checkTooltip(
                 assert,
                 graph,
@@ -1715,7 +1705,7 @@ QUnit.module("Views", (hooks) => {
                     title: "Revenue",
                     lines: [{ label: "January 2021 / true / W1 2021", value: "12" }],
                 },
-                2,
+                1,
                 1
             );
             checkTooltip(
@@ -1725,7 +1715,7 @@ QUnit.module("Views", (hooks) => {
                     title: "Revenue",
                     lines: [{ label: "January 2021 / false / W2 2021", value: "5" }],
                 },
-                3,
+                2,
                 1
             );
         }

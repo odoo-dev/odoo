@@ -114,7 +114,7 @@ export class GraphModel extends Model {
         const dateClasses = identify ? this.getDateClasses(dataPoints) : null;
 
         // dataPoints --> labels
-        const labels = [];
+        let labels = [];
         const labelMap = {};
         for (const dataPt of dataPoints) {
             const x = dataPt.labels.slice(0, mode === "pie" ? undefined : 1);
@@ -162,7 +162,27 @@ export class GraphModel extends Model {
             datasetsTmp[datasetLabel].trueLabels[labelIndex] = trueLabel;
         }
         // sort by origin
-        const datasets = sortBy(Object.values(datasetsTmp), "originIndex");
+        let datasets = sortBy(Object.values(datasetsTmp), "originIndex");
+
+        if (mode === "pie") {
+            // We kinda have a matrix. We remove the zero columns and rows. This is a global operation.
+            // That's why it cannot be done before.
+            datasets = datasets.filter((dataset) => dataset.data.some((v) => Boolean(v)));
+            const labelsToKeepIndexes = {};
+            labels.forEach((_, index) => {
+                if (datasets.some((dataset) => Boolean(dataset.data[index]))) {
+                    labelsToKeepIndexes[index] = true;
+                }
+            });
+            labels = labels.filter((_, index) => labelsToKeepIndexes[index]);
+            for (const dataset of datasets) {
+                dataset.data = dataset.data.filter((_, index) => labelsToKeepIndexes[index]);
+                dataset.domains = dataset.domains.filter((_, index) => labelsToKeepIndexes[index]);
+                dataset.trueLabels = dataset.trueLabels.filter(
+                    (_, index) => labelsToKeepIndexes[index]
+                );
+            }
+        }
 
         return { datasets, labels };
     }

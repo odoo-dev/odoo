@@ -744,7 +744,6 @@ export class GraphView extends Component {
      */
     onMeasureSelected(ev) {
         const { measure } = ev.detail.payload;
-        /** @todo check problem with bounce in crm.lead */
         this.model.updateMetaData({ measure });
     }
 
