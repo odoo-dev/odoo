@@ -349,7 +349,7 @@ QUnit.test('invite button should be present on livechat', async function (assert
     });
     assert.containsOnce(
         document.body,
-        '.o_Discuss_inviteButton',
+        '.o_ThreadViewTopbar_inviteButton',
         "Invite button should be visible in top bar when livechat is active thread"
     );
 });

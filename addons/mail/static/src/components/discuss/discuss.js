@@ -9,10 +9,7 @@ import DiscussSidebar from '@mail/components/discuss_sidebar/discuss_sidebar';
 import MobileMessagingNavbar from '@mail/components/mobile_messaging_navbar/mobile_messaging_navbar';
 import NotificationList from '@mail/components/notification_list/notification_list';
 import PartnerListing from '@mail/components/partner_listing/partner_listing';
-import PartnerSelector from '@mail/components/partner_selector/partner_selector';
 import RtcCallParticipants from '@mail/components/rtc_call_participants/rtc_call_participants';
-import RtcController from '@mail/components/rtc_controller/rtc_controller';
-import ThreadIcon from '@mail/components/thread_icon/thread_icon';
 import ThreadView from '@mail/components/thread_view/thread_view';
 import { link, unlink } from '@mail/model/model_field_command';
 
@@ -27,10 +24,7 @@ const components = {
     MobileMessagingNavbar,
     NotificationList,
     PartnerListing,
-    PartnerSelector,
     RtcCallParticipants,
-    RtcController,
-    ThreadIcon,
     ThreadView,
 };
 
@@ -176,8 +170,6 @@ class Discuss extends Component {
         const replyingToMessage = discuss && discuss.replyingToMessage;
         const replyingToMessageOriginThread = replyingToMessage && replyingToMessage.originThread;
         return {
-            activeCallThreadLocalId: this.env.messaging.activeCallThreadLocalId,
-            callParticipants: thread && thread.callParticipants,
             discuss,
             discussActiveId: discuss && discuss.activeId, // for widget
             discussActiveMobileNavbarTabId: discuss && discuss.activeMobileNavbarTabId,
@@ -194,8 +186,6 @@ class Discuss extends Component {
             thread,
             threadCache: threadView && threadView.threadCache,
             threadChannelType: thread && thread.channel_type,
-            threadDescription: thread && thread.description,
-            threadDisplayName: thread && thread.displayName,
             threadCounter: thread && thread.counter,
             threadModel: thread && thread.model,
             threadView,
@@ -206,34 +196,6 @@ class Discuss extends Component {
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onClickMarkAllAsRead() {
-        this.env.models['mail.message'].markAllAsRead();
-    }
-
-    /**
-     * @private
-     */
-    _onClickMobileNewChannelButton() {
-        this.discuss.update({ isAddingChannel: true });
-    }
-
-    /**
-     * @private
-     */
-    _onClickMobileNewMessageButton() {
-        this.discuss.update({ isAddingChat: true });
-    }
-
-    /**
-     * @private
-     */
-    _onClickUnstarAll() {
-        this.env.models['mail.message'].unstarAll();
-    }
 
     /**
      * @private

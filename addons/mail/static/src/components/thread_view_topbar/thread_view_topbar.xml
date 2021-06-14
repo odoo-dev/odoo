@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ThreadViewTopbar" owl="1">
+        <div class="o_ThreadViewTopbar">
+            <div class="o_ThreadViewTopbar_title">
+                <t t-if="threadView.thread">
+                    <ThreadIcon class="o_ThreadViewTopbar_threadIcon" threadLocalId="threadView.thread.localId"/>
+                    <div class="o_ThreadViewTopbar_threadName" t-att-title="threadView.thread.displayName">
+                        <t t-esc="threadView.thread.displayName"/>
+                    </div>
+                </t>
+                <t t-if="!threadView.thread">
+                    <div class="o_ThreadViewTopbar_threadName" title="Discuss">
+                        Discuss
+                    </div>
+                </t>
+                <t t-if="threadView.thread and threadView.thread.description">
+                    <div class="o_ThreadViewTopbar_threadDescriptionSeparator"/>
+                    <div class="o_ThreadViewTopbar_threadDescription" t-att-title="threadView.thread.description">
+                        <t t-esc="threadView.thread.description"/>
+                    </div>
+                </t>
+            </div>
+            <div class="o_ThreadViewTopbar_actions">
+                <t t-if="threadView.thread and threadView.thread.model === 'mail.channel'">
+                    <Popover popoverExtraClass="'o_ThreadViewTopbar_invitePopover'" position="'bottom'">
+                        <button class="o_ThreadViewTopbar_inviteButton btn btn-secondary">
+                            <i class="fa fa-user-plus"/>
+                        </button>
+                        <t t-set="opened">
+                            <PartnerSelector
+                                invitePartnerListLocalId="threadView.thread.invitePartnerList.localId"
+                            />
+                        </t>
+                    </Popover>
+                </t>
+                <t t-if="threadView.thread and threadView.thread === env.messaging.inbox">
+                    <button class="o_ThreadViewTopbar_markAllReadButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="_onClickMarkAllAsRead">Mark all read</button>
+                </t>
+                <t t-if="threadView.thread and threadView.thread === env.messaging.starred">
+                    <button class="o_ThreadViewTopbar_unstarAllButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="_onClickUnstarAll">Unstar all</button>
+                </t>
+                <t t-if="threadView.thread and threadView.thread.model === 'mail.channel'">
+                    <RtcController threadLocalId="threadView.thread.localId" showMembersButton="true"/>
+                </t>
+                <t t-if="env.messaging.device.isMobile">
+                    <t t-if="env.messaging.discuss.activeMobileNavbarTabId === 'chat'">
+                        <button class="o_Discuss_mobileNewMessageButton btn btn-secondary" t-on-click="_onClickMobileNewMessageButton">New Message</button>
+                    </t>
+                    <t t-if="env.messaging.discuss.activeMobileNavbarTabId === 'channel'">
+                        <button class="o_Discuss_mobileNewChannelButton btn btn-secondary" t-on-click="_onClickMobileNewChannelButton">New Channel</button>
+                    </t>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

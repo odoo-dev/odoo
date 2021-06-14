@@ -5,12 +5,13 @@ import useStore from '@mail/component_hooks/use_store/use_store';
 import useUpdate from '@mail/component_hooks/use_update/use_update';
 import Composer from '@mail/components/composer/composer';
 import MessageList from '@mail/components/message_list/message_list';
+import ThreadViewTopbar from '@mail/components/thread_view_topbar/thread_view_topbar';
 import VideoRoom from '@mail/components/video_room/video_room';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { Composer, MessageList, VideoRoom };
+const components = { Composer, MessageList, ThreadViewTopbar, VideoRoom };
 
 class ThreadView extends Component {
 
@@ -143,6 +144,7 @@ class ThreadView extends Component {
             threadModel: thread && thread.model,
             threadTextInputSendShortcuts: thread && thread.textInputSendShortcuts || [],
             threadView,
+            threadViewHasTopbar: threadView && threadView.hasTopbar,
             threadViewIsLoading: threadView && threadView.isLoading,
         };
     }
