@@ -245,7 +245,7 @@ odoo.define('web.OwlCompatibility', function () {
                     payload.callback(result);
                 } else {
                     throw new Error(
-                        `The service "${service}" is not present in the legacy owl environment.
+                        `The service "${payload.service}" is not present in the legacy owl environment.
                          You should probably create a mapper in @web/legacy/utils`
                     );
                 }
