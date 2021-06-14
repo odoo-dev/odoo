@@ -271,6 +271,12 @@ function factory(dependencies) {
             default: true,
         }),
         /**
+         * Determines whether the topbar of this thread view should be displayed.
+         */
+        hasTopbar: attr({
+            related: 'threadViewer.hasTopbar',
+        }),
+        /**
          * Last message in the context of the currently displayed thread cache.
          */
         lastMessage: many2one('mail.message', {
