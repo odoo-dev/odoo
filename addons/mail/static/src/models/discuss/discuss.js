@@ -375,6 +375,7 @@ function factory(dependencies) {
         _computeThreadViewer() {
             const threadViewerData = {
                 hasThreadView: this.hasThreadView,
+                hasTopbar: true,
                 selectedMessage: this.replyingToMessage ? link(this.replyingToMessage) : unlink(),
                 thread: this.thread ? link(this.thread) : unlink(),
             };

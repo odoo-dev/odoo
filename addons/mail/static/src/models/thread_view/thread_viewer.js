@@ -2,7 +2,7 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2one, one2one } from '@mail/model/model_field';
-import { create, insert, link, unlink } from '@mail/model/model_field_command';
+import { create, unlink } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -81,6 +81,12 @@ function factory(dependencies) {
          * Determines whether `this.thread` should be displayed.
          */
         hasThreadView: attr({
+            default: false,
+        }),
+        /**
+         * Determines whether the topbar of this thread view should be displayed.
+         */
+        hasTopbar: attr({
             default: false,
         }),
         /**
