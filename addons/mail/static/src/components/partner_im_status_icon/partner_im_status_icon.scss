@@ -38,11 +38,11 @@
 .o_PartnerImStatusIcon_icon {
 
     &.o-away {
-        color: o-text-color('warning');
+        color: theme-color('warning');
     }
 
     &.o-bot {
-        color: o-text-color('primary');
+        color: $o-enterprise-primary-color;
     }
 
     &.o-offline {
@@ -50,7 +50,7 @@
     }
 
     &.o-online {
-        color: o-text-color('primary');
+        color: $o-enterprise-primary-color;
     }
 }
 

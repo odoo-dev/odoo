@@ -18,9 +18,9 @@
 // ------------------------------------------------------------------
 
 .o_ThreadIcon_away {
-    color: o-text-color('warning');
+    color: theme-color('warning');
 }
 
 .o_ThreadIcon_online {
-    color: o-text-color('primary');
+    color: $o-enterprise-primary-color;
 }
