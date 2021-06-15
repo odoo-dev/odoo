@@ -184,6 +184,7 @@
             'mail/static/src/models/discuss_sidebar_category/discuss_sidebar_category.js',
             'mail/static/src/models/discuss_sidebar_category_item/discuss_sidebar_category_item.js',
             'mail/static/src/models/channel_command/channel_command.js',
+            'mail/static/src/models/channel_member/channel_member.js',
             'mail/static/src/models/chat_window/chat_window.js',
             'mail/static/src/models/chat_window_manager/chat_window_manager.js',
             'mail/static/src/models/chatter/chatter.js',

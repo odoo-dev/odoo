@@ -43,6 +43,43 @@ MockServer.include({
         }
         this._widget = options.widget;
 
+        /**
+         * Generating channel_last_seen_partner_ids/mail.channel.partner based on the member field of mail.channel
+         * which mimics the behaviour of the compute of the member field.
+         */
+        const channelMembers = data && 'mail.channel.member' in data ? data['mail.channel'].records : [];
+        this.data = data; // required to use this._getUnusedID();
+        if (data && 'mail.channel' in data) {
+            for (const channel of data['mail.channel'].records) {
+                if (!channel.id) {
+                    channel.id = this._getUnusedID('mail.channel');
+                }
+                const partnerIds = channel.members ? channel.members : [];
+                if (this.currentPartnerId && !partnerIds.includes(this.currentPartnerId)) {
+                    partnerIds.push(this.currentPartnerId);
+                }
+                const existingPartnerIds = new Set(
+                    channelMembers
+                        .filter(member => member.channel_id === channel.id)
+                        .map(member => member.partner_id)
+                );
+                for (const partnerId of partnerIds) {
+                    if (existingPartnerIds.has(partnerId)) {
+                        continue;
+                    }
+                    const id = this._getUnusedID('mail.channel.partner');
+                    if (!channel.channel_last_seen_partner_ids) {
+                        channel.channel_last_seen_partner_ids = [];
+                    }
+                    channel.channel_last_seen_partner_ids.push(id);
+                    data['mail.channel.partner'].records.push({
+                        partner_id: partnerId,
+                        channel_id: channel.id,
+                        id,
+                    });
+                }
+            }
+        }
         this._super(...arguments);
     },
 
@@ -247,6 +284,9 @@ MockServer.include({
             if (args.model === 'res.partner') {
                 return this._mockResPartnerGetMentionSuggestions(args);
             }
+        }
+        if (args.method === 'get_channel_mention_suggestions') {
+            return this._mockResPartnerGetChannelMentionSuggestions(args);
         }
         if (args.model === 'res.partner' && args.method === 'im_search') {
             const name = args.args[0] || args.kwargs.search;
@@ -721,6 +761,17 @@ MockServer.include({
             public: 'private',
             state: 'open',
         });
+        const channelPartnerIds = [];
+        for (const partnerId of partners_to) {
+            channelPartnerIds.push(this._mockCreate('mail.channel.partner', {
+                partner_id: partnerId,
+                channel_id: id,
+            }));
+        }
+        this._mockWrite('mail.channel', [
+            [id],
+            { channel_last_seen_partner_ids: channelPartnerIds },
+        ]);
         return this._mockMailChannelChannelInfo([id])[0];
     },
     /**
@@ -744,7 +795,10 @@ MockServer.include({
         }, []))];
         const partnerInfos = this._mockMailChannelPartnerInfo(all_partners, direct_partners);
         return channels.map(channel => {
-            const members = channel.members.map(partnerId => partnerInfos[partnerId]);
+            const channelPartners = this._getRecords(
+                'mail.channel.partner',
+                [['channel_id', '=', channel.id]],
+            );
             const messages = this._getRecords('mail.message', [
                 ['model', '=', 'mail.channel'],
                 ['res_id', '=', channel.id],
@@ -763,12 +817,24 @@ MockServer.include({
             const res = Object.assign({}, channel, {
                 info: extra_info,
                 last_message_id: lastMessageId,
-                members,
                 message_needaction_counter: messageNeedactionCounter,
             });
+            const currentChannelPartners = channelPartners.filter(channelPartner => channelPartner.partner_id === this.currentPartnerId);
+            const partnerChannel = currentChannelPartners[0];
             if (channel.channel_type === 'channel') {
-                delete res.members;
+                const channelPartnerData = Object.assign({}, partnerChannel, {
+                    partner: partnerInfos[partnerChannel.partner_id],
+                });
+                delete channelPartnerData.partner_id;
+                res.members = [channelPartnerData];
             } else {
+                res.members = channelPartners.map(channelPartner => {
+                    const channelPartnerData = Object.assign({}, channelPartner, {
+                        partner: partnerInfos[channelPartner.partner_id],
+                    });
+                    delete channelPartnerData.partner_id;
+                    return channelPartnerData;
+                });
                 res['seen_partners_info'] = [{
                     partner_id: this.currentPartnerId,
                     seen_message_id: channel.seen_message_id,
@@ -1703,6 +1769,29 @@ MockServer.include({
             ['partner_id', 'in', partner_ids || []],
         ]);
         this._mockUnlink(model, [followers.map(follower => follower.id)]);
+    },
+    /**
+     * Simulates `get_channel_mention_suggestions` on `res.partner`.
+     *
+     * @private
+     * @returns {Array[]}
+     */
+    _mockResPartnerGetChannelMentionSuggestions(args) {
+        const partners = this._mockResPartnerGetMentionSuggestions(args)
+        const partnerIds = partners.map(partner => partner.id);
+        const partnerData = {};
+        for (const partner of partners) {
+            partnerData[partner.id] = partner;
+        }
+        const channelPartners = this._getRecords('mail.channel.partner', [
+            ['channel_id', '=', args.kwargs.channel_id],
+            ['partner_id', 'in', partnerIds],
+        ]);
+        return channelPartners.map(channelPartner => {
+            channelPartner.partner = partnerData[channelPartner.partner_id];
+            delete channelPartner.partner_id;
+            return channelPartner;
+        });
     },
     /**
      * Simulates `set_mail_user_settings` on `mail.user.settings`.

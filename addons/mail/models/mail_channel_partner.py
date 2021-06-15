@@ -51,3 +51,18 @@ class ChannelPartner(models.Model):
         if vals.get('is_pinned'):
             vals['last_meaningful_action_time'] = fields.Datetime.now()
         return super(ChannelPartner, self).write(vals)
+
+    def mail_channel_partner_format(self, partner_infos=None):
+        members = self.read(['id', 'partner_id'])
+        partner_infos = partner_infos or {}
+        formatted_members = []
+        for member in members:
+            partner_data = partner_infos.get(member['partner_id'][0], {
+                'id': member['partner_id'][0],
+                'display_name': member['partner_id'][1]
+            })
+            formatted_members.append({
+                'id': member['id'],
+                'partner': partner_data,
+            })
+        return formatted_members
