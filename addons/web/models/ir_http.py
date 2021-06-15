@@ -58,7 +58,7 @@ class Http(models.AbstractModel):
             qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(debug=request.session.debug, bundle="web.assets_qweb")
             lang = user_context.get("lang")
             translation_hash = request.env['ir.translation'].get_web_translations_hash(mods, lang)
-            menu_json_utf8 = json.dumps(request.env['ir.ui.menu'].load_menus(request.session.debug), default=ustr, sort_keys=True).encode()
+            menu_json_utf8 = json.dumps(request.env['ir.ui.menu'].load_menus(request.session.debug), default=ustr).encode()
             cache_hashes = {
                 "load_menus": hashlib.sha512(menu_json_utf8).hexdigest()[:64], # sha512/256
                 "qweb": qweb_checksum,

@@ -1,41 +1,52 @@
-from odoo import api, models, tools
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import models
 
 class IrUiMenu(models.Model):
-
     _inherit = "ir.ui.menu"
 
-    @api.model
-    @tools.ormcache_context('self._uid', 'debug', keys=('lang',))
-    def load_menus_flat(self, debug):
-        menu_data = self.load_menus(debug)
-        for app in menu_data['children']:
-            child = app
-            while not app['action'] and child['children']:
-                child = child['children'][0]
-                app['action'] = child['action']
-        return self._process_flatten(menu_data, None, None)[0]
+    def load_web_menus(self, debug):
+        menus = super(IrUiMenu, self).load_menus(debug)
 
-    @api.model
-    def _process_flatten(self, menu_data, appID, accumulator):
-        if accumulator is None:
-            accumulator = {}
-        appID = appID or menu_data['id']
-        children = []
-        for submenu in menu_data['children']:
-            children.append(self._process_flatten(submenu, appID, accumulator)[1]['id'])
+        web_menus = {}
+        for menu in menus.values():
+            if not menu['id']:
+                # special root menu case
+                web_menus['root'] = {
+                    "id": 'root',
+                    "name": menu['name'],
+                    "children": menu['children'],
+                    "appID": False,
+                    "xmlid": "",
+                    "actionID": False,
+                    "actionModel": False,
+                    "webIcon": None,
+                    "webIconData": None,
+                }
+            else:
+                action = menu['action']
 
-        action = menu_data.get('action', '')
-        action = action and action.split(',')
-        menuID = menu_data.get('id') or 'root'
-        menu = {
-            'id': menuID,
-            'appID': appID,
-            'name': menu_data['name'],
-            'children': children,
-            'actionModel': action[0] if action else False,
-            'actionID': int(action[1]) if action else False,
-            'xmlid': menu_data.get('xmlid', '')
-        }
-        accumulator[menuID] = menu
-        return accumulator, menu
+                if menu['id'] == menu['app_id']:
+                    # if it's an app take action of first (sub)child having one defined
+                    child = menu
+                    while child and not action:
+                        action = child['action']
+                        child = menus[child['children'][0]] if child['children'] else False
+
+                action_model, action_id = action.split(',') if action else (False, False)
+                action_id = int(action_id) if action_id else False
+
+                web_menus[menu['id']] = {
+                    "id": menu['id'],
+                    "name": menu['name'],
+                    "children": menu['children'],
+                    "appID": menu['app_id'],
+                    "xmlid": menu['xmlid'],
+                    "actionID": action_id,
+                    "actionModel": action_model,
+                    "webIcon": menu['web_icon'],
+                    "webIconData": menu['web_icon_data'],
+                }
+
+        return web_menus
