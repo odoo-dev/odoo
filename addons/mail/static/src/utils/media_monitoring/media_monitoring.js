@@ -92,7 +92,10 @@ function _loadScriptProcessor(source, audioContext, { onStateChange, minimumActi
 
         if (wasAboveThreshold !== isAboveThreshold) {
             wasAboveThreshold = isAboveThreshold;
-            onStateChange?.(isAboveThreshold);
+            if (!onStateChange) {
+                return;
+            }
+            onStateChange(isAboveThreshold);
         }
     };
     return {
@@ -126,9 +129,10 @@ async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange,
     source.connect(thresholdProcessor).connect(audioContext.destination);
     thresholdProcessor.port.onmessage = (event) => {
         const { isAboveThreshold } = event.data;
-        if (isAboveThreshold !== undefined) {
-            onStateChange?.(isAboveThreshold);
+        if (!onStateChange) {
+            return;
         }
+        onStateChange(isAboveThreshold);
     }
     return {
         disconnect: () => {

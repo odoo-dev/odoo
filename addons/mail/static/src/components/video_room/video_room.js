@@ -163,9 +163,9 @@ class VideoRoom extends Component {
     async _toggleFullScreen(force) {
         const el = document.body;
         const fullScreenElement = document.webkitFullscreenElement || document.fullscreenElement;
-        if (force ?? !fullScreenElement) {
+        if (force !== undefined ? force : !fullScreenElement) {
             try {
-                if (force ?? el.requestFullscreen) {
+                if (el.requestFullscreen) {
                     await el.requestFullscreen();
                 } else if (el.mozRequestFullScreen) {
                     await el.mozRequestFullScreen();

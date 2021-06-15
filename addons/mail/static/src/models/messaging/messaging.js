@@ -199,7 +199,8 @@ function factory(dependencies) {
          * @param {String} partnerId
          */
         toggleFocusedVideoPartner(partnerId) {
-            if (!partnerId || this.focusedVideoPartner?.id === partnerId) {
+            const focusedPartnerId = this.focusedVideoPartner && this.focusedVideoPartner.id;
+            if (!partnerId || focusedPartnerId === partnerId) {
                 this.update({ focusedVideoPartner: [['unlink']] });
                 return;
             }
