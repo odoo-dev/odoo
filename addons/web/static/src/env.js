@@ -60,7 +60,7 @@ export async function startServices(env) {
     serviceRegistry.on("UPDATE", null, async (payload) => {
         // Wait for all synchronous code so that if new services that depend on
         // one another are added to the registry, they're all present before we
-        // start them.
+        // start them regardless of the order they're added to the registry.
         await Promise.resolve();
         const { operation, key: name, value: service } = payload;
         if (operation === "delete") {
@@ -76,6 +76,10 @@ export async function startServices(env) {
             await _startServices(env, toStart);
         }
     });
+    // Wait for all synchronous code so that if new services that depend on
+    // one another are added to the registry, they're all present before we
+    // start them regardless of the order they're added to the registry.
+    await Promise.resolve();
     await _startServices(env, toStart);
 }
 
