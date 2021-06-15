@@ -242,7 +242,9 @@ function factory(dependencies) {
          * @param {mediaStreamTrack} [audioTrack]
          */
         async updateVoiceActivation(audioTrack=this.audioTrack) {
-            this._audioMonitor?.disconnect();
+            if (this._audioMonitor) {
+                this._audioMonitor.disconnect();
+            }
             if (this.env.messaging.userSetting.usePushToTalk || !this.hasActiveSession || !audioTrack) {
                 this.update({ isTalking: !this.env.messaging.userSetting.pushToTalkKey });
                 return;
@@ -307,11 +309,11 @@ function factory(dependencies) {
          */
         async _toggleVideoTrack({ force, type }) {
             if (type === 'user-video') {
-                const sendUserVideo = force ?? !this.sendUserVideo;
+                const sendUserVideo = force !== undefined ? force : !this.sendUserVideo;
                 await this._updateVideoTrack(type, sendUserVideo);
             }
             if (type === 'display') {
-                const sendDisplay = force ?? !this.sendDisplay;
+                const sendDisplay = force !== undefined ? force : !this.sendDisplay;
                 await this._updateVideoTrack(type, sendDisplay);
             }
             if (!this.videoTrack) {
@@ -587,7 +589,9 @@ function factory(dependencies) {
          * @param {Object|Boolean} audio MediaStreamConstraints.audio
          */
         async _updateAudioTrack(audio) {
-            this.audioTrack?.stop?.();
+            if (this.audioTrack) {
+                this.audioTrack.stop();
+            }
             this.update({ audioTrack: clear() });
             if (audio) {
                 let audioStream;
@@ -633,7 +637,9 @@ function factory(dependencies) {
          * @param {Object|boolean} constraints MediaTrackConstraints
          */
         async _updateVideoTrack(type, constraints) {
-            this.videoTrack?.stop?.();
+            if (this.videoTrack) {
+                this.videoTrack.stop();
+            }
             this.update({
                 sendDisplay: false,
                 sendUserVideo: false,
@@ -654,10 +660,12 @@ function factory(dependencies) {
                 // TODO maybe notify the user? It could happen if the user doesn't have a userMedia (eg: webcam)
                 return;
             }
-            const videoTrack = videoStream?.getVideoTracks()[0];
-            videoTrack.addEventListener('ended', async () => {
-                this._toggleVideoTrack({ force: false, type });
-            });
+            const videoTrack = videoStream ? videoStream.getVideoTracks()[0] : undefined;
+            if (videoTrack) {
+                videoTrack.addEventListener('ended', async () => {
+                    this._toggleVideoTrack({ force: false, type });
+                });
+            }
             this.update({
                 videoTrack,
                 sendUserVideo: type === 'user-video' && !!videoTrack,
@@ -674,7 +682,7 @@ function factory(dependencies) {
          * @param {String} [param1.type] 'server' or 'peerToPeer'
          */
         async _notifyPeers(targetTokens, { event, payload, type='server' }) {
-            if (!targetTokens?.length) {
+            if (!targetTokens.length) {
                 return;
             }
             if (event !== 'trackChange') {
@@ -778,16 +786,13 @@ function factory(dependencies) {
          * @param {String} token
          */
         _removeStreams(token) {
-            const audio = this.activeAudioStreams[token]?.audio;
+            const audioStreamData = this.activeAudioStreams[token];
+            const audio =  audioStreamData ? audioStreamData.audio : undefined;
             if (audio) {
                 audio.srcObject = undefined;
             }
-            for (const track of this.activeAudioStreams[token]?.stream?.getTracks?.() || []) {
-                track.stop();
-            }
-            for (const track of this.activeVideoStreams[token]?.stream?.getTracks?.() || []) {
-                track.stop();
-            }
+            this._removeStream(this.activeAudioStreams[token]);
+            this._removeStream(this.activeVideoStreams[token]);
             const newActiveVideoStreams = Object.assign({}, this.activeVideoStreams);
             const newActiveAudioStreams = Object.assign({}, this.activeAudioStreams);
             delete newActiveVideoStreams[token];
@@ -818,9 +823,25 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @param {Object} streamData
+         */
+        _removeStream(streamData) {
+            if (!streamData || !streamData.stream) {
+                return;
+            }
+            const stream = streamData.stream;
+            for (const track of stream.getTracks() || []) {
+                track.stop();
+            }
+        }
+
+        /**
+         * @private
          */
         _reset() {
-            this._audioMonitor?.disconnect();
+            if (this._audioMonitor) {
+                this._audioMonitor.disconnect();
+            }
             if (this._peerConnections) {
                 const peerTokens = Object.keys(this._peerConnections);
                 this._notifyPeers(peerTokens, {
@@ -830,8 +851,9 @@ function factory(dependencies) {
                     this._removePeer(token);
                 }
             }
-            this.videoTrack?.stop();
-            this.audioTrack?.stop();
+
+            this.videoTrack && this.videoTrack.stop();
+            this.audioTrack && this.audioTrack.stop();
 
             /*
              * technical fields that are not exposed
@@ -870,11 +892,9 @@ function factory(dependencies) {
             stream.addTrack(track);
 
             if (track.kind === 'audio') {
-                for (const track of this.activeAudioStreams[token]?.stream?.getTracks?.() || []) {
-                    track.stop();
-                }
+                this._removeStream(this.activeAudioStreams[token]);
                 // creating an Audio to play the audioTrack directly from the JS.
-                const audio = this.activeAudioStreams[token]?.audio || new Audio();
+                const audio = this.activeAudioStreams[token] && this.activeAudioStreams[token].audio || new Audio();
                 audio.srcObject = stream;
                 audio.play();
                 audio.muted = this.isDeaf;
@@ -886,9 +906,7 @@ function factory(dependencies) {
             }
 
             if (track.kind === 'video') {
-                for (const track of this.activeVideoStreams[token]?.stream?.getTracks?.() || []) {
-                    track.stop();
-                }
+                this._removeStream(this.activeVideoStreams[token]);
                 this.update({
                     activeVideoStreams: Object.assign({}, this.activeVideoStreams, {
                         [token]: { token, stream },
