@@ -649,7 +649,6 @@ $o-form-label-margin-right: 0px;
     // Labels
     .o_form_label {
         margin: 0 $o-form-spacing-unit 0 0;
-        color: $headings-color;
         font-size: $font-size-base; // The label muse have the same size whatever their position
         line-height: $line-height-base;
         font-weight: $font-weight-bold;
