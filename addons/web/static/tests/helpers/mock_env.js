@@ -34,6 +34,14 @@ function cloneRegistryWithCleanup(registry) {
     patchWithCleanup(registry, patch);
 }
 
+export function clearServicesMetadataWithCleanup() {
+    const servicesMetadata = Object.assign({}, SERVICES_METADATA);
+    for (const key of Object.keys(SERVICES_METADATA)) {
+        delete SERVICES_METADATA[key];
+    }
+    registerCleanup(() => patch(SERVICES_METADATA, servicesMetadata));
+}
+
 export function prepareRegistriesWithCleanup() {
     // Clone registries
     cloneRegistryWithCleanup(registry.category("actions"));
@@ -48,12 +56,7 @@ export function prepareRegistriesWithCleanup() {
     clearRegistryWithCleanup(registry.category("error_dialogs"));
 
     clearRegistryWithCleanup(registry.category("services"));
-    // Empty services metadata
-    const servicesMetadata = Object.assign({}, SERVICES_METADATA);
-    for (const key of Object.keys(SERVICES_METADATA)) {
-        delete SERVICES_METADATA[key];
-    }
-    registerCleanup(() => patch(SERVICES_METADATA, servicesMetadata));
+    clearServicesMetadataWithCleanup();
 
     clearRegistryWithCleanup(registry.category("systray"));
     clearRegistryWithCleanup(registry.category("user_menuitems"));
