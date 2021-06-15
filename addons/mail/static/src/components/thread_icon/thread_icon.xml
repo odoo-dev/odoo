@@ -22,16 +22,16 @@
                         />
                     </t>
                     <t t-elif="thread.correspondent.im_status === 'online'">
-                        <div class="o_ThreadIcon_online text-primary fa fa-circle" title="Online"/>
+                        <div class="o_ThreadIcon_online fa fa-circle" title="Online"/>
                     </t>
                     <t t-elif="thread.correspondent.im_status === 'offline'">
                         <div class="o_ThreadIcon_offline fa fa-circle-o" title="Offline"/>
                     </t>
                     <t t-elif="thread.correspondent.im_status === 'away'">
-                        <div class="o_ThreadIcon_away text-warning fa fa-circle" title="Away"/>
+                        <div class="o_ThreadIcon_away fa fa-circle" title="Away"/>
                     </t>
                     <t t-elif="thread.correspondent === env.messaging.partnerRoot">
-                        <div class="o_ThreadIcon_online text-primary fa fa-heart" title="Bot"/>
+                        <div class="o_ThreadIcon_online fa fa-heart" title="Bot"/>
                     </t>
                     <t t-else="" name="noImStatusCondition">
                         <div class="o_ThreadIcon_noImStatus fa fa-question-circle" title="No IM status available"/>

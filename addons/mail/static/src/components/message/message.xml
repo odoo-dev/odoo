@@ -97,11 +97,11 @@
                                 </div>
                             </t>
                             <t t-if="message.moderation_status === 'pending_moderation' and !message.isModeratedByCurrentPartner">
-                                <span class="o_Message_moderationPending o-author text-danger" title="Your message is pending moderation.">Pending moderation</span>
+                                <span class="o_Message_moderationPending o-author" title="Your message is pending moderation.">Pending moderation</span>
                             </t>
                             <t t-if="threadView and message.originThread and message.originThread === threadView.thread and message.notifications.length > 0">
                                 <t t-if="message.failureNotifications.length > 0">
-                                    <span class="o_Message_notificationIconClickable o-error text-danger" t-on-click="_onClickFailure">
+                                    <span class="o_Message_notificationIconClickable o-error" t-on-click="_onClickFailure">
                                         <i name="failureIcon" class="o_Message_notificationIcon fa fa-envelope"/>
                                     </span>
                                 </t>

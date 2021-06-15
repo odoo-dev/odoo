@@ -5,3 +5,23 @@
 .o_FollowButton {
     display: flex;
 }
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_FollowButton_follow {
+    color: gray('600');
+}
+
+.o_FollowButton_unfollow {
+    color: gray('600');
+
+    &.o-following {
+        color: o-text-color('success');
+    }
+
+    &.o-unfollow {
+        color: o-text-color('warning')
+    }
+}

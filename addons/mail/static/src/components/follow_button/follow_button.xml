@@ -5,12 +5,12 @@
         <div class="o_FollowButton">
             <t t-if="thread.isCurrentPartnerFollowing">
                 <button class="o_FollowButton_unfollow btn btn-link" t-att-class="{ 'o-following': !state.isUnfollowButtonHighlighted, 'o-unfollow': state.isUnfollowButtonHighlighted }" t-att-disabled="props.isDisabled" t-on-click="_onClickUnfollow" t-on-mouseenter="_onMouseEnterUnfollow" t-on-mouseleave="_onMouseLeaveUnfollow">
-                    <span t-if="state.isUnfollowButtonHighlighted" class="text-warning">
+                    <t t-if="state.isUnfollowButtonHighlighted">
                         <i class="fa fa-times"/> Unfollow
-                    </span>
-                    <span t-else="" class="text-success">
+                    </t>
+                    <t t-else="">
                         <i class="fa fa-check"/> Following
-                    </span>
+                    </t>
                 </button>
             </t>
             <t t-else="">
