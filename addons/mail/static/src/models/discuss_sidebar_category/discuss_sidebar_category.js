@@ -4,7 +4,6 @@ import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_field';
 import { clear, insertAndReplace, link, replace } from '@mail/model/model_field_command';
 
-
 function factory(dependencies) {
     class DiscussSidebarCategory extends dependencies['mail.model'] {
 
@@ -18,7 +17,7 @@ function factory(dependencies) {
          * @static
          * @param {Object.<string, boolean>} mailUserSettings
          */
-         static async performRpcSetMailUserSettings(mailUserSettings) {
+        static async performRpcSetMailUserSettings(mailUserSettings) {
             return this.env.services.rpc(
                 {
                     model: 'mail.user.settings',
@@ -122,7 +121,7 @@ function factory(dependencies) {
             return replace(this.allPinnedChannels.filter(channel => this.supportedChannelTypes.includes(channel.channel_type)));
         }
 
-         /**
+        /**
          *
          * @private
          * @returns {mail.thread[]}
@@ -242,7 +241,7 @@ function factory(dependencies) {
                     type: 'ir.actions.act_window',
                     res_model: 'mail.channel',
                     views: [[false, 'kanban'], [false, 'form']],
-                    domain: [['public', '!=', 'private']]
+                    domain: [['public', '!=', 'private']],
                 },
             });
         }
@@ -287,7 +286,7 @@ function factory(dependencies) {
          * Serves as compute dependency.
          */
         discussThread: many2one('mail.thread', {
-            related: 'discuss.thread'
+            related: 'discuss.thread',
         }),
         /**
          * Serves as compute dependency.
@@ -299,7 +298,7 @@ function factory(dependencies) {
          * Serves as compute dependency.
          */
         allPinnedChannels: many2many('mail.thread', {
-            related: 'messaging.allPinnedChannels'
+            related: 'messaging.allPinnedChannels',
         }),
         /**
          * The sorted category items which belong to the category.

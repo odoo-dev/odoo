@@ -382,13 +382,13 @@ function factory(dependencies) {
          * @param {String} payload.push_to_talk_key
          * @param {number} payload.voice_active_duration
          */
-         _handleNotificationMailUserSettings({
+        _handleNotificationMailUserSettings({
             is_discuss_sidebar_category_channel_open,
             is_discuss_sidebar_category_chat_open,
             use_push_to_talk,
             push_to_talk_key,
             voice_active_duration,
-         }) {
+        }) {
             this.env.messaging.userSetting.update({
                 usePushToTalk: use_push_to_talk,
                 pushToTalkKey: push_to_talk_key,

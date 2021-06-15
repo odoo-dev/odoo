@@ -996,8 +996,8 @@ MockServer.include({
                 [channel.id],
                 {
                     last_meaningful_action_time: datetime_to_str(new Date()),
-                }
-            ])
+                },
+            ]);
             if (!channel.is_pinned) {
                 this._mockWrite('mail.channel', [
                     [channel.id],

@@ -15,7 +15,7 @@ registerInstancePatchModel('mail.messaging_initializer', 'im_livechat/static/src
      * @param {object} mailUserSettings
      * @param {boolean} mailUserSettings.is_discuss_sidebar_category_livechat_open
      */
-     _initMailUserSettings({ is_discuss_sidebar_category_livechat_open }) {
+    _initMailUserSettings({ is_discuss_sidebar_category_livechat_open }) {
         this.messaging.discuss.update({
             categoryLivechat: create({
                 counterComputeMethod: 'unread',
@@ -24,7 +24,7 @@ registerInstancePatchModel('mail.messaging_initializer', 'im_livechat/static/src
                 serverStateKey: 'is_discuss_sidebar_category_livechat_open',
                 sortComputeMethod: 'last_action',
                 supportedChannelTypes: ['livechat'],
-            })
+            }),
         });
         this._super(...arguments);
     },

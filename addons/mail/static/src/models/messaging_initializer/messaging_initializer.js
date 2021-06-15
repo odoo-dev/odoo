@@ -5,7 +5,6 @@ import { one2one } from '@mail/model/model_field';
 import { executeGracefully } from '@mail/utils/utils';
 import { create, link, insert } from '@mail/model/model_field_command';
 
-
 function factory(dependencies) {
 
     class MessagingInitializer extends dependencies['mail.model'] {

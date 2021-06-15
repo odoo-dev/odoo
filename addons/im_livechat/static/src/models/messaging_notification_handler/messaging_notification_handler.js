@@ -8,17 +8,17 @@ registerInstancePatchModel('mail.messaging_notification_handler', 'im_livechat/s
     // Private
     //----------------------------------------------------------------------
 
-        /**
+    /**
      * @override
      * @param {object} payload
      * @param {boolean} payload.is_discuss_sidebar_category_livechat_open
-     */
-         _handleNotificationMailUserSettings({ is_discuss_sidebar_category_livechat_open }) {
-            this.env.messaging.discuss.categoryLivechat.update({
-                isServerOpen: is_discuss_sidebar_category_livechat_open
-            });
-            this._super(...arguments);
-        },
+    */
+    _handleNotificationMailUserSettings({ is_discuss_sidebar_category_livechat_open }) {
+        this.env.messaging.discuss.categoryLivechat.update({
+            isServerOpen: is_discuss_sidebar_category_livechat_open,
+        });
+        this._super(...arguments);
+    },
 
     /**
      * @override
