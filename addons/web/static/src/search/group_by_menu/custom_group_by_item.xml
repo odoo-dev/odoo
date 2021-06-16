@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="wowl.CustomGroupByItem" owl="1">
-        <Dropdown class="o_add_custom_group_menu" t-on-dropdown-item-selected.stop="">
+        <Dropdown class="o_add_custom_group_menu o_dropdown_inline" t-on-dropdown-item-selected.stop="">
             Add Custom Group
             <t t-set-slot="menu">
                 <select class="w-auto o_input" t-model="state.fieldName">
