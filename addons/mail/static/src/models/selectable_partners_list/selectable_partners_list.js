@@ -167,8 +167,32 @@ function factory(dependencies) {
         /**
          * Serves as compute dependency.
          */
-        allPartners: one2many('mail.partner', {
+        allPartners: many2many('mail.partner', {
             related: 'messaging.allPartners',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        allPartnersEmail: attr({
+            related: 'allPartners.email',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        allPartnersNameOrDisplayName: attr({
+            related: 'allPartners.nameOrDisplayName',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        allPartnersUser: many2many('mail.user', {
+            related: 'allPartners.user',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        allPartnersUserIsInternalUser: attr({
+            related: 'allPartnersUser.isInternalUser',
         }),
         /**
          * Determines the search term used to filter this list.
@@ -189,6 +213,24 @@ function factory(dependencies) {
             inverse: 'invitePartnersList',
         }),
         /**
+         * Serves as compute dependency.
+         */
+        messagingCurrentPartner: many2many('mail.partner', {
+            related: 'messaging.currentPartner',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        messagingPartnerRoot: many2many('mail.partner', {
+            related: 'messaging.partnerRoot',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        messagingPublicPartners: many2many('mail.partner', {
+            related: 'messaging.publicPartners',
+        }),
+        /**
          * States all partners that are potential choices according to this
          * search term, or that are already selected,
          */
@@ -196,8 +238,20 @@ function factory(dependencies) {
             compute: '_computeSelectablePartners',
             dependencies: [
                 'allPartners',
+                'allPartnersEmail',
+                'allPartnersNameOrDisplayName',
+                'allPartnersUser',
+                'allPartnersUserIsInternalUser',
                 'inputSearch',
-                'selectedPartners'
+                'messaging',
+                'messagingCurrentPartner',
+                'messagingPartnerRoot',
+                'messagingPublicPartners',
+                'selectedPartners',
+                'thread',
+                'threadChannelType',
+                'threadMembers',
+                'threadModel',
             ],
             readonly: true,
         }),
@@ -206,12 +260,35 @@ function factory(dependencies) {
          */
         selectedPartners: many2many('mail.partner', {
             compute: '_computeSelectedPartners',
+            dependencies: [
+                'thread',
+                'threadChannelType',
+                'threadMembers',
+            ],
         }),
         /**
          * States the thread on which this list operates (if any).
          */
         thread: one2one('mail.thread', {
             inverse: 'invitePartnerList',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        threadChannelType: attr({
+            related: 'thread.channel_type',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        threadMembers: many2many('mail.partner', {
+            related: 'thread.members',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        threadModel: attr({
+            related: 'thread.model',
         }),
     };
 

@@ -17,9 +17,15 @@ class SelectablePartnersList extends Component {
         useShouldUpdateBasedOnProps();
         useStore(props => {
             const invitePartnerList = this.env.models['mail.selectable_partners_list'].get(this.props.invitePartnerListLocalId);
+            const selectablePartners = invitePartnerList ? invitePartnerList.selectablePartners : [];
             return {
-                invitePartnerList: invitePartnerList.__state,
+                invitePartnerList,
+                selectablePartners,
             };
+        }, {
+            compareDepth: {
+                selectablePartners: 1,
+            },
         });
     }
 
