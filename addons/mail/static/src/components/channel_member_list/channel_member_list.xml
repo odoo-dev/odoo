@@ -3,6 +3,7 @@
 
     <t t-name="mail.ChannelMemberList" owl="1">
         <div class="o_ChannelMemberList">
+            <!-- TODO sort the list alphabetically -->
             <t t-foreach="channel.members" t-as="member" t-key="member.localId">
                 <div class="o_ChannelMemberList_member">
                     <div class="o_ChannelMemberList_avatarContainer">
