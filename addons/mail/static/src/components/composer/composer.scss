@@ -140,8 +140,7 @@
 
 .o_Composer_threadTextualTypingStatus {
     font-size: $font-size-sm;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    @include text-truncate();
 
     &:before {
         // invisible character so that typing status bar has constant height, regardless of text content.

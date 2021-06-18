@@ -23,9 +23,7 @@
 
 .o_ThreadViewTopbar_threadDescription {
     flex: 0 1 auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include text-truncate();
 }
 
 .o_ThreadViewTopbar_threadDescriptionSeparator {
@@ -43,9 +41,7 @@
 .o_ThreadViewTopbar_threadName {
     flex: 0 0 auto; // no shrink to let the name have priority over description
     max-width: map-get($sizes, 75); // but always leave at least a bit of space for the description
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include text-truncate();
 }
 
 .o_ThreadViewTopbar_title {

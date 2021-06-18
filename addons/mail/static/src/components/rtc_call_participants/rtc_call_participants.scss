@@ -67,7 +67,7 @@
 }
 
 .o_RtcCallParticipants_member_name {
-    text-overflow: ellipsis;
+    @include text-truncate();
     font-weight: bold;
     font-size: $font-size-lg;
     opacity: 0.8;

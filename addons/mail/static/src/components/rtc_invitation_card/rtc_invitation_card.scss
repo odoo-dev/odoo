@@ -62,7 +62,7 @@
 
 .o_RtcInvitationCard_partner_info_name {
     font-weight: bold;
-    text-overflow: ellipsis;
+    @include text-truncate();
     text-align: center;
 }
 
