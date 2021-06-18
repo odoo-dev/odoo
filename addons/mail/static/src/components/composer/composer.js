@@ -59,7 +59,7 @@ class Composer extends Component {
                 threadDisplayName: thread && thread.displayName,
                 threadMassMailing: thread && thread.mass_mailing,
                 threadModel: thread && thread.model,
-                threadName: thread && thread.name,
+                threadDisplayName: thread && thread.displayName,
             };
         }, {
             compareDepth: {
