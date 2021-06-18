@@ -2,7 +2,7 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { one2one } from '@mail/model/model_field';
-import { decrement, increment, insert, link } from '@mail/model/model_field_command';
+import { decrement, increment, insert, link, unlink } from '@mail/model/model_field_command';
 import { htmlToTextContentInline } from '@mail/js/utils';
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
@@ -83,6 +83,12 @@ function factory(dependencies) {
                     }
                 }
                 const [, model, id] = channel;
+                switch (message.type) {
+                    case 'new_channel_members':
+                        return this._handleNotificationNewChannelMembers(message.payload);
+                    case 'channel_members_leaving':
+                        return this._handleNotificationChannelMembersLeaving(message.payload);
+                }
                 switch (model) {
                     case 'ir.needaction':
                         return this._handleNotificationNeedaction(message);
@@ -193,6 +199,27 @@ function factory(dependencies) {
                     type: 'info',
                 });
             }
+        }
+
+        /*
+         * @private
+         * @param {Object} payload
+         * @param {integer} payload.id
+         * @param {Object[]} payload.leaving_members
+         * @param {integer} payload.member_count
+         */
+        _handleNotificationChannelMembersLeaving({ id, leaving_members: leavingMembersData, member_count: memberCount }) {
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id,
+                model: 'mail.channel',
+            });
+            const leavingMembers = this.env.models['mail.partner'].insert(
+                leavingMembersData.map(leavingMemberData => this.env.models['mail.partner'].convertData(leavingMemberData))
+            );
+            channel.update({
+                memberCount,
+                members: unlink(leavingMembers),
+            });
         }
 
         /**
@@ -383,6 +410,26 @@ function factory(dependencies) {
             if (originThread && message.isNeedaction) {
                 originThread.update({ message_needaction_counter: increment() });
             }
+        }
+
+        /**
+         * @private
+         * @param {Object} payload
+         * @param {integer} payload.id
+         * @param {integer} payload.member_count
+         * @param {Object[]} payload.new_members
+         */
+        _handleNotificationNewChannelMembers({ id, member_count: memberCount, new_members: newMembersData }) {
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id,
+                model: 'mail.channel',
+            });
+            channel.update({
+                memberCount,
+                members: insert(
+                    newMembersData.map(newMemberData => this.env.models['mail.partner'].convertData(newMemberData))
+                ),
+            });
         }
 
         /**
