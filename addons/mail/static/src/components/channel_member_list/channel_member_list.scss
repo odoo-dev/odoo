@@ -50,9 +50,7 @@
 .o_ChannelMemberList_name {
     flex: 1 1 auto;
     min-width: 0;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include text-truncate();
 }
 
 // ------------------------------------------------------------------

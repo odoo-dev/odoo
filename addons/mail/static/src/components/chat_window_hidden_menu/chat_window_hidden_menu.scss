@@ -53,9 +53,8 @@
 }
 
 .o_ChatWindowHiddenMenu_windowCounter {
-    overflow: hidden;
-    text-overflow: ellipsis;
     margin-left: 1px;
+    @include text-truncate();
 }
 
 // ------------------------------------------------------------------

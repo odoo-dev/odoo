@@ -14,9 +14,7 @@
 }
 
 .o_RtcActivityNotice_button_title {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    @include text-truncate();
 }
 
 @keyframes o_indicator_pulse {

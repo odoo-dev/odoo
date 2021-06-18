@@ -56,9 +56,7 @@
 }
 
 .o_DiscussSidebarCategoryItem_name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include text-truncate();
     margin-left: 10px;
 
     &.o-editable {

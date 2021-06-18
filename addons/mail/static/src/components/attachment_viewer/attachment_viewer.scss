@@ -89,9 +89,7 @@
 }
 
 .o_AttachmentViewer_nameText {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    @include text-truncate();
 }
 
 .o_AttachmentViewer_toolbar {

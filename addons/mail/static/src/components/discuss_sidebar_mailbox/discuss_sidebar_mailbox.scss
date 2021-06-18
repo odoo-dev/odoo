@@ -24,9 +24,7 @@
 
 
 .o_DiscussSidebarMailBox_name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include text-truncate();
 }
 
 // ------------------------------------------------------------------

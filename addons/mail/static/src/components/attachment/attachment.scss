@@ -60,9 +60,7 @@
 }
 
 .o_Attachment_filename {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include text-truncate();
 }
 
 .o_Attachment_image {

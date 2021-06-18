@@ -63,9 +63,7 @@
 }
 
 @mixin o-mail-notification-list-item-inline-text-layout {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    @include text-truncate();
 
     &.o-empty::before {
         content: '\00a0'; // keep line-height as if it had content
@@ -78,9 +76,7 @@
 }
 
 @mixin o-mail-notification-list-item-name-layout {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    @include text-truncate();
 
     &.o-mobile {
         font-size: 1.1em;
