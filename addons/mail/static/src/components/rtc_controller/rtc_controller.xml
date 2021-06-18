@@ -65,31 +65,16 @@
                     t-on-click="_onClickScreen">
                     <i class="fa fa-lg fa-desktop"/>
                 </span>
-                <t t-if="showMemberList"><t t-set="usersTitle">Hide member list</t></t>
-                <t t-else=""><t t-set="usersTitle">Show member list</t></t>
-                <t t-if="props.showMembersButton">
-                    <span class="o_RtcController_button"
-                        t-att-class="{
-                            'o-active': env.messaging.showMemberList,
-                        }"
-                        t-att-aria-label="usersTitle"
-                        t-att-title="usersTitle"
-                        t-on-click="_onClickMembers">
-                        <i class="fa fa-lg fa-users"/>
-                    </span>
-                </t>
-                <t t-if="props.showMembersButton">
-                    <span class="o_RtcController_button"
-                        t-att-class="{
-                            'o-active': env.messaging.userSetting.isOpen,
-                        }"
-                        aria-label="Show settings"
-                        role="button"
-                        title="Show settings"
-                        t-on-click="_onClickSettings">
-                        <i class="fa fa-lg fa-cog"/>
-                    </span>
-                </t>
+                <span class="o_RtcController_button"
+                    t-att-class="{
+                        'o-active': env.messaging.userSetting.isOpen,
+                    }"
+                    aria-label="Show settings"
+                    role="button"
+                    title="Show settings"
+                    t-on-click="_onClickSettings">
+                    <i class="fa fa-lg fa-cog"/>
+                </span>
             </div>
         </div>
     </t>

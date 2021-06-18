@@ -61,7 +61,7 @@
                     t-on-o-rendered="_onThreadRendered"
                     t-ref="threadView"
                 />
-                <t t-if="env.messaging.showMemberList and discuss.thread and ['channel', 'chat', 'group'].includes(discuss.thread.channel_type)">
+                <t t-if="discuss.thread and ['channel', 'chat', 'group'].includes(discuss.thread.channel_type)">
                     <RtcCallParticipants class="o_Discuss_thread_callParticipants" threadLocalId="discuss.thread.localId"/>
                 </t>
             </div>
@@ -72,6 +72,12 @@
             </div>
         </t>
         <t t-if="env.messaging.device.isMobile and discuss.activeMobileNavbarTabId !== 'mailbox'">
+            <t t-if="env.messaging.discuss.activeMobileNavbarTabId === 'chat'">
+                <button class="o_Discuss_mobileNewMessageButton btn btn-secondary" t-on-click="env.messaging.discuss.onClickMobileNewMessageButton(ev)">New Message</button>
+            </t>
+            <t t-if="env.messaging.discuss.activeMobileNavbarTabId === 'channel'">
+                <button class="o_Discuss_mobileNewChannelButton btn btn-secondary" t-on-click="env.messaging.discuss.onClickMobileNewChannelButton(ev)">New Channel</button>
+            </t>
             <NotificationList
                 class="o_Discuss_notificationList"
                 filter="discuss.activeMobileNavbarTabId"

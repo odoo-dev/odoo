@@ -8,57 +8,65 @@
                     <ThreadViewTopbar threadViewLocalId="threadView.localId"/>
                     <div class="o_ThreadView_topbarBottomSeparator"/>
                 </t>
-                <t t-if="env.messaging.activeCallThreadLocalId and threadView.thread.localId === env.messaging.activeCallThreadLocalId and Object.keys(env.mailRtc.activeVideoStreams).length > 0">
-                    <VideoRoom class="o_ThreadView_videoRoom"/>
-                </t>
-                <t t-if="threadView.isLoading and !threadView.threadCache.isLoaded" name="loadingCondition">
-                    <div class="o_ThreadView_loading">
-                        <span><i class="o_ThreadView_loadingIcon fa fa-circle-o-notch fa-spin" title="Loading..." role="img"/>Loading...</span>
+                <div class="o_ThreadView_bottomPart">
+                    <div class="o_ThreadView_core">
+                        <t t-if="env.messaging.activeCallThreadLocalId and threadView.thread.localId === env.messaging.activeCallThreadLocalId and Object.keys(env.mailRtc.activeVideoStreams).length > 0">
+                            <VideoRoom class="o_ThreadView_videoRoom"/>
+                        </t>
+                        <t t-if="threadView.isLoading and !threadView.threadCache.isLoaded" name="loadingCondition">
+                            <div class="o_ThreadView_loading">
+                                <span><i class="o_ThreadView_loadingIcon fa fa-circle-o-notch fa-spin" title="Loading..." role="img"/>Loading...</span>
+                            </div>
+                        </t>
+                        <t t-elif="threadView.threadCache.isLoaded or threadView.thread.isTemporary">
+                            <MessageList
+                                class="o_ThreadView_messageList"
+                                getScrollableElement= "props.getScrollableElement"
+                                hasMessageCheckbox="props.hasMessageCheckbox"
+                                hasScrollAdjust="props.hasScrollAdjust"
+                                hasSquashCloseMessages="props.hasSquashCloseMessages"
+                                haveMessagesMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
+                                haveMessagesReplyIcon="props.haveMessagesReplyIcon"
+                                order="props.order"
+                                threadViewLocalId="threadView.localId"
+                                t-ref="messageList"
+                            />
+                        </t>
+                        <t t-elif="threadView.threadCache.hasLoadingFailed">
+                            <div class="o_ThreadView_loadingFailed">
+                                <div class="o_ThreadView_loadingFailedText">
+                                    An error occured while fetching messages.
+                                </div>
+                                <button class="o_ThreadView_loadingFailedRetryButton btn btn-link" t-on-click="_onClickRetryLoadMessages">
+                                    Click here to retry
+                                </button>
+                            </div>
+                        </t>
+                        <t t-elif="props.hasComposer">
+                            <div class="o-autogrow"/>
+                        </t>
+                        <t t-if="props.hasComposer">
+                            <Composer
+                                class="o_ThreadView_composer"
+                                attachmentsDetailsMode="props.composerAttachmentsDetailsMode"
+                                composerLocalId="threadView.thread.composer.localId"
+                                hasCurrentPartnerAvatar="props.hasComposerCurrentPartnerAvatar"
+                                hasSendButton="props.hasComposerSendButton"
+                                hasThreadTyping="props.hasComposerThreadTyping"
+                                isCompact="(threadView.thread.model === 'mail.channel' and threadView.thread.mass_mailing) ? false : undefined"
+                                isDoFocus="props.isDoFocus"
+                                showAttachmentsExtensions="props.showComposerAttachmentsExtensions"
+                                showAttachmentsFilenames="props.showComposerAttachmentsFilenames"
+                                textInputSendShortcuts="threadView.textInputSendShortcuts"
+                                t-ref="composer"
+                            />
+                        </t>
                     </div>
-                </t>
-                <t t-elif="threadView.threadCache.isLoaded or threadView.thread.isTemporary">
-                    <MessageList
-                        class="o_ThreadView_messageList"
-                        getScrollableElement= "props.getScrollableElement"
-                        hasMessageCheckbox="props.hasMessageCheckbox"
-                        hasScrollAdjust="props.hasScrollAdjust"
-                        hasSquashCloseMessages="props.hasSquashCloseMessages"
-                        haveMessagesMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
-                        haveMessagesReplyIcon="props.haveMessagesReplyIcon"
-                        order="props.order"
-                        threadViewLocalId="threadView.localId"
-                        t-ref="messageList"
-                    />
-                </t>
-                <t t-elif="threadView.threadCache.hasLoadingFailed">
-                    <div class="o_ThreadView_loadingFailed">
-                        <div class="o_ThreadView_loadingFailedText">
-                            An error occured while fetching messages.
-                        </div>
-                        <button class="o_ThreadView_loadingFailedRetryButton btn btn-link" t-on-click="_onClickRetryLoadMessages">
-                            Click here to retry
-                        </button>
-                    </div>
-                </t>
-                <t t-elif="props.hasComposer">
-                    <div class="o-autogrow"/>
-                </t>
-                <t t-if="props.hasComposer">
-                    <Composer
-                        class="o_ThreadView_composer"
-                        attachmentsDetailsMode="props.composerAttachmentsDetailsMode"
-                        composerLocalId="threadView.thread.composer.localId"
-                        hasCurrentPartnerAvatar="props.hasComposerCurrentPartnerAvatar"
-                        hasSendButton="props.hasComposerSendButton"
-                        hasThreadTyping="props.hasComposerThreadTyping"
-                        isCompact="(threadView.thread.model === 'mail.channel' and threadView.thread.mass_mailing) ? false : undefined"
-                        isDoFocus="props.isDoFocus"
-                        showAttachmentsExtensions="props.showComposerAttachmentsExtensions"
-                        showAttachmentsFilenames="props.showComposerAttachmentsFilenames"
-                        textInputSendShortcuts="threadView.textInputSendShortcuts"
-                        t-ref="composer"
-                    />
-                </t>
+                    <t t-if="threadView.isMemberListMakingSense and threadView.hasMemberList and threadView.isMemberListOpened">
+                        <div class="o_ThreadView_coreChannelMemberListSeparator"/>
+                        <ChannelMemberList class="o_ThreadView_channelMemberList" channelLocalId="threadView.thread.localId"/>
+                    </t>
+                </div>
             </t>
         </div>
     </t>

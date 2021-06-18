@@ -54,6 +54,34 @@ function factory(dependencies) {
         }
 
         /**
+         * @param {Event} ev
+         */
+        onClickHideMemberList(ev) {
+            this.update({ isMemberListOpened: false });
+        }
+
+        /**
+         * @param {Event} ev
+         */
+        onClickMarkAllAsRead(ev) {
+            this.env.models['mail.message'].markAllAsRead();
+        }
+
+        /**
+         * @param {Event} ev
+         */
+        onClickShowMemberList(ev) {
+            this.update({ isMemberListOpened: true });
+        }
+
+        /**
+         * @param {Event} ev
+         */
+        onClickUnstarAll(ev) {
+            this.env.models['mail.message'].unstarAll();
+        }
+
+        /**
          * @param {mail.message} message
          */
         handleVisibleMessage(message) {
@@ -238,6 +266,19 @@ function factory(dependencies) {
             related: 'composer.hasFocus',
         }),
         /**
+         * Determines whether this thread viewer has a member list.
+         * Only makes sense if isMemberListMakingSense is true.
+         */
+        hasMemberList: attr({
+            related: 'threadViewer.hasMemberList',
+        }),
+        /**
+         * Determines whether this thread view has a topbar.
+         */
+        hasTopbar: attr({
+            related: 'threadViewer.hasTopbar',
+        }),
+        /**
          * States whether `this.threadCache` is currently loading messages.
          *
          * This field is related to `this.threadCache.isLoading` but with a
@@ -248,6 +289,20 @@ function factory(dependencies) {
          */
         isLoading: attr({
             default: false,
+        }),
+        /**
+         * Determines whether it makes sense for this thread viewer to have a
+         * member list.
+         */
+        isMemberListMakingSense: attr({
+            related: 'threadViewer.isMemberListMakingSense',
+        }),
+        /**
+         * Determines whether the member list of this thread is opened.
+         * Only makes sense if isMemberListMakingSense and hasMemberList are true.
+         */
+        isMemberListOpened: attr({
+            default: true,
         }),
         /**
          * States whether `this` is aware of `this.threadCache` currently
@@ -269,12 +324,6 @@ function factory(dependencies) {
          */
         hasAutoScrollOnMessageReceived: attr({
             default: true,
-        }),
-        /**
-         * Determines whether the topbar of this thread view should be displayed.
-         */
-        hasTopbar: attr({
-            related: 'threadViewer.hasTopbar',
         }),
         /**
          * Last message in the context of the currently displayed thread cache.

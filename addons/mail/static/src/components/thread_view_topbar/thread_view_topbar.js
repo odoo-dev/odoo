@@ -10,7 +10,7 @@ const { Component } = owl;
 
 const components = { PartnerSelector, RtcController, ThreadIcon };
 
-class ThreadViewTopbar extends Component {
+export class ThreadViewTopbar extends Component {
 
     /**
      * @override
@@ -31,6 +31,9 @@ class ThreadViewTopbar extends Component {
                 threadInvitePartnerList: thread && thread.invitePartnerList,
                 threadModel: thread && thread.model,
                 threadView,
+                threadViewHasMemberList: threadView && threadView.hasMemberList,
+                threadViewIsMemberListMakingSense: threadView && threadView.isMemberListMakingSense,
+                threadViewIsMemberListOpened: threadView && threadView.isMemberListOpened,
                 threadViewMessagesLength: threadView && threadView.messages.length,
             };
         });
@@ -47,38 +50,6 @@ class ThreadViewTopbar extends Component {
         return this.env.models['mail.thread_view'].get(this.props.threadViewLocalId);
     }
 
-    /**
-     * @private
-     */
-    _onClickMobileNewChannelButton() {
-        this.discuss.update({ isAddingChannel: true });
-    }
-
-    /**
-     * @private
-     */
-    _onClickMobileNewMessageButton() {
-        this.discuss.update({ isAddingChat: true });
-    }
-
-    /**
-     * @private
-     */
-    _onClickUnstarAll() {
-        this.env.models['mail.message'].unstarAll();
-    }
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onClickMarkAllAsRead() {
-        this.env.models['mail.message'].markAllAsRead();
-    }
-
 }
 
 Object.assign(ThreadViewTopbar, {
@@ -88,5 +59,3 @@ Object.assign(ThreadViewTopbar, {
     },
     template: 'mail.ThreadViewTopbar',
 });
-
-export default ThreadViewTopbar;

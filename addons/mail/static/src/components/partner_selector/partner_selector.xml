@@ -5,6 +5,7 @@
         <div class="o_PartnerSelector">
             <h3 class="o_PartnerSelector_title">Invite people</h3>
             <div class="o_PartnerSelector_searchInputContainer">
+                <!-- todo add auto focus on open -->
                 <input type="text" t-att-value="invitePartnerList.inputSearch" placeholder="Type the name of a person" t-on-input="_onInputSearch"/>
             </div>
             <SelectablePartnersList
