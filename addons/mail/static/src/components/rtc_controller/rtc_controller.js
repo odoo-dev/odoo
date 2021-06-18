@@ -17,11 +17,11 @@ class RtcController extends Component {
             const messaging = this.env.messaging;
             return {
                 activeCallThreadLocalId: messaging.activeCallThreadLocalId,
-                isDeaf: mailRtc.isDeaf,
+                isDeaf: mailRtc && mailRtc.isDeaf,
                 isSettingWindowOpen: messaging.userSetting.isOpen,
-                sendDisplay: mailRtc.sendDisplay,
-                sendSound: mailRtc.sendSound,
-                sendUserVideo: mailRtc.sendUserVideo,
+                sendDisplay: mailRtc && mailRtc.sendDisplay,
+                sendSound: mailRtc && mailRtc.sendSound,
+                sendUserVideo: mailRtc && mailRtc.sendUserVideo,
             };
         });
         this._getRefs = useRefs();
@@ -43,7 +43,7 @@ class RtcController extends Component {
      */
     get isCurrentActiveCall() {
         return this.env.messaging.activeCallThreadLocalId &&
-         (!this.props.threadLocalId || this.props.threadLocalId === this.env.messaging.activeCallThreadLocalId)
+         (!this.props.threadLocalId || this.props.threadLocalId === this.env.messaging.activeCallThreadLocalId);
     }
 
     //--------------------------------------------------------------------------

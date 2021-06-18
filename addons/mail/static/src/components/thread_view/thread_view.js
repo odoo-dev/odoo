@@ -133,7 +133,7 @@ class ThreadView extends Component {
         const mailRtc = this.env.mailRtc;
         return {
             activeCallThreadLocalId: this.env.messaging.activeCallThreadLocalId,
-            activeVideoStreams: mailRtc.activeVideoStreams,
+            activeVideoStreams: mailRtc && mailRtc.activeVideoStreams,
             composer: thread && thread.composer,
             correspondentId: correspondent && correspondent.id,
             isDeviceMobile: this.env.messaging.device.isMobile,
