@@ -3,79 +3,81 @@
 
     <t t-name="mail.RtcController" owl="1">
         <div class="o_RtcController">
-            <t t-if="thread">
-                <t t-if="isCurrentActiveCall"><t t-set="phoneTitle">Disconnect</t></t>
-                <t t-else=""><t t-set="phoneTitle">Join Call</t></t>
-                <div class="o_RtcController_thread">
-                    <span class="o_RtcController_button o_RtcController_call_button"
-                        t-att-class="{ 'o-active': isCurrentActiveCall }"
-                        t-att-aria-label="phoneTitle"
-                        t-att-title="phoneTitle"
-                        t-on-click="_onClickPhone">
-                        <i class="fa fa-lg fa-phone o_RtcController_thread_phone"/>
+            <t t-if="env.mailRtc">
+                <t t-if="thread">
+                    <t t-if="isCurrentActiveCall"><t t-set="phoneTitle">Disconnect</t></t>
+                    <t t-else=""><t t-set="phoneTitle">Join Call</t></t>
+                    <div class="o_RtcController_thread">
+                        <span class="o_RtcController_button o_RtcController_call_button"
+                            t-att-class="{ 'o-active': isCurrentActiveCall }"
+                            t-att-aria-label="phoneTitle"
+                            t-att-title="phoneTitle"
+                            t-on-click="_onClickPhone">
+                            <i class="fa fa-lg fa-phone o_RtcController_thread_phone"/>
+                        </span>
+                    </div>
+                </t>
+                <div class="o_RtcController_buttons">
+                    <t t-if="env.mailRtc.sendSound"><t t-set="microphoneTitle">Mute</t></t>
+                    <t t-else=""><t t-set="microphoneTitle">Unmute</t></t>
+                    <span class="o_RtcController_button"
+                        t-att-class="{ 'o-active': env.mailRtc.sendSound }"
+                        t-att-aria-label="microphoneTitle"
+                        t-att-title="microphoneTitle"
+                        t-on-click="_onClickMicrophone">
+                        <i class="fa fa-lg" t-att-class="{
+                            'fa-microphone': env.mailRtc.sendSound,
+                            'fa-microphone-slash': !env.mailRtc.sendSound,
+                        }"/>
+                    </span>
+                    <t t-if="env.mailRtc.isDeaf"><t t-set="headphoneTitle">Undeafen</t></t>
+                    <t t-else=""><t t-set="headphoneTitle">Deafen</t></t>
+                    <span class="o_RtcController_button"
+                        t-att-class="{ 'o-active': !env.mailRtc.isDeaf }"
+                        t-att-aria-label="headphoneTitle"
+                        t-att-title="headphoneTitle"
+                        t-on-click="_onClickDeafen">
+                        <i class="fa fa-lg" t-att-class="{
+                            'fa-headphones': !env.mailRtc.isDeaf,
+                            'fa-deaf': env.mailRtc.isDeaf,
+                        }"/>
+                    </span>
+                    <t t-if="env.mailRtc.sendUserVideo"><t t-set="cameraTitle">Stop camera</t></t>
+                    <t t-else=""><t t-set="cameraTitle">Turn camera on</t></t>
+                    <span class="o_RtcController_button"
+                        t-att-class="{
+                            'text-success': env.mailRtc.sendUserVideo,
+                            'o-active': env.mailRtc.sendUserVideo,
+                        }"
+                        t-att-aria-label="cameraTitle"
+                        t-att-title="cameraTitle"
+                        t-on-click="_onClickCamera">
+                        <i class="fa fa-lg fa-video-camera"/>
+                    </span>
+                    <t t-if="env.mailRtc.sendDisplay"><t t-set="displayTitle">Stop screen sharing</t></t>
+                    <t t-else=""><t t-set="displayTitle">Share screen</t></t>
+                    <span class="o_RtcController_button"
+                        t-att-class="{
+                            'text-success': env.mailRtc.sendDisplay,
+                            'o-active': env.mailRtc.sendDisplay,
+                        }"
+                        t-att-aria-label="displayTitle"
+                        t-att-title="displayTitle"
+                        t-on-click="_onClickScreen">
+                        <i class="fa fa-lg fa-desktop"/>
+                    </span>
+                    <span class="o_RtcController_button"
+                        t-att-class="{
+                            'o-active': env.messaging.userSetting.isOpen,
+                        }"
+                        aria-label="Show settings"
+                        role="button"
+                        title="Show settings"
+                        t-on-click="_onClickSettings">
+                        <i class="fa fa-lg fa-cog"/>
                     </span>
                 </div>
             </t>
-            <div class="o_RtcController_buttons">
-                <t t-if="env.mailRtc.sendSound"><t t-set="microphoneTitle">Mute</t></t>
-                <t t-else=""><t t-set="microphoneTitle">Unmute</t></t>
-                <span class="o_RtcController_button"
-                    t-att-class="{ 'o-active': env.mailRtc.sendSound }"
-                    t-att-aria-label="microphoneTitle"
-                    t-att-title="microphoneTitle"
-                    t-on-click="_onClickMicrophone">
-                    <i class="fa fa-lg" t-att-class="{
-                        'fa-microphone': env.mailRtc.sendSound,
-                        'fa-microphone-slash': !env.mailRtc.sendSound,
-                    }"/>
-                </span>
-                <t t-if="env.mailRtc.isDeaf"><t t-set="headphoneTitle">Undeafen</t></t>
-                <t t-else=""><t t-set="headphoneTitle">Deafen</t></t>
-                <span class="o_RtcController_button"
-                    t-att-class="{ 'o-active': !env.mailRtc.isDeaf }"
-                    t-att-aria-label="headphoneTitle"
-                    t-att-title="headphoneTitle"
-                    t-on-click="_onClickDeafen">
-                    <i class="fa fa-lg" t-att-class="{
-                        'fa-headphones': !env.mailRtc.isDeaf,
-                        'fa-deaf': env.mailRtc.isDeaf,
-                    }"/>
-                </span>
-                <t t-if="env.mailRtc.sendUserVideo"><t t-set="cameraTitle">Stop camera</t></t>
-                <t t-else=""><t t-set="cameraTitle">Turn camera on</t></t>
-                <span class="o_RtcController_button"
-                    t-att-class="{
-                        'text-success': env.mailRtc.sendUserVideo,
-                        'o-active': env.mailRtc.sendUserVideo,
-                    }"
-                    t-att-aria-label="cameraTitle"
-                    t-att-title="cameraTitle"
-                    t-on-click="_onClickCamera">
-                    <i class="fa fa-lg fa-video-camera"/>
-                </span>
-                <t t-if="env.mailRtc.sendDisplay"><t t-set="displayTitle">Stop screen sharing</t></t>
-                <t t-else=""><t t-set="displayTitle">Share screen</t></t>
-                <span class="o_RtcController_button"
-                    t-att-class="{
-                        'text-success': env.mailRtc.sendDisplay,
-                        'o-active': env.mailRtc.sendDisplay,
-                    }"
-                    t-att-aria-label="displayTitle"
-                    t-att-title="displayTitle"
-                    t-on-click="_onClickScreen">
-                    <i class="fa fa-lg fa-desktop"/>
-                </span>
-                <span class="o_RtcController_button"
-                    t-att-class="{
-                        'o-active': env.messaging.userSetting.isOpen,
-                    }"
-                    aria-label="Show settings"
-                    role="button"
-                    title="Show settings"
-                    t-on-click="_onClickSettings">
-                    <i class="fa fa-lg fa-cog"/>
-                </span>
-            </div>
         </div>
     </t>
 

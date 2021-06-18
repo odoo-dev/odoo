@@ -21,15 +21,15 @@ class RtcCallParticipants extends Component {
             const messaging = this.env.messaging;
             const thread = this.env.models['mail.thread'].get(props.threadLocalId);
             return {
-                activeAudioStreams: mailRtc.activeAudioStreams,
+                activeAudioStreams: mailRtc && mailRtc.activeAudioStreams,
                 activeCallThreadLocalId: messaging.activeCallThreadLocalId,
-                activeVideoStreams: mailRtc.activeVideoStreams,
-                connectionStates: mailRtc.connectionStates,
+                activeVideoStreams: mailRtc && mailRtc.activeVideoStreams,
+                connectionStates: mailRtc && mailRtc.connectionStates,
                 focusedVideoPartner: messaging.focusedVideoPartner,
                 isUserSettingWindowOpen: messaging.userSetting.isOpen,
                 partnerIds: thread.callParticipants,
                 peerToken: messaging.currentPartner.peerToken,
-                sendSound: mailRtc.sendSound,
+                sendSound: mailRtc && mailRtc.sendSound,
                 thread,
             };
         });
