@@ -207,10 +207,6 @@ function factory(dependencies) {
             this.update({ focusedVideoPartner: [['insert', { id: partnerId } ]] });
         }
 
-        toggleMemberList() {
-            this.update({ showMemberList: !this.showMemberList });
-        }
-
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -406,12 +402,6 @@ function factory(dependencies) {
          * which are special partners notably used in livechat.
          */
         publicPartners: many2many('mail.partner'),
-        /**
-         * Tue if displaying the list of thread members.
-         */
-        showMemberList: attr({
-            default: true,
-        }),
         /**
          * Mailbox Starred.
          */

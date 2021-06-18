@@ -34,9 +34,7 @@
                         <RtcController threadLocalId="thread.localId" showMembersButton="true"/>
                     </div>
                 </div>
-                <t t-if="env.messaging.showMemberList">
-                    <RtcCallParticipants class="o_VideoRoom_callParticipants" threadLocalId="thread.localId"/>
-                </t>
+                <RtcCallParticipants class="o_VideoRoom_callParticipants" threadLocalId="thread.localId"/>
             </t>
         </div>
     </t>

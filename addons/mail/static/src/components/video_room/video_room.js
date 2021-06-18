@@ -29,7 +29,6 @@ class VideoRoom extends Component {
             return {
                 activeVideoStreams: mailRtc.activeVideoStreams,
                 focusedVideoPartner: this.env.messaging.focusedVideoPartner,
-                showMemberList : this.env.messaging.showMemberList,
                 thread: thread ? thread.__state : undefined,
                 globalWindowInnerWidth: device.globalWindowInnerWidth,
                 globalWindowInnerHeight: device.globalWindowInnerHeight,

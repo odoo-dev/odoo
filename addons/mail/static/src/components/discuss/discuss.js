@@ -181,7 +181,6 @@ class Discuss extends Component {
             isDeviceMobile: this.env.messaging && this.env.messaging.device.isMobile,
             isMessagingInitialized: this.env.isMessagingInitialized(),
             replyingToMessage,
-            showMemberList: this.env.messaging.showMemberList,
             starred: this.env.messaging.starred,
             thread,
             threadCache: threadView && threadView.threadCache,
@@ -271,6 +270,8 @@ class Discuss extends Component {
         }
         this.discuss.clearReplyingToMessage();
         this.discuss.update({ activeMobileNavbarTabId: ev.detail.tabId });
+        const isChatSelected = this.discuss.activeMobileNavbarTabId === 'chat';
+        const isChannelSelected = this.discuss.activeMobileNavbarTabId === 'channel';
         const isMailboxSelected = this.discuss.activeMobileNavbarTabId === 'mailbox';
         const isThreadMailbox = this.discuss.thread && this.discuss.thread.model === 'mailbox';
         if (isMailboxSelected && !isThreadMailbox) {
@@ -278,6 +279,12 @@ class Discuss extends Component {
         }
         if (!isMailboxSelected) {
             this.discuss.update({ thread: unlink() });
+        }
+        if (!isChatSelected) {
+            this.discuss.update({ isAddingChat: false });
+        }
+        if (!isChannelSelected) {
+            this.discuss.update({ isAddingChannel: false });
         }
     }
 

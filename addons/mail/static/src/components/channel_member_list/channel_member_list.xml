@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.ChannelMemberList" owl="1">
+        <div class="o_ChannelMemberList">
+            <t t-foreach="channel.members" t-as="member" t-key="member.localId">
+                <div class="o_ChannelMemberList_member">
+                    <div class="o_ChannelMemberList_avatarContainer">
+                        <img class="o_ChannelMemberList_avatar" t-att-src="member.avatarUrl" alt="Avatar"/>
+                        <t t-if="member.im_status">
+                            <PartnerImStatusIcon
+                                class="o_ChannelMemberList_partnerImStatusIcon"
+                                t-att-class="{
+                                    'o-mobile': env.messaging.device.isMobile,
+                                }"
+                                partnerLocalId="member.localId"
+                            />
+                        </t>
+                    </div>
+                    <div class="o_ChannelMemberList_avatarNameSeparator"/>
+                    <span class="o_ChannelMemberList_name">
+                        <t t-esc="member.nameOrDisplayName"/>
+                    </span>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

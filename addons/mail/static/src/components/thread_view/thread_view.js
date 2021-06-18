@@ -3,15 +3,16 @@
 import useShouldUpdateBasedOnProps from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 import useStore from '@mail/component_hooks/use_store/use_store';
 import useUpdate from '@mail/component_hooks/use_update/use_update';
+import { ChannelMemberList } from '@mail/components/channel_member_list/channel_member_list';
 import Composer from '@mail/components/composer/composer';
 import MessageList from '@mail/components/message_list/message_list';
-import ThreadViewTopbar from '@mail/components/thread_view_topbar/thread_view_topbar';
+import { ThreadViewTopbar } from '@mail/components/thread_view_topbar/thread_view_topbar';
 import VideoRoom from '@mail/components/video_room/video_room';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { Composer, MessageList, ThreadViewTopbar, VideoRoom };
+const components = { ChannelMemberList, Composer, MessageList, ThreadViewTopbar, VideoRoom };
 
 class ThreadView extends Component {
 
@@ -137,15 +138,18 @@ class ThreadView extends Component {
             correspondentId: correspondent && correspondent.id,
             isDeviceMobile: this.env.messaging.device.isMobile,
             thread,
-            threadCacheIsLoaded: threadCache && threadCache.isLoaded,
             threadCacheHasLoadingFailed: threadCache && threadCache.hasLoadingFailed,
+            threadCacheIsLoaded: threadCache && threadCache.isLoaded,
             threadIsTemporary: thread && thread.isTemporary,
             threadMassMailing: thread && thread.mass_mailing,
             threadModel: thread && thread.model,
             threadTextInputSendShortcuts: thread && thread.textInputSendShortcuts || [],
             threadView,
+            threadViewHasMemberList: threadView && threadView.hasMemberList,
             threadViewHasTopbar: threadView && threadView.hasTopbar,
             threadViewIsLoading: threadView && threadView.isLoading,
+            threadViewIsMemberListMakingSense: threadView && threadView.isMemberListMakingSense,
+            threadViewIsMemberListOpened: threadView && threadView.isMemberListOpened,
         };
     }
 
