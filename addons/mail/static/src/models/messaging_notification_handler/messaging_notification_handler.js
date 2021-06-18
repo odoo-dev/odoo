@@ -77,6 +77,10 @@ function factory(dependencies) {
                     return;
                 }
                 const [, model, id] = channel;
+                switch (message.type) {
+                    case 'new_channel_members':
+                        return this._handleNotificationNewChannelMembers(message.payload);
+                }
                 switch (model) {
                     case 'ir.needaction':
                         return this._handleNotificationNeedaction(message);
@@ -411,6 +415,24 @@ function factory(dependencies) {
             if (originThread && message.isNeedaction) {
                 originThread.update({ message_needaction_counter: increment() });
             }
+        }
+
+        /**
+         * @private
+         * @param {Object} payload
+         * @param {integer} payload.id
+         * @param {Object[]} payload.new_members
+         */
+        _handleNotificationNewChannelMembers({ id, new_members: newMembers }) {
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id,
+                model: 'mail.channel',
+            });
+            channel.update({
+                members: insert(
+                    newMembers.map(newMemberData => this.env.models['mail.partner'].convertData(newMemberData))
+                ),
+            });
         }
 
         /**
