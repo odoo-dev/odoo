@@ -30,7 +30,7 @@
 
 .o_ThreadViewTopbar_threadDescriptionSeparator {
     flex: 0 0 auto;
-    min-width: $border-width;
+    width: $border-width;
     height: $font-size-sm;
     margin-inline-start: map-get($spacers, 2);
     margin-inline-end: map-get($spacers, 2);
@@ -64,6 +64,25 @@
 
 .o_ThreadViewTopbar {
     background-color: $o-mail-discuss-bg;
+}
+
+.o_ThreadViewTopbar_button {
+    background: none;
+    border: none;
+    outline: none;
+
+    &.o-active {
+        color: gray('700');
+    }
+
+    &:not(.o-active) {
+        color: gray('500');
+    }
+
+    @include hover-focus () {
+        outline: none;
+        color: gray('600');
+    }
 }
 
 .o_ThreadViewTopbar_threadDescriptionSeparator {

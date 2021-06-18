@@ -23,10 +23,18 @@
                 </t>
             </div>
             <div class="o_ThreadViewTopbar_actions">
+                <t t-if="threadView.thread and threadView.thread === env.messaging.inbox">
+                    <button class="o_ThreadViewTopbar_markAllReadButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="threadView.onClickMarkAllAsRead(ev)">Mark all read</button>
+                </t>
+                <t t-if="threadView.thread and threadView.thread === env.messaging.starred">
+                    <button class="o_ThreadViewTopbar_unstarAllButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="threadView.onClickUnstarAll(ev)">Unstar all</button>
+                </t>
                 <t t-if="threadView.thread and threadView.thread.model === 'mail.channel'">
+                    <RtcController threadLocalId="threadView.thread.localId"/>
                     <Popover popoverExtraClass="'o_ThreadViewTopbar_invitePopover'" position="'bottom'">
-                        <button class="o_ThreadViewTopbar_inviteButton btn btn-secondary">
-                            <i class="fa fa-user-plus"/>
+                        <!-- todo add o-active when necessary -->
+                        <button class="o_ThreadViewTopbar_inviteButton o_ThreadViewTopbar_button">
+                            <i class="fa fa-lg fa-user-plus"/>
                         </button>
                         <t t-set="opened">
                             <PartnerSelector
@@ -35,22 +43,15 @@
                         </t>
                     </Popover>
                 </t>
-                <t t-if="threadView.thread and threadView.thread === env.messaging.inbox">
-                    <button class="o_ThreadViewTopbar_markAllReadButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="_onClickMarkAllAsRead">Mark all read</button>
+                <t t-if="threadView.isMemberListMakingSense and threadView.hasMemberList and !threadView.isMemberListOpened">
+                    <button class="o_ThreadViewTopbar_showMemberListButton o_ThreadViewTopbar_button" title="Show Member List" t-on-click="threadView.onClickShowMemberList(ev)">
+                        <i class="fa fa-lg fa-users"/>
+                    </button>
                 </t>
-                <t t-if="threadView.thread and threadView.thread === env.messaging.starred">
-                    <button class="o_ThreadViewTopbar_unstarAllButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="_onClickUnstarAll">Unstar all</button>
-                </t>
-                <t t-if="threadView.thread and threadView.thread.model === 'mail.channel'">
-                    <RtcController threadLocalId="threadView.thread.localId" showMembersButton="true"/>
-                </t>
-                <t t-if="env.messaging.device.isMobile">
-                    <t t-if="env.messaging.discuss.activeMobileNavbarTabId === 'chat'">
-                        <button class="o_Discuss_mobileNewMessageButton btn btn-secondary" t-on-click="_onClickMobileNewMessageButton">New Message</button>
-                    </t>
-                    <t t-if="env.messaging.discuss.activeMobileNavbarTabId === 'channel'">
-                        <button class="o_Discuss_mobileNewChannelButton btn btn-secondary" t-on-click="_onClickMobileNewChannelButton">New Channel</button>
-                    </t>
+                <t t-if="threadView.isMemberListMakingSense and threadView.hasMemberList and threadView.isMemberListOpened">
+                    <button class="o_ThreadViewTopbar_hideMemberListButton o_ThreadViewTopbar_button o-active" title="Hide Member List" t-on-click="threadView.onClickHideMemberList(ev)">
+                        <i class="fa fa-lg fa-users"/>
+                    </button>
                 </t>
             </div>
         </div>

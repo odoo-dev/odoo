@@ -22,7 +22,6 @@ class RtcController extends Component {
                 sendDisplay: mailRtc.sendDisplay,
                 sendSound: mailRtc.sendSound,
                 sendUserVideo: mailRtc.sendUserVideo,
-                showMemberList: messaging.showMemberList,
             };
         });
         this._getRefs = useRefs();
@@ -55,10 +54,6 @@ class RtcController extends Component {
         this.env.mailRtc.toggleDeaf();
     }
 
-    _onClickMembers(ev) {
-        this.env.messaging.toggleMemberList();
-    }
-
     _onClickMicrophone(ev) {
         this.env.mailRtc.toggleMicrophone();
     }
@@ -88,10 +83,6 @@ Object.assign(RtcController, {
             type: String,
             optional: true, // if not defined, represents the current active call
         },
-        showMembersButton: {
-            type: Boolean,
-            optional: true,
-        }
     },
     template: 'mail.RtcController',
 });

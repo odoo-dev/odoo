@@ -21,6 +21,9 @@
 
 .o_Message_authorName {
     margin-inline-end: map-get($spacers, 2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .o_Message_checkbox {

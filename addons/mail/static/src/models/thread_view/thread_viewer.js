@@ -62,6 +62,14 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {boolean}
+         */
+        _computeIsMemberListMakingSense() {
+            return this.thread && this.thread.model === 'mail.channel' && ['channel', 'group'].includes(this.thread.channel_type);
+        }
+
+        /**
+         * @private
          * @returns {mail.thread_viewer|undefined}
          */
         _computeThreadView() {
@@ -78,16 +86,36 @@ function factory(dependencies) {
 
     ThreadViewer.fields = {
         /**
+         * Determines whether this thread viewer has a member list.
+         * Only makes sense if this thread is a channel and if the channel is
+         * not a chat.
+         */
+        hasMemberList: attr({
+            default: false,
+        }),
+        /**
          * Determines whether `this.thread` should be displayed.
          */
         hasThreadView: attr({
             default: false,
         }),
         /**
-         * Determines whether the topbar of this thread view should be displayed.
+         * Determines whether this thread viewer has a topbar.
          */
         hasTopbar: attr({
             default: false,
+        }),
+        /**
+         * Determines whether it makes sense for this thread viewer to have a
+         * member list.
+         */
+        isMemberListMakingSense: attr({
+            compute: '_computeIsMemberListMakingSense',
+            dependencies: [
+                'thread',
+                'threadModel',
+                'threadChannelType',
+            ],
         }),
         /**
          * Determines the selected `mail.message`.
@@ -121,6 +149,18 @@ function factory(dependencies) {
          */
         threadCacheInitialScrollPositions: attr({
             default: {},
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        threadChannelType: attr({
+            related: 'thread.channel_type'
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        threadModel: attr({
+            related: 'thread.model'
         }),
         /**
          * States the `mail.thread_view` currently displayed and managed by `this`.

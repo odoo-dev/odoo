@@ -153,6 +153,20 @@ function factory(dependencies) {
         }
 
         /**
+         * @param {Event} ev
+         */
+        onClickMobileNewChannelButton(ev) {
+            this.update({ isAddingChannel: true });
+        }
+
+        /**
+         * @param {Event} ev
+         */
+        onClickMobileNewMessageButton(ev) {
+            this.update({ isAddingChat: true });
+        }
+
+        /**
          * Open thread from init active id. `initActiveId` is used to refer to
          * a thread that we may not have full data yet, such as when messaging
          * is not yet initialized.
@@ -374,6 +388,7 @@ function factory(dependencies) {
          */
         _computeThreadViewer() {
             const threadViewerData = {
+                hasMemberList: true,
                 hasThreadView: this.hasThreadView,
                 hasTopbar: true,
                 selectedMessage: this.replyingToMessage ? link(this.replyingToMessage) : unlink(),
