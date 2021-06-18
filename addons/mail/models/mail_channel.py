@@ -374,6 +374,7 @@ class Channel(models.Model):
         """ Add the given partner_ids to the current channels and broadcast the channel header to them.
             :param partner_ids : list of partner id to add
         """
+        self.ensure_one()
         partners = self.env['res.partner'].browse(partner_ids)
         self._invite_check_access(partners)
 
@@ -383,7 +384,8 @@ class Channel(models.Model):
             channel.write({'channel_last_seen_partner_ids': [Command.create({'partner_id': partner_id}) for partner_id in partners_to_add.ids]})
             for partner in partners_to_add:
                 if partner.id != self.env.user.partner_id.id:
-                    notification = _('<div class="o_mail_notification">%(author)s invited %(new_partner)s to <a href="#" class="o_channel_redirect" data-oe-id="%(channel_id)s">#%(channel_name)s</a></div>',
+                    notification = _(
+                        '<div class="o_mail_notification">%(author)s invited %(new_partner)s to <a href="#" class="o_channel_redirect" data-oe-id="%(channel_id)s">#%(channel_name)s</a></div>',
                         author=self.env.user.display_name,
                         new_partner=partner.display_name,
                         channel_id=channel.id,
@@ -395,6 +397,13 @@ class Channel(models.Model):
 
         # broadcast the channel header to the added partner
         self._broadcast(partner_ids)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', self.id), {
+            'type': 'new_channel_members',
+            'payload': {
+                'id': self.id,
+                'new_members': [partner.mail_partner_format() for partner in partners],
+            },
+        })
 
     def _invite_check_access(self, partners):
         """ Check invited partners could match channel access """
