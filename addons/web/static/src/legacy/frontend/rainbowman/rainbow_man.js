@@ -25,6 +25,7 @@ var RainbowMan = Widget.extend({
      * @constructor
      * @param {Object} [options]
      * @param {string} [options.message] Message to be displayed on rainbowman card
+     * @param {string} [options.messageIsHtml=false] If true, message is considered as HTML otherwise it's escaped
      * @param {string} [options.fadeout='medium'] Delay for rainbowman to disappear. 'fast' will make rainbowman dissapear quickly, 'medium' and 'slow' will wait little longer before disappearing (can be used when options.message is longer), 'no' will keep rainbowman on screen until user clicks anywhere outside rainbowman
      * @param {string} [options.img_url] URL of the image to be displayed
      */
@@ -35,6 +36,7 @@ var RainbowMan = Widget.extend({
             fadeout: 'medium',
             img_url: '/web/static/img/smile.svg',
             message: _t('Well Done!'),
+            messageIsHtml: false,
         });
         this.delay = rainbowDelay[this.options.fadeout];
     },
@@ -61,7 +63,15 @@ var RainbowMan = Widget.extend({
                 }, 600); // destroy only after fadeout animation is completed
             }, this.delay);
         }
-        this.$('.o_reward_msg_content').append(this.options.message);
+        let message = this.options.message;
+        if (!this.options.messageIsHtml) {
+            if (message instanceof jQuery) {
+                message = message.text();
+            } else if (message instanceof Element) {
+                message = message.textContent;
+            }
+        }
+        this.$('.o_reward_msg_content').append(message);
         return this._super.apply(this, arguments);
     }
 });
