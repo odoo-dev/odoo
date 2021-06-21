@@ -8,6 +8,8 @@ import ThreadIcon from '@mail/components/thread_icon/thread_icon';
 
 const { Component } = owl;
 
+const { useRef } = owl.hooks;
+
 const components = { PartnerSelector, RtcController, ThreadIcon };
 
 export class ThreadViewTopbar extends Component {
@@ -32,11 +34,28 @@ export class ThreadViewTopbar extends Component {
                 threadModel: thread && thread.model,
                 threadView,
                 threadViewHasMemberList: threadView && threadView.hasMemberList,
+                threadViewIsEditingThreadName: threadView && threadView.isEditingThreadName,
                 threadViewIsMemberListMakingSense: threadView && threadView.isMemberListMakingSense,
                 threadViewIsMemberListOpened: threadView && threadView.isMemberListOpened,
+                threadViewIsMouseOverThreadName: threadView && threadView.isMouseOverThreadName,
                 threadViewMessagesLength: threadView && threadView.messages.length,
+                threadViewPendingThreadName: threadView && threadView.pendingThreadName,
             };
         });
+        /**
+         * Reference to the thread name input (rename feature).
+         * Useful to know when a click is done outside of it.
+         */
+        this._threadNameInputRef = useRef('threadNameInput');
+        this._onClickCaptureGlobal = this._onClickCaptureGlobal.bind(this);
+    }
+
+    mounted() {
+        document.addEventListener('click', this._onClickCaptureGlobal, true);
+    }
+
+    willUnmount() {
+        document.removeEventListener('click', this._onClickCaptureGlobal, true);
     }
 
     //--------------------------------------------------------------------------
@@ -48,6 +67,39 @@ export class ThreadViewTopbar extends Component {
      */
     get threadView() {
         return this.env.models['mail.thread_view'].get(this.props.threadViewLocalId);
+    }
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Must be done as capture to avoid stop propagation.
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickCaptureGlobal(ev) {
+        if (this._threadNameInputRef.el && this._threadNameInputRef.el.contains(ev.target)) {
+            return;
+        }
+        this.threadView.onClickOutsideThreadNameInput(ev);
+    }
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onInputThreadNameInput(ev) {
+        this.threadView.onInputThreadNameInput(ev);
+    }
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onKeyDownThreadNameInput(ev) {
+        this.threadView.onKeyDownThreadNameInput(ev);
     }
 
 }

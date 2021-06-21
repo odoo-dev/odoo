@@ -664,18 +664,6 @@ function factory(dependencies) {
             }
         }
 
-        /**
-         *
-         * @param name
-         */
-        async renameForAll(name) {
-            await this.env.services.rpc({
-                model: "mail.channel",
-                method: "write",
-                args: [this.id, { name: name }],
-            });
-        }
-
         /*
          * Returns threads that match the given search term. More specially only
          * threads of model 'mail.channel' are suggested, and if the context
@@ -1148,17 +1136,12 @@ function factory(dependencies) {
          * @param {string} newName
          */
         async rename(newName) {
-            if (this.channel_type === 'chat' || this.channel_type === 'group') {
-                await this.async(() => this.env.services.rpc({
-                    model: 'mail.channel',
-                    method: 'channel_set_custom_name',
-                    args: [this.id],
-                    kwargs: {
-                        name: newName,
-                    },
-                }));
-            }
-            this.update({ custom_channel_name: newName });
+            return this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'channel_rename',
+                args: [this.id],
+                kwargs: { name: newName },
+            });
         }
 
         /**

@@ -4,15 +4,15 @@
 
 .o_ThreadViewTopbar {
     display: flex;
-    height: $o-statusbar-height;
+    height: $o-statusbar-height * 1.25;
     width: map-get($sizes, 100);
+    padding-inline-start: map-get($spacers, 3);
+    padding-inline-end: map-get($spacers, 3);
 }
 
 .o_ThreadViewTopbar_actions {
     display: flex;
-    align-items: center;
-    margin-inline-start: map-get($spacers, 4);
-    margin-inline-end: map-get($spacers, 4);
+    align-items: center; // actions don't need full height
 }
 
 .o_ThreadViewTopbar_invitePopover {
@@ -35,6 +35,7 @@
 }
 
 .o_ThreadViewTopbar_threadIcon {
+    align-self: center; // icon doesn't need full height
     margin-inline-end: map-get($spacers, 2);
 }
 
@@ -42,16 +43,21 @@
     flex: 0 0 auto; // no shrink to let the name have priority over description
     max-width: map-get($sizes, 75); // but always leave at least a bit of space for the description
     @include text-truncate();
+    /**
+     * Horizontal padding to give some space inside the edit indicator border.
+     * But avoid vertical padding because it is not working well with baseline
+     * alignment for description.
+     */
+    padding: 0 map-get($spacers, 1);
+    border: $border-width solid;
 }
 
 .o_ThreadViewTopbar_title {
     flex: 1 1 auto;
     display: flex;
-    align-self: center; // cancel stretch from parent, the current element and its children don't want to use the whole height but use baseline instead
+    align-self: center; // title doesn't need full height
     align-items: baseline;
     min-width: 0; // allow flex shrink to work on children that have content
-    margin-inline-start: map-get($spacers, 4);
-    margin-inline-end: map-get($spacers, 4);
 }
 
 // ------------------------------------------------------------------
@@ -88,4 +94,13 @@
 .o_ThreadViewTopbar_threadName {
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
+
+    &:not(.o-isMouseOverThreadName) {
+        border-color: transparent; // presence of border even if invisible to prevent flicker
+    }
+
+    &.o-isMouseOverThreadName {
+        background-color: $white;
+        border-color: $border-color;
+    }
 }

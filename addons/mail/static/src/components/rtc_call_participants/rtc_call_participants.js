@@ -5,9 +5,7 @@ import UserSettingWindow from '@mail/components/user_setting_window/user_setting
 
 const { Component } = owl;
 
-const components = {
-    UserSettingWindow
-};
+const components = { UserSettingWindow };
 
 class RtcCallParticipants extends Component {
 
