@@ -3,12 +3,20 @@
 
     <t t-name="mail.ThreadViewTopbar" owl="1">
         <div class="o_ThreadViewTopbar">
+            <t t-if="threadView.thread">
+                <ThreadIcon class="o_ThreadViewTopbar_threadIcon" threadLocalId="threadView.thread.localId"/>
+            </t>
             <div class="o_ThreadViewTopbar_title">
                 <t t-if="threadView.thread">
-                    <ThreadIcon class="o_ThreadViewTopbar_threadIcon" threadLocalId="threadView.thread.localId"/>
-                    <div class="o_ThreadViewTopbar_threadName" t-att-title="threadView.thread.displayName">
-                        <t t-esc="threadView.thread.displayName"/>
-                    </div>
+                    <t t-if="!threadView.isEditingThreadName">
+                        <div class="o_ThreadViewTopbar_threadName" t-att-title="threadView.thread.displayName" t-on-click="threadView.onClickTopbarThreadName(ev)" t-on-mouseenter="threadView.onMouseEnterTopBarThreadName(ev)" t-on-mouseleave="threadView.onMouseLeaveTopBarThreadName(ev)" t-att-class="{ 'o-isMouseOverThreadName': threadView.isMouseOverThreadName }">
+                            <t t-esc="threadView.thread.displayName"/>
+                        </div>
+                    </t>
+                    <t t-if="threadView.isEditingThreadName">
+                        <!-- TODO auto focus this input when it is shown for the first time -->
+                        <input class="o_ThreadViewTopbar_threadNameInput" type="text" t-att-value="threadView.pendingThreadName" t-on-input="_onInputThreadNameInput" t-on-keydown="_onKeyDownThreadNameInput" t-ref="threadNameInput"/>
+                    </t>
                 </t>
                 <t t-if="!threadView.thread">
                     <div class="o_ThreadViewTopbar_threadName" title="Discuss">

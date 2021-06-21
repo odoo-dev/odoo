@@ -180,10 +180,10 @@ MockServer.include({
             const last_message_id = args.args[1] || args.kwargs.last_message_id;
             return this._mockMailChannelChannelSeen(channel_ids, last_message_id);
         }
-        if (args.model === 'mail.channel' && args.method === 'channel_set_custom_name') {
-            const channel_id = args.args[0] || args.kwargs.channel_id;
+        if (args.model === 'mail.channel' && args.method === 'channel_rename') {
+            const ids = args.args[0];
             const name = args.args[1] || args.kwargs.name;
-            return this._mockMailChannelChannelSetCustomName(channel_id, name);
+            return this._mockMailChannelChannelRename(ids, name);
         }
         if (args.model === 'mail.channel' && args.method === 'execute_command') {
             return this._mockMailChannelExecuteCommand(args);
@@ -856,17 +856,28 @@ MockServer.include({
         this._widget.call('bus_service', 'trigger', 'notification', [notification]);
     },
     /**
-     * Simulates `channel_set_custom_name` on `mail.channel`.
+     * Simulates `channel_rename` on `mail.channel`.
      *
      * @private
-     * @param {integer} channel_id
-     * @returns {string} [name]
+     * @param {integer[]} ids
+     * @returns {string} name
      */
-    _mockMailChannelChannelSetCustomName(channel_id, name) {
-        this._mockWrite('mail.channel', [
-            [channel_id],
-            { custom_channel_name: name },
-        ]);
+    _mockMailChannelChannelRename(ids, name) {
+        const channel = this._getRecords('mail.channel', [['id', 'in', ids]])[0];
+        if (channel.channel_type === 'chat') {
+            this._mockWrite('mail.channel', [
+                [channel.id],
+                { custom_channel_name: name },
+            ]);
+            this._mockMailChannel_broadcast([channel.id], [this.currentPartnerId]);
+        }
+        if (['channel', 'group'].includes(channel.channel_type)) {
+            this._mockWrite('mail.channel', [
+                [channel.id],
+                { name: name },
+            ]);
+            this._mockMailChannel_broadcast([channel.id], [channel.members]);
+        }
     },
     /**
      * Simulates `execute_command` on `mail.channel`.

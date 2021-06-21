@@ -70,6 +70,13 @@ function factory(dependencies) {
         /**
          * @param {Event} ev
          */
+        onClickOutsideThreadNameInput(ev) {
+            this._applyThreadRename();
+        }
+
+        /**
+         * @param {Event} ev
+         */
         onClickShowMemberList(ev) {
             this.update({ isMemberListOpened: true });
         }
@@ -77,8 +84,60 @@ function factory(dependencies) {
         /**
          * @param {Event} ev
          */
+        onClickTopbarThreadName() {
+            if (!this.thread || this.thread.model !== 'mail.channel') {
+                return;
+            }
+            this.update({
+                isEditingThreadName: true,
+                isMouseOverThreadName: false,
+                pendingThreadName: this.thread.displayName,
+            });
+        }
+
+        /**
+         * @param {Event} ev
+         */
         onClickUnstarAll(ev) {
             this.env.models['mail.message'].unstarAll();
+        }
+
+        /**
+         * @param {Event} ev
+         */
+        onInputThreadNameInput(ev) {
+            this.update({ pendingThreadName: ev.target.value });
+        }
+
+        /**
+         * @param {Event} ev
+         */
+        onKeyDownThreadNameInput(ev) {
+            switch (ev.key) {
+                case 'Enter':
+                    this._applyThreadRename();
+                    break;
+                case 'Escape':
+                    this._discardThreadRename();
+                    break;
+            }
+        }
+
+        /**
+         * @param {Event} ev
+         */
+        onMouseEnterTopBarThreadName() {
+            if (!this.thread || this.thread.model !== 'mail.channel') {
+                return;
+            }
+            this.update({ isMouseOverThreadName: true });
+        }
+
+        /**
+         * @param {Event} ev
+         */
+        onMouseLeaveTopBarThreadName() {
+            this.update({ isMouseOverThreadName: false });
         }
 
         /**
@@ -93,6 +152,20 @@ function factory(dependencies) {
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
+
+
+        /**
+         * @private
+         */
+        _applyThreadRename() {
+            if (this.pendingThreadName && this.pendingThreadName !== this.thread.displayName) {
+                this.thread.rename(this.pendingThreadName);
+            }
+            this.update({
+                isEditingThreadName: false,
+                pendingThreadName: clear(),
+            });
+        }
 
         /**
          * @private
@@ -181,6 +254,16 @@ function factory(dependencies) {
                 if (!(e instanceof RecordDeletedError)) {
                     throw e;
                 }
+            });
+        }
+
+        /**
+         * @private
+         */
+        _discardThreadRename() {
+            this.update({
+                isEditingThreadName: false,
+                pendingThreadName: clear(),
             });
         }
 
@@ -279,6 +362,12 @@ function factory(dependencies) {
             related: 'threadViewer.hasTopbar',
         }),
         /**
+         * Determines whether this thread is currently being renamed.
+         */
+        isEditingThreadName: attr({
+            default: false,
+        }),
+        /**
          * States whether `this.threadCache` is currently loading messages.
          *
          * This field is related to `this.threadCache.isLoading` but with a
@@ -303,6 +392,13 @@ function factory(dependencies) {
          */
         isMemberListOpened: attr({
             default: true,
+        }),
+        /**
+         * Determines whether the cursor is currently over this thread name in
+         * the top bar.
+         */
+        isMouseOverThreadName: attr({
+            default: false,
         }),
         /**
          * States whether `this` is aware of `this.threadCache` currently
@@ -454,6 +550,15 @@ function factory(dependencies) {
          */
         threadModel: attr({
             related: 'thread.model',
+        }),
+        /**
+         * Determines the pending name of this thread, which is the new name of
+         * the thread as the current user is currently typing it, with the goal
+         * of renaming the thread.
+         * This value can either be applied or discarded.
+         */
+        pendingThreadName: attr({
+            default: "",
         }),
         /**
          * Not a real field, used to trigger `thread.markAsSeen` when one of
