@@ -58,5 +58,5 @@
 // ------------------------------------------------------------------
 
 .o_ChannelMemberList_partnerImStatusIcon {
-    color: $white;
+    color: theme-color('light'); // same as background of parent
 }
