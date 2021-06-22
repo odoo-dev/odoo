@@ -32,16 +32,11 @@
 // Style
 // ------------------------------------------------------------------
 
-.o_DiscussSidebar {
-    background-color: gray('900');
-    color: gray('300');
-}
-
 .o_DiscussSidebar_quickSearch {
     border: none;
     outline: none;
 }
 
 .o_DiscussSidebar_separator {
-    background-color: gray('600');
+    background-color: $border-color;
 }

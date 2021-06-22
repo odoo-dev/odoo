@@ -35,17 +35,17 @@
     cursor: pointer;
 
     &.o-active {
-        background-color: lighten(gray('900'), 5%);
+        background-color: gray('200')
     }
 
     &:hover {
-        background-color: darken(gray('900'), 5%);
+        background-color: gray('300');
     }
 
     &.o-starred-box {
         .o_DiscussSidebarMailBox_counter {
-            border-color: gray('600');
-            background-color: gray('600');
+            border-color: gray('400');
+            background-color: gray('400');
         }
     }
 }
