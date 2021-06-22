@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.RtcCallParticipants" owl="1">
-        <div class="o_RtcCallParticipants">
+        <div class="o_RtcCallParticipants bg-light">
             <div t-if="env.messaging.userSetting.isOpen">
                 <UserSettingWindow/>
             </div>
