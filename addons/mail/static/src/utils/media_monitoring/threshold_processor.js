@@ -9,10 +9,11 @@ class ThresholdProcessor extends AudioWorkletProcessor {
      * @param {number} processorOptions.baseLevel the minimum value for audio detection
                TODO find a way to properly normalize sound? See process() comment.
      * @param {Array<number>} processorOptions.frequencyRange array of two numbers that represent the range of
-              frequencies that we want to minotor in hz.
+              frequencies that we want to monitor in hz.
      * @param {number} processorOptions.processInterval time in ms between each check
+     * @param {number} sampleRate of the audio track
      */
-    constructor({ processorOptions: { minimumActiveCycles=10, baseLevel=0.3, frequencyRange } }) {
+    constructor({ processorOptions: { minimumActiveCycles=10, baseLevel=0.3, frequencyRange, sampleRate } }) {
         super();
 
         // timing variables
@@ -29,6 +30,7 @@ class ThresholdProcessor extends AudioWorkletProcessor {
         const boostedLevel = baseLevel*10;
         this.baseLevel = boostedLevel*boostedLevel / 10;
         this.frequencyRange = frequencyRange;
+        this.sampleRate = sampleRate;
         this.activityBuffer = 0;
         this.wasAboveThreshold = undefined;
         this.isAboveThreshold = false;
@@ -50,8 +52,8 @@ class ThresholdProcessor extends AudioWorkletProcessor {
         }
         this.nextUpdateFrame += this.intervalInFrames;
 
-        const startIndex = _getFrequencyIndex(this.frequencyRange[0], sampleRate, 128);
-        const endIndex = _getFrequencyIndex(this.frequencyRange[1], sampleRate, 128);
+        const startIndex = _getFrequencyIndex(this.frequencyRange[0], this.sampleRate, 128);
+        const endIndex = _getFrequencyIndex(this.frequencyRange[1], this.sampleRate, 128);
 
 
         /**

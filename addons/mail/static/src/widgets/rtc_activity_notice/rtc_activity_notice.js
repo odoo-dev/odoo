@@ -2,8 +2,8 @@
 
 import RtcActivityNoticeComponent from '@mail/components/rtc_activity_notice/rtc_activity_notice';
 
-const SystrayMenu = require('web.SystrayMenu');
-const Widget = require('web.Widget');
+import SystrayMenu from 'web.SystrayMenu';
+import Widget from 'web.Widget';
 
 /**
  * Odoo Widget, necessary to instantiate component.
