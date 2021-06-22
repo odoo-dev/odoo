@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.ThreadViewTopbar" owl="1">
-        <div class="o_ThreadViewTopbar">
+        <div class="o_ThreadViewTopbar bg-light">
             <t t-if="threadView.thread">
                 <ThreadIcon class="o_ThreadViewTopbar_threadIcon" threadLocalId="threadView.thread.localId"/>
             </t>
