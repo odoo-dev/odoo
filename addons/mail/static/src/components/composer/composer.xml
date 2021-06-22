@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.Composer" owl="1">
-        <div class="o_Composer"
+        <div class="o_Composer bg-light"
             t-att-class="{
                 'o-focused': composer and composer.hasFocus,
                 'o-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
