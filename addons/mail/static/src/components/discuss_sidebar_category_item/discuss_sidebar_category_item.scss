@@ -86,16 +86,16 @@
 
     .o_DiscussSidebarCategoryItem_threadIcon {
         font-size: xx-small;
-        background-color: gray('900');
+        background-color: gray('100');
         border-radius: 50%;
     }
 
-    &:hover {
-        background-color: darken(gray('900'), 5%);
+    &.o-active {
+        background-color: gray('200');
     }
 
-    &.o-active {
-        background-color: lighten(gray('900'), 5%);
+    &:hover {
+        background-color: gray('300');
     }
 }
 
