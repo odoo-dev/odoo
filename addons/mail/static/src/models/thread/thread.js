@@ -1586,6 +1586,22 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {mail.partner[]}
+         */
+        _computeOrderedOfflineMembers() {
+            return replace(this._sortMembers(this.members.filter(member => !member.isOnline)));
+        }
+
+        /**
+         * @private
+         * @returns {mail.partner[]}
+         */
+        _computeOrderedOnlineMembers() {
+            return replace(this._sortMembers(this.members.filter(member => member.isOnline)));
+        }
+
+        /**
+         * @private
          * @returns {mail.message[]}
          */
         _computeOrderedMessages() {
@@ -1815,6 +1831,25 @@ function factory(dependencies) {
                        this.env.bus.trigger('mail.thread:promptAddFollower-closed');
                     },
                 },
+            });
+        }
+
+        /**
+         * @private
+         * @param {mail.partner[]} members
+         * @returns {mail.partner[]}
+         */
+        _sortMembers(members) {
+            return members.sort((a, b) => {
+                const cleanedAName = cleanSearchTerm(a.nameOrDisplayName || '');
+                const cleanedBName = cleanSearchTerm(b.nameOrDisplayName || '');
+                if (cleanedAName < cleanedBName) {
+                    return -1;
+                }
+                if (cleanedAName > cleanedBName) {
+                    return 1;
+                }
+                return a.id - b.id;
             });
         }
 
@@ -2149,6 +2184,18 @@ function factory(dependencies) {
             inverse: 'memberThreads',
         }),
         /**
+         * Serves as compute dependency.
+         */
+        membersIsOnline: attr({
+            related: 'members.isOnline',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        membersNameOrDisplayName: attr({
+            related: 'members.nameOrDisplayName',
+        }),
+        /**
          * Determines the message before which the "new message" separator must
          * be positioned, if any.
          */
@@ -2284,6 +2331,28 @@ function factory(dependencies) {
                 'serverFoldState',
             ],
             isOnChange: true,
+        }),
+        /**
+         * All offline members ordered like they are displayed.
+         */
+        orderedOfflineMembers: many2many('mail.partner', {
+            compute: '_computeOrderedOfflineMembers',
+            dependencies: [
+                'members',
+                'membersIsOnline',
+                'membersNameOrDisplayName',
+            ],
+        }),
+        /**
+         * All online members ordered like they are displayed.
+         */
+        orderedOnlineMembers: many2many('mail.partner', {
+            compute: '_computeOrderedOnlineMembers',
+            dependencies: [
+                'members',
+                'membersIsOnline',
+                'membersNameOrDisplayName',
+            ],
         }),
         /**
          * All messages ordered like they are displayed.

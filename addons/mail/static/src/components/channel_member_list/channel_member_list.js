@@ -17,10 +17,18 @@ export class ChannelMemberList extends Component {
         useShouldUpdateBasedOnProps();
         useStore(props => {
             const channel = this.env.models['mail.thread'].get(props.channelLocalId);
-            const channelMembers = channel ? channel.members : [];
+            const channelOrderedOfflineMembers = channel ? channel.orderedOfflineMembers : [];
+            const channelOrderedOnlineMembers = channel ? channel.orderedOnlineMembers : [];
             return {
                 channel,
-                channelMembers: channelMembers.map(member => {
+                channelOrderedOfflineMembers: channelOrderedOfflineMembers.map(member => {
+                    return {
+                        avatarUrl: member.avatarUrl,
+                        imStatus: member.im_status,
+                        nameOrDisplayName: member.nameOrDisplayName,
+                    };
+                }),
+                channelOrderedOnlineMembers: channelOrderedOnlineMembers.map(member => {
                     return {
                         avatarUrl: member.avatarUrl,
                         imStatus: member.im_status,
@@ -31,7 +39,8 @@ export class ChannelMemberList extends Component {
             };
         }, {
             compareDepth: {
-                channelMembers: 2, // list + data object
+                channelOrderedOfflineMembers: 2, // list + data object
+                channelOrderedOnlineMembers: 2, // list + data object
             },
         });
     }
