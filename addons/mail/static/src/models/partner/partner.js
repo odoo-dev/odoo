@@ -431,6 +431,14 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {boolean}
+         */
+        _computeIsOnline() {
+            return ['online', 'away'].includes(this.im_status);
+        }
+
+        /**
+         * @private
          * @returns {mail.messaging}
          */
         _computeMessaging() {
@@ -503,6 +511,13 @@ function factory(dependencies) {
             inverse: 'callParticipants',
         }),
         im_status: attr(),
+        /**
+         * States whether this partner is online.
+         */
+        isOnline: attr({
+            compute: '_computeIsOnline',
+            dependencies: ['im_status'],
+        }),
         isMuted: attr({
             default: false,
         }),
