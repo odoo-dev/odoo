@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.ChannelMemberList" owl="1">
-        <div class="o_ChannelMemberList">
+        <div class="o_ChannelMemberList bg-light">
             <!-- TODO sort the list alphabetically -->
             <t t-foreach="channel.members" t-as="member" t-key="member.localId">
                 <div class="o_ChannelMemberList_member">
