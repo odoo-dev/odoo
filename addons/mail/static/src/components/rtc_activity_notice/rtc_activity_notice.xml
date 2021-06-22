@@ -4,7 +4,7 @@
     <t t-name="mail.RtcActivityNotice" owl="1">
         <li class="o_RtcActivityNotice">
             <RtcInvitations/>
-            <t t-if="env.messaging.activeCallThreadLocalId">
+            <t t-if="env.messaging and env.messaging.activeCallThreadLocalId">
                 <t t-set="title">Open conference: <t t-esc="thread.displayName"/></t>
                 <a class="o_RtcActivityNotice_button" t-att-title="title" role="button" t-on-click="_onClick">
                     <div class="o_RtcActivityNotice_button_content">

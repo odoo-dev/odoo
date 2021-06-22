@@ -23,7 +23,7 @@ class RtcActivityNotice extends Component {
         useStore(props => {
             const messaging = this.env.messaging;
             return {
-                activeCallThreadLocalId: messaging.activeCallThreadLocalId,
+                activeCallThreadLocalId: messaging && messaging.activeCallThreadLocalId,
             };
         });
     }
