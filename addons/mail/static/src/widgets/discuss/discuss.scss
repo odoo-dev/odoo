@@ -15,14 +15,6 @@
 
 .o_widget_Discuss {
 
-    .o_control_panel {
-        border-bottom: 0; // cancel default border, so that we only apply it on top of discuss content
-    }
-
-    .o_Discuss_content {
-        border-top: 1px solid $border-color;
-    }
-
     .o_Discuss.o-mobile {
 
         &:not(.o-adding-item) {
