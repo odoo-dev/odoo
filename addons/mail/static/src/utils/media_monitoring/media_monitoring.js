@@ -28,6 +28,7 @@ async function monitorAudioThresholds(track, processorOptions) {
 
     let processor;
     try {
+        processorOptions.sampleRate = audioContext.sampleRate;
         processor = await _loadAudioWorkletProcessor(source, audioContext, processorOptions);
     } catch (e) {
         // In case Worklets are not supported by the browser (eg: Safari)
