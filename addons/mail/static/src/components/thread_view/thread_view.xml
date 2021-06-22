@@ -47,7 +47,7 @@
                         </t>
                         <t t-if="props.hasComposer">
                             <Composer
-                                class="o_ThreadView_composer"
+                                class="o_ThreadView_composer border-top"
                                 attachmentsDetailsMode="props.composerAttachmentsDetailsMode"
                                 composerLocalId="threadView.thread.composer.localId"
                                 hasCurrentPartnerAvatar="props.hasComposerCurrentPartnerAvatar"
