@@ -81,7 +81,7 @@ class TestAPI(SavepointCaseWithUserDemo):
     @mute_logger('odoo.models')
     def test_05_immutable(self):
         """ Check that a recordset remains the same, even after updates. """
-        domain = [('name', 'ilike', 'g')]
+        domain = [('name', 'ilike', 'g'), ('id', 'in', self.partners.ids)]
         partners = self.env['res.partner'].search(domain)
         self.assertTrue(partners)
         ids = partners.ids
@@ -141,7 +141,7 @@ class TestAPI(SavepointCaseWithUserDemo):
     @mute_logger('odoo.models')
     def test_40_new_new(self):
         """ Call new-style methods in the new API style. """
-        partners = self.env['res.partner'].search([('name', 'ilike', 'g')])
+        partners = self.env['res.partner'].search([('name', 'ilike', 'g'), ('id', 'in', self.partners.ids)])
         self.assertTrue(partners)
 
         # call method write on partners itself, and check its effect
@@ -152,7 +152,7 @@ class TestAPI(SavepointCaseWithUserDemo):
     @mute_logger('odoo.models')
     def test_45_new_new(self):
         """ Call new-style methods on records (new API style). """
-        partners = self.env['res.partner'].search([('name', 'ilike', 'g')])
+        partners = self.env['res.partner'].search([('name', 'ilike', 'g'), ('id', 'in', self.partners.ids)])
         self.assertTrue(partners)
 
         # call method write on partner records, and check its effects
