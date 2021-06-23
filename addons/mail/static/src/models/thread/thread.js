@@ -161,6 +161,9 @@ function factory(dependencies) {
             if ('group_based_subscription' in data) {
                 data2.group_based_subscription = data.group_based_subscription;
             }
+            if ('is_default_avatar' in data) {
+                data2.isDefaultAvatar = data.is_default_avatar;
+            }
             if ('id' in data) {
                 data2.id = data.id;
             }
@@ -2038,6 +2041,10 @@ function factory(dependencies) {
                 'messagingCurrentPartner',
             ],
         }),
+        /**
+         * Boolean that determines whether the thread is using default avatar.
+         */
+        isDefaultAvatar: attr(),
         /**
          * States whether `this` is currently loading attachments.
          */

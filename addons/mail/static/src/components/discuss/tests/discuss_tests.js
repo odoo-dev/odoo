@@ -392,7 +392,7 @@ QUnit.test('sidebar: add channel', async function (assert) {
 });
 
 QUnit.test('sidebar: basic channel rendering', async function (assert) {
-    assert.expect(13);
+    assert.expect(12);
 
     // channel expected to be found in the sidebar,
     // with a random unique id and name that  will be referenced in the test
@@ -417,11 +417,6 @@ QUnit.test('sidebar: basic channel rendering', async function (assert) {
     assert.notOk(
         channel.classList.contains('o-active'),
         "should not be active by default"
-    );
-    assert.strictEqual(
-        channel.querySelectorAll(`:scope .o_ThreadIcon`).length,
-        1,
-        "should have an icon"
     );
     assert.strictEqual(
         channel.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_name`).length,
@@ -471,6 +466,48 @@ QUnit.test('sidebar: basic channel rendering', async function (assert) {
         document.querySelectorAll(`.o_Discuss_thread .o_ThreadView_composer`).length,
         1,
         "should have composer section inside thread content (can post message in channel)"
+    );
+});
+
+QUnit.test('sidebar: channel should have a icon if not using default avatar', async function (assert) {
+    assert.expect(1);
+
+    this.data['mail.channel'].records.push({
+        id: 10,
+        is_default_avatar: false,
+    });
+    await this.start();
+
+    const channel = document.querySelector(`
+        .o_DiscussSidebar_categoryChannel
+        .o_DiscussSidebarCategory_item
+    `);
+
+    assert.strictEqual(
+        channel.querySelectorAll(`:scope .o_ThreadIcon`).length,
+        1,
+        "should have an icon if the channel is not using default avatar"
+    );
+});
+
+QUnit.test('sidebar: channel should not have a icon if using default avatar', async function (assert) {
+    assert.expect(1);
+
+    this.data['mail.channel'].records.push({
+        id: 10,
+        is_default_avatar: true,
+    });
+    await this.start();
+
+    const channel = document.querySelector(`
+        .o_DiscussSidebar_categoryChannel
+        .o_DiscussSidebarCategory_item
+    `);
+
+    assert.strictEqual(
+        channel.querySelectorAll(`:scope .o_ThreadIcon`).length,
+        0,
+        "should not have an icon if the channel is using default avatar"
     );
 });
 
@@ -540,8 +577,8 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
     // channels that are expected to be found in the sidebar (one public, one private)
     // with random unique id and name that will be referenced in the test
     this.data['mail.channel'].records.push(
-        { id: 100, name: "channel1", public: 'public', },
-        { id: 101, name: "channel2", public: 'private' }
+        { id: 100, name: "channel1", public: 'public', is_default_avatar: false },
+        { id: 101, name: "channel2", public: 'private', is_default_avatar: false }
     );
     await this.start();
     assert.strictEqual(

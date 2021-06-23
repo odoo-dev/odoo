@@ -76,6 +76,7 @@ class MockModels {
                     fetched_message_id: { string: "Last Fetched", type: 'many2one', relation: 'mail.message' },
                     group_based_subscription: { string: "Group based subscription", type: "boolean", default: false },
                     id: { string: "Id", type: 'integer' },
+                    is_default_avatar: { string: "Is using default avatar?", type: "boolean", default: true },
                     // In python this belongs to mail.channel.partner. Here for simplicity.
                     is_minimized: { string: "isMinimized", type: "boolean", default: false },
                     // In python it is moderator_ids. Here for simplicity.
