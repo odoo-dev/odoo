@@ -129,8 +129,9 @@ function factory(dependencies) {
         _computeHasThreadIcon() {
             switch (this.channelType) {
                 case 'channel':
-                case 'chat':
                 case 'group':
+                    return !this.channelIsDefaultAvatar;
+                case 'chat':
                     return true;
             }
         }
@@ -248,7 +249,10 @@ function factory(dependencies) {
          */
         hasThreadIcon: attr({
             compute: '_computeHasThreadIcon',
-            dependencies: ['channelType'],
+            dependencies: [
+                'channelType',
+                'channelIsDefaultAvatar',
+            ],
         }),
         /**
          * Boolean determines whether the item has a "unpin" command.
@@ -306,6 +310,12 @@ function factory(dependencies) {
          */
         channelId: attr({
             required: true,
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        channelIsDefaultAvatar: attr({
+            related: 'channel.isDefaultAvatar',
         }),
         /**
          * Serves as compute dependency.

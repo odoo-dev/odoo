@@ -33,10 +33,6 @@ class Channel(models.Model):
             res['alias_contact'] = 'everyone' if res.get('public', 'private') == 'public' else 'followers'
         return res
 
-    def _get_default_image(self):
-        image_path = modules.get_module_resource('mail', 'static/src/img', 'groupdefault.png')
-        return base64.b64encode(open(image_path, 'rb').read())
-
     # description
     name = fields.Char('Name', required=True, translate=True)
     active = fields.Boolean(default=True, help="Set active to false to hide the channel without removing it.")
@@ -48,7 +44,10 @@ class Channel(models.Model):
     is_chat = fields.Boolean(string='Is a chat', compute='_compute_is_chat')
     description = fields.Text('Description')
     email_send = fields.Boolean('Send messages by email', default=False)
-    image_128 = fields.Image("Image", max_width=128, max_height=128, default=_get_default_image)
+    image_128 = fields.Image("Image", max_width=128, max_height=128, compute='_compute_image_128', inverse='_inverse_image_128')
+    avatar_default = fields.Image("Default avatar", max_width=128, max_height=128, compute='_compute_avatar_default')
+    avatar_upload = fields.Image("User upload avatar")
+    is_default_avatar = fields.Boolean("Is using default avatar?", compute='_compute_is_default_avatar')
     # members (depends=['...'] is for `test_mail/tests/common.py`, class Moderation, `setUpClass`)
     channel_partner_ids = fields.Many2many(
         'res.partner', string='Members',
@@ -147,6 +146,32 @@ class Channel(models.Model):
         for channel in self:
             channel.moderation_count = data.get(channel.id, 0)
 
+    @api.depends('avatar_default', 'avatar_upload')
+    def _compute_image_128(self):
+        for channel in self:
+            channel.image_128 = channel.avatar_upload if channel.avatar_upload else channel.avatar_default
+
+    @api.depends('public', 'email_send')
+    def _compute_avatar_default(self):
+        for channel in self:
+            if channel.email_send:
+                image_path = modules.get_module_resource('mail', 'static/src/img', 'channel_mailing.png')
+            elif channel.public == 'private':
+                image_path = modules.get_module_resource('mail', 'static/src/img', 'channel_private.png')
+            else:
+                image_path = modules.get_module_resource('mail', 'static/src/img', 'channel.png')
+            channel.avatar_default = base64.b64encode(open(image_path, 'rb').read())
+
+    def _inverse_image_128(self):
+        for channel in self:
+            if channel.image_128 != channel.avatar_default:
+                channel.avatar_upload = channel.image_128
+
+    @api.depends('avatar_upload')
+    def _compute_is_default_avatar(self):
+        for channel in self:
+            channel.is_default_avatar = False if channel.avatar_upload else True
+
     # CONSTRAINTS
 
     @api.constrains('moderator_ids')
@@ -204,13 +229,18 @@ class Channel(models.Model):
         else:
             self.moderator_ids |= self.env.user
 
+    @api.onchange('image_128')
+    def _onchange_image_128(self):
+        if self.image_128 != self.avatar_default:
+            self.avatar_upload = self.image_128
+
     # ------------------------------------------------------------
     # CRUD
     # ------------------------------------------------------------
 
     @api.model_create_multi
     def create(self, vals_list):
-        defaults = self.default_get(['image_128', 'public'])
+        defaults = self.default_get(['public'])
 
         access_types = []
         for vals in vals_list:
@@ -234,10 +264,6 @@ class Channel(models.Model):
                 (0, 0, {'partner_id': pid})
                 for pid in partner_ids_to_add if pid not in membership_pids
             ]
-
-            # ensure image at quick create
-            if not vals.get('image_128'):
-                vals['image_128'] = defaults['image_128']
 
             # save visibility, apply public visibility for create then set back after creation
             # to avoid ACLS issue
@@ -950,6 +976,7 @@ class Channel(models.Model):
                 'is_moderator': self.env.uid in channel.moderator_ids.ids,
                 'group_based_subscription': bool(channel.group_ids),
                 'create_uid': channel.create_uid.id,
+                'is_default_avatar': channel.is_default_avatar,
             }
             if extra_info:
                 info['info'] = extra_info
