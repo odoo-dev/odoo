@@ -350,7 +350,7 @@ function factory(dependencies) {
         }),
         /**
          * Determines whether this thread viewer has a member list.
-         * Only makes sense if isMemberListMakingSense is true.
+         * Only makes sense if thread.isMemberListMakingSense is true.
          */
         hasMemberList: attr({
             related: 'threadViewer.hasMemberList',
@@ -378,13 +378,6 @@ function factory(dependencies) {
          */
         isLoading: attr({
             default: false,
-        }),
-        /**
-         * Determines whether it makes sense for this thread viewer to have a
-         * member list.
-         */
-        isMemberListMakingSense: attr({
-            related: 'threadViewer.isMemberListMakingSense',
         }),
         /**
          * Determines whether the member list of this thread is opened.

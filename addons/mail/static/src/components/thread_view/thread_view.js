@@ -140,6 +140,7 @@ class ThreadView extends Component {
             thread,
             threadCacheHasLoadingFailed: threadCache && threadCache.hasLoadingFailed,
             threadCacheIsLoaded: threadCache && threadCache.isLoaded,
+            threadIsMemberListMakingSense: thread && thread.isMemberListMakingSense,
             threadIsTemporary: thread && thread.isTemporary,
             threadMassMailing: thread && thread.mass_mailing,
             threadModel: thread && thread.model,
@@ -148,7 +149,6 @@ class ThreadView extends Component {
             threadViewHasMemberList: threadView && threadView.hasMemberList,
             threadViewHasTopbar: threadView && threadView.hasTopbar,
             threadViewIsLoading: threadView && threadView.isLoading,
-            threadViewIsMemberListMakingSense: threadView && threadView.isMemberListMakingSense,
             threadViewIsMemberListOpened: threadView && threadView.isMemberListOpened,
         };
     }

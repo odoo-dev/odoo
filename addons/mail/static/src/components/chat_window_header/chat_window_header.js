@@ -30,13 +30,15 @@ class ChatWindowHeader extends Component {
                 chatWindow,
                 chatWindowHasShiftNext: chatWindow && chatWindow.hasShiftNext,
                 chatWindowHasShiftPrev: chatWindow && chatWindow.hasShiftPrev,
+                chatWindowIsMemberListOpened: chatWindow && chatWindow.isMemberListOpened,
                 chatWindowName: chatWindow && chatWindow.name,
-                isDeviceMobile: messaging.device.isMobile,
                 isDeaf: mailRtc && mailRtc.isDeaf,
+                isDeviceMobile: messaging.device.isMobile,
                 sendDisplay: mailRtc && mailRtc.sendDisplay,
                 sendSound: mailRtc && mailRtc.sendSound,
                 sendUserVideo: mailRtc && mailRtc.sendUserVideo,
                 thread,
+                threadIsMemberListMakingSense: thread && thread.isMemberListMakingSense,
                 threadLocalMessageUnreadCounter: thread && thread.localMessageUnreadCounter,
                 threadMassMailing: thread && thread.mass_mailing,
                 threadModel: thread && thread.model,
@@ -84,10 +86,12 @@ class ChatWindowHeader extends Component {
      * @param {MouseEvent} ev
      */
     _onClick(ev) {
-        if (isEventHandled(ev, 'ChatWindowHeader.ClickShiftNext')) {
-            return;
-        }
-        if (isEventHandled(ev, 'ChatWindowHeader.ClickShiftPrev')) {
+        if (
+            isEventHandled(ev, 'ChatWindowHeader.ClickShiftNext') ||
+            isEventHandled(ev, 'ChatWindowHeader.ClickShiftPrev') ||
+            isEventHandled(ev, 'ChatWindow.onClickHideMemberList') ||
+            isEventHandled(ev, 'ChatWindow.onClickShowMemberList')
+        ) {
             return;
         }
         const chatWindow = this.chatWindow;
@@ -141,6 +145,16 @@ class ChatWindowHeader extends Component {
     }
 
     /**
+     * Indirection necessary because of lack of ev in template: https://github.com/odoo/owl/issues/572
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickHideMemberList(ev) {
+        this.chatWindow.onClickHideMemberList(ev);
+    }
+
+    /**
      * @private
      * @param {MouseEvent} ev
      */
@@ -158,6 +172,15 @@ class ChatWindowHeader extends Component {
         this.chatWindow.shiftNext();
     }
 
+    /**
+     * Indirection necessary because of lack of ev in template: https://github.com/odoo/owl/issues/572
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickShowMemberList(ev) {
+        this.chatWindow.onClickShowMemberList(ev);
+    }
 }
 
 Object.assign(ChatWindowHeader, {

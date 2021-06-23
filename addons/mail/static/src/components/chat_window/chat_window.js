@@ -5,13 +5,14 @@ import useStore from '@mail/component_hooks/use_store/use_store';
 import useUpdate from '@mail/component_hooks/use_update/use_update';
 import AutocompleteInput from '@mail/components/autocomplete_input/autocomplete_input';
 import ChatWindowHeader from '@mail/components/chat_window_header/chat_window_header';
+import { ChannelMemberList } from '@mail/components/channel_member_list/channel_member_list';
 import ThreadView from '@mail/components/thread_view/thread_view';
 import { isEventHandled } from '@mail/utils/utils';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { AutocompleteInput, ChatWindowHeader, ThreadView };
+const components = { AutocompleteInput, ChannelMemberList, ChatWindowHeader, ThreadView };
 
 class ChatWindow extends Component {
 
@@ -30,12 +31,14 @@ class ChatWindow extends Component {
                 chatWindowIsDoFocus: chatWindow && chatWindow.isDoFocus,
                 chatWindowIsFocused: chatWindow && chatWindow.isFocused,
                 chatWindowIsFolded: chatWindow && chatWindow.isFolded,
+                chatWindowIsMemberListOpened: chatWindow && chatWindow.isMemberListOpened,
                 chatWindowThreadView: chatWindow && chatWindow.threadView,
                 chatWindowVisibleIndex: chatWindow && chatWindow.visibleIndex,
                 chatWindowVisibleOffset: chatWindow && chatWindow.visibleOffset,
                 isDeviceMobile: this.env.messaging.device.isMobile,
                 localeTextDirection: this.env.messaging.locale.textDirection,
                 thread,
+                threadIsMemberListMakingSense: thread && thread.isMemberListMakingSense,
                 threadMassMailing: thread && thread.mass_mailing,
                 threadModel: thread && thread.model,
             };

@@ -59,6 +59,16 @@
                             <i class="fa fa-phone"/>
                         </div>
                     </t>
+                    <t t-if="chatWindow.thread and chatWindow.thread.isMemberListMakingSense and !chatWindow.isMemberListOpened">
+                        <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandShowMemberList" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }"  title="Show Member List" t-on-click="_onClickShowMemberList">
+                            <i class="fa fa-users"/>
+                        </div>
+                    </t>
+                    <t t-if="chatWindow.thread and chatWindow.thread.isMemberListMakingSense and chatWindow.isMemberListOpened">
+                        <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandHideMemberList" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" title="Hide Member List" t-on-click="_onClickHideMemberList">
+                            <i class="fa fa-users"/>
+                        </div>
+                    </t>
                     <t t-if="chatWindow.hasShiftPrev">
                         <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandShiftPrev" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickShiftPrev" t-att-title="shiftPrevText">
                             <!-- this is reversed automatically when language is rtl -->

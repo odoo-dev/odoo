@@ -51,12 +51,12 @@
                         </t>
                     </Popover>
                 </t>
-                <t t-if="threadView.isMemberListMakingSense and threadView.hasMemberList and !threadView.isMemberListOpened">
+                <t t-if="threadView.thread and threadView.thread.isMemberListMakingSense and threadView.hasMemberList and !threadView.isMemberListOpened">
                     <button class="o_ThreadViewTopbar_showMemberListButton o_ThreadViewTopbar_button" title="Show Member List" t-on-click="threadView.onClickShowMemberList(ev)">
                         <i class="fa fa-lg fa-users"/>
                     </button>
                 </t>
-                <t t-if="threadView.isMemberListMakingSense and threadView.hasMemberList and threadView.isMemberListOpened">
+                <t t-if="threadView.thread and threadView.thread.isMemberListMakingSense and threadView.hasMemberList and threadView.isMemberListOpened">
                     <button class="o_ThreadViewTopbar_hideMemberListButton o_ThreadViewTopbar_button o-active" title="Hide Member List" t-on-click="threadView.onClickHideMemberList(ev)">
                         <i class="fa fa-lg fa-users"/>
                     </button>
