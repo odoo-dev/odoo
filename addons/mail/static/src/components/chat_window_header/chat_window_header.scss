@@ -68,7 +68,10 @@
         background-color: darken(theme-color('success'), 10%);
     }
     color: white;
-    cursor: pointer;
+
+    &:not(.o-mobile) {
+        cursor: pointer;
+    }
 
     &:not(.o-mobile):not(.o-isActiveVoiceThread) {
 
@@ -87,8 +90,12 @@
 
 }
 
-.o_ChatWindowHeader_command.o-mobile {
-    font-size: 1.3rem;
+.o_ChatWindowHeader_command {
+    cursor: pointer;
+
+    &.o-mobile {
+        font-size: 1.3rem;
+    }
 }
 
 .o_ChatWindowHeader_commandPhone {

@@ -62,7 +62,7 @@
                             />
                         </t>
                     </div>
-                    <t t-if="threadView.isMemberListMakingSense and threadView.hasMemberList and threadView.isMemberListOpened">
+                    <t t-if="threadView.thread and threadView.thread.isMemberListMakingSense and threadView.hasMemberList and threadView.isMemberListOpened">
                         <div class="o_ThreadView_coreChannelMemberListSeparator"/>
                         <ChannelMemberList class="o_ThreadView_channelMemberList" channelLocalId="threadView.thread.localId"/>
                     </t>

@@ -62,14 +62,6 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {boolean}
-         */
-        _computeIsMemberListMakingSense() {
-            return this.thread && this.thread.model === 'mail.channel' && ['channel', 'group'].includes(this.thread.channel_type);
-        }
-
-        /**
-         * @private
          * @returns {mail.thread_viewer|undefined}
          */
         _computeThreadView() {
@@ -104,18 +96,6 @@ function factory(dependencies) {
          */
         hasTopbar: attr({
             default: false,
-        }),
-        /**
-         * Determines whether it makes sense for this thread viewer to have a
-         * member list.
-         */
-        isMemberListMakingSense: attr({
-            compute: '_computeIsMemberListMakingSense',
-            dependencies: [
-                'thread',
-                'threadModel',
-                'threadChannelType',
-            ],
         }),
         /**
          * Determines the selected `mail.message`.

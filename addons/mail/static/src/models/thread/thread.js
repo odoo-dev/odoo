@@ -1361,6 +1361,14 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
+        _computeIsMemberListMakingSense() {
+            return this.model === 'mail.channel' && ['channel', 'group'].includes(this.channel_type);
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
         _computeIsModeratedByCurrentPartner() {
             if (!this.messaging) {
                 return false;
@@ -2059,6 +2067,16 @@ function factory(dependencies) {
          */
         isLoadingAttachments: attr({
             default: false,
+        }),
+        /**
+         * Determines whether it makes sense for this thread to have a member list.
+         */
+        isMemberListMakingSense: attr({
+            compute: '_computeIsMemberListMakingSense',
+            dependencies: [
+                'channel_type',
+                'model',
+            ],
         }),
         isModeratedByCurrentPartner: attr({
             compute: '_computeIsModeratedByCurrentPartner',

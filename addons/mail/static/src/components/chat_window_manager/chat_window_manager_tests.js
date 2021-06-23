@@ -474,7 +474,7 @@ QUnit.test('new message autocomplete should automatically select first result', 
 });
 
 QUnit.test('chat window: basic rendering', async function (assert) {
-    assert.expect(12);
+    assert.expect(13);
 
     // channel that is expected to be found in the messaging menu
     // with random unique id and name that will be asserted during the test
@@ -524,13 +524,18 @@ QUnit.test('chat window: basic rendering', async function (assert) {
     );
     assert.strictEqual(
         chatWindowHeader.querySelectorAll(`:scope .o_ChatWindowHeader_command`).length,
-        3,
-        "should have 3 commands in header part"
+        4,
+        "should have 4 commands in header part"
     );
     assert.strictEqual(
         chatWindowHeader.querySelectorAll(`:scope .o_ChatWindowHeader_commandPhone`).length,
         1,
         "should have command to start an RTC call"
+    );
+    assert.strictEqual(
+        chatWindowHeader.querySelectorAll(`:scope .o_ChatWindowHeader_commandShowMemberList`).length,
+        1,
+        "should have command to show the member list"
     );
     assert.strictEqual(
         chatWindowHeader.querySelectorAll(`:scope .o_ChatWindowHeader_commandExpand`).length,
