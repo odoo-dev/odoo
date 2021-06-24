@@ -345,6 +345,14 @@ class Channel(models.Model):
             notification = _('<div class="o_mail_notification">left <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>', self.id, self.name)
             # post 'channel left' message as root since the partner just unsubscribed from the channel
             self.sudo().message_post(body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', self.id), {
+            'type': 'channel_members_leaving',
+            'payload': {
+                'id': self.id,
+                'leaving_members': [partner.mail_partner_format()],
+                'member_count': len(self.channel_partner_ids),
+            },
+        })
         return result
 
     def _action_add_members(self, partners):

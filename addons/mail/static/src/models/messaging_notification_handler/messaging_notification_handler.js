@@ -2,7 +2,7 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { one2one } from '@mail/model/model_field';
-import { decrement, increment, insert, link } from '@mail/model/model_field_command';
+import { decrement, increment, insert, link, unlink } from '@mail/model/model_field_command';
 import { htmlToTextContentInline } from '@mail/js/utils';
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
@@ -80,6 +80,8 @@ function factory(dependencies) {
                 switch (message.type) {
                     case 'new_channel_members':
                         return this._handleNotificationNewChannelMembers(message.payload);
+                    case 'channel_members_leaving':
+                        return this._handleNotificationChannelMembersLeaving(message.payload);
                 }
                 switch (model) {
                     case 'ir.needaction':
@@ -171,6 +173,27 @@ function factory(dependencies) {
             });
             // FIXME force the computing of message values (cf task-2261221)
             this.env.models['mail.message_seen_indicator'].recomputeFetchedValues(channel);
+        }
+
+        /**
+         * @private
+         * @param {Object} payload
+         * @param {integer} payload.id
+         * @param {Object[]} payload.leaving_members
+         * @param {integer} payload.member_count
+         */
+        _handleNotificationChannelMembersLeaving({ id, leaving_members: leavingMembersData, member_count: memberCount }) {
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id,
+                model: 'mail.channel',
+            });
+            const leavingMembers = this.env.models['mail.partner'].insert(
+                leavingMembersData.map(leavingMemberData => this.env.models['mail.partner'].convertData(leavingMemberData))
+            );
+            channel.update({
+                memberCount,
+                members: unlink(leavingMembers),
+            });
         }
 
         /**
