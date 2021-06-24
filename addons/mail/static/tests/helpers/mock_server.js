@@ -423,7 +423,6 @@ MockServer.include({
             current_user_id: this.currentUserId,
             current_user_settings,
             mail_failures: mailFailures,
-            mention_partner_suggestions: [],
             menu_id: false,
             moderation_channel_ids,
             moderation_counter,

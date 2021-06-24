@@ -76,7 +76,6 @@ function factory(dependencies) {
          * @param {integer} param0.current_user_id
          * @param {Object} param0.current_user_settings
          * @param {Object} [param0.mail_failures={}]
-         * @param {Object[]} [param0.mention_partner_suggestions=[]]
          * @param {Object[]} [param0.moderation_channel_ids=[]]
          * @param {integer} [param0.moderation_counter=0]
          * @param {integer} [param0.needaction_inbox_counter=0]
@@ -93,7 +92,6 @@ function factory(dependencies) {
             current_user_id,
             current_user_settings,
             mail_failures = {},
-            mention_partner_suggestions = [],
             menu_id,
             moderation_channel_ids = [],
             moderation_counter = 0,
@@ -125,7 +123,6 @@ function factory(dependencies) {
             // various suggestions in no particular order
             this._initCannedResponses(shortcodes);
             this._initCommands(commands);
-            this._initMentionPartnerSuggestions(mention_partner_suggestions);
             // channels when the rest of messaging is ready
             await this.async(() => this._initChannels(channel_slots));
             // failures after channels
@@ -283,16 +280,6 @@ function factory(dependencies) {
                     supportedChannelTypes: ['chat', 'group'],
                 }),
             });
-        }
-
-        /**
-         * @private
-         * @param {Object[]} mentionPartnerSuggestionsData
-         */
-        async _initMentionPartnerSuggestions(mentionPartnerSuggestionsData) {
-            return executeGracefully(mentionPartnerSuggestionsData.map(partnerData => () => {
-                this.env.models['mail.partner'].insert(this.env.models['mail.partner'].convertData(partnerData));
-            }));
         }
 
         /**
