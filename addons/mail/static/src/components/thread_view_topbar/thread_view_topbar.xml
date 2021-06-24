@@ -3,65 +3,67 @@
 
     <t t-name="mail.ThreadViewTopbar" owl="1">
         <div class="o_ThreadViewTopbar bg-light">
-            <t t-if="threadView.thread">
-                <ThreadIcon class="o_ThreadViewTopbar_threadIcon" threadLocalId="threadView.thread.localId"/>
-            </t>
-            <div class="o_ThreadViewTopbar_title">
+            <t t-if="threadView">
                 <t t-if="threadView.thread">
-                    <t t-if="!threadView.isEditingThreadName">
-                        <div class="o_ThreadViewTopbar_threadName" t-att-title="threadView.thread.displayName" t-on-click="threadView.onClickTopbarThreadName(ev)" t-on-mouseenter="threadView.onMouseEnterTopBarThreadName(ev)" t-on-mouseleave="threadView.onMouseLeaveTopBarThreadName(ev)" t-att-class="{ 'o-isMouseOverThreadName': threadView.isMouseOverThreadName }">
-                            <t t-esc="threadView.thread.displayName"/>
+                    <ThreadIcon class="o_ThreadViewTopbar_threadIcon" threadLocalId="threadView.thread.localId"/>
+                </t>
+                <div class="o_ThreadViewTopbar_title">
+                    <t t-if="threadView.thread">
+                        <t t-if="!threadView.isEditingThreadName">
+                            <div class="o_ThreadViewTopbar_threadName" t-att-title="threadView.thread.displayName" t-on-click="threadView.onClickTopbarThreadName(ev)" t-on-mouseenter="threadView.onMouseEnterTopBarThreadName(ev)" t-on-mouseleave="threadView.onMouseLeaveTopBarThreadName(ev)" t-att-class="{ 'o-isMouseOverThreadName': threadView.isMouseOverThreadName }">
+                                <t t-esc="threadView.thread.displayName"/>
+                            </div>
+                        </t>
+                        <t t-if="threadView.isEditingThreadName">
+                            <!-- TODO auto focus this input when it is shown for the first time -->
+                            <input class="o_ThreadViewTopbar_threadNameInput" type="text" t-att-value="threadView.pendingThreadName" t-on-input="_onInputThreadNameInput" t-on-keydown="_onKeyDownThreadNameInput" t-ref="threadNameInput"/>
+                        </t>
+                    </t>
+                    <t t-if="!threadView.thread">
+                        <div class="o_ThreadViewTopbar_threadName" title="Discuss">
+                            Discuss
                         </div>
                     </t>
-                    <t t-if="threadView.isEditingThreadName">
-                        <!-- TODO auto focus this input when it is shown for the first time -->
-                        <input class="o_ThreadViewTopbar_threadNameInput" type="text" t-att-value="threadView.pendingThreadName" t-on-input="_onInputThreadNameInput" t-on-keydown="_onKeyDownThreadNameInput" t-ref="threadNameInput"/>
+                    <t t-if="threadView.thread and threadView.thread.description">
+                        <div class="o_ThreadViewTopbar_threadDescriptionSeparator"/>
+                        <div class="o_ThreadViewTopbar_threadDescription" t-att-title="threadView.thread.description">
+                            <t t-esc="threadView.thread.description"/>
+                        </div>
                     </t>
-                </t>
-                <t t-if="!threadView.thread">
-                    <div class="o_ThreadViewTopbar_threadName" title="Discuss">
-                        Discuss
-                    </div>
-                </t>
-                <t t-if="threadView.thread and threadView.thread.description">
-                    <div class="o_ThreadViewTopbar_threadDescriptionSeparator"/>
-                    <div class="o_ThreadViewTopbar_threadDescription" t-att-title="threadView.thread.description">
-                        <t t-esc="threadView.thread.description"/>
-                    </div>
-                </t>
-            </div>
-            <div class="o_ThreadViewTopbar_actions">
-                <t t-if="threadView.thread and threadView.thread === env.messaging.inbox">
-                    <button class="o_ThreadViewTopbar_markAllReadButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="threadView.onClickMarkAllAsRead(ev)">Mark all read</button>
-                </t>
-                <t t-if="threadView.thread and threadView.thread === env.messaging.starred">
-                    <button class="o_ThreadViewTopbar_unstarAllButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="threadView.onClickUnstarAll(ev)">Unstar all</button>
-                </t>
-                <t t-if="threadView.thread and threadView.thread.model === 'mail.channel'">
-                    <RtcController threadLocalId="threadView.thread.localId"/>
-                    <Popover popoverExtraClass="'o_ThreadViewTopbar_invitePopover'" position="'bottom'">
-                        <!-- todo add o-active when necessary -->
-                        <button class="o_ThreadViewTopbar_inviteButton o_ThreadViewTopbar_button">
-                            <i class="fa fa-lg fa-user-plus"/>
+                </div>
+                <div class="o_ThreadViewTopbar_actions">
+                    <t t-if="threadView.thread and threadView.thread === env.messaging.inbox">
+                        <button class="o_ThreadViewTopbar_markAllReadButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="threadView.onClickMarkAllAsRead(ev)">Mark all read</button>
+                    </t>
+                    <t t-if="threadView.thread and threadView.thread === env.messaging.starred">
+                        <button class="o_ThreadViewTopbar_unstarAllButton btn btn-secondary" t-att-disabled="threadView.messages.length === 0" t-on-click="threadView.onClickUnstarAll(ev)">Unstar all</button>
+                    </t>
+                    <t t-if="threadView.thread and threadView.thread.model === 'mail.channel'">
+                        <RtcController threadLocalId="threadView.thread.localId"/>
+                        <Popover popoverExtraClass="'o_ThreadViewTopbar_invitePopover'" position="'bottom'">
+                            <!-- todo add o-active when necessary -->
+                            <button class="o_ThreadViewTopbar_inviteButton o_ThreadViewTopbar_button">
+                                <i class="fa fa-lg fa-user-plus"/>
+                            </button>
+                            <t t-set="opened">
+                                <PartnerSelector
+                                    invitePartnerListLocalId="threadView.thread.invitePartnerList.localId"
+                                />
+                            </t>
+                        </Popover>
+                    </t>
+                    <t t-if="threadView.thread and threadView.thread.isMemberListMakingSense and threadView.hasMemberList and !threadView.isMemberListOpened">
+                        <button class="o_ThreadViewTopbar_showMemberListButton o_ThreadViewTopbar_button" title="Show Member List" t-on-click="threadView.onClickShowMemberList(ev)">
+                            <i class="fa fa-lg fa-users"/>
                         </button>
-                        <t t-set="opened">
-                            <PartnerSelector
-                                invitePartnerListLocalId="threadView.thread.invitePartnerList.localId"
-                            />
-                        </t>
-                    </Popover>
-                </t>
-                <t t-if="threadView.thread and threadView.thread.isMemberListMakingSense and threadView.hasMemberList and !threadView.isMemberListOpened">
-                    <button class="o_ThreadViewTopbar_showMemberListButton o_ThreadViewTopbar_button" title="Show Member List" t-on-click="threadView.onClickShowMemberList(ev)">
-                        <i class="fa fa-lg fa-users"/>
-                    </button>
-                </t>
-                <t t-if="threadView.thread and threadView.thread.isMemberListMakingSense and threadView.hasMemberList and threadView.isMemberListOpened">
-                    <button class="o_ThreadViewTopbar_hideMemberListButton o_ThreadViewTopbar_button o-active" title="Hide Member List" t-on-click="threadView.onClickHideMemberList(ev)">
-                        <i class="fa fa-lg fa-users"/>
-                    </button>
-                </t>
-            </div>
+                    </t>
+                    <t t-if="threadView.thread and threadView.thread.isMemberListMakingSense and threadView.hasMemberList and threadView.isMemberListOpened">
+                        <button class="o_ThreadViewTopbar_hideMemberListButton o_ThreadViewTopbar_button o-active" title="Hide Member List" t-on-click="threadView.onClickHideMemberList(ev)">
+                            <i class="fa fa-lg fa-users"/>
+                        </button>
+                    </t>
+                </div>
+            </t>
         </div>
     </t>
 </templates>
