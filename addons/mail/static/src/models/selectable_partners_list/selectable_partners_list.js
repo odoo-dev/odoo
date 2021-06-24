@@ -106,7 +106,7 @@ function factory(dependencies) {
             if (this.messagingAsInvitePartnerList) {
                 return link(this.messagingAsInvitePartnerList);
             }
-            return link(this.thread.messaging);
+            return link(this.threadView.messaging);
         }
 
         /**
@@ -269,7 +269,13 @@ function factory(dependencies) {
         /**
          * States the thread on which this list operates (if any).
          */
-        thread: one2one('mail.thread', {
+        thread: many2one('mail.thread', {
+            related: 'threadView.thread',
+        }),
+        /**
+         * States the thread view on which this list operates (if any).
+         */
+        threadView: one2one('mail.thread_view', {
             inverse: 'invitePartnerList',
         }),
         /**

@@ -3,7 +3,7 @@
 import { registerNewModel } from '@mail/model/model_core';
 import { RecordDeletedError } from '@mail/model/model_errors';
 import { attr, many2many, many2one, one2one } from '@mail/model/model_field';
-import { clear, link, unlink } from '@mail/model/model_field_command';
+import { clear, create, link, unlink } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -165,6 +165,20 @@ function factory(dependencies) {
                 isEditingThreadName: false,
                 pendingThreadName: clear(),
             });
+        }
+
+        /**
+         * @private
+         * @returns {mail.selectable_partners_list}
+         */
+        _computeInvitePartnerList() {
+            if (!this.thread || this.thread.model !== 'mail.channel') {
+                return clear();
+            }
+            if (this.invitePartnerList) {
+                return;
+            }
+            return create();
         }
 
         /**
@@ -360,6 +374,20 @@ function factory(dependencies) {
          */
         hasTopbar: attr({
             related: 'threadViewer.hasTopbar',
+        }),
+        /**
+         * States which invite partner list is operating this thread view.
+         * Only applies if this thread is a channel.
+         */
+        invitePartnerList: one2one('mail.selectable_partners_list', {
+            compute: '_computeInvitePartnerList',
+            dependencies: [
+                'thread',
+                'threadModel'
+            ],
+            inverse: 'threadView',
+            isCausal: true,
+            readonly: true,
         }),
         /**
          * Determines whether this thread is currently being renamed.
