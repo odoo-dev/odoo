@@ -515,7 +515,7 @@ class Channel(models.Model):
             lambda partner: partner.is_in_rtc_call
         ).mapped('partner_id')
 
-        if call_participants:
+        if not call_participants:
             # if there is no member left in the rtc call, all invitations are reset
             self._cancel_rtc_invitations()
             return
