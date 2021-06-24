@@ -400,6 +400,7 @@ class Channel(models.Model):
                 'type': 'new_channel_members',
                 'payload': {
                     'id': channel.id,
+                    'member_count': len(channel.channel_partner_ids),
                     'new_members': [partner.mail_partner_format() for partner in partners],
                 },
             })
@@ -957,6 +958,7 @@ class Channel(models.Model):
             info['last_message_id'] = channel_last_message_ids.get(channel.id, False)
             # listeners of the channel
             channel_partners = all_partner_channel.filtered(lambda pc: channel.id == pc.channel_id.id)
+            info['member_count'] = len(channel_partners)
 
             # find the channel partner state, if logged user
             if self.env.user and self.env.user.partner_id:
@@ -1280,6 +1282,7 @@ class Channel(models.Model):
             'type': 'new_channel_members',
             'payload': {
                 'id': self.id,
+                'member_count': len(self.channel_partner_ids),
                 'new_members': [self.env.user.partner_id.mail_partner_format()],
             },
         })
