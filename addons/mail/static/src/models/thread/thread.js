@@ -195,6 +195,9 @@ function factory(dependencies) {
             if ('mass_mailing' in data) {
                 data2.mass_mailing = data.mass_mailing;
             }
+            if ('member_count' in data) {
+                data2.memberCount = data.member_count;
+            }
             if ('moderation' in data) {
                 data2.moderation = data.moderation;
             }
@@ -2198,6 +2201,11 @@ function factory(dependencies) {
         mass_mailing: attr({
             default: false,
         }),
+        /**
+         * States the number of members in this thread according to the server.
+         * Only makes sense if this thread is a channel.
+         */
+        memberCount: attr(),
         members: many2many('mail.partner', {
             inverse: 'memberThreads',
         }),

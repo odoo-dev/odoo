@@ -421,16 +421,18 @@ function factory(dependencies) {
          * @private
          * @param {Object} payload
          * @param {integer} payload.id
+         * @param {integer} payload.member_count
          * @param {Object[]} payload.new_members
          */
-        _handleNotificationNewChannelMembers({ id, new_members: newMembers }) {
+        _handleNotificationNewChannelMembers({ id, member_count: memberCount, new_members: newMembersData }) {
             const channel = this.env.models['mail.thread'].findFromIdentifyingData({
                 id,
                 model: 'mail.channel',
             });
             channel.update({
+                memberCount,
                 members: insert(
-                    newMembers.map(newMemberData => this.env.models['mail.partner'].convertData(newMemberData))
+                    newMembersData.map(newMemberData => this.env.models['mail.partner'].convertData(newMemberData))
                 ),
             });
         }
