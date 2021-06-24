@@ -1330,20 +1330,6 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {mail.selectable_partners_list}
-         */
-        _computeInvitePartnerList() {
-            if (this.model !== 'mail.channel') {
-                return clear();
-            }
-            if (this.invitePartnerList) {
-                return;
-            }
-            return create();
-        }
-
-        /**
-         * @private
          * @returns {boolean}
          */
         _computeIsChatChannel() {
@@ -2030,19 +2016,6 @@ function factory(dependencies) {
         }),
         id: attr({
             required: true,
-        }),
-        /**
-         * States which invite partner list is operating this thread.
-         * Only applies to channels.
-         */
-        invitePartnerList: one2one('mail.selectable_partners_list', {
-            compute: '_computeInvitePartnerList',
-            dependencies: [
-                'model'
-            ],
-            inverse: 'thread',
-            isCausal: true,
-            readonly: true,
         }),
         /**
          * States whether this thread is a `mail.channel` qualified as chat.

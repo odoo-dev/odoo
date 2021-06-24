@@ -47,7 +47,7 @@
                             </button>
                             <t t-set="opened">
                                 <PartnerSelector
-                                    invitePartnerListLocalId="threadView.thread.invitePartnerList.localId"
+                                    invitePartnerListLocalId="threadView.invitePartnerList.localId"
                                 />
                             </t>
                         </Popover>
