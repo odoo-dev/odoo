@@ -374,7 +374,6 @@ class Channel(models.Model):
         """ Add the given partner_ids to the current channels and broadcast the channel header to them.
             :param partner_ids : list of partner id to add
         """
-        self.ensure_one()
         partners = self.env['res.partner'].browse(partner_ids)
         self._invite_check_access(partners)
 
@@ -395,15 +394,15 @@ class Channel(models.Model):
                     notification = _('<div class="o_mail_notification">joined <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>', channel.id, channel.name)
                 self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment", author_id=partner.id, notify_by_email=False)
 
-        # broadcast the channel header to the added partner
-        self._broadcast(partner_ids)
-        self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', self.id), {
-            'type': 'new_channel_members',
-            'payload': {
-                'id': self.id,
-                'new_members': [partner.mail_partner_format() for partner in partners],
-            },
-        })
+            # broadcast the channel header to the added partner
+            channel._broadcast(partner_ids)
+            self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', channel.id), {
+                'type': 'new_channel_members',
+                'payload': {
+                    'id': channel.id,
+                    'new_members': [partner.mail_partner_format() for partner in partners],
+                },
+            })
 
     def _invite_check_access(self, partners):
         """ Check invited partners could match channel access """
@@ -1277,6 +1276,13 @@ class Channel(models.Model):
 
         channel_info = self.channel_info('join')[0]
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), channel_info)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', self.id), {
+            'type': 'new_channel_members',
+            'payload': {
+                'id': self.id,
+                'new_members': [self.env.user.partner_id.mail_partner_format()],
+            },
+        })
         return channel_info
 
     @api.model
