@@ -115,9 +115,10 @@ function _loadScriptProcessor(source, audioContext, { onStateChange, minimumActi
  * @param {number} param2.minimumActiveCycles - how long the sound remains 'active' after the last time the threshold is passed
  * @param {function} param2.onStateChange
  * @param {number} param2.baseLevel the normalized minimum value for audio detection
+ * @param {number} param2.sampleRate of the audio track
  * @returns {function} disconnect callback
  */
-async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange, minimumActiveCycles=10, baseLevel=0.3 }) {
+async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange, minimumActiveCycles=10, baseLevel=0.3, sampleRate }) {
     await audioContext.resume();
     await audioContext.audioWorklet.addModule('mail/static/src/utils/media_monitoring/threshold_processor.js');
     const thresholdProcessor = new AudioWorkletNode(audioContext, 'threshold-processor', {
@@ -125,6 +126,7 @@ async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange,
             minimumActiveCycles,
             baseLevel,
             frequencyRange: FREQUENCY_RANGE,
+            sampleRate,
         }
     });
     source.connect(thresholdProcessor).connect(audioContext.destination);
