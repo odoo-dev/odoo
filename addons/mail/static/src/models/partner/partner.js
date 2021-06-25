@@ -525,9 +525,6 @@ function factory(dependencies) {
                 'id',
             ],
         }),
-        activeCallChannel: many2one('mail.thread', {
-            inverse: 'callParticipants',
-        }),
         im_status: attr(),
         /**
          * States whether this partner is online.

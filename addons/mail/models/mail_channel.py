@@ -483,7 +483,7 @@ class Channel(models.Model):
         self.ensure_one()
         current_partner = self.env.user.partner_id
         current_channel_partner = self.channel_last_seen_partner_ids.search(
-            [('channel_id', '=', self.id), ('partner_id', '=', current_partner.id)],
+            [('partner_id', '=', current_partner.id)],
             limit=1
         )
         if not current_channel_partner:
@@ -502,7 +502,7 @@ class Channel(models.Model):
     def leave_call(self):
         self.ensure_one()
         current_channel_partner = self.channel_last_seen_partner_ids.search(
-            [('channel_id', '=', self.id), ('partner_id', '=', self.env.user.partner_id.id)],
+            [('partner_id', '=', self.env.user.partner_id.id)],
             limit=1
         )
         was_current_partner_in_rtc_call = current_channel_partner.is_in_rtc_call
@@ -515,7 +515,7 @@ class Channel(models.Model):
         self.ensure_one()
         call_participants = self.channel_last_seen_partner_ids.filtered(
             lambda partner: partner.is_in_rtc_call
-        ).mapped('partner_id')
+        )
 
         if not call_participants:
             # if there is no member left in the rtc call, all invitations are reset
@@ -545,12 +545,12 @@ class Channel(models.Model):
     def _notify_call_participation_change(self, call_participants):
         self.ensure_one()
         notifications = []
-        call_participants_data = call_participants.read(['name'])
-        for partner in call_participants:
-            if partner == self.env.user.partner_id:
+        call_participants_data = call_participants.mail_channel_partner_format()
+        for member in call_participants:
+            if member.partner_id == self.env.user.partner_id:
                 continue
             notifications.append([
-                (self._cr.dbname, 'res.partner', partner.id),
+                (self._cr.dbname, 'res.partner', member.partner_id.id),
                 {
                     'type': 'rtc_update',
                     'channelId': self.id,
@@ -563,8 +563,8 @@ class Channel(models.Model):
         self.ensure_one()
         call_participants = self.channel_last_seen_partner_ids.filtered(
             lambda partner: partner.is_in_rtc_call
-        ).mapped('partner_id')
-        return call_participants.read(['name'])
+        )
+        return call_participants.mail_channel_partner_format()
 
     # ------------------------------------------------------------
     # MAILING

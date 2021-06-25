@@ -7,7 +7,8 @@
                 t-ref="videoContainer"
                  t-attf-style="--height:{{state.videoHeight}}px; --width:{{state.videoWidth}}px; --columns:{{state.columnCount}};">
                 <t t-if="thread">
-                    <t t-foreach="thread.callParticipants" t-as="partner" t-if="env.mailRtc.activeVideoStreams[partner.peerToken]" t-key="partner.id">
+                    <t t-foreach="thread.callParticipants" t-as="member" t-if="env.mailRtc.activeVideoStreams[member.peerToken]" t-key="member.id">
+                        <t t-set="partner" t-value="member.partner"/>
                         <t t-if="!env.messaging.focusedVideoPartner or env.messaging.focusedVideoPartner.id === partner.id">
                             <div class="o_VideoRoom_video_box"
                                  t-key="'video_box_'+partner.peerToken"
@@ -20,7 +21,7 @@
                                        t-ref="video_{{ partner.peerToken }}"
                                        t-on-loadedmetadata="_onVideoLoadedMetaData"/>
                                 <div class="o_VideoRoom_video_info">
-                                    <span class="o_VideoRoom_video_name" t-esc="partner.name"/>
+                                    <span class="o_VideoRoom_video_name" t-esc="partner.nameOrDisplayName"/>
                                 </div>
                             </div>
                         </t>

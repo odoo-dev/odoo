@@ -7,26 +7,27 @@
                 <UserSettingWindow/>
             </div>
             <div class="o_RtcCallParticipants_memberList">
-                <t t-foreach="thread.callParticipants" t-as="partner" t-key="partner.id">
+                <t t-foreach="thread.callParticipants" t-as="member" t-key="member.id">
+                    <t t-set="partner" t-value="member.partner"/>
                     <span class="o_RtcCallParticipants_member">
                         <img alt="Avatar"
                              class="o_RtcCallParticipants_member_avatar rounded-circle"
-                             t-att-class="{ 'o-is-talking': env.mailRtc.isPartnerTalking(partner.peerToken) }"
+                             t-att-class="{ 'o-is-talking': env.mailRtc.isPartnerTalking(member.peerToken) }"
                              t-attf-src="/web/image/res.partner/{{ partner.id }}/avatar_128"
                         />
-                        <span class="o_RtcCallParticipants_member_name" t-esc="partner.name"/>
-                        <t t-if="env.mailRtc.activeVideoStreams[partner.peerToken]">
+                        <span class="o_RtcCallParticipants_member_name" t-esc="partner.nameOrDisplayName"/>
+                        <t t-if="env.mailRtc.activeVideoStreams[member.peerToken]">
                             <span class="o_RtcCallParticipants_member_liveIndicator badge-pill"
                                   t-att-class="{ 'o-not-viewed': !!env.messaging.focusedVideoPartner and env.messaging.focusedVideoPartner.id !== partner.id }"
                                   t-on-click="_onLiveClick(partner.id)">
                                 LIVE
                             </span>
                         </t>
-                        <t t-if="env.mailRtc.isPartnerMute(partner.peerToken)">
+                        <t t-if="env.mailRtc.isPartnerMute(member.peerToken)">
                             <i class="o_RtcCallParticipants_member_muteIndicator fa fa-lg fa-microphone-slash"/>
                         </t>
-                        <t t-if="env.messaging.currentPartner.peerToken !== partner.peerToken">
-                            <t t-if="!['connected', 'completed'].includes(env.mailRtc.connectionStates[partner.peerToken])">
+                        <t t-if="env.messaging.currentPartner !== member.partner">
+                            <t t-if="!['connected', 'completed'].includes(env.mailRtc.connectionStates[member.peerToken])">
                                 <i class="fa fa-lg fa-signal o_RtcCallParticipants_member_signal"
                                    t-att-title="env.mailRtc.connectionStates[partner.peerToken]"/>
                             </t>

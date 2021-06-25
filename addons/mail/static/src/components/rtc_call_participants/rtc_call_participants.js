@@ -25,7 +25,7 @@ class RtcCallParticipants extends Component {
                 connectionStates: mailRtc && mailRtc.connectionStates,
                 focusedVideoPartner: messaging.focusedVideoPartner,
                 isUserSettingWindowOpen: messaging.userSetting.isOpen,
-                partnerIds: thread.callParticipants,
+                memberIds: thread.callParticipants,
                 peerToken: messaging.currentPartner.peerToken,
                 sendSound: mailRtc && mailRtc.sendSound,
                 thread,

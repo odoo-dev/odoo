@@ -84,7 +84,7 @@ function factory(dependencies) {
             if (sessionToken !== this.sessionToken) {
                 return;
             }
-            const currentMembersTokens = new Set(currentMembers.map(partner => partner.peerToken));
+            const currentMembersTokens = new Set(currentMembers.map(member => member.peerToken));
             for (const token of Object.keys(this._peerConnections)) {
                 if (!currentMembersTokens.has(token)) {
                     this._removePeer(token);
@@ -160,18 +160,18 @@ function factory(dependencies) {
             if (!callees) {
                 return true;
             }
-            for (const partner of callees) {
-                if (partner.peerToken === peerToken) {
+            for (const member of callees) {
+                if (member.peerToken === peerToken) {
                     continue;
                 }
-                console.log('calling: ' + partner.name);
-                await this._callPeer(partner.peerToken);
+                console.log('calling: ' + member.partner.name);
+                await this._callPeer(member.peerToken);
             }
             return true;
         }
 
         /**
-         * @param {String} token mail.partner.peerToken
+         * @param {String} token
          * @returns {boolean}
          */
         isPartnerMute(token) {
@@ -186,7 +186,7 @@ function factory(dependencies) {
         }
 
         /**
-         * @param {String} token mail.partner.peerToken
+         * @param {String} token
          * @returns {boolean}
          */
         isPartnerTalking(token) {

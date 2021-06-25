@@ -841,10 +841,19 @@ function factory(dependencies) {
             this.updateCallParticipants(callParticipants);
         }
 
+        /**
+         * @param{Array<Object>} formatted list of mail.channel.partner
+         */
         updateCallParticipants(callParticipants) {
-            this.update({ callParticipants: [
-                ['insert-and-replace', callParticipants.map(record => this.env.models['mail.partner'].convertData(record))],
+            const callParticipantsIds = new Set(callParticipants.map(member => member.id));
+            this.update({ members: [
+                ['insert', callParticipants.map(record => this.env.models['mail.channel_member'].convertData(record))],
             ]});
+            for (const member of this.members) {
+                if (!callParticipantsIds.has(member.id)) {
+                    member.update({ isInRtcCall: false });
+                }
+            }
             this.env.mailRtc.filterCallees(this.callParticipants, { sessionToken: this.uuid });
         }
 
@@ -1229,7 +1238,7 @@ function factory(dependencies) {
 
         async _leaveCall() {
             this.update({ rtcRingingPartner: [['unlink']] });
-            this.env.messaging.currentPartner.update({ activeCallChannel: [['unlink']] });
+            this.currentMember.update({ isInRtcCall: false });
 
             await this.env.services.rpc({
                 model: 'mail.channel',
@@ -1268,6 +1277,26 @@ function factory(dependencies) {
                     return Math.abs(a2.id) - Math.abs(a1.id);
                 });
             return replace(allAttachments);
+        }
+
+        /**
+         * @private
+         * @returns {mail.channel_member}
+         */
+        _computeCallParticipants() {
+            return replace(this.members.filter(member => member.isInRtcCall));
+        }
+
+        /**
+         * @private
+         * @returns {mail.channel_member}
+         */
+        _computeCurrentMember() {
+            const currentMember = this.members.filter(member => member.partner === this.env.messaging.currentPartner)[0];
+            if (currentMember) {
+                return link(currentMember);
+            }
+            return unlink();
         }
 
         /**
@@ -1924,8 +1953,15 @@ function factory(dependencies) {
         attachments: many2many('mail.attachment', {
             inverse: 'threads',
         }),
-        callParticipants: one2many('mail.partner', {
-            inverse: 'activeCallChannel',
+        /**
+         * All members that are currently in the RTC session.
+         */
+        callParticipants: many2many('mail.channel_member', {
+            compute: '_computeCallParticipants',
+            dependencies: [
+                'members',
+                'membersIsInRtcCall'
+            ],
         }),
         channel_type: attr(),
         /**
@@ -1964,6 +2000,12 @@ function factory(dependencies) {
             default: 0,
         }),
         creator: many2one('mail.user'),
+        currentMember: many2one('mail.channel_member', {
+            compute: '_computeCurrentMember',
+            dependencies: [
+                'members',
+            ],
+        }),
         custom_channel_name: attr(),
         /**
          * Determines the description of this thread. Only applies to channels.
@@ -2192,6 +2234,12 @@ function factory(dependencies) {
          */
         membersIsOnline: attr({
             related: 'members.isOnline',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        membersIsInRtcCall: attr({
+            related: 'members.isInRtcCall',
         }),
         /**
          * Serves as compute dependency.

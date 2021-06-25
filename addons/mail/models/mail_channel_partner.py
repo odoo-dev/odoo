@@ -24,9 +24,12 @@ class ChannelPartner(models.Model):
     is_minimized = fields.Boolean("Conversation is minimized")
     is_pinned = fields.Boolean("Is pinned on the interface", default=True)
     last_meaningful_action_time = fields.Datetime('Last action time for the thread', default=fields.Datetime.now)
+    rtc_ringing_partner_id = fields.Many2one('res.partner', string='Ringing partner')
+
     is_in_rtc_call = fields.Boolean("Is in a RTC session", default=False)
     is_muted = fields.Boolean("Is the microphone muted", default=False)
-    rtc_ringing_partner_id = fields.Many2one('res.partner', string='Ringing partner')
+    is_live = fields.Boolean("Is broadcasting video", default=False)
+    is_deaf = fields.Boolean(default=False)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -53,7 +56,7 @@ class ChannelPartner(models.Model):
         return super(ChannelPartner, self).write(vals)
 
     def mail_channel_partner_format(self, partner_infos=None):
-        members = self.read(['id', 'partner_id'])
+        members = self.read(['id', 'partner_id', 'is_in_rtc_call', 'is_deaf', 'is_muted', 'is_live'])
         partner_infos = partner_infos or {}
         formatted_members = []
         for member in members:
@@ -63,6 +66,10 @@ class ChannelPartner(models.Model):
             })
             formatted_members.append({
                 'id': member['id'],
+                'is_in_rtc_call': member['is_in_rtc_call'],
+                'is_deaf': member['is_deaf'],
+                'is_muted': member['is_muted'],
+                'is_live': member['is_live'],
                 'partner': partner_data,
             })
         return formatted_members

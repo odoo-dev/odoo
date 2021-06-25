@@ -22,6 +22,18 @@ function factory(dependencies) {
             if ('id' in data) {
                 data2.id = data.id;
             }
+            if ('is_in_rtc_call' in data) {
+                data2.isInRtcCall = data.is_in_rtc_call;
+            }
+            if ('is_muted' in data) {
+                data2.isMuted = data.is_muted;
+            }
+            if ('is_deaf' in data) {
+                data2.isDeaf = data.is_deaf;
+            }
+            if ('is_live' in data) {
+                data2.isLive = data.is_live;
+            }
             // relations
             if ('partner' in data) {
                 if (!data.partner) {
@@ -49,6 +61,21 @@ function factory(dependencies) {
     ChannelMember.fields = {
         id: attr({
             required: true,
+        }),
+        isInRtcCall: attr({
+            default: false,
+        }),
+        isMuted: attr({
+            default: false,
+        }),
+        isLive: attr({
+            default: false,
+        }),
+        isDeaf: attr({
+            default: false,
+        }),
+        peerToken: attr({
+            related: 'partner.peerToken',
         }),
         partner: many2one('mail.partner', {
             required: true,
