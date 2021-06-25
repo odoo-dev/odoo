@@ -336,6 +336,7 @@ class Channel(models.Model):
         if partner not in self.with_context(active_test=False).channel_partner_ids:
             return True
         channel_info = self.channel_info('unsubscribe')[0]  # must be computed before leaving the channel (access rights)
+        old_member = self.channel_last_seen_partner_ids.filtered(lambda member: member.partner_id == partner)[0]
         result = self.write({'channel_partner_ids': [Command.unlink(partner.id)]})
         # side effect of unsubscribe that wasn't taken into account because
         # channel_info is called before actually unpinning the channel
@@ -349,7 +350,7 @@ class Channel(models.Model):
             'type': 'channel_members_leaving',
             'payload': {
                 'id': self.id,
-                'leaving_members': [partner.mail_partner_format()],
+                'leaving_members': [old_member.mail_channel_partner_format()],
                 'member_count': len(self.channel_partner_ids),
             },
         })
@@ -404,12 +405,13 @@ class Channel(models.Model):
 
             # broadcast the channel header to the added partner
             channel._broadcast(partner_ids)
+            new_members = self.channel_last_seen_partner_ids.filtered(lambda member: member.partner_id in partner_ids)
             self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', channel.id), {
                 'type': 'new_channel_members',
                 'payload': {
                     'id': channel.id,
                     'member_count': len(channel.channel_partner_ids),
-                    'new_members': [partner.mail_partner_format() for partner in partners],
+                    'new_members': new_members.mail_channel_partner_format(),
                 },
             })
 

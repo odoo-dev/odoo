@@ -159,7 +159,14 @@ function factory(dependencies) {
             if (this.thread.channel_type !== 'chat') {
                 return;
             }
-            return link(this.thread.members);
+            return link(this.threadPartners);
+        }
+
+        _computeThreadMemberPartners() {
+            if (!this.thread) {
+                return;
+            }
+            return replace(this.thread.members.map(member => member.partner));
         }
     }
 
@@ -250,7 +257,7 @@ function factory(dependencies) {
                 'selectedPartners',
                 'thread',
                 'threadChannelType',
-                'threadMembers',
+                'threadPartners',
                 'threadModel',
             ],
             readonly: true,
@@ -263,7 +270,7 @@ function factory(dependencies) {
             dependencies: [
                 'thread',
                 'threadChannelType',
-                'threadMembers',
+                'threadPartners',
             ],
         }),
         /**
@@ -287,7 +294,14 @@ function factory(dependencies) {
         /**
          * Serves as compute dependency.
          */
-        threadMembers: many2many('mail.partner', {
+        threadPartners: many2many('mail.partner', {
+            compute: '_computeThreadMemberPartners',
+            dependencies: [
+                'thread',
+                'threadChannelMembers',
+            ],
+        }),
+        threadChannelMembers: many2many('mail.channel_member', {
             related: 'thread.members',
         }),
         /**

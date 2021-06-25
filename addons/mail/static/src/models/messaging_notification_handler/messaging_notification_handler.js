@@ -455,7 +455,7 @@ function factory(dependencies) {
             channel.update({
                 memberCount,
                 members: insert(
-                    newMembersData.map(newMemberData => this.env.models['mail.partner'].convertData(newMemberData))
+                    newMembersData.map(newMemberData => this.env.models['mail.channel_member'].convertData(newMemberData))
                 ),
             });
         }
