@@ -21,22 +21,23 @@
     <t t-name="mail.ChannelMemberList_memberList" owl="1">
         <h6 class="m-2"><t t-esc="title"/> - <t t-esc="members.length"/></h6>
         <t t-foreach="members" t-as="member" t-key="member.localId">
+            <t t-set="partner" t-value="member.partner"/>
             <div class="o_ChannelMemberList_member">
                 <div class="o_ChannelMemberList_avatarContainer">
-                    <img class="o_ChannelMemberList_avatar" t-att-src="member.avatarUrl" alt="Avatar"/>
-                    <t t-if="member.im_status">
+                    <img class="o_ChannelMemberList_avatar" t-att-src="partner.avatarUrl" alt="Avatar"/>
+                    <t t-if="partner.im_status">
                         <PartnerImStatusIcon
                             class="o_ChannelMemberList_partnerImStatusIcon"
                             t-att-class="{
                                 'o-mobile': env.messaging.device.isMobile,
                             }"
-                            partnerLocalId="member.localId"
+                            partnerLocalId="partner.localId"
                         />
                     </t>
                 </div>
                 <div class="o_ChannelMemberList_avatarNameSeparator"/>
                 <span class="o_ChannelMemberList_name">
-                    <t t-esc="member.nameOrDisplayName"/>
+                    <t t-esc="partner.nameOrDisplayName"/>
                 </span>
             </div>
         </t>

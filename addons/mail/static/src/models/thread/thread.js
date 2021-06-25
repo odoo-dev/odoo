@@ -1584,7 +1584,7 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {mail.partner[]}
+         * @returns {mail.channel_member[]}
          */
         _computeOrderedOfflineMembers() {
             return replace(this._sortMembers(this.members.filter(member => !member.isOnline)));
@@ -1592,7 +1592,7 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {mail.partner[]}
+         * @returns {mail.channel_member[]}
          */
         _computeOrderedOnlineMembers() {
             return replace(this._sortMembers(this.members.filter(member => member.isOnline)));
@@ -2339,7 +2339,7 @@ function factory(dependencies) {
         /**
          * All offline members ordered like they are displayed.
          */
-        orderedOfflineMembers: many2many('mail.partner', {
+        orderedOfflineMembers: many2many('mail.channel_member', {
             compute: '_computeOrderedOfflineMembers',
             dependencies: [
                 'members',
@@ -2350,7 +2350,7 @@ function factory(dependencies) {
         /**
          * All online members ordered like they are displayed.
          */
-        orderedOnlineMembers: many2many('mail.partner', {
+        orderedOnlineMembers: many2many('mail.channel_member', {
             compute: '_computeOrderedOnlineMembers',
             dependencies: [
                 'members',

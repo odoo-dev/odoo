@@ -53,6 +53,15 @@ function factory(dependencies) {
         partner: many2one('mail.partner', {
             required: true,
         }),
+        isOnline: attr({
+            related: 'partner.isOnline',
+        }),
+        /**
+         * Used for thread relation (thread.membersNameOrDisplayName)
+         */
+        nameOrDisplayName: attr({
+            related: 'partner.nameOrDisplayName',
+        }),
         /**
          * The thread for which it the the member of.
          */
