@@ -3,7 +3,6 @@
 // ------------------------------------------------------------------
 
 .o_RtcActivityNotice_indicator {
-    animation: o_indicator_pulse 2s infinite;
     margin-inline-start: map-get($spacers, 2);
 }
 
@@ -15,15 +14,6 @@
 
 .o_RtcActivityNotice_button_title {
     @include text-truncate();
-}
-
-@keyframes o_indicator_pulse {
-    50% {
-        opacity: 1;
-    }
-    0%, 100% {
-        opacity: 0.2;
-    }
 }
 
 // ------------------------------------------------------------------

@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+
 import { useModels } from '@mail/component_hooks/use_models/use_models';
 import { RtcController } from '@mail/components/rtc_controller/rtc_controller';
 import { RtcInvitations } from '@mail/components/rtc_invitations/rtc_invitations';
@@ -19,6 +21,7 @@ export class RtcActivityNotice extends Component {
     constructor(...args) {
         super(...args);
         useModels();
+        useShouldUpdateBasedOnProps();
     }
 
     //--------------------------------------------------------------------------
@@ -26,10 +29,10 @@ export class RtcActivityNotice extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.thread}
+     * @returns {mail.thread|undefined}
      */
     get thread() {
-        return this.env.models['mail.thread'].get(this.env.messaging.activeCallThreadLocalId);
+        return this.env.messaging && this.env.messaging.mailRtc.channel;
     }
 
     //--------------------------------------------------------------------------

@@ -213,6 +213,7 @@ function factory(dependencies) {
          * @param {boolean} payload.use_push_to_talk
          * @param {String} payload.push_to_talk_key
          * @param {number} payload.voice_active_duration
+         * @param {Object} [payload.volume_settings]
          */
         _initMailUserSettings({
             id,
@@ -221,6 +222,7 @@ function factory(dependencies) {
             use_push_to_talk,
             push_to_talk_key,
             voice_active_duration,
+            volume_settings = [],
         }) {
             this.messaging.update({
                 mailUserSettingsId: id,
@@ -229,6 +231,7 @@ function factory(dependencies) {
                 usePushToTalk: use_push_to_talk,
                 pushToTalkKey: push_to_talk_key,
                 voiceActiveDuration: voice_active_duration,
+                volumeSettings: insert(volume_settings.map(volumeSetting => this.env.models['mail.volume_setting'].convertData(volumeSetting))),
             });
             this.messaging.discuss.update({
                 categoryChannel: create({

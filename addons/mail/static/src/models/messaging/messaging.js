@@ -2,7 +2,8 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_field';
-import { create } from '@mail/model/model_field_command';
+import { OnChange } from '@mail/model/model_onchange';
+import { create, replace, link, unlink } from '@mail/model/model_field_command';
 import { makeDeferred } from '@mail/utils/deferred/deferred';
 
 function factory(dependencies) {
@@ -175,38 +176,22 @@ function factory(dependencies) {
         }
 
         /**
-         * @param {Object} param0
-         * @param {String} param0.threadLocalId
+         * @param {String} sessionId
          */
-        async toggleCall({ threadLocalId='' } = {}) {
-            let activeCallThreadLocalId = threadLocalId;
-            if (this.activeCallThreadLocalId) {
-                await this.async(() => {
-                    this.env.models['mail.thread'].get(this.activeCallThreadLocalId).leaveCall();
-                });
-            }
-            if (this.activeCallThreadLocalId === activeCallThreadLocalId) {
-                activeCallThreadLocalId = '';
-            }
-            this.update({ activeCallThreadLocalId });
-
-            if (this.activeCallThreadLocalId) {
-                await this.async(() => {
-                    this.env.models['mail.thread'].get(this.activeCallThreadLocalId).joinCall();
-                });
-            }
-        }
-
-        /**
-         * @param {String} partnerId
-         */
-        toggleFocusedVideoPartner(partnerId) {
-            const focusedPartnerId = this.focusedVideoPartner && this.focusedVideoPartner.id;
-            if (!partnerId || focusedPartnerId === partnerId) {
-                this.update({ focusedVideoPartner: [['unlink']] });
+        toggleFocusedRtcSession(sessionId) {
+            const rtcSession = this.env.models['mail.rtc_session'].findFromIdentifyingData({
+                id: sessionId,
+            });
+            const focusedSessionId = this.focusedRtcSession && this.focusedRtcSession.id;
+            if (!sessionId || focusedSessionId === sessionId || !rtcSession.videoStream) {
+                this.update({ focusedRtcSession: unlink() });
                 return;
             }
-            this.update({ focusedVideoPartner: [['insert', { id: partnerId } ]] });
+            this.update({ focusedRtcSession: link(rtcSession) });
+            if (this.userSetting.rtcLayout !== 'tiled') {
+                return;
+            }
+            this.userSetting.setRtcLayout('sidebar');
         }
 
         //----------------------------------------------------------------------
@@ -232,12 +217,40 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {mail.partner[]}
+         */
+        _computeRingingThreads() {
+            const threads = this.env.models['mail.thread'].all().filter(thread => !!thread.rtcRingingPartner);
+            return replace(threads);
+        }
+
+        /**
+         * @private
          */
         _handleGlobalWindowFocus() {
             this.update({ outOfFocusUnreadMessageCounter: 0 });
             this.env.bus.trigger('set_title_part', {
                 part: '_chat',
             });
+        }
+
+        _onChangeMailRtcChannel() {
+            if (!this.env.messaging) {
+                return;
+            }
+            this.env.messaging.userSetting.toggleFullScreen(false);
+            this.env.messaging.userSetting.update({ rtcFilterVideoGrid: false });
+        }
+
+        /**
+         * @private
+         */
+        _onChangeRingingThreads() {
+            if (this.ringingThreads && this.ringingThreads.length > 0) {
+                this.soundEffects.incomingCall.play({ loop: true });
+            } else {
+                this.soundEffects.incomingCall.stop();
+            }
         }
 
     }
@@ -249,13 +262,6 @@ function factory(dependencies) {
             inverse: 'messaging',
             isCausal: true,
             readonly: true,
-        }),
-        /**
-         * The thread of the current RTC session.
-         * TODO make a relational field
-         */
-        activeCallThreadLocalId: attr({
-            default: '',
         }),
         commands: one2many('mail.channel_command'),
         currentPartner: one2one('mail.partner'),
@@ -276,7 +282,7 @@ function factory(dependencies) {
             isCausal: true,
             readonly: true,
         }),
-        focusedVideoPartner: one2one('mail.partner'),
+        focusedRtcSession: one2one('mail.rtc_session'),
         /**
          * Mailbox History.
          */
@@ -315,6 +321,11 @@ function factory(dependencies) {
             isCausal: true,
             readonly: true,
         }),
+        mailRtc: one2one('mail.rtc', {
+            default: create(),
+            isCausal: true,
+            readonly: true,
+        }),
         /**
          * Id of the current user's mail.user.settings record.
          */
@@ -346,15 +357,36 @@ function factory(dependencies) {
          */
         publicPartners: many2many('mail.partner'),
         /**
+         * Threads for which the current partner has a pending invitation
+         */
+        ringingThreads: many2many('mail.thread', {
+            compute: '_computeRingingThreads',
+        }),
+        soundEffects: one2one('mail.sound_effects', {
+            default: create(),
+            isCausal: true,
+            readonly: true,
+        }),
+        /**
          * Mailbox Starred.
          */
         starred: one2one('mail.thread'),
         userSetting: one2one('mail.user_setting', {
             default: create(),
             inverse: 'messaging',
+            readonly: true,
         }),
     };
-
+    Messaging.onChanges = [
+        new OnChange({
+            dependencies: ['mailRtc.channel'],
+            methodName: '_onChangeMailRtcChannel',
+        }),
+        new OnChange({
+            dependencies: ['ringingThreads'],
+            methodName: '_onChangeRingingThreads',
+        }),
+    ];
     Messaging.modelName = 'mail.messaging';
 
     return Messaging;

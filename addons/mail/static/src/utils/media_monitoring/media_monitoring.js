@@ -12,7 +12,8 @@ const FREQUENCY_RANGE = [80, 400];
  *
  * @param {MediaStreamTrack} audioTrack
  * @param {Object} processorOptions options for the audio processor
-
+ * @returns {Object} returnValue
+ * @returns {function} returnValue.disconnect callback to cleanly end the monitoring
  */
 export async function monitorAudioThresholds(track, processorOptions) {
     // cloning the track so it is not affected by the enabled change of the original track.

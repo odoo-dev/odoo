@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { useModels } from '@mail/component_hooks/use_models/use_models';
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 import { RtcInvitationCard } from '@mail/components/rtc_invitation_card/rtc_invitation_card';
 
 const { Component } = owl;
@@ -17,6 +18,7 @@ export class RtcInvitations extends Component {
     constructor(...args) {
         super(...args);
         useModels();
+        useShouldUpdateBasedOnProps();
     }
 
     //--------------------------------------------------------------------------
@@ -27,8 +29,9 @@ export class RtcInvitations extends Component {
      * @returns {mail.thread[]}
      */
     get threads() {
-        return this.env.messaging ? this.env.models['mail.thread'].all(thread => !!thread.rtcRingingPartner) : [];
+        return this.env.messaging && this.env.messaging.ringingThreads;
     }
+
 }
 
 Object.assign(RtcInvitations, {

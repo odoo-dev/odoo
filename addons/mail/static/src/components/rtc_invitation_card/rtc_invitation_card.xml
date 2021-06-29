@@ -3,14 +3,16 @@
 
     <t t-name="mail.RtcInvitationCard" owl="1">
         <div class="o_RtcInvitationCard">
-            <div class="o_RtcInvitationCard_partner_info">
-                <img class="o_RtcInvitationCard_partner_info_image rounded-circle"
-                     t-attf-src="/web/image/res.partner/{{ thread.rtcRingingPartner.id }}/avatar_128"
-                     t-on-click="_onCLickAvatar"
-                     alt="Avatar"/>
-                <span class="o_RtcInvitationCard_partner_info_name" t-esc="thread.rtcRingingPartner.name"/>
-                <span class="o_RtcInvitationCard_partner_info_text">Incoming Call...</span>
-            </div>
+            <t t-if="thread and thread.rtcRingingPartner">
+                <div class="o_RtcInvitationCard_partner_info">
+                    <img class="o_RtcInvitationCard_partner_info_image rounded-circle"
+                         t-attf-src="/web/image/res.partner/{{ thread.rtcRingingPartner.id }}/avatar_128"
+                         t-on-click="_onCLickAvatar"
+                         alt="Avatar"/>
+                    <span class="o_RtcInvitationCard_partner_info_name" t-esc="thread.rtcRingingPartner.name"/>
+                    <span class="o_RtcInvitationCard_partner_info_text">Incoming Call...</span>
+                </div>
+            </t>
             <div class="o_RtcInvitationCard_buttons">
                 <div class="o_RtcInvitationCard_buttons_button o_RtcInvitationCard_buttons_refuse"
                     aria-label="Refuse"

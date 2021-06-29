@@ -142,13 +142,6 @@ export class DiscussSidebarCategoryItem extends Component {
         this.categoryItem.channel.unsubscribe();
     }
 
-    async _onClickPhone(ev) {
-        ev.stopPropagation();
-        await this.env.messaging.toggleCall({
-            threadLocalId: this.props.threadLocalId,
-        });
-    }
-
     /**
      * @private
      * @param {MouseEvent} ev

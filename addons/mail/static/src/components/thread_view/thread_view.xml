@@ -9,8 +9,8 @@
                 </t>
                 <div class="o_ThreadView_bottomPart">
                     <div class="o_ThreadView_core">
-                        <t t-if="env.messaging.activeCallThreadLocalId and threadView.thread.localId === env.messaging.activeCallThreadLocalId and Object.keys(env.mailRtc.activeVideoStreams).length > 0">
-                            <VideoRoom class="o_ThreadView_videoRoom"/>
+                        <t t-if="threadView.rtcCallViewer">
+                            <RtcCallViewer localId="threadView.rtcCallViewer.localId"/>
                         </t>
                         <t t-if="threadView.isLoading and !threadView.threadCache.isLoaded" name="loadingCondition">
                             <div class="o_ThreadView_loading">

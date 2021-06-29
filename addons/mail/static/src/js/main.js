@@ -37,7 +37,6 @@ async function createMessaging() {
      * Create the messaging singleton record.
      */
     env.messaging = env.models['mail.messaging'].create();
-    env.mailRtc = env.models['mail.rtc'].create();
 }
 
 /**

@@ -488,9 +488,6 @@ function factory(dependencies) {
         peerToken: attr({
             compute: '_computePeerToken',
         }),
-        activeCallChannel: many2one('mail.thread', {
-            inverse: 'callParticipants',
-        }),
         im_status: attr(),
         /**
          * States whether this partner is online.
@@ -514,7 +511,13 @@ function factory(dependencies) {
         nameOrDisplayName: attr({
             compute: '_computeNameOrDisplayName',
         }),
+        rtcSessions: one2many('mail.rtc_session', {
+            inverse: 'partner',
+        }),
         user: one2one('mail.user', {
+            inverse: 'partner',
+        }),
+        volumeSetting: one2one('mail.volume_setting', {
             inverse: 'partner',
         }),
     };

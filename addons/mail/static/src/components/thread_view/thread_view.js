@@ -6,12 +6,18 @@ import { ChannelMemberList } from '@mail/components/channel_member_list/channel_
 import { Composer } from '@mail/components/composer/composer';
 import { MessageList } from '@mail/components/message_list/message_list';
 import { ThreadViewTopbar } from '@mail/components/thread_view_topbar/thread_view_topbar';
-import { VideoRoom } from '@mail/components/video_room/video_room';
+import { RtcCallViewer } from '@mail/components/rtc_call_viewer/rtc_call_viewer';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { ChannelMemberList, Composer, MessageList, ThreadViewTopbar, VideoRoom };
+const components = {
+    ChannelMemberList,
+    Composer,
+    MessageList,
+    ThreadViewTopbar,
+    RtcCallViewer,
+};
 
 export class ThreadView extends Component {
 

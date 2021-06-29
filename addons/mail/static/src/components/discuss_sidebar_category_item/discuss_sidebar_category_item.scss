@@ -55,6 +55,10 @@
     }
 }
 
+.o_DiscussSidebarCategoryItem_call_indicator {
+    margin-right: $o-mail-discuss-sidebar-scrollbar-width;
+}
+
 .o_DiscussSidebarCategoryItem_name {
     @include text-truncate();
     margin-left: 10px;

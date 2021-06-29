@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 import { useModels } from '@mail/component_hooks/use_models/use_models';
 
 const { Component } = owl;
@@ -12,6 +13,7 @@ export class RtcInvitationCard extends Component {
     constructor(...args) {
         super(...args);
         useModels();
+        useShouldUpdateBasedOnProps();
     }
 
     //--------------------------------------------------------------------------
@@ -31,7 +33,7 @@ export class RtcInvitationCard extends Component {
 
     async _onClickAccept(ev) {
         this.thread.open();
-        await this.env.messaging.toggleCall({ threadLocalId: this.thread.localId });
+        await this.thread.toggleCall();
     }
 
     _onCLickAvatar(ev) {

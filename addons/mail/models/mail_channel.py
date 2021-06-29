@@ -55,6 +55,7 @@ class Channel(models.Model):
     channel_last_seen_partner_ids = fields.One2many(
         'mail.channel.partner', 'channel_id', string='Last Seen',
         groups='base.group_user')
+    rtc_sessions = fields.One2many('mail.rtc.session', 'channel_id')
     is_member = fields.Boolean('Is Member', compute='_compute_is_member', compute_sudo=True)
     group_ids = fields.Many2many(
         'res.groups', string='Auto Subscription',
@@ -331,27 +332,59 @@ class Channel(models.Model):
                     return False
         return True
 
-    def invite_members_to_rtc(self):
+    # ------------------------------------------------------------
+    # RTC Call
+    # ------------------------------------------------------------
+
+    def _cancel_rtc_invitations(self):
+        invited_members = self.channel_last_seen_partner_ids.filtered(
+            lambda partner: partner.rtc_ringing_partner_id is not False
+        )
+        invited_members.write({
+            'rtc_ringing_partner_id': False
+        })
+        notifications = []
+        for partner in invited_members.mapped('partner_id'):
+            notifications.append([
+                (self._cr.dbname, 'res.partner', partner.id),
+                {
+                    'type': 'rtc_invitation',
+                    'payload': {
+                        'remove': True,
+                        'channelId': self.id,
+                    },
+                },
+            ])
+        self.env['bus.bus'].sendmany(notifications)
+
+    def _get_rtc_sessions_data(self):
+        return [session._mail_rtc_session_format() for session in self.rtc_sessions]
+
+    def _invite_members_to_rtc(self):
         """ Sends invitations to join the RTC call to all connected members of the thread who are not already invited.
         """
         self.ensure_one()
         current_partner = self.env.user.partner_id
+        current_sessions_partners = self.rtc_sessions.mapped('partner_id')
         notifications = []
         for channel_partner in self.channel_last_seen_partner_ids:
             if channel_partner.partner_id == current_partner:
                 continue
-            if channel_partner.is_in_rtc_call or channel_partner.rtc_ringing_partner_id:
+            if channel_partner.partner_id in current_sessions_partners:
                 continue
-            # maybe use im_status to filter DND?
+            if channel_partner.rtc_ringing_partner_id:
+                continue
             channel_partner.rtc_ringing_partner_id = current_partner.id
             notifications.append([
                 (self._cr.dbname, 'res.partner', channel_partner.partner_id.id),
                 {
                     'type': 'rtc_invitation',
-                    'channelId': self.id,
-                    'partner': {
-                        'id': current_partner.id,
-                        'name': current_partner.name,
+                    'payload': {
+                        'channelId': self.id,
+                        'partner': {
+                            'id': current_partner.id,
+                            'name': current_partner.name,
+                        },
                     },
                 },
             ])
@@ -361,92 +394,68 @@ class Channel(models.Model):
         self.message_post(body=notification, message_type="notification")
         self.env['bus.bus'].sendmany(notifications)
 
-    def join_call(self):
-        self.ensure_one()
-        current_partner = self.env.user.partner_id
-        current_channel_partner = self.channel_last_seen_partner_ids.search(
-            [('channel_id', '=', self.id), ('partner_id', '=', current_partner.id)],
-            limit=1
+    def _join_call(self):
+        session_data, session_id = self._update_call_participation(True)
+        ice_servers = self.env['mail.ice.server']._get_ice_servers()
+        return {
+            'rtcSessions': session_data,
+            'iceServers': ice_servers or False,
+            'sessionId': session_id,
+        }
+
+    def _leave_call(self, session_id=None):
+        self._update_call_participation(False, session_id=session_id)
+
+    def _update_call_participation(self, join_call, session_id=None):
+        """ Updates the call participation of the current partner and notifies members of
+            the channel if necessary.
+
+            :param join_call : boolean true if joining the call, false if leaving.
+            :param session_id : int to be provided if leaving the call
+
+            Leaving the call without providing a session_id will only cancel the
+            invitation.
+        """
+        new_session_id = None
+        current_channel_partner = self.channel_last_seen_partner_ids.filtered(
+            lambda member: member.partner_id == self.env.user.partner_id
         )
         if not current_channel_partner:
             return
-        if not current_channel_partner.is_in_rtc_call:
-            current_channel_partner.is_in_rtc_call = True
-            current_channel_partner.rtc_ringing_partner_id = False
-            self._update_call_participation()
-        call_participants_data = self.get_call_participants_data()
-        ice_servers = self.env['mail.ice.server']._get_ice_servers()
-        return {
-            'callParticipants': call_participants_data,
-            'iceServers': ice_servers or False,
-        }
-
-    def leave_call(self):
-        self.ensure_one()
-        current_channel_partner = self.channel_last_seen_partner_ids.search(
-            [('channel_id', '=', self.id), ('partner_id', '=', self.env.user.partner_id.id)],
-            limit=1
-        )
-        was_current_partner_in_rtc_call = current_channel_partner.is_in_rtc_call
-        current_channel_partner.is_in_rtc_call = False
         current_channel_partner.rtc_ringing_partner_id = False
-        if was_current_partner_in_rtc_call:
-            self._update_call_participation()
+        if join_call:
+            current_partner_id = self.env.user.partner_id.id
+            old_sessions = self.rtc_sessions.filtered(lambda session: session.partner_id.id == current_partner_id)
+            old_sessions._disconnect()
+            new_session = self.env['mail.rtc.session'].create({
+                'channel_id': self.id,
+                'partner_id': current_partner_id,
+            })
+            new_session_id = new_session.id
+        elif session_id:
+            self.env['mail.rtc.session'].browse(session_id).unlink()
+        else:
+            return
 
-    def _update_call_participation(self):
-        self.ensure_one()
-        call_participants = self.channel_last_seen_partner_ids.filtered(
-            lambda partner: partner.is_in_rtc_call
-        ).mapped('partner_id')
-
-        if not call_participants:
+        sessions_data = self._get_rtc_sessions_data()
+        if not sessions_data:
             # if there is no member left in the rtc call, all invitations are reset
             self._cancel_rtc_invitations()
-            return
-        self._notify_call_participation_change(call_participants)
 
-    def _cancel_rtc_invitations(self):
-        invited_partners = self.channel_last_seen_partner_ids.filtered(
-            lambda partner: partner.rtc_ringing_partner_id is not False
-        )
-        invited_partners.write({
-            'rtc_ringing_partner_id': False
-        })
         notifications = []
-        for partner in invited_partners.mapped('partner_id'):
+        for member in self.channel_last_seen_partner_ids:
             notifications.append([
-                (self._cr.dbname, 'res.partner', partner.id),
+                (self._cr.dbname, 'res.partner', member.partner_id.id),
                 {
-                    'type': 'rtc_invitation',
-                    'remove': True,
-                    'channelId': self.id,
+                    'type': 'rtc_sessions_update',
+                    'payload': {
+                        'channelId': self.id,
+                        'rtcSessions': sessions_data,
+                    },
                 },
             ])
         self.env['bus.bus'].sendmany(notifications)
-
-    def _notify_call_participation_change(self, call_participants):
-        self.ensure_one()
-        notifications = []
-        call_participants_data = call_participants.read(['name'])
-        for partner in call_participants:
-            if partner == self.env.user.partner_id:
-                continue
-            notifications.append([
-                (self._cr.dbname, 'res.partner', partner.id),
-                {
-                    'type': 'rtc_update',
-                    'channelId': self.id,
-                    'callParticipants': call_participants_data,
-                },
-            ])
-        self.env['bus.bus'].sendmany(notifications)
-
-    def get_call_participants_data(self):
-        self.ensure_one()
-        call_participants = self.channel_last_seen_partner_ids.filtered(
-            lambda partner: partner.is_in_rtc_call
-        ).mapped('partner_id')
-        return call_participants.read(['name'])
+        return sessions_data, new_session_id
 
     # ------------------------------------------------------------
     # MAILING

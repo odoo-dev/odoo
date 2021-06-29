@@ -5,7 +5,8 @@ class ThresholdProcessor extends AudioWorkletProcessor {
      * @param {Object} param0 options
      * @param {Object} param0.processorOptions
      * @param {number} processorOptions.minimumActiveCycles - how many cycles have to pass since the last time the
-                       threshold was exceeded to go back to inactive state.
+                       threshold was exceeded to go back to inactive state. It prevents the microphone to shut down
+                       when the user's voice drops in volume mid-sentence.
      * @param {number} processorOptions.baseLevel the minimum value for audio detection
                TODO find a way to properly normalize sound? See process() comment.
      * @param {Array<number>} processorOptions.frequencyRange array of two numbers that represent the range of
@@ -26,9 +27,9 @@ class ThresholdProcessor extends AudioWorkletProcessor {
         /**
          * TODO ideally, do the mathematical inverse when computing this.volume, it would make it consistent with
          * the scriptProcessor version and easier to create a visual match between the input and the volume.
+         * probably not use a sqrt but a log2 since input has negative numbers.
          */
-        const boostedLevel = baseLevel * 10;
-        this.baseLevel = boostedLevel * boostedLevel / 10;
+        this.baseLevel = Math.pow(baseLevel, 2);
         this.frequencyRange = frequencyRange;
         this.sampleRate = sampleRate;
         this.activityBuffer = 0;
@@ -61,12 +62,15 @@ class ThresholdProcessor extends AudioWorkletProcessor {
          * `samples` is a Float32array of 128 samples with values in [-1 .. 1],
          * I couldn't figure a way to make a good normalization for those values in a way that would be comparable
          * to the Uint8Array version of the scriptProcessor equivalent: see media_monitoring._getFrquencyAverage
+         * TODO something like Math.log2(volume+1) * constant, while baseLevel = baseLevel
+         * Math.log2(0) should be counted as 0
          */
         let sum = 0;
         for (let i = startIndex; i < endIndex; ++i) {
             sum += samples[i];
         }
-        this.volume = sum * 30 / (endIndex - startIndex);
+        const preNormalizationVolume = sum / (endIndex - startIndex);
+        this.volume = preNormalizationVolume * 3;
 
         if (this.volume >= this.baseLevel) {
             this.activityBuffer = this.minimumActiveCycles;
