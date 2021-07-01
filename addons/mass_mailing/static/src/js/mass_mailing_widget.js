@@ -69,6 +69,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
 
             convertInline.attachmentThumbnailToLinkImg($editable);
             convertInline.fontToImg($editable);
+            convertInline.bootstrapToTable($editable);
             convertInline.classToStyle($editable);
 
             // fix outlook image rendering bug

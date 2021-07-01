@@ -5,6 +5,15 @@ var FieldHtml = require('web_editor.field.html');
 
 const SELECTORS_IGNORE = /(^\*$|:hover|:before|:after|:active|:link|::|'|\([^(),]+[,(])/;
 /**
+ * @see https://getbootstrap.com/docs/4.0/layout/grid/#grid-options
+ */
+const BOOTSTRAP_MAX_WIDTHS = {
+    sm: 540,
+    md: 720,
+    lg: 960,
+    xl: 1140,
+};
+/**
  * Returns the css rules which applies on an element, tweaked so that they are
  * browser/mail client ok.
  *
@@ -223,7 +232,10 @@ function applyOverDescendants(node, func) {
     node = node.firstChild;
     while (node) {
         if (node.nodeType === 1) {
-            func(node);
+            const newNode = func(node);
+            if (newNode) {
+                node = newNode;
+            }
             applyOverDescendants(node, func);
         }
         var $node = $(node);
@@ -235,6 +247,76 @@ function applyOverDescendants(node, func) {
         }
         node = node.nextSibling;
     }
+}
+
+/**
+ * Converts bootstrap rows and columns to actual tables.
+ *
+ * Note: Because of the limited support of media queries in emails, this doesn't
+ * support the mixing and matching of column options (e.g., "col-4 col-sm-6" and
+ * "col col-4" aren't supported).
+ *
+ * @param {jQuery} $editable
+ */
+function bootstrapToTable($editable) {
+    applyOverDescendants($editable[0], function (node) {
+        const $node = $(node);
+        if (/container( |$|-fluid)/.test(node.className) && $node.find('.row').length) { // todo: container-fluid works too
+            const $table = $('<table align="center"/>');
+            for (const attr of node.attributes) {
+                $table.attr(attr.name, attr.value);
+            }
+            $table.removeClass('container container-fluid');
+            for (const child of [...node.childNodes]) {
+                $table.append(child);
+            }
+            $table.attr({
+                cellspacing: 0,
+                cellpadding: 0,
+                border: 0,
+            });
+            $node.before($table);
+            $node.remove();
+            return $table[0];
+        } else if ($node.hasClass('row')) {
+            const $row = $('<tr/>');
+            for (const attr of node.attributes) {
+                $row.attr(attr.name, attr.value);
+            }
+            $row.removeClass('row');
+            for (const child of [...node.childNodes]) {
+                $row.append(child);
+            }
+            $node.before($row);
+            $node.remove();
+            return $row[0];
+        }
+        const colMatch = node.className.match(/(^| )col(-[\w\d]+)*( |$)/);
+        if (colMatch) {
+            const colOptions = colMatch[2] && colMatch[2].substr(1).split('-');
+            const $col = $('<td/>');
+            for (const attr of node.attributes) {
+                $col.attr(attr.name, attr.value);
+            }
+            $col.removeClass(colMatch[0]);
+            for (const child of [...node.childNodes]) {
+                $col.append(child);
+            }
+            $node.before($col);
+            $node.remove();
+            if (colOptions) {
+                const screenSize = colOptions.length === 2 && colOptions[0];
+                const colSize = colOptions.length === 2 ? +colOptions[1] : +colOptions[0];
+                if (screenSize in BOOTSTRAP_MAX_WIDTHS) {
+                    $col.css({'max-width': BOOTSTRAP_MAX_WIDTHS[screenSize] + 'px'});
+                }
+                if (colSize) {
+                    $col.attr('width', Math.round(colSize * 100 / 12) + '%');
+                }
+            }
+            return $col[0];
+        }
+    });
 }
 
 /**
@@ -349,6 +431,7 @@ FieldHtml.include({
 
         attachmentThumbnailToLinkImg($editable);
         fontToImg($editable);
+        bootstrapToTable($editable);
         classToStyle($editable);
 
         // fix outlook image rendering bug
@@ -368,6 +451,7 @@ FieldHtml.include({
 
 return {
     fontToImg: fontToImg,
+    bootstrapToTable: bootstrapToTable,
     classToStyle: classToStyle,
     attachmentThumbnailToLinkImg: attachmentThumbnailToLinkImg,
 };
