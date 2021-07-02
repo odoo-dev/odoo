@@ -39,10 +39,8 @@ div.col:not([align]) {
 .o_layout {
     overflow: hidden;
     box-sizing: content-box;
-    width: 94%;
     min-height: 100%;
     background-color: $o-mm-def-color-1;
-    padding: 0 3%;
 
     // Forces on <p/> and <hx/> elements as several mail clients does not
     // correctly inherit font properties
@@ -60,7 +58,6 @@ div.col:not([align]) {
                                    // same width
 
         .o_mail_wrapper_td {
-            width: $o-mm-def-body-width;
             border: 1px solid darken($o-mm-def-color-1, 2%);
             background-color: $o-mm-def-color-2;
             flex: none;
@@ -71,7 +68,6 @@ div.col:not([align]) {
 // ===== Snippets (general) =====
 .o_mail_snippet_general {
     width: 100%;
-    max-width: $o-mm-def-body-width; // should not be necessary thanks to mail wrapper
     margin: 0 auto;
 
     h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
