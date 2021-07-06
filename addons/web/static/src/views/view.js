@@ -9,40 +9,107 @@ const viewRegistry = registry.category("views");
 
 const { Component } = owl;
 
+/** @typedef {Object} ViewProps
+ *  @property {string} resModel
+ *  @property {string} type
+ *
+ *  @property {Array[]} [views]
+ *
+ *  @property {string} [arch] if given, fields must be given too /\ no post processing is done (evaluation of "groups" attribute,...)
+ *  @property {Object} [fields] if given, arch must be given too
+ *  @property {number|false} [viewId]
+ *  @property {Object} [actionMenus]
+ *  @property {boolean} [loadActionMenus=false]
+ *
+ *  @property {string} [searchViewArch] if given, searchViewFields must be given too
+ *  @property {Object} [searchViewFields] if given, searchViewArch must be given too
+ *  @property {number|false} [searchViewId]
+ *  @property {Object[]} [irFilters]
+ *  @property {boolean} [loadIrFilters=false]
+ *
+ *  @property {Object} [context={}]
+ *  @property {DomainRepr} [domain]
+ *  @property {Object[]} [domains]
+ *  @property {string[]} [groupBy]
+ *  @property {string[]} [orderBy]
+ *
+ *  @property {number|false} [actionId=false]
+ *  @property {Object} [actionFlags={}]
+ *  @property {string} [displayName]
+ *
+ *  @property {boolean} [useSampleModel]
+ *  @property {string} [noContentHelp]
+ *
+ *  @property {Object} [display={}] to rework
+ *
+ *  @property {Object[]} [breadcrumbs]
+ *  @property {Object[]} [viewSwitcherEntries]
+ *
+ *  manipulated by withSearch
+ *
+ *  @property {boolean} [activateFavorite]
+ *  @property {Object[]} [dynamicFilters]
+ *  @property {boolean} [loadSearchPanel]
+ *  @property {string[]} [searchMenuTypes]
+ *  @property {Object} [searchState]
+ */
+
 const STANDARD_PROPS = new Set([
-    "actionFlags",
-    "actionId",
-    "context",
-    "displayName",
-    "domain",
-    "groupBy",
-    "loadActionMenus",
-    "loadIrFilters",
-    "noContentHelp",
     "resModel",
     "type",
+
     "views",
-    "viewSwitcherEntries",
-    "breadcrumbs",
-    "useSampleModel",
-    "searchViewId",
+
+    "arch",
+    "fields",
+    "viewId",
+    "actionMenus",
+    "loadActionMenus",
+
     "searchViewArch",
     "searchViewFields",
+    "searchViewId",
     "irFilters",
-    "viewId",
-    // LEGACY: remove this later
+    "loadIrFilters",
+
+    "context",
+    "domain",
+    "domains",
+    "groupBy",
+    "orderBy",
+
+    "actionId",
+    "actionFlags",
+    "displayName",
+
+    "useSampleModel",
+    "noContentHelp",
+
+    "breadcrumbs",
+    "viewSwitcherEntries",
+
+    "searchState",
+
+    // LEGACY: remove this later (clean when mappings old state <-> new state are established)
     "searchPanel",
     "searchModel",
-    "searchState", // ?
 ]);
 
 export class View extends Component {
     setup() {
-        if (!("resModel" in this.props)) {
+        const { arch, fields, resModel, searchViewArch, searchViewFields, type } = this.props;
+
+        if (!resModel) {
             throw Error(`View props should have a "resModel" key`);
         }
-        if (!("type" in this.props)) {
+        if (!type) {
             throw Error(`View props should have a "type" key`);
+        }
+        if ((arch && !fields) || (!arch && fields)) {
+            throw new Error(`"arch" and "fields" props must be given together`);
+        }
+        if ((searchViewArch && !searchViewFields) || (!searchViewArch && searchViewFields)) {
+            throw new Error(`"searchViewArch" and "searchViewFields" props must be given together`);
         }
 
         this.viewService = useService("view");
@@ -79,15 +146,14 @@ export class View extends Component {
 
         // prepare view description
         const { actionId, context, resModel, loadActionMenus, loadIrFilters } = this.props;
-        let viewDescription = { resModel, type };
-        let searchViewDescription;
         let { arch, fields, searchViewArch, searchViewFields, irFilters, actionMenus } = this.props;
 
-        let loadView = !arch || !fields || (!actionMenus && loadActionMenus);
+        let loadView = !arch || (!actionMenus && loadActionMenus);
         let loadSearchView =
-            searchViewId !== undefined &&
-            (!searchViewArch || !searchViewFields || (!irFilters && loadIrFilters));
+            (searchViewId !== undefined && !searchViewArch) || (!irFilters && loadIrFilters);
 
+        let viewDescription = { resModel, type };
+        let searchViewDescription;
         if (loadView || loadSearchView) {
             // view description (or search view description if required) is incomplete
             // a loadViews is done to complete the missing information
@@ -103,8 +169,6 @@ export class View extends Component {
             if (loadSearchView) {
                 if (!searchViewArch) {
                     searchViewArch = searchViewDescription.arch;
-                }
-                if (!searchViewFields) {
                     searchViewFields = searchViewDescription.fields;
                 }
                 if (!irFilters) {
@@ -113,19 +177,16 @@ export class View extends Component {
             }
         }
 
-        if (arch) {
-            viewDescription.arch = arch;
+        if (!arch) {
+            arch = viewDescription.arch;
+            fields = viewDescription.fields;
         }
-        if (fields) {
-            viewDescription.fields = fields;
-        }
-        if (actionMenus) {
-            // good name for prop?
-            viewDescription.actionMenus = actionMenus;
+        if (!actionMenus) {
+            actionMenus = viewDescription.actionMenus;
         }
 
         const parser = new DOMParser();
-        const xml = parser.parseFromString(viewDescription.arch, "text/xml");
+        const xml = parser.parseFromString(arch, "text/xml");
         const rootNode = xml.documentElement;
         const rootAttrs = {};
         for (const attrName of rootNode.getAttributeNames()) {
@@ -150,14 +211,13 @@ export class View extends Component {
                 viewId: viewDescription.viewId,
                 views,
                 mode: this.props.display.mode,
-                actionMenus: viewDescription.actionMenus,
+                actionMenus,
                 breadcrumbs: this.props.breadcrumbs,
                 viewSwitcherEntries: this.props.viewSwitcherEntries,
                 displayName: this.props.displayName,
-                noContentHelp: null,
             },
-            arch: viewDescription.arch,
-            fields: viewDescription.fields,
+            arch,
+            fields,
             resModel,
             useSampleModel: false,
         };
@@ -199,8 +259,6 @@ export class View extends Component {
         }
         if (searchViewArch) {
             this.withSearchProps.searchViewArch = searchViewArch;
-        }
-        if (searchViewFields) {
             this.withSearchProps.searchViewFields = searchViewFields;
         }
         if (irFilters) {
@@ -209,7 +267,9 @@ export class View extends Component {
 
         if (!this.withSearchProps.searchMenuTypes) {
             this.withSearchProps.searchMenuTypes =
-                ViewClass.searchMenuTypes || this.constructor.searchMenuTypes;
+                this.props.searchMenuTypes ||
+                ViewClass.searchMenuTypes ||
+                this.constructor.searchMenuTypes;
         }
 
         //////////////////////////////////////////////////////////////////
@@ -258,72 +318,20 @@ View.searchMenuTypes = ["filter", "groupBy", "favorite"];
 
 /** @todo rework doc */
 
-/** @typedef {Object} ViewProps
- *  @property {string} resModel
- *  @property {string} type
- *  ...
- */
+// - create a fakeORM service? --> use sampleServer and mockServer parts?
 
-// export interface ViewProps {
-//     // mandatory
+// - action service uses View comp --> see if things cannot be simplified (we will use also maybe a ClientAction comp similar to view)
 
-//     resModel: string;
-//     type: string;
-
-//     // view description
-//     arch?: string;
-//     fields?: Object;
-//     viewId?: number|false;
-
-//     views?: Array[];
-
-//     actionMenus?: Object;
-//     loadActionMenus?: Boolean;
-
-//     // search view description
-//     searchViewArch?: string;
-//     searchViewFields?: Object;
-//     searchViewId?: number|false;
-
-//     irFilters?: IrFilter[];
-//     loadIrFilters?: Boolean;
-
-//     // search query
-//     context?: Object;
-//     domain?: DomainRepr;
-//     domains?: Object[]; // to rewok
-//     groupBy?: string[];
-//     orderBy?: string[];
-
-//     // search state
-//     __exportSearchState__?: CallbackRecorder;
-//     searchState?: Object;
-
-//     // others props manipulated by View or WithSearch
-//     __saveParams__?: CallbackRecorder;
-//     actionId?: number|false;
-//     activateFavorite?: Boolean;
-//     displayName?: string;
-//     dynamicFilters?: Object[];
-//     loadSearchPanel?: Boolean;
-//     noContentHelp?: string;
-//     searchMenuTypes?: string[];
-//     useSampleModel?: Boolean;
-
-//     // all props (sometimes modified like "views", "domain",...) to concrete view
-//     // if it validate them (a filtering is done in case props validation is defined in concrete view)
-//     [key:string]: any;
-// }
+// - see if we want to simplify things related to callback recorders --> the class should be put elsewhere too (maybe in core along registry?)
 
 /**
- * To manage:
+ * To manage (how?):
  * 
   Relate to search
       searchModel // search model state (searchItems, query)
       searchPanel // search panel component state (expanded (hierarchy), scrollbar)
 
   Related to config/display/layout
-      displayName // not exactly actionName,... action.display_name || action.name
       breadcrumbs
       withBreadcrumbs // 'no_breadcrumbs' in context ? !context.no_breadcrumbs : true,
       withControlPanel // this.withControlPanel from constructor
@@ -331,9 +339,9 @@ View.searchMenuTypes = ["filter", "groupBy", "favorite"];
       withSearchPanel // this.withSearchPanel from constructor
       search_panel // = params.search_panel or context.search_panel
 
-  Prepare for concrete view
+  Prepare for concrete view ???
       activeActions
 
-  Do stuff in View comp
+  Do stuff in View comp ???
       banner // from arch = this.arch.attrs.banner_route
 */
