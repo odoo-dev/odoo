@@ -3,7 +3,7 @@
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { GraphView } from "@web/views/graph/graph_view";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/service_hook";
+import { useService } from "@web/core/utils/hooks";
 
 const viewRegistry = registry.category("views");
 
