@@ -123,9 +123,9 @@ QUnit.module("Views", (hooks) => {
             setup() {
                 this._super();
                 const { arch, fields, info } = this.props;
-                assert.notOk("actionMenus" in this.props);
                 assert.strictEqual(arch, serverData.views["animal,false,toy"]);
                 assert.deepEqual(fields, serverData.models.animal.fields);
+                assert.strictEqual(info.actionMenus, undefined);
                 assert.strictEqual(info.viewId, false);
             },
         });
@@ -157,9 +157,9 @@ QUnit.module("Views", (hooks) => {
             setup() {
                 this._super();
                 const { arch, fields, info } = this.props;
-                assert.notOk("actionMenus" in this.props);
                 assert.strictEqual(arch, serverData.views["animal,1,toy"]);
                 assert.deepEqual(fields, serverData.models.animal.fields);
+                assert.strictEqual(info.actionMenus, undefined);
                 assert.strictEqual(info.viewId, 1);
             },
         });
@@ -190,9 +190,9 @@ QUnit.module("Views", (hooks) => {
             setup() {
                 this._super();
                 const { arch, fields, info } = this.props;
-                assert.notOk("actionMenus" in this.props);
                 assert.strictEqual(arch, serverData.views["animal,1,toy"]);
                 assert.deepEqual(fields, serverData.models.animal.fields);
+                assert.strictEqual(info.actionMenus, undefined);
                 assert.strictEqual(info.viewId, 1);
             },
         });
@@ -225,9 +225,9 @@ QUnit.module("Views", (hooks) => {
                 setup() {
                     this._super();
                     const { arch, fields, info } = this.props;
-                    assert.notOk("actionMenus" in this.props);
                     assert.strictEqual(arch, serverData.views["animal,false,toy"]);
                     assert.deepEqual(fields, serverData.models.animal.fields);
+                    assert.strictEqual(info.actionMenus, undefined);
                     assert.strictEqual(info.viewId, false);
                 },
             });
@@ -262,9 +262,9 @@ QUnit.module("Views", (hooks) => {
             setup() {
                 this._super();
                 const { arch, fields, info } = this.props;
-                assert.notOk("actionMenus" in this.props);
                 assert.strictEqual(arch, serverData.views["animal,1,toy"]);
                 assert.deepEqual(fields, serverData.models.animal.fields);
+                assert.strictEqual(info.actionMenus, undefined);
                 assert.strictEqual(info.viewId, 1);
             },
         });
@@ -294,40 +294,6 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(view.el.innerHTML, serverData.views["animal,1,toy"]);
     });
 
-    QUnit.test("rendering with given arch", async function (assert) {
-        assert.expect(8);
-
-        const ToyView = viewRegistry.get("toy");
-        patchWithCleanup(ToyView.prototype, {
-            setup() {
-                this._super();
-                const { arch, fields, info } = this.props;
-                assert.strictEqual(info.actionMenus, undefined);
-                assert.strictEqual(arch, `<toy>Specific arch content</toy>`);
-                assert.deepEqual(fields, serverData.models.animal.fields);
-                assert.strictEqual(info.viewId, false);
-            },
-        });
-
-        const view = await makeView({
-            serverData,
-            mockRPC: (_, args) => {
-                // the rpc is done for fields
-                assert.deepEqual(args.kwargs.views, [[false, "toy"]]);
-                assert.deepEqual(args.kwargs.options, {
-                    action_id: false,
-                    load_filters: false,
-                    toolbar: false,
-                });
-            },
-            resModel: "animal",
-            type: "toy",
-            arch: `<toy>Specific arch content</toy>`,
-        });
-        assert.hasClass(view.el, "o_toy_view");
-        assert.strictEqual(view.el.innerHTML, `<toy>Specific arch content</toy>`);
-    });
-
     QUnit.test("rendering with given arch and fields", async function (assert) {
         assert.expect(6);
 
@@ -336,10 +302,10 @@ QUnit.module("Views", (hooks) => {
             setup() {
                 this._super();
                 const { arch, fields, info } = this.props;
-                assert.strictEqual(info.actionMenus, undefined);
                 assert.strictEqual(arch, `<toy>Specific arch content</toy>`);
                 assert.deepEqual(fields, {});
-                assert.notOk("viewId" in this.props);
+                assert.strictEqual(info.actionMenus, undefined);
+                assert.strictEqual(info.viewId, undefined);
             },
         });
 
@@ -367,8 +333,8 @@ QUnit.module("Views", (hooks) => {
                 const { arch, fields, info } = this.props;
                 assert.strictEqual(arch, serverData.views["animal,false,toy"]);
                 assert.deepEqual(fields, serverData.models.animal.fields);
-                assert.strictEqual(info.viewId, false);
                 assert.deepEqual(info.actionMenus, {});
+                assert.strictEqual(info.viewId, false);
             },
         });
 
@@ -403,8 +369,8 @@ QUnit.module("Views", (hooks) => {
                     const { arch, fields, info } = this.props;
                     assert.strictEqual(arch, `<toy>Specific arch content</toy>`);
                     assert.deepEqual(fields, {});
-                    assert.strictEqual(info.viewId, false);
                     assert.deepEqual(info.actionMenus, {});
+                    assert.strictEqual(info.viewId, false);
                 },
             });
 
@@ -439,11 +405,11 @@ QUnit.module("Views", (hooks) => {
             patchWithCleanup(ToyView.prototype, {
                 setup() {
                     this._super();
-                    const { actionMenus, arch, fields } = this.props;
+                    const { arch, fields, info } = this.props;
                     assert.strictEqual(arch, `<toy>Specific arch content</toy>`);
                     assert.deepEqual(fields, {});
-                    assert.notOk("viewId" in this.props);
-                    assert.deepEqual(actionMenus, {});
+                    assert.deepEqual(info.actionMenus, {});
+                    assert.strictEqual(info.viewId, undefined);
                 },
             });
 
@@ -473,11 +439,16 @@ QUnit.module("Views", (hooks) => {
         patchWithCleanup(ToyView.prototype, {
             setup() {
                 this._super();
-                const { searchViewArch, searchViewFields, searchViewId } = this.props.info;
+                const {
+                    irFilters,
+                    searchViewArch,
+                    searchViewFields,
+                    searchViewId,
+                } = this.props.info;
                 assert.strictEqual(searchViewArch, serverData.views["animal,false,search"]);
                 assert.deepEqual(searchViewFields, serverData.models.animal.fields);
                 assert.strictEqual(searchViewId, false);
-                assert.notOk("irFilters" in this.props);
+                assert.strictEqual(irFilters, undefined);
             },
         });
 
@@ -512,11 +483,16 @@ QUnit.module("Views", (hooks) => {
             patchWithCleanup(ToyView.prototype, {
                 setup() {
                     this._super();
-                    const { searchViewArch, searchViewFields, searchViewId } = this.props.info;
+                    const {
+                        irFilters,
+                        searchViewArch,
+                        searchViewFields,
+                        searchViewId,
+                    } = this.props.info;
                     assert.strictEqual(searchViewArch, `<search/>`);
                     assert.deepEqual(searchViewFields, {});
                     assert.strictEqual(searchViewId, false);
-                    assert.notOk("irFilters" in this.props);
+                    assert.strictEqual(irFilters, undefined);
                 },
             });
 
@@ -530,6 +506,45 @@ QUnit.module("Views", (hooks) => {
                 arch: `<toy>Specific arch content</toy>`,
                 fields: {},
                 searchViewId: false,
+                searchViewArch: `<search/>`,
+                searchViewFields: {},
+            });
+            assert.hasClass(view.el, "o_toy_view");
+            assert.strictEqual(view.el.innerText, "Specific arch content");
+        }
+    );
+
+    QUnit.test(
+        "rendering with given arch, fields, searchViewArch, and searchViewFields",
+        async function (assert) {
+            assert.expect(6);
+
+            const ToyView = viewRegistry.get("toy");
+            patchWithCleanup(ToyView.prototype, {
+                setup() {
+                    this._super();
+                    const {
+                        irFilters,
+                        searchViewArch,
+                        searchViewFields,
+                        searchViewId,
+                    } = this.props.info;
+                    assert.strictEqual(searchViewArch, `<search/>`);
+                    assert.deepEqual(searchViewFields, {});
+                    assert.strictEqual(searchViewId, undefined);
+                    assert.strictEqual(irFilters, undefined);
+                },
+            });
+
+            const view = await makeView({
+                serverData,
+                mockRPC: () => {
+                    throw new Error("no RPC expected");
+                },
+                resModel: "animal",
+                type: "toy",
+                arch: `<toy>Specific arch content</toy>`,
+                fields: {},
                 searchViewArch: `<search/>`,
                 searchViewFields: {},
             });
@@ -608,10 +623,15 @@ QUnit.module("Views", (hooks) => {
             patchWithCleanup(ToyView.prototype, {
                 setup() {
                     this._super();
-                    const { irFilters, searchViewArch, searchViewFields } = this.props.info;
+                    const {
+                        irFilters,
+                        searchViewArch,
+                        searchViewFields,
+                        searchViewId,
+                    } = this.props.info;
                     assert.strictEqual(searchViewArch, `<search/>`);
                     assert.deepEqual(searchViewFields, {});
-                    assert.notOk("searchViewId" in this.props);
+                    assert.strictEqual(searchViewId, undefined);
                     assert.deepEqual(irFilters, irFilters);
                 },
             });
@@ -679,20 +699,16 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("rendering with given arch attribute 'js_class'", async function (assert) {
-        assert.expect(4);
+        assert.expect(2);
         const view = await makeView({
             serverData,
-            mockRPC: (_, args) => {
-                assert.deepEqual(args.kwargs.views, [[false, "toy"]]);
-                assert.deepEqual(args.kwargs.options, {
-                    action_id: false,
-                    load_filters: false,
-                    toolbar: false,
-                });
+            mockRPC: () => {
+                throw new Error("no RPC expected");
             },
             resModel: "animal",
             type: "toy",
             arch: `<toy js_class="toy_imp">Specific arch content for specific class</toy>`,
+            fields: {},
         });
         assert.hasClass(view.el, "o_toy_view_imp");
         assert.strictEqual(view.el.innerText, "Specific arch content for specific class");
@@ -729,7 +745,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "rendering with given arch attribute 'js_class' and given jsClass",
         async function (assert) {
-            assert.expect(3);
+            assert.expect(1);
 
             class ToyView2 extends Component {}
             ToyView2.template = xml`<div class="o_toy_view_2"/>`;
@@ -738,17 +754,13 @@ QUnit.module("Views", (hooks) => {
 
             const view = await makeView({
                 serverData,
-                mockRPC: (_, args) => {
-                    assert.deepEqual(args.kwargs.views, [[false, "toy"]]);
-                    assert.deepEqual(args.kwargs.options, {
-                        action_id: false,
-                        load_filters: false,
-                        toolbar: false,
-                    });
+                mockRPC: () => {
+                    throw new Error("no RPC expected");
                 },
                 resModel: "animal",
                 type: "toy_2",
                 arch: `<toy js_class="toy_imp"/>`,
+                fields: {},
             });
             assert.hasClass(view.el, "o_toy_view_imp", "jsClass from arch prefered");
         }
@@ -776,6 +788,55 @@ QUnit.module("Views", (hooks) => {
             assert.step(error.message);
         }
         assert.verifySteps([`View props should have a "type" key`]);
+    });
+
+    QUnit.test("'arch' cannot be passed as prop alone", async function (assert) {
+        assert.expect(2);
+        try {
+            await makeView({ serverData, resModel: "animal", type: "toy", arch: "<toy/>" });
+        } catch (error) {
+            assert.step(error.message);
+        }
+        assert.verifySteps([`"arch" and "fields" props must be given together`]);
+    });
+
+    QUnit.test("'fields' cannot be passed as prop alone", async function (assert) {
+        assert.expect(2);
+        try {
+            await makeView({ serverData, resModel: "animal", type: "toy", fields: {} });
+        } catch (error) {
+            assert.step(error.message);
+        }
+        assert.verifySteps([`"arch" and "fields" props must be given together`]);
+    });
+
+    QUnit.test("'searchViewArch' cannot be passed as prop alone", async function (assert) {
+        assert.expect(2);
+        try {
+            await makeView({
+                serverData,
+                resModel: "animal",
+                type: "toy",
+                searchViewArch: "<toy/>",
+            });
+        } catch (error) {
+            assert.step(error.message);
+        }
+        assert.verifySteps([
+            `"searchViewArch" and "searchViewFields" props must be given together`,
+        ]);
+    });
+
+    QUnit.test("'searchViewFields' cannot be passed as prop alone", async function (assert) {
+        assert.expect(2);
+        try {
+            await makeView({ serverData, resModel: "animal", type: "toy", searchViewFields: {} });
+        } catch (error) {
+            assert.step(error.message);
+        }
+        assert.verifySteps([
+            `"searchViewArch" and "searchViewFields" props must be given together`,
+        ]);
     });
 
     ////////////////////////////////////////////////////////////////////////////
@@ -823,7 +884,7 @@ QUnit.module("Views", (hooks) => {
 
         class ToyView extends Component {
             setup() {
-                assert.notOk("noContentHelp" in this.props);
+                assert.strictEqual(this.props.info.noContentHelp, undefined);
             }
         }
         ToyView.template = xml`<div/>`;
@@ -880,7 +941,13 @@ QUnit.module("Views", (hooks) => {
         ToyView.type = "toy";
         viewRegistry.add("toy", ToyView, { force: true });
 
-        await makeView({ serverData, resModel: "animal", type: "toy", arch: `<toy sample="1"/>` });
+        await makeView({
+            serverData,
+            resModel: "animal",
+            type: "toy",
+            arch: `<toy sample="1"/>`,
+            fields: {},
+        });
     });
 
     QUnit.test("sample='0' on arch and useSampleModel=true", async function (assert) {
@@ -901,6 +968,7 @@ QUnit.module("Views", (hooks) => {
             type: "toy",
             useSampleModel: true,
             arch: `<toy sample="0"/>`,
+            fields: {},
         });
     });
 
@@ -922,6 +990,7 @@ QUnit.module("Views", (hooks) => {
             type: "toy",
             useSampleModel: false,
             arch: `<toy sample="1"/>`,
+            fields: {},
         });
     });
 
