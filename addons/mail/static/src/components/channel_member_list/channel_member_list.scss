@@ -57,6 +57,14 @@
 // Style
 // ------------------------------------------------------------------
 
+.o_ChannelMemberList_avatarContainer {
+    cursor: pointer;
+}
+
+.o_ChannelMemberList_name {
+    cursor: pointer;
+}
+
 .o_ChannelMemberList_partnerImStatusIcon {
     color: theme-color('light'); // same as background of parent
 }

@@ -22,7 +22,7 @@
         <h6 class="m-2"><t t-esc="title"/> - <t t-esc="members.length"/></h6>
         <t t-foreach="members" t-as="member" t-key="member.localId">
             <div class="o_ChannelMemberList_member">
-                <div class="o_ChannelMemberList_avatarContainer">
+                <div class="o_ChannelMemberList_avatarContainer" t-on-click="channel.onClickMemberAvatar(member)">
                     <img class="o_ChannelMemberList_avatar" t-att-src="member.avatarUrl" alt="Avatar"/>
                     <t t-if="member.im_status">
                         <PartnerImStatusIcon
@@ -35,7 +35,7 @@
                     </t>
                 </div>
                 <div class="o_ChannelMemberList_avatarNameSeparator"/>
-                <span class="o_ChannelMemberList_name">
+                <span class="o_ChannelMemberList_name" t-on-click="channel.onClickMemberName(member)">
                     <t t-esc="member.nameOrDisplayName"/>
                 </span>
             </div>
