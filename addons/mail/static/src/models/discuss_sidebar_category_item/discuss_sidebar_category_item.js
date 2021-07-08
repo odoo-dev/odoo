@@ -26,7 +26,7 @@ function factory(dependencies) {
             switch (this.channelType) {
                 case 'channel':
                 case 'group':
-                    return `/web/image/mail.channel/${this.channelId}/image_128`;
+                    return `/web/image/mail.channel/${this.channelId}/avatar_128?unique=${this.channelAvatarUnique}`;
                 case 'chat':
                     return this.channel.correspondent.avatarUrl;
             }
@@ -134,9 +134,11 @@ function factory(dependencies) {
         _computeHasThreadIcon() {
             switch (this.channelType) {
                 case 'channel':
+                    return this.channelPublic === 'private';
                 case 'chat':
-                case 'group':
                     return true;
+                case 'group':
+                    return false;
             }
         }
 
@@ -169,6 +171,7 @@ function factory(dependencies) {
          */
         avatarUrl: attr({
             compute: '_computeAvatarUrl',
+            dependencies: ['channelAvatarUnique'],
         }),
         /**
          * Amount of unread/action-needed messages
@@ -199,6 +202,7 @@ function factory(dependencies) {
          */
         hasThreadIcon: attr({
             compute: '_computeHasThreadIcon',
+            dependencies: ['channelPublic'],
         }),
         /**
          * Boolean determines whether the item has a "unpin" command.
@@ -231,6 +235,12 @@ function factory(dependencies) {
             compute: '_computeChannel',
         }),
         /**
+         * Serves as compute dependency.
+         */
+        channelAvatarUnique: attr({
+            related: 'channel.avatarUnique',
+        }),
+        /**
          * Id of the related channel thread.
          */
         channelId: attr({
@@ -241,6 +251,12 @@ function factory(dependencies) {
          */
         channelName: attr({
             related: 'channel.name',
+        }),
+        /**
+         * Public setting of the related channel thread.
+         */
+        channelPublic: attr({
+            related: 'channel.public',
         }),
         /**
          * Type of the related channel thread.

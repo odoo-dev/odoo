@@ -34,7 +34,14 @@ QUnit.module('discuss_sidebar_category_item_tests.js', {
 QUnit.test('channel - avatar: should have correct avatar', async function (assert) {
     assert.expect(2);
 
-    this.data['mail.channel'].records.push({ id: 20 });
+    this.data['mail.channel'].records.push({
+        id: 20,
+    });
+
+    // Stub Date.now for testing.
+    const originalDateNow = Date.now;
+    Date.now = () => 100111;
+
     await this.start();
 
     const channelItem = document.querySelector(`
@@ -53,9 +60,62 @@ QUnit.test('channel - avatar: should have correct avatar', async function (asser
 
     assert.strictEqual(
         channelItem.querySelector(`:scope .o_DiscussSidebarCategoryItem_image`).dataset.src,
-        '/web/image/mail.channel/20/image_128',
+        '/web/image/mail.channel/20/avatar_128?unique=100111',
         'should link to the correct picture source'
     );
+
+    // Recover Date.now after the test
+    Date.now = originalDateNow;
+});
+
+QUnit.test('channel - avatar: should update avatar url from bus', async function (assert) {
+    assert.expect(2);
+
+    this.data['mail.channel'].records.push({
+        id: 20,
+    });
+
+    await this.start();
+
+    const channelItemAvatar = document.querySelector(`
+        .o_DiscussSidebarCategoryItem[data-thread-local-id="${
+            this.env.models['mail.thread'].findFromIdentifyingData({
+                id: 20,
+                model: 'mail.channel',
+            }).localId
+        }"] .o_DiscussSidebarCategoryItem_image
+    `);
+
+    assert.notEqual(
+        channelItemAvatar.dataset.src,
+        '/web/image/mail.channel/20/avatar_128?unique=100111',
+    );
+
+    // Stub Date.now for testing
+    const originalDateNow = Date.now;
+    Date.now = () => 100111;
+
+    await afterNextRender(() => {
+        const notif = [
+            ['dbName', 'mail.channel', 20],
+            {
+                type: 'channel_avatar_changed',
+                payload: {
+                    id: 20,
+                },
+            },
+        ];
+        this.env.services.bus_service.trigger('notification', [notif]);
+    });
+
+    // FIXME: current test framework does not replace `src` with `data-src` during the re-rendering.
+    assert.strictEqual(
+        channelItemAvatar.getAttribute('src'),
+        '/web/image/mail.channel/20/avatar_128?unique=100111',
+    );
+
+    // Recover Date.now after the test.
+    Date.now = originalDateNow;
 });
 
 QUnit.test('chat - avatar: should have correct avatar', async function (assert) {

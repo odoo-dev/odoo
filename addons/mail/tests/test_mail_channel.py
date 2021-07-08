@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from base64 import b64encode
 from datetime import datetime
 from unittest.mock import patch
 
@@ -10,7 +11,7 @@ from odoo.addons.mail.tests.common import MailCommon
 from odoo.exceptions import AccessError
 from odoo.tests import tagged, Form
 from odoo.tests.common import users
-from odoo.tools import mute_logger
+from odoo.tools import html_escape, mute_logger, file_open
 
 
 @tagged('mail_channel')
@@ -435,6 +436,30 @@ class TestChannelInternals(MailCommon):
         ])
         self.assertEqual(len(messages_2), 1)
         self.assertEqual(messages_1, messages_2)
+
+    def test_channel_should_generate_correct_default_avatar(self):
+        channel = self.env['mail.channel'].browse(self.test_channel.ids)
+        channel.image_128 = False
+        channel.name = "test channel"
+        channel.create_date = datetime(2021, 1, 1)
+        bgcolor = html_escape('hsl(129.88235294117646, 44.8235294117647%, 45%)')
+        avatar_channel = b64encode(file_open('mail/static/src/img/channel.svg', 'r').read().replace('#875a7b', bgcolor).encode())
+        avatar_group = b64encode(file_open('mail/static/src/img/group.svg', 'r').read().replace('#875a7b', bgcolor).encode())
+
+        channel.channel_type = 'group'
+        self.assertEqual(channel.avatar_128, avatar_group)
+
+        channel.channel_type = 'channel'
+        self.assertEqual(channel.avatar_128, avatar_channel)
+
+        channel.image_128 = b64encode(("<svg/>").encode())
+        self.assertEqual(channel.avatar_128, channel.image_128)
+
+    def test_channel_write_should_send_notification_if_image_128_presents(self):
+        channel = self.env['mail.channel'].browse(self.test_channel.ids)
+
+        with self.assertBus([(self.cr.dbname, 'mail.channel', channel.id)]):
+            channel.image_128 = b64encode(("<svg/>").encode())
 
     def test_multi_company_chat(self):
         self._activate_multi_company()

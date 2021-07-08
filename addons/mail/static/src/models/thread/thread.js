@@ -1885,6 +1885,12 @@ function factory(dependencies) {
             readonly: true,
             required: true,
         }),
+        /**
+         * An unique integer to force a reload of the avatar when the avatar is changed.
+         */
+        avatarUnique: attr({
+            default: Date.now(),
+        }),
         callParticipants: one2many('mail.partner', {
             inverse: 'activeCallChannel',
         }),

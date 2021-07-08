@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
+from base64 import b64encode
+from hashlib import sha512
 import logging
 import re
 from uuid import uuid4
 
-from odoo import _, api, fields, models, modules, tools, Command
+from odoo import _, api, fields, models, tools, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import ormcache, formataddr
+from odoo.tools import html_escape, ormcache, file_open
 
 _logger = logging.getLogger(__name__)
 
@@ -32,10 +33,6 @@ class Channel(models.Model):
             res['alias_contact'] = 'everyone' if res.get('public', 'private') == 'public' else 'followers'
         return res
 
-    def _get_default_image(self):
-        image_path = modules.get_module_resource('mail', 'static/src/img', 'groupdefault.png')
-        return base64.b64encode(open(image_path, 'rb').read())
-
     # description
     name = fields.Char('Name', required=True, translate=True)
     active = fields.Boolean(default=True, help="Set active to false to hide the channel without removing it.")
@@ -46,7 +43,8 @@ class Channel(models.Model):
         string='Channel Type', default='channel')
     is_chat = fields.Boolean(string='Is a chat', compute='_compute_is_chat')
     description = fields.Text('Description')
-    image_128 = fields.Image("Image", max_width=128, max_height=128, default=_get_default_image)
+    image_128 = fields.Image("Image", max_width=128, max_height=128)
+    avatar_128 = fields.Image("Avatar", max_width=128, max_height=128, compute='_compute_avatar_128')
     channel_partner_ids = fields.Many2many(
         'res.partner', string='Members',
         compute='_compute_channel_partner_ids', inverse='_inverse_channel_partner_ids',
@@ -82,6 +80,27 @@ class Channel(models.Model):
     def _compute_channel_partner_ids(self):
         for channel in self:
             channel.channel_partner_ids = channel.channel_last_seen_partner_ids.partner_id
+
+    @api.depends('image_128', 'channel_type')
+    def _compute_avatar_128(self):
+        for record in self:
+            record.avatar_128 = record.image_128 if record.image_128 else record._generate_avatar()
+
+    def _generate_avatar(self):
+        if self.channel_type == 'group':
+            avatar_path = "mail/static/src/img/group.svg"
+        else:
+            avatar_path = "mail/static/src/img/channel.svg"
+        avatar = file_open(avatar_path, 'r').read()
+        if self.create_date:
+            seed = self.name + str(self.create_date.timestamp())
+            hashed_seed = sha512(seed.encode()).hexdigest()
+            hue = int(hashed_seed[0:2], 16) * 360 / 255
+            sat = int(hashed_seed[2:4], 16) * ((70 - 40) / 255) + 40
+            lig = 45
+            bgcolor = html_escape(f'hsl({hue}, {sat}%, {lig}%)')
+            avatar = avatar.replace('fill="#875a7b"', f'fill="{bgcolor}"')
+        return b64encode(avatar.encode())
 
     def _inverse_channel_partner_ids(self):
         new_members = []
@@ -129,7 +148,7 @@ class Channel(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        defaults = self.default_get(['image_128', 'public'])
+        defaults = self.default_get(['public'])
 
         access_types = []
         for vals in vals_list:
@@ -153,10 +172,6 @@ class Channel(models.Model):
                 (0, 0, {'partner_id': pid})
                 for pid in partner_ids_to_add if pid not in membership_pids
             ]
-
-            # ensure image at quick create
-            if not vals.get('image_128'):
-                vals['image_128'] = defaults['image_128']
 
             # save visibility, apply public visibility for create then set back after creation
             # to avoid ACLS issue
@@ -193,10 +208,22 @@ class Channel(models.Model):
     def write(self, vals):
         result = super(Channel, self).write(vals)
 
+        if 'image_128' in vals:
+            self._notify_channel_avatar_changed()
+
         if vals.get('group_ids'):
             self._subscribe_users_automatically()
 
         return result
+
+    def _notify_channel_avatar_changed(self):
+        for channel in self:
+            self.env['bus.bus'].sendone((self._cr.dbname, 'mail.channel', channel.id), {
+                'type': 'channel_avatar_changed',
+                'payload': {
+                    'id': channel.id,
+                },
+            })
 
     def init(self):
         self._cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('mail_channel_partner_seen_message_id_idx',))
@@ -1049,7 +1076,6 @@ class Channel(models.Model):
             'channel_partner_ids': [Command.link(partner_id) for partner_id in partners_to],
             'public': 'private',
             'channel_type': 'group',
-            'email_send': False,
             'name': ', '.join(self.env['res.partner'].sudo().browse(partners_to).mapped('name')),
         })
         channel.channel_last_seen_partner_ids.write({'is_pinned': True})

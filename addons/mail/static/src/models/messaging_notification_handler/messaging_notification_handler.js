@@ -84,6 +84,8 @@ function factory(dependencies) {
                 }
                 const [, model, id] = channel;
                 switch (message.type) {
+                    case 'channel_avatar_changed':
+                        return this._handleNotificationChannelAvatarChanged(message.payload);
                     case 'new_channel_members':
                         return this._handleNotificationNewChannelMembers(message.payload);
                     case 'channel_members_leaving':
@@ -179,6 +181,14 @@ function factory(dependencies) {
             });
             // FIXME force the computing of message values (cf task-2261221)
             this.env.models['mail.message_seen_indicator'].recomputeFetchedValues(channel);
+        }
+
+        _handleNotificationChannelAvatarChanged({ id }) {
+            const channel = this.env.models['mail.thread'].findFromIdentifyingData({
+                id,
+                model: 'mail.channel',
+            });
+            channel.update({ avatarUnique: Date.now() });
         }
 
         /**
