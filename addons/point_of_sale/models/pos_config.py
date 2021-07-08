@@ -43,14 +43,6 @@ class AccountBankStmtCashWizard(models.Model):
                 vals['cashbox_lines_ids'] = [[0, 0, {'coin_value': line.coin_value, 'number': 0, 'subtotal': 0.0}] for line in lines]
         return vals
 
-    def _validate_cashbox(self):
-        super(AccountBankStmtCashWizard, self)._validate_cashbox()
-        session_id = self.env.context.get('pos_session_id')
-        if session_id:
-            current_session = self.env['pos.session'].browse(session_id)
-            if current_session.state == 'new_session':
-                current_session.write({'state': 'opening_control'})
-
     def set_default_cashbox(self):
         self.ensure_one()
         current_session = self.env['pos.session'].browse(self.env.context['pos_session_id'])
@@ -145,7 +137,8 @@ class PosConfig(models.Model):
         help="The product categories will be displayed with pictures.")
     restrict_price_control = fields.Boolean(string='Restrict Price Modifications to Managers',
         help="Only users with Manager access rights for PoS app can modify the product prices on orders.")
-    cash_control = fields.Boolean(string='Advanced Cash Control', help="Check the amount of the cashbox at opening and closing.")
+    cash_control = fields.Boolean(string='Advanced Cash Control', compute='_compute_cash_control', help="Check the amount of the cashbox at opening and closing.")
+    set_maximum_difference = fields.Boolean('Set Maximum Difference', help="Set a maximum difference allowed between the expected and counted cash during the closing of the session.")
     receipt_header = fields.Text(string='Receipt Header', help="A short text that will be inserted as a header in the printed receipt.")
     receipt_footer = fields.Text(string='Receipt Footer', help="A short text that will be inserted as a footer in the printed receipt.")
     proxy_ip = fields.Char(string='IP Address', size=45,
@@ -192,6 +185,7 @@ class PosConfig(models.Model):
         help="This product is used as reference on customer receipts.")
     fiscal_position_ids = fields.Many2many('account.fiscal.position', string='Fiscal Positions', help='This is useful for restaurants with onsite and take-away services that imply specific tax rates.')
     default_fiscal_position_id = fields.Many2one('account.fiscal.position', string='Default Fiscal Position')
+    default_bill_ids = fields.Many2many('pos.bill', string="Coins/Bills")
     default_cashbox_id = fields.Many2one('account.bank.statement.cashbox', string='Default Balance')
     use_pricelist = fields.Boolean("Use a pricelist.")
     tax_regime = fields.Boolean("Tax Regime")
@@ -241,6 +235,11 @@ class PosConfig(models.Model):
                                                    "In the meantime, you can use the 'Load Customers' button to load partners from database.")
     limited_partners_amount = fields.Integer(default=100)
     partner_load_background = fields.Boolean()
+
+    @api.depends('payment_method_ids')
+    def _compute_cash_control(self):
+        for config in self:
+            config.cash_control = bool(config.payment_method_ids.filtered('is_cash_count'))
 
     @api.depends('use_pricelist', 'available_pricelist_ids')
     def _compute_allowed_pricelist_ids(self):
@@ -335,12 +334,6 @@ class PosConfig(models.Model):
     def _compute_customer_facing_display(self):
         for config in self:
             config.iface_customer_facing_display = config.iface_customer_facing_display_via_proxy or config.iface_customer_facing_display_local
-
-    @api.constrains('cash_control')
-    def _check_session_state(self):
-        open_session = self.env['pos.session'].search([('config_id', 'in', self.ids), ('state', '!=', 'closed')], limit=1)
-        if open_session:
-            raise ValidationError(_("You are not allowed to change the cash control status while a session is already opened."))
 
     @api.constrains('rounding_method')
     def _check_rounding_method_strategy(self):
@@ -536,7 +529,7 @@ class PosConfig(models.Model):
         return result
 
     def _get_forbidden_change_fields(self):
-        forbidden_keys = ['module_pos_hr', 'cash_control', 'module_pos_restaurant', 'available_pricelist_ids',
+        forbidden_keys = ['module_pos_hr', 'module_pos_restaurant', 'available_pricelist_ids',
                           'limit_categories', 'iface_available_categ_ids', 'use_pricelist', 'module_pos_discount',
                           'payment_method_ids', 'iface_tipproduc']
         return forbidden_keys
@@ -609,7 +602,7 @@ class PosConfig(models.Model):
         """
         self.ensure_one()
         # check all constraints, raises if any is not met
-        self._validate_fields(set(self._fields) - {"cash_control"})
+        self._validate_fields(self._fields)
         return {
             'type': 'ir.actions.act_url',
             'url': self._get_pos_base_url() + '?config_id=%d' % self.id,
