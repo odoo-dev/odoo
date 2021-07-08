@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="CurrencyAmount" owl="1">
+        <span>
+            <t t-if="props.currency.position === 'before'"><t t-esc="props.currency.symbol"/><![CDATA[ ]]></t>
+            <t t-esc="props.amount"/>
+            <t t-if="props.currency.position === 'after'"><![CDATA[ ]]><t t-esc="props.currency.symbol"/></t>
+            <t t-if="props.optionalAfterText"><![CDATA[ ]]> <t t-esc="props.optionalAfterText"/></t>
+        </span>
+    </t>
+</templates>

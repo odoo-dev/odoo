@@ -1,54 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-
     <t t-name="CashOpeningPopup" owl="1">
         <div role="dialog" class="modal-dialog">
-            <div class="popup popup-confirm">
+            <div class="popup popup-confirm opening-cash-control">
                 <header class="title drag-handle">
-                    Start Cash Drawer
+                    OPENING CASH CONTROL
                 </header>
                 <main class="body">
-                    <div class="cashbox-input">
-                        <span class="input-title">
-                             Starting Cash
-                        </span>
-
-                        <span class="input-amount">
-                            <span t-if="currency.position === 'before'">
-                                <t t-esc="currency.symbol"/><span> </span>
-                            </span>
-                            <t t-esc="cashBoxValue"/>
-                            <span t-if="currency.position === 'after'">
-                                <span> </span><t t-esc="currency.symbol"/>
-                            </span>
-                        </span>
-                    </div><br/>
-                    <textarea style="line-height: 20px;" rows="3"
-                           placeholder="Notes" class="cashbox-input cashbox-notes"
-                           t-model="state.notes" t-ref="input"/><br/><br/>
-                    <div>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('1')">1</button>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('2')">2</button>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('3')">3</button>
-                        <br/>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('4')">4</button>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('5')">5</button>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('6')">6</button>
-                        <br />
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('7')">7</button>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('8')">8</button>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('9')">9</button>
-                        <br/>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('.')">.</button>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('0')">0</button>
-                        <button class="input-button number-char cashbox-button" t-on-click="sendInput('Backspace')">
-                            <img style="pointer-events: none;" src="/point_of_sale/static/src/img/backspace.png"
-                            width="24" height="21" alt="Backspace" />
-                        </button>
-                    </div><br/>
+                    <div class="cashbox-display">
+                        <div class="cashbox-display-info">
+                            <div class="info">
+                                <span class="info-title">Previous closing cash</span>
+                                <CurrencyAmount currency="currency" amount="previousClosingCash"/>
+                            </div>
+                            <div class="info">
+                                <span class="info-title">Opening cash</span>
+                                <CurrencyAmount currency="currency" amount="state.openingCashString" t-ref="openingCash"/>
+                            </div>
+                            <div class="info">
+                                <span class="info-title">(Cash difference</span>
+                                <CurrencyAmount currency="currency" amount="state.cashDifference" optionalAfterText="')'"/>
+                            </div>
+                        </div>
+                        <div class="details-button-section">
+                            <button class="button cashbox-button" t-on-click="openDetailsPopup()">Details</button>
+                        </div>
+                    </div>
+                    <div class="input-section">
+                        <textarea placeholder="Notes" class="cashbox-input cashbox-notes" t-model="state.notes" t-ref="input"/>
+                        <div>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('1')">1</button>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('2')">2</button>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('3')">3</button>
+                            <br/>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('4')">4</button>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('5')">5</button>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('6')">6</button>
+                            <br />
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('7')">7</button>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('8')">8</button>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('9')">9</button>
+                            <br/>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('.')">.</button>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('0')">0</button>
+                            <button class="input-button number-char cashbox-button" t-on-click="sendInput('Backspace')">
+                                <img style="pointer-events: none;" src="/point_of_sale/static/src/img/backspace.png"
+                                width="24" height="21" alt="Backspace" />
+                            </button>
+                        </div>
+                    </div>
+                    <br/>
                 </main>
                 <footer class="footer">
-                    <button style="height: 50px; margin: 22px 22px 22px 0px" t-model="state.notes" class="button cashbox-button" t-on-click="startSession()">Start Drawer</button>
+                    <button class="button cashbox-button" t-on-click="startSession()">Open session</button>
+                </footer>
+            </div>
+            <div class="popup opening-cash-details invisible">
+                <main class="body">
+                    <div class="details" t-if="Object.entries(state.coins).length !== 0">
+                        <div class="details-title">
+                            Coins
+                        </div>
+                        <t t-foreach="state.coins" t-as="coin" t-key="coin">
+                            <div class="details-value">
+                                <div class="input-details" t-ref="{{coin}}">
+                                    <span t-esc="state.coins[coin]"/>
+                                </div>
+                                <input type="number" t-on-click="onInputClick(coin, 'coins')" onkeydown="return false;"/>
+                                <CurrencyAmount currency="currency" amount="coin"/>
+                            </div>
+                        </t>
+                    </div>
+                    <div class="details" t-if="Object.entries(state.bills).length !== 0">
+                        <div class="details-title">
+                            Bills
+                        </div>
+                        <t t-foreach="state.bills" t-as="bill" t-key="bill">
+                            <div class="details-value">
+                                <div class="input-details" t-ref="{{bill}}">
+                                    <span t-esc="state.bills[bill]"/>
+                                </div>
+                                <input type="number" t-on-click="onInputClick(bill, 'bills')" onkeydown="return false;"/>
+                                <CurrencyAmount currency="currency" amount="bill"/>
+                            </div>
+                        </t>
+                    </div>
+                </main>
+                <footer class="footer">
+                    <button class="button cashbox-button" t-on-click="computeOpeningCash">OK</button>
+                    <button class="button cashbox-button" t-on-click="resetDetails">Cancel</button>
                 </footer>
             </div>
         </div>

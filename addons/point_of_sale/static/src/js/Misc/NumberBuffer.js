@@ -10,11 +10,9 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
     const { _t } = require('web.core');
     const { Gui } = require('point_of_sale.Gui');
 
-    const INPUT_KEYS = new Set(
-        ['Delete', 'Backspace', '+1', '+2', '+5', '+10', '+20', '+50'].concat('0123456789+-.,'.split(''))
-    );
-    const CONTROL_KEYS = new Set(['Enter', 'Esc']);
-    const ALLOWED_KEYS = new Set([...INPUT_KEYS, ...CONTROL_KEYS]);
+    const INPUT_KEYS = ['+1', '+2', '+5', '+10', '+20', '+50'].concat('0123456789+-.,'.split(''));
+    const DELETE_KEYS = ['Delete', 'Backspace'];
+    const CONTROL_KEYS = ['Enter', 'Esc'];
     const getDefaultConfig = () => ({
         decimalPoint: false,
         triggerAtEnter: false,
@@ -22,6 +20,8 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
         triggerAtInput: false,
         nonKeyboardInputEvent: false,
         useWithBarcode: false,
+        allowInputTarget: false,
+        inputKeys: INPUT_KEYS,
     });
 
     /**
@@ -128,6 +128,8 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
          *      that carries a payload of { key }. The key is checked if it is a valid input. If valid,
          *      the number buffer is modified just as it is modified when a keyboard key is pressed.
          * @param {Boolean} config.useWithBarcode Whether this buffer is used with barcode.
+         * @param {Boolean} config.allowInputTarget Whether we accept key coming from an <input> tag
+         * @param {Array} config.inputKeys Array of allowed input keys
          * @emits config.triggerAtEnter when 'Enter' key is pressed.
          * @emits config.triggerAtEsc when 'Esc' key is pressed.
          * @emits config.triggerAtInput when an input is accepted.
@@ -166,6 +168,10 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
             this.maxTimeBetweenKeys = this.config.useWithBarcode
                 ? BarcodeEvents.max_time_between_keys_in_ms
                 : 0;
+            this.forbiddenTargets = config.allowInputTarget ? ['TEXTAREA'] : ['INPUT', 'TEXTAREA'];
+            this.updateBufferKeys = config.inputKeys ?
+                new Set([...config.inputKeys, ...DELETE_KEYS]) : new Set([...INPUT_KEYS, ...DELETE_KEYS])
+            this.allowedKeys = new Set([...this.updateBufferKeys, ...CONTROL_KEYS]);
         }
         _onKeyboardInput(event) {
             return this._bufferEvents(this._onInput(event => event.key))(event);
@@ -175,7 +181,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
         }
         _bufferEvents(handler) {
             return event => {
-                if (['INPUT', 'TEXTAREA'].includes(event.target.tagName) || !this.eventsBuffer) return;
+                if (this.forbiddenTargets.includes(event.target.tagName) || !this.eventsBuffer) return;
                 clearTimeout(this._timeout);
                 this.eventsBuffer.push(event);
                 this._timeout = setTimeout(handler, this.maxTimeBetweenKeys);
@@ -188,7 +194,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
                     // Check first the buffer if its contents are all valid
                     // number input.
                     for (let event of this.eventsBuffer) {
-                        if (!ALLOWED_KEYS.has(keyAccessor(event))) {
+                        if (!this.allowedKeys.has(keyAccessor(event))) {
                             this.eventsBuffer = [];
                             return;
                         }
@@ -210,7 +216,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
                 this.component.trigger(this.config.triggerAtEnter, this.state);
             } else if (key === 'Esc' && this.config.triggerAtEsc) {
                 this.component.trigger(this.config.triggerAtEsc, this.state);
-            } else if (INPUT_KEYS.has(key)) {
+            } else if (this.updateBufferKeys.has(key)) {
                 this._updateBuffer(key);
                 if (this.config.triggerAtInput)
                     this.component.trigger(this.config.triggerAtInput, { buffer: this.state.buffer, key });
