@@ -18,15 +18,17 @@ const { mount } = owl;
 export async function makeView(params) {
     const serverData = params.serverData;
     const mockRPC = params.mockRPC;
-    const env = await makeTestEnv({ serverData, mockRPC });
-
     const props = Object.assign({}, params);
     delete props.serverData;
     delete props.mockRPC;
-    props.fields = props.fields || serverData.models[props.resModel].fields;
 
+    props.fields = props.fields || Object.assign({}, serverData.models[props.resModel].fields);
+    if (props.searchViewArch && !props.searchViewFields) {
+        props.searchViewFields = Object.assign({}, props.fields);
+    }
+
+    const env = await makeTestEnv({ serverData, mockRPC });
     const target = getFixture();
-
     const view = await mount(View, { env, props, target });
 
     registerCleanup(() => view.destroy());
