@@ -253,7 +253,7 @@ class PosSession(models.Model):
     def action_pos_session_open(self):
         # second browse because we need to refetch the data from the DB for cash_register_id
         # we only open sessions that haven't already been opened
-        for session in self.filtered(lambda session: session.state in ('new_session', 'opening_control')):
+        for session in self.filtered(lambda session: session.state == 'opening_control'):
             values = {}
             if not session.start_at:
                 values['start_at'] = fields.Datetime.now()

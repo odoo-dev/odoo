@@ -48,8 +48,6 @@ class AccountBankStmtCashWizard(models.Model):
         session_id = self.env.context.get('pos_session_id')
         if session_id:
             current_session = self.env['pos.session'].browse(session_id)
-            if current_session.state == 'new_session':
-                current_session.write({'state': 'opening_control'})
 
     def set_default_cashbox(self):
         self.ensure_one()
