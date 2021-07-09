@@ -12,7 +12,7 @@
                 <t t-set="currentGroup" t-value="null"/>
                 <t t-foreach="items" t-as="item" t-key="item.id or item.key">
                     <t t-if="currentGroup !== null and currentGroup !== item.groupNumber">
-                        <div role="separator" class="dropdown-divider"/>
+                        <li role="separator" class="dropdown-divider"/>
                     </t>
                     <t t-if="item.type ==='favorite'">
                         <DropdownItem class="o_menu_item dropdown-item"
@@ -28,7 +28,9 @@
                         </DropdownItem>
                     </t>
                     <t t-else="">
-                        <t t-component="item.Component" t-on-dropdown-item-selected.stop=""/>
+                        <li>
+                            <t t-component="item.Component" t-on-dropdown-item-selected.stop=""/>
+                        </li>
                     </t>
                     <t t-set="currentGroup" t-value="item.groupNumber"/>
                 </t>
