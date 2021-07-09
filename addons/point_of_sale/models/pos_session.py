@@ -1242,6 +1242,8 @@ class PosSession(models.Model):
         self.state = 'opened'
         self.cash_register_id.balance_start = cashbox_value
         if notes:
+            notes = notes.replace('\n', '<br/>')
+            notes = notes.replace('\n', '<br/>')
             self.env['mail.message'].create({
                         'body': notes,
                         'model': 'account.bank.statement',

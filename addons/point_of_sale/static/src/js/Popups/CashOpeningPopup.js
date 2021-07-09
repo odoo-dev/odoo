@@ -46,12 +46,12 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
         }
 
         startSession() {
-            this.env.pos.bank_statement.balance_start = parseFloat(this.state.cashBoxValue);
+            this.env.pos.bank_statement.balance_start = parseFloat(this.state.openingCashString);
             this.env.pos.pos_session.state = 'opened';
             this.rpc({
                    model: 'pos.session',
                     method: 'set_cashbox_pos',
-                    args: [this.env.pos.pos_session.id, parseFloat(this.state.cashBoxValue), this.state.notes],
+                    args: [this.env.pos.pos_session.id, parseFloat(this.state.openingCashString), this.state.notes],
                 });
             this.trigger('close-popup');
         }
@@ -74,7 +74,7 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
         }
         _updateOpeningCashString(value) {
             this.state.openingCashString = value;
-            this.state.cashDifference = parseFloat(this.state.openingCashString) - this.previousClosingCash;
+            this.state.cashDifference =  this.env.pos.format_currency_no_symbol(this.previousClosingCash - parseFloat(this.state.openingCashString));
         }
         _updateSelectedAmount(event) {
             if (this.selectedDetailsRef) {
@@ -122,8 +122,8 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
         }
         _fillNotesWithMoneyDetails() {
             let notes = 'Money details: \n';
-            for (let key in this.state.coins) { if (this.state.coins[key]) notes += `  - ${this.state.coins[key]} x ${key}\n` }
-            for (let key in this.state.bills) { if (this.state.bills[key]) notes += `  - ${this.state.bills[key]} x ${key}\n` }
+            for (let key in this.state.coins) { if (this.state.coins[key]) notes += `  - ${this.state.coins[key]} x ${this.env.pos.format_currency(key)}\n` }
+            for (let key in this.state.bills) { if (this.state.bills[key]) notes += `  - ${this.state.bills[key]} x ${this.env.pos.format_currency(key)}\n` }
             this.state.notes = notes;
         }
     }
