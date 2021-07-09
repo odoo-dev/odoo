@@ -17,11 +17,9 @@ class RtcInvitations extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const threads = this.env.models['mail.thread'].all().filter(thread => !!thread.rtcRingingPartner);
+            const threads = this.env.messaging && this.env.messaging.allThreads.filter(thread => !!thread.rtcRingingPartner);
             return {
-                threads: threads
-                    ? threads.map(thread => thread.__state)
-                    : undefined,
+                threads: threads ? threads.map(thread => thread.__state) : [],
             };
         });
     }
@@ -34,7 +32,7 @@ class RtcInvitations extends Component {
      * @returns {mail.thread[]}
      */
     get threads() {
-        return this.env.models['mail.thread'].all().filter(thread => !!thread.rtcRingingPartner);
+        return this.env.messaging ? this.env.messaging.allThreads.filter(thread => !!thread.rtcRingingPartner) : [];
     }
 }
 
