@@ -52,7 +52,7 @@ function parseNumber(value, options = {}) {
  * Formats a number into a more readable string representing a float.
  *
  * @param {number|false} value
- * @param {Object} options additional options
+ * @param {Object} [options] additional options
  * @param {number} [options.precision=2] number of digits to keep after decimal point
  * @param {string} [options.decimalPoint="."] decimal separating character
  * @param {string} [options.thousandsSep=""] thousands separator to insert
@@ -71,6 +71,26 @@ export function formatFloat(value, options = {}) {
     const formatted = value.toFixed(options.precision || 2).split(".");
     formatted[0] = insertThousandsSep(+formatted[0], thousandsSep, grouping);
     return formatted.join(decimalPoint);
+}
+
+/**
+ * Formats a number into a more readable string representing an integer.
+ *
+ * @param {number|false} value
+ * @param {Object} [options] additional options
+ * @param {string} [options.thousandsSep=""] thousands separator to insert
+ * @param {number[]} [options.grouping]
+ *   array of relative offsets at which to insert `thousandsSep`.
+ *   See `numbers.insertThousandsSep` method.
+ * @returns {string}
+ */
+export function formatInteger(value, options = {}) {
+    if (value === false) {
+        return "";
+    }
+    const grouping = options.grouping || localization.grouping;
+    const thousandsSep = options.thousandsSep || localization.thousandsSep;
+    return insertThousandsSep(value.toFixed(0), thousandsSep, grouping);
 }
 
 /**
