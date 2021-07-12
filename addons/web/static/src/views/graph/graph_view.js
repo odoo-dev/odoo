@@ -24,9 +24,6 @@ const ORDERS = ["ASC", "DESC", null];
 export class GraphArchParser extends XMLParser {
     parse(arch, fields = {}) {
         const metaData = { fields, fieldModif: {} };
-        if (!arch) {
-            return metaData;
-        }
         this.visitXML(arch, (node) => {
             switch (node.tagName) {
                 case "graph":
@@ -98,23 +95,44 @@ export class GraphArchParser extends XMLParser {
     }
 }
 
+const KEYS = [
+    "additionalMeasures",
+    "disableLinking",
+    "display",
+    "fields",
+    "fieldModif",
+    "measure",
+    "mode",
+    "order",
+    "resModel",
+    "stacked",
+    "title",
+    "useSampleModel",
+];
+
 export class GraphView extends Component {
     setup() {
         this.actionService = useService("action");
 
-        const { additionalMeasures, arch, fields, state } = this.props;
-        const loadParams = {};
-        if (state) {
-            Object.assign(loadParams, state);
+        let modelParams;
+        if (this.props.state) {
+            modelParams = this.props.state;
         } else {
+            const { additionalMeasures, arch, fields } = this.props;
             const parser = new GraphArchParser();
-            const propsFromArch = parser.parse(arch, fields);
-            Object.assign(loadParams, this.props, propsFromArch);
-            const { measure } = loadParams;
+            const archInfo = parser.parse(arch, fields);
+            modelParams = {};
+            for (const key of KEYS) {
+                modelParams[key] = key in archInfo ? archInfo[key] : this.props[key];
+            }
+            if (archInfo.groupBy) {
+                modelParams.groupBy = archInfo.groupBy;
+            }
+            const { fieldModif, measure } = modelParams;
             const measures = [];
             for (const fieldName in fields) {
                 const field = fields[fieldName];
-                const { invisible, string } = loadParams.fieldModif[fieldName] || {};
+                const { invisible, string } = fieldModif[fieldName] || {};
                 if (!["id", "__count"].includes(fieldName) && field.store === true) {
                     if (
                         (!invisible && ["integer", "float", "monetary"].includes(field.type)) ||
@@ -128,10 +146,10 @@ export class GraphView extends Component {
                     }
                 }
             }
-            loadParams.measures = sortBy(measures, (m) => m.description.toLowerCase());
+            modelParams.measures = sortBy(measures, (m) => m.description.toLowerCase());
         }
 
-        this.model = useModel(this.constructor.Model, loadParams);
+        this.model = useModel(this.constructor.Model, modelParams);
 
         useSetupView({
             exportState: () => this.model.metaData,

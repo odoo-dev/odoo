@@ -73,8 +73,8 @@
             <div class="o_content">
                 <!-- <label t-if="model.metaData.title" t-esc="model.metaData.title"/> -->
                 <t t-if="model.data">
-                    <t t-if="model.metaData.useSampleModel and model.metaData.info.noContentHelp" t-call="web.ActionHelper">
-                        <t t-set="noContentHelp" t-value="model.metaData.info.noContentHelp"/>
+                    <t t-if="model.metaData.useSampleModel and props.info.noContentHelp" t-call="web.ActionHelper">
+                        <t t-set="noContentHelp" t-value="props.info.noContentHelp"/>
                     </t>
                     <t t-component="constructor.Renderer"
                         data="model.data"
