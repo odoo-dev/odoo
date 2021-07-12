@@ -8,6 +8,7 @@ import {
     formatInteger,
     formatMany2one,
     formatMonetary,
+    formatPercentage,
 } from "@web/fields/format";
 import { defaultLocalization } from "../helpers/mock_services";
 import { patchWithCleanup } from "../helpers/utils";
@@ -135,5 +136,30 @@ QUnit.module("Format Fields", (hooks) => {
             currency_id: { res_id: 11 },
         };
         assert.strictEqual(formatMonetary(200, floatField, { data }), "$ 200.00");
+    });
+
+    QUnit.test("formatPercentage", function (assert) {
+        assert.strictEqual(formatPercentage(false), "0%");
+        assert.strictEqual(formatPercentage(0), "0%");
+        assert.strictEqual(formatPercentage(0.5), "50%");
+
+        assert.strictEqual(formatPercentage(1), "100%");
+
+        assert.strictEqual(formatPercentage(-0.2), "-20%");
+        assert.strictEqual(formatPercentage(2.5), "250%");
+
+        assert.strictEqual(formatPercentage(0.125), "12.5%");
+        assert.strictEqual(formatPercentage(0.666666), "66.67%");
+        assert.strictEqual(formatPercentage(125), "12500%");
+
+        const options = {
+            humanReadable: () => true,
+        };
+        assert.strictEqual(formatPercentage(50, null, options), "5k%");
+        assert.strictEqual(formatPercentage(0.5, null, { noSymbol: true }), "50");
+
+        patchWithCleanup(localization, { grouping: [3, 0], decimalPoint: ",", thousandsSep: "." });
+        assert.strictEqual(formatPercentage(0.125), "12,5%");
+        assert.strictEqual(formatPercentage(0.666666), "66,67%");
     });
 });
