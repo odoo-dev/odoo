@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { BORDER_WHITE, DEFAULT_BG } from "@web/views/graph/colors";
-import { CallbackRecorder } from "@web/webclient/actions/action_hook";
 import { click, triggerEvent } from "@web/../tests/helpers/utils";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { dialogService } from "@web/core/dialog/dialog_service";
@@ -2067,88 +2066,84 @@ QUnit.module("Views", (hooks) => {
         checkLabels(assert, graph, ["Undefined", "red"]);
     });
 
-    QUnit.skip(
-        /** @todo fix normalize (metaData) in graph model */
-        "getOwnedQueryParams correctly returns mode, measure, and groupbys",
-        async function (assert) {
-            assert.expect(4);
-            const expectedContexts = [
-                {
-                    graph_mode: "bar",
-                    graph_measure: "__count",
-                    graph_groupbys: ["product_id"],
-                    group_by: [],
-                },
-                {
-                    graph_mode: "bar",
-                    graph_measure: "foo",
-                    graph_groupbys: ["product_id"],
-                    group_by: [],
-                },
-                {
-                    graph_mode: "line",
-                    graph_measure: "foo",
-                    graph_groupbys: ["product_id"],
-                    group_by: [],
-                },
-                {
-                    graph_mode: "line",
-                    graph_measure: "foo",
-                    graph_groupbys: ["product_id", "color_id"],
-                    group_by: ["product_id", "color_id"],
-                },
-            ];
+    QUnit.skip("save params succeeds", async function (assert) {
+        assert.expect(4);
+        const expectedContexts = [
+            {
+                graph_mode: "bar",
+                graph_measure: "__count",
+                graph_groupbys: ["product_id"],
+                group_by: [],
+            },
+            {
+                graph_mode: "bar",
+                graph_measure: "foo",
+                graph_groupbys: ["product_id"],
+                group_by: [],
+            },
+            {
+                graph_mode: "line",
+                graph_measure: "foo",
+                graph_groupbys: ["product_id"],
+                group_by: [],
+            },
+            {
+                graph_mode: "line",
+                graph_measure: "foo",
+                graph_groupbys: ["product_id", "color_id"],
+                group_by: ["product_id", "color_id"],
+            },
+        ];
 
-            let serverId = 1;
-            const graph = await makeView({
-                mockRPC: function (_, args) {
-                    if (args.method === "create_or_replace") {
-                        const favorite = args.args[0];
-                        assert.deepEqual(favorite.context, expectedContexts.shift());
-                        return serverId++;
-                    }
-                },
-                serverData,
-                resModel: "foo",
-                type: "graph",
-                arch: `
+        let serverId = 1;
+        const graph = await makeView({
+            mockRPC: function (_, args) {
+                if (args.method === "create_or_replace") {
+                    const favorite = args.args[0];
+                    assert.deepEqual(favorite.context, expectedContexts.shift());
+                    return serverId++;
+                }
+            },
+            serverData,
+            resModel: "foo",
+            type: "graph",
+            arch: `
                     <graph>
                         <field name="product_id"/>
                     </graph>
                 `,
-                searchViewId: false,
-            });
+            searchViewId: false,
+        });
 
-            await toggleFavoriteMenu(graph);
-            await toggleSaveFavorite(graph);
-            await editFavoriteName(graph, "First Favorite");
-            await saveFavorite(graph);
+        await toggleFavoriteMenu(graph);
+        await toggleSaveFavorite(graph);
+        await editFavoriteName(graph, "First Favorite");
+        await saveFavorite(graph);
 
-            await toggleMenu(graph, "Measures");
-            await toggleMenuItem(graph, "Foo");
+        await toggleMenu(graph, "Measures");
+        await toggleMenuItem(graph, "Foo");
 
-            await toggleFavoriteMenu(graph);
-            await toggleSaveFavorite(graph);
-            await editFavoriteName(graph, "Second Favorite");
-            await saveFavorite(graph);
+        await toggleFavoriteMenu(graph);
+        await toggleSaveFavorite(graph);
+        await editFavoriteName(graph, "Second Favorite");
+        await saveFavorite(graph);
 
-            await selectMode(graph, "line");
+        await selectMode(graph, "line");
 
-            await toggleFavoriteMenu(graph);
-            await toggleSaveFavorite(graph);
-            await editFavoriteName(graph, "Third Favorite");
-            await saveFavorite(graph);
+        await toggleFavoriteMenu(graph);
+        await toggleSaveFavorite(graph);
+        await editFavoriteName(graph, "Third Favorite");
+        await saveFavorite(graph);
 
-            await toggleGroupByMenu(graph);
-            await toggleMenuItem(graph, "Product");
-            await toggleMenuItem(graph, "Color");
+        await toggleGroupByMenu(graph);
+        await toggleMenuItem(graph, "Product");
+        await toggleMenuItem(graph, "Color");
 
-            await toggleFavoriteMenu(graph);
-            await toggleSaveFavorite(graph);
-            await editFavoriteName(graph, "Fourth Favorite");
-            await saveFavorite(graph);
-        }
-    );
+        await toggleFavoriteMenu(graph);
+        await toggleSaveFavorite(graph);
+        await editFavoriteName(graph, "Fourth Favorite");
+        await saveFavorite(graph);
+    });
 
     QUnit.test("correctly uses graph_ keys from the context", async function (assert) {
         assert.expect(8);

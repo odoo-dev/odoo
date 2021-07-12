@@ -89,7 +89,7 @@ export class GraphModel extends Model {
     /**
      * @override
      */
-    setup(services) {
+    setup(params, services) {
         const { orm, user } = services;
         this.orm = orm;
         this.user = user;
@@ -97,7 +97,11 @@ export class GraphModel extends Model {
         this.keepLast = new KeepLast();
         this._fakeORM = null;
 
-        this.metaData = null;
+        this.firstLoad = true;
+        this.initialGroupBy = null;
+
+        this.metaData = params;
+
         this.data = null;
     }
 
@@ -252,12 +256,28 @@ export class GraphModel extends Model {
     }
 
     /**
-     * @param {Object} loadParams
+     * @param {Object} [searchParams={}]
      */
-    async load(loadParams) {
-        let metaData = Object.assign({}, this.metaData, loadParams);
+    async load(searchParams = {}) {
+        const { context, domains, groupBy } = searchParams;
+        const metaData = Object.assign({}, this.metaData, { context, domains });
+        if (!this.firstLoad || !metaData.groupBy) {
+            metaData.groupBy = groupBy;
+        }
         this.normalize(metaData);
+        if (!this.initialGroupBy) {
+            this.initialGroupBy = metaData.groupBy;
+        } else if (metaData.groupBy.length === 0) {
+            metaData.groupBy = this.initialGroupBy;
+        }
+        await this._fetchData(metaData);
+        this.firstLoad = false;
+    }
 
+    /**
+     * @param {Object} metaData
+     */
+    async _fetchData(metaData) {
         let dataPoints = await this.keepLast.add(this.loadDataPoints(metaData));
 
         this.metaData = metaData;
@@ -278,7 +298,7 @@ export class GraphModel extends Model {
                 };
                 this._fakeORM = new ORM(fakeRPC, this.user);
             }
-            dataPoints = await this.keepLast.add(this.loadDataPoints(metaData, true));
+            dataPoints = await this.keepLast.add(this.loadDataPoints(this.metaData, true));
         } else {
             this.metaData.useSampleModel = false;
             this._fakeORM = null;
@@ -288,10 +308,6 @@ export class GraphModel extends Model {
         if (this.isValidData(processedDataPoints)) {
             this.data = this.getData(processedDataPoints);
         }
-    }
-
-    reload(params) {
-        return this.load(params);
     }
 
     /**
@@ -486,7 +502,8 @@ export class GraphModel extends Model {
      * @param {Object} params
      */
     async updateMetaData(params) {
-        await this.load(params);
+        const metaData = Object.assign({}, this.metaData, params);
+        await this._fetchData(metaData);
         this.notify();
     }
 }
