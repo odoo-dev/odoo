@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { formatCurrency } from "@web/core/l10n/currency";
 import {
     formatFloat as _formatFloat,
     formatInteger as _formatInteger,
@@ -147,10 +148,44 @@ export function formatMany2one(value, field, options) {
     return value;
 }
 
+/**
+ * Returns a string representing a monetary value. The result takes into account
+ * the user settings (to display the correct decimal separator, currency, ...).
+ *
+ * @param {float|false} value the value that should be formatted
+ * @param {Object} [field]
+ *   a description of the field (returned by fields_get for example). It may
+ *   contain a description of the number of digits that should be used.
+ * @param {Object} [options]
+ *   additional options to override the values in the python description of the
+ *   field.
+ * @param {integer} [options.currencyId] the id of the 'res.currency' to use
+ * @param {string} [options.currencyField] the name of the field whose value is
+ *   the currency id (ignored if options.currency_id).
+ *   Note: if not given it will default to the field "currency_field" value or
+ *   on "currency_id".
+ * @param {Object} [options.data] a mapping of field names to field values,
+ *   required with options.currencyField
+ * @param {integer[]} [options.digits] see @formatCurrency
+ * @param {integer[]} [options.humanReadable] see @formatCurrency
+ * @param {integer[]} [options.noSymbol] see @formatCurrency
+ * @returns {string}
+ */
+export function formatMonetary(value, field, options = {}) {
+    let currencyId = options.currencyId;
+    if (!currencyId && options.data) {
+        const currencyField =
+            options.currencyField || (field && field.currency_field) || "currency_id";
+        currencyId = options.data[currencyField] && options.data[currencyField].res_id;
+    }
+    return formatCurrency(value, currencyId, options);
+}
+
 registry
     .category("formatters")
     .add("float", formatFloat)
     .add("float_factor", formatFloatFactor)
     .add("float_time", formatFloatTime)
     .add("integer", formatInteger)
-    .add("many2one", formatMany2one);
+    .add("many2one", formatMany2one)
+    .add("monetary", formatMonetary);
