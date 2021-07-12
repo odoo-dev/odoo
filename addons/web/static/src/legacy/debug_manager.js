@@ -3,7 +3,7 @@
 import { _lt } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
 import { formatDateTime, parseDateTime } from "@web/core/l10n/dates";
-import { formatMany2one } from "@web/fields/format";
+import { formatMany2one } from "@web/fields/formatters";
 import { registry } from "@web/core/registry";
 
 const { hooks } = owl;
