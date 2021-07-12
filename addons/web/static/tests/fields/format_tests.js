@@ -7,6 +7,7 @@ import {
     formatFloatTime,
     formatInteger,
     formatMany2one,
+    formatMonetary,
 } from "@web/fields/format";
 import { defaultLocalization } from "../helpers/mock_services";
 import { patchWithCleanup } from "../helpers/utils";
@@ -93,5 +94,46 @@ QUnit.module("Format Fields", (hooks) => {
             ),
             "A%20M2O%20value"
         );
+    });
+
+    QUnit.test("formatMonetary", function (assert) {
+        const field = {
+            type: "monetary",
+            currency_field: "c_x",
+        };
+        let data = {
+            c_x: { res_id: 11 },
+            c_y: { res_id: 12 },
+        };
+        patchWithCleanup(odoo.session_info.currencies, {
+            10: {
+                digits: [69, 2],
+                position: "after",
+                symbol: "€",
+            },
+            11: {
+                digits: [69, 2],
+                position: "before",
+                symbol: "$",
+            },
+            12: {
+                digits: [69, 2],
+                position: "after",
+                symbol: "&",
+            },
+        });
+
+        assert.strictEqual(formatMonetary(false), "");
+        assert.strictEqual(formatMonetary(200), "200.00");
+
+        assert.strictEqual(formatMonetary(200, field, { currencyId: 10, data }), "200.00 €");
+        assert.strictEqual(formatMonetary(200, field, { data }), "$ 200.00");
+        assert.strictEqual(formatMonetary(200, field, { currencyField: "c_y", data }), "200.00 &");
+
+        const floatField = { type: "float" };
+        data = {
+            currency_id: { res_id: 11 },
+        };
+        assert.strictEqual(formatMonetary(200, floatField, { data }), "$ 200.00");
     });
 });
