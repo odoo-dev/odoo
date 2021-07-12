@@ -94,6 +94,24 @@ export function formatInteger(value, options = {}) {
 }
 
 /**
+ * Formats a number into a string representing the value (multipled by  100) in
+ * percentage.
+ *
+ * @param {number | false} value
+ * @param {Object} [field]
+ * @param {Object} [options]
+ * @param {number} [options.precision=2] number of digits to keep after decimal point
+ * @param {boolean} [options.noSymbol] if true, doesn't concatenate with "%"
+ * @returns {string}
+ */
+export function formatPercentage(value, options = {}) {
+    value = (value || 0) * 100;
+    let result = window.parseFloat(value.toFixed(options.precision || 2)).toString();
+    result = result.replace(".", localization.decimalPoint);
+    return `${result}${options.noSymbol ? "" : "%"}`;
+}
+
+/**
  * Try to extract a float from a string. The localization is considered in the process.
  *
  * @param {string} value

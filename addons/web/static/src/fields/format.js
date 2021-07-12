@@ -4,6 +4,7 @@ import { formatCurrency } from "@web/core/l10n/currency";
 import {
     formatFloat as _formatFloat,
     formatInteger as _formatInteger,
+    formatPercentage as _formatPercentage,
     humanNumber,
 } from "@web/core/l10n/numbers";
 import { registry } from "@web/core/registry";
@@ -181,6 +182,24 @@ export function formatMonetary(value, field, options = {}) {
     return formatCurrency(value, currencyId, options);
 }
 
+/**
+ * Returns a string representing the given value (multiplied by 100)
+ * concatenated with '%'.
+ *
+ * @param {number | false} value
+ * @param {Object} [field]
+ * @param {Object} [options]
+ * @param {boolean} [options.noSymbol] if true, doesn't concatenate with "%"
+ * @returns {string}
+ */
+export function formatPercentage(value, field, options = {}) {
+    if (options.humanReadable && options.humanReadable(value * 100)) {
+        value = value || 0;
+        return `${humanNumber(value * 100, options)}${options.noSymbol ? "" : "%"}`;
+    }
+    return _formatPercentage(value, options);
+}
+
 registry
     .category("formatters")
     .add("float", formatFloat)
@@ -188,4 +207,5 @@ registry
     .add("float_time", formatFloatTime)
     .add("integer", formatInteger)
     .add("many2one", formatMany2one)
-    .add("monetary", formatMonetary);
+    .add("monetary", formatMonetary)
+    .add("percentage", formatPercentage);
