@@ -1323,8 +1323,6 @@ class Channel(models.Model):
             :returns: channel_info of the created or existing channel
             :rtype: dict
         """
-        if self.env.user.partner_id.id not in partners_to:
-            partners_to.append(self.env.user.partner_id.id)
         channel = self.create({
             'channel_partner_ids': [Command.link(partner_id) for partner_id in partners_to],
             'public': 'private',
@@ -1332,9 +1330,7 @@ class Channel(models.Model):
             'email_send': False,
             'name': ', '.join(self.env['res.partner'].sudo().browse(partners_to).mapped('name')),
         })
-        self.env['mail.channel.partner'].search(
-            [('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', channel.id)]).write(
-            {'is_pinned': True})
+        channel.channel_last_seen_partner_ids.write({'is_pinned': True})
         channel._broadcast(partners_to)
         return channel.channel_info()[0]
 

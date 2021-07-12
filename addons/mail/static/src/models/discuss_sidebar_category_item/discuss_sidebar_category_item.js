@@ -69,7 +69,7 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeHasLeaveCommand() {
-            return this.channelType === 'channel' &&
+            return (this.channelType === 'channel' || this.channelType === 'group') &&
                 !this.channelMessageNeedactionCounter &&
                 !this.channelGroupBasedSubscription;
         }

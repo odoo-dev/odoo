@@ -2,6 +2,7 @@
 
 import useShouldUpdateBasedOnProps from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 import useStore from '@mail/component_hooks/use_store/use_store';
+import useUpdate from '@mail/component_hooks/use_update/use_update';
 import PartnerSelector from '@mail/components/partner_selector/partner_selector';
 import RtcController from '@mail/components/rtc_controller/rtc_controller';
 import ThreadIcon from '@mail/components/thread_icon/thread_icon';
@@ -42,6 +43,12 @@ export class ThreadViewTopbar extends Component {
                 threadViewPendingThreadName: threadView && threadView.pendingThreadName,
             };
         });
+        useUpdate({ func: () => {
+            if (this.threadView.doFocusOnThreadRenameInput) {
+                this._threadNameInputRef.el.focus();
+                this.threadView.update({ doFocusOnThreadRenameInput: false });
+            }
+        } });
         /**
          * Reference to the thread name input (rename feature).
          * Useful to know when a click is done outside of it.

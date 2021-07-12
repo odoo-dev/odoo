@@ -89,6 +89,7 @@ function factory(dependencies) {
                 return;
             }
             this.update({
+                doFocusOnThreadRenameInput: true,
                 isEditingThreadName: true,
                 isMouseOverThreadName: false,
                 pendingThreadName: this.thread.displayName,
@@ -358,6 +359,12 @@ function factory(dependencies) {
          */
         deviceIsMobile: attr({
             related: 'device.isMobile',
+        }),
+        /**
+         * Determines whether the rename input needs to have focus.
+         */
+        doFocusOnThreadRenameInput: attr({
+            default: false,
         }),
         hasComposerFocus: attr({
             related: 'composer.hasFocus',

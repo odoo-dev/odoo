@@ -4,7 +4,6 @@ import useShouldUpdateBasedOnProps from '@mail/component_hooks/use_should_update
 import useStore from '@mail/component_hooks/use_store/use_store';
 import EditableText from '@mail/components/editable_text/editable_text';
 import PartnerImStatusIcon from '@mail/components/partner_im_status_icon/partner_im_status_icon';
-import GroupChatLeaveConfirmDialog from '@mail/components/group_chat_leave_confirm_dialog/group_chat_leave_confirm_dialog';
 import ThreadIcon from '@mail/components/thread_icon/thread_icon';
 
 import { isEventHandled } from '@mail/utils/utils';
@@ -13,7 +12,7 @@ import Dialog from 'web.Dialog';
 
 const { Component, useState } = owl;
 
-const components = { EditableText, GroupChatLeaveConfirmDialog, PartnerImStatusIcon, ThreadIcon };
+const components = { EditableText, PartnerImStatusIcon, ThreadIcon };
 
 export class DiscussSidebarCategoryItem extends Component {
 
@@ -77,6 +76,32 @@ export class DiscussSidebarCategoryItem extends Component {
         });
     }
 
+    /**
+     * @private
+     * @returns {Promise}
+     */
+    _askLeaveGroupConfirmation() {
+        return new Promise(resolve => {
+            Dialog.confirm(this,
+                this.env._t("You are about to leave this group conversation and will no longer have access to it unless you are invited again. Are you sure you want to continue?"),
+                {
+                    buttons: [
+                        {
+                            text: this.env._t("Leave"),
+                            classes: 'btn-primary',
+                            close: true,
+                            click: resolve
+                        },
+                        {
+                            text: this.env._t("Discard"),
+                            close: true
+                        }
+                    ]
+                }
+            );
+        });
+    }
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -110,18 +135,17 @@ export class DiscussSidebarCategoryItem extends Component {
         ev.stopPropagation();
     }
 
-    _onClickLeaveGroupChat() {
-        this.thread.members.length === 1 ? this.thread.unsubscribe() : this.state.hasLeaveConfirmDialog = true;
-    }
-
     /**
      * @private
      * @param {MouseEvent} ev
      */
     async _onClickLeave(ev) {
         ev.stopPropagation();
-        if (this.categoryItem.channel.creator === this.env.messaging.currentUser) {
+        if (this.categoryItem.channel.channel_type !== 'group' && this.categoryItem.channel.creator === this.env.messaging.currentUser) {
             await this._askAdminConfirmation();
+        }
+        if (this.categoryItem.channel.channel_type === 'group' && this.categoryItem.channel.members.length > 1) {
+            await this._askLeaveGroupConfirmation();
         }
         this.categoryItem.channel.unsubscribe();
     }
@@ -158,10 +182,6 @@ export class DiscussSidebarCategoryItem extends Component {
     _onClickUnpin(ev) {
         ev.stopPropagation();
         this.categoryItem.channel.unsubscribe();
-    }
-
-    _onLeaveConfirmDialogClosed() {
-        this.state.hasLeaveConfirmDialog = false;
     }
 
     /**
