@@ -11,7 +11,7 @@ export class hrTimesheetGraphModel extends GraphModel {
     /**
      * @override
      */
-    setup(services) {
+    setup(params, services) {
         super.setup(...arguments);
         this.companyService = services.company;
     }
