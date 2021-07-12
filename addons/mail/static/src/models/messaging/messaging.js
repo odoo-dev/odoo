@@ -174,6 +174,41 @@ function factory(dependencies) {
             this.update({ isNotificationPermissionDefault: this._computeIsNotificationPermissionDefault() });
         }
 
+        /**
+         * @param {Object} param0
+         * @param {String} param0.threadLocalId
+         */
+        async toggleCall({ threadLocalId='' } = {}) {
+            let activeCallThreadLocalId = threadLocalId;
+            if (this.activeCallThreadLocalId) {
+                await this.async(() => {
+                    this.env.models['mail.thread'].get(this.activeCallThreadLocalId).leaveCall();
+                });
+            }
+            if (this.activeCallThreadLocalId === activeCallThreadLocalId) {
+                activeCallThreadLocalId = '';
+            }
+            this.update({ activeCallThreadLocalId });
+
+            if (this.activeCallThreadLocalId) {
+                await this.async(() => {
+                    this.env.models['mail.thread'].get(this.activeCallThreadLocalId).joinCall();
+                });
+            }
+        }
+
+        /**
+         * @param {String} partnerId
+         */
+        toggleFocusedVideoPartner(partnerId) {
+            const focusedPartnerId = this.focusedVideoPartner && this.focusedVideoPartner.id;
+            if (!partnerId || focusedPartnerId === partnerId) {
+                this.update({ focusedVideoPartner: [['unlink']] });
+                return;
+            }
+            this.update({ focusedVideoPartner: [['insert', { id: partnerId } ]] });
+        }
+
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -215,6 +250,13 @@ function factory(dependencies) {
             isCausal: true,
             readonly: true,
         }),
+        /**
+         * The thread of the current RTC session.
+         * TODO make a relational field
+         */
+        activeCallThreadLocalId: attr({
+            default: '',
+        }),
         commands: one2many('mail.channel_command'),
         currentPartner: one2one('mail.partner'),
         currentUser: one2one('mail.user'),
@@ -234,6 +276,7 @@ function factory(dependencies) {
             isCausal: true,
             readonly: true,
         }),
+        focusedVideoPartner: one2one('mail.partner'),
         /**
          * Mailbox History.
          */
@@ -306,6 +349,10 @@ function factory(dependencies) {
          * Mailbox Starred.
          */
         starred: one2one('mail.thread'),
+        userSetting: one2one('mail.user_setting', {
+            default: create(),
+            inverse: 'messaging',
+        }),
     };
 
     Messaging.modelName = 'mail.messaging';

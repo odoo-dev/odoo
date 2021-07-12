@@ -63,13 +63,16 @@
 
 .o_ChatWindowHeader {
     background-color: $o-brand-odoo;
+    &.o-isActiveVoiceThread {
+        background-color: darken(theme-color('success'), 10%);
+    }
     color: $white;
 
     &:not(.o-mobile) {
         cursor: pointer;
     }
 
-    &:not(.o-mobile) {
+    &:not(.o-mobile):not(.o-isActiveVoiceThread) {
 
         &:hover .o_ChatWindowHeader_command {
             opacity: 0.7;
@@ -91,6 +94,13 @@
 
     &.o-mobile {
         font-size: 1.3rem;
+    }
+}
+
+.o_ChatWindowHeader_commandPhone {
+    color: theme-color('success');
+    &.o-activeCall {
+        color: theme-color('danger');
     }
 }
 

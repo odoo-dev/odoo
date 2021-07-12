@@ -290,3 +290,13 @@ class MailController(http.Controller):
         except:
             return {}
         return records._message_get_suggested_recipients()
+
+    @http.route('/mail/notify_peers', type="json", auth="user")
+    def notify_peers(self, targets, content):
+        notifications = []
+        for target in targets:
+            notifications.append([
+                (request._cr.dbname, 'res.partner', int(target)),
+                {'type': 'rtc_peer_notification', 'sender': request.env.user.partner_id.id, 'content': content},
+            ])
+        return request.env['bus.bus'].sendmany(notifications)

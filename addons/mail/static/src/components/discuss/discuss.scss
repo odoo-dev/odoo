@@ -79,7 +79,14 @@
     width: map-get($sizes, 100);
 }
 
-.o_Discuss_sidebar {
+.o_Discuss_thread_container {
+    display: flex;
+    width: map-get($sizes, 100);
+    height: map-get($sizes, 100);
+    overflow: auto;
+}
+
+.o_Discuss_sidebar, .o_Discuss_thread_callParticipants {
     height: map-get($sizes, 100);
     overflow: auto;
     padding-top: map-get($spacers, 3);

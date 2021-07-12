@@ -1,0 +1,61 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_UserSettingWindow {
+    display: flex;
+    overflow-y: auto;
+    flex-direction: column;
+    margin-left: map-get($spacers, 2);
+    border-bottom: 1px solid $border-color;
+    user-select: none;
+}
+
+.o_UserSettingWindow_option {
+    min-height: 40px;
+    padding: map-get($spacers, 1);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.o_UserSettingWindow_option_button {
+    margin-left: map-get($spacers, 2);
+}
+
+.o_UserSettingWindow_option_key {
+    padding-left: map-get($spacers, 3);
+    padding-right: map-get($spacers, 3);
+    margin-left: map-get($spacers, 1);
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_UserSettingWindow_register_button {
+    cursor: pointer;
+}
+
+.o_UserSettingWindow_option_button {
+    cursor: pointer;
+    &:hover {
+        color: black;
+    }
+}
+
+.o_UserSettingWindow_option_name {
+    font-weight: bold;
+}
+
+.o_UserSettingWindow_option_key {
+    font-size: 1.4em;
+    font-weight: bold;
+    border-radius: 3px;
+    border: 2px solid $o-brand-primary;
+
+    &.o-registering {
+        border-color: theme-color('danger');
+    }
+}

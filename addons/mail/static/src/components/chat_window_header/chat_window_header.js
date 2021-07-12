@@ -87,6 +87,31 @@ export class ChatWindowHeader extends Component {
         this.chatWindow.close();
     }
 
+    _onClickDeafen(ev) {
+        ev.stopPropagation();
+        this.env.mailRtc.toggleDeaf();
+    }
+
+    _onClickMicrophone(ev) {
+        ev.stopPropagation();
+        this.env.mailRtc.toggleMicrophone();
+    }
+
+    _onClickCamera(ev) {
+        ev.stopPropagation();
+        this.env.mailRtc.toggleUserVideo();
+    }
+
+    _onClickScreen(ev) {
+        ev.stopPropagation();
+        this.env.mailRtc.toggleScreenShare();
+    }
+
+    async _onClickPhone(ev) {
+        ev.stopPropagation();
+        await this.env.messaging.toggleCall({ threadLocalId: this.chatWindow.thread.localId });
+    }
+
     /**
      * @private
      * @param {MouseEvent} ev

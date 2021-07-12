@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.UserSettingWindow" owl="1">
+        <div class="o_UserSettingWindow">
+            <span class="o_UserSettingWindow_option">
+                <span class="o_UserSettingWindow_option_name">Use Push-to-talk:</span>
+                <input class="o_UserSettingWindow_option_button" type="checkbox" aria-title="toggle push-to-talk" title="toggle push-to-talk" t-on-change="_onChangePushToTalk" t-att-checked="userSetting.usePushToTalk ? 'checked' : ''"/>
+            </span>
+            <t t-if="userSetting.usePushToTalk">
+                <span class="o_UserSettingWindow_option">
+                    <span class="o_UserSettingWindow_option_name">Push-to-talk key:</span>
+                    <t t-if="userSetting.pushToTalkKey">
+                        <span class="o_UserSettingWindow_option_key" t-att-class="{ 'o-registering': state.isRegisteringKey }" t-esc="userSetting.pushToTalkKey"/>
+                    </t>
+                    <span role="button" class="o_UserSettingWindow_register_button" t-on-click="_onCLickKeyboard">
+                        <t t-if="state.isRegisteringKey">
+                            <i title="Cancel" aria-title="Cancel" class="o_UserSettingWindow_option_button fa fa-2x fa-times-circle"/>
+                        </t>
+                        <t t-else="">
+                            <i title="Register new key" aria-title="Register new key" class="o_UserSettingWindow_option_button fa fa-2x fa-keyboard-o"/>
+                        </t>
+                    </span>
+                </span>
+                <span t-if="state.isRegisteringKey">Press a key to register it as the push-to-talk shortcut</span>
+                <span class="o_UserSettingWindow_option">
+                    <span class="o_UserSettingWindow_option_name">Delay after releasing push-to-talk:</span>
+                    <input type="range" min="1" max="2000" step="1" t-att-value="userSetting.voiceActiveDuration" t-on-change="_onDelayChange"/>
+                    <span><t t-esc="userSetting.voiceActiveDuration"/></span>
+                    <span>ms</span>
+                </span>
+            </t>
+            <t t-else="">
+                <span class="o_UserSettingWindow_option">
+                    <span class="o_UserSettingWindow_option_name">Minimum activity for voice detection:</span>
+                    <input type="range" min="0.1" max="1" step="0.1" t-att-value="userSetting.voiceActivationThreshold" t-on-change="_onThresholdChange"/>
+                    <span><t t-esc="userSetting.voiceActivationThreshold"/></span>
+                </span>
+            </t>
+        </div>
+    </t>
+
+</templates>
