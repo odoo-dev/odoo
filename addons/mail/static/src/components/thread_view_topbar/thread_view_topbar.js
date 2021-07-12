@@ -18,8 +18,8 @@ export class ThreadViewTopbar extends Component {
      */
     setup() {
         super.setup();
-        useShouldUpdateBasedOnProps();
         useModels();
+        useShouldUpdateBasedOnProps();
         useRefToModel({ fieldName: 'threadNameInputRef', modelName: 'mail.thread_view_topbar', propNameAsRecordLocalId: 'localId', refName: 'threadNameInput' });
         useUpdateToModel({ methodName: 'onComponentUpdate', modelName: 'mail.thread_view_topbar', propNameAsRecordLocalId: 'localId' });
     }
@@ -33,6 +33,16 @@ export class ThreadViewTopbar extends Component {
      */
     get threadViewTopBar() {
         return this.env.models['mail.thread_view_topbar'].get(this.props.localId);
+    }
+
+    async _onClickPhone(ev) {
+        await this.threadViewTopBar.thread.toggleCall();
+    }
+
+    async _onClickCamera(ev) {
+        await this.threadViewTopBar.thread.toggleCall({
+            video: true,
+        });
     }
 
 }

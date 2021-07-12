@@ -290,3 +290,23 @@ class MailController(http.Controller):
         except:
             return {}
         return records._message_get_suggested_recipients()
+
+    @http.route('/mail/channel_call_notify', type="json", auth="user")
+    def channel_call_notify(self, sender, targets=None, content=None):
+        request.env['mail.rtc.session'].browse(int(sender))._notify_peers(targets, content)
+
+    @http.route('/mail/channel_call_join', type="json", auth="user")
+    def channel_call_join(self, channel_id):
+        return request.env['mail.channel'].browse(int(channel_id))._join_call()
+
+    @http.route('/mail/channel_call_leave', type="json", auth="user")
+    def channel_call_leave(self, channel_id, session_id=None):
+        request.env['mail.channel'].browse(int(channel_id))._leave_call(session_id)
+
+    @http.route('/mail/channel_call_invite', type="json", auth="user")
+    def channel_call_invite(self, channel_id):
+        request.env['mail.channel'].browse(int(channel_id))._invite_members_to_rtc()
+
+    @http.route('/mail/channel_call_info', type="json", auth="user")
+    def channel_call_info(self, channel_id):
+        return request.env['mail.channel'].browse(int(channel_id))._get_rtc_sessions_data()

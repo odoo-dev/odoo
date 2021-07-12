@@ -87,6 +87,16 @@ export class ChatWindowHeader extends Component {
         this.chatWindow.close();
     }
 
+    async _onClickCamera(ev) {
+        ev.stopPropagation();
+        await this.chatWindow.thread.toggleCall({ video: true });
+    }
+
+    async _onClickPhone(ev) {
+        ev.stopPropagation();
+        await this.chatWindow.thread.toggleCall();
+    }
+
     /**
      * @private
      * @param {MouseEvent} ev

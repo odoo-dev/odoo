@@ -75,6 +75,7 @@ function factory(dependencies) {
          * @param {Object[]} param0.public_partners
          * @param {Object[]} [param0.shortcodes=[]]
          * @param {integer} [param0.starred_counter=0]
+         * @param {integer} [param0.user_settings=[]]
          */
         async _init({
             channel_slots,
@@ -88,7 +89,7 @@ function factory(dependencies) {
             partner_root,
             public_partners,
             shortcodes = [],
-            starred_counter = 0
+            starred_counter = 0,
         }) {
             const discuss = this.messaging.discuss;
             // partners first because the rest of the code relies on them
@@ -209,10 +210,28 @@ function factory(dependencies) {
          * @param {integer} mailUserSettings.id
          * @param {boolean} mailUserSettings.is_discuss_sidebar_category_channel_open
          * @param {boolean} mailUserSettings.is_discuss_sidebar_category_chat_open
+         * @param {boolean} payload.use_push_to_talk
+         * @param {String} payload.push_to_talk_key
+         * @param {number} payload.voice_active_duration
+         * @param {Object} [payload.volume_settings]
          */
-        _initMailUserSettings({ id, is_discuss_sidebar_category_channel_open, is_discuss_sidebar_category_chat_open }) {
+        _initMailUserSettings({
+            id,
+            is_discuss_sidebar_category_channel_open,
+            is_discuss_sidebar_category_chat_open,
+            use_push_to_talk,
+            push_to_talk_key,
+            voice_active_duration,
+            volume_settings = [],
+        }) {
             this.messaging.update({
                 mailUserSettingsId: id,
+            });
+            this.env.messaging.userSetting.update({
+                usePushToTalk: use_push_to_talk,
+                pushToTalkKey: push_to_talk_key,
+                voiceActiveDuration: voice_active_duration,
+                volumeSettings: insert(volume_settings.map(volumeSetting => this.env.models['mail.volume_setting'].convertData(volumeSetting))),
             });
             this.messaging.discuss.update({
                 categoryChannel: create({
@@ -270,7 +289,6 @@ function factory(dependencies) {
                 ))
             });
         }
-
     }
 
     MessagingInitializer.fields = {

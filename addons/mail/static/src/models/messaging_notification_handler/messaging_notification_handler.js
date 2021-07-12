@@ -88,6 +88,18 @@ function factory(dependencies) {
                         return this._handleNotificationNewChannelMembers(message.payload);
                     case 'channel_members_leaving':
                         return this._handleNotificationChannelMembersLeaving(message.payload);
+                    case 'rtc_peer_notification':
+                        return this._handleNotificationRtcPeerToPeer(message.payload);
+                    case 'rtc_invitation':
+                        return this._handleNotificationRtcInvitation(message.payload);
+                    case 'rtc_sessions_update':
+                        return this._handleNotificationRtcSessionUpdate(message.payload);
+                    case 'rtc_session_ended':
+                        return this._handleNotificationRtcSessionEnded(message.payload);
+                    case 'rtc_session_data_update':
+                        return this._handleNotificationRtcSessionDataUpdate(message.payload);
+                    case 'mail_volume_setting_update':
+                        return this._handleNotificationVolumeSettingUpdate(message.payload);
                 }
                 switch (model) {
                     case 'ir.needaction':
@@ -387,8 +399,25 @@ function factory(dependencies) {
          * @param {object} payload
          * @param {boolean} payload.is_discuss_sidebar_category_channel_open
          * @param {boolean} payload.is_discuss_sidebar_category_chat_open
+         * @param {boolean} payload.use_push_to_talk
+         * @param {String} payload.push_to_talk_key
+         * @param {number} payload.voice_active_duration
+         * @param {Object} [payload.volume_settings]
          */
-        _handleNotificationMailUserSettings({ is_discuss_sidebar_category_channel_open, is_discuss_sidebar_category_chat_open }) {
+        _handleNotificationMailUserSettings({
+            is_discuss_sidebar_category_channel_open,
+            is_discuss_sidebar_category_chat_open,
+            use_push_to_talk,
+            push_to_talk_key,
+            voice_active_duration,
+            volume_settings = [],
+        }) {
+            this.env.messaging.userSetting.update({
+                usePushToTalk: use_push_to_talk,
+                pushToTalkKey: push_to_talk_key,
+                voiceActiveDuration: voice_active_duration,
+                volumeSettings: insert(volume_settings.map(volumeSetting => this.env.models['mail.volume_setting'].convertData(volumeSetting))),
+            });
             this.env.messaging.discuss.categoryChannel.update({
                 isServerOpen: is_discuss_sidebar_category_channel_open,
             });
@@ -474,6 +503,91 @@ function factory(dependencies) {
             } else if (!type) {
                 return this._handleNotificationPartnerChannel(data);
             }
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {string} [data.channelId]
+         * @param {string} [data.remove]
+         * @param {string} [data.partner]
+         */
+        async _handleNotificationRtcInvitation({ channelId, remove, partner }) {
+            const channel = this.env.models['mail.thread'].all().filter((thread) => thread.model === 'mail.channel' && thread.id === channelId)[0];
+            if (!channel) {
+                return;
+            }
+            if (channel.mailRtc) {
+                return;
+            }
+            if (remove) {
+                channel.update({ rtcRingingPartner: [['unlink']] });
+            } else {
+                channel.update({ rtcRingingPartner: [['insert', partner]] });
+            }
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {string} [data.sender]
+         * @param {string} [data.content]
+         */
+        _handleNotificationRtcPeerToPeer({ sender, content }) {
+            this.env.messaging.mailRtc.handleNotification(sender, content);
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {Object} [data.rtcSession]
+         */
+        async _handleNotificationRtcSessionDataUpdate({ rtcSession }) {
+            const rtcSessionModel = this.env.models['mail.rtc_session'];
+            rtcSessionModel.insert(rtcSessionModel.convertData(rtcSession));
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {Object} [data.volumeSetting]
+         */
+        async _handleNotificationVolumeSettingUpdate({ volumeSetting }) {
+            this.env.messaging && this.env.messaging.userSetting.update({
+                volumeSettings: insert(this.env.models['mail.volume_setting'].convertData(volumeSetting)),
+            });
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {number} [sessionId]
+         */
+        async _handleNotificationRtcSessionEnded({ sessionId }) {
+            const currentSession = this.env.messaging.mailRtc.currentRtcSession;
+            if (currentSession && currentSession.id === sessionId) {
+                this.env.messaging.mailRtc.channel.endCall();
+            }
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {string} [data.channelId]
+         * @param {Object} [data.rtcSessions]
+         */
+        async _handleNotificationRtcSessionUpdate({ channelId, rtcSessions }) {
+            const channel = this.env.models["mail.thread"]
+                .all()
+                .filter(
+                    (thread) =>
+                        thread.model === "mail.channel" &&
+                        thread.id === channelId
+                )[0];
+            if (!channel) {
+                return;
+            }
+            channel.updateRtcSessions(rtcSessions);
         }
 
         /**
