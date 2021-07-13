@@ -2,6 +2,7 @@
 
 import { useModels } from '@mail/component_hooks/use_models/use_models';
 import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { ChannelMemberList } from '@mail/components/channel_member_list/channel_member_list';
 import { Composer } from '@mail/components/composer/composer';
 import { MessageList } from '@mail/components/message_list/message_list';
 import { ThreadViewTopbar } from '@mail/components/thread_view_topbar/thread_view_topbar';
@@ -9,7 +10,7 @@ import { ThreadViewTopbar } from '@mail/components/thread_view_topbar/thread_vie
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { Composer, MessageList, ThreadViewTopbar };
+const components = { ChannelMemberList, Composer, MessageList, ThreadViewTopbar };
 
 export class ThreadView extends Component {
 

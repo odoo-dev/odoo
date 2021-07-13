@@ -4,6 +4,7 @@ import { useModels } from '@mail/component_hooks/use_models/use_models';
 import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 import { useUpdate } from '@mail/component_hooks/use_update/use_update';
 import { AutocompleteInput } from '@mail/components/autocomplete_input/autocomplete_input';
+import { ChannelMemberList } from '@mail/components/channel_member_list/channel_member_list';
 import { ChatWindowHeader } from '@mail/components/chat_window_header/chat_window_header';
 import { ThreadView } from '@mail/components/thread_view/thread_view';
 import { isEventHandled } from '@mail/utils/utils';
@@ -11,7 +12,7 @@ import { isEventHandled } from '@mail/utils/utils';
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { AutocompleteInput, ChatWindowHeader, ThreadView };
+const components = { AutocompleteInput, ChannelMemberList, ChatWindowHeader, ThreadView };
 
 export class ChatWindow extends Component {
 

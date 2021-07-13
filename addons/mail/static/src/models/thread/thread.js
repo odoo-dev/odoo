@@ -789,6 +789,26 @@ function factory(dependencies) {
         }
 
         /**
+         * Handles click on the avatar of the given member in the member list of
+         * this channel.
+         *
+         * @param {mail.partner} member
+         */
+        onClickMemberAvatar(member) {
+            member.openChat();
+        }
+
+        /**
+         * Handles click on the name of the given member in the member list of
+         * this channel.
+         *
+         * @param {mail.partner} member
+         */
+        onClickMemberName(member) {
+            member.openProfile();
+        }
+
+        /**
          * Opens this thread either as form view, in discuss app, or as a chat
          * window. The thread will be opened in an "active" matter, which will
          * interrupt current user flow.
@@ -1213,6 +1233,14 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
+        _computeIsMemberListMakingSense() {
+            return this.model === 'mail.channel' && ['channel', 'group'].includes(this.channel_type);
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
         _computeIsPinned() {
             return this.isPendingPinned !== undefined ? this.isPendingPinned : this.isServerPinned;
         }
@@ -1402,6 +1430,22 @@ function factory(dependencies) {
                 return unlink();
             }
             return link(message);
+        }
+
+        /**
+         * @private
+         * @returns {mail.partner[]}
+         */
+        _computeOrderedOfflineMembers() {
+            return replace(this._sortMembers(this.members.filter(member => !member.isOnline)));
+        }
+
+        /**
+         * @private
+         * @returns {mail.partner[]}
+         */
+        _computeOrderedOnlineMembers() {
+            return replace(this._sortMembers(this.members.filter(member => member.isOnline)));
         }
 
         /**
@@ -1602,6 +1646,25 @@ function factory(dependencies) {
             });
         }
 
+        /**
+         * @private
+         * @param {mail.partner[]} members
+         * @returns {mail.partner[]}
+         */
+        _sortMembers(members) {
+            return members.sort((a, b) => {
+                const cleanedAName = cleanSearchTerm(a.nameOrDisplayName || '');
+                const cleanedBName = cleanSearchTerm(b.nameOrDisplayName || '');
+                if (cleanedAName < cleanedBName) {
+                    return -1;
+                }
+                if (cleanedAName > cleanedBName) {
+                    return 1;
+                }
+                return a.id - b.id;
+            });
+        }
+
         //----------------------------------------------------------------------
         // Handlers
         //----------------------------------------------------------------------
@@ -1769,6 +1832,12 @@ function factory(dependencies) {
             default: false,
         }),
         /**
+         * Determines whether it makes sense for this thread to have a member list.
+         */
+        isMemberListMakingSense: attr({
+            compute: '_computeIsMemberListMakingSense',
+        }),
+        /**
          * Determine if there is a pending pin state change, which is a change
          * of pin state requested by the client but not yet confirmed by the
          * server.
@@ -1852,6 +1921,18 @@ function factory(dependencies) {
             inverse: 'memberThreads',
         }),
         /**
+         * Serves as compute dependency.
+         */
+        membersIsOnline: attr({
+            related: 'members.isOnline',
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        membersNameOrDisplayName: attr({
+            related: 'members.nameOrDisplayName',
+        }),
+        /**
          * Determines the message before which the "new message" separator must
          * be positioned, if any.
          */
@@ -1895,6 +1976,18 @@ function factory(dependencies) {
          */
         needactionMessagesAsOriginThread: many2many('mail.message', {
             compute: '_computeNeedactionMessagesAsOriginThread',
+        }),
+        /**
+         * All offline members ordered like they are displayed.
+         */
+        orderedOfflineMembers: many2many('mail.partner', {
+            compute: '_computeOrderedOfflineMembers',
+        }),
+        /**
+         * All online members ordered like they are displayed.
+         */
+        orderedOnlineMembers: many2many('mail.partner', {
+            compute: '_computeOrderedOnlineMembers',
         }),
         /**
          * All messages ordered like they are displayed.
