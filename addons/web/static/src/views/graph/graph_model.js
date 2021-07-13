@@ -105,6 +105,78 @@ export class GraphModel extends Model {
         this.data = null;
     }
 
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @param {Object} [searchParams={}]
+     */
+    async load(searchParams = {}) {
+        const { context, domains, groupBy } = searchParams;
+        const metaData = Object.assign({}, this.metaData, { context, domains });
+        if (!this.firstLoad || !metaData.groupBy) {
+            metaData.groupBy = groupBy;
+        }
+        this._normalize(metaData);
+        if (!this.initialGroupBy) {
+            this.initialGroupBy = metaData.groupBy;
+        } else if (metaData.groupBy.length === 0) {
+            metaData.groupBy = this.initialGroupBy;
+        }
+        await this._fetchData(metaData);
+        this.firstLoad = false;
+    }
+
+    /**
+     * @param {Object} params
+     */
+    async updateMetaData(params) {
+        const metaData = Object.assign({}, this.metaData, params);
+        await this._fetchData(metaData);
+        this.notify();
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @param {Object} metaData
+     */
+    async _fetchData(metaData) {
+        let dataPoints = await this.keepLast.add(this._loadDataPoints(metaData));
+
+        this.metaData = metaData;
+        this.data = null;
+
+        if (this.metaData.useSampleModel && dataPoints.length === 0) {
+            if (!this._fakeORM) {
+                // would be good to reuse MockServer from tests and data generation from SampleServer?
+                // or do something else?
+                const sampleServer = new SampleServer(
+                    this.metaData.resModel,
+                    Object.assign({ __count: { type: "integer" } }, this.metaData.fields)
+                );
+                const fakeRPC = async (_, params) => {
+                    const { kwargs, method, model } = params;
+                    const { groupby: groupBy } = kwargs;
+                    return sampleServer.mockRpc({ method, model, ...kwargs, groupBy });
+                };
+                this._fakeORM = new ORM(fakeRPC, this.user);
+            }
+            dataPoints = await this.keepLast.add(this._loadDataPoints(this.metaData, true));
+        } else {
+            this.metaData.useSampleModel = false;
+            this._fakeORM = null;
+        }
+
+        const processedDataPoints = this._processDataPoints(dataPoints);
+        if (this._isValidData(processedDataPoints)) {
+            this.data = this._getData(processedDataPoints);
+        }
+    }
+
     /**
      * Separates dataPoints coming from the read_group(s) into different
      * datasets. This function returns the parameters data and labels used
@@ -112,14 +184,14 @@ export class GraphModel extends Model {
      * @param {Object[]}
      * @returns {Object}
      */
-    getData(dataPoints) {
+    _getData(dataPoints) {
         const { domains, groupBy, mode } = this.metaData;
 
         let identify = false;
         if (domains.length && groupBy.length && groupBy[0].fieldName === domains.fieldName) {
             identify = true;
         }
-        const dateClasses = identify ? this.getDateClasses(dataPoints) : null;
+        const dateClasses = identify ? this._getDateClasses(dataPoints) : null;
 
         // dataPoints --> labels
         let labels = [];
@@ -151,7 +223,7 @@ export class GraphModel extends Model {
         const datasetsTmp = {};
         for (const dataPt of dataPoints) {
             const { domain, labelIndex, originIndex, trueLabel, value } = dataPt;
-            const datasetLabel = this.getDatasetLabel(dataPt);
+            const datasetLabel = this._getDatasetLabel(dataPt);
             if (!(datasetLabel in datasetsTmp)) {
                 let dataLength = labels.length;
                 if (mode !== "pie" && dateClasses) {
@@ -200,7 +272,7 @@ export class GraphModel extends Model {
      * @param {Object} dataPoint
      * @returns {string}
      */
-    getDatasetLabel(dataPoint) {
+    _getDatasetLabel(dataPoint) {
         const { measure, domains, mode, fields, fieldModif } = this.metaData;
         const { labels, originIndex } = dataPoint;
         if (mode === "pie") {
@@ -220,7 +292,7 @@ export class GraphModel extends Model {
      * @param {Object[]} dataPoints
      * @returns {DateClasses}
      */
-    getDateClasses(dataPoints) {
+    _getDateClasses(dataPoints) {
         const { domains } = this.metaData;
         const dateSets = domains.map(() => new Set());
         for (const { labels, originIndex } of dataPoints) {
@@ -236,7 +308,7 @@ export class GraphModel extends Model {
      * @param {Object[]}
      * @returns {boolean}
      */
-    isValidData(dataPoints) {
+    _isValidData(dataPoints) {
         const { mode } = this.metaData;
         let somePositive = false;
         let someNegative = false;
@@ -256,61 +328,6 @@ export class GraphModel extends Model {
     }
 
     /**
-     * @param {Object} [searchParams={}]
-     */
-    async load(searchParams = {}) {
-        const { context, domains, groupBy } = searchParams;
-        const metaData = Object.assign({}, this.metaData, { context, domains });
-        if (!this.firstLoad || !metaData.groupBy) {
-            metaData.groupBy = groupBy;
-        }
-        this.normalize(metaData);
-        if (!this.initialGroupBy) {
-            this.initialGroupBy = metaData.groupBy;
-        } else if (metaData.groupBy.length === 0) {
-            metaData.groupBy = this.initialGroupBy;
-        }
-        await this._fetchData(metaData);
-        this.firstLoad = false;
-    }
-
-    /**
-     * @param {Object} metaData
-     */
-    async _fetchData(metaData) {
-        let dataPoints = await this.keepLast.add(this.loadDataPoints(metaData));
-
-        this.metaData = metaData;
-        this.data = null;
-
-        if (this.metaData.useSampleModel && dataPoints.length === 0) {
-            if (!this._fakeORM) {
-                // would be good to reuse MockServer from tests and data generation from SampleServer?
-                // or do something else?
-                const sampleServer = new SampleServer(
-                    this.metaData.resModel,
-                    Object.assign({ __count: { type: "integer" } }, this.metaData.fields)
-                );
-                const fakeRPC = async (_, params) => {
-                    const { kwargs, method, model } = params;
-                    const { groupby: groupBy } = kwargs;
-                    return sampleServer.mockRpc({ method, model, ...kwargs, groupBy });
-                };
-                this._fakeORM = new ORM(fakeRPC, this.user);
-            }
-            dataPoints = await this.keepLast.add(this.loadDataPoints(this.metaData, true));
-        } else {
-            this.metaData.useSampleModel = false;
-            this._fakeORM = null;
-        }
-
-        const processedDataPoints = this.processDataPoints(dataPoints);
-        if (this.isValidData(processedDataPoints)) {
-            this.data = this.getData(processedDataPoints);
-        }
-    }
-
-    /**
      * Fetch and process graph data.  It is basically a(some) read_group(s)
      * with correct fields for each domain.  We have to do some light processing
      * to separate date groups in the field list, because they can be defined
@@ -319,7 +336,7 @@ export class GraphModel extends Model {
      * @param {boolean} [useFakeORM=false]
      * @returns {Object[]}
      */
-    async loadDataPoints(metaData, useFakeORM = false) {
+    async _loadDataPoints(metaData, useFakeORM = false) {
         const { measure, domains, fields, groupBy, resModel } = metaData;
         const measures = ["__count"];
         if (measure !== "__count") {
@@ -415,7 +432,7 @@ export class GraphModel extends Model {
      * Normalize the keys "groupBy", "measure", and "mode".
      * @param {Object} metaData
      */
-    normalize(metaData) {
+    _normalize(metaData) {
         const { context, fields } = metaData;
         const { graph_measure, graph_mode, graph_groupbys } = context || {};
 
@@ -468,7 +485,7 @@ export class GraphModel extends Model {
      * @param {Object[]} dataPoints
      * @returns {Object[]}
      */
-    processDataPoints(dataPoints) {
+    _processDataPoints(dataPoints) {
         const { domains, groupBy, mode, order } = this.metaData;
         let processedDataPoints = [];
         if (mode === "line") {
@@ -496,15 +513,6 @@ export class GraphModel extends Model {
         }
 
         return processedDataPoints;
-    }
-
-    /**
-     * @param {Object} params
-     */
-    async updateMetaData(params) {
-        const metaData = Object.assign({}, this.metaData, params);
-        await this._fetchData(metaData);
-        this.notify();
     }
 }
 GraphModel.services = ["orm", "user"];

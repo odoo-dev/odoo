@@ -16,11 +16,15 @@ export class hrTimesheetGraphModel extends GraphModel {
         this.companyService = services.company;
     }
 
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
      * Override processDataPoints to take into account the analytic line uom.
      * @override
      */
-    processDataPoints(dataPoints) {
+    _processDataPoints(dataPoints) {
         const currentCompany = this.companyService.currentCompany;
         const factor = currentCompany.timesheet_uom_factor || 1;
         if (factor !== 1 && FIELDS.includes(this.metaData.measure)) {
@@ -29,7 +33,7 @@ export class hrTimesheetGraphModel extends GraphModel {
                 dataPt.value *= factor;
             }
         }
-        return super.processDataPoints(...arguments);
+        return super._processDataPoints(...arguments);
     }
 }
 hrTimesheetGraphModel.services = [...GraphModel.services, "company"];
