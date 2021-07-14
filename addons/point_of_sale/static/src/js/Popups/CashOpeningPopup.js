@@ -19,7 +19,7 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
                 openingCashString: `${openingCash}`,
                 coins: {'0.05': 0, '0.10': 0, '0.20': 0, '0.50': 0, '1.00': 0, '2.00': 0},
                 bills: {'5': 0, '10': 0, '20': 0, '50': 0, '100': 0, '200': 0, '500': 0,},
-                cashDifference: openingCash - this.previousClosingCash,
+                cashDifference: this.env.pos.format_currency_no_symbol(this.previousClosingCash - openingCash),
             });
             this.validKeys = new Set('0123456789.,'.split(''))
             this.detailsRefMap = { coins: {}, bills: {} }
@@ -53,7 +53,7 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
                     method: 'set_cashbox_pos',
                     args: [this.env.pos.pos_session.id, parseFloat(this.state.openingCashString), this.state.notes],
                 });
-            this.trigger('close-popup');
+            this.cancel(); // close popup
         }
 
         sendInput(key) {
