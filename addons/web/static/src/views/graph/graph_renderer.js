@@ -183,7 +183,7 @@ export class GraphRenderer extends Component {
             return String(value);
         }
         if (largeNumber) {
-            return formatFloat(value, { humanReadble: true, decimals: 2, minDigits: 1 });
+            return formatFloat(value, { humanReadable: true, decimals: 2, minDigits: 1 });
         }
         return formatFloat(value);
     }
