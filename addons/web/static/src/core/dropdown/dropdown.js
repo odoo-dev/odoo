@@ -130,6 +130,28 @@ export class Dropdown extends Component {
         }
 
         useEffect(autoSubscribeKeynav.bind(this));
+
+        if (this.props.toggler === "parent") {
+            useEffect(
+                () => {
+                    const onClick = (ev) => {
+                        if (this.el.contains(ev.target)) {
+                            // ignore clicks inside the dropdown
+                            return;
+                        }
+                        // must stop the event to prevent the dropdown from
+                        // closing directly as this is an outside click
+                        ev.stopPropagation();
+                        this.toggle();
+                    };
+                    this.el.parentElement.addEventListener("click", onClick);
+                    return () => {
+                        this.el.parentElement.removeEventListener("click", onClick);
+                    };
+                },
+                () => []
+            );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -285,6 +307,10 @@ export class Dropdown extends Component {
 }
 Dropdown.bus = new EventBus();
 Dropdown.props = {
+    toggler: {
+        type: String,
+        optional: true,
+    },
     startOpen: {
         type: Boolean,
         optional: true,

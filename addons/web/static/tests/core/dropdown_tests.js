@@ -5,23 +5,22 @@ import { uiService } from "@web/core/ui/ui_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, makeDeferred, nextTick, triggerHotkey } from "../helpers/utils";
+import { registerCleanup } from "../helpers/cleanup";
 
-const { mount } = owl;
+const { mount, hooks } = owl;
 const serviceRegistry = registry.category("services");
 
 let env;
 let parent;
 let target;
 
-QUnit.module("Components", (hooks) => {
-    hooks.beforeEach(async () => {
+QUnit.module("Components", ({ beforeEach }) => {
+    beforeEach(async () => {
         serviceRegistry.add("hotkey", hotkeyService);
         serviceRegistry.add("ui", uiService);
         env = await makeTestEnv();
         target = getFixture();
-    });
-    hooks.afterEach(() => {
-        parent.destroy();
+        registerCleanup(() => parent.destroy());
     });
 
     QUnit.module("Dropdown");
@@ -622,5 +621,57 @@ QUnit.module("Components", (hooks) => {
         assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
 
         assert.verifySteps(["1", "2"], "items should have been selected in this order");
+    });
+
+    QUnit.test("props toggler='parent'", async (assert) => {
+        class Parent extends owl.Component {}
+        Parent.template = owl.tags.xml`
+            <div>
+                <div class="my_custom_toggler">
+                    Click Me
+                    <Dropdown toggler="'parent'">
+                        <t t-set-slot="menu">
+                            <li>Element 1</li>
+                            <li>Element 2</li>
+                        </t>
+                    </Dropdown>
+                </div>
+            </div>`;
+
+        parent = await mount(Parent, { env, target });
+        assert.containsOnce(parent, ".o_dropdown");
+        assert.containsNone(parent, ".o_dropdown .o_dropdown_menu");
+        assert.containsNone(parent, ".o_dropdown button.o_dropdown_toggler");
+        await click(parent.el, ".my_custom_toggler");
+        assert.containsOnce(parent, ".o_dropdown .o_dropdown_menu");
+        assert.containsN(parent, ".o_dropdown .o_dropdown_menu li", 2);
+    });
+
+    QUnit.test("props toggler='none'", async (assert) => {
+        class Parent extends owl.Component {
+            setup() {
+                this.dropdownRef = hooks.useRef("dropdown");
+            }
+        }
+        Parent.template = owl.tags.xml`
+            <div>
+                <button class="my_custom_toggler" t-on-click.stop="dropdownRef.comp.toggle()">
+                    Click Me
+                </button>
+                <Dropdown t-ref="dropdown" toggler="'none'">
+                    <t t-set-slot="menu">
+                        <li>Element 1</li>
+                        <li>Element 2</li>
+                    </t>
+                </Dropdown>
+            </div>`;
+
+        parent = await mount(Parent, { env, target });
+        assert.containsOnce(parent, ".o_dropdown");
+        assert.containsNone(parent, ".o_dropdown .o_dropdown_menu");
+        assert.containsNone(parent, ".o_dropdown button.o_dropdown_toggler");
+        await click(parent.el, ".my_custom_toggler");
+        assert.containsOnce(parent, ".o_dropdown .o_dropdown_menu");
+        assert.containsN(parent, ".o_dropdown .o_dropdown_menu li", 2);
     });
 });

@@ -27,6 +27,8 @@ export const ParentClosingMode = {
 export class DropdownItem extends Component {
     /**
      * Triggers a custom DropdownItemSelectedEvent
+     *
+     * @param {MouseEvent} ev
      */
     onClick() {
         /** @type DropdownItemSelectedEventDetail */
