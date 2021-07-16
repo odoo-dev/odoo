@@ -5,8 +5,10 @@ import { Domain } from "@web/core/domain";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import * as utils from "@web/core/utils/arrays";
+import { Registry } from "@web/core/registry";
 import { makeFakeRPCService, makeMockFetch } from "./mock_services";
 import { patchWithCleanup } from "./utils";
+import { parseDate } from "@web/core/l10n/dates";
 
 const { DateTime } = luxon;
 const serviceRegistry = registry.category("services");
@@ -242,7 +244,10 @@ export class MockServer {
                     // TODO
                     // const pyevalContext = window.py.dict.fromJSON(context || {});
                     // var v = pyUtils.py_eval(mod, {context: pyevalContext}) ? true : false;
-                    console.info("MockServer: naive parse of modifier value in", QUnit.config.current.testName);
+                    console.info(
+                        "MockServer: naive parse of modifier value in",
+                        QUnit.config.current.testName
+                    );
                     const v = JSON.parse(mod);
                     if (inTreeView && !inListHeader && attr === "invisible") {
                         modifiers.column_invisible = v;
@@ -374,6 +379,17 @@ export class MockServer {
     }
 
     _performRPC(route, args) {
+        // Check if there is an handler in the mockRegistry: either specific for this model
+        // (with key 'model/method'), or global (with key 'method')
+        // This will allows to mock complex servers
+        const methodName = args.method || route;
+        const mockFunction =
+            MockServer.mockRegistry.get(`${args.model}/${methodName}`, null) ||
+            MockServer.mockRegistry.get(methodName, null);
+        if (mockFunction) {
+            return mockFunction.call(this, route, args);
+        }
+
         switch (route) {
             case "/web/webclient/load_menus":
                 return Promise.resolve(this.mockLoadMenus());
@@ -506,7 +522,9 @@ export class MockServer {
         if (!action) {
             // when the action doesn't exist, the real server doesn't crash, it
             // simply returns false
-            console.warn(`No action found for ID ${kwargs.action_id} during test ${QUnit.config.current.testName}`);
+            console.warn(
+                `No action found for ID ${kwargs.action_id} during test ${QUnit.config.current.testName}`
+            );
         }
         return action || false;
     }
@@ -816,24 +834,26 @@ export class MockServer {
                     res[groupByField] = val;
                 }
                 if (field.type === "date" && val) {
-                    console.info("Mock Server: read group not fully implemented (moment stuff) in", QUnit.config.current.testName);
-                    // const aggregateFunction = groupByField.split(':')[1];
-                    // let startDate;
-                    // let endDate;
-                    // if (aggregateFunction === 'day') {
-                    //     startDate = moment(val, 'YYYY-MM-DD');
-                    //     endDate = startDate.clone().add(1, 'days');
-                    // } else if (aggregateFunction === 'week') {
-                    //     startDate = moment(val, 'ww YYYY');
-                    //     endDate = startDate.clone().add(1, 'weeks');
-                    // } else if (aggregateFunction === 'year') {
-                    //     startDate = moment(val, 'Y');
-                    //     endDate = startDate.clone().add(1, 'years');
-                    // } else {
-                    //     startDate = moment(val, 'MMMM YYYY');
-                    //     endDate = startDate.clone().add(1, 'months');
-                    // }
-                    // res.__domain = [[fieldName, '>=', startDate.format('YYYY-MM-DD')], [fieldName, '<', endDate.format('YYYY-MM-DD')]].concat(res.__domain);
+                    const aggregateFunction = groupByField.split(":")[1];
+                    let startDate;
+                    let endDate;
+                    if (aggregateFunction === "day") {
+                        startDate = parseDate(val, { format: "yyyy-MM-dd" });
+                        endDate = startDate.plus({ days: 1 });
+                    } else if (aggregateFunction === "week") {
+                        startDate = parseDate(val, { format: "WW kkkk" });
+                        endDate = startDate.plus({ weeks: 1 });
+                    } else if (aggregateFunction === "year") {
+                        startDate = parseDate(val, { format: "y" });
+                        endDate = startDate.plus({ years: 1 });
+                    } else {
+                        startDate = parseDate(val, { format: "MMMM yyyy" });
+                        endDate = startDate.plus({ months: 1 });
+                    }
+                    res.__domain = [
+                        [fieldName, ">=", startDate.toFormat("yyyy-MM-dd")],
+                        [fieldName, "<", endDate.toFormat("yyyy-MM-dd")],
+                    ].concat(res.__domain);
                 } else {
                     res.__domain = Domain.combine(
                         [[[fieldName, "=", val]], res.__domain],
@@ -2186,6 +2206,13 @@ export class MockServer {
         }
     }
 }
+
+// mockRegistry allows to register mock version of methods or routes,
+// for all models:
+//   MockServer.mockRegistry.add('some_route', () => "abcd");
+// for a specific model (e.g. 'res.partner'):
+//   MockServer.mockRegistry.add('res.partner/some_method', () => 23);
+MockServer.mockRegistry = new Registry();
 
 // -----------------------------------------------------------------------------
 // MockServer deployment helper

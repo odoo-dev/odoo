@@ -2,6 +2,8 @@
 
 import { groupBy as arrayGroupBy, sortBy as arraySortBy } from "@web/core/utils/arrays";
 import { Registry } from "@web/core/registry";
+import { ORM } from "../../core/orm_service";
+import { parseDate } from "@web/core/l10n/dates";
 
 class UnimplementedRouteError extends Error {}
 
@@ -118,8 +120,8 @@ export class SampleServer {
         // global (with key 'method')
         const method = params.method || params.route;
         const mockFunction =
-            SampleServer.mockRegistry.get(`${params.model}/${method}`) ||
-            SampleServer.mockRegistry.get(method);
+            SampleServer.mockRegistry.get(`${params.model}/${method}`, null) ||
+            SampleServer.mockRegistry.get(method, null);
         if (mockFunction) {
             return mockFunction.call(this, params);
         }
@@ -177,7 +179,7 @@ export class SampleServer {
         const { type, interval, relation } = options;
         if (["date", "datetime"].includes(type)) {
             const fmt = SampleServer.FORMATS[interval];
-            return moment(value).format(fmt);
+            return parseDate(value).toFormat(fmt);
         } else if (type === "many2one") {
             const rec = this.data[relation].records.find(({ id }) => id === value);
             return [value, rec.display_name];
@@ -229,7 +231,7 @@ export class SampleServer {
                 return false;
             case "date":
             case "datetime": {
-                const format = field.type === "date" ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm:ss";
+                const format = field.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm:ss";
                 return this._getRandomDate(format);
             }
             case "float":
@@ -301,7 +303,7 @@ export class SampleServer {
      */
     _getRandomDate(format) {
         const delta = Math.floor((Math.random() - Math.random()) * SampleServer.DATE_DELTA);
-        return new moment().add(delta, "hour").format(format);
+        return luxon.DateTime.local().plus({ hours: delta }).toFormat(format);
     }
 
     /**
@@ -444,7 +446,7 @@ export class SampleServer {
             result = arraySortBy(result, (group) => {
                 const val = group[alias];
                 if (["date", "datetime"].includes(type)) {
-                    return moment(val, SampleServer.FORMATS[interval]);
+                    return parseDate(val, { format: SampleServer.FORMATS[interval] });
                 }
                 return val;
             });
@@ -643,13 +645,13 @@ export class SampleServer {
 }
 
 SampleServer.FORMATS = {
-    day: "YYYY-MM-DD",
-    week: "[W]ww YYYY",
-    month: "MMMM YYYY",
-    quarter: "[Q]Q YYYY",
-    year: "Y",
+    day: "yyyy-MM-dd",
+    week: "'W'WW kkkk",
+    month: "MMMM yyyy",
+    quarter: "'Q'q yyyy",
+    year: "y",
 };
-SampleServer.DISPLAY_FORMATS = Object.assign({}, SampleServer.FORMATS, { day: "DD MMM YYYY" });
+SampleServer.DISPLAY_FORMATS = Object.assign({}, SampleServer.FORMATS, { day: "dd MMM yyyy" });
 
 SampleServer.MAIN_RECORDSET_SIZE = 16;
 SampleServer.SUB_RECORDSET_SIZE = 5;
@@ -693,3 +695,13 @@ SampleServer.UnimplementedRouteError = UnimplementedRouteError;
 // for a specific model (e.g. 'res.partner'):
 //   SampleServer.mockRegistry.add('res.partner/some_method', () => 23);
 SampleServer.mockRegistry = new Registry();
+
+export function buildSampleORM(resModel, fields, user) {
+    const sampleServer = new SampleServer(resModel, fields);
+    const fakeRPC = async (_, params) => {
+        const { kwargs, method, model } = params;
+        const { groupby: groupBy } = kwargs;
+        return sampleServer.mockRpc({ method, model, ...kwargs, groupBy });
+    };
+    return new ORM(fakeRPC, user);
+}

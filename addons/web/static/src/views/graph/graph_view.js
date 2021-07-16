@@ -267,6 +267,7 @@ GraphView.props = {
     order: { validate: (o) => ORDERS.includes(o), optional: 1 },
     stacked: { type: Boolean, optional: 1 },
     title: { type: String, optional: 1 },
+    limit: { type: Number, optional: 1 },
 };
 
 GraphView.type = "graph";
