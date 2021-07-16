@@ -378,6 +378,17 @@ class PosSession(models.Model):
             'context': {**self.env.context, 'active_ids': self.ids, 'active_model': 'pos.session'},
         }
 
+    def close_session_from_ui(self):
+        self.ensure_one()
+        self._check_pos_session_balance()
+        if any(order.state == 'draft' for order in self.order_ids):
+            raise UserError(_("You cannot close the POS when orders are still in draft"))
+        if self.state == 'closed':
+            raise UserError(_('This session is already closed.'))
+        self.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
+        self._validate_session()
+        return True
+
     def _create_picking_at_end_of_session(self):
         self.ensure_one()
         lines_grouped_by_dest_location = {}

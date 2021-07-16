@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="ClosePosPopup" owl="1">
+        <div role="dialog" class="modal-dialog">
+            <div class="popup close-pos-popup">
+                <header class="title">
+                    What do you want to do ?
+                </header>
+                <main class="body">
+                    <button class="button main-button" t-att-class="{ confirm: state.closeSession }" t-on-click="onClick('closeSession')">
+                        <t t-if="!state.closeSession">Close the session and post the entries</t>
+                        <t t-else="">Click to confirm the closing !</t>
+                    </button>
+                    <button class="button main-button" t-att-class="{ confirm: state.openBackEnd }" t-on-click="onClick('openBackEnd')">
+                        <t t-if="!state.openBackEnd">Open the back-end and keep the session open</t>
+                        <t t-else="">Confirm</t>
+                    </button>
+                </main>
+                <footer class="footer">
+                    <button class="button" t-on-click="cancel()">Close</button>
+                </footer>
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,14 @@
+.pos .close-pos-popup .main-button {
+    width: 100%;
+    text-align: left;
+    height: unset;
+    float: unset;
+    font-size: 16px;
+    font-weight: unset;
+}
+
+.pos .close-pos-popup .main-button.confirm {
+    background: #359766;
+    color: white;
+    font-weight: bold;
+}

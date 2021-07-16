@@ -497,11 +497,6 @@ td {
     background: rgba(0,0,0,0.2);
     color:#EEE;
 }
-.pos .pos-rightheader .header-button.confirm {
-    background: #359766;
-    color: white;
-    font-weight: bold;
-}
 
 /*  c) The notifications indicator */
 
