@@ -46,7 +46,6 @@
                 <div class="o_panel_body" id="email_designer_body_elements">
                     <t t-snippet="mass_mailing.s_title" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_title.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_title_text" t-thumbnail="/mass_mailing/static/src/img/blocks/block_title_text.png"/>
-                    <t t-snippet="mass_mailing.s_mail_block_title_sub" t-thumbnail="/mass_mailing/static/src/img/blocks/block_title_sub.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_paragraph" t-thumbnail="/mass_mailing/static/src/img/blocks/block_paragraph.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_comparison_table" t-thumbnail="/mass_mailing/static/src/img/blocks/block_comparison_table.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_two_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_two_cols.png"/>
@@ -206,22 +205,6 @@
                         <p> Usability improvements made on Odoo will automatically apply to all
                             of our fully integrated apps.</p>
                         <p> That way, Odoo evolves much faster than any other solution.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-
-<template id="s_mail_block_title_sub" name="Title - Subtitle">
-    <div class="o_mail_block_title_sub">
-        <div class="o_mail_snippet_general">
-            <div cellspacing="0" cellpadding="0" class="container o_mail_table_styles">
-                <div class="row">
-                    <div class="col o_mail_h_padding o_mail_v_padding o_mail_no_colorpicker">
-                        <h2 class="o_mail_no_margin">Check this out!</h2>
-                        <p class="o_mail_no_margin">Apps That Help You Grow Your Business!</p>
                     </div>
                 </div>
             </div>
