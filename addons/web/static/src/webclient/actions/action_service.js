@@ -484,7 +484,6 @@ function makeActionManager(env) {
      * @param {UpdateStackOptions} options
      * @param {boolean} [options.clearBreadcrumbs=false]
      * @param {number} [options.index]
-     * @param {Object} [options.shareSearchState]
      * @returns {Promise<Number>}
      */
     async function _updateUI(controller, options = {}) {
@@ -504,16 +503,16 @@ function makeActionManager(env) {
                 useDebugCategory("action", { action });
                 if (action.target !== "new") {
                     this.__beforeLeave__ = new CallbackRecorder();
-                    this.__exportState__ = new CallbackRecorder();
-                    this.__exportSearchState__ = new CallbackRecorder();
-                    controller.getState = () => {
-                        const exportFns = this.__exportState__.callbacks;
+                    this.__exportGlobalState__ = new CallbackRecorder();
+                    this.__exportLocalState__ = new CallbackRecorder();
+                    controller.getGlobalState = () => {
+                        const exportFns = this.__exportGlobalState__.callbacks;
                         if (exportFns.length) {
                             return Object.assign({}, ...exportFns.map((fn) => fn()));
                         }
                     };
-                    controller.getSearchState = () => {
-                        const exportFns = this.__exportSearchState__.callbacks;
+                    controller.getLocalState = () => {
+                        const exportFns = this.__exportLocalState__.callbacks;
                         if (exportFns.length) {
                             return Object.assign({}, ...exportFns.map((fn) => fn()));
                         }
@@ -524,8 +523,8 @@ function makeActionManager(env) {
                     });
                     useSubEnv({
                         __beforeLeave__: this.__beforeLeave__,
-                        __exportState__: this.__exportState__,
-                        __exportSearchState__: this.__exportSearchState__,
+                        __exportGlobalState__: this.__exportGlobalState__,
+                        __exportLocalState__: this.__exportLocalState__,
                     });
                 }
             }
@@ -649,22 +648,28 @@ function makeActionManager(env) {
         }
 
         const currentController = _getCurrentController();
-        let searchState;
-        if (currentController && currentController.getState) {
-            currentController.exportedState = currentController.getState();
+        if (currentController && currentController.getLocalState) {
+            currentController.exportedState = currentController.getLocalState();
         }
-        if (currentController && currentController.getSearchState) {
-            searchState = currentController.getSearchState();
-            currentController.exportedSearchState = searchState;
-        }
-
         if (controller.exportedState) {
             controller.props.state = controller.exportedState;
         }
-        if (options.shareSearchState && searchState) {
-            controller.props.searchState = searchState;
-        } else if (controller.exportedSearchState) {
-            controller.props.searchState = controller.exportedSearchState;
+
+        // TODO DAM Remarks:
+        // this thing seems useless for client actions.
+        // restore and switchView (at least) use this --> cannot be done in switchView only
+        // if prop globalState has been passed in doAction, since the action is new the prop won't be overridden in l655.
+        // if globalState is not useful for client actions --> maybe use that thing in useSetupView instead of useSetupAction?
+        // a good thing: the Object.assign seems to reflect the use of "externalState" in legacy Model class --> things should be fine.
+        if (currentController && currentController.getGlobalState) {
+            currentController.action.globalState = Object.assign(
+                {},
+                currentController.action.globalState,
+                currentController.getGlobalState() // what if this = {}?
+            );
+        }
+        if (controller.action.globalState) {
+            controller.props.globalState = controller.action.globalState;
         }
 
         const index = _computeStackIndex(options);
@@ -1176,7 +1181,7 @@ function makeActionManager(env) {
         // LEGACY CODE COMPATIBILITY: remove when controllers will be written in owl
         if (view.isLegacy && newController.jsId === controller.jsId) {
             // case where a legacy view is reloaded via the view switcher
-            const { __legacy_widget__ } = controller.getState();
+            const { __legacy_widget__ } = controller.getLocalState();
             const params = {};
             if ("resId" in props) {
                 params.currentId = props.resId;
@@ -1186,6 +1191,7 @@ function makeActionManager(env) {
         // END LEGACY CODE COMPATIBILITY
 
         newController.props = _getViewProps(view, controller.action, controller.views, props);
+
         controller.action.controllers[viewType] = newController;
         let index;
         if (view.multiRecord) {
@@ -1200,7 +1206,7 @@ function makeActionManager(env) {
             index = index > -1 ? index : controllerStack.length;
         }
         await clearUncommittedChanges(env);
-        return _updateUI(newController, { index, shareSearchState: true });
+        return _updateUI(newController, { index });
     }
 
     /**
