@@ -4,7 +4,6 @@ import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { sortBy } from "@web/core/utils/arrays";
-import { CallbackRecorder } from "@web/webclient/actions/action_hook";
 import { SearchArchParser } from "./search_arch_parser";
 import {
     constructDateDomain,
@@ -262,7 +261,7 @@ export class SearchModel extends EventBus {
             const { resModel } = JSON.parse(config.state);
             // check that state is consistent with other props
             if (this.resModel === resModel) {
-                this.importState(config.state);
+                this._importState(config.state);
                 this.searchDomain = this.getDomain({ full: false });
                 this.sectionsPromise = Promise.resolve();
                 return;
@@ -319,7 +318,7 @@ export class SearchModel extends EventBus {
 
         // prepare search items (populate this.searchItems)
         for (const preGroup of preSearchItems || []) {
-            this.createGroupOfSearchItems(preGroup);
+            this._createGroupOfSearchItems(preGroup);
         }
         this.nextGroupNumber =
             1 + Math.max(...Object.values(this.searchItems).map((i) => i.groupNumber || 0), 0);
@@ -328,19 +327,19 @@ export class SearchModel extends EventBus {
             (searchElement) => searchElement.type === "dateFilter"
         );
         if (dateFilters.length) {
-            this.createGroupOfComparisons(dateFilters);
+            this._createGroupOfComparisons(dateFilters);
         }
 
         const { dynamicFilters } = config;
         if (dynamicFilters) {
-            this.createGroupOfDynamicFilters(dynamicFilters);
+            this._createGroupOfDynamicFilters(dynamicFilters);
         }
 
-        const defaultFavoriteId = this.createGroupOfFavorites(this.irFilters || []);
+        const defaultFavoriteId = this._createGroupOfFavorites(this.irFilters || []);
         const activateFavorite = "activateFavorite" in config ? config.activateFavorite : true;
 
         // activate default search items (populate this.query)
-        this.activateDefaultSearchItems(activateFavorite ? defaultFavoriteId : null);
+        this._activateDefaultSearchItems(activateFavorite ? defaultFavoriteId : null);
 
         // prepare search panel sections
 
@@ -349,8 +348,8 @@ export class SearchModel extends EventBus {
 
         if (this.loadSearchPanel) {
             /** @type DomainListRepr */
-            this.searchDomain = this.getDomain({ full: false });
-            this.sectionsPromise = this.fetchSections(this.categories, this.filters).then(() => {
+            this.searchDomain = this._getDomain({ full: false });
+            this.sectionsPromise = this._fetchSections(this.categories, this.filters).then(() => {
                 for (const { fieldName, values } of this.filters) {
                     const filterDefaults = defaultValues[fieldName] || [];
                     for (const valueId of filterDefaults) {
@@ -361,7 +360,7 @@ export class SearchModel extends EventBus {
                     }
                 }
             });
-            if (Object.keys(defaultValues).length || this.shouldWaitForData()) {
+            if (Object.keys(defaultValues).length || this._shouldWaitForData()) {
                 await this.sectionsPromise;
             }
         }
@@ -396,39 +395,23 @@ export class SearchModel extends EventBus {
         if (this.loadSearchPanel) {
             this.blockNotification = true;
 
-            const searchDomain = this.getDomain({ full: false });
+            const searchDomain = this._getDomain({ full: false });
             const searchDomainChanged =
                 JSON.stringify(this.searchDomain) !== JSON.stringify(searchDomain);
             this.searchDomain = searchDomain;
             if (searchDomainChanged) {
                 const toFetch = (section) => section.enableCounters || !section.expand;
-                this.sectionsPromise = this.fetchSections(
+                this.sectionsPromise = this._fetchSections(
                     this.categories.filter(toFetch),
                     this.filters.filter(toFetch)
                 );
-                if (this.shouldWaitForData(true)) {
+                if (this._shouldWaitForData(true)) {
                     await this.sectionsPromise;
                 }
             }
 
             this.blockNotification = false;
         }
-    }
-
-    /**
-     * @param {string} state
-     */
-    importState(state) {
-        execute(arraytoMap, JSON.parse(state), this);
-    }
-
-    /**
-     * @returns {string}
-     */
-    exportState() {
-        const state = {};
-        execute(mapToArray, this, state);
-        return JSON.stringify(state);
     }
 
     //--------------------------------------------------------------------------
@@ -447,7 +430,7 @@ export class SearchModel extends EventBus {
      */
     get context() {
         if (!this._context) {
-            this._context = this.getContext();
+            this._context = this._getContext();
         }
         return this._context;
     }
@@ -457,16 +440,9 @@ export class SearchModel extends EventBus {
      */
     get domain() {
         if (!this._domain) {
-            this._domain = this.getDomain();
+            this._domain = this._getDomain();
         }
         return this._domain;
-    }
-
-    /**
-     * @returns {Domain}
-     */
-    getSearchPanelDomain() {
-        return Domain.and([this.getCategoryDomain(), this.getFilterDomain()]);
     }
 
     get domains() {
@@ -474,7 +450,7 @@ export class SearchModel extends EventBus {
             if (this.globalDomains) {
                 this._domains = this.globalDomains;
             } else {
-                const comparison = this.getComparison();
+                const comparison = this._getComparison();
                 if (comparison) {
                     const {
                         fieldName,
@@ -509,7 +485,7 @@ export class SearchModel extends EventBus {
         const isValidType = (type) =>
             !["groupBy", "comparison"].includes(type) || this.searchMenuTypes.has(type);
         const facets = [];
-        for (const facet of this.getFacets()) {
+        for (const facet of this._getFacets()) {
             if (!isValidType(facet.type)) {
                 continue;
             }
@@ -530,7 +506,7 @@ export class SearchModel extends EventBus {
      */
     get groupBy() {
         if (!this._groupBy) {
-            this._groupBy = this.getGroupBy();
+            this._groupBy = this._getGroupBy();
         }
         return this._groupBy;
     }
@@ -540,59 +516,13 @@ export class SearchModel extends EventBus {
      */
     get orderBy() {
         if (!this._orderBy) {
-            this._orderBy = this.getOrderBy();
+            this._orderBy = this._getOrderBy();
         }
         return this._orderBy;
     }
 
-    getDomainParts() {
-        return JSON.parse(JSON.stringify(this.domainParts));
-    }
-
-    /**
-     * Return an array containing enriched copies of all searchElements or of those
-     * satifying the given predicate if any
-     * @param {Function} [predicate]
-     * @returns {Object[]}
-     */
-    getSearchItems(predicate) {
-        const searchItems = [];
-        Object.values(this.searchItems).forEach((searchItem) => {
-            if (
-                (!("invisible" in searchItem) || !searchItem.invisible) &&
-                (!predicate || predicate(searchItem))
-            ) {
-                const enrichedSearchitem = this.enrichItem(searchItem);
-                if (enrichedSearchitem) {
-                    searchItems.push(enrichedSearchitem);
-                }
-            }
-        });
-        if (searchItems.some((f) => f.type === "favorite")) {
-            searchItems.sort((f1, f2) => f1.groupNumber - f2.groupNumber);
-        }
-        return searchItems;
-    }
-
-    /**
-     * Returns a sorted list of a copy of all sections. This list can be
-     * filtered by a given predicate.
-     * @param {SectionPredicate} [predicate] used to determine
-     *      which subsets of sections is wanted
-     * @returns {Section[]}
-     */
-    getSections(predicate) {
-        let sections = [...this.sections.values()].map((section) =>
-            Object.assign({}, section, { empty: !hasValues(section) })
-        );
-        if (predicate) {
-            sections = sections.filter(predicate);
-        }
-        return sections.sort((s1, s2) => s1.index - s2.index);
-    }
-
     //--------------------------------------------------------------------------
-    // "Actions"
+    // Public
     //--------------------------------------------------------------------------
 
     /**
@@ -618,7 +548,7 @@ export class SearchModel extends EventBus {
         } else {
             queryElem.autocompleteValue.label = label; // seems related to old stuff --> should be useless now
         }
-        this.notify();
+        this._notify();
     }
 
     /**
@@ -626,7 +556,7 @@ export class SearchModel extends EventBus {
      */
     clearQuery() {
         this.query = [];
-        this.notify();
+        this._notify();
     }
 
     /**
@@ -642,7 +572,7 @@ export class SearchModel extends EventBus {
         const fns = this.env.__saveParams__.callbacks;
         const saveParams = Object.assign({}, ...fns.map((fn) => fn()));
         saveParams.context = saveParams.context || {};
-        const queryContext = this.getContext();
+        const queryContext = this._getContext();
         const context = makeContext(userContext, saveParams.context, queryContext);
         for (const key in userContext) {
             delete context[key];
@@ -654,10 +584,10 @@ export class SearchModel extends EventBus {
                 delete context[key];
             }
         }
-        const domain = this.getDomain({ evaluation: false });
-        const groupBys = this.getGroupBy();
-        const comparison = this.getComparison();
-        const orderBy = saveParams.orderBy ? saveParams.orderBy : this.getOrderBy() || [];
+        const domain = this._getDomain({ evaluation: false });
+        const groupBys = this._getGroupBy();
+        const comparison = this._getComparison();
+        const orderBy = saveParams.orderBy ? saveParams.orderBy : this._getOrderBy() || [];
         const userId = isShared ? false : this.userService.userId;
         const serverSideId = await this.orm.call("ir.filters", "create_or_replace", [
             {
@@ -705,7 +635,7 @@ export class SearchModel extends EventBus {
         this.nextGroupId++;
         this.nextId++;
         this.blockNotification = false;
-        this.notify();
+        this._notify();
     }
 
     /**
@@ -729,7 +659,7 @@ export class SearchModel extends EventBus {
         });
         this.nextGroupId++;
         this.nextGroupNumber++;
-        this.notify();
+        this._notify();
     }
 
     /**
@@ -761,7 +691,7 @@ export class SearchModel extends EventBus {
         }
         this.nextGroupNumber++;
         this.nextId++;
-        this.notify();
+        this._notify();
     }
 
     /**
@@ -773,8 +703,8 @@ export class SearchModel extends EventBus {
             const searchItem = this.searchItems[queryElem.searchItemId];
             return searchItem.groupId !== groupId;
         });
-        this.checkComparisonStatus();
-        this.notify();
+        this._checkComparisonStatus();
+        this._notify();
     }
 
     /**
@@ -796,7 +726,62 @@ export class SearchModel extends EventBus {
         if (index >= 0) {
             this.query.splice(index, 1);
         }
-        this.notify();
+        this._notify();
+    }
+
+    /**
+     * @returns {string}
+     */
+    exportState() {
+        const state = {};
+        execute(mapToArray, this, state);
+        return JSON.stringify(state);
+    }
+
+    getDomainParts() {
+        return JSON.parse(JSON.stringify(this.domainParts));
+    }
+
+    /**
+     * Return an array containing enriched copies of all searchElements or of those
+     * satifying the given predicate if any
+     * @param {Function} [predicate]
+     * @returns {Object[]}
+     */
+    getSearchItems(predicate) {
+        const searchItems = [];
+        Object.values(this.searchItems).forEach((searchItem) => {
+            if (
+                (!("invisible" in searchItem) || !searchItem.invisible) &&
+                (!predicate || predicate(searchItem))
+            ) {
+                const enrichedSearchitem = this._enrichItem(searchItem);
+                if (enrichedSearchitem) {
+                    searchItems.push(enrichedSearchitem);
+                }
+            }
+        });
+        if (searchItems.some((f) => f.type === "favorite")) {
+            searchItems.sort((f1, f2) => f1.groupNumber - f2.groupNumber);
+        }
+        return searchItems;
+    }
+
+    /**
+     * Returns a sorted list of a copy of all sections. This list can be
+     * filtered by a given predicate.
+     * @param {SectionPredicate} [predicate] used to determine
+     *      which subsets of sections is wanted
+     * @returns {Section[]}
+     */
+    getSections(predicate) {
+        let sections = [...this.sections.values()].map((section) =>
+            Object.assign({}, section, { empty: !hasValues(section) })
+        );
+        if (predicate) {
+            sections = sections.filter(predicate);
+        }
+        return sections.sort((s1, s2) => s1.index - s2.index);
     }
 
     search() {
@@ -813,7 +798,7 @@ export class SearchModel extends EventBus {
                 // val of the form { domain: ArrayRepr, facet: Object | null }
             }
         }
-        this.notify();
+        this._notify();
         // this affect search panel content and maybe search bar (when facet is defined)
     }
 
@@ -825,7 +810,7 @@ export class SearchModel extends EventBus {
     toggleCategoryValue(sectionId, valueId) {
         const category = this.sections.get(sectionId);
         category.activeValueId = valueId;
-        this.notify();
+        this._notify();
     }
 
     /**
@@ -841,7 +826,7 @@ export class SearchModel extends EventBus {
             const value = filter.values.get(valueId);
             value.checked = forceTo === null ? !value.checked : forceTo;
         }
-        this.notify();
+        this._notify();
     }
 
     /**
@@ -871,7 +856,7 @@ export class SearchModel extends EventBus {
             }
             this.query.push({ searchItemId });
         }
-        this.notify();
+        this._notify();
     }
 
     /**
@@ -893,7 +878,7 @@ export class SearchModel extends EventBus {
         );
         if (index >= 0) {
             this.query.splice(index, 1);
-            if (!yearSelected(this.getSelectedGeneratorIds(searchItemId))) {
+            if (!yearSelected(this._getSelectedGeneratorIds(searchItemId))) {
                 // This is the case where generatorId was the last option
                 // of type 'year' to be there before being removed above.
                 // Since other options of type 'month' or 'quarter' do
@@ -904,15 +889,15 @@ export class SearchModel extends EventBus {
             }
         } else {
             this.query.push({ searchItemId, generatorId });
-            if (!yearSelected(this.getSelectedGeneratorIds(searchItemId))) {
+            if (!yearSelected(this._getSelectedGeneratorIds(searchItemId))) {
                 // Here we add 'this_year' as options if no option of type
                 // year is already selected.
                 const { defaultYearId } = this.optionGenerators.find((o) => o.id === generatorId);
                 this.query.push({ searchItemId, generatorId: defaultYearId });
             }
         }
-        this.checkComparisonStatus();
-        this.notify();
+        this._checkComparisonStatus();
+        this._notify();
     }
 
     toggleDateGroupBy(searchItemId, intervalId) {
@@ -932,7 +917,7 @@ export class SearchModel extends EventBus {
         } else {
             this.query.push({ searchItemId, intervalId });
         }
-        this.notify();
+        this._notify();
     }
 
     //--------------------------------------------------------------------------
@@ -942,7 +927,7 @@ export class SearchModel extends EventBus {
     /**
      * Activate the default favorite (if any) or all default filters.
      */
-    activateDefaultSearchItems(defaultFavoriteId) {
+    _activateDefaultSearchItems(defaultFavoriteId) {
         if (defaultFavoriteId) {
             // Activate default favorite
             this.toggleSearchItem(defaultFavoriteId);
@@ -970,8 +955,8 @@ export class SearchModel extends EventBus {
      * The comparison should become inactive if the corresponding date filter has become
      * inactive.
      */
-    checkComparisonStatus() {
-        const activeComparison = this.getActiveComparison();
+    _checkComparisonStatus() {
+        const activeComparison = this._getActiveComparison();
         if (!activeComparison) {
             return;
         }
@@ -988,7 +973,7 @@ export class SearchModel extends EventBus {
      * @param {string} sectionId
      * @param {Object} result
      */
-    createCategoryTree(sectionId, result) {
+    _createCategoryTree(sectionId, result) {
         const category = this.sections.get(sectionId);
 
         let { error_msg, parent_field: parentField, values } = result;
@@ -1024,14 +1009,14 @@ export class SearchModel extends EventBus {
         }
         // Set active value from context
         const valueIds = [false, ...values.map((val) => val.id)];
-        this.ensureCategoryValue(category, valueIds);
+        this._ensureCategoryValue(category, valueIds);
     }
 
     /**
      * @param {string} sectionId
      * @param {Object} result
      */
-    createFilterTree(sectionId, result) {
+    _createFilterTree(sectionId, result) {
         const filter = this.sections.get(sectionId);
 
         let { error_msg, values } = result;
@@ -1092,7 +1077,7 @@ export class SearchModel extends EventBus {
      * 'comparison'.
      * @param {Object[]} dateFilters
      */
-    createGroupOfComparisons(dateFilters) {
+    _createGroupOfComparisons(dateFilters) {
         const preSearchItem = [];
         for (const dateFilter of dateFilters) {
             for (const comparisonOption of this.comparisonOptions) {
@@ -1106,13 +1091,13 @@ export class SearchModel extends EventBus {
                 preSearchItem.push(preFilter);
             }
         }
-        this.createGroupOfSearchItems(preSearchItem);
+        this._createGroupOfSearchItems(preSearchItem);
     }
 
     /**
      * Add filters of type 'filter' determined by the key array dynamicFilters.
      */
-    createGroupOfDynamicFilters(dynamicFilters) {
+    _createGroupOfDynamicFilters(dynamicFilters) {
         const pregroup = dynamicFilters.map((filter) => {
             return {
                 groupNumber: this.nextGroupNumber,
@@ -1123,17 +1108,17 @@ export class SearchModel extends EventBus {
             };
         });
         this.nextGroupNumber++;
-        this.createGroupOfSearchItems(pregroup);
+        this._createGroupOfSearchItems(pregroup);
     }
 
     /**
      * Add filters of type 'favorite' determined by the array this.favoriteFilters.
      */
-    createGroupOfFavorites(irFilters) {
+    _createGroupOfFavorites(irFilters) {
         let defaultFavoriteId = null;
         irFilters.forEach((irFilter) => {
-            const favorite = this.irFilterToFavorite(irFilter);
-            this.createGroupOfSearchItems([favorite]);
+            const favorite = this._irFilterToFavorite(irFilter);
+            this._createGroupOfSearchItems([favorite]);
             if (favorite.isDefault) {
                 defaultFavoriteId = favorite.id;
             }
@@ -1145,7 +1130,7 @@ export class SearchModel extends EventBus {
      * Using a list (a 'pregroup') of 'prefilters', create new filters in `searchItems`
      * for each prefilter. The new filters belong to a same new group.
      */
-    createGroupOfSearchItems(pregroup) {
+    _createGroupOfSearchItems(pregroup) {
         pregroup.forEach((preSearchItem) => {
             const searchItem = Object.assign(preSearchItem, {
                 groupId: this.nextGroupId,
@@ -1163,7 +1148,7 @@ export class SearchModel extends EventBus {
      * various menus. The value null is returned if the filter should not appear
      * for some reason.
      */
-    enrichItem(searchItem) {
+    _enrichItem(searchItem) {
         const queryElements = this.query.filter(
             (queryElem) => queryElem.searchItemId === searchItem.id
         );
@@ -1214,7 +1199,7 @@ export class SearchModel extends EventBus {
      * @param {Category} category
      * @param {number[]} valueIds
      */
-    ensureCategoryValue(category, valueIds) {
+    _ensureCategoryValue(category, valueIds) {
         if (!valueIds.includes(category.activeValueId)) {
             category.activeValueId = valueIds[0];
         }
@@ -1226,8 +1211,8 @@ export class SearchModel extends EventBus {
      * @param {Category[]} categories
      * @returns {Promise} resolved when all categories have been fetched
      */
-    async fetchCategories(categories) {
-        const filterDomain = this.getFilterDomain();
+    async _fetchCategories(categories) {
+        const filterDomain = this._getFilterDomain();
         const searchDomain = this.searchDomain;
         await Promise.all(
             categories.map(async (category) => {
@@ -1236,7 +1221,7 @@ export class SearchModel extends EventBus {
                     "search_panel_select_range",
                     [category.fieldName],
                     {
-                        category_domain: this.getCategoryDomain(category.id),
+                        category_domain: this._getCategoryDomain(category.id),
                         enable_counters: category.enableCounters,
                         expand: category.expand,
                         filter_domain: filterDomain,
@@ -1245,7 +1230,7 @@ export class SearchModel extends EventBus {
                         search_domain: searchDomain,
                     }
                 );
-                this.createCategoryTree(category.id, result);
+                this._createCategoryTree(category.id, result);
             })
         );
     }
@@ -1256,12 +1241,12 @@ export class SearchModel extends EventBus {
      * @param {Filter[]} filters
      * @returns {Promise} resolved when all filters have been fetched
      */
-    async fetchFilters(filters) {
+    async _fetchFilters(filters) {
         const evalContext = {};
         for (const category of this.categories) {
             evalContext[category.fieldName] = category.activeValueId;
         }
-        const categoryDomain = this.getCategoryDomain();
+        const categoryDomain = this._getCategoryDomain();
         const searchDomain = this.searchDomain;
         await Promise.all(
             filters.map(async (filter) => {
@@ -1273,15 +1258,15 @@ export class SearchModel extends EventBus {
                         category_domain: categoryDomain,
                         comodel_domain: new Domain(filter.domain).toList(evalContext),
                         enable_counters: filter.enableCounters,
-                        filter_domain: this.getFilterDomain(filter.id),
+                        filter_domain: this._getFilterDomain(filter.id),
                         expand: filter.expand,
                         group_by: filter.groupBy || false,
-                        group_domain: this.getGroupDomain(filter),
+                        group_domain: this._getGroupDomain(filter),
                         limit: filter.limit,
                         search_domain: searchDomain,
                     }
                 );
-                this.createFilterTree(filter.id, result);
+                this._createFilterTree(filter.id, result);
             })
         );
     }
@@ -1292,12 +1277,12 @@ export class SearchModel extends EventBus {
      * @param {Filter[]} filtersToLoad
      * @returns {Promise} resolved when all categories have been fetched
      */
-    async fetchSections(categoriesToLoad, filtersToLoad) {
-        await this.fetchCategories(categoriesToLoad);
-        await this.fetchFilters(filtersToLoad);
+    async _fetchSections(categoriesToLoad, filtersToLoad) {
+        await this._fetchCategories(categoriesToLoad);
+        await this._fetchFilters(filtersToLoad);
     }
 
-    getActiveComparison() {
+    _getActiveComparison() {
         for (const queryElem of this.query) {
             const searchItem = this.searchItems[queryElem.searchItemId];
             if (searchItem.type === "comparison") {
@@ -1314,7 +1299,7 @@ export class SearchModel extends EventBus {
      * @param {string} [excludedCategoryId]
      * @returns {Array[]}
      */
-    getCategoryDomain(excludedCategoryId) {
+    _getCategoryDomain(excludedCategoryId) {
         const domain = [];
         for (const category of this.categories) {
             if (category.id === excludedCategoryId || !category.activeValueId) {
@@ -1327,7 +1312,7 @@ export class SearchModel extends EventBus {
         return domain;
     }
 
-    getComparison() {
+    _getComparison() {
         let searchItem = null;
         for (const queryElem of this.query.slice().reverse()) {
             const item = this.searchItems[queryElem.searchItemId];
@@ -1348,7 +1333,7 @@ export class SearchModel extends EventBus {
         const { fieldName, fieldType, description: dateFilterDescription } = this.searchItems[
             dateFilterId
         ];
-        const selectedGeneratorIds = this.getSelectedGeneratorIds(dateFilterId);
+        const selectedGeneratorIds = this._getSelectedGeneratorIds(dateFilterId);
         // compute range and range description
         const { domain: range, description: rangeDescription } = constructDateDomain(
             this.referenceMoment,
@@ -1383,12 +1368,12 @@ export class SearchModel extends EventBus {
      * filters of type 'filter', 'favorite', and 'field'.
      * @returns {Object}
      */
-    getContext() {
-        const groups = this.getGroups();
+    _getContext() {
+        const groups = this._getGroups();
         const contexts = [this.userService.context, this.globalContext];
         for (const group of groups) {
             for (const activeItem of group.activeItems) {
-                const context = this.getSearchItemContext(activeItem);
+                const context = this._getSearchItemContext(activeItem);
                 if (context) {
                     contexts.push(context);
                 }
@@ -1409,7 +1394,7 @@ export class SearchModel extends EventBus {
      * Compute the string representation or the description of the current domain associated
      * with a date filter starting from its corresponding query elements.
      */
-    getDateFilterDomain(dateFilter, generatorIds, key = "domain") {
+    _getDateFilterDomain(dateFilter, generatorIds, key = "domain") {
         const { fieldName, fieldType } = dateFilter;
         const dateFilterRange = constructDateDomain(
             this.referenceMoment,
@@ -1428,16 +1413,16 @@ export class SearchModel extends EventBus {
      * @param {boolean} [params.full=true]
      * @returns {DomainListRepr|string} domain a DomainListRepr if evaluation, a string else
      */
-    getDomain(params = {}) {
+    _getDomain(params = {}) {
         const evaluation = "evaluation" in params ? params.evaluation : true;
         const full = "full" in params ? params.full : true;
 
-        const groups = this.getGroups();
+        const groups = this._getGroups();
         const domains = [this.globalDomain];
         for (const group of groups) {
             const groupActiveItemDomains = [];
             for (const activeItem of group.activeItems) {
-                const domain = this.getSearchItemDomain(activeItem);
+                const domain = this._getSearchItemDomain(activeItem);
                 if (domain) {
                     groupActiveItemDomains.push(domain);
                 }
@@ -1452,7 +1437,7 @@ export class SearchModel extends EventBus {
         // we need to manage (optional) facets, deactivateGroup, clearQuery,...
 
         if (full) {
-            domains.push(this.getSearchPanelDomain());
+            domains.push(this._getSearchPanelDomain());
         }
 
         let domain;
@@ -1471,9 +1456,9 @@ export class SearchModel extends EventBus {
         }
     }
 
-    getFacets() {
+    _getFacets() {
         const facets = [];
-        const groups = this.getGroups();
+        const groups = this._getGroups();
         for (const group of groups) {
             const values = [];
             let title;
@@ -1501,7 +1486,7 @@ export class SearchModel extends EventBus {
                         break;
                     case "dateFilter":
                         type = "filter";
-                        const periodDescription = this.getDateFilterDomain(
+                        const periodDescription = this._getDateFilterDomain(
                             searchItem,
                             activeItem.generatorIds,
                             "description"
@@ -1533,7 +1518,7 @@ export class SearchModel extends EventBus {
      * Return the domain resulting from the combination of the autocomplete values
      * of a search item of type 'field'.
      */
-    getFieldDomain(field, autocompleteValues) {
+    _getFieldDomain(field, autocompleteValues) {
         const domains = autocompleteValues.map(({ label, value, operator }) => {
             let domain;
             if (field.filterDomain) {
@@ -1560,7 +1545,7 @@ export class SearchModel extends EventBus {
      * @param {string} [excludedFilterId]
      * @returns {Array[]}
      */
-    getFilterDomain(excludedFilterId) {
+    _getFilterDomain(excludedFilterId) {
         const domain = [];
 
         function addCondition(fieldName, valueMap) {
@@ -1600,12 +1585,12 @@ export class SearchModel extends EventBus {
      * defined in this.query. If no groupBys are found, one tries to
      * find some grouBys in this.globalContext.
      */
-    getGroupBy() {
-        const groups = this.getGroups();
+    _getGroupBy() {
+        const groups = this._getGroups();
         const groupBys = [];
         for (const group of groups) {
             for (const activeItem of group.activeItems) {
-                const activeItemGroupBys = this.getSearchItemGroupBys(activeItem);
+                const activeItemGroupBys = this._getSearchItemGroupBys(activeItem);
                 if (activeItemGroupBys) {
                     groupBys.push(...activeItemGroupBys);
                 }
@@ -1625,7 +1610,7 @@ export class SearchModel extends EventBus {
      * @param {Filter} filter
      * @returns {Object<string, Array[]> | Array[] | null}
      */
-    getGroupDomain(filter) {
+    _getGroupDomain(filter) {
         const { fieldName, groups, enableCounters } = filter;
         const { type: fieldType } = this.searchViewFields[fieldName];
 
@@ -1688,7 +1673,7 @@ export class SearchModel extends EventBus {
      * Reconstruct the (active) groups from the query elements.
      * @returns {Object[]}
      */
-    getGroups() {
+    _getGroups() {
         const preGroups = [];
         for (const queryElem of this.query) {
             const { searchItemId } = queryElem;
@@ -1745,8 +1730,8 @@ export class SearchModel extends EventBus {
     /**
      * @returns {string[]}
      */
-    getOrderBy() {
-        const groups = this.getGroups();
+    _getOrderBy() {
+        const groups = this._getGroups();
         let orderBy = [];
         for (const group of groups) {
             for (const activeItem of group.activeItems) {
@@ -1764,7 +1749,7 @@ export class SearchModel extends EventBus {
     /**
      * Return the context of the provided (active) filter.
      */
-    getSearchItemContext(activeItem) {
+    _getSearchItemContext(activeItem) {
         const { searchItemId } = activeItem;
         const searchItem = this.searchItems[searchItemId];
         switch (searchItem.type) {
@@ -1811,18 +1796,18 @@ export class SearchModel extends EventBus {
     /**
      * Return the domain of the provided filter.
      */
-    getSearchItemDomain(activeItem) {
+    _getSearchItemDomain(activeItem) {
         const { searchItemId } = activeItem;
         const searchItem = this.searchItems[searchItemId];
         switch (searchItem.type) {
             case "field":
-                return this.getFieldDomain(searchItem, activeItem.autocompletValues);
+                return this._getFieldDomain(searchItem, activeItem.autocompletValues);
             case "dateFilter":
-                const { dateFilterId } = this.getActiveComparison() || {};
+                const { dateFilterId } = this._getActiveComparison() || {};
                 if (this.searchMenuTypes.has("comparison") && dateFilterId === searchItemId) {
                     return new Domain([]);
                 }
-                return this.getDateFilterDomain(searchItem, activeItem.generatorIds);
+                return this._getDateFilterDomain(searchItem, activeItem.generatorIds);
             case "filter":
             case "favorite":
                 return searchItem.domain;
@@ -1831,7 +1816,7 @@ export class SearchModel extends EventBus {
         }
     }
 
-    getSearchItemGroupBys(activeItem) {
+    _getSearchItemGroupBys(activeItem) {
         const { searchItemId } = activeItem;
         const searchItem = this.searchItems[searchItemId];
         switch (searchItem.type) {
@@ -1851,7 +1836,7 @@ export class SearchModel extends EventBus {
      * Starting from a date filter id, returns the array of option ids currently selected
      * for the corresponding date filter.
      */
-    getSelectedGeneratorIds(dateFilterId) {
+    _getSelectedGeneratorIds(dateFilterId) {
         const selectedOptionIds = [];
         for (const queryElem of this.query) {
             if (queryElem.searchItemId === dateFilterId && "generatorId" in queryElem) {
@@ -1861,7 +1846,24 @@ export class SearchModel extends EventBus {
         return selectedOptionIds;
     }
 
-    irFilterToFavorite(irFilter) {
+    /**
+     * @returns {Domain}
+     */
+    _getSearchPanelDomain() {
+        return Domain.and([this._getCategoryDomain(), this._getFilterDomain()]);
+    }
+
+    /**
+     * @param {string} state
+     */
+    _importState(state) {
+        execute(arraytoMap, JSON.parse(state), this);
+    }
+
+    /**
+     * @param {Object} irFilter
+     */
+    _irFilterToFavorite(irFilter) {
         let userId = false;
         if (Array.isArray(irFilter.user_id)) {
             userId = irFilter.user_id[0];
@@ -1935,7 +1937,7 @@ export class SearchModel extends EventBus {
         return favorite;
     }
 
-    async notify() {
+    async _notify() {
         if (this.blockNotification) {
             return;
         }
@@ -1946,17 +1948,17 @@ export class SearchModel extends EventBus {
         this._orderBy = null;
 
         if (this.loadSearchPanel) {
-            const searchDomain = this.getDomain({ full: false });
+            const searchDomain = this._getDomain({ full: false });
             const searchDomainChanged =
                 JSON.stringify(this.searchDomain) !== JSON.stringify(searchDomain);
             this.searchDomain = searchDomain;
             if (searchDomainChanged) {
                 const toFetch = (section) => section.enableCounters || !section.expand;
-                this.sectionsPromise = this.fetchSections(
+                this.sectionsPromise = this._fetchSections(
                     this.categories.filter(toFetch),
                     this.filters.filter(toFetch)
                 );
-                if (this.shouldWaitForData(true)) {
+                if (this._shouldWaitForData(true)) {
                     await this.sectionsPromise;
                 }
             }
@@ -1971,7 +1973,7 @@ export class SearchModel extends EventBus {
      * @param {boolean} searchDomainChanged
      * @returns {boolean}
      */
-    shouldWaitForData(searchDomainChanged = false) {
+    _shouldWaitForData(searchDomainChanged = false) {
         if (this.categories.length && this.filters.some((filter) => filter.domain !== "[]")) {
             // Selected category value might affect the filter values
             return true;

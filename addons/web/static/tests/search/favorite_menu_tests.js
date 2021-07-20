@@ -243,7 +243,7 @@ QUnit.module("Search", (hooks) => {
 
             let domain = controlPanel.env.searchModel.domain;
             let groupBy = controlPanel.env.searchModel.groupBy;
-            let comparison = controlPanel.env.searchModel.getComparison();
+            let comparison = controlPanel.env.searchModel._getComparison();
 
             assert.deepEqual(domain, [
                 "&",
@@ -267,7 +267,7 @@ QUnit.module("Search", (hooks) => {
 
             domain = controlPanel.env.searchModel.domain;
             groupBy = controlPanel.env.searchModel.groupBy;
-            comparison = controlPanel.env.searchModel.getComparison();
+            comparison = controlPanel.env.searchModel._getComparison();
 
             assert.deepEqual(domain, [["foo", "ilike", "a"]]);
             assert.deepEqual(groupBy, ["date_field:month"]);
@@ -295,7 +295,7 @@ QUnit.module("Search", (hooks) => {
 
             domain = controlPanel.env.searchModel.domain;
             groupBy = controlPanel.env.searchModel.groupBy;
-            comparison = controlPanel.env.searchModel.getComparison();
+            comparison = controlPanel.env.searchModel._getComparison();
 
             assert.deepEqual(domain, ["!", ["foo", "=", "qsdf"]]);
             assert.deepEqual(groupBy, ["foo"]);
