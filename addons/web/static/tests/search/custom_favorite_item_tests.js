@@ -463,7 +463,7 @@ QUnit.module("Search", (hooks) => {
                 {
                     start() {
                         return {
-                            create(message, options) {
+                            add(message, options) {
                                 assert.strictEqual(
                                     message,
                                     "A filter with same name already exists."

@@ -26,7 +26,7 @@ export class CustomFavoriteItem extends Component {
      */
     saveFavorite(ev) {
         if (!this.state.description.length) {
-            this.notificationService.create(
+            this.notificationService.add(
                 this.env._t("A name for your favorite filter is required."),
                 { type: "danger" }
             );
@@ -37,12 +37,9 @@ export class CustomFavoriteItem extends Component {
             (s) => s.type === "favorite" && s.description === this.state.description
         );
         if (favorites.length) {
-            this.notificationService.create(
-                this.env._t("A filter with same name already exists."),
-                {
-                    type: "danger",
-                }
-            );
+            this.notificationService.add(this.env._t("A filter with same name already exists."), {
+                type: "danger",
+            });
             ev.stopPropagation();
             return this.descriptionRef.el.focus();
         }
