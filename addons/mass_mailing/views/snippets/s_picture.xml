@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_picture" name="Picture">
+    <div class="s_picture pt48 pb24 o_cc o_cc2 o_mail_snippet_general" data-snippet="s_picture">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h2 style="text-align: center;">
+                        <font style="font-size: 48px;" class="o_default_snippet_text">A punchy Headline</font>
+                    </h2>
+                    <p style="text-align: center;" class="">With strong technical foundations, Odoo's framework is unique. It provides <strong class="">top notch usability that scales across all apps</strong>.</p>
+                </div>
+            </div>
+            <div class="row s_nb_column_fixed">
+                <div class="col-lg-12 pb24" style="text-align: center;">
+                    <div class="figure">
+                        <img src="/mass_mailing/static/src/img/theme_default/s_default_image_block_image.jpg" class="figure-img img-thumbnail padding-large" alt=""/>
+                        <p class="figure-caption text-muted py-3 o_default_snippet_text">Add a caption to enhance the meaning of this image.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>
