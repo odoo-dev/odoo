@@ -52,7 +52,7 @@
                     <t t-snippet="mass_mailing.s_mail_block_two_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_two_cols.png"/>
                     <t t-snippet="mass_mailing.s_three_columns" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_three_columns.svg"/>
                     <t t-snippet="mass_mailing.s_image_text" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_image_text.svg"/>
-                    <t t-snippet="mass_mailing.s_mail_block_text_image" t-thumbnail="/mass_mailing/static/src/img/blocks/block_text_image.png"/>
+                    <t t-snippet="mass_mailing.s_text_image" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_text_image.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_image" t-thumbnail="/mass_mailing/static/src/img/blocks/block_image.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_footer_separator" t-thumbnail="/mass_mailing/static/src/img/blocks/block_footer_separator.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_footer_tag_line" t-thumbnail="/mass_mailing/static/src/img/blocks/block_footer_tag_line.png"/>
@@ -226,27 +226,6 @@
                                 <a role="button" href="#" class="btn btn-link">Read More...</a>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-<template id="s_mail_block_text_image" name="Text - Image">
-    <div class="o_mail_block_text_image">
-        <div class="o_mail_snippet_general">
-            <div cellspacing="0" cellpadding="0" class="container o_mail_table_styles">
-                <div class="row">
-                    <div style="width:270px;vertical-align:middle;text-align:center;" class="col o_mail_col_mv o_mail_h_padding o_mail_v_padding">
-                        <h3>A unique value</h3>
-                        <p class="o_mail_no_margin" style="text-align:justify;">The open source model of Odoo has allowed us to leverage thousands of developers and business experts to build hundreds of apps in just a few years.</p>
-                        <div class="text-center" style="margin-top:15px;">
-                            <a role="button" href="#" class="btn btn-link">Read More...</a>
-                        </div>
-                    </div>
-                    <div style="width:270px;text-align:center;vertical-align:middle" class="col o_mail_col_mv o_mail_img_container o_mail_h_padding o_mail_v_padding">
-                        <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_text_image.jpg" class="d-block mx-auto"/>
                     </div>
                 </div>
             </div>
