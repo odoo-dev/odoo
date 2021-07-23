@@ -51,6 +51,7 @@
         'views/snippets/s_numbers.xml',
         'views/snippets/s_picture.xml',
         'views/snippets/s_text_block.xml',
+        'views/snippets/s_text_highlight.xml',
         'views/snippets/s_text_image.xml',
         'views/snippets/s_three_columns.xml',
         'views/snippets/s_title.xml',

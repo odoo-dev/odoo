@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_text_highlight" name="Text Highlight">
+    <div class="s_text_highlight bg-secondary my-3 text-center w-100 o_mail_snippet_general" data-snippet="s_text_highlight">
+        <div class="container pt16 pb16">
+            <div class="row">
+                <div class="col-12">
+                    <h3 class="o_default_snippet_text">Text Highlight</h3>
+                    <p class="o_default_snippet_text o_mail_no_margin">Put the focus on what you have to say!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>
