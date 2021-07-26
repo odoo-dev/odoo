@@ -1,138 +1,40 @@
 .pos .opening-cash-control {
-    max-width: 550px !important;
-    height: 570px;
+    left: 35% !important;
 }
 
-.pos .cashbox-button {
-    height: 54px;
-    width: 54px;
-    font-weight: bold;
-    vertical-align: middle;
-    color: #555555;
-    border-radius: 0;
-    border: none;
-    border-right: 1px solid;
-    border-bottom: 1px solid;
-    border-color: #bfbfbf;
-    transition: all 150ms linear;
+.pos .opening-cash-control .body{
+    margin: 40px;
 }
 
-.pos .opening-cash-control .button {
-    height: 50px;
-}
-
-.pos .opening-cash-control .cashbox-display {
-    display: flex;
-}
-
-.pos .opening-cash-control .cashbox-display-info {
-    width: 420px;
-}
-
-.pos .opening-cash-control .cashbox-display-info .info {
+.pos .opening-cash-control .opening-cash-section {
     display: flex;
     justify-content: space-between;
-    font-weight: bold;
-    font-size: 19px;
-    margin: 20px 0;
+    margin: 40px 0;
 }
 
-.pos .opening-cash-control .cashbox-display .details-button-section {
-    display: flex;
-    width: 200px;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.pos .opening-cash-control .cashbox-notes {
-    font-style: italic;
-    font-weight: 350;
-    width: 300px;
-    line-height: 20px;
-    resize: none;
-}
-
-.pos .opening-cash-control .input-section {
-    display: flex;
-    justify-content: space-between;
-}
-
-.pos .opening-cash-control footer .button {
-     margin: 22px 22px 22px 0px
-}
-
-.pos .popup.opening-cash-details {
-    transform: none;
-    left: calc(50% + 280px);
-    top: calc(50% - 222px);
-    box-shadow: 10px 10px 20px rgb(0 0 0 / 40%);
-    width: 250px;
-    max-height: 507px;
-}
-
-.pos .opening-cash-details.invisible {
-    display: none;
-}
-
-.pos .opening-cash-details .body {
-    overflow: auto;
-    max-height: 415px;
-    position: relative; /* this one is important for the scrollable part of the position absolute of the input*/
-}
-
-.pos .opening-cash-details .details {
-    margin-left: 30px;
-    margin-bottom: 20px;
-}
-
-.pos .opening-cash-details .details-title {
-    text-align: left;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-.pos .opening-cash-details .details-value {
-    display: flex;
-    margin: 5px 0;
-}
-
-.pos .opening-cash-details .input-details {
-    width: 50px;
-    margin-right: 30px;
-    border-bottom: solid 2px;
-    text-align: center;
-    font-size: 18px;
-    color: #555555;
-    overflow: auto;
-}
-
-.pos .opening-cash-details .details-value input {
-    position: absolute;
-    width: 50px;
-    background: none;
-    min-height: 0;
-    border-radius: unset;
-    box-shadow: none;
-    caret-color: transparent;
-    padding: 0;
-    cursor: pointer;
-}
-
-.pos .opening-cash-details .input:focus {
-    box-shadow: none;
-}
-
-.pos .opening-cash-details .input-details.selected {
-    border-color: blue;
+.pos .opening-cash-section .info-title {
     font-size: 20px;
     font-weight: bold;
 }
 
-.pos .opening-cash-details .input-details.highlight span {
-    color:white;
-    background: limegreen;
+.pos .opening-cash-section .cash-input-sub-section {
+    display: flex;
 }
 
-.pos .opening-cash-details .button {
-    line-height: unset;
+.pos .cash-input-sub-section .pos-input {
+    width: 85px;
+}
+
+.pos .cash-input-sub-section .button.icon {
+    margin: 0;
+    float: unset;
+}
+
+.pos .opening-cash-control .opening-cash-notes {
+    font-style: italic;
+    font-weight: 350;
+    width: calc(100% - 20px); /* textarea has a padding of 10px */
+    line-height: 20px;
+    resize: none;
+    height: 150px;
 }
