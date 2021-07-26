@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_references" name="References">
+    <div class="s_references pt48 pb32 o_mail_snippet_general" data-snippet="s_references">
+        <div class="container">
+            <div class="row">
+                <div class="col-12" align="center">
+                    <h2 style="text-align: center;" class="">Our References</h2>
+                    <p style="text-align: center;" class="o_default_snippet_text">We are in good company.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2 pt16 pb16">
+                    <img src="/web/image/mass_mailing.s_reference_demo_image_1" class="img img-fluid mx-auto" alt=""/>
+                </div>
+                <div class="col-lg-2 pt16 pb16">
+                    <img src="/web/image/mass_mailing.s_reference_demo_image_2" class="img img-fluid mx-auto" alt=""/>
+                </div>
+                <div class="col-lg-2 pt16 pb16">
+                    <img src="/web/image/mass_mailing.s_reference_demo_image_3" class="img img-fluid mx-auto" alt=""/>
+                </div>
+                <div class="col-lg-2 pt16 pb16">
+                    <img src="/web/image/mass_mailing.s_reference_demo_image_4" class="img img-fluid mx-auto" alt=""/>
+                </div>
+                <div class="col-lg-2 pt16 pb16">
+                    <img src="/web/image/mass_mailing.s_reference_demo_image_5" class="img img-fluid mx-auto" alt=""/>
+                </div>
+                <div class="col-lg-2 pt16 pb16">
+                    <img src="/web/image/mass_mailing.s_reference_default_image_6" class="img img-fluid mx-auto" alt=""/>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>
