@@ -44,6 +44,7 @@
         'views/mass_mailing_templates_portal.xml',
         'views/themes_templates.xml',
         'views/snippets_themes.xml',
+        'views/snippets/s_alert.xml',
         'views/snippets/s_call_to_action.xml',
         'views/snippets/s_cover.xml',
         'views/snippets/s_color_blocks_2.xml',

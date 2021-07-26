@@ -79,6 +79,7 @@
             <div id="email_designer_default_inner" class="o_panel">
                 <div class="o_panel_header">Inner Content</div>
                 <div class="o_panel_body" id="email_designer_inner_elements">
+                    <t t-snippet="mass_mailing.s_alert" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_alert.svg"/>
                 </div>
             </div>
             <div id="email_designer_default_footer" class="o_panel">
