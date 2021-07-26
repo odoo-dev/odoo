@@ -50,6 +50,7 @@
         'views/snippets/s_company_team.xml',
         'views/snippets/s_comparisons.xml',
         'views/snippets/s_features.xml',
+        'views/snippets/s_features_grid.xml',
         'views/snippets/s_image_text.xml',
         'views/snippets/s_masonry_block.xml',
         'views/snippets/s_media_list.xml',
