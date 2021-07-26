@@ -15,6 +15,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
     jsLibs: [
         '/mass_mailing/static/src/js/mass_mailing_link_dialog_fix.js',
         '/mass_mailing/static/src/js/mass_mailing_snippets.js',
+        '/mass_mailing/static/src/snippets/s_blockquote/options.js',
         '/mass_mailing/static/src/snippets/s_media_list/options.js',
         '/mass_mailing/static/src/snippets/s_showcase/options.js',
         '/mass_mailing/static/src/snippets/s_rating/options.js',

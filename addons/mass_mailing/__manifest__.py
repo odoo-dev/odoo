@@ -45,6 +45,7 @@
         'views/themes_templates.xml',
         'views/snippets_themes.xml',
         'views/snippets/s_alert.xml',
+        'views/snippets/s_blockquote.xml',
         'views/snippets/s_call_to_action.xml',
         'views/snippets/s_cover.xml',
         'views/snippets/s_color_blocks_2.xml',
@@ -96,6 +97,7 @@
         'web.qunit_suite_tests': [
             'mass_mailing/static/tests/field_html_test.js',
             'mass_mailing/static/src/js/mass_mailing_snippets.js',
+            'mass_mailing/static/src/snippets/s_blockquote/options.js',
             'mass_mailing/static/src/snippets/s_media_list/options.js',
             'mass_mailing/static/src/snippets/s_showcase/options.js',
             'mass_mailing/static/src/snippets/s_rating/options.js',

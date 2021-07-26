@@ -81,6 +81,7 @@
                 <div class="o_panel_body" id="email_designer_inner_elements">
                     <t t-snippet="mass_mailing.s_alert" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_alert.svg"/>
                     <t t-snippet="mass_mailing.s_rating" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_rating.svg"/>
+                    <t t-snippet="mass_mailing.s_blockquote" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_blockquote.svg"/>
                 </div>
             </div>
             <div id="email_designer_default_footer" class="o_panel">
