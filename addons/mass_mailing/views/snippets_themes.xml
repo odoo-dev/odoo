@@ -71,7 +71,7 @@
                     <t t-snippet="mass_mailing.s_mail_block_discount2" t-thumbnail="/mass_mailing/static/src/img/blocks/block_discount2.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_discount1" t-thumbnail="/mass_mailing/static/src/img/blocks/block_discount1.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_event" t-thumbnail="/mass_mailing/static/src/img/blocks/block_event.png"/>
-                    <t t-snippet="mass_mailing.s_mail_block_steps" t-thumbnail="/mass_mailing/static/src/img/blocks/block_steps.png"/>
+                    <t t-snippet="mass_mailing.s_process_steps" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_process_steps.svg"/>
                 </div>
             </div>
             <div id="email_designer_default_footer" class="o_panel">
@@ -324,62 +324,6 @@
                         <div class="small mt16">
                             <a role="button" href="#" class="btn btn-primary">Registration</a>
                             <a role="button" href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-<template id="s_mail_block_steps" name="Steps">
-    <div class="o_mail_block_steps o_mail_no_colorpicker">
-        <div class="o_mail_snippet_general">
-            <div cellspacing="0" cellpadding="0" class="container o_mail_table_styles o_mail_full_width_padding">
-                <div class="row">
-                    <div class="col o_mail_col_mv o_mail_h_padding o_mail_v_padding">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col text-right">
-                                    &amp;nbsp;
-                                    <span class="fa fa-compass fa-2x text-o-color-4" role="img" aria-label="Choose" title="Choose"></span>
-                                    &amp;nbsp;
-                                </div>
-                                <div style="padding-left:10px;" class="col">
-                                    <p class="o_mail_no_margin"><small>Step 1:</small></p>
-                                    <h4 class="o_mail_no_margin">Choose</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col o_mail_col_mv o_mail_h_padding o_mail_v_padding">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col text-right">
-                                    &amp;nbsp;
-                                    <span class="fa fa-credit-card fa-2x text-o-color-4" role="img" aria-label="Order" title="Order"></span>
-                                    &amp;nbsp;
-                                </div>
-                                <div class="col" style="padding-left:10px;">
-                                    <p class="o_mail_no_margin"><small>Step 2:</small></p>
-                                    <h4 class="o_mail_no_margin ">Order</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col o_mail_col_mv o_mail_h_padding o_mail_v_padding">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col text-right">
-                                    &amp;nbsp;
-                                    <span class="fa fa-smile-o fa-2x text-o-color-4" role="img" aria-label="Enjoy" title="Enjoy"></span>
-                                    &amp;nbsp;
-                                </div>
-                                <div class="col" style="padding-left:10px;">
-                                    <p class="o_mail_no_margin"><small>Step 3:</small></p>
-                                    <h4 class="o_mail_no_margin ">Enjoy!</h4>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

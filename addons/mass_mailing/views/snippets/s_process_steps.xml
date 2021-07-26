@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_process_steps" name="Steps">
+    <div class="s_process_steps pt24 pb24 o_mail_snippet_general" data-snippet="s_process_steps">
+        <div class="container">
+            <div class="row no-gutters">
+                <div class="s_process_step pt24 pb24 col-lg-4" valign="top">
+                    <div class="s_process_step_icon">
+                        <span>
+                            <i class="fa fa-2x mx-auto rounded-circle bg-primary fa-compass"></i>
+                        </span>
+                    </div>
+                    <div class="s_process_step_content text-center">
+                        <h2 class="o_default_snippet_text">Choose</h2>
+                        <p class="o_default_snippet_text">Let your customers follow <br/>and understand your process.</p>
+                    </div>
+                </div>
+                <div class="s_process_step pt24 pb24 col-lg-4" valign="top">
+                    <div class="s_process_step_icon">
+                        <span>
+                            <i class="fa fa-2x mx-auto rounded-circle bg-o-color-5 fa-credit-card"></i>
+                        </span>
+                    </div>
+                    <div class="s_process_step_content text-center">
+                        <h2 class="o_default_snippet_text">Order</h2>
+                        <p class="o_default_snippet_text">Click on the icon to adapt it <br/>to your purpose.</p>
+                    </div>
+                </div>
+                <div class="s_process_step pt24 pb24 col-lg-4" valign="top">
+                    <div class="s_process_step_icon">
+                        <span>
+                            <i class="fa fa-2x mx-auto rounded-circle bg-secondary fa-smile-o"></i>
+                        </span>
+                    </div>
+                    <div class="s_process_step_content text-center">
+                        <h2 class="o_default_snippet_text">Enjoy!</h2>
+                        <p class="o_default_snippet_text">Duplicate blocks <br/>to add more steps.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>

@@ -55,6 +55,7 @@
         'views/snippets/s_media_list.xml',
         'views/snippets/s_numbers.xml',
         'views/snippets/s_picture.xml',
+        'views/snippets/s_process_steps.xml',
         'views/snippets/s_references.xml',
         'views/snippets/s_showcase.xml',
         'views/snippets/s_text_block.xml',
