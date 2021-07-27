@@ -424,11 +424,14 @@ odoo.define('point_of_sale.tour.acceptance', function (require) {
     steps = steps.concat(verify_order_total('5.52'));
 
     steps = steps.concat([{
-        content: "close the Point of Sale frontend",
+        content: "open closing the Point of Sale frontend popup",
         trigger: ".header-button",
     }, {
+        content: "close the Point of Sale frontend",
+        trigger: ".button.main-button:contains('Open the back-end and keep the session open')",
+    }, {
         content: "confirm closing the frontend",
-        trigger: ".header-button.confirm",
+        trigger: ".button.main-button.confirm",
         run: function() {}, //it's a check,
     }]);
 

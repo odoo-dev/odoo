@@ -18,7 +18,7 @@
                     </button>
                 </main>
                 <footer class="footer">
-                    <button class="button" t-on-click="cancel()">Close</button>
+                    <div class="button" t-on-click="cancel()">Close</div>
                 </footer>
             </div>
         </div>
