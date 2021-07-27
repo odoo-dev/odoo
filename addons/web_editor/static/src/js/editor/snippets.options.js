@@ -4444,6 +4444,118 @@ registry.Box = SnippetOptionWidget.extend({
     }
 });
 
+
+
+registry.layout_column = SnippetOptionWidget.extend({
+    /**
+     * @override
+     */
+    start: function () {
+        // Needs to be done manually for now because _computeWidgetVisibility
+        // doesn't go through this option for buttons inside of a select.
+        // TODO: improve this.
+        this.$el.find('we-button[data-name="zero_cols_opt"]')
+            .toggleClass('d-none', !this.$target.is('.s_allow_columns'));
+        return this._super(...arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Changes the number of columns.
+     *
+     * @see this.selectClass for parameters
+     */
+    selectCount: async function (previewMode, widgetValue, params) {
+        const previousNbColumns = this.$('> .row').children().length;
+        let $row = this.$('> .row');
+        if (!$row.length) {
+            $row = this.$target.contents().wrapAll($('<div class="row"><div class="col-lg-12"/></div>')).parent().parent();
+        }
+
+        const nbColumns = parseInt(widgetValue);
+        await this._updateColumnCount($row, (nbColumns || 1) - $row.children().length);
+        // Yield UI thread to wait for event to bubble before activate_snippet is called.
+        // In this case this lets the select handle the click event before we switch snippet.
+        // TODO: make this more generic in activate_snippet event handler.
+        await new Promise(resolve => setTimeout(resolve));
+        if (nbColumns === 0) {
+            $row.contents().unwrap().contents().unwrap();
+            this.trigger_up('activate_snippet', {$snippet: this.$target});
+        } else if (previousNbColumns === 0) {
+            this.trigger_up('activate_snippet', {$snippet: this.$('> .row').children().first()});
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState: function (methodName, params) {
+        if (methodName === 'selectCount') {
+            return this.$('> .row').children().length;
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Adds new columns which are clones of the last column or removes the
+     * last x columns.
+     *
+     * @private
+     * @param {jQuery} $row - the row in which to update the columns
+     * @param {integer} count - positif to add, negative to remove
+     */
+    _updateColumnCount: async function ($row, count) {
+        if (!count) {
+            return;
+        }
+
+        if (count > 0) {
+            var $lastColumn = $row.children().last();
+            for (var i = 0; i < count; i++) {
+                await new Promise(resolve => {
+                    this.trigger_up('clone_snippet', {$snippet: $lastColumn, onSuccess: resolve});
+                });
+            }
+        } else {
+            var self = this;
+            for (const el of $row.children().slice(count)) {
+                await new Promise(resolve => {
+                    self.trigger_up('remove_snippet', {$snippet: $(el), onSuccess: resolve, shouldRecordUndo: false});
+                });
+            }
+        }
+
+        this._resizeColumns($row.children());
+        this.trigger_up('cover_update');
+    },
+    /**
+     * Resizes the columns so that they are kept on one row.
+     *
+     * @private
+     * @param {jQuery} $columns - the columns to resize
+     */
+    _resizeColumns: function ($columns) {
+        const colsLength = $columns.length;
+        var colSize = Math.floor(12 / colsLength) || 1;
+        var colOffset = Math.floor((12 - colSize * colsLength) / 2);
+        var colClass = 'col-lg-' + colSize;
+        _.each($columns, function (column) {
+            var $column = $(column);
+            $column.attr('class', $column.attr('class').replace(/\b(col|offset)-lg(-\d+)?\b/g, ''));
+            $column.addClass(colClass);
+        });
+        if (colOffset) {
+            $columns.first().addClass('offset-lg-' + colOffset);
+        }
+    },
+});
+
 /**
  * Allows for media to be replaced.
  */
