@@ -297,13 +297,9 @@
     </div>
 
     <!-- H-ALIGN -->
-    <div id="so_text_align" data-selector=".s_share, .s_text_highlight">
-        <we-button-group string="Alignment">
-            <we-button title="Left" data-select-class="text-left"><i class="fa fa-fw fa-align-left"/></we-button>
-            <we-button title="Center" data-select-class="text-center"><i class="fa fa-fw fa-align-center"/></we-button>
-            <we-button title="Right" data-select-class="text-right"><i class="fa fa-fw fa-align-right"/></we-button>
-        </we-button-group>
-    </div>
+    <t t-call="web_editor.snippet_options_text_align">
+        <t t-set="selector" t-value="'.s_share, .s_text_highlight'"/>
+    </t>
 
     <div id="so_width" data-selector=".s_alert, .s_card, .s_blockquote, .s_text_highlight">
         <we-select string="Width">

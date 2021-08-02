@@ -365,6 +365,17 @@
     </t>
 </template>
 
+<!-- H-ALIGN -->
+<template id="snippet_options_text_align">
+    <div id="so_text_align" t-att-data-selector="selector">
+        <we-button-group string="Alignment">
+            <we-button title="Left" data-select-class="text-left"><i class="fa fa-fw fa-align-left"/></we-button>
+            <we-button title="Center" data-select-class="text-center"><i class="fa fa-fw fa-align-center"/></we-button>
+            <we-button title="Right" data-select-class="text-right"><i class="fa fa-fw fa-align-right"/></we-button>
+        </we-button-group>
+    </div>
+</template>
+
 <!-- Stretch section -->
 <template id="snippet_options_container_width">
     <we-button-group string="Content Width">
@@ -457,6 +468,7 @@
 
 <!-- options (data-selector, data-drop-in, data-drop-near, data-js to link js object ) -->
 <template id="snippet_options">
+
     <!-- t-field -->
     <div data-js='many2one'
          data-selector="[data-oe-many2one-model]:not([data-oe-readonly])"
