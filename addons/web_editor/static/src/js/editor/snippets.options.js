@@ -4557,6 +4557,72 @@ registry.layout_column = SnippetOptionWidget.extend({
 });
 
 /**
+ * Allows snippets to be moved before the preceding element or after the following.
+ */
+registry.SnippetMove = SnippetOptionWidget.extend({
+    displayOverlayOptions: true,
+
+    /**
+     * @override
+     */
+    start: function () {
+        var $buttons = this.$el.find('we-button');
+        var $overlayArea = this.$overlay.find('.o_overlay_move_options');
+        $overlayArea.prepend($buttons[0]);
+        $overlayArea.append($buttons[1]);
+
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    onFocus: function () {
+        // TODO improve this: hack to hide options section if snippet move is
+        // the only one.
+        const $allOptions = this.$el.parent();
+        if ($allOptions.find('we-customizeblock-option').length <= 1) {
+            $allOptions.addClass('d-none');
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Moves the snippet around.
+     *
+     * @see this.selectClass for parameters
+     */
+    moveSnippet: function (previewMode, widgetValue, params) {
+        const isNavItem = this.$target[0].classList.contains('nav-item');
+        const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
+        switch (widgetValue) {
+            case 'prev':
+                this.$target.prev().before(this.$target);
+                if (isNavItem) {
+                    $tabPane.prev().before($tabPane);
+                }
+                break;
+            case 'next':
+                this.$target.next().after(this.$target);
+                if (isNavItem) {
+                    $tabPane.next().after($tabPane);
+                }
+                break;
+        }
+        if (!this.$target.is(this.data.noScroll)
+                && (params.name === 'move_up_opt' || params.name === 'move_down_opt')) {
+            scrollTo(this.$target[0], {
+                extraOffset: 50,
+                easing: 'linear',
+                duration: 550,
+            });
+        }
+    },
+});
+
+/**
  * Allows for media to be replaced.
  */
 registry.ReplaceMedia = SnippetOptionWidget.extend({

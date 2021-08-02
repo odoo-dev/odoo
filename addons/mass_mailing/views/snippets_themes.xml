@@ -434,6 +434,19 @@
             <we-button data-select-count="6">6</we-button>
         </we-select>
     </div>
+
+    <!-- Move snippets around -->
+    <div data-js="SnippetMove" data-selector="[data-snippet]">
+        <we-button class="fa fa-fw fa-angle-up" data-move-snippet="prev" data-no-preview="true" data-name="move_up_opt"/>
+        <we-button class="fa fa-fw fa-angle-down" data-move-snippet="next" data-no-preview="true" data-name="move_down_opt"/>
+    </div>
+    <div data-js="SnippetMove"
+         data-selector=".row:not(.s_col_no_resize) > div"
+         data-exclude=".s_showcase .row > div"
+         data-name="move_horizontally_opt">
+        <we-button class="fa fa-fw fa-angle-left" data-move-snippet="prev" data-no-preview="true" data-name="move_left_opt"/>
+        <we-button class="fa fa-fw fa-angle-right" data-move-snippet="next" data-no-preview="true" data-name="move_right_opt"/>
+    </div>
     <div data-js="BodyWidth" data-selector=".o_mail_wrapper">
         <we-button-group string="Body Width">
             <we-button data-select-class="o_mail_small"
