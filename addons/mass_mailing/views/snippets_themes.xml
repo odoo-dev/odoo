@@ -453,6 +453,10 @@
         <t t-set="selector" t-value="'.s_text_highlight'"/>
     </t>
 
+    <t t-call="web_editor.snippet_options_width">
+        <t t-set="selector" t-value="'.s_alert, .s_blockquote, .s_text_highlight'"/>
+    </t>
+
     <div data-js="BodyWidth" data-selector=".o_mail_wrapper">
         <we-button-group string="Body Width">
             <we-button data-select-class="o_mail_small"

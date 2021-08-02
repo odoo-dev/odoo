@@ -301,14 +301,9 @@
         <t t-set="selector" t-value="'.s_share, .s_text_highlight'"/>
     </t>
 
-    <div id="so_width" data-selector=".s_alert, .s_card, .s_blockquote, .s_text_highlight">
-        <we-select string="Width">
-            <we-button data-select-class="w-25">25%</we-button>
-            <we-button data-select-class="w-50">50%</we-button>
-            <we-button data-select-class="w-75">75%</we-button>
-            <we-button data-select-class="w-100" data-name="so_width_100">100%</we-button>
-        </we-select>
-    </div>
+    <t t-call="web_editor.snippet_options_width">
+        <t t-set="selector" t-value="'.s_alert, .s_card, .s_blockquote, .s_text_highlight'"/>
+    </t>
 
     <div id="so_block_align" data-selector=".s_alert, .s_card, .s_blockquote, .s_text_highlight">
         <we-button-group string="Alignment" data-dependencies="!so_width_100">

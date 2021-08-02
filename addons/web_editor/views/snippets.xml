@@ -376,6 +376,17 @@
     </div>
 </template>
 
+<template id="snippet_options_width">
+    <div id="so_width" t-att-data-selector="selector">
+        <we-select string="Width">
+            <we-button data-select-class="w-25">25%</we-button>
+            <we-button data-select-class="w-50">50%</we-button>
+            <we-button data-select-class="w-75">75%</we-button>
+            <we-button data-select-class="w-100" data-name="so_width_100">100%</we-button>
+        </we-select>
+    </div>
+</template>
+
 <!-- Stretch section -->
 <template id="snippet_options_container_width">
     <we-button-group string="Content Width">
