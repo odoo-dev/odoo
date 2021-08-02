@@ -305,13 +305,9 @@
         <t t-set="selector" t-value="'.s_alert, .s_card, .s_blockquote, .s_text_highlight'"/>
     </t>
 
-    <div id="so_block_align" data-selector=".s_alert, .s_card, .s_blockquote, .s_text_highlight">
-        <we-button-group string="Alignment" data-dependencies="!so_width_100">
-            <we-button title="Left" data-select-class="mr-auto"><i class="fa fa-fw fa-align-left"/></we-button>
-            <we-button title="Center" data-select-class="mx-auto"><i class="fa fa-fw fa-align-center"/></we-button>
-            <we-button title="Right" data-select-class="ml-auto"><i class="fa fa-fw fa-align-right"/></we-button>
-        </we-button-group>
-    </div>
+    <t t-call="web_editor.snippet_options_block_align">
+        <t t-set="selector" t-value="'.s_alert, .s_card, .s_blockquote, .s_text_highlight'"/>
+    </t>
 
     <!-- Carousel | .s_carousel | .s_quotes_carousel -->
     <!-- Dedicated colorpicker so that there is not 3 level of

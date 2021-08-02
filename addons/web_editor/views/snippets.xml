@@ -387,6 +387,16 @@
     </div>
 </template>
 
+<template id="snippet_options_block_align">
+    <div id="so_block_align" t-att-data-selector="selector">
+        <we-button-group string="Alignment" data-dependencies="!so_width_100">
+            <we-button title="Left" data-select-class="mr-auto"><i class="fa fa-fw fa-align-left"/></we-button>
+            <we-button title="Center" data-select-class="mx-auto"><i class="fa fa-fw fa-align-center"/></we-button>
+            <we-button title="Right" data-select-class="ml-auto"><i class="fa fa-fw fa-align-right"/></we-button>
+        </we-button-group>
+    </div>
+</template>
+
 <!-- Stretch section -->
 <template id="snippet_options_container_width">
     <we-button-group string="Content Width">
