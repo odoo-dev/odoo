@@ -1846,7 +1846,11 @@ QUnit.module("Views", (hooks) => {
                     <field name="bar"/>
                 </graph>
             `,
-            views: [[false, "search"]],
+            searchViewArch: `
+                <search>
+                    <filter name="group_by_color" string="Color" context="{ 'group_by': 'color_id' }"/>
+                </search>
+            `,
         });
         checkModeIs(assert, graph, "bar");
         assert.strictEqual(getXAxeLabel(graph), "bar");
@@ -2058,7 +2062,11 @@ QUnit.module("Views", (hooks) => {
                     <field name="product_id"/>
                 </graph>
             `,
-            views: [[false, "search"]],
+            searchViewArch: `
+                <search>
+                    <filter name="group_by_color" string="Color" context="{ 'group_by': 'color_id' }"/>
+                </search>
+            `,
         });
         checkLabels(assert, graph, ["xphone", "xpad"]);
         await toggleGroupByMenu(graph);
@@ -2184,7 +2192,15 @@ QUnit.module("Views", (hooks) => {
                     <field name="product_id"/>
                 </graph>
             `,
-            views: [[false, "search"]],
+            searchViewArch: `
+                <search>
+                    <filter name="filter_with_context"
+                        string="Filter With Context"
+                        domain="[]"
+                        context="{ 'graph_measure': 'foo', 'graph_mode': 'line', 'graph_groupbys': ['color_id'] }"
+                        />
+                </search>
+            `,
         });
         checkLabels(assert, graph, ["xphone", "xpad"]);
         checkLegend(assert, graph, "Count");
@@ -2289,17 +2305,17 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("correctly uses graph_ keys from the context (at reload)", async function (assert) {
         assert.expect(10);
-        serverData.views["foo,false,search"] = `
-            <search>
-                <filter name="context" domain="[]" string="Context" context="{ 'graph_measure': 'foo', 'graph_mode': 'line' }"/>
-            <search/>
-        `;
+
         const graph = await makeView({
             serverData,
             type: "graph",
             resModel: "foo",
             arch: '<graph><field name="product_id"/></graph>',
-            views: [[false, "search"]],
+            searchViewArch: `
+                <search>
+                    <filter name="context" domain="[]" string="Context" context="{ 'graph_measure': 'foo', 'graph_mode': 'line' }"/>
+                </search>
+            `,
         });
         checkLegend(assert, graph, "Count");
         assert.strictEqual(getYAxeLabel(graph), "Count");
@@ -2327,7 +2343,11 @@ QUnit.module("Views", (hooks) => {
                     <field name="foo" type="measure"/>
                 </graph>
             `,
-            views: [[false, "search"]],
+            searchViewArch: `
+                <search>
+                    <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]"/>
+                </search>
+            `,
         });
         await toggleFilterMenu(graph);
         await toggleMenuItem(graph, "False Domain");
@@ -2350,7 +2370,11 @@ QUnit.module("Views", (hooks) => {
                     <field name="foo" type="measure"/>
                 </graph>
             `,
-            views: [[false, "search"]],
+            searchViewArch: `
+                <search>
+                    <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]"/>
+                </search>
+            `,
         });
         checkLabels(assert, graph, ["xphone", "xpad"]);
         checkLegend(assert, graph, "Foo");
@@ -3116,7 +3140,11 @@ QUnit.module("Views", (hooks) => {
                 </graph>
             `,
             context: { search_default_false_domain: 1 },
-            views: [[false, "search"]],
+            searchViewArch: `
+                <search>
+                    <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]"/>
+                </search>
+            `,
             noContentHelp: '<p class="abc">click to add a foo</p>',
         });
 
@@ -3148,7 +3176,11 @@ QUnit.module("Views", (hooks) => {
                     <field name="date"/>
                 </graph>
             `,
-            views: [[false, "search"]],
+            searchViewArch: `
+                <search>
+                    <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]"/>
+                </search>
+            `,
             noContentHelp: '<p class="abc">click to add a foo</p>',
         });
         assert.doesNotHaveClass(graph.el, "o_view_sample_data");

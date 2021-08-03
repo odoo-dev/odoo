@@ -23,11 +23,13 @@ export async function makeView(params) {
     delete props.mockRPC;
 
     const defaultFields = serverData.models[props.resModel].fields;
-    if (props.arch && !props.fields) {
-        props.fields = Object.assign({}, defaultFields);
-    }
-    if (props.searchViewArch && !props.searchViewFields) {
-        props.searchViewFields = Object.assign({}, props.fields || defaultFields);
+    if (props.arch) {
+        if (!props.fields) {
+            props.fields = Object.assign({}, defaultFields);
+        }
+        props.searchViewArch = props.searchViewArch || "<search/>";
+        props.searchViewFields =
+            props.searchViewFields || Object.assign({}, props.fields);
     }
 
     const env = await makeTestEnv({ serverData, mockRPC });
