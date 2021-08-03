@@ -110,8 +110,8 @@ QUnit.module("Project", {}, () => {
                 type: "burndown_chart",
             });
             assert.ok(burndownChart.model.metaData.stacked, "graph should be a burndown chart.");
-            assert.containsOnce(burndownChart, `button.o_graph_button[title="Stacked"]`);
-            const stackButton = burndownChart.el.querySelector(`button.o_graph_button[title="Stacked"]`);
+            assert.containsOnce(burndownChart, `button.o_graph_button[data-tooltip="Stacked"]`);
+            const stackButton = burndownChart.el.querySelector(`button.o_graph_button[data-tooltip="Stacked"]`);
             await click(stackButton);
             assert.notOk(burndownChart.model.metaData.stacked, "graph should be a classic line chart.");
         });
@@ -125,7 +125,7 @@ QUnit.module("Project", {}, () => {
                 type: "burndown_chart",
             });
 
-            const stackButton = burndownChart.el.querySelector(`button.o_graph_button[title="Stacked"]`);
+            const stackButton = burndownChart.el.querySelector(`button.o_graph_button[data-tooltip="Stacked"]`);
             await click(stackButton);
             assert.notOk(burndownChart.model.metaData.stacked, "graph should be a classic line chart.");
 
