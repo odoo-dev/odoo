@@ -513,11 +513,11 @@
         data-drop-near=".row:not(.s_col_no_resize) > div"
         data-exclude=".o_mail_no_resize, .o_mail_no_options"/>
 
-    <div data-selector=".note-editable > div:not(.o_layout),
+    <div data-selector=".o_layout, .note-editable > div:not(.o_layout),
         .note-editable .oe_structure > div:not(:has(> .o_mail_snippet_general)),
         .note-editable .oe_structure > div > .o_mail_snippet_general,
         td, td.o_mail_no_colorpicker div:first-child, th"
-         data-exclude=".o_mail_no_colorpicker, .o_mail_no_options">
+        data-exclude=".o_mail_no_colorpicker, .o_mail_no_options">
         <we-colorpicker string="Background Color"
             data-select-style="true"
             data-css-property="background-color"

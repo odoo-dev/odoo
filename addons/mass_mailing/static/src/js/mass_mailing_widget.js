@@ -280,7 +280,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
             ));
         }
         var $newLayout = $('<div/>', {
-            class: 'o_layout ' + themeParams.className
+            class: 'o_layout ' + themeParams.className,
+            'data-name': 'Mailing',
         }).append($new_wrapper);
 
         var $contents;
