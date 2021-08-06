@@ -1333,10 +1333,7 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeHasInviteFeature() {
-            if (this.model !== 'mail.channel') {
-                return false;
-            }
-            return this.channel_type === 'channel';
+            return this.model === 'mail.channel';
         }
 
         /**
