@@ -22,6 +22,7 @@ export class ThreadViewTopbar extends Component {
         useShouldUpdateBasedOnProps();
         useModels();
         useRefToModel({ fieldName: 'threadNameInputRef', modelName: 'mail.thread_view_topbar', propNameAsRecordLocalId: 'localId', refName: 'threadNameInput' });
+        useRefToModel({ fieldName: 'threadDescriptionInputRef', modelName: 'mail.thread_view_topbar', propNameAsRecordLocalId: 'localId', refName: 'threadDescriptionInput' });
         useUpdateToModel({ methodName: 'onComponentUpdate', modelName: 'mail.thread_view_topbar', propNameAsRecordLocalId: 'localId' });
     }
 
@@ -36,6 +37,9 @@ export class ThreadViewTopbar extends Component {
         return this.env.models['mail.thread_view_topbar'].get(this.props.localId);
     }
 
+    get ADD_DESCRIPTION_LABEL() {
+        return this.env._t("Add a description")
+    }
 }
 
 Object.assign(ThreadViewTopbar, {

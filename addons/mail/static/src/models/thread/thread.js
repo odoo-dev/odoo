@@ -1146,6 +1146,21 @@ function factory(dependencies) {
         }
 
         /**
+         * Change description of the thread to the given new description.
+         * Only makes sense for channels.
+         *
+         * @param {string} newName
+         */
+        async changeDescription(newDescription) {
+            return this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'channel_change_description',
+                args: [this.id],
+                kwargs: { description: newDescription },
+            });
+        }
+
+        /**
          * Sets the custom name of this thread for the current user to the given
          * new name.
          * Only makes sense for channels.
@@ -1356,6 +1371,14 @@ function factory(dependencies) {
                 this.model === 'mail.channel' &&
                 ['chat', 'channel'].includes(this.channel_type)
             );
+        }
+
+         /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsChannelDescriptionChangeable() {
+            return this.model === 'mail.channel' && this.channel_type === 'channel';
         }
 
         /**
@@ -1960,6 +1983,13 @@ function factory(dependencies) {
          */
         isChannelRenamable: attr({
             compute: '_computeIsChannelRenamable',
+        }),
+        /**
+         * Determines whether this thread can be renamed.
+         * Only makes sense for channels.
+         */
+        isChannelDescriptionChangeable: attr({
+            compute: '_computeIsChannelDescriptionChangeable',
         }),
         /**
          * States whether this thread is a `mail.channel` qualified as chat.

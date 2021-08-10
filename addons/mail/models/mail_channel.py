@@ -949,6 +949,11 @@ class Channel(models.Model):
         self.write({'name': name})
         self._broadcast(self.channel_partner_ids.ids)
 
+    def channel_change_description(self, description):
+        self.ensure_one()
+        self.write({'description': description})
+        self._broadcast(self.channel_partner_ids.ids)
+
     def notify_typing(self, is_typing):
         """ Broadcast the typing notification to channel members
             :param is_typing: (boolean) tells whether the current user is typing or not

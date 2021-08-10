@@ -23,11 +23,23 @@
                             Discuss
                         </div>
                     </t>
-                    <t t-if="threadViewTopBar.thread and threadViewTopBar.thread.description">
+                    <t t-if="threadViewTopBar.thread">
                         <div class="o_ThreadViewTopbar_threadDescriptionSeparator flex-shrink-0 mx-2"/>
-                        <div class="o_ThreadViewTopbar_threadDescription text-truncate" t-att-title="threadViewTopBar.thread.description">
-                            <t t-esc="threadViewTopBar.thread.description"/>
-                        </div>
+                        <t t-if="!threadViewTopBar.isEditingThreadDescription">
+                            <t t-if="threadViewTopBar.thread.description">
+                                <div class="o_ThreadViewTopbar_threadDescription text-truncate px-1" t-att-title="threadViewTopBar.thread.description" t-on-click="threadViewTopBar.onClickTopbarThreadDescription" t-on-mouseenter="threadViewTopBar.onMouseEnterTopBarThreadDescription" t-on-mouseleave="threadViewTopBar.onMouseLeaveTopBarThreadDescription" t-att-class="{ 'o-isMouseOverThreadDescription': threadViewTopBar.isMouseOverThreadDescription }">
+                                    <t t-esc="threadViewTopBar.thread.description"/>
+                                </div>
+                            </t>
+                            <t t-if="!threadViewTopBar.thread.description">
+                                <div class="o_ThreadViewTopbar_threadAddDescriptionEmptyLabel text-truncate" t-att-title="ADD_DESCRIPTION_LABEL" t-on-click="threadViewTopBar.onClickTopbarThreadDescription">
+                                    <t t-esc="ADD_DESCRIPTION_LABEL"/>
+                                </div>
+                            </t>
+                        </t>
+                        <t t-if="threadViewTopBar.isEditingThreadDescription">
+                            <input class="o_ThreadViewTopbar_threadDescriptionInput" type="text" t-att-value="threadViewTopBar.pendingThreadDescription" t-on-input="threadViewTopBar.onInputThreadDescriptionInput" t-on-keydown="threadViewTopBar.onKeyDownThreadDescriptionInput" t-ref="threadDescriptionInput"/>
+                        </t>
                     </t>
                 </div>
                 <div class="o_ThreadViewTopbar_actions d-flex align-items-center">
