@@ -14,6 +14,7 @@ import { useModel } from "../helpers/model";
 import { useService } from "@web/core/utils/hooks";
 import { useSetupView } from "@web/views/helpers/view_hook";
 import { XMLParser } from "@web/core/utils/xml";
+import { archParseBoolean } from "../helpers/utils";
 
 const viewRegistry = registry.category("views");
 
@@ -28,12 +29,12 @@ export class GraphArchParser extends XMLParser {
             switch (node.tagName) {
                 case "graph":
                     if (node.hasAttribute("disable_linking")) {
-                        metaData.disableLinking = Boolean(
-                            evaluateExpr(node.getAttribute("disable_linking"))
+                        metaData.disableLinking = archParseBoolean(
+                            node.getAttribute("disable_linking")
                         );
                     }
                     if (node.hasAttribute("stacked")) {
-                        metaData.stacked = Boolean(evaluateExpr(node.getAttribute("stacked")));
+                        metaData.stacked = archParseBoolean(node.getAttribute("stacked"));
                     }
                     const mode = node.getAttribute("type");
                     if (mode && MODES.includes(mode)) {
