@@ -206,13 +206,43 @@ function fontToImg($editable) {
         });
         if (content) {
             var color = $font.css('color').replace(/\s/g, '');
+            let $backgroundColoredElement = $font;
+            let bg, isTransparent;
+            do {
+                bg = $backgroundColoredElement.css('background-color').replace(/\s/g, '');
+                isTransparent = bg === 'transparent' || bg === 'rgba(0,0,0,0)';
+                $backgroundColoredElement = $backgroundColoredElement.parent();
+            } while (isTransparent && $backgroundColoredElement[0]);
+            if (bg === 'rgba(0,0,0,0)' && isTransparent) {
+                // default on white rather than black background since opacity
+                // is not supported.
+                bg = 'rgb(255,255,255)';
+            }
+            const style = $font.attr('style');
+            const width = $font.width();
+            const height = $font.height();
+            const lineHeight = $font.css('line-height');
+            // Compute the padding.
+            // First get the dimensions of the icon itself (::before)
+            $font.css({height: 'fit-content', width: 'fit-content', 'line-height': 'normal'});
+            const hPadding = width && (width - $font.width()) / 2;
+            const vPadding = height && (height - $font.height()) / 2;
+            let padding = '';
+            if (hPadding || vPadding) {
+                padding = vPadding ? vPadding + 'px ' : '0 ';
+                padding += hPadding ? hPadding + 'px' : '0';
+            }
             $font.replaceWith($('<img/>', {
-                src: _.str.sprintf('/web_editor/font_to_img/%s/%s/%s', content.charCodeAt(0), window.encodeURI(color), Math.max(1, Math.round($font.height()))),
+                src: `/web_editor/font_to_img/${content.charCodeAt(0)}/${window.encodeURI(color)}/${window.encodeURI(bg)}/${Math.max(1, $font.height())}`,
                 'data-class': $font.attr('class'),
-                'data-style': $font.attr('style'),
+                'data-style': style,
                 class: $font.attr('class').replace(new RegExp('(^|\\s+)' + icon + '(-[^\\s]+)?', 'gi'), ''), // remove inline font-awsome style
-                style: $font.attr('style'),
-            }).css({height: 'auto', width: 'auto'}));
+                style,
+            }).css({
+                'box-sizing': 'border-box', // keep the fontawesome's dimensions
+                'line-height': lineHeight,
+                padding, width: width + 'px', height: height + 'px',
+            }));
         } else {
             $font.remove();
         }
