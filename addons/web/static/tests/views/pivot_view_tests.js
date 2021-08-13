@@ -31,6 +31,7 @@ import {
     saveFavorite,
     selectGroup,
     removeFacet,
+    toggleMenu,
 } from "../search/helpers";
 import { createWebClient, doAction } from "../webclient/helpers";
 import { PivotView } from "@web/views/pivot/pivot_view";
@@ -1958,7 +1959,116 @@ QUnit.module("Views", (hooks) => {
         await saveFavorite(pivot);
     });
 
-    QUnit.test("Removing or adding filter shouldn't modify the row group", async function (assert) {
+    QUnit.test("Apply two groupby, and remove facet", async function (assert) {
+        serverData.views = {
+            "partner,false,pivot": `
+                    <pivot>
+                        <field name="customer" type="row"/>
+                    </pivot>`,
+            "partner,false,search": `
+                    <search>
+                        <filter name="group_by_product" string="Product" domain="[]" context="{'group_by': 'product_id'}"/>
+                        <filter name="group_by_bar" string="Bar" domain="[]" context="{'group_by': 'bar'}"/>
+                    </search>`,
+        };
+
+        const webClient = await createWebClient({ serverData });
+
+        await doAction(webClient, {
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [[false, "pivot"]],
+        });
+
+        assert.strictEqual(
+            webClient.el.querySelector("tbody .o_pivot_header_cell_closed").textContent,
+            "First"
+        );
+
+        // Apply both groupbys
+        await toggleGroupByMenu(webClient);
+        await toggleMenuItem(webClient, "Product");
+        assert.strictEqual(
+            webClient.el.querySelector("tbody .o_pivot_header_cell_closed").textContent,
+            "xphone"
+        );
+
+        await toggleMenuItem(webClient, "Bar");
+        assert.strictEqual(
+            webClient.el.querySelector("tbody .o_pivot_header_cell_closed").textContent,
+            "true"
+        );
+
+        // remove filter
+        await removeFacet(webClient);
+
+        assert.strictEqual(
+            webClient.el.querySelector("tbody .o_pivot_header_cell_closed").textContent,
+            "true"
+        );
+    });
+
+    QUnit.test("Add a group by on the CP when a favorite already exists", async function (assert) {
+        serverData.views = {
+            "partner,false,pivot": `
+                    <pivot>
+                    </pivot>`,
+            "partner,false,search": `
+                    <search>
+                        <filter name="groubybar" string="Bar" domain="[]" context="{'group_by': 'bar'}"/>
+                    </search>`,
+        };
+
+        serverData.models.partner.filters = [
+            {
+                context: "{'pivot_row_groupby': ['date']}",
+                domain: "[]",
+                id: 7,
+                is_default: true,
+                name: "My favorite",
+                sort: "[]",
+                user_id: [2, "Mitchell Admin"],
+            },
+        ];
+
+        const webClient = await createWebClient({ serverData });
+
+        await doAction(webClient, {
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [[false, "pivot"]],
+        });
+
+        assert.strictEqual(
+            webClient.el.querySelector("tbody .o_pivot_header_cell_closed").textContent,
+            "December 2016"
+        );
+
+        // Apply BAR groupbys
+        await toggleGroupByMenu(webClient);
+        await toggleMenuItem(webClient, "Bar");
+        assert.strictEqual(
+            webClient.el.querySelector("tbody .o_pivot_header_cell_closed").textContent,
+            "true"
+        );
+
+        // remove groupBy
+        await toggleMenuItem(webClient, "Bar");
+        assert.strictEqual(
+            webClient.el.querySelector("tbody .o_pivot_header_cell_closed").textContent,
+            "December 2016"
+        );
+
+        // remove all facets
+        await removeFacet(webClient);
+
+        assert.strictEqual(
+            webClient.el.querySelector("tbody .o_pivot_header_cell_closed").textContent,
+            "December 2016"
+        );
+    });
+
+    QUnit.skip("Removing or adding filter shouldn't modify the row group", async function (assert) {
         serverData.views = {
             "partner,false,pivot": `
                     <pivot>
@@ -2549,6 +2659,115 @@ QUnit.module("Views", (hooks) => {
         await click(pivot.el.querySelector("thead .o_pivot_header_cell_closed"));
         await click(pivot.el.querySelectorAll("thead .o_dropdown_menu .o_dropdown_item")[4]);
         assert.strictEqual(pivot.el.querySelectorAll(".o_pivot_cell_value")[3].innerText, ""); // December 2016 xphone
+    });
+
+    QUnit.test("correctly group data after flip (1)", async function (assert) {
+        assert.expect(4);
+
+        serverData.views = {
+            "partner,false,pivot": "<pivot/>",
+            "partner,false,search": `<search><filter name="bayou" string="Bayou" domain="[(1,'=',1)]"/></search>`,
+            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,form": '<form><field name="foo"/></form>',
+        };
+
+        const webClient = await createWebClient({ serverData });
+
+        await doAction(webClient, {
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [[false, "pivot"]],
+            context: { group_by: ["product_id"] },
+        });
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total", "xphone", "xpad"]
+        );
+
+        // flip axis
+        await click(webClient.el.querySelector(".o_pivot_flip_button"));
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total"]
+        );
+
+        // select filter "Bayou" in control panel
+        await toggleFilterMenu(webClient);
+        await toggleMenuItem(webClient, "Bayou");
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total", "xphone", "xpad"]
+        );
+
+        // close row header "Total"
+        await click(webClient.el.querySelector("tbody .o_pivot_header_cell_opened"));
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total"]
+        );
+    });
+
+    QUnit.test("correctly group data after flip (2)", async function (assert) {
+        assert.expect(5);
+
+        serverData.views = {
+            "partner,false,pivot": "<pivot/>",
+            "partner,false,search": `<search><filter name="bayou" string="Bayou" domain="[(1,'=',1)]"/></search>`,
+            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,form": '<form><field name="foo"/></form>',
+        };
+
+        const webClient = await createWebClient({ serverData });
+
+        await doAction(webClient, {
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [[false, "pivot"]],
+            context: { group_by: ["product_id"] },
+        });
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total", "xphone", "xpad"]
+        );
+
+        // select filter "Bayou" in control panel
+        await toggleFilterMenu(webClient);
+        await toggleMenuItem(webClient, "Bayou");
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total", "xphone", "xpad"]
+        );
+
+        // flip axis
+        await click(webClient.el.querySelector(".o_pivot_flip_button"));
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total"]
+        );
+
+        // unselect filter "Bayou" in control panel
+        await toggleFilterMenu(webClient);
+        await toggleMenuItem(webClient, "Bayou");
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total", "xphone", "xpad"]
+        );
+
+        // close row header "Total"
+        await click(webClient.el.querySelector("tbody .o_pivot_header_cell_opened"));
+
+        assert.deepEqual(
+            [...webClient.el.querySelectorAll("tbody th")].map((e) => e.innerText),
+            ["Total"]
+        );
     });
 
     QUnit.test("correctly uses pivot_ keys from the context (at reload)", async function (assert) {
@@ -4625,5 +4844,89 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
 
         assert.strictEqual(getCurrentValues(webClient), ["32", "12", "12", "20"].join(","));
+    });
+
+    QUnit.test(
+        "if no measure is set in arch, 'Count' is used as measure initially",
+        async function (assert) {
+            const pivot = await makeView({
+                type: "pivot",
+                resModel: "partner",
+                serverData,
+                arch: `<pivot/>`,
+            });
+
+            assert.deepEqual(
+                [...pivot.el.querySelectorAll("thead th")].map((e) => e.innerText),
+                ["", "Total", "Count"]
+            );
+        }
+    );
+
+    QUnit.test(
+        "if (at least) one measure is set in arch and display_quantity is false or unset, 'Count' is not used as measure initially",
+        async function (assert) {
+            const pivot = await makeView({
+                type: "pivot",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <pivot>
+                    <field name="foo" type="measure"/>
+                </pivot>
+            `,
+            });
+
+            assert.deepEqual(
+                [...pivot.el.querySelectorAll("thead th")].map((e) => e.innerText),
+                ["", "Total", "Foo"]
+            );
+        }
+    );
+
+    QUnit.test(
+        "if (at least) one measure is set in arch and display_quantity is true, 'Count' is used as measure initially",
+        async function (assert) {
+            const pivot = await makeView({
+                type: "pivot",
+                resModel: "partner",
+                serverData,
+                arch: `
+                <pivot display_quantity="1">
+                    <field name="foo" type="measure"/>
+                </pivot>
+            `,
+            });
+
+            assert.deepEqual(
+                [...pivot.el.querySelectorAll("thead th")].map((e) => e.innerText),
+                ["", "Total", "Count", "Foo"]
+            );
+        }
+    );
+
+    QUnit.test("'Measures' menu when there is no measurable fields", async function (assert) {
+        serverData.models.partner = {
+            fields: {},
+            records: [{ id: 1, display_name: "The one" }],
+        };
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `<pivot/>`,
+        });
+
+        await toggleMenu(pivot, "Measures");
+
+        // "Count" is the only measure available
+        assert.deepEqual(
+            [...pivot.el.querySelectorAll(".o_cp_bottom_left .o_dropdown_menu li")].map(
+                (e) => e.innerText
+            ),
+            ["Count"]
+        );
+        // No separator should be displayed in the menu "Measures"
+        assert.containsNone(pivot, ".o_cp_bottom_left .o_dropdown_menu div.dropdown-divider");
     });
 });

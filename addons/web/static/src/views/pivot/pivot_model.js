@@ -8,6 +8,7 @@ import { Model } from "../helpers/model";
 import { buildSampleORM } from "@web/views/helpers/sample_server";
 import { computeVariation } from "@web/core/utils/numbers";
 import { DEFAULT_INTERVAL } from "@web/search/utils/dates";
+import { sortBy } from "@web/core/utils/arrays";
 
 /**
  * Pivot Model
@@ -679,27 +680,31 @@ export class PivotModel extends Model {
      */
     async load(searchParams) {
         this.orm2Use = this.realORM;
+        searchParams = JSON.parse(JSON.stringify(searchParams)); //This to prevent errors in the Dashboard
 
         const activeMeasures =
             this._processMeasures(searchParams.context.pivot_measures) || this.meta.activeMeasures;
         const meta = this._buildMeta({ activeMeasures });
-        meta.rowGroupBys =
-            (searchParams.context.pivot_row_groupby &&
-                searchParams.context.pivot_row_groupby.slice()) ||
-            (searchParams.groupBy.length ? searchParams.groupBy : this.meta.rowGroupBys);
-        meta.colGroupBys =
-            (searchParams.context.pivot_column_groupby &&
-                searchParams.context.pivot_column_groupby.slice()) ||
-            this.meta.colGroupBys;
+        if (!this.reload) {
+            meta.rowGroupBys =
+                searchParams.context.pivot_row_groupby ||
+                (searchParams.groupBy.length ? searchParams.groupBy : meta.rowGroupBys);
+            this.reload = true;
+        } else {
+            meta.rowGroupBys = searchParams.groupBy.length
+                ? searchParams.groupBy
+                : searchParams.context.pivot_row_groupby || meta.rowGroupBys;
+        }
+        meta.colGroupBys = searchParams.context.pivot_column_groupby || this.meta.colGroupBys;
 
         const { domains, origins } = this._computeDerivedParams(searchParams);
         searchParams.domains = domains;
         searchParams.origins = origins;
 
-        if (!_.isEqual(meta.rowGroupBys, this.meta.rowGroupBys)) {
+        if (JSON.stringify(meta.rowGroupBys) !== JSON.stringify(this.meta.rowGroupBys)) {
             meta.expandedRowGroupBys = [];
         }
-        if (!_.isEqual(meta.colGroupBys, this.meta.colGroupBys)) {
+        if (JSON.stringify(meta.colGroupBys) !== JSON.stringify(this.meta.colGroupBys)) {
             meta.expandedColGroupBys = [];
         }
 
@@ -1051,7 +1056,7 @@ export class PivotModel extends Model {
                 };
                 if (
                     sortedColumn.measure === measureName &&
-                    _.isEqual(sortedColumn.groupId, column.groupId) // FIXME
+                    JSON.stringify(sortedColumn.groupId) === JSON.stringify(column.groupId) // FIXME
                 ) {
                     measureCell.order = sortedColumn.order;
                 }
@@ -1108,7 +1113,7 @@ export class PivotModel extends Model {
         data.numbering[fieldName] = data.numbering[fieldName] || {};
         data.numbering[fieldName][name] = data.numbering[fieldName][name] || {};
         const numbers = data.numbering[fieldName][name];
-        numbers[id] = numbers[id] || _.size(numbers) + 1;
+        numbers[id] = numbers[id] || Object.keys(numbers).length + 1;
         return name + (numbers[id] > 1 ? "  (" + numbers[id] + ")" : "");
     }
     /**
@@ -1126,7 +1131,8 @@ export class PivotModel extends Model {
             const groupId = column.groupId;
             const measure = column.measure;
             const isSorted =
-                sortedColumn.measure === measure && _.isEqual(sortedColumn.groupId, groupId); // FIXME
+                sortedColumn.measure === measure &&
+                JSON.stringify(sortedColumn.groupId) === JSON.stringify(groupId); // FIXME
             const isSortedByOrigin = isSorted && !sortedColumn.originIndexes[1];
             const isSortedByVariation = isSorted && sortedColumn.originIndexes[1];
 
@@ -1544,8 +1550,8 @@ export class PivotModel extends Model {
             return this._getNumberedLabel(value, fieldName, config);
         }
         if (fieldName && meta.fields[fieldName] && meta.fields[fieldName].type === "selection") {
-            const selected = _.where(meta.fields[fieldName].selection, { 0: value })[0];
-            return selected ? selected[1] : value;
+            const selected = meta.fields[fieldName].selection.find((o) => o[0] === value);
+            return selected ? selected[1] : value; // selected should be truthy normally ?!
         }
         return value;
     }
@@ -1641,7 +1647,7 @@ export class PivotModel extends Model {
      * @param {Object} tree
      */
     _sortTree(sortFunction, tree) {
-        tree.sortedKeys = _.sortBy([...tree.directSubTrees.keys()], sortFunction(tree));
+        tree.sortedKeys = sortBy([...tree.directSubTrees.keys()], sortFunction(tree));
         [...tree.directSubTrees.values()].forEach((subTree) => {
             this._sortTree(sortFunction, subTree);
         });
