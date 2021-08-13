@@ -1046,13 +1046,11 @@ class Channel(models.Model):
             :rtype: dict
         """
         channel = self.create({
-            'channel_partner_ids': [Command.link(partner_id) for partner_id in partners_to],
-            'public': 'private',
+            'channel_last_seen_partner_ids': [Command.create({'partner_id': partner_id}) for partner_id in partners_to],
             'channel_type': 'group',
-            'email_send': False,
-            'name': ', '.join(self.env['res.partner'].sudo().browse(partners_to).mapped('name')),
+            'name': '',
+            'public': 'private',
         })
-        channel.channel_last_seen_partner_ids.write({'is_pinned': True})
         channel._broadcast(partners_to)
         return channel.channel_info()[0]
 

@@ -1315,7 +1315,7 @@ function factory(dependencies) {
                 return this.custom_channel_name || this.correspondent.nameOrDisplayName;
             }
             if (this.channel_type === 'group') {
-                return this.custom_channel_name || this.name;
+                return this.name || this.members.map(partner => partner.nameOrDisplayName).join(', ');
             }
             return this.name;
         }
@@ -1354,7 +1354,7 @@ function factory(dependencies) {
         _computeIsChannelRenamable() {
             return (
                 this.model === 'mail.channel' &&
-                ['chat', 'channel'].includes(this.channel_type)
+                ['chat', 'channel', 'group'].includes(this.channel_type)
             );
         }
 
