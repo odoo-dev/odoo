@@ -1582,7 +1582,7 @@ export class SearchModel extends EventBus {
                 }
             }
         }
-        const groupBy = groupBys.length ? groupBys : this.globalGroupBy;
+        const groupBy = groupBys.length ? groupBys : this.globalGroupBy.slice();
         return typeof groupBy === "string" ? [groupBy] : groupBy;
     }
 
@@ -1773,7 +1773,10 @@ export class SearchModel extends EventBus {
                 return context;
             case "favorite":
             case "filter":
-                return makeContext(searchItem.context);
+                //Return a deep copy of the filter/favorite to avoid the view to modify the context
+                return makeContext(
+                    searchItem.context && JSON.parse(JSON.stringify(searchItem.context))
+                );
             default:
                 return null;
         }
