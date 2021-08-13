@@ -263,6 +263,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
             $new_wrapper = $('<div/>', {
                 class: 'container o_mail_wrapper',
                 'data-name': 'Body',
+                'data-no-move': true,
+                'data-no-remove': true,
             });
             $newWrapperContent = $('<div/>', {
                 class: 'col o_mail_no_options o_mail_wrapper_td oe_structure'
@@ -282,6 +284,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
         var $newLayout = $('<div/>', {
             class: 'o_layout ' + themeParams.className,
             'data-name': 'Mailing',
+            'data-no-move': true,
+            'data-no-remove': true,
         }).append($new_wrapper);
 
         var $contents;

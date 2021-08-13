@@ -181,8 +181,8 @@ var SnippetEditor = Widget.extend({
         var $customize = this._customize$Elements[this._customize$Elements.length - 1];
 
         this.isTargetParentEditable = this.$target.parent().is(':o_editable');
-        this.isTargetMovable = this.isTargetParentEditable && this.isTargetMovable;
-        this.isTargetRemovable = this.isTargetParentEditable && !this.$target.parent().is('[data-oe-type="image"]');
+        this.isTargetMovable = this.isTargetParentEditable && this.isTargetMovable && !this.$target.data('no-move');
+        this.isTargetRemovable = this.isTargetParentEditable && !this.$target.parent().is('[data-oe-type="image"]') && !this.$target.data('no-remove');
         this.displayOverlayOptions = this.displayOverlayOptions || this.isTargetMovable || !this.isTargetParentEditable;
 
         // Initialize move/clone/remove buttons

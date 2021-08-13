@@ -86,8 +86,8 @@
             <field name="reply_to_mode">new</field>
             <field name="reply_to">Info &lt;info@yourcompany.example.com&gt;</field>
             <field name="body_html" type="html">
-<div class="o_layout o_default_theme" data-name="Mailing">
-    <div class="container o_mail_wrapper" style="border-collapse:collapse;" data-name="Body">
+<div class="o_layout o_default_theme" data-name="Mailing" data-no-remove="True" data-no-move="True">
+    <div class="container o_mail_wrapper" style="border-collapse:collapse;" data-name="Body" data-no-remove="True" data-no-move="True">
         <div class="row">
             <div class="col o_mail_no_resize o_not_editable" style="text-align:left;"> </div>
             <div class="col o_mail_no_options o_mail_wrapper_td oe_structure" style="text-align:left;width:100%;">
