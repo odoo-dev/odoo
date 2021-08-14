@@ -21,7 +21,7 @@ function factory(dependencies) {
         //----------------------------------------------------------------------
 
         onClick() {
-            this._showOverlay()
+            this._showOverlay();
         }
 
         onMouseMove() {
@@ -42,7 +42,7 @@ function factory(dependencies) {
         /**
          * @private
          */
-        _debounce(f, { delay=0 } = {}) {
+        _debounce(f, { delay = 0 } = {}) {
             this._timeoutId && clearTimeout(this._timeoutId);
             this._timeoutId = setTimeout(() => {
                 if (!this.exists()) {
@@ -68,7 +68,7 @@ function factory(dependencies) {
         _computeFilterVideoGrid() {
             const setting = this.env.messaging && this.env.messaging.userSetting;
             const mailRtc = this.threadView && this.threadView.thread.mailRtc;
-            return  mailRtc && setting.rtcFilterVideoGrid;
+            return mailRtc && setting.rtcFilterVideoGrid;
         }
 
 
@@ -119,7 +119,9 @@ function factory(dependencies) {
             if (this.threadView.compact && !this.env.messaging.userSetting.isRtcCallViewerFullScreen) {
                 return;
             }
-            this._debounce(() => { this.update({ showOverlay: false }) }, { delay: 3000 });
+            this._debounce(() => {
+                this.update({ showOverlay: false });
+            }, { delay: 3000 });
         }
 
     }

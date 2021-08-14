@@ -54,7 +54,7 @@ export async function monitorAudioThresholds(track, processorOptions) {
  * @param {AudioContext} audioContext
  * @param {Object} param1 options
  * @param {number} param1.minimumActiveCycles - how many cycles have to pass since the last time the
-                   threshold was exceeded to go back to inactive state.
+                threshold was exceeded to go back to inactive state.
  * @param {function} param1.onStateChange
  * @param {number} param1.baseLevel the normalized minimum value for audio detection
  * @returns {function} disconnect callback

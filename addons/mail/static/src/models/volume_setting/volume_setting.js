@@ -2,7 +2,7 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, one2one, many2one } from '@mail/model/model_field';
-import { create, insert } from '@mail/model/model_field_command';
+import { insert } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
 
 function factory(dependencies) {

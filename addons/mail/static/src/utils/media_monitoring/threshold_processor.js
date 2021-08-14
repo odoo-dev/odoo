@@ -5,12 +5,12 @@ class ThresholdProcessor extends AudioWorkletProcessor {
      * @param {Object} param0 options
      * @param {Object} param0.processorOptions
      * @param {number} processorOptions.minimumActiveCycles - how many cycles have to pass since the last time the
-                       threshold was exceeded to go back to inactive state. It prevents the microphone to shut down
-                       when the user's voice drops in volume mid-sentence.
+                    threshold was exceeded to go back to inactive state. It prevents the microphone to shut down
+                    when the user's voice drops in volume mid-sentence.
      * @param {number} processorOptions.baseLevel the minimum value for audio detection
-               TODO find a way to properly normalize sound? See process() comment.
+            TODO find a way to properly normalize sound? See process() comment.
      * @param {Array<number>} processorOptions.frequencyRange array of two numbers that represent the range of
-              frequencies that we want to monitor in hz.
+            frequencies that we want to monitor in hz.
      * @param {number} processorOptions.processInterval time in ms between each check
      * @param {number} sampleRate of the audio track
      */

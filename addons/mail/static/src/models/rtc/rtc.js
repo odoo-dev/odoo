@@ -817,7 +817,9 @@ function factory(dependencies) {
                 this.env.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
             }
             this._pushToTalkTimeoutId = setTimeout(
-                () => { this._setSoundBroadcast(false) },
+                () => {
+                    this._setSoundBroadcast(false);
+                },
                 this.env.messaging.userSetting.voiceActiveDuration || 0,
             );
         }
@@ -832,7 +834,7 @@ function factory(dependencies) {
          * @param {number} [param1.delay] in ms
          * @param {string} [param1.reason]
          */
-        _recoverConnection(token, { delay=0, reason='' } = {}) {
+        _recoverConnection(token, { delay = 0, reason = '' } = {}) {
             if (this._fallBackTimeouts[token]) {
                 return;
             }

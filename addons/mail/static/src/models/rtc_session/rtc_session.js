@@ -2,7 +2,7 @@
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2one } from '@mail/model/model_field';
-import { clear, insert, unlink } from '@mail/model/model_field_command';
+import { clear, insert } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 

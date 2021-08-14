@@ -759,7 +759,7 @@ function factory(dependencies) {
          * @param {Object} param0
          * @param {boolean} param0.video whether or not to start the call with the video
          */
-        async _joinCall({ video=false } = {}) {
+        async _joinCall({ video = false } = {}) {
             if (this.model !== 'mail.channel') {
                 return;
             }

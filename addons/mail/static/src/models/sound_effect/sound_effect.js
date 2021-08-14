@@ -29,7 +29,7 @@ function factory(dependencies) {
          * @param {boolean} [param0.loop] true if we want to make the audio loop, will only stop if stop() is called
          * @param {boolean} [param0.volume]
          */
-        play({ loop, volume=1 } = {}) {
+        play({ loop, volume = 1 } = {}) {
             if (typeof(Audio) !== "undefined") {
                 if (!this.audio) {
                     const audio = new Audio();
