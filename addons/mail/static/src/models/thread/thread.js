@@ -836,9 +836,9 @@ function factory(dependencies) {
 
         updateRtcSessions(rtcSessions) {
             const oldCount = this.rtcSessions.length;
-            this.update({ rtcSessions: [
-                ['insert-and-replace', rtcSessions.map(record => this.env.models['mail.rtc_session'].convertData(record))],
-            ]});
+            this.update({
+                rtcSessions: insertAndReplace(rtcSessions.map(record => this.env.models['mail.rtc_session'].convertData(record)))
+            });
             if (this.mailRtc) {
                 const newCount = this.rtcSessions.length;
                 if (newCount > oldCount) {
