@@ -357,9 +357,6 @@ class Channel(models.Model):
             ])
         self.env['bus.bus'].sendmany(notifications)
 
-    def _get_rtc_sessions_data(self):
-        return [session._mail_rtc_session_format() for session in self.rtc_sessions]
-
     def _invite_members_to_rtc(self):
         """ Sends invitations to join the RTC call to all connected members of the thread who are not already invited.
         """
@@ -437,7 +434,8 @@ class Channel(models.Model):
         else:
             return
 
-        sessions_data = self._get_rtc_sessions_data()
+        sessions_data_by_channel = self.rtc_sessions._mail_rtc_session_format_by_channel()
+        sessions_data = sessions_data_by_channel.get(self.id, [])
         if not sessions_data:
             # if there is no member left in the rtc call, all invitations are reset
             self._cancel_rtc_invitations()
@@ -680,6 +678,8 @@ class Channel(models.Model):
         if not self:
             return []
         channel_infos = []
+        rtc_sessions_by_channel = self.mapped('rtc_sessions')._mail_rtc_session_format_by_channel()
+
         # all relations partner_channel on those channels
         all_partner_channel = self.env['mail.channel.partner'].sudo().search([('channel_id', 'in', self.ids)]).sudo(False)
 
@@ -729,6 +729,8 @@ class Channel(models.Model):
                     info['custom_channel_name'] = partner_channel.custom_channel_name
                     info['is_pinned'] = partner_channel.is_pinned
                     info['last_meaningful_action_time'] = partner_channel.last_meaningful_action_time
+                    if rtc_sessions_by_channel.get(channel.id):
+                        info['rtc_sessions'] = rtc_sessions_by_channel[channel.id]
                     if partner_channel.rtc_ringing_partner_id:
                         info['rtc_ringing_partner'] = {
                             'id': partner_channel.rtc_ringing_partner_id.id,

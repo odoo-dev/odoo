@@ -225,9 +225,6 @@ function factory(dependencies) {
                     },
                 });
             }
-            if (this.thread) {
-                await this.thread.fetchRtcSessions();
-            }
         }
 
         /**

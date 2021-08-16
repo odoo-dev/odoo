@@ -77,6 +77,23 @@ class MailRtcSession(models.Model):
             'is_camera_on': self.is_camera_on,
         }
 
+    def _mail_rtc_session_format_by_channel(self):
+        data = {}
+        for record in self:
+            data.setdefault(record.channel_id.id, [])
+            data[record.channel_id.id].append({
+                'id': record.id,
+                'partner': {
+                    'id': record.partner_id.id,
+                    'name': record.partner_id.name,
+                },
+                'is_screen_sharing_on': record.is_screen_sharing_on,
+                'is_muted': record.is_muted,
+                'is_deaf': record.is_deaf,
+                'is_camera_on': record.is_camera_on,
+            })
+        return data
+
     def update_and_broadcast(self, values):
         if self.env.user.partner_id != self.partner_id:
             return

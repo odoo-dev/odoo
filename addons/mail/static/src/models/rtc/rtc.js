@@ -28,6 +28,7 @@ const TRANSCEIVER_ORDER = ['audio', 'video'];
  * TODO IMP nice-to-have? "test microphone" in rtcConfigurationMenu, auto mutes, attach monitorAudio, audioVisual feedback,
  *      it needs a change in the normalization in threshold_processor.js (see comment L:27)
  * TODO REF html/scss classes naming (bad/inconsistent/outdated names, wrong order)
+ *      for example, rtc_call_participant_card still has "video" css classes.
  * TODO REF rename ringing/invitation
  */
 

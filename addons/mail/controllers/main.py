@@ -306,7 +306,3 @@ class MailController(http.Controller):
     @http.route('/mail/channel_call_invite', type="json", auth="user")
     def channel_call_invite(self, channel_id):
         request.env['mail.channel'].browse(int(channel_id))._invite_members_to_rtc()
-
-    @http.route('/mail/channel_call_info', type="json", auth="user")
-    def channel_call_info(self, channel_id):
-        return request.env['mail.channel'].browse(int(channel_id))._get_rtc_sessions_data()

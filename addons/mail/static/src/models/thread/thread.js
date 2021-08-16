@@ -226,6 +226,9 @@ function factory(dependencies) {
             if ('rtc_ringing_partner' in data) {
                 data2.rtcRingingPartner = [['insert', data.rtc_ringing_partner]];
             }
+            if ('rtc_sessions' in data) {
+                data2.rtcSessions = insert(data.rtc_sessions.map(record => this.env.models['mail.rtc_session'].convertData(record)));
+            }
             if ('seen_partners_info' in data) {
                 if (!data.seen_partners_info) {
                     data2.partnerSeenInfos = unlinkAll();
@@ -812,26 +815,6 @@ function factory(dependencies) {
         async leaveCall() {
             await this._leaveCall();
             this.endCall();
-        }
-
-        async fetchRtcSessions() {
-            if (this.model !== 'mail.channel') {
-                return;
-            }
-            if (this.mailRtc) {
-                /**
-                 * There is no need to fetch the call participants of the active call thread
-                 * since they are already updated through the bus.
-                 */
-                return;
-            }
-            const rtcSessions = await this.async(() => this.env.services.rpc({
-                route: '/mail/channel_call_info',
-                params: {
-                    channel_id: this.id,
-                },
-            }, { shadow: true }));
-            this.updateRtcSessions(rtcSessions);
         }
 
         updateRtcSessions(rtcSessions) {
