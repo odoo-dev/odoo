@@ -71,7 +71,6 @@ function factory(dependencies) {
             this.removeVideo();
             this.update({
                 audioElement: clear(),
-                connectionState: clear(),
                 isTalking: clear(),
             });
         }

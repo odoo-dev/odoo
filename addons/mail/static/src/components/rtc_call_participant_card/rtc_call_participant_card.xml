@@ -19,7 +19,7 @@
                         <RtcVideo t-on-click="_onClickVideo" rtcSessionLocalId="rtcSession.localId"/>
                     </t>
                     <t t-else="">
-                        <div class="o_RtcCallParticipantCard_AvatarCard">
+                        <div class="o_RtcCallParticipantCard_AvatarCard" draggable="false">
                             <img alt="Avatar"
                                  t-att-class="{ 'o-is-talking': rtcSession.isTalking and !rtcSession.isMuted }"
                                  class="o_RtcCallParticipantCard_AvatarCard_image rounded-circle"
@@ -57,7 +57,7 @@
                             </span>
                         </t>
                         <t t-if="rtcSession.connectionState">
-                            <t t-if="rtcSession.connectionState and !['connected', 'completed'].includes(rtcSession.connectionState)">
+                            <t t-if="rtcSession.connectionState and !['connected', 'completed'].includes(rtcSession.connectionState) and rtcSession.channel.mailRtc">
                                 <span class="o_RtcCallParticipantCard_info_iconWrapper o_RtcCallParticipantCard_video_info_element" t-att-title="rtcSession.connectionState">
                                     <i class="fa fa-lg fa-signal o_RtcCallParticipantCard_member_signal"/>
                                 </span>
