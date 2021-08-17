@@ -25,49 +25,10 @@ export class PivotView extends Component {
             modelParams.data = this.props.state.data;
             modelParams.meta = this.props.state.meta;
         } else {
-            const { arch, fields, additionalMeasures } = this.props;
+            const { arch } = this.props;
 
             // parse arch
             const archInfo = new PivotArchParser().parse(arch);
-
-            // compute measures
-            const measures = {
-                __count: { name: "__count", string: this.env._t("Count"), type: "integer" },
-            };
-            for (const [fieldName, field] of Object.entries(fields)) {
-                if (fieldName === "id" || !field.store) {
-                    continue;
-                }
-                const { isInvisible } = archInfo.fieldAttrs[fieldName] || {};
-                if (isInvisible) {
-                    continue;
-                }
-                if (
-                    ["integer", "float", "monetary"].includes(field.type) ||
-                    additionalMeasures.includes(fieldName)
-                ) {
-                    measures[fieldName] = field;
-                }
-            }
-
-            // add active measures to the measure list.  This is very rarely
-            // necessary, but it can be useful if one is working with a
-            // functional field non stored, but in a model with an overridden
-            // read_group method.  In this case, the pivot view could work, and
-            // the measure should be allowed.  However, be careful if you define
-            // a measure in your pivot view: non stored functional fields will
-            // probably not work (their aggregate will always be 0).
-            for (const measure of archInfo.activeMeasures) {
-                if (!measures[measure]) {
-                    measures[measure] = fields[measure];
-                }
-            }
-
-            for (const fieldName in archInfo.fieldAttrs) {
-                if (archInfo.fieldAttrs[fieldName].string && fieldName in measures) {
-                    measures[fieldName].string = archInfo.fieldAttrs[fieldName].string;
-                }
-            }
 
             if (!archInfo.activeMeasures.length || archInfo.displayQuantity) {
                 archInfo.activeMeasures.unshift("__count");
@@ -75,11 +36,12 @@ export class PivotView extends Component {
 
             modelParams.meta = {
                 activeMeasures: archInfo.activeMeasures,
+                additionalMeasures: this.props.additionalMeasures,
                 colGroupBys: archInfo.colGroupBys,
                 defaultOrder: archInfo.defaultOrder,
                 disableLinking: Boolean(archInfo.disableLinking),
                 fields: this.props.fields,
-                measures,
+                fieldAttrs: archInfo.fieldAttrs,
                 resModel: this.props.resModel,
                 rowGroupBys: archInfo.rowGroupBys,
                 title: this.props.title || archInfo.title || this.env._t("Untitled"),
@@ -109,21 +71,6 @@ export class PivotView extends Component {
             controlPanelProps.display = this.props.display.controlPanel;
         }
         return controlPanelProps;
-    }
-    /**
-     * Returns the list of measures alphabetically sorted, and with the Count
-     * measure at the end of the list.
-     *
-     * @returns {Object[]}
-     */
-    get sortedMeasures() {
-        const measures = this.model.meta.measures;
-        return Object.keys(measures).sort((m1, m2) => {
-            if (m1 === "__count" || m2 === "__count") {
-                return m1 === "__count" ? 1 : -1; // Count is always last
-            }
-            return measures[m1].string.toLowerCase() > measures[m2].string.toLowerCase() ? 1 : -1;
-        });
     }
     /**
      * @returns {Object}

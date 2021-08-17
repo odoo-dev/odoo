@@ -1,29 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="web.ReportingViews.MeasureMenu" owl="1">
-        <Dropdown togglerClass="'btn btn-primary'" t-on-dropdown-item-selected="onMeasureSelected">
-            <t t-set-slot="toggler">
-                Measures <i class="fa fa-caret-down ml-1"/>
-            </t>
-            <t t-foreach="sortedMeasures" t-as="measure" t-key="measure">
-                <div t-if="!measure_first and measure == '__count'" role="separator" class="dropdown-divider"/>
-                <DropdownItem class="o_menu_item dropdown-item"
-                    t-att-class="{ active: activeMeasures.includes(measure) }"
-                    payload="{ measure: measure }"
-                    parentClosingMode="'none'"
-                    >
-                    <t t-esc="measures[measure].string"/>
-                </DropdownItem>
-            </t>
-        </Dropdown>
-    </t>
-
     <t t-name="web.PivotView.Buttons" owl="1">
-        <div class="btn-group" role="toolbar" aria-label="Main actions">
-            <t t-call="web.ReportingViews.MeasureMenu">
-                <t t-set="activeMeasures" t-value="model.meta.activeMeasures"/>
+        <div class="btn-group" role="toolbar" aria-label="Main actions"  t-on-dropdown-item-selected="onMeasureSelected">
+            <t t-call="web.ReportViewMeasures">
                 <t t-set="measures" t-value="model.meta.measures"/>
+                <t t-set="activeMeasures" t-value="model.meta.activeMeasures"/>
             </t>
         </div>
         <div class="btn-group" role="toolbar" aria-label="Pivot settings">

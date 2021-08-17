@@ -25,6 +25,7 @@ export class PivotGroupByMenu extends GroupByMenu {
             id: item.id || item.name,
             fieldName: item.fieldName || item.name,
             description: item.description || item.string,
+            isActive: false,
             options:
                 item.options || ["date", "datetime"].includes(item.type)
                     ? getIntervalOptions()

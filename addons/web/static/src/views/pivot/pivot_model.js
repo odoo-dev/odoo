@@ -9,6 +9,7 @@ import { buildSampleORM } from "@web/views/helpers/sample_server";
 import { computeVariation } from "@web/core/utils/numbers";
 import { DEFAULT_INTERVAL } from "@web/search/utils/dates";
 import { sortBy } from "@web/core/utils/arrays";
+import { computeReportMeasures } from "../helpers/utils";
 
 /**
  * Pivot Model
@@ -708,6 +709,12 @@ export class PivotModel extends Model {
             meta.expandedColGroupBys = [];
         }
 
+        meta.measures = computeReportMeasures(
+            meta.fields,
+            meta.fieldAttrs,
+            meta.activeMeasures,
+            meta.additionalMeasures
+        );
         const config = { meta, data: this.data, searchParams };
         const data = await this._loadData(config);
         const oldConfig = { meta: this.meta, data: this.data, searchParams: this.searchParams };
