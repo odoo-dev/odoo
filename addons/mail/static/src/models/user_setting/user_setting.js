@@ -119,7 +119,7 @@ function factory(dependencies) {
                 audioInputDeviceId,
             });
             this.env.services.local_storage.setItem('mail_user_setting_audio_input_device_id', audioInputDeviceId);
-            await this.env.messaging.mailRtc.updateAudioTrack(true);
+            await this.env.messaging.mailRtc.updateLocalAudioTrack(true);
         }
 
         /**
@@ -326,14 +326,20 @@ function factory(dependencies) {
         messaging: one2one('mail.messaging', {
             inverse: 'userSetting',
         }),
+        /**
+         * Formatted string that represent the push to talk key with its modifiers.
+         */
+        pushToTalkKey: attr({
+            default: '',
+        }),
+        /**
+         * Model for the component with the controls for RTC related settings.
+         */
         rtcConfigurationMenu: one2one('mail.rtc_configuration_menu', {
             default: create(),
             inverse: 'userSetting',
             isCausal: true,
             required: true,
-        }),
-        pushToTalkKey: attr({
-            default: '',
         }),
         /**
          * layout of the rtc session display chosen by the user
@@ -355,7 +361,7 @@ function factory(dependencies) {
             default: false,
         }),
         /**
-         * Normalized volume at which the voice activation system must consider the person as "talking".
+         * Normalized volume at which the voice activation system must consider the user as "talking".
          */
         voiceActivationThreshold: attr({
             default: 0.3,
@@ -366,6 +372,9 @@ function factory(dependencies) {
         voiceActiveDuration: attr({
             default: 0,
         }),
+        /**
+         * Models that represent the volume chosen by the user for each partner.
+         */
         volumeSettings: one2many('mail.volume_setting', {
             inverse: 'userSetting',
             isCausal: true,

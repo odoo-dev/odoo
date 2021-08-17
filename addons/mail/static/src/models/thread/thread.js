@@ -281,9 +281,13 @@ function factory(dependencies) {
             return data2;
         }
 
+        /**
+         * Client-side ending of the call.
+         */
         endCall() {
             if (this.mailRtc) {
-                this.mailRtc.disconnectSession();
+                this.mailRtc.reset();
+                this.env.messaging.soundEffects.channelLeave.play({ volume: 0.15 });
                 this.env.messaging.update({ focusedRtcSession: unlink() });
                 this.env.messaging.userSetting.toggleFullScreen(false);
             }
@@ -759,8 +763,8 @@ function factory(dependencies) {
         }
 
         /**
-         * @param {Object} param0
-         * @param {boolean} param0.video whether or not to start the call with the video
+         * @param {Object} [param0]
+         * @param {boolean} [param0.video] whether or not to start the call with the video
          */
         async _joinCall({ video = false } = {}) {
             if (this.model !== 'mail.channel') {
@@ -817,6 +821,9 @@ function factory(dependencies) {
             this.endCall();
         }
 
+        /**
+         * @param {Array<Object>} rtcSessions server representation of the current rtc sessions of the channel
+         */
         updateRtcSessions(rtcSessions) {
             const oldCount = this.rtcSessions.length;
             this.update({
@@ -1759,6 +1766,15 @@ function factory(dependencies) {
         }
 
         /**
+         * @private
+         */
+        _onChangeVideoCount() {
+            if (this.videoCount === 0) {
+                this.env.messaging.userSetting.update({ rtcFilterVideoGrid: false });
+            }
+        }
+
+        /**
          * Handles change of pinned state coming from the server. Useful to
          * clear pending state once server acknowledged the change.
          *
@@ -1794,15 +1810,6 @@ function factory(dependencies) {
                     isFolded: this.serverFoldState === 'folded',
                     notifyServer: false,
                 });
-            }
-        }
-
-        /**
-         * @private
-         */
-        _onChangeVideoCount() {
-            if (this.videoCount === 0 && this.mailRtc) {
-                this.env.messaging.userSetting.update({ rtcFilterVideoGrid: false });
             }
         }
 

@@ -326,6 +326,9 @@ function factory(dependencies) {
         connectionState: attr({
             default: '',
         }),
+        /**
+         * Id of the record on the server.
+         */
         id: attr({
             required: true,
         }),

@@ -123,6 +123,7 @@ function _loadScriptProcessor(source, audioContext, { onStateChange, minimumActi
  */
 async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange, minimumActiveCycles = 10, baseLevel = 0.3, sampleRate }) {
     await audioContext.resume();
+    // Safari does not support Worklet.addModule
     await audioContext.audioWorklet.addModule('mail/static/src/utils/media_monitoring/threshold_processor.js');
     const thresholdProcessor = new AudioWorkletNode(audioContext, 'threshold-processor', {
         processorOptions: {

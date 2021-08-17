@@ -1,7 +1,5 @@
 class ThresholdProcessor extends AudioWorkletProcessor {
     /**
-     * Worklets are not yet supported by Safari.
-     *
      * @param {Object} param0 options
      * @param {Object} param0.processorOptions
      * @param {number} processorOptions.minimumActiveCycles - how many cycles have to pass since the last time the

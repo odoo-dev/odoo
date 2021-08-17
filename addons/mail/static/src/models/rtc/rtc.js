@@ -123,13 +123,8 @@ function factory(dependencies) {
         // Public
         //----------------------------------------------------------------------
 
-        disconnectSession() {
-            this._reset();
-            this.env.messaging.soundEffects.channelLeave.play({ volume: 0.15 });
-        }
-
         /**
-         * removes and disconnect all the peers that are not current members of the call.
+         * Removes and disconnects all the peerConnections that are not current members of the call.
          *
          * @param {mail.rtc_session[]} currentSessions list of sessions of this call.
          */
@@ -191,7 +186,7 @@ function factory(dependencies) {
 
         /**
          * @param {Object} param0
-         * @param {string} [param0.rtcSessionId] the Id of the 'mail.rtc_session'
+         * @param {string} param0.rtcSessionId the Id of the 'mail.rtc_session'
                   of the current partner for the current call
          * @param {mail.rtc_session[]} [param0.callees] the list of sessions to call
          * @param {Array<Object>} [param0.iceServers]
@@ -201,7 +196,7 @@ function factory(dependencies) {
          */
         async initSession({ rtcSessionId, callees, iceServers, audio, video }) {
             // Initializing a new session implies closing the current session.
-            this._reset();
+            this.reset();
             if (!this.isClientRtcCompatible) {
                 return false;
             }
@@ -210,7 +205,7 @@ function factory(dependencies) {
                 iceServers: iceServers || this.iceServers,
             });
 
-            await this.updateAudioTrack(audio);
+            await this.updateLocalAudioTrack(audio);
             if (navigator.permissions && navigator.permissions.query) {
                 try {
                     this._microphonePermissionStatus = this._microphonePermissionStatus || await navigator.permissions.query({ name: 'microphone' });
@@ -236,7 +231,47 @@ function factory(dependencies) {
         }
 
         /**
-         * mutes and unmutes the microphone, will not unmute if deaf.
+         * Resets the state of the model and cleanly ends all connections and
+         * streams.
+         *
+         * @private
+         */
+        reset() {
+            if (this._audioMonitor) {
+                this._audioMonitor.disconnect();
+            }
+            if (this._peerConnections) {
+                const peerTokens = Object.keys(this._peerConnections);
+                this._notifyPeers(peerTokens, {
+                    event: 'disconnect',
+                });
+                for (const token of peerTokens) {
+                    this._removePeer(token);
+                }
+            }
+            this._microphonePermissionStatus && this._microphonePermissionStatus.removeEventListener('change', this._onMicrophonePermissionStatusChange);
+            this.videoTrack && this.videoTrack.stop();
+            this.audioTrack && this.audioTrack.stop();
+
+            this._peerConnections = {};
+            this._dataChannels = {};
+            this._fallBackTimeouts = {};
+            this._outGoingCallTokens = new Set();
+            this._audioMonitor = undefined;
+
+            this.update({
+                connectionStates: clear(),
+                currentRtcSession: clear(),
+                sendUserVideo: clear(),
+                sendDisplay: clear(),
+                videoTrack: clear(),
+                audioTrack: clear(),
+            });
+        }
+
+        /**
+         * Mutes and unmutes the microphone, will not unmute if deaf.
+         *
          * @param {Object} [param0]
          * @param {string} [param0.requestAudioDevice] true if requesting the audio input device
          *                 from the user
@@ -246,13 +281,13 @@ function factory(dependencies) {
             this.currentRtcSession.updateAndBroadcast({ isMuted: shouldMute || !this.audioTrack });
             if (!this.audioTrack && !shouldMute && requestAudioDevice) {
                 // if we don't have an audioTrack, we try to request it again
-                await this.updateAudioTrack(true);
+                await this.updateLocalAudioTrack(true);
             }
             await this.async(() => this._updateLocalAudioTrackEnabledState());
         }
 
         /**
-         * toggles user video (eg: webcam) broadcasting to peers.
+         * Toggles user video (eg: webcam) broadcasting to peers.
          * TODO maybe directly expose toggleVideoBroadcast(), to consider when
          * refactoring for simultaneous userVideo/display.
          */
@@ -270,7 +305,7 @@ function factory(dependencies) {
         /**
          * @param {Boolean} audio
          */
-        async updateAudioTrack(audio) {
+        async updateLocalAudioTrack(audio) {
             if (this.audioTrack) {
                 this.audioTrack.stop();
             }
@@ -284,7 +319,7 @@ function factory(dependencies) {
                     const audioStream = await navigator.mediaDevices.getUserMedia({ audio: this.env.messaging.userSetting.getAudioConstraints() });
                     audioTrack = audioStream.getAudioTracks()[0];
                     audioTrack.addEventListener('ended', async () => {
-                        await this.async(() => this.updateAudioTrack(false));
+                        await this.async(() => this.updateLocalAudioTrack(false));
                         this.currentRtcSession.updateAndBroadcast({ isMuted: true });
                         await this.async(() => this._updateLocalAudioTrackEnabledState());
                     });
@@ -362,7 +397,7 @@ function factory(dependencies) {
             if (!this.channel) {
                 return;
             }
-            await this._toggleVideoTrack(trackOptions);
+            await this._toggleLocalVideoTrack(trackOptions);
             for (const peerConnection of Object.values(this._peerConnections)) {
                 await this._updateRemoteTrack(peerConnection, 'video', { remove: !this.videoTrack });
             }
@@ -390,9 +425,9 @@ function factory(dependencies) {
          * @private
          * @param {Object} param0
          * @param {String} param0.type 'user-video' (eg: webcam) or 'display' (eg: screen sharing)
-         * @param {boolean} param0.force
+         * @param {boolean} [param0.force]
          */
-        async _toggleVideoTrack({ force, type }) {
+        async _toggleLocalVideoTrack({ type, force }) {
             if (type === 'user-video') {
                 const sendUserVideo = force !== undefined ? force : !this.sendUserVideo;
                 await this._updateLocalVideoTrack(type, sendUserVideo);
@@ -407,17 +442,23 @@ function factory(dependencies) {
                 }
                 this.currentRtcSession.removeVideo();
             } else {
-                this._updateDisplayableStreams(this.videoTrack, this.currentRtcSession.peerToken);
+                this._updateExternalSessionTrack(this.videoTrack, this.currentRtcSession.peerToken);
             }
         }
 
         /**
+         * Updates the track that is broadcasted to the RTCPeerConnection.
+         * This will start new transaction by triggering a negotiationneeded event
+         * on the peerConnection given as parameter.
+         *
+         * negotiationneeded -> offer -> answer -> ...
+         *
          * @private
          * @param {RTCPeerConnection} peerConnection
          * @param {String} trackKind
-         * @param {Object} [param3]
-         * @param {boolean} [param3.initTransceiver]
-         * @param {Boolean} [param3.remove]
+         * @param {Object} [param2]
+         * @param {boolean} [param2.initTransceiver]
+         * @param {Boolean} [param2.remove]
          */
         async _updateRemoteTrack(peerConnection, trackKind, { initTransceiver, remove } = {}) {
             const track = trackKind === 'audio' ? this.audioTrack : this.videoTrack;
@@ -470,11 +511,11 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeIsClientRtcCompatible() {
-            return window.RTCPeerConnection && window.MediaStream && navigator.mediaDevices;
+            return window.RTCPeerConnection && window.MediaStream;
         }
 
         /**
-         * Creates and setup a RTCPeerConnection
+         * Creates and setup a RTCPeerConnection.
          *
          * @private
          * @param {String} token
@@ -514,7 +555,7 @@ function factory(dependencies) {
                 });
             };
             peerConnection.ontrack = ({ transceiver, track }) => {
-                this._updateDisplayableStreams(track, token);
+                this._updateExternalSessionTrack(track, token);
             };
             const dataChannel = peerConnection.createDataChannel("notifications", { negotiated: true, id: 1 });
             dataChannel.onmessage = (event) => {
@@ -546,6 +587,7 @@ function factory(dependencies) {
          * @private
          * @param {RTCPeerConnection} peerConnection
          * @param {String} trackKind
+         * @returns {RTCRtpTransceiver} the transceiver used for this trackKind.
          */
         _getTransceiver(peerConnection, trackKind) {
             const transceivers = peerConnection.getTransceivers();
@@ -662,6 +704,9 @@ function factory(dependencies) {
         }
 
         /**
+         * Updates the "isTalking" state of the current user and sets the
+         * enabled state of its audio track accordingly.
+         *
          * @private
          * @param {boolean} isTalking
          */
@@ -747,7 +792,7 @@ function factory(dependencies) {
             if (videoTrack) {
                 videoTrack.addEventListener('ended', async () => {
                     await this.async(() =>
-                        this._toggleVideoTrack({ force: false, type })
+                        this._toggleLocalVideoTrack({ force: false, type })
                     );
                 });
             }
@@ -764,7 +809,8 @@ function factory(dependencies) {
          * @param {Object} param1
          * @param {String} param1.event
          * @param {Object} [param1.payload]
-         * @param {String} [param1.type] 'server' or 'peerToPeer'
+         * @param {String} [param1.type] 'server' or 'peerToPeer',
+         *                 'peerToPeer' requires an active RTCPeerConnection
          */
         async _notifyPeers(targetTokens, { event, payload, type = 'server' }) {
             if (!targetTokens.length || !this.channel || !this.currentRtcSession) {
@@ -799,49 +845,6 @@ function factory(dependencies) {
                     dataChannel.send(content);
                 }
             }
-        }
-
-        /**
-         * @private
-         */
-        _onPushToTalkKeyDown() {
-            if (!this.channel) {
-                return;
-            }
-            if (!this.env.messaging.userSetting.usePushToTalk) {
-                return;
-            }
-            if (this._pushToTalkTimeoutId) {
-                clearTimeout(this._pushToTalkTimeoutId);
-            }
-            if (!this.currentRtcSession.isTalking && !this.currentRtcSession.isMuted) {
-                this.env.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
-            }
-            this._setSoundBroadcast(true);
-        }
-
-        /**
-         * @private
-         */
-        _onPushToTalkKeyUp() {
-            if (!this.channel) {
-                return;
-            }
-            if (!this.currentRtcSession.isTalking) {
-                return;
-            }
-            if (!this.env.messaging.userSetting.usePushToTalk) {
-                return;
-            }
-            if (!this.currentRtcSession.isMuted) {
-                this.env.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
-            }
-            this._pushToTalkTimeoutId = setTimeout(
-                () => {
-                    this._setSoundBroadcast(false);
-                },
-                this.env.messaging.userSetting.voiceActiveDuration || 0,
-            );
         }
 
         /**
@@ -884,7 +887,7 @@ function factory(dependencies) {
         }
 
         /**
-         * Cleans up a peer by closing all its associated content
+         * Cleans up a peer by closing all its associated content and the connection.
          *
          * @private
          * @param {String} token
@@ -909,6 +912,8 @@ function factory(dependencies) {
         }
 
         /**
+         * Terminates the Transceivers of the peer connection.
+         *
          * @private
          * @param {RTCPeerConnection} peerConnection
          */
@@ -933,61 +938,13 @@ function factory(dependencies) {
         }
 
         /**
-         * @private
-         * @param {Object} streamData
-         */
-        _removeStream(streamData) {
-            if (!streamData || !streamData.stream) {
-                return;
-            }
-            const stream = streamData.stream;
-            for (const track of stream.getTracks() || []) {
-                track.stop();
-            }
-        }
-
-        /**
-         * @private
-         */
-        _reset() {
-            if (this._audioMonitor) {
-                this._audioMonitor.disconnect();
-            }
-            if (this._peerConnections) {
-                const peerTokens = Object.keys(this._peerConnections);
-                this._notifyPeers(peerTokens, {
-                    event: 'disconnect',
-                });
-                for (const token of peerTokens) {
-                    this._removePeer(token);
-                }
-            }
-            this._microphonePermissionStatus && this._microphonePermissionStatus.removeEventListener('change', this._onMicrophonePermissionStatusChange);
-            this.videoTrack && this.videoTrack.stop();
-            this.audioTrack && this.audioTrack.stop();
-
-            this._peerConnections = {};
-            this._dataChannels = {};
-            this._fallBackTimeouts = {};
-            this._outGoingCallTokens = new Set();
-            this._audioMonitor = undefined;
-
-            this.update({
-                connectionStates: clear(),
-                currentRtcSession: clear(),
-                sendUserVideo: clear(),
-                sendDisplay: clear(),
-                videoTrack: clear(),
-                audioTrack: clear(),
-            });
-        }
-
-        /**
+         * Updates the mail.rtc_session associated to the token with a new track.
+         *
          * @private
          * @param {Track} [track]
          * @param {String} token the token of video
          */
-        _updateDisplayableStreams(track, token) {
+        _updateExternalSessionTrack(track, token) {
             const rtcSession = this.env.models['mail.rtc_session'].findFromIdentifyingData({ id: token });
             if (!rtcSession) {
                 return;
@@ -1060,13 +1017,22 @@ function factory(dependencies) {
          * @param {keyboardEvent} ev
          */
         _onKeyDown(ev) {
+            if (!this.channel) {
+                return;
+            }
             if (this.env.messaging.userSetting.rtcConfigurationMenu.isRegisteringKey) {
                 return;
             }
-            if (!this.env.messaging.userSetting.isPushToTalkKey(ev)) {
+            if (!this.env.messaging.userSetting.usePushToTalk || !this.env.messaging.userSetting.isPushToTalkKey(ev)) {
                 return;
             }
-            this._onPushToTalkKeyDown();
+            if (this._pushToTalkTimeoutId) {
+                clearTimeout(this._pushToTalkTimeoutId);
+            }
+            if (!this.currentRtcSession.isTalking && !this.currentRtcSession.isMuted) {
+                this.env.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
+            }
+            this._setSoundBroadcast(true);
         }
 
         /**
@@ -1074,10 +1040,24 @@ function factory(dependencies) {
          * @param {keyboardEvent} ev
          */
         _onKeyUp(ev) {
-            if (!this.env.messaging.userSetting.isPushToTalkKey(ev, { ignoreModifiers: true })) {
+            if (!this.channel) {
                 return;
             }
-            this._onPushToTalkKeyUp();
+            if (!this.env.messaging.userSetting.usePushToTalk || !this.env.messaging.userSetting.isPushToTalkKey(ev, { ignoreModifiers: true })) {
+                return;
+            }
+            if (!this.currentRtcSession.isTalking) {
+                return;
+            }
+            if (!this.currentRtcSession.isMuted) {
+                this.env.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
+            }
+            this._pushToTalkTimeoutId = setTimeout(
+                () => {
+                    this._setSoundBroadcast(false);
+                },
+                this.env.messaging.userSetting.voiceActiveDuration || 0,
+            );
         }
 
         /**
@@ -1090,7 +1070,7 @@ function factory(dependencies) {
         async _onMicrophonePermissionStatusChange(ev) {
             const canRequest = ev.target.state !== 'denied';
             this.currentRtcSession.updateAndBroadcast({ isMuted: !canRequest });
-            await this.updateAudioTrack(canRequest);
+            await this.updateLocalAudioTrack(canRequest);
             await this.async(() => this._updateLocalAudioTrackEnabledState());
         }
 

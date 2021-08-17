@@ -22,7 +22,11 @@ function factory(dependencies) {
             isCausal: true,
         }),
         channelLeave: one2one('mail.sound_effect', {
-            default: create({ filename: 'channel_04_out' }), // this file looks faulty on firefox.
+            /**
+             * FIXME This file is faulty on at least chrome.
+             * task-id for the sound effects: 2554674
+             */
+            default: create({ filename: 'channel_04_out' }),
             isCausal: true,
         }),
         incomingCall: one2one('mail.sound_effect', {

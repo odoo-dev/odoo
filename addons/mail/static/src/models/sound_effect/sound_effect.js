@@ -8,41 +8,29 @@ function factory(dependencies) {
     class SoundEffect extends dependencies['mail.model'] {
 
         //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
-        /**
-         * @override
-         */
-        static _createRecordLocalId(data) {
-            return `${this.modelName}_${data.path}_${data.filename}`;
-        }
-
-        //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
 
         /**
-         *
-         *
          * @param {Object} param0
          * @param {boolean} [param0.loop] true if we want to make the audio loop, will only stop if stop() is called
          * @param {boolean} [param0.volume]
          */
-        play({ loop, volume = 1 } = {}) {
-            if (typeof(Audio) !== "undefined") {
-                if (!this.audio) {
-                    const audio = new Audio();
-                    this.update({ audio });
-                }
-                this.audio.pause();
-                const ext = this.audio.canPlayType("audio/ogg; codecs=vorbis") ? ".ogg" : ".mp3";
-                this.audio.loop = loop;
-                this.audio.src = this.path + this.filename + ext;
-                this.audio.volume = volume;
-                this.audio.currentTime = 0;
-                this.audio.play().catch(()=>{});
+        play({ loop = false, volume = 1 } = {}) {
+            if (typeof(Audio) === "undefined") {
+                return;
             }
+            if (!this.audio) {
+                const audio = new Audio();
+                const ext = audio.canPlayType("audio/ogg; codecs=vorbis") ? ".ogg" : ".mp3";
+                audio.src = this.path + this.filename + ext;
+                this.update({ audio });
+            }
+            this.audio.pause();
+            this.audio.currentTime = 0;
+            this.audio.loop = loop;
+            this.audio.volume = volume;
+            this.audio.play().catch(()=>{});
         }
 
         /**
@@ -54,11 +42,26 @@ function factory(dependencies) {
                 this.audio.currentTime = 0;
             }
         }
+
+        //----------------------------------------------------------------------
+        // Private
+        //----------------------------------------------------------------------
+
+        /**
+         * @override
+         */
+        static _createRecordLocalId(data) {
+            return `${this.modelName}_${data.path}_${data.filename}`;
+        }
     }
 
     SoundEffect.fields = {
         /**
-         * HTMLAudioElement.
+         * HTMLAudioElement
+         * Does not require to be mounted on the DOM to operate.
+         *
+         * Set the first time the audio is played so the file is lazy loaded and
+         * then cached.
          */
         audio: attr(),
         /**
@@ -68,7 +71,7 @@ function factory(dependencies) {
             required: true,
         }),
         /**
-         * Path to the audio file folder.
+         * Path to the audio file.
          */
         path: attr({
             default: '/mail/static/src/audio/',

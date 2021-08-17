@@ -444,9 +444,9 @@ class Channel(models.Model):
             if not sessions_data:
                 # if there is no member left in the rtc call, all invitations are reset
                 record._cancel_rtc_invitations()
-            for member in record.channel_last_seen_partner_ids:
+            for partner in record.channel_partner_ids:
                 notifications.append([
-                    (self._cr.dbname, 'res.partner', member.partner_id.id),
+                    (self._cr.dbname, 'res.partner', partner.id),
                     {
                         'type': 'rtc_sessions_update',
                         'payload': {
