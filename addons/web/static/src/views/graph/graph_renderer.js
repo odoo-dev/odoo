@@ -3,7 +3,7 @@
 import { _lt } from "@web/core/l10n/translation";
 import { BORDER_WHITE, DEFAULT_BG, getColor, hexToRGBA } from "./colors";
 import { formatFloat } from "@web/fields/formatters";
-import { getMeasureDescription, SEP } from "./graph_model";
+import { SEP } from "./graph_model";
 import { sortBy } from "@web/core/utils/arrays";
 import { useAssets } from "@web/core/assets";
 
@@ -94,7 +94,7 @@ export class GraphRenderer extends Component {
      * @param {Object} tooltipModel see chartjs documentation
      */
     customTooltip(data, metaData, tooltipModel) {
-        const { measure, disableLinking, fields, fieldModif, mode } = metaData;
+        const { measure, measures, disableLinking, mode } = metaData;
         this.el.style.cursor = "";
         this.removeTooltips();
         if (tooltipModel.opacity === 0 || tooltipModel.dataPoints.length === 0) {
@@ -107,7 +107,7 @@ export class GraphRenderer extends Component {
         const viewContentTop = this.el.getBoundingClientRect().top;
         const innerHTML = this.env.qweb.renderToString("web.GraphRenderer.CustomTooltip", {
             maxWidth: getMaxWidth(this.chart.chartArea),
-            measure: getMeasureDescription(measure, fields, fieldModif),
+            measure: measures[measure].string,
             tooltipItems: this.getTooltipItems(data, metaData, tooltipModel),
         });
         const template = Object.assign(document.createElement("template"), { innerHTML });
@@ -407,6 +407,7 @@ export class GraphRenderer extends Component {
             fieldModif,
             groupBy,
             measure,
+            measures,
             mode,
         } = this.props.metaData;
         if (mode === "pie") {
@@ -424,7 +425,7 @@ export class GraphRenderer extends Component {
             type: "linear",
             scaleLabel: {
                 display: displayScaleLabels,
-                labelString: getMeasureDescription(measure, fields, fieldModif),
+                labelString: measures[measure].string,
             },
             ticks: {
                 callback: (value) => this.formatValue(value, allIntegers),

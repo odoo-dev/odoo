@@ -1949,7 +1949,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(propsFromArch, {
             fields,
             fieldModif: {
-                bar: { invisible: true, string: "My invisible field" },
+                bar: { isInvisible: true, string: "My invisible field" },
                 fighters: { string: "FooFighters" },
             },
             measure: "revenue",

@@ -8,7 +8,6 @@ import { GraphRenderer } from "./graph_renderer";
 import { GROUPABLE_TYPES } from "@web/search/utils/misc";
 import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { registry } from "@web/core/registry";
-import { sortBy } from "@web/core/utils/arrays";
 import { standardViewProps } from "@web/views/helpers/standard_view_props";
 import { useModel } from "../helpers/model";
 import { useService } from "@web/core/utils/hooks";
@@ -68,7 +67,7 @@ export class GraphArchParser extends XMLParser {
                         if (!metaData.fieldModif[fieldName]) {
                             metaData.fieldModif[fieldName] = {};
                         }
-                        metaData.fieldModif[fieldName].invisible = true;
+                        metaData.fieldModif[fieldName].isInvisible = true;
                         break;
                     }
                     const isMeasure = node.getAttribute("type") === "measure";
@@ -119,7 +118,7 @@ export class GraphView extends Component {
         if (this.props.state) {
             modelParams = this.props.state;
         } else {
-            const { additionalMeasures, arch, fields } = this.props;
+            const { arch, fields } = this.props;
             const parser = new GraphArchParser();
             const archInfo = parser.parse(arch, fields);
             modelParams = {};
@@ -129,25 +128,6 @@ export class GraphView extends Component {
             if (archInfo.groupBy) {
                 modelParams.groupBy = archInfo.groupBy;
             }
-            const { fieldModif, measure } = modelParams;
-            const measures = [];
-            for (const fieldName in fields) {
-                const field = fields[fieldName];
-                const { invisible, string } = fieldModif[fieldName] || {};
-                if (!["id", "__count"].includes(fieldName) && field.store === true) {
-                    if (
-                        (!invisible && ["integer", "float", "monetary"].includes(field.type)) ||
-                        (!invisible && fieldName === measure) ||
-                        additionalMeasures.includes(fieldName)
-                    ) {
-                        measures.push({
-                            description: string || field.string,
-                            fieldName,
-                        });
-                    }
-                }
-            }
-            modelParams.measures = sortBy(measures, (m) => m.description.toLowerCase());
         }
 
         this.model = useModel(this.constructor.Model, modelParams);

@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
 import { getGroupBy } from "@web/search/utils/group_by";
 import { GROUPABLE_TYPES } from "@web/search/utils/misc";
 import { KeepLast } from "@web/core/utils/concurrency";
@@ -9,16 +8,10 @@ import { ORM } from "@web/core/orm_service";
 import { rankInterval } from "@web/search/utils/dates";
 import { SampleServer } from "@web/views/helpers/sample_server";
 import { sortBy } from "@web/core/utils/arrays";
+import { computeReportMeasures } from "../helpers/utils";
 
 export const SEP = " / ";
 export const MODES = ["bar", "line", "pie"];
-
-const COUNT = _lt("Count");
-export function getMeasureDescription(measure, fields, fieldModif) {
-    return measure === "__count"
-        ? COUNT.toString()
-        : (fieldModif[measure] && fieldModif[measure].string) || fields[measure].string;
-}
 
 // Remove and directly do computations in graph model?
 class DateClasses {
@@ -124,6 +117,12 @@ export class GraphModel extends Model {
         } else if (metaData.groupBy.length === 0) {
             metaData.groupBy = this.initialGroupBy;
         }
+        metaData.measures = computeReportMeasures(
+            metaData.fields,
+            metaData.fieldModif,
+            [metaData.measure],
+            metaData.additionalMeasures
+        );
         await this._fetchData(metaData);
         this.firstLoad = false;
     }
@@ -273,7 +272,7 @@ export class GraphModel extends Model {
      * @returns {string}
      */
     _getDatasetLabel(dataPoint) {
-        const { measure, domains, mode, fields, fieldModif } = this.metaData;
+        const { measure, measures, domains, mode } = this.metaData;
         const { labels, originIndex } = dataPoint;
         if (mode === "pie") {
             return domains[originIndex].description || "";
@@ -284,7 +283,7 @@ export class GraphModel extends Model {
             datasetLabel =
                 domains[originIndex].description + (datasetLabel ? SEP + datasetLabel : "");
         }
-        datasetLabel = datasetLabel || getMeasureDescription(measure, fields, fieldModif);
+        datasetLabel = datasetLabel || measures[measure].string;
         return datasetLabel;
     }
 
