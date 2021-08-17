@@ -433,27 +433,30 @@ class Channel(models.Model):
             self.env['mail.rtc.session'].browse(session_id).unlink()
         else:
             return
+        session_data_by_channel = self._notify_rtc_sessions_change()
+        return session_data_by_channel.get(self.id, []), new_session_id
 
-        sessions_data_by_channel = self.rtc_sessions._mail_rtc_session_format_by_channel()
-        sessions_data = sessions_data_by_channel.get(self.id, [])
-        if not sessions_data:
-            # if there is no member left in the rtc call, all invitations are reset
-            self._cancel_rtc_invitations()
-
+    def _notify_rtc_sessions_change(self):
+        session_data_by_channel = self.mapped('rtc_sessions')._mail_rtc_session_format_by_channel()
         notifications = []
-        for member in self.channel_last_seen_partner_ids:
-            notifications.append([
-                (self._cr.dbname, 'res.partner', member.partner_id.id),
-                {
-                    'type': 'rtc_sessions_update',
-                    'payload': {
-                        'channelId': self.id,
-                        'rtcSessions': sessions_data,
+        for record in self:
+            sessions_data = session_data_by_channel.get(record.id, [])
+            if not sessions_data:
+                # if there is no member left in the rtc call, all invitations are reset
+                record._cancel_rtc_invitations()
+            for member in record.channel_last_seen_partner_ids:
+                notifications.append([
+                    (self._cr.dbname, 'res.partner', member.partner_id.id),
+                    {
+                        'type': 'rtc_sessions_update',
+                        'payload': {
+                            'channelId': record.id,
+                            'rtcSessions': sessions_data,
+                        },
                     },
-                },
-            ])
+                ])
         self.env['bus.bus'].sendmany(notifications)
-        return sessions_data, new_session_id
+        return session_data_by_channel
 
     # ------------------------------------------------------------
     # MAILING

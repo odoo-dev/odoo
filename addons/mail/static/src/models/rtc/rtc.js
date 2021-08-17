@@ -9,17 +9,14 @@ import { monitorAudioThresholds } from '@mail/utils/media_monitoring/media_monit
 /**
  * The order in which transceivers are added, relevant for RTCPeerConnection.getTransceivers which returns
  * transceivers in insertion order as per webRTC specifications.
- *
- * TODO
- * const TRANSCEIVER_ORDER = [{ trackKind: 'audio', name: 'audio'}, { trackKind: 'video', name: 'user-video' }, { trackKind: 'video', name: 'display' }];
- * get index with TRANSCEIVER_ORDER.findIndex(o => o.name === 'user-video');
  */
 const TRANSCEIVER_ORDER = ['audio', 'video'];
 
 /**
  * backend
  * TODO REF turn update_and_broadcast into route
- * TODO IMP Remove offline members
+ * TODO REF '/mail/channel_call_invite' to be called server-side inside join_call?
+ *      it is not useful to have it as a separate route if we only do it when joining a call.
  * TODO IMP nice-to-have? 1 'mail.rtc.session' per user session (tab/device)?
  *
  * frontend
@@ -27,9 +24,13 @@ const TRANSCEIVER_ORDER = ['audio', 'video'];
  *      from a new option in the 'mail.RtcOptionList'
  * TODO IMP nice-to-have? "test microphone" in rtcConfigurationMenu, auto mutes, attach monitorAudio, audioVisual feedback,
  *      it needs a change in the normalization in threshold_processor.js (see comment L:27)
+ * TODO IMP nice-to-have? Have both video and share screen at the same time
+ *      requires small ref TRANSCEIVER_ORDER to support an arbitrary amount of transceivers:
+ *      const TRANSCEIVER_ORDER = [{ trackKind: 'audio', name: 'audio'}, { trackKind: 'video', name: 'user-video' }, { trackKind: 'video', name: 'display' }];
+ *      get index with TRANSCEIVER_ORDER.findIndex(o => o.name === 'user-video');
  * TODO REF html/scss classes naming (bad/inconsistent/outdated names, wrong order)
  *      for example, rtc_call_participant_card still has "video" css classes.
- * TODO REF rename ringing/invitation
+ * TODO REF rename ringing/invitation into one consistent name
  */
 
 function factory(dependencies) {
@@ -94,6 +95,18 @@ function factory(dependencies) {
             window.addEventListener('beforeunload', async () => {
                 this.channel && await this.channel.leaveCall();
             });
+
+            /**
+             * Pings the server to prevent garbage collection of the rtc session
+             * if we have a currentRtcSession (which means that we are in an active call).
+             *
+             * Note that setInterval is not a good timekeeping mechanism and is prone to
+             * drift during loads on the main thread or when the tab is on the background
+             * so the interval should not be too close to the server-side timeout.
+             */
+            setInterval(() => {
+                this.currentRtcSession && this.currentRtcSession.pingServer();
+            }, 120000); // 2 minutes
             return res;
         }
 
@@ -122,9 +135,14 @@ function factory(dependencies) {
          */
         async filterCallees(currentSessions) {
             console.log(`MEMBERS UPDATE: ${currentSessions.length} members in call`);
-            const currentSessionsToken = new Set(currentSessions.map(session => session.peerToken));
+            const currentSessionsTokens = new Set(currentSessions.map(session => session.peerToken));
+            if (this.currentRtcSession && !currentSessionsTokens.has(this.currentRtcSession.peerToken)) {
+                // if the current RTC session is not in the channel session, this call is no longer valid.
+                this.channel && this.channel.endCall();
+                return;
+            }
             for (const token of Object.keys(this._peerConnections)) {
-                if (!currentSessionsToken.has(token)) {
+                if (!currentSessionsTokens.has(token)) {
                     this._removePeer(token);
                 }
             }
