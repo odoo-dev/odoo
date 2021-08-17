@@ -89,7 +89,6 @@
 <div class="o_layout o_default_theme" data-name="Mailing" data-no-remove="True" data-no-move="True">
     <div class="container o_mail_wrapper" style="border-collapse:collapse;" data-name="Body" data-no-remove="True" data-no-move="True">
         <div class="row">
-            <div class="col o_mail_no_resize o_not_editable" style="text-align:left;"> </div>
             <div class="col o_mail_no_options o_mail_wrapper_td oe_structure" style="text-align:left;width:100%;">
                 <div class="o_mail_block_header_logo" data-snippet="s_mail_block_header_logo">
                     <div class="o_mail_snippet_general" style="margin:0px auto 0px auto;background-color:rgb(255, 255, 255);max-width:600px;width:100%;">
