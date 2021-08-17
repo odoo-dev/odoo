@@ -120,16 +120,20 @@ function factory(dependencies) {
         setVolume(volume) {
             if (this.audioElement) {
                 this.audioElement.volume = volume;
-                this.update({
-                    audioElement: this.audioElement,
-                });
+                this.update({ audioElement: this.audioElement });
             }
             if (!this.partner || this.partner === this.env.messaging.currentPartner) {
                 return;
             }
-            this.partner.volumeSetting && this.partner.volumeSetting.update({
-                volume,
-            });
+            if (this.partner.volumeSetting) {
+                this.partner.volumeSetting.update({ volume });
+            } else {
+                /**
+                 * Manually updating the volume field as it will not update based on
+                 * the change of the volume property of the audioElement alone.
+                 */
+                this.audioElement && this.update({ volume: this.audioElement.volume });
+            }
             this.env.messaging.userSetting.saveVolumeSetting(this.partner.id, volume);
         }
 

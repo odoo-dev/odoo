@@ -100,7 +100,7 @@ function factory(dependencies) {
         /**
          * @override
          */
-        _willDelete() {
+        async _willDelete() {
             window.removeEventListener('keydown', this._onKeyDown);
             window.removeEventListener('keyup', this._onKeyUp);
             return super._willDelete(...arguments);
@@ -717,8 +717,9 @@ function factory(dependencies) {
             } catch (e) {
                 this.env.services['notification'].notify({
                     message: _.str.sprintf(
-                        this.env._t(`"%s" requires camera access`),
+                        this.env._t(`"%s" requires "%s" access`),
                         window.location.host,
+                        type === 'user-video' ? 'camera' : 'display',
                     ),
                     type: 'warning',
                 });
@@ -826,8 +827,8 @@ function factory(dependencies) {
         }
 
         /**
-         * Attempts a connection recovery by updating the tracks, which will start a new transaction:
-         * negotiationneeded -> offer -> answer -> ...
+         * Attempts a connection recovery by closing and restarting the call
+         * from the receiving end.
          *
          * @private
          * @param {Object} constraints MediaStreamTrack constraints
@@ -842,7 +843,7 @@ function factory(dependencies) {
             this._fallBackTimeouts[token] = setTimeout(async () => {
                 delete this._fallBackTimeouts[token];
                 const peerConnection = this._peerConnections[token];
-                if (!peerConnection) {
+                if (!peerConnection || !this.channel) {
                     return;
                 }
                 if (this._outGoingCallTokens.has(token)) {
@@ -854,13 +855,13 @@ function factory(dependencies) {
                 if (['connected', 'closed'].includes(peerConnection.connectionState)) {
                     return;
                 }
-                // hard reset: recreating a RTCPeerConnection
+
                 console.log(`RECOVERY: calling back ${token} to salvage the connection ${peerConnection.iceConnectionState}, reason: ${reason}`);
                 await this._notifyPeers([token], {
                     event: 'disconnect',
                 });
                 this._removePeer(token);
-                this._callPeer(token, { name: token });
+                this._callPeer(token);
             }, delay);
         }
 
@@ -875,10 +876,8 @@ function factory(dependencies) {
             if (rtcSession) {
                 rtcSession.reset();
             }
-            const timeoutId = this._fallBackTimeouts[token];
             const peerConnection = this._peerConnections[token];
             const dataChannel = this._dataChannels[token];
-            clearTimeout(timeoutId);
             dataChannel.close();
             if (peerConnection) {
                 this._removeRemoteTracks(peerConnection);
