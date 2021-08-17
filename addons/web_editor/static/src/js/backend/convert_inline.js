@@ -180,6 +180,13 @@ function getMatchedCSSRules(a) {
         } while ($el.length && !$el.is('html'));
     }
 
+    // flexboxes are not supported in Windows Outlook
+    for (const styleName in style) {
+        if (styleName.includes('flex') || `${style[styleName]}`.includes('flex')) {
+            delete style[styleName];
+        }
+    }
+
     return style;
 }
 
@@ -360,6 +367,13 @@ function classToStyle($editable) {
     applyOverDescendants($editable[0], function (node) {
         var $target = $(node);
         var css = getMatchedCSSRules(node);
+        // Flexbox
+        for (const styleName in node.style) {
+            if (styleName.includes('flex') || `${node.style[styleName]}`.includes('flex')) {
+                node.style[styleName] = '';
+            }
+        }
+
         var style = $target.attr('style') || '';
         _.each(css, function (v,k) {
             if (!(new RegExp('(^|;)\s*' + k).test(style))) {
