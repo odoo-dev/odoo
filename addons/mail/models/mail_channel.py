@@ -394,6 +394,8 @@ class Channel(models.Model):
     def _join_call(self):
         session_data, session_id = self._update_call_participation(True)
         ice_servers = self.env['mail.ice.server']._get_ice_servers()
+        if len(self.rtc_sessions) == 1 and self.channel_type in ['chat', 'group']:
+            self._invite_members_to_rtc()
         return {
             'rtcSessions': session_data,
             'iceServers': ice_servers or False,

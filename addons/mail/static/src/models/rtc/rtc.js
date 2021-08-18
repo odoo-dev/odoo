@@ -14,13 +14,10 @@ const TRANSCEIVER_ORDER = ['audio', 'video'];
 
 /**
  * backend
- * TODO REF turn update_and_broadcast into route
- * TODO REF '/mail/channel_call_invite' to be called server-side inside join_call?
- *      it is not useful to have it as a separate route if we only do it when joining a call.
  * TODO IMP nice-to-have? 1 'mail.rtc.session' per user session (tab/device)?
  *
  * frontend
- * TODO IMP updateVideoConfig, allow control of video (fps, resolution) by user,
+ * TODO IMP nice-to-have? updateVideoConfig, allow control of video (fps, resolution) by user,
  *      from a new option in the 'mail.RtcOptionList'
  * TODO IMP nice-to-have? "test microphone" in rtcConfigurationMenu, auto mutes, attach monitorAudio, audioVisual feedback,
  *      it needs a change in the normalization in threshold_processor.js (see comment L:27)
@@ -186,26 +183,21 @@ function factory(dependencies) {
 
         /**
          * @param {Object} param0
-         * @param {string} param0.rtcSessionId the Id of the 'mail.rtc_session'
+         * @param {string} param0.currentSessionId the Id of the 'mail.rtc_session'
                   of the current partner for the current call
-         * @param {mail.rtc_session[]} [param0.callees] the list of sessions to call
          * @param {Array<Object>} [param0.iceServers]
-         * @param {boolean} [param0.audio] audio boolean
-         * @param {boolean} [param0.video] video boolean
-         * @returns {boolean} true if the session is successfully initialized
+         * @param {boolean} [param0.startWithAudio]
+         * @param {boolean} [param0.startWithVideo]
          */
-        async initSession({ rtcSessionId, callees, iceServers, audio, video }) {
+        async initSession({ currentSessionId, iceServers, startWithAudio, startWithVideo }) {
             // Initializing a new session implies closing the current session.
             this.reset();
-            if (!this.isClientRtcCompatible) {
-                return false;
-            }
             this.update({
-                currentRtcSession: insert({ id: rtcSessionId }),
+                currentRtcSession: insert({ id: currentSessionId }),
                 iceServers: iceServers || this.iceServers,
             });
 
-            await this.updateLocalAudioTrack(audio);
+            await this.updateLocalAudioTrack(startWithAudio);
             if (navigator.permissions && navigator.permissions.query) {
                 try {
                     this._microphonePermissionStatus = this._microphonePermissionStatus || await navigator.permissions.query({ name: 'microphone' });
@@ -214,12 +206,12 @@ function factory(dependencies) {
                     // permission query or microphone status may not be supported by this browser, experimental feature.
                 }
             }
-            if (video) {
+            if (startWithVideo) {
                 await this._toggleVideoBroadcast({ type: 'user-video' });
             }
-            if (callees) {
-                console.log(`init session: ${callees.length} members in call`);
-                for (const session of callees) {
+            if (this.channel.rtcSessions) {
+                console.log(`init session: ${this.channel.rtcSessions.length} members in call`);
+                for (const session of this.channel.rtcSessions) {
                     if (session.peerToken === this.currentRtcSession.peerToken) {
                         continue;
                     }
@@ -227,7 +219,6 @@ function factory(dependencies) {
                     this._callPeer(session.peerToken);
                 }
             }
-            return true;
         }
 
         /**
@@ -237,9 +228,6 @@ function factory(dependencies) {
          * @private
          */
         reset() {
-            if (this._audioMonitor) {
-                this._audioMonitor.disconnect();
-            }
             if (this._peerConnections) {
                 const peerTokens = Object.keys(this._peerConnections);
                 this._notifyPeers(peerTokens, {
@@ -249,6 +237,8 @@ function factory(dependencies) {
                     this._removePeer(token);
                 }
             }
+
+            this._audioMonitor && this._audioMonitor.disconnect();
             this._microphonePermissionStatus && this._microphonePermissionStatus.removeEventListener('change', this._onMicrophonePermissionStatusChange);
             this.videoTrack && this.videoTrack.stop();
             this.audioTrack && this.audioTrack.stop();

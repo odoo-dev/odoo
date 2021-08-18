@@ -64,7 +64,7 @@ export class RtcController extends Component {
 
     async _onClickJoinCamera() {
         await this.thread.toggleCall({
-            video: true,
+            startWithVideo: true,
         });
     }
 

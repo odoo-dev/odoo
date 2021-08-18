@@ -733,18 +733,6 @@ function factory(dependencies) {
             this.fetchAndUpdateSuggestedRecipients();
         }
 
-        async inviteMembersToCall() {
-            if (this.model !== 'mail.channel') {
-                return;
-            }
-            await this.async(() => this.env.services.rpc({
-                route: '/mail/channel_call_invite',
-                params: {
-                    channel_id: this.id,
-                },
-            }));
-        }
-
         /**
          * Leaves the current call if there is one, joins the call if the user was
          * not yet in it.
@@ -764,9 +752,9 @@ function factory(dependencies) {
 
         /**
          * @param {Object} [param0]
-         * @param {boolean} [param0.video] whether or not to start the call with the video
+         * @param {boolean} [param0.startWithVideo] whether or not to start the call with the video
          */
-        async _joinCall({ video = false } = {}) {
+        async _joinCall({ startWithVideo = false } = {}) {
             if (this.model !== 'mail.channel') {
                 return;
             }
@@ -777,45 +765,30 @@ function factory(dependencies) {
                 });
                 return;
             }
+
             const { rtcSessions, iceServers, sessionId } = await this.async(() => this.env.services.rpc({
                 route: '/mail/channel_call_join',
                 params: {
                     channel_id: this.id,
                 },
             }, { shadow: true }));
-            this.updateRtcSessions(rtcSessions);
             this.update({
+                rtcSessions: insertAndReplace(rtcSessions.map(record => this.env.models['mail.rtc_session'].convertData(record))),
                 rtcRingingPartner: unlink(),
                 mailRtc: link(this.env.messaging.mailRtc),
             });
-            const rtcInitSuccess = await this.async(() => this.env.messaging.mailRtc.initSession({
-                rtcSessionId: sessionId,
-                callees: this.rtcSessions,
-                audio: true,
-                video,
+            await this.async(() => this.env.messaging.mailRtc.initSession({
+                currentSessionId: sessionId,
                 iceServers,
+                startWithAudio: true,
+                startWithVideo,
             }));
-            if (!rtcInitSuccess) {
-                this.env.services['notification'].notify({
-                    message: this.env._t("Failed to initialize the webRTC session, your browser version may not support webRTC"),
-                    type: 'danger',
-                });
-                this.update({
-                    mailRtc: unlink(),
-                });
-                return;
-            }
             this.env.messaging.soundEffects.channelJoin.play();
-            if (rtcSessions.length > 1) {
-                // we do not ring if the call is already populated
-                return;
-            }
-            if (!['chat', 'group'].includes(this.channel_type)) {
-                return;
-            }
-            await this.async(() => this.inviteMembersToCall());
         }
 
+        /**
+         * Notifies the server and does the cleanup of the current call.
+         */
         async leaveCall() {
             await this._leaveCall();
             this.endCall();
@@ -1268,19 +1241,6 @@ function factory(dependencies) {
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
-
-        /**
-         * @private
-         */
-        async _leaveCall() {
-            await this.async(() => this.env.services.rpc({
-                route: '/mail/channel_call_leave',
-                params: {
-                    channel_id: this.id,
-                    session_id: this.mailRtc && this.mailRtc.currentRtcSession.id,
-                },
-            }, { shadow: true }));
-        }
 
         /**
          * @override
@@ -1785,6 +1745,19 @@ function factory(dependencies) {
             if (this.isServerPinned === this.isPendingPinned) {
                 this.update({ isPendingPinned: clear() });
             }
+        }
+
+        /**
+         * @private
+         */
+        async _leaveCall() {
+            await this.async(() => this.env.services.rpc({
+                route: '/mail/channel_call_leave',
+                params: {
+                    channel_id: this.id,
+                    session_id: this.mailRtc && this.mailRtc.currentRtcSession.id,
+                },
+            }, { shadow: true }));
         }
 
         /**

@@ -41,7 +41,7 @@ export class ThreadViewTopbar extends Component {
 
     async _onClickCamera(ev) {
         await this.threadViewTopBar.thread.toggleCall({
-            video: true,
+            startWithVideo: true,
         });
     }
 
