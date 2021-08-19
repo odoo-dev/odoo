@@ -38,7 +38,7 @@
             </div>
 
             <!-- Buttons -->
-            <t t-if="state.showOverlay or !userSetting.isRtcCallViewerFullScreen">
+            <t t-if="rtcCallViewer.showOverlay or !userSetting.isRtcCallViewerFullScreen">
                 <t t-if="thread">
                     <div class="o_RtcCallViewer_control_overlay" t-att-class="{ 'o-floating': userSetting.isRtcCallViewerFullScreen }">
                         <div class="o_RtcCallViewer_control_overlay_container" t-on-mousemove="_onMouseMoveOverlay">
