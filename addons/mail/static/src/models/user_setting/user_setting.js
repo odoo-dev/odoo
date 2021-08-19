@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
+
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, one2one, one2many } from '@mail/model/model_field';
 import { create } from '@mail/model/model_field_command';
@@ -25,7 +27,7 @@ function factory(dependencies) {
          */
         _willDelete() {
             for (const timeoutId of Object.values(this._timeoutIds)) {
-                clearTimeout(timeoutId);
+                browser.clearTimeout(timeoutId);
             }
             window.removeEventListener('fullscreenchange', this._onFullScreenChange);
             return super._willDelete(...arguments);
@@ -238,8 +240,8 @@ function factory(dependencies) {
          * @param {any} key
          */
         _debounce(f, delay, key) {
-            this._timeoutIds[key] && clearTimeout(this._timeoutIds[key]);
-            this._timeoutIds[key] = setTimeout(() => {
+            this._timeoutIds[key] && browser.clearTimeout(this._timeoutIds[key]);
+            this._timeoutIds[key] = browser.setTimeout(() => {
                 if (!this.exists()) {
                     return;
                 }

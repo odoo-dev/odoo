@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
+
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, one2one } from '@mail/model/model_field';
 
@@ -32,7 +34,7 @@ function factory(dependencies) {
             this.update({
                 showOverlay: true,
             });
-            this._timeoutId && clearTimeout(this._timeoutId);
+            this._timeoutId && browser.clearTimeout(this._timeoutId);
         }
 
         //----------------------------------------------------------------------
@@ -43,8 +45,8 @@ function factory(dependencies) {
          * @private
          */
         _debounce(f, { delay = 0 } = {}) {
-            this._timeoutId && clearTimeout(this._timeoutId);
-            this._timeoutId = setTimeout(() => {
+            this._timeoutId && browser.clearTimeout(this._timeoutId);
+            this._timeoutId = browser.setTimeout(() => {
                 if (!this.exists()) {
                     return;
                 }

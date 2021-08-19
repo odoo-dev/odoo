@@ -19,7 +19,7 @@ export async function monitorAudioThresholds(track, processorOptions) {
     // cloning the track so it is not affected by the enabled change of the original track.
     const monitoredTrack = track.clone();
     monitoredTrack.enabled = true;
-    const stream = new MediaStream([monitoredTrack]);
+    const stream = new window.MediaStream([monitoredTrack]);
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) {
         throw 'missing audio context';
@@ -125,7 +125,7 @@ async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange,
     await audioContext.resume();
     // Safari does not support Worklet.addModule
     await audioContext.audioWorklet.addModule('mail/static/src/utils/media_monitoring/threshold_processor.js');
-    const thresholdProcessor = new AudioWorkletNode(audioContext, 'threshold-processor', {
+    const thresholdProcessor = new window.AudioWorkletNode(audioContext, 'threshold-processor', {
         processorOptions: {
             minimumActiveCycles,
             baseLevel,
@@ -155,7 +155,7 @@ async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange,
  * @returns {number} normalized [0...1] average quantity of the relevant frequencies
  */
 function _getFrquencyAverage(analyser, lowerFrequency, higherFrequency) {
-    const frequencies = new Uint8Array(analyser.frequencyBinCount);
+    const frequencies = new window.Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(frequencies);
     const sampleRate = analyser.context.sampleRate;
     const startIndex = _getFrequencyIndex(lowerFrequency, sampleRate, analyser.frequencyBinCount);

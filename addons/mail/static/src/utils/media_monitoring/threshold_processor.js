@@ -1,4 +1,4 @@
-class ThresholdProcessor extends AudioWorkletProcessor {
+class ThresholdProcessor extends globalThis.AudioWorkletProcessor {
     /**
      * @param {Object} param0 options
      * @param {Object} param0.processorOptions
@@ -112,4 +112,4 @@ function _getFrequencyIndex(frequency, sampleRate, binCount) {
     return index;
 }
 
-registerProcessor("threshold-processor", ThresholdProcessor);
+globalThis.registerProcessor("threshold-processor", ThresholdProcessor);

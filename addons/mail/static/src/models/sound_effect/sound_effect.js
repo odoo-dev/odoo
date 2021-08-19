@@ -21,7 +21,7 @@ function factory(dependencies) {
                 return;
             }
             if (!this.audio) {
-                const audio = new Audio();
+                const audio = new window.Audio();
                 const ext = audio.canPlayType("audio/ogg; codecs=vorbis") ? ".ogg" : ".mp3";
                 audio.src = this.path + this.filename + ext;
                 this.update({ audio });

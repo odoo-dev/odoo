@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
+
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, one2one } from '@mail/model/model_field';
 import { clear, insert } from '@mail/model/model_field_command';
@@ -101,7 +103,7 @@ function factory(dependencies) {
              * drift during loads on the main thread or when the tab is on the background
              * so the interval should not be too close to the server-side timeout.
              */
-            setInterval(() => {
+            browser.setInterval(() => {
                 this.currentRtcSession && this.currentRtcSession.pingServer();
             }, 120000); // 2 minutes
             return res;
@@ -198,9 +200,9 @@ function factory(dependencies) {
             });
 
             await this.updateLocalAudioTrack(startWithAudio);
-            if (navigator.permissions && navigator.permissions.query) {
+            if (browser.navigator.permissions && browser.navigator.permissions.query) {
                 try {
-                    this._microphonePermissionStatus = this._microphonePermissionStatus || await navigator.permissions.query({ name: 'microphone' });
+                    this._microphonePermissionStatus = this._microphonePermissionStatus || await browser.navigator.permissions.query({ name: 'microphone' });
                     this._microphonePermissionStatus.addEventListener('change', this._onMicrophonePermissionStatusChange);
                 } catch (e) {
                     // permission query or microphone status may not be supported by this browser, experimental feature.
@@ -306,7 +308,7 @@ function factory(dependencies) {
             if (audio) {
                 let audioTrack;
                 try {
-                    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: this.env.messaging.userSetting.getAudioConstraints() });
+                    const audioStream = await browser.navigator.mediaDevices.getUserMedia({ audio: this.env.messaging.userSetting.getAudioConstraints() });
                     audioTrack = audioStream.getAudioTracks()[0];
                     audioTrack.addEventListener('ended', async () => {
                         await this.async(() => this.updateLocalAudioTrack(false));
@@ -511,7 +513,7 @@ function factory(dependencies) {
          * @param {String} token
          */
         _createPeerConnection(token) {
-            const peerConnection = new RTCPeerConnection({ iceServers: this.iceServers });
+            const peerConnection = new window.RTCPeerConnection({ iceServers: this.iceServers });
             peerConnection.onicecandidate = async (event) => {
                 if (!event.candidate) {
                     return;
@@ -602,7 +604,7 @@ function factory(dependencies) {
                 // we already have an offer
                 return;
             }
-            const rtcSessionDescription = new RTCSessionDescription(sdp);
+            const rtcSessionDescription = new window.RTCSessionDescription(sdp);
             await peerConnection.setRemoteDescription(rtcSessionDescription);
         }
 
@@ -620,7 +622,7 @@ function factory(dependencies) {
                 console.groupEnd();
                 return;
             }
-            const rtcIceCandidate = new RTCIceCandidate(candidate);
+            const rtcIceCandidate = new window.RTCIceCandidate(candidate);
             try {
                 await peerConnection.addIceCandidate(rtcIceCandidate);
             } catch (error) {
@@ -651,7 +653,7 @@ function factory(dependencies) {
                 // we already have an offer
                 return;
             }
-            const rtcSessionDescription = new RTCSessionDescription(sdp);
+            const rtcSessionDescription = new window.RTCSessionDescription(sdp);
             await peerConnection.setRemoteDescription(rtcSessionDescription);
             await this._updateRemoteTrack(peerConnection, 'audio');
             await this._updateRemoteTrack(peerConnection, 'video');
@@ -761,10 +763,10 @@ function factory(dependencies) {
             }
             try {
                 if (type === 'user-video') {
-                    videoStream = await navigator.mediaDevices.getUserMedia({ video: this.videoConfig });
+                    videoStream = await browser.navigator.mediaDevices.getUserMedia({ video: this.videoConfig });
                 }
                 if (type === 'display') {
-                    videoStream = await navigator.mediaDevices.getDisplayMedia({ video: this.videoConfig });
+                    videoStream = await browser.navigator.mediaDevices.getDisplayMedia({ video: this.videoConfig });
                     this.env.messaging.soundEffects.screenSharing.play();
                 }
             } catch (e) {
@@ -851,7 +853,7 @@ function factory(dependencies) {
             if (this._fallBackTimeouts[token]) {
                 return;
             }
-            this._fallBackTimeouts[token] = setTimeout(async () => {
+            this._fallBackTimeouts[token] = browser.setTimeout(async () => {
                 delete this._fallBackTimeouts[token];
                 const peerConnection = this._peerConnections[token];
                 if (!peerConnection || !this.channel) {
@@ -895,7 +897,7 @@ function factory(dependencies) {
                 peerConnection.close();
             }
             delete this._peerConnections[token];
-            clearTimeout(this._fallBackTimeouts[token]);
+            browser.clearTimeout(this._fallBackTimeouts[token]);
             delete this._fallBackTimeouts[token];
 
             this._outGoingCallTokens.delete(token);
@@ -939,7 +941,7 @@ function factory(dependencies) {
             if (!rtcSession) {
                 return;
             }
-            const stream = new MediaStream();
+            const stream = new window.MediaStream();
             stream.addTrack(track);
 
             if (track.kind === 'audio') {
@@ -1017,7 +1019,7 @@ function factory(dependencies) {
                 return;
             }
             if (this._pushToTalkTimeoutId) {
-                clearTimeout(this._pushToTalkTimeoutId);
+                browser.clearTimeout(this._pushToTalkTimeoutId);
             }
             if (!this.currentRtcSession.isTalking && !this.currentRtcSession.isMuted) {
                 this.env.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
@@ -1042,7 +1044,7 @@ function factory(dependencies) {
             if (!this.currentRtcSession.isMuted) {
                 this.env.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
             }
-            this._pushToTalkTimeoutId = setTimeout(
+            this._pushToTalkTimeoutId = browser.setTimeout(
                 () => {
                     this._setSoundBroadcast(false);
                 },

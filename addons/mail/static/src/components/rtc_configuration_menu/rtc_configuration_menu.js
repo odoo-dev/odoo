@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
+
 import { useModels } from '@mail/component_hooks/use_models/use_models';
 import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 
@@ -21,7 +23,7 @@ export class RtcConfigurationMenu extends Component {
     }
 
     async willStart() {
-        this.state.userDevices = await navigator.mediaDevices.enumerateDevices();
+        this.state.userDevices = await browser.navigator.mediaDevices.enumerateDevices();
     }
 
     //--------------------------------------------------------------------------

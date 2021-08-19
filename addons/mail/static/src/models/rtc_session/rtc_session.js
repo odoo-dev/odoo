@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
+
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2one } from '@mail/model/model_field';
 import { clear, insert } from '@mail/model/model_field_command';
@@ -81,7 +83,7 @@ function factory(dependencies) {
          * restores the session to its default values
          */
         reset() {
-            this._timeoutId && clearTimeout(this._timeoutId);
+            this._timeoutId && browser.clearTimeout(this._timeoutId);
             this._removeAudio();
             this.removeVideo();
             this.update({
@@ -116,7 +118,7 @@ function factory(dependencies) {
          */
         setAudio({ audioStream, isMuted, isTalking }) {
             this._removeAudio();
-            const audioElement = this.audioElement || new Audio();
+            const audioElement = this.audioElement || new window.Audio();
             audioElement.srcObject = audioStream;
             audioElement.volume = this.partner && this.partner.volumeSetting ? this.partner.volumeSetting.volume : 1;
             audioElement.muted = this.env.messaging.mailRtc.currentRtcSession.isDeaf;
@@ -265,8 +267,8 @@ function factory(dependencies) {
          * @private
          */
         _debounce(f, delay) {
-            this._timeoutId && clearTimeout(this._timeoutId);
-            this._timeoutId = setTimeout(() => {
+            this._timeoutId && browser.clearTimeout(this._timeoutId);
+            this._timeoutId = browser.setTimeout(() => {
                 if (!this.exists()) {
                     return;
                 }
