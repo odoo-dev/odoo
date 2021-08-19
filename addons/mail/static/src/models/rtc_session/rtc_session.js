@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 
 import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one } from '@mail/model/model_field';
+import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, insert } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
@@ -228,6 +228,14 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {boolean}
+         */
+        _computeIsOwnSession() {
+            return this.env.messaging && this.env.messaging.currentPartner === this.partner;
+        }
+
+        /**
+         * @private
          * @returns {string}
          */
         _computeName() {
@@ -323,10 +331,11 @@ function factory(dependencies) {
             required: true,
         }),
         /**
-         * RTCPeerConnection.iceConnectionState
+         * State of the connection with this session, uses RTCPeerConnection.iceConnectionState
+         * once a peerConnection has been initialized.
          */
         connectionState: attr({
-            default: '',
+            default: 'Waiting for the peer to send a RTC offer',
         }),
         /**
          * Id of the record on the server.
@@ -339,6 +348,12 @@ function factory(dependencies) {
          */
         isCameraOn: attr({
             default: false,
+        }),
+        /**
+         * Determines if the session is a session of the current partner.
+         */
+        isOwnSession: attr({
+            compute: '_computeIsOwnSession',
         }),
         /**
          * Determines if the user is deafened, which means that all incoming
@@ -367,6 +382,15 @@ function factory(dependencies) {
          */
         isTalking: attr({
             default: false,
+        }),
+        /**
+         * If set, this session is the session of the current user and is in the active RTC call.
+         * This information is distinct from this.isOwnSession as there can be other
+         * sessions from other channels with the same partner (sessions opened from different
+         * tabs or devices).
+         */
+        mailRtc: one2one('mail.rtc', {
+            inverse: 'currentRtcSession',
         }),
         /**
          * Name of the session, based on the partner name if set.

@@ -217,6 +217,9 @@ function factory(dependencies) {
                     if (session.peerToken === this.currentRtcSession.peerToken) {
                         continue;
                     }
+                    session.update({
+                        connectionState: 'Initializing call, sending RTC offer',
+                    });
                     console.log('calling: ' + session.name);
                     this._callPeer(session.peerToken);
                 }
@@ -1101,7 +1104,9 @@ function factory(dependencies) {
         /**
          * String, peerToken of the current session used to identify him during the peer-to-peer transactions.
          */
-        currentRtcSession: one2one('mail.rtc_session'),
+        currentRtcSession: one2one('mail.rtc_session', {
+            inverse: 'mailRtc',
+        }),
         /**
          * True if we want to enable the video track of the current partner.
          */

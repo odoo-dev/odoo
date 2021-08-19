@@ -4,7 +4,7 @@
     <t t-name="mail.RtcCallParticipantCard" owl="1">
         <div class="o_RtcCallParticipantCard" t-att-class="{ 'o-is-talking': !props.isMinimized and rtcSession and rtcSession.isTalking and !rtcSession.isMuted }" t-on-contextmenu="_onContextMenu">
             <t t-if="rtcSession">
-                <t t-if="rtcSession.partner !== env.messaging.currentPartner">
+                <t t-if="!rtcSession.isOwnSession">
                     <i class="o_RtcCallParticipantCard_volumeMenuAnchor">
                         <Popover>
                             <i t-ref="volumeMenuAnchor"/>
@@ -56,12 +56,10 @@
                                 LIVE
                             </span>
                         </t>
-                        <t t-if="rtcSession.connectionState">
-                            <t t-if="rtcSession.connectionState and !['connected', 'completed'].includes(rtcSession.connectionState) and rtcSession.channel.mailRtc">
-                                <span class="o_RtcCallParticipantCard_info_iconWrapper o_RtcCallParticipantCard_video_info_element" t-att-title="rtcSession.connectionState">
-                                    <i class="fa fa-lg fa-signal o_RtcCallParticipantCard_member_signal"/>
-                                </span>
-                            </t>
+                        <t t-if="rtcSession.channel.mailRtc and !rtcSession.mailRtc and !['connected', 'completed'].includes(rtcSession.connectionState)">
+                            <span class="o_RtcCallParticipantCard_info_iconWrapper o_RtcCallParticipantCard_video_info_element" t-att-title="rtcSession.connectionState">
+                                <i class="fa fa-lg fa-signal o_RtcCallParticipantCard_member_signal"/>
+                            </span>
                         </t>
                     </div>
                 </div>
