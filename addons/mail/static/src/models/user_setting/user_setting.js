@@ -18,7 +18,7 @@ function factory(dependencies) {
             this._timeoutIds = {};
             this._loadLocalSettings();
             this._onFullScreenChange = this._onFullScreenChange.bind(this);
-            window.addEventListener('fullscreenchange', this._onFullScreenChange);
+            browser.addEventListener('fullscreenchange', this._onFullScreenChange);
             return res;
         }
 
@@ -29,7 +29,7 @@ function factory(dependencies) {
             for (const timeoutId of Object.values(this._timeoutIds)) {
                 browser.clearTimeout(timeoutId);
             }
-            window.removeEventListener('fullscreenchange', this._onFullScreenChange);
+            browser.removeEventListener('fullscreenchange', this._onFullScreenChange);
             return super._willDelete(...arguments);
         }
 

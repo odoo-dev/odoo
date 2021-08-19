@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
+
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, one2one } from '@mail/model/model_field';
 
@@ -14,8 +16,8 @@ function factory(dependencies) {
             const res = super._created(...arguments);
             this._onKeyDown = this._onKeyDown.bind(this);
             this._onKeyUp = this._onKeyUp.bind(this);
-            window.addEventListener('keydown', this._onKeyDown);
-            window.addEventListener('keyup', this._onKeyUp);
+            browser.addEventListener('keydown', this._onKeyDown);
+            browser.addEventListener('keyup', this._onKeyUp);
             return res;
         }
 
@@ -23,8 +25,8 @@ function factory(dependencies) {
          * @override
          */
         _willDelete() {
-            window.removeEventListener('keydown', this._onKeyDown);
-            window.removeEventListener('keyup', this._onKeyUp);
+            browser.removeEventListener('keydown', this._onKeyDown);
+            browser.removeEventListener('keyup', this._onKeyUp);
             return super._willDelete(...arguments);
         }
 

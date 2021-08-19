@@ -89,9 +89,9 @@ function factory(dependencies) {
             this._onMicrophonePermissionStatusChange = this._onMicrophonePermissionStatusChange.bind(this);
             this._onKeyDown = this._onKeyDown.bind(this);
             this._onKeyUp = this._onKeyUp.bind(this);
-            window.addEventListener('keydown', this._onKeyDown);
-            window.addEventListener('keyup', this._onKeyUp);
-            window.addEventListener('beforeunload', async () => {
+            browser.addEventListener('keydown', this._onKeyDown);
+            browser.addEventListener('keyup', this._onKeyUp);
+            browser.addEventListener('beforeunload', async () => {
                 this.channel && await this.channel.leaveCall();
             });
 
@@ -113,8 +113,8 @@ function factory(dependencies) {
          * @override
          */
         async _willDelete() {
-            window.removeEventListener('keydown', this._onKeyDown);
-            window.removeEventListener('keyup', this._onKeyUp);
+            browser.removeEventListener('keydown', this._onKeyDown);
+            browser.removeEventListener('keyup', this._onKeyUp);
             return super._willDelete(...arguments);
         }
 
