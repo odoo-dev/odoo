@@ -40,6 +40,7 @@ export class RtcLayoutMenu extends Component {
 
     /**
      * @private
+     * @param {MouseEvent} ev
      */
     _onClickFilter(ev) {
         ev.preventDefault();
@@ -59,6 +60,7 @@ export class RtcLayoutMenu extends Component {
 
     /**
      * @private
+     * @param {MouseEvent} ev
      */
     _onClickLayout(ev) {
         ev.preventDefault();

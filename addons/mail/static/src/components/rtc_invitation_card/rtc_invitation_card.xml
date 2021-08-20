@@ -13,18 +13,18 @@
                     <span class="o_RtcInvitationCard_partner_info_text">Incoming Call...</span>
                 </div>
             </t>
-            <div class="o_RtcInvitationCard_buttons">
-                <div class="o_RtcInvitationCard_buttons_button o_RtcInvitationCard_buttons_refuse"
+            <div class="o_RtcInvitationCard_buttonList">
+                <div class="o_RtcInvitationCard_buttonList_button o_RtcInvitationCard_buttonList_refuse"
                     aria-label="Refuse"
                     title="Refuse"
                     t-on-click="_onClickRefuse">
-                    <i class="o_RtcInvitationCard_buttons_button_icon fa fa-lg fa-times"/>
+                    <i class="o_RtcInvitationCard_buttonList_button_icon fa fa-lg fa-times"/>
                 </div>
-                <div class="o_RtcInvitationCard_buttons_button o_RtcInvitationCard_buttons_accept"
+                <div class="o_RtcInvitationCard_buttonList_button o_RtcInvitationCard_buttonList_accept"
                     aria-label="Accept"
                     title="Accept"
                     t-on-click="_onClickAccept">
-                    <i class="o_RtcInvitationCard_buttons_button_icon fa fa-lg fa-phone"/>
+                    <i class="o_RtcInvitationCard_buttonList_button_icon fa fa-lg fa-phone"/>
                 </div>
             </div>
         </div>

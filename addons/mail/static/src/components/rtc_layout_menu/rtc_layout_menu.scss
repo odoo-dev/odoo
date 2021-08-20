@@ -8,6 +8,10 @@
     padding: map-get($spacers, 1);
 }
 
+.o_RtcLayoutMenu_input_text  {
+    @include text-truncate();
+}
+
 .o_RtcLayoutMenu_separator {
     width: 100%;
 }
@@ -19,25 +23,17 @@
     font-size: 1.3em;
 }
 
-.o_RtcLayoutMenu_input_text  {
-    @include text-truncate();
+.o_RtcLayoutMenu_radio_icon {
+    margin-inline-end: map-get($spacers, 1);
 }
 
 .o_RtcLayoutMenu_radio_input {
     margin: map-get($spacers, 3);
 }
 
-.o_RtcLayoutMenu_radio_icon {
-    margin-inline-end: map-get($spacers, 1);
-}
-
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------
-
-.o_RtcLayoutMenu_separator {
-    background-color: $border-color;
-}
 
 .o_RtcLayoutMenu_radio {
     cursor: pointer;
@@ -52,4 +48,8 @@
         background-color: gray('200');
         box-shadow: 0px 0px 1px 1px gray('400') inset;
     }
+}
+
+.o_RtcLayoutMenu_separator {
+    background-color: $border-color;
 }

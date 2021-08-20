@@ -44,19 +44,6 @@ function factory(dependencies) {
         /**
          * @private
          */
-        _debounce(f, { delay = 0 } = {}) {
-            this._timeoutId && browser.clearTimeout(this._timeoutId);
-            this._timeoutId = browser.setTimeout(() => {
-                if (!this.exists()) {
-                    return;
-                }
-                f();
-            }, delay);
-        }
-
-        /**
-         * @private
-         */
         _computeAspectRatio() {
             const rtcAspectRatio = this.env.messaging.mailRtc.videoConfig && this.env.messaging.mailRtc.videoConfig.ideal;
             const aspectRatio = rtcAspectRatio || 16 / 9;
@@ -107,6 +94,19 @@ function factory(dependencies) {
                 return 'spotlight';
             }
             return this.env.messaging.userSetting.rtcLayout;
+        }
+
+        /**
+         * @private
+         */
+        _debounce(f, { delay = 0 } = {}) {
+            this._timeoutId && browser.clearTimeout(this._timeoutId);
+            this._timeoutId = browser.setTimeout(() => {
+                if (!this.exists()) {
+                    return;
+                }
+                f();
+            }, delay);
         }
 
         /**

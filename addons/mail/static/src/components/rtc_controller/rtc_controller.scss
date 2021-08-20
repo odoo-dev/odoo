@@ -7,12 +7,6 @@
     justify-content: space-between;
 }
 
-.o_RtcController_buttons {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
 .o_RtcController_button {
     margin: map-get($spacers, 1);
     padding: map-get($spacers, 4);
@@ -26,6 +20,12 @@
     justify-content: center;
     flex-direction: column;
     align-items: center;
+}
+
+.o_RtcController_buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .o-small {
@@ -63,19 +63,19 @@
     }
 }
 
-.o_RtcController_call_button {
+.o_RtcController_callToggle {
     background-color: theme-color('success');
 
     &:hover {
         background-color: darken(theme-color('success'), 20%);
     }
-}
 
-.o_RtcController_call_button.o-active {
-    background-color: theme-color('danger');
+    &.o-active {
+        background-color: theme-color('danger');
 
-    &:hover {
-        background-color: darken(theme-color('danger'), 20%);
+        &:hover {
+            background-color: darken(theme-color('danger'), 20%);
+        }
     }
 }
 

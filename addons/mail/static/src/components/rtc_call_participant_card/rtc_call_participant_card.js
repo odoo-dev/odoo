@@ -48,7 +48,7 @@ export class RtcCallParticipantCard extends Component {
 
     /**
      * @private
-     * @param {Event} ev
+     * @param {MouseEvent} ev
      */
     async _onClickVideo(ev) {
         ev.stopPropagation();

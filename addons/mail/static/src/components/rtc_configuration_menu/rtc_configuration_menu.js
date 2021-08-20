@@ -31,14 +31,17 @@ export class RtcConfigurationMenu extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * @returns {mail.configuration_menu}
+     */
+    get rtcConfigurationMenu() {
+        return this.env.messaging && this.env.messaging.userSetting.rtcConfigurationMenu;
+    }
+
+    /**
      * @returns {mail.user_setting}
      */
     get userSetting() {
         return this.env.messaging && this.env.messaging.userSetting;
-    }
-
-    get rtcConfigurationMenu() {
-        return this.env.messaging && this.env.messaging.userSetting.rtcConfigurationMenu;
     }
 
     //--------------------------------------------------------------------------
@@ -55,8 +58,9 @@ export class RtcConfigurationMenu extends Component {
 
     /**
      * @private
+     * @param {Event} ev
      */
-    _onChangePushToTalk() {
+    _onChangePushToTalk(ev) {
         this.rtcConfigurationMenu.onChangePushToTalk();
     }
 
@@ -78,6 +82,7 @@ export class RtcConfigurationMenu extends Component {
 
     /**
      * @private
+     * @param {MouseEvent} ev
      */
     _onCLickRegisterKeyButton() {
         this.rtcConfigurationMenu.onCLickRegisterKeyButton();

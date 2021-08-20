@@ -26,21 +26,20 @@
     }
 }
 
-.o_RtcCallViewer_video_main_display {
-    max-height: 100%;
-    display: flex;
-    flex-grow: 1;
-}
-
-.o_RtcCallViewer_video_container {
-    overflow: hidden;
-    height: 100%;
+.o_RtcCallViewer_controls {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    padding-bottom: map-get($spacers, 1);
+
+    &.o-floating {
+        position: absolute;
+        padding-bottom: map-get($spacers, 3);
+        bottom: 0;
+    }
 }
 
-.o_RtcCallViewer_video_multi_display {
+.o_RtcCallViewer_grid {
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -62,7 +61,7 @@
     }
 }
 
-.o_RtcCallViewer_videoContainer_tile {
+.o_RtcCallViewer_grid_tile {
     width: 100%;
     aspect-ratio: 16/9;
 }
@@ -71,24 +70,25 @@
     width: 100%;
 }
 
-.o-dynamic-sizing .o_RtcCallViewer_videoContainer_callParticipant {
+.o_RtcCallViewer_mainParticipantContainer {
+    max-height: 100%;
+    display: flex;
+    flex-grow: 1;
+}
+
+.o_RtcCallViewer_participantCard.o-dynamic-sizing {
     width: var(--width);
     height: var(--height);
     min-width: var(--width);
     min-height: var(--height);
 }
 
-.o_RtcCallViewer_control_overlay {
+.o_RtcCallViewer_participantContainer {
+    overflow: hidden;
+    height: 100%;
     width: 100%;
     display: flex;
-    justify-content: center;
-    padding-bottom: map-get($spacers, 1);
-
-    &.o-floating {
-        position: absolute;
-        padding-bottom: map-get($spacers, 3);
-        bottom: 0;
-    }
+    justify-content: space-between;
 }
 
 // ------------------------------------------------------------------
@@ -98,4 +98,3 @@
 .o_RtcCallViewer {
     background-color: black;
 }
-

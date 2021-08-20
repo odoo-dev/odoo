@@ -31,15 +31,27 @@ export class RtcInvitationCard extends Component {
     // Handlers
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     async _onClickAccept(ev) {
         this.thread.open();
         await this.thread.toggleCall();
     }
 
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onCLickAvatar(ev) {
         this.thread.open();
     }
 
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onClickRefuse(ev) {
         this.thread.leaveCall();
     }

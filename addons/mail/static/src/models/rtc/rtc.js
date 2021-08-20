@@ -17,6 +17,7 @@ const TRANSCEIVER_ORDER = ['audio', 'video'];
 /**
  * backend
  * TODO IMP nice-to-have? 1 'mail.rtc.session' per user session (tab/device)?
+ *      Should "just" be removing old_sessions._disconnect() when joining a call.
  *
  * frontend
  * TODO IMP nice-to-have? updateVideoConfig, allow control of video (fps, resolution) by user,
@@ -27,9 +28,8 @@ const TRANSCEIVER_ORDER = ['audio', 'video'];
  *      requires small ref TRANSCEIVER_ORDER to support an arbitrary amount of transceivers:
  *      const TRANSCEIVER_ORDER = [{ trackKind: 'audio', name: 'audio'}, { trackKind: 'video', name: 'user-video' }, { trackKind: 'video', name: 'display' }];
  *      get index with TRANSCEIVER_ORDER.findIndex(o => o.name === 'user-video');
- * TODO REF html/scss classes naming (bad/inconsistent/outdated names, wrong order)
- *      for example, rtc_call_participant_card still has "video" css classes.
  * TODO REF rename ringing/invitation into one consistent name
+ * TODO REF move handlers in models
  */
 
 function factory(dependencies) {
@@ -282,19 +282,19 @@ function factory(dependencies) {
         }
 
         /**
+         * toggles screen broadcasting to peers.
+         */
+        async toggleScreenShare() {
+            this._toggleVideoBroadcast({ type: 'display' });
+        }
+
+        /**
          * Toggles user video (eg: webcam) broadcasting to peers.
          * TODO maybe directly expose toggleVideoBroadcast(), to consider when
          * refactoring for simultaneous userVideo/display.
          */
         async toggleUserVideo() {
             this._toggleVideoBroadcast({ type: 'user-video' });
-        }
-
-        /**
-         * toggles screen broadcasting to peers.
-         */
-        async toggleScreenShare() {
-            this._toggleVideoBroadcast({ type: 'display' });
         }
 
         /**
@@ -340,6 +340,15 @@ function factory(dependencies) {
         }
 
         /**
+         * @param {MediaTrackConstraints Object} constraints
+         */
+        updateVideoConfig(constraints) {
+            const videoConfig = Object.assign(this.videoConfig, constraints);
+            this.update({ videoConfig });
+            this.videoTrack && this.videoTrack.applyConstraints(this.videoConfig);
+        }
+
+        /**
          * Updates the way broadcast of the local audio track is handled,
          * attaches an audio monitor for voice activation if necessary.
          */
@@ -371,123 +380,9 @@ function factory(dependencies) {
             }
         }
 
-        /**
-         * @param {MediaTrackConstraints Object} constraints
-         */
-        updateVideoConfig(constraints) {
-            const videoConfig = Object.assign(this.videoConfig, constraints);
-            this.update({ videoConfig });
-            this.videoTrack && this.videoTrack.applyConstraints(this.videoConfig);
-        }
-
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
-
-        /**
-         * @private
-         * @param {Object} trackOptions
-         */
-        async _toggleVideoBroadcast(trackOptions) {
-            if (!this.channel) {
-                return;
-            }
-            await this._toggleLocalVideoTrack(trackOptions);
-            for (const peerConnection of Object.values(this._peerConnections)) {
-                await this._updateRemoteTrack(peerConnection, 'video', { remove: !this.videoTrack });
-            }
-            const isScreenSharingOn = !!this.sendDisplay;
-            const isCameraOn = !!this.sendUserVideo;
-            this.currentRtcSession.updateAndBroadcast({
-                isScreenSharingOn,
-                isCameraOn,
-            });
-            if (isScreenSharingOn || isCameraOn) {
-                // the peer already gets notified through RTC transaction.
-                return;
-            }
-            this._notifyPeers(Object.keys(this._peerConnections), {
-                event: 'trackChange',
-                type: 'peerToPeer',
-                payload: {
-                    type: 'video',
-                    state: { isSendingVideo: false },
-                },
-            });
-        }
-
-        /**
-         * @private
-         * @param {Object} param0
-         * @param {String} param0.type 'user-video' (eg: webcam) or 'display' (eg: screen sharing)
-         * @param {boolean} [param0.force]
-         */
-        async _toggleLocalVideoTrack({ type, force }) {
-            if (type === 'user-video') {
-                const sendUserVideo = force !== undefined ? force : !this.sendUserVideo;
-                await this._updateLocalVideoTrack(type, sendUserVideo);
-            }
-            if (type === 'display') {
-                const sendDisplay = force !== undefined ? force : !this.sendDisplay;
-                await this._updateLocalVideoTrack(type, sendDisplay);
-            }
-            if (!this.videoTrack) {
-                if (this.env.messaging.focusedRtcSession === this.currentRtcSession) {
-                    this.env.messaging.toggleFocusedRtcSession();
-                }
-                this.currentRtcSession.removeVideo();
-            } else {
-                this._updateExternalSessionTrack(this.videoTrack, this.currentRtcSession.peerToken);
-            }
-        }
-
-        /**
-         * Updates the track that is broadcasted to the RTCPeerConnection.
-         * This will start new transaction by triggering a negotiationneeded event
-         * on the peerConnection given as parameter.
-         *
-         * negotiationneeded -> offer -> answer -> ...
-         *
-         * @private
-         * @param {RTCPeerConnection} peerConnection
-         * @param {String} trackKind
-         * @param {Object} [param2]
-         * @param {boolean} [param2.initTransceiver]
-         * @param {Boolean} [param2.remove]
-         */
-        async _updateRemoteTrack(peerConnection, trackKind, { initTransceiver, remove } = {}) {
-            const track = trackKind === 'audio' ? this.audioTrack : this.videoTrack;
-            let transceiver;
-            if (initTransceiver) {
-                transceiver = peerConnection.addTransceiver(trackKind);
-                transceiver.direction = 'recvonly';
-            } else {
-                transceiver = this._getTransceiver(peerConnection, trackKind);
-            }
-
-            if (remove) {
-                try {
-                    await transceiver.sender.replaceTrack(null);
-                    transceiver.direction = 'recvonly';
-                } catch (e) {
-                    // ignored, the transceiver is probably already removed
-                    console.groupCollapsed('=== ERROR: remove transceiver track ===');
-                    console.trace(e);
-                    console.groupEnd();
-                }
-            }
-            if (track) {
-                try {
-                    await transceiver.sender.replaceTrack(track);
-                    transceiver.direction = 'sendrecv';
-                } catch (e) {
-                    // ignored, the track is probably already on the peerConnection.
-                    console.groupCollapsed('=== ERROR: replace transceiver track ===');
-                    console.trace(e);
-                    console.groupEnd();
-                }
-            }
-        }
 
         /**
          * @private
@@ -699,106 +594,6 @@ function factory(dependencies) {
         }
 
         /**
-         * Updates the "isTalking" state of the current user and sets the
-         * enabled state of its audio track accordingly.
-         *
-         * @private
-         * @param {boolean} isTalking
-         */
-        async _setSoundBroadcast(isTalking) {
-            if (!this.currentRtcSession) {
-                return;
-            }
-            if (isTalking === this.currentRtcSession.isTalking) {
-                return;
-            }
-            this.currentRtcSession.update({ isTalking });
-            if (!this.currentRtcSession.isMuted) {
-                await this._updateLocalAudioTrackEnabledState();
-            }
-        }
-
-        /**
-         * Sets the enabled property of the local audio track based on the
-         * current session state. And notifies peers of the new audio state.
-         *
-         * @private
-         */
-        async _updateLocalAudioTrackEnabledState() {
-            if (!this.audioTrack) {
-                return;
-            }
-            this.audioTrack.enabled = !this.currentRtcSession.isMuted && this.currentRtcSession.isTalking;
-            await this._notifyPeers(Object.keys(this._peerConnections), {
-                event: 'trackChange',
-                type: 'peerToPeer',
-                payload: {
-                    type: 'audio',
-                    state: {
-                        isTalking: this.currentRtcSession.isTalking && !this.currentRtcSession.isMuted,
-                        isMuted: this.currentRtcSession.isMuted,
-                        isDeaf: this.currentRtcSession.isDeaf,
-                    },
-                },
-            });
-        }
-
-        /**
-         * @private
-         * @param {String} type 'user-video' or 'display'
-         * @param {boolean} activateVideo true if we want to activate the video
-         */
-        async _updateLocalVideoTrack(type, activateVideo) {
-            if (this.videoTrack) {
-                this.videoTrack.stop();
-            }
-            this.update({
-                sendDisplay: false,
-                sendUserVideo: false,
-                videoTrack: clear(),
-            });
-            let videoStream;
-            if (!activateVideo) {
-                if (type === 'display') {
-                    this.env.messaging.soundEffects.screenSharing.play();
-                }
-                return;
-            }
-            try {
-                if (type === 'user-video') {
-                    videoStream = await browser.navigator.mediaDevices.getUserMedia({ video: this.videoConfig });
-                }
-                if (type === 'display') {
-                    videoStream = await browser.navigator.mediaDevices.getDisplayMedia({ video: this.videoConfig });
-                    this.env.messaging.soundEffects.screenSharing.play();
-                }
-            } catch (e) {
-                this.env.services['notification'].notify({
-                    message: _.str.sprintf(
-                        this.env._t(`"%s" requires "%s" access`),
-                        window.location.host,
-                        type === 'user-video' ? 'camera' : 'display',
-                    ),
-                    type: 'warning',
-                });
-                return;
-            }
-            const videoTrack = videoStream ? videoStream.getVideoTracks()[0] : undefined;
-            if (videoTrack) {
-                videoTrack.addEventListener('ended', async () => {
-                    await this.async(() =>
-                        this._toggleLocalVideoTrack({ force: false, type })
-                    );
-                });
-            }
-            this.update({
-                videoTrack,
-                sendUserVideo: type === 'user-video' && !!videoTrack,
-                sendDisplay: type === 'display' && !!videoTrack,
-            });
-        }
-
-        /**
          * @private
          * @param {String[]} targetToken
          * @param {Object} param1
@@ -933,6 +728,83 @@ function factory(dependencies) {
         }
 
         /**
+         * Updates the "isTalking" state of the current user and sets the
+         * enabled state of its audio track accordingly.
+         *
+         * @private
+         * @param {boolean} isTalking
+         */
+        async _setSoundBroadcast(isTalking) {
+            if (!this.currentRtcSession) {
+                return;
+            }
+            if (isTalking === this.currentRtcSession.isTalking) {
+                return;
+            }
+            this.currentRtcSession.update({ isTalking });
+            if (!this.currentRtcSession.isMuted) {
+                await this._updateLocalAudioTrackEnabledState();
+            }
+        }
+
+        /**
+         * @private
+         * @param {Object} trackOptions
+         */
+        async _toggleVideoBroadcast(trackOptions) {
+            if (!this.channel) {
+                return;
+            }
+            await this._toggleLocalVideoTrack(trackOptions);
+            for (const peerConnection of Object.values(this._peerConnections)) {
+                await this._updateRemoteTrack(peerConnection, 'video', { remove: !this.videoTrack });
+            }
+            const isScreenSharingOn = !!this.sendDisplay;
+            const isCameraOn = !!this.sendUserVideo;
+            this.currentRtcSession.updateAndBroadcast({
+                isScreenSharingOn,
+                isCameraOn,
+            });
+            if (isScreenSharingOn || isCameraOn) {
+                // the peer already gets notified through RTC transaction.
+                return;
+            }
+            this._notifyPeers(Object.keys(this._peerConnections), {
+                event: 'trackChange',
+                type: 'peerToPeer',
+                payload: {
+                    type: 'video',
+                    state: { isSendingVideo: false },
+                },
+            });
+        }
+
+        /**
+         * @private
+         * @param {Object} param0
+         * @param {String} param0.type 'user-video' (eg: webcam) or 'display' (eg: screen sharing)
+         * @param {boolean} [param0.force]
+         */
+        async _toggleLocalVideoTrack({ type, force }) {
+            if (type === 'user-video') {
+                const sendUserVideo = force !== undefined ? force : !this.sendUserVideo;
+                await this._updateLocalVideoTrack(type, sendUserVideo);
+            }
+            if (type === 'display') {
+                const sendDisplay = force !== undefined ? force : !this.sendDisplay;
+                await this._updateLocalVideoTrack(type, sendDisplay);
+            }
+            if (!this.videoTrack) {
+                if (this.env.messaging.focusedRtcSession === this.currentRtcSession) {
+                    this.env.messaging.toggleFocusedRtcSession();
+                }
+                this.currentRtcSession.removeVideo();
+            } else {
+                this._updateExternalSessionTrack(this.videoTrack, this.currentRtcSession.peerToken);
+            }
+        }
+
+        /**
          * Updates the mail.rtc_session associated to the token with a new track.
          *
          * @private
@@ -959,6 +831,134 @@ function factory(dependencies) {
                 rtcSession.update({
                     videoStream: stream,
                 });
+            }
+        }
+
+        /**
+         * Sets the enabled property of the local audio track based on the
+         * current session state. And notifies peers of the new audio state.
+         *
+         * @private
+         */
+        async _updateLocalAudioTrackEnabledState() {
+            if (!this.audioTrack) {
+                return;
+            }
+            this.audioTrack.enabled = !this.currentRtcSession.isMuted && this.currentRtcSession.isTalking;
+            await this._notifyPeers(Object.keys(this._peerConnections), {
+                event: 'trackChange',
+                type: 'peerToPeer',
+                payload: {
+                    type: 'audio',
+                    state: {
+                        isTalking: this.currentRtcSession.isTalking && !this.currentRtcSession.isMuted,
+                        isMuted: this.currentRtcSession.isMuted,
+                        isDeaf: this.currentRtcSession.isDeaf,
+                    },
+                },
+            });
+        }
+
+        /**
+         * @private
+         * @param {String} type 'user-video' or 'display'
+         * @param {boolean} activateVideo true if we want to activate the video
+         */
+        async _updateLocalVideoTrack(type, activateVideo) {
+            if (this.videoTrack) {
+                this.videoTrack.stop();
+            }
+            this.update({
+                sendDisplay: false,
+                sendUserVideo: false,
+                videoTrack: clear(),
+            });
+            let videoStream;
+            if (!activateVideo) {
+                if (type === 'display') {
+                    this.env.messaging.soundEffects.screenSharing.play();
+                }
+                return;
+            }
+            try {
+                if (type === 'user-video') {
+                    videoStream = await browser.navigator.mediaDevices.getUserMedia({ video: this.videoConfig });
+                }
+                if (type === 'display') {
+                    videoStream = await browser.navigator.mediaDevices.getDisplayMedia({ video: this.videoConfig });
+                    this.env.messaging.soundEffects.screenSharing.play();
+                }
+            } catch (e) {
+                this.env.services['notification'].notify({
+                    message: _.str.sprintf(
+                        this.env._t(`"%s" requires "%s" access`),
+                        window.location.host,
+                        type === 'user-video' ? 'camera' : 'display',
+                    ),
+                    type: 'warning',
+                });
+                return;
+            }
+            const videoTrack = videoStream ? videoStream.getVideoTracks()[0] : undefined;
+            if (videoTrack) {
+                videoTrack.addEventListener('ended', async () => {
+                    await this.async(() =>
+                        this._toggleLocalVideoTrack({ force: false, type })
+                    );
+                });
+            }
+            this.update({
+                videoTrack,
+                sendUserVideo: type === 'user-video' && !!videoTrack,
+                sendDisplay: type === 'display' && !!videoTrack,
+            });
+        }
+
+        /**
+         * Updates the track that is broadcasted to the RTCPeerConnection.
+         * This will start new transaction by triggering a negotiationneeded event
+         * on the peerConnection given as parameter.
+         *
+         * negotiationneeded -> offer -> answer -> ...
+         *
+         * @private
+         * @param {RTCPeerConnection} peerConnection
+         * @param {String} trackKind
+         * @param {Object} [param2]
+         * @param {boolean} [param2.initTransceiver]
+         * @param {Boolean} [param2.remove]
+         */
+        async _updateRemoteTrack(peerConnection, trackKind, { initTransceiver, remove } = {}) {
+            const track = trackKind === 'audio' ? this.audioTrack : this.videoTrack;
+            let transceiver;
+            if (initTransceiver) {
+                transceiver = peerConnection.addTransceiver(trackKind);
+                transceiver.direction = 'recvonly';
+            } else {
+                transceiver = this._getTransceiver(peerConnection, trackKind);
+            }
+
+            if (remove) {
+                try {
+                    await transceiver.sender.replaceTrack(null);
+                    transceiver.direction = 'recvonly';
+                } catch (e) {
+                    // ignored, the transceiver is probably already removed
+                    console.groupCollapsed('=== ERROR: remove transceiver track ===');
+                    console.trace(e);
+                    console.groupEnd();
+                }
+            }
+            if (track) {
+                try {
+                    await transceiver.sender.replaceTrack(track);
+                    transceiver.direction = 'sendrecv';
+                } catch (e) {
+                    // ignored, the track is probably already on the peerConnection.
+                    console.groupCollapsed('=== ERROR: replace transceiver track ===');
+                    console.trace(e);
+                    console.groupEnd();
+                }
             }
         }
 
@@ -1072,6 +1072,16 @@ function factory(dependencies) {
     }
     Rtc.fields = {
         /**
+         * audio MediaStreamTrack of the current user
+         */
+        audioTrack: attr(),
+        /**
+         * The channel that is hosting the current RTC call.
+         */
+        channel: one2one('mail.thread', {
+            inverse: 'mailRtc',
+        }),
+        /**
          * connection state for each peerToken
          * { token: RTCPeerConnection.iceConnectionState<String> }
          * can be:
@@ -1079,6 +1089,12 @@ function factory(dependencies) {
          */
         connectionStates: attr({
             default: {},
+        }),
+        /**
+         * String, peerToken of the current session used to identify him during the peer-to-peer transactions.
+         */
+        currentRtcSession: one2one('mail.rtc_session', {
+            inverse: 'mailRtc',
         }),
         /**
          * true if the browser supports webRTC
@@ -1102,12 +1118,6 @@ function factory(dependencies) {
             ],
         }),
         /**
-         * String, peerToken of the current session used to identify him during the peer-to-peer transactions.
-         */
-        currentRtcSession: one2one('mail.rtc_session', {
-            inverse: 'mailRtc',
-        }),
-        /**
          * True if we want to enable the video track of the current partner.
          */
         sendUserVideo: attr({
@@ -1119,20 +1129,6 @@ function factory(dependencies) {
         sendDisplay: attr({
             default: false,
         }),
-        /**
-         * The channel that is hosting the current RTC call.
-         */
-        channel: one2one('mail.thread', {
-            inverse: 'mailRtc',
-        }),
-        /**
-         * audio MediaStreamTrack of the current user
-         */
-        audioTrack: attr(),
-        /**
-         * video MediaStreamTrack of the current user
-         */
-        videoTrack: attr(),
         /**
          * MediaTrackConstraints
          */
@@ -1146,6 +1142,10 @@ function factory(dependencies) {
                 },
             },
         }),
+        /**
+         * video MediaStreamTrack of the current user
+         */
+        videoTrack: attr(),
     };
 
     Rtc.modelName = 'mail.rtc';

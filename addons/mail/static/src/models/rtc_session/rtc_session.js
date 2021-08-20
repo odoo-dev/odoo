@@ -69,7 +69,7 @@ function factory(dependencies) {
          * to prevent garbage collection.
          */
         async pingServer() {
-            if (this.partner !== this.env.messaging.currentPartner) {
+            if (!this.mailRtc) {
                 return;
             }
             await await this.async(() => this.env.services.rpc({
@@ -135,21 +135,19 @@ function factory(dependencies) {
          * @param {number} volume
          */
         setVolume(volume) {
+            /**
+             * Manually updating the volume field as it will not update based on
+             * the change of the volume property of the audioElement alone.
+             */
+            this.update({ volume });
             if (this.audioElement) {
                 this.audioElement.volume = volume;
-                this.update({ audioElement: this.audioElement });
             }
-            if (!this.partner || this.partner === this.env.messaging.currentPartner) {
+            if (!this.partner || this.isOwnSession) {
                 return;
             }
             if (this.partner.volumeSetting) {
                 this.partner.volumeSetting.update({ volume });
-            } else {
-                /**
-                 * Manually updating the volume field as it will not update based on
-                 * the change of the volume property of the audioElement alone.
-                 */
-                this.audioElement && this.update({ volume: this.audioElement.volume });
             }
             this.env.messaging.userSetting.saveVolumeSetting(this.partner.id, volume);
         }
@@ -159,7 +157,7 @@ function factory(dependencies) {
          * of the current partner.
          */
         async toggleDeaf() {
-            if (this.env.messaging.currentPartner !== this.partner) {
+            if (!this.mailRtc) {
                 return;
             }
             this.updateAndBroadcast({
@@ -188,7 +186,7 @@ function factory(dependencies) {
          * @param {Object} data
          */
         updateAndBroadcast(data) {
-            if (this.env.messaging.currentPartner !== this.partner) {
+            if (!this.mailRtc) {
                 return;
             }
             this.update(data);
@@ -350,12 +348,6 @@ function factory(dependencies) {
             default: false,
         }),
         /**
-         * Determines if the session is a session of the current partner.
-         */
-        isOwnSession: attr({
-            compute: '_computeIsOwnSession',
-        }),
-        /**
          * Determines if the user is deafened, which means that all incoming
          * audio tracks are disabled.
          */
@@ -369,6 +361,12 @@ function factory(dependencies) {
          */
         isMuted: attr({
             default: false,
+        }),
+        /**
+         * Determines if the session is a session of the current partner.
+         */
+        isOwnSession: attr({
+            compute: '_computeIsOwnSession',
         }),
         /**
          * Determines if the user is sharing their screen.

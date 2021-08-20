@@ -46,30 +46,54 @@ export class RtcController extends Component {
     // Handlers
     //--------------------------------------------------------------------------
 
-    async _onClickDeafen(ev) {
-        await this.rtcSession.toggleDeaf();
-    }
-
-    _onClickMicrophone(ev) {
-        this.env.messaging.mailRtc.toggleMicrophone();
-    }
-
-    _onClickCamera(ev) {
-        this.env.messaging.mailRtc.toggleUserVideo();
-    }
-
-    _onClickScreen(ev) {
-        this.env.messaging.mailRtc.toggleScreenShare();
-    }
-
-    async _onClickJoinCamera() {
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    async _onClickCallToggleVideo(ev) {
         await this.thread.toggleCall({
             startWithVideo: true,
         });
     }
 
-    async _onClickPhone(ev) {
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    async _onClickCallToggleAudio(ev) {
         await this.thread.toggleCall();
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickCamera(ev) {
+        this.env.messaging.mailRtc.toggleUserVideo();
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    async _onClickDeafen(ev) {
+        await this.rtcSession.toggleDeaf();
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickMicrophone(ev) {
+        this.env.messaging.mailRtc.toggleMicrophone();
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickScreen(ev) {
+        this.env.messaging.mailRtc.toggleScreenShare();
     }
 
 }

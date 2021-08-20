@@ -168,16 +168,10 @@ export class RtcCallViewer extends Component {
 
     /**
      * @private
+     * @param {MouseEvent} ev
      */
-    _onClick() {
+    _onClick(ev) {
         this.rtcCallViewer && this.rtcCallViewer.onClick();
-    }
-
-    /**
-     * @private
-     */
-    _onRtcSettingsDialogClosed() {
-        this.env.messaging.userSetting.rtcConfigurationMenu.toggle();
     }
 
     /**
@@ -205,6 +199,13 @@ export class RtcCallViewer extends Component {
     _onMouseMoveOverlay(ev) {
         markEventHandled(ev, 'RtcCallViewer.MouseMoveOverlay');
         this.rtcCallViewer && this.rtcCallViewer.onMouseMoveOverlay();
+    }
+
+    /**
+     * @private
+     */
+    _onRtcSettingsDialogClosed() {
+        this.env.messaging.userSetting.rtcConfigurationMenu.toggle();
     }
 
 }

@@ -22,16 +22,28 @@ export class RtcOptionList extends Component {
     // Handlers
     //--------------------------------------------------------------------------
 
-    _onClickLayout(ev) {
-        this.env.messaging.userSetting.toggleLayoutSettingsWindow();
-        this.trigger('o-popover-close');
-    }
-
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onClickFullScreen(ev) {
         this.env.messaging.userSetting.toggleFullScreen();
         this.trigger('o-popover-close');
     }
 
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickLayout(ev) {
+        this.env.messaging.userSetting.toggleLayoutSettingsWindow();
+        this.trigger('o-popover-close');
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onClickOptions(ev) {
         this.env.messaging.userSetting.rtcConfigurationMenu.toggle();
         this.trigger('o-popover-close');

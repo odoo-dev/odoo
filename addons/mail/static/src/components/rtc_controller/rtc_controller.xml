@@ -78,10 +78,10 @@
                         </Popover>
                     </t>
                     <t t-if="!thread.mailRtc">
-                        <button class="o_RtcController_button o_RtcController_call_button"
+                        <button class="o_RtcController_button o_RtcController_callToggle"
                             aria-label="Join Video Call"
                             title="Join Video Call"
-                            t-on-click="_onClickJoinCamera">
+                            t-on-click="_onClickCallToggleVideo">
                             <div class="o_RtcController_button_iconWrapper">
                                 <i class="fa fa-video-camera" t-att-class="{ 'fa-lg': !props.small }"/>
                             </div>
@@ -90,13 +90,13 @@
                     <t t-if="thread">
                         <t t-if="thread.mailRtc"><t t-set="phoneTitle">Disconnect</t></t>
                         <t t-else=""><t t-set="phoneTitle">Join Call</t></t>
-                        <button class="o_RtcController_button o_RtcController_call_button"
+                        <button class="o_RtcController_button o_RtcController_callToggle"
                             t-att-aria-label="phoneTitle"
                             t-att-class="{ 'o-active': !!thread.mailRtc }"
                             t-att-title="phoneTitle"
-                            t-on-click="_onClickPhone">
+                            t-on-click="_onClickCallToggleAudio">
                             <div class="o_RtcController_button_iconWrapper">
-                                <i class="fa fa-phone o_RtcController_thread_phone" t-att-class="{ 'fa-lg': !props.small }"/>
+                                <i class="fa fa-phone" t-att-class="{ 'fa-lg': !props.small }"/>
                             </div>
                         </button>
                     </t>

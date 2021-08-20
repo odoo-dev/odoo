@@ -9,27 +9,36 @@
             <t t-set="sizeChangeListener" t-value="windowSize"/>
 
             <!-- Call members display -->
-            <div class="o_RtcCallViewer_video_container">
+            <div class="o_RtcCallViewer_participantContainer">
                 <t t-if="thread">
                     <t t-if="rtcCallViewer.layout !== 'tiled'">
-                        <div class="o_RtcCallViewer_video_main_display">
+                        <div class="o_RtcCallViewer_mainParticipantContainer">
                             <t t-if="env.messaging.focusedRtcSession">
-                                <RtcCallParticipantCard class="o_RtcCallViewer_videoContainer_callParticipant o_RtcCallViewer_mainParticipant" rtcSessionLocalId="env.messaging.focusedRtcSession.localId"/>
+                                <RtcCallParticipantCard class="o_RtcCallViewer_participantCard o_RtcCallViewer_mainParticipant" rtcSessionLocalId="env.messaging.focusedRtcSession.localId"/>
                             </t>
                         </div>
                     </t>
                     <t t-if="rtcCallViewer.layout !== 'spotlight'">
-                        <div class="o_RtcCallViewer_video_multi_display"
+                        <div
+                            class="o_RtcCallViewer_grid"
                             t-att-class="{
                                 'o-dynamic-sizing': rtcCallViewer.layout === 'tiled',
                                 'o-sidebar': rtcCallViewer.layout === 'sidebar',
                             }"
                             t-ref="tileContainer"
-                            t-attf-style="--height:{{state.tileHeight}}px; --width:{{state.tileWidth}}px; --columns:{{state.columnCount}};">
-                            <t t-foreach="thread.rtcSessions" t-as="rtcSession" t-key="'video_box_'+rtcSession.localId">
+                            t-attf-style="--height:{{state.tileHeight}}px; --width:{{state.tileWidth}}px; --columns:{{state.columnCount}};"
+                        >
+                            <t t-foreach="thread.rtcSessions" t-as="rtcSession" t-key="'grid_tile_'+rtcSession.localId">
                                 <t t-if="!rtcCallViewer.filterVideoGrid or rtcSession.videoStream">
                                     <!-- maybe filter focused partner out? -->
-                                    <RtcCallParticipantCard class="o_RtcCallViewer_videoContainer_callParticipant o_RtcCallViewer_videoContainer_tile" isMinimized="rtcCallViewer.isMinimized" rtcSessionLocalId="rtcSession.localId"/>
+                                    <RtcCallParticipantCard
+                                        class="o_RtcCallViewer_participantCard o_RtcCallViewer_grid_tile"
+                                        t-att-class="{
+                                            'o-dynamic-sizing': rtcCallViewer.layout === 'tiled',
+                                        }"
+                                        isMinimized="rtcCallViewer.isMinimized"
+                                        rtcSessionLocalId="rtcSession.localId"
+                                    />
                                 </t>
                             </t>
                         </div>
@@ -40,8 +49,8 @@
             <!-- Buttons -->
             <t t-if="rtcCallViewer.showOverlay or !userSetting.isRtcCallViewerFullScreen">
                 <t t-if="thread">
-                    <div class="o_RtcCallViewer_control_overlay" t-att-class="{ 'o-floating': userSetting.isRtcCallViewerFullScreen }">
-                        <div class="o_RtcCallViewer_control_overlay_container" t-on-mousemove="_onMouseMoveOverlay">
+                    <div class="o_RtcCallViewer_controls" t-att-class="{ 'o-floating': userSetting.isRtcCallViewerFullScreen }">
+                        <div class="o_RtcCallViewer_controls_overlay_container" t-on-mousemove="_onMouseMoveOverlay">
                             <RtcController small="rtcCallViewer.threadView.compact and !userSetting.isRtcCallViewerFullScreen" threadLocalId="thread.localId"/>
                         </div>
                     </div>

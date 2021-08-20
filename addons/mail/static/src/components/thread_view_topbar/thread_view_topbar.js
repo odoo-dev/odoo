@@ -35,10 +35,22 @@ export class ThreadViewTopbar extends Component {
         return this.env.models['mail.thread_view_topbar'].get(this.props.localId);
     }
 
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     async _onClickPhone(ev) {
         await this.threadViewTopBar.thread.toggleCall();
     }
 
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     async _onClickCamera(ev) {
         await this.threadViewTopBar.thread.toggleCall({
             startWithVideo: true,

@@ -39,6 +39,10 @@ export class RtcActivityNotice extends Component {
     // Handlers
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onClick(ev) {
         this.thread.open();
     }
