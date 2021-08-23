@@ -783,6 +783,19 @@
     <t t-call="web_editor.snippet_options"/>
     <t t-out="0"/>
 
+    <div data-js="BodyWidth" data-selector=".o_mail_wrapper">
+        <we-button-group string="Body Width">
+            <we-button data-select-class="o_mail_small"
+                        data-img="/web_editor/static/src/img/snippets_options/content_width_small.svg"
+                        title="Small"/>
+            <we-button data-select-class="o_mail_regular"
+                        data-img="/web_editor/static/src/img/snippets_options/content_width_normal.svg"
+                        title="Regular"/>
+            <we-button data-select-class=""
+                        data-img="/web_editor/static/src/img/snippets_options/content_width_full.svg"
+                        title="Full"/>
+        </we-button-group>
+    </div>
     <div data-js="mass_mailing_sizing_x"
         data-selector="img, .mv, .col_mv, td, th"
         data-exclude=".o_mail_no_resize, .o_mail_no_options"/>

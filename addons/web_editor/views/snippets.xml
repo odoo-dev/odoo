@@ -365,6 +365,21 @@
     </t>
 </template>
 
+<!-- Stretch section -->
+<template id="snippet_options_container_width">
+    <we-button-group string="Content Width">
+        <we-button data-select-class="o_container_small"
+                    data-img="/web_editor/static/src/img/snippets_options/content_width_small.svg"
+                    title="Small"/>
+        <we-button data-select-class="container"
+                    data-img="/web_editor/static/src/img/snippets_options/content_width_normal.svg"
+                    title="Regular"/>
+        <we-button data-select-class="container-fluid"
+                    data-img="/web_editor/static/src/img/snippets_options/content_width_full.svg"
+                    title="Full"/>
+    </we-button-group>
+</template>
+
 <!-- options (data-selector, data-drop-in, data-drop-near, data-js to link js object ) -->
 <template id="snippet_options">
     <!-- t-field -->

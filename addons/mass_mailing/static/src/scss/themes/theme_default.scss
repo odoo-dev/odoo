@@ -57,6 +57,13 @@ div.col:not([align]) {
         border-collapse: separate; // Allow the first and last td to have the
                                    // same width
 
+        &.o_mail_small {
+            width: 600px;
+        }
+        &.o_mail_regular {
+            width: 720px;
+        }
+
         .o_mail_wrapper_td {
             border: 1px solid darken($o-mm-def-color-1, 2%);
             background-color: $o-mm-def-color-2;

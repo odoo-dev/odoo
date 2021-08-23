@@ -350,13 +350,6 @@ font[class*='bg-'] {
         background: transparent;
     }
 }
-// Smaller container
-.o_container_small {
-    @extend .container;
-    @include media-breakpoint-up(lg) {
-        max-width: map-get($container-max-widths, md);
-    }
-}
 
 // Buttons
 .btn {

@@ -869,6 +869,7 @@ body.editor_enable.editor_has_snippets {
                     margin-bottom: 1px; // Not sure why but not really centered otherwise
                 }
                 > svg {
+                    height: 100%; // Not sure why but not centered in iframe otherwise
                     margin-bottom: 2px; // Not sure why but not really centered otherwise
                 }
             }

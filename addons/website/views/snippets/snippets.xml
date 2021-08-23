@@ -332,6 +332,11 @@
 <template id="snippet_options">
     <t t-call="web_editor.snippet_options"/>
 
+    <div data-js="ContainerWidth" data-selector="section, .s_carousel .carousel-item, s_quotes_carousel .carousel-item"
+        data-exclude="[data-snippet] :not(.oe_structure) > [data-snippet]" data-target="> .container, > .container-fluid, > .o_container_small">
+        <t t-call="web_editor.snippet_options_container_width"/>
+    </div>
+
     <!-- COLOR, BORDER, SHADOW | .s_three_columns | .s_comparisons -->
     <div data-js="Box"
          data-selector=".s_three_columns .row > div, .s_comparisons .row > div"
@@ -1055,22 +1060,6 @@
             <we-button data-select-class="text-center">Centered</we-button>
             <we-button data-select-class="text-right">Right</we-button>
         </we-select>
-    </div>
-
-    <!-- Stretch section -->
-    <div data-js="ContainerWidth" data-selector="section, .s_carousel .carousel-item, s_quotes_carousel .carousel-item"
-        data-exclude="[data-snippet] :not(.oe_structure) > [data-snippet]" data-target="> .container, > .container-fluid, > .o_container_small">
-        <we-button-group string="Content Width">
-            <we-button data-select-class="o_container_small"
-                       data-img="/website/static/src/img/snippets_options/content_width_small.svg"
-                       title="Small"/>
-            <we-button data-select-class="container"
-                       data-img="/website/static/src/img/snippets_options/content_width_normal.svg"
-                       title="Regular"/>
-            <we-button data-select-class="container-fluid"
-                       data-img="/website/static/src/img/snippets_options/content_width_full.svg"
-                       title="Full"/>
-        </we-button-group>
     </div>
 
     <!-- Scroll to next section button (only for full height) -->
