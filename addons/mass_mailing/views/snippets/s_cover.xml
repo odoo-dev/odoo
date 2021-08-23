@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="s_cover" name="Cover">
+        <div class="s_cover o_mail_snippet_general">
+            <div class="container s_allow_columns">
+                <div class="row">
+                    <div class="col-12 o_mail_no_padding_x">
+                        <img src="/mass_mailing/static/src/img/theme_default/s_default_image_block_banner.jpg" alt="Cover image" class="img-fluid w-100"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

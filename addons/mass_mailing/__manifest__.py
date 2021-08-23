@@ -44,6 +44,7 @@
         'views/mass_mailing_templates_portal.xml',
         'views/themes_templates.xml',
         'views/snippets_themes.xml',
+        'views/snippets/s_cover.xml',
     ],
     'demo': [
         'data/mass_mailing_demo.xml',

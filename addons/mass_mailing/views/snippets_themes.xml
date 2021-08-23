@@ -37,7 +37,7 @@
                     <t t-snippet="mass_mailing.s_mail_block_header_social" t-thumbnail="/mass_mailing/static/src/img/blocks/block_header_social.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_header_text_social" t-thumbnail="/mass_mailing/static/src/img/blocks/block_header_text_social.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_header_logo" t-thumbnail="/mass_mailing/static/src/img/blocks/block_header_logo.png"/>
-                    <t t-snippet="mass_mailing.s_mail_block_banner" t-thumbnail="/mass_mailing/static/src/img/blocks/block_banner.png"/>
+                    <t t-snippet="mass_mailing.s_cover" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_cover.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_header_view" t-thumbnail="/mass_mailing/static/src/img/blocks/block_header_browser.png"/>
                 </div>
             </div>
@@ -141,22 +141,6 @@
                         </a>
                     </div>
                     <div class="col-4" style="text-align:right"/>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-<template id="s_mail_block_banner" name="Banner">
-    <div class="o_mail_block_banner">
-        <div class="o_mail_snippet_general">
-            <div cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles container">
-                <div class="row">
-                    <div class="col-12 o_mail_full_width_padding o_mail_no_colorpicker">
-                        <a href="#">
-                            <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_banner.jpg" class="d-block mx-auto"/>
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
