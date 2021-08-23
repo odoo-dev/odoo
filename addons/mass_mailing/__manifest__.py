@@ -49,6 +49,7 @@
         'views/snippets/s_comparisons.xml',
         'views/snippets/s_numbers.xml',
         'views/snippets/s_text_block.xml',
+        'views/snippets/s_three_columns.xml',
         'views/snippets/s_title.xml',
     ],
     'demo': [

@@ -50,7 +50,7 @@
                     <t t-snippet="mass_mailing.s_comparisons" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_comparisons.svg"/>
                     <t t-snippet="mass_mailing.s_color_blocks_2" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_color_blocks_2.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_two_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_two_cols.png"/>
-                    <t t-snippet="mass_mailing.s_mail_block_three_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_three_cols.png"/>
+                    <t t-snippet="mass_mailing.s_three_columns" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_three_columns.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_image_text" t-thumbnail="/mass_mailing/static/src/img/blocks/block_image_text.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_text_image" t-thumbnail="/mass_mailing/static/src/img/blocks/block_text_image.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_image" t-thumbnail="/mass_mailing/static/src/img/blocks/block_image.png"/>
@@ -221,55 +221,6 @@
                                 Write one paragraph describing your product,
                                 services or a specific feature. To be successful
                                 your content needs to be useful to your readers.
-                            </p>
-                            <div class="text-center" style="margin-top:15px;">
-                                <a role="button" href="#" class="btn btn-link">Read More...</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-<template id="s_mail_block_three_cols" name="Three Columns">
-    <div class="o_mail_block_three_cols">
-        <div class="o_mail_snippet_general">
-            <div cellspacing="0" cellpadding="0" class="container o_mail_table_styles o_mail_v_padding o_mail_col_table">
-                <div class="row">
-                    <div style="vertical-align:top;width:180px;" class="col o_mail_col_mv o_mail_col_container">
-                        <div>
-                            <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_three_cols_1.jpg" class="d-block mx-auto"/>
-                            <h4 class="text-center">Column Title</h4>
-                            <p class="text-center o_mail_no_margin">
-                                A short description
-                            </p>
-                            <div class="text-center" style="margin-top:15px;">
-                                <a role="button" href="#" class="btn btn-link">Read More...</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="vertical-align:top;width:180px;" class="col o_mail_col_mv o_mail_col_container">
-                        <div>
-                            <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_three_cols_2.jpg" class="d-block mx-auto"/>
-                            <h4 class="text-center">Column Title</h4>
-                            <p class="text-center o_mail_no_margin">
-                                A short description
-                            </p>
-                            <div class="text-center" style="margin-top:15px;">
-                                <a role="button" href="#" class="btn btn-link">Read More...</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="vertical-align:top;width:180px;" class="col o_mail_col_mv o_mail_col_container">
-                        <div>
-                            <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_three_cols_3.jpg" class="d-block mx-auto"/>
-                            <h4 class="text-center">Column Title</h4>
-                            <p class="text-center o_mail_no_margin">
-                                A short description
                             </p>
                             <div class="text-center" style="margin-top:15px;">
                                 <a role="button" href="#" class="btn btn-link">Read More...</a>

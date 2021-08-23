@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_three_columns" name="Columns">
+    <div class="s_three_columns o_mail_snippet_general" data-snippet="s_three_columns">
+        <div class="container">
+            <div class="row align-items-stretch">
+                <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
+                    <div class="card bg-white h-100">
+                        <img class="card-img-top" src="/mass_mailing/static/src/img/theme_default/s_default_image_block_three_cols_1.jpg" alt=""/>
+                        <div class="card-body">
+                            <h3 class="card-title o_default_snippet_text">Column Title</h3>
+                            <p class="card-text o_default_snippet_text">A short description</p>
+                        </div>
+                        <div class="card-footer">
+                            <a role="button" href="#" class="btn btn-link o_default_snippet_text">Read More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
+                    <div class="card bg-white h-100">
+                        <img class="card-img-top" src="/mass_mailing/static/src/img/theme_default/s_default_image_block_three_cols_2.jpg" alt=""/>
+                        <div class="card-body">
+                            <h3 class="card-title o_default_snippet_text">Column Title</h3>
+                            <p class="card-text o_default_snippet_text">A short description</p>
+                        </div>
+                        <div class="card-footer">
+                            <a role="button" href="#" class="btn btn-link o_default_snippet_text">Read More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
+                    <div class="card bg-white h-100">
+                        <img class="card-img-top" src="/mass_mailing/static/src/img/theme_default/s_default_image_block_three_cols_3.jpg" alt=""/>
+                        <div class="card-body">
+                            <h3 class="card-title o_default_snippet_text">Column Title</h3>
+                            <p class="card-text o_default_snippet_text">A short description</p>
+                        </div>
+                        <div class="card-footer">
+                            <a role="button" href="#" class="btn btn-link o_default_snippet_text">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>
