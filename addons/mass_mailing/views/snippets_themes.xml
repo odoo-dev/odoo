@@ -826,7 +826,13 @@
         data-drop-in="[data-oe-field='body_html']:not(:has(.o_layout)), .oe_structure"/>
 
     <div data-js="sizing_y"
-        data-selector=".note-editable > div:not(.o_layout), .note-editable .oe_structure > div, td, th"
+        data-selector=".row > div"
+        data-drop-near=".row:not(.s_col_no_resize) > div"
+        data-exclude=".o_mail_no_resize, .o_mail_no_options"/>
+
+    <div data-js="sizing_x"
+        data-selector=".row > div"
+        data-drop-near=".row:not(.s_col_no_resize) > div"
         data-exclude=".o_mail_no_resize, .o_mail_no_options"/>
 
     <div data-selector=".note-editable > div:not(.o_layout),

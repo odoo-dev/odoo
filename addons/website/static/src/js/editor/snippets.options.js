@@ -1568,65 +1568,6 @@ options.registry.CarouselItem = options.Class.extend({
     },
 });
 
-options.registry.sizing_x = options.registry.sizing.extend({
-    /**
-     * @override
-     */
-    onClone: function (options) {
-        this._super.apply(this, arguments);
-        // Below condition is added to remove offset of target element only
-        // and not its children to avoid design alteration of a container/block.
-        if (options.isCurrent) {
-            var _class = this.$target.attr('class').replace(/\s*(offset-xl-|offset-lg-)([0-9-]+)/g, '');
-            this.$target.attr('class', _class);
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    _getSize: function () {
-        var width = this.$target.closest('.row').width();
-        var gridE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-        var gridW = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-        this.grid = {
-            e: [_.map(gridE, v => ('col-lg-' + v)), _.map(gridE, v => width / 12 * v), 'width'],
-            w: [_.map(gridW, v => ('offset-lg-' + v)), _.map(gridW, v => width / 12 * v), 'margin-left'],
-        };
-        return this.grid;
-    },
-    /**
-     * @override
-     */
-    _onResize: function (compass, beginClass, current) {
-        if (compass === 'w') {
-            // don't change the right border position when we change the offset (replace col size)
-            var beginCol = Number(beginClass.match(/col-lg-([0-9]+)|$/)[1] || 0);
-            var beginOffset = Number(beginClass.match(/offset-lg-([0-9-]+)|$/)[1] || beginClass.match(/offset-xl-([0-9-]+)|$/)[1] || 0);
-            var offset = Number(this.grid.w[0][current].match(/offset-lg-([0-9-]+)|$/)[1] || 0);
-            if (offset < 0) {
-                offset = 0;
-            }
-            var colSize = beginCol - (offset - beginOffset);
-            if (colSize <= 0) {
-                colSize = 1;
-                offset = beginOffset + beginCol - 1;
-            }
-            this.$target.attr('class', this.$target.attr('class').replace(/\s*(offset-xl-|offset-lg-|col-lg-)([0-9-]+)/g, ''));
-
-            this.$target.addClass('col-lg-' + (colSize > 12 ? 12 : colSize));
-            if (offset > 0) {
-                this.$target.addClass('offset-lg-' + offset);
-            }
-        }
-        this._super.apply(this, arguments);
-    },
-});
-
 options.registry.layout_column = options.Class.extend({
     /**
      * @override
