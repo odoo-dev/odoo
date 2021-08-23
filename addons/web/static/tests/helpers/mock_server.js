@@ -788,7 +788,7 @@ export class MockServer {
                 } else if (aggregateFunction === "week") {
                     return `W${date.toFormat("WW kkkk")}`;
                 } else if (aggregateFunction === "quarter") {
-                    return `Q${date.toFormat("qq yyyy")}`;
+                    return `Q${date.toFormat("q yyyy")}`;
                 } else if (aggregateFunction === "year") {
                     return date.toFormat("yyyy");
                 } else {
