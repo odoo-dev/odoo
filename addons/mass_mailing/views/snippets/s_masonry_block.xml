@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Template -->
+<template id="s_masonry_block" name="Masonry">
+    <div class="s_masonry_block o_mail_snippet_general">
+        <div class="container-fluid">
+            <div class="row no-gutters">
+                <div class="col-lg-6">
+                    <img src="/mass_mailing/static/src/img/theme_default/s_masonry_block_default_image_1.jpg" class="img-fluid"/>
+                </div>
+                <div class="col-lg-6">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12 pt32 pb32 text-center o_cc o_cc3" data-name="Block">
+                                <h3>A great title</h3>
+                                <p>And a great subtitle</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 pt32 pb32 text-center o_cc o_cc4" data-name="Block">
+                                <h3>A great title</h3>
+                                <p>And a great subtitle</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+</odoo>
