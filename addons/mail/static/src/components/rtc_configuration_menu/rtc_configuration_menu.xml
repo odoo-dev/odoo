@@ -60,7 +60,7 @@
                     <label class="o_RtcConfigurationMenu_option_label" title="Minimum activity for voice detection" aria-label="Minimum activity for voice detection">
                         <span class="o_RtcConfigurationMenu_option_name">Minimum activity for voice detection</span>
                         <div class="o_RtcConfigurationMenu_option_inputGroup">
-                            <input class="o_RtcConfigurationMenu_option_inputGroup_input" type="range" min="0.01" max="1" step="0.01" t-att-value="userSetting.voiceActivationThreshold" t-on-change="_onChangeThreshold"/>
+                            <input class="o_RtcConfigurationMenu_option_inputGroup_input" type="range" min="0.001" max="1" step="0.001" t-att-value="userSetting.voiceActivationThreshold" t-on-change="_onChangeThreshold"/>
                             <span class="o_RtcConfigurationMenu_option_inputGroup_value"><t t-esc="userSetting.voiceActivationThreshold"/></span>
                         </div>
                     </label>

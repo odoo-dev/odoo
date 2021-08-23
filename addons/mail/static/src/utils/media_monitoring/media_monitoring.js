@@ -12,12 +12,13 @@ const HUMAN_VOICE_FREQUENCY_RANGE = [80, 400];
  *
  * @param {MediaStreamTrack} track
  * @param {Object} [processorOptions] options for the audio processor
- * @param {number} [processorOptions.baseLevel] the normalized minimum value for audio detection
  * @param {Array<number>} [processorOptions.frequencyRange] the range of frequencies to monitor in hz
  * @param {number} [processorOptions.minimumActiveCycles] - how many cycles have to pass since the last time the
- *          threshold was exceeded to go back to inactive state.
+ *          threshold was exceeded to go back to inactive state, this prevents stuttering when the speech volume oscillates
+ *          around the threshold value.
  * @param {function} [processorOptions.onStateChange(isAboveThreshold)] a function to be called when the threshold is passed
  * @param {function} [processorOptions.onTic(volume)] a function to be called at each tics
+ * @param {number} [processorOptions.volumeThreshold] the normalized minimum value for audio detection
  * @returns {Object} returnValue
  * @returns {function} returnValue.disconnect callback to cleanly end the monitoring
  */
@@ -63,7 +64,7 @@ export async function monitorAudioThresholds(track, processorOptions) {
  * @returns {Object} returnValue
  * @returns {function} returnValue.disconnect disconnect callback
  */
-function _loadScriptProcessor(source, audioContext, { baseLevel = 0.3, frequencyRange = HUMAN_VOICE_FREQUENCY_RANGE, minimumActiveCycles = 10, onStateChange, onTic } = {}) {
+function _loadScriptProcessor(source, audioContext, { frequencyRange = HUMAN_VOICE_FREQUENCY_RANGE, minimumActiveCycles = 10, onStateChange, onTic, volumeThreshold = 0.3 } = {}) {
     // audio setup
     const bitSize = 1024;
     const analyser = audioContext.createAnalyser();
@@ -92,10 +93,10 @@ function _loadScriptProcessor(source, audioContext, { baseLevel = 0.3, frequency
         nextUpdateFrame += intervalInFrames;
 
         // computes volume and threshold
-        const normalizedVolume = _getFrquencyAverage(analyser, frequencyRange[0], frequencyRange[1]);
-        if (normalizedVolume >= baseLevel) {
+        const normalizedVolume = getFrequencyAverage(analyser, frequencyRange[0], frequencyRange[1]);
+        if (normalizedVolume >= volumeThreshold) {
             activityBuffer = minimumActiveCycles;
-        } else if (normalizedVolume < baseLevel && activityBuffer > 0) {
+        } else if (normalizedVolume < volumeThreshold && activityBuffer > 0) {
             activityBuffer--;
         }
         isAboveThreshold = activityBuffer > 0;
@@ -122,14 +123,14 @@ function _loadScriptProcessor(source, audioContext, { baseLevel = 0.3, frequency
  * @returns {Object} returnValue
  * @returns {function} returnValue.disconnect disconnect callback
  */
-async function _loadAudioWorkletProcessor(source, audioContext, { baseLevel = 0.3, frequencyRange = HUMAN_VOICE_FREQUENCY_RANGE, minimumActiveCycles = 10, onStateChange, onTic } = {}) {
+async function _loadAudioWorkletProcessor(source, audioContext, { frequencyRange = HUMAN_VOICE_FREQUENCY_RANGE, minimumActiveCycles = 10, onStateChange, onTic, volumeThreshold = 0.3 } = {}) {
     await audioContext.resume();
     // Safari does not support Worklet.addModule
     await audioContext.audioWorklet.addModule('mail/static/src/utils/media_monitoring/threshold_processor.js');
     const thresholdProcessor = new window.AudioWorkletNode(audioContext, 'threshold-processor', {
         processorOptions: {
             minimumActiveCycles,
-            baseLevel,
+            volumeThreshold,
             frequencyRange,
             postAllTics: !!onTic,
         }
@@ -153,7 +154,7 @@ async function _loadAudioWorkletProcessor(source, audioContext, { baseLevel = 0.
  * @param {number} higherFrequency upper bound for relevant frequencies to monitor
  * @returns {number} normalized [0...1] average quantity of the relevant frequencies
  */
-function _getFrquencyAverage(analyser, lowerFrequency, higherFrequency) {
+function getFrequencyAverage(analyser, lowerFrequency, higherFrequency) {
     const frequencies = new window.Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(frequencies);
     const sampleRate = analyser.context.sampleRate;

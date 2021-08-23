@@ -2,16 +2,15 @@ class ThresholdProcessor extends globalThis.AudioWorkletProcessor {
     /**
      * @param {Object} param0 options
      * @param {Object} param0.processorOptions
-     * @param {number} [param0.processorOptions.baseLevel] the minimum value for audio detection
-            TODO find a way to properly normalize sound? See process() comment.
      * @param {Array<number>} param0.processorOptions.frequencyRange array of two numbers that represent the range of
             frequencies that we want to monitor in hz.
      * @param {number} [param0.processorOptions.minimumActiveCycles] - how many cycles have to pass since the last time the
             threshold was exceeded to go back to inactive state. It prevents the microphone to shut down
             when the user's voice drops in volume mid-sentence.
      * @param {boolean} [param0.processorOptions.postAllTics] true if we need to postMessage at each tics
+     * @param {number} [param0.processorOptions.volumeThreshold] the minimum value for audio detection
      */
-    constructor({ processorOptions: { baseLevel = 0.3, frequencyRange, minimumActiveCycles = 10, postAllTics } }) {
+    constructor({ processorOptions: { frequencyRange, minimumActiveCycles = 10, postAllTics, volumeThreshold = 0.3 } }) {
         super();
 
         // timing variables
@@ -22,12 +21,7 @@ class ThresholdProcessor extends globalThis.AudioWorkletProcessor {
 
         // process variables
         this.activityBuffer = 0;
-        /**
-         * TODO ideally, do the mathematical inverse when computing this.volume, it would make it consistent with
-         * the scriptProcessor version and easier to create a visual match between the input and the volume.
-         * probably not use a sqrt but a log2 since input has negative numbers.
-         */
-        this.baseLevel = Math.pow(baseLevel, 2);
+        this.volumeThreshold = volumeThreshold;
         this.frequencyRange = frequencyRange || [80, 400];
         this.isAboveThreshold = false;
         this.postAllTics = postAllTics;
@@ -53,24 +47,22 @@ class ThresholdProcessor extends globalThis.AudioWorkletProcessor {
         // computes volume and threshold
         const startIndex = _getFrequencyIndex(this.frequencyRange[0], globalThis.sampleRate, samples.length);
         const endIndex = _getFrequencyIndex(this.frequencyRange[1], globalThis.sampleRate, samples.length);
-        /**
-         * Here is an attempt at a normalization process,
-         * `samples` is a Float32array of 128 samples with values in [-1 .. 1],
-         * I couldn't figure a way to make a good normalization for those values in a way that would be comparable
-         * to the Uint8Array version of the scriptProcessor equivalent: see media_monitoring._getFrquencyAverage
-         * TODO something like Math.log2(volume+1) * constant, while baseLevel = baseLevel
-         * Math.log2(0) should be counted as 0
-         */
         let sum = 0;
         for (let i = startIndex; i < endIndex; ++i) {
             sum += samples[i];
         }
+        // Normalizing the volume so that volume mostly fits in the [0,1] range.
         const preNormalizationVolume = sum / (endIndex - startIndex);
-        this.volume = preNormalizationVolume * 3;
+        const preLogarithmVolume = (preNormalizationVolume * 50) + 1;
+        if (preLogarithmVolume <= 0) {
+            this.volume = 0;
+        } else {
+            this.volume = Math.log10(preLogarithmVolume);
+        }
 
-        if (this.volume >= this.baseLevel) {
+        if (this.volume >= this.volumeThreshold) {
             this.activityBuffer = this.minimumActiveCycles;
-        } else if (this.volume < this.baseLevel && this.activityBuffer > 0) {
+        } else if (this.volume < this.volumeThreshold && this.activityBuffer > 0) {
             this.activityBuffer--;
         }
         this.isAboveThreshold = this.activityBuffer > 0;

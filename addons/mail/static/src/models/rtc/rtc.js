@@ -364,7 +364,7 @@ function factory(dependencies) {
                         this._setSoundBroadcast(state);
                     },
                     minimumActiveCycles: 10,
-                    baseLevel: this.env.messaging.userSetting.voiceActivationThreshold,
+                    volumeThreshold: this.env.messaging.userSetting.voiceActivationThreshold,
                 });
             } catch (e) {
                 /**
