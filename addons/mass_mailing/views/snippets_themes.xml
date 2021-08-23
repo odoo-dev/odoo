@@ -46,7 +46,7 @@
                 <div class="o_panel_body" id="email_designer_body_elements">
                     <t t-snippet="mass_mailing.s_title" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_title.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_title_text" t-thumbnail="/mass_mailing/static/src/img/blocks/block_title_text.png"/>
-                    <t t-snippet="mass_mailing.s_mail_block_paragraph" t-thumbnail="/mass_mailing/static/src/img/blocks/block_paragraph.png"/>
+                    <t t-snippet="mass_mailing.s_text_block" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_text_block.svg"/>
                     <t t-snippet="mass_mailing.s_comparisons" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_comparisons.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_two_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_two_cols.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_three_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_three_cols.png"/>
@@ -185,26 +185,6 @@
                             <a role="button" href="#" class="btn btn-primary">LOGIN</a>
                         </div>
 
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-<template id="s_mail_block_paragraph" name="Paragraph">
-    <div class="o_mail_block_paragraph">
-        <div class="o_mail_snippet_general">
-            <div cellspacing="0" cellpadding="0" border="0" class="container o_mail_table_styles">
-                <div class="row">
-                    <div class="col-12 o_mail_h_padding o_mail_v_padding o_mail_no_colorpicker">
-                        <p> The open source model of Odoo has allowed us to leverage thousands of developers and
-                            business experts to build hundreds of apps in just a few years.</p>
-                        <p> With strong technical foundations, Odoo's framework is unique.
-                            It provides top notch usability that scales across all apps.</p>
-                        <p> Usability improvements made on Odoo will automatically apply to all
-                            of our fully integrated apps.</p>
-                        <p> That way, Odoo evolves much faster than any other solution.</p>
                     </div>
                 </div>
             </div>

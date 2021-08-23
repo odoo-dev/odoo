@@ -47,6 +47,7 @@
         'views/snippets/s_cover.xml',
         'views/snippets/s_comparisons.xml',
         'views/snippets/s_numbers.xml',
+        'views/snippets/s_text_block.xml',
         'views/snippets/s_title.xml',
     ],
     'demo': [
