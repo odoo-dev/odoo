@@ -380,6 +380,15 @@
     </we-button-group>
 </template>
 
+<!-- Min height of section -->
+<template id="snippet_options_min_height">
+    <we-button-group string="Height">
+        <we-button data-name="minheight_auto_opt" data-select-class="" title="Fit content">Auto</we-button>
+        <we-button data-select-class="o_half_screen_height" title="Half screen">50%</we-button>
+        <we-button data-select-class="o_full_screen_height" title="Full screen">100%</we-button>
+    </we-button-group>
+</template>
+
 <!-- options (data-selector, data-drop-in, data-drop-near, data-js to link js object ) -->
 <template id="snippet_options">
     <!-- t-field -->

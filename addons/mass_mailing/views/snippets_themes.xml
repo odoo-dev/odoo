@@ -796,6 +796,9 @@
                         title="Full"/>
         </we-button-group>
     </div>
+    <div data-option-name="minHeight" data-selector="[data-snippet]" data-exclude="[data-snippet] .row div *">
+        <t t-call="web_editor.snippet_options_min_height"/>
+    </div>
     <div data-js="mass_mailing_sizing_x"
         data-selector="img, .mv, .col_mv, td, th"
         data-exclude=".o_mail_no_resize, .o_mail_no_options"/>
