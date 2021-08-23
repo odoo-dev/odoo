@@ -45,6 +45,7 @@
         'views/themes_templates.xml',
         'views/snippets_themes.xml',
         'views/snippets/s_cover.xml',
+        'views/snippets/s_comparisons.xml',
         'views/snippets/s_numbers.xml',
         'views/snippets/s_title.xml',
     ],
