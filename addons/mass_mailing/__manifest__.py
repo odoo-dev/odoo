@@ -46,6 +46,7 @@
         'views/snippets_themes.xml',
         'views/snippets/s_cover.xml',
         'views/snippets/s_color_blocks_2.xml',
+        'views/snippets/s_company_team.xml',
         'views/snippets/s_comparisons.xml',
         'views/snippets/s_features.xml',
         'views/snippets/s_image_text.xml',

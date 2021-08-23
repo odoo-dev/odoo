@@ -65,6 +65,7 @@
             <div id="email_designer_default_extra" class="o_panel">
                 <div class="o_panel_header">Marketing Content</div>
                 <div class="o_panel_body" id="email_designer_marketing_elements">
+                    <t t-snippet="mass_mailing.s_company_team" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_company_team.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_discount2" t-thumbnail="/mass_mailing/static/src/img/blocks/block_discount2.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_discount1" t-thumbnail="/mass_mailing/static/src/img/blocks/block_discount1.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_event" t-thumbnail="/mass_mailing/static/src/img/blocks/block_event.png"/>
