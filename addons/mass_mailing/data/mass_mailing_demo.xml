@@ -104,7 +104,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="o_mail_block_footer_separator" data-snippet="s_mail_block_footer_separator" style="margin:0 20px 0 20px;">
+                <div class="o_mail_block_footer_separator" data-snippet="s_hr" style="margin:0 20px 0 20px;">
                     <div class="o_mail_snippet_general" style="margin:0px auto 0px auto;background-color:rgb(255, 255, 255);max-width:600px;width:100%;">
                         <div class="container o_mail_table_styles o_mail_full_width_padding" style="width:100%;border-collapse:separate;">
                             <div class="row">

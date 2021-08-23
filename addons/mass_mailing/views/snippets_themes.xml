@@ -54,7 +54,7 @@
                     <t t-snippet="mass_mailing.s_image_text" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_image_text.svg"/>
                     <t t-snippet="mass_mailing.s_text_image" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_text_image.svg"/>
                     <t t-snippet="mass_mailing.s_picture" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_picture.svg"/>
-                    <t t-snippet="mass_mailing.s_mail_block_footer_separator" t-thumbnail="/mass_mailing/static/src/img/blocks/block_footer_separator.png"/>
+                    <t t-snippet="web_editor.s_hr" t-thumbnail="/web_editor/static/src/img/snippets_thumbs/s_hr.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_footer_tag_line" t-thumbnail="/mass_mailing/static/src/img/blocks/block_footer_tag_line.png"/>
                     <t t-snippet="mass_mailing.s_numbers" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_numbers.svg"/>
                 </div>
@@ -226,20 +226,6 @@
                                 <a role="button" href="#" class="btn btn-link">Read More...</a>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-<template id="s_mail_block_footer_separator" name="Separator">
-    <div class="o_mail_block_footer_separator">
-        <div class="o_mail_snippet_general">
-            <div cellspacing="0" cellpadding="0" class="container o_mail_table_styles o_mail_full_width_padding">
-                <div class="row">
-                    <div style="width:100%;" class="col o_mail_v_padding o_mail_no_colorpicker">
-                        <div style="width:100%;" class="separator"></div>
                     </div>
                 </div>
             </div>
