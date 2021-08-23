@@ -51,7 +51,7 @@
                     <t t-snippet="mass_mailing.s_color_blocks_2" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_color_blocks_2.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_two_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_two_cols.png"/>
                     <t t-snippet="mass_mailing.s_three_columns" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_three_columns.svg"/>
-                    <t t-snippet="mass_mailing.s_mail_block_image_text" t-thumbnail="/mass_mailing/static/src/img/blocks/block_image_text.png"/>
+                    <t t-snippet="mass_mailing.s_image_text" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_image_text.svg"/>
                     <t t-snippet="mass_mailing.s_mail_block_text_image" t-thumbnail="/mass_mailing/static/src/img/blocks/block_text_image.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_image" t-thumbnail="/mass_mailing/static/src/img/blocks/block_image.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_footer_separator" t-thumbnail="/mass_mailing/static/src/img/blocks/block_footer_separator.png"/>
@@ -225,27 +225,6 @@
                             <div class="text-center" style="margin-top:15px;">
                                 <a role="button" href="#" class="btn btn-link">Read More...</a>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-<template id="s_mail_block_image_text" name="Image - Text">
-    <div class="o_mail_block_image_text">
-        <div class="o_mail_snippet_general">
-            <div cellspacing="0" cellpadding="0" class="container o_mail_table_styles">
-                <div class="row">
-                    <div style="width:270px;text-align:center;vertical-align:middle" class="col o_mail_col_mv o_mail_img_container o_mail_h_padding o_mail_v_padding">
-                        <img src="/mass_mailing/static/src/img/theme_basic/s_default_image_block_image_text.jpg" class="d-block mx-auto"/>
-                    </div>
-                    <div style="width:270px;vertical-align:middle;text-align:center;" class="col o_mail_col_mv o_mail_h_padding o_mail_v_padding">
-                        <h3>Omnichannel sales</h3>
-                        <p class="o_mail_no_margin" style="text-align:justify;">Get your inside sales (CRM) fully integrated with online sales (eCommerce), in-store sales (Point of Sale) and marketplaces like eBay and Amazon.</p>
-                        <div class="text-center" style="margin-top:15px;">
-                            <a role="button" href="#" class="btn btn-link">Read More...</a>
                         </div>
                     </div>
                 </div>
