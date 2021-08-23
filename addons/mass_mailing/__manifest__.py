@@ -50,6 +50,7 @@
         'views/snippets/s_features.xml',
         'views/snippets/s_image_text.xml',
         'views/snippets/s_masonry_block.xml',
+        'views/snippets/s_media_list.xml',
         'views/snippets/s_numbers.xml',
         'views/snippets/s_picture.xml',
         'views/snippets/s_text_block.xml',
@@ -86,6 +87,7 @@
         'web.qunit_suite_tests': [
             'mass_mailing/static/tests/field_html_test.js',
             'mass_mailing/static/src/js/mass_mailing_snippets.js',
+            'mass_mailing/static/src/snippets/s_media_list/options.js',
             'mass_mailing/static/tests/mass_mailing_html_tests.js',
         ],
         'web.assets_qweb': [

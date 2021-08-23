@@ -58,6 +58,7 @@
                     <t t-snippet="mass_mailing.s_features" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_features.svg"/>
                     <t t-snippet="mass_mailing.s_numbers" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_numbers.svg"/>
                     <t t-snippet="mass_mailing.s_masonry_block" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_masonry_block.svg"/>
+                    <t t-snippet="mass_mailing.s_media_list" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_media_list.svg"/>
                 </div>
             </div>
             <div id="email_designer_default_extra" class="o_panel">
@@ -458,7 +459,7 @@
     <!-- Border | Columns -->
     <div data-js="Box"
          data-selector=".row > div"
-         data-exclude=".o_mail_wrapper_td">
+         data-exclude=".o_mail_wrapper_td, .s_col_no_bgcolor, .s_col_no_bgcolor.row > div, .s_image_gallery .row > div">
         <t t-call="web_editor.snippet_options_border_widgets"/>
         <t t-call="web_editor.snippet_options_shadow_widgets"/>
     </div>
