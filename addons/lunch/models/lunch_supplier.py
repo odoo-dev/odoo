@@ -123,7 +123,7 @@ class LunchSupplier(models.Model):
 
         for supplier in records:
             send_at = datetime.combine(fields.Date.today(),
-                                       float_to_time(supplier.automatic_email_time, supplier.moment, supplier.tz)).astimezone(pytz.UTC).replace(tzinfo=None)
+                                       float_to_time(supplier.automatic_email_time, supplier.moment, self._context.get('tz') or self.env.user.tz))
             if supplier.available_today and fields.Datetime.now() > send_at:
                 lines = self.env['lunch.order'].search([('supplier_id', '=', supplier.id),
                                                              ('state', '=', 'ordered'), ('date', '=', fields.Date.today())])
