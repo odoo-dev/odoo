@@ -2,38 +2,37 @@ class ThresholdProcessor extends globalThis.AudioWorkletProcessor {
     /**
      * @param {Object} param0 options
      * @param {Object} param0.processorOptions
-     * @param {number} processorOptions.minimumActiveCycles - how many cycles have to pass since the last time the
-                    threshold was exceeded to go back to inactive state. It prevents the microphone to shut down
-                    when the user's voice drops in volume mid-sentence.
-     * @param {number} processorOptions.baseLevel the minimum value for audio detection
+     * @param {number} [param0.processorOptions.baseLevel] the minimum value for audio detection
             TODO find a way to properly normalize sound? See process() comment.
-     * @param {Array<number>} processorOptions.frequencyRange array of two numbers that represent the range of
+     * @param {Array<number>} param0.processorOptions.frequencyRange array of two numbers that represent the range of
             frequencies that we want to monitor in hz.
-     * @param {number} processorOptions.processInterval time in ms between each check
-     * @param {number} sampleRate of the audio track
+     * @param {number} [param0.processorOptions.minimumActiveCycles] - how many cycles have to pass since the last time the
+            threshold was exceeded to go back to inactive state. It prevents the microphone to shut down
+            when the user's voice drops in volume mid-sentence.
+     * @param {boolean} [param0.processorOptions.postAllTics] true if we need to postMessage at each tics
      */
-    constructor({ processorOptions: { minimumActiveCycles = 10, baseLevel = 0.3, frequencyRange, sampleRate } }) {
+    constructor({ processorOptions: { baseLevel = 0.3, frequencyRange, minimumActiveCycles = 10, postAllTics } }) {
         super();
 
         // timing variables
         this.processInterval = 50; // how many ms between each computation
         this.minimumActiveCycles = minimumActiveCycles;
-        this.intervalInFrames = this.processInterval / 1000 * sampleRate;
+        this.intervalInFrames = this.processInterval / 1000 * globalThis.sampleRate;
         this.nextUpdateFrame = this.processInterval;
 
         // process variables
+        this.activityBuffer = 0;
         /**
          * TODO ideally, do the mathematical inverse when computing this.volume, it would make it consistent with
          * the scriptProcessor version and easier to create a visual match between the input and the volume.
          * probably not use a sqrt but a log2 since input has negative numbers.
          */
         this.baseLevel = Math.pow(baseLevel, 2);
-        this.frequencyRange = frequencyRange;
-        this.sampleRate = sampleRate;
-        this.activityBuffer = 0;
-        this.wasAboveThreshold = undefined;
+        this.frequencyRange = frequencyRange || [80, 400];
         this.isAboveThreshold = false;
+        this.postAllTics = postAllTics;
         this.volume = 0;
+        this.wasAboveThreshold = undefined;
     }
 
     process(inputs, outputs, parameters) {
@@ -51,10 +50,9 @@ class ThresholdProcessor extends globalThis.AudioWorkletProcessor {
         }
         this.nextUpdateFrame += this.intervalInFrames;
 
-        const startIndex = _getFrequencyIndex(this.frequencyRange[0], this.sampleRate, 128);
-        const endIndex = _getFrequencyIndex(this.frequencyRange[1], this.sampleRate, 128);
-
-
+        // computes volume and threshold
+        const startIndex = _getFrequencyIndex(this.frequencyRange[0], globalThis.sampleRate, samples.length);
+        const endIndex = _getFrequencyIndex(this.frequencyRange[1], globalThis.sampleRate, samples.length);
         /**
          * Here is an attempt at a normalization process,
          * `samples` is a Float32array of 128 samples with values in [-1 .. 1],
@@ -77,6 +75,7 @@ class ThresholdProcessor extends globalThis.AudioWorkletProcessor {
         }
         this.isAboveThreshold = this.activityBuffer > 0;
 
+        this.postAllTics && this.port.postMessage({ volume: this.volume });
         if (this.wasAboveThreshold !== this.isAboveThreshold) {
             this.wasAboveThreshold = this.isAboveThreshold;
             this.port.postMessage({ isAboveThreshold: this.isAboveThreshold });
@@ -87,29 +86,14 @@ class ThresholdProcessor extends globalThis.AudioWorkletProcessor {
 }
 
 /**
- * @param {number} frequency in Hz
+ * @param {number} targetFrequency in Hz
  * @param {number} sampleRate the sample rate of the audio
- * @param {number} sampleRate the sample rate of the audio
- * @returns {number} the index of the frequency within binCount
+ * @param {number} samplesSize amount of samples in the audio input
+ * @returns {number} the index of the targetFrequency within samplesSize
  */
-function _getFrequencyIndex(frequency, sampleRate, binCount) {
-    const index = Math.round(frequency / (sampleRate / 2) * binCount);
-    if (binCount > 0) {
-        if (index < 0) {
-            return 0;
-        }
-        if (index > binCount) {
-            return binCount;
-        }
-        return index;
-    }
-    if (index < binCount) {
-        return binCount;
-    }
-    if (index > 0) {
-        return 0;
-    }
-    return index;
+function _getFrequencyIndex(targetFrequency, sampleRate, samplesSize) {
+    const index = Math.round(targetFrequency / (sampleRate / 2) * samplesSize);
+    return Math.min(Math.max(0, index), samplesSize);
 }
 
 globalThis.registerProcessor("threshold-processor", ThresholdProcessor);

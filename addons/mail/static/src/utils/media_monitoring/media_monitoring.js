@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-// broad human voice range of frequencies.
-const FREQUENCY_RANGE = [80, 400];
+// Broad human voice range of frequencies in hz.
+const HUMAN_VOICE_FREQUENCY_RANGE = [80, 400];
 
 //------------------------------------------------------------------------------
 // Public
@@ -10,8 +10,14 @@ const FREQUENCY_RANGE = [80, 400];
 /**
  * monitors the activity of an audio mediaStreamTrack
  *
- * @param {MediaStreamTrack} audioTrack
- * @param {Object} processorOptions options for the audio processor
+ * @param {MediaStreamTrack} track
+ * @param {Object} [processorOptions] options for the audio processor
+ * @param {number} [processorOptions.baseLevel] the normalized minimum value for audio detection
+ * @param {Array<number>} [processorOptions.frequencyRange] the range of frequencies to monitor in hz
+ * @param {number} [processorOptions.minimumActiveCycles] - how many cycles have to pass since the last time the
+ *          threshold was exceeded to go back to inactive state.
+ * @param {function} [processorOptions.onStateChange(isAboveThreshold)] a function to be called when the threshold is passed
+ * @param {function} [processorOptions.onTic(volume)] a function to be called at each tics
  * @returns {Object} returnValue
  * @returns {function} returnValue.disconnect callback to cleanly end the monitoring
  */
@@ -29,11 +35,12 @@ export async function monitorAudioThresholds(track, processorOptions) {
 
     let processor;
     try {
-        processorOptions.sampleRate = audioContext.sampleRate;
         processor = await _loadAudioWorkletProcessor(source, audioContext, processorOptions);
+        console.log('VOICE ACTIVATION: using audioWorklet processor');
     } catch (e) {
         // In case Worklets are not supported by the browser (eg: Safari)
         processor = _loadScriptProcessor(source, audioContext, processorOptions);
+        console.log('VOICE ACTIVATION: using scriptProcessor');
     }
 
     return {
@@ -52,14 +59,11 @@ export async function monitorAudioThresholds(track, processorOptions) {
 /**
  * @param {MediaStreamSource} source
  * @param {AudioContext} audioContext
- * @param {Object} param1 options
- * @param {number} param1.minimumActiveCycles - how many cycles have to pass since the last time the
-                threshold was exceeded to go back to inactive state.
- * @param {function} param1.onStateChange
- * @param {number} param1.baseLevel the normalized minimum value for audio detection
- * @returns {function} disconnect callback
+ * @param {Object} [param2] options
+ * @returns {Object} returnValue
+ * @returns {function} returnValue.disconnect disconnect callback
  */
-function _loadScriptProcessor(source, audioContext, { onStateChange, minimumActiveCycles = 10, baseLevel = 0.3 }) {
+function _loadScriptProcessor(source, audioContext, { baseLevel = 0.3, frequencyRange = HUMAN_VOICE_FREQUENCY_RANGE, minimumActiveCycles = 10, onStateChange, onTic } = {}) {
     // audio setup
     const bitSize = 1024;
     const analyser = audioContext.createAnalyser();
@@ -86,7 +90,9 @@ function _loadScriptProcessor(source, audioContext, { onStateChange, minimumActi
             return;
         }
         nextUpdateFrame += intervalInFrames;
-        const normalizedVolume = _getFrquencyAverage(analyser, FREQUENCY_RANGE[0], FREQUENCY_RANGE[1]);
+
+        // computes volume and threshold
+        const normalizedVolume = _getFrquencyAverage(analyser, frequencyRange[0], frequencyRange[1]);
         if (normalizedVolume >= baseLevel) {
             activityBuffer = minimumActiveCycles;
         } else if (normalizedVolume < baseLevel && activityBuffer > 0) {
@@ -94,12 +100,10 @@ function _loadScriptProcessor(source, audioContext, { onStateChange, minimumActi
         }
         isAboveThreshold = activityBuffer > 0;
 
+        onTic && onTic(normalizedVolume);
         if (wasAboveThreshold !== isAboveThreshold) {
             wasAboveThreshold = isAboveThreshold;
-            if (!onStateChange) {
-                return;
-            }
-            onStateChange(isAboveThreshold);
+            onStateChange && onStateChange(isAboveThreshold);
         }
     };
     return {
@@ -114,14 +118,11 @@ function _loadScriptProcessor(source, audioContext, { onStateChange, minimumActi
 /**
  * @param {MediaStreamSource} source
  * @param {AudioContext} audioContext
- * @param {Object} param2 options
- * @param {number} param2.minimumActiveCycles - how long the sound remains 'active' after the last time the threshold is passed
- * @param {function} param2.onStateChange
- * @param {number} param2.baseLevel the normalized minimum value for audio detection
- * @param {number} param2.sampleRate of the audio track
- * @returns {function} disconnect callback
+ * @param {Object} [param2] options
+ * @returns {Object} returnValue
+ * @returns {function} returnValue.disconnect disconnect callback
  */
-async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange, minimumActiveCycles = 10, baseLevel = 0.3, sampleRate }) {
+async function _loadAudioWorkletProcessor(source, audioContext, { baseLevel = 0.3, frequencyRange = HUMAN_VOICE_FREQUENCY_RANGE, minimumActiveCycles = 10, onStateChange, onTic } = {}) {
     await audioContext.resume();
     // Safari does not support Worklet.addModule
     await audioContext.audioWorklet.addModule('mail/static/src/utils/media_monitoring/threshold_processor.js');
@@ -129,17 +130,15 @@ async function _loadAudioWorkletProcessor(source, audioContext, { onStateChange,
         processorOptions: {
             minimumActiveCycles,
             baseLevel,
-            frequencyRange: FREQUENCY_RANGE,
-            sampleRate,
+            frequencyRange,
+            postAllTics: !!onTic,
         }
     });
     source.connect(thresholdProcessor).connect(audioContext.destination);
     thresholdProcessor.port.onmessage = (event) => {
-        const { isAboveThreshold } = event.data;
-        if (!onStateChange) {
-            return;
-        }
-        onStateChange(isAboveThreshold);
+        const { isAboveThreshold, volume } = event.data;
+        onStateChange && isAboveThreshold !== undefined && onStateChange(isAboveThreshold);
+        onTic && volume !== undefined && onTic(volume);
     };
     return {
         disconnect: () => {
@@ -172,27 +171,12 @@ function _getFrquencyAverage(analyser, lowerFrequency, higherFrequency) {
 }
 
 /**
- * @param {number} frequency in Hz
+ * @param {number} targetFrequency in Hz
  * @param {number} sampleRate the sample rate of the audio
- * @param {number} sampleRate the sample rate of the audio
- * @returns {number} the index of the frequency within binCount
+ * @param {number} binCount AnalyserNode.frequencyBinCount
+ * @returns {number} the index of the targetFrequency within binCount
  */
-function _getFrequencyIndex(frequency, sampleRate, binCount) {
-    const index = Math.round(frequency / (sampleRate / 2) * binCount);
-    if (binCount > 0) {
-        if (index < 0) {
-            return 0;
-        }
-        if (index > binCount) {
-            return binCount;
-        }
-        return index;
-    }
-    if (index < binCount) {
-        return binCount;
-    }
-    if (index > 0) {
-        return 0;
-    }
-    return index;
+function _getFrequencyIndex(targetFrequency, sampleRate, binCount) {
+    const index = Math.round(targetFrequency / (sampleRate / 2) * binCount);
+    return Math.min(Math.max(0, index), binCount);
 }
