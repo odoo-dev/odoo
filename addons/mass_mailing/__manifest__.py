@@ -53,6 +53,7 @@
         'views/snippets/s_media_list.xml',
         'views/snippets/s_numbers.xml',
         'views/snippets/s_picture.xml',
+        'views/snippets/s_showcase.xml',
         'views/snippets/s_text_block.xml',
         'views/snippets/s_text_highlight.xml',
         'views/snippets/s_text_image.xml',
@@ -88,6 +89,7 @@
             'mass_mailing/static/tests/field_html_test.js',
             'mass_mailing/static/src/js/mass_mailing_snippets.js',
             'mass_mailing/static/src/snippets/s_media_list/options.js',
+            'mass_mailing/static/src/snippets/s_showcase/options.js',
             'mass_mailing/static/tests/mass_mailing_html_tests.js',
         ],
         'web.assets_qweb': [

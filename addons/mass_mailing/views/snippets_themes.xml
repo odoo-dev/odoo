@@ -59,6 +59,7 @@
                     <t t-snippet="mass_mailing.s_numbers" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_numbers.svg"/>
                     <t t-snippet="mass_mailing.s_masonry_block" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_masonry_block.svg"/>
                     <t t-snippet="mass_mailing.s_media_list" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_media_list.svg"/>
+                    <t t-snippet="mass_mailing.s_showcase" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_showcase.svg"/>
                 </div>
             </div>
             <div id="email_designer_default_extra" class="o_panel">
