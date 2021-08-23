@@ -26,10 +26,10 @@
                 <div class="o-autogrow"/>
                 <div class="o_ChatWindowHeader_item o_ChatWindowHeader_rightArea">
                     <t t-if="chatWindow.thread and ['channel', 'chat'].includes(chatWindow.thread.channel_type) and chatWindow.thread.rtcSessions.length === 0">
-                        <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandCamera" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickCamera" title="Start a VideoCall">
+                        <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandCamera" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-att-disabled="chatWindow.thread.hasPendingRtcRequest" t-on-click="_onClickCamera" title="Start a VideoCall">
                             <i class="fa fa-video-camera"/>
                         </div>
-                        <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandPhone" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-on-click="_onClickPhone" title="Start a Call">
+                        <div class="o_ChatWindowHeader_command o_ChatWindowHeader_commandPhone" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" t-att-disabled="chatWindow.thread.hasPendingRtcRequest" t-on-click="_onClickPhone" title="Start a Call">
                             <i class="fa fa-phone"/>
                         </div>
                     </t>

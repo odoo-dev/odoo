@@ -81,6 +81,7 @@
                         <button class="o_RtcController_button o_RtcController_callToggle"
                             aria-label="Join Video Call"
                             title="Join Video Call"
+                            t-att-disabled="thread.hasPendingRtcRequest"
                             t-on-click="_onClickCallToggleVideo">
                             <div class="o_RtcController_button_iconWrapper">
                                 <i class="fa fa-video-camera" t-att-class="{ 'fa-lg': !props.small }"/>
@@ -93,6 +94,7 @@
                         <button class="o_RtcController_button o_RtcController_callToggle"
                             t-att-aria-label="phoneTitle"
                             t-att-class="{ 'o-active': !!thread.mailRtc }"
+                            t-att-disabled="thread.hasPendingRtcRequest"
                             t-att-title="phoneTitle"
                             t-on-click="_onClickCallToggleAudio">
                             <div class="o_RtcController_button_iconWrapper">

@@ -765,7 +765,10 @@ function factory(dependencies) {
                 });
                 return;
             }
-
+            if (this.hasPendingRtcRequest) {
+                return;
+            }
+            this.update({ hasPendingRtcRequest: true });
             const { rtcSessions, iceServers, sessionId } = await this.async(() => this.env.services.rpc({
                 route: '/mail/channel_call_join',
                 params: {
@@ -773,9 +776,10 @@ function factory(dependencies) {
                 },
             }, { shadow: true }));
             this.update({
-                rtcSessions: insertAndReplace(rtcSessions.map(record => this.env.models['mail.rtc_session'].convertData(record))),
-                rtcRingingPartner: unlink(),
+                hasPendingRtcRequest: false,
                 mailRtc: link(this.env.messaging.mailRtc),
+                rtcRingingPartner: unlink(),
+                rtcSessions: insertAndReplace(rtcSessions.map(record => this.env.models['mail.rtc_session'].convertData(record))),
             });
             await this.async(() => this.env.messaging.mailRtc.initSession({
                 currentSessionId: sessionId,
@@ -790,6 +794,9 @@ function factory(dependencies) {
          * Notifies the server and does the cleanup of the current call.
          */
         async leaveCall() {
+            if (this.hasPendingRtcRequest) {
+                return;
+            }
             await this._leaveCall();
             this.endCall();
         }
@@ -1751,6 +1758,7 @@ function factory(dependencies) {
          * @private
          */
         async _leaveCall() {
+            this.update({ hasPendingRtcRequest: true });
             await this.async(() => this.env.services.rpc({
                 route: '/mail/channel_call_leave',
                 params: {
@@ -1758,6 +1766,7 @@ function factory(dependencies) {
                     session_id: this.mailRtc && this.mailRtc.currentRtcSession.id,
                 },
             }, { shadow: true }));
+            this.update({ hasPendingRtcRequest: false });
         }
 
         /**
@@ -1959,6 +1968,13 @@ function factory(dependencies) {
          */
         hasInviteFeature: attr({
             compute: '_computeHasInviteFeature',
+        }),
+        /**
+         * States whether there is a server request for joining or leaving the RTC session.
+         * TODO Should maybe be on messaging (after messaging env rebase) to lock the rpc across all threads.
+         */
+        hasPendingRtcRequest: attr({
+            default: false,
         }),
         /**
          * Determine whether this thread has the seen indicators (V and VV)

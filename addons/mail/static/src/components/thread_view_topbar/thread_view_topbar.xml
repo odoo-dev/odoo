@@ -38,10 +38,10 @@
                         <button class="o_ThreadViewTopbar_unstarAllButton btn btn-secondary" t-att-disabled="threadViewTopBar.threadView.messages.length === 0" t-on-click="threadViewTopBar.onClickUnstarAll">Unstar all</button>
                     </t>
                     <t t-if="threadViewTopBar.thread and threadViewTopBar.thread.model === 'mail.channel' and threadViewTopBar.thread.rtcSessions.length === 0">
-                        <button class="o_ThreadViewTopbar_callButton o_ThreadViewTopbar_button o-active" title="Start a Call" t-on-click="_onClickPhone">
+                        <button class="o_ThreadViewTopbar_callButton o_ThreadViewTopbar_button o-active" t-att-disabled="threadViewTopBar.thread.hasPendingRtcRequest" title="Start a Call" t-on-click="_onClickPhone">
                             <i class="fa fa-lg fa-phone"/>
                         </button>
-                        <button class="o_ThreadViewTopbar_callButton o_ThreadViewTopbar_button o-active" title="Start a VideoCall" t-on-click="_onClickCamera">
+                        <button class="o_ThreadViewTopbar_callButton o_ThreadViewTopbar_button o-active" t-att-disabled="threadViewTopBar.thread.hasPendingRtcRequest" title="Start a VideoCall" t-on-click="_onClickCamera">
                             <i class="fa fa-lg fa-video-camera"/>
                         </button>
                     </t>
