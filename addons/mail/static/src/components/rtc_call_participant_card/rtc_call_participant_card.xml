@@ -4,7 +4,7 @@
     <t t-name="mail.RtcCallParticipantCard" owl="1">
         <div class="o_RtcCallParticipantCard" t-att-class="{ 'o-is-talking': !props.isMinimized and rtcSession and rtcSession.isTalking and !rtcSession.isMuted }" t-on-contextmenu="_onContextMenu">
             <t t-if="rtcSession">
-                <div t-if="rtcSession" class="o_RtcCallParticipantCard_container" t-att-class="{'o-minimized': props.isMinimized }" t-att-title="rtcSession.name" t-att-aria-label="rtcSession.name">
+                <div class="o_RtcCallParticipantCard_container" t-att-class="{'o-minimized': props.isMinimized }" t-att-title="rtcSession.name" t-att-aria-label="rtcSession.name">
 
                     <t t-if="rtcSession.videoStream">
                         <RtcVideo t-on-click="_onClickVideo" rtcSessionLocalId="rtcSession.localId"/>

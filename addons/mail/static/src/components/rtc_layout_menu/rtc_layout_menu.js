@@ -55,6 +55,7 @@ export class RtcLayoutMenu extends Component {
     _onClickLayout(ev) {
         ev.preventDefault();
         this.userSetting.setRtcLayout(ev.target.value);
+        this.trigger("dialog-closed");
     }
 }
 

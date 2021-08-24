@@ -15,15 +15,22 @@ import { monitorAudioThresholds } from '@mail/utils/media_monitoring/media_monit
 const TRANSCEIVER_ORDER = ['audio', 'video'];
 
 /**
- * backend
- * TODO IMP nice-to-have? 1 'mail.rtc.session' per user session (tab/device)?
- *      Should "just" be removing old_sessions._disconnect() when joining a call.
+ * FP/AL Feedback:
+ * TODO IMP show invited members in the call_viewer, may not be trivial, need a model
+ *      for the call participant cards, which should also show invitations. And notify
+ *      members of the updated invitation list.
+ * TODO IMP when moving from a DM to a group DM, transfer RTC sessions from one channel to the other
+ *      may not be trivial but it should be "just" about changing channel_id of the mail.rtc.session's
+ *      on both client and server side + updating channel_id of mail.rtc (maybe more to do).
+ * TODO IMP nice-to-have (since the browser already allows that)? Pick the video input device like we pick
+ *      the audio input device, should be pretty trivial.
  *
  * frontend
  * TODO IMP nice-to-have? updateVideoConfig, allow control of video (fps, resolution) by user,
  *      from a new option in the 'mail.RtcOptionList'
  * TODO IMP nice-to-have? "test microphone" in rtcConfigurationMenu, auto mutes, attach monitorAudio, audioVisual feedback,
- *      it needs a change in the normalization in threshold_processor.js (see comment L:27)
+ *      should create a sandboxed audio/video environment in the setting model and mount a new audioMonitor with
+ *      a "onTic" callBack, and update the display based on the returned volume.
  * TODO IMP nice-to-have? Have both video and share screen at the same time
  *      requires small ref TRANSCEIVER_ORDER to support an arbitrary amount of transceivers:
  *      const TRANSCEIVER_ORDER = [{ trackKind: 'audio', name: 'audio'}, { trackKind: 'video', name: 'user-video' }, { trackKind: 'video', name: 'display' }];
@@ -106,6 +113,18 @@ function factory(dependencies) {
             browser.setInterval(() => {
                 this.currentRtcSession && this.currentRtcSession.pingServer();
             }, 120000); // 2 minutes
+
+            /**
+             * Call all sessions for which no peerConnection is established at
+             * a regular interval to try to recover any connection that failed
+             * to start.
+             *
+             * This is distinct from this._recoverConnection which tries to restores
+             * connection that were established but failed or timed out.
+             */
+            browser.setInterval(() => {
+                this.channel_id && this.currentRtcSession && this._callAllSessions();
+            }, 30000); // 30 seconds
             return res;
         }
 
@@ -154,7 +173,7 @@ function factory(dependencies) {
                 return;
             }
             if (event !== 'trackChange') {
-                console.log(`RECEIVED NOTIFICATION: ${event} from: ${sender}`);
+                console.log(`RECEIVED NOTIFICATION: ${event} from: ${rtcSession.name}`);
             }
             if (!this.isClientRtcCompatible) {
                 return;
@@ -211,19 +230,8 @@ function factory(dependencies) {
             if (startWithVideo) {
                 await this._toggleVideoBroadcast({ type: 'user-video' });
             }
-            if (this.channel.rtcSessions) {
-                console.log(`init session: ${this.channel.rtcSessions.length} members in call`);
-                for (const session of this.channel.rtcSessions) {
-                    if (session.peerToken === this.currentRtcSession.peerToken) {
-                        continue;
-                    }
-                    session.update({
-                        connectionState: 'Initializing call, sending RTC offer',
-                    });
-                    console.log('calling: ' + session.name);
-                    this._callPeer(session.peerToken);
-                }
-            }
+            console.log(`init session: ${this.channel.rtcSessions.length} members in call`);
+            this._callAllSessions();
         }
 
         /**
@@ -386,6 +394,28 @@ function factory(dependencies) {
 
         /**
          * @private
+         */
+        _callAllSessions() {
+            if (!this.channel.rtcSessions) {
+                return;
+            }
+            for (const session of this.channel.rtcSessions) {
+                if (session.peerToken in this._peerConnections) {
+                    continue;
+                }
+                if (session === this.currentRtcSession) {
+                    continue;
+                }
+                session.update({
+                    connectionState: 'Disconnected: sending initial RTC offer',
+                });
+                console.log('calling: ' + session.name);
+                this._callPeer(session.peerToken);
+            }
+        }
+
+        /**
+         * @private
          * @param {String} token
          */
         async _callPeer(token) {
@@ -503,7 +533,12 @@ function factory(dependencies) {
                 return;
             }
             const rtcSessionDescription = new window.RTCSessionDescription(sdp);
-            await peerConnection.setRemoteDescription(rtcSessionDescription);
+            try {
+                await peerConnection.setRemoteDescription(rtcSessionDescription);
+            } catch(e) {
+                // ignored the transaction may have been resolved by another concurrent offer.
+                console.trace(e);
+            }
         }
 
         /**
@@ -552,6 +587,13 @@ function factory(dependencies) {
                 return;
             }
             const rtcSessionDescription = new window.RTCSessionDescription(sdp);
+            try {
+                await peerConnection.setRemoteDescription(rtcSessionDescription);
+            } catch(e) {
+                // ignored the transaction may have been resolved by another concurrent offer.
+                console.trace(e);
+                return;
+            }
             await peerConnection.setRemoteDescription(rtcSessionDescription);
             await this._updateRemoteTrack(peerConnection, 'audio');
             await this._updateRemoteTrack(peerConnection, 'video');
@@ -607,7 +649,9 @@ function factory(dependencies) {
                 return;
             }
             if (event !== 'trackChange') {
-                console.log(`SEND NOTIFICATION: - ${event} to: [${targetTokens}] (${type})`);
+                const tokenSet = new Set(targetTokens);
+                const sessions = this.messaging.models['mail.rtc_session'].all(session => tokenSet.has(session.peerToken));
+                console.log(`SEND NOTIFICATION: - ${event} to: [${sessions.map(session => session.name).join(',')}] (${type})`);
             }
             const content = JSON.stringify({
                 event,

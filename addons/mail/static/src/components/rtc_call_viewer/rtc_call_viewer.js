@@ -75,43 +75,46 @@ export class RtcCallViewer extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * Finds a tile layout and dimensions that respects param0.aspectRatio while maximizing
+     * the total area covered by the tiles within the specified container dimensions.
+     *
      * @private
+     * @param {Object} param0
+     * @param {number} [param0.aspectRatio]
+     * @param {number} param0.containerHeight
+     * @param {number} param0.containerWidth
+     * @param {number} param0.tileCount
      */
-    _computeOptimalLayout({ containerWidth, containerHeight }) {
+    _computeTessellation({ aspectRatio = 1, containerHeight, containerWidth, tileCount }) {
         let optimalLayout = {
             area: 0,
             cols: 0,
-            width: 0,
-            height: 0,
+            tileHeight: 0,
+            tileWidth: 0,
         };
-
-        // finding out how many tiles are part of the dynamic grid.
-        const tileCount = this.rtcCallViewer.filterVideoGrid
-            ? this.thread.videoCount
-            : this.thread.rtcSessions.length;
 
         for (let columnCount = 1; columnCount <= tileCount; columnCount++) {
             const rowCount = Math.ceil(tileCount / columnCount);
-            const tileHeight = containerWidth / (columnCount * this.rtcCallViewer.aspectRatio);
-            const tileWidth = containerHeight / rowCount;
-            let width;
-            let height;
-            if (tileHeight > tileWidth) {
-                height = Math.floor(containerHeight / rowCount);
-                width = Math.floor(height * this.rtcCallViewer.aspectRatio);
+            const potentialHeight = containerWidth / (columnCount * aspectRatio);
+            const potentialWidth = containerHeight / rowCount;
+            let tileHeight;
+            let tileWidth;
+            if (potentialHeight > potentialWidth) {
+                tileHeight = Math.floor(potentialWidth);
+                tileWidth = Math.floor(tileHeight * aspectRatio);
             } else {
-                width = Math.floor(containerWidth / columnCount);
-                height = Math.floor(width / this.rtcCallViewer.aspectRatio);
+                tileWidth = Math.floor(containerWidth / columnCount);
+                tileHeight = Math.floor(tileWidth / aspectRatio);
             }
-            const area = height * width;
+            const area = tileHeight * tileWidth;
             if (area <= optimalLayout.area) {
                 continue;
             }
             optimalLayout = {
                 area,
-                width,
-                height,
-                columnCount
+                columnCount,
+                tileHeight,
+                tileWidth,
             };
         }
         return optimalLayout;
@@ -130,15 +133,17 @@ export class RtcCallViewer extends Component {
         if (!this.tileContainerRef.el) {
             return;
         }
-        const roomRect = this.tileContainerRef.el.getBoundingClientRect();
+        const { width, height } = this.tileContainerRef.el.getBoundingClientRect();
 
-        const { width, height, columnCount } = this._computeOptimalLayout({
-            containerWidth: roomRect.width,
-            containerHeight: roomRect.height,
+        const { tileWidth, tileHeight, columnCount } = this._computeTessellation({
+            aspectRatio: this.rtcCallViewer.aspectRatio,
+            containerHeight: height,
+            containerWidth: width,
+            tileCount: this.tileContainerRef.el.children.length,
         });
 
-        this.state.tileWidth = width;
-        this.state.tileHeight = height;
+        this.state.tileWidth = tileWidth;
+        this.state.tileHeight = tileHeight;
         this.state.columnCount = columnCount;
     }
 
