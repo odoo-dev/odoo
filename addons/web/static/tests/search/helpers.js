@@ -104,17 +104,15 @@ export async function editConditionOperator(el, index, operator) {
     await triggerEvent(select, null, "change");
 }
 
-export async function editConditionValue(el, index, value) {
+export async function editConditionValue(el, index, value, valueIndex = 0) {
     const condition = findItem(el, `.o_filter_condition`, index);
-    const input = condition.querySelector(".o_generator_menu_value input");
-    if (input) {
-        input.value = value;
-        await triggerEvent(input, null, "input");
-    } else {
-        const select = findItem(condition, ".o_generator_menu_value select");
-        select.value = value;
-        await triggerEvent(select, null, "change");
-    }
+    const target = findItem(
+        condition,
+        ".o_generator_menu_value input,.o_generator_menu_value select",
+        valueIndex
+    );
+    target.value = value;
+    await triggerEvent(target, null, "change");
 }
 
 export async function applyFilter(el) {

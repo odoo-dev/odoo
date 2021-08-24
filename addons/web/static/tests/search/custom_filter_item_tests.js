@@ -1,5 +1,9 @@
 /** @odoo-module **/
 
+import { registerCleanup } from "@web/../tests/helpers/cleanup";
+import { click, patchDate, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { localization } from "@web/core/l10n/localization";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
     addCondition,
     applyFilter,
@@ -15,10 +19,6 @@ import {
     toggleFilterMenu,
     toggleMenuItem,
 } from "./helpers";
-import { click, patchDate, patchWithCleanup, triggerEvent } from "@web/../tests/helpers/utils";
-import { registerCleanup } from "@web/../tests/helpers/cleanup";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { localization } from "@web/core/l10n/localization";
 
 function getDomain(controlPanel) {
     return controlPanel.env.searchModel.domain;
@@ -62,6 +62,7 @@ QUnit.module("Search", (hooks) => {
                             name: "float_field",
                             string: "Floaty McFloatface",
                             type: "float",
+                            digits: [999, 1],
                             searchable: true,
                         },
                         color: {
@@ -152,6 +153,7 @@ QUnit.module("Search", (hooks) => {
                     searchMenuTypes: ["filter"],
                     searchViewFields: {
                         date_field: {
+                            name: "date_field",
                             string: "Date",
                             type: "date",
                             store: true,
@@ -173,7 +175,7 @@ QUnit.module("Search", (hooks) => {
         }
     );
 
-    QUnit.skip("deactivate a new custom filter works", async function (assert) {
+    QUnit.test("deactivate a new custom filter works", async function (assert) {
         assert.expect(4);
 
         patchDate(2020, 1, 5, 12, 20, 0);
@@ -187,6 +189,7 @@ QUnit.module("Search", (hooks) => {
                 searchMenuTypes: ["filter"],
                 searchViewFields: {
                     date_field: {
+                        name: "date_field",
                         string: "Date",
                         type: "date",
                         store: true,
@@ -449,11 +452,11 @@ QUnit.module("Search", (hooks) => {
         }
     );
 
-    QUnit.skip("custom filter datetime with equal operator", async function (assert) {
-        assert.expect(5);
+    QUnit.test("custom filter datetime with equal operator", async function (assert) {
+        assert.expect(4);
 
         const originalZoneName = luxon.Settings.defaultZoneName;
-        luxon.Settings.defaultZoneName = new luxon.FixedOffsetZone.instance(240);
+        luxon.Settings.defaultZoneName = new luxon.FixedOffsetZone.instance(-240);
         registerCleanup(() => {
             luxon.Settings.defaultZoneName = originalZoneName;
         });
@@ -498,11 +501,11 @@ QUnit.module("Search", (hooks) => {
         );
     });
 
-    QUnit.skip("custom filter datetime between operator", async function (assert) {
-        assert.expect(5);
+    QUnit.test("custom filter datetime between operator", async function (assert) {
+        assert.expect(4);
 
         const originalZoneName = luxon.Settings.defaultZoneName;
-        luxon.Settings.defaultZoneName = new luxon.FixedOffsetZone.instance(240);
+        luxon.Settings.defaultZoneName = new luxon.FixedOffsetZone.instance(-240);
         registerCleanup(() => {
             luxon.Settings.defaultZoneName = originalZoneName;
         });
@@ -530,14 +533,8 @@ QUnit.module("Search", (hooks) => {
             "between"
         );
 
-        const [input1, input2] = controlPanel.el.querySelectorAll(
-            ".o_generator_menu_value .o_input"
-        );
-        input1.value = "02/22/2017 11:00:00"; // in TZ
-        await triggerEvent(input1, null, "input");
-        input2.value = "02-22-2017 17:00:00"; // in TZ
-        await triggerEvent(input2, null, "input");
-
+        await editConditionValue(controlPanel, 0, "02/22/2017 11:00:00", 0); // in TZ
+        await editConditionValue(controlPanel, 0, "02-22-2017 17:00:00", 1); // in TZ
         await applyFilter(controlPanel);
 
         assert.deepEqual(
@@ -583,6 +580,7 @@ QUnit.module("Search", (hooks) => {
         // Default values
         await editConditionValue(controlPanel, 0, "0.0");
         assert.strictEqual(floatInput.value, "0.0");
+
         await editConditionValue(controlPanel, 1, "0");
         assert.strictEqual(idInput.value, "0");
 
@@ -592,27 +590,22 @@ QUnit.module("Search", (hooks) => {
 
         await editConditionValue(controlPanel, 0, "DefinitelyValidFloat");
         // "DefinitelyValidFloat" cannot be entered in a input type number so that the input value is reset to 0
-        assert.strictEqual(floatInput.value, "0.0");
+        assert.strictEqual(floatInput.value, "4.2");
 
         // Number parsing
         await editConditionValue(controlPanel, 1, "4");
         assert.strictEqual(idInput.value, "4");
+
         await editConditionValue(controlPanel, 1, "4.2");
         assert.strictEqual(idInput.value, "4");
+
         await editConditionValue(controlPanel, 1, "DefinitelyValidID");
         // "DefinitelyValidID" cannot be entered in a input type number so that the input value is reset to 0
         assert.strictEqual(idInput.value, "0");
     });
 
-    QUnit.skip("input value parsing with language", async function (assert) {
-        /** @todo review parsing */
+    QUnit.test("input value parsing with language", async function (assert) {
         assert.expect(5);
-
-        patchWithCleanup(localization, {
-            decimal_point: ",",
-            thousands_sep: "",
-            grouping: [3, 0],
-        });
 
         const controlPanel = await makeWithSearch(
             { serverData },
@@ -623,6 +616,13 @@ QUnit.module("Search", (hooks) => {
                 searchMenuTypes: ["filter"],
             }
         );
+
+        // Needs to be done after services have been started
+        patchWithCleanup(localization, {
+            decimalPoint: ",",
+            thousandsSep: "",
+            grouping: [3, 0],
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleAddCustomFilter(controlPanel);
@@ -636,17 +636,21 @@ QUnit.module("Search", (hooks) => {
 
         // Float parsing
         await editConditionValue(controlPanel, 0, "4,");
-        assert.strictEqual(floatInput.value, "4,");
+        assert.strictEqual(floatInput.value, "4,0");
+
         await editConditionValue(controlPanel, 0, "4,2");
         assert.strictEqual(floatInput.value, "4,2");
+
         await editConditionValue(controlPanel, 0, "4,2,");
         assert.strictEqual(floatInput.value, "4,2");
+
         await editConditionValue(controlPanel, 0, "DefinitelyValidFloat");
+
         // The input here is a string, resulting in a parsing error instead of 0
         assert.strictEqual(floatInput.value, "4,2");
     });
 
-    QUnit.skip("add custom filter with multiple values", async function (assert) {
+    QUnit.test("add custom filter with multiple values", async function (assert) {
         assert.expect(2);
 
         const controlPanel = await makeWithSearch(
@@ -684,23 +688,24 @@ QUnit.module("Search", (hooks) => {
         const thirdcondition = controlPanel.el.querySelectorAll(".o_filter_condition")[2];
 
         await click(thirdcondition, ".o_generator_menu_delete");
-
         await applyFilter(controlPanel);
+
         assert.deepEqual(getFacetTexts(controlPanel), [
-            'A date is equal to "01/09/1997"',
-            "Boolean Field is true",
-            'Floaty McFloatface is equal to "7.2"',
-            'ID is "9"',
+            [
+                'A date is equal to "01/09/1997"',
+                "Boolean Field is false",
+                'Floaty McFloatface is equal to "7.2"',
+                'ID is "9"',
+            ].join("or"),
         ]);
         assert.deepEqual(getDomain(controlPanel), [
-            "&",
-            [["date_field", "=", "1997-01-09"]],
-            "&",
-            [["boolean_field", "=", true]],
-            "&",
-            [["float_field", "=", 7.2]],
-            "&",
-            [["id", "=", 9]],
+            "|",
+            ["date_field", "=", "1997-01-09"],
+            "|",
+            ["boolean_field", "!=", true],
+            "|",
+            ["float_field", "=", 7.2],
+            ["id", "=", 9],
         ]);
     });
 });

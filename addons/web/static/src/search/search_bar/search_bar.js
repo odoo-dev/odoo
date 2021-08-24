@@ -1,33 +1,17 @@
 /** @odoo-module **/
 
 import { Domain } from "@web/core/domain";
+import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
+import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { parseDate, parseDateTime } from "@web/core/l10n/dates";
-import { parseFloat, parseInteger, parsePercentage } from "@web/fields/parsers";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { fuzzyTest } from "@web/core/utils/search";
 
 const { Component, hooks } = owl;
 const { useExternalListener, useRef, useState } = hooks;
+const parsers = registry.category("parsers");
 
 const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text"];
-
-function getParser(type) {
-    switch (type) {
-        case "date":
-            return parseDate;
-        case "datetime":
-            return parseDateTime;
-        case "float":
-            return parseFloat;
-        case "percentage":
-            return parsePercentage;
-        case "integer":
-            return parseInteger;
-        default:
-            return (str) => str;
-    }
-}
 
 let nextItemId = 1;
 
@@ -143,18 +127,25 @@ export class SearchBar extends Component {
                 continue;
             }
 
-            const parser = getParser(type);
+            const parser = parsers.contains(type) ? parsers.get(type) : (str) => str;
             let value;
             try {
-                /** @todo check date/datetime processing */
-                if (type === "date") {
-                    value = parser(trimmedQuery, { timezone: true })
-                        .setLocale("en")
-                        .toFormat("yyyy-MM-dd");
-                } else if (type === "datetime") {
-                    value = parser(trimmedQuery, { timezone: true }).toJSON();
-                } else {
-                    value = parser(trimmedQuery);
+                switch (type) {
+                    case "date": {
+                        value = serializeDate(parser(trimmedQuery, { timezone: false }));
+                        break;
+                    }
+                    case "datetime": {
+                        value = serializeDateTime(parser(trimmedQuery, { timezone: true }));
+                        break;
+                    }
+                    case "many2one": {
+                        value = trimmedQuery;
+                        break;
+                    }
+                    default: {
+                        value = parser(trimmedQuery);
+                    }
                 }
             } catch (e) {
                 continue;
@@ -195,7 +186,9 @@ export class SearchBar extends Component {
         if (searchItem.domain) {
             try {
                 domain = new Domain(searchItem.domain).toList();
-            } catch (e) {}
+            } catch (e) {
+                // Pass
+            }
         }
         const options = await this.orm.call(field.relation, "name_search", domain, {
             context: field.context,
@@ -296,14 +289,15 @@ export class SearchBar extends Component {
      */
     onFacetKeydown(facet, facetIndex, ev) {
         switch (ev.key) {
-            case "ArrowLeft":
+            case "ArrowLeft": {
                 if (facetIndex === 0) {
                     this.inputRef.el.focus();
                 } else {
                     this.focusFacet(facetIndex - 1);
                 }
                 break;
-            case "ArrowRight":
+            }
+            case "ArrowRight": {
                 const facets = this.el.getElementsByClassName("o_searchview_facet");
                 if (facetIndex === facets.length - 1) {
                     this.inputRef.el.focus();
@@ -311,9 +305,11 @@ export class SearchBar extends Component {
                     this.focusFacet(facetIndex + 1);
                 }
                 break;
-            case "Backspace":
+            }
+            case "Backspace": {
                 this.removeFacet(facet);
                 break;
+            }
         }
     }
 

@@ -30,8 +30,7 @@
                         />
                     </select>
                     <span t-if="!('value' in selectedOperator)" class="o_generator_menu_value">
-                        <t t-if="false"/>
-                        <!-- <t t-if="fieldType === 'date'">
+                        <t t-if="fieldType === 'date'">
                             <DatePicker
                                 date="condition.value[0]"
                                 t-on-datetime-changed="onDateChanged(condition, 0)"
@@ -50,16 +49,16 @@
                                 date="condition.value[1]"
                                 t-on-datetime-changed="onDateChanged(condition, 1)"
                             />
-                        </t> -->
+                        </t>
                         <select t-elif="fieldType === 'selection'" class="o_input"
-                            t-on-change="onValueInput(condition)"
+                            t-on-change="onValueChange(condition)"
                             >
                             <option t-foreach="fields[condition.field].selection" t-as="option" t-key="option_index"
                                 t-att-value="option[0]"
                                 t-esc="option[1]"
                             />
                         </select>
-                        <!-- @todo (DAM) I think that the localization should be better consisered below --> 
+                        <!-- @todo (DAM) I think that the localization should be better consisered below -->
                         <input t-elif="fieldType === 'float'"
                             class="o_input"
                             step="0.01"
@@ -67,20 +66,20 @@
                             t-attf-title="Number using {{ DECIMAL_POINT }} as decimal separator."
                             t-attf-pattern="[0-9]+([\\{{ DECIMAL_POINT }}][0-9]+)?"
                             t-att-value="condition.displayedValue"
-                            t-on-input="onValueInput(condition)"
+                            t-on-change="onValueChange(condition)"
                         />
                         <input t-elif="['integer', 'id'].includes(fieldType)"
                             class="o_input"
                             step="1"
                             type="number"
                             t-att-value="condition.displayedValue"
-                            t-on-input="onValueInput(condition)"
+                            t-on-change="onValueChange(condition)"
                         />
                         <input t-else=""
                             type="text"
                             class="o_input"
                             t-att-value="condition.displayedValue"
-                            t-on-input="onValueInput(condition)"
+                            t-on-change="onValueChange(condition)"
                         />
                     </span>
                     <i t-if="conditions.length gt 1"

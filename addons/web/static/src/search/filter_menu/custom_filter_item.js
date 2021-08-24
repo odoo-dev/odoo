@@ -1,15 +1,18 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
+import { DatePicker, DateTimePicker } from "@web/core/datepicker/datepicker";
 import { Domain } from "@web/core/domain";
-import { localization } from "@web/core/l10n/localization";
-import { parseDate, parseDateTime } from "@web/core/l10n/dates";
-import { parseFloat, parseInteger, parsePercentage } from "@web/fields/parsers";
+import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
+import { _lt } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
 
 const { Component, hooks } = owl;
 const { useState } = hooks;
 
 const { DateTime } = luxon;
+
+const formatters = registry.category("formatters");
+const parsers = registry.category("parsers");
 
 const FIELD_TYPES = {
     boolean: "boolean",
@@ -83,34 +86,34 @@ const FIELD_OPERATORS = {
     ],
 };
 
-function getParser(type) {
-    switch (type) {
-        case "date":
-            return parseDate;
-        case "datetime":
-            return parseDateTime;
-        case "float":
-            return parseFloat;
-        case "percentage":
-            return parsePercentage;
-        case "integer":
-            return parseInteger;
-        default:
-            return (str) => str;
+const parseField = (field, value, opts = {}) => {
+    if (FIELD_TYPES[field.type] === "char") {
+        return value;
     }
-}
+    const type = field.type === "id" ? "integer" : field.type;
+    const parse = parsers.contains(type) ? parsers.get(type) : (v) => v;
+    return parse(value, { field, ...opts });
+};
+
+const formatField = (field, value, opts = {}) => {
+    if (FIELD_TYPES[field.type] === "char") {
+        return value;
+    }
+    const type = field.type === "id" ? "integer" : field.type;
+    const format = formatters.contains(type) ? formatters.get(type) : (v) => v;
+    return format(value, { field, ...opts });
+};
 
 export class CustomFilterItem extends Component {
     setup() {
         this.conditions = useState([]);
         // Format, filter and sort the fields props
         this.fields = Object.values(this.env.searchModel.searchViewFields)
-            .filter((field) => this._validateField(field))
+            .filter((field) => this.validateField(field))
             .concat({ string: "ID", type: "id", name: "id" })
             .sort(({ string: a }, { string: b }) => (a > b ? 1 : a < b ? -1 : 0));
 
         // Give access to constants variables to the template.
-        this.DECIMAL_POINT = localization.decimalPoint;
         this.OPERATORS = FIELD_OPERATORS;
         this.FIELD_TYPES = FIELD_TYPES;
 
@@ -119,7 +122,7 @@ export class CustomFilterItem extends Component {
     }
 
     //---------------------------------------------------------------------
-    // Private
+    // Protected
     //---------------------------------------------------------------------
 
     /**
@@ -144,7 +147,7 @@ export class CustomFilterItem extends Component {
      * @param {Object} field
      * @returns {boolean}
      */
-    _validateField(field) {
+    validateField(field) {
         return (
             !field.deprecated && field.searchable && FIELD_TYPES[field.type] && field.name !== "id"
         );
@@ -154,39 +157,42 @@ export class CustomFilterItem extends Component {
      * @param {Object} condition
      */
     setDefaultValue(condition) {
-        const fieldType = this.fields[condition.field].type;
-        const genericType = FIELD_TYPES[fieldType];
+        const field = this.fields[condition.field];
+        const genericType = FIELD_TYPES[field.type];
         const operator = FIELD_OPERATORS[genericType][condition.operator];
         // Logical value
         switch (genericType) {
             case "id":
-            case "number":
+            case "number": {
                 condition.value = 0;
                 break;
-            case "date":
+            }
+            case "date": {
                 condition.value = [DateTime.local()];
                 if (operator.symbol === "between") {
                     condition.value.push(DateTime.local());
                 }
                 break;
-            case "datetime":
+            }
+            case "datetime": {
                 condition.value = [DateTime.fromFormat("00:00:00", "hh:mm:ss")];
                 if (operator.symbol === "between") {
                     condition.value.push(DateTime.fromFormat("23:59:59", "hh:mm:ss"));
                 }
                 break;
-            case "selection":
+            }
+            case "selection": {
                 const [firstValue] = this.fields[condition.field].selection[0];
                 condition.value = firstValue;
                 break;
-            default:
+            }
+            default: {
                 condition.value = "";
+            }
         }
-        // Displayed value
-        if (["float", "monetary"].includes(fieldType)) {
-            condition.displayedValue = `0${this.DECIMAL_POINT}0`;
-        } else {
-            condition.displayedValue = String(condition.value);
+        // Displayed value (no needed for dates: they are handled by the DatePicker component)
+        if (!["date", "datetime"].includes(field.type)) {
+            condition.displayedValue = formatField(field, condition.value);
         }
     }
 
@@ -200,8 +206,8 @@ export class CustomFilterItem extends Component {
     onApply() {
         const preFilters = this.conditions.map((condition) => {
             const field = this.fields[condition.field];
-            const type = this.FIELD_TYPES[field.type];
-            const operator = this.OPERATORS[type][condition.operator];
+            const genericType = this.FIELD_TYPES[field.type];
+            const operator = this.OPERATORS[genericType][condition.operator];
             const descriptionArray = [field.string, operator.description.toString()];
             const domainArray = [];
             let domainValue;
@@ -209,18 +215,14 @@ export class CustomFilterItem extends Component {
             if ("value" in operator) {
                 domainValue = [operator.value];
                 // No description to push here
-            } else if (["date", "datetime"].includes(type)) {
-                /** @todo rework datepicker before that */
-                const parser = getParser(type);
-                domainValue = condition.value.map((val) => parser(val, { timezone: false }));
-                const dateValue = condition.value.map((val) => parser(val, { timezone: true }));
-                const dateDescription = dateValue.map((val) => {
-                    if (type === "datetime") {
-                        return val.toJSON();
-                    }
-                    return val.toFormat("yyyy-MM-dd");
-                });
-                descriptionArray.push(`"${dateDescription.join(" " + this.env._t("and") + " ")}"`);
+            } else if (["date", "datetime"].includes(genericType)) {
+                const serialize = genericType === "date" ? serializeDate : serializeDateTime;
+                domainValue = condition.value.map(serialize);
+                descriptionArray.push(
+                    `"${condition.value
+                        .map((val) => formatField(field, val, { timezone: true }))
+                        .join(" " + this.env._t("and") + " ")}"`
+                );
             } else {
                 domainValue = [condition.value];
                 descriptionArray.push(`"${condition.value}"`);
@@ -293,30 +295,23 @@ export class CustomFilterItem extends Component {
      * @param {Object} condition
      * @param {Event} ev
      */
-    onValueInput(condition, ev) {
+    onValueChange(condition, ev) {
         if (!ev.target.value) {
             return this.setDefaultValue(condition);
         }
-        let { type } = this.fields[condition.field];
-        if (type === "id") {
-            type = "integer";
+        const field = this.fields[condition.field];
+        try {
+            const parsed = parseField(field, ev.target.value);
+            const formatted = formatField(field, parsed);
+            // Only updates values if it can be correctly parsed and formatted.
+            condition.value = parsed;
+            condition.displayedValue = formatted;
+        } catch (err) {
+            // Parsing error: nothing is done
         }
-        if (FIELD_TYPES[type] === "number") {
-            try {
-                // Write logical value into the 'value' property
-                condition.value = getParser(type)(ev.target.value);
-                // Write displayed value in the input and 'displayedValue' property
-                condition.displayedValue = ev.target.value;
-            } catch (err) {
-                // Parsing error: reverts to previous value
-                ev.target.value = condition.displayedValue;
-            }
-        } else {
-            condition.value = condition.displayedValue = ev.target.value;
-        }
+        ev.target.value = condition.displayedValue;
     }
 }
 
-// CustomFilterItem.components = { DatePicker, DateTimePicker };
-
+CustomFilterItem.components = { DatePicker, DateTimePicker };
 CustomFilterItem.template = "web.CustomFilterItem";
