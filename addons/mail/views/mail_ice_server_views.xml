@@ -6,7 +6,7 @@
             <field name="model">mail.ice.server</field>
             <field name="arch" type="xml">
                 <tree editable="bottom">
-                    <field colspan="1" name="type"/>
+                    <field colspan="1" name="server_type"/>
                     <field name="uri"/>
                     <field name="username"/>
                     <field name="credential"/>
@@ -23,7 +23,7 @@
                         <group>
                             <label for="uri"/>
                             <div class="oe_inline" name="URI" style="display: inline;">
-                                <field name="type" class="oe_inline"/><field name="uri" class="oe_inline"/>
+                                <field name="server_type" class="oe_inline"/><field name="uri" class="oe_inline"/>
                             </div>
                         </group>
                         <group>

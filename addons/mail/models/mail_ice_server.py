@@ -10,8 +10,9 @@ class MailIceServer(models.Model):
     _name = 'mail.ice.server'
     _description = 'ICE server'
 
-    type = fields.Selection([('stun', 'stun:'), ('turn', 'turn:')],
-                            string='Type', required=True, default='stun')
+    server_type = fields.Selection(
+        [('stun', 'stun:'), ('turn', 'turn:')], string='Type', required=True, default='stun'
+    )
     uri = fields.Char('URI', required=True)
     username = fields.Char()
     credential = fields.Char()
@@ -21,11 +22,11 @@ class MailIceServer(models.Model):
         :return: List of up to 5 dict, each of which representing a stun or turn server
         """
         # firefox has a hard cap of 5 ice servers
-        ice_servers = self.search_read([], ['type', 'uri', 'username', 'credential'], limit=5)
+        ice_servers = self.sudo().search_read([], ['server_type', 'uri', 'username', 'credential'], limit=5)
         formatted_ice_servers = []
         for ice_server in ice_servers:
             formatted_ice_server = {
-                'urls': '%s:%s' % (ice_server['type'], ice_server['uri']),
+                'urls': '%s:%s' % (ice_server['server_type'], ice_server['uri']),
             }
             if ice_server['username']:
                 formatted_ice_server['username'] = ice_server['username']
