@@ -17,21 +17,21 @@ class MailIceServer(models.Model):
     username = fields.Char()
     credential = fields.Char()
 
-    def get_local_ice_servers(self):
+    def _get_local_ice_servers(self):
         """
         :return: List of up to 5 dict, each of which representing a stun or turn server
         """
         # firefox has a hard cap of 5 ice servers
-        ice_servers = self.sudo().search_read([], ['server_type', 'uri', 'username', 'credential'], limit=5)
+        ice_servers = self.sudo().search([], limit=5)
         formatted_ice_servers = []
         for ice_server in ice_servers:
             formatted_ice_server = {
-                'urls': '%s:%s' % (ice_server['server_type'], ice_server['uri']),
+                'urls': '%s:%s' % (ice_server.server_type, ice_server.uri),
             }
-            if ice_server['username']:
-                formatted_ice_server['username'] = ice_server['username']
-            if ice_server['credential']:
-                formatted_ice_server['credential'] = ice_server['credential']
+            if ice_server.username:
+                formatted_ice_server['username'] = ice_server.username
+            if ice_server.credential:
+                formatted_ice_server['credential'] = ice_server.credential
             formatted_ice_servers.append(formatted_ice_server)
         return formatted_ice_servers
 
@@ -53,13 +53,9 @@ class MailIceServer(models.Model):
             (account_sid, auth_token) = self._get_twilio_credentials()
             if account_sid and auth_token:
                 url = 'https://api.twilio.com/2010-04-01/Accounts/%s/Tokens.json' % account_sid
-                response = requests.request('POST', url, auth=(account_sid, auth_token), headers={
-                    'Accept-Charset': 'utf-8',
-                    'Content-type': 'application/x-www-form-urlencoded',
-                    'Accept': 'application/json',
-                }, timeout=60)
-                if response.status_code in [200, 201]:
-                    response_content = json.loads(response.content)
+                response = requests.post(url, auth=(account_sid, auth_token), timeout=60)
+                if response.ok:
+                    response_content = response.json()
                     if response_content:
                         return response_content['ice_servers']
-        return self.get_local_ice_servers()
+        return self._get_local_ice_servers()

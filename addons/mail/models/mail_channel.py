@@ -391,7 +391,7 @@ class Channel(models.Model):
         self.env['bus.bus'].sendmany(notifications)
 
     def _join_call(self):
-        session_data, session_id = self._update_call_participation(True)
+        session_data, session_id = self._update_call_participation(joining=True)
         ice_servers = self.env['mail.ice.server']._get_ice_servers()
         if len(self.rtc_sessions) == 1 and self.channel_type in ['chat', 'group']:
             self._invite_members_to_rtc()
@@ -402,14 +402,14 @@ class Channel(models.Model):
         }
 
     def _leave_call(self, session_id=None):
-        self._update_call_participation(False, session_id=session_id)
+        self._update_call_participation(joining=False, session_id=session_id)
 
-    def _update_call_participation(self, join_call, session_id=None):
+    def _update_call_participation(self, joining=True, session_id=None):
         """ Updates the call participation of the current partner and notifies members of
             the channel if necessary.
 
-            :param join_call : boolean true if joining the call, false if leaving.
-            :param session_id : int to be provided if leaving the call
+            :param bool joining : true if joining the call, false if leaving.
+            :param int session_id : to be provided if leaving the call
 
             Leaving the call without providing a session_id will only cancel the
             invitation.
@@ -421,7 +421,7 @@ class Channel(models.Model):
         if not current_channel_partner:
             return
         current_channel_partner.rtc_ringing_partner_id = False
-        if join_call:
+        if joining:
             current_partner_id = self.env.user.partner_id.id
             old_sessions = self.rtc_sessions.filtered(lambda session: session.partner_id.id == current_partner_id)
             old_sessions._disconnect()

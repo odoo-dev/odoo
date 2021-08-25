@@ -10,8 +10,9 @@ class MailRtcSession(models.Model):
     _name = 'mail.rtc.session'
     _description = 'Mail RTC session'
 
-    channel_id = fields.Many2one('mail.channel', ondelete='cascade', required=True)
+    channel_id = fields.Many2one('mail.channel', index=True, required=True, ondelete='cascade')
     partner_id = fields.Many2one('res.partner', index=True, required=True, ondelete='cascade')
+    write_date = fields.Datetime("Last Updated On", index=True)
 
     is_screen_sharing_on = fields.Boolean()
     is_camera_on = fields.Boolean()
@@ -88,7 +89,7 @@ class MailRtcSession(models.Model):
         if not self.exists() or self.env.user.partner_id != self.partner_id:
             return
         notifications = []
-        target_sessions = self.search([('id', 'in', [int(target) for target in targets])])
+        target_sessions = self.search([('id', 'in', [int(target) for target in targets]), ('channel_id', '=', self.channel_id.id)])
         for session in target_sessions:
             notifications.append([
                 (self._cr.dbname, 'res.partner', session.partner_id.id),

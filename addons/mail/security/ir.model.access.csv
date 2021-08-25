@@ -55,4 +55,3 @@ access_mail_ice_server_user,mail.ice.server.user,model_mail_ice_server,base.grou
 access_mail_ice_server_system,mail.ice.server.system,model_mail_ice_server,base.group_system,1,1,1,1
 access_mail_rtc_session_all,mail.rtc.session.all,model_mail_rtc_session,,1,0,0,0
 access_mail_rtc_session_user,mail.rtc.session.user,model_mail_rtc_session,base.group_user,1,1,1,1
-access_mail_rtc_session_system,mail.rtc.session.system,model_mail_rtc_session,base.group_system,1,1,1,1
