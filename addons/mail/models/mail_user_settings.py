@@ -59,7 +59,6 @@ class MailUserSettings(models.Model):
 
     def set_volume_setting(self, partner_id, volume):
         self.ensure_one()
-        volume_setting = None
         volume_settings = self.volume_settings_ids.filtered(lambda record: record.partner_id.id == partner_id)
         if volume_settings:
             volume_setting = volume_settings[0]

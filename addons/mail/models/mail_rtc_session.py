@@ -126,8 +126,7 @@ class MailRtcSession(models.Model):
     def _mail_rtc_session_format_by_channel(self):
         data = {}
         for record in self:
-            data.setdefault(record.channel_id.id, [])
-            data[record.channel_id.id].append({
+            data.setdefault(record.channel_id.id, []).append({
                 'id': record.id,
                 'partner': {
                     'id': record.partner_id.id,
