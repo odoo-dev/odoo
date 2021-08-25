@@ -87,13 +87,7 @@ function factory(dependencies) {
              *  timeoutId for the push to talk release delay.
              */
             this._pushToTalkTimeoutId = undefined;
-            /**
-             * PermissionStatus object for the microphone, contains information
-             * regarding the microphone access granted by the browser.
-             */
-            this._microphonePermissionStatus = undefined;
 
-            this._onMicrophonePermissionStatusChange = this._onMicrophonePermissionStatusChange.bind(this);
             this._onKeyDown = this._onKeyDown.bind(this);
             this._onKeyUp = this._onKeyUp.bind(this);
             browser.addEventListener('keydown', this._onKeyDown);
@@ -218,20 +212,10 @@ function factory(dependencies) {
                 iceServers: iceServers || this.iceServers,
             });
 
-            await this.updateLocalAudioTrack(startWithAudio);
-            if (browser.navigator.permissions && browser.navigator.permissions.query) {
-                try {
-                    this._microphonePermissionStatus = this._microphonePermissionStatus || await browser.navigator.permissions.query({ name: 'microphone' });
-                    this._microphonePermissionStatus.addEventListener('change', this._onMicrophonePermissionStatusChange);
-                } catch (e) {
-                    // permission query or microphone status may not be supported by this browser, experimental feature.
-                }
-            }
-            if (startWithVideo) {
-                await this._toggleVideoBroadcast({ type: 'user-video' });
-            }
             console.log(`init session: ${this.channel.rtcSessions.length} members in call`);
-            this._callAllSessions();
+            await this._callAllSessions();
+            await this.updateLocalAudioTrack(startWithAudio);
+            startWithVideo && await this._toggleVideoBroadcast({ type: videoType });
         }
 
         /**
@@ -252,7 +236,6 @@ function factory(dependencies) {
             }
 
             this._audioMonitor && this._audioMonitor.disconnect();
-            this._microphonePermissionStatus && this._microphonePermissionStatus.removeEventListener('change', this._onMicrophonePermissionStatusChange);
             this.videoTrack && this.videoTrack.stop();
             this.audioTrack && this.audioTrack.stop();
 
@@ -1091,20 +1074,6 @@ function factory(dependencies) {
                 },
                 this.messaging.userSetting.voiceActiveDuration || 0,
             );
-        }
-
-        /**
-         * Updates the muted state and the local audio track
-         * based on the permission status.
-         *
-         * @private
-         * @param {event} ev
-         */
-        async _onMicrophonePermissionStatusChange(ev) {
-            const canRequest = ev.target.state !== 'denied';
-            this.currentRtcSession.updateAndBroadcast({ isMuted: !canRequest });
-            await this.updateLocalAudioTrack(canRequest);
-            await this.async(() => this._updateLocalAudioTrackEnabledState());
         }
 
     }
