@@ -46,9 +46,6 @@ function factory(dependencies) {
             if ('is_muted' in data) {
                 data2.isMuted = data.is_muted;
             }
-            if ('peer_token' in data) {
-                data2.peerToken = data.peer_token;
-            }
             if ('im_status' in data) {
                 data2.im_status = data.im_status;
             }
@@ -445,14 +442,6 @@ function factory(dependencies) {
             return this.name || this.display_name;
         }
 
-        /**
-         * @private
-         * @returns {string}
-         */
-        _computePeerToken() {
-            return String(this.id);
-        }
-
     }
 
     Partner.fields = {
@@ -484,9 +473,6 @@ function factory(dependencies) {
         }),
         id: attr({
             required: true,
-        }),
-        peerToken: attr({
-            compute: '_computePeerToken',
         }),
         im_status: attr(),
         /**
