@@ -190,7 +190,7 @@ export class GraphRenderer extends Component {
         } catch (e) {
             console.log("value:", value);
             console.log("allIntegers:", allIntegers);
-            throw e;
+            // throw e;
         }
     }
 
