@@ -288,7 +288,6 @@ function factory(dependencies) {
             if (this.mailRtc) {
                 this.mailRtc.reset();
                 this.messaging.soundEffects.channelLeave.play({ volume: 0.15 });
-                this.messaging.update({ focusedRtcSession: unlink() });
                 this.messaging.userSetting.toggleFullScreen(false);
             }
             this.update({

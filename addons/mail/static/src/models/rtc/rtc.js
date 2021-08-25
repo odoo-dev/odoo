@@ -628,9 +628,6 @@ function factory(dependencies) {
                 });
             }
             if (type === 'video' && isSendingVideo === false) {
-                if (this.messaging.focusedRtcSession === rtcSession) {
-                    this.messaging.toggleFocusedRtcSession();
-                }
                 rtcSession.removeVideo({ stopTracks: false });
             }
         }
@@ -839,9 +836,6 @@ function factory(dependencies) {
                 await this._updateLocalVideoTrack(type, sendDisplay);
             }
             if (!this.videoTrack) {
-                if (this.messaging.focusedRtcSession === this.currentRtcSession) {
-                    this.messaging.toggleFocusedRtcSession();
-                }
                 this.currentRtcSession.removeVideo();
             } else {
                 this._updateExternalSessionTrack(this.videoTrack, this.currentRtcSession.peerToken);

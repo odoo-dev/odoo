@@ -4,7 +4,8 @@ import { browser } from "@web/core/browser/browser";
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2one, one2one } from '@mail/model/model_field';
-import { clear, insert } from '@mail/model/model_field_command';
+import { clear, insert, unlink } from '@mail/model/model_field_command';
+import { OnChange } from '@mail/model/model_onchange';
 
 function factory(dependencies) {
 
@@ -283,6 +284,15 @@ function factory(dependencies) {
         }
 
         /**
+         * @private
+         */
+        _onChangeVideoStream() {
+            if (!this.videoStream) {
+                this.update({ focusingMessaging: unlink() });
+            }
+        }
+
+        /**
          * cleanly removes the audio stream of the session
          *
          * @private
@@ -334,6 +344,13 @@ function factory(dependencies) {
          */
         connectionState: attr({
             default: 'Waiting for the peer to send a RTC offer',
+        }),
+        /**
+         * If this field is set, this session is 'focused' which means that it will
+         * be displayed as the main session.
+         */
+        focusingMessaging: one2one('mail.messaging', {
+            inverse: 'focusedRtcSession',
         }),
         /**
          * Id of the record on the server.
@@ -430,6 +447,12 @@ function factory(dependencies) {
             compute: '_computeVolume',
         }),
     };
+    RtcSession.onChanges = [
+        new OnChange({
+            dependencies: ['videoStream'],
+            methodName: '_onChangeVideoStream',
+        }),
+    ];
 
     RtcSession.modelName = 'mail.rtc_session';
 

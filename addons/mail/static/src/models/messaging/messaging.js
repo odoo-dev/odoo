@@ -314,7 +314,9 @@ function factory(dependencies) {
             isCausal: true,
             readonly: true,
         }),
-        focusedRtcSession: one2one('mail.rtc_session'),
+        focusedRtcSession: one2one('mail.rtc_session', {
+            inverse: 'focusingMessaging',
+        }),
         /**
          * Mailbox History.
          */
