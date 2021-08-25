@@ -17,11 +17,9 @@ const TRANSCEIVER_ORDER = ['audio', 'video'];
 /**
  * FP/AL Feedback:
  * TODO IMP show invited members in the call_viewer, may not be trivial, need a model
- *      for the call participant cards, which should also show invitations. And notify
- *      members of the updated invitation list.
- * TODO IMP when moving from a DM to a group DM, transfer RTC sessions from one channel to the other
- *      may not be trivial but it should be "just" about changing channel_id of the mail.rtc.session's
- *      on both client and server side + updating channel_id of mail.rtc (maybe more to do).
+ *      for the call participant cards, which should also show invitations. the call_viewer
+ *      should probably compute both the main card list (for the grid/sidebar), and the focused
+ *      card separately.
  * TODO IMP nice-to-have (since the browser already allows that)? Pick the video input device like we pick
  *      the audio input device, should be pretty trivial.
  *
@@ -144,7 +142,7 @@ function factory(dependencies) {
             console.log(`MEMBERS UPDATE: ${currentSessions.length} members in call`);
             const currentSessionsTokens = new Set(currentSessions.map(session => session.peerToken));
             if (this.currentRtcSession && !currentSessionsTokens.has(this.currentRtcSession.peerToken)) {
-                // if the current RTC session is not in the channel session, this call is no longer valid.
+                // if the current RTC session is not in the channel sessions, this call is no longer valid.
                 this.channel && this.channel.endCall();
                 return;
             }
@@ -203,8 +201,9 @@ function factory(dependencies) {
          * @param {Array<Object>} [param0.iceServers]
          * @param {boolean} [param0.startWithAudio]
          * @param {boolean} [param0.startWithVideo]
+         * @param {boolean} [param0.videoType] 'user-video' or 'display'
          */
-        async initSession({ currentSessionId, iceServers, startWithAudio, startWithVideo }) {
+        async initSession({ currentSessionId, iceServers, startWithAudio, startWithVideo, videoType = 'user-video' }) {
             // Initializing a new session implies closing the current session.
             this.reset();
             this.update({
@@ -212,7 +211,6 @@ function factory(dependencies) {
                 iceServers: iceServers || this.iceServers,
             });
 
-            console.log(`init session: ${this.channel.rtcSessions.length} members in call`);
             await this._callAllSessions();
             await this.updateLocalAudioTrack(startWithAudio);
             startWithVideo && await this._toggleVideoBroadcast({ type: videoType });
@@ -305,6 +303,7 @@ function factory(dependencies) {
                     const audioStream = await browser.navigator.mediaDevices.getUserMedia({ audio: this.messaging.userSetting.getAudioConstraints() });
                     audioTrack = audioStream.getAudioTracks()[0];
                     audioTrack.addEventListener('ended', async () => {
+                        // this mostly happens when the user retracts microphone permission.
                         await this.async(() => this.updateLocalAudioTrack(false));
                         this.currentRtcSession.updateAndBroadcast({ isMuted: true });
                         await this.async(() => this._updateLocalAudioTrackEnabledState());

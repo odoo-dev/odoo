@@ -3,7 +3,6 @@
 
 from odoo import fields, models
 import requests
-import json
 
 
 class MailIceServer(models.Model):

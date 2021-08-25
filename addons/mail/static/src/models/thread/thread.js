@@ -761,8 +761,9 @@ function factory(dependencies) {
         /**
          * @param {Object} [param0]
          * @param {boolean} [param0.startWithVideo] whether or not to start the call with the video
+         * @param {boolean} [param0.videoType] type of the video: 'user-video' or 'display'
          */
-        async _joinCall({ startWithVideo = false } = {}) {
+        async _joinCall({ startWithVideo = false, videoType } = {}) {
             if (this.model !== 'mail.channel') {
                 return;
             }
@@ -794,6 +795,7 @@ function factory(dependencies) {
                 iceServers,
                 startWithAudio: true,
                 startWithVideo,
+                videoType,
             }));
             this.messaging.soundEffects.channelJoin.play();
         }
