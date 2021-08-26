@@ -56,7 +56,7 @@ class MailRtcSession(models.Model):
         ])
         if not sessions:
             return
-        channel_ids = sessions.mapped('channel_id')
+        channel_ids = sessions.channel_id
         sessions.unlink()
         channel_ids._notify_rtc_sessions_change()
 

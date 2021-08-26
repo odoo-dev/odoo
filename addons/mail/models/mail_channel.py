@@ -343,7 +343,7 @@ class Channel(models.Model):
             'rtc_ringing_partner_id': False
         })
         notifications = []
-        for partner in invited_members.mapped('partner_id'):
+        for partner in invited_members.partner_id:
             notifications.append([
                 (self._cr.dbname, 'res.partner', partner.id),
                 {
@@ -438,7 +438,7 @@ class Channel(models.Model):
         return session_data_by_channel.get(self.id, []), new_session_id
 
     def _notify_rtc_sessions_change(self):
-        session_data_by_channel = self.mapped('rtc_sessions')._mail_rtc_session_format_by_channel()
+        session_data_by_channel = self.rtc_sessions._mail_rtc_session_format_by_channel()
         notifications = []
         for record in self:
             sessions_data = session_data_by_channel.get(record.id, [])
@@ -666,7 +666,7 @@ class Channel(models.Model):
         if not self:
             return []
         channel_infos = []
-        rtc_sessions_by_channel = self.mapped('rtc_sessions')._mail_rtc_session_format_by_channel()
+        rtc_sessions_by_channel = self.rtc_sessions._mail_rtc_session_format_by_channel()
         channel_last_message_ids = dict((r['id'], r['message_id']) for r in self._channel_last_message_ids())
         for channel in self:
             info = {
