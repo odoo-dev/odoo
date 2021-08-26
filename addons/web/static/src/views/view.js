@@ -33,7 +33,7 @@ const { Component } = owl;
  *  @property {string[]} [groupBy]
  *  @property {string[]} [orderBy]
  *
- *  @property {number|false} [actionId=false]
+ *  @property {Object} [action={}]
  *  @property {Object} [actionFlags={}]
  *  @property {string} [displayName]
  *
@@ -78,7 +78,7 @@ const STANDARD_PROPS = new Set([
     "groupBy",
     "orderBy",
 
-    "actionId",
+    "action",
     "actionFlags",
     "displayName",
 
@@ -145,7 +145,7 @@ export class View extends Component {
         // searchViewId will remains undefined if loadSearchView=false
 
         // prepare view description
-        const { actionId, context, resModel, loadActionMenus, loadIrFilters } = this.props;
+        const { action, context, resModel, loadActionMenus, loadIrFilters } = this.props;
         let { arch, fields, searchViewArch, searchViewFields, irFilters, actionMenus } = this.props;
 
         let loadView = !arch || (!actionMenus && loadActionMenus);
@@ -159,7 +159,7 @@ export class View extends Component {
             // a loadViews is done to complete the missing information
             const viewDescriptions = await this.viewService.loadViews(
                 { context, resModel, views },
-                { actionId, loadActionMenus, loadIrFilters }
+                { actionId: action.id, loadActionMenus, loadIrFilters }
             );
             // Note: if this.props.views is different from views, the cached descriptions
             // will certainly not be reused! (but for the standard flow this will work as
@@ -207,7 +207,7 @@ export class View extends Component {
         let viewProps = {
             info: {
                 actionFlags: this.props.actionFlags,
-                actionId: this.props.actionId,
+                action: this.props.action,
                 viewId: viewDescription.viewId,
                 views,
                 mode: this.props.display.mode,
@@ -252,6 +252,7 @@ export class View extends Component {
         Object.assign(this.withSearchProps, {
             Component: ViewClass,
             componentProps: viewProps,
+            view: { id: viewId, type },
         });
 
         if (searchViewId !== undefined) {
@@ -305,7 +306,7 @@ export class View extends Component {
 View.template = "web.View";
 View.components = { WithSearch };
 View.defaultProps = {
-    actionId: false,
+    action: { id: false },
     display: {},
     context: {},
     actionFlags: {},
@@ -326,7 +327,7 @@ View.searchMenuTypes = ["filter", "groupBy", "favorite"];
 
 /**
  * To manage (how?):
- * 
+ *
   Relate to search
       searchModel // search model state (searchItems, query)
       searchPanel // search panel component state (expanded (hierarchy), scrollbar)
