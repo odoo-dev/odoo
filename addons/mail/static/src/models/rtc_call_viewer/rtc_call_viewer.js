@@ -4,6 +4,7 @@ import { browser } from "@web/core/browser/browser";
 
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, one2one } from '@mail/model/model_field';
+import { insert, insertAndReplace, link, unlink } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -124,6 +125,49 @@ function factory(dependencies) {
             this._debounce(() => {
                 this.update({ showOverlay: false });
             }, { delay: 3000 });
+        }
+
+        /**
+         * @private
+         * TODO Field
+         */
+        _computeMainCard() {
+            if (this.messaging.focusedRtcSession && this.messaging.focusedRtcSession.channel === this.threadView.thread) {
+                return insert({
+                    relationalId: `rtc_session_${this.messaging.focusedRtcSession.localId}`,
+                    rtcSession: link(this.messaging.focusedRtcSession),
+                    channel: link(this.threadView.thread),
+                });
+            }
+            return unlink();
+        }
+
+        /**
+         * @private
+         * TODO Field
+         */
+        _computeTileCards() {
+            const tileCards = [];
+            const sessionPartners = new Set();
+            for (const rtcSession in this.threadView.thread.rtcSessions) {
+                rtcSession.partner && sessionPartners.add(rtcSession.partner.id);
+                tileCards.push({
+                    relationalId: `rtc_session_${rtcSession.localId}`,
+                    rtcSession: link(this.messaging.focusedRtcSession),
+                    channel: link(this.threadView.thread),
+                });
+            }
+            for (const partner in this.threadView.thread.invitedPartners) {
+                if (sessionPartners.has(partner.id)) {
+                    continue;
+                }
+                tileCards.push({
+                    relationalId: `invited_partner_${partner.localId}`,
+                    invitedPartner: link(partner),
+                    channel: link(this.threadView.thread),
+                });
+            }
+            return insertAndReplace(tileCards);
         }
 
     }

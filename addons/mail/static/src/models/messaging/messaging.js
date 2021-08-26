@@ -233,7 +233,7 @@ function factory(dependencies) {
          * @returns {mail.partner[]}
          */
         _computeRingingThreads() {
-            const threads = this.messaging.models['mail.thread'].all().filter(thread => !!thread.rtcRingingPartner);
+            const threads = this.messaging.models['mail.thread'].all().filter(thread => !!thread.rtcInvitingPartner);
             return replace(threads);
         }
 
@@ -248,11 +248,8 @@ function factory(dependencies) {
         }
 
         _onChangeMailRtcChannel() {
-            if (!this.messaging) {
-                return;
-            }
-            this.messaging.userSetting.toggleFullScreen(false);
-            this.messaging.userSetting.update({ rtcFilterVideoGrid: false });
+            this.userSetting.toggleFullScreen(false);
+            this.userSetting.update({ rtcFilterVideoGrid: false });
         }
 
         /**

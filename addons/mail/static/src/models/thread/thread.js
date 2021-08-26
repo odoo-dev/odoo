@@ -223,8 +223,8 @@ function factory(dependencies) {
                     ))];
                 }
             }
-            if ('rtc_ringing_partner' in data) {
-                data2.rtcRingingPartner = [['insert', data.rtc_ringing_partner]];
+            if ('rtc_inviting_partner' in data) {
+                data2.rtcInvitingPartner = insert(data.rtc_inviting_partner);
             }
             if ('rtc_sessions' in data) {
                 data2.rtcSessions = insert(data.rtc_sessions.map(record => this.messaging.models['mail.rtc_session'].convertData(record)));
@@ -291,8 +291,9 @@ function factory(dependencies) {
                 this.messaging.userSetting.toggleFullScreen(false);
             }
             this.update({
-                rtcRingingPartner: unlink(),
+                invitedPartners: clear(),
                 mailRtc: unlink(),
+                rtcInvitingPartner: unlink(),
             });
         }
 
@@ -778,7 +779,7 @@ function factory(dependencies) {
                 return;
             }
             this.update({ hasPendingRtcRequest: true });
-            const { rtcSessions, iceServers, sessionId } = await this.async(() => this.env.services.rpc({
+            const { rtcSessions, iceServers, sessionId, invitedPartners } = await this.async(() => this.env.services.rpc({
                 route: '/mail/channel_call_join',
                 params: {
                     channel_id: this.id,
@@ -787,8 +788,9 @@ function factory(dependencies) {
             this.update({
                 hasPendingRtcRequest: false,
                 mailRtc: link(this.messaging.mailRtc),
-                rtcRingingPartner: unlink(),
+                rtcInvitingPartner: unlink(),
                 rtcSessions: insertAndReplace(rtcSessions.map(record => this.messaging.models['mail.rtc_session'].convertData(record))),
+                invitedPartners: insertAndReplace(invitedPartners.map(record => this.messaging.models['mail.partner'].convertData(record))),
             });
             await this.async(() => this.messaging.mailRtc.initSession({
                 currentSessionId: sessionId,
@@ -2006,6 +2008,10 @@ function factory(dependencies) {
             required: true,
         }),
         /**
+         * List of partners that have been invited to the RTC call of this channel.
+         */
+        invitedPartners: many2many('mail.partner'),
+        /**
          * Determines whether this thread can be renamed.
          * Only makes sense for channels.
          */
@@ -2255,9 +2261,12 @@ function factory(dependencies) {
         pendingSeenMessageId: attr(),
         public: attr(),
         /**
-         * The partner that rings the current user
+         * The partner that invited the current user, it is only set when the
+         * invitation is still pending.
          */
-        rtcRingingPartner: many2one('mail.partner'),
+        rtcInvitingPartner: many2one('mail.partner', {
+            inverse: 'calledChannels',
+        }),
         rtcSessions: one2many('mail.rtc_session', {
             inverse: 'channel',
             isCausal: true,

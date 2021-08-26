@@ -89,8 +89,10 @@ function factory(dependencies) {
                         return this._handleNotificationChannelMembersLeaving(message.payload);
                     case 'rtc_peer_notification':
                         return this._handleNotificationRtcPeerToPeer(message.payload);
-                    case 'rtc_invitation':
+                    case 'rtc_incoming_invitation_update':
                         return this._handleNotificationRtcInvitation(message.payload);
+                    case 'rtc_outgoing_invitation_ended':
+                        return this._handleNotificationRtcInvitationEnded(message.payload);
                     case 'rtc_sessions_update':
                         return this._handleNotificationRtcSessionUpdate(message.payload);
                     case 'rtc_session_ended':
@@ -507,23 +509,38 @@ function factory(dependencies) {
         /**
          * @private
          * @param {Object} data
-         * @param {string} [data.channelId]
-         * @param {string} [data.remove]
+         * @param {string} data.channelId
          * @param {string} [data.partner]
          */
-        async _handleNotificationRtcInvitation({ channelId, remove, partner }) {
-            const channel = this.messaging.models['mail.thread'].all().filter((thread) => thread.model === 'mail.channel' && thread.id === channelId)[0];
+        async _handleNotificationRtcInvitation({ channelId, partner }) {
+            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({ id: channelId, model: 'mail.channel' });
             if (!channel) {
                 return;
             }
             if (channel.mailRtc) {
                 return;
             }
-            if (remove) {
-                channel.update({ rtcRingingPartner: [['unlink']] });
-            } else {
-                channel.update({ rtcRingingPartner: [['insert', partner]] });
+            if (partner) {
+                return channel.update({ rtcInvitingPartner: insert(partner) });
             }
+            return channel.update({ rtcInvitingPartner: unlink() });
+        }
+
+        /**
+         * @private
+         * @param {Object} data
+         * @param {number} data.channelId
+         * @param {number} data.partnerId
+         */
+        async _handleNotificationRtcInvitationEnded({ channelId, partnerId }) {
+            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({ id: channelId, model: 'mail.channel' });
+            const partner = this.messaging.models['mail.partner'].findFromIdentifyingData({ id: partnerId });
+            if (!channel || !partner) {
+                return;
+            }
+            channel.update({
+                invitedPartners: unlink(partner),
+            });
         }
 
         /**
@@ -576,13 +593,7 @@ function factory(dependencies) {
          * @param {Object} [data.rtcSessions]
          */
         async _handleNotificationRtcSessionUpdate({ channelId, rtcSessions }) {
-            const channel = this.messaging.models["mail.thread"]
-                .all()
-                .filter(
-                    (thread) =>
-                        thread.model === "mail.channel" &&
-                        thread.id === channelId
-                )[0];
+            const channel = this.messaging.models['mail.thread'].findFromIdentifyingData({ id: channelId, model: 'mail.channel' });
             if (!channel) {
                 return;
             }

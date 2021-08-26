@@ -24,7 +24,26 @@ class ChannelPartner(models.Model):
     is_minimized = fields.Boolean("Conversation is minimized")
     is_pinned = fields.Boolean("Is pinned on the interface", default=True)
     last_meaningful_action_time = fields.Datetime('Last action time for the thread', default=fields.Datetime.now)
-    rtc_ringing_partner_id = fields.Many2one('res.partner', string='Ringing partner')
+    rtc_inviting_partner_id = fields.Many2one('res.partner', string='Ringing partner')
+
+    def _remove_rtc_invitation(self):
+        """ Removes the invitation to the rtc call and notifies the inviting partner if removed. """
+        notifications = []
+        for record in self:
+            if not record.rtc_inviting_partner_id:
+                continue
+            notifications.append([
+                (self._cr.dbname, 'res.partner', record.rtc_inviting_partner_id.id),
+                {
+                    'type': 'rtc_outgoing_invitation_ended',
+                    'payload': {
+                        'channelId': record.channel_id.id,
+                        'partnerId': record.partner_id.id,
+                    },
+                },
+            ])
+        self.write({'rtc_inviting_partner_id': False})
+        self.env['bus.bus'].sendmany(notifications)
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -287,3 +287,7 @@ class MailController(http.Controller):
     @http.route('/mail/channel_call_leave', type="json", auth="user")
     def channel_call_leave(self, channel_id, session_id=None):
         request.env['mail.channel'].browse(int(channel_id))._leave_call(session_id)
+
+    @http.route('/mail/channel_call_cancel_invitation', type="json", auth="user")
+    def channel_call_cancel_invitation(self, channel_id, partner_ids=None):
+        request.env['mail.channel'].browse(int(channel_id))._cancel_rtc_invitations(partner_ids=partner_ids)

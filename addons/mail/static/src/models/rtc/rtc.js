@@ -20,6 +20,7 @@ const TRANSCEIVER_ORDER = ['audio', 'video'];
  *      for the call participant cards, which should also show invitations. the call_viewer
  *      should probably compute both the main card list (for the grid/sidebar), and the focused
  *      card separately.
+        in progress: missing model, relation fields in call_viewer and template.
  * TODO IMP nice-to-have (since the browser already allows that)? Pick the video input device like we pick
  *      the audio input device, should be pretty trivial.
  *

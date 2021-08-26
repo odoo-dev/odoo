@@ -497,6 +497,14 @@ function factory(dependencies) {
         nameOrDisplayName: attr({
             compute: '_computeNameOrDisplayName',
         }),
+        /**
+         * Channels on which this partner is inviting the current partner,
+         * this serves as an explicit inverse as it seems to confuse it with
+         * other partner-channel relations without an inverse.
+         */
+        calledChannels: one2many('mail.thread', {
+            inverse: 'rtcInvitingPartner',
+        }),
         rtcSessions: one2many('mail.rtc_session', {
             inverse: 'partner',
         }),

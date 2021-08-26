@@ -3,13 +3,13 @@
 
     <t t-name="mail.RtcInvitationCard" owl="1">
         <div class="o_RtcInvitationCard">
-            <t t-if="thread and thread.rtcRingingPartner">
+            <t t-if="thread and thread.rtcInvitingPartner">
                 <div class="o_RtcInvitationCard_partner_info">
                     <img class="o_RtcInvitationCard_partner_info_image rounded-circle"
-                         t-attf-src="/web/image/res.partner/{{ thread.rtcRingingPartner.id }}/avatar_128"
+                         t-attf-src="/web/image/res.partner/{{ thread.rtcInvitingPartner.id }}/avatar_128"
                          t-on-click="_onCLickAvatar"
                          alt="Avatar"/>
-                    <span class="o_RtcInvitationCard_partner_info_name" t-esc="thread.rtcRingingPartner.name"/>
+                    <span class="o_RtcInvitationCard_partner_info_name" t-esc="thread.rtcInvitingPartner.name"/>
                     <span class="o_RtcInvitationCard_partner_info_text">Incoming Call...</span>
                 </div>
             </t>

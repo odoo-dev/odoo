@@ -335,21 +335,23 @@ class Channel(models.Model):
     # RTC Call
     # ------------------------------------------------------------
 
-    def _cancel_rtc_invitations(self):
+    def _cancel_rtc_invitations(self, partner_ids=None):
+        """ Cancels the invitations of the RTC call from all invited members (or the specified partner_ids).
+            :param list partner_ids: list of the ids of the partners to remove, if falsy all channel members are removed
+        """
         invited_members = self.channel_last_seen_partner_ids.filtered(
-            lambda partner: partner.rtc_ringing_partner_id is not False
+            lambda partner: (not partner_ids or partner.id in partner_ids) and partner.rtc_inviting_partner_id is not False
         )
         invited_members.write({
-            'rtc_ringing_partner_id': False
+            'rtc_inviting_partner_id': False
         })
         notifications = []
         for partner in invited_members.partner_id:
             notifications.append([
                 (self._cr.dbname, 'res.partner', partner.id),
                 {
-                    'type': 'rtc_invitation',
+                    'type': 'rtc_incoming_invitation_update',
                     'payload': {
-                        'remove': True,
                         'channelId': self.id,
                     },
                 },
@@ -363,18 +365,23 @@ class Channel(models.Model):
         current_partner = self.env.user.partner_id
         current_sessions_partners = self.rtc_sessions.mapped('partner_id')
         notifications = []
+        invited_partners = []
         for channel_partner in self.channel_last_seen_partner_ids:
             if channel_partner.partner_id == current_partner:
                 continue
             if channel_partner.partner_id in current_sessions_partners:
                 continue
-            if channel_partner.rtc_ringing_partner_id:
+            if channel_partner.rtc_inviting_partner_id:
                 continue
-            channel_partner.rtc_ringing_partner_id = current_partner.id
+            channel_partner.rtc_inviting_partner_id = current_partner.id
+            invited_partners.append({
+                'id': channel_partner.partner_id.id,
+                'name': channel_partner.partner_id.name,
+            })
             notifications.append([
                 (self._cr.dbname, 'res.partner', channel_partner.partner_id.id),
                 {
-                    'type': 'rtc_invitation',
+                    'type': 'rtc_incoming_invitation_update',
                     'payload': {
                         'channelId': self.id,
                         'partner': {
@@ -384,20 +391,21 @@ class Channel(models.Model):
                     },
                 },
             ])
-        notification = _(
-            '%s started a live conference',
-            current_partner.name)
+        notification = _('%s started a live conference', current_partner.name)
         self.message_post(body=notification, message_type="notification")
         self.env['bus.bus'].sendmany(notifications)
+        return invited_partners
 
     def _join_call(self):
         session_data, session_id = self._update_call_participation(joining=True)
         ice_servers = self.env['mail.ice.server']._get_ice_servers()
+        invited_partners = []
         if len(self.rtc_sessions) == 1 and self.channel_type in ['chat', 'group']:
-            self._invite_members_to_rtc()
+            invited_partners = self._invite_members_to_rtc()
         return {
             'rtcSessions': session_data,
             'iceServers': ice_servers or False,
+            'invitedPartners': invited_partners,
             'sessionId': session_id,
         }
 
@@ -420,7 +428,7 @@ class Channel(models.Model):
         )
         if not current_channel_partner:
             return
-        current_channel_partner.rtc_ringing_partner_id = False
+        current_channel_partner._remove_rtc_invitation()
         if joining:
             current_partner_id = self.env.user.partner_id.id
             old_sessions = self.rtc_sessions.filtered(lambda session: session.partner_id.id == current_partner_id)
@@ -704,10 +712,10 @@ class Channel(models.Model):
                     info['last_meaningful_action_time'] = partner_channel.last_meaningful_action_time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     if rtc_sessions_by_channel.get(channel.id):
                         info['rtc_sessions'] = rtc_sessions_by_channel[channel.id]
-                    if partner_channel.rtc_ringing_partner_id:
-                        info['rtc_ringing_partner'] = {
-                            'id': partner_channel.rtc_ringing_partner_id.id,
-                            'name': partner_channel.rtc_ringing_partner_id.name,
+                    if partner_channel.rtc_inviting_partner_id:
+                        info['rtc_inviting_partner'] = {
+                            'id': partner_channel.rtc_inviting_partner_id.id,
+                            'name': partner_channel.rtc_inviting_partner_id.name,
                         }
             # add members infos
             if channel.channel_type != 'channel':
