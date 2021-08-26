@@ -66,21 +66,6 @@ function factory(dependencies) {
         }
 
         /**
-         * Notifies the server that this session is still in active usage
-         * to prevent garbage collection.
-         */
-        async pingServer() {
-            if (!this.mailRtc) {
-                return;
-            }
-            await await this.async(() => this.env.services.rpc({
-                model: 'mail.rtc.session',
-                method: 'ping',
-                args: [[this.id]],
-            }, { shadow: true }));
-        }
-
-        /**
          * restores the session to its default values
          */
         reset() {

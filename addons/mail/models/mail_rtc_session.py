@@ -19,15 +19,6 @@ class MailRtcSession(models.Model):
     is_muted = fields.Boolean()
     is_deaf = fields.Boolean()
 
-    def ping(self):
-        """ Set the write date as the current time to prevent garbage collection
-        """
-        if self.env.user.partner_id != self.partner_id:
-            return
-        self.write({
-            'write_date': fields.Datetime.now(),
-        })
-
     def update_and_broadcast(self, values):
         if self.env.user.partner_id != self.partner_id:
             return
@@ -45,14 +36,14 @@ class MailRtcSession(models.Model):
             ])
         self.env['bus.bus'].sendmany(notifications)
 
-    @api.model
-    def _gc_inactive_sessions(self, max_age_minutes=3):
+    @api.autovacuum
+    def _gc_inactive_sessions(self):
         """ Garbage collect sessions that aren't active anymore,
             this can happen when the server or the user's browser crash
             or when the user's odoo session ends.
         """
         sessions = self.search([
-            ('write_date', '<', fields.Datetime.now() - relativedelta(minutes=max_age_minutes))
+            ('write_date', '<', fields.Datetime.now() - relativedelta(days=1))
         ])
         if not sessions:
             return

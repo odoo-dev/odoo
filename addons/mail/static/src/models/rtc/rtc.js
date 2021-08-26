@@ -95,18 +95,6 @@ function factory(dependencies) {
             });
 
             /**
-             * Pings the server to prevent garbage collection of the rtc session
-             * if we have a currentRtcSession (which means that we are in an active call).
-             *
-             * Note that setInterval is not a good timekeeping mechanism and is prone to
-             * drift during loads on the main thread or when the tab is on the background
-             * so the interval should not be too close to the server-side timeout.
-             */
-            browser.setInterval(() => {
-                this.currentRtcSession && this.currentRtcSession.pingServer();
-            }, 120000); // 2 minutes
-
-            /**
              * Call all sessions for which no peerConnection is established at
              * a regular interval to try to recover any connection that failed
              * to start.
