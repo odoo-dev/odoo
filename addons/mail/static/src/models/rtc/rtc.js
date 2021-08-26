@@ -33,7 +33,6 @@ const TRANSCEIVER_ORDER = ['audio', 'video'];
  *      requires small ref TRANSCEIVER_ORDER to support an arbitrary amount of transceivers:
  *      const TRANSCEIVER_ORDER = [{ trackKind: 'audio', name: 'audio'}, { trackKind: 'video', name: 'user-video' }, { trackKind: 'video', name: 'display' }];
  *      get index with TRANSCEIVER_ORDER.findIndex(o => o.name === 'user-video');
- * TODO REF rename ringing/invitation into one consistent name
  * TODO REF move handlers in models
  */
 
@@ -1033,7 +1032,7 @@ function factory(dependencies) {
                 browser.clearTimeout(this._pushToTalkTimeoutId);
             }
             if (!this.currentRtcSession.isTalking && !this.currentRtcSession.isMuted) {
-                this.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
+                this.messaging.soundEffects.pushToTalk.play();
             }
             this._setSoundBroadcast(true);
         }
@@ -1053,7 +1052,7 @@ function factory(dependencies) {
                 return;
             }
             if (!this.currentRtcSession.isMuted) {
-                this.messaging.soundEffects.pushToTalk.play({ volume: 0.1 });
+                this.messaging.soundEffects.pushToTalk.play();
             }
             this._pushToTalkTimeoutId = browser.setTimeout(
                 () => {

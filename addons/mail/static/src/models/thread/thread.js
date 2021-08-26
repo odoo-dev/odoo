@@ -287,7 +287,7 @@ function factory(dependencies) {
         endCall() {
             if (this.mailRtc) {
                 this.mailRtc.reset();
-                this.messaging.soundEffects.channelLeave.play({ volume: 0.15 });
+                this.messaging.soundEffects.channelLeave.play();
                 this.messaging.userSetting.toggleFullScreen(false);
             }
             this.update({
@@ -822,10 +822,10 @@ function factory(dependencies) {
             if (this.mailRtc) {
                 const newCount = this.rtcSessions.length;
                 if (newCount > oldCount) {
-                    this.messaging.soundEffects.channelJoin.play({ volume: 0.7 });
+                    this.messaging.soundEffects.channelJoin.play();
                 }
                 if (newCount < oldCount) {
-                    this.messaging.soundEffects.memberLeave.play({ volume: 0.7 });
+                    this.messaging.soundEffects.memberLeave.play();
                 }
             }
             this.mailRtc && this.mailRtc.filterCallees(this.rtcSessions);
