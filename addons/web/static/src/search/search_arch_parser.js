@@ -3,27 +3,53 @@
 import { makeContext } from "@web/core/context";
 import { _lt } from "@web/core/l10n/translation";
 import { evaluateExpr } from "@web/core/py_js/py";
-import { XMLParser } from "../core/utils/xml";
-import { DEFAULT_INTERVAL, DEFAULT_PERIOD } from "./utils/dates";
+import { XMLParser } from "@web/core/utils/xml";
+import { DEFAULT_INTERVAL, DEFAULT_PERIOD } from "@web/search/utils/dates";
 
 const ALL = _lt("All");
 const DEFAULT_LIMIT = 200;
+const DEFAULT_VIEWS_WITH_SEARCH_PANEL = ["kanban", "list"];
+
+/**
+ * Returns the split 'group_by' key from the given context attribute.
+ * This helper accepts any invalid context or one that does not have
+ * a valid 'group_by' key, and falls back to an empty list.
+ * @param {string} context
+ * @returns {string[]}
+ */
+const getContextGroubBy = (context) => {
+    try {
+        return makeContext(context).group_by.split(":");
+    } catch (err) {
+        return [];
+    }
+};
 
 export class SearchArchParser extends XMLParser {
-    constructor(searchViewDescription, searchDefaults = {}, defaultValues = {}) {
+    constructor(searchViewDescription, searchDefaults = {}, searchPanelDefaults = {}) {
         super();
-        this.fields = searchViewDescription.fields || {};
-        this.irFilters = searchViewDescription.irFilters || [];
-        this.arch = searchViewDescription.arch || "<search/>";
-        this.preSearchItems = [];
-        this.sections = [];
+
+        const { fields, irFilters, arch } = searchViewDescription;
+
+        this.fields = fields || {};
+        this.irFilters = irFilters || [];
+        this.arch = arch || "<search/>";
+
         this.labels = [];
-        this.defaultValues = defaultValues;
+        this.preSearchItems = [];
+        this.searchPanelInfo = {
+            className: "",
+            viewTypes: DEFAULT_VIEWS_WITH_SEARCH_PANEL,
+        };
+        this.sections = [];
+
+        this.searchDefaults = searchDefaults;
+        this.searchPanelDefaults = searchPanelDefaults;
+
         this.currentGroup = [];
         this.currentTag = null;
-        (this.defaultValues = defaultValues), (this.groupNumber = 0);
+        this.groupNumber = 0;
         this.pregroupOfGroupBys = [];
-        this.searchDefaults = searchDefaults;
     }
 
     parse() {
@@ -51,9 +77,10 @@ export class SearchArchParser extends XMLParser {
         });
 
         return {
-            preSearchItems: this.preSearchItems,
-            sections: this.sections,
             labels: this.labels,
+            preSearchItems: this.preSearchItems,
+            searchPanelInfo: this.searchPanelInfo,
+            sections: this.sections,
         };
     }
 
@@ -148,20 +175,17 @@ export class SearchArchParser extends XMLParser {
         const preSearchItem = { type: "filter" };
         if (node.hasAttribute("context")) {
             const context = node.getAttribute("context");
-            try {
-                const groupBy = makeContext(context).group_by;
-                if (groupBy) {
-                    preSearchItem.type = "groupBy";
-                    const [fieldName, defaultInterval] = makeContext(context).group_by.split(":");
-                    preSearchItem.fieldName = fieldName;
-                    preSearchItem.fieldType = this.fields[fieldName].type;
-                    if (["date", "datetime"].includes(preSearchItem.fieldType)) {
-                        preSearchItem.type = "dateGroupBy";
-                        preSearchItem.defaultIntervalId = defaultInterval || DEFAULT_INTERVAL;
-                    }
+            const [fieldName, defaultInterval] = getContextGroubBy(context);
+            const groupByField = this.fields[fieldName];
+            if (groupByField) {
+                preSearchItem.type = "groupBy";
+                preSearchItem.fieldName = fieldName;
+                preSearchItem.fieldType = groupByField.type;
+                if (["date", "datetime"].includes(groupByField.type)) {
+                    preSearchItem.type = "dateGroupBy";
+                    preSearchItem.defaultIntervalId = defaultInterval || DEFAULT_INTERVAL;
                 }
-            } catch (e) {}
-            if (preSearchItem.type === "filter") {
+            } else {
                 preSearchItem.context = context;
             }
         }
@@ -240,12 +264,19 @@ export class SearchArchParser extends XMLParser {
         }
     }
 
-    visitSearchPanel(node) {
-        const nodes = node.children;
+    visitSearchPanel(searchPanelNode) {
         let hasCategoryWithCounters = false;
         let hasFilterWithDomain = false;
         let nextSectionId = 1;
-        for (const node of nodes) {
+
+        if (searchPanelNode.hasAttribute("class")) {
+            this.searchPanelInfo.className = searchPanelNode.getAttribute("class");
+        }
+        if (searchPanelNode.hasAttribute("view_types")) {
+            this.searchPanelInfo.viewTypes = searchPanelNode.getAttribute("view_types").split(",");
+        }
+
+        for (const node of searchPanelNode.children) {
             if (node.nodeType !== 1 || node.tagName !== "field") {
                 continue;
             }
@@ -272,7 +303,7 @@ export class SearchArchParser extends XMLParser {
                 values: new Map(),
             };
             if (type === "category") {
-                section.activeValueId = this.defaultValues[attrs.name];
+                section.activeValueId = this.searchPanelDefaults[attrs.name];
                 section.icon = section.icon || "fa-folder";
                 section.hierarchize = Boolean(evaluateExpr(attrs.hierarchize || "1"));
                 section.values.set(false, {

@@ -13,7 +13,6 @@ function searchModelStateFromLegacy(state) {
      * @todo (DAM) check when search panel is reworked.
      */
     const parsedState = JSON.parse(state);
-
     const newState = {};
 
     if (parsedState.ControlPanelModelExtension) {
@@ -87,7 +86,10 @@ function searchModelStateFromLegacy(state) {
     }
 
     if (parsedState.SearchPanelModelExtension) {
-        newState.sections = parsedState.SearchPanelModelExtension.sections;
+        const { sections, searchPanelInfo } = parsedState.SearchPanelModelExtension;
+        newState.sections = sections;
+        //! Can be undefined. See search_model.__legacyParseSearchPanelArchAnyway
+        newState.searchPanelInfo = searchPanelInfo;
     }
 
     for (const [key, extension] of Object.entries(ActionModel.registry.entries())) {
@@ -99,9 +101,10 @@ function searchModelStateFromLegacy(state) {
         }
     }
 
-    if (Object.keys(newState).length === 0) {
+    if (!Object.keys(newState).length) {
         return;
     }
+
     return JSON.stringify(newState);
 }
 
@@ -110,6 +113,10 @@ function searchModelStateFromLegacy(state) {
  * @returns {string}
  */
 export function searchModelStateToLegacy(state) {
+    if (!state) {
+        return;
+    }
+
     const parsedState = JSON.parse(state);
     const query = [];
     for (const queryElem of parsedState.query) {
@@ -162,7 +169,7 @@ export function searchModelStateToLegacy(state) {
         filters[item.id] = filter;
     }
 
-    const { nextGroupId, nextGroupNumber, nextId, sections } = parsedState;
+    const { nextGroupId, nextGroupNumber, nextId, sections, searchPanelInfo } = parsedState;
     const legacyState = {};
     legacyState.ControlPanelModelExtension = {
         query,
@@ -171,7 +178,7 @@ export function searchModelStateToLegacy(state) {
         nextGroupNumber,
         nextId,
     };
-    legacyState.SearchPanelModelExtension = { sections };
+    legacyState.SearchPanelModelExtension = { sections, searchPanelInfo };
 
     for (const [key, extension] of Object.entries(ActionModel.registry.entries())) {
         if (!["ControlPanel", "SearchPanel"].includes(key) && parsedState[key] !== undefined) {
@@ -184,9 +191,7 @@ export function searchModelStateToLegacy(state) {
 
 export function exportGlobalState(legacyControllerState) {
     const { resIds, searchModel, searchPanel } = legacyControllerState;
-    const globalState = {
-        __legacySearchModel__: searchModel,
-    };
+    const globalState = {};
     if (searchPanel) {
         globalState.searchPanel = searchPanel;
     }

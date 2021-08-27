@@ -424,7 +424,7 @@ QUnit.module("Search", (hooks) => {
                         <searchpanel/>
                     </search>
                 `,
-                loadSearchPanel: true,
+                view: { type: "kanban" },
             }
         );
         assert.deepEqual(model.getSections(), []);
@@ -438,12 +438,12 @@ QUnit.module("Search", (hooks) => {
                 searchViewArch: `
                     <search>
                         <searchpanel>
-                        <field name="company_id"/>
+                            <field name="company_id"/>
                         </searchpanel>
                     </search>
                 `,
                 resModel: "partner",
-                loadSearchPanel: true,
+                view: { type: "kanban" },
             }
         );
         const sections = model.getSections();
@@ -502,20 +502,20 @@ QUnit.module("Search", (hooks) => {
         ]);
     });
 
-    QUnit.test("parsing a searchpanel field select one", async function (assert) {
+    QUnit.test("parsing a searchpanel field select multi", async function (assert) {
         assert.expect(1);
         const model = await makeSearchModel(
             { serverData },
             {
                 searchViewArch: `
-                <search>
-                    <searchpanel>
-                        <field name="company_id" select="multi"/>
-                    </searchpanel>
-                </search>
+                    <search>
+                        <searchpanel>
+                            <field name="company_id" select="multi"/>
+                        </searchpanel>
+                    </search>
                 `,
                 resModel: "partner",
-                loadSearchPanel: true,
+                view: { type: "kanban" },
             }
         );
         const sections = model.getSections();

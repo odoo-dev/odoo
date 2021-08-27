@@ -49,7 +49,6 @@ const { Component } = owl;
  *
  *  @property {boolean} [activateFavorite]
  *  @property {Object[]} [dynamicFilters]
- *  @property {boolean} [loadSearchPanel]
  *  @property {string[]} [searchMenuTypes]
  *  @property {Object} [globalState]
  */
@@ -246,10 +245,7 @@ export class View extends Component {
         }
 
         // prepare the WithSearh component props
-        this.withSearchProps = {};
-        for (const key in this.props) {
-            this.withSearchProps[key] = this.props[key];
-        }
+        this.withSearchProps = { ...this.props };
 
         Object.assign(this.withSearchProps, {
             Component: ViewClass,
@@ -273,21 +269,6 @@ export class View extends Component {
                 this.props.searchMenuTypes ||
                 ViewClass.searchMenuTypes ||
                 this.constructor.searchMenuTypes;
-        }
-
-        //////////////////////////////////////////////////////////////////
-        /** @todo prepare loadSearchPanel WithSearch prop (depends on view
-         * types on searchpanel tag in search arch)                     */
-        //////////////////////////////////////////////////////////////////
-
-        if (searchViewArch) {
-            // determine loadSearchPanel here and display
-            // const DEFAULT_VIEW_TYPES = ["kanban", "list"];
-            // if (node.hasAttribute("view_types")) {
-            //   data.viewTypes.push(...node.getAttribute("view_types").split(","));
-            // } else {
-            //   data.viewTypes.push(...DEFAULT_VIEW_TYPES);
-            // }
         }
 
         for (const key in this.withSearchProps) {

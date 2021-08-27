@@ -79,23 +79,6 @@ QUnit.module("Search", (hooks) => {
         assert.strictEqual(component.el.innerText, "Test component content");
     });
 
-    QUnit.test("simple rendering with loadSearchPanel='true'", async function (assert) {
-        assert.expect(1);
-
-        class TestComponent extends Component {}
-        TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
-
-        const component = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "animal",
-                Component: TestComponent,
-                loadSearchPanel: true,
-            }
-        );
-        assert.hasClass(component.el, "o_test_component");
-    });
-
     QUnit.test("search model in sub env", async function (assert) {
         assert.expect(1);
 

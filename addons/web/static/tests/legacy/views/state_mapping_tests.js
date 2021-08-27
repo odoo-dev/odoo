@@ -1,23 +1,21 @@
 /** @odoo-module **/
 
+import { legacyExtraNextTick } from "@web/../tests/helpers/utils";
+import {
+    getFacetTexts, removeFacet, setupControlPanelServiceRegistry, switchView,
+    toggleMenu,
+    toggleMenuItem
+} from "@web/../tests/search/helpers";
+import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
+import { dialogService } from "@web/core/dialog/dialog_service";
 import { _lt } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { SearchModel } from "@web/search/search_model";
 import AbstractView from "web.AbstractView";
 import ActionModel from "web.ActionModel";
 import { mock } from "web.test_utils";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
-import { dialogService } from "@web/core/dialog/dialog_service";
-import {
-    getFacetTexts,
-    switchView,
-    toggleMenu,
-    toggleMenuItem,
-} from "@web/../tests/search/helpers";
-import { legacyExtraNextTick } from "@web/../tests/helpers/utils";
 import legacyViewRegistry from "web.view_registry";
-import { registry } from "@web/core/registry";
-import { SearchModel } from "@web/search/search_model";
-import { setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";
 
 const serviceRegistry = registry.category("services");
 const viewRegistry = registry.category("views");
@@ -97,7 +95,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "legacy and new views can share search model state (no favorite)",
         async function (assert) {
-            assert.expect(6);
+            assert.expect(10);
 
             const unpatchDate = mock.patchDate(2021, 6, 1, 10, 0, 0);
 
@@ -121,6 +119,14 @@ QUnit.module("Views", (hooks) => {
             });
 
             assert.containsOnce(webClient, ".o_switch_view.o_toy.active");
+            assert.deepEqual(
+                getFacetTexts(webClient).map((s) => s.replace(/\s/, "")),
+                [
+                    "FooABC",
+                    "TrueDomainorDate Filter: July 2021",
+                    "DateGroupBy: Month>Bar",
+                ]
+            );
 
             await toggleMenu(webClient, "Comparison");
             await toggleMenuItem(webClient, "Date Filter: Previous Period");
@@ -149,6 +155,16 @@ QUnit.module("Views", (hooks) => {
                 ]
             );
 
+            await removeFacet(webClient, 1);
+
+            assert.deepEqual(
+                getFacetTexts(webClient).map((s) => s.replace(/\s/, "")),
+                [
+                    "FooABC",
+                    "DateGroupBy: Month>Bar",
+                ]
+            );
+
             await switchView(webClient, "toy");
 
             assert.containsOnce(webClient, ".o_switch_view.o_toy.active");
@@ -156,9 +172,26 @@ QUnit.module("Views", (hooks) => {
                 getFacetTexts(webClient).map((s) => s.replace(/\s/, "")),
                 [
                     "FooABC",
-                    "TrueDomainorDate Filter: July 2021",
                     "DateGroupBy: Month>Bar",
-                    "DateFilter: Previous Period",
+                ]
+            );
+
+            // Check if update works
+            await removeFacet(webClient, 1);
+
+            assert.deepEqual(
+                getFacetTexts(webClient).map((s) => s.replace(/\s/, "")),
+                [
+                    "FooABC",
+                ]
+            );
+
+            await switchView(webClient, "legacy_toy");
+
+            assert.deepEqual(
+                getFacetTexts(webClient).map((s) => s.replace(/\s/, "")),
+                [
+                    "FooABC",
                 ]
             );
 

@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
+import { useBus, useEffect, useService } from "@web/core/utils/hooks";
+import { SearchModel } from "@web/search/search_model";
 import { CallbackRecorder, useSetupAction } from "@web/webclient/actions/action_hook";
-import { SearchModel } from "../search_model";
-import { useBus, useService } from "@web/core/utils/hooks";
 
 const { Component, hooks } = owl;
 const { useSubEnv } = hooks;
@@ -20,8 +20,8 @@ export class WithSearch extends Component {
             });
         }
 
-        const SearchModel = this.Component.SearchModel || this.constructor.SearchModel;
-        this.searchModel = new SearchModel(this.env, {
+        const SearchModelClass = this.Component.SearchModel || SearchModel;
+        this.searchModel = new SearchModelClass(this.env, {
             user: useService("user"),
             orm: useService("orm"),
             view: useService("view"),
@@ -38,10 +38,21 @@ export class WithSearch extends Component {
                 };
             },
         });
+
+        useEffect(() => {
+            if (!this.searchModel.display.searchPanel) {
+                return;
+            }
+            // TODO: add better way to retrieve o_content
+            const [content] = this.el.getElementsByClassName("o_content");
+            if (content) {
+                content.classList.add("o_component_with_search_panel");
+            }
+        });
     }
 
     async willStart() {
-        const config = Object.assign({}, this.props);
+        const config = { ...this.props };
         if (config.globalState && config.globalState.searchModel) {
             config.state = JSON.parse(config.globalState.searchModel);
             delete config.globalState;
@@ -59,23 +70,20 @@ export class WithSearch extends Component {
         await this.searchModel.reload(config);
     }
 
+    //-------------------------------------------------------------------------
+    // Getters
+    //-------------------------------------------------------------------------
+
     get componentProps() {
-        const componentProps = Object.assign({}, this.props.componentProps);
+        const componentProps = { ...this.props.componentProps };
         for (const key of SEARCH_KEYS) {
             componentProps[key] = this.searchModel[key];
         }
-        if (!componentProps.info) {
-            componentProps.info = {};
-        }
+        componentProps.info = componentProps.info || {};
         for (const key of OTHER_SEARCH_KEYS) {
             componentProps.info[key] = this.searchModel[key];
         }
         return componentProps;
-    }
-
-    get withSearchPanel() {
-        /** @todo review when working on search panel */
-        return this.searchModel.loadSearchPanel;
     }
 }
 
@@ -86,7 +94,7 @@ WithSearch.defaultProps = {
 };
 WithSearch.props = {
     Component: Function,
-    componentProps: { type: Object, optional: 1 },
+    componentProps: { type: Object, optional: true },
 
     resModel: String,
 
@@ -94,44 +102,43 @@ WithSearch.props = {
         type: Object,
         shape: {
             id: [Number, false],
-            type: { type: [String, false], optional: 1 },
-            views: { type: Array, element: [Number, String, false] },
+            type: { type: [String, false], optional: true },
+            views: { type: Array, element: [Number, String, false], optional: true },
         },
-        optional: 1,
+        optional: true,
     },
-    displayName: { type: String, optional: 1 },
+    displayName: { type: String, optional: true },
     view: {
         type: Object,
         shape: {
             id: [Number, false],
-            type: { type: [String, false], optional: 1 },
+            type: { type: [String, false], optional: true },
         },
-        optional: 1,
+        optional: true,
     },
 
-    globalState: { type: Object, optional: 1 },
+    globalState: { type: Object, optional: true },
+
+    display: { type: Object, optional: true },
 
     // search query elements
-    context: { type: Object, optional: 1 },
-    domain: { type: Array, element: [String, Array], optional: 1 },
-    domains: { type: Array, element: Object, optional: 1 },
-    groupBy: { type: Array, element: String, optional: 1 },
-    orderBy: { type: Array, element: String, optional: 1 },
+    context: { type: Object, optional: true },
+    domain: { type: Array, element: [String, Array], optional: true },
+    domains: { type: Array, element: Object, optional: true },
+    groupBy: { type: Array, element: String, optional: true },
+    orderBy: { type: Array, element: String, optional: true },
 
     // search view description
-    searchViewArch: { type: String, optional: 1 },
-    searchViewFields: { type: Object, optional: 1 },
-    searchViewId: { type: [Number, false], optional: 1 },
+    searchViewArch: { type: String, optional: true },
+    searchViewFields: { type: Object, optional: true },
+    searchViewId: { type: [Number, false], optional: true },
 
-    irFilters: { type: Array, element: Object, optional: 1 },
-    loadIrFilters: { type: Boolean, optional: 1 },
+    irFilters: { type: Array, element: Object, optional: true },
+    loadIrFilters: { type: Boolean, optional: true },
 
     // extra options
-    activateFavorite: { type: Boolean, optional: 1 },
-    dynamicFilters: { type: Array, element: Object, optional: 1 },
-    loadSearchPanel: { type: Boolean, optional: 1 },
-    searchMenuTypes: { type: Array, element: String, optional: 1 },
+    activateFavorite: { type: Boolean, optional: true },
+    dynamicFilters: { type: Array, element: Object, optional: true },
+    searchMenuTypes: { type: Array, element: String, optional: true },
 };
 WithSearch.template = "web.WithSearch";
-
-WithSearch.SearchModel = SearchModel;

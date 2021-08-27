@@ -32,7 +32,7 @@ export class ControlPanel extends Component {
                 "bottom-left": true,
                 "bottom-right": true,
             },
-            this.props.display
+            this.props.display || this.env.searchModel.display.controlPanel
         );
         display.top = display["top-left"] || display["top-right"];
         display.bottom = display["bottom-left"] || display["bottom-right"];
@@ -99,5 +99,4 @@ ControlPanel.template = "web.ControlPanel";
 // };
 ControlPanel.defaultProps = {
     breadcrumbs: [],
-    display: {},
 };

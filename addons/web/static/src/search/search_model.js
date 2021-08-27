@@ -97,7 +97,15 @@ function arraytoMap(array) {
  * @param {Object} target
  */
 function execute(op, source, target) {
-    const { query, nextId, nextGroupId, nextGroupNumber, searchItems, sections } = source;
+    const {
+        query,
+        nextId,
+        nextGroupId,
+        nextGroupNumber,
+        searchItems,
+        searchPanelInfo,
+        sections,
+    } = source;
 
     target.nextGroupId = nextGroupId;
     target.nextGroupNumber = nextGroupNumber;
@@ -105,6 +113,8 @@ function execute(op, source, target) {
 
     target.query = query;
     target.searchItems = searchItems;
+
+    target.searchPanelInfo = searchPanelInfo;
 
     target.sections = op(sections);
     for (const [, section] of target.sections) {
@@ -167,7 +177,7 @@ export class SearchModel extends EventBus {
      * @param {Array} [config.dynamicFilters=[]]
      * @param {string[]} [config.groupBy=[]]
      * @param {boolean} [config.loadIrFilters=false]
-     * @param {boolean} [config.loadSearchPanel=false]
+     * @param {boolean} [config.display.searchPanel=true]
      * @param {string[]} [config.orderBy=[]]
      * @param {string[]} [config.searchMenuTypes=["filter", "groupBy", "favorite"]]
      * @param {Object} [config.state]
@@ -208,9 +218,7 @@ export class SearchModel extends EventBus {
             searchViewId !== undefined &&
             (!searchViewArch || !searchViewFields || (!irFilters && loadIrFilters));
 
-        this.loadSearchPanel = Boolean(config.loadSearchPanel); // find best API see also viewTypes and see what to do
-
-        let searchViewDescription;
+        const searchViewDescription = {};
         if (loadSearchView) {
             const viewDescriptions = await this.viewService.loadViews(
                 {
@@ -223,10 +231,7 @@ export class SearchModel extends EventBus {
                     loadIrFilters: loadIrFilters || false,
                 }
             );
-            searchViewDescription = viewDescriptions.search;
-        }
-        if (!searchViewDescription) {
-            searchViewDescription = {};
+            Object.assign(searchViewDescription, viewDescriptions.search);
         }
         if (searchViewArch) {
             searchViewDescription.arch = searchViewArch;
@@ -252,10 +257,11 @@ export class SearchModel extends EventBus {
 
         if (config.state) {
             this._importState(config.state);
+            this.__legacyParseSearchPanelArchAnyway(searchViewDescription);
             this.domainParts = {};
-            this.searchDomain = this._getDomain({ full: false });
-            this.sectionsPromise = Promise.resolve();
-            return;
+            this.display = this._getDisplay(config.display);
+
+            return this._reloadSections();
         }
 
         this.blockNotification = true;
@@ -270,41 +276,37 @@ export class SearchModel extends EventBus {
         // ... to rework (API for external domain, groupBy, facet)
         this.domainParts = {}; // put in state?
 
-        /////////////////////////////////////////////////////////////////////////
-        // improve this
-        let processedSearchViewDescription;
-        let defaultValues = {};
-        if (searchViewDescription) {
-            const searchDefaults = {};
-            for (const key in this.globalContext) {
-                const val = this.globalContext[key];
-                const match = /^search_default_(.*)$/.exec(key);
-                if (match) {
-                    if (val) {
-                        searchDefaults[match[1]] = val;
-                    }
-                    delete this.globalContext[key];
+        const searchDefaults = {};
+        const searchPanelDefaults = {};
+
+        for (const key in this.globalContext) {
+            const defaultValue = this.globalContext[key];
+            const searchDefaultMatch = /^search_default_(.*)$/.exec(key);
+            if (searchDefaultMatch) {
+                if (defaultValue) {
+                    searchDefaults[searchDefaultMatch[1]] = defaultValue;
                 }
+                delete this.globalContext[key];
+                continue;
             }
-            for (const key in this.globalContext) {
-                const val = this.globalContext[key];
-                const match = /^searchpanel_default_(.*)$/.exec(key);
-                if (match) {
-                    defaultValues[match[1]] = val;
-                    delete this.globalContext[key];
-                }
+            const searchPanelDefaultMatch = /^searchpanel_default_(.*)$/.exec(key);
+            if (searchPanelDefaultMatch) {
+                searchPanelDefaults[searchPanelDefaultMatch[1]] = defaultValue;
+                delete this.globalContext[key];
             }
-            const parser = new SearchArchParser(
-                searchViewDescription,
-                searchDefaults,
-                defaultValues
-            );
-            processedSearchViewDescription = parser.parse();
-            const labels = processedSearchViewDescription.labels;
-            await Promise.all(labels.map((cb) => cb(this.orm)));
         }
-        const { preSearchItems, sections } = processedSearchViewDescription || {};
-        /////////////////////////////////////////////////////////////////////////
+
+        const parser = new SearchArchParser(
+            searchViewDescription,
+            searchDefaults,
+            searchPanelDefaults
+        );
+        const { labels, preSearchItems, searchPanelInfo, sections } = parser.parse();
+
+        this.searchPanelInfo = { ...searchPanelInfo, shouldReload: false };
+        this.display = this._getDisplay(config.display);
+
+        await Promise.all(labels.map((cb) => cb(this.orm)));
 
         // prepare search items (populate this.searchItems)
         for (const preGroup of preSearchItems || []) {
@@ -336,12 +338,12 @@ export class SearchModel extends EventBus {
         /** @type Map<number,Section> */
         this.sections = new Map(sections || []);
 
-        if (this.loadSearchPanel) {
+        if (this.display.searchPanel) {
             /** @type DomainListRepr */
-            this.searchDomain = this._getDomain({ full: false });
+            this.searchDomain = this._getDomain({ withSearchPanel: false });
             this.sectionsPromise = this._fetchSections(this.categories, this.filters).then(() => {
                 for (const { fieldName, values } of this.filters) {
-                    const filterDefaults = defaultValues[fieldName] || [];
+                    const filterDefaults = searchPanelDefaults[fieldName] || [];
                     for (const valueId of filterDefaults) {
                         const value = values.get(valueId);
                         if (value) {
@@ -350,7 +352,7 @@ export class SearchModel extends EventBus {
                     }
                 }
             });
-            if (Object.keys(defaultValues).length || this._shouldWaitForData()) {
+            if (Object.keys(searchPanelDefaults).length || this._shouldWaitForData(false)) {
                 await this.sectionsPromise;
             }
         }
@@ -382,26 +384,7 @@ export class SearchModel extends EventBus {
         this.globalGroupBy = groupBy || [];
         this.globalOrderBy = orderBy || [];
 
-        if (this.loadSearchPanel) {
-            this.blockNotification = true;
-
-            const searchDomain = this._getDomain({ full: false });
-            const searchDomainChanged =
-                JSON.stringify(this.searchDomain) !== JSON.stringify(searchDomain);
-            this.searchDomain = searchDomain;
-            if (searchDomainChanged) {
-                const toFetch = (section) => section.enableCounters || !section.expand;
-                this.sectionsPromise = this._fetchSections(
-                    this.categories.filter(toFetch),
-                    this.filters.filter(toFetch)
-                );
-                if (this._shouldWaitForData(true)) {
-                    await this.sectionsPromise;
-                }
-            }
-
-            this.blockNotification = false;
-        }
+        await this._reloadSections();
     }
 
     //--------------------------------------------------------------------------
@@ -458,14 +441,11 @@ export class SearchModel extends EventBus {
                     } = comparison;
                     this._domains = [
                         {
-                            arrayRepr: Domain.combine([this.domain, range], "AND").toList(),
+                            arrayRepr: Domain.and([this.domain, range]).toList(),
                             description: rangeDescription,
                         },
                         {
-                            arrayRepr: Domain.combine(
-                                [this.domain, comparisonRange],
-                                "AND"
-                            ).toList(),
+                            arrayRepr: Domain.and([this.domain, comparisonRange]).toList(),
                             description: comparisonRangeDescription,
                         },
                     ];
@@ -1378,19 +1358,43 @@ export class SearchModel extends EventBus {
     }
 
     /**
+     * Returns which components are displayed in the current action. Components
+     * are opt-out, meaning that they will be displayed as long as a falsy
+     * value is not provided. With the search panel, the view type must also
+     * match the given (or default) search panel view types if the search model
+     * is instanciated in a view (this doesn't apply for any other action type).
+     * @private
+     * @param {Object} [display={}]
+     * @returns {{ controlPanel: Object | false, searchPanel: boolean }}
+     */
+    _getDisplay(display = {}) {
+        const { viewTypes } = this.searchPanelInfo;
+        return {
+            controlPanel: "controlPanel" in display ? display.controlPanel : {},
+            searchPanel:
+                (!this.view.type || viewTypes.includes(this.view.type)) &&
+                ("searchPanel" in display ? display.searchPanel : true),
+        };
+    }
+
+    /**
      * Return a domain created by combinining appropriately (with an 'AND') the domains
      * coming from the active groups of type 'filter', 'dateFilter', 'favorite', and 'field'.
      * @param {Object} [params]
-     * @param {boolean} [params.evaluation=true]
-     * @param {boolean} [params.full=true]
-     * @returns {DomainListRepr|string} domain a DomainListRepr if evaluation, a string else
+     * @param {boolean} [params.raw=false]
+     * @param {boolean} [params.withSearchPanel=true]
+     * @param {boolean} [params.withGlobal=true]
+     * @returns {DomainListRepr | string} AST domain if 'raw', else the evaluated list domain
      */
     _getDomain(params = {}) {
-        const evaluation = "evaluation" in params ? params.evaluation : true;
-        const full = "full" in params ? params.full : true;
+        const withSearchPanel = "withSearchPanel" in params ? params.withSearchPanel : true;
+        const withGlobal = "withGlobal" in params ? params.withGlobal : true;
 
         const groups = this._getGroups();
-        const domains = [this.globalDomain];
+        const domains = [];
+        if (withGlobal) {
+            domains.push(this.globalDomain);
+        }
         for (const group of groups) {
             const groupActiveItemDomains = [];
             for (const activeItem of group.activeItems) {
@@ -1399,7 +1403,7 @@ export class SearchModel extends EventBus {
                     groupActiveItemDomains.push(domain);
                 }
             }
-            const groupDomain = Domain.combine(groupActiveItemDomains, "OR");
+            const groupDomain = Domain.or(groupActiveItemDomains);
             domains.push(groupDomain);
         }
 
@@ -1408,17 +1412,14 @@ export class SearchModel extends EventBus {
         }
         // we need to manage (optional) facets, deactivateGroup, clearQuery,...
 
-        if (full) {
+        if (this.display.searchPanel && withSearchPanel) {
             domains.push(this._getSearchPanelDomain());
         }
 
         let domain;
         try {
-            domain = Domain.combine(domains, "AND");
-            if (evaluation === true) {
-                return domain.toList(this.userService.context);
-            }
-            return domain;
+            domain = Domain.and(domains);
+            return params.raw ? domain : domain.toList(this.userService.context);
         } catch (error) {
             throw new Error(
                 `${this.env._t("Failed to evaluate the domain")} ${domain.toString()}.\n${
@@ -1516,7 +1517,7 @@ export class SearchModel extends EventBus {
             }
             return new Domain(domain);
         });
-        return Domain.combine(domains, "OR");
+        return Domain.or(domains);
     }
 
     /**
@@ -1726,18 +1727,14 @@ export class SearchModel extends EventBus {
         const fns = this.env.__saveParams__.callbacks;
         const saveParams = Object.assign({}, ...fns.map((fn) => fn()));
         const context = makeContext(this._getContext(), saveParams.context);
+        const userContext = this.userService.context;
         for (const key in context) {
-            if (key in this.userService.context) {
-                delete context[key];
-                continue;
-            }
-            // clean search defaults from context --> could be removed I think
-            const match = /^search_default_(.*)$/.exec(key);
-            if (match) {
+            if (key in userContext || /^search(panel)?_default_/.test(key)) {
+                // clean search defaults and user context keys
                 delete context[key];
             }
         }
-        const domain = this._getDomain({ evaluation: false });
+        const rawDomain = this._getDomain({ raw: true, withGlobal: false });
         const groupBys = this._getGroupBy();
         const comparison = this._getComparison();
         const orderBy = saveParams.orderBy ? saveParams.orderBy : this._getOrderBy() || [];
@@ -1746,7 +1743,7 @@ export class SearchModel extends EventBus {
         const preFavorite = {
             description,
             isDefault,
-            domain,
+            domain: rawDomain.toList(userContext),
             context,
             groupBys,
             orderBy,
@@ -1756,7 +1753,7 @@ export class SearchModel extends EventBus {
             name: description,
             action_id: this.action.id,
             model_id: this.resModel,
-            domain: domain.toString(),
+            domain: rawDomain.toString(),
             is_default: isDefault,
             sort: JSON.stringify(orderBy.map((o) => `${o.name}${o.asc === false ? " desc" : ""}`)),
             user_id: userId,
@@ -2005,24 +2002,49 @@ export class SearchModel extends EventBus {
         this._groupBy = null;
         this._orderBy = null;
 
-        if (this.loadSearchPanel) {
-            const searchDomain = this._getDomain({ full: false });
-            const searchDomainChanged =
-                JSON.stringify(this.searchDomain) !== JSON.stringify(searchDomain);
-            this.searchDomain = searchDomain;
-            if (searchDomainChanged) {
-                const toFetch = (section) => section.enableCounters || !section.expand;
-                this.sectionsPromise = this._fetchSections(
-                    this.categories.filter(toFetch),
-                    this.filters.filter(toFetch)
-                );
-                if (this._shouldWaitForData(true)) {
+        await this._reloadSections();
+
+        this.trigger("update");
+    }
+
+    /**
+     * Updates the search domain and reloads sections if:
+     * - the current search domain is different from the previous, or...
+     * - a `shouldReload` flag has been set to true on the searchPanelInfo.
+     * The latter means that the search domain has been modified while the
+     * search panel was not displayed (and thus not reloaded) and the reload
+     * should occur as soon as the search panel is visible again.
+     * @private
+     * @returns {Promise<void>}
+     */
+    async _reloadSections() {
+        this.blockNotification = true;
+
+        // Check whether the search domain changed
+        const searchDomain = this._getDomain({ withSearchPanel: false });
+        const searchDomainChanged =
+            this.searchPanelInfo.shouldReload ||
+            JSON.stringify(this.searchDomain) !== JSON.stringify(searchDomain);
+        this.searchDomain = searchDomain;
+
+        // Check whether categories/filters will force a reload of the sections
+        const toFetch = (section) =>
+            section.enableCounters || (searchDomainChanged && !section.expand);
+        const categoriesToFetch = this.categories.filter(toFetch);
+        const filtersToFetch = this.filters.filter(toFetch);
+
+        if (searchDomainChanged || Boolean(categoriesToFetch.length + filtersToFetch.length)) {
+            if (this.display.searchPanel) {
+                this.sectionsPromise = this._fetchSections(categoriesToFetch, filtersToFetch);
+                if (this._shouldWaitForData(searchDomainChanged)) {
                     await this.sectionsPromise;
                 }
             }
+            // If no current search panel: will try to reload on next model update
+            this.searchPanelInfo.shouldReload = !this.display.searchPanel;
         }
 
-        this.trigger("update");
+        this.blockNotification = false;
     }
 
     /**
@@ -2031,7 +2053,7 @@ export class SearchModel extends EventBus {
      * @param {boolean} searchDomainChanged
      * @returns {boolean}
      */
-    _shouldWaitForData(searchDomainChanged = false) {
+    _shouldWaitForData(searchDomainChanged) {
         if (this.categories.length && this.filters.some((filter) => filter.domain !== "[]")) {
             // Selected category value might affect the filter values
             return true;
@@ -2043,5 +2065,22 @@ export class SearchModel extends EventBus {
         return [...this.sections.values()].some(
             (section) => !section.expand && searchDomainChanged
         );
+    }
+
+    /**
+     * Legacy compatibility: the imported state of a legacy search panel model
+     * extension doesn't include the arch information, i.e. the class name and
+     * view types. We have to extract those if they are not given.
+     * @param {Object} searchViewDescription
+     */
+    __legacyParseSearchPanelArchAnyway(searchViewDescription) {
+        if (this.searchPanelInfo) {
+            return;
+        }
+
+        const parser = new SearchArchParser(searchViewDescription);
+        const { searchPanelInfo } = parser.parse();
+
+        this.searchPanelInfo = { ...searchPanelInfo, shouldReload: false };
     }
 }

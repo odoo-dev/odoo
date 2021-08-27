@@ -46,11 +46,7 @@ function registerView(name, LegacyView) {
             const { globalState } = this.props;
             if (globalState) {
                 resIds = globalState.resIds;
-                if (globalState.__legacySearchModel__) {
-                    searchModel = globalState.__legacySearchModel__;
-                } else {
-                    searchModel = searchModelStateToLegacy(globalState.searchModel);
-                }
+                searchModel = searchModelStateToLegacy(globalState.searchModel);
                 searchPanel = globalState.searchPanel;
             }
 
