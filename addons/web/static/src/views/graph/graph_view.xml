@@ -45,23 +45,25 @@
 
     <t t-name="web.GraphView" owl="1">
         <div class="o_graph_view" t-att-class="{ o_view_sample_data: model.metaData.useSampleModel }">
-            <t t-component="constructor.ControlPanel" t-props="controlPanelProps">
+            <ControlPanel t-if="env.searchModel.display.controlPanel" t-props="props.info">
                 <t t-set-slot="control-panel-bottom-left">
                     <t t-call="{{ constructor.buttonTemplate }}"/>
                 </t>
-            </t>
+            </ControlPanel>
             <div class="o_content">
+                <SearchPanel t-if="env.searchModel.display.searchPanel" />
                 <!-- <label t-if="model.metaData.title" t-esc="model.metaData.title"/> -->
                 <t t-if="model.data">
                     <t t-if="model.metaData.useSampleModel and props.info.noContentHelp" t-call="web.ActionHelper">
                         <t t-set="noContentHelp" t-value="props.info.noContentHelp"/>
                     </t>
-                    <t t-component="constructor.Renderer"
+                    <Renderer
+                        class="o_renderer"
                         data="model.data"
                         metaData="model.metaData"
                         t-att-class="{ o_sample_data_disabled: model.metaData.useSampleModel }"
                         t-on-inspect-domain-records="onInspectDomainRecords"
-                        />
+                    />
                 </t>
                 <t t-else="" t-call="web.NoContentHelper">
                     <t t-set="title">Invalid data</t>

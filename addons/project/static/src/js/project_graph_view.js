@@ -8,6 +8,5 @@ const viewRegistry = registry.category("views");
 
 class ProjectGraphView extends GraphView {}
 ProjectGraphView.components = { ...GraphView, ControlPanel: ProjectControlPanel };
-ProjectGraphView.ControlPanel = ProjectControlPanel; // TODO remove when JUM has merged his PR SearchPanel
 
 viewRegistry.add("project_graph", ProjectGraphView);

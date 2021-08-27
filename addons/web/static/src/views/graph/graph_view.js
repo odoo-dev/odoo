@@ -2,6 +2,7 @@
 
 import { _lt } from "@web/core/l10n/translation";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { SearchPanel } from "@web/search/search_panel/search_panel";
 import { GraphArchParser, MODES, ORDERS } from "./graph_arch_parser";
 import { GraphModel } from "./graph_model";
 import { GraphRenderer } from "./graph_renderer";
@@ -55,14 +56,6 @@ export class GraphView extends Component {
             exportLocalState: () => this.model.metaData,
             saveParams: () => this.saveParams(),
         });
-    }
-
-    get controlPanelProps() {
-        const controlPanelProps = Object.assign({}, this.props.info);
-        if (this.props.display.controlPanel) {
-            controlPanelProps.display = this.props.display.controlPanel;
-        }
-        return controlPanelProps;
     }
 
     /**
@@ -145,7 +138,7 @@ export class GraphView extends Component {
 GraphView.template = "web.GraphView";
 GraphView.buttonTemplate = "web.GraphView.Buttons";
 
-GraphView.components = { GroupByMenu };
+GraphView.components = { ControlPanel, GroupByMenu, Renderer: GraphRenderer, SearchPanel };
 
 GraphView.defaultProps = {
     additionalMeasures: [],
@@ -159,14 +152,14 @@ GraphView.defaultProps = {
 
 GraphView.props = {
     ...standardViewProps,
-    additionalMeasures: { type: Array, elements: String, optional: 1 },
-    disableLinking: { type: Boolean, optional: 1 },
-    display: { type: Object, optional: 1 },
-    measure: { type: String, optional: 1 },
-    mode: { validate: (m) => MODES.includes(m), optional: 1 },
-    order: { validate: (o) => ORDERS.includes(o), optional: 1 },
-    stacked: { type: Boolean, optional: 1 },
-    title: { type: String, optional: 1 },
+    additionalMeasures: { type: Array, elements: String, optional: true },
+    disableLinking: { type: Boolean, optional: true },
+    display: { type: Object, optional: true },
+    measure: { type: String, optional: true },
+    mode: { validate: (m) => MODES.includes(m), optional: true },
+    order: { validate: (o) => ORDERS.includes(o), optional: true },
+    stacked: { type: Boolean, optional: true },
+    title: { type: String, optional: true },
 };
 
 GraphView.type = "graph";
@@ -176,8 +169,6 @@ GraphView.icon = "fa-bar-chart";
 GraphView.multiRecord = true;
 
 GraphView.Model = GraphModel;
-GraphView.Renderer = GraphRenderer;
-GraphView.ControlPanel = ControlPanel;
 
 GraphView.archParser = GraphArchParser;
 
