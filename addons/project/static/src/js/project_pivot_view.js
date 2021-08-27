@@ -8,6 +8,5 @@ const viewRegistry = registry.category("views");
 
 class ProjectPivotView extends PivotView {}
 ProjectPivotView.components = { ...PivotView, ControlPanel: ProjectControlPanel };
-ProjectPivotView.ControlPanel = ProjectControlPanel; // TODO remove when JUM has merged his PR SearchPanel
 
 viewRegistry.add("project_pivot", ProjectPivotView);

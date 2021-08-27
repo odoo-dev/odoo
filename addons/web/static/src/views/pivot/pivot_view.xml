@@ -18,12 +18,13 @@
 
     <t t-name="web.PivotView" owl="1">
         <div class="o_pivot_view" t-att-class="{o_view_sample_data: model.meta.useSampleModel }">
-            <t t-component="constructor.ControlPanel" t-props="controlPanelProps" t-if="props.display.controlPanel !== false">
+            <ControlPanel t-if="env.searchModel.display.controlPanel" t-props="props.info">
                 <t t-set-slot="control-panel-bottom-left">
                     <t t-call="{{ constructor.buttonTemplate }}"/>
                 </t>
-            </t>
+            </ControlPanel>
             <div class="o_content">
+                <SearchPanel t-if="env.searchModel.display.searchPanel" />
                 <t t-set="displayNoContent" t-value="
                     props.info.noContentHelp !== false and (
                         !(model.hasData() and model.meta.activeMeasures.length) or
@@ -36,7 +37,7 @@
                     <t t-else="" t-call="web.NoContentHelper"/>
                 </t>
                 <t t-if="model.hasData() and model.meta.activeMeasures.length">
-                    <t t-component="constructor.Renderer" model="model" onCellClicked="cell => onOpenView(cell)"/>
+                    <Renderer model="model" onCellClicked="cell => onOpenView(cell)"/>
                 </t>
             </div>
         </div>

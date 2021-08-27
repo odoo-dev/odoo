@@ -1,16 +1,17 @@
 /** @odoo-module **/
 
 import { _lt } from "@web/core/l10n/translation";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { download } from "@web/core/network/download";
-import { PivotArchParser } from "./pivot_arch_parser";
-import { PivotModel } from "./pivot_model";
-import { PivotRenderer } from "./pivot_renderer";
 import { registry } from "@web/core/registry";
-import { standardViewProps } from "@web/views/helpers/standard_view_props";
-import { useModel } from "../helpers/model";
 import { useService } from "@web/core/utils/hooks";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { SearchPanel } from "@web/search/search_panel/search_panel";
+import { useModel } from "@web/views/helpers/model";
+import { standardViewProps } from "@web/views/helpers/standard_view_props";
 import { useSetupView } from "@web/views/helpers/view_hook";
+import { PivotArchParser } from "@web/views/pivot/pivot_arch_parser";
+import { PivotModel } from "@web/views/pivot/pivot_model";
+import { PivotRenderer } from "@web/views/pivot/pivot_renderer";
 
 const viewRegistry = registry.category("views");
 
@@ -59,16 +60,6 @@ export class PivotView extends Component {
             },
             saveParams: () => this.saveParams(), // FIXME: rename this
         });
-    }
-    /**
-     * @returns {Object}
-     */
-    get controlPanelProps() {
-        const controlPanelProps = Object.assign({}, this.props.info);
-        if (this.props.display.controlPanel) {
-            controlPanelProps.display = this.props.display.controlPanel;
-        }
-        return controlPanelProps;
     }
     /**
      * @returns {Object}
@@ -169,6 +160,7 @@ export class PivotView extends Component {
 
 PivotView.template = "web.PivotView";
 PivotView.buttonTemplate = "web.PivotView.Buttons";
+PivotView.components = { ControlPanel, SearchPanel, Renderer: PivotRenderer };
 
 PivotView.props = {
     ...standardViewProps,
@@ -182,8 +174,6 @@ PivotView.defaultProps = {
 };
 
 PivotView.Model = PivotModel;
-PivotView.Renderer = PivotRenderer;
-PivotView.ControlPanel = ControlPanel;
 
 PivotView.archParser = PivotArchParser;
 
