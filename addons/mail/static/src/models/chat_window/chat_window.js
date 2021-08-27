@@ -163,6 +163,14 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
+        _computeHasCallButtons() {
+            return this.thread && this.thread.rtcSessions.length === 0 && ['channel', 'chat', 'group'].includes(this.thread.channel_type);
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
         _computeHasNewMessageForm() {
             return this.isVisible && !this.isFolded && !this.thread;
         }
@@ -334,6 +342,13 @@ function factory(dependencies) {
     }
 
     ChatWindow.fields = {
+        /**
+         * Determines whether the buttons to start a RTC call should be displayed.
+         */
+        hasCallButtons: attr({
+            default: false,
+            compute: '_computeHasCallButtons',
+        }),
         /**
          * Determines whether "new message form" should be displayed.
          */
