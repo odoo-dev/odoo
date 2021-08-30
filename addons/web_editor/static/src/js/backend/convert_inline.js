@@ -303,10 +303,10 @@ function bootstrapToTable($editable) {
             for (const attr of node.attributes) {
                 $table.attr(attr.name, attr.value);
             }
-            $table.removeClass('container container-fluid');
             for (const child of [...node.childNodes]) {
                 $table.append(child);
             }
+            $table.removeClass('container container-fluid');
             $table.attr({
                 cellspacing: 0,
                 cellpadding: 0,
@@ -476,8 +476,8 @@ FieldHtml.include({
 
         attachmentThumbnailToLinkImg($editable);
         fontToImg($editable);
-        bootstrapToTable($editable);
         classToStyle($editable);
+        bootstrapToTable($editable);
 
         // fix outlook image rendering bug
         _.each(['width', 'height'], function(attribute) {
