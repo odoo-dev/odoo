@@ -393,26 +393,8 @@ function classToStyle($editable) {
 
         // Outlook
         if (node.nodeName === 'A' && $target.hasClass('btn') && !$target.hasClass('btn-link') && !$target.children().length) {
-            var $hack = $('<table class="o_outlook_hack" style="display: inline-table;vertical-align:middle"><tr><td></td></tr></table>');
-            $hack.find('td')
-                .attr('height', $target.outerHeight())
-                .css({
-                    'text-align': $target.parent().css('text-align'),
-                    'margin': $target.css('padding'),
-                    'border-radius': $target.css('border-radius'),
-                    'background-color': $target.css('background-color'),
-                });
-            $target.after($hack);
-            $target.appendTo($hack.find('td'));
-            // the space add a line when it's a table but it's invisible when it's a link
-            node = $hack[0].previousSibling;
-            if (node && node.nodeType === Node.TEXT_NODE && !node.textContent.match(/\S/)) {
-                $(node).remove();
-            }
-            node = $hack[0].nextSibling;
-            if (node && node.nodeType === Node.TEXT_NODE && !node.textContent.match(/\S/)) {
-                $(node).remove();
-            }
+            $target.prepend(`<!--[if mso]><i style="letter-spacing: 25px; mso-font-width: -100%; mso-text-raise: 30pt;">&nbsp;</i><![endif]-->`);
+            $target.append(`<!--[if mso]><i style="letter-spacing: 25px; mso-font-width: -100%;">&nbsp;</i><![endif]-->`);
         }
         else if (node.nodeName === 'IMG' && $target.is('.mx-auto.d-block')) {
             $target.wrap('<p class="o_outlook_hack" style="text-align:center;margin:0"/>');
