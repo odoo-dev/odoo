@@ -349,7 +349,8 @@ function bootstrapToTable($editable) {
                     $col.css({'max-width': BOOTSTRAP_MAX_WIDTHS[screenSize] + 'px'});
                 }
                 if (colSize) {
-                    $col.attr('width', Math.round(colSize * 100 / 12) + '%');
+                    const width = Math.round(colSize * 100 / 12) + '%';
+                    $col.attr('width', width).css('width', width);
                 }
             }
             return $col[0];
