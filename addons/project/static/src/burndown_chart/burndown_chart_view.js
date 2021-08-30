@@ -7,7 +7,7 @@ import { registry } from "@web/core/registry";
 const viewRegistry = registry.category("views");
 
 class BurndownChartView extends GraphView {}
-BurndownChartView.Renderer = BurndownChartRenderer;
+BurndownChartView.components = { ...GraphView.components, Renderer: BurndownChartRenderer };
 BurndownChartView.buttonTemplate = "project.BurndownChartView.Buttons";
 
 viewRegistry.add("burndown_chart", BurndownChartView);
