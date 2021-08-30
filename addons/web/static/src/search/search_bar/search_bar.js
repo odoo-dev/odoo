@@ -324,7 +324,7 @@ export class SearchBar extends Component {
      * @param {number} index
      */
     onItemMousemove(focusedIndex) {
-        this.computeState({ focusedIndex });
+        this.computeState({ focusedIndex }); /** @todo review that */
         this.inputRef.el.focus();
     }
 
@@ -420,7 +420,7 @@ export class SearchBar extends Component {
                 break;
         }
 
-        if (focusedIndex) {
+        if (focusedIndex !== undefined) {
             this.computeState({ focusedIndex });
         }
     }
