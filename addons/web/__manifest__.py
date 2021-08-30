@@ -50,6 +50,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/xml/report.xml',
             'web/static/src/legacy/xml/web_calendar.xml',
             'web/static/src/legacy/xml/graph.xml',
+            'web/static/src/legacy/xml/search_panel.xml',
             'web/static/src/legacy/xml/week_days.xml',
         ],
         'web.assets_common_minimal': [
