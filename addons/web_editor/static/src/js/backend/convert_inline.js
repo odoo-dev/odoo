@@ -298,7 +298,7 @@ function applyOverDescendants(node, func) {
 function bootstrapToTable($editable) {
     applyOverDescendants($editable[0], function (node) {
         const $node = $(node);
-        if (/container( |$|-fluid)/.test(node.className)) {
+        if (/(^| )container( |$|-fluid)/.test(node.className)) {
             const $table = $($node.find('.row').length ? '<table align="center"/>' : node.cloneNode());
             for (const attr of node.attributes) {
                 $table.attr(attr.name, attr.value);
