@@ -296,6 +296,8 @@ function applyOverDescendants(node, func) {
  * @param {jQuery} $editable
  */
 function bootstrapToTable($editable) {
+    const reColMatch = /(^| )col(-[\w\d]+)*( |$)/;
+    const reOffsetMatch = /(^| )offset(-[\w\d]+)*( |$)/;
     applyOverDescendants($editable[0], function (node) {
         const $node = $(node);
         if (/(^| )container( |$|-fluid)/.test(node.className)) {
@@ -327,9 +329,29 @@ function bootstrapToTable($editable) {
             }
             $node.before($row);
             $node.remove();
+            // Check the children to already add an extra column if the total
+            // width doesn't amount to 100% (as margins are not supported in
+            // <td> elements in e-mails).
+            const colSizes = [...$row[0].childNodes].map(child => {
+                if (!child.className) {
+                    return 0;
+                }
+                const colMatch = child.className.match(reColMatch);
+                const colOptions = colMatch && colMatch[2] && colMatch[2].substr(1).split('-');
+                const colSize = colOptions && (colOptions.length === 2 ? +colOptions[1] : +colOptions[0]) || 0;
+                const offsetMatch = child.className.match(reOffsetMatch);
+                const offsetOptions = offsetMatch && offsetMatch[2] && offsetMatch[2].substr(1).split('-');
+                const offsetSize = offsetOptions && (offsetOptions.length === 2 ? +offsetOptions[1] : +offsetOptions[0]) || 0;
+                return colSize + offsetSize;
+            });
+            const colTotalSize = colSizes.reduce((a, b) => a + b);
+            if (colTotalSize < 12) {
+                const width = Math.round((12 - colTotalSize) * 100 / 12);
+                $row.append($('<td/>').css('width', width + '%').attr('width', width + '%'));
+            }
             return $row[0];
         }
-        const colMatch = node.className.match(/(^| )col(-[\w\d]+)*( |$)/);
+        const colMatch = node.className.match(reColMatch);
         if (colMatch) {
             const colOptions = colMatch[2] && colMatch[2].substr(1).split('-');
             const $col = $('<td/>');
@@ -352,6 +374,13 @@ function bootstrapToTable($editable) {
                     const width = Math.round(colSize * 100 / 12) + '%';
                     $col.attr('width', width).css('width', width);
                 }
+            }
+            const offsetMatch = node.className.match(reOffsetMatch);
+            const offsetOptions = offsetMatch && offsetMatch[2] && offsetMatch[2].substr(1).split('-');
+            const offsetSize = offsetOptions && (offsetOptions.length === 2 ? +offsetOptions[1] : +offsetOptions[0]);
+            if (offsetSize) {
+                const offset = Math.round(offsetSize * 100 / 12);
+                $col.before($('<td/>').css('width', offset + '%').attr('width', offset + '%')).removeClass(offsetMatch[0]);
             }
             return $col[0];
         }
