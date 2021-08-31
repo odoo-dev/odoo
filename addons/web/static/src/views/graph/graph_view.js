@@ -21,7 +21,7 @@ const KEYS = [
     "disableLinking",
     "display",
     "fields",
-    "fieldModif",
+    "fieldAttrs",
     "groupBy",
     "measure",
     "mode",
@@ -41,7 +41,7 @@ export class GraphView extends Component {
             modelParams = this.props.state;
         } else {
             const { arch, fields } = this.props;
-            const parser = new GraphArchParser();
+            const parser = new this.constructor.archParser();
             const archInfo = parser.parse(arch, fields);
             modelParams = {};
             for (const key of KEYS) {
@@ -178,6 +178,8 @@ GraphView.multiRecord = true;
 GraphView.Model = GraphModel;
 GraphView.Renderer = GraphRenderer;
 GraphView.ControlPanel = ControlPanel;
+
+GraphView.archParser = GraphArchParser;
 
 GraphView.searchMenuTypes = ["filter", "groupBy", "comparison", "favorite"];
 

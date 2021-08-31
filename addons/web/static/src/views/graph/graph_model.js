@@ -121,7 +121,7 @@ export class GraphModel extends Model {
 
         metaData.measures = computeReportMeasures(
             metaData.fields,
-            metaData.fieldModif,
+            metaData.fieldAttrs,
             [metaData.measure],
             metaData.additionalMeasures
         );

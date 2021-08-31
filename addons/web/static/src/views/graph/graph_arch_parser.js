@@ -10,29 +10,29 @@ export const ORDERS = ["ASC", "DESC", null];
 
 export class GraphArchParser extends XMLParser {
     parse(arch, fields = {}) {
-        const metaData = { fields, fieldModif: {}, groupBy: [] };
+        const archInfo = { fields, fieldAttrs: {}, groupBy: [] };
         this.visitXML(arch, (node) => {
             switch (node.tagName) {
                 case "graph":
                     if (node.hasAttribute("disable_linking")) {
-                        metaData.disableLinking = archParseBoolean(
+                        archInfo.disableLinking = archParseBoolean(
                             node.getAttribute("disable_linking")
                         );
                     }
                     if (node.hasAttribute("stacked")) {
-                        metaData.stacked = archParseBoolean(node.getAttribute("stacked"));
+                        archInfo.stacked = archParseBoolean(node.getAttribute("stacked"));
                     }
                     const mode = node.getAttribute("type");
                     if (mode && MODES.includes(mode)) {
-                        metaData.mode = mode;
+                        archInfo.mode = mode;
                     }
                     const order = node.getAttribute("order");
                     if (order && ORDERS.includes(order)) {
-                        metaData.order = order;
+                        archInfo.order = order;
                     }
                     const title = node.getAttribute("string");
                     if (title) {
-                        metaData.title = title;
+                        archInfo.title = title;
                     }
                     break;
                 case "field":
@@ -42,39 +42,39 @@ export class GraphArchParser extends XMLParser {
                     }
                     const string = node.getAttribute("string");
                     if (string) {
-                        if (!metaData.fieldModif[fieldName]) {
-                            metaData.fieldModif[fieldName] = {};
+                        if (!archInfo.fieldAttrs[fieldName]) {
+                            archInfo.fieldAttrs[fieldName] = {};
                         }
-                        metaData.fieldModif[fieldName].string = string;
+                        archInfo.fieldAttrs[fieldName].string = string;
                     }
                     const isInvisible = Boolean(
                         evaluateExpr(node.getAttribute("invisible") || "0")
                     );
                     if (isInvisible) {
-                        if (!metaData.fieldModif[fieldName]) {
-                            metaData.fieldModif[fieldName] = {};
+                        if (!archInfo.fieldAttrs[fieldName]) {
+                            archInfo.fieldAttrs[fieldName] = {};
                         }
-                        metaData.fieldModif[fieldName].isInvisible = true;
+                        archInfo.fieldAttrs[fieldName].isInvisible = true;
                         break;
                     }
                     const isMeasure = node.getAttribute("type") === "measure";
                     if (isMeasure) {
                         // the last field with type="measure" (if any) will be used as measure else __count
-                        metaData.measure = fieldName;
+                        archInfo.measure = fieldName;
                     } else {
-                        const { type } = metaData.fields[fieldName]; // exists (rng validation)
+                        const { type } = archInfo.fields[fieldName]; // exists (rng validation)
                         if (GROUPABLE_TYPES.includes(type)) {
                             let groupBy = fieldName;
                             const interval = node.getAttribute("interval");
                             if (interval) {
                                 groupBy += `:${interval}`;
                             }
-                            metaData.groupBy.push(groupBy);
+                            archInfo.groupBy.push(groupBy);
                         }
                     }
                     break;
             }
         });
-        return metaData;
+        return archInfo;
     }
 }

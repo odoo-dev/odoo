@@ -410,7 +410,6 @@ export class GraphRenderer extends Component {
             allIntegers,
             display,
             fields,
-            fieldModif,
             groupBy,
             measure,
             measures,

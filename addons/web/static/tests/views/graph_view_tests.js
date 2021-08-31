@@ -1917,7 +1917,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("process default view description", async function (assert) {
         assert.expect(1);
         const propsFromArch = new GraphArchParser().parse();
-        assert.deepEqual(propsFromArch, { fields: {}, fieldModif: {}, groupBy: [] });
+        assert.deepEqual(propsFromArch, { fields: {}, fieldAttrs: {}, groupBy: [] });
     });
 
     QUnit.test("process simple arch (no field tag)", async function (assert) {
@@ -1929,7 +1929,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(propsFromArch, {
             disableLinking: true,
             fields,
-            fieldModif: {},
+            fieldAttrs: {},
             groupBy: [],
             mode: "line",
             order: "ASC",
@@ -1940,7 +1940,7 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(propsFromArch, {
             disableLinking: false,
             fields,
-            fieldModif: {},
+            fieldAttrs: {},
             groupBy: [],
             stacked: false,
             title: "Title",
@@ -1964,7 +1964,7 @@ QUnit.module("Views", (hooks) => {
         let propsFromArch = new GraphArchParser().parse(arch, fields);
         assert.deepEqual(propsFromArch, {
             fields,
-            fieldModif: {
+            fieldAttrs: {
                 bar: { isInvisible: true, string: "My invisible field" },
                 fighters: { string: "FooFighters" },
             },
