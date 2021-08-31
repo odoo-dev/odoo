@@ -269,10 +269,7 @@ function applyOverDescendants(node, func) {
     node = node.firstChild;
     while (node) {
         if (node.nodeType === 1) {
-            const newNode = func(node);
-            if (newNode) {
-                node = newNode;
-            }
+            func(node);
             applyOverDescendants(node, func);
         }
         var $node = $(node);
@@ -286,6 +283,18 @@ function applyOverDescendants(node, func) {
     }
 }
 
+const reColMatch = /(^| )col(-[\w\d]+)*( |$)/;
+const reOffsetMatch = /(^| )offset(-[\w\d]+)*( |$)/;
+function _getColumnSize(column) {
+    const colMatch = column.className.match(reColMatch);
+    const colOptions = colMatch[2] && colMatch[2].substr(1).split('-');
+    const colSize = colOptions && (colOptions.length === 2 ? +colOptions[1] : +colOptions[0]) || 0;
+    const offsetMatch = column.className.match(reOffsetMatch);
+    const offsetOptions = offsetMatch && offsetMatch[2] && offsetMatch[2].substr(1).split('-');
+    const offsetSize = offsetOptions && (offsetOptions.length === 2 ? +offsetOptions[1] : +offsetOptions[0]) || 0;
+    return colSize + offsetSize;
+}
+
 /**
  * Converts bootstrap rows and columns to actual tables.
  *
@@ -296,95 +305,100 @@ function applyOverDescendants(node, func) {
  * @param {jQuery} $editable
  */
 function bootstrapToTable($editable) {
-    const reColMatch = /(^| )col(-[\w\d]+)*( |$)/;
-    const reOffsetMatch = /(^| )offset(-[\w\d]+)*( |$)/;
-    applyOverDescendants($editable[0], function (node) {
-        const $node = $(node);
-        if (/(^| )container( |$|-fluid)/.test(node.className)) {
-            const $table = $($node.find('.row').length ? '<table align="center"/>' : node.cloneNode());
-            for (const attr of node.attributes) {
-                $table.attr(attr.name, attr.value);
-            }
-            for (const child of [...node.childNodes]) {
-                $table.append(child);
-            }
-            $table.removeClass('container container-fluid');
-            $table.attr({
-                cellspacing: 0,
-                cellpadding: 0,
-                border: 0,
-                width: '100%',
-            });
-            $node.before($table);
-            $node.remove();
-            return $table[0];
-        } else if ($node.hasClass('row')) {
+    for (const container of $editable.find('.container, .container-fluid')) {
+        const $container = $(container);
+        // Table
+        const $table = $($container.find('.row').length ? '<table align="center"/>' : container.cloneNode());
+        for (const attr of container.attributes) {
+            $table.attr(attr.name, attr.value);
+        }
+        for (const child of [...container.childNodes]) {
+            $table.append(child);
+        }
+        $table.removeClass('container container-fluid');
+        $table.attr({
+            cellspacing: 0,
+            cellpadding: 0,
+            border: 0,
+            width: '100%',
+        });
+        $container.before($table);
+        $container.remove();
+
+
+        // Rows
+        const $bootstrapRows = $table.children().filter('.row');
+        for (const bootstrapRow of $bootstrapRows) {
+            const $bootstrapRow = $(bootstrapRow);
             const $row = $('<tr/>');
-            for (const attr of node.attributes) {
+            for (const attr of bootstrapRow.attributes) {
                 $row.attr(attr.name, attr.value);
             }
             $row.removeClass('row');
-            for (const child of [...node.childNodes]) {
+            for (const child of [...bootstrapRow.childNodes]) {
                 $row.append(child);
             }
-            $node.before($row);
-            $node.remove();
-            // Check the children to already add an extra column if the total
-            // width doesn't amount to 100% (as margins are not supported in
-            // <td> elements in e-mails).
-            const colSizes = [...$row[0].childNodes].map(child => {
-                if (!child.className) {
-                    return 0;
-                }
-                const colMatch = child.className.match(reColMatch);
-                const colOptions = colMatch && colMatch[2] && colMatch[2].substr(1).split('-');
-                const colSize = colOptions && (colOptions.length === 2 ? +colOptions[1] : +colOptions[0]) || 0;
-                const offsetMatch = child.className.match(reOffsetMatch);
-                const offsetOptions = offsetMatch && offsetMatch[2] && offsetMatch[2].substr(1).split('-');
-                const offsetSize = offsetOptions && (offsetOptions.length === 2 ? +offsetOptions[1] : +offsetOptions[0]) || 0;
-                return colSize + offsetSize;
-            });
-            const colTotalSize = colSizes.reduce((a, b) => a + b);
+            $bootstrapRow.before($row);
+            $bootstrapRow.remove();
+
+
+            // Columns
+            // TODO: optimize to use reColMatch regex less often.
+            const $bootstrapColumns = $row.children().filter((i, column) => column.className && column.className.match(reColMatch));
+            // First check the added width of the columns to already add an
+            // extra column if it doesn't amount to 100% (as margins are not
+            // supported in <td> elements in e-mails).
+            let colTotalSize = $bootstrapColumns.toArray().map(child => _getColumnSize(child)).reduce((a, b) => a + b, 0);
             if (colTotalSize < 12) {
-                const width = Math.round((12 - colTotalSize) * 100 / 12);
-                $row.append($('<td/>').css('width', width + '%').attr('width', width + '%'));
-            }
-            return $row[0];
-        }
-        const colMatch = node.className.match(reColMatch);
-        if (colMatch) {
-            const colOptions = colMatch[2] && colMatch[2].substr(1).split('-');
-            const $col = $('<td/>');
-            for (const attr of node.attributes) {
-                $col.attr(attr.name, attr.value);
-            }
-            $col.removeClass(colMatch[0]);
-            for (const child of [...node.childNodes]) {
-                $col.append(child);
-            }
-            $node.before($col);
-            $node.remove();
-            if (colOptions) {
-                const screenSize = colOptions.length === 2 && colOptions[0];
-                const colSize = colOptions.length === 2 ? +colOptions[1] : +colOptions[0];
-                if (screenSize in BOOTSTRAP_MAX_WIDTHS) {
-                    $col.css({'max-width': BOOTSTRAP_MAX_WIDTHS[screenSize] + 'px'});
+                // Replace generic "col" classes with specific "col-n",
+                // computed by sharing the available space between them.
+                const $flexColumns = $bootstrapColumns.filter((i, column) => !/\d/.test(column.className.match(reColMatch)[0] || '0'));
+                const flexWidth = Math.round((12 - colTotalSize) / $flexColumns.length);
+                for (const flexColumn of $flexColumns) {
+                    flexColumn.classList.remove(flexColumn.className.match(reColMatch)[0].trim());
+                    flexColumn.classList.add(`col-${flexWidth}`);
                 }
-                if (colSize) {
-                    const width = Math.round(colSize * 100 / 12) + '%';
-                    $col.attr('width', width).css('width', width);
+                colTotalSize = $bootstrapColumns.toArray().map(child => _getColumnSize(child)).reduce((a, b) => a + b, 0);
+                if (colTotalSize < 12) {
+                    const width = Math.round((12 - colTotalSize) * 100 / 12);
+                    $row.append($('<td/>').css('width', width + '%').attr('width', width + '%'));
                 }
             }
-            const offsetMatch = node.className.match(reOffsetMatch);
-            const offsetOptions = offsetMatch && offsetMatch[2] && offsetMatch[2].substr(1).split('-');
-            const offsetSize = offsetOptions && (offsetOptions.length === 2 ? +offsetOptions[1] : +offsetOptions[0]);
-            if (offsetSize) {
-                const offset = Math.round(offsetSize * 100 / 12);
-                $col.before($('<td/>').css('width', offset + '%').attr('width', offset + '%')).removeClass(offsetMatch[0]);
+            for (const bootstrapColumn of $bootstrapColumns) {
+                const $bootstrapColumn = $(bootstrapColumn);
+                const colMatch = bootstrapColumn.className.match(reColMatch);
+                const colOptions = colMatch[2] && colMatch[2].substr(1).split('-');
+                const $col = $('<td/>');
+                for (const attr of bootstrapColumn.attributes) {
+                    $col.attr(attr.name, attr.value);
+                }
+                $col.removeClass(colMatch[0]);
+                for (const child of [...bootstrapColumn.childNodes]) {
+                    $col.append(child);
+                }
+                $bootstrapColumn.before($col);
+                $bootstrapColumn.remove();
+                if (colOptions) {
+                    const screenSize = colOptions.length === 2 && colOptions[0];
+                    const colSize = colOptions.length === 2 ? +colOptions[1] : +colOptions[0];
+                    if (screenSize in BOOTSTRAP_MAX_WIDTHS) {
+                        $col.css({'max-width': BOOTSTRAP_MAX_WIDTHS[screenSize] + 'px'});
+                    }
+                    if (colSize) {
+                        const width = Math.round(colSize * 100 / 12) + '%';
+                        $col.attr('width', width).css('width', width);
+                    }
+                }
+                const offsetMatch = bootstrapColumn.className.match(reOffsetMatch);
+                const offsetOptions = offsetMatch && offsetMatch[2] && offsetMatch[2].substr(1).split('-');
+                const offsetSize = offsetOptions && (offsetOptions.length === 2 ? +offsetOptions[1] : +offsetOptions[0]);
+                if (offsetSize) {
+                    const offset = Math.round(offsetSize * 100 / 12);
+                    $col.before($('<td/>').css('width', offset + '%').attr('width', offset + '%')).removeClass(offsetMatch[0]);
+                }
             }
-            return $col[0];
         }
-    });
+    }
 }
 
 /**
