@@ -321,6 +321,7 @@ function bootstrapToTable($editable) {
             cellpadding: 0,
             border: 0,
             width: '100%',
+            color: 'inherit', // cancel default table text color
         });
         $container.before($table);
         $container.remove();
