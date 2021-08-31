@@ -4929,4 +4929,42 @@ QUnit.module("Views", (hooks) => {
         // No separator should be displayed in the menu "Measures"
         assert.containsNone(pivot, ".o_cp_bottom_left .o_dropdown_menu div.dropdown-divider");
     });
+
+    QUnit.skip("correctly handle concurent actions (1)", async function (assert) {
+        let def;
+        const mockRPC = async (route, args) => {
+            if (args.method === "read_group" && def) {
+                return Promise.resolve(def);
+            }
+        };
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <pivot>
+                    <field name="foo" type="measure"/>
+                    <field name="product_id" type="row"/>
+                </pivot>
+            `,
+            searchViewArch: `
+                <search>
+                    <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]"/>
+                </search>
+            `,
+            mockRPC,
+        });
+
+        assert.strictEqual(getCurrentValues(pivot), ["32", "12", "20"].join(","));
+
+        def = makeDeferred();
+        // filter
+        await toggleFilterMenu(pivot);
+        await toggleMenuItem(pivot, "False Domain");
+        // flip
+        click(pivot.el.querySelector(".o_cp_bottom_left .o_pivot_flip_button"));
+        await nextTick();
+        def.resolve();
+        // ...
+    });
 });

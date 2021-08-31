@@ -28,7 +28,7 @@ export class PivotView extends Component {
             const { arch } = this.props;
 
             // parse arch
-            const archInfo = new PivotArchParser().parse(arch);
+            const archInfo = new this.constructor.archParser().parse(arch);
 
             if (!archInfo.activeMeasures.length || archInfo.displayQuantity) {
                 archInfo.activeMeasures.unshift("__count");
@@ -186,6 +186,8 @@ PivotView.defaultProps = {
 PivotView.Model = PivotModel;
 PivotView.Renderer = PivotRenderer;
 PivotView.ControlPanel = ControlPanel;
+
+PivotView.archParser = PivotArchParser;
 
 PivotView.type = "pivot";
 PivotView.display_name = _lt("Pivot");

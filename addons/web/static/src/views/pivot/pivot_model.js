@@ -727,7 +727,6 @@ export class PivotModel extends Model {
         this.data = data;
         this.meta = meta;
         this.searchParams = searchParams;
-        this.notify();
     }
     /**
      * Sort the rows, depending on the values of a given column.  This is an
