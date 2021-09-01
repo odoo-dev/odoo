@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one, one2many, one2one } from '@mail/model/model_field';
+import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, create, link, unlink, unlinkAll, update } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
@@ -10,6 +10,7 @@ function factory(dependencies) {
 
         //----------------------------------------------------------------------
         // Public
+        //----------------------------------------------------------------------
 
         clearIsAddingItem() {
             this.update({
@@ -28,6 +29,20 @@ function factory(dependencies) {
          */
         close() {
             this.update({ isOpen: false });
+        }
+
+        async createMeetingChannel() {
+            const channelData = await this.env.services.rpc({
+                model: 'mail.channel',
+                method: 'create_group',
+                kwargs: {
+                    partners_to: [this.messaging.currentPartner.id],
+                    default_video_display_mode: 'full_screen',
+                },
+            });
+            const Thread = this.messaging.models['mail.thread'];
+            const channel = Thread.insert(Thread.convertData(channelData));
+            this.update({ mostRecentMeetingChannel: link(channel) });
         }
 
         focus() {
@@ -262,6 +277,25 @@ function factory(dependencies) {
 
         /**
          * @private
+         * @returns {mail.channel_invitation_form}
+         */
+        _computeChannelInvitationForm() {
+            if (!this.mostRecentMeetingChannel) {
+                return clear();
+            }
+            if (!this.channelInvitationForm) {
+                return create();
+            }
+            return update({
+                searchResultCount: clear(),
+                searchTerm: clear(),
+                selectablePartners: clear(),
+                selectedPartners: clear(),
+            });
+        }
+
+        /**
+         * @private
          * @returns {boolean}
          */
         _computeHasThreadView() {
@@ -322,7 +356,6 @@ function factory(dependencies) {
             }
             return;
         }
-
 
         /**
          * Only pinned threads are allowed in discuss.
@@ -385,6 +418,16 @@ function factory(dependencies) {
             isCausal: true,
         }),
         /**
+         * States which channel invitation form is operating this thread view.
+         * Only applies if this thread is a channel.
+         */
+        channelInvitationForm: one2one('mail.channel_invitation_form', {
+            compute: '_computeChannelInvitationForm',
+            inverse: 'discuss',
+            isCausal: true,
+            readonly: true,
+        }),
+        /**
          * Determines whether `this.thread` should be displayed.
          */
         hasThreadView: attr({
@@ -434,6 +477,11 @@ function factory(dependencies) {
             compute: '_computeIsReplyingToMessage',
             default: false,
         }),
+        /**
+         * The channel created last time the user clicked on the "Start a
+         * meeting" button.
+         */
+        mostRecentMeetingChannel: one2one('mail.thread'),
         /**
          * The menu_id of discuss app, received on mail/init_messaging and
          * used to open discuss from elsewhere.

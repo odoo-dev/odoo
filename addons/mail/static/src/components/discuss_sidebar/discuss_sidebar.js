@@ -54,6 +54,108 @@ export class DiscussSidebar extends Component {
 
     /**
      * @private
+     * @param {Event} ev
+     * @param {Object} ui
+     * @param {Object} ui.item
+     * @param {integer} ui.item.id
+     */
+    _onAddChannelAutocompleteSelect(ev, ui) {
+        this.discuss.handleAddChannelAutocompleteSelect(ev, ui);
+    }
+
+    /**
+     * @private
+     * @param {Object} req
+     * @param {string} req.term
+     * @param {function} res
+     */
+    _onAddChannelAutocompleteSource(req, res) {
+        this.discuss.handleAddChannelAutocompleteSource(req, res);
+    }
+
+    /**
+     * @private
+     * @param {Event} ev
+     * @param {Object} ui
+     * @param {Object} ui.item
+     * @param {integer} ui.item.id
+     */
+    _onAddChatAutocompleteSelect(ev, ui) {
+        this.discuss.handleAddChatAutocompleteSelect(ev, ui);
+    }
+
+    /**
+     * @private
+     * @param {Object} req
+     * @param {string} req.term
+     * @param {function} res
+     */
+    _onAddChatAutocompleteSource(req, res) {
+        this.discuss.handleAddChatAutocompleteSource(req, res);
+    }
+
+    /**
+     * Called when clicking on add channel icon.
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickChannelAdd(ev) {
+        ev.stopPropagation();
+        this.discuss.update({ isAddingChannel: true });
+    }
+
+    /**
+     * Called when clicking on channel title.
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickChannelTitle(ev) {
+        ev.stopPropagation();
+        return this.env.bus.trigger('do-action', {
+            action: {
+                name: this.env._t("Public Channels"),
+                type: 'ir.actions.act_window',
+                res_model: 'mail.channel',
+                views: [[false, 'kanban'], [false, 'form']],
+                domain: [['public', '!=', 'private']]
+            },
+        });
+    }
+
+    /**
+     * Called when clicking on add chat icon.
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickChatAdd(ev) {
+        ev.stopPropagation();
+        this.discuss.update({ isAddingChat: true });
+    }
+
+    /**
+     * @private
+     */
+    _onClickStartAMeetingButton() {
+        this.discuss.createMeetingChannel();
+    }
+
+    /**
+     * @private
+     * @param {CustomEvent} ev
+     */
+    _onHideAddingItem(ev) {
+        ev.stopPropagation();
+        if (!this.discuss) {
+            return;
+        }
+        this.discuss.clearIsAddingItem();
+    }
+
+    /**
+     * @private
      * @param {KeyboardEvent} ev
      */
     _onInputQuickSearch(ev) {

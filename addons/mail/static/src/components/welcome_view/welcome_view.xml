@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.WelcomeView" owl="1">
+        <div class="o-WelcomeView h-100 d-flex flex-column justify-content-center align-items-center bg-light">
+            <h1 class="font-weight-light">You've been invited to a meeting!</h1>
+            <h2 class="m-5" t-esc="messaging.companyName"/>
+            <div class=" d-flex justify-content-center">
+                <MediaPreview class="mr-5" localId="props.mediaPreviewLocalId"/>
+                <div class="d-flex flex-column justify-content-center">
+                    <t t-if="messaging.currentGuest">
+                        <label class="o-WelcomeView-guestNameInputLabel" for="guest-name">What's your name?</label>
+                        <input class="form-control mb-3" type="text" placeholder="Your name" name="guest-name" id="guest-name" t-ref="guestNameInput" t-on-input="_onInputGuestNameInput" t-on-keydown="_onKeydownGuestNameInput"/>
+                    </t>
+                    <t t-if="!messaging.currentGuest and messaging.currentUser">
+                        <p class="o-WelcomeView-loggedAsStatus">Logged as <span t-esc="messaging.currentUser.nameOrDisplayName"/></p>
+                    </t>
+                    <button class="o-WelcomeView-joinButton btn btn-success btn-lg align-self-end p-0 rounded-circle shadow fa fa-phone" title="Join Channel" t-att-disabled="messaging.currentGuest and !welcomeView.isGuestNameValid" t-on-click="_onClickJoinButton"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

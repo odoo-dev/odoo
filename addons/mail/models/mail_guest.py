@@ -60,6 +60,7 @@ class MailGuest(models.Model):
         partner_root = self.env.ref('base.partner_root')
         return {
             'channels': self.channel_ids.channel_info(),
+            'company_name': self.env.user.company_id.name,
             'currentGuest': {
                 'id': self.id,
                 'name': self.name,

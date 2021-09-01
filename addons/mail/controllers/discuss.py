@@ -22,9 +22,9 @@ class DiscussController(http.Controller):
         channel_sudo = request.env['mail.channel'].browse(int(channel_id)).sudo().exists()
         if not channel_sudo or not channel_sudo.uuid or not consteq(channel_sudo.uuid, invitation_token):
             raise NotFound()
-        response = request.redirect(f'/discuss/channel/{channel_sudo.id}')
+        response = request.redirect(f'/chat/welcome/{channel_sudo.id}')
         if request.env['mail.channel.partner']._get_as_sudo_from_request(request=request, channel_id=int(channel_id)):
-            return response
+            return request.redirect(f'/discuss/channel/{channel_sudo.id}')
         if channel_sudo.channel_type == 'chat':
             raise NotFound()
         if request.session.uid:
@@ -44,6 +44,16 @@ class DiscussController(http.Controller):
             response.set_cookie('mail.guest_access_token', guest.access_token, httponly=True)
         channel_sudo.add_members(guest_ids=[guest.id])
         return response
+    
+    @http.route('/chat/welcome/<int:channel_id>', methods=['GET'], type='http', auth='public')
+    def discuss_welcome_view(self, channel_id):
+        channel_partner_sudo = request.env['mail.channel.partner']._get_as_sudo_from_request_or_raise(request=request, channel_id=int(channel_id))
+        if not channel_partner_sudo:
+            raise NotFound()
+        return request.render('mail.discuss_public_welcome_template', {
+            'channel_sudo': channel_partner_sudo.channel_id,
+            'session_info': channel_partner_sudo.env['ir.http'].session_info(),
+        })
 
     @http.route('/discuss/channel/<int:channel_id>', methods=['GET'], type='http', auth='public')
     def discuss_channel(self, channel_id, **kwargs):
@@ -285,3 +295,14 @@ class DiscussController(http.Controller):
         except Exception:
             return {}
         return records._message_get_suggested_recipients()
+
+    # --------------------------------------------------------------------------
+    # Guest API
+    # --------------------------------------------------------------------------
+    
+    @http.route('/mail/guest/update_name', type='json', auth='public')
+    def update_current_guest_name(self, guest_name):
+        guest = request.env['mail.guest']._get_guest_from_request(request)
+        if not guest:
+            raise NotFound()
+        guest.sudo().write({ 'name': guest_name })

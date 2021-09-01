@@ -1,0 +1,18 @@
+$button-size: 4rem;
+
+.o-WelcomeView-joinButton {
+    height: $button-size;
+    width: $button-size;
+
+    font-size: 2em;
+    line-height: $button-size;
+}
+
+.o-WelcomeView-guestNameInputLabel {
+    font-size: $font-size-lg;
+    text-align: center;
+}
+
+.o-WelcomeView-loggedAsStatus {
+    font-size: $font-size-lg;
+}

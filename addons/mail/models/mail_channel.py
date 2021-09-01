@@ -57,6 +57,7 @@ class Channel(models.Model):
         ('group', 'Group')],
         string='Channel Type', default='channel', help="Chat is private and unique between 2 persons. Group is private among invited persons. Channel can be freely joined (depending on its configuration).")
     is_chat = fields.Boolean(string='Is a chat', compute='_compute_is_chat')
+    default_video_display_mode = fields.Selection([('full_screen', "Full screen")])
     description = fields.Text('Description')
     image_128 = fields.Image("Image", max_width=128, max_height=128)
     avatar_128 = fields.Image("Avatar", max_width=128, max_height=128, compute='_compute_avatar_128')
@@ -936,7 +937,7 @@ class Channel(models.Model):
         return channel_info
 
     @api.model
-    def create_group(self, partners_to):
+    def create_group(self, partners_to, default_video_display_mode=False):
         """ Create a group channel.
             :param partners_to : list of res.partner ids to add to the conversation
             :returns: channel_info of the created channel
@@ -945,6 +946,7 @@ class Channel(models.Model):
         channel = self.create({
             'channel_last_seen_partner_ids': [Command.create({'partner_id': partner_id}) for partner_id in partners_to],
             'channel_type': 'group',
+            'default_video_display_mode': default_video_display_mode,
             'name': '',  # default name is computed client side from the list of members
             'public': 'private',
         })

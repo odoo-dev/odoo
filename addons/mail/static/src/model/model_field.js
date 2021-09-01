@@ -839,6 +839,9 @@ export class ModelField {
      * @throws {Error} if record does not satisfy related model
      */
     _verifyRelationalValue(record) {
+        if (!record) {
+            debugger;
+        }
         if (!record.modelManager) {
             throw Error(`${record} is not a record. Did you try to use link() instead of insert() with data?`);
         }

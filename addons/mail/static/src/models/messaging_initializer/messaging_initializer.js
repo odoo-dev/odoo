@@ -74,6 +74,7 @@ function factory(dependencies) {
         async _init({
             channels,
             commands = [],
+            company_name,
             current_partner,
             currentGuest,
             current_user_id,
@@ -113,6 +114,8 @@ function factory(dependencies) {
             // failures after channels
             this._initMailFailures(mail_failures);
             discuss.update({ menu_id });
+            // company related data
+            this._initCompany(company_name);
         }
 
         /**
@@ -181,6 +184,14 @@ function factory(dependencies) {
                     }
                 ]),
             });
+        }
+
+        /**
+         * @private
+         * @param {string} companyName
+         */
+        _initCompany(companyName) {
+            this.messaging.update({ companyName });
         }
 
         /**
