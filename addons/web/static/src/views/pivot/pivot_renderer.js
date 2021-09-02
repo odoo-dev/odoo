@@ -2,6 +2,7 @@
 
 import { PivotGroupByMenu } from "@web/views/pivot/pivot_group_by_menu";
 import { registry } from "@web/core/registry";
+import fieldUtils from "web.field_utils";
 
 const { Component } = owl;
 const formatterRegistry = registry.category("formatters");
@@ -28,7 +29,12 @@ export class PivotRenderer extends Component {
             const fieldType = field.type;
             formatType = fieldType === "many2one" ? "integer" : fieldType;
         }
-        const formatter = formatterRegistry.get(formatType);
+        //If the formatter is not found on the registry, search on the legacy fieldUtils.format.
+        //This must be removed when all the formatters will be on the registry
+        const formatter = formatterRegistry.get(formatType, null) || fieldUtils.format[formatType];
+        if (!formatter) {
+            throw new Error(`${formatType} is not a defined formatter!`);
+        }
         return formatter(cell.value, field);
     }
     /**
