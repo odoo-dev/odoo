@@ -117,6 +117,16 @@ var MassMailingFieldHtml = FieldHtml.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * @override
+     */
+     _createWysiwygIntance: async function () {
+        await this._super(...arguments);
+        // Data is removed on save but we need the mailing and its body to be
+        // named so they are handled properly by the snippets menu.
+        this.$content.find('.o_layout').addBack().data('name', 'Mailing');
+        this.$content.find('.o_mail_wrapper').data('name', 'Body');
+    },
+    /**
      * Returns true if the editable area is empty.
      *
      * @private
