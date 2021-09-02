@@ -461,7 +461,7 @@
         <t t-set="selector" t-value="'.s_alert, .s_blockquote, .s_text_highlight'"/>
     </t>
 
-    <div data-js="BodyWidth" data-selector=".o_mail_wrapper">
+    <div data-js="BodyWidth" data-selector=".o_layout" data-target=".o_mail_wrapper">
         <we-button-group string="Body Width">
             <we-button data-select-class="o_mail_small"
                         data-img="/web_editor/static/src/img/snippets_options/content_width_small.svg"
