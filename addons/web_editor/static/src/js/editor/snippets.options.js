@@ -4349,7 +4349,7 @@ registry['sizing_x'] = registry.sizing.extend({
     _onResize: function (compass, beginClass, current) {
         if (compass === 'w') {
             // don't change the right border position when we change the offset (replace col size)
-            var beginCol = Number(beginClass.match(/(col-lg-|col-)([0-9]+)|$/)[2] || 0);
+            var beginCol = Number(beginClass.match(/col-lg-([0-9]+)|$/)[1] || 0);
             var beginOffset = Number(beginClass.match(/offset-lg-([0-9-]+)|$/)[1] || beginClass.match(/offset-xl-([0-9-]+)|$/)[1] || 0);
             var offset = Number(this.grid.w[0][current].match(/offset-lg-([0-9-]+)|$/)[1] || 0);
             if (offset < 0) {
@@ -4360,7 +4360,7 @@ registry['sizing_x'] = registry.sizing.extend({
                 colSize = 1;
                 offset = beginOffset + beginCol - 1;
             }
-            this.$target.attr('class', this.$target.attr('class').replace(/\s*(offset-xl-|offset-lg-|col-lg-|col-)([0-9-]+)/g, ''));
+            this.$target.attr('class', this.$target.attr('class').replace(/\s*(offset-xl-|offset-lg-|col-lg-)([0-9-]+)/g, ''));
 
             this.$target.addClass('col-lg-' + (colSize > 12 ? 12 : colSize));
             if (offset > 0) {
