@@ -1,5 +1,8 @@
 /** @odoo-module **/
 
+import { registerCleanup } from "@web/../tests/helpers/cleanup";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { click, patchWithCleanup, triggerEvent } from "../helpers/utils";
 import {
     editSearch,
     getFacetTexts,
@@ -8,9 +11,6 @@ import {
     setupControlPanelServiceRegistry,
     validateSearch,
 } from "./helpers";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { click, patchWithCleanup, triggerEvent } from "../helpers/utils";
-import { registerCleanup } from "@web/../tests/helpers/cleanup";
 
 function getDomain(controlPanel) {
     return controlPanel.env.searchModel.domain;
@@ -110,15 +110,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("basic rendering", async function (assert) {
         assert.expect(1);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+        });
 
         assert.strictEqual(
             document.activeElement,
@@ -130,16 +128,14 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("navigation with facets", async function (assert) {
         assert.expect(4);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                context: { search_default_date_group_by: 1 },
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            context: { search_default_date_group_by: 1 },
+        });
 
         assert.containsOnce(
             controlPanel,
@@ -175,17 +171,13 @@ QUnit.module("Search", (hooks) => {
             luxon.Settings.defaultZoneName = originalZoneName;
         });
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+        });
 
         // Date case
         await editSearch(controlPanel, "07/15/1983");
@@ -223,16 +215,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("autocomplete menu clickout interactions", async function (assert) {
         assert.expect(9);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <field name="bar"/>
                         <field name="birthday"/>
@@ -241,8 +230,7 @@ QUnit.module("Search", (hooks) => {
                         <field name="bool"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         const input = controlPanel.el.querySelector(".o_searchview input");
 
@@ -272,17 +260,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("select an autocomplete field", async function (assert) {
         assert.expect(3);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+        });
 
         await editSearch(controlPanel, "a");
         assert.containsN(
@@ -316,17 +300,13 @@ QUnit.module("Search", (hooks) => {
             },
         });
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+        });
 
         // 'r' key to filter on bar "First Record"
         await editSearch(controlPanel, "record");
@@ -376,17 +356,13 @@ QUnit.module("Search", (hooks) => {
             },
         });
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+        });
 
         const searchInput = controlPanel.el.querySelector(".o_searchview input");
         await triggerEvent(searchInput, null, "keydown", { key: "Enter" });
@@ -398,22 +374,18 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("selecting (no result) triggers a search bar rendering", async function (assert) {
         assert.expect(3);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <field name="bar"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         await editSearch(controlPanel, "hello there");
 
@@ -451,17 +423,13 @@ QUnit.module("Search", (hooks) => {
             // not handled but are triggered to ensure they do not interfere.
             const TEST = "TEST";
             const テスト = "テスト";
-            const controlPanel = await makeWithSearch(
-                {
-                    serverData,
-                },
-                {
-                    resModel: "partner",
-                    Component: ControlPanel,
-                    searchMenuTypes: [],
-                    searchViewId: false,
-                }
-            );
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "partner",
+                Component: ControlPanel,
+                searchMenuTypes: [],
+                searchViewId: false,
+            });
 
             const searchInput = controlPanel.el.querySelector(".o_searchview input");
 
@@ -556,17 +524,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("open search view autocomplete on paste value using mouse", async function (assert) {
         assert.expect(1);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+        });
 
         // Simulate paste text through the mouse.
         const searchInput = controlPanel.el.querySelector(".o_searchview input");
@@ -582,16 +546,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("select autocompleted many2one", async function (assert) {
         assert.expect(4);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <field name="foo"/>
                         <field name="birthday"/>
@@ -599,8 +560,7 @@ QUnit.module("Search", (hooks) => {
                         <field name="bar" operator="child_of"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         assert.deepEqual(getDomain(controlPanel), []);
 
@@ -625,17 +585,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test('"null" as autocomplete value', async function (assert) {
         assert.expect(3);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+        });
 
         assert.deepEqual(getDomain(controlPanel), []);
 
@@ -657,22 +613,18 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("autocompletion with a boolean field", async function (assert) {
         assert.expect(8);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <field name="bool"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         assert.deepEqual(getDomain(controlPanel), []);
 
@@ -716,22 +668,18 @@ QUnit.module("Search", (hooks) => {
             record.ref = `ref${String(i).padStart(3, "0")}`;
         });
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-            },
-            {
-                resModel: "partner",
-                Component: ControlPanel,
-                searchMenuTypes: [],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "partner",
+            Component: ControlPanel,
+            searchMenuTypes: [],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <field name="ref"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         assert.deepEqual(getDomain(controlPanel), []);
 

@@ -317,7 +317,7 @@ export class MockServer {
         let arch = this.archs[key];
         if (!arch) {
             const genericViewKey = Object.keys(this.archs).find((fullKey) => {
-                const [_model, _viewID, _viewType] = fullKey.split(",");
+                const [_model, , _viewType] = fullKey.split(",");
                 return _model === modelName && _viewType === viewType;
             });
             if (genericViewKey) {
@@ -388,7 +388,7 @@ export class MockServer {
         return values;
     }
 
-    _performRPC(route, args) {
+    async _performRPC(route, args) {
         // Check if there is an handler in the mockRegistry: either specific for this model
         // (with key 'model/method'), or global (with key 'method')
         // This allows to mock routes/methods defined outside web.
@@ -402,72 +402,60 @@ export class MockServer {
 
         switch (route) {
             case "/web/webclient/load_menus":
-                return Promise.resolve(this.mockLoadMenus());
+                return this.mockLoadMenus();
             case "/web/action/load":
-                return Promise.resolve(this.mockLoadAction(args));
+                return this.mockLoadAction(args);
             case "/web/dataset/search_read":
-                return Promise.resolve(this.mockSearchReadController(args));
+                return this.mockSearchReadController(args);
             case "/web/dataset/search":
-                return Promise.resolve(this.mockSearchController(args));
+                return this.mockSearchController(args);
         }
         if (
             route.indexOf("/web/image") >= 0 ||
             [".png", ".jpg"].includes(route.substr(route.length - 4))
         ) {
-            return Promise.resolve();
+            return;
         }
         switch (args.method) {
             case "create":
-                return Promise.resolve(this.mockCreate(args.model, args.args[0]));
+                return this.mockCreate(args.model, args.args[0]);
             case "fields_get":
-                return Promise.resolve(this.mockFieldsGet(args.model));
+                return this.mockFieldsGet(args.model);
             case "load_views":
-                return Promise.resolve(this.mockLoadViews(args.model, args.kwargs));
+                return this.mockLoadViews(args.model, args.kwargs);
             case "name_create":
-                return Promise.resolve(this.mockNameCreate(args.model, args.args[0]));
+                return this.mockNameCreate(args.model, args.args[0]);
             case "name_get":
-                return Promise.resolve(this.mockNameGet(args.model, args.args));
+                return this.mockNameGet(args.model, args.args);
             case "name_search":
-                return Promise.resolve(this.mockNameSearch(args.model, args.args, args.kwargs));
+                return this.mockNameSearch(args.model, args.args, args.kwargs);
             case "onchange":
-                return Promise.resolve(this.mockOnchange(args.model, args.args, args.kwargs));
+                return this.mockOnchange(args.model, args.args, args.kwargs);
             case "read":
-                return Promise.resolve(this.mockRead(args.model, args.args));
+                return this.mockRead(args.model, args.args);
             case "search":
-                return Promise.resolve(this.mockSearch(args.model, args.args, args.kwargs));
+                return this.mockSearch(args.model, args.args, args.kwargs);
             case "search_count":
-                return Promise.resolve(this.mockSearchCount(args.model, args.args, args.kwargs));
+                return this.mockSearchCount(args.model, args.args, args.kwargs);
             case "search_panel_select_range":
-                return Promise.resolve(
-                    this._mockSearchPanelSelectRange(args.model, args.args, args.kwargs)
-                );
+                return this.mockSearchPanelSelectRange(args.model, args.args, args.kwargs);
             case "search_panel_select_multi_range":
-                return Promise.resolve(
-                    this._mockSearchPanelSelectMultiRange(args.model, args.args, args.kwargs)
-                );
+                return this.mockSearchPanelSelectMultiRange(args.model, args.args, args.kwargs);
             case "search_read":
-                return Promise.resolve(this.mockSearchRead(args.model, args.args, args.kwargs));
-            case "search_panel_select_range":
-                return Promise.resolve(
-                    this.mockSearchPanelSelectRange(args.model, args.args, args.kwargs)
-                );
-            case "search_panel_select_multi_range":
-                return Promise.resolve(
-                    this.mockSearchPanelSelectMultiRange(args.model, args.args, args.kwargs)
-                );
+                return this.mockSearchRead(args.model, args.args, args.kwargs);
             case "web_search_read":
-                return Promise.resolve(this.mockWebSearchRead(args.model, args.args, args.kwargs));
+                return this.mockWebSearchRead(args.model, args.args, args.kwargs);
             case "read_group":
-                return Promise.resolve(this.mockReadGroup(args.model, args.kwargs));
+                return this.mockReadGroup(args.model, args.kwargs);
             case "web_read_group":
-                return Promise.resolve(this.mockWebReadGroup(args.model, args.kwargs));
+                return this.mockWebReadGroup(args.model, args.kwargs);
             case "write":
-                return Promise.resolve(this.mockWrite(args.model, args.args));
+                return this.mockWrite(args.model, args.args);
         }
         const model = this.models[args.model];
         const method = model && model.methods[args.method];
         if (method) {
-            return Promise.resolve(method(args.model, args.args, args.kwargs));
+            return method(args.model, args.args, args.kwargs);
         }
         throw new Error(`Unimplemented route: ${route}`);
     }
@@ -931,9 +919,9 @@ export class MockServer {
      * @param {string} model
      * @param {string} fieldName
      * @param {Object} kwargs
-     * @see _mockSearchPanelDomainImage()
+     * @see mockSearchPanelDomainImage()
      */
-    _mockSearchPanelFieldImage(model, fieldName, kwargs) {
+    mockSearchPanelFieldImage(model, fieldName, kwargs) {
         const enableCounters = kwargs.enable_counters;
         const onlyCounters = kwargs.only_counters;
         const extraDomain = kwargs.extra_domain || [];
@@ -946,10 +934,10 @@ export class MockServer {
         const setLimit = kwargs.set_limit;
 
         if (onlyCounters) {
-            return this._mockSearchPanelDomainImage(model, fieldName, countDomain, true);
+            return this.mockSearchPanelDomainImage(model, fieldName, countDomain, true);
         }
 
-        const modelDomainImage = this._mockSearchPanelDomainImage(
+        const modelDomainImage = this.mockSearchPanelDomainImage(
             model,
             fieldName,
             modelDomain,
@@ -957,7 +945,7 @@ export class MockServer {
             setLimit && limit
         );
         if (enableCounters && !noExtra) {
-            const countDomainImage = this._mockSearchPanelDomainImage(
+            const countDomainImage = this.mockSearchPanelDomainImage(
                 model,
                 fieldName,
                 countDomain,
@@ -982,7 +970,7 @@ export class MockServer {
      * @param {boolean} setCount
      * @returns {Map}
      */
-    _mockSearchPanelDomainImage(model, fieldName, domain, setCount = false, limit = false) {
+    mockSearchPanelDomainImage(model, fieldName, domain, setCount = false, limit = false) {
         const field = this.models[model].fields[fieldName];
         let groupIdName;
         if (field.type === "many2one") {
@@ -1021,7 +1009,7 @@ export class MockServer {
      * @param {Map} valuesRange
      * @param {(string|boolean)} parentName 'parent_id' or false
      */
-    _mockSearchPanelGlobalCounters(valuesRange, parentName) {
+    mockSearchPanelGlobalCounters(valuesRange, parentName) {
         const localCounters = [...valuesRange.keys()].map((id) => valuesRange.get(id).__count);
         for (let [id, values] of valuesRange.entries()) {
             const count = localCounters[id];
@@ -1044,7 +1032,7 @@ export class MockServer {
      * @param {number[]} ids
      * @returns {Object[]}
      */
-    _mockSearchPanelSanitizedParentHierarchy(records, parentName, ids) {
+    mockSearchPanelSanitizedParentHierarchy(records, parentName, ids) {
         const getParentId = (record) => record[parentName] && record[parentName][0];
         const allowedRecords = {};
         for (const record of records) {
@@ -1084,7 +1072,7 @@ export class MockServer {
      * @param {Object} kwargs
      * @returns {Object[]}
      */
-    _mockSearchPanelSelectionRange(model, fieldName, kwargs) {
+    mockSearchPanelSelectionRange(model, fieldName, kwargs) {
         const enableCounters = kwargs.enable_counters;
         const expand = kwargs.expand;
         let domainImage;
@@ -1092,7 +1080,7 @@ export class MockServer {
             const newKwargs = Object.assign({}, kwargs, {
                 only_counters: expand,
             });
-            domainImage = this._mockSearchPanelFieldImage(model, fieldName, newKwargs);
+            domainImage = this.mockSearchPanelFieldImage(model, fieldName, newKwargs);
         }
         if (!expand) {
             return [...domainImage.values()];
@@ -1131,7 +1119,7 @@ export class MockServer {
      *      is used in _search_panel_range)
      * @returns {Object}
      */
-    _mockSearchPanelSelectRange(model, [fieldName], kwargs) {
+    mockSearchPanelSelectRange(model, [fieldName], kwargs) {
         const field = this.models[model].fields[fieldName];
         const supportedTypes = ["many2one", "selection"];
         if (!supportedTypes.includes(field.type)) {
@@ -1154,7 +1142,7 @@ export class MockServer {
             kwargs.model_domain = modelDomain;
             return {
                 parent_field: false,
-                values: this._mockSearchPanelSelectionRange(model, fieldName, newKwargs),
+                values: this.mockSearchPanelSelectionRange(model, fieldName, newKwargs),
             };
         }
 
@@ -1181,7 +1169,7 @@ export class MockServer {
                 only_counters: expand,
                 set_limit: limit && !(expand || hierarchize || comodelDomain),
             });
-            domainImage = this._mockSearchPanelFieldImage(model, fieldName, newKwargs);
+            domainImage = this.mockSearchPanelFieldImage(model, fieldName, newKwargs);
         }
         if (!expand && !hierarchize && !comodelDomain.length) {
             if (limit && domainImage.size === limit) {
@@ -1220,7 +1208,7 @@ export class MockServer {
 
         if (hierarchize) {
             const ids = expand ? comodelRecords.map((rec) => rec.id) : imageElementIds;
-            comodelRecords = this._mockSearchPanelSanitizedParentHierarchy(
+            comodelRecords = this.mockSearchPanelSanitizedParentHierarchy(
                 comodelRecords,
                 parentName,
                 ids
@@ -1249,7 +1237,7 @@ export class MockServer {
         }
 
         if (hierarchize && enableCounters) {
-            this._mockSearchPanelGlobalCounters(fieldRange, parentName);
+            this.mockSearchPanelGlobalCounters(fieldRange, parentName);
         }
 
         return {
@@ -1280,7 +1268,7 @@ export class MockServer {
      * @param {Array[]} [kwargs.search_domain] base domain of search
      * @returns {Object}
      */
-    _mockSearchPanelSelectMultiRange(model, [fieldName], kwargs) {
+    mockSearchPanelSelectMultiRange(model, [fieldName], kwargs) {
         const field = this.models[model].fields[fieldName];
         const supportedTypes = ["many2one", "many2many", "selection"];
         if (!supportedTypes.includes(field.type)) {
@@ -1299,7 +1287,7 @@ export class MockServer {
                 extra_domain: extraDomain,
             });
             return {
-                values: this._mockSearchPanelSelectionRange(model, fieldName, newKwargs),
+                values: this.mockSearchPanelSelectionRange(model, fieldName, newKwargs),
             };
         }
         const fieldNames = ["display_name"];
@@ -1369,13 +1357,13 @@ export class MockServer {
                         ...localExtraDomain,
                     ]).toList();
                     if (enableCounters) {
-                        count = this._mockSearchCount(model, [searchCountDomain]);
+                        count = this.mockSearchCount(model, [searchCountDomain]);
                     }
                     if (!expand) {
                         if (enableCounters && JSON.stringify(localExtraDomain) === "[]") {
                             inImage = count;
                         } else {
-                            inImage = this._mockSearch(model, [searchDomain], { limit: 1 }).length;
+                            inImage = this.mockSearch(model, [searchDomain], { limit: 1 }).length;
                         }
                     }
                 }
@@ -1405,7 +1393,7 @@ export class MockServer {
                     only_counters: expand,
                     set_limit: limit && !(expand || groupBy || comodelDomain),
                 });
-                domainImage = this._mockSearchPanelFieldImage(model, fieldName, newKwargs);
+                domainImage = this.mockSearchPanelFieldImage(model, fieldName, newKwargs);
             }
             if (!expand && !groupBy && !comodelDomain.length) {
                 if (limit && domainImage.size === limit) {
@@ -1541,497 +1529,6 @@ export class MockServer {
             length,
             records: this.mockRead(params.model, [records.map((r) => r.id), fieldNames]),
         };
-    }
-
-    /**
-     * Simulates a call to the server '_search_panel_domain_image' method.
-     *
-     * @private
-     * @param {string} model
-     * @param {Array[]} domain
-     * @param {string} fieldName
-     * @param {boolean} setCount
-     * @returns {Map}
-     */
-    mockSearchPanelDomainImage(model, fieldName, domain, setCount = false, limit = false) {
-        const field = this.models[model].fields[fieldName];
-        let groupIdName;
-        if (field.type === "many2one") {
-            groupIdName = (value) => value || [false, undefined];
-            // mockReadGroup does not take care of the condition [fieldName, '!=', false]
-            // in the domain defined below !!!
-        } else if (field.type === "selection") {
-            const selection = {};
-            for (const [value, label] of this.models[model].fields[fieldName].selection) {
-                selection[value] = label;
-            }
-            groupIdName = (value) => [value, selection[value]];
-        }
-        domain = Domain.combine([domain, [[fieldName, "!=", false]]]).toList();
-        const groups = this.mockReadGroup(model, {
-            domain,
-            fields: [fieldName],
-            groupby: [fieldName],
-            limit,
-        });
-        const domainImage = new Map();
-        for (const group of groups) {
-            const [id, display_name] = groupIdName(group[fieldName]);
-            const values = { id, display_name };
-            if (setCount) {
-                values.__count = group[fieldName + "_count"];
-            }
-            domainImage.set(id, values);
-        }
-        return domainImage;
-    }
-
-    /**
-     * Simulates a call to the server '_search_panel_field_image' method.
-     *
-     * @private
-     * @param {string} model
-     * @param {string} fieldName
-     * @param {Object} kwargs
-     * @see _mockSearchPanelDomainImage()
-     */
-    mockSearchPanelFieldImage(model, fieldName, kwargs) {
-        const enableCounters = kwargs.enable_counters;
-        const onlyCounters = kwargs.only_counters;
-        const extraDomain = kwargs.extra_domain || [];
-        const normalizedExtra = new Domain(extraDomain).toList();
-        const noExtra = JSON.stringify(normalizedExtra) === "[]";
-        const modelDomain = kwargs.model_domain || [];
-        const countDomain = Domain.combine([modelDomain, extraDomain]).toList();
-
-        const limit = kwargs.limit;
-        const setLimit = kwargs.set_limit;
-
-        if (onlyCounters) {
-            return this.mockSearchPanelDomainImage(model, fieldName, countDomain, true);
-        }
-
-        const modelDomainImage = this.mockSearchPanelDomainImage(
-            model,
-            fieldName,
-            modelDomain,
-            enableCounters && noExtra,
-            setLimit && limit
-        );
-        if (enableCounters && !noExtra) {
-            const countDomainImage = this.mockSearchPanelDomainImage(
-                model,
-                fieldName,
-                countDomain,
-                true
-            );
-            for (const [id, values] of modelDomainImage.entries()) {
-                const element = countDomainImage.get(id);
-                values.__count = element ? element.__count : 0;
-            }
-        }
-
-        return modelDomainImage;
-    }
-
-    /**
-     * Simulates a call to the server '_search_panel_global_counters' method.
-     *
-     * @private
-     * @param {Map} valuesRange
-     * @param {(string|boolean)} parentName 'parent_id' or false
-     */
-    mockSearchPanelGlobalCounters(valuesRange, parentName) {
-        const localCounters = [...valuesRange.keys()].map((id) => valuesRange.get(id).__count);
-        for (let [id, values] of valuesRange.entries()) {
-            const count = localCounters[id];
-            if (count) {
-                let parent_id = values[parentName];
-                while (parent_id) {
-                    values = valuesRange.get(parent_id);
-                    values.__count += count;
-                    parent_id = values[parentName];
-                }
-            }
-        }
-    }
-
-    /**
-     * Simulates a call to the server '_search_panel_sanitized_parent_hierarchy' method.
-     *
-     * @private
-     * @param {Object[]} records
-     * @param {(string|boolean)} parentName 'parent_id' or false
-     * @param {number[]} ids
-     * @returns {Object[]}
-     */
-    mockSearchPanelSanitizedParentHierarchy(records, parentName, ids) {
-        const getParentId = (record) => record[parentName] && record[parentName][0];
-        const allowedRecords = {};
-        for (const record of records) {
-            allowedRecords[record.id] = record;
-        }
-        const recordsToKeep = {};
-        for (const id of ids) {
-            const ancestorChain = {};
-            let recordId = id;
-            let chainIsFullyIncluded = true;
-            while (chainIsFullyIncluded && recordId) {
-                const knownStatus = recordsToKeep[recordId];
-                if (knownStatus !== undefined) {
-                    chainIsFullyIncluded = knownStatus;
-                    break;
-                }
-                const record = allowedRecords[recordId];
-                if (record) {
-                    ancestorChain[recordId] = record;
-                    recordId = getParentId(record);
-                } else {
-                    chainIsFullyIncluded = false;
-                }
-            }
-            for (const id in ancestorChain) {
-                recordsToKeep[id] = chainIsFullyIncluded;
-            }
-        }
-        return records.filter((rec) => recordsToKeep[rec.id]);
-    }
-
-    /**
-     * Simulates a call to the server 'search_panel_select_range' method.
-     *
-     * @private
-     * @param {string} model
-     * @param {string[]} args
-     * @param {string} args[fieldName]
-     * @param {Object} [kwargs={}]
-     * @param {Array[]} [kwargs.category_domain] domain generated by categories
-     *      (this parameter is used in _search_panel_range)
-     * @param {Array[]} [kwargs.comodel_domain] domain of field values (if relational)
-     *      (this parameter is used in _search_panel_range)
-     * @param {boolean} [kwargs.enable_counters] whether to count records by value
-     * @param {Array[]} [kwargs.filter_domain] domain generated by filters
-     * @param {integer} [kwargs.limit] maximal number of values to fetch
-     * @param {Array[]} [kwargs.search_domain] base domain of search (this parameter
-     *      is used in _search_panel_range)
-     * @returns {Object}
-     */
-    mockSearchPanelSelectRange(model, [fieldName], kwargs) {
-        const field = this.models[model].fields[fieldName];
-        const supportedTypes = ["many2one", "selection"];
-        if (!supportedTypes.includes(field.type)) {
-            throw new Error(
-                `Only types ${supportedTypes} are supported for category (found type ${field.type})`
-            );
-        }
-
-        const modelDomain = kwargs.search_domain || [];
-        const extraDomain = Domain.combine([
-            kwargs.category_domain || [],
-            kwargs.filter_domain || [],
-        ]).toList();
-
-        if (field.type === "selection") {
-            const newKwargs = Object.assign({}, kwargs, {
-                model_domain: modelDomain,
-                extra_domain: extraDomain,
-            });
-            kwargs.model_domain = modelDomain;
-            return {
-                parent_field: false,
-                values: this.mockSearchPanelSelectionRange(model, fieldName, newKwargs),
-            };
-        }
-
-        const fieldNames = ["display_name"];
-        let hierarchize = "hierarchize" in kwargs ? kwargs.hierarchize : true;
-        let getParentId;
-        let parentName = false;
-        if (hierarchize && this.models[field.relation].fields.parent_id) {
-            parentName = "parent_id"; // in tests, parent field is always 'parent_id'
-            fieldNames.push(parentName);
-            getParentId = (record) => record.parent_id && record.parent_id[0];
-        } else {
-            hierarchize = false;
-        }
-        let comodelDomain = kwargs.comodel_domain || [];
-        const enableCounters = kwargs.enable_counters;
-        const expand = kwargs.expand;
-        const limit = kwargs.limit;
-        let domainImage;
-        if (enableCounters || !expand) {
-            const newKwargs = Object.assign({}, kwargs, {
-                model_domain: modelDomain,
-                extra_domain: extraDomain,
-                only_counters: expand,
-                set_limit: limit && !(expand || hierarchize || comodelDomain),
-            });
-            domainImage = this.mockSearchPanelFieldImage(model, fieldName, newKwargs);
-        }
-        if (!expand && !hierarchize && !comodelDomain.length) {
-            if (limit && domainImage.size === limit) {
-                return { error_msg: "Too many items to display." };
-            }
-            return {
-                parent_field: parentName,
-                values: [...domainImage.values()],
-            };
-        }
-        let imageElementIds;
-        if (!expand) {
-            imageElementIds = [...domainImage.keys()].map(Number);
-            let condition;
-            if (hierarchize) {
-                const records = this.models[field.relation].records;
-                const ancestorIds = new Set();
-                for (const id of imageElementIds) {
-                    let recordId = id;
-                    let record;
-                    while (recordId) {
-                        ancestorIds.add(recordId);
-                        record = records.find((rec) => rec.id === recordId);
-                        recordId = record[parentName];
-                    }
-                }
-                condition = ["id", "in", [...new Set(ancestorIds)]];
-            } else {
-                condition = ["id", "in", imageElementIds];
-            }
-            comodelDomain = Domain.combine([comodelDomain, [condition]]).toList();
-        }
-        let comodelRecords = this.mockSearchRead(field.relation, [comodelDomain, fieldNames], {
-            limit,
-        });
-
-        if (hierarchize) {
-            const ids = expand ? comodelRecords.map((rec) => rec.id) : imageElementIds;
-            comodelRecords = this.mockSearchPanelSanitizedParentHierarchy(
-                comodelRecords,
-                parentName,
-                ids
-            );
-        }
-
-        if (limit && comodelRecords.length === limit) {
-            return { error_msg: "Too many items to display." };
-        }
-        // A map is used to keep the initial order.
-        const fieldRange = new Map();
-        for (const record of comodelRecords) {
-            const values = {
-                id: record.id,
-                display_name: record.display_name,
-            };
-            if (hierarchize) {
-                values[parentName] = getParentId(record);
-            }
-            if (enableCounters) {
-                values.__count = domainImage.get(record.id)
-                    ? domainImage.get(record.id).__count
-                    : 0;
-            }
-            fieldRange.set(record.id, values);
-        }
-
-        if (hierarchize && enableCounters) {
-            this.mockSearchPanelGlobalCounters(fieldRange, parentName);
-        }
-
-        return {
-            parent_field: parentName,
-            values: [...fieldRange.values()],
-        };
-    }
-
-    /**
-     * Simulates a call to the server 'search_panel_select_multi_range' method.
-     *
-     * @private
-     * @param {string} model
-     * @param {string[]} args
-     * @param {string} args[fieldName]
-     * @param {Object} [kwargs={}]
-     * @param {Array[]} [kwargs.category_domain] domain generated by categories
-     * @param {Array[]} [kwargs.comodel_domain] domain of field values (if relational)
-     *      (this parameter is used in _search_panel_range)
-     * @param {boolean} [kwargs.enable_counters] whether to count records by value
-     * @param {Array[]} [kwargs.filter_domain] domain generated by filters
-     * @param {string} [kwargs.group_by] extra field to read on comodel, to group
-     *      comodel records
-     * @param {Array[]} [kwargs.group_domain] dict, one domain for each activated
-     *      group for the group_by (if any). Those domains are used to fech accurate
-     *      counters for values in each group
-     * @param {integer} [kwargs.limit] maximal number of values to fetch
-     * @param {Array[]} [kwargs.search_domain] base domain of search
-     * @returns {Object}
-     */
-    mockSearchPanelSelectMultiRange(model, [fieldName], kwargs) {
-        const field = this.models[model].fields[fieldName];
-        const supportedTypes = ["many2one", "many2many", "selection"];
-        if (!supportedTypes.includes(field.type)) {
-            throw new Error(
-                `Only types ${supportedTypes} are supported for filter (found type ${field.type})`
-            );
-        }
-        let modelDomain = kwargs.search_domain || [];
-        let extraDomain = Domain.combine([
-            kwargs.category_domain || [],
-            kwargs.filter_domain || [],
-        ]).toList();
-        if (field.type === "selection") {
-            const newKwargs = Object.assign({}, kwargs, {
-                model_domain: modelDomain,
-                extra_domain: extraDomain,
-            });
-            return {
-                values: this.mockSearchPanelSelectionRange(model, fieldName, newKwargs),
-            };
-        }
-        const fieldNames = ["display_name"];
-        const groupBy = kwargs.group_by;
-        let groupIdName;
-        if (groupBy) {
-            const groupByField = this.models[field.relation].fields[groupBy];
-            fieldNames.push(groupBy);
-            if (groupByField.type === "many2one") {
-                groupIdName = (value) => value || [false, "Not set"];
-            } else if (groupByField.type === "selection") {
-                const groupBySelection = Object.assign(
-                    {},
-                    this.models[field.relation].fields[groupBy].selection
-                );
-                groupBySelection[false] = "Not Set";
-                groupIdName = (value) => [value, groupBySelection[value]];
-            } else {
-                groupIdName = (value) => (value ? [value, value] : [false, "Not set"]);
-            }
-        }
-        let comodelDomain = kwargs.comodel_domain || [];
-        const enableCounters = kwargs.enable_counters;
-        const expand = kwargs.expand;
-        const limit = kwargs.limit;
-        if (field.type === "many2many") {
-            const comodelRecords = this.mockSearchRead(
-                field.relation,
-                [comodelDomain, fieldNames],
-                { limit }
-            );
-            if (expand && limit && comodelRecords.length === limit) {
-                return { error_msg: "Too many items to display." };
-            }
-
-            const groupDomain = kwargs.group_domain;
-            const fieldRange = [];
-            for (const record of comodelRecords) {
-                const values = {
-                    id: record.id,
-                    display_name: record.display_name,
-                };
-                let groupId;
-                if (groupBy) {
-                    const [gId, gName] = groupIdName(record[groupBy]);
-                    values.group_id = groupId = gId;
-                    values.group_name = gName;
-                }
-                let count;
-                let inImage;
-                if (enableCounters || !expand) {
-                    const searchDomain = Domain.combine([
-                        modelDomain,
-                        [[fieldName, "in", record.id]],
-                    ]).toList();
-                    let localExtraDomain = extraDomain;
-                    if (groupBy && groupDomain) {
-                        localExtraDomain = Domain.combine([
-                            localExtraDomain,
-                            groupDomain[JSON.stringify(groupId)] || [],
-                        ]).toList();
-                    }
-                    const searchCountDomain = Domain.combine([
-                        searchDomain,
-                        localExtraDomain,
-                    ]).toList();
-                    if (enableCounters) {
-                        count = this.mockSearchCount(model, [searchCountDomain]);
-                    }
-                    if (!expand) {
-                        if (enableCounters && JSON.stringify(localExtraDomain) === "[]") {
-                            inImage = count;
-                        } else {
-                            inImage = this.mockSearch(model, [searchDomain], { limit: 1 }).length;
-                        }
-                    }
-                }
-                if (expand || inImage) {
-                    if (enableCounters) {
-                        values.__count = count;
-                    }
-                    fieldRange.push(values);
-                }
-            }
-
-            if (!expand && limit && fieldRange.length === limit) {
-                return { error_msg: "Too many items to display." };
-            }
-
-            return { values: fieldRange };
-        }
-
-        if (field.type === "many2one") {
-            let domainImage;
-            if (enableCounters || !expand) {
-                extraDomain = Domain.combine([extraDomain, kwargs.group_domain || []]).toList();
-                modelDomain = Domain.combine([modelDomain, kwargs.group_domain || []]).toList();
-                const newKwargs = Object.assign({}, kwargs, {
-                    model_domain: modelDomain,
-                    extra_domain: extraDomain,
-                    only_counters: expand,
-                    set_limit: limit && !(expand || groupBy || comodelDomain),
-                });
-                domainImage = this.mockSearchPanelFieldImage(model, fieldName, newKwargs);
-            }
-            if (!expand && !groupBy && !comodelDomain.length) {
-                if (limit && domainImage.size === limit) {
-                    return { error_msg: "Too many items to display." };
-                }
-                return { values: [...domainImage.values()] };
-            }
-            if (!expand) {
-                const imageElementIds = [...domainImage.keys()].map(Number);
-                comodelDomain = Domain.combine([
-                    comodelDomain,
-                    [["id", "in", imageElementIds]],
-                ]).toList();
-            }
-            const comodelRecords = this.mockSearchRead(
-                field.relation,
-                [comodelDomain, fieldNames],
-                { limit }
-            );
-            if (limit && comodelRecords.length === limit) {
-                return { error_msg: "Too many items to display." };
-            }
-
-            const fieldRange = [];
-            for (const record of comodelRecords) {
-                const values = {
-                    id: record.id,
-                    display_name: record.display_name,
-                };
-                if (groupBy) {
-                    const [groupId, groupName] = groupIdName(record[groupBy]);
-                    values.group_id = groupId;
-                    values.group_name = groupName;
-                }
-                if (enableCounters) {
-                    values.__count = domainImage.get(record.id)
-                        ? domainImage.get(record.id).__count
-                        : 0;
-                }
-                fieldRange.push(values);
-            }
-            return { values: fieldRange };
-        }
     }
 
     mockWrite(modelName, args) {
@@ -2237,11 +1734,12 @@ export function makeMockServer(serverData, mockRPC) {
     });
     const _mockRPC = async (route, args = {}) => {
         let res;
+        const performRPC = (route, args) => mockServer.performRPC(route, args);
         if (mockRPC) {
-            res = await mockRPC(route, args);
+            res = await mockRPC(route, args, performRPC);
         }
         if (res === undefined) {
-            res = await mockServer.performRPC(route, args);
+            res = await performRPC(route, args);
         }
         return res;
     };

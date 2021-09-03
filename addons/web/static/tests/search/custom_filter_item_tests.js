@@ -91,15 +91,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("basic rendering", async function (assert) {
         assert.expect(14);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+        });
 
         await toggleFilterMenu(controlPanel);
 
@@ -144,26 +142,24 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(2);
 
-            const controlPanel = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchViewId: false,
-                    searchMenuTypes: ["filter"],
-                    searchViewFields: {
-                        date_field: {
-                            name: "date_field",
-                            string: "Date",
-                            type: "date",
-                            store: true,
-                            sortable: true,
-                            searchable: true,
-                        },
-                        foo: { string: "Foo", type: "char", store: true, sortable: true },
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchViewId: false,
+                searchMenuTypes: ["filter"],
+                searchViewFields: {
+                    date_field: {
+                        name: "date_field",
+                        string: "Date",
+                        type: "date",
+                        store: true,
+                        sortable: true,
+                        searchable: true,
                     },
-                }
-            );
+                    foo: { string: "Foo", type: "char", store: true, sortable: true },
+                },
+            });
 
             await toggleFilterMenu(controlPanel);
             await toggleAddCustomFilter(controlPanel);
@@ -180,25 +176,23 @@ QUnit.module("Search", (hooks) => {
 
         patchDate(2020, 1, 5, 12, 20, 0);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewFields: {
-                    date_field: {
-                        name: "date_field",
-                        string: "Date",
-                        type: "date",
-                        store: true,
-                        sortable: true,
-                        searchable: true,
-                    },
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewFields: {
+                date_field: {
+                    name: "date_field",
+                    string: "Date",
+                    type: "date",
+                    store: true,
+                    sortable: true,
+                    searchable: true,
                 },
-            }
-        );
+            },
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleAddCustomFilter(controlPanel);
@@ -216,15 +210,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("custom OR filter presets new condition from preceding", async function (assert) {
         assert.expect(4);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleAddCustomFilter(controlPanel);
@@ -266,16 +258,14 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("add a custom filter works", async function (assert) {
         assert.expect(2);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewFields: {},
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewFields: {},
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleAddCustomFilter(controlPanel);
@@ -292,24 +282,22 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("adding a simple filter works", async function (assert) {
         assert.expect(11);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewFields: {
-                    boolean_field: {
-                        name: "boolean_field",
-                        string: "Boolean Field",
-                        type: "boolean",
-                        default: true,
-                        searchable: true,
-                    },
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewFields: {
+                boolean_field: {
+                    name: "boolean_field",
+                    string: "Boolean Field",
+                    type: "boolean",
+                    default: true,
+                    searchable: true,
                 },
-            }
-        );
+            },
+        });
 
         await toggleFilterMenu(controlPanel);
 
@@ -339,15 +327,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("selection field: default and updated value", async function (assert) {
         assert.expect(10);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+        });
 
         // Default value
         await toggleFilterMenu(controlPanel);
@@ -387,23 +373,21 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(12);
 
-            const controlPanel = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchViewId: false,
-                    searchMenuTypes: ["filter"],
-                    searchViewFields: {
-                        many2one_field: {
-                            name: "many2one_field",
-                            string: "AAA",
-                            type: "many2one",
-                            searchable: true,
-                        },
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchViewId: false,
+                searchMenuTypes: ["filter"],
+                searchViewFields: {
+                    many2one_field: {
+                        name: "many2one_field",
+                        string: "AAA",
+                        type: "many2one",
+                        searchable: true,
                     },
-                }
-            );
+                },
+            });
 
             const steps = [
                 {
@@ -461,15 +445,13 @@ QUnit.module("Search", (hooks) => {
             luxon.Settings.defaultZoneName = originalZoneName;
         });
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleAddCustomFilter(controlPanel);
@@ -510,15 +492,13 @@ QUnit.module("Search", (hooks) => {
             luxon.Settings.defaultZoneName = originalZoneName;
         });
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleAddCustomFilter(controlPanel);
@@ -556,15 +536,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("input value parsing", async function (assert) {
         assert.expect(7);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleAddCustomFilter(controlPanel);
@@ -607,15 +585,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("input value parsing with language", async function (assert) {
         assert.expect(5);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+        });
 
         // Needs to be done after services have been started
         patchWithCleanup(localization, {
@@ -653,15 +629,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("add custom filter with multiple values", async function (assert) {
         assert.expect(2);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleAddCustomFilter(controlPanel);

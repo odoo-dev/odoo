@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { patchDate } from "@web/../tests/helpers/utils";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
     getFacetTexts,
     isItemSelected,
@@ -10,9 +12,6 @@ import {
     toggleMenuItem,
     toggleMenuItemOption,
 } from "./helpers";
-import { patchDate } from "@web/../tests/helpers/utils";
-
-import { ControlPanel } from "@web/search/control_panel/control_panel";
 
 function getDomain(controlPanel) {
     return controlPanel.env.searchModel.domain;
@@ -53,14 +52,12 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering with no filter", async function (assert) {
         assert.expect(3);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["filter"],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["filter"],
+        });
 
         await toggleFilterMenu(controlPanel);
         assert.containsNone(controlPanel, ".o_menu_item");
@@ -71,20 +68,18 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering with a single filter", async function (assert) {
         assert.expect(3);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewArch: `
                     <search>
                         <filter string="Foo" name="foo" domain="[]"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         await toggleFilterMenu(controlPanel);
         assert.containsOnce(controlPanel, ".o_menu_item");
@@ -95,20 +90,18 @@ QUnit.module("Search", (hooks) => {
     QUnit.test('toggle a "simple" filter in filter menu works', async function (assert) {
         assert.expect(10);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewArch: `
                     <search>
                         <filter string="Foo" name="foo" domain="[('foo', '=', 'qsdf')]"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         await toggleFilterMenu(controlPanel);
         assert.deepEqual(getFacetTexts(controlPanel), []);
@@ -137,21 +130,19 @@ QUnit.module("Search", (hooks) => {
 
         patchDate(2017, 2, 22, 1, 0, 0);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewArch: `
                     <search>
                         <filter string="Date" name="date_field" date="date_field"/>
                     </search>
                 `,
-                context: { search_default_date_field: 1 },
-            }
-        );
+            context: { search_default_date_field: 1 },
+        });
 
         await toggleFilterMenu(controlPanel);
         await toggleMenuItem(controlPanel, "Date");
@@ -369,21 +360,19 @@ QUnit.module("Search", (hooks) => {
 
             patchDate(2017, 0, 7, 3, 0, 0);
 
-            const controlPanel = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchViewId: false,
-                    searchMenuTypes: ["filter"],
-                    searchViewArch: `
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchViewId: false,
+                searchMenuTypes: ["filter"],
+                searchViewArch: `
                         <search>
                             <filter string="Date" name="some_filter" date="date_field" default_period="last_month"/>
                         </search>
                     `,
-                    context: { search_default_some_filter: 1 },
-                }
-            );
+                context: { search_default_some_filter: 1 },
+            });
 
             assert.deepEqual(getDomain(controlPanel), [
                 "&",
@@ -405,21 +394,19 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("`context` key in <filter> is used", async function (assert) {
         assert.expect(1);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewArch: `
                     <search>
                         <filter string="Filter" name="some_filter" domain="[]" context="{'coucou_1': 1}"/>
                     </search>
                 `,
-                context: { search_default_some_filter: 1 },
-            }
-        );
+            context: { search_default_some_filter: 1 },
+        });
 
         assert.deepEqual(getContext(controlPanel), {
             coucou_1: 1,
@@ -434,21 +421,19 @@ QUnit.module("Search", (hooks) => {
 
         const xml_domain = "[[&quot;foo&quot;,&quot;=&quot;,&quot;Gently Weeps&quot;]]";
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewArch: `
                     <search>
                         <filter string="Foo" name="gently_weeps" domain="${xml_domain}"/>
                     </search>
                 `,
-                context: { search_default_gently_weeps: 1 },
-            }
-        );
+            context: { search_default_gently_weeps: 1 },
+        });
 
         assert.deepEqual(
             getDomain(controlPanel),
@@ -462,21 +447,19 @@ QUnit.module("Search", (hooks) => {
 
         patchDate(2019, 6, 31, 13, 43, 0);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewArch: `
                     <search>
                         <filter string="Date" name="date_field" date="date_field" default_period="last_month"/>
                     </search>
                 `,
-                context: { search_default_date_field: true },
-            }
-        );
+            context: { search_default_date_field: true },
+        });
 
         assert.deepEqual(getFacetTexts(controlPanel), ["Date: June 2019"]);
     });
@@ -484,14 +467,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("filter domains are correcly combined by OR and AND", async function (assert) {
         assert.expect(2);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewArch: `
                     <search>
                         <filter string="Filter Group 1" name="f_1_g1" domain="[['foo', '=', 'f1_g1']]"/>
                         <separator/>
@@ -499,13 +481,12 @@ QUnit.module("Search", (hooks) => {
                         <filter string="Filter 2 GROUP 2" name="f2_g2" domain="[['foo', '=', 'f2_g2']]"/>
                     </search>
                 `,
-                context: {
-                    search_default_f_1_g1: true,
-                    search_default_f1_g2: true,
-                    search_default_f2_g2: true,
-                },
-            }
-        );
+            context: {
+                search_default_f_1_g1: true,
+                search_default_f1_g2: true,
+                search_default_f2_g2: true,
+            },
+        });
 
         assert.deepEqual(getDomain(controlPanel), [
             "&",
@@ -524,14 +505,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("arch order of groups of filters preserved", async function (assert) {
         assert.expect(12);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchViewId: false,
-                searchMenuTypes: ["filter"],
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchViewId: false,
+            searchMenuTypes: ["filter"],
+            searchViewArch: `
                     <search>
                         <filter string="1" name="coolName1" date="date_field"/>
                         <separator/>
@@ -556,8 +536,7 @@ QUnit.module("Search", (hooks) => {
                         <filter string="11" name="coolName11" domain="[]"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         await toggleFilterMenu(controlPanel);
         assert.containsN(controlPanel, ".o_filter_menu .o_menu_item", 11);

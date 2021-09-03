@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
     applyGroup,
     getFacetTexts,
@@ -11,7 +12,6 @@ import {
     toggleGroupByMenu,
     toggleMenuItem,
 } from "./helpers";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
 
 let serverData;
 QUnit.module("Search", (hooks) => {
@@ -41,15 +41,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering", async function (assert) {
         assert.expect(5);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+        });
 
         await toggleGroupByMenu(controlPanel);
 
@@ -76,19 +74,17 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(1);
 
-            const controlPanel = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchMenuTypes: ["groupBy"],
-                    searchViewId: false,
-                    searchViewFields: {
-                        foo: { string: "Foo", type: "char", store: true, sortable: true },
-                        id: { sortable: true, string: "ID", type: "integer" },
-                    },
-                }
-            );
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchMenuTypes: ["groupBy"],
+                searchViewId: false,
+                searchViewFields: {
+                    foo: { string: "Foo", type: "char", store: true, sortable: true },
+                    id: { sortable: true, string: "ID", type: "integer" },
+                },
+            });
 
             await toggleGroupByMenu(controlPanel);
             await toggleAddCustomGroup(controlPanel);
@@ -109,19 +105,17 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(6);
 
-            const controlPanel = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchMenuTypes: ["groupBy"],
-                    searchViewId: false,
-                    searchViewFields: {
-                        date_field: { string: "Date", type: "date", store: true, sortable: true },
-                        id: { sortable: true, string: "ID", type: "integer" },
-                    },
-                }
-            );
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchMenuTypes: ["groupBy"],
+                searchViewId: false,
+                searchViewFields: {
+                    date_field: { string: "Date", type: "date", store: true, sortable: true },
+                    id: { sortable: true, string: "ID", type: "integer" },
+                },
+            });
             await toggleGroupByMenu(controlPanel);
 
             assert.deepEqual(controlPanel.env.searchModel.groupBy, []);
@@ -143,17 +137,15 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("click on add custom group toggle group selector", async function (assert) {
         assert.expect(4);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewFields: {
-                    date: { sortable: true, name: "date", string: "Super Date", type: "date" },
-                },
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewFields: {
+                date: { sortable: true, name: "date", string: "Super Date", type: "date" },
+            },
+        });
 
         await toggleGroupByMenu(controlPanel);
 
@@ -181,21 +173,19 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(4);
 
-            const controlPanel = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchMenuTypes: ["groupBy"],
-                    searchViewFields: {
-                        candle_light: {
-                            sortable: true,
-                            string: "Candlelight",
-                            type: "boolean",
-                        },
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchMenuTypes: ["groupBy"],
+                searchViewFields: {
+                    candle_light: {
+                        sortable: true,
+                        string: "Candlelight",
+                        type: "boolean",
                     },
-                }
-            );
+                },
+            });
 
             await toggleGroupByMenu(controlPanel);
             await toggleAddCustomGroup(controlPanel);

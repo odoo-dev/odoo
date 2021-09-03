@@ -1,22 +1,22 @@
 /** @odoo-module **/
 
 import { click, patchDate } from "@web/../tests/helpers/utils";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { dialogService } from "@web/core/dialog/dialog_service";
+import { registry } from "@web/core/registry";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { FavoriteMenu } from "@web/search/favorite_menu/favorite_menu";
+import { SearchBar } from "@web/search/search_bar/search_bar";
 import {
-    makeWithSearch,
     deleteFavorite,
     getFacetTexts,
     isItemSelected,
+    makeWithSearch,
+    setupControlPanelServiceRegistry,
     toggleComparisonMenu,
     toggleFavoriteMenu,
     toggleMenuItem,
-    setupControlPanelServiceRegistry,
 } from "./helpers";
-import { registry } from "@web/core/registry";
-import { SearchBar } from "@web/search/search_bar/search_bar";
 
 const serviceRegistry = registry.category("services");
 const viewRegistry = registry.category("views");
@@ -54,16 +54,14 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering with no favorite", async function (assert) {
         assert.expect(5);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["favorite"],
-                searchViewId: false,
-                displayName: "Action Name",
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["favorite"],
+            searchViewId: false,
+            displayName: "Action Name",
+        });
 
         assert.containsOnce(controlPanel, "div.o_favorite_menu > button i.fa.fa-star");
         assert.strictEqual(
@@ -160,29 +158,25 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(3);
 
-            const controlPanel = await makeWithSearch(
-                {
-                    serverData,
-                },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchMenuTypes: ["favorite"],
-                    searchViewId: false,
-                    irFilters: [
-                        {
-                            context: "{}",
-                            domain: "[('foo', '=', 'a')]",
-                            id: 7,
-                            is_default: true,
-                            name: "My favorite",
-                            sort: "[]",
-                            user_id: [2, "Mitchell Admin"],
-                        },
-                    ],
-                    activateFavorite: false,
-                }
-            );
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchMenuTypes: ["favorite"],
+                searchViewId: false,
+                irFilters: [
+                    {
+                        context: "{}",
+                        domain: "[('foo', '=', 'a')]",
+                        id: 7,
+                        is_default: true,
+                        name: "My favorite",
+                        sort: "[]",
+                        user_id: [2, "Mitchell Admin"],
+                    },
+                ],
+                activateFavorite: false,
+            });
 
             await toggleFavoriteMenu(controlPanel);
 
@@ -199,18 +193,15 @@ QUnit.module("Search", (hooks) => {
 
             patchDate(2019, 6, 31, 13, 43, 0);
 
-            const controlPanel = await makeWithSearch(
-                {
-                    serverData,
-                },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchMenuTypes: ["filter", "groupBy", "comparison", "favorite"],
-                    searchViewId: false,
-                    irFilters: [
-                        {
-                            context: `
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchMenuTypes: ["filter", "groupBy", "comparison", "favorite"],
+                searchViewId: false,
+                irFilters: [
+                    {
+                        context: `
                                 {
                                     "group_by": ["foo"],
                                     "comparison": {
@@ -218,28 +209,27 @@ QUnit.module("Search", (hooks) => {
                                     },
                                  }
                             `,
-                            domain: "['!', ['foo', '=', 'qsdf']]",
-                            id: 7,
-                            is_default: false,
-                            name: "My favorite",
-                            sort: "[]",
-                            user_id: [2, "Mitchell Admin"],
-                        },
-                    ],
-                    searchViewArch: `
+                        domain: "['!', ['foo', '=', 'qsdf']]",
+                        id: 7,
+                        is_default: false,
+                        name: "My favorite",
+                        sort: "[]",
+                        user_id: [2, "Mitchell Admin"],
+                    },
+                ],
+                searchViewArch: `
                         <search>
                             <field string="Foo" name="foo"/>
                             <filter string="Date Field Filter" name="positive" date="date_field" default_period="this_year"/>
                             <filter string="Date Field Groupby" name="coolName" context="{'group_by': 'date_field'}"/>
                         </search>
                     `,
-                    context: {
-                        search_default_positive: true,
-                        search_default_coolName: true,
-                        search_default_foo: "a",
-                    },
-                }
-            );
+                context: {
+                    search_default_positive: true,
+                    search_default_coolName: true,
+                    search_default_foo: "a",
+                },
+            });
 
             let domain = controlPanel.env.searchModel.domain;
             let groupBy = controlPanel.env.searchModel.groupBy;

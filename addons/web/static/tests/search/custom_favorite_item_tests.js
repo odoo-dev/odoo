@@ -1,22 +1,22 @@
 /** @odoo-module **/
 
+import { triggerEvent } from "@web/../tests/helpers/utils";
+import { dialogService } from "@web/core/dialog/dialog_service";
+import { registry } from "@web/core/registry";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { FavoriteMenu } from "@web/search/favorite_menu/favorite_menu";
+import { useSetupAction } from "@web/webclient/actions/action_hook";
 import {
-    makeWithSearch,
     editFavoriteName,
     editSearch,
     getFacetTexts,
+    makeWithSearch,
     saveFavorite,
     setupControlPanelServiceRegistry,
     toggleFavoriteMenu,
     toggleSaveFavorite,
     validateSearch,
 } from "./helpers";
-import { triggerEvent } from "@web/../tests/helpers/utils";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { FavoriteMenu } from "@web/search/favorite_menu/favorite_menu";
-import { registry } from "@web/core/registry";
-import { useSetupAction } from "@web/webclient/actions/action_hook";
-import { dialogService } from "@web/core/dialog/dialog_service";
 
 const serviceRegistry = registry.category("services");
 
@@ -67,16 +67,14 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering", async function (assert) {
         assert.expect(3);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["favorite"],
-                searchViewId: false,
-                displayName: "Action Name",
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["favorite"],
+            searchViewId: false,
+            displayName: "Action Name",
+        });
 
         await toggleFavoriteMenu(controlPanel);
         await toggleSaveFavorite(controlPanel);
@@ -99,15 +97,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("favorites use by default and share are exclusive", async function (assert) {
         assert.expect(11);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["favorite"],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["favorite"],
+            searchViewId: false,
+        });
 
         await toggleFavoriteMenu(controlPanel);
         await toggleSaveFavorite(controlPanel);
@@ -171,23 +167,19 @@ QUnit.module("Search", (hooks) => {
         TestComponent.components = { FavoriteMenu };
         TestComponent.template = owl.tags.xml`<div><FavoriteMenu/></div>`;
 
-        const comp = await makeWithSearch(
-            {
-                serverData,
-                mockRPC: (_, args) => {
-                    if (args.model === "ir.filters" && args.method === "create_or_replace") {
-                        const irFilter = args.args[0];
-                        assert.deepEqual(irFilter.sort, '["foo","bar desc"]');
-                        return 7; // fake serverSideId
-                    }
-                },
+        const comp = await makeWithSearch({
+            serverData,
+            mockRPC: (_, args) => {
+                if (args.model === "ir.filters" && args.method === "create_or_replace") {
+                    const irFilter = args.args[0];
+                    assert.deepEqual(irFilter.sort, '["foo","bar desc"]');
+                    return 7; // fake serverSideId
+                }
             },
-            {
-                resModel: "foo",
-                Component: TestComponent,
-                searchViewId: false,
-            }
-        );
+            resModel: "foo",
+            Component: TestComponent,
+            searchViewId: false,
+        });
 
         await toggleFavoriteMenu(comp);
         await toggleSaveFavorite(comp);
@@ -198,33 +190,29 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("dynamic filters are saved dynamic", async function (assert) {
         assert.expect(3);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-                mockRPC: (_, args) => {
-                    if (args.model === "ir.filters" && args.method === "create_or_replace") {
-                        const irFilter = args.args[0];
-                        assert.deepEqual(
-                            irFilter.domain,
-                            '[("date_field", ">=", (context_today() + relativedelta()).strftime("%Y-%m-%d"))]'
-                        );
-                        return 7; // fake serverSideId
-                    }
-                },
+        const controlPanel = await makeWithSearch({
+            serverData,
+            mockRPC: (_, args) => {
+                if (args.model === "ir.filters" && args.method === "create_or_replace") {
+                    const irFilter = args.args[0];
+                    assert.deepEqual(
+                        irFilter.domain,
+                        '[("date_field", ">=", (context_today() + relativedelta()).strftime("%Y-%m-%d"))]'
+                    );
+                    return 7; // fake serverSideId
+                }
             },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["favorite"],
-                searchViewId: false,
-                searchViewArch: `
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["favorite"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Filter" name="filter" domain="[('date_field', '>=', (context_today() + relativedelta()).strftime('%Y-%m-%d'))]"/>
                     </search>
                 `,
-                context: { search_default_filter: 1 },
-            }
-        );
+            context: { search_default_filter: 1 },
+        });
 
         assert.deepEqual(getFacetTexts(controlPanel), ["Filter"]);
 
@@ -239,29 +227,25 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("save filters created via autocompletion works", async function (assert) {
         assert.expect(4);
 
-        const controlPanel = await makeWithSearch(
-            {
-                serverData,
-                mockRPC: (_, args) => {
-                    if (args.model === "ir.filters" && args.method === "create_or_replace") {
-                        const irFilter = args.args[0];
-                        assert.deepEqual(irFilter.domain, '[("foo", "ilike", "a")]');
-                        return 7; // fake serverSideId
-                    }
-                },
+        const controlPanel = await makeWithSearch({
+            serverData,
+            mockRPC: (_, args) => {
+                if (args.model === "ir.filters" && args.method === "create_or_replace") {
+                    const irFilter = args.args[0];
+                    assert.deepEqual(irFilter.domain, '[("foo", "ilike", "a")]');
+                    return 7; // fake serverSideId
+                }
             },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["favorite"],
-                searchViewId: false,
-                searchViewArch: `
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["favorite"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <field name="foo"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         assert.deepEqual(getFacetTexts(controlPanel), []);
 
@@ -301,44 +285,40 @@ QUnit.module("Search", (hooks) => {
                 { force: true }
             );
 
-            const controlPanel = await makeWithSearch(
-                {
-                    serverData,
-                    mockRPC: (route, args) => {
-                        if (args.model === "ir.filters" && args.method === "create_or_replace") {
-                            const irFilter = args.args[0];
-                            assert.deepEqual(irFilter, {
-                                action_id: false,
-                                context: { group_by: [] },
-                                domain: "[]",
-                                is_default: false,
-                                model_id: "foo",
-                                name: "My favorite 2",
-                                sort: "[]",
-                                user_id: 7,
-                            });
-                            return 2; // serverSideId
-                        }
-                    },
-                },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchMenuTypes: ["favorite"],
-                    searchViewId: false,
-                    irFilters: [
-                        {
-                            context: "{}",
+            const controlPanel = await makeWithSearch({
+                serverData,
+                mockRPC: (route, args) => {
+                    if (args.model === "ir.filters" && args.method === "create_or_replace") {
+                        const irFilter = args.args[0];
+                        assert.deepEqual(irFilter, {
+                            action_id: false,
+                            context: { group_by: [] },
                             domain: "[]",
-                            id: 1,
                             is_default: false,
-                            name: "My favorite",
+                            model_id: "foo",
+                            name: "My favorite 2",
                             sort: "[]",
-                            user_id: [2, "Mitchell Admin"],
-                        },
-                    ],
-                }
-            );
+                            user_id: 7,
+                        });
+                        return 2; // serverSideId
+                    }
+                },
+                resModel: "foo",
+                Component: ControlPanel,
+                searchMenuTypes: ["favorite"],
+                searchViewId: false,
+                irFilters: [
+                    {
+                        context: "{}",
+                        domain: "[]",
+                        id: 1,
+                        is_default: false,
+                        name: "My favorite",
+                        sort: "[]",
+                        user_id: [2, "Mitchell Admin"],
+                    },
+                ],
+            });
 
             await toggleFavoriteMenu(controlPanel);
             await toggleSaveFavorite(controlPanel);

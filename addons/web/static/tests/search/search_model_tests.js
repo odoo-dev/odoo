@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
-import { makeWithSearch, setupControlPanelServiceRegistry } from "./helpers";
 import { patchDate } from "@web/../tests/helpers/utils";
+import { makeWithSearch, setupControlPanelServiceRegistry } from "./helpers";
 
 const { Component, tags } = owl;
 const { xml } = tags;
@@ -9,16 +9,13 @@ const { xml } = tags;
 class TestComponent extends Component {}
 TestComponent.template = xml`<div class="o_test_component"/>`;
 
-async function makeSearchModel(params, props) {
-    const withSearchProps = Object.assign(
-        {
-            Component: TestComponent,
-            resModel: "foo",
-            searchViewId: false,
-        },
-        props
-    );
-    const component = await makeWithSearch(params, withSearchProps);
+async function makeSearchModel(params) {
+    const component = await makeWithSearch({
+        Component: TestComponent,
+        resModel: "foo",
+        searchViewId: false,
+        ...params,
+    });
     return component.env.searchModel;
 }
 
@@ -164,16 +161,14 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing one field tag", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <field name="bar"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 description: "Bar",
@@ -186,32 +181,28 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing one separator tag", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <separator/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), []);
     });
 
     QUnit.test("parsing one separator tag and one field tag", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <separator/>
                         <field name="bar"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 description: "Bar",
@@ -224,16 +215,14 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing one filter tag", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="filter" string="Hello" domain="[]"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 description: "Hello",
@@ -245,16 +234,14 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing one filter tag with date attribute", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="date_filter" string="Date" date="date_field"/>
                     </search>
                 `,
-            }
-        );
+        });
         const dateFilterId = model.getSearchItems((f) => f.type === "dateFilter")[0].id;
         assert.deepEqual(sanitizeSearchItems(model), [
             {
@@ -281,16 +268,14 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing one groupBy tag", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="groupby" string="Hi" context="{ 'group_by': 'date_field:day'}"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 defaultIntervalId: "day",
@@ -304,17 +289,15 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing two filter tags", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="filter_1" string="Hello One" domain="[]"/>
                         <filter name="filter_2" string="Hello Two" domain="[('bar', '=', 3)]"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 description: "Hello One",
@@ -331,18 +314,16 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing two filter tags separated by a separator", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="filter_1" string="Hello One" domain="[]"/>
                         <separator/>
                         <filter name="filter_2" string="Hello Two" domain="[('bar', '=', 3)]"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 description: "Hello One",
@@ -359,17 +340,15 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing one filter tag and one field", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="filter" string="Hello" domain="[]"/>
                         <field name="bar"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 description: "Hello",
@@ -387,17 +366,15 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing two field tags", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <field name="foo"/>
                         <field name="bar"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 description: "Foo",
@@ -416,36 +393,32 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing a searchpanel tag", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <searchpanel/>
                     </search>
                 `,
-                view: { type: "kanban" },
-            }
-        );
+            view: { type: "kanban" },
+        });
         assert.deepEqual(model.getSections(), []);
     });
 
     QUnit.test("parsing a searchpanel field select one", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <searchpanel>
                             <field name="company_id"/>
                         </searchpanel>
                     </search>
                 `,
-                resModel: "partner",
-                view: { type: "kanban" },
-            }
-        );
+            resModel: "partner",
+            view: { type: "kanban" },
+        });
         const sections = model.getSections();
         for (const section of sections) {
             section.values = [...section.values];
@@ -504,20 +477,18 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("parsing a searchpanel field select multi", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <searchpanel>
                             <field name="company_id" select="multi"/>
                         </searchpanel>
                     </search>
                 `,
-                resModel: "partner",
-                view: { type: "kanban" },
-            }
-        );
+            resModel: "partner",
+            view: { type: "kanban" },
+        });
         const sections = model.getSections();
         for (const section of sections) {
             section.values = [...section.values];
@@ -560,17 +531,15 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("process search default group by", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="group_by" context="{ 'group_by': 'foo'}"/>
                     </search>
                 `,
-                context: { search_default_group_by: 14 },
-            }
-        );
+            context: { search_default_group_by: 14 },
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 defaultRank: 14,
@@ -585,16 +554,14 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("process and toggle a field with a context to evaluate", async function (assert) {
         assert.expect(2);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <field name="foo" context="{ 'a': self }"/>
                     </search>
                 `,
-            }
-        );
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 context: "{ 'a': self }",
@@ -610,24 +577,22 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("process favorite filters", async function (assert) {
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                irFilters: [
-                    {
-                        user_id: [2, "Mitchell Admin"],
-                        name: "Sorted filter",
-                        id: 5,
-                        context: `{"group_by":["foo","bar"]}`,
-                        sort: '["foo", "-bar"]',
-                        domain: "[('user_id', '=', uid)]",
-                        is_default: false,
-                        model_id: "res.partner",
-                        action_id: false,
-                    },
-                ],
-            }
-        );
+        const model = await makeSearchModel({
+            serverData,
+            irFilters: [
+                {
+                    user_id: [2, "Mitchell Admin"],
+                    name: "Sorted filter",
+                    id: 5,
+                    context: `{"group_by":["foo","bar"]}`,
+                    sort: '["foo", "-bar"]',
+                    domain: "[('user_id', '=', uid)]",
+                    is_default: false,
+                    model_id: "res.partner",
+                    action_id: false,
+                },
+            ],
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 context: {},
@@ -655,17 +620,15 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("process dynamic filters", async function (assert) {
         assert.expect(1);
         assert.expect(1);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                dynamicFilters: [
-                    {
-                        description: "Quick search",
-                        domain: [["id", "in", [1, 3, 4]]],
-                    },
-                ],
-            }
-        );
+        const model = await makeSearchModel({
+            serverData,
+            dynamicFilters: [
+                {
+                    description: "Quick search",
+                    domain: [["id", "in", [1, 3, 4]]],
+                },
+            ],
+        });
         assert.deepEqual(sanitizeSearchItems(model), [
             {
                 description: "Quick search",
@@ -679,16 +642,14 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("toggle a filter", async function (assert) {
         assert.expect(1);
         assert.expect(3);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="filter" string="Filter" domain="[['foo', '=', 'a']]"/>
                     </search>
                 `,
-            }
-        );
+        });
         const filterId = Object.keys(model.searchItems).map((key) => Number(key))[0];
         assert.deepEqual([], model.domain);
         model.toggleSearchItem(filterId);
@@ -700,16 +661,14 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("toggle a date filter", async function (assert) {
         assert.expect(3);
         patchDate(2019, 0, 6, 15, 0, 0);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="date_filter" date="date_field" string="DateFilter"/>
                     </search>
                 `,
-            }
-        );
+        });
         const filterId = Object.keys(model.searchItems).map((key) => Number(key))[0];
         model.toggleDateFilter(filterId);
         assert.deepEqual(
@@ -735,16 +694,14 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("toggle a groupBy", async function (assert) {
         assert.expect(3);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="groupBy" string="GroupBy" context="{'group_by': 'foo'}"/>
                     </search>
                 `,
-            }
-        );
+        });
         const filterId = Object.keys(model.searchItems).map((key) => Number(key))[0];
         assert.deepEqual(model.groupBy, []);
         model.toggleSearchItem(filterId);
@@ -755,16 +712,14 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("toggle a date groupBy", async function (assert) {
         assert.expect(5);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="date_groupBy" string="DateGroupBy" context="{'group_by': 'date_field:day'}"/>
                     </search>
                 `,
-            }
-        );
+        });
         const filterId = Object.keys(model.searchItems).map((key) => Number(key))[0];
         assert.deepEqual(model.groupBy, []);
         model.toggleDateGroupBy(filterId);
@@ -795,16 +750,14 @@ QUnit.module("Search", (hooks) => {
 
     QUnit.test("create a new dateGroupBy", async function (assert) {
         assert.expect(2);
-        const model = await makeSearchModel(
-            { serverData },
-            {
-                searchViewArch: `
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
                     <search>
                         <filter name="foo" string="Foo" context="{'group_by': 'foo'}"/>
                     </search>
                 `,
-            }
-        );
+        });
         model.createNewGroupBy("date_field");
         assert.deepEqual(sanitizeSearchItems(model), [
             {

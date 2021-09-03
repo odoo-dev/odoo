@@ -23,19 +23,17 @@ QUnit.module("Search", (hooks) => {
     QUnit.module("ControlPanel");
 
     QUnit.test("simple rendering", async (assert) => {
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                componentProps: {
-                    display: {
-                        "top-right": false,
-                    },
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            componentProps: {
+                display: {
+                    "top-right": false,
                 },
-                searchMenuTypes: [],
-            }
-        );
+            },
+            searchMenuTypes: [],
+        });
 
         assert.containsOnce(controlPanel, ".o_cp_top");
         assert.containsOnce(controlPanel, ".o_cp_top_left");
@@ -55,18 +53,16 @@ QUnit.module("Search", (hooks) => {
     });
 
     QUnit.test("breadcrumbs prop", async (assert) => {
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                componentProps: {
-                    breadcrumbs: [{ jsId: "controller_7", name: "Previous" }],
-                    displayName: "Current",
-                },
-                searchMenuTypes: [],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            componentProps: {
+                breadcrumbs: [{ jsId: "controller_7", name: "Previous" }],
+                displayName: "Current",
+            },
+            searchMenuTypes: [],
+        });
 
         assert.containsN(controlPanel, ".breadcrumb li.breadcrumb-item", 2);
         const breadcrumbItems = controlPanel.el.querySelectorAll("li.breadcrumb-item");
@@ -83,20 +79,18 @@ QUnit.module("Search", (hooks) => {
     });
 
     QUnit.test("viewSwitcherEntries prop", async (assert) => {
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                componentProps: {
-                    viewSwitcherEntries: [
-                        { type: "list", active: true, icon: "fa-list-ul", name: "List" },
-                        { type: "kanban", icon: "fa-th-large", name: "Kanban" },
-                    ],
-                },
-                searchMenuTypes: [],
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            componentProps: {
+                viewSwitcherEntries: [
+                    { type: "list", active: true, icon: "fa-list-ul", name: "List" },
+                    { type: "kanban", icon: "fa-th-large", name: "Kanban" },
+                ],
+            },
+            searchMenuTypes: [],
+        });
 
         assert.containsOnce(controlPanel, ".o_cp_switch_buttons");
         assert.containsN(controlPanel, ".o_switch_view", 2);

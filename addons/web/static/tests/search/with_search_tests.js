@@ -1,13 +1,14 @@
 /** @odoo-module **/
 
-import { FilterMenu } from "@web/search/filter_menu/filter_menu";
-import { getFixture, nextTick } from "@web/../tests/helpers/utils";
-import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { ormService } from "@web/core/orm_service";
-import { viewService } from "@web/views/view_service";
-import { WithSearch } from "@web/search/with_search/with_search";
+import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
+import { ormService } from "@web/core/orm_service";
+import { registry } from "@web/core/registry";
+import { FilterMenu } from "@web/search/filter_menu/filter_menu";
+import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
+import { WithSearch } from "@web/search/with_search/with_search";
+import { viewService } from "@web/views/view_service";
 import {
     getMenuItemTexts,
     makeWithSearch,
@@ -15,7 +16,6 @@ import {
     toggleGroupByMenu,
     toggleMenuItem,
 } from "./helpers";
-import { registry } from "@web/core/registry";
 
 const { Component, hooks, mount, tags } = owl;
 const { useState } = hooks;
@@ -68,13 +68,11 @@ QUnit.module("Search", (hooks) => {
         class TestComponent extends Component {}
         TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
-        const component = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "animal",
-                Component: TestComponent,
-            }
-        );
+        const component = await makeWithSearch({
+            serverData,
+            resModel: "animal",
+            Component: TestComponent,
+        });
         assert.hasClass(component.el, "o_test_component");
         assert.strictEqual(component.el.innerText, "Test component content");
     });
@@ -85,13 +83,11 @@ QUnit.module("Search", (hooks) => {
         class TestComponent extends Component {}
         TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
-        const component = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "animal",
-                Component: TestComponent,
-            }
-        );
+        const component = await makeWithSearch({
+            serverData,
+            resModel: "animal",
+            Component: TestComponent,
+        });
         assert.ok(component.env.searchModel);
     });
 
@@ -116,17 +112,15 @@ QUnit.module("Search", (hooks) => {
             }
             TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
-            await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "animal",
-                    Component: TestComponent,
-                    domain: [[0, "=", 1]],
-                    groupBy: ["birthday"],
-                    context: { key: "val" },
-                    orderBy: ["bar"],
-                }
-            );
+            await makeWithSearch({
+                serverData,
+                resModel: "animal",
+                Component: TestComponent,
+                domain: [[0, "=", 1]],
+                groupBy: ["birthday"],
+                context: { key: "val" },
+                orderBy: ["bar"],
+            });
         }
     );
 
@@ -136,20 +130,16 @@ QUnit.module("Search", (hooks) => {
         class TestComponent extends Component {}
         TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
-        await makeWithSearch(
-            {
-                serverData,
-                mockRPC: function (_, args) {
-                    if (args.method === "load_views") {
-                        throw new Error("No load_views should be done");
-                    }
-                },
+        await makeWithSearch({
+            serverData,
+            mockRPC: function (_, args) {
+                if (args.method === "load_views") {
+                    throw new Error("No load_views should be done");
+                }
             },
-            {
-                resModel: "animal",
-                Component: TestComponent,
-            }
-        );
+            resModel: "animal",
+            Component: TestComponent,
+        });
 
         assert.ok(true);
     });
@@ -162,33 +152,29 @@ QUnit.module("Search", (hooks) => {
             class TestComponent extends Component {}
             TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
-            await makeWithSearch(
-                {
-                    serverData,
-                    mockRPC: function (_, args) {
-                        if (args.method === "load_views") {
-                            assert.deepEqual(args.kwargs, {
-                                context: {
-                                    lang: "en",
-                                    tz: "taht",
-                                    uid: 7,
-                                },
-                                options: {
-                                    action_id: false,
-                                    load_filters: false,
-                                    toolbar: false,
-                                },
-                                views: [[false, "search"]],
-                            });
-                        }
-                    },
+            await makeWithSearch({
+                serverData,
+                mockRPC: function (_, args) {
+                    if (args.method === "load_views") {
+                        assert.deepEqual(args.kwargs, {
+                            context: {
+                                lang: "en",
+                                tz: "taht",
+                                uid: 7,
+                            },
+                            options: {
+                                action_id: false,
+                                load_filters: false,
+                                toolbar: false,
+                            },
+                            views: [[false, "search"]],
+                        });
+                    }
                 },
-                {
-                    resModel: "animal",
-                    Component: TestComponent,
-                    searchViewId: false,
-                }
-            );
+                resModel: "animal",
+                Component: TestComponent,
+                searchViewId: false,
+            });
         }
     );
 
@@ -200,23 +186,19 @@ QUnit.module("Search", (hooks) => {
             class TestComponent extends Component {}
             TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
-            await makeWithSearch(
-                {
-                    serverData,
-                    mockRPC: function (_, args) {
-                        if (args.method === "load_views") {
-                            throw new Error("No load_views should be done");
-                        }
-                    },
+            await makeWithSearch({
+                serverData,
+                mockRPC: function (_, args) {
+                    if (args.method === "load_views") {
+                        throw new Error("No load_views should be done");
+                    }
                 },
-                {
-                    resModel: "animal",
-                    Component: TestComponent,
-                    searchViewArch: "<search/>",
-                    searchViewFields: {},
-                    searchViewId: false,
-                }
-            );
+                resModel: "animal",
+                Component: TestComponent,
+                searchViewArch: "<search/>",
+                searchViewFields: {},
+                searchViewId: false,
+            });
             assert.ok(true);
         }
     );
@@ -229,28 +211,24 @@ QUnit.module("Search", (hooks) => {
             class TestComponent extends Component {}
             TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
 
-            await makeWithSearch(
-                {
-                    serverData,
-                    mockRPC: function (_, args) {
-                        if (args.method === "load_views") {
-                            assert.deepEqual(args.kwargs.options, {
-                                action_id: false,
-                                load_filters: true,
-                                toolbar: false,
-                            });
-                        }
-                    },
+            await makeWithSearch({
+                serverData,
+                mockRPC: function (_, args) {
+                    if (args.method === "load_views") {
+                        assert.deepEqual(args.kwargs.options, {
+                            action_id: false,
+                            load_filters: true,
+                            toolbar: false,
+                        });
+                    }
                 },
-                {
-                    resModel: "animal",
-                    Component: TestComponent,
-                    searchViewArch: "<search/>",
-                    searchViewFields: {},
-                    searchViewId: true,
-                    loadIrFilters: true,
-                }
-            );
+                resModel: "animal",
+                Component: TestComponent,
+                searchViewArch: "<search/>",
+                searchViewFields: {},
+                searchViewId: true,
+                loadIrFilters: true,
+            });
         }
     );
 
@@ -268,21 +246,17 @@ QUnit.module("Search", (hooks) => {
                 </div>
             `;
 
-            const component = await makeWithSearch(
-                {
-                    serverData,
-                    mockRPC: function (_, args) {
-                        if (args.method === "load_views") {
-                            assert.deepEqual(args.kwargs.views, [[1, "search"]]);
-                        }
-                    },
+            const component = await makeWithSearch({
+                serverData,
+                mockRPC: function (_, args) {
+                    if (args.method === "load_views") {
+                        assert.deepEqual(args.kwargs.views, [[1, "search"]]);
+                    }
                 },
-                {
-                    resModel: "animal",
-                    Component: TestComponent,
-                    searchViewId: 1,
-                }
-            );
+                resModel: "animal",
+                Component: TestComponent,
+                searchViewId: 1,
+            });
             await toggleFilterMenu(component);
             await assert.ok(getMenuItemTexts(component), ["True Domain"]);
 
@@ -311,14 +285,12 @@ QUnit.module("Search", (hooks) => {
                 </div>
             `;
 
-            const component = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "animal",
-                    Component: TestComponent,
-                    searchViewId: 1,
-                }
-            );
+            const component = await makeWithSearch({
+                serverData,
+                resModel: "animal",
+                Component: TestComponent,
+                searchViewId: 1,
+            });
             await toggleFilterMenu(component);
             await toggleMenuItem(component, "True domain");
         }

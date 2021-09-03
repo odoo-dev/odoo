@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
     getFacetTexts,
     isItemSelected,
@@ -11,7 +12,6 @@ import {
     toggleMenuItem,
     toggleMenuItemOption,
 } from "./helpers";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
 
 let serverData;
 QUnit.module("Search", (hooks) => {
@@ -43,16 +43,14 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(3);
 
-            const controlPanel = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchMenuTypes: ["groupBy"],
-                    searchViewId: false,
-                    searchViewFields: {},
-                }
-            );
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchMenuTypes: ["groupBy"],
+                searchViewId: false,
+                searchViewFields: {},
+            });
 
             await toggleGroupByMenu(controlPanel);
 
@@ -65,15 +63,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering with no groupby", async function (assert) {
         assert.expect(3);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+        });
 
         await toggleGroupByMenu(controlPanel);
 
@@ -85,20 +81,18 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering with a single groupby", async function (assert) {
         assert.expect(4);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Foo" name="group_by_foo" context="{'group_by': 'foo'}"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         await toggleGroupByMenu(controlPanel);
 
@@ -111,20 +105,18 @@ QUnit.module("Search", (hooks) => {
     QUnit.test('toggle a "simple" groupby in groupby menu works', async function (assert) {
         assert.expect(10);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Foo" name="group_by_foo" context="{'group_by': 'foo'}"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         await toggleGroupByMenu(controlPanel);
 
@@ -152,20 +144,18 @@ QUnit.module("Search", (hooks) => {
     QUnit.test('toggle a "simple" groupby quickly does not crash', async function (assert) {
         assert.expect(1);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Foo" name="group_by_foo" context="{'group_by': 'foo'}"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         await toggleGroupByMenu(controlPanel);
 
@@ -180,21 +170,19 @@ QUnit.module("Search", (hooks) => {
         async function (assert) {
             assert.expect(6);
 
-            const controlPanel = await makeWithSearch(
-                { serverData },
-                {
-                    resModel: "foo",
-                    Component: ControlPanel,
-                    searchMenuTypes: ["groupBy"],
-                    searchViewId: false,
-                    searchViewArch: `
+            const controlPanel = await makeWithSearch({
+                serverData,
+                resModel: "foo",
+                Component: ControlPanel,
+                searchMenuTypes: ["groupBy"],
+                searchViewId: false,
+                searchViewArch: `
                     <search>
                         <filter string="Foo" name="group_by_foo" context="{'group_by': 'foo'}"/>
                     </search>
                 `,
-                    context: { search_default_group_by_foo: 1 },
-                }
-            );
+                context: { search_default_group_by_foo: 1 },
+            });
 
             await toggleGroupByMenu(controlPanel);
 
@@ -216,21 +204,19 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("group by a date field using interval works", async function (assert) {
         assert.expect(21);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Date" name="date" context="{'group_by': 'date_field:week'}"/>
                     </search>
                 `,
-                context: { search_default_date: 1 },
-            }
-        );
+            context: { search_default_date: 1 },
+        });
 
         await toggleGroupByMenu(controlPanel);
 
@@ -286,23 +272,21 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("interval options are correctly grouped and ordered", async function (assert) {
         assert.expect(8);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Bar" name="bar" context="{'group_by': 'bar'}"/>
                         <filter string="Date" name="date" context="{'group_by': 'date_field'}"/>
                         <filter string="Foo" name="foo" context="{'group_by': 'foo'}"/>
                     </search>
                 `,
-                context: { search_default_bar: 1 },
-            }
-        );
+            context: { search_default_bar: 1 },
+        });
 
         assert.deepEqual(getFacetTexts(controlPanel), ["Bar"]);
 
@@ -356,22 +340,20 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("default groupbys can be ordered", async function (assert) {
         assert.expect(2);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Birthday" name="birthday" context="{'group_by': 'birthday'}"/>
                         <filter string="Date" name="date" context="{'group_by': 'date_field:week'}"/>
                     </search>
                 `,
-                context: { search_default_birthday: 2, search_default_date: 1 },
-            }
-        );
+            context: { search_default_birthday: 2, search_default_date: 1 },
+        });
 
         // the default groupbys should be activated in the right order
         assert.deepEqual(controlPanel.env.searchModel.groupBy, [
@@ -384,22 +366,20 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("a separator in groupbys does not cause problems", async function (assert) {
         assert.expect(23);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Date" name="coolName" context="{'group_by': 'date_field'}"/>
                         <separator/>
                         <filter string="Bar" name="superName" context="{'group_by': 'bar'}"/>
                     </search>
                 `,
-            }
-        );
+        });
 
         await toggleGroupByMenu(controlPanel);
         await toggleMenuItem(controlPanel, "Date");
@@ -451,22 +431,20 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("falsy search default groupbys are not activated", async function (assert) {
         assert.expect(2);
 
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["groupBy"],
-                searchViewId: false,
-                searchViewArch: `
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["groupBy"],
+            searchViewId: false,
+            searchViewArch: `
                     <search>
                         <filter string="Birthday" name="birthday" context="{'group_by': 'birthday'}"/>
                         <filter string="Date" name="date" context="{'group_by': 'foo'}"/>
                     </search>
                 `,
-                context: { search_default_birthday: false, search_default_foo: 0 },
-            }
-        );
+            context: { search_default_birthday: false, search_default_foo: 0 },
+        });
 
         assert.deepEqual(controlPanel.env.searchModel.groupBy, []);
         assert.deepEqual(getFacetTexts(controlPanel), []);

@@ -1,8 +1,10 @@
 /** @odoo-module **/
 
+import { patchDate } from "@web/../tests/helpers/utils";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import {
-    makeWithSearch,
     getFacetTexts,
+    makeWithSearch,
     removeFacet,
     setupControlPanelServiceRegistry,
     toggleComparisonMenu,
@@ -10,8 +12,6 @@ import {
     toggleMenuItem,
     toggleMenuItemOption,
 } from "./helpers";
-import { patchDate } from "@web/../tests/helpers/utils";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
 
 let serverData;
 QUnit.module("Search", (hooks) => {
@@ -42,15 +42,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("simple rendering", async function (assert) {
         assert.expect(6);
         patchDate(1997, 0, 9, 12, 0, 0);
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["filter", "comparison"],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["filter", "comparison"],
+            searchViewId: false,
+        });
         assert.containsOnce(controlPanel, ".o_dropdown.o_filter_menu");
         assert.containsNone(controlPanel, ".o_dropdown.o_comparison_menu");
         await toggleFilterMenu(controlPanel);
@@ -76,15 +74,13 @@ QUnit.module("Search", (hooks) => {
     QUnit.test("activate a comparison works", async function (assert) {
         assert.expect(5);
         patchDate(1997, 0, 9, 12, 0, 0);
-        const controlPanel = await makeWithSearch(
-            { serverData },
-            {
-                resModel: "foo",
-                Component: ControlPanel,
-                searchMenuTypes: ["filter", "comparison"],
-                searchViewId: false,
-            }
-        );
+        const controlPanel = await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["filter", "comparison"],
+            searchViewId: false,
+        });
         await toggleFilterMenu(controlPanel);
         await toggleMenuItem(controlPanel, "Birthday");
         await toggleMenuItemOption(controlPanel, "Birthday", "January");
