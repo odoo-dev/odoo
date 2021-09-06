@@ -289,7 +289,7 @@ export function formatMonetary(value, options = {}) {
 
     let formatted;
     if (options.humanReadable) {
-        formatted = humanNumber(value, { decimals: digits[1] });
+        formatted = humanNumber(value, { decimals: digits ? digits[1] : 2 });
     } else {
         formatted = formatFloat(value, { digits });
     }
