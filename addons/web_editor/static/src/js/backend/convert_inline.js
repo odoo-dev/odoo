@@ -21,6 +21,8 @@ const TABLE_ATTRIBUTES = {
     width: '100%',
     align: 'center',
     color: 'inherit', // cancel default table text color
+    role: 'presentation',
+    'border-collapse': 'collapse', // cancel default table border-collapse
 };
 /**
  * Returns the css rules which applies on an element, tweaked so that they are
