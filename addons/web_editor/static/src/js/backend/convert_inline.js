@@ -32,7 +32,7 @@ const TABLE_ATTRIBUTES = {
  * @returns {Object} css property name -> css property value
  */
 function getMatchedCSSRules(a) {
-    var i, r, k;
+    var i, r, k, l;
     var doc = a.ownerDocument;
     var rulesCache = a.ownerDocument._rulesCache || (a.ownerDocument._rulesCache = []);
 
@@ -49,11 +49,37 @@ function getMatchedCSSRules(a) {
             }
             if (rules) {
                 for (r = rules.length-1; r >= 0; r--) {
+                    const conditionText = rules[r].conditionText;
+                    const minWidthMatch = conditionText && conditionText.match(/\(min-width *: *(\d+)/);
+                    const minWidth = minWidthMatch && +(minWidthMatch[1] || '0');
+                    if (minWidth && minWidth >= 1200) {
+                        // Large min-width media queries should be included.
+                        // eg., .container has a default max-width for all
+                        // screens.
+                        let mediaRules;
+                        try {
+                            mediaRules = rules[r].rules || rules[r].cssRules;
+                        } catch (e) {
+                            console.warn(`Can't read the css rules of: ${sheets[i].href} (${conditionText})`, e);
+                            continue;
+                        }
+                        if (mediaRules) {
+                            for (k = mediaRules.length-1; k >= 0; k--) {
+                                var selectorText = mediaRules[k].selectorText;
+                                if (selectorText && !SELECTORS_IGNORE.test(selectorText)) {
+                                    var st = selectorText.split(/\s*,\s*/);
+                                    for (l = 0 ; l < st.length ; l++) {
+                                        rulesCache.push({ 'selector': st[l], 'style': mediaRules[k].style });
+                                    }
+                                }
+                            }
+                        }
+                    }
                     var selectorText = rules[r].selectorText;
                     if (selectorText && !SELECTORS_IGNORE.test(selectorText)) {
                         var st = selectorText.split(/\s*,\s*/);
-                        for (k = 0 ; k < st.length ; k++) {
-                            rulesCache.push({ 'selector': st[k], 'style': rules[r].style });
+                        for (l = 0 ; l < st.length ; l++) {
+                            rulesCache.push({ 'selector': st[l], 'style': rules[r].style });
                         }
                     }
                 }
