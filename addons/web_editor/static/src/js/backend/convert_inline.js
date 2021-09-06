@@ -13,6 +13,15 @@ const BOOTSTRAP_MAX_WIDTHS = {
     lg: 960,
     xl: 1140,
 };
+// Attributes all tables should have in a mailing.
+const TABLE_ATTRIBUTES = {
+    cellspacing: 0,
+    cellpadding: 0,
+    border: 0,
+    width: '100%',
+    align: 'center',
+    color: 'inherit', // cancel default table text color
+};
 /**
  * Returns the css rules which applies on an element, tweaked so that they are
  * browser/mail client ok.
@@ -308,7 +317,7 @@ function bootstrapToTable($editable) {
     for (const container of $editable.find('.container, .container-fluid, .list-group')) {
         const $container = $(container);
         // Table
-        const $table = $($container.find('.row, .list-group-item').length ? '<table align="center"/>' : container.cloneNode());
+        const $table = $($container.find('.row, .list-group-item').length ? '<table/>' : container.cloneNode());
         for (const attr of container.attributes) {
             $table.attr(attr.name, attr.value);
         }
@@ -334,13 +343,7 @@ function bootstrapToTable($editable) {
             }
         }
         $table.removeClass('container container-fluid list-group');
-        $table.attr({
-            cellspacing: 0,
-            cellpadding: 0,
-            border: 0,
-            width: '100%',
-            color: 'inherit', // cancel default table text color
-        });
+        $table.attr(TABLE_ATTRIBUTES);
         $container.before($table);
         $container.remove();
         if (isListGroup) {
@@ -419,6 +422,40 @@ function bootstrapToTable($editable) {
                     $col.before($('<td/>').css('width', offset + '%').attr('width', offset + '%')).removeClass(offsetMatch[0]);
                 }
             }
+        }
+    }
+}
+
+function addTables($editable) {
+    for (const snippet of $editable.find('.o_mail_snippet_general')) {
+        // Convert all snippets into table > tr > td
+        const $table = $('<table/>');
+        $table.attr(TABLE_ATTRIBUTES);
+        for (const attr of snippet.attributes) {
+            $table.attr(attr.name, attr.value);
+        }
+        const $row = $('<tr/>');
+        const $col = $('<td/>');
+        $row.append($col);
+        $table.append($row);
+        for (const child of [...snippet.childNodes]) {
+            $col.append(child);
+        }
+        $(snippet).before($table);
+        $(snippet).remove();
+
+        // If snippet doesn't have a table as child, wrap its contents in one.
+        if (!$col.children().filter('table')) {
+            const $tableB = $('<table/>');
+            $tableB.attr(TABLE_ATTRIBUTES);
+            const $rowB = $('<tr/>');
+            const $colB = $('<td/>');
+            $rowB.append($colB);
+            $tableB.append($rowB);
+            for (const child of [...$table[0].childNodes]) {
+                $colB.append(child);
+            }
+            $col.append($tableB);
         }
     }
 }
@@ -526,6 +563,7 @@ FieldHtml.include({
         fontToImg($editable);
         classToStyle($editable);
         bootstrapToTable($editable);
+        addTables($editable);
 
         // fix outlook image rendering bug
         _.each(['width', 'height'], function(attribute) {
@@ -545,6 +583,7 @@ FieldHtml.include({
 return {
     fontToImg: fontToImg,
     bootstrapToTable: bootstrapToTable,
+    addTables: addTables,
     classToStyle: classToStyle,
     attachmentThumbnailToLinkImg: attachmentThumbnailToLinkImg,
 };
