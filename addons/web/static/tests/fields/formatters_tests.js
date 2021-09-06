@@ -274,6 +274,17 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(formatMonetary(200, { field: floatField, data }), "$ 200.00");
     });
 
+    QUnit.test("formatMonetary without currency", function (assert) {
+        patchWithCleanup(session, {
+            currencies: {},
+        });
+        assert.deepEqual(
+            formatMonetary(1234567.654, { currencyId: 10, humanReadable: true }),
+            "1.23M"
+        );
+        assert.deepEqual(formatMonetary(1234567.654, { currencyId: 10 }), "1,234,567.65");
+    });
+
     QUnit.test("formatPercentage", function (assert) {
         assert.strictEqual(formatPercentage(false), "0%");
         assert.strictEqual(formatPercentage(0), "0%");
