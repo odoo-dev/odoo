@@ -305,17 +305,35 @@ function _getColumnSize(column) {
  * @param {jQuery} $editable
  */
 function bootstrapToTable($editable) {
-    for (const container of $editable.find('.container, .container-fluid')) {
+    for (const container of $editable.find('.container, .container-fluid, .list-group')) {
         const $container = $(container);
         // Table
-        const $table = $($container.find('.row').length ? '<table align="center"/>' : container.cloneNode());
+        const $table = $($container.find('.row, .list-group-item').length ? '<table align="center"/>' : container.cloneNode());
         for (const attr of container.attributes) {
             $table.attr(attr.name, attr.value);
         }
+        const isListGroup = $container.is('.list-group');
         for (const child of [...container.childNodes]) {
-            $table.append(child);
+            if (isListGroup && child.classList && child.classList.contains('list-group-item')) {
+                // List groups are <ul>s that render like tables. Their
+                // li.list-group-item children should translate to tr > td.
+                const $row = $('<tr/>');
+                const $col = $('<td/>');
+                for (const attr of child.attributes) {
+                    $col.attr(attr.name, attr.value);
+                }
+                for (const descendant of [...child.childNodes]) {
+                    $col.append(descendant);
+                }
+                $col.removeClass('list-group-item');
+                $row.append($col);
+                $table.append($row);
+                $(child).remove();
+            } else {
+                $table.append(child);
+            }
         }
-        $table.removeClass('container container-fluid');
+        $table.removeClass('container container-fluid list-group');
         $table.attr({
             cellspacing: 0,
             cellpadding: 0,
@@ -325,6 +343,9 @@ function bootstrapToTable($editable) {
         });
         $container.before($table);
         $container.remove();
+        if (isListGroup) {
+            continue;
+        }
 
 
         // Rows

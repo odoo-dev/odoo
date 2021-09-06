@@ -14,12 +14,12 @@
                             <small class="o_default_snippet_text">user / month (billed annually)</small>
 
                         </div>
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item o_default_snippet_text">Basic features</div>
-                            <div class="list-group-item o_default_snippet_text">Basic management</div>
-                            <div class="list-group-item o_default_snippet_text">No customization</div>
-                            <div class="list-group-item o_default_snippet_text">No support</div>
-                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item o_default_snippet_text">Basic features</li>
+                            <li class="list-group-item o_default_snippet_text">Basic management</li>
+                            <li class="list-group-item o_default_snippet_text">No customization</li>
+                            <li class="list-group-item o_default_snippet_text">No support</li>
+                        </ul>
                         <div class="card-footer">
                             <a href="#" class="btn btn-block btn-primary o_default_snippet_text">More</a>
                         </div>
@@ -34,22 +34,22 @@
                             <small class="o_default_snippet_text">user / month (billed annually)</small>
 
                         </div>
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item o_default_snippet_text">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item o_default_snippet_text">
                                 <strong class="o_default_snippet_text">Advanced</strong>
                                 features
-                            </div>
-                            <div class="list-group-item o_default_snippet_text">
+                            </li>
+                            <li class="list-group-item o_default_snippet_text">
                                 <strong class="o_default_snippet_text">Total</strong>
                                 management
-                            </div>
-                            <div class="list-group-item">
+                            </li>
+                            <li class="list-group-item">
                                 <strong class="o_default_snippet_text">Fully customizable</strong>
-                            </div>
-                            <div class="list-group-item">
+                            </li>
+                            <li class="list-group-item">
                                 <strong class="o_default_snippet_text">24/7 Support</strong>
-                            </div>
-                        </div>
+                            </li>
+                        </ul>
                         <div class="card-footer">
                             <a href="#" class="btn btn-block btn-primary o_default_snippet_text">More</a>
                         </div>
