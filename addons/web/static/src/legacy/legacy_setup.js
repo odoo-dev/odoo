@@ -46,6 +46,13 @@ export const legacySetupProm = new Promise((resolve) => {
     serviceRegistry.add("legacy_dialog_mapping", legacyDialogMappingService);
     const legacyCommandService = makeLegacyCommandService(legacyEnv);
     serviceRegistry.add("legacy_command", legacyCommandService);
+    serviceRegistry.add("legacy_dropdown", {
+        dependencies: ["ui", "hotkey"],
+        start(env, { ui, hotkey }) {
+            Component.env.services.ui = ui;
+            Component.env.services.hotkey = hotkey;
+        },
+    });
     await Promise.all([whenReady(), session.is_bound]);
     legacyEnv.qweb.addTemplates(session.owlTemplates);
     legacySetupResolver(legacyEnv);
