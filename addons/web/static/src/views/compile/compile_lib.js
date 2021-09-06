@@ -1,6 +1,15 @@
 /* @odoo-module */
 import { evaluateExpr } from "@web/core/py_js/py";
 
+/**
+ * A helper to identify nodes in an arch to allow matching between
+ * the parsing of an arch, and the template compilation.
+ * Nodes with the same tag will be assigned an incrementing number.
+ * Note that, consequently every node of the same tag should be added to produce
+ * a reliable ID.
+ * @return {Function} An add function to execute on each node of a given tagName
+ *  Function.idFor: Produce an Id for the lastNode, or for the given node.
+ */
 export function nodeIdentifier() {
     const mapping = {};
     let lastNode;
@@ -32,6 +41,11 @@ export function nodeIdentifier() {
     });
 }
 
+/**
+ * Checks if a XML node will resolve to a component when rendered by OWL.
+ * @param  {Element} node Should be a node of a pre-compiled template.
+ * @return {boolean}
+ */
 function isComponentNode(node) {
     return (
         node.tagName.charAt(0).toUpperCase() === node.tagName.charAt(0) ||
@@ -39,6 +53,12 @@ function isComponentNode(node) {
     );
 }
 
+/**
+ * Helper to add onto a Component node the information of the arch node (e.g. modifiers)
+ * This is almost exclusively the support of legacy Widgets.
+ * @param {Element} node A node from an arch
+ * @param {Element} compiled A node of a pre-compiled template
+ */
 export function addLegacyNodeInfo(node, compiled) {
     const modifiers = getAllModifiers(node);
     if (modifiers) {
@@ -49,10 +69,20 @@ export function addLegacyNodeInfo(node, compiled) {
     }
 }
 
+/**
+ * Encodes an object into a string usable inside a pre-compiled template
+ * @param  {Object}
+ * @return {string}
+ */
 export function encodeObjectForTemplate(obj) {
     return encodeURI(JSON.stringify(obj));
 }
 
+/**
+ * Decodes a string within an attribute into an Object
+ * @param  {string} str
+ * @return {Object}
+ */
 export function decodeObjectForTemplate(str) {
     return JSON.parse(decodeURI(str));
 }
@@ -60,7 +90,7 @@ export function decodeObjectForTemplate(str) {
 /**
  * Combines the existing value of a node attribute with new given parts. The glue
  * is the string used to join the parts.
- * @param {Node} node
+ * @param {Element} node
  * @param {string} attr
  * @param {string | string[]} parts
  * @param {string} [glue=" "]
@@ -74,7 +104,7 @@ export const combineAttributes = (node, attr, parts, glue = " ") => {
     node.setAttribute(attr, allValues.join(glue));
 };
 /**
- * there is no particular expecation of what should be a boolean
+ * there is no particular expectation of what should be a boolean
  * according to a view's arch
  * Sometimes it is 0 or one, True or False ; true or false
  * @return {boolean}
@@ -89,6 +119,11 @@ function evalIrUiViewModifier(expr) {
     });
 }
 
+/**
+ * Gets all the Odoo's dynamic modifiers (invisible, readonly etc...) of a Node coming from an arch.
+ * @param  {Element} node An arch's node
+ * @return {Object} The modifiers set on the node.
+ */
 export function getAllModifiers(node) {
     const modifiers = node.getAttribute("modifiers");
     if (!modifiers) {
@@ -98,7 +133,16 @@ export function getAllModifiers(node) {
     return parsed;
 }
 
+/**
+ * Gets a specific modifier, either static or dynamic, on a Node.
+ * A static modifier is set as an attribute and is a boolean.
+ * A dynamuic modifier is set in the `modifiers` attribute and id a domain.`
+ * @param  {Element} node An arch's Node.
+ * @param  {string} modifierName
+ * @return {boolean|Array}
+ */
 export function getModifier(node, modifierName) {
+    /** @type {string|boolean|Array} (mod) */
     let mod = node.getAttribute(modifierName);
     if (mod === null) {
         const modifiers = getAllModifiers(node);
@@ -111,16 +155,43 @@ export function getModifier(node, modifierName) {
     return mod;
 }
 
+/**
+ * Specifically gets the "invisible" modifier.
+ * @param  {Element} node
+ * @return {boolean|Array}
+ */
 function getInvisible(node) {
     const invisible = getModifier(node, "invisible");
     return invisible || false;
 }
 
-export function isAlwaysInvisible(node, params) {
+/**
+ * An object containing various information about the current
+ * compilation from an Arch to a owl template.
+ * @typedef {Object} CompilationContext
+ */
+
+/**
+ * Determine if a node in an arch will always be invisible. Usually if it is the case,
+ * the node will not be compiled at all
+ * @param  {Element}  node   An arch's node
+ * @param  {CompilationContext}
+ * @return {boolean}
+ */
+export function isAlwaysInvisible(node, compilationContext) {
     const invisibleModifer = getInvisible(node);
-    return !params.enableInvisible && typeof invisibleModifer === "boolean" && invisibleModifer;
+    return (
+        !compilationContext.enableInvisible &&
+        typeof invisibleModifer === "boolean" &&
+        invisibleModifer
+    );
 }
 
+/**
+ * Appends a child node to a parent node
+ * @param  {Element} parent
+ * @param  {Element|Element[]} node  The future children nodes
+ */
 export function appendTo(parent, node) {
     if (!node) {
         return;
@@ -132,6 +203,11 @@ export function appendTo(parent, node) {
     }
 }
 
+/**
+ * Copy some attributes from an arch node to a pre-compiled node
+ * @param  {Element} node
+ * @param  {Element} compiled
+ */
 function copyAttributes(node, compiled) {
     if (node.tagName === "button") {
         return;
@@ -154,6 +230,24 @@ function copyAttributes(node, compiled) {
     }
 }
 
+/**
+ * A string representing an abject that will be evaluated by a t-attr
+ * eg.: `{ attr1: my_expression ? true : false, attr2: true }`
+ * @typedef {string} TAttrString
+ */
+
+/**
+ * A string that links an attribute to an expression
+ * eg.: `my_attribute: my_expression ? true : false`
+ * @typedef {string} TAttrStringPart
+ */
+
+/**
+ * Helper to push in a string representing an object
+ * @param  {TAttrString} originalTattr
+ * @param  {TAttrStringPart} string        string to add onto the object
+ * @return {TAttrString}               The new string.
+ */
 function appendToStringifiedObject(originalTattr, string) {
     const re = /{(.*)}/;
     const oldString = re.exec(originalTattr);
@@ -164,25 +258,43 @@ function appendToStringifiedObject(originalTattr, string) {
     return `{ ${string} }`;
 }
 
+/**
+ * Appends a string to an attibute (t-attr)
+ * @param  {Element} node
+ * @param  {string} attr   The attribute's name
+ * @param  {TAttrStringPart} string
+ */
 export function appendAttr(node, attr, string) {
     const attrKey = `t-att-${attr}`;
     const attrVal = node.getAttribute(attrKey);
     node.setAttribute(attrKey, appendToStringifiedObject(attrVal, string));
 }
 
-export function applyInvisibleModifier({ node, compiled }, params, invisible) {
+/**
+ * Applies an arch's node invisible modifier onto a pre-compiled node
+ * That is, set an t-if on the pre-compiled node, evaluating to the right expression
+ * or, if enableInvisible is set in params, put the class o_invisible on the compiled node
+ * @param {Object} params
+ * @param  {Element} params.node     An arch's node
+ * @param  {Element} params.compiled A pre-compiled node
+ * @param  {CompilationContext} compilationContext
+ * @param  {boolean|Array} [invisible]        A node invisible modifier
+ * @return {Element|undefined}                Return the -pre-compiled
+ *   Element if it is not always invisible
+ */
+export function applyInvisibleModifier({ node, compiled }, compilationContext, invisible) {
     if (invisible === undefined && node) {
         invisible = getInvisible(node);
     }
     if (!invisible) {
         return compiled;
     }
-    if (typeof invisible === "boolean" && !params.enableInvisible) {
+    if (typeof invisible === "boolean" && !compilationContext.enableInvisible) {
         return;
     }
 
     const notInvisibleExpr = `!model.evalDomain(record,${JSON.stringify(invisible)})`;
-    if (!params.enableInvisible) {
+    if (!compilationContext.enableInvisible) {
         combineAttributes(compiled, "t-if", `${notInvisibleExpr}`, " and ");
     } else {
         let expr;
