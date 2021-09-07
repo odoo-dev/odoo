@@ -276,7 +276,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 'data-no-remove': true,
             });
             $newWrapperContent = $('<div/>', {
-                class: 'col o_mail_no_options o_mail_wrapper_td oe_structure'
+                class: 'col o_mail_no_options o_mail_wrapper_td oe_structure o_editable'
             });
             $new_wrapper.append($('<div class="row"/>').append($newWrapperContent));
         }
@@ -299,7 +299,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         $newWrapperContent.append($contents);
         this._switchImages(themeParams, $newWrapperContent);
         old_layout && old_layout.remove();
-        this.$content.empty().append($newLayout);
+        this.$content.removeClass('o_editable').addClass('o_not_editable').empty().append($newLayout);
 
         if (firstChoice) {
             $newWrapperContent.find('*').addBack()
