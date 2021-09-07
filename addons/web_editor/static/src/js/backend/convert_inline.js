@@ -20,9 +20,13 @@ const TABLE_ATTRIBUTES = {
     border: 0,
     width: '100%',
     align: 'center',
-    color: 'inherit', // cancel default table text color
     role: 'presentation',
+};
+// Cancel tables default styles.
+const TABLE_STYLES = {
+    color: 'inherit', // cancel default table text color
     'border-collapse': 'collapse', // cancel default table border-collapse
+    'text-align': 'inherit', // cancel default table text-align
 };
 /**
  * Returns the css rules which applies on an element, tweaked so that they are
@@ -371,7 +375,7 @@ function bootstrapToTable($editable) {
             }
         }
         $table.removeClass('container container-fluid list-group');
-        $table.attr(TABLE_ATTRIBUTES);
+        $table.attr(TABLE_ATTRIBUTES).css(TABLE_STYLES);
         $container.before($table);
         $container.remove();
         if (isListGroup) {
@@ -458,7 +462,7 @@ function addTables($editable) {
     for (const snippet of $editable.find('.o_mail_snippet_general')) {
         // Convert all snippets into table > tr > td
         const $table = $('<table/>');
-        $table.attr(TABLE_ATTRIBUTES);
+        $table.attr(TABLE_ATTRIBUTES).css(TABLE_STYLES);
         for (const attr of snippet.attributes) {
             $table.attr(attr.name, attr.value);
         }
@@ -475,7 +479,7 @@ function addTables($editable) {
         // If snippet doesn't have a table as child, wrap its contents in one.
         if (!$col.children().filter('table')) {
             const $tableB = $('<table/>');
-            $tableB.attr(TABLE_ATTRIBUTES);
+            $tableB.attr(TABLE_ATTRIBUTES).css(TABLE_STYLES);
             const $rowB = $('<tr/>');
             const $colB = $('<td/>');
             $rowB.append($colB);
