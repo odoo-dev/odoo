@@ -69,17 +69,18 @@ var MassMailingFieldHtml = FieldHtml.extend({
         }
         return this.wysiwyg.saveModifiedImages(this.$content).then(function () {
             self._isDirty = self.wysiwyg.isDirty();
-            self._doAction();
 
-            convertInline.attachmentThumbnailToLinkImg($editable);
-            convertInline.fontToImg($editable);
-            convertInline.classToStyle($editable);
-            convertInline.bootstrapToTable($editable);
-            convertInline.addTables($editable);
+            const $clone = $editable.clone();
+            $editable.after($clone);
+            convertInline.attachmentThumbnailToLinkImg($clone);
+            convertInline.fontToImg($clone);
+            convertInline.classToStyle($clone);
+            convertInline.bootstrapToTable($clone);
+            convertInline.addTables($clone);
 
             // fix outlook image rendering bug
             _.each(['width', 'height'], function (attribute) {
-                $editable.find('img[style*="width"], img[style*="height"]').attr(attribute, function () {
+                $clone.find('img[style*="width"], img[style*="height"]').attr(attribute, function () {
                     return $(this)[attribute]();
                 }).css(attribute, function () {
                     return $(this).get(0).style[attribute] || 'auto';
@@ -88,10 +89,10 @@ var MassMailingFieldHtml = FieldHtml.extend({
 
             self.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,
-                changes: _.object([fieldName], [self._unWrap($editable.html())])
+                changes: _.object([fieldName], [self._unWrap($clone.html())])
             });
+            $clone.remove();
 
-            $editable.html(self.value);
             if (self._isDirty && self.mode === 'edit') {
                 return self._doAction();
             }
