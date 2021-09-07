@@ -483,7 +483,7 @@ var SnippetEditor = Widget.extend({
                         // Consider layout-only elements (like bg-shapes) as empty
                         return el.matches(this.layoutElementsSelector);
                     });
-                return isEmpty && !$el.hasClass('oe_structure')
+                return isEmpty && !$el.hasClass('oe_structure') && !$el.data('no-remove')
                     && (!editor || editor.isTargetParentEditable);
             };
 

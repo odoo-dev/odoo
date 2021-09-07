@@ -272,7 +272,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
             // This wrapper structure is the only way to have a responsive
             // and centered fixed-width content column on all mail clients
             $new_wrapper = $('<div/>', {
-                class: 'container o_mail_wrapper',
+                class: 'container o_mail_wrapper o_mail_regular',
+                'data-no-remove': true,
             });
             $newWrapperContent = $('<div/>', {
                 class: 'col o_mail_no_options o_mail_wrapper_td oe_structure'
