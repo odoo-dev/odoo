@@ -143,8 +143,11 @@ function getMatchedCSSRules(a) {
         }
     });
 
-    if (style.display === 'block') {
+    if (style.display === 'block' && !(a.classList && a.classList.contains('btn-block'))) {
         delete style.display;
+    }
+    if (!style['box-sizing']) {
+        style['box-sizing'] = 'border-box'; // This is by default with Bootstrap.
     }
 
     // The css generates all the attributes separately and not in simplified form.
@@ -205,20 +208,6 @@ function getMatchedCSSRules(a) {
         delete style['text-decoration-color'];
         delete style['text-decoration-style'];
         delete style['text-decoration-thickness'];
-    }
-
-    // text-align inheritance does not seem to get past <td> elements on some
-    // mail clients
-    if (style['text-align'] === 'inherit') {
-        var $el = $(a).parent();
-        do {
-            var align = $el.css('text-align');
-            if (_.indexOf(['left', 'right', 'center', 'justify'], align) >= 0) {
-                style['text-align'] = align;
-                break;
-            }
-            $el = $el.parent();
-        } while ($el.length && !$el.is('html'));
     }
 
     // flexboxes are not supported in Windows Outlook
