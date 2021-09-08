@@ -9,7 +9,7 @@ import { viewService } from "@web/views/view_service";
 import { actionService } from "@web/webclient/actions/action_service";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture, triggerEvent } from "../helpers/utils";
+import { click, getFixture, triggerEvent, triggerEvents } from "../helpers/utils";
 
 const serviceRegistry = registry.category("services");
 
@@ -223,53 +223,54 @@ export const switchView = async (el, viewType) => {
 /////////////////////////////////////
 // Pager
 /////////////////////////////////////
-// /**
-//  * @param {EventTarget} el
-//  * @returns {Promise}
-//  */
-// export async function pagerPrevious(el) {
-//     await click(getNode(el).querySelector(`.o_pager button.o_pager_previous`));
-// }
-// /**
-//  * @param {EventTarget} el
-//  * @returns {Promise}
-//  */
-// export async function pagerNext(el) {
-//     await click(getNode(el).querySelector(`.o_pager button.o_pager_next`));
-// }
-// /**
-//  * @param {EventTarget} el
-//  * @returns {string}
-//  */
-// export function getPagerValue(el) {
-//     const pagerValue = getNode(el).querySelector(`.o_pager_counter .o_pager_value`);
-//     switch (pagerValue.tagName) {
-//         case 'INPUT':
-//             return pagerValue.value;
-//         case 'SPAN':
-//             return pagerValue.innerText.trim();
-//     }
-// }
-// /**
-//  * @param {EventTarget} el
-//  * @returns {string}
-//  */
-// export function getPagerSize(el) {
-//     return getNode(el).querySelector(`.o_pager_counter span.o_pager_limit`).innerText.trim();
-// }
-// /**
-//  * @param {EventTarget} el
-//  * @param {string} value
-//  * @returns {Promise}
-//  */
-// export async function setPagerValue(el, value) {
-//     let pagerValue = getNode(el).querySelector(`.o_pager_counter .o_pager_value`);
-//     if (pagerValue.tagName === 'SPAN') {
-//         await click(pagerValue);
-//     }
-//     pagerValue = getNode(el).querySelector(`.o_pager_counter input.o_pager_value`);
-//     if (!pagerValue) {
-//         throw new Error("Pager value is being edited and cannot be changed.");
-//     }
-//     await editAndTrigger(pagerValue, value, ['change', 'blur']);
-// }
+/**
+ * @param {EventTarget} el
+ * @returns {Promise}
+ */
+export async function pagerPrevious(el) {
+    await click(getNode(el).querySelector(`.o_pager button.o_pager_previous`));
+}
+/**
+ * @param {EventTarget} el
+ * @returns {Promise}
+ */
+export async function pagerNext(el) {
+    await click(getNode(el).querySelector(`.o_pager button.o_pager_next`));
+}
+/**
+ * @param {EventTarget} el
+ * @returns {string}
+ */
+export function getPagerValue(el) {
+    const pagerValue = getNode(el).querySelector(`.o_pager_counter .o_pager_value`);
+    switch (pagerValue.tagName) {
+        case "INPUT":
+            return pagerValue.value;
+        case "SPAN":
+            return pagerValue.innerText.trim();
+    }
+}
+/**
+ * @param {EventTarget} el
+ * @returns {string}
+ */
+export function getPagerSize(el) {
+    return getNode(el).querySelector(`.o_pager_counter span.o_pager_limit`).innerText.trim();
+}
+/**
+ * @param {EventTarget} el
+ * @param {string} value
+ * @returns {Promise}
+ */
+export async function setPagerValue(el, value) {
+    let pagerValue = getNode(el).querySelector(`.o_pager_counter .o_pager_value`);
+    if (pagerValue.tagName === "SPAN") {
+        await click(pagerValue);
+    }
+    pagerValue = getNode(el).querySelector(`.o_pager_counter input.o_pager_value`);
+    if (!pagerValue) {
+        throw new Error("Pager value is being edited and cannot be changed.");
+    }
+    pagerValue.value = value;
+    await triggerEvents(pagerValue, null, ["change", "blur"]);
+}

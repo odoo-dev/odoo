@@ -4,6 +4,7 @@ import { ComparisonMenu } from "../comparison_menu/comparison_menu";
 import { FavoriteMenu } from "../favorite_menu/favorite_menu";
 import { FilterMenu } from "../filter_menu/filter_menu";
 import { GroupByMenu } from "../group_by_menu/group_by_menu";
+import { Pager } from "../pager/pager";
 import { SearchBar } from "../search_bar/search_bar";
 import { useService } from "@web/core/utils/hooks";
 
@@ -76,7 +77,14 @@ export class ControlPanel extends Component {
     }
 }
 
-ControlPanel.components = { ComparisonMenu, FavoriteMenu, FilterMenu, GroupByMenu, SearchBar };
+ControlPanel.components = {
+    ComparisonMenu,
+    FavoriteMenu,
+    FilterMenu,
+    GroupByMenu,
+    Pager,
+    SearchBar,
+};
 ControlPanel.template = "web.ControlPanel";
 // ControlPanel.props = {
 //     breadcrumbs: { type: Array, element: { jsId: String, name: String }, optional: true },

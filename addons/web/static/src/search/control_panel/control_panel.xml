@@ -39,7 +39,11 @@
                 </div>
             </t>
 
-            <div class="o_cp_pager"/>
+            <div class="o_cp_pager" role="search">
+                <t t-if="props.pager and props.pager.limit">
+                    <Pager t-props="props.pager" />
+                </t>
+            </div>
 
             <t t-if="props.viewSwitcherEntries and props.viewSwitcherEntries.length > 1">
                 <nav class="btn-group o_cp_switch_buttons">
