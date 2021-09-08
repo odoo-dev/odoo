@@ -10,6 +10,7 @@ import {
     makeLegacyNotificationService,
     mapLegacyEnvToWowlEnv,
     makeLegacySessionService,
+    makeLegacyDropdownService,
 } from "@web/legacy/utils";
 import { makeLegacyActionManagerService } from "@web/legacy/backend_utils";
 import { viewService } from "@web/views/view_service";
@@ -168,7 +169,7 @@ export function addLegacyMockEnvironment(env, legacyParams = {}) {
     // deploy the legacyActionManagerService (in Wowl env)
     const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
     serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
-
+    serviceRegistry.add("legacy_dropdown", makeLegacyDropdownService(legacyEnv));
     serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
     // patch DebouncedField delay
     const debouncedField = basicFields.DebouncedField;

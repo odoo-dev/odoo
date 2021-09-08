@@ -4,7 +4,7 @@ odoo.define('web.field_many_to_many_tests', function (require) {
 var FormView = require('web.FormView');
 var testUtils = require('web.test_utils');
 
-const cpHelpers = testUtils.controlPanel;
+const cpHelpers = require('@web/../tests/search/helpers');
 var createView = testUtils.createView;
 
 QUnit.module('fields', {}, function () {

@@ -133,10 +133,10 @@
         </div>
     </t>
 
-    <t t-name="web.legacy.PivotCustomGroupByItem" t-inherit="web.Legacy.CustomGroupByItem" t-inherit-mode="primary" owl="1">
-        <xpath expr="//div[hasclass('o_generator_menu')]" position="attributes">
+    <t t-name="web.legacy.PivotCustomGroupByItem" t-inherit="web.CustomGroupByItem" t-inherit-mode="primary" owl="1">
+        <!-- <xpath expr="//div" position="attributes">
             <attribute name="t-on-click">_onToggleCustomGroupbyItem</attribute>
-        </xpath>
+        </xpath> -->
     </t>
 
 </templates>

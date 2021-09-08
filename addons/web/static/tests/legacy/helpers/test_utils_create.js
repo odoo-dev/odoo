@@ -20,6 +20,7 @@ odoo.define('web.test_utils_create', function (require) {
     const Registry = require('web.Registry');
     const testUtilsMock = require('web.test_utils_mock');
     const Widget = require('web.Widget');
+    const { deployAndGetLegacyDropdownServices } = require('@web/../tests/helpers/legacy_env_utils');
 
     const { Component } = owl;
     const { useRef, useState } = owl.hooks;
@@ -125,6 +126,7 @@ odoo.define('web.test_utils_create', function (require) {
     async function createControlPanel(params = {}) {
         const debug = params.debug || false;
         const env = makeTestEnvironment(params.env || {});
+        await deployAndGetLegacyDropdownServices(env);
         const props = Object.assign({
             action: {},
             fields: {},
@@ -289,6 +291,9 @@ odoo.define('web.test_utils_create', function (require) {
         target.prepend(webClient);
         webClient.append(actionManager);
         webClient.append(dialogContainer);
+
+        Object.assign(params, { env: { ...params.env } });
+        await deployAndGetLegacyDropdownServices(params.env);
 
         // add mock environment: mock server, session, fieldviewget, ...
         const mockServer = await testUtilsMock.addMockEnvironment(widget, params);

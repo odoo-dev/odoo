@@ -23,17 +23,12 @@ import { RPCError } from "@web/core/network/rpc_service";
 import { registerCleanup } from "../../helpers/cleanup";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { makeFakeUserService } from "@web/../tests/helpers/mock_services";
+import * as cpHelpers from "@web/../tests/search/helpers";
 
 let serverData;
 const serviceRegistry = registry.category("services");
 
-// legacy stuff
-let cpHelpers;
-
 QUnit.module("ActionManager", (hooks) => {
-    hooks.before(() => {
-        cpHelpers = testUtils.controlPanel;
-    });
     hooks.beforeEach(() => {
         serverData = getActionManagerServerData();
     });
@@ -1793,8 +1788,8 @@ QUnit.module("ActionManager", (hooks) => {
         await legacyExtraNextTick();
         assert.containsOnce(webClient, ".o_form_view");
         // execute the custom action from the action menu
-        await cpHelpers.toggleActionMenu(webClient.el);
-        await cpHelpers.toggleMenuItem(webClient.el, "Favorite Ponies");
+        await testUtils.controlPanel.toggleActionMenu(webClient.el);
+        await testUtils.controlPanel.toggleMenuItem(webClient.el, "Favorite Ponies");
         await legacyExtraNextTick();
         assert.containsOnce(webClient, ".o_list_view");
     });

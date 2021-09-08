@@ -20,18 +20,14 @@ import {
     getActionManagerServerData,
     setupWebClientServiceRegistry,
 } from "./../helpers";
+import * as cpHelpers from "@web/../tests/search/helpers";
 
 let serverData;
 // legacy stuff
-let cpHelpers;
 const actionRegistry = registry.category("actions");
 const actionHandlersRegistry = registry.category("action_handlers");
 
 QUnit.module("ActionManager", (hooks) => {
-    hooks.before(() => {
-        cpHelpers = testUtils.controlPanel;
-    });
-
     hooks.beforeEach(() => {
         serverData = getActionManagerServerData();
     });

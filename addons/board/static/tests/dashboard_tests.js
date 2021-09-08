@@ -10,14 +10,18 @@ var pyUtils = require('web.py_utils');
 const registry = require("@web/core/registry");
 const { makeFakeUserService } = require("@web/../tests/helpers/mock_services");
 const {
+    applyFilter,
+    applyGroup,
+    toggleAddCustomFilter,
+    toggleAddCustomGroup,
     toggleFilterMenu,
+    toggleGroupByMenu,
     toggleMenuItem,
     toggleMenuItemOption,
     toggleComparisonMenu,
     toggleFavoriteMenu,
 } = require("@web/../tests/search/helpers");
 
-const cpHelpers = testUtils.controlPanel;
 const { createWebClient, doAction } = require("@web/../tests/webclient/helpers");
 var createView = testUtils.createView;
 
@@ -771,12 +775,12 @@ QUnit.test("save actions to dashboard", async function (assert) {
     await testUtils.dom.click($(".o_column_sortable"));
 
     // Group It
-    await cpHelpers.toggleGroupByMenu(webClient);
-    await cpHelpers.toggleAddCustomGroup(webClient);
-    await cpHelpers.applyGroup(webClient);
+    await toggleGroupByMenu(webClient);
+    await toggleAddCustomGroup(webClient);
+    await applyGroup(webClient);
 
     // add this action to dashboard
-    await cpHelpers.toggleFavoriteMenu(webClient);
+    await toggleFavoriteMenu(webClient);
 
     await testUtils.dom.click($(".o_add_to_board > button"));
     await testUtils.fields.editInput($(".o_add_to_board input"), "a name");
@@ -827,16 +831,16 @@ QUnit.test("save two searches to dashboard", async function (assert) {
 
     var filter_count = 0;
     // Add a first filter
-    await cpHelpers.toggleFilterMenu(webClient);
-    await cpHelpers.toggleAddCustomFilter(webClient);
+    await toggleFilterMenu(webClient);
+    await toggleAddCustomFilter(webClient);
     await testUtils.fields.editInput(
         webClient.el.querySelector(".o_generator_menu_value .o_input"),
         "a"
     );
-    await cpHelpers.applyFilter(webClient);
+    await applyFilter(webClient);
 
     // Add it to dashboard
-    await cpHelpers.toggleFavoriteMenu(webClient);
+    await toggleFavoriteMenu(webClient);
     await testUtils.dom.click($(".o_add_to_board > button"));
     await testUtils.dom.click($(".o_add_to_board div button"));
 
@@ -844,15 +848,15 @@ QUnit.test("save two searches to dashboard", async function (assert) {
     await testUtils.dom.click(webClient.el.querySelector(".o_facet_remove"));
 
     // Add the second filter
-    await cpHelpers.toggleFilterMenu(webClient);
-    await cpHelpers.toggleAddCustomFilter(webClient);
+    await toggleFilterMenu(webClient);
+    await toggleAddCustomFilter(webClient);
     await testUtils.fields.editInput(
         webClient.el.querySelector(".o_generator_menu_value .o_input"),
         "b"
     );
-    await cpHelpers.applyFilter(webClient);
+    await applyFilter(webClient);
     // Add it to dashboard
-    await cpHelpers.toggleFavoriteMenu(webClient);
+    await toggleFavoriteMenu(webClient);
     await testUtils.dom.click(webClient.el.querySelector(".o_add_to_board > button"));
     await testUtils.dom.click(webClient.el.querySelector(".o_add_to_board div button"));
 });
@@ -890,15 +894,15 @@ QUnit.test("save a action domain to dashboard", async function (assert) {
     });
 
     // Add a filter
-    await cpHelpers.toggleFilterMenu(webClient);
-    await cpHelpers.toggleAddCustomFilter(webClient);
+    await toggleFilterMenu(webClient);
+    await toggleAddCustomFilter(webClient);
     await testUtils.fields.editInput(
         webClient.el.querySelector(".o_generator_menu_value .o_input"),
         "b"
     );
-    await cpHelpers.applyFilter(webClient);
+    await applyFilter(webClient);
     // Add it to dashboard
-    await cpHelpers.toggleFavoriteMenu(webClient);
+    await toggleFavoriteMenu(webClient);
     await testUtils.dom.click(webClient.el.querySelector(".o_add_to_board > button"));
     // add
     await testUtils.dom.click(webClient.el.querySelector(".o_add_to_board div button"));

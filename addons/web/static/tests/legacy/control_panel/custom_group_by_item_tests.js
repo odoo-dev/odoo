@@ -4,12 +4,19 @@ odoo.define('web.groupby_menu_generator_tests', function (require) {
     const CustomGroupByItem = require('web.CustomGroupByItem');
     const ActionModel = require('web.ActionModel');
     const testUtils = require('web.test_utils');
+    const { deployAndGetLegacyDropdownServices } = require('@web/../tests/helpers/legacy_env_utils');
 
     const { createComponent } = testUtils;
 
+    let services;
+
     QUnit.module('Components', {}, function () {
 
-        QUnit.module('CustomGroupByItem (legacy)');
+        QUnit.module('CustomGroupByItem (legacy)', {
+            async beforeEach() {
+                services = await deployAndGetLegacyDropdownServices();
+            },
+        });
 
         QUnit.test('click on add custom group toggle group selector', async function (assert) {
             assert.expect(6);
@@ -21,23 +28,24 @@ odoo.define('web.groupby_menu_generator_tests', function (require) {
                     ],
                 },
                 env: {
+                    services,
                     searchModel: new ActionModel(),
                 },
             });
 
             assert.strictEqual(cgi.el.innerText.trim(), "Add Custom Group");
-            assert.hasClass(cgi.el, 'o_generator_menu');
+            assert.hasClass(cgi.el, 'o_add_custom_group_menu');
             assert.strictEqual(cgi.el.children.length, 1);
 
-            await testUtils.dom.click(cgi.el.querySelector('.o_generator_menu span.o_add_custom_group_by'));
+            await testUtils.dom.click(cgi.el.querySelector('.o_add_custom_group_menu .o_dropdown_toggler'));
 
             // Single select node with a single option
-            assert.containsOnce(cgi, 'div > select.o_group_by_selector');
-            assert.strictEqual(cgi.el.querySelector('div > select.o_group_by_selector option').innerText.trim(),
+            assert.containsOnce(cgi, 'li > select');
+            assert.strictEqual(cgi.el.querySelector('li > select option').innerText.trim(),
                 "Super Date");
 
             // Button apply
-            assert.containsOnce(cgi, 'button.o_apply_group_by');
+            assert.containsOnce(cgi, 'li > button.btn.btn-primary');
 
             cgi.destroy();
         });
@@ -58,15 +66,15 @@ odoo.define('web.groupby_menu_generator_tests', function (require) {
             const searchModel = new MockedSearchModel();
             const cgi = await createComponent(CustomGroupByItem, {
                 props: { fields },
-                env: { searchModel },
+                env: { services, searchModel },
             });
 
-            await testUtils.dom.click(cgi.el.querySelector('.o_generator_menu span.o_add_custom_group_by'));
-            await testUtils.dom.click(cgi.el.querySelector('.o_generator_menu button.o_apply_group_by'));
+            await testUtils.dom.click(cgi.el.querySelector('.o_add_custom_group_menu .o_dropdown_toggler'));
+            await testUtils.dom.click(cgi.el.querySelector('li > button.btn.btn-primary'));
 
             // The only thing visible should be the button 'Add Custome Group';
             assert.strictEqual(cgi.el.children.length, 1);
-            assert.containsOnce(cgi, 'span.o_add_custom_group_by');
+            assert.containsOnce(cgi, '.o_dropdown_toggler');
 
             cgi.destroy();
         });

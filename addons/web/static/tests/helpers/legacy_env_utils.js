@@ -3,8 +3,9 @@
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { patch, unpatch } from "@web/core/utils/patch";
-import { makeLegacyDialogMappingService } from "@web/legacy/utils";
+import { makeLegacyDialogMappingService, makeLegacyDropdownService } from "@web/legacy/utils";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
+import { startServices } from "@web/env";
 import core from "web.core";
 import makeTestEnvironment from "web.test_env";
 import { registerCleanup } from "./cleanup";
@@ -39,4 +40,15 @@ export async function makeLegacyDialogMappingTestEnv() {
         legacyEnv,
         env,
     };
+}
+
+export async function deployAndGetLegacyDropdownServices(env = {}) {
+    Object.assign(env, { services: { ...env.services } });
+    registry
+        .category("services")
+        .add("hotkey", hotkeyService)
+        .add("ui", uiService)
+        .add("legacy_dropdown", makeLegacyDropdownService(env));
+    await startServices(env);
+    return env.services;
 }

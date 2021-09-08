@@ -7,7 +7,7 @@ const ListView = require('web.ListView');
 const testUtils = require('web.test_utils');
 const SearchPanel = require("web.searchPanel");
 
-const cpHelpers = testUtils.controlPanel;
+const cpHelpers = require('@web/../tests/search/helpers');
 const createView = testUtils.createView;
 
 const { makeFakeUserService } = require("@web/../tests/helpers/mock_services");
@@ -1568,7 +1568,7 @@ QUnit.module('Views', {
         ]);
 
         // go to page 2 (the domain doesn't change, so the filters should not be reloaded)
-        await cpHelpers.pagerNext(kanban);
+        await testUtils.controlPanel.pagerNext(kanban);
 
         assert.verifySteps([]);
 
@@ -1634,7 +1634,7 @@ QUnit.module('Views', {
         ]);
 
         // go to page 2 (the domain doesn't change, so the filters should not be reloaded)
-        await cpHelpers.pagerNext(kanban);
+        await testUtils.controlPanel.pagerNext(kanban);
 
         assert.verifySteps([]);
 
@@ -1712,7 +1712,7 @@ QUnit.module('Views', {
         );
 
         // go to page 2 (the domain doesn't change, so the categories should not be reloaded)
-        await cpHelpers.pagerNext(kanban);
+        await testUtils.controlPanel.pagerNext(kanban);
 
         assert.verifySteps([]);
 
@@ -1810,7 +1810,7 @@ QUnit.module('Views', {
         );
 
         // go to page 2 (the domain doesn't change, so the categories should not be reloaded)
-        await cpHelpers.pagerNext(kanban);
+        await testUtils.controlPanel.pagerNext(kanban);
 
         assert.verifySteps([]);
 

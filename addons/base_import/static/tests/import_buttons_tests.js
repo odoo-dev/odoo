@@ -7,7 +7,7 @@ const ListView = require('web.ListView');
 const PivotView = require('web.PivotView');
 const testUtils = require('web.test_utils');
 
-const cpHelpers = testUtils.controlPanel;
+const cpHelpers = require('@web/../tests/search/helpers');
 const createView = testUtils.createView;
 
 QUnit.module('Base Import Tests', {

@@ -12,7 +12,7 @@ const legacyViewRegistry = require('web.view_registry');
 const { createWebClient, doAction } = require('@web/../tests/webclient/helpers');
 
 var _t = core._t;
-const cpHelpers = testUtils.controlPanel;
+const cpHelpers = require('@web/../tests/search/helpers');
 var createView = testUtils.createView;
 var patchDate = testUtils.mock.patchDate;
 

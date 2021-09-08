@@ -11,7 +11,7 @@ const legacyViewRegistry = require("web.view_registry");
 const { registry } = require("@web/core/registry");
 
 const { createView } = testUtils;
-const cpHelpers = testUtils.controlPanel;
+const cpHelpers = require('@web/../tests/search/helpers');
 const patchDate = testUtils.mock.patchDate;
 
 const viewRegistry = registry.category("views");
