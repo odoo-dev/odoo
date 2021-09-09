@@ -161,7 +161,7 @@
 </template>
 
 <template id="s_mail_block_header_view" name="View Online">
-    <div class="o_mail_snippet_general o_snippet_view_in_browser pt16 pb16 text-center">
+    <div class="o_mail_snippet_general o_snippet_view_in_browser pt16 pb16 px-3 text-center">
         <a href="/view">
             View Online
         </a>
@@ -169,7 +169,7 @@
 </template>
 
 <template id="s_mail_block_title_text" name="Title Content">
-    <div class="o_mail_snippet_general o_mail_block_title_text s_title_text pt16 pb16">
+    <div class="o_mail_snippet_general o_mail_block_title_text s_title_text pt16 pb16 px-3">
         <h2 class="mt0">Thank you for joining us!</h2>
         <p>We want to take this opportunity to welcome you to our ever-growing community!<br/></p>
         <p>Your platform is ready for work. It will help you reduce the costs of digital signage, attract new customers and increase sales.</p>
@@ -198,7 +198,7 @@
 </template>
 
 <template id="s_mail_block_discount2" name="Promo Code">
-    <div class="o_mail_snippet_general o_mail_block_discount2 s_discount2">
+    <div class="o_mail_snippet_general o_mail_block_discount2 s_discount2 px-3">
         <p class="o_mail_display_coupon o_mail_no_margin text-center text-o-color-2" style="font-weight:800;">
             $20
         </p>

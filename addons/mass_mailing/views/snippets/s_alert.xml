@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <template id="s_alert" name="Alert">
-    <div class="s_alert s_alert_md alert-info w-100 clearfix o_mail_snippet_general pt16 pb16" data-snippet="s_alert">
+    <div class="s_alert s_alert_md alert-info w-100 clearfix o_mail_snippet_general pt16 pb16 px-3" data-snippet="s_alert">
         <h3><i class="fa fa-2x fa-info-circle s_alert_icon"/>&amp;nbsp;<strong>Explain the benefits you offer</strong></h3>
         <p class="o_mail_no_margin">Don't write about products or services here, write about solutions.</p>
     </div>
