@@ -44,6 +44,7 @@ import { userService } from "@web/core/user_service";
 import { uiService } from "@web/core/ui/ui_service";
 import { ClientActionAdapter, ViewAdapter } from "@web/legacy/action_adapters";
 import { commandService } from "@web/webclient/commands/command_service";
+import { httpService } from "@web/core/network/http_service";
 
 const { Component, mount, tags } = owl;
 
@@ -63,6 +64,7 @@ export function setupWebClientServiceRegistry() {
         dialog: () => dialogService,
         effect: () => effectService,
         hotkey: () => hotkeyService,
+        http: () => httpService,
         legacy_service_provider: () => legacyServiceProvider,
         localization: () => makeFakeLocalizationService(),
         menu: () => menuService,
