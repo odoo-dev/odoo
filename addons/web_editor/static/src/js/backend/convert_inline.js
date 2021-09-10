@@ -478,8 +478,8 @@ function bootstrapToTable($editable) {
 }
 
 function addTables($editable) {
-    for (const snippet of $editable.find('.o_mail_snippet_general')) {
-        // Convert all snippets into table > tr > td
+    for (const snippet of $editable.find('.o_mail_snippet_general, .o_layout')) {
+        // Convert all snippets and the mailing itself into table > tr > td
         const $table = $('<table/>');
         $table.attr(TABLE_ATTRIBUTES).css(TABLE_STYLES);
         for (const attr of snippet.attributes) {
