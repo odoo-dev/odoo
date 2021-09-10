@@ -5,7 +5,7 @@
     <div class="s_text_image pt32 pb32 o_mail_snippet_general" data-snippet="s_image_text">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-6 o_mail_no_padding_x">
+                <div class="col-lg-6 px-0">
                     <img src="/mass_mailing/static/src/img/theme_default/s_default_image_block_image_text.jpg" class="img w-100" />
                 </div>
                 <div class="col-lg-6 pt16 pb16">

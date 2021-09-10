@@ -8,7 +8,7 @@
                 <div class="col-lg-1 d-flex align-items-start o_mail_no_resize" valign="top" align="right">
                     <i class="s_blockquote_icon fa fa-1x fa-quote-left"/>
                 </div>
-                <div class="col-lg-10 o_mail_no_padding_x">
+                <div class="col-lg-10 px-0">
                     <div class="s_blockquote_content">
                         <p><i>Write a quote here from one of your customers. Quotes are a great way to build confidence in your products or services.</i></p>
                         <div>

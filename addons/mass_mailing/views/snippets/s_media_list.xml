@@ -5,7 +5,7 @@
     <div class="s_media_list o_cc o_cc2 o_mail_snippet_general" data-snippet="s_media_list">
         <div class="container border-bottom">
             <div class="row s_col_no_resize s_col_no_bgcolor align-items-center o_cc o_cc1">
-                <div class="col-lg-4 o_mail_no_padding_x align-self-stretch s_media_list_img_wrapper">
+                <div class="col-lg-4 px-0 align-self-stretch s_media_list_img_wrapper">
                     <img src="/web/image/mass_mailing.s_media_list_default_image_1" class="s_media_list_img h-100 w-100" />
                 </div>
                 <div class="s_media_list_body pt16 pb16 col-lg-8">
@@ -17,7 +17,7 @@
         </div>
         <div class="container border-bottom">
             <div class="row s_col_no_resize s_col_no_bgcolor align-items-center o_cc o_cc1">
-                <div class="col-lg-4 o_mail_no_padding_x align-self-stretch s_media_list_img_wrapper">
+                <div class="col-lg-4 px-0 align-self-stretch s_media_list_img_wrapper">
                     <img src="/web/image/mass_mailing.s_media_list_default_image_2" class="s_media_list_img h-100 w-100" />
                 </div>
                 <div class="col-lg-8 s_media_list_body pt16 pb16">
@@ -28,7 +28,7 @@
         </div>
         <div class="container border-bottom">
             <div class="row s_col_no_resize s_col_no_bgcolor align-items-center o_cc o_cc1">
-                <div class="col-lg-4 o_mail_no_padding_x align-self-stretch s_media_list_img_wrapper">
+                <div class="col-lg-4 px-0 align-self-stretch s_media_list_img_wrapper">
                     <img src="/web/image/mass_mailing.s_media_list_default_image_3" class="s_media_list_img h-100 w-100"/>
                 </div>
                 <div class="col-lg-8 s_media_list_body pt16 pb16">

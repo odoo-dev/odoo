@@ -12,7 +12,7 @@
                         <a href="#" class="btn btn-link">Read More</a>
                     </div>
                 </div>
-                <div class="col-lg-6 o_mail_no_padding_x">
+                <div class="col-lg-6 px-0">
                     <img src="/mass_mailing/static/src/img/theme_default/s_default_image_block_text_image.jpg" class="img w-100"/>
                 </div>
             </div>

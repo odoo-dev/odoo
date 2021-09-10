@@ -14,7 +14,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
+                            <div class="col-lg-2 px-0 text-right s_features_grid_icon">
                                 <i class="fa fa-font-awesome rounded-circle bg-primary"></i>
                             </div>
                             <div class="col-lg-10 s_features_grid_content pb16">
@@ -23,7 +23,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
+                            <div class="col-lg-2 px-0 text-right s_features_grid_icon">
                                 <i class="fa fa-files-o rounded-circle bg-primary"></i>
                             </div>
                             <div class="col-lg-10 s_features_grid_content pb16">
@@ -32,7 +32,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
+                            <div class="col-lg-2 px-0 text-right s_features_grid_icon">
                                 <i class="fa fa-trash rounded-circle bg-primary"></i>
                             </div>
                             <div class="col-lg-10 s_features_grid_content pb16">
@@ -51,7 +51,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
+                            <div class="col-lg-2 px-0 text-right s_features_grid_icon">
                                 <i class="fa fa-magic rounded bg-secondary"></i>
                             </div>
                             <div class="col-lg-10 s_features_grid_content pb16">
@@ -60,7 +60,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
+                            <div class="col-lg-2 px-0 text-right s_features_grid_icon">
                                 <i class="fa fa-eyedropper rounded bg-secondary"></i>
                             </div>
                             <div class="col-lg-10 s_features_grid_content pb16">
@@ -69,7 +69,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
+                            <div class="col-lg-2 px-0 text-right s_features_grid_icon">
                                 <i class="fa fa-picture-o rounded bg-secondary"></i>
                             </div>
                             <div class="col-lg-10 s_features_grid_content pb16">
