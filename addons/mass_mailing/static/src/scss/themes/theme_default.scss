@@ -74,6 +74,8 @@ div.col:not([align]) {
     a:not(.btn), .btn.btn-link {
         font-weight: bold;
         text-decoration: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
 
         &:hover, &:focus, &:active {
             text-decoration: none !important;
