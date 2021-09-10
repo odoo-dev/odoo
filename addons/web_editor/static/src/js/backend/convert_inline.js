@@ -24,7 +24,6 @@ const TABLE_ATTRIBUTES = {
 };
 // Cancel tables default styles.
 const TABLE_STYLES = {
-    color: 'inherit', // cancel default table text color
     'border-collapse': 'collapse', // cancel default table border-collapse
     'text-align': 'inherit', // cancel default table text-align
 };
@@ -208,6 +207,37 @@ function getMatchedCSSRules(a) {
         delete style['text-decoration-color'];
         delete style['text-decoration-style'];
         delete style['text-decoration-thickness'];
+    }
+
+    // text-align inheritance does not seem to get past <td> elements on some
+    // mail clients
+    if (style['text-align'] === 'inherit') {
+        var $el = $(a).parent();
+        do {
+            var align = $el.css('text-align');
+            if (_.indexOf(['left', 'right', 'center', 'justify'], align) >= 0) {
+                style['text-align'] = align;
+                break;
+            }
+            $el = $el.parent();
+        } while ($el.length && !$el.is('html'));
+    }
+
+    // color inheritance does not seem to get past <td> elements on some mail
+    // clients. TODO: This is hacky as it applies a color style to all
+    // descendants of nodes with a color style. We can probably do this more
+    // elegantly.
+    if (style.color) {
+        function _colorDescendants(node) {
+            node.style.color = style.color;
+            for (const child of $(node).children()) {
+                const childColor = $(child).css('color');
+                if (childColor && childColor !== 'inherit') {
+                    _colorDescendants(child);
+                }
+            }
+        }
+        _colorDescendants(a);
     }
 
     // flexboxes are not supported in Windows Outlook
