@@ -3,13 +3,7 @@
 
 <template id="s_title" name="Title">
     <div class="s_title o_mail_snippet_general" data-snippet="s_title">
-        <div class="container s_allow_columns">
-            <div class="row">
-                <div class="col-12">
-                    <h1 style="text-align: center;"><font style="font-size: 42px;" class="o_default_snippet_text">Your Title</font></h1>
-                </div>
-            </div>
-        </div>
+        <h1 class="text-center"><font style="font-size: 42px;">Your Title</font></h1>
     </div>
 </template>
 

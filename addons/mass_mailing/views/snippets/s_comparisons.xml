@@ -2,15 +2,14 @@
 <odoo>
 
 <template id="s_comparisons" name="Comparisons">
-    <div class="s_comparisons pt32 pb32 o_mail_snippet_general">
+    <div class="s_comparisons pt32 pb32 o_mail_snippet_general" data-snippet="s_comparisons">
         <div class="container">
             <div class="row">
                 <div class="s_col_no_bgcolor text-center pt32 pb16 col-lg-6">
-                    <div class="card bg-200">
-                        <h4 class="card-header o_default_snippet_text">DEFAULT</h4>
+                    <div class="card o_cc o_cc2">
+                        <div class="card-header"><span class="o_default_snippet_text" style="font-size:18px; font-weight: 500;">DEFAULT</span></div>
                         <div class="card-body text-center">
-                            <h2 class="card-title oe-hint" placeholder="Heading 2"></h2>
-                            <p class="o_mail_display_coupon text-center o_default_snippet_text" style="margin-top:10px;">$8</p>
+                            <h2 class="card-title o_mail_display_coupon text-center o_default_snippet_text">$8</h2>
                             <small class="o_default_snippet_text">user / month (billed annually)</small>
 
                         </div>
@@ -26,11 +25,10 @@
                     </div>
                 </div>
                 <div class="s_col_no_bgcolor text-center pt32 pb16 col-lg-6">
-                    <div class="card bg-o-color-5">
-                        <h4 class="card-header o_default_snippet_text">PRO</h4>
+                    <div class="card o_cc o_cc3">
+                        <div class="card-header"><span class="o_default_snippet_text" style="font-size:18px; font-weight: 500;">PRO</span></div>
                         <div class="card-body text-center">
-                            <h2 class="card-title oe-hint" placeholder="Heading 2"></h2>
-                            <p class="o_mail_display_coupon text-center o_default_snippet_text" style="margin-top:10px;">$18</p>
+                            <h2 class="card-title o_mail_display_coupon text-center o_default_snippet_text">$18</h2>
                             <small class="o_default_snippet_text">user / month (billed annually)</small>
 
                         </div>

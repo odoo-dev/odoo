@@ -6,7 +6,7 @@
         <div class="container">
             <div class="row align-items-stretch">
                 <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
-                    <div class="card bg-white h-100">
+                    <div class="card o_cc o_cc1 h-100">
                         <img class="card-img-top" src="/mass_mailing/static/src/img/theme_default/s_default_image_block_three_cols_1.jpg" alt=""/>
                         <div class="card-body">
                             <h3 class="card-title o_default_snippet_text">Column Title</h3>
@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
-                    <div class="card bg-white h-100">
+                    <div class="card o_cc o_cc1 h-100">
                         <img class="card-img-top" src="/mass_mailing/static/src/img/theme_default/s_default_image_block_three_cols_2.jpg" alt=""/>
                         <div class="card-body">
                             <h3 class="card-title o_default_snippet_text">Column Title</h3>
@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 <div class="col-lg-4 s_col_no_bgcolor pt16 pb16">
-                    <div class="card bg-white h-100">
+                    <div class="card o_cc o_cc1 h-100">
                         <img class="card-img-top" src="/mass_mailing/static/src/img/theme_default/s_default_image_block_three_cols_3.jpg" alt=""/>
                         <div class="card-body">
                             <h3 class="card-title o_default_snippet_text">Column Title</h3>

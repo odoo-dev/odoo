@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_hr" name="Separator" inherit_id="web_editor.s_hr" primary="True">
+    <xpath expr="//div[hasclass('s_hr')]" position="attributes">
+        <attribute name="class" add="pt16 pb16" remove="pt32 pb32" separator=" "/>
+    </xpath>
+</template>
+
+</odoo>

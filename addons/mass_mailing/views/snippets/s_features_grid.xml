@@ -2,40 +2,40 @@
 <odoo>
 
 <template id="s_features_grid" name="Features Grid">
-    <div class="s_features_grid pt48 pb24 o_mail_snippet_general">
+    <div class="s_features_grid pt48 pb24 o_mail_snippet_general" data-snippet="s_features_grid">
         <div class="container">
             <div class="row">
                 <div class="col-lg-6 s_col_no_bgcolor pb24">
                     <div class="container">
                         <div class="row">
-                            <div class="col-12 pb24" colspan="2">
+                            <div class="col-lg-12 pb24" colspan="2">
                                 <h2 class="o_default_snippet_text">First list of Features</h2>
                                 <h5 class="o_default_snippet_text">Add a great slogan.</h5>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-1 s_features_grid_icon">
+                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
                                 <i class="fa fa-font-awesome rounded-circle bg-primary"></i>
                             </div>
-                            <div class="col-11 s_features_grid_content pb16">
+                            <div class="col-lg-10 s_features_grid_content pb16">
                                 <h4 class="o_default_snippet_text">Change Icons</h4>
                                 <p class="o_default_snippet_text">Double click an icon to replace it with one of your choice.</p>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-1 s_features_grid_icon">
+                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
                                 <i class="fa fa-files-o rounded-circle bg-primary"></i>
                             </div>
-                            <div class="col-11 s_features_grid_content pb16">
+                            <div class="col-lg-10 s_features_grid_content pb16">
                                 <h4 class="o_default_snippet_text">Duplicate</h4>
                                 <p class="o_default_snippet_text">Duplicate blocks and columns to add more features.</p>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-1 s_features_grid_icon">
+                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
                                 <i class="fa fa-trash rounded-circle bg-primary"></i>
                             </div>
-                            <div class="col-11 s_features_grid_content pb16">
+                            <div class="col-lg-10 s_features_grid_content pb16">
                                 <h4 class="o_default_snippet_text">Delete Blocks</h4>
                                 <p class="o_default_snippet_text">Select and delete blocks to remove features.</p>
                             </div>
@@ -45,34 +45,34 @@
                 <div class="col-lg-6 s_col_no_bgcolor pb24">
                     <div class="container">
                         <div class="row">
-                            <div class="col-12 pb24" colspan="2">
+                            <div class="col-lg-12 pb24" colspan="2">
                                 <h2 class="o_default_snippet_text">Second list of Features</h2>
                                 <h5 class="o_default_snippet_text">Add a great slogan.</h5>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-1 s_features_grid_icon">
+                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
                                 <i class="fa fa-magic rounded bg-secondary"></i>
                             </div>
-                            <div class="col-11 s_features_grid_content pb16">
+                            <div class="col-lg-10 s_features_grid_content pb16">
                                 <h4 class="o_default_snippet_text">Great Value</h4>
                                 <p class="o_default_snippet_text">Turn every feature into a benefit for your reader.</p>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-1 s_features_grid_icon">
+                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
                                 <i class="fa fa-eyedropper rounded bg-secondary"></i>
                             </div>
-                            <div class="col-11 s_features_grid_content pb16">
+                            <div class="col-lg-10 s_features_grid_content pb16">
                                 <h4 class="o_default_snippet_text">Edit Styles</h4>
                                 <p class="o_default_snippet_text">You can edit colors and backgrounds to highlight features.</p>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-1 s_features_grid_icon">
+                            <div class="col-lg-2 o_mail_no_padding_x text-right s_features_grid_icon">
                                 <i class="fa fa-picture-o rounded bg-secondary"></i>
                             </div>
-                            <div class="col-11 s_features_grid_content pb16">
+                            <div class="col-lg-10 s_features_grid_content pb16">
                                 <h4 class="o_default_snippet_text">Sample Icons</h4>
                                 <p class="o_default_snippet_text">All these icons are completely free for commercial use.</p>
                             </div>

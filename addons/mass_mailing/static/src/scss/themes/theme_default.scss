@@ -40,22 +40,10 @@ div.col:not([align]) {
     overflow: hidden;
     box-sizing: content-box;
     min-height: 100%;
-    background-color: $o-mm-def-color-1;
-
-    // Forces on <p/> and <hx/> elements as several mail clients does not
-    // correctly inherit font properties
-    &, p, ol {
-        font-size: 14px; // force bootstrap default
-    }
-    &, p, h1, h2, h3, h4, h5, h6, ol {
-        font-family: $o-mm-def-font;
-        color: lighten($o-mm-def-text-color, 20%);
-    }
 
     > .o_mail_wrapper {
         width: 100%;
-        border-collapse: separate; // Allow the first and last td to have the
-                                   // same width
+        margin: 0 auto;
 
         &.o_mail_small {
             width: 600px;
@@ -65,9 +53,10 @@ div.col:not([align]) {
         }
 
         .o_mail_wrapper_td {
-            border: 1px solid darken($o-mm-def-color-1, 2%);
             background-color: $o-mm-def-color-2;
             flex: none;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
         }
     }
 }
@@ -78,23 +67,12 @@ div.col:not([align]) {
     margin: 0 auto;
     box-sizing: border-box;
 
-    h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-        color: $o-mm-def-text-color;
-    }
-
-    .btn.btn-primary {
-        color: $o-mm-def-btn-text;
-        border: none;
-        text-decoration: none;
-        font-weight: normal;
-        font-family: $o-mm-def-font;
-        cursor: pointer;
-        border-radius: $o-mm-def-b-radius;
-        background-color: $o-mm-def-btn-bg;
+    .container > div.row {
+        margin-left: 0;
+        margin-right: 0;
     }
 
     a:not(.btn), .btn.btn-link {
-        color: $o-mm-def-color-5;
         font-weight: bold;
         text-decoration: none !important;
 
@@ -102,34 +80,34 @@ div.col:not([align]) {
             text-decoration: none !important;
         }
     }
-
-    img {
-        width: 100%;
-        max-width: 100%;
-        height: auto;
-    }
-
-    .separator {
-        height: 2px;
-        background-color: $o-mm-def-color-1;
-    }
-
-    .bg-o-color-2 {
-        h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-            color: $o-mm-def-color-2;
+    // Icons
+    .fa {
+        @mixin size($width, $height: $width) {
+          width: $width;
+          height: $height;
         }
 
-        .btn.btn-primary {
-            background-color: $o-mm-def-color-7;
-        }
+        $size: 2rem;
 
-        a:not(.btn), .btn.btn-link {
-            color: $o-mm-def-color-7;
+        &.rounded-circle,
+        &.rounded,
+        &.rounded-0,
+        &.rounded-leaf,
+        &.img-thumbnail,
+        &.shadow {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            // fa-1x is not ouput
+            @include size($size);
+            line-height: $size;
+            @for $i from 2 through 5 {
+                &.fa-#{$i}x {
+                    @include size($size + $i);
+                    line-height: $size + $i;
+                }
+            }
         }
-    }
-
-    div.col {
-        vertical-align: top;
     }
 }
 
@@ -141,80 +119,26 @@ div.col:not([align]) {
         }
     }
     .o_mail_header_social {
-        margin-right: 20px;
 
         a:not(.btn), .btn.btn-link {
             display: inline-block;
         }
     }
     div .col, div[class*="col-"] {
-        vertical-align: middle;
-    }
-}
-
-.o_mail_block_header_text_social {
-    h3 {
-        font-weight: bold;
-    }
-}
-
-.o_mail_block_steps .o_mail_snippet_general{
-    background-color: $o-mm-def-color-1;
-}
-
-.o_mail_block_two_cols, .o_mail_block_three_cols {
-    // Forces on <p/> elements as several mail clients does not correctly
-    // inherit font properties
-    &, p {
-        font-size: small;
-    }
-
-    .o_mail_col_container {
-        padding: 10px 20px;
-
-        h4 {
-            margin-top: 15px;
-        }
-    }
-}
-
-.o_mail_block_image_text, .o_mail_block_text_image {
-    // Forces on <p/> elements as several mail clients does not correctly
-    // inherit font properties
-    &, p {
-        font-size: small;
+        align-self: center;
     }
 }
 
 .o_mail_block_event {
-    margin-left: 20px;
-    margin-right: 20px;
     .o_mail_snippet_general{
         background: darken($o-mm-def-color-1, 2%);
     }
 }
 
-.o_mail_block_footer_separator {
-    margin-left: 20px;
-    margin-right: 20px;
-}
-
-.o_mail_block_comparison_table {
-    .separator {
-        height: 1px;
-        background-color: darken($o-mm-def-color-1, 15%);
-    }
-    div.container div.container {
-        div.col:not(.o_col_head) {
-            vertical-align: middle;
-        }
-        div.col {
-            padding: 10px 20px;
-            * {
-                margin: 0;
-                line-height: 1.3;
-            }
-        }
+.o_mail_block_discount1, .o_mail_block_discount2, .s_comparisons {
+    .o_mail_display_coupon {
+        font-size: 32px;
+        line-height: 1;
     }
 }
 
@@ -227,9 +151,23 @@ div.col:not([align]) {
     }
 }
 
+.s_hr {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.s_process_steps {
+    .s_process_step_icon {
+        text-align: center;
+    }
+}
+
 .o_mail_block_footer_social {
+    .btn-link{
+        padding: 0;
+    }
+    
     .o_mail_table_styles {
-        border-top: 2px solid $o-mm-def-color-1;
         padding-top: 20px;
         padding-bottom: 20px;
     }
@@ -237,16 +175,10 @@ div.col:not([align]) {
     .o_mail_footer_links {
         padding-top: 10px;
         padding-bottom: 10px;
-
-        .btn-link{
-            padding: 0;
-            font-size: 12px;
-        }
     }
 
     .o_mail_footer_copy {
         font-size: 9px;
-        font-weight: bold;
         color: lighten($o-mm-def-text-color, 30%);
     }
 
@@ -276,20 +208,7 @@ div.col:not([align]) {
     }
 }
 
-.o_mail_display_coupon {
-    font-size: 50px;
-    line-height: 1;
-}
-
 // ===== Misc =====
-.o_mail_h_padding {
-    padding-left: 20px;
-    padding-right: 20px;
-}
-.o_mail_v_padding {
-    padding-top: 20px;
-    padding-bottom: 20px;
-}
 .o_mail_no_margin {
     margin: 0;
 
@@ -297,6 +216,12 @@ div.col:not([align]) {
         line-height: 1.1;
     }
 }
+
+.o_mail_no_padding_x {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 .o_mail_table_styles {
     width: 100%;
     border-collapse:separate;

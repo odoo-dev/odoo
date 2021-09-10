@@ -2,10 +2,10 @@
 <odoo>
 
 <template id="s_showcase" name="Showcase">
-    <div class="s_showcase pt48 pb48 o_mail_snippet_general">
+    <div class="s_showcase pt48 pb48 o_mail_snippet_general" data-snippet="s_showcase">
         <!-- TODO: (below) issue with height: `fit-content` is not supported, can we calculate it in px in translation ? 
         empty div height is 0 unless table has defined height (div.col-1 > div.w-50.h100.border-right)-->
-        <div class="container pb-16" style="height: fit-content;">
+        <div class="container" style="height: fit-content;">
             <div class="row no-gutters s_col_no_resize s_col_no_bgcolor s_nb_column_fixed">
                 <div class="col-lg text-lg-right pb24" align="right">
                     <div class="mb-2">
@@ -14,7 +14,7 @@
                     </div>
                     <p>A short description of this great feature.</p>
                 </div>
-                <div class="col-1" align="left">
+                <div class="col-lg-1" align="left">
                     <div class="w-50 h-100 border-right"/>
                 </div>
                 <div class="col-lg pb24" align="left">
@@ -25,28 +25,28 @@
                     <p>A short description of this great feature.</p>
                 </div>
             </div>
-        </div>
-        <div class="row no-gutters s_col_no_resize s_col_no_bgcolor s_nb_column_fixed">
-            <div class="col-lg text-lg-right" align="right">
-                <div class="mb-2">
-                    <h3 class="d-inline-block">Second feature</h3>
-                    <i class="fa fa-2x fa-paint-brush text-secondary ml-3"/>
+            <div class="row no-gutters s_col_no_resize s_col_no_bgcolor s_nb_column_fixed">
+                <div class="col-lg text-lg-right" align="right">
+                    <div class="mb-2">
+                        <h3 class="d-inline-block">Second feature</h3>
+                        <i class="fa fa-2x fa-paint-brush text-secondary ml-3"/>
+                    </div>
+                    <p>A short description of this great feature.</p>
                 </div>
-                <p>A short description of this great feature.</p>
-            </div>
-            <div class="col-1" align="left">
-                <div class="w-50 h-100 border-right"/>
-            </div>
-            <div class="col-lg" align="left">
-                <div class="mb-2">
-                    <i class="fa fa-2x fa-gift text-secondary mr-3"/>
-                    <h3 class="d-inline-block">Last Feature</h3>
+                <div class="col-lg-1" align="left">
+                    <div class="w-50 h-100 border-right"/>
                 </div>
-                <p>A short description of this great feature.</p>
+                <div class="col-lg" align="left">
+                    <div class="mb-2">
+                        <i class="fa fa-2x fa-gift text-secondary mr-3"/>
+                        <h3 class="d-inline-block">Last Feature</h3>
+                    </div>
+                    <p>A short description of this great feature.</p>
+                </div>
             </div>
         </div>
         <div class="container text-lg-center" align="center">
-            <a href="#" class="btn btn-primary mb-2">Discover all the features</a>
+            <a href="#" class="btn btn-primary">Discover all the features</a>
         </div>
     </div>
 </template>

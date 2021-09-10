@@ -2,7 +2,7 @@
 <odoo>
 
 <template id="s_features" name="Features">
-    <div class="s_features pt32 pb32 o_mail_snippet_general">
+    <div class="s_features pt32 pb32 o_mail_snippet_general" data-snippet="s_features">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 pt32 pb32 text-center">

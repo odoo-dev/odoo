@@ -2,7 +2,7 @@
 <odoo>
 
 <template id="s_company_team" name="Team">
-    <div class="s_company_team pt48 pb48 o_mail_snippet_general">
+    <div class="s_company_team pt48 pb48 o_mail_snippet_general" data-snippet="s_company_team">
         <div class="container">
             <div class="row s_nb_column_fixed">
                 <div class="col-lg-6 pt24 pb24">

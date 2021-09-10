@@ -3,7 +3,7 @@
 
 <!-- Template -->
 <template id="s_masonry_block" name="Masonry">
-    <div class="s_masonry_block o_mail_snippet_general">
+    <div class="s_masonry_block o_mail_snippet_general" data-snippet="s_masonry_block">
         <div class="container-fluid">
             <div class="row no-gutters">
                 <div class="col-lg-6">

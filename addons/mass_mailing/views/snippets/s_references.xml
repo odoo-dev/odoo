@@ -5,9 +5,9 @@
     <div class="s_references pt48 pb32 o_mail_snippet_general" data-snippet="s_references">
         <div class="container">
             <div class="row">
-                <div class="col-12" align="center">
-                    <h2 style="text-align: center;" class="">Our References</h2>
-                    <p style="text-align: center;" class="o_default_snippet_text">We are in good company.</p>
+                <div class="col-lg-12" align="center">
+                    <h2 class="text-center">Our References</h2>
+                    <p class="text-center">We are in good company.</p>
                 </div>
             </div>
             <div class="row">
