@@ -143,7 +143,7 @@ class PosConfig(models.Model):
         help="The product categories will be displayed with pictures.")
     restrict_price_control = fields.Boolean(string='Restrict Price Modifications to Managers',
         help="Only users with Manager access rights for PoS app can modify the product prices on orders.")
-    cash_control = fields.Boolean(string='Advanced Cash Control', help="Check the amount of the cashbox at opening and closing.")
+    cash_control = fields.Boolean(string='Advanced Cash Control', default=True, help="Check the amount of the cashbox at opening and closing.")
     receipt_header = fields.Text(string='Receipt Header', help="A short text that will be inserted as a header in the printed receipt.")
     receipt_footer = fields.Text(string='Receipt Footer', help="A short text that will be inserted as a footer in the printed receipt.")
     proxy_ip = fields.Char(string='IP Address', size=45,
