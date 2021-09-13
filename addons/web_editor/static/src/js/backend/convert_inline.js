@@ -13,20 +13,6 @@ const BOOTSTRAP_MAX_WIDTHS = {
     lg: 960,
     xl: 1140,
 };
-// Attributes all tables should have in a mailing.
-const TABLE_ATTRIBUTES = {
-    cellspacing: 0,
-    cellpadding: 0,
-    border: 0,
-    width: '100%',
-    align: 'center',
-    role: 'presentation',
-};
-// Cancel tables default styles.
-const TABLE_STYLES = {
-    'border-collapse': 'collapse', // cancel default table border-collapse
-    'text-align': 'inherit', // cancel default table text-align
-};
 /**
  * Returns the css rules which applies on an element, tweaked so that they are
  * browser/mail client ok.
@@ -355,6 +341,31 @@ function _getColumnSize(column) {
     return colSize + offsetSize;
 }
 
+
+// Attributes all tables should have in a mailing.
+const tableAttributes = {
+    cellspacing: 0,
+    cellpadding: 0,
+    border: 0,
+    width: '100%',
+    align: 'center',
+    role: 'presentation',
+};
+// Cancel tables default styles.
+const tableStyles = {
+    'border-collapse': 'collapse',
+    'text-align': 'inherit',
+};
+function _createTable(attributes = []) {
+    const $table = $('<table/>');
+    for (const attr of attributes) {
+        $table.attr(attr.name, attr.value);
+    }
+    $table.attr(tableAttributes).css(tableStyles);
+    $table[0].style.setProperty('width', '100%', 'important');
+    return $table;
+}
+
 /**
  * Converts bootstrap rows and columns to actual tables.
  *
@@ -368,9 +379,14 @@ function bootstrapToTable($editable) {
     for (const container of $editable.find('.container, .container-fluid, .list-group')) {
         const $container = $(container);
         // Table
-        const $table = $($container.find('.row, .list-group-item').length ? '<table/>' : container.cloneNode());
-        for (const attr of container.attributes) {
-            $table.attr(attr.name, attr.value);
+        let $table;
+        if ($container.find('.row, .list-group-item').length) {
+            $table = _createTable(container.attributes);
+        } else {
+            $table = $(container.cloneNode());
+            for (const attr of container.attributes) {
+                $table.attr(attr.name, attr.value);
+            }
         }
         const isListGroup = $container.is('.list-group');
         for (const child of [...container.childNodes]) {
@@ -394,7 +410,6 @@ function bootstrapToTable($editable) {
             }
         }
         $table.removeClass('container container-fluid list-group');
-        $table.attr(TABLE_ATTRIBUTES).css(TABLE_STYLES);
         $container.before($table);
         $container.remove();
         if (isListGroup) {
@@ -480,11 +495,7 @@ function bootstrapToTable($editable) {
 function addTables($editable) {
     for (const snippet of $editable.find('.o_mail_snippet_general, .o_layout')) {
         // Convert all snippets and the mailing itself into table > tr > td
-        const $table = $('<table/>');
-        $table.attr(TABLE_ATTRIBUTES).css(TABLE_STYLES);
-        for (const attr of snippet.attributes) {
-            $table.attr(attr.name, attr.value);
-        }
+        const $table = _createTable(snippet.attributes);
         const $row = $('<tr/>');
         const $col = $('<td/>');
         $row.append($col);
@@ -497,8 +508,8 @@ function addTables($editable) {
 
         // If snippet doesn't have a table as child, wrap its contents in one.
         if (!$col.children().filter('table')) {
-            const $tableB = $('<table/>');
-            $tableB.attr(TABLE_ATTRIBUTES).css(TABLE_STYLES);
+            const $tableB = _createTable();
+            $tableB[0].style.width
             const $rowB = $('<tr/>');
             const $colB = $('<td/>');
             $rowB.append($colB);
