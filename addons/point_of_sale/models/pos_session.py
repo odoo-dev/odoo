@@ -379,15 +379,28 @@ class PosSession(models.Model):
         }
 
     def close_session_from_ui(self):
+        """Calling this method will try to close the session.
+
+        If successful, it returns {'successful': True}
+        Otherwise, it returns {'successful': False, 'reason': string}.
+        When necessary, error (i.e. UserError, AccessError) is raised.
+        """
         self.ensure_one()
         self._check_pos_session_balance()
         if any(order.state == 'draft' for order in self.order_ids):
             raise UserError(_("You cannot close the POS when orders are still in draft"))
         if self.state == 'closed':
             raise UserError(_('This session is already closed.'))
-        self.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
-        self._validate_session()
-        return True
+
+        closing_result = self.action_pos_session_close()
+        if isinstance(closing_result, dict):
+            # This means that it reached either of the 2 cases:
+            #  1. _warning_balance_closing
+            #  2. _close_session_action
+            self.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
+            return {'successful': False, 'reason': closing_result.get('name')}
+
+        return {'successful': bool(closing_result)}
 
     def _create_picking_at_end_of_session(self):
         self.ensure_one()
