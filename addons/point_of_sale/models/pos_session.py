@@ -382,7 +382,7 @@ class PosSession(models.Model):
         """Calling this method will try to close the session.
 
         If successful, it returns {'successful': True}
-        Otherwise, it returns {'successful': False, 'reason': string}.
+        Otherwise, it returns {'successful': False, 'reason': string, 'res_model': 'closing.balance.confirm.wizard' | 'pos.close.session.wizard'}.
         When necessary, error (i.e. UserError, AccessError) is raised.
         """
         self.ensure_one()
@@ -398,7 +398,7 @@ class PosSession(models.Model):
             #  1. _warning_balance_closing
             #  2. _close_session_action
             self.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
-            return {'successful': False, 'reason': closing_result.get('name')}
+            return {'successful': False, 'reason': closing_result.get('name'), 'res_model': closing_result.get('res_model')}
 
         return {'successful': bool(closing_result)}
 

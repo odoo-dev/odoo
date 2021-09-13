@@ -29,16 +29,17 @@ odoo.define('point_of_sale.ClosePosPopup', function(require) {
         }
         async _closeSession() {
             try {
-                const { successful, reason } = await this.rpc({
+                const { successful, reason, res_model } = await this.rpc({
                     model: 'pos.session',
                     method: 'close_session_from_ui',
                     args: [this.env.pos.pos_session.id],
                 });
                 if (!successful) {
-                    this.showPopup('ErrorPopup', { title: 'Error', body: reason });
-                } else {
-                    window.location = '/web#action=point_of_sale.action_client_pos_menu';
+                    await this.showPopup('ErrorPopup', { title: 'Error', body: reason });
+                    // do not redirect if cash control is not successful
+                    if (res_model == 'closing.balance.confirm.wizard') return;
                 }
+                window.location = '/web#action=point_of_sale.action_client_pos_menu';
             } catch (error) {
                 const iError = identifyError(error);
                 if (iError instanceof ConnectionLostError) {
