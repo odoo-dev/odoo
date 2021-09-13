@@ -539,6 +539,9 @@ function classToStyle($editable) {
         } else {
             $target.attr('style', style);
         }
+        if (css.width) {
+            $target.attr('width', css.width); // Widths need to be applied as attributes as well.
+        }
         // Apple Mail
         if (node.nodeName === 'TD' && !node.childNodes.length) {
             $(node).html('&nbsp;');
