@@ -10,6 +10,8 @@
                     <p class="text-center">We are in good company.</p>
                 </div>
             </div>
+       </div>
+       <div class="container">
             <div class="row">
                 <div class="col-lg-2 pt16 pb16">
                     <img src="/web/image/mass_mailing.s_reference_demo_image_1" class="img img-fluid mx-auto" alt=""/>
