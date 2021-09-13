@@ -87,6 +87,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             convertInline.classToStyle($clone);
             convertInline.bootstrapToTable($clone);
             convertInline.addTables($clone);
+            convertInline.formatTables($clone);
 
             self.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,

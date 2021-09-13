@@ -360,11 +360,13 @@ const tableStyles = {
 };
 function _createTable(attributes = []) {
     const $table = $('<table/>');
-    for (const attr of attributes) {
-        $table.attr(attr.name, attr.value);
-    }
     $table.attr(tableAttributes).css(tableStyles);
     $table[0].style.setProperty('width', '100%', 'important');
+    for (const attr of attributes) {
+        if (attr.name !== 'width' && attr.value !== '100%') {
+            $table.attr(attr.name, attr.value);
+        }
+    }
     return $table;
 }
 
@@ -524,6 +526,33 @@ function addTables($editable) {
     }
 }
 
+const rePadding = /(\d+)/;
+function formatTables($editable) {
+    for (const table of $editable.find('table.o_mail_snippet_general, .o_mail_snippet_general table')) {
+        const $table = $(table);
+        const tablePaddingTop = +$table.css('padding-top').match(rePadding)[1];
+        const tablePaddingRight = +$table.css('padding-right').match(rePadding)[1];
+        const tablePaddingBottom = +$table.css('padding-bottom').match(rePadding)[1];
+        const tablePaddingLeft = +$table.css('padding-left').match(rePadding)[1];
+        for (const column of $table.find('td').filter((i, td) => $(td).closest('table').is($table))) {
+            const $column = $(column);
+            if ($column.css('padding')) {
+                const columnPaddingTop = +$column.css('padding-top').match(rePadding)[1];
+                const columnPaddingRight = +$column.css('padding-right').match(rePadding)[1];
+                const columnPaddingBottom = +$column.css('padding-bottom').match(rePadding)[1];
+                const columnPaddingLeft = +$column.css('padding-left').match(rePadding)[1];
+                $column.css({
+                    'padding-top': columnPaddingTop + tablePaddingTop,
+                    'padding-right': columnPaddingRight + tablePaddingRight,
+                    'padding-bottom': columnPaddingBottom + tablePaddingBottom,
+                    'padding-left': columnPaddingLeft + tablePaddingLeft,
+                });
+            }
+        }
+        $table.css('padding', '');
+    }
+}
+
 /**
  * Converts css style to inline style (leave the classes on elements but forces
  * the style they give as inline style).
@@ -631,6 +660,7 @@ FieldHtml.include({
         classToStyle($editable);
         bootstrapToTable($editable);
         addTables($editable);
+        formatTables($editable);
 
         // fix outlook image rendering bug
         _.each(['width', 'height'], function(attribute) {
@@ -651,6 +681,7 @@ return {
     fontToImg: fontToImg,
     bootstrapToTable: bootstrapToTable,
     addTables: addTables,
+    formatTables: formatTables,
     classToStyle: classToStyle,
     attachmentThumbnailToLinkImg: attachmentThumbnailToLinkImg,
 };
