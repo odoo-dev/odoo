@@ -190,6 +190,7 @@ class PosConfig(models.Model):
         help="This product is used as reference on customer receipts.")
     fiscal_position_ids = fields.Many2many('account.fiscal.position', string='Fiscal Positions', help='This is useful for restaurants with onsite and take-away services that imply specific tax rates.')
     default_fiscal_position_id = fields.Many2one('account.fiscal.position', string='Default Fiscal Position')
+    default_bill_ids = fields.Many2many('pos.bill', string="Coins/Bills")
     default_cashbox_id = fields.Many2one('account.bank.statement.cashbox', string='Default Balance')
     use_pricelist = fields.Boolean("Use a pricelist.")
     tax_regime = fields.Boolean("Tax Regime")
