@@ -345,6 +345,15 @@ exports.PosModel = Backbone.Model.extend({
             }
        },
     },{
+        model: 'pos.bill',
+        fields: ['name', 'value'],
+        domain: function (self) {
+            return [['id', 'in', self.config.default_bill_ids]];
+        },
+        loaded: function (self, bills) {
+            self.bills = bills;
+        },
+      }, {
         model:  'res.partner',
         label: 'load_partners',
         fields: ['name','street','city','state_id','country_id','vat','lang',

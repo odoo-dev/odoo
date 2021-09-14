@@ -15,8 +15,7 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
             super(...arguments);
             this.currency = this.env.pos.currency;
             this.state = useState({
-                moneyDetails: {'0.05': 0, '0.10': 0, '0.20': 0, '0.50': 0, '1.00': 0, '2.00': 0,
-                            '5': 0, '10': 0, '20': 0, '50': 0, '100': 0, '200': 0, '500': 0},
+                moneyDetails: Object.fromEntries(this.env.pos.bills.map(bill => ([bill.value, 0]))),
                 total: 0,
             });
             this.inputRefs = {}

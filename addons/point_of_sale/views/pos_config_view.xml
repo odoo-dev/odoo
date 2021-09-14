@@ -455,6 +455,9 @@
                                     <label for="amount_authorized_diff" string="Authorized Difference" class="font-weight-normal"/>
                                     <field name="amount_authorized_diff"/>
                                 </div>
+                                <div class="content-group mt16">
+                                    <field name="default_bill_ids" colspan="4" widget="many2many_tags" options="{'no_create_edit': True}" context="{'default_pos_config_ids':[(6, False, active_ids)]}"/>
+                                </div>
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box"
