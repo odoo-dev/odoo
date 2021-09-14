@@ -419,7 +419,6 @@
          data-selector=".row > div"
          data-exclude=".o_mail_wrapper_td, .s_col_no_bgcolor, .s_col_no_bgcolor.row > div, .s_image_gallery .row > div">
         <t t-call="web_editor.snippet_options_border_widgets"/>
-        <t t-call="web_editor.snippet_options_shadow_widgets"/>
     </div>
     <div data-js="layout_column"
         data-selector="[data-snippet]"
@@ -527,6 +526,19 @@
             data-select-style="true"
             data-css-property="background-color"
             data-color-prefix="bg-"/>
+    </div>
+
+    <!-- COLOR, BORDER | .s_three_columns | .s_comparisons -->
+    <div data-js="Box"
+         data-selector=".s_three_columns .row > div, .s_comparisons .row > div"
+         data-target=".card">
+        <we-colorpicker string="Colors"
+            data-select-style="true"
+            data-css-property="background-color"
+            data-color-prefix="bg-"/>
+        <t t-call="web_editor.snippet_options_border_widgets">
+            <t t-set="so_rounded_no_dependencies" t-value="True"/>
+        </t>
     </div>
 </template>
 </odoo>
