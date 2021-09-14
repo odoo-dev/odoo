@@ -394,9 +394,6 @@
                         title="Full"/>
         </we-button-group>
     </div>
-    <div data-option-name="minHeight" data-selector="[data-snippet]" data-exclude="[data-snippet] .row div *">
-        <t t-call="web_editor.snippet_options_min_height"/>
-    </div>
     <div data-js="mass_mailing_sizing_x"
         data-selector="img, .mv, .col_mv, td, th"
         data-exclude=".o_mail_no_resize, .o_mail_no_options"/>
@@ -431,7 +428,7 @@
         data-drop-in=".content, nav"/>
 
     <div data-js="sizing_y"
-        data-selector=".row > div"
+        data-selector=".o_mail_snippet_general, .o_mail_snippet_general .row > div"
         data-exclude=".o_mail_no_resize, .o_mail_no_options"/>
 
     <div data-js="sizing_x"
@@ -441,6 +438,8 @@
     <div data-selector=".o_layout, .note-editable > div:not(.o_layout),
         .note-editable .oe_structure > div:not(:has(> .o_mail_snippet_general)),
         .note-editable .oe_structure > div > .o_mail_snippet_general,
+        .note-editable .oe_structure > div > .o_mail_snippet_general .o_cc,
+        .note-editable .oe_structure > div > .o_mail_snippet_general .btn:not(.btn-link),
         td, td.o_mail_no_colorpicker div:first-child, th"
         data-exclude=".o_mail_no_colorpicker, .o_mail_no_options">
         <we-colorpicker string="Background Color"
