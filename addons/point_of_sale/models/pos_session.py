@@ -381,8 +381,8 @@ class PosSession(models.Model):
     def close_session_from_ui(self):
         """Calling this method will try to close the session.
 
-        If successful, it returns {'successful': True}
-        Otherwise, it returns {'successful': False, 'reason': string, 'res_model': 'closing.balance.confirm.wizard' | 'pos.close.session.wizard'}.
+        If successful, it returns [True]
+        Otherwise, it returns [False, str].
         When necessary, error (i.e. UserError, AccessError) is raised.
         """
         self.ensure_one()
@@ -392,15 +392,46 @@ class PosSession(models.Model):
         if self.state == 'closed':
             raise UserError(_('This session is already closed.'))
 
-        closing_result = self.action_pos_session_close()
-        if isinstance(closing_result, dict):
-            # This means that it reached either of the 2 cases:
-            #  1. _warning_balance_closing
-            #  2. _close_session_action
+        self._check_bank_statement_state()
+        validate_result = self._validate_session()
+        if isinstance(validate_result, dict):
+            # Prevent the session to be opened again.
             self.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
-            return {'successful': False, 'reason': closing_result.get('name'), 'res_model': closing_result.get('res_model')}
+            # imbalance accounting entry
+            return [False, validate_result.get('name')]
 
-        return {'successful': bool(closing_result)}
+        self.write({'stop_at': fields.Datetime.now()})
+        return [True]
+
+    def post_closing_cash_details(self, counted_cash, bill_details):
+        self.ensure_one()
+
+        if not self.cash_register_id:
+            return [False, _("There is no cash register in this session.")]
+
+        if counted_cash is not None:
+            # give priority to counted_cash if it's not None
+            bill_details = [(counted_cash, 1)]
+
+        if bool(self.cash_register_id.cashbox_end_id):
+            self.cash_register_id.cashbox_end_id.cashbox_lines_ids.unlink()
+            self.cash_register_id.cashbox_end_id.unlink()
+
+        self.env['account.bank.statement.cashbox'].create({
+            'cashbox_lines_ids': [(0, 0, {'coin_value': value, 'number': count}) for value, count in bill_details],
+            'end_bank_stmt_ids': [(6, 0, self.cash_register_id.ids)]
+        })
+
+        if abs(self.cash_register_difference) > self.config_id.amount_authorized_diff:
+            if not self.user_has_groups("point_of_sale.group_pos_manager"):
+                # We are not raising this as an error because we want the details to persist.
+                # It will become the starting point on next attempt to close the session.
+                return [False, _(
+                    "Your ending balance is too different from the theoretical cash closing (%.2f), "
+                    "the maximum allowed is: %.2f. You can contact your manager to force it."
+                ) % (self.cash_register_difference, self.config_id.amount_authorized_diff), self.cash_register_difference]
+
+        return [True]
 
     def _create_picking_at_end_of_session(self):
         self.ensure_one()
