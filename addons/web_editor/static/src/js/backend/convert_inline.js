@@ -285,7 +285,8 @@ function fontToImg($editable) {
                 padding = vPadding ? vPadding + 'px ' : '0 ';
                 padding += hPadding ? hPadding + 'px' : '0';
             }
-            $font.replaceWith($('<img/>', {
+            const $img = $('<img/>').attr({
+                width, height,
                 src: `/web_editor/font_to_img/${content.charCodeAt(0)}/${window.encodeURI(color)}/${window.encodeURI(bg)}/${Math.max(1, $font.height())}`,
                 'data-class': $font.attr('class'),
                 'data-style': style,
@@ -295,7 +296,8 @@ function fontToImg($editable) {
                 'box-sizing': 'border-box', // keep the fontawesome's dimensions
                 'line-height': lineHeight,
                 padding, width: width + 'px', height: height + 'px',
-            }));
+            });
+            $font.replaceWith($img);
         } else {
             $font.remove();
         }

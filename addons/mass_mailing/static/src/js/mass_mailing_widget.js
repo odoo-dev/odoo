@@ -70,6 +70,16 @@ var MassMailingFieldHtml = FieldHtml.extend({
         return this.wysiwyg.saveModifiedImages(this.$content).then(function () {
             self._isDirty = self.wysiwyg.isDirty();
 
+            // fix outlook image rendering bug (this change will be kept in both
+            // fields)
+            _.each(['width', 'height'], function (attribute) {
+                $editable.find('img[style*="width"], img[style*="height"]').attr(attribute, function () {
+                    return $(this)[attribute]();
+                }).css(attribute, function () {
+                    return $(this).get(0).style[attribute] || 'auto';
+                });
+            });
+
             const $clone = $editable.clone();
             $editable.after($clone);
             convertInline.attachmentThumbnailToLinkImg($clone);
@@ -77,15 +87,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
             convertInline.classToStyle($clone);
             convertInline.bootstrapToTable($clone);
             convertInline.addTables($clone);
-
-            // fix outlook image rendering bug
-            _.each(['width', 'height'], function (attribute) {
-                $clone.find('img[style*="width"], img[style*="height"]').attr(attribute, function () {
-                    return $(this)[attribute]();
-                }).css(attribute, function () {
-                    return $(this).get(0).style[attribute] || 'auto';
-                });
-            });
 
             self.trigger_up('field_changed', {
                 dataPointID: self.dataPointID,
