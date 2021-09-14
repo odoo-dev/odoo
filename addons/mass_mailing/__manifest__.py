@@ -58,7 +58,6 @@
         'views/snippets/s_media_list.xml',
         'views/snippets/s_numbers.xml',
         'views/snippets/s_picture.xml',
-        'views/snippets/s_process_steps.xml',
         'views/snippets/s_product_list.xml',
         'views/snippets/s_rating.xml',
         'views/snippets/s_references.xml',

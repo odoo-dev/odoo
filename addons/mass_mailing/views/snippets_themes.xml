@@ -74,7 +74,6 @@
                     <t t-snippet="mass_mailing.s_mail_block_discount2" t-thumbnail="/mass_mailing/static/src/img/blocks/block_discount2.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_discount1" t-thumbnail="/mass_mailing/static/src/img/blocks/block_discount1.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_event" t-thumbnail="/mass_mailing/static/src/img/blocks/block_event.png"/>
-                    <t t-snippet="mass_mailing.s_process_steps" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_process_steps.svg"/>
                     <t t-snippet="mass_mailing.s_product_list" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_product_list.svg"/>
                     <t t-snippet="mass_mailing.s_features_grid" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_features_grid.svg"/>
                 </div>
