@@ -353,7 +353,31 @@ exports.PosModel = Backbone.Model.extend({
         loaded: function (self, bills) {
             self.bills = bills;
         },
-      }, {
+    }, {
+        model: 'account.bank.statement.cashbox',
+        fields: ['cashbox_lines_ids'],
+        condition: function (self) {
+            return self.config.last_session_closing_cashbox;
+        },
+        domain: function (self) {
+            return [['id', '=', self.config.last_session_closing_cashbox[0]]];
+        },
+        loaded: function (self, cashbox) {
+            self.lastSessionClosingCashbox = cashbox[0];
+        },
+    }, {
+        model: 'account.cashbox.line',
+        fields: ['coin_value', 'number', 'display_name'],
+        condition: function (self) {
+            return self.config.last_session_closing_cashbox && self.lastSessionClosingCashbox;
+        },
+        domain: function (self) {
+            return [['id', 'in', self.lastSessionClosingCashbox.cashbox_lines_ids]];
+        },
+        loaded: function (self, cashbox_lines) {
+            self.lastSessionClosingCashboxLines = cashbox_lines;
+        },
+    }, {
         model:  'res.partner',
         label: 'load_partners',
         fields: ['name','street','city','state_id','country_id','vat','lang',

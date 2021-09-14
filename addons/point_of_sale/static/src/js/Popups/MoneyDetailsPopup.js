@@ -4,6 +4,7 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
     const { useState, useRef } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
+    const { float_is_zero } = require('web.utils');
 
     /**
      * Even if this component has a "confirm and cancel"-like buttons, this should not be an AbstractAwaitablePopup.
@@ -14,10 +15,7 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
         constructor() {
             super(...arguments);
             this.currency = this.env.pos.currency;
-            this.state = useState({
-                moneyDetails: Object.fromEntries(this.env.pos.bills.map(bill => ([bill.value, 0]))),
-                total: 0,
-            });
+            this.state = useState(this._getStartingMoneyDetails());
             this.inputRefs = {}
             for (let key in this.state.moneyDetails) { this.inputRefs[key] = useRef(key) }
 
@@ -29,6 +27,40 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
         get lastHalfMoneyDetails() {
             const moneyDetailsKeys = Object.keys(this.state.moneyDetails).sort((a, b) => a - b);
             return moneyDetailsKeys.slice(moneyDetailsKeys.length/2, moneyDetailsKeys.length);
+        }
+        _amountIsZero(amount) {
+            return float_is_zero(amount, this.env.pos.currency.decimals)
+        }
+        /**
+         * This function loops thru each bill to assign count to it. The count will come
+         * from the previous session's closing cashbox. Since the lines of the cashbox
+         * is not indexed by "bill value", we loop thru each line to find the corresponding
+         * count.
+         * Yes, this is O(N x M).
+         * But it only involves few array items so performance won't be an issue.
+         */
+        _getStartingMoneyDetails() {
+            const valueCountPairs = [];
+            let initTotal = 0;
+            for (const bill of this.env.pos.bills) {
+                let isFound = false;
+                // lastSessionClosingCashboxLines can be undefined if there is no last session's cashbox
+                for (const line of (this.env.pos.lastSessionClosingCashboxLines || [])) {
+                    if (this._amountIsZero(line.coin_value - bill.value)) {
+                        valueCountPairs.push([bill.value, line.number])
+                        initTotal += bill.value * line.number;
+                        isFound = true;
+                        break;
+                    }
+                }
+                if (!isFound) {
+                    valueCountPairs.push([bill.value, 0]);
+                }
+            }
+            return {
+              moneyDetails: Object.fromEntries(valueCountPairs),
+              total: initTotal,
+            };
         }
         isClosed() {
             return this.el.classList.contains('invisible')
