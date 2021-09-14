@@ -29,15 +29,24 @@ odoo.define('point_of_sale.ClosePosPopup', function(require) {
         }
         async _closeSession() {
             try {
-                const { successful, reason, res_model } = await this.rpc({
+                let successful, reason;
+                // TODO TRJ - TO remove - This is just an example.
+                [successful, reason] = await this.rpc({
+                    model: 'pos.session',
+                    method: 'post_closing_cash_details',
+                    args: [[this.env.pos.pos_session.id], null, [[20.0, 5]]],
+                })
+                if (!successful) {
+                    await this.showPopup('ErrorPopup', { title: 'Error', body: reason });
+                    return;
+                }
+                [successful, reason] = await this.rpc({
                     model: 'pos.session',
                     method: 'close_session_from_ui',
                     args: [this.env.pos.pos_session.id],
                 });
                 if (!successful) {
                     await this.showPopup('ErrorPopup', { title: 'Error', body: reason });
-                    // do not redirect if cash control is not successful
-                    if (res_model == 'closing.balance.confirm.wizard') return;
                 }
                 window.location = '/web#action=point_of_sale.action_client_pos_menu';
             } catch (error) {
