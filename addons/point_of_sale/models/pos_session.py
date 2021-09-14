@@ -1338,6 +1338,50 @@ class PosSession(models.Model):
             .run()
         self.message_post(body='<br/>\n'.join([f"Cash {extras['translatedType']}", f'- Amount: {extras["formattedAmount"]}', f'- Reason: {reason}']))
 
+    def get_closing_control_data(self):
+        self.ensure_one()
+        orders = self.order_ids.filtered(lambda o: o.state == 'paid' or o.state == 'invoiced')
+        payments = orders.payment_ids.filtered(lambda p: p.payment_method_id.type != "pay_later")
+        pay_later_payments = orders.payment_ids - payments
+        cash_payment_method_ids = self.payment_method_ids.filtered(lambda pm: pm.type == 'cash')
+        default_cash_payment_method_id = cash_payment_method_ids[0] if cash_payment_method_ids else None
+        total_default_cash_payment_amount = sum(payments.filtered(lambda p: p.payment_method_id == default_cash_payment_method_id).mapped('amount')) if default_cash_payment_method_id else 0
+        other_payment_method_ids = self.payment_method_ids - default_cash_payment_method_id if default_cash_payment_method_id else self.payment_method_ids
+        cash_in_count = 0
+        cash_out_count = 0
+        cash_in_out_list = []
+        for cash_move in self.cash_register_id.line_ids.sorted('create_date'):
+            if cash_move.amount > 0:
+                cash_in_count += 1
+                name = f'Cash in {cash_in_count}'
+            else:
+                cash_out_count += 1
+                name = f'Cash in {cash_out_count}'
+            cash_in_out_list.append({
+                'name': cash_move.payment_ref if cash_move.payment_ref else name,
+                'amount': cash_move.amount
+            })
+
+        return {
+            'orders_quantity': len(orders),
+            'orders_amount_total': sum(orders.mapped('amount_total')),
+            'payments_amount': sum(payments.mapped('amount')),
+            'pay_later_amount': sum(pay_later_payments.mapped('amount')),
+            'opening_notes': 'opening notes', #TODO
+            'total_default_cash_amount': self.cash_register_id.balance_start + sum(self.cash_register_id.line_ids.mapped('amount')) + total_default_cash_payment_amount,
+            'default_cash_payments': {
+                'name': default_cash_payment_method_id.name,
+                'amount': total_default_cash_payment_amount,
+            } if default_cash_payment_method_id else None,
+            'opening_amount': self.cash_register_id.balance_start,
+            'cash_in_out_list': cash_in_out_list,
+            'other_payment_methods': [{
+                'name': pm.name,
+                'amount': sum(payments.filtered(lambda p: p.payment_method_id == pm).mapped('amount'))
+            } for pm in other_payment_method_ids]
+        }
+
+
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
