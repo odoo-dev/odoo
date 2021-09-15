@@ -15,6 +15,4 @@ class PosCloseSessionWizard(models.TransientModel):
 
     def close_session(self):
         session = self.env["pos.session"].browse(self.env.context["active_ids"])
-        return session.action_pos_session_closing_control(
-            self.account_id, self.amount_to_balance
-        )
+        return session.action_pos_session_close(self.account_id, self.amount_to_balance)

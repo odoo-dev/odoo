@@ -85,6 +85,8 @@ odoo.define('point_of_sale.tour.pricelist', function (require) {
                     $('.pos').addClass('done-testing');
                 });
         },
+    }, {
+        trigger: '.opening-cash-control .button:contains("Open session")',
     }];
 
     steps = steps.concat([{
