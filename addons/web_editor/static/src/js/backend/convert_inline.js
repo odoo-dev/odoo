@@ -49,7 +49,7 @@ function getMatchedCSSRules(a) {
                         try {
                             mediaRules = rules[r].rules || rules[r].cssRules;
                         } catch (e) {
-                            console.warn(`Can't read the css rules of: ${sheets[i].href} (${conditionText})`, e);
+                            console.log(`Can't read the css rules of: ${sheets[i].href} (${conditionText})`, e);
                             continue;
                         }
                         if (mediaRules) {
@@ -659,6 +659,8 @@ FieldHtml.include({
         fontToImg($editable);
         classToStyle($editable);
         bootstrapToTable($editable);
+        cardToTable($editable);
+        listGroupToTable($editable);
         addTables($editable);
         formatTables($editable);
 
@@ -680,6 +682,8 @@ FieldHtml.include({
 return {
     fontToImg: fontToImg,
     bootstrapToTable: bootstrapToTable,
+    cardToTable: cardToTable,
+    listGroupToTable: listGroupToTable,
     addTables: addTables,
     formatTables: formatTables,
     classToStyle: classToStyle,
