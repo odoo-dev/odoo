@@ -372,11 +372,11 @@ function _createTable(attributes = []) {
  * @param {jQuery} $editable
  */
 function bootstrapToTable($editable) {
-    for (const container of $editable.find('.container, .container-fluid, .list-group')) {
+    for (const container of $editable.find('.container, .container-fluid')) {
         const $container = $(container);
         // Table
         let $table;
-        if ($container.find('.row, .list-group-item').length) {
+        if ($container.find('.row').length) {
             $table = _createTable(container.attributes);
         } else {
             $table = $(container.cloneNode());
@@ -384,33 +384,12 @@ function bootstrapToTable($editable) {
                 $table.attr(attr.name, attr.value);
             }
         }
-        const isListGroup = $container.is('.list-group');
         for (const child of [...container.childNodes]) {
-            if (isListGroup && child.classList && child.classList.contains('list-group-item')) {
-                // List groups are <ul>s that render like tables. Their
-                // li.list-group-item children should translate to tr > td.
-                const $row = $('<tr/>');
-                const $col = $('<td/>');
-                for (const attr of child.attributes) {
-                    $col.attr(attr.name, attr.value);
-                }
-                for (const descendant of [...child.childNodes]) {
-                    $col.append(descendant);
-                }
-                $col.removeClass('list-group-item');
-                $row.append($col);
-                $table.append($row);
-                $(child).remove();
-            } else {
-                $table.append(child);
-            }
+            $table.append(child);
         }
-        $table.removeClass('container container-fluid list-group');
+        $table.removeClass('container container-fluid');
         $container.before($table);
         $container.remove();
-        if (isListGroup) {
-            continue;
-        }
 
 
         // Rows
@@ -484,6 +463,78 @@ function bootstrapToTable($editable) {
                     $col.before($('<td/>').css('width', offset + '%').attr('width', offset + '%')).removeClass(offsetMatch[0]);
                 }
             }
+        }
+    }
+}
+
+function cardToTable($editable) {
+    for (const card of $editable.find('.card')) {
+        const $card = $(card);
+        // Table
+        const $table = _createTable(card.attributes);
+        for (const child of [...card.childNodes]) {
+            if (child.nodeType === Node.TEXT_NODE) {
+                $table.append(child);
+            } else {
+                const $row = $('<tr/>');
+                const $col = $('<td/>');
+                for (const attr of child.attributes) {
+                    $col.attr(attr.name, attr.value);
+                }
+                for (const descendant of [...child.childNodes]) {
+                    $col.append(descendant);
+                }
+                $row.append($col);
+                $table.append($row);
+                $(child).remove();
+            }
+        }
+        $card.before($table);
+        $card.remove();
+    }
+}
+
+function listGroupToTable($editable) {
+    for (const listGroup of $editable.find('.list-group')) {
+        const $listGroup = $(listGroup);
+        // Table
+        let $table;
+        if ($listGroup.find('.list-group-item').length) {
+            $table = _createTable(listGroup.attributes);
+        } else {
+            $table = $(listGroup.cloneNode());
+            for (const attr of $listGroup.attributes) {
+                $table.attr(attr.name, attr.value);
+            }
+        }
+        for (const child of [...listGroup.childNodes]) {
+            const $child = $(child);
+            if ($child.hasClass('list-group-item')) {
+                // List groups are <ul>s that render like tables. Their
+                // li.list-group-item children should translate to tr > td.
+                const $row = $('<tr/>');
+                const $col = $('<td/>');
+                for (const attr of child.attributes) {
+                    $col.attr(attr.name, attr.value);
+                }
+                for (const descendant of [...child.childNodes]) {
+                    $col.append(descendant);
+                }
+                $col.removeClass('list-group-item');
+                $row.append($col);
+                $table.append($row);
+                $(child).remove();
+            } else {
+                $table.append(child);
+            }
+        }
+        $table.removeClass('list-group');
+        if ($listGroup.is('td')) {
+            $listGroup.append($table);
+            $listGroup.removeClass('list-group');
+        } else {
+            $listGroup.before($table);
+            $listGroup.remove();
         }
     }
 }

@@ -86,6 +86,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
             convertInline.fontToImg($clone);
             convertInline.classToStyle($clone);
             convertInline.bootstrapToTable($clone);
+            convertInline.cardToTable($clone);
+            convertInline.listGroupToTable($clone);
             convertInline.addTables($clone);
             convertInline.formatTables($clone);
 
