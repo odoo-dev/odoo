@@ -143,7 +143,8 @@ class PosConfig(models.Model):
         help="The product categories will be displayed with pictures.")
     restrict_price_control = fields.Boolean(string='Restrict Price Modifications to Managers',
         help="Only users with Manager access rights for PoS app can modify the product prices on orders.")
-    cash_control = fields.Boolean(string='Advanced Cash Control', default=True, help="Check the amount of the cashbox at opening and closing.")
+    cash_control = fields.Boolean(string='Advanced Cash Control', compute='_compute_cash_control', store=True, help="Check the amount of the cashbox at opening and closing.")
+    set_maximum_difference = fields.Boolean('Set Maximum Difference', help="Set a maximum difference allowed between the expected and counted cash during the closing of the session.")
     receipt_header = fields.Text(string='Receipt Header', help="A short text that will be inserted as a header in the printed receipt.")
     receipt_footer = fields.Text(string='Receipt Footer', help="A short text that will be inserted as a footer in the printed receipt.")
     proxy_ip = fields.Char(string='IP Address', size=45,
@@ -240,6 +241,11 @@ class PosConfig(models.Model):
                                                    "In the meantime, you can use the 'Load Customers' button to load partners from database.")
     limited_partners_amount = fields.Integer(default=100)
     partner_load_background = fields.Boolean()
+
+    @api.depends('payment_method_ids')
+    def _compute_cash_control(self):
+        for config in self:
+            config.cash_control = bool(config.payment_method_ids.filtered('is_cash_count'))
 
     @api.depends('use_pricelist', 'available_pricelist_ids')
     def _compute_allowed_pricelist_ids(self):
