@@ -4,6 +4,7 @@ from odoo import api, fields, models, _
 class Bill(models.Model):
     _name = "pos.bill"
     _order = "value"
+    _description = "Coins/Bills"
 
     name = fields.Char("Name")
     value = fields.Float("Coin/Bill Value", required=True, digits=0)
