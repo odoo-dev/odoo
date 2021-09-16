@@ -195,35 +195,27 @@ function getMatchedCSSRules(a) {
         delete style['text-decoration-thickness'];
     }
 
-    // text-align inheritance does not seem to get past <td> elements on some
-    // mail clients
-    if (style['text-align'] === 'inherit') {
-        var $el = $(a).parent();
-        do {
-            var align = $el.css('text-align');
-            if (_.indexOf(['left', 'right', 'center', 'justify'], align) >= 0) {
-                style['text-align'] = align;
-                break;
-            }
-            $el = $el.parent();
-        } while ($el.length && !$el.is('html'));
-    }
-
-    // color inheritance does not seem to get past <td> elements on some mail
-    // clients. TODO: This is hacky as it applies a color style to all
-    // descendants of nodes with a color style. We can probably do this more
-    // elegantly.
-    if (style.color) {
-        function _colorDescendants(node) {
-            node.style.color = style.color;
+    // color and text-align inheritance do not seem to get past <td> elements on
+    // some mail clients. TODO: This is hacky as it applies a color/text-align
+    // style to all descendants of nodes with a color style. We can probably do
+    // this more elegantly.
+    if (style.color || style['text-align']) {
+        function _styleDescendants(node, styleName) {
+            const camelCased = styleName.replace(/-(\w)/g, match => match[1].toUpperCase());
+            node.style[camelCased] = style[styleName];
             for (const child of $(node).children()) {
-                const childColor = $(child).css('color');
-                if (childColor && childColor !== 'inherit') {
-                    _colorDescendants(child);
+                const childStyle = $(child).css(styleName);
+                if (childStyle && childStyle !== 'inherit') {
+                    _styleDescendants(child, styleName);
                 }
             }
         }
-        _colorDescendants(a);
+        if (style.color) {
+            _styleDescendants(a, 'color');
+        }
+        if (style['text-align']) {
+            _styleDescendants(a, 'text-align');
+        }
     }
 
     // flexboxes are not supported in Windows Outlook
