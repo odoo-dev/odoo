@@ -1387,25 +1387,28 @@ class PosSession(models.Model):
                 name = f'Cash in {cash_in_count}'
             else:
                 cash_out_count += 1
-                name = f'Cash in {cash_out_count}'
+                name = f'Cash out {cash_out_count}'
             cash_in_out_list.append({
                 'name': cash_move.payment_ref if cash_move.payment_ref else name,
                 'amount': cash_move.amount
             })
 
         return {
-            'orders_quantity': len(orders),
-            'orders_amount_total': sum(orders.mapped('amount_total')),
+            'orders_details': {
+                'quantity': len(orders),
+                'amount': sum(orders.mapped('amount_total'))
+            },
             'payments_amount': sum(payments.mapped('amount')),
             'pay_later_amount': sum(pay_later_payments.mapped('amount')),
-            'opening_notes': 'opening notes', #TODO
-            'total_default_cash_amount': self.cash_register_id.balance_start + sum(self.cash_register_id.line_ids.mapped('amount')) + total_default_cash_payment_amount,
-            'default_cash_payments': {
+            'opening_notes': 'opening notes ', #TODO
+            'default_cash_details': {
                 'name': default_cash_payment_method_id.name,
-                'amount': total_default_cash_payment_amount,
+                'amount': self.cash_register_id.balance_start + total_default_cash_payment_amount +
+                                             sum(self.cash_register_id.line_ids.mapped('amount')),
+                'opening': self.cash_register_id.balance_start,
+                'payment_amount': total_default_cash_payment_amount,
+                'moves': cash_in_out_list
             } if default_cash_payment_method_id else None,
-            'opening_amount': self.cash_register_id.balance_start,
-            'cash_in_out_list': cash_in_out_list,
             'other_payment_methods': [{
                 'name': pm.name,
                 'amount': sum(payments.filtered(lambda p: p.payment_method_id == pm).mapped('amount'))

@@ -22,7 +22,7 @@
                     <div class="button" t-on-click="startSession()">Open session</div>
                 </footer>
             </div>
-            <MoneyDetailsPopup t-ref="moneyDetails" positionClass="'from-opening-cash-control'" t-on-money-details-validated="updateCashOpening"/>
+            <MoneyDetailsPopup t-ref="moneyDetails" t-on-money-details-validated="updateCashOpening"/>
         </div>
     </t>
 </templates>

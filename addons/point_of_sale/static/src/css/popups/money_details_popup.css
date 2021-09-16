@@ -1,13 +1,6 @@
 .pos .popup.money-details {
-    transform: none;
-    box-shadow: 10px 10px 20px rgb(0 0 0 / 40%);
     width: 350px;
-}
-
-.pos .money-details.from-opening-cash-control {
-    left: calc(35% + 255px);
-    top: calc(50% - 169px);
-    height: 400px;
+    max-height: 400px;
 }
 
 .pos .money-details.invisible {

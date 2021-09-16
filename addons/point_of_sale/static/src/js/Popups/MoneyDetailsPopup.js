@@ -44,8 +44,8 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
             const value = this.inputRefs[moneyValue].el.value;
             const floatValue = parseFloat(value);
             if (!isNaN(floatValue) || !value) { // if !value, it means value = '' and thus we replace it with 0
-                const value = parseFloat(moneyValue);
-                const difference = ((floatValue || 0)  - this.state.moneyDetails[moneyValue]) * value;
+                const moneyValueFloat = parseFloat(moneyValue);
+                const difference = ((floatValue || 0)  - this.state.moneyDetails[moneyValue]) * moneyValueFloat;
                 this.state.moneyDetails[moneyValue] = floatValue || 0;
                 this.state.total = this.state.total + difference;
             }
@@ -64,9 +64,12 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
             this.trigger('money-details-validated', payload)
             this._closePopup();
         }
-        discard() {
+        reset() {
             for (let key in this.state.moneyDetails) { this.state.moneyDetails[key] = 0 }
             this.state.total = 0;
+        }
+        discard() {
+            this.reset();
             this._closePopup();
         }
     }

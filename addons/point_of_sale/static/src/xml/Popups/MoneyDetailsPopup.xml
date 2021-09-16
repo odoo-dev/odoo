@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="MoneyDetailsPopup" owl="1">
-        <div class="popup money-details invisible" t-att-class="props.positionClass">
+        <div class="popup money-details invisible">
             <main class="body">
                 <div class="money-details-title">
                     Coins/Bills
