@@ -14,10 +14,11 @@ odoo.define('point_of_sale.ClosePosPopup', function(require) {
     class ClosePosPopup extends AbstractAwaitablePopup {
         constructor() {
             super(...arguments);
-            this.manualInputCashCount = false;
+            this.manualInputCashCount = true;
             this.cashControl = this.env.pos.config.cash_control;
             this.moneyDetailsRef = useRef('moneyDetails');
             this.closeSessionClicked = false;
+            this.moneyDetails = null;
         }
         async willStart() {
             try {
@@ -97,29 +98,33 @@ odoo.define('point_of_sale.ClosePosPopup', function(require) {
             }
         }
         updateCountedCash(event) {
-            const { total, moneyDetails } = event.detail;
+            const { total, moneyDetailsNotes, moneyDetails } = event.detail;
             this.state[this.defaultCashDetails.name].counted = round_pr(total, this.env.pos.currency.rounding);
             this.state[this.defaultCashDetails.name].difference = this.state[[this.defaultCashDetails.name]].counted - this.defaultCashDetails.amount;
-            if (moneyDetails) {
-                this.state.notes = moneyDetails;
+            if (moneyDetailsNotes) {
+                this.state.notes = moneyDetailsNotes;
             }
-            this.manualCashCount = false;
+            this.manualInputCashCount = false;
+            this.moneyDetails = moneyDetails;
         }
         canCloseSession() {
-            return !this.cashControl || (this.state[this.defaultCashDetails.name].difference && this.state.acceptClosing)
+            return !this.cashControl || !this.state[this.defaultCashDetails.name].difference || this.state.acceptClosing;
         }
         closePos() {
             this.trigger('close-pos');
         }
-        async _closeSession() {
+        async closeSession() {
             if (this.canCloseSession() && !this.closeSessionClicked) {
                 try {
                     let successful, reason;
-                    // TODO TRJ - TO remove - This is just an example.
                     [successful, reason] = await this.rpc({
                         model: 'pos.session',
                         method: 'post_closing_cash_details',
-                        args: [[this.env.pos.pos_session.id], null, [[20.0, 5]]],
+                        args: [[this.env.pos.pos_session.id]],
+                        kwargs: {
+                            counted_cash: this.manualInputCashCount ? this.state[this.defaultCashDetails.name].counted : null,
+                            bill_details: this.manualInputCashCount ? null : Object.entries(this.moneyDetails)
+                        }
                     })
                     if (!successful) {
                         await this.showPopup('ErrorPopup', {title: 'Error', body: reason});

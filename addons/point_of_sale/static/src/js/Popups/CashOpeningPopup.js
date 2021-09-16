@@ -35,10 +35,10 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
             this.cancel(); // close popup
         }
         updateCashOpening(event) {
-            const { total, moneyDetails } = event.detail;
+            const { total, moneyDetailsNotes } = event.detail;
             this.state.openingCash = round_pr(total, this.env.pos.currency.rounding);
-            if (moneyDetails) {
-                this.state.notes = moneyDetails;
+            if (moneyDetailsNotes) {
+                this.state.notes = moneyDetailsNotes;
             }
         }
     }

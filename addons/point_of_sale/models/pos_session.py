@@ -415,12 +415,14 @@ class PosSession(models.Model):
 
         if bool(self.cash_register_id.cashbox_end_id):
             self.cash_register_id.cashbox_end_id.cashbox_lines_ids.unlink()
-            self.cash_register_id.cashbox_end_id.unlink()
-
-        self.env['account.bank.statement.cashbox'].create({
-            'cashbox_lines_ids': [(0, 0, {'coin_value': value, 'number': count}) for value, count in bill_details],
-            'end_bank_stmt_ids': [(6, 0, self.cash_register_id.ids)]
-        })
+            self.cash_register_id.cashbox_end_id.write({
+                'cashbox_lines_ids': [(0, 0, {'coin_value': value, 'number': count}) for value, count in bill_details],
+            })
+        else:
+            self.env['account.bank.statement.cashbox'].create({
+                'cashbox_lines_ids': [(0, 0, {'coin_value': value, 'number': count}) for value, count in bill_details],
+                'end_bank_stmt_ids': [(6, 0, self.cash_register_id.ids)]
+            })
 
         if abs(self.cash_register_difference) > self.config_id.amount_authorized_diff:
             if not self.user_has_groups("point_of_sale.group_pos_manager"):
@@ -428,7 +430,7 @@ class PosSession(models.Model):
                 # It will become the starting point on next attempt to close the session.
                 return [False, _(
                     "Your ending balance is too different from the theoretical cash closing (%.2f), "
-                    "the maximum allowed is: %.2f. You can contact your manager to force it."
+                    "the maximum allowed is: %.2f.\n You can contact your manager to force it."
                 ) % (self.cash_register_difference, self.config_id.amount_authorized_diff), self.cash_register_difference]
 
         return [True]

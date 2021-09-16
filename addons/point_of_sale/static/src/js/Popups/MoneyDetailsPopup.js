@@ -54,14 +54,14 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
             this.el.classList.add('invisible');
         }
         confirm() {
-            let moneyDetails = this.state.total  ? 'Money details: \n' : null;
+            let moneyDetailsNotes = this.state.total  ? 'Money details: \n' : null;
             for (let key in this.state.moneyDetails) {
                 if (this.state.moneyDetails[key]) {
-                    moneyDetails += `  - ${this.state.moneyDetails[key]} x ${this.env.pos.format_currency(key)}\n`;
+                    moneyDetailsNotes += `  - ${this.state.moneyDetails[key]} x ${this.env.pos.format_currency(key)}\n`;
                 }
             }
-            const payload = { total: this.state.total, moneyDetails }
-            this.trigger('money-details-validated', payload)
+            const payload = { total: this.state.total, moneyDetailsNotes, moneyDetails: { ...this.state.moneyDetails }};
+            this.trigger('money-details-validated', payload);
             this._closePopup();
         }
         reset() {
