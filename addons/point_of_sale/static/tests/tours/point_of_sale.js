@@ -430,10 +430,7 @@ odoo.define('point_of_sale.tour.acceptance', function (require) {
         trigger: ".header-button",
     }, {
         content: "close the Point of Sale frontend",
-        trigger: ".button.main-button:contains('Open the back-end and keep the session open')",
-    }, {
-        content: "confirm closing the frontend",
-        trigger: ".button.main-button.confirm",
+        trigger: ".close-pos-popup .button:contains('Continue Selling')",
         run: function() {}, //it's a check,
     }]);
 
