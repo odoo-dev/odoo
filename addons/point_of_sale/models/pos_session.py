@@ -292,7 +292,7 @@ class PosSession(models.Model):
                         'end_bank_stmt_ids': [(6, 0, self.cash_register_id.ids)]
                     })
 
-            return self.action_pos_session_validate()
+            return session.action_pos_session_validate(balancing_account, amount_to_balance)
 
     def _check_pos_session_balance(self):
         for session in self:
@@ -300,9 +300,9 @@ class PosSession(models.Model):
                 if (statement != session.cash_register_id) and (statement.balance_end != statement.balance_end_real):
                     statement.write({'balance_end_real': statement.balance_end})
 
-    def action_pos_session_validate(self):
+    def action_pos_session_validate(self, balancing_account=False, amount_to_balance=0):
         self._check_pos_session_balance()
-        return self.action_pos_session_close()
+        return self.action_pos_session_close(balancing_account, amount_to_balance)
 
     def action_pos_session_close(self, balancing_account=False, amount_to_balance=0):
         # Session without cash payment method will not have a cash register.
