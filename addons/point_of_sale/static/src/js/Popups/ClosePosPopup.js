@@ -129,6 +129,14 @@ odoo.define('point_of_sale.ClosePosPopup', function(require) {
                     if (!response.successful) {
                         return this.handleClosingError(response);
                     }
+                    const paymentMethodDiffPairs = this.env.pos.payment_methods
+                        .filter((pm) => pm.type == 'bank')
+                        .map((pm) => [pm.id, -5]);
+                    await this.rpc({
+                        model: 'pos.session',
+                        method: 'create_diff_account_moves',
+                        args: [[this.env.pos.pos_session.id], paymentMethodDiffPairs]
+                    })
                     window.location = '/web#action=point_of_sale.action_client_pos_menu';
                 } catch (error) {
                     const iError = identifyError(error);

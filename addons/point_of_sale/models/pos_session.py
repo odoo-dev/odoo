@@ -7,6 +7,7 @@ from datetime import timedelta
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_is_zero, float_compare
+from odoo.osv import expression
 
 class PosSession(models.Model):
     _name = 'pos.session'
@@ -456,6 +457,37 @@ class PosSession(models.Model):
                 }
 
         return {'successful': True}
+
+    def create_diff_account_moves(self, payment_method_id_diff_pairs):
+        for payment_method_id, diff_amount in payment_method_id_diff_pairs:
+            payment_method = self.env['pos.payment.method'].browse(payment_method_id)
+            diff_compare_to_zero = self.currency_id.compare_amounts(diff_amount, 0)
+            source_account = payment_method.outstanding_account_id or self.company_id.account_journal_payment_debit_account_id
+            destination_account = self.env['account.account']
+
+            if (diff_compare_to_zero == 0):
+                # do nothing if the diff is zero
+                return
+            elif (diff_compare_to_zero > 0):
+                destination_account = payment_method.journal_id.profit_account_id
+            else:
+                destination_account = payment_method.journal_id.loss_account_id
+            amounts = self._update_amounts({'amount': 0, 'amount_converted': 0}, {'amount': diff_amount}, self.stop_at)
+            source_vals = self._debit_amounts({'account_id': source_account.id}, amounts['amount'], amounts['amount_converted'])
+            dest_vals = self._credit_amounts({'account_id': destination_account.id}, amounts['amount'], amounts['amount_converted'])
+
+            diff_move = self.env['account.move'].create({
+                'journal_id': self.config_id.journal_id.id,
+                'date': fields.Date.context_today(self),
+                'ref': self._get_diff_account_move_ref(payment_method),
+                'line_ids': [(0, 0, source_vals), (0, 0, dest_vals)]
+            })
+            diff_move._post()
+
+        return {'successful': True}
+
+    def _get_diff_account_move_ref(self, payment_method):
+        return _('Closing difference in %s (%s)', payment_method.name, self.name)
 
     def _cannot_close_session(self):
         """
@@ -1327,6 +1359,18 @@ class PosSession(models.Model):
             },
         }
 
+    def _get_other_related_moves(self):
+        # TODO This is not an ideal way to get the diff account.move's for
+        # the session. It would be better if there is a relation field where
+        # these moves are saved.
+
+        # Unfortunately, the 'ref' of account.move is not indexed, so
+        # we are querying over the account.move.line because its 'ref' is indexed.
+        diff_lines_domain = []
+        for bank_payment_method in self.config_id.payment_method_ids.filtered(lambda pm: pm.type == 'bank'):
+            diff_lines_domain = expression.OR([diff_lines_domain, [('ref', '=', self._get_diff_account_move_ref(bank_payment_method))]])
+        return self.env['account.move.line'].search(diff_lines_domain).mapped('move_id')
+
     def _get_related_account_moves(self):
         pickings = self.picking_ids | self.order_ids.mapped('picking_ids')
         invoices = self.mapped('order_ids.account_move')
@@ -1334,7 +1378,8 @@ class PosSession(models.Model):
         stock_account_moves = pickings.mapped('move_lines.account_move_ids')
         cash_moves = self.cash_register_id.line_ids.mapped('move_id')
         bank_payment_moves = self.bank_payment_ids.mapped('move_id')
-        return invoices | invoice_payments | self.move_id | stock_account_moves | cash_moves | bank_payment_moves
+        other_related_moves = self._get_other_related_moves()
+        return invoices | invoice_payments | self.move_id | stock_account_moves | cash_moves | bank_payment_moves | other_related_moves
 
     def _get_receivable_account(self, payment_method):
         """Returns the default pos receivable account if no receivable_account_id is set on the payment method."""
