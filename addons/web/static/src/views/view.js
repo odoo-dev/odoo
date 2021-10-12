@@ -189,6 +189,7 @@ export class View extends Component {
         const bannerRoute = rootNode.getAttribute("banner_route");
         const sample = rootNode.getAttribute("sample");
 
+        /** @todo to uncomment */
         // determine ViewClass to instantiate (if not already done)
         // if (subType) {
         //     ViewClass = viewRegistry.get(subType);
