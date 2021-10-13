@@ -13,6 +13,9 @@ var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
 var widgetRegistry = require('web.widget_registry');
 const widgetRegistryOwl = require('web.widgetRegistry');
+const {Markup} = require('web.utils');
+const { registry } = require('@web/core/registry');
+const legacyViewRegistry = require('web.view_registry');
 
 var makeTestPromise = testUtils.makeTestPromise;
 var nextTick = testUtils.nextTick;
@@ -31,6 +34,9 @@ QUnit.module('Views', {
         KanbanColumnProgressBar.prototype.ANIMATE = this._initialKanbanProgressBarAnimate;
     },
     beforeEach: function () {
+        registry.category("views").remove("kanban"); // remove new kanban from registry
+        legacyViewRegistry.add("kanban", KanbanView); // add legacy kanban -> will be wrapped and added to new registry
+
         this.data = {
             partner: {
                 fields: {
@@ -105,7 +111,7 @@ QUnit.module('Views', {
     },
 }, function () {
 
-    QUnit.module('KanbanView');
+    QUnit.module('Legacy KanbanView');
 
     QUnit.test('basic ungrouped rendering', async function (assert) {
         assert.expect(6);
