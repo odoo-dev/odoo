@@ -255,7 +255,6 @@ export class View extends Component {
             info: { actionMenus, mode: this.props.display.mode },
             arch,
             fields,
-            fieldsView: viewDescription[type],
             resModel,
             useSampleModel: false,
             className: `${this.props.className} o_view_controller o_${this.env.config.viewType}_view`,
