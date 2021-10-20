@@ -256,7 +256,6 @@ export class View extends Component {
             arch,
             className: "o_action o_view_controller",
             fields,
-            fieldsView: viewDescription[type],
             resModel,
             useSampleModel: false,
         };
