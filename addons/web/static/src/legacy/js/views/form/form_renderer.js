@@ -14,7 +14,7 @@ var qweb = core.qweb;
 const symbol = Symbol('form');
 
 var FormRenderer = BasicRenderer.extend({
-    className: "o_form_view",
+    className: "o_legacy_form_view",
     events: _.extend({}, BasicRenderer.prototype.events, {
         'click .o_notification_box .oe_field_translate': '_onTranslate',
         'click .o_notification_box .close': '_onTranslateNotificationClose',
@@ -30,7 +30,7 @@ var FormRenderer = BasicRenderer.extend({
     INNER_GROUP_COL: 2,
     OUTER_GROUP_COL: 2,
     quickEditExclusion: [
-        '.o_list_view tbody',
+        '.o_legacy_list_view tbody',
         '.oe_button_box',
         '.oe_subtotal_footer',
     ],
