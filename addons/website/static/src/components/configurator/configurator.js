@@ -315,10 +315,10 @@ class PaletteSelectionScreen extends Component {
             const attachment = await this.rpc({
                 route: '/web_editor/attachment/add_data',
                 params: {
-                    'name': 'logo',
-                    'data': data.split(',')[1],
-                    'is_image': true,
-                },
+                    name: 'logo',
+                    data: data.split(',')[1],
+                    filetype: 'image',
+                }
             });
             if (!attachment.error) {
                 this.state.changeLogo(data, attachment.id);
