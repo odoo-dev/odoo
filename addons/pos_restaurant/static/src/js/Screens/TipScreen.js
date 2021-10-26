@@ -4,12 +4,11 @@ odoo.define('pos_restaurant.TipScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const PosComponent = require('point_of_sale.PosComponent');
     const { parse } = require('web.field_utils');
-    const { useContext } = owl.hooks;
 
     class TipScreen extends PosComponent {
         constructor() {
             super(...arguments);
-            this.state = useContext(this.currentOrder.uiState.TipScreen);
+            this.state = this.currentOrder.uiState.TipScreen;
             this._totalAmount = this.currentOrder.get_total_with_tax();
         }
         mounted () {

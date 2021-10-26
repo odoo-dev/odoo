@@ -16,12 +16,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const { odooExceptionTitleMap } = require("@web/core/errors/error_dialogs");
     const { ConnectionLostError, ConnectionAbortedError, RPCError } = require('@web/core/network/rpc_service');
     const { useBus } = require("@web/core/utils/hooks");
-
-    // This is kind of a trick.
-    // We get a reference to the whole exports so that
-    // when we create an instance of one of the classes,
-    // we instantiate the extended one.
-    const models = require('point_of_sale.models');
+    const atom = require("@point_of_sale/js/createAtom");
+    const { PosModel } = require('point_of_sale.models');
 
     /**
      * Chrome is the root component of the PoS App.
@@ -69,6 +65,22 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.progressbar = useRef('progressbar');
 
             this.previous_touch_y_coordinate = -1;
+
+            // Instead of passing chrome to the instantiation the PosModel,
+            // we inject functions needed by pos.
+            // This way, we somehow decoupled Chrome from PosModel.
+            // We can then test PosModel independently from Chrome by supplying
+            // mocked version of these default attributes.
+            const posModelDefaultAttributes = {
+                env: this.env,
+                rpc: this.rpc.bind(this),
+                session: this.env.session,
+                do_action: this.props.webClient.do_action.bind(this.props.webClient),
+                showLoadingSkip: () => {
+                    this.state.loadingSkipButtonIsShown = true;
+                }
+            };
+            this.env.pos = atom.useState(new (Registries.PModel.get(PosModel))(posModelDefaultAttributes));
         }
 
         // OVERLOADED METHODS //
@@ -131,35 +143,17 @@ odoo.define('point_of_sale.Chrome', function(require) {
          */
         async start() {
             try {
-                // Instead of passing chrome to the instantiation the PosModel,
-                // we inject functions needed by pos.
-                // This way, we somehow decoupled Chrome from PosModel.
-                // We can then test PosModel independently from Chrome by supplying
-                // mocked version of these default attributes.
-                const posModelDefaultAttributes = {
-                    env: this.env,
-                    rpc: this.rpc.bind(this),
-                    session: this.env.session,
-                    do_action: this.props.webClient.do_action.bind(this.props.webClient),
-                    showLoadingSkip: () => {
-                        this.state.loadingSkipButtonIsShown = true;
-                    }
-                };
-                this.env.pos = new models.PosModel(posModelDefaultAttributes);
                 await this.env.pos.load_server_data();
                 // Load the saved `env.pos.toRefundLines` from localStorage when
                 // the PosModel is ready.
                 Object.assign(this.env.pos.toRefundLines, this.env.pos.db.load('TO_REFUND_LINES') || {});
                 this._buildChrome();
                 this._closeOtherTabs();
-                this.env.pos.set(
-                    'selectedCategoryId',
-                    this.env.pos.config.iface_start_categ_id
-                        ? this.env.pos.config.iface_start_categ_id[0]
-                        : 0
-                );
+                this.env.pos.selectedCategoryId = this.env.pos.config.iface_start_categ_id
+                    ? this.env.pos.config.iface_start_categ_id[0]
+                    : 0;
                 this.state.uiState = 'READY';
-                this.env.pos.on('change:selectedOrder', this._showSavedScreen, this);
+                // this.env.pos.on('change:selectedOrder', this._showSavedScreen, this);
                 this._showStartScreen();
                 if (_.isEmpty(this.env.pos.db.product_by_category_id)) {
                     this._loadDemoData();
@@ -293,7 +287,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     window.location = '/web#action=point_of_sale.action_client_pos_menu';
                 } catch (error) {
                     console.warn(error);
-                    const reason = this.env.pos.get('failed')
+                    const reason = this.env.pos.failed
                         ? this.env._t(
                               'Some orders could not be submitted to ' +
                                   'the server due to configuration errors. ' +
@@ -340,7 +334,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.state.sound.src = src;
         }
         _onSetSyncStatus({ detail: { status, pending }}) {
-            this.env.pos.set('synch', { status, pending });
+            this.env.pos.synch = { status, pending };
         }
         _onShowNotification({ detail: { message, duration } }) {
             this.state.notification.isShown = true;

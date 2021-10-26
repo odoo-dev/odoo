@@ -6,6 +6,7 @@ odoo.define('point_of_sale.Registries', function(require) {
      */
 
     const ComponentRegistry = require('point_of_sale.ComponentRegistry');
+    const ClassRegistry = require('point_of_sale.ClassRegistry');
 
-    return { Component: new ComponentRegistry() };
+    return { Component: new ComponentRegistry(), PModel: new ClassRegistry() };
 });

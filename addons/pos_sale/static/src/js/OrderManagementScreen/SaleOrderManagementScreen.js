@@ -27,7 +27,6 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
         }
         mounted() {
             SaleOrderFetcher.on('update', this, this.render);
-            this.env.pos.get('orders').on('add remove', this.render, this);
 
             // calculate how many can fit in the screen.
             // It is based on the height of the header element.
@@ -47,7 +46,6 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
         }
         willUnmount() {
             SaleOrderFetcher.off('update', this);
-            this.env.pos.get('orders').off('add remove', null, this);
         }
         get selectedClient() {
             const order = this.orderManagementContext.selectedOrder;

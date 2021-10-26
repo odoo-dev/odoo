@@ -139,13 +139,13 @@ var PosDB = core.Class.extend({
     },
     /* loads a record store from the database. returns default if nothing is found */
     load: function(store,deft){
-        if(this.cache[store] !== undefined){
-            return this.cache[store];
-        }
+        // if(this.cache[store] !== undefined){
+        //     return this.cache[store];
+        // }
         var data = localStorage[this.name + '_' + store];
         if(data !== undefined && data !== ""){
             data = JSON.parse(data);
-            this.cache[store] = data;
+            // this.cache[store] = data;
             return data;
         }else{
             return deft;
@@ -154,7 +154,7 @@ var PosDB = core.Class.extend({
     /* saves a record store to the database */
     save: function(store,data){
         localStorage[this.name + '_' + store] = JSON.stringify(data);
-        this.cache[store] = data;
+        // this.cache[store] = data;
     },
     _product_search_string: function(product){
         var str = product.display_name;

@@ -3,26 +3,11 @@ odoo.define('pos_coupon.ActivePrograms', function (require) {
 
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
-    const { onChangeOrder } = require('point_of_sale.custom_hooks');
 
     class ActivePrograms extends PosComponent {
         constructor() {
             super(...arguments);
-            onChangeOrder(this._onPrevOrder, this._onNewOrder);
             this.renderParams = {};
-        }
-        _onPrevOrder(prevOrder) {
-            if (prevOrder) {
-                prevOrder.off('change', null, this);
-                prevOrder.off('rewards-updated', null, this);
-            }
-        }
-        _onNewOrder(newOrder) {
-            if (newOrder) {
-                newOrder.on('change', this.render, this);
-                newOrder.on('rewards-updated', this.render, this);
-                newOrder.trigger('update-rewards');
-            }
         }
         async render() {
             this._setRenderParams();

@@ -237,7 +237,13 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
             if (this.state.isEditMode) {
                 this.state.selectedTableId = table.id;
             } else {
-                this.env.pos.set_table(table);
+                this.env.pos.set_table(table).then(() => {
+                    const order = this.env.pos.get_order();
+                    if (order) {
+                        const { name: screenName } = order.get_screen_data();
+                        this.showScreen(screenName);
+                    }
+                });
             }
         }
         _onDeselectTable() {
@@ -325,7 +331,7 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
                         .filter(
                             (o) =>
                                 o.server_id === undefined &&
-                                (o.orderlines.length !== 0 || o.paymentlines.length !== 0) &&
+                                (o.orderlines.getItems().length !== 0 || o.paymentlines.getItems().length !== 0) &&
                                 // do not count the orders that are already finalized
                                 !o.finalized
                         ).length;

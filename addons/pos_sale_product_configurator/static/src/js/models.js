@@ -3,11 +3,13 @@ odoo.define('pos_sale_product_configurator.models', function (require) {
 
     const { Gui } = require('point_of_sale.Gui');
     var models = require('point_of_sale.models');
+    const Registries = require('point_of_sale.Registries');
 
-    const super_order_model = models.Order.prototype;
-    models.Order = models.Order.extend({
+    Registries.PModel.extend(models.Order, (Order) => {
+
+    class PosSaleProductConfiguratorOrder extends Order {
         async add_product(product, options) {
-            super_order_model.add_product.apply(this, arguments);
+            super.add_product(...arguments);
             if (this.pos.config.iface_open_product_info && product.optional_product_ids.length) {
                 // The `optional_product_ids` only contains ids of the product templates and not the product itself
                 // We don't load all the product template in the pos, so it'll be hard to know if the id comes from
@@ -24,5 +26,8 @@ odoo.define('pos_sale_product_configurator.models', function (require) {
                 }
             }
         }
-    })
+    }
+
+    return PosSaleProductConfiguratorOrder;
+    });
 })

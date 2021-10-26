@@ -4,11 +4,14 @@ odoo.define('pos_restaurant.multiprint', function (require) {
 var models = require('point_of_sale.models');
 var core = require('web.core');
 var Printer = require('point_of_sale.Printer').Printer;
+const Registries = require('point_of_sale.Registries');
 
 var QWeb = core.qweb;
 
-models.PosModel = models.PosModel.extend({
-    create_printer: function (config) {
+Registries.PModel.extend(models.PosModel, (PosModel) => {
+
+class PosResMultiprintPosModel extends PosModel {
+    create_printer(config) {
         var url = config.proxy_ip || '';
         if(url.indexOf('//') < 0) {
             url = window.location.protocol + '//' + url;
@@ -17,7 +20,10 @@ models.PosModel = models.PosModel.extend({
             url = url + ':8069';
         }
         return new Printer(url, this);
-    },
+    }
+}
+
+return PosResMultiprintPosModel;
 });
 
 models.load_models({
@@ -48,11 +54,11 @@ models.load_models({
     },
 });
 
-var _super_orderline = models.Orderline.prototype;
+Registries.PModel.extend(models.Orderline, (Orderline) => {
 
-models.Orderline = models.Orderline.extend({
-    initialize: function() {
-        _super_orderline.initialize.apply(this,arguments);
+class PosResMultiprintOrderline extends Orderline {
+    initialize() {
+        super.initialize(...arguments);
         if (!this.pos.config.iface_printers) {
             return;
         }
@@ -69,64 +75,65 @@ models.Orderline = models.Orderline.extend({
             // not to be sent to the kitchen
             this.mp_skip  = false;
         }
-    },
+    }
     // can this orderline be potentially printed ?
-    printable: function() {
+    printable() {
         return this.pos.db.is_product_in_category(this.pos.printers_categories, this.get_product().id);
-    },
-    init_from_JSON: function(json) {
-        _super_orderline.init_from_JSON.apply(this,arguments);
+    }
+    init_from_JSON(json) {
+        super.init_from_JSON(...arguments);
         this.mp_dirty = json.mp_dirty;
         this.mp_skip  = json.mp_skip;
-    },
-    export_as_JSON: function() {
-        var json = _super_orderline.export_as_JSON.apply(this,arguments);
+    }
+    export_as_JSON() {
+        var json = super.export_as_JSON(...arguments);
         json.mp_dirty = this.mp_dirty;
         json.mp_skip  = this.mp_skip;
         return json;
-    },
-    set_quantity: function(quantity) {
+    }
+    set_quantity(quantity) {
         if (this.pos.config.iface_printers && quantity !== this.quantity && this.printable()) {
             this.mp_dirty = true;
         }
-        return _super_orderline.set_quantity.apply(this,arguments);
-    },
-    can_be_merged_with: function(orderline) {
+        return super.set_quantity(...arguments);
+    }
+    can_be_merged_with(orderline) {
         return (!this.mp_skip) &&
                (!orderline.mp_skip) &&
-               _super_orderline.can_be_merged_with.apply(this,arguments);
-    },
-    set_skip: function(skip) {
+               super.can_be_merged_with(...arguments);
+    }
+    set_skip(skip) {
         if (this.mp_dirty && skip && !this.mp_skip) {
             this.mp_skip = true;
-            this.trigger('change',this);
         }
         if (this.mp_skip && !skip) {
             this.mp_dirty = true;
             this.mp_skip  = false;
-            this.trigger('change',this);
         }
-    },
-    set_dirty: function(dirty) {
+    }
+    set_dirty(dirty) {
         if (this.mp_dirty !== dirty) {
             this.mp_dirty = dirty;
-            this.trigger('change', this);
         }
-    },
-    get_line_diff_hash: function(){
+    }
+    get_line_diff_hash(){
         if (this.get_note()) {
             return this.id + '|' + this.get_note();
         } else {
             return '' + this.id;
         }
-    },
+    }
+}
+
+return PosResMultiprintOrderline;
 });
 
-var _super_order = models.Order.prototype;
-models.Order = models.Order.extend({
-    build_line_resume: function(){
+Registries.PModel.extend(models.Order, (Order) => {
+
+class PosResMultiprintOrder extends Order {
+    build_line_resume(){
         var resume = {};
-        this.orderlines.each(function(line){
+        this.orderlines.getItems().forEach(function(line){
             if (line.mp_skip) {
                 return;
             }
@@ -142,15 +149,14 @@ models.Order = models.Order.extend({
             resume[product_id] = product_resume;
         });
         return resume;
-    },
-    saveChanges: function(){
+    }
+    saveChanges(){
         this.saved_resume = this.build_line_resume();
-        this.orderlines.each(function(line){
+        this.orderlines.getItems().forEach(function(line){
             line.set_dirty(false);
         });
-        this.trigger('change',this);
-    },
-    computeChanges: function(categories){
+    }
+    computeChanges(categories){
         var current_res = this.build_line_resume();
         var old_res     = this.saved_resume || {};
         var json        = this.export_as_JSON();
@@ -250,8 +256,8 @@ models.Order = models.Order.extend({
             },
         };
 
-    },
-    printChanges: async function(){
+    }
+    async printChanges(){
         var printers = this.pos.printers;
         let isPrintSuccessful = true;
         for(var i = 0; i < printers.length; i++){
@@ -265,8 +271,8 @@ models.Order = models.Order.extend({
             }
         }
         return isPrintSuccessful;
-    },
-    hasChangesToPrint: function(){
+    }
+    hasChangesToPrint(){
         var printers = this.pos.printers;
         for(var i = 0; i < printers.length; i++){
             var changes = this.computeChanges(printers[i].config.product_categories_ids);
@@ -275,8 +281,8 @@ models.Order = models.Order.extend({
             }
         }
         return false;
-    },
-    hasSkippedChanges: function() {
+    }
+    hasSkippedChanges() {
         var orderlines = this.get_orderlines();
         for (var i = 0; i < orderlines.length; i++) {
             if (orderlines[i].mp_skip) {
@@ -284,16 +290,19 @@ models.Order = models.Order.extend({
             }
         }
         return false;
-    },
-    export_as_JSON: function(){
-        var json = _super_order.export_as_JSON.apply(this,arguments);
+    }
+    export_as_JSON(){
+        var json = super.export_as_JSON(...arguments);
         json.multiprint_resume = JSON.stringify(this.saved_resume);
         return json;
-    },
-    init_from_JSON: function(json){
-        _super_order.init_from_JSON.apply(this,arguments);
+    }
+    init_from_JSON(json){
+        super.init_from_JSON(...arguments);
         this.saved_resume = json.multiprint_resume && JSON.parse(json.multiprint_resume);
-    },
+    }
+}
+
+return PosResMultiprintOrder;
 });
 
 

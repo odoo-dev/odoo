@@ -15,7 +15,7 @@ odoo.define('pos_gift_card.PaymentScreen', function(require) {
                     try {
                         let giftProduct = this.env.pos.db.product_by_id[this.env.pos.config.gift_card_product_id[0]];
 
-                        for (let line of this.currentOrder.orderlines.models) {
+                        for (let line of this.currentOrder.orderlines.getItems()) {
                             if(line.product.id === giftProduct.id && line.price <= 0) {
                                 let is_valid = await this.rpc({
                                     model: "gift.card",

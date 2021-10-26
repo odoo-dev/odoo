@@ -3,23 +3,24 @@ odoo.define('point_of_sale.PaymentScreenStatus', function(require) {
 
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
+    const { useState } = require("@point_of_sale/js/createAtom");
 
     class PaymentScreenStatus extends PosComponent {
+        setup() {
+            this._order = useState(this.props.order)
+        }
         get changeText() {
-            return this.env.pos.format_currency(this.currentOrder.get_change());
+            return this.env.pos.format_currency(this._order.get_change());
         }
         get totalDueText() {
             return this.env.pos.format_currency(
-                this.currentOrder.get_total_with_tax() + this.currentOrder.get_rounding_applied()
+                this._order.get_total_with_tax() + this._order.get_rounding_applied()
             );
         }
         get remainingText() {
             return this.env.pos.format_currency(
-                this.currentOrder.get_due() > 0 ? this.currentOrder.get_due() : 0
+                this._order.get_due() > 0 ? this._order.get_due() : 0
             );
-        }
-        get currentOrder() {
-            return this.env.pos.get_order();
         }
     }
     PaymentScreenStatus.template = 'PaymentScreenStatus';

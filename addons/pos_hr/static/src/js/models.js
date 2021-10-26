@@ -2,6 +2,7 @@ odoo.define('pos_hr.employees', function (require) {
     "use strict";
 
 var models = require('point_of_sale.models');
+const Registries = require('point_of_sale.Registries');
 
 models.load_models([{
     model:  'hr.employee',
@@ -26,9 +27,10 @@ models.load_models([{
     }
 }]);
 
-var posmodel_super = models.PosModel.prototype;
-models.PosModel = models.PosModel.extend({
-    after_load_server_data: function () {
+Registries.PModel.extend(models.PosModel, (PosModel) => {
+
+class PosHrPosModel extends PosModel {
+    after_load_server_data() {
         var self = this;
         var employee_ids = _.map(self.employees, function(employee){return employee.id;});
         var records = self.rpc({
@@ -44,13 +46,13 @@ models.PosModel = models.PosModel.extend({
                     employee.pin = data.pin;
                 }
             });
-        }).then(async () => {
-            await posmodel_super.after_load_server_data.apply(self, arguments);
+        }).then(() => {
+            return super.after_load_server_data(...arguments);
             this.hasLoggedIn = !this.config.module_pos_hr;
         });
-    },
-    set_cashier: function(employee) {
-        posmodel_super.set_cashier.apply(this, arguments);
+    }
+    set_cashier(employee) {
+        super.set_cashier(...arguments);
         const selectedOrder = this.get_order();
         if (selectedOrder && !selectedOrder.get_orderlines().length) {
             // Order without lines can be considered to be un-owned by any employee.
@@ -58,29 +60,36 @@ models.PosModel = models.PosModel.extend({
             selectedOrder.employee = employee;
         }
     }
+}
+
+return PosHrPosModel;
 });
 
-var super_order_model = models.Order.prototype;
-models.Order = models.Order.extend({
-    initialize: function (attributes, options) {
-        super_order_model.initialize.apply(this, arguments);
+Registries.PModel.extend(models.Order, (Order) => {
+
+class PosHrOrder extends Order {
+    initialize(attributes, options) {
+        super.initialize(...arguments);
         if (!options.json) {
             this.employee = this.pos.get_cashier();
         }
-    },
-    init_from_JSON: function (json) {
-        super_order_model.init_from_JSON.apply(this, arguments);
+    }
+    init_from_JSON(json) {
+        super.init_from_JSON(...arguments);
         if (this.pos.config.module_pos_hr) {
             this.employee = this.pos.employee_by_id[json.employee_id];
         }
-    },
-    export_as_JSON: function () {
-        const json = super_order_model.export_as_JSON.apply(this, arguments);
+    }
+    export_as_JSON() {
+        const json = super.export_as_JSON(...arguments);
         if (this.pos.config.module_pos_hr) {
             json.employee_id = this.employee ? this.employee.id : false;
         }
         return json;
-    },
+    }
+}
+
+return PosHrOrder;
 });
 
 });

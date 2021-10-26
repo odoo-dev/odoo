@@ -1,11 +1,11 @@
-odoo.define('pos_mercury.PaymentScreenPaymentLines', function (require) {
+odoo.define('pos_mercury.PaymentLine', function (require) {
     'use strict';
 
-    const PaymentScreenPaymentLines = require('point_of_sale.PaymentScreenPaymentLines');
+    const PaymentLine = require('point_of_sale.PaymentLine');
     const Registries = require('point_of_sale.Registries');
 
-    const PosMercuryPaymentLines = (PaymentScreenPaymentLines) =>
-        class extends PaymentScreenPaymentLines {
+    const PosMercuryPaymentLines = (PaymentLine) =>
+        class extends PaymentLine {
             /**
              * @override
              */
@@ -24,7 +24,7 @@ odoo.define('pos_mercury.PaymentScreenPaymentLines', function (require) {
             }
         };
 
-    Registries.Component.extend(PaymentScreenPaymentLines, PosMercuryPaymentLines);
+    Registries.Component.extend(PaymentLine, PosMercuryPaymentLines);
 
-    return PaymentScreenPaymentLines;
+    return PaymentLine;
 });

@@ -13,7 +13,8 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
             useListener('click-line', this.onClickLine);
             this.splitlines = useState(this._initSplitLines(this.env.pos.get_order()));
             this.newOrderLines = {};
-            this.newOrder = new models.Order(
+            const ExtenderOrder = Registries.PModel.get(models.Order);
+            this.newOrder = new ExtenderOrder(
                 {},
                 {
                     pos: this.env.pos,
@@ -21,12 +22,6 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
                 }
             );
             this._isFinal = false;
-        }
-        mounted() {
-            this.env.pos.on('change:selectedOrder', this._resetState, this);
-        }
-        willUnmount() {
-            this.env.pos.off('change:selectedOrder', null, this);
         }
         get currentOrder() {
             return this.env.pos.get_order();
@@ -50,9 +45,7 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
             this._isFinal = true;
             delete this.newOrder.temporary;
 
-            if (this._isFullPayOrder()) {
-                this.showScreen('PaymentScreen');
-            } else {
+            if (!this._isFullPayOrder()) {
                 this._setQuantityOnCurrentOrder();
 
                 this.newOrder.set_screen_data({ name: 'PaymentScreen' });
@@ -74,9 +67,10 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
                 this.currentOrder.set_customer_count(newCustomerCount || 1);
                 this.currentOrder.set_screen_data({ name: 'ProductScreen' });
 
-                this.env.pos.get('orders').add(this.newOrder);
-                this.env.pos.set('selectedOrder', this.newOrder);
+                this.env.pos.orders.add(this.newOrder);
+                this.env.pos.selectedOrder = this.newOrder;
             }
+            this.showScreen('PaymentScreen');
         }
         /**
          * @param {models.Order} order
@@ -176,17 +170,6 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
                     }
                 }
             }
-        }
-        _resetState() {
-            if (this._isFinal) return;
-
-            for (let id in this.splitlines) {
-                delete this.splitlines[id];
-            }
-            for (let line of this.currentOrder.get_orderlines()) {
-                this.splitlines[line.id] = { quantity: 0 };
-            }
-            this.newOrder.orderlines.reset();
         }
     }
     SplitBillScreen.template = 'SplitBillScreen';

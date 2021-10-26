@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_mercury.PaymentLine" t-inherit="point_of_sale.PaymentLine" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('payment-name')]//t" position="replace">
+            <t t-if="!props.line.payment_method.is_cash_count and props.line.mercury_swipe_pending">
+                <span>WAITING FOR SWIPE</span>
+            </t>
+            <t t-else="">
+                <t t-esc="props.line.payment_method.name" />
+            </t>
+        </xpath>
+    </t>
+
+</templates>

@@ -2,6 +2,7 @@ odoo.define("pos_gift_card.gift_card", function (require) {
   "use strict";
 
   const models = require("point_of_sale.models");
+  const Registries = require('point_of_sale.Registries');
 
     // Load the products used for creating program reward lines.
     var existing_models = models.PosModel.prototype.models;
@@ -19,55 +20,64 @@ odoo.define("pos_gift_card.gift_card", function (require) {
     },
   ]);
 
-  var _order_super = models.Order.prototype;
-  models.Order = models.Order.extend({
-    set_orderline_options: function (orderline, options) {
-      _order_super.set_orderline_options.apply(this, [orderline, options]);
+  Registries.PModel.extend(models.Order, (Order) => {
+
+  class PosGiftCardOrder extends Order {
+    set_orderline_options(orderline, options) {
+      super.set_orderline_options(...arguments);
       if (options && options.generated_gift_card_ids) {
         orderline.generated_gift_card_ids = [options.generated_gift_card_ids];
       }
       if (options && options.gift_card_id) {
         orderline.gift_card_id = options.gift_card_id;
       }
-    },
-    wait_for_push_order: function () {
+    }
+    wait_for_push_order() {
         if(this.pos.config.use_gift_card) {
             let giftProduct = this.pos.db.product_by_id[this.pos.config.gift_card_product_id[0]];
-            for (let line of this.orderlines.models) {
+            for (let line of this.orderlines.getItems()) {
                 if(line.product.id === giftProduct.id)
                     return true;
             }
         }
-        return _order_super.wait_for_push_order.apply(this, arguments);
-    },
+        return super.wait_for_push_order(...arguments);
+    }
+  }
+
+  return PosGiftCardOrder;
   });
 
-  var _super_orderline = models.Orderline;
-  models.Orderline = models.Orderline.extend({
-    export_as_JSON: function () {
-      var json = _super_orderline.prototype.export_as_JSON.apply(
-        this,
-        arguments
-      );
+  Registries.PModel.extend(models.Orderline, (Orderline) => {
+
+  class PosGiftCardOrderline extends Orderline {
+    export_as_JSON() {
+      var json = super.export_as_JSON(...arguments);
       json.generated_gift_card_ids = this.generated_gift_card_ids;
       json.gift_card_id = this.gift_card_id;
       return json;
-    },
-    init_from_JSON: function (json) {
-      _super_orderline.prototype.init_from_JSON.apply(this, arguments);
+    }
+    init_from_JSON(json) {
+      super.init_from_JSON(...arguments);
       this.generated_gift_card_ids = json.generated_gift_card_ids;
       this.gift_card_id = json.gift_card_id;
-    },
+    }
+  }
+
+  return PosGiftCardOrderline;
   });
 
-  var _posmodel_super = models.PosModel.prototype;
-    models.PosModel = models.PosModel.extend({
-        print_gift_pdf: function (giftCardIds) {
+  Registries.PModel.extend(models.PosModel, (PosModel) => {
+
+  class PosGiftCardPosModel extends PosModel {
+        print_gift_pdf(giftCardIds) {
             this.do_action('pos_gift_card.gift_card_report_pdf', {
                 additional_context: {
                     active_ids: [giftCardIds],
                 },
             })
         }
+    }
+
+    return PosGiftCardPosModel;
     });
 });

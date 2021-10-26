@@ -3,21 +3,25 @@ odoo.define('pos_epson_printer_restaurant.multiprint', function (require) {
 
 var models = require('point_of_sale.models');
 var EpsonPrinter = require('pos_epson_printer.Printer');
+const Registries = require('point_of_sale.Registries');
 
 // The override of create_printer needs to happen after its declaration in
 // pos_restaurant. We need to make sure that this code is executed after the
 // multiprint file in pos_restaurant.
 require('pos_restaurant.multiprint');
 
-var _super_posmodel = models.PosModel.prototype;
+Registries.PModel.extend(models.PosModel, (PosModel) => {
 
-models.PosModel = models.PosModel.extend({
-    create_printer: function (config) {
+class PosEpsonResPosModel extends PosModel {
+    create_printer(config) {
         if (config.printer_type === "epson_epos") {
             return new EpsonPrinter(config.epson_printer_ip);
         } else {
-            return _super_posmodel.create_printer.apply(this, arguments);
+            return super.create_printer(...arguments);
         }
-    },
+    }
+}
+
+return PosEpsonResPosModel;
 });
 });
