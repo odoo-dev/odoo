@@ -472,9 +472,7 @@ class ThreadedServer(CommonServer):
             _logger.debug("cron%d started!" % i)
 
     def http_thread(self):
-        def app(e, s):
-            return self.app(e, s)
-        self.httpd = ThreadedWSGIServerReloadable(self.interface, self.port, app)
+        self.httpd = ThreadedWSGIServerReloadable(self.interface, self.port, self.app)
         self.httpd.serve_forever()
 
     def http_spawn(self):
@@ -1286,12 +1284,12 @@ def start(preload=None, stop=False):
     load_server_wide_modules()
 
     if odoo.evented:
-        server = GeventServer(odoo.service.wsgi_server.application)
+        server = GeventServer(odoo.http.application)
     elif config['workers']:
         if config['test_enable'] or config['test_file']:
             _logger.warning("Unit testing in workers mode could fail; use --workers 0.")
 
-        server = PreforkServer(odoo.service.wsgi_server.application)
+        server = PreforkServer(odoo.http.application)
 
         # Workaround for Python issue24291, fixed in 3.6 (see Python issue26721)
         if sys.version_info[:2] == (3,5):
@@ -1320,7 +1318,7 @@ def start(preload=None, stop=False):
                 assert libc.mallopt(ctypes.c_int(M_ARENA_MAX), ctypes.c_int(2))
             except Exception:
                 _logger.warning("Could not set ARENA_MAX through mallopt()")
-        server = ThreadedServer(odoo.service.wsgi_server.application)
+        server = ThreadedServer(odoo.http.application)
 
     watcher = None
     if 'reload' in config['dev_mode'] and not odoo.evented:
