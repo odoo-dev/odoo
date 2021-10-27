@@ -183,6 +183,70 @@ babel.core.LOCALE_ALIASES['nb'] = 'nb_NO'
 
 
 # =========================================================
+# Const
+# =========================================================
+
+# The request mimetypes that transport JSON in their body.
+JSON_MIMETYPES = ('application/json', 'application/json-rpc')
+
+
+# =========================================================
+# Helpers
+# =========================================================
+
+def db_list(force=False, httprequest=None):
+    """
+    Get the list of available databases
+
+    :param bool force: See :func:`~odoo.service.db.list_dbs`:
+    :param Optional[werkzeug.Request] httprequest:
+        See `:func:~odoo.http.db_filter:`.
+    :returns: the list of available databases
+    :rtype: List[str]
+    """
+    dbs = odoo.service.db.list_dbs(force)
+    return db_filter(dbs, httprequest=httprequest)
+
+def db_filter(dbs, httprequest=None):
+    """
+    Return the subset of ``dbs`` that match the dbfilter or the dbname
+    server configuration. In case neither are configured, return ``dbs``
+    as-is.
+
+    :param Iterable[str] dbs: The list of database names to filter.
+    :param Optional[werkzeug.Request] httprequest: The request from
+        which to extract the hostname and domain that are injected in
+        the ``%d`` and ``%h`` dbfilter placeholders.
+    :returns: The original list filtered.
+    :rtype: List[str]
+    """
+
+    if config['dbfilter']:
+        #        host
+        #     -----------
+        # www.example.com:80
+        #     -------
+        #     domain
+        host = (httprequest or request.httprequest).environ.get('HTTP_HOST', '')
+        host = host.partition(':')[0]
+        if host.startswith('www.'):
+            host = host[4:]
+        domain = host.partition('.')[0]
+
+        dbfilter_re = re.compile(
+            config["dbfilter"].replace("%h", re.escape(host))
+                              .replace("%d", re.escape(domain)))
+        return [db for db in dbs if dbfilter_re.match(db)]
+
+    if config['db_name']:
+        # In case --db-filter is not provided and --database is passed, Odoo will
+        # use the value of --database as a comma separated list of exposed databases.
+        exposed_dbs = {db.strip() for db in config['db_name'].split(',')}
+        return sorted(exposed_dbs.intersection(dbs))
+
+    return list(dbs)
+
+# =========================================================
 # Controller and routes
 # =========================================================
 
@@ -269,16 +333,72 @@ def route(route=None, **routing):
 _request_stack = werkzeug.local.LocalStack()
 request = _request_stack()
 
+
 class Response(werkzeug.wrappers.Response):
     """
     Outgoing HTTP response with body, status, headers and qweb support.
     """
+
 
 class Request:
     """
     Wrapper around the incomming HTTP request with deserialized request
     parameters, session utilities and request dispatching logic.
     """
+
+    def __init__(self, httprequest):
+        self.httprequest = httprequest
+        self.type = 'json' if httprequest.mimetype in JSON_MIMETYPES else 'http'
+        self.future_response = FutureResponse()
+
+    # =====================================================
+    # Session
+    # =====================================================
+    def _get_session_id(self):
+        """
+        Get the session identifier and the database from the request,
+        only return the database when it is available.
+
+        :return Tuple[str, str]: a pair (session_id, dbname), each may
+            be an empty string when the info is missing or could not be
+            determined.
+
+        The session identifier is retrieve from the, in priority:
+          * ``session_id`` query-string;
+          * ``X-Openerp-Session-Id`` header (deprecated);
+          * ``session_id`` cookie (usually set).
+
+        The database is retrieve from the, in priority:
+          * ``db`` query-string option;
+          * ``session_id`` query-string option;
+          * ``X-Openerp-Session-Id`` header (deprecated);
+          * ``session_id`` cookie (usually set);
+          * database list if there is only one database available.
+
+        Because the two information share the same query-string option,
+        cookie and header, the two are to be concatenated with a single
+        dot separating the two: ``<session_id>.<dbname>``.
+        """
+        sid, _, requested_db = (
+               self.httprequest.args.get('session_id')
+            or self.httprequest.headers.get("X-Openerp-Session-Id")
+            or self.httprequest.cookies.get('session_id')
+            or ''
+        ).partition('.')
+
+        query_db = self.httprequest.args.get('db')
+        if query_db is not None:
+            requested_db = query_db
+
+        available_dbs = db_list(httprequest=self.httprequest)
+        if requested_db in available_dbs:
+            return sid, requested_db
+
+        all_dbs = db_list(force=True, httprequest=self.httprequest)
+        if len(all_dbs) == 1:
+            return sid, all_dbs[0]
+
+        return sid, ''
 
     # =====================================================
     # HTTP Controllers
@@ -368,6 +488,39 @@ class Application(object):
             server that this application must call in order to send the
             HTTP response status line and the response headers.
         """
+        if odoo.tools.config['proxy_mode'] and environ.get("HTTP_X_FORWARDED_HOST"):
+            # The ProxyFix middleware has a side effect of updating the
+            # environ, see https://github.com/pallets/werkzeug/pull/2184
+            def fake_app(environ, start_response):
+                return []
+            def fake_start_response(status, headers):
+                return
+            ProxyFix(fake_app)(environ, fake_start_response)
+
+        httprequest = werkzeug.wrappers.Request(environ)
+        httprequest.parameter_storage_class = (
+            werkzeug.datastructures.ImmutableOrderedMultiDict)
+        request = Request(httprequest)
+        _request_stack.push(request)
+
+        current_thread = threading.current_thread()
+        current_thread.query_count = 0
+        current_thread.query_time = 0
+        current_thread.perf_t0 = time.time()
+        current_thread.url = httprequest.url
+
+        segments = httprequest.path.split('/')
+        if len(segments) >= 4 and segments[2] == 'static':
+            response = request._serve_static()
+        else:
+            sid, dbname = request._get_session_id()
+            if dbname is None:
+                response = request._serve_nodb()
+            else:
+                response = request._serve_db(dbname, sid)
+
+        _request_stack.pop()
+        return response(environ, start_response)
 
 
 app = application = root = Application()
