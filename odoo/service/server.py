@@ -1132,17 +1132,12 @@ class WorkerCron(Worker):
         return db_names
 
     def process_work(self):
-        rpc_request = logging.getLogger('odoo.netsvc.rpc.request')
-        rpc_request_flag = rpc_request.isEnabledFor(logging.DEBUG)
         _logger.debug("WorkerCron (%s) polling for jobs", self.pid)
         db_names = self._db_list()
         if len(db_names):
             self.db_index = (self.db_index + 1) % len(db_names)
             db_name = db_names[self.db_index]
             self.setproctitle(db_name)
-            if rpc_request_flag:
-                start_time = time.time()
-                start_memory = memory_info(psutil.Process(os.getpid()))
 
             from odoo.addons import base
             base.models.ir_cron.ir_cron._process_jobs(db_name)
@@ -1150,13 +1145,6 @@ class WorkerCron(Worker):
             # dont keep cursors in multi database mode
             if len(db_names) > 1:
                 odoo.sql_db.close_db(db_name)
-            if rpc_request_flag:
-                run_time = time.time() - start_time
-                end_memory = memory_info(psutil.Process(os.getpid()))
-                vms_diff = (end_memory - start_memory) / 1024
-                logline = '%s time:%.3fs mem: %sk -> %sk (diff: %sk)' % \
-                    (db_name, run_time, start_memory / 1024, end_memory / 1024, vms_diff)
-                _logger.debug("WorkerCron (%s) %s", self.pid, logline)
 
             self.request_count += 1
             if self.request_count >= self.request_max and self.request_max < len(db_names):

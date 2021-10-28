@@ -39,10 +39,10 @@ from odoo.tools.translate import _
 from odoo.tools.misc import str2bool, xlsxwriter, file_open, file_path
 from odoo.tools.safe_eval import safe_eval, time
 from odoo import http
-from odoo.http import content_disposition, dispatch_rpc, request, serialize_exception as _serialize_exception
+from odoo.http import content_disposition, request, serialize_exception as _serialize_exception
 from odoo.exceptions import AccessError, UserError, AccessDenied
 from odoo.models import check_method_name
-from odoo.service import db, security
+from odoo.service import db, dispatch_rpc, security
 
 _logger = logging.getLogger(__name__)
 

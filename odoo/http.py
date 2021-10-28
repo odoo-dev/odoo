@@ -597,7 +597,7 @@ class Request:
         self.httprequest = httprequest
         self.type = 'json' if httprequest.mimetype in JSON_MIMETYPES else 'http'
         self.future_response = FutureResponse()
-        #self.params = {}  # set in _http_dispatch
+        #self.params = {}  # set in _http_dispatch and _json_dispatch
 
         self.db = None
 
@@ -790,11 +790,66 @@ class Request:
     # =====================================================
     # JSON-RPC2 Controllers
     # =====================================================
-    def _json_dispatch(self, ...):
+    def _json_dispatch(self, endpoint, args):
         """
-        Perform json-related actions such as deserializing the request
-        body while dispatching a request to a ``type='json'`` route.
+        `JSON-RPC 2 <http://www.jsonrpc.org/specification>`_ over HTTP.
+
+        Our implementation differs from the specification on two points:
+
+        1. The ``method`` member of the JSON-RPC request payload is
+           ignored as the HTTP path is already used to route the request
+           to the controller.
+        2. We only support parameter structures by-name, i.e. the
+           ``params`` member of the JSON-RPC request payload MUST be a
+           JSON Object and not a JSON Array.
+
+        In addition, it is possible to pass a context that replaces
+        the session context via a special ``context`` argument that is
+        removed prior to calling the endpoint.
+
+        Sucessful request::
+
+          --> {"jsonrpc": "2.0", "method": "call", "params": {"context": {}, "arg1": "val1" }, "id": null}
+
+          <-- {"jsonrpc": "2.0", "result": { "res1": "val1" }, "id": null}
+
+        Request producing a error::
+
+          --> {"jsonrpc": "2.0", "method": "call", "params": {"context": {}, "arg1": "val1" }, "id": null}
+
+          <-- {"jsonrpc": "2.0", "error": {"code": 1, "message": "End user error message.", "data": {"code": "codestring", "debug": "traceback" } }, "id": null}
+
         """
+        body = self.httprequest.get_data().decode(self.httprequest.charset)
+        try:
+            self.jsonrequest = json.loads(body)
+        except ValueError:
+            _logger.info('%s: Invalid JSON data\n%s', self.httprequest.path, body)
+            raise werkzeug.exceptions.BadRequest(f"Invalid JSON data:\n{body}")
+
+        self.params = dict(self.jsonrequest.get('params', {}), **args)
+        ctx = self.params.pop('context', None)
+        if ctx is not None and self.db:
+            self.update_env(context=ctx)
+
+        result = endpoint(**self.params)
+        return self._json_response(result, request_id=self.jsonrequest.get('id'))
+
+    def _json_response(self, result=None, error=None, request_id=None):
+        status = 200
+        response = {'jsonrpc': '2.0', 'id': request_id}
+        if error is not None:
+            response['error'] = error
+            status = error.pop('http_status', 200)
+        if result is not None:
+            response['result'] = result
+
+        body = json.dumps(response, default=date_utils.json_default)
+
+        return Response(body, status=status, headers=[
+            ('Content-Type', 'application/json'),
+            ('Content-Length', len(body)),
+        ])
 
     def _json_handle_error(self, exc):
         """
@@ -856,7 +911,7 @@ class Request:
         rule, args = router.match(return_rule=True)
         self._pre_dispatch(rule, args)
         if self.type == 'json':
-            response = self._json_dispatch(rule.endpoint)
+            response = self._json_dispatch(rule.endpoint, args)
         else:
             response = self._http_dispatch(rule.endpoint, args)
         self._inject_future_response(response)
