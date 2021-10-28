@@ -186,6 +186,9 @@ babel.core.LOCALE_ALIASES['nb'] = 'nb_NO'
 # Const
 # =========================================================
 
+# The validity duration of a preflight response, one day.
+CORS_MAX_AGE = 60 * 60 * 24
+
 # The request mimetypes that transport JSON in their body.
 JSON_MIMETYPES = ('application/json', 'application/json-rpc')
 
@@ -310,6 +313,15 @@ class Controller:
             def greeting(self):
                 return super().handler()
     """
+    children_classes = collections.defaultdict(list)  # indexed by module
+
+    @classmethod
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        if Controller in cls.__bases__:
+            path = cls.__module__.split('.')
+            module = path[2] if path[:2] == ['odoo', 'addons'] else ''
+            Controller.children_classes[module].append(cls)
 
 
 def route(route=None, **routing):
@@ -348,6 +360,116 @@ def route(route=None, **routing):
         by default for ``'json'``-type requests. See
         :ref:`CSRF Protection <csrf>` for more.
     """
+    def decorator(endpoint):
+        fname = f"<function {endpoint.__module__}.{endpoint.__name__}>"
+
+        # Sanitize the routing
+        assert 'type' not in routing or routing['type'] in ('http', 'json')
+        if route:
+            routing['routes'] = route if isinstance(route, list) else [route]
+        wrong = routing.pop('method', None)
+        if wrong is not None:
+            _logger.warning("%s defined with invalid routing parameter 'method', assuming 'methods'", fname)
+            routing['methods'] = wrong
+
+        @functools.wraps(endpoint)
+        def route_wrapper(self, *args, **params):
+            params_ok = filter_kwargs(endpoint, params)
+            params_ko = set(params) - set(params_ok)
+            if params_ko:
+                _logger.warning("%s called ignoring args %s", fname, params_ko)
+
+            result = endpoint(self, *args, **params_ok)
+            return result
+
+        route_wrapper.original_routing = routing
+        route_wrapper.original_endpoint = endpoint
+        return route_wrapper
+    return decorator
+
+def _generate_routing_rules(modules, nodb_only, converters=None):
+    def is_valid(cls):
+        path = cls.__module__.split('.')
+        return path[:2] == ['odoo', 'addons'] and path[2] in modules
+
+    def get_leaf_classes(cls):
+        result = []
+        for subcls in cls.__subclasses__():
+            if is_valid(subcls):
+                result.extend(get_leaf_classes(subcls))
+        if not result and is_valid(cls):
+            result.append(cls)
+        return result
+
+    def build_controllers():
+        highest_controllers = []
+        for module in modules:
+            highest_controllers.extend(Controller.children_classes.get(module, []))
+
+        for top_ctrl in highest_controllers:
+            leaf_controllers = list(unique(get_leaf_classes(top_ctrl)))
+            name = '{} (extended by {})'.format(
+                top_ctrl.__name__,
+                ', '.join(bot_ctrl.__name__ for bot_ctrl in leaf_controllers),
+            )
+            Ctrl = type(name, tuple(reversed(leaf_controllers)), {})
+            yield Ctrl()
+
+    for ctrl in build_controllers():
+        for method_name, method in inspect.getmembers(ctrl, inspect.ismethod):
+
+            # Skip this method if it is not @route decorated anywhere in
+            # the hierarchy
+            def is_method_a_route(cls):
+                return resolve_attr(cls, f'{method_name}.original_routing', None) is not None
+            if not any(map(is_method_a_route, type(ctrl).mro())):
+                continue
+
+            merged_routing = {
+                # 'type': 'http',  # set below
+                'auth': 'user',
+                'methods': None,
+                'routes': [],
+                'readonly': False,
+            }
+
+            for cls in unique(reversed(type(ctrl).mro())):  # ancestors first
+                submethod = getattr(cls, method_name, None)
+                if submethod is None:
+                    continue
+
+                if not hasattr(submethod, 'original_routing'):
+                    _logger.warning("The endpoint %s is not decorated by @route(), decorating it myself.", f'{cls.__module__}.{cls.__name__}.{method_name}')
+                    submethod = route()(submethod)
+
+                # Ensure "type" is defined on each method's own routing,
+                # also ensure overrides don't change the routing type.
+                default_type = submethod.original_routing.get('type', 'http')
+                routing_type = merged_routing.setdefault('type', default_type)
+                if submethod.original_routing.get('type') not in (None, routing_type):
+                    _logger.warning("The endpoint %s changes the route type, using the original type: %r.", f'{cls.__module__}.{cls.__name__}.{method_name}', routing_type)
+                submethod.original_routing['type'] = routing_type
+
+                merged_routing.update(submethod.original_routing)
+
+            if not merged_routing['routes']:
+                _logger.warning("%s is a controller endpoint without any route, skipping.", f'{cls.__module__}.{cls.__name__}.{method_name}')
+                continue
+
+            if nodb_only and merged_routing['auth'] != "none":
+                continue
+
+            for url in merged_routing['routes']:
+                # duplicates the function (partial) with a copy of the
+                # original __dict__ (update_wrapper) to keep a reference
+                # to `original_routing` and `original_endpoint`, assign
+                # the merged routing ONLY on the duplicated function to
+                # ensure method's immutability.
+                endpoint = functools.partial(method)
+                functools.update_wrapper(endpoint, method, assigned=())
+                endpoint.routing = merged_routing
+
+                yield (url, endpoint)
 
 
 # =========================================================
@@ -363,6 +485,20 @@ class Response(werkzeug.wrappers.Response):
     """
     Outgoing HTTP response with body, status, headers and qweb support.
     """
+
+
+class FutureResponse:
+    """ werkzeug.Response mock class that only serves as placeholder for
+        headers to inject in the final response. """
+    charset = 'utf-8'
+    max_cookie_size = 4093
+
+    def __init__(self):
+        self.headers = werkzeug.datastructures.Headers()
+
+    @functools.wraps(werkzeug.Response.set_cookie)
+    def set_cookie(self, *args, **kwargs):
+        werkzeug.Response.set_cookie(self, *args, **kwargs)
 
 
 class Request:
@@ -556,6 +692,32 @@ class Request:
     # =====================================================
     # Routing
     # =====================================================
+    def _inject_future_response(self, response):
+        response.headers.extend(self.future_response.headers)
+        return response
+
+    def _pre_dispatch(self, rule, args):
+        routing = rule.endpoint.routing
+        set_header = self.future_response.headers.set
+
+        cors = routing.get('cors')
+        if cors:
+            set_header('Access-Control-Allow-Origin', cors)
+            set_header('Access-Control-Allow-Methods', (
+                     'POST' if routing['type'] == 'json'
+                else ', '.join(routing['methods'] or ['GET', 'POST'])
+            ))
+
+        if cors and self.httprequest.method == 'OPTIONS':
+            set_header('Access-Control-Max-Age', CORS_MAX_AGE)
+            set_header('Access-Control-Allow-Headers',
+                'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+            werkzeug.exceptions.abort(self._inject_future_response(Response()))
+
+        if self.type != routing['type']:
+            _logger.warning("Request's content type is %s but '%s' is type %s.", self.type, routing['routes'][0], routing['type'])
+            raise BadRequest(f"Request's content type is {self.type} but '{routing['routes'][0]}' is type {routing['type']}.")
+
     def _serve_static(self):
         """ Serve a static file from the file system. """
         module, _, path = self.httprequest.path[1:].partition('/static/')
@@ -573,6 +735,15 @@ class Request:
         Dispatch the request to its matching controller in a
         database-free environment.
         """
+        router = app.nodb_routing_map.bind_to_environ(self.httprequest.environ)
+        rule, args = router.match(return_rule=True)
+        self._pre_dispatch(rule, args)
+        if self.type == 'json':
+            response = self._json_dispatch(rule.endpoint)
+        else:
+            response = self._http_dispatch(rule.endpoint, args)
+        self._inject_future_response(response)
+        return response
 
     def _serve_db(self, dbname, session_id):
         """
@@ -617,6 +788,16 @@ class Application(object):
                         and os.path.isdir(static_path)):
                     mod2path[module] = static_path
         return mod2path
+
+    @lazy_property
+    def nodb_routing_map(self):
+        nodb_routing_map = werkzeug.routing.Map(strict_slashes=False, converters=None)
+        for url, endpoint in _generate_routing_rules([''] + odoo.conf.server_wide_modules, nodb_only=True):
+            rule = werkzeug.routing.Rule(url, endpoint=endpoint, **submap(endpoint.routing, ROUTING_KEYS))
+            rule.merge_slashes = False
+            nodb_routing_map.add(rule)
+
+        return nodb_routing_map
 
     def __call__(self, environ, start_response):
         """

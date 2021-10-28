@@ -4,8 +4,8 @@
 __all__ = ['synchronized', 'lazy_classproperty', 'lazy_property',
            'classproperty', 'conditional', 'lazy']
 
+from inspect import getsourcefile, Parameter, signature
 from functools import wraps
-from inspect import getsourcefile
 from json import JSONEncoder
 
 
@@ -60,6 +60,21 @@ def conditional(condition, decorator):
         return decorator
     else:
         return lambda fn: fn
+
+def filter_kwargs(func, kwargs):
+    """ Filter the given keyword arguments to only return the kwargs
+        that bind to the function's signature.
+    """
+    leftovers = set(kwargs)
+    for p in signature(func).parameters.values():
+        if p.kind == Parameter.VAR_KEYWORD:  # **kwargs
+            return kwargs
+
+        if p.kind in (Parameter.POSITIONAL_OR_KEYWORD, Parameter.KEYWORD_ONLY):
+            leftovers.discard(p.name)
+
+    return {keyword: kwargs[keyword] for keyword in set(kwargs) - leftovers}
+
 
 def synchronized(lock_attr='_lock'):
     def decorator(func):

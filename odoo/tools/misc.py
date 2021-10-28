@@ -1217,6 +1217,16 @@ def unique(it):
             seen.add(e)
             yield e
 
+def submap(mapping, keys):
+    """
+    Get a filtered copy of the mapping where only some keys are present.
+
+    :param Mapping mapping: the original dict-like structure to filter
+    :param Iterable keys: the list of keys to keep
+    :return dict: a filtered dict copy of the original mapping
+    """
+    return {key: mapping[key] for key in set(keys).intersection(mapping)}
+
 class Reverse(object):
     """ Wraps a value and reverses its ordering, useful in key functions when
     mixing ascending and descending sort on non-numeric data as the
