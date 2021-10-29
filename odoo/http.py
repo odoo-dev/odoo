@@ -189,6 +189,18 @@ babel.core.LOCALE_ALIASES['nb'] = 'nb_NO'
 # The validity duration of a preflight response, one day.
 CORS_MAX_AGE = 60 * 60 * 24
 
+# The default validity duration for new csrf tokens, two days.
+DEFAULT_CSRF_TOKEN_LIFETIME = 60 * 60 * 24 * 2
+
+# The dictionnary to initialise a new session with.
+DEFAULT_SESSION = {
+    'context': {},
+    'debug': '',
+    'login': None,
+    'uid': None,
+    'session_token': None,
+}
+
 # The request mimetypes that transport JSON in their body.
 JSON_MIMETYPES = ('application/json', 'application/json-rpc')
 
@@ -198,6 +210,10 @@ ROUTING_KEYS = {
     'defaults', 'subdomain', 'build_only', 'strict_slashes', 'redirect_to',
     'alias', 'host', 'methods',
 }
+
+# The duration of a user session before it is considered expirated,
+# three months.
+SESSION_LIFETIME = 60 * 60 * 24 * 90
 
 # The cache duration for static content from the filesystem, one week.
 STATIC_CACHE = 60 * 60 * 24 * 7
@@ -600,6 +616,45 @@ class Request:
         #self.params = {}  # set in _http_dispatch and _json_dispatch
 
         self.db = None
+        self.registry = None
+        self.env = None
+
+        self.session = Namespace()
+        self.session_id = None
+        self._session_data = None
+
+    # =====================================================
+    # Getters and setters
+    # =====================================================
+    def update_env(self, user=None, context=None, su=None):
+        """ Update the environment of the current request. """
+        cr = None  # None is a sentinel, it keeps the same cursor
+        self.env = self.env(cr, user, context, su)
+        threading.current_thread().uid = self.env.uid
+
+    def update_context(self, **overrides):
+        """
+        Override the environment context of the current request with the
+        values of ``overrides``. To replace the entire context, please
+        use :meth:`~update_env`: instead.
+        """
+        self.update_env(context=dict(self.env.context, **overrides))
+
+    # =====================================================
+    # Helpers
+    # =====================================================
+    def default_lang(self):
+        lang = self.httprequest.accept_languages.best or "en-US"
+        try:
+            code, territory, _, _ = babel.core.parse_locale(lang, sep='-')
+            if territory:
+                lang = f'{code}_{territory}'
+            else:
+                lang = babel.core.LOCALE_ALIASES[code]
+        except (ValueError, KeyError):
+            lang = 'en_US'
+
+        return lang
 
     # =====================================================
     # Session
@@ -649,6 +704,64 @@ class Request:
             return sid, all_dbs[0]
 
         return sid, ''
+
+    def _set_cookie_session_id(self, session_id, dbname):
+        """
+        Update the cookie session with a new session id and database.
+
+        :param str session_id: The (possibly empty) session id.
+        :param str dbname: The (possibly empty) database name.
+        """
+        self.future_response.set_cookie(
+            'session_id', f'{session_id}.{dbname}',
+            max_age=SESSION_LIFETIME, httponly=True
+        )
+
+    @contextlib.contextmanager
+    def manage_session(self):
+        """
+        Load the session from the database (or use a default session if
+        it is missing) and write it back (if modified) when the context
+        manager exits without error.
+        """
+        with contextlib.closing(db_connect(self.db).cursor()) as cr:
+            cr.execute("SELECT data FROM ir_session WHERE sid = %s", (self.session_id,))
+            row = cr.fetchone()
+            self._session_data = row[0] if row else '{}'
+
+        self.session = Namespace(DEFAULT_SESSION, sid=self.session_id)
+        self.session.update(json.loads(self._session_data))
+
+        yield
+
+        self.save_session()
+
+    def save_session(self):
+        """
+        Save the current session on the database. Does nothing if the
+        session is not dirty.
+        """
+        session_data = json.dumps(self.session, ensure_ascii=False, sort_keys=True)
+        if session_data == self._session_data:
+            return
+
+        with db_connect(self.db).cursor() as cr, \
+             contextlib.suppress(psycopg2.OperationalError):
+            cr.execute("""
+                INSERT INTO ir_session (sid, data, create_date, write_date)
+                VALUES (%(sid)s, %(data)s, NOW(), NOW())
+                ON CONFLICT (sid)
+                    DO UPDATE SET data=%(data)s, write_date=NOW()
+            """, {
+                'sid': self.session_id,
+                'data': session_data,
+            }, log_exceptions=False)
+
+    def reload_session(self):
+        """ Reload the session from the cache of the database. """
+        self.session = Namespace(DEFAULT_SESSION, sid=self.session_id)
+        self.session.update(json.loads(self._session_data))
+        self.update_env(user=self.session.uid, context=self.session.context)
 
     # =====================================================
     # HTTP Controllers
@@ -742,6 +855,56 @@ class Request:
                 res.set_etag(etag)
         return res
 
+    def csrf_token(self, time_limit=DEFAULT_CSRF_TOKEN_LIFETIME):
+        """
+        Generates and returns a CSRF token for the current session
+
+        :param Optional[int] time_limit: the CSRF token should only be
+            valid for the specified duration (in second), by default
+            48h, ``None`` for the token to be valid as long as the
+            current user's session is.
+        :returns: ASCII token string
+        :rtype: str
+        """
+        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+        if not secret:
+            raise ValueError("CSRF protection requires a configured database secret")
+
+        # if no `time_limit` => distant 1y expiry (31536000) so max_ts acts as salt, e.g. vs BREACH
+        max_ts = int(time.time() + (time_limit or 31536000))
+        msg = f'{self.session_id}{max_ts}'.encode('utf-8')
+
+        hm = hmac.new(secret.encode('ascii'), msg, hashlib.sha1).hexdigest()
+        return f'{hm}o{max_ts}'
+
+    def validate_csrf(self, csrf):
+        """
+        Is the given csrf token valid ?
+
+        :param str csrf: The token to validate.
+        :returns: ``True`` when valid, ``False`` when not.
+        :rtype: bool
+        """
+        if not csrf:
+            return False
+
+        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+        if not secret:
+            raise ValueError("CSRF protection requires a configured database secret")
+
+        hm, _, max_ts = csrf.rpartition('o')
+        msg = f'{self.session_id}{max_ts}'.encode('utf-8')
+
+        if max_ts:
+            try:
+                if int(max_ts) < int(time.time()):
+                    return False
+            except ValueError:
+                return False
+
+        hm_expected = hmac.new(secret.encode('ascii'), msg, hashlib.sha1).hexdigest()
+        return consteq(hm, hm_expected)
+
     def get_http_params(self):
         """
         Extract key=value pairs from the query string and the forms
@@ -774,6 +937,14 @@ class Request:
         if self.httprequest.method not in ('GET', 'HEAD', 'OPTIONS', 'TRACE') and endpoint.routing.get('csrf', True):
             if not self.db:
                 return self.redirect('/web/database/selector')
+
+            token = self.params.pop('csrf_token', None)
+            if not self.validate_csrf(token):
+                if token is not None:
+                    _logger.warning("CSRF validation failed on path '%s'", self.httprequest.path)
+                else:
+                    _logger.warning("No CSRF token provided for path '%s' https://www.odoo.com/documentation/15.0/reference/addons/http.html#csrf for more details.", request.httprequest.path)
+                raise werkzeug.exceptions.BadRequest('Session expired (invalid CSRF token)')
 
         return endpoint(**self.params)
 
@@ -928,6 +1099,31 @@ class Request:
             missing, a new random secret session identifier is granted
             and saved in the response cookies.
         """
+        self.db = threading.current_thread().dbname = dbname
+        self.session_id = session_id = session_id or secrets.token_urlsafe()
+        self._set_cookie_session_id(session_id, dbname)
+
+        with self.manage_session():
+            try:
+                self.registry = Registry(dbname)
+                self.registry.check_signaling()
+            except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError):
+                # psycopg2 error or attribute error while constructing
+                # the registry. That means either
+                #  - the database probably does not exists anymore, or
+                #  - the database is corrupted, or
+                #  - the database version doesnt match the server version.
+                # So remove the database from the cookie
+                redirect = self.redirect('/web/database/selector')
+                self._set_cookie_session_id(self.session_id, dbname='')
+                return redirect
+
+            with contextlib.closing(self.registry.cursor()) as cr:
+                self.env = odoo.api.Environment(cr, self.session.uid, self.session.context)
+                threading.current_thread().uid = self.env.uid
+                if 'lang' not in self.env.context:
+                    self.update_context(lang=self.default_lang())
+                return service_model.retrying(self._serve_ir_http, self.env)
 
     def _serve_ir_http(self):
         """

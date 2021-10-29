@@ -1564,6 +1564,16 @@ class DotDict(dict):
         return DotDict(val) if type(val) is dict else val
 
 
+class Namespace(DotDict):
+    """ Namespace that supports both .dot and ["dot"] notations """
+
+    def __setattr__(self, attrib, value):
+        self[attrib] = value
+
+    def __delattr__(self, attrib):
+        del self[attrib]
+
+
 def get_diff(data_from, data_to, custom_style=False):
     """
     Return, in an HTML table, the diff between two texts.
