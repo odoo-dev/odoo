@@ -621,6 +621,7 @@ class Request:
 
         self.session = Namespace()
         self.session_id = None
+        self._session_save = False
         self._session_data = None
 
     # =====================================================
@@ -734,7 +735,8 @@ class Request:
 
         yield
 
-        self.save_session()
+        if self._session_save:
+            self.save_session()
 
     def save_session(self):
         """
@@ -762,6 +764,56 @@ class Request:
         self.session = Namespace(DEFAULT_SESSION, sid=self.session_id)
         self.session.update(json.loads(self._session_data))
         self.update_env(user=self.session.uid, context=self.session.context)
+
+    def reset_session(self):
+        """ Reset the session defaults, basically logout. """
+        self.env.cr.execute('DELETE FROM ir_session WHERE sid = %s', [self.session.sid])
+        self.session_id = secrets.token_urlsafe()
+        self.session = Namespace(DEFAULT_SESSION, sid=self.session_id)
+        self._set_cookie_session_id(self.session_id, self.db)
+
+    def session_authenticate_start(self, login=None, password=None):
+        """
+        Authenticate the current user with the given db, login and
+        password. If successful, store the authentication parameters in
+        the current session and request, unless multi-factor-auth (MFA)
+        is activated. In that case, that last part will be done by
+        :ref:`session_authenticate_finalize`.
+        """
+        wsgienv = {
+            "interactive": True,
+            "base_location": self.httprequest.url_root.rstrip('/'),
+            "HTTP_HOST": self.httprequest.environ['HTTP_HOST'],
+            "REMOTE_ADDR": self.httprequest.environ['REMOTE_ADDR'],
+        }
+        uid = self.env['res.users'].authenticate(self.db, login, password, wsgienv)
+
+        self.session.pre_login = login
+        self.session.pre_uid = uid
+
+        # if 2FA is disabled we finalize immediately
+        user = self.env(user=uid)['res.users'].browse(uid)
+        if not user._mfa_url():
+            self.session_authenticate_finalize()
+
+        return uid
+
+    def session_authenticate_finalize(self):
+        """
+        Finalizes a partial session, should be called on MFA validation
+        to convert a partial / pre-session into a logged-in one.
+        """
+        login = self.session.pop('pre_login')
+        uid = self.session.pop('pre_uid')
+        self.update_env(user=uid)
+        self.update_context(**self.env['res.users'].context_get())
+
+        self.session.update({
+            'login': login,
+            'uid': uid,
+            'context': submap(self.env.context, ['lang']),
+            'session_token': self.env.user._compute_session_token(self.session_id),
+        })
 
     # =====================================================
     # HTTP Controllers
@@ -946,7 +998,10 @@ class Request:
                     _logger.warning("No CSRF token provided for path '%s' https://www.odoo.com/documentation/15.0/reference/addons/http.html#csrf for more details.", request.httprequest.path)
                 raise werkzeug.exceptions.BadRequest('Session expired (invalid CSRF token)')
 
-        return endpoint(**self.params)
+        if self.db:
+            return self.env['ir.http']._dispatch(endpoint)
+        else:
+            return endpoint(**self.params)
 
     def _http_handle_error(self, exc):
         """
@@ -1003,7 +1058,10 @@ class Request:
         if ctx is not None and self.db:
             self.update_env(context=ctx)
 
-        result = endpoint(**self.params)
+        if self.db:
+            result = self.env['ir.http']._dispatch(endpoint)
+        else:
+            result = endpoint(**self.params)
         return self._json_response(result, request_id=self.jsonrequest.get('id'))
 
     def _json_response(self, result=None, error=None, request_id=None):
@@ -1130,6 +1188,29 @@ class Request:
         Delegate most of the processing to the ir.http model that is
         extensible by applications.
         """
+        ir_http = self.env['ir.http']
+
+        try:
+            rule, args = ir_http._match(self.httprequest.path)
+        except NotFound:
+            response = ir_http._serve_fallback()
+            if response:
+                self._inject_future_response(response)
+                return response
+            raise
+
+        self._session_save = rule.endpoint.routing.get('save_session', True)
+        if not self._session_save:
+            self._set_cookie_session_id(session_id='', dbname=self.db)
+
+        ir_http._authenticate(rule.endpoint)
+        ir_http._pre_dispatch(rule, args)
+        if self.type == 'json':
+            response = self._json_dispatch(rule.endpoint, args)
+        else:
+            response = self._http_dispatch(rule.endpoint, args)
+        self._inject_future_response(response)
+        return response
 
 
 # =========================================================
