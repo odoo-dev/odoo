@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests.common import HttpCase
@@ -35,13 +34,13 @@ class TestStandardPerformance(UtilPerf):
     def test_10_perf_sql_img_controller(self):
         self.authenticate('demo', 'demo')
         url = '/web/image/res.users/2/image_256'
-        self.assertEqual(self._get_url_hot_query(url), 6)
+        self.assertEqual(self._get_url_hot_query(url), 4)
 
     def test_20_perf_sql_img_controller_bis(self):
         url = '/web/image/website/1/favicon'
-        self.assertEqual(self._get_url_hot_query(url), 4)
+        self.assertEqual(self._get_url_hot_query(url), 2)
         self.authenticate('portal', 'portal')
-        self.assertEqual(self._get_url_hot_query(url), 4)
+        self.assertEqual(self._get_url_hot_query(url), 2)
 
 
 class TestWebsitePerformance(UtilPerf):
@@ -78,20 +77,20 @@ class TestWebsitePerformance(UtilPerf):
 
     def test_10_perf_sql_queries_page(self):
         # standard untracked website.page
-        self.assertEqual(self._get_url_hot_query(self.page.url), 11)
+        self.assertEqual(self._get_url_hot_query(self.page.url), 9)
         self.menu.unlink()
-        self.assertEqual(self._get_url_hot_query(self.page.url), 13)
+        self.assertEqual(self._get_url_hot_query(self.page.url), 11)
 
     def test_15_perf_sql_queries_page(self):
         # standard tracked website.page
         self.page.track = True
-        self.assertEqual(self._get_url_hot_query(self.page.url), 19)
+        self.assertEqual(self._get_url_hot_query(self.page.url), 17)
         self.menu.unlink()
-        self.assertEqual(self._get_url_hot_query(self.page.url), 21)
+        self.assertEqual(self._get_url_hot_query(self.page.url), 19)
 
     def test_20_perf_sql_queries_homepage(self):
         # homepage "/" has its own controller
-        self.assertEqual(self._get_url_hot_query('/'), 18)
+        self.assertEqual(self._get_url_hot_query('/'), 17)
 
     def test_30_perf_sql_queries_page_no_layout(self):
         # website.page with no call to layout templates
@@ -114,10 +113,10 @@ class TestWebsitePerformance(UtilPerf):
         menu_bb.parent_id = menu_b
         menu_aa.parent_id = menu_a
 
-        self.assertEqual(self._get_url_hot_query(self.page.url), 11)
+        self.assertEqual(self._get_url_hot_query(self.page.url), 9)
 
     def test_50_perf_sql_web_assets(self):
         # assets route /web/assets/..
         self.url_open('/')  # create assets attachments
         assets_url = self.env['ir.attachment'].search([('url', '=like', '/web/assets/%/web.assets_common%.js')], limit=1).url
-        self.assertEqual(self._get_url_hot_query(assets_url), 2)
+        self.assertEqual(self._get_url_hot_query(assets_url), 0)

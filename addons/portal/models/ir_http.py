@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models
@@ -15,6 +14,6 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _get_frontend_langs(cls):
-        if request and request.is_frontend:
+        if request and getattr(request, 'is_frontend', True):
             return [lang[0] for lang in filter(lambda l: l[3], request.env['res.lang'].get_available())]
         return super()._get_frontend_langs()

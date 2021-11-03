@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-from odoo.http import request
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import models
+from odoo.http import request
 
 
 class IrHttp(models.AbstractModel):
@@ -11,25 +11,15 @@ class IrHttp(models.AbstractModel):
         return request.httprequest.host
 
     @classmethod
-    def _set_utm(cls, response):
-        if isinstance(response, Exception):
-            return response
-        # the parent dispatch might destroy the session
-        if not request.db:
-            return response
-
+    def _set_utm(cls):
         domain = cls.get_utm_domain_cookies()
-        for var, dummy, cook in request.env['utm.mixin'].tracking_fields():
+        for var, _, cook in request.env['utm.mixin'].tracking_fields():
             if var in request.params and request.httprequest.cookies.get(var) != request.params[var]:
-                response.set_cookie(cook, request.params[var], domain=domain)
-        return response
+                request.future_response.set_cookie(cook, request.params[var], domain=domain)
 
     @classmethod
-    def _dispatch(cls):
-        response = super(IrHttp, cls)._dispatch()
-        return cls._set_utm(response)
-
-    @classmethod
-    def _handle_exception(cls, exc):
-        response = super(IrHttp, cls)._handle_exception(exc)
-        return cls._set_utm(response)
+    def _dispatch(cls, endpoint):
+        # cannot override _pre_dispatch() as _set_utm() requires the
+        # params from the request's body.
+        cls._set_utm()
+        return super()._dispatch(endpoint)
