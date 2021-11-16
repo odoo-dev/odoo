@@ -1,9 +1,12 @@
 odoo.define('web.domain_selector_tests', function (require) {
 "use strict";
 
+const FormView = require("web.FormView");
 var DomainSelector = require("web.DomainSelector");
 var testUtils = require("web.test_utils");
 const { createWebClient, doAction } = require('@web/../tests/webclient/helpers');
+const { registry } = require('@web/core/registry');
+const legacyViewRegistry = require('web.view_registry');
 
 QUnit.module('widgets', {}, function () {
 
@@ -247,6 +250,9 @@ QUnit.module('DomainSelector', {
     });
 
     QUnit.test("inline domain editor in modal", async function (assert) {
+        registry.category("views").remove("form"); // remove new form from registry
+        legacyViewRegistry.add("form", FormView); // add legacy form -> will be wrapped and added to new registry
+
         assert.expect(1);
 
         const serverData = {
