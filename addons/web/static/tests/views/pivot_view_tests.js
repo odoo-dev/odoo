@@ -2171,6 +2171,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.skip("Removing or adding filter shouldn't modify the row group", async function (assert) {
+        // #long-term-skipped-test
         serverData.views = {
             "partner,false,pivot": `
                     <pivot>
