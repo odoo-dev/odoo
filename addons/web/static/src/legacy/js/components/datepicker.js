@@ -23,9 +23,7 @@ odoo.define('web.DatePickerOwl', function (require) {
      * @extends Component
      */
     class DatePicker extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.inputRef = useRef('input');
             this.state = useState({ warning: false });
 

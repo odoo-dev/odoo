@@ -26,15 +26,15 @@ function getJsClassWidget(fieldsInfo) {
 
 const legacyViewTemplate = xml`
     <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"
-                 widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
-                 t-on-scrollTo.stop="onScrollTo"/>`;
+                 widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" />`;
+// t-ref="controller" NXOWL
+// t-on-scrollTo.stop="onScrollTo"
 
 // registers a view from the legacy view registry to the wowl one, but wrapped
 // into an Owl Component
 function registerView(name, LegacyView) {
     class Controller extends Component {
-        constructor() {
-            super(...arguments);
+        setup() {
             this.vm = useService("view");
             this.controllerRef = useRef("controller");
             this.Widget = Widget; // fool the ComponentAdapter with a simple Widget

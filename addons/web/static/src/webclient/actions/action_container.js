@@ -10,7 +10,7 @@ const { Component, xml } = owl;
 export class ActionContainer extends Component {
     setup() {
         this.info = {};
-        this.onActionManagerUpdate = (info) => {
+        this.onActionManagerUpdate = ({ detail: info }) => {
             this.info = info;
             this.render();
         };
@@ -29,3 +29,4 @@ ActionContainer.template = xml`
         <t t-if="info.Component" t-component="info.Component" t-props="info.componentProps" t-key="info.id"/>
       </div>
     </t>`;
+console.log(ActionContainer.template);

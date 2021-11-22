@@ -11,7 +11,7 @@ import { ViewNotFoundError } from "../webclient/actions/action_service";
 import { cleanDomFromBootstrap, wrapSuccessOrFail } from "./utils";
 import { mapDoActionOptionAPI } from "./backend_utils";
 
-const { Component, useExternalListener, xml } = owl;
+const { Component, useExternalListener, useComponent, xml } = owl;
 
 const warningDialogBodyTemplate = xml`<t t-esc="props.message"/>`;
 
@@ -222,7 +222,7 @@ export class ClientActionAdapter extends ActionAdapter {
 const magicReloadSymbol = Symbol("magicReload");
 
 function useMagicLegacyReload() {
-    const comp = Component.current;
+    const comp = useComponent();
     if (comp.props.widget && comp.props.widget[magicReloadSymbol]) {
         return comp.props.widget[magicReloadSymbol];
     }
