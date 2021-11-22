@@ -6140,7 +6140,7 @@ QUnit.module('Views', {
                 return JSON.stringify(this.props.record.data);
             }
         }
-        MyComponent.template = owl.tags.xml`<div t-esc="value"/>`;
+        MyComponent.template = owl.xml`<div t-esc="value"/>`;
         widgetRegistryOwl.add('test', MyComponent);
 
         const kanban = await createView({

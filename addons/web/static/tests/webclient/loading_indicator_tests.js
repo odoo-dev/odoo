@@ -129,10 +129,10 @@ QUnit.test("loading indicator blocks UI", async (assert) => {
         },
     });
     const ui = env.services.ui;
-    ui.bus.on("BLOCK", null, () => {
+    ui.bus.addEventListener("BLOCK", () => {
         assert.step("block");
     });
-    ui.bus.on("UNBLOCK", null, () => {
+    ui.bus.addEventListener("UNBLOCK", () => {
         assert.step("unblock");
     });
     await mount(LoadingIndicator, { env, target });

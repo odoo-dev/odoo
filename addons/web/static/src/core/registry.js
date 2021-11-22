@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-const { core } = owl;
-const { EventBus } = core;
+const { EventBus } = owl;
 
 // -----------------------------------------------------------------------------
 // Errors
@@ -30,7 +29,7 @@ export class Registry extends EventBus {
         this.elements = null;
         this.entries = null;
 
-        this.on("UPDATE", this, () => {
+        this.addEventListener("UPDATE", () => {
             this.elements = null;
             this.entries = null;
         });

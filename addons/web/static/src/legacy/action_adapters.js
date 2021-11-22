@@ -11,9 +11,9 @@ import { ViewNotFoundError } from "../webclient/actions/action_service";
 import { cleanDomFromBootstrap, wrapSuccessOrFail } from "./utils";
 import { mapDoActionOptionAPI } from "./backend_utils";
 
-const { Component, tags, hooks } = owl;
+const { Component, useExternalListener, xml } = owl;
 
-const warningDialogBodyTemplate = tags.xml`<t t-esc="props.message"/>`;
+const warningDialogBodyTemplate = xml`<t t-esc="props.message"/>`;
 
 class ActionAdapter extends ComponentAdapter {
     setup() {
@@ -41,10 +41,11 @@ class ActionAdapter extends ComponentAdapter {
                     this.title.setParts({ action: this.widget.getTitle() });
                     this.waitTitle = false;
                 }
-                this.wowlEnv.bus.on("ACTION_MANAGER:UPDATE", this, () => {
+                const onActionManagerUpdate = () => {
                     this.env.bus.trigger("close_dialogs");
                     cleanDomFromBootstrap();
-                });
+                };
+                this.wowlEnv.bus.addEventListener("ACTION_MANAGER:UPDATE", onActionManagerUpdate);
                 originalUpdateControlPanel = this.__widget.updateControlPanel.bind(this.__widget);
                 this.__widget.updateControlPanel = (newProps) => {
                     this.trigger("controller-title-updated", this.__widget.getTitle());
@@ -55,12 +56,15 @@ class ActionAdapter extends ComponentAdapter {
 
                 return () => {
                     this.__widget.updateControlPanel = originalUpdateControlPanel;
-                    this.wowlEnv.bus.off("ACTION_MANAGER:UPDATE", this);
+                    this.wowlEnv.bus.removeEventListener(
+                        "ACTION_MANAGER:UPDATE",
+                        onActionManagerUpdate
+                    );
                 };
             },
             () => []
         );
-        hooks.useExternalListener(window, "click", () => {
+        useExternalListener(window, "click", () => {
             cleanDomFromBootstrap();
         });
     }

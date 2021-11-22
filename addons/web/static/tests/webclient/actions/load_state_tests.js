@@ -25,7 +25,7 @@ import {
 } from "./../helpers";
 import { errorService } from "@web/core/errors/error_service";
 
-const { Component, mount, tags } = owl;
+const { Component, mount, xml } = owl;
 
 let serverData;
 
@@ -180,7 +180,7 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("properly load client actions", async function (assert) {
         assert.expect(3);
         class ClientAction extends Component {}
-        ClientAction.template = tags.xml`<div class="o_client_action_test">Hello World</div>`;
+        ClientAction.template = xml`<div class="o_client_action_test">Hello World</div>`;
         actionRegistry.add("HelloWorldTest", ClientAction);
         const mockRPC = async function (route, args) {
             assert.step((args && args.method) || route);
@@ -986,7 +986,7 @@ QUnit.module("ActionManager", (hooks) => {
                 browser.location.hash = "#action=__test__client__action__&menu_id=1";
             }
         }
-        MyAction.template = tags.xml`<div class="not-here" />`;
+        MyAction.template = xml`<div class="not-here" />`;
         registry.category("actions").add("myAction", MyAction);
 
         browser.location.hash = "#action=myAction";
@@ -1017,7 +1017,7 @@ QUnit.module("ActionManager", (hooks) => {
                 window.dispatchEvent(new HashChangeEvent("hashchange", { newURL }));
             }
         }
-        MyAction.template = tags.xml`<div class="not-here" />`;
+        MyAction.template = xml`<div class="not-here" />`;
         registry.category("actions").add("myAction", MyAction);
 
         browser.location.hash = "#action=myAction";

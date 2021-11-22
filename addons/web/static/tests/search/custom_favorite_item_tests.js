@@ -169,7 +169,7 @@ QUnit.module("Search", (hooks) => {
             }
         }
         TestComponent.components = { FavoriteMenu };
-        TestComponent.template = owl.tags.xml`<div><FavoriteMenu/></div>`;
+        TestComponent.template = owl.xml`<div><FavoriteMenu/></div>`;
 
         const comp = await makeWithSearch({
             serverData,

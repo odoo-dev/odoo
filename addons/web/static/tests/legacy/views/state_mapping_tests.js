@@ -27,7 +27,6 @@ import { browser } from "@web/core/browser/browser";
 
 const serviceRegistry = registry.category("services");
 const viewRegistry = registry.category("views");
-const searchModelRegistry = registry.category("search_models");
 
 let serverData;
 QUnit.module("Views", (hooks) => {
@@ -81,7 +80,7 @@ QUnit.module("Views", (hooks) => {
         ToyView.icon = "fab fa-android";
         ToyView.multiRecord = true;
         ToyView.searchMenuTypes = ["filter", "groupBy", "comparison", "favorite"];
-        ToyView.template = owl.tags.xml`
+        ToyView.template = owl.xml`
             <div class="o_toy_view">
                 <ControlPanel />
             </div>

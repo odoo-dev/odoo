@@ -18,8 +18,7 @@ import { scrollTo } from "../utils/scrolling";
  * }} MenuElement
  */
 
-const { hooks } = owl;
-const { useComponent, useRef } = hooks;
+const { useComponent, useRef } = owl;
 
 const ACTIVE_MENU_ELEMENT_CLASS = "focus";
 const MENU_ELEMENTS_SELECTORS = [":scope > .dropdown-item", ":scope > .dropdown"];

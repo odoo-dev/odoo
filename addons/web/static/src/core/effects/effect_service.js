@@ -4,7 +4,7 @@ import { registry } from "../registry";
 import { EffectContainer } from "./effect_container";
 import { RainbowMan } from "./rainbow_man";
 
-const { EventBus } = owl.core;
+const { EventBus } = owl;
 
 const effectRegistry = registry.category("effects");
 

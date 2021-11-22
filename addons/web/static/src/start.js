@@ -6,8 +6,7 @@ import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { processTemplates } from "./core/assets";
 import { session } from "@web/session";
 
-const { mount, utils } = owl;
-const { whenReady } = utils;
+const { mount, whenReady } = owl;
 
 /**
  * Function to start a webclient.

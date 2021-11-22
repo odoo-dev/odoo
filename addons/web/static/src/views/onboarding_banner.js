@@ -4,6 +4,8 @@ import { loadAssets } from "@web/core/assets";
 import { useService } from "@web/core/utils/hooks";
 import { useActionLinks } from "@web/views/helpers/view_hook";
 
+const { xml } = owl;
+
 export class OnboardingBanner extends owl.Component {
     setup() {
         this.rpc = useService("rpc");
@@ -48,5 +50,5 @@ export class OnboardingBanner extends owl.Component {
     }
 }
 
-OnboardingBanner.template = owl.tags.xml`<div class="w-100" t-raw="bannerHTML" />`;
+OnboardingBanner.template = xml`<div class="w-100" t-raw="bannerHTML" />`;
 OnboardingBanner.props = {};

@@ -2,8 +2,7 @@
 
 import { useService } from "@web/core/utils/hooks";
 
-const { Component, hooks, QWeb } = owl;
-const { useRef } = hooks;
+const { Component, useRef } = owl;
 
 /**
  * Custom file input
@@ -83,5 +82,3 @@ FileInput.props = {
     multi_upload: { type: Boolean, optional: 1 },
 };
 FileInput.template = "web.FileInput";
-
-QWeb.registerComponent("FileInput", FileInput);

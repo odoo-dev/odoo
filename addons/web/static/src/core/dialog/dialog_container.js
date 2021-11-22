@@ -2,11 +2,11 @@
 
 import { ErrorHandler, NotUpdatable } from "../utils/components";
 
-const { Component, tags } = owl;
+const { Component, xml } = owl;
 
 export class DialogContainer extends Component {
     setup() {
-        this.props.bus.on("UPDATE", this, this.render);
+        this.props.bus.addEventListener("UPDATE", this.render.bind(this));
     }
 
     close(id) {
@@ -23,7 +23,7 @@ export class DialogContainer extends Component {
     }
 }
 DialogContainer.components = { ErrorHandler, NotUpdatable };
-DialogContainer.template = tags.xml`
+DialogContainer.template = xml`
     <div class="o_dialog_container" t-att-class="{'modal-open': Object.keys(props.dialogs).length > 0}">
       <t t-foreach="Object.values(props.dialogs)" t-as="dialog" t-key="dialog.id">
         <NotUpdatable>

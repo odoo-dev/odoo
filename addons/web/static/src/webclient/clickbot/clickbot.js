@@ -38,7 +38,7 @@
         }
         setupDone = true;
         const env = odoo.__WOWL_DEBUG__.root.env;
-        env.bus.on("ACTION_MANAGER:UI-UPDATED", null, () => {
+        env.bus.addEventListener("ACTION_MANAGER:UI-UPDATED", () => {
             actionCount++;
         });
 

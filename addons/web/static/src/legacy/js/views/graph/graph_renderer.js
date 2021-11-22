@@ -17,7 +17,7 @@ odoo.define("web/static/src/js/views/graph/graph_renderer", function (require) {
         shortenLabel,
     } = require("web/static/src/js/views/graph/graph_utils");
 
-    const { useRef } = owl.hooks;
+    const { useRef } = owl;
     class GraphRenderer extends AbstractRenderer {
         constructor() {
             super(...arguments);

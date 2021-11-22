@@ -172,11 +172,11 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
     legacyEnv.services.local_storage = mapStorage(browser.localStorage);
     legacyEnv.services.session_storage = mapStorage(browser.sessionStorage);
     // map WebClientReady
-    wowlEnv.bus.on("WEB_CLIENT_READY", null, () => {
+    wowlEnv.bus.addEventListener("WEB_CLIENT_READY", () => {
         legacyEnv.bus.trigger("web_client_ready");
     });
 
-    wowlEnv.bus.on("SCROLLER:ANCHOR_LINK_CLICKED", null, (payload) => {
+    wowlEnv.bus.addEventListener("SCROLLER:ANCHOR_LINK_CLICKED", (payload) => {
         legacyEnv.bus.trigger("SCROLLER:ANCHOR_LINK_CLICKED", payload);
     });
 

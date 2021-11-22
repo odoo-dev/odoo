@@ -240,12 +240,14 @@ QUnit.module("ActionManager", (hooks) => {
             };
             const webClient = await createWebClient({ serverData, mockRPC });
             const ui = webClient.env.services.ui;
-            ui.bus.on("BLOCK", webClient, () => {
+            const onBlock = () => {
                 assert.step("block");
-            });
-            ui.bus.on("UNBLOCK", webClient, () => {
+            };
+            const onUnblock = () => {
                 assert.step("unblock");
-            });
+            };
+            ui.bus.addEventListener("BLOCK", onBlock);
+            ui.bus.addEventListener("UNBLOCK", onUnblock);
             await doAction(webClient, 7);
             try {
                 await doAction(webClient, 7);
@@ -261,8 +263,8 @@ QUnit.module("ActionManager", (hooks) => {
                 "unblock",
                 "error caught",
             ]);
-            ui.bus.off("BLOCK", webClient);
-            ui.bus.off("UNBLOCK", webClient);
+            ui.bus.removeEventListener("BLOCK", onBlock);
+            ui.bus.removeEventListener("UNBLOCK", onUnblock);
         }
     );
 

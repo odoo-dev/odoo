@@ -6,9 +6,7 @@ import { useDropdownNavigation } from "./dropdown_navigation_hook";
 import { ParentClosingMode } from "./dropdown_item";
 import { localization } from "../l10n/localization";
 
-const { Component, core, hooks, useState, QWeb } = owl;
-const { EventBus } = core;
-const { onWillStart, useExternalListener, useRef, useSubEnv } = hooks;
+const { Component, EventBus, onWillStart, useExternalListener, useRef, useState, useSubEnv } = owl;
 
 const DIRECTION_CARET_CLASS = {
     bottom: "dropdown",
@@ -313,5 +311,3 @@ Dropdown.props = {
     },
 };
 Dropdown.template = "web.Dropdown";
-
-QWeb.registerComponent("Dropdown", Dropdown);

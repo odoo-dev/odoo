@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-const { Component, QWeb } = owl;
+const { Component } = owl;
 
 /**
  * Custom checkbox
@@ -24,5 +24,3 @@ export class CheckBox extends Component {
 
 CheckBox.template = "web.CheckBox";
 CheckBox.nextId = 1;
-
-QWeb.registerComponent("CheckBox", CheckBox);

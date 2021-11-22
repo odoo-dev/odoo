@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
-const { Component, tags } = owl;
+const { Component, xml } = owl;
 
 export class EffectContainer extends Component {
     setup() {
         this.effect = null;
-        this.props.bus.on("UPDATE", this, (effect) => {
+        this.props.bus.addEventListener("UPDATE", (effect) => {
             this.effect = effect;
             this.render();
         });
@@ -16,7 +16,7 @@ export class EffectContainer extends Component {
     }
 }
 
-EffectContainer.template = tags.xml`
+EffectContainer.template = xml`
   <div class="o_effects_manager">
     <t t-if="effect">
         <t t-component="effect.Component" t-props="effect.props" t-key="effect.id" close="() => removeEffect()"/>
