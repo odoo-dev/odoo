@@ -40,7 +40,7 @@ export async function startWebClient(Webclient) {
     env.app = app;
     app.configure({ env });
     app.addTemplates(templates);
-    const root = app.mount(document.body);
+    const root = await app.mount(document.body);
     // delete odoo.debug; // FIXME: some legacy code rely on this
     odoo.__WOWL_DEBUG__ = { root }; // FIXME NXOWL CRAP
     odoo.isReady = true;

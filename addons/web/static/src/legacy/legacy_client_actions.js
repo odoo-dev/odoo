@@ -23,8 +23,7 @@ function registerClientAction(name, action) {
     if (action.prototype instanceof Widget) {
         // the action is a widget, wrap it into a Component and register that component
         class Action extends Component {
-            constructor() {
-                super(...arguments);
+            setup() {
                 this.controllerRef = useRef("controller");
                 this.Widget = action;
                 const options = {};

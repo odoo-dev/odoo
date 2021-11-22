@@ -79,7 +79,7 @@ odoo.define('web.OwlCompatibility', function () {
          *
          * @override
          */
-        constructor(parent, props) {
+        constructor(props) {
             if (!props.Component) {
                 throw Error(`ComponentAdapter: 'Component' prop is missing.`);
             }
@@ -92,7 +92,7 @@ odoo.define('web.OwlCompatibility', function () {
             ComponentAdapter.template = template;
             super(...arguments);
             this.template = template;
-            ComponentAdapter.template = null;
+            //ComponentAdapter.template = null;
 
             this.widget = null; // widget instance, if Component is a legacy widget
         }

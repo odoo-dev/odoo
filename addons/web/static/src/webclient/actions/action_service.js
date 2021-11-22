@@ -73,10 +73,10 @@ export class InvalidButtonParamsError extends Error {}
 const CTX_KEY_REGEX = /^(?:(?:default_|search_default_|show_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids|orderedBy)$/;
 
 // only register this template once for all dynamic classes ControllerComponent
-const ControllerComponentTemplate = xml`<t t-component="Component" t-props="props"
-    t-ref="component"
-    t-on-history-back="onHistoryBack"
-    t-on-controller-title-updated.stop="onTitleUpdated"/>`;
+const ControllerComponentTemplate = xml`<t t-component="Component" t-props="props"/>`;
+// t-ref="component" NXOWL
+// t-on-history-back="onHistoryBack"
+// t-on-controller-title-updated.stop="onTitleUpdated"/>`;
 
 function makeActionManager(env) {
     const keepLast = new KeepLast();
