@@ -17,9 +17,9 @@ NotificationContainer.template = xml`
         <t t-foreach="props.notifications" t-as="notification" t-key="notification.id">
             <Notification
                 t-props="notification.props"
-                t-transition="o_notification_fade"
-                t-on-close="notification.close()"
-            />
+                />
+                <!-- NXOWL onClose="notification.close" -->
+                <!-- NXOWL t-transition="o_notification_fade" -->
         </t>
     </div>`;
 NotificationContainer.components = { Notification };

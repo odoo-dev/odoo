@@ -6,7 +6,7 @@ import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { processTemplates } from "./core/assets";
 import { session } from "@web/session";
 
-const { mount, whenReady } = owl;
+const { App, whenReady } = owl;
 
 /**
  * Function to start a webclient.
@@ -31,14 +31,17 @@ export async function startWebClient(Webclient) {
         startServices(env),
         odoo.loadTemplatesPromise.then(processTemplates),
     ]);
-    env.qweb.addTemplates(templates);
 
     // start web client
     await whenReady();
     const legacyEnv = await legacySetupProm;
     mapLegacyEnvToWowlEnv(legacyEnv, env);
-    const root = await mount(Webclient, { env, target: document.body, position: "self" });
+    const app = new App(Webclient);
+    env.app = app;
+    app.configure({ env });
+    app.addTemplates(templates);
+    const root = app.mount(document.body);
     // delete odoo.debug; // FIXME: some legacy code rely on this
-    odoo.__WOWL_DEBUG__ = { root };
+    odoo.__WOWL_DEBUG__ = { root }; // FIXME NXOWL CRAP
     odoo.isReady = true;
 }

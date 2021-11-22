@@ -27,9 +27,6 @@ import { registry } from "./core/registry";
  */
 export function makeEnv() {
     return {
-        get qweb() {
-            throw new Error("pouet");
-        },
         bus: new owl.EventBus(),
         services: {},
         debug: odoo.debug,

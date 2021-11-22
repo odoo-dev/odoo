@@ -28,7 +28,8 @@
                     </DropdownItem>
                 </t>
                 <t t-else="">
-                    <t t-component="item.Component" t-on-dropdown-item-selected.stop=""/>
+                    <t t-component="item.Component"/>
+                    <!-- NXOWL t-on-dropdown-item-selected.stop="" -->
                 </t>
                 <t t-set="currentGroup" t-value="item.groupNumber"/>
             </t>

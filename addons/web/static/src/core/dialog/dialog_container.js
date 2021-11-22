@@ -28,9 +28,10 @@ DialogContainer.template = xml`
       <t t-foreach="Object.values(props.dialogs)" t-as="dialog" t-key="dialog.id">
         <NotUpdatable>
             <ErrorHandler onError="(error) => handleError(error, dialog.id)">
-                <t t-component="dialog.class" t-props="dialog.props"
+                <t t-component="dialog.class" t-props="dialog.props"/>
+                <!-- NXOWL 
                     t-on-dialog-closed="dialog.props.close()" 
-                    t-att-class="{o_inactive_modal: !dialog_last}"/>
+                    t-att-class="{o_inactive_modal: !dialog_last}" -->
             </ErrorHandler>
         </NotUpdatable>
       </t>
