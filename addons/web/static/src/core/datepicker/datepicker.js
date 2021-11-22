@@ -105,7 +105,7 @@ export class DatePicker extends Component {
         return {
             // Fallback to default localization format in `core/l10n/dates.js`.
             format: this.props.format,
-            locale: this.props.locale || this.date.locale,
+            locale: this.props.locale || (this.date && this.date.locale),
             timezone: this.isLocal,
         };
     }
@@ -132,7 +132,7 @@ export class DatePicker extends Component {
      * @param {string} [params.locale]
      */
     setDate({ date, locale }) {
-        this.date = locale ? date.setLocale(locale) : date;
+        this.date = date && locale ? date.setLocale(locale) : date;
     }
 
     /**
@@ -189,7 +189,7 @@ export class DatePicker extends Component {
     onDateChange() {
         try {
             const date = this.parse(this.inputRef.el.value, this.options);
-            if (!date.equals(this.props.date)) {
+            if (!this.props.date || !date.equals(this.props.date)) {
                 this.state.warning = date > DateTime.local();
                 this.props.onDateTimeChanged(date);
             }
@@ -230,7 +230,7 @@ DatePicker.defaultProps = {
 DatePicker.props = {
     // Components props
     onDateTimeChanged: Function,
-    date: DateTime,
+    date: { type: DateTime, optional: true },
     warn_future: { type: Boolean, optional: true },
     // Bootstrap datepicker options
     buttons: {
