@@ -2,10 +2,10 @@
 
 import { registry } from "../../core/registry";
 
-const { loadJS } = owl.utils;
+const { loadFile } = owl;
 
 export default async function startClickEverywhere(xmlId, appsMenusOnly) {
-    await loadJS("web/static/src/webclient/clickbot/clickbot.js");
+    await loadFile("web/static/src/webclient/clickbot/clickbot.js"); // FIXME NXOWL
     window.clickEverywhere(xmlId, appsMenusOnly);
 }
 

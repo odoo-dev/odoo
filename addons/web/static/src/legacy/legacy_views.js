@@ -1,5 +1,5 @@
 /** @odoo-module **/
-const { Component, hooks, tags } = owl;
+const { Component, useRef, xml } = owl;
 
 import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "../webclient/actions/action_hook";
@@ -24,7 +24,7 @@ function getJsClassWidget(fieldsInfo) {
     return legacyViewRegistry.get(key);
 }
 
-const legacyViewTemplate = tags.xml`
+const legacyViewTemplate = xml`
     <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"
                  widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
                  t-on-scrollTo.stop="onScrollTo"/>`;
@@ -36,7 +36,7 @@ function registerView(name, LegacyView) {
         constructor() {
             super(...arguments);
             this.vm = useService("view");
-            this.controllerRef = hooks.useRef("controller");
+            this.controllerRef = useRef("controller");
             this.Widget = Widget; // fool the ComponentAdapter with a simple Widget
             this.View = LegacyView;
             this.viewInfo = {};

@@ -184,11 +184,11 @@ QUnit.test("check trigger RPC:REQUEST and RPC:RESPONSE for a simple rpc", async 
     });
     let rpcIdsRequest = [];
     let rpcIdsResponse = [];
-    env.bus.on("RPC:REQUEST", null, (rpcId) => {
+    env.bus.addEventListener("RPC:REQUEST", (rpcId) => {
         rpcIdsRequest.push(rpcId);
         assert.step("RPC:REQUEST");
     });
-    env.bus.on("RPC:RESPONSE", null, (rpcId) => {
+    env.bus.addEventListener("RPC:RESPONSE", (rpcId) => {
         rpcIdsResponse.push(rpcId);
         assert.step("RPC:RESPONSE");
     });
@@ -218,11 +218,11 @@ QUnit.test("check trigger RPC:REQUEST and RPC:RESPONSE for a rpc with an error",
     });
     let rpcIdsRequest = [];
     let rpcIdsResponse = [];
-    env.bus.on("RPC:REQUEST", null, (rpcId) => {
+    env.bus.addEventListener("RPC:REQUEST", (rpcId) => {
         rpcIdsRequest.push(rpcId);
         assert.step("RPC:REQUEST");
     });
-    env.bus.on("RPC:RESPONSE", null, (rpcId) => {
+    env.bus.addEventListener("RPC:RESPONSE", (rpcId) => {
         rpcIdsResponse.push(rpcId);
         assert.step("RPC:RESPONSE");
     });

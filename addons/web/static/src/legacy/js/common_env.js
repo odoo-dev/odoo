@@ -49,7 +49,7 @@ odoo.define("web.commonEnv", function (require) {
         bus,
         device,
         isDebug,
-        qweb: new owl.QWeb({ translateFn: _t }),
+        get qweb() { throw new Error("pouet"); }, // FIXME NXOWL
         services: {
             ajaxJsonRPC() {
                 return jsonRpc(...arguments);

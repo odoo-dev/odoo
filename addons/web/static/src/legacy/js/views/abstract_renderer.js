@@ -156,7 +156,7 @@ export default mvc.Renderer.extend({
         // FIXME: retrieve owl qweb instance via the env set on Component s.t.
         // it also works in the tests (importing 'web.env' wouldn't). This
         // won't be necessary as soon as this will be written in owl.
-        const owlQWeb = owl.Component.env.qweb;
+        const owlQWeb = owl.Component.env.qweb; // FIXME NXOWL
         template.innerHTML = owlQWeb.renderToString(templateName, context);
         this.el.append(template.content.firstChild);
     },

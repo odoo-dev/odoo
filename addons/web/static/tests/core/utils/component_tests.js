@@ -18,9 +18,9 @@ QUnit.module("utils", () => {
                 assert.step("willupdateprops");
             }
         }
-        Child.template = owl.tags.xml`<div>hey</div>`;
+        Child.template = owl.xml`<div>hey</div>`;
         class Parent extends Component {}
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
           <div>
             <Child/>
             <NotUpdatable><Child/></NotUpdatable>
@@ -38,7 +38,7 @@ QUnit.module("utils", () => {
 
     QUnit.test("ErrorHandler component", async function (assert) {
         class Boom extends Component {}
-        Boom.template = owl.tags.xml`<div><t t-esc="this.will.throw"/></div>`;
+        Boom.template = owl.xml`<div><t t-esc="this.will.throw"/></div>`;
 
         class Parent extends Component {
             setup() {
@@ -49,7 +49,7 @@ QUnit.module("utils", () => {
                 this.render();
             }
         }
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
         <div>
           <t t-if="flag">
             <ErrorHandler onError="() => handleError()">

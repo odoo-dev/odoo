@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-const { useEnv, onWillStart } = owl.hooks;
+const { useEnv, onWillStart } = owl;
 import { memoize } from "./utils/functions";
 import { browser } from "./browser/browser";
 

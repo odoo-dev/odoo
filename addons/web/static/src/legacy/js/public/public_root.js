@@ -352,13 +352,14 @@ export const PublicRoot = publicWidget.RootWidget.extend({
     },
 });
 
-const { Component, mount } = owl;
+const { Component, mount, whenReady } = owl;
 
 /**
  * Configure Owl with the public env
  */
-owl.config.mode = legacyEnv.isDebug() ? "dev" : "prod";
-owl.Component.env = legacyEnv;
+// FIXME NXOWL
+// owl.config.mode = legacyEnv.isDebug() ? "dev" : "prod";
+// owl.Component.env = legacyEnv;
 
 /**
  * This widget is important, because the tour manager needs a root widget in
@@ -376,7 +377,7 @@ export async function createPublicRoot(RootWidget) {
     serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
     serviceRegistry.add("legacy_dialog_mapping", makeLegacyDialogMappingService(legacyEnv));
     serviceRegistry.add("legacy_rainbowman_service", makeLegacyRainbowManService(legacyEnv));
-    await Promise.all([owl.utils.whenReady(), session.is_bound]);
+    await Promise.all([whenReady(), session.is_bound]);
 
     const wowlEnv = makeEnv();
     wowlEnv.qweb.addTemplates(await loadBundleTemplates("web.assets_frontend"));

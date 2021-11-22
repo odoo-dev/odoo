@@ -2,7 +2,7 @@
 
 import { SERVICES_METADATA } from "@web/env";
 
-const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent } = owl.hooks;
+const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent } = owl;
 
 /**
  * This file contains various custom hooks.
@@ -75,8 +75,9 @@ export function useBus(bus, eventName, callback) {
     const component = useComponent();
     useEffect(
         () => {
-            bus.on(eventName, component, callback);
-            return () => bus.off(eventName, component);
+            const listener = callback.bind(component);
+            bus.addEventListener(eventName, listener);
+            return () => bus.removeEventListener(eventName, listener);
         },
         () => []
     );

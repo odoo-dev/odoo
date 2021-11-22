@@ -365,7 +365,7 @@ odoo.define('web.dropdown_menu_tests', function (require) {
                 }
             }
             Parent.components = { DropdownMenu };
-            Parent.template = owl.tags.xml`
+            Parent.template = owl.xml`
                 <div>
                     <DropdownMenu class="first" title="'First'" items="state.items"/>
                     <DropdownMenu class="second" title="'Second'" items="state.items"/>
@@ -412,7 +412,7 @@ odoo.define('web.dropdown_menu_tests', function (require) {
                 }
             }
             Parent.components = { DropdownMenu };
-            Parent.template = owl.tags.xml`
+            Parent.template = owl.xml`
                 <div>
                     <DropdownMenu class="first" title="'First'" items="items"/>
                 </div>`;

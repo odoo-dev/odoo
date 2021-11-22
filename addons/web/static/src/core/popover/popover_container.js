@@ -2,9 +2,7 @@
 
 import { Popover } from "./popover";
 
-const { Component } = owl;
-const { useExternalListener, useState } = owl.hooks;
-const { xml } = owl.tags;
+const { Component, useExternalListener, useState, xml } = owl;
 
 class PopoverController extends Component {
     setup() {
@@ -66,7 +64,7 @@ PopoverController.template = xml/*xml*/ `
 
 export class PopoverContainer extends Component {
     setup() {
-        this.props.bus.on("UPDATE", this, this.render);
+        this.props.bus.addEventListener("UPDATE", this.render.bind(this));
     }
 }
 PopoverContainer.components = { PopoverController };

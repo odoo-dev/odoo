@@ -23,8 +23,8 @@ export class LoadingIndicator extends Component {
             show: false,
         });
         this.rpcIds = new Set();
-        this.env.bus.on("RPC:REQUEST", this, this.requestCall);
-        this.env.bus.on("RPC:RESPONSE", this, this.responseCall);
+        this.env.bus.addEventListener("RPC:REQUEST", this.requestCall.bind(this));
+        this.env.bus.addEventListener("RPC:RESPONSE", this.responseCall.bind(this));
         this.uiService = useService("ui");
     }
 

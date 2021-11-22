@@ -154,7 +154,7 @@ export function makeFakeRouterService(params = {}) {
     return {
         start({ bus }) {
             const router = routerService.start(...arguments);
-            bus.on("test:hashchange", null, (hash) => {
+            bus.addEventListener("test:hashchange", (hash) => {
                 browser.location.hash = objectToUrlEncodedString(hash);
             });
             registerCleanup(router.cancelPushes);
@@ -258,12 +258,16 @@ export function makeFakeUserService(hasGroup = () => false) {
 }
 
 export function makeFakeHTTPService(getResponse, postResponse) {
-    getResponse = getResponse || ((route, readMethod) => {
-        return readMethod === "json" ? {} : "";
-    });
-    postResponse = postResponse || ((route, params, readMethod) => {
-        return readMethod === "json" ? {} : "";
-    });
+    getResponse =
+        getResponse ||
+        ((route, readMethod) => {
+            return readMethod === "json" ? {} : "";
+        });
+    postResponse =
+        postResponse ||
+        ((route, params, readMethod) => {
+            return readMethod === "json" ? {} : "";
+        });
     return {
         start() {
             return {
@@ -272,7 +276,7 @@ export function makeFakeHTTPService(getResponse, postResponse) {
                 },
                 async post(...args) {
                     return postResponse(...args);
-                }
+                },
             };
         },
     };
