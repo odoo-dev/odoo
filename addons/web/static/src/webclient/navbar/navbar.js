@@ -195,4 +195,4 @@ export class NavBar extends Component {
     }
 }
 NavBar.template = "web.NavBar";
-NavBar.components = { MenuDropdown, MenuItem, NotUpdatable, ErrorHandler };
+NavBar.components = { MenuDropdown, Dropdown, MenuItem, NotUpdatable, ErrorHandler };

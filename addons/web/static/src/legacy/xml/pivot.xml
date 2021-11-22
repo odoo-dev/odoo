@@ -100,8 +100,8 @@
                         <t t-foreach="Object.values(intervalOptions)" t-as="option" t-key="option.id">
                             <DropdownItem
                                 class="o_item_option dropdown-item"
-                                t-on-dropdown-item-selected.stop="_onClickMenuGroupBy(item.fieldName, option.id)"
-                            >
+                                >
+                                <!-- NXOWL t-on-dropdown-item-selected.stop="_onClickMenuGroupBy(item.fieldName, option.id)" -->
                                 <t t-esc="option.description"/>
                             </DropdownItem>
                         </t>

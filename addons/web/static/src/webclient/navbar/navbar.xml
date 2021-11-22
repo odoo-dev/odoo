@@ -18,10 +18,10 @@
           t-if="currentApp"
           href="getMenuItemHref(currentApp)"
           payload="currentApp"
-          t-esc="currentApp.name"
-          class="o_menu_brand"
-          t-ref="menuBrand"
-        />
+          class="o_menu_brand">
+          <!-- FIXME NXOWL t-ref="menuBrand" -->
+          <t t-esc="currentApp.name"/>
+        </MenuItem>
 
         <!-- Current App Sections -->
         <t t-if="currentAppSections.length" t-call="web.NavBar.SectionsMenu">
@@ -52,11 +52,12 @@
         t-as="app"
         t-key="app.id"
         class="o_app"
-        t-att-class="{ focus: menuService.getCurrentApp() === app }"
         href="getMenuItemHref(app)"
         payload="app"
-        t-esc="app.name" 
-      />
+        >
+        <!-- FIXME NXOWL t-att-class="{ focus: menuService.getCurrentApp() === app }" -->
+        <t t-esc="app.name"/>
+      </MenuItem> 
     </Dropdown>
   </t>
 
@@ -82,9 +83,9 @@
             class="o_nav_entry"
             payload="section"
             href="getMenuItemHref(section)"
-            hotkey="hotkey"
-            t-esc="section.name"
-          />
+            hotkey="hotkey">
+            <t t-esc="section.name"/>
+          </MenuItem>
         </t>
         <t t-else="">
           <MenuDropdown
@@ -118,9 +119,9 @@
         t-if="!item.childrenTree.length"
         payload="item"
         href="getMenuItemHref(item)"
-        class="dropdown-item"
-        t-esc="item.name" 
-      />
+        class="dropdown-item">
+        <t t-esc="item.name"/>
+      </MenuItem>
 
       <t t-else="">
         <div class="dropdown-menu_group dropdown-header" t-esc="item.name" />
@@ -128,11 +129,11 @@
           t-foreach="item.childrenTree"
           t-as="subItem"
           t-key="subItem.id"
-          class="o_dropdown_menu_group_entry dropdown-item"
+          class="'o_dropdown_menu_group_entry dropdown-item'"
           payload="subItem"
-          href="getMenuItemHref(subItem)"
-          t-esc="subItem.name"
-        />
+          href="getMenuItemHref(subItem)">
+          <t t-esc="subItem.name"/>
+        </MenuItem>
       </t>
     </t>
   </t>
@@ -148,9 +149,9 @@
           <MenuItem
             class="o_more_dropdown_section"
             payload="section"
-            href="getMenuItemHref(section)"
-            t-esc="section.name"
-          />
+            href="getMenuItemHref(section)">
+            <t t-esc="section.name" />
+          </MenuItem>
         </t>
         <t t-else="">
           <div
