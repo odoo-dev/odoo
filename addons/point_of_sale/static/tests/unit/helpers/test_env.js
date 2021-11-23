@@ -20,12 +20,12 @@ odoo.define('point_of_sale.test_env', async function (require) {
     Registries.Component.add(owl.misc.Portal);
 
     await env.session.is_bound;
-    const pos = new models.PosModel({
-        rpc: env.services.rpc,
-        session: env.session,
-        do_action: async () => {},
-        showLoadingSkip: () => {},
-    });
+    const ExtendedPosModel = Registries.PModel.PosModel;
+    const pos = new ExtendedPosModel();
+    pos.rpc = env.services.rpc.bind(env.services);
+    pos.session = env.session;
+    pos.do_action = async () => {};
+    pos.showLoadingSkip = () => {};
     await pos.load_server_data();
 
     /**

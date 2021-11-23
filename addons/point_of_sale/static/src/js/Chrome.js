@@ -16,8 +16,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const { odooExceptionTitleMap } = require("@web/core/errors/error_dialogs");
     const { ConnectionLostError, ConnectionAbortedError, RPCError } = require('@web/core/network/rpc_service');
     const { useBus } = require("@web/core/utils/hooks");
-    const atom = require("@point_of_sale/js/createAtom");
-    const { PosModel } = require('point_of_sale.models');
+    const reactivity = require("@point_of_sale/js/reactivity");
 
     /**
      * Chrome is the root component of the PoS App.
@@ -66,21 +65,16 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
             this.previous_touch_y_coordinate = -1;
 
-            // Instead of passing chrome to the instantiation the PosModel,
-            // we inject functions needed by pos.
-            // This way, we somehow decoupled Chrome from PosModel.
-            // We can then test PosModel independently from Chrome by supplying
-            // mocked version of these default attributes.
-            const posModelDefaultAttributes = {
-                env: this.env,
-                rpc: this.rpc.bind(this),
-                session: this.env.session,
-                do_action: this.props.webClient.do_action.bind(this.props.webClient),
-                showLoadingSkip: () => {
-                    this.state.loadingSkipButtonIsShown = true;
-                }
-            };
-            this.env.pos = atom.useState(new (Registries.PModel.get(PosModel))(posModelDefaultAttributes));
+            this.env.pos = reactivity.useState(this.env.pos);
+
+            // TODO: Aim to remove these assignments.
+            this.env.pos.do_action = this.props.webClient.do_action.bind(this.props.webClient);
+            this.env.pos.showLoadingSkip = () => {
+                this.state.loadingSkipButtonIsShown = true;
+            }
+            this.env.pos.session = this.env.session;
+            this.env.pos.rpc = this.rpc.bind(this);
+            this.env.pos.env = this.env;
         }
 
         // OVERLOADED METHODS //

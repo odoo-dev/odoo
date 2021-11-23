@@ -21,7 +21,6 @@ var round_di = utils.round_decimals;
 var round_pr = utils.round_precision;
 
 const Registries = require('point_of_sale.Registries');
-const atom = require('@point_of_sale/js/createAtom');
 
 class ModelCollection {
     constructor() {
@@ -63,17 +62,7 @@ let nextId = 0;
 
 class PosModel {
     constructor() {
-        this.initialize(...arguments);
-    }
-    initialize(attributes) {
-        var  self = this;
         this.flush_mutex = new Mutex();                   // used to make sure the orders are sent to the server once at time
-
-        this.env = attributes['env'];
-        this.rpc = attributes['rpc'];
-        this.session = attributes['session'];
-        this.do_action = attributes['do_action'];
-        this.showLoadingSkip = attributes['showLoadingSkip'];
 
         this.proxy = new devices.ProxyDevice(this);              // used to communicate to the hardware devices via a local proxy
         this.barcode_reader = new BarcodeReader({'pos': this, proxy:this.proxy});
@@ -100,7 +89,6 @@ class PosModel {
         this.uom_unit_id = null;
         this.default_pricelist = null;
         this.order_sequence = 1;
-        window.posmodel = this;
 
         // Object mapping the order's name (which contains the uid) to it's server_id after
         // validation (order paid then sent to the backend).
@@ -298,11 +286,12 @@ class PosModel {
             options.json = json;
         }
         let order = new (Registries.PModel.get(Order))({},options);
-        const observer = () => {
-            order.save_to_db()
-        };
-        order.unregisterObserver = atom.registerObserver(observer);
-        order = atom.atom(order, observer)
+        // TODO-REF make this work
+        // const observer = () => {
+        //     order.save_to_db()
+        // };
+        // order.unregisterObserver = atom.registerObserver(observer);
+        // order = atom.atom(order, observer)
         order.save_to_db();
         return order;
     }
@@ -389,8 +378,8 @@ class PosModel {
                     'domain': productLoadingInfo.domain,
                     'fields': productLoadingInfo.fields,
                     'order': productLoadingInfo.order.split(',').map(name => ({ name })),
-                    'offset': page * this.env.pos.config.limited_products_amount,
-                    'limit': this.env.pos.config.limited_products_amount,
+                    'offset': page * this.config.limited_products_amount,
+                    'limit': this.config.limited_products_amount,
                 },
                 context: { ...this.session.user_context, ...productLoadingInfo.context },
             });
@@ -415,12 +404,12 @@ class PosModel {
                 method: 'search_read',
                 args: [[], partnerLoadingInfo.fields],
                 kwargs: {
-                    limit: this.env.pos.config.limited_partners_amount,
-                    offset: this.env.pos.config.limited_partners_amount * i
+                    limit: this.config.limited_partners_amount,
+                    offset: this.config.limited_partners_amount * i
                 },
-                context: this.env.session.user_context,
+                context: this.session.user_context,
             });
-            this.env.pos.db.add_partners(partners);
+            this.db.add_partners(partners);
             i += 1;
         } while(partners.length);
     }
@@ -909,7 +898,7 @@ class PosModel {
     }
 
     isProductQtyZero(qty) {
-        return utils.float_is_zero(qty, this.env.pos.dp['Product Unit of Measure']);
+        return utils.float_is_zero(qty, this.dp['Product Unit of Measure']);
     }
 
     formatProductQty(qty) {

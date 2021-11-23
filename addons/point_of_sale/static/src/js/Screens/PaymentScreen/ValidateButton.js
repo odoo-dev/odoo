@@ -3,11 +3,10 @@ odoo.define('point_of_sale.ValidateButton', function(require) {
 
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
-    const { useState } = require("@point_of_sale/js/createAtom");
 
     class ValidateButton extends PosComponent {
-        setup() {
-            this._order = useState(this.props.order);
+        get _order() {
+            return this.props.order;
         }
     }
     ValidateButton.template = 'point_of_sale.ValidateButton';

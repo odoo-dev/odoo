@@ -3,11 +3,10 @@ odoo.define('point_of_sale.PaymentLine', function(require) {
 
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
-    const { useState } = require("@point_of_sale/js/createAtom");
 
     class PaymentLine extends PosComponent {
-        setup() {
-            this._line = useState(this.props.line)
+        get _line() {
+            return this.props.line;
         }
         formatLineAmount(line) {
             return this.env.pos.format_currency_no_symbol(line.get_amount());

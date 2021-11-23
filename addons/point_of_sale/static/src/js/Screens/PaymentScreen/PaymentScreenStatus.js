@@ -3,11 +3,10 @@ odoo.define('point_of_sale.PaymentScreenStatus', function(require) {
 
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
-    const { useState } = require("@point_of_sale/js/createAtom");
 
     class PaymentScreenStatus extends PosComponent {
-        setup() {
-            this._order = useState(this.props.order)
+        get _order() {
+            return this.props.order;
         }
         get changeText() {
             return this.env.pos.format_currency(this._order.get_change());

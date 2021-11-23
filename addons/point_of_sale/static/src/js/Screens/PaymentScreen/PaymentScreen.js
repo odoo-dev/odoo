@@ -8,7 +8,6 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
     const { useListener } = require('web.custom_hooks');
     const Registries = require('point_of_sale.Registries');
     const { isConnectionError } = require('point_of_sale.utils');
-    const { useState } = require("@point_of_sale/js/createAtom");
 
     class PaymentScreen extends PosComponent {
         constructor() {
@@ -22,7 +21,6 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             useListener('send-payment-reverse', this._sendPaymentReverse);
             useListener('send-force-done', this._sendForceDone);
             useListener('validate-order', () => this.validateOrder(false));
-            this._paymentLines = useState(this.currentOrder.get_paymentlines());
             NumberBuffer.use({
                 // The numberBuffer listens to this event to update its state.
                 // Basically means 'update the buffer when this event is triggered'
@@ -40,7 +38,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             return this.env.pos.get_order();
         }
         get paymentLines() {
-            return this._paymentLines;
+            return this.currentOrder.get_paymentlines();
         }
         get selectedPaymentLine() {
             return this.currentOrder.selected_paymentline;

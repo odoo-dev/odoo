@@ -3,6 +3,7 @@ odoo.define('point_of_sale.custom_hooks', function (require) {
 
     const { Component } = owl;
     const { onMounted, onPatched, onWillUnmount } = owl.hooks;
+    const { batchedRenderFunctions, clearReactivesForCallback, batched, reactive } = '@point_of_sale/js/reactivity.js';
 
     /**
      * Introduce error handlers in the component.
@@ -104,5 +105,46 @@ odoo.define('point_of_sale.custom_hooks', function (require) {
         });
     }
 
-    return { useErrorHandlers, useAutoFocusToLast, useBarcodeReader };
+    function usePropsAsState(keys) {
+        const stateProps = {};
+        const atoms = {};
+        keys = keys || Object.keys(owl.Component.current.props);
+        for (const key of keys) {
+            Object.defineProperty(stateProps, key, {
+                enumerable: true,
+                get() {
+                    return atoms[key];
+                },
+            });
+        }
+
+        const component = owl.Component.current;
+        if (!batchedRenderFunctions.has(component)) {
+            batchedRenderFunctions.set(
+                component,
+                batched(() => component.render())
+            );
+        }
+        const render = batchedRenderFunctions.get(component);
+        function makeReactiveProps(props) {
+            for (const key of keys) {
+                if (props[key]) {
+                    atoms[key] = reactive(props[key], render);
+                } else {
+                    atoms[key] = props[key];
+                }
+            }
+        }
+
+        makeReactiveProps(component.props);
+        owl.hooks.onWillUpdateProps((nextProps) => {
+            clearReactivesForCallback(render);
+            makeReactiveProps(nextProps);
+        });
+        owl.hooks.onWillUnmount(() => clearReactivesForCallback(render));
+        return stateProps;
+    }
+
+
+    return { useErrorHandlers, useAutoFocusToLast, useBarcodeReader, usePropsAsState };
 });
