@@ -11,10 +11,11 @@ import { prepareRegistriesWithCleanup } from "./helpers/mock_env";
 import { session as sessionInfo } from "@web/session";
 import { prepareLegacyRegistriesWithCleanup } from "./helpers/legacy_env_utils";
 
-const { whenReady, loadFile } = owl.utils;
+const { whenReady, loadFile } = owl;
 
-owl.config.enableTransitions = false;
-owl.QWeb.dev = true;
+// FIXME NXOWL
+// owl.config.enableTransitions = false;
+// owl.QWeb.dev = true;
 
 function stringifyObjectValues(obj, properties) {
     let res = "";

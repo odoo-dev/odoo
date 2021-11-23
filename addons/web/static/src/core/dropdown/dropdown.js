@@ -205,26 +205,26 @@ export class Dropdown extends Component {
      *
      * @see changeStateAndNotify()
      *
-     * @param {DropdownStateChangedPayload} args
+     * @param {{detail: DropdownStateChangedPayload}} args
      */
-    onDropdownStateChanged(args) {
-        if (this.el.contains(args.emitter.el)) {
+    onDropdownStateChanged({ detail }) {
+        if (this.el.contains(detail.emitter.el)) {
             // Do not listen to events emitted by self or children
             return;
         }
 
         // Emitted by direct siblings ?
-        if (args.emitter.el.parentElement === this.el.parentElement) {
+        if (detail.emitter.el.parentElement === this.el.parentElement) {
             // Sync the group status
-            this.state.groupIsOpen = args.newState.groupIsOpen;
+            this.state.groupIsOpen = detail.newState.groupIsOpen;
 
             // Another dropdown is now open ? Close myself without notifying siblings.
-            if (this.state.open && args.newState.open) {
+            if (this.state.open && detail.newState.open) {
                 this.state.open = false;
             }
         } else {
             // Another dropdown is now open ? Close myself and notify the world (i.e. siblings).
-            if (this.state.open && args.newState.open) {
+            if (this.state.open && detail.newState.open) {
                 this.close();
             }
         }
