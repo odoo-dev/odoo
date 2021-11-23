@@ -2,7 +2,8 @@
 <templates xml:space="preserve">
 
     <t t-name="web.FilterMenu" owl="1">
-        <Dropdown class="o_filter_menu btn-group" togglerClass="'btn btn-light'" t-on-dropdown-item-selected="onFilterSelected">
+        <Dropdown class="'o_filter_menu btn-group'" togglerClass="'btn btn-light'" >
+            <!-- NXOWL t-on-dropdown-item-selected="onFilterSelected"> -->
             <t t-set-slot="toggler">
                 <i class="small mr-1" t-att-class="icon"/>
                 <span class="o_dropdown_title">Filters</span>
@@ -23,22 +24,22 @@
                                 <div class="dropdown-divider" role="separator"/>
                             </t>
                             <DropdownItem class="o_item_option"
-                                t-att-class="{ selected: option.isActive }"
-                                payload="{ itemId: item.id, optionId: option.id }"
-                                parentClosingMode="'none'"
-                                t-esc="option.description"
-                            />
+                            payload="{ itemId: item.id, optionId: option.id }"
+                            parentClosingMode="'none'">
+                            <!-- NXOWL t-att-class="{ selected: option.isActive }" -->
+                                <t t-esc="option.description"/>
+                            </DropdownItem>
                             <t t-set="subGroup" t-value="option.groupNumber"/>
                         </t>
                     </Dropdown>
                 </t>
                 <t t-else="">
                     <DropdownItem class="o_menu_item"
-                        t-att-class="{ selected: item.isActive }"
-                        payload="{ itemId: item.id }"
-                        parentClosingMode="'none'"
-                        t-esc="item.description"
-                    />
+                    payload="{ itemId: item.id }"
+                    parentClosingMode="'none'">
+                    <!-- NXOWL t-att-class="{ selected: item.isActive }" -->
+                        <t t-esc="item.description"/>
+                    </DropdownItem>
                 </t>
                 <t t-set="currentGroup" t-value="item.groupNumber"/>
             </t>

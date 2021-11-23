@@ -37,11 +37,11 @@ export async function startWebClient(Webclient) {
     const legacyEnv = await legacySetupProm;
     mapLegacyEnvToWowlEnv(legacyEnv, env);
     const app = new App(Webclient);
-    env.app = app;
+    env.app = app; // FIXME NXOWL ?
     app.configure({ env });
     app.addTemplates(templates);
     const root = await app.mount(document.body);
     // delete odoo.debug; // FIXME: some legacy code rely on this
-    odoo.__WOWL_DEBUG__ = { root }; // FIXME NXOWL CRAP
+    odoo.__WOWL_DEBUG__ = { root };
     odoo.isReady = true;
 }

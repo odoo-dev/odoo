@@ -1,4 +1,4 @@
-odoo.define('web.OwlCompatibility', function () {
+odoo.define('web.OwlCompatibility', function (require) {
     "use strict";
 
     /**
@@ -9,7 +9,8 @@ odoo.define('web.OwlCompatibility', function () {
      *  2) A legacy widget has to instantiate Owl components
      */
 
-    const { Component, useComponent, useEnv, useRef, useSubEnv, xml } = owl;
+    const { App, Component, onMounted, useComponent, useEnv, useRef, useSubEnv, xml } = owl;
+    const legacyEnv = require("web.env");
 
     const widgetSymbol = odoo.widgetSymbol;
     const children = new WeakMap(); // associates legacy widgets with their Owl children
@@ -346,7 +347,7 @@ odoo.define('web.OwlCompatibility', function () {
             children.delete(this);
         },
     };
-    class ComponentWrapper extends Component {
+    class ComponentWrapperLegacy extends Component {
         /**
          * Stores the reference of the instance in the parent (in __components).
          * Also creates a sub environment with a function that will be called
@@ -551,7 +552,120 @@ odoo.define('web.OwlCompatibility', function () {
             return $(this.el);
         }
     }
-    ComponentWrapper.template = xml`<t t-component="Component" t-props="props" t-ref="component"/>`;
+    ComponentWrapperLegacy.template = xml`<t t-component="Component" t-props="props" t-ref="component"/>`;
+
+    class ComponentWrapperRoot extends Component {
+        setup() {
+            useSubEnv({
+                [widgetSymbol]: this._addListener.bind(this),
+            });
+            this._handledEvents = new Set(); // Owl events we are redirecting
+        }
+
+        /**
+         * Adds an event handler that will redirect the given Owl event to an
+         * Odoo legacy event. This function is called just before the event is
+         * actually triggered.
+         *
+         * @private
+         * @param {string} evType
+         */
+        _addListener(evType) {
+            if (this.props.parentWidget && !this._handledEvents.has(evType)) {
+                this._handledEvents.add(evType);
+                this.el.addEventListener(evType, (ev) => {
+                    // as the WrappeComponent has the same root node as the
+                    // actual sub Component, we have to check that the event
+                    // hasn't been stopped by that component (it would naturally
+                    // call stopPropagation, whereas it should actually call
+                    // stopImmediatePropagation to prevent from getting here)
+                    if (!ev.cancelBubble) {
+                        ev.stopPropagation();
+                        const detail = Object.assign({}, ev.detail, {
+                            __originalComponent: ev.originalComponent,
+                        });
+                        this.props.parentWidget.trigger_up(ev.type.replace(/-/g, "_"), detail);
+                    }
+                });
+            }
+        }
+    }
+    ComponentWrapperRoot.template = xml`<t t-component="props.Component" t-props="props.componentProps"/>`;
+ 
+    class ComponentWrapper extends App {
+        constructor(parent, C, props) {
+            if (parent instanceof Component) {
+                throw new Error('ComponentWrapper must be used with a legacy Widget as parent');
+            }
+            super(ComponentWrapperRoot, {
+                parentWidget: parent,
+                Component: C,
+                componentProps: props,
+            });
+            // if (parent) {
+                this._register(parent);
+            // }
+            this.configure({ env: legacyEnv });
+            this.addTemplates(legacyEnv.templates); // TODO NXOWL: share compiled templates
+        }
+
+        get componentRef() {
+            return { comp: Object.values(this.root.children)[0] };
+        }
+        /**
+         * Calls __callMounted on itself and on each sub component (as this
+         * function isn't recursive) when the component is appended into the DOM.
+         */
+        on_attach_callback() {
+            // function recursiveCallMounted(component) {
+            //     const { status, fiber: currentFiber } = component.__owl__;
+
+            //     if (status === 2 && currentFiber && !currentFiber.appliedToDom) {
+            //         // the component is rendered but another rendering is being done
+            //         // it would be foolish to declare the component and children as mounted
+            //         return;
+            //     }
+            //     if (
+            //        status !== 2 /* RENDERED */ &&
+            //        status !== 3 /* MOUNTED */ &&
+            //        status !== 4 /* UNMOUNTED */
+            //     ) {
+            //         // Avoid calling mounted on a component that is not even
+            //         // rendered. Doing otherwise will lead to a crash if a
+            //         // specific mounted callback is legitimately relying on the
+            //         // component being mounted.
+            //         return;
+            //     }
+            //     for (const key in component.__owl__.children) {
+            //         recursiveCallMounted(component.__owl__.children[key]);
+            //     }
+            //     component.__callMounted();
+            // }
+            // recursiveCallMounted(this.root);
+        }
+        /**
+         * Calls __callWillUnmount to notify the component it will be unmounted.
+         */
+        on_detach_callback() {
+            this.__callWillUnmount();
+        }
+
+        /**
+         * Registers this instance as a child of the given parent in the
+         * 'children' weakMap.
+         *
+         * @private
+         * @param {Widget} parent
+         */
+        _register(parent) {
+            let parentChildren = children.get(parent);
+            if (!parentChildren) {
+                parentChildren = [];
+                children.set(parent, parentChildren);
+            }
+            parentChildren.push(this);
+        }
+    }
 
     return {
         ComponentAdapter,

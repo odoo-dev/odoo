@@ -6,9 +6,7 @@ odoo.define('web.CustomGroupByItem', function (require) {
     const { Component, useState } = owl;
 
     class CustomGroupByItem extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.state = useState({
                 fieldName: this.props.fields[0].name,
             });

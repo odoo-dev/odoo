@@ -30,9 +30,7 @@ odoo.define('web.Pager', function (require) {
          * @param {boolean} [props.withAccessKey] can be disabled, for example,
          *   for x2m widgets
          */
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.state = useState({
                 disabled: false,
                 editing: false,
