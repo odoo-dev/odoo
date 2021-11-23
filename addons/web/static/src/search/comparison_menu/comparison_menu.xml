@@ -2,7 +2,8 @@
 <templates xml:space="preserve">
 
     <t t-name="web.ComparisonMenu" owl="1">
-        <Dropdown class="o_comparison_menu btn-group" togglerClass="'btn btn-light'" t-on-dropdown-item-selected="onComparisonSelected">
+        <Dropdown class="'o_comparison_menu btn-group'" togglerClass="'btn btn-light'">
+        <!-- NXOWL t-on-dropdown-item-selected="onComparisonSelected" -->
             <t t-set-slot="toggler">
                 <i class="small mr-1" t-att-class="icon"/>
                 <span class="o_dropdown_title">Comparison</span>
@@ -10,11 +11,11 @@
             <t t-foreach="items" t-as="item" t-key="item.id">
                 <DropdownItem
                     class="o_menu_item"
-                    t-att-class="{ selected: item.isActive }"
                     payload="{ itemId: item.id }"
-                    parentClosingMode="'none'"
-                    t-esc="item.description"
-                />
+                    parentClosingMode="'none'">
+                    <!-- NXOWL t-att-class="{ selected: item.isActive }" -->
+                    <t t-esc="item.description"/>
+                </DropdownItem>
             </t>
         </Dropdown>
     </t>

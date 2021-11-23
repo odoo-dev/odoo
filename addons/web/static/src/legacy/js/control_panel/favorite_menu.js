@@ -17,8 +17,7 @@ odoo.define('web.FavoriteMenu', function (require) {
      * the `web` module.
      */
     class FavoriteMenu extends Component {
-        constructor() {
-            super(...arguments);
+        setup() {
             this.icon = FACET_ICONS.favorite;
             this.model = useModel('searchModel');
             this.state = useState({ deletedFavorite: false });

@@ -1,5 +1,5 @@
 (function () {
-    const { Component } = owl;
+    const { Component, useComponent } = owl;
     const capitalize = (s) => (s ? s[0].toUpperCase() + s.slice(1) : "");
     const oldLifecycleMethods = [
         "mounted",
@@ -21,5 +21,47 @@
                 }
             }
         }
+
+        static get current() {
+            return useComponent();
+        }
+
+        get el() {
+            return this.__owl__.bdom.el || this.__owl__.bdom.child.el;
+        }
+
+        /**
+         * Emit a custom event of type 'eventType' with the given 'payload' on the
+         * component's el, if it exists. However, note that the event will only bubble
+         * up to the parent DOM nodes. Thus, it must be called between mounted() and
+         * willUnmount().
+         */
+        trigger(eventType, payload) {
+            this.__trigger(eventType, payload);
+        }
+        /**
+         * Private trigger method, allows to choose the component which triggered
+         * the event in the first place
+         */
+        __trigger(eventType, payload) {
+            if (this.el) {
+                const ev = new CustomEvent(eventType, {
+                    bubbles: true,
+                    cancelable: true,
+                    detail: payload,
+                });
+                this.el.dispatchEvent(ev);
+            }
+        }
     };
+
+    Object.defineProperty(owl.Component, "components", {
+        get() {
+            return Object.assign({}, owl.Component._components, this._components);
+        },
+        set(val) {
+            this._components = val;
+        },
+    });
+    owl.Component._components = {};
 })();

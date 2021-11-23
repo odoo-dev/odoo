@@ -6,8 +6,8 @@
         <Dialog t-if="state.deletedFavorite"
             title="'Warning'"
             size="'medium'"
-            t-on-dialog-closed="state.deletedFavorite = false"
             >
+            <!-- NXOWL t-on-dialog-closed="state.deletedFavorite = false" -->
             <t t-if="state.deletedFavorite.userId">Are you sure that you want to remove this filter?</t>
             <t t-else="">This filter is global and will be removed for everybody if you continue.</t>
             <t t-set="buttons">

@@ -24,3 +24,4 @@ export class CheckBox extends Component {
 
 CheckBox.template = "web.CheckBox";
 CheckBox.nextId = 1;
+owl.Component._components.CheckBox = CheckBox;

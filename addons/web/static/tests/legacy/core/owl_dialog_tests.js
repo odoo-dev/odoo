@@ -58,8 +58,8 @@ odoo.define('web.owl_dialog_tests', function (require) {
                     subtitle="state.subtitle"
                     technical="state.technical"
                     title="state.title"
-                    t-on-dialog-closed="_onDialogClosed"
                     >
+                    <!-- t-on-dialog-closed="_onDialogClosed" NXOWL -->
                     <SubComponent text="state.textContent"/>
                     <t t-set="buttons">
                         <button class="btn btn-primary" t-on-click="_onButtonClicked">The Button</button>
@@ -192,8 +192,8 @@ odoo.define('web.owl_dialog_tests', function (require) {
                 <div>
                     <Dialog t-foreach="dialogIds" t-as="dialogId" t-key="dialogId"
                         contentClass="'dialog_' + dialogId"
-                        t-on-dialog-closed="_onDialogClosed(dialogId)"
-                    />
+                        />
+                        <!-- NXOWL t-on-dialog-closed="_onDialogClosed(dialogId)"-->
                 </div>`;
 
             const parent = new Parent();
@@ -289,7 +289,9 @@ odoo.define('web.owl_dialog_tests', function (require) {
                 }
             }
             OwlDialogWrapper.template = xml`
-                <Dialog t-on-dialog-closed="props.close()" />
+                <Dialog
+                />
+                <!-- NXOWL t-on-dialog-closed="props.close()" -->
             `;
             OwlDialogWrapper.components = { Dialog };
             class WowlDialogSubClass extends WowlDialog{

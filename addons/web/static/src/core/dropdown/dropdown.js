@@ -311,3 +311,5 @@ Dropdown.props = {
     },
 };
 Dropdown.template = "web.Dropdown";
+
+owl.Component._components.Dropdown = Dropdown;

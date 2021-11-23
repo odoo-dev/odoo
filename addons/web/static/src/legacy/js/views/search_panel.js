@@ -16,6 +16,8 @@
      */
     class SearchPanel extends Component {
         setup() {
+            this.env = Object.create(this.env);
+            this.env.searchModel = this.props.searchModel;
             useSubEnv({ searchModel: this.props.searchModel });
 
             this.state = useState({
