@@ -9,7 +9,7 @@ odoo.define('web.OwlCompatibility', function () {
      *  2) A legacy widget has to instantiate Owl components
      */
 
-    const { Component, useRef, useSubEnv, xml } = owl;
+    const { Component, useComponent, useEnv, useRef, useSubEnv, xml } = owl;
 
     const widgetSymbol = odoo.widgetSymbol;
     const children = new WeakMap(); // associates legacy widgets with their Owl children
@@ -92,7 +92,6 @@ odoo.define('web.OwlCompatibility', function () {
             ComponentAdapter.template = template;
             super(...arguments);
             this.template = template;
-            //ComponentAdapter.template = null;
 
             this.widget = null; // widget instance, if Component is a legacy widget
         }
@@ -364,7 +363,9 @@ odoo.define('web.OwlCompatibility', function () {
             if (parent instanceof Component) {
                 throw new Error('ComponentWrapper must be used with a legacy Widget as parent');
             }
-            super(null, props);
+            const env = useEnv();
+            const { __owl__: node } = useComponent();
+            super(props, env, node);
             if (parent) {
                 this._register(parent);
             }
@@ -538,14 +539,8 @@ odoo.define('web.OwlCompatibility', function () {
          * @override
          */
         async mount(target, options) {
-            if (options && options.position === 'self') {
-                throw new Error(
-                    'Unsupported position: "self" is not allowed for wrapper components. ' +
-                    'Contact the JS Framework team or open an issue if your use case is relevant.'
-                );
-            }
             this._mountArgs = arguments;
-            return super.mount(...arguments);
+            return this.__owl__.mount(...arguments);
         }
 
         //----------------------------------------------------------------------
