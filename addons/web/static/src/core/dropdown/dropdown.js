@@ -195,6 +195,11 @@ export class Dropdown extends Component {
         }
         // Mark closing request as started
         ev.detail.dropdownClosingRequest.isFresh = false;
+
+        // Now call the eventual callback
+        if (this.props.onDropdownItemSelected) {
+            this.props.onDropdownItemSelected(ev.detail);
+        }
     }
 
     /**

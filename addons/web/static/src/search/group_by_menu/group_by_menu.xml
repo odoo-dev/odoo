@@ -5,8 +5,8 @@
         <Dropdown class="'o_group_by_menu btn-group'"
             togglerClass="'btn btn-light'"
             t-props="dropdownProps"
-            >
-            <!-- NXOWL t-on-dropdown-item-selected="onGroupBySelected" -->
+            onDropdownItemSelected="onGroupBySelected"
+        >
             <t t-set-slot="toggler">
                 <i class="small mr-1" t-att-class="icon"/>
                 <span class="o_dropdown_title">Group By<t t-if="props.showCaretDown"> <i class="fa fa-caret-down ml-1"/></t></span>
