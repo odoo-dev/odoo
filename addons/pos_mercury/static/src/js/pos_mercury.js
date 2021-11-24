@@ -4,7 +4,7 @@ odoo.define('pos_mercury.pos_mercury', function (require) {
 var pos_model = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PModel.extend(pos_model.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(pos_model.PosModel, (PosModel) => {
 
 class PosMercuryPosModel extends PosModel {
     getOnlinePaymentMethods() {
@@ -85,7 +85,7 @@ class PosMercuryPosModel extends PosModel {
 return PosMercuryPosModel;
 });
 
-Registries.PModel.extend(pos_model.Payment, (Payment) => {
+Registries.PosModelRegistry.extend(pos_model.Payment, (Payment) => {
 
 class PosMercuryPayment extends Payment {
     init_from_JSON(json) {
@@ -137,7 +137,7 @@ return PosMercuryPayment;
 });
 
 
-Registries.PModel.extend(pos_model.Order, (Order) => {
+Registries.PosModelRegistry.extend(pos_model.Order, (Order) => {
 
 class PosMercuryOrder extends Order {
     electronic_payment_in_progress() {

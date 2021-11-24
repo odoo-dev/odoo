@@ -4,7 +4,7 @@ odoo.define('l10n_in_pos.receipt', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PModel.extend(models.Orderline, (Orderline) => {
+Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
 class L10nInOrderline extends Orderline {
     export_for_printing() {

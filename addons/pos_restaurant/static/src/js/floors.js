@@ -43,7 +43,7 @@ models.load_models({
 });
 
 // New orders are now associated with the current table, if any.
-Registries.PModel.extend(models.Order, (Order) => {
+Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
 class PosRestaurantOrder extends Order {
     initialize(attr,options) {
@@ -93,7 +93,7 @@ return PosRestaurantOrder;
 //
 // And when we change the table, we must create an order for that table
 // if there is none.
-Registries.PModel.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 
 class PosRestaurantPosModel extends PosModel {
     async after_load_server_data() {
@@ -384,7 +384,7 @@ class PosRestaurantPosModel extends PosModel {
 return PosRestaurantPosModel;
 });
 
-Registries.PModel.extend(models.Payment, (Payment) => {
+Registries.PosModelRegistry.extend(models.Payment, (Payment) => {
 
 class PosRestaurantPayment extends Payment {
     /**

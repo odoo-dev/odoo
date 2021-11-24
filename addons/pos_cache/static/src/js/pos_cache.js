@@ -12,7 +12,7 @@ function roundUpDiv(y, x) {
     return (y - remainder) / x + (remainder > 0 ? 1 : 0);
 }
 
-Registries.PModel.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 class PosCachePosModel extends PosModel {
     async loadProductsBackground() {
         if (this.config.limited_products_loading) {

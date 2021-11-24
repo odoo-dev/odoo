@@ -217,7 +217,7 @@ odoo.define('pos_coupon.pos', function (require) {
         },
     ]);
 
-    Registries.PModel.extend(models.PosModel, (PosModel) => {
+    Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 
     class PosCouponPosModel extends PosModel {
         async load_server_data() {
@@ -231,7 +231,7 @@ odoo.define('pos_coupon.pos', function (require) {
     return PosCouponPosModel;
     });
 
-    Registries.PModel.extend(models.Order, (Order) => {
+    Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
     class PosCouponOrder extends Order {
         // OVERIDDEN METHODS
@@ -447,7 +447,7 @@ odoo.define('pos_coupon.pos', function (require) {
                         tax_ids: tax_ids,
                         coupon_id: coupon_id,
                     };
-                    const ExtendedOrderline = Registries.PModel.get(models.Orderline);
+                    const ExtendedOrderline = Registries.PosModelRegistry.get(models.Orderline);
                     const line = new ExtendedOrderline({}, { pos: this.pos, order: this, product });
                     this.fix_tax_included_price(line);
                     this.set_orderline_options(line, options);
@@ -1015,7 +1015,7 @@ odoo.define('pos_coupon.pos', function (require) {
     return PosCouponOrder;
     });
 
-    Registries.PModel.extend(models.Orderline, (Orderline) => {
+    Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
     class PosCouponOrderline extends Orderline {
         export_as_JSON() {

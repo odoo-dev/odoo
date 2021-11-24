@@ -20,7 +20,7 @@ odoo.define("pos_gift_card.gift_card", function (require) {
     },
   ]);
 
-  Registries.PModel.extend(models.Order, (Order) => {
+  Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
   class PosGiftCardOrder extends Order {
     set_orderline_options(orderline, options) {
@@ -47,7 +47,7 @@ odoo.define("pos_gift_card.gift_card", function (require) {
   return PosGiftCardOrder;
   });
 
-  Registries.PModel.extend(models.Orderline, (Orderline) => {
+  Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
   class PosGiftCardOrderline extends Orderline {
     export_as_JSON() {
@@ -66,7 +66,7 @@ odoo.define("pos_gift_card.gift_card", function (require) {
   return PosGiftCardOrderline;
   });
 
-  Registries.PModel.extend(models.PosModel, (PosModel) => {
+  Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 
   class PosGiftCardPosModel extends PosModel {
         print_gift_pdf(giftCardIds) {

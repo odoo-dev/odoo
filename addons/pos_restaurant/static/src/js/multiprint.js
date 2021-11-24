@@ -8,7 +8,7 @@ const Registries = require('point_of_sale.Registries');
 
 var QWeb = core.qweb;
 
-Registries.PModel.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 
 class PosResMultiprintPosModel extends PosModel {
     create_printer(config) {
@@ -54,7 +54,7 @@ models.load_models({
     },
 });
 
-Registries.PModel.extend(models.Orderline, (Orderline) => {
+Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
 class PosResMultiprintOrderline extends Orderline {
     initialize() {
@@ -128,7 +128,7 @@ class PosResMultiprintOrderline extends Orderline {
 return PosResMultiprintOrderline;
 });
 
-Registries.PModel.extend(models.Order, (Order) => {
+Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
 class PosResMultiprintOrder extends Order {
     build_line_resume(){

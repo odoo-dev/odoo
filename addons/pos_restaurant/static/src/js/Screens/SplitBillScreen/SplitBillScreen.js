@@ -13,7 +13,7 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
             useListener('click-line', this.onClickLine);
             this.splitlines = useState(this._initSplitLines(this.env.pos.get_order()));
             this.newOrderLines = {};
-            const ExtenderOrder = Registries.PModel.get(models.Order);
+            const ExtenderOrder = Registries.PosModelRegistry.get(models.Order);
             this.newOrder = new ExtenderOrder(
                 {},
                 {

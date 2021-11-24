@@ -10,7 +10,7 @@ const Registries = require('point_of_sale.Registries');
 // multiprint file in pos_restaurant.
 require('pos_restaurant.multiprint');
 
-Registries.PModel.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 
 class PosEpsonResPosModel extends PosModel {
     create_printer(config) {

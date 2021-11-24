@@ -4,7 +4,7 @@ odoo.define('pos_sale.models', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PModel.extend(models.Orderline, (Orderline) => {
+Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
 class PosSaleOrderline extends Orderline {
   initialize(attributes, options) {

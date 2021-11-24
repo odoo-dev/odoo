@@ -12,7 +12,7 @@ const Registries = require('point_of_sale.Registries');
 var _t = core._t;
 var round_di = utils.round_decimals;
 
-Registries.PModel.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 
 class L10nFrPosModel extends PosModel {
     is_french_country(){
@@ -45,7 +45,7 @@ class L10nFrPosModel extends PosModel {
 return L10nFrPosModel;
 });
 
-Registries.PModel.extend(models.Order, (Order) => {
+Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
 class L10nFrOrder extends Order {
     initialize() {
@@ -74,7 +74,7 @@ class L10nFrOrder extends Order {
 return L10nFrOrder;
 });
 
-Registries.PModel.extend(models.Orderline, (Orderline) => {
+Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
 class L10nFrOrderline extends Orderline {
     can_be_merged_with(orderline) {

@@ -28,7 +28,7 @@ export class ChromeAdapter extends Component {
         this.PosChrome = Registries.Component.get(Chrome);
         this.legacyActionManager = useService("legacy_action_manager");
 
-        const ExtendedPosModel = Registries.PModel.get(PosModel);
+        const ExtendedPosModel = Registries.PosModelRegistry.get(PosModel);
         const pos = reactive(new ExtendedPosModel(), () => {});
 
         window.posmodel = pos;

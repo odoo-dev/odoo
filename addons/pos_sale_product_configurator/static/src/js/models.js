@@ -5,7 +5,7 @@ odoo.define('pos_sale_product_configurator.models', function (require) {
     var models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
 
-    Registries.PModel.extend(models.Order, (Order) => {
+    Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
     class PosSaleProductConfiguratorOrder extends Order {
         async add_product(product, options) {

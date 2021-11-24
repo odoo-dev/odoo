@@ -20,10 +20,10 @@ var Mutex = concurrency.Mutex;
 var round_di = utils.round_decimals;
 var round_pr = utils.round_precision;
 
-const Registries = require('point_of_sale.Registries');
+const { PosModelRegistry } = require('point_of_sale.Registries');
 
 /**
- * TODO-REF This should behave like sequence (array) and set (dict).
+ * TODO-REF-JCB This should behave like sequence (array) and set (dict).
  *  col.get(key);
  *  col.set(key, value);
  *  col.at(index);
@@ -298,7 +298,7 @@ class PosModel {
         if (json) {
             options.json = json;
         }
-        let order = new (Registries.PModel.get(Order))({},options);
+        let order = new (PosModelRegistry.get(Order))({},options);
         // TODO-REF make this work
         // const observer = () => {
         //     order.save_to_db()
@@ -1209,7 +1209,7 @@ PosModel.prototype.models = [
                 }
                 product.categ = _.findWhere(self.product_categories, {'id': product.categ_id[0]});
                 product.pos = self;
-                return new (Registries.PModel.get(Product))({}, product);
+                return new (PosModelRegistry.get(Product))({}, product);
             }));
         },
     },{
@@ -1365,7 +1365,7 @@ PosModel.prototype.models = [
     },
 ];
 
-Registries.PModel.add(PosModel);
+PosModelRegistry.add(PosModel);
 exports.PosModel = PosModel;
 
 /**
@@ -1580,7 +1580,7 @@ class Product {
         return price;
     }
 }
-Registries.PModel.add(Product);
+PosModelRegistry.add(Product);
 exports.Product = Product;
 
 var orderline_id = 1;
@@ -1638,7 +1638,7 @@ class Orderline {
         var pack_lot_lines = json.pack_lot_ids;
         for (var i = 0; i < pack_lot_lines.length; i++) {
             var packlotline = pack_lot_lines[i][2];
-            var pack_lot_line = new (Registries.PModel.get(Packlotline))({}, {'json': _.extend(packlotline, {'order_line':this})});
+            var pack_lot_line = new (PosModelRegistry.get(Packlotline))({}, {'json': _.extend(packlotline, {'order_line':this})});
             this.pack_lot_lines.add(pack_lot_line);
         }
         this.tax_ids = json.tax_ids && json.tax_ids.length !== 0 ? json.tax_ids[0][2] : undefined;
@@ -1647,7 +1647,7 @@ class Orderline {
         this.refunded_orderline_id = json.refunded_orderline_id;
     }
     clone(){
-        var orderline = new (Registries.PModel.get(Orderline))({},{
+        var orderline = new (PosModelRegistry.get(Orderline))({},{
             pos: this.pos,
             order: this.order,
             product: this.product,
@@ -1706,7 +1706,7 @@ class Orderline {
         // Create new pack lot lines.
         let newPackLotLine;
         for (let newLotLine of newPackLotLines) {
-            newPackLotLine = new (Registries.PModel.get(Packlotline))({}, { order_line: this });
+            newPackLotLine = new (PosModelRegistry.get(Packlotline))({}, { order_line: this });
             newPackLotLine.lot_name = newLotLine.lot_name;
             this.pack_lot_lines.add(newPackLotLine);
         }
@@ -2395,7 +2395,7 @@ class Orderline {
         return this.product.standard_price * this.quantity;
     }
 }
-Registries.PModel.add(Orderline);
+PosModelRegistry.add(Orderline);
 exports.Orderline = Orderline;
 
 class Packlotline {
@@ -2428,7 +2428,7 @@ class Packlotline {
         };
     }
 }
-Registries.PModel.add(Packlotline);
+PosModelRegistry.add(Packlotline);
 exports.Packlotline = Packlotline;
 
 // Every Paymentline contains a cashregister and an amount of money.
@@ -2561,7 +2561,7 @@ class Payment {
         return Boolean(this.get_payment_status());
     }
 }
-Registries.PModel.add(Payment);
+PosModelRegistry.add(Payment);
 exports.Payment = Payment;
 
 // An order more or less represents the content of a client's shopping cart (the OrderLines)
@@ -2694,13 +2694,13 @@ class Order {
         var orderlines = json.lines;
         for (var i = 0; i < orderlines.length; i++) {
             var orderline = orderlines[i][2];
-            this.add_orderline(new (Registries.PModel.get(Orderline))({}, {pos: this.pos, order: this, json: orderline}));
+            this.add_orderline(new (PosModelRegistry.get(Orderline))({}, {pos: this.pos, order: this, json: orderline}));
         }
 
         var paymentlines = json.statement_ids;
         for (var i = 0; i < paymentlines.length; i++) {
             var paymentline = paymentlines[i][2];
-            var newpaymentline = new (Registries.PModel.get(Payment))({},{pos: this.pos, order: this, json: paymentline});
+            var newpaymentline = new (PosModelRegistry.get(Payment))({},{pos: this.pos, order: this, json: paymentline});
             this.paymentlines.add(newpaymentline);
 
             if (i === paymentlines.length - 1) {
@@ -2987,7 +2987,7 @@ class Order {
         }
         this.assert_editable();
         options = options || {};
-        var line = new (Registries.PModel.get(Orderline))({}, {pos: this.pos, order: this, product: product});
+        var line = new (PosModelRegistry.get(Orderline))({}, {pos: this.pos, order: this, product: product});
         this.fix_tax_included_price(line);
 
         this.set_orderline_options(line, options);
@@ -3087,7 +3087,7 @@ class Order {
     /* ---- Payment Lines --- */
     add_paymentline(payment_method) {
         this.assert_editable();
-        var newPaymentline = new (Registries.PModel.get(Payment))({},{order: this, payment_method:payment_method, pos: this.pos});
+        var newPaymentline = new (PosModelRegistry.get(Payment))({},{order: this, payment_method:payment_method, pos: this.pos});
         this.paymentlines.add(newPaymentline);
         this.select_paymentline(newPaymentline);
         if(this.pos.config.cash_rounding){
@@ -3532,7 +3532,7 @@ class Order {
         }
     }
 }
-Registries.PModel.add(Order);
+PosModelRegistry.add(Order);
 exports.Order = Order;
 
 return exports;

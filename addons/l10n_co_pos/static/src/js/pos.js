@@ -4,7 +4,7 @@ odoo.define('l10n_co_pos.pos', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PModel.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 
 class L10nCoPosModel extends PosModel {
     is_colombian_country() {
@@ -15,7 +15,7 @@ class L10nCoPosModel extends PosModel {
 return L10nCoPosModel;
 });
 
-Registries.PModel.extend(models.Order, (Order) => {
+Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
 class L10nCoPosOrder extends Order {
     export_for_printing() {

@@ -27,7 +27,7 @@ models.load_models([{
     }
 }]);
 
-Registries.PModel.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
 
 class PosHrPosModel extends PosModel {
     after_load_server_data() {
@@ -65,7 +65,7 @@ class PosHrPosModel extends PosModel {
 return PosHrPosModel;
 });
 
-Registries.PModel.extend(models.Order, (Order) => {
+Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
 class PosHrOrder extends Order {
     initialize(attributes, options) {
