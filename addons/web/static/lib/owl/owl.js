@@ -3270,7 +3270,7 @@
             if (ast.defaultContent) {
                 let name = this.generateId("defaultSlot");
                 const slot = new CodeTarget(name);
-                slot.signature = "(ctx, node, key) => {";
+                slot.signature = "(ctx, node, key) => {"; /** NXOWL **/
                 this.functions.push(slot);
                 const initialTarget = this.target;
                 const subCtx = createContext(ctx);
@@ -4122,7 +4122,7 @@
                 child1 = dynamic ? toggler(name, slotBDom) : slotBDom;
             }
             else {
-                child2 = defaultSlot(ctx, parent, key);
+                child2 = defaultSlot(ctx, parent, key); /** NXOWL **/
             }
             return multi([child1, child2]);
         }

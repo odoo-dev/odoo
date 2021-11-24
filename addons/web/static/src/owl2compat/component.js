@@ -27,7 +27,11 @@
         }
 
         get el() {
-            return this.__owl__.bdom.el || this.__owl__.bdom.child.el;
+            let bdom = this.__owl__.bdom;
+            while (!bdom.el) {
+                bdom = bdom.child || bdom.bdom;
+            }
+            return bdom.el;
         }
 
         /**
