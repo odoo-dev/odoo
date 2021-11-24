@@ -13,12 +13,12 @@
         return new Promise((resolve, reject) => {
             return this.env.services.rpc(...arguments)
                 .then(result => {
-                    if (this.__owl__.status !== 5 /* not destroyed */) {
+                    if (this.__owl__.status !== 2 /** NXOWL CHECK **/ /* not destroyed */) {
                         resolve(result);
                     }
                 })
                 .catch(reason => {
-                    if (this.__owl__.status !== 5) /* not destroyed */ {
+                    if (this.__owl__.status !== 2 /** NXOWL CHECK **/) /* not destroyed */ {
                         reject(reason);
                     }
                 });

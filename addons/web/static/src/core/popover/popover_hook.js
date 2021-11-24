@@ -33,7 +33,10 @@ export function usePopover() {
             const newOptions = Object.create(options);
             newOptions.onClose = function () {
                 removeFns.delete(removeFn);
-                if (options.onClose && component.__owl__.status !== 5 /* DESTROYED */) {
+                if (
+                    options.onClose &&
+                    component.__owl__.status !== 2 /** NXOWL CHECK **/ /* DESTROYED */
+                ) {
                     options.onClose();
                 }
             };

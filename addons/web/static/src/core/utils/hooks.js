@@ -216,11 +216,11 @@ export function useListener(eventName, querySelector, handler, options = {}) {
 
 function _protectMethod(component, caller, fn) {
     return async (...args) => {
-        if (component.__owl__.status === 5 /* DESTROYED */) {
+        if (component.__owl__.status === 2 /** NXOWL CHECK **/ /* DESTROYED */) {
             throw new Error("Component is destroyed");
         }
         const result = await fn.call(caller, ...args);
-        return component.__owl__.status === 5 ? new Promise(() => {}) : result;
+        return component.__owl__.status === 2 /** NXOWL CHECK **/ ? new Promise(() => {}) : result;
     };
 }
 

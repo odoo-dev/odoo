@@ -1790,7 +1790,6 @@
             this.bdom = null;
             this.status = 0 /* NEW */;
             this.children = Object.create(null);
-            this.slots = {};
             this.refs = {};
             this.willStart = [];
             this.willUpdateProps = [];
@@ -2569,7 +2568,23 @@
             }
             this.addLine(`}`);
         }
-        captureExpression(expr) {
+        /**
+         * Captures variables that are used inside of an expression. This is useful
+         * because in compiled code, almost all variables are accessed through the ctx
+         * object. In the case of functions, that lookup in the context can be delayed
+         * which can cause issues if the value has changed since the function was
+         * defined.
+         *
+         * @param expr the expression to capture
+         * @param forceCapture whether the expression should capture its scope even if
+         *  it doesn't contain a function. Useful when the expression will be used as
+         *  a function body.
+         * @returns a new expression that uses the captured values
+         */
+        captureExpression(expr, forceCapture = false) {
+            if (!forceCapture && !expr.includes("=>")) {
+                return compileExpr(expr);
+            }
             const tokens = compileExprToArray(expr);
             const mapping = new Map();
             return tokens
@@ -2749,7 +2764,7 @@
                 this.hasRef = true;
                 const isDynamic = INTERP_REGEXP.test(ast.ref);
                 if (isDynamic) {
-                    const str = ast.ref.replace(INTERP_REGEXP, (expr) => "${" + this.captureExpression(expr.slice(2, -2)) + "}");
+                    const str = ast.ref.replace(INTERP_REGEXP, (expr) => "${" + this.captureExpression(expr.slice(2, -2), true) + "}");
                     const idx = block.insertData(`(el) => refs[\`${str}\`] = el`);
                     attrs["block-ref"] = String(idx);
                 }
@@ -2931,6 +2946,10 @@
             const l = `l_block${block.id}`;
             const c = `c_block${block.id}`;
             this.addLine(`const [${keys}, ${vals}, ${l}, ${c}] = prepareList(${compileExpr(ast.collection)});`);
+            // Throw errors on duplicate keys in dev mode
+            if (this.dev) {
+                this.addLine(`const keys${block.id} = new Set();`);
+            }
             this.addLine(`for (let ${loopVar} = 0; ${loopVar} < ${l}; ${loopVar}++) {`);
             this.target.indentLevel++;
             this.addLine(`ctx[\`${ast.elem}\`] = ${vals}[${loopVar}];`);
@@ -2947,6 +2966,11 @@
                 this.addLine(`ctx[\`${ast.elem}_value\`] = ${keys}[${loopVar}];`);
             }
             this.addLine(`let key${this.target.loopLevel} = ${ast.key ? compileExpr(ast.key) : loopVar};`);
+            if (this.dev) {
+                // Throw error on duplicate keys in dev mode
+                this.addLine(`if (keys${block.id}.has(key${this.target.loopLevel})) { throw new Error(\`Got duplicate key in t-foreach: \${key${this.target.loopLevel}}\`)}`);
+                this.addLine(`keys${block.id}.add(key${this.target.loopLevel});`);
+            }
             let id;
             if (ast.memo) {
                 this.target.hasCache = true;
@@ -3121,11 +3145,59 @@
         }
         compileComponent(ast, ctx) {
             let { block } = ctx;
-            let extraArgs = {};
             // props
             const props = [];
+            let hasSlotsProp = false;
             for (let p in ast.props) {
-                props.push(`${p}: ${compileExpr(ast.props[p]) || undefined}`);
+                const propName = /^[a-z_]+$/i.test(p) ? p : `'${p}'`;
+                props.push(`${propName}: ${this.captureExpression(ast.props[p]) || undefined}`);
+                if (p === "slots") {
+                    hasSlotsProp = true;
+                }
+            }
+            // slots
+            const hasSlot = !!Object.keys(ast.slots).length;
+            let slotDef = "";
+            if (hasSlot) {
+                let ctxStr = "ctx";
+                if (this.target.loopLevel || !this.hasSafeContext) {
+                    ctxStr = this.generateId("ctx");
+                    this.addLine(`const ${ctxStr} = capture(ctx);`);
+                }
+                let slotStr = [];
+                const initialTarget = this.target;
+                for (let slotName in ast.slots) {
+                    let name = this.generateId("slot");
+                    const slot = new CodeTarget(name);
+                    slot.signature = "(ctx, node, key) => {";
+                    this.functions.push(slot);
+                    this.target = slot;
+                    const subCtx = createContext(ctx);
+                    this.compileAST(ast.slots[slotName].content, subCtx);
+                    const params = [`__render: ${name}, __ctx: ${ctxStr}`];
+                    const scope = ast.slots[slotName].scope;
+                    if (scope) {
+                        params.push(`__scope: "${scope}"`);
+                    }
+                    if (ast.slots[slotName].attrs) {
+                        for (const [n, v] of Object.entries(ast.slots[slotName].attrs)) {
+                            params.push(`${n}: ${compileExpr(v) || undefined}`);
+                        }
+                    }
+                    const slotInfo = `{${params.join(", ")}}`;
+                    if (this.hasRef) {
+                        slot.code.unshift(`  const refs = ctx.__owl__.refs`);
+                        slotStr.push(`'${slotName}': ${slotInfo}`);
+                    }
+                    else {
+                        slotStr.push(`'${slotName}': ${slotInfo}`);
+                    }
+                }
+                this.target = initialTarget;
+                slotDef = `{${slotStr.join(", ")}}`;
+            }
+            if (slotDef && !(ast.dynamicProps || hasSlotsProp)) {
+                props.push(`slots: ${slotDef}`);
             }
             const propStr = `{${props.join(",")}}`;
             let propString = propStr;
@@ -3136,6 +3208,15 @@
                 else {
                     propString = `Object.assign({}, ${compileExpr(ast.dynamicProps)}, ${propStr})`;
                 }
+            }
+            let propVar;
+            if ((slotDef && (ast.dynamicProps || hasSlotsProp)) || this.dev) {
+                propVar = this.generateId("props");
+                this.addLine(`const ${propVar} = ${propString}`);
+                propString = propVar;
+            }
+            if (slotDef && (ast.dynamicProps || hasSlotsProp)) {
+                this.addLine(`${propVar}.slots = Object.assign(${slotDef}, ${propVar}.slots)`);
             }
             // cmap key
             const key = this.generateComponentKey();
@@ -3148,41 +3229,7 @@
                 expr = `\`${ast.name}\``;
             }
             if (this.dev) {
-                const propVar = this.generateId("props");
-                this.addLine(`const ${propVar} = ${propString}`);
                 this.addLine(`helpers.validateProps(${expr}, ${propVar}, ctx)`);
-                propString = propVar;
-            }
-            // slots
-            const hasSlot = !!Object.keys(ast.slots).length;
-            let slotDef;
-            if (hasSlot) {
-                let ctxStr = "ctx";
-                if (this.target.loopLevel || !this.hasSafeContext) {
-                    ctxStr = this.generateId("ctx");
-                    this.addLine(`const ${ctxStr} = capture(ctx);`);
-                }
-                let slotStr = [];
-                const initialTarget = this.target;
-                for (let slotName in ast.slots) {
-                    let name = this.generateId("slot");
-                    const slot = new CodeTarget(name);
-                    slot.signature = "ctx => (node, key) => {";
-                    this.functions.push(slot);
-                    this.target = slot;
-                    const subCtx = createContext(ctx);
-                    this.compileAST(ast.slots[slotName], subCtx);
-                    if (this.hasRef) {
-                        slot.code.unshift(`  const refs = ctx.__owl__.refs`);
-                        slotStr.push(`'${slotName}': ${name}(${ctxStr})`);
-                    }
-                    else {
-                        slotStr.push(`'${slotName}': ${name}(${ctxStr})`);
-                    }
-                }
-                this.target = initialTarget;
-                slotDef = `{${slotStr.join(", ")}}`;
-                extraArgs.slots = slotDef;
             }
             if (block && (ctx.forceNewBlock === false || ctx.tKeyExpr)) {
                 // todo: check the forcenewblock condition
@@ -3194,11 +3241,6 @@
             }
             const blockArgs = `${expr}, ${propString}, ${keyArg}, node, ctx`;
             let blockExpr = `component(${blockArgs})`;
-            if (Object.keys(extraArgs).length) {
-                this.shouldDefineAssign = true;
-                const content = Object.keys(extraArgs).map((k) => `${k}: ${extraArgs[k]}`);
-                blockExpr = `assign(${blockExpr}, {${content.join(", ")}})`;
-            }
             if (ast.isDynamic) {
                 blockExpr = `toggler(${expr}, ${blockExpr})`;
             }
@@ -3217,26 +3259,34 @@
             else {
                 slotName = "'" + ast.name + "'";
             }
+            let scope = null;
+            if (ast.attrs) {
+                const params = [];
+                for (const [n, v] of Object.entries(ast.attrs)) {
+                    params.push(`${n}: ${compileExpr(v) || undefined}`);
+                }
+                scope = `{${params.join(", ")}}`;
+            }
             if (ast.defaultContent) {
                 let name = this.generateId("defaultSlot");
                 const slot = new CodeTarget(name);
-                slot.signature = "ctx => {";
+                slot.signature = "(ctx, node, key) => {";
                 this.functions.push(slot);
                 const initialTarget = this.target;
                 const subCtx = createContext(ctx);
                 this.target = slot;
                 this.compileAST(ast.defaultContent, subCtx);
                 this.target = initialTarget;
-                blockString = `callSlot(ctx, node, key, ${slotName}, ${name}, ${dynamic})`;
+                blockString = `callSlot(ctx, node, key, ${slotName}, ${dynamic}, ${scope}, ${name})`;
             }
             else {
                 if (dynamic) {
                     let name = this.generateId("slot");
                     this.addLine(`const ${name} = ${slotName};`);
-                    blockString = `toggler(${name}, callSlot(ctx, node, key, ${name}))`;
+                    blockString = `toggler(${name}, callSlot(ctx, node, key, ${name}), ${dynamic}, ${scope})`;
                 }
                 else {
-                    blockString = `callSlot(ctx, node, key, ${slotName})`;
+                    blockString = `callSlot(ctx, node, key, ${slotName}, ${dynamic}, ${scope})`;
                 }
             }
             if (block) {
@@ -3276,7 +3326,8 @@
         ASTType[ASTType["TTranslation"] = 16] = "TTranslation";
     })(ASTType || (ASTType = {}));
     function parse(xml) {
-        const node = xml instanceof Element ? xml : parseXML(`<t>${xml}</t>`).firstChild;
+        const node = xml instanceof Element ? xml : parseXML$1(`<t>${xml}</t>`).firstChild;
+        normalizeXML(node);
         const ctx = { inPreTag: false, inSVG: false };
         const ast = parseNode(node, ctx);
         if (!ast) {
@@ -3649,7 +3700,7 @@
                 return ast;
             }
             if (ast && ast.type === 11 /* TComponent */) {
-                return Object.assign(Object.assign({}, ast), { slots: { default: tcall } });
+                return Object.assign(Object.assign({}, ast), { slots: { default: { content: tcall } } });
             }
         }
         const body = [];
@@ -3745,6 +3796,19 @@
     // -----------------------------------------------------------------------------
     // Components
     // -----------------------------------------------------------------------------
+    // Error messages when trying to use an unsupported directive on a component
+    const directiveErrorMap = new Map([
+        ["t-on", "t-on is no longer supported on components. Consider passing a callback in props."],
+        [
+            "t-ref",
+            "t-ref is no longer supported on components. Consider exposing only the public part of the component's API through a callback prop.",
+        ],
+        ["t-att", "t-att makes no sense on component: props are already treated as expressions"],
+        [
+            "t-attf",
+            "t-attf is not supported on components: use template strings for string interpolation in props",
+        ],
+    ]);
     function parseComponent(node, ctx) {
         let name = node.tagName;
         const firstLetter = name[0];
@@ -3764,8 +3828,9 @@
         const props = {};
         for (let name of node.getAttributeNames()) {
             const value = node.getAttribute(name);
-            if (name.startsWith("t-on-")) {
-                throw new Error("t-on is no longer supported on Component node. Consider passing a callback in props.");
+            if (name.startsWith("t-")) {
+                const message = directiveErrorMap.get(name.split("-").slice(0, 2).join("-"));
+                throw new Error(message || `unsupported directive on Component: ${name}`);
             }
             else {
                 props[name] = value;
@@ -3777,6 +3842,9 @@
             // named slots
             const slotNodes = Array.from(clone.querySelectorAll("[t-set-slot]"));
             for (let slotNode of slotNodes) {
+                if (slotNode.tagName !== "t") {
+                    throw new Error(`Directive 't-set-slot' can only be used on <t> nodes (used on a <${slotNode.tagName}>)`);
+                }
                 const name = slotNode.getAttribute("t-set-slot");
                 // check if this is defined in a sub component (in which case it should
                 // be ignored)
@@ -3796,13 +3864,26 @@
                 slotNode.remove();
                 const slotAst = parseNode(slotNode, ctx);
                 if (slotAst) {
-                    slots[name] = slotAst;
+                    const slotInfo = { content: slotAst };
+                    const attrs = {};
+                    for (let attributeName of slotNode.getAttributeNames()) {
+                        const value = slotNode.getAttribute(attributeName);
+                        if (attributeName === "t-slot-scope") {
+                            slotInfo.scope = value;
+                            continue;
+                        }
+                        attrs[attributeName] = value;
+                    }
+                    if (Object.keys(attrs).length) {
+                        slotInfo.attrs = attrs;
+                    }
+                    slots[name] = slotInfo;
                 }
             }
             // default slot
             const defaultContent = parseChildNodes(clone, ctx);
             if (defaultContent) {
-                slots.default = defaultContent;
+                slots.default = { content: defaultContent };
             }
         }
         return { type: 11 /* TComponent */, name, isDynamic, dynamicProps, props, slots };
@@ -3814,9 +3895,17 @@
         if (!node.hasAttribute("t-slot")) {
             return null;
         }
+        const name = node.getAttribute("t-slot");
+        node.removeAttribute("t-slot");
+        const attrs = {};
+        for (let attributeName of node.getAttributeNames()) {
+            const value = node.getAttribute(attributeName);
+            attrs[attributeName] = value;
+        }
         return {
             type: 14 /* TSlot */,
-            name: node.getAttribute("t-slot"),
+            name,
+            attrs,
             defaultContent: parseChildNodes(node, ctx),
         };
     }
@@ -3850,33 +3939,16 @@
                 return { type: 3 /* Multi */, content: children };
         }
     }
-    function parseXML(xml) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(xml, "text/xml");
-        if (doc.getElementsByTagName("parsererror").length) {
-            let msg = "Invalid XML in template.";
-            const parsererrorText = doc.getElementsByTagName("parsererror")[0].textContent;
-            if (parsererrorText) {
-                msg += "\nThe parser has produced the following error message:\n" + parsererrorText;
-                const re = /\d+/g;
-                const firstMatch = re.exec(parsererrorText);
-                if (firstMatch) {
-                    const lineNumber = Number(firstMatch[0]);
-                    const line = xml.split("\n")[lineNumber - 1];
-                    const secondMatch = re.exec(parsererrorText);
-                    if (line && secondMatch) {
-                        const columnIndex = Number(secondMatch[0]) - 1;
-                        if (line[columnIndex]) {
-                            msg +=
-                                `\nThe error might be located at xml line ${lineNumber} column ${columnIndex}\n` +
-                                    `${line}\n${"-".repeat(columnIndex - 1)}^`;
-                        }
-                    }
-                }
-            }
-            throw new Error(msg);
-        }
-        let tbranch = doc.querySelectorAll("[t-elif], [t-else]");
+    /**
+     * Normalizes the content of an Element so that t-if/t-elif/t-else directives
+     * immediately follow one another (by removing empty text nodes or comments).
+     * Throws an error when a conditional branching statement is malformed. This
+     * function modifies the Element in place.
+     *
+     * @param el the element containing the tree that should be normalized
+     */
+    function normalizeTIf(el) {
+        let tbranch = el.querySelectorAll("[t-elif], [t-else]");
         for (let i = 0, ilen = tbranch.length; i < ilen; i++) {
             let node = tbranch[i];
             let prevElem = node.previousElementSibling;
@@ -3904,6 +3976,73 @@
             else {
                 throw new Error("t-elif and t-else directives must be preceded by a t-if or t-elif directive");
             }
+        }
+    }
+    /**
+     * Normalizes the content of an Element so that t-esc directives on components
+     * are removed and instead places a <t t-esc=""> as the default slot of the
+     * component. Also throws if the component already has content. This function
+     * modifies the Element in place.
+     *
+     * @param el the element containing the tree that should be normalized
+     */
+    function normalizeTEsc(el) {
+        const elements = [...el.querySelectorAll("[t-esc]")].filter((el) => el.tagName[0] === el.tagName[0].toUpperCase() || el.hasAttribute("t-component"));
+        for (const el of elements) {
+            if (el.childNodes.length) {
+                throw new Error("Cannot have t-esc on a component that already has content");
+            }
+            const value = el.getAttribute("t-esc");
+            el.removeAttribute("t-esc");
+            const t = el.ownerDocument.createElement("t");
+            if (value != null) {
+                t.setAttribute("t-esc", value);
+            }
+            el.appendChild(t);
+        }
+    }
+    /**
+     * Normalizes the tree inside a given element and do some preliminary validation
+     * on it. This function modifies the Element in place.
+     *
+     * @param el the element containing the tree that should be normalized
+     */
+    function normalizeXML(el) {
+        normalizeTIf(el);
+        normalizeTEsc(el);
+    }
+    /**
+     * Parses an XML string into an XML document, throwing errors on parser errors
+     * instead of returning an XML document containing the parseerror.
+     *
+     * @param xml the string to parse
+     * @returns an XML document corresponding to the content of the string
+     */
+    function parseXML$1(xml) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xml, "text/xml");
+        if (doc.getElementsByTagName("parsererror").length) {
+            let msg = "Invalid XML in template.";
+            const parsererrorText = doc.getElementsByTagName("parsererror")[0].textContent;
+            if (parsererrorText) {
+                msg += "\nThe parser has produced the following error message:\n" + parsererrorText;
+                const re = /\d+/g;
+                const firstMatch = re.exec(parsererrorText);
+                if (firstMatch) {
+                    const lineNumber = Number(firstMatch[0]);
+                    const line = xml.split("\n")[lineNumber - 1];
+                    const secondMatch = re.exec(parsererrorText);
+                    if (line && secondMatch) {
+                        const columnIndex = Number(secondMatch[0]) - 1;
+                        if (line[columnIndex]) {
+                            msg +=
+                                `\nThe error might be located at xml line ${lineNumber} column ${columnIndex}\n` +
+                                    `${line}\n${"-".repeat(columnIndex - 1)}^`;
+                        }
+                    }
+                }
+            }
+            throw new Error(msg);
         }
         return doc;
     }
@@ -3968,10 +4107,14 @@
     function withDefault(value, defaultValue) {
         return value === undefined || value === null || value === false ? defaultValue : value;
     }
-    function callSlot(ctx, parent, key, name, defaultSlot, dynamic) {
-        const slots = ctx.__owl__.slots;
-        const slotFn = slots[name];
-        const slotBDom = slotFn ? slotFn(parent, key) : null;
+    function callSlot(ctx, parent, key, name, dynamic, extra, defaultSlot) {
+        const slots = (ctx.props && ctx.props.slots) || {};
+        const { __render, __ctx, __scope } = slots[name] || {};
+        const slotScope = Object.create(__ctx || {});
+        if (__scope) {
+            slotScope[__scope] = extra || {};
+        }
+        const slotBDom = __render ? __render(slotScope, parent, key) : null;
         if (defaultSlot) {
             let child1 = undefined;
             let child2 = undefined;
@@ -3979,7 +4122,7 @@
                 child1 = dynamic ? toggler(name, slotBDom) : slotBDom;
             }
             else {
-                child2 = defaultSlot(parent, key);
+                child2 = defaultSlot(ctx, parent, key);
             }
             return multi([child1, child2]);
         }
@@ -4080,6 +4223,34 @@
 
     const bdom = { text, createBlock, list, multi, html, toggler, component };
     const globalTemplates = {};
+    function parseXML(xml) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xml, "text/xml");
+        if (doc.getElementsByTagName("parsererror").length) {
+            let msg = "Invalid XML in template.";
+            const parsererrorText = doc.getElementsByTagName("parsererror")[0].textContent;
+            if (parsererrorText) {
+                msg += "\nThe parser has produced the following error message:\n" + parsererrorText;
+                const re = /\d+/g;
+                const firstMatch = re.exec(parsererrorText);
+                if (firstMatch) {
+                    const lineNumber = Number(firstMatch[0]);
+                    const line = xml.split("\n")[lineNumber - 1];
+                    const secondMatch = re.exec(parsererrorText);
+                    if (line && secondMatch) {
+                        const columnIndex = Number(secondMatch[0]) - 1;
+                        if (line[columnIndex]) {
+                            msg +=
+                                `\nThe error might be located at xml line ${lineNumber} column ${columnIndex}\n` +
+                                    `${line}\n${"-".repeat(columnIndex - 1)}^`;
+                        }
+                    }
+                }
+            }
+            throw new Error(msg);
+        }
+        return doc;
+    }
     class TemplateSet {
         constructor() {
             this.rawTemplates = Object.create(globalTemplates);
@@ -4098,7 +4269,11 @@
             this.rawTemplates[name] = template;
         }
         addTemplates(xml, options = {}) {
-            xml = xml instanceof Document ? xml : new DOMParser().parseFromString(xml, "text/xml");
+            if (!xml) {
+                // empty string
+                return;
+            }
+            xml = xml instanceof Document ? xml : parseXML(xml);
             for (const template of xml.querySelectorAll("[t-name]")) {
                 const name = template.getAttribute("t-name");
                 template.removeAttribute("t-name");
@@ -4154,15 +4329,18 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             if (config.translatableAttributes) {
                 this.translatableAttributes = config.translatableAttributes;
             }
+            if (config.templates) {
+                this.addTemplates(config.templates);
+            }
             return this;
         }
         mount(target, options) {
             if (!(target instanceof HTMLElement)) {
                 throw new Error("Cannot mount component: the target is not a valid DOM element");
             }
-            // if (!document.body.contains(target)) {
-            //     throw new Error("Cannot mount a component on a detached dom node");
-            // }
+            if (!document.body.contains(target)) {
+                throw new Error("Cannot mount a component on a detached dom node");
+            }
             const node = new ComponentNode(this.Root, this.props, this);
             this.root = node;
             return node.mountComponent(target, options);
@@ -4218,9 +4396,9 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     // -----------------------------------------------------------------------------
     //  Global templates
     // -----------------------------------------------------------------------------
-    function xml(strings, ...args) {
+    function xml(...args) {
         const name = `__template__${xml.nextId++}`;
-        const value = String.raw(strings, ...args);
+        const value = String.raw(...args);
         globalTemplates[name] = value;
         return name;
     }
@@ -4327,7 +4505,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
      */
     function shallowEqual(p1, p2) {
         for (let k in p1) {
-            if (p1[k] !== p2[k]) {
+            if (k !== "slots" && p1[k] !== p2[k]) {
                 return false;
             }
         }
@@ -4773,9 +4951,9 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '2.0.0-alpha';
-    __info__.date = '2021-11-22T09:18:09.768Z';
-    __info__.hash = 'efd934d';
+    __info__.version = '2.0.0-alpha1';
+    __info__.date = '2021-11-24T10:27:03.103Z';
+    __info__.hash = 'b988a68';
     __info__.url = 'https://github.com/odoo/owl';
 
 

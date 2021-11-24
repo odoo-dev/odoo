@@ -470,7 +470,7 @@ odoo.define('web.OwlCompatibility', function (require) {
          * @return {Promise}
          */
         async update(props = {}) {
-            if (this.__owl__.status === 5 /* destroyed */) {
+            if (this.__owl__.status === 2 /** NXOWL CHECK **/ /* destroyed */) {
                 return new Promise(() => {});
             }
 

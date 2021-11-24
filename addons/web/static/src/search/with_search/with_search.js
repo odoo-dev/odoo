@@ -18,17 +18,19 @@ export class WithSearch extends Component {
         }
 
         const SearchModelClass = this.Component.SearchModel || SearchModel;
-        this.env.searchModel = new SearchModelClass(this.env, {
+        this.searchModel = new SearchModelClass(this.env, {
             user: useService("user"),
             orm: useService("orm"),
             view: useService("view"),
         });
 
-        useBus(this.env.searchModel, "update", this.render);
+        useSubEnv({ searchModel: this.searchModel });
+
+        useBus(this.searchModel, "update", this.render);
         useSetupAction({
             getGlobalState: () => {
                 return {
-                    searchModel: JSON.stringify(this.env.searchModel.exportState()),
+                    searchModel: JSON.stringify(this.searchModel.exportState()),
                 };
             },
         });
@@ -40,7 +42,7 @@ export class WithSearch extends Component {
             config.state = JSON.parse(config.globalState.searchModel);
             delete config.globalState;
         }
-        await this.env.searchModel.load(config);
+        await this.searchModel.load(config);
     }
 
     async willUpdateProps(nextProps) {
@@ -50,7 +52,7 @@ export class WithSearch extends Component {
                 config[key] = nextProps[key];
             }
         }
-        await this.env.searchModel.reload(config);
+        await this.searchModel.reload(config);
     }
 
     //-------------------------------------------------------------------------
@@ -60,11 +62,11 @@ export class WithSearch extends Component {
     get componentProps() {
         const componentProps = { ...this.props.componentProps };
         for (const key of SEARCH_KEYS) {
-            componentProps[key] = this.env.searchModel[key];
+            componentProps[key] = this.searchModel[key];
         }
         componentProps.info = componentProps.info || {};
         for (const key of OTHER_SEARCH_KEYS) {
-            componentProps.info[key] = this.env.searchModel[key];
+            componentProps.info[key] = this.searchModel[key];
         }
         return componentProps;
     }
