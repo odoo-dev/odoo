@@ -4,9 +4,9 @@ odoo.define('l10n_co_pos.pos', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-class L10nCoPosModel extends PosModel {
+class L10nCoPosModel extends PosGlobalState {
     is_colombian_country() {
         return this.company.country.code === 'CO';
     }

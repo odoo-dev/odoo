@@ -5,9 +5,9 @@ var models = require('point_of_sale.models');
 var EpsonPrinter = require('pos_epson_printer.Printer');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-class PosEpsonPosModel extends PosModel {
+class PosEpsonPosModel extends PosGlobalState {
     after_load_server_data() {
         var self = this;
         return super.after_load_server_data(...arguments).then(function () {

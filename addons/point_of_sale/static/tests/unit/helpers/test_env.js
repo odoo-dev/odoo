@@ -2,7 +2,7 @@ odoo.define('point_of_sale.test_env', async function (require) {
     'use strict';
 
     /**
-     * Many components in PoS are dependent on the PosModel instance (pos).
+     * Many components in PoS are dependent on the PosGlobalState instance (pos).
      * Therefore, for unit tests that require pos in the Components' env, we
      * prepared here a test env maker (makePosTestEnv) based on
      * makeTestEnvironment of web.
@@ -20,7 +20,7 @@ odoo.define('point_of_sale.test_env', async function (require) {
     Registries.Component.add(owl.misc.Portal);
 
     await env.session.is_bound;
-    const ExtendedPosModel = Registries.PosModelRegistry.PosModel;
+    const ExtendedPosModel = Registries.PosModelRegistry.PosGlobalState;
     const pos = new ExtendedPosModel();
     pos.rpc = env.services.rpc.bind(env.services);
     pos.session = env.session;
@@ -36,7 +36,7 @@ odoo.define('point_of_sale.test_env', async function (require) {
     function makePosTestEnv(env = {}, providedRPC = null, providedDoAction = null) {
         env = Object.assign(env, { pos });
         let posEnv = makeTestEnvironment(env, providedRPC);
-        // Replace rpc in the PosModel instance after loading
+        // Replace rpc in the PosGlobalState instance after loading
         // data from the server so that every succeeding rpc calls
         // made by pos are mocked by the providedRPC.
         pos.rpc = posEnv.rpc;

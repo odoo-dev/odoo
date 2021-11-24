@@ -12,9 +12,9 @@ const Registries = require('point_of_sale.Registries');
 var _t = core._t;
 var round_di = utils.round_decimals;
 
-Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-class L10nFrPosModel extends PosModel {
+class L10nFrPosModel extends PosGlobalState {
     is_french_country(){
       var french_countries = ['FR', 'MF', 'MQ', 'NC', 'PF', 'RE', 'GF', 'GP', 'TF'];
       if (!this.company.country) {

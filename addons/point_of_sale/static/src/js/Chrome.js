@@ -139,7 +139,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             try {
                 await this.env.pos.load_server_data();
                 // Load the saved `env.pos.toRefundLines` from localStorage when
-                // the PosModel is ready.
+                // the PosGlobalState is ready.
                 Object.assign(this.env.pos.toRefundLines, this.env.pos.db.load('TO_REFUND_LINES') || {});
                 this._buildChrome();
                 this._closeOtherTabs();
@@ -215,7 +215,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
         /**
          * Show the screen saved in the order when the `selectedOrder` of pos is changed.
-         * @param {models.PosModel} pos
+         * @param {models.PosGlobalState} pos
          * @param {models.Order} newSelectedOrder
          */
         _showSavedScreen(pos, newSelectedOrder) {

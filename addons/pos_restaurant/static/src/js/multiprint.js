@@ -8,9 +8,9 @@ const Registries = require('point_of_sale.Registries');
 
 var QWeb = core.qweb;
 
-Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-class PosResMultiprintPosModel extends PosModel {
+class PosResMultiprintPosModel extends PosGlobalState {
     create_printer(config) {
         var url = config.proxy_ip || '';
         if(url.indexOf('//') < 0) {

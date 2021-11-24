@@ -12,8 +12,8 @@ function roundUpDiv(y, x) {
     return (y - remainder) / x + (remainder > 0 ? 1 : 0);
 }
 
-Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
-class PosCachePosModel extends PosModel {
+Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
+class PosCachePosModel extends PosGlobalState {
     async loadProductsBackground() {
         if (this.config.limited_products_loading) {
             // Just do the native way of loading products when limited_product_loading is active.

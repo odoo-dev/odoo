@@ -5,7 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import Chrome from "point_of_sale.Chrome";
 import Registries from "point_of_sale.Registries";
 import { reactive } from "@point_of_sale/js/reactivity";
-import { PosModel } from "point_of_sale.models";
+import { PosGlobalState } from "point_of_sale.models";
 import { configureGui } from "point_of_sale.Gui";
 import { useBus } from "@web/core/utils/hooks";
 const { Component } = owl;
@@ -28,7 +28,7 @@ export class ChromeAdapter extends Component {
         this.PosChrome = Registries.Component.get(Chrome);
         this.legacyActionManager = useService("legacy_action_manager");
 
-        const ExtendedPosModel = Registries.PosModelRegistry.get(PosModel);
+        const ExtendedPosModel = Registries.PosModelRegistry.get(PosGlobalState);
         const pos = reactive(new ExtendedPosModel(), () => {});
 
         window.posmodel = pos;

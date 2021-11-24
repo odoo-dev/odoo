@@ -63,17 +63,7 @@ var exports = {};
 
 let nextId = 0;
 
-// The PosModel contains the Point Of Sale's representation of the backend.
-// Since the PoS must work in standalone ( Without connection to the server )
-// it must contains a representation of the server's PoS backend.
-// (taxes, product list, configuration options, etc.)  this representation
-// is fetched and stored by the PosModel at the initialisation.
-// this is done asynchronously, a ready deferred alows the GUI to wait interactively
-// for the loading to be completed
-// There is a single instance of the PosModel for each Front-End instance, it is usually called
-// 'pos' and is available to all widgets extending PosWidget.
-
-class PosModel {
+class PosGlobalState {
     constructor() {
         this.flush_mutex = new Mutex();                   // used to make sure the orders are sent to the server once at time
 
@@ -1010,8 +1000,8 @@ class PosModel {
         return false;
     }
 }
-PosModel.prototype.electronic_payment_interfaces = {};
-PosModel.prototype.models = [
+PosGlobalState.prototype.electronic_payment_interfaces = {};
+PosGlobalState.prototype.models = [
     {
         label:  'version',
         loaded: function (self) {
@@ -1365,8 +1355,8 @@ PosModel.prototype.models = [
     },
 ];
 
-PosModelRegistry.add(PosModel);
-exports.PosModel = PosModel;
+PosModelRegistry.add(PosGlobalState);
+exports.PosGlobalState = PosGlobalState;
 
 /**
  * Call this function to map your PaymentInterface implementation to
@@ -1381,7 +1371,7 @@ exports.PosModel = PosModel;
  * PaymentInterface
  */
 exports.register_payment_method = function(use_payment_terminal, ImplementedPaymentInterface) {
-    PosModel.prototype.electronic_payment_interfaces[use_payment_terminal] = ImplementedPaymentInterface;
+    PosGlobalState.prototype.electronic_payment_interfaces[use_payment_terminal] = ImplementedPaymentInterface;
 };
 
 // Add fields to the list of read fields when a model is loaded
@@ -1393,7 +1383,7 @@ exports.load_fields = function(model_name, fields) {
         fields = [fields];
     }
 
-    var models = PosModel.prototype.models;
+    var models = PosGlobalState.prototype.models;
     for (var i = 0; i < models.length; i++) {
         var model = models[i];
         if (model.model === model_name) {
@@ -1413,7 +1403,7 @@ exports.load_fields = function(model_name, fields) {
 //   will be loaded, but the system can be used to preprocess
 //   data before load.
 // - loader arguments can be functions that return a dynamic
-//   value. The function takes the PosModel as the first argument
+//   value. The function takes the PosGlobalState as the first argument
 //   and a temporary object that is shared by all models, and can
 //   be used to store transient information between model loads.
 // - There is no dependency management. The models must be loaded
@@ -1453,7 +1443,7 @@ exports.load_models = function(models,options) {
         models = [models];
     }
 
-    var pmodels = PosModel.prototype.models;
+    var pmodels = PosGlobalState.prototype.models;
     var index = pmodels.length;
     if (options.before) {
         for (var i = 0; i < pmodels.length; i++) {

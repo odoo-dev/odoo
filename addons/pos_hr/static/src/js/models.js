@@ -27,9 +27,9 @@ models.load_models([{
     }
 }]);
 
-Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-class PosHrPosModel extends PosModel {
+class PosHrPosModel extends PosGlobalState {
     after_load_server_data() {
         var self = this;
         var employee_ids = _.map(self.employees, function(employee){return employee.id;});

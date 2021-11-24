@@ -4,9 +4,9 @@ odoo.define('pos_mercury.pos_mercury', function (require) {
 var pos_model = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PosModelRegistry.extend(pos_model.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(pos_model.PosGlobalState, (PosGlobalState) => {
 
-class PosMercuryPosModel extends PosModel {
+class PosMercuryPosModel extends PosGlobalState {
     getOnlinePaymentMethods() {
         var online_payment_methods = [];
 

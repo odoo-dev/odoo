@@ -93,9 +93,9 @@ return PosRestaurantOrder;
 //
 // And when we change the table, we must create an order for that table
 // if there is none.
-Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
+Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-class PosRestaurantPosModel extends PosModel {
+class PosRestaurantPosModel extends PosGlobalState {
     async after_load_server_data() {
         var res = await super.after_load_server_data(...arguments);
         if (this.config.iface_floorplan) {

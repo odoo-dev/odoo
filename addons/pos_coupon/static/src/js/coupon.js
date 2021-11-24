@@ -217,9 +217,9 @@ odoo.define('pos_coupon.pos', function (require) {
         },
     ]);
 
-    Registries.PosModelRegistry.extend(models.PosModel, (PosModel) => {
+    Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-    class PosCouponPosModel extends PosModel {
+    class PosCouponPosModel extends PosGlobalState {
         async load_server_data() {
             await super.load_server_data(...arguments);
             if (this.selectedOrder) {
