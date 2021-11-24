@@ -5,15 +5,16 @@
         <Dropdown class="o_debug_manager"
           beforeOpen="getElements"
           position="'bottom-end'"
-          togglerClass="`o-dropdown--narrow ${env.inDialog?'btn btn-link':''}`">
+          togglerClass="`o-dropdown--narrow ${env.inDialog?'btn btn-link':''}`"
+          onDropdownItemSelected="(detail) => detail.payload.callback()">
             <t t-set-slot="toggler">
                 <i class="fa fa-bug"/>
             </t>
             <t t-foreach="elements" t-as="element" t-key="element_index">
                 <DropdownItem
                     t-if="element.type == 'item'"
-                    href="element.href">
-                    <!-- NXOWL t-on-dropdown-item-selected.stop="element.callback" -->
+                    href="element.href"
+                    payload="element">
                     <t t-esc="element.description"/>
                 </DropdownItem>
                 <div t-if="element.type == 'separator'" role="separator" class="dropdown-divider"/>

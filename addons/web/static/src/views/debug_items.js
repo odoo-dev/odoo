@@ -93,5 +93,5 @@ debugRegistry
     .category("view")
     .add("viewSeparator", viewSeparator)
     .add("fieldsViewGet", fieldsViewGet)
-    .add("editView", editView)
+    // NXOWL .add("editView", editView)
     .add("editSearchView", editSearchView);
