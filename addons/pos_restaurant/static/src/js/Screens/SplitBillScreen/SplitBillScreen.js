@@ -2,7 +2,7 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const { useState } = owl.hooks;
+    const { useState, onMounted } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
     const models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
@@ -13,15 +13,22 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
             useListener('click-line', this.onClickLine);
             this.splitlines = useState(this._initSplitLines(this.env.pos.get_order()));
             this.newOrderLines = {};
-            const ExtenderOrder = Registries.PosModelRegistry.get(models.Order);
-            this.newOrder = new ExtenderOrder(
-                {},
-                {
-                    pos: this.env.pos,
-                    temporary: true,
-                }
-            );
+            this.newOrder = undefined;
             this._isFinal = false;
+            onMounted(() => {
+                // Should create the new order outside of the constructor because
+                // sequence_number of pos_session is modified. which will trigger
+                // rerendering which will rerender this screen and will be infinite loop.
+                const ExtenderOrder = Registries.PosModelRegistry.get(models.Order);
+                this.newOrder = new ExtenderOrder(
+                    {},
+                    {
+                        pos: this.env.pos,
+                        temporary: true,
+                    }
+                );
+                this.render();
+            });
         }
         get currentOrder() {
             return this.env.pos.get_order();

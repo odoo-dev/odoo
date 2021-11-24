@@ -52,7 +52,6 @@ class PosRestaurantOrder extends Order {
             this.table = this.pos.table;
         }
         this.customer_count = this.customer_count || 1;
-        this.save_to_db();
     }
     export_as_JSON() {
         var json = super.export_as_JSON(...arguments);

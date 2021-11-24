@@ -237,9 +237,8 @@ odoo.define('pos_coupon.pos', function (require) {
         // OVERIDDEN METHODS
 
         constructor() {
-            let res = super(...arguments);
-            res._initializePrograms();
-            return res;
+            super(...arguments);
+            this._initializePrograms();
         }
         init_from_JSON(json) {
             super.init_from_JSON(...arguments);

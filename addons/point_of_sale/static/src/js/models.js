@@ -21,6 +21,7 @@ var round_di = utils.round_decimals;
 var round_pr = utils.round_precision;
 
 const { PosModelRegistry } = require('point_of_sale.Registries');
+const reactivity = require('@point_of_sale/js/reactivity');
 
 /**
  * TODO-REF-JCB This should behave like sequence (array) and set (dict).
@@ -63,9 +64,8 @@ let nextId = 0;
 class PosModel {
     /**
      * Create an object with cid. If no cid is in the defaultObj,
-     * cid is computed based on id of the defaultObj. Override
-     * _getCID if you don't want the default calculation of cid which
-     * is based on id of the defaultObj.
+     * cid is computed based on its id. Override _getCID if you
+     * don't want this default calculation of cid.
      * @param {Object?} defaultObj its props copied to this instance.
      */
     constructor(defaultObj) {
@@ -317,13 +317,9 @@ class PosGlobalState extends PosModel {
         if (json) {
             options.json = json;
         }
-        let order = new (PosModelRegistry.get(Order))({},options);
-        // TODO-REF make this work
-        // const observer = () => {
-        //     order.save_to_db()
-        // };
-        // order.unregisterObserver = atom.registerObserver(observer);
-        // order = atom.atom(order, observer)
+        let order = reactivity.reactive(new (PosModelRegistry.get(Order))({},options), () => {
+            order.save_to_db();
+        });
         order.save_to_db();
         return order;
     }
