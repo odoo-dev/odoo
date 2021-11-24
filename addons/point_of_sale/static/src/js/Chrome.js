@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.Chrome', function(require) {
     'use strict';
 
-    const { useState, useRef, useContext, useExternalListener } = owl.hooks;
+    const { useState, useRef, useContext, useExternalListener } = owl;
     const { debounce } = owl.utils;
     const { loadCSS } = require('web.ajax');
     const { useListener } = require('web.custom_hooks');

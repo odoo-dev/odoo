@@ -3,7 +3,7 @@
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
 const { Component } = owl;
-const { onMounted, onPatched, onWillUnmount, useRef } = owl.hooks;
+const { onMounted, onPatched, onWillUnmount, useRef } = owl;
 
 export class ChatWindowHiddenMenu extends Component {
 

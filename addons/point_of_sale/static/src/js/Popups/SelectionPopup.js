@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.SelectionPopup', function (require) {
     'use strict';
 
-    const { useState } = owl.hooks;
+    const { useState } = owl;
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registries = require('point_of_sale.Registries');
     const { _lt } = require('@web/core/l10n/translation');

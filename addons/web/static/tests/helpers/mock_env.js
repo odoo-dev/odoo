@@ -17,7 +17,7 @@ export function clearRegistryWithCleanup(registry) {
         entries: null,
         subRegistries: {},
         // Preserve OnUpdate handlers
-        subscriptions: { UPDATE: [...registry.subscriptions.UPDATE] },
+        targetsCallbacks: new Map(registry.targetsCallbacks.entries()),
     };
     patchWithCleanup(registry, patch);
 }
@@ -29,7 +29,7 @@ function cloneRegistryWithCleanup(registry) {
         entries: null,
         subRegistries: {},
         // Preserve OnUpdate handlers
-        subscriptions: { UPDATE: [...registry.subscriptions.UPDATE] },
+        targetsCallbacks: new Map(registry.targetsCallbacks.entries()),
     };
     patchWithCleanup(registry, patch);
 }
@@ -112,6 +112,7 @@ export async function makeTestEnv(config = {}) {
     const env = makeEnv();
     env.config = config.config || {};
     await startServices(env);
-    env.qweb.addTemplates(window.__ODOO_TEMPLATES__);
+    // env.qweb.addTemplates(window.__ODOO_TEMPLATES__);
+    // NXOWL
     return env;
 }

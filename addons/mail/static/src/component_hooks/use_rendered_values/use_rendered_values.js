@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 const { Component } = owl;
-const { onMounted, onPatched } = owl.hooks;
+const { onMounted, onPatched } = owl;
 
 /**
  * This hooks provides support for accessing the values returned by the given

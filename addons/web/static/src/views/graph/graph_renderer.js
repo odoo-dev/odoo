@@ -107,12 +107,13 @@ export class GraphRenderer extends Component {
         }
         const chartAreaTop = this.chart.chartArea.top;
         const viewContentTop = this.el.getBoundingClientRect().top;
-        const innerHTML = this.env.qweb.renderToString("web.GraphRenderer.CustomTooltip", {
+        const innerHTML = this.env.renderToString("web.GraphRenderer.CustomTooltip", {
             maxWidth: getMaxWidth(this.chart.chartArea),
             measure: measures[measure].string,
             mode: this.model.metaData.mode,
             tooltipItems: this.getTooltipItems(data, metaData, tooltipModel),
         });
+        debugger;
         const template = Object.assign(document.createElement("template"), { innerHTML });
         const tooltip = template.content.firstChild;
         this.containerRef.el.prepend(tooltip);

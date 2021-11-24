@@ -2,7 +2,7 @@ odoo.define('account.ShowResequenceRenderer', function (require) {
 "use strict";
 
 const { Component } = owl;
-const { useState } = owl.hooks;
+const { useState } = owl;
 const AbstractFieldOwl = require('web.AbstractFieldOwl');
 const field_registry = require('web.field_registry_owl');
 

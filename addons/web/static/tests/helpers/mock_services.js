@@ -42,7 +42,8 @@ export function makeFakeLocalizationService(config = {}) {
         start: async (env) => {
             const _t = (str) => translatedTerms[str] || str;
             env._t = _t;
-            env.qweb.translateFn = _t;
+            // env.qweb.translateFn = _t;
+            // NXOWL: configure app in some way
         },
     };
 }

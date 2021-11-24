@@ -12,8 +12,8 @@ import {
 } from "../helpers/utils";
 
 const { Component, mount } = owl;
-const { useState } = owl.hooks;
-const { xml } = owl.tags;
+const { useState } = owl;
+const { xml } = owl;
 
 class PagerController extends Component {
     setup() {

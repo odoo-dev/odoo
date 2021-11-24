@@ -15,7 +15,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
     const addMockEnvironmentOwl = testUtils.mock.addMockEnvironmentOwl;
 
     const { Component, tags, useState } = owl;
-    const { xml } = tags;
+    const { xml } = owl;
 
     // from Owl internal status enum
     const ISMOUNTED = 3; 

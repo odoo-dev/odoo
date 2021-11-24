@@ -6,8 +6,8 @@ import { click } from "../helpers/utils";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "./helpers";
 
 const { Component } = owl;
-const { useState } = owl.hooks;
-const { xml } = owl.tags;
+const { useState } = owl;
+const { xml } = owl;
 
 let serverData;
 QUnit.module("Search", (hooks) => {

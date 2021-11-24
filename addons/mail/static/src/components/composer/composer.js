@@ -8,7 +8,7 @@ import {
 } from '@mail/utils/utils';
 
 const { Component } = owl;
-const { onMounted, onWillUnmount, useRef } = owl.hooks;
+const { onMounted, onWillUnmount, useRef } = owl;
 
 export class Composer extends Component {
 

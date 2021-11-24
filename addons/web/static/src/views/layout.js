@@ -23,10 +23,17 @@ export class Layout extends Component {
         this.components = extractLayoutComponents(this.env.config);
         this.display = display;
     }
+    get controlPanelSlots() {
+        // NXOWL
+        const slots = { ...this.props.slots };
+        delete slots.default;
+        return slots;
+    }
 }
 
 Layout.template = "web.Layout";
 Layout.props = {
+    slots: { type: Object, optional: true },
     viewType: { type: String, optional: true },
     useSampleModel: { type: Boolean, optional: true },
 };

@@ -5,7 +5,7 @@ import { link, unlink } from '@mail/model/model_field_command';
 import { useUpdate } from '@mail/component_hooks/use_update/use_update';
 
 const { Component } = owl;
-const { onWillUnmount } = owl.hooks;
+const { onWillUnmount } = owl;
 
 export class Discuss extends Component {
 

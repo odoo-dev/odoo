@@ -38,6 +38,13 @@ export async function startWebClient(Webclient) {
     mapLegacyEnvToWowlEnv(legacyEnv, env);
     const app = new App(Webclient);
     env.app = app; // FIXME NXOWL ?
+    env.renderToString = (template, context) => {
+        const div = document.createElement("div");
+        const templateFn = app.getTemplate(template);
+        const bdom = templateFn(context);
+        owl.blockDom.mount(bdom, div);
+        return div.innerHTML;
+    };
     app.configure({ env });
     app.addTemplates(templates);
     const root = await app.mount(document.body);

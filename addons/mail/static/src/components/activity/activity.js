@@ -9,7 +9,7 @@ import {
 } from 'web.time';
 
 const { Component, useState } = owl;
-const { useRef } = owl.hooks;
+const { useRef } = owl;
 
 export class Activity extends Component {
 

@@ -12,7 +12,7 @@ import { getFixture, makeDeferred, nextTick, patchWithCleanup } from "../../help
 import { registerCleanup } from "../../helpers/cleanup";
 
 const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 
 let isXHRMocked = false;
 const serviceRegistry = registry.category("services");

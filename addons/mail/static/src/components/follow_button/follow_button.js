@@ -3,7 +3,7 @@
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
 const { Component } = owl;
-const { useState } = owl.hooks;
+const { useState } = owl;
 
 export class FollowButton extends Component {
 

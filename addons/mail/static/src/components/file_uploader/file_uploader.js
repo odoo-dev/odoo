@@ -6,7 +6,7 @@ import { replace } from '@mail/model/model_field_command';
 import core from 'web.core';
 
 const { Component } = owl;
-const { useRef } = owl.hooks;
+const { useRef } = owl;
 
 const geAttachmentNextTemporaryId = (function () {
     let tmpId = 0;

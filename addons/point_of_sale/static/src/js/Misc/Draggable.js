@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.Draggable', function(require) {
     'use strict';
 
-    const { useExternalListener } = owl.hooks;
+    const { useExternalListener } = owl;
     const { useListener } = require('web.custom_hooks');
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');

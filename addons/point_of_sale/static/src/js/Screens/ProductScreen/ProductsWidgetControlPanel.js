@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
     'use strict';
 
-    const { useRef } = owl.hooks;
+    const { useRef } = owl;
     const { debounce } = owl.utils;
     const { identifyError } = require('point_of_sale.utils');
     const { ConnectionLostError, ConnectionAbortedError } = require('@web/core/network/rpc_service');

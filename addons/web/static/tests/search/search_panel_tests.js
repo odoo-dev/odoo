@@ -16,7 +16,7 @@ import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { SearchPanel } from "@web/search/search_panel/search_panel";
 
 const { Component, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 
 const serviceRegistry = registry.category("services");
 

@@ -2,7 +2,7 @@
 "use strict";
 
 const { Component } = owl;
-const { useState, useRef } = owl.hooks;
+const { useState, useRef } = owl;
 import session from 'web.session';
 import AbstractFieldOwl from 'web.AbstractFieldOwl';
 import fieldUtils from 'web.field_utils';

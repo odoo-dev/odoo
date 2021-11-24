@@ -16,7 +16,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
 
     const { Component, tags, useState, mount } = owl;
     const EscapeKey = { key: 'Escape', keyCode: 27, which: 27 };
-    const { xml } = tags;
+    const { xml } = owl;
 
     QUnit.module('core', {}, function () {
         QUnit.module('OwlDialog');

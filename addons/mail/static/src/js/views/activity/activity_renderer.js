@@ -13,7 +13,7 @@ import utils from 'web.utils';
 
 const _t = core._t;
 
-const { useState } = owl.hooks;
+const { useState } = owl;
 
 /**
  * Owl Component Adapter for ActivityRecord which is KanbanRecord (Odoo Widget)
