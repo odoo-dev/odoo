@@ -16,8 +16,8 @@ import { View } from "@web/views/view";
 import { actionService } from "@web/webclient/actions/action_service";
 
 const { Component, mount, hooks, tags } = owl;
-const { useState } = hooks;
-const { xml } = tags;
+const { useState } = owl;
+const { xml } = owl;
 
 const serviceRegistry = registry.category("services");
 const viewRegistry = registry.category("views");

@@ -19,7 +19,7 @@ import {
 import { editSearchBar } from "./command_service_tests";
 
 const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 
 let env;
 let target;

@@ -10,7 +10,7 @@ import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import { getFixture, nextTick, patchWithCleanup, triggerEvent } from "../../helpers/utils";
 
 const { Component, mount, useState } = owl;
-const { xml } = owl.tags;
+const { xml } = owl;
 
 const mainComponents = registry.category("main_components");
 

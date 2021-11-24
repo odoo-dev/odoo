@@ -18,8 +18,8 @@ import {
 } from "./helpers";
 
 const { Component, hooks, mount, tags } = owl;
-const { useState } = hooks;
-const { xml } = tags;
+const { useState } = owl;
+const { xml } = owl;
 
 const serviceRegistry = registry.category("services");
 

@@ -5,7 +5,7 @@ import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import Dialog from 'web.OwlDialog';
 
 const { Component } = owl;
-const { useRef } = owl.hooks;
+const { useRef } = owl;
 
 export class DeleteMessageConfirmDialog extends Component {
 

@@ -9,7 +9,7 @@ import { makeTestEnv } from "../../helpers/mock_env";
 import { getFixture, nextTick, patchWithCleanup, triggerHotkey } from "../../helpers/utils";
 
 const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 const serviceRegistry = registry.category("services");
 
 let env;

@@ -10,7 +10,7 @@ import { click, getFixture, triggerEvent } from "../helpers/utils";
 
 const { DateTime } = luxon;
 const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 const serviceRegistry = registry.category("services");
 
 /**

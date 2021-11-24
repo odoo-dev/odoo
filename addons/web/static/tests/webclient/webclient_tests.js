@@ -16,7 +16,7 @@ import { getFixture, patchWithCleanup, triggerEvent } from "../helpers/utils";
 import { session } from "@web/session";
 
 const { Component, tags, mount } = owl;
-const { xml } = tags;
+const { xml } = owl;
 const mainComponentRegistry = registry.category("main_components");
 const serviceRegistry = registry.category("services");
 

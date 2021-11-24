@@ -5,7 +5,7 @@ odoo.define('web.component_extension_tests', function (require) {
     const testUtils = require("web.test_utils");
 
     const { Component, tags } = owl;
-    const { xml } = tags;
+    const { xml } = owl;
     const { useListener } = require('web.custom_hooks');
 
     QUnit.module("web", function () {

@@ -4339,7 +4339,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 throw new Error("Cannot mount component: the target is not a valid DOM element");
             }
             if (!document.body.contains(target)) {
-                throw new Error("Cannot mount a component on a detached dom node");
+                // throw new Error("Cannot mount a component on a detached dom node");
+                // NXOWL
             }
             const node = new ComponentNode(this.Root, this.props, this);
             this.root = node;

@@ -8,8 +8,8 @@ import { Layout } from "@web/views/layout";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 
 const { Component, hooks, mount, tags } = owl;
-const { xml } = tags;
-const { useSubEnv } = hooks;
+const { xml } = owl;
+const { useSubEnv } = owl;
 
 const serviceRegistry = registry.category("services");
 

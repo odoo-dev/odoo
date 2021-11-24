@@ -12,7 +12,7 @@ import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, nextTick, patchWithCleanup, makeDeferred } from "../helpers/utils";
 
 const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 const systrayRegistry = registry.category("systray");
 const serviceRegistry = registry.category("services");
 

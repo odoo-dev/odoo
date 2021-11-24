@@ -5,7 +5,7 @@ import { makeWithSearch, setupControlPanelServiceRegistry } from "./helpers";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 
 const { Component, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 
 class TestComponent extends Component {}
 TestComponent.template = xml`<div class="o_test_component"/>`;

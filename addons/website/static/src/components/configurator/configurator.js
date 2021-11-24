@@ -10,7 +10,7 @@ import {svgToPNG} from 'website.utils';
 import {useService} from "@web/core/utils/hooks";
 
 const {Component, Store, mount, QWeb} = owl;
-const {useDispatch, useStore, useGetters, useRef} = owl.hooks;
+const {useDispatch, useStore, useGetters, useRef} = owl;
 const {Router, RouteComponent} = owl.router;
 const {whenReady} = owl.utils;
 

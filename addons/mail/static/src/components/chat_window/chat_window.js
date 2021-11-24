@@ -5,7 +5,7 @@ import { useUpdate } from '@mail/component_hooks/use_update/use_update';
 import { isEventHandled } from '@mail/utils/utils';
 
 const { Component } = owl;
-const { useRef } = owl.hooks;
+const { useRef } = owl;
 
 export class ChatWindow extends Component {
 

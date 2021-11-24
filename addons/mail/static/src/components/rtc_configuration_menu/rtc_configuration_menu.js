@@ -5,7 +5,7 @@ import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { browser } from "@web/core/browser/browser";
 
 const { Component } = owl;
-const { onWillStart, useState } = owl.hooks;
+const { onWillStart, useState } = owl;
 
 export class RtcConfigurationMenu extends Component {
 

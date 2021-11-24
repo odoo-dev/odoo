@@ -24,7 +24,7 @@ import { openViewItem } from "@web/webclient/debug_items";
 import { editSearchView, editView } from "@web/views/debug_items";
 
 const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 
 export class DebugMenuParent extends Component {
     setup() {

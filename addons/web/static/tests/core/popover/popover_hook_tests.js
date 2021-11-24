@@ -8,7 +8,7 @@ import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import { getFixture, nextTick } from "../../helpers/utils";
 
 const { Component, mount } = owl;
-const { xml } = owl.tags;
+const { xml } = owl;
 
 let env;
 let fixture;

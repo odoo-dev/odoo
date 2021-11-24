@@ -7,7 +7,7 @@ import { View } from "@web/views/view";
 import { _fieldsViewGet } from "../helpers/mock_server";
 import { addLegacyMockEnvironment } from "../webclient/helpers";
 
-const { mount } = owl;
+const { App } = owl;
 
 /**
  * @typedef {{
@@ -79,12 +79,31 @@ export const makeView = async (params, options = {}) => {
     //
 
     const target = getFixture();
-    const view = await mount(View, { env, props, target });
 
-    registerCleanup(() => view.destroy());
+    // FIXME NXOWL ?
 
-    const withSearch = Object.values(view.__owl__.children)[0];
-    const concreteView = Object.values(withSearch.__owl__.children)[0];
+    const app = new App(View, props);
+    env.app = app;
+    env.renderToString = (template, context) => {
+        const div = document.createElement("div");
+        const templateFn = app.getTemplate(template);
+        const bdom = templateFn(context);
+        owl.blockDom.mount(bdom, div);
+        return div.innerHTML;
+    };
+    app.configure({
+        env,
+        templates: window.__ODOO_TEMPLATES__,
+    });
+    const view = await app.mount(target);
+
+    registerCleanup(() => app.destroy());
+
+    const viewNode = view.__owl__;
+    const withSearchNode = Object.values(viewNode.children)[0];
+    const concreteViewNode = Object.values(withSearchNode.children)[0];
+    const concreteView = concreteViewNode.component;
+    //
 
     return concreteView;
 };

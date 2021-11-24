@@ -7,7 +7,7 @@ import { FormViewDialog } from 'web.view_dialogs';
 import { ComponentAdapter } from 'web.OwlCompatibility';
 
 const { Component } = owl;
-const { useRef } = owl.hooks;
+const { useRef } = owl;
 
 class FormViewDialogComponentAdapter extends ComponentAdapter {
 

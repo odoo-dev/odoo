@@ -402,7 +402,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.debug(
+    QUnit.skip(
         "owl2test",
         async function (assert) {
             serverData.views[

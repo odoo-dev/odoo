@@ -14,7 +14,7 @@ import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import { click, getFixture, nextTick, patchWithCleanup, triggerHotkey } from "../../helpers/utils";
 
 const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { xml } = owl;
 
 let env;
 let target;
