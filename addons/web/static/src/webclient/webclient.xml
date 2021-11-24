@@ -8,7 +8,7 @@
                 <NavBar/>
             </NotUpdatable>
             <NotUpdatable>
-                <!-- NXOWL <ActionContainer/> -->
+                <ActionContainer/>
             </NotUpdatable>
             <MainComponentsContainer/>
         </div>

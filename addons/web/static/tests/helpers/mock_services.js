@@ -49,7 +49,7 @@ export function makeFakeLocalizationService(config = {}) {
 
 function buildMockRPC(mockRPC) {
     return async function (...args) {
-        if (this instanceof Component && this.__owl__.status === 5) {
+        if (this instanceof Component && this.__owl__.status === 2 /** NXOWL CHECK **/) {
             return new Promise(() => {});
         }
         if (mockRPC) {

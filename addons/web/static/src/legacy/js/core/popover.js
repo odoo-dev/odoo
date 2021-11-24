@@ -221,7 +221,7 @@ odoo.define('web.Popover', function (require) {
          * @param {Event} ev
          */
         _onResizeWindow(ev) {
-            if (this.__owl__.status === 5 /* destroyed */) {
+            if (this.__owl__.status === 2 /** NXOWL CHECK **/ /* destroyed */) {
                 return;
             }
             this._compute();
@@ -235,7 +235,7 @@ odoo.define('web.Popover', function (require) {
          * @param {Event} ev
          */
         _onScrollDocument(ev) {
-            if (this.__owl__.status === 5 /* destroyed */) {
+            if (this.__owl__.status === 2 /** NXOWL CHECK **/ /* destroyed */) {
                 return;
             }
             this._compute();

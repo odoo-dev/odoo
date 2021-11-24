@@ -89,11 +89,11 @@ function registerView(name, LegacyView) {
             this.widget = this.props.state && this.props.state.__legacy_widget__;
             this.onReverseBreadcrumb =
                 this.props.state && this.props.state.__on_reverse_breadcrumb__;
-            useSetupAction({
-                beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
-                getGlobalState: () => getGlobalState(this.controllerRef.comp.exportState()),
-                getLocalState: () => getLocalState(this.controllerRef.comp.exportState()),
-            });
+            // useSetupAction({
+            //     beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
+            //     getGlobalState: () => getGlobalState(this.controllerRef.comp.exportState()),
+            //     getLocalState: () => getLocalState(this.controllerRef.comp.exportState()),
+            // });
             this.onScrollTo = (ev) => {
                 setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });
             };
