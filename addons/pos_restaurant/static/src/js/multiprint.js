@@ -57,8 +57,8 @@ models.load_models({
 Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
 class PosResMultiprintOrderline extends Orderline {
-    initialize() {
-        super.initialize(...arguments);
+    constructor() {
+        super(...arguments);
         if (!this.pos.config.iface_printers) {
             return;
         }

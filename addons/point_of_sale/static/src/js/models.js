@@ -59,12 +59,41 @@ class PosCollection {
     }
 }
 
-var exports = {};
-
 let nextId = 0;
+class PosModel {
+    /**
+     * Create an object with cid. If no cid is in the defaultObj,
+     * cid is computed based on id of the defaultObj. Override
+     * _getCID if you don't want the default calculation of cid which
+     * is based on id of the defaultObj.
+     * @param {Object?} defaultObj its props copied to this instance.
+     */
+    constructor(defaultObj) {
+        defaultObj = defaultObj || {};
+        if (!defaultObj.cid) {
+            defaultObj.cid = this._getCID(defaultObj);
+        }
+        Object.assign(this, defaultObj);
+    }
+    /**
+     * Default cid getter. Used as local identity of this object.
+     * @param {Object} obj
+     */
+    _getCID(obj) {
+        if (obj.id) {
+            if (typeof obj.id == 'string') {
+                return obj.id;
+            } else if (typeof obj.id == 'number') {
+                return `c${obj.id}`;
+            }
+        }
+        return `c${nextId++}`;
+    }
+}
 
-class PosGlobalState {
-    constructor() {
+class PosGlobalState extends PosModel {
+    constructor(obj) {
+        super(obj);
         this.flush_mutex = new Mutex();                   // used to make sure the orders are sent to the server once at time
 
         this.proxy = new devices.ProxyDevice(this);              // used to communicate to the hardware devices via a local proxy
@@ -1199,7 +1228,7 @@ PosGlobalState.prototype.models = [
                 }
                 product.categ = _.findWhere(self.product_categories, {'id': product.categ_id[0]});
                 product.pos = self;
-                return new (PosModelRegistry.get(Product))({}, product);
+                return new (PosModelRegistry.get(Product))(product);
             }));
         },
     },{
@@ -1356,7 +1385,6 @@ PosGlobalState.prototype.models = [
 ];
 
 PosModelRegistry.add(PosGlobalState);
-exports.PosGlobalState = PosGlobalState;
 
 /**
  * Call this function to map your PaymentInterface implementation to
@@ -1370,7 +1398,7 @@ exports.PosGlobalState = PosGlobalState;
  * @param {Object} ImplementedPaymentInterface - implemented
  * PaymentInterface
  */
-exports.register_payment_method = function(use_payment_terminal, ImplementedPaymentInterface) {
+function register_payment_method(use_payment_terminal, ImplementedPaymentInterface) {
     PosGlobalState.prototype.electronic_payment_interfaces[use_payment_terminal] = ImplementedPaymentInterface;
 };
 
@@ -1378,7 +1406,7 @@ exports.register_payment_method = function(use_payment_terminal, ImplementedPaym
 // by the point of sale.
 // e.g: module.load_fields("product.product",['price','category'])
 
-exports.load_fields = function(model_name, fields) {
+function load_fields(model_name, fields) {
     if (!(fields instanceof Array)) {
         fields = [fields];
     }
@@ -1437,7 +1465,7 @@ exports.load_fields = function(model_name, fields) {
 //   after:  [string] The model will be loaded after the (last loaded)
 //           named model. (applies to both model name and label)
 //
-exports.load_models = function(models,options) {
+function load_models(models,options) {
     options = options || {};
     if (!(models instanceof Array)) {
         models = [models];
@@ -1464,10 +1492,7 @@ exports.load_models = function(models,options) {
     pmodels.splice.apply(pmodels,[index,0].concat(models));
 };
 
-class Product {
-    constructor(attr, options){
-        _.extend(this, options);
-    }
+class Product extends PosModel {
     isAllowOnlyOneLot() {
         const productUnit = this.get_unit();
         return this.tracking === 'lot' || !productUnit || !productUnit.is_pos_groupable;
@@ -1571,19 +1596,15 @@ class Product {
     }
 }
 PosModelRegistry.add(Product);
-exports.Product = Product;
 
 var orderline_id = 1;
 
 // An orderline represent one element of the content of a client's shopping cart.
 // An orderline contains a product, its quantity, its price, discount. etc.
 // An Order contains zero or more Orderlines.
-class Orderline {
-    constructor() {
-        this.initialize(...arguments);
-    }
-    initialize(attr,options){
-        this.cid = nextId++;
+class Orderline extends PosModel {
+    constructor(obj, options) {
+        super(obj);
         this.pos   = options.pos;
         this.order = options.order;
         if (options.json) {
@@ -2386,11 +2407,10 @@ class Orderline {
     }
 }
 PosModelRegistry.add(Orderline);
-exports.Orderline = Orderline;
 
-class Packlotline {
-    constructor(attributes, options){
-        this.cid = nextId++;
+class Packlotline extends PosModel {
+    constructor(obj, options){
+        super(obj);
         this.lot_name = null;
         this.order_line = options.order_line;
         if (options.json) {
@@ -2419,12 +2439,11 @@ class Packlotline {
     }
 }
 PosModelRegistry.add(Packlotline);
-exports.Packlotline = Packlotline;
 
 // Every Paymentline contains a cashregister and an amount of money.
-class Payment {
-    constructor(attributes, options) {
-        this.cid = nextId++;
+class Payment extends PosModel {
+    constructor(obj, options) {
+        super(obj);
         this.pos = options.pos;
         this.order = options.order;
         this.amount = 0;
@@ -2552,21 +2571,17 @@ class Payment {
     }
 }
 PosModelRegistry.add(Payment);
-exports.Payment = Payment;
 
 // An order more or less represents the content of a client's shopping cart (the OrderLines)
 // plus the associated payment information (the Paymentlines)
 // there is always an active ('selected') order in the Pos, a new one is created
 // automaticaly once an order is completed and sent to the server.
-class Order {
-    constructor() {
-        this.initialize(...arguments);
-    }
-    initialize(attributes,options){
+class Order extends PosModel {
+    constructor(obj, options) {
+        super(obj);
         var self = this;
         options  = options || {};
 
-        this.cid = nextId++;
         this.locked         = false;
         this.pos            = options.pos;
         this.selected_orderline   = undefined;
@@ -3523,8 +3538,17 @@ class Order {
     }
 }
 PosModelRegistry.add(Order);
-exports.Order = Order;
 
-return exports;
+return {
+    register_payment_method,
+    load_fields,
+    load_models,
+    PosGlobalState,
+    Product,
+    Orderline,
+    Packlotline,
+    Payment,
+    Order,
+};
 
 });

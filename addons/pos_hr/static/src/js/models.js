@@ -68,8 +68,8 @@ return PosHrPosModel;
 Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
 class PosHrOrder extends Order {
-    initialize(attributes, options) {
-        super.initialize(...arguments);
+    constructor(obj, options) {
+        super(...arguments);
         if (!options.json) {
             this.employee = this.pos.get_cashier();
         }

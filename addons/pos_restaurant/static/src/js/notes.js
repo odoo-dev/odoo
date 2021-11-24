@@ -7,8 +7,8 @@ const Registries = require('point_of_sale.Registries');
 Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
 class PosResNotesOrderline extends Orderline {
-    initialize(attr, options) {
-        super.initialize(...arguments);
+    constructor() {
+        super(...arguments);
         this.note = this.note || "";
     }
     set_note(note){

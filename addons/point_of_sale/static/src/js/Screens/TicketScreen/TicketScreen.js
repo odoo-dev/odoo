@@ -553,7 +553,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 // Cache these fetched orders so that next time, no need to fetch
                 // them again, unless invalidated. See `_onInvoiceOrder`.
                 fetchedOrders.forEach((order) => {
-                    this._state.syncedOrders.cache[order.id] = new models.Order({}, { pos: this.env.pos, json: order });
+                    this._state.syncedOrders.cache[order.id] = new (Registries.PosModelRegistry.get(models.Order))({}, { pos: this.env.pos, json: order });
                 });
             }
             this._state.syncedOrders.totalCount = totalCount;

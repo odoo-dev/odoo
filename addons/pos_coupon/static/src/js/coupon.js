@@ -236,8 +236,8 @@ odoo.define('pos_coupon.pos', function (require) {
     class PosCouponOrder extends Order {
         // OVERIDDEN METHODS
 
-        initialize() {
-            let res = super.initialize(...arguments);
+        constructor() {
+            let res = super(...arguments);
             res._initializePrograms();
             return res;
         }

@@ -46,8 +46,8 @@ models.load_models({
 Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
 class PosRestaurantOrder extends Order {
-    initialize(attr,options) {
-        super.initialize(...arguments);
+    constructor(obj, options) {
+        super(...arguments);
         if (!this.table && !options.json) {
             this.table = this.pos.table;
         }

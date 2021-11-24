@@ -48,8 +48,8 @@ return L10nFrPosModel;
 Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
 class L10nFrOrder extends Order {
-    initialize() {
-        super.initialize(...arguments);
+    constructor() {
+        super(...arguments);
         this.l10n_fr_hash = this.l10n_fr_hash || false;
         this.save_to_db();
     }

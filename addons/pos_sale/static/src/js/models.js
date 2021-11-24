@@ -7,8 +7,8 @@ const Registries = require('point_of_sale.Registries');
 Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
 class PosSaleOrderline extends Orderline {
-  initialize(attributes, options) {
-      super.initialize(...arguments);
+  constructor(obj, options) {
+      super(...arguments);
       // It is possible that this orderline is initialized using `init_from_JSON`,
       // meaning, it is loaded from localStorage or from export_for_ui. This means
       // that some fields has already been assigned. Therefore, we only set the options
