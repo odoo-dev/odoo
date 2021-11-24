@@ -22,7 +22,20 @@ var round_pr = utils.round_precision;
 
 const Registries = require('point_of_sale.Registries');
 
-class ModelCollection {
+/**
+ * TODO-REF This should behave like sequence (array) and set (dict).
+ *  col.get(key);
+ *  col.set(key, value);
+ *  col.at(index);
+ *  col.last();
+ *  col.first();
+ *  col.insertAt(index);
+ *  col.removeAt(index);
+ *  col.push(value);
+ *  col.insertFirst(value);
+ *  ... and so on ...
+ */
+class PosCollection {
     constructor() {
         this._items = [];
     }
@@ -120,7 +133,7 @@ class PosModel {
         // these dynamic attributes can be watched for change by other models or widgets
         Object.assign(this, {
             'synch':            { status:'connected', pending:0 },
-            'orders':           new (Registries.PModel.get(OrderCollection))(),
+            'orders':           new PosCollection(),
             'selectedOrder':    null,
             'selectedClient':   null,
             'cashier':          null,
@@ -1699,11 +1712,11 @@ class Orderline {
         }
 
         // Set the quantity of the line based on number of pack lots.
-        this.pack_lot_lines.set_quantity_by_lot();
+        this.set_quantity_by_lot();
     }
     set_product_lot(product){
         this.has_product_lot = product.tracking !== 'none';
-        this.pack_lot_lines  = this.has_product_lot && new (Registries.PModel.get(PacklotlineCollection))(null, {'order_line': this});
+        this.pack_lot_lines  = this.has_product_lot && new PosCollection();
     }
     // sets a discount [0,100]%
     set_discount(discount){
@@ -1823,11 +1836,25 @@ class Orderline {
         return lots_required;
     }
 
+    get_valid_lots(){
+        return this.pack_lot_lines.getItems().filter((item) => {
+            return item.lot_name;
+        });
+    }
+
+    set_quantity_by_lot() {
+        var valid_lots_quantity = this.get_valid_lots().length;
+        if (this.quantity < 0){
+            valid_lots_quantity = -valid_lots_quantity;
+        }
+        this.set_quantity(valid_lots_quantity);
+    }
+
     has_valid_product_lot(){
         if(!this.has_product_lot){
             return true;
         }
-        var valid_product_lot = this.pack_lot_lines.get_valid_lots();
+        var valid_product_lot = this.get_valid_lots();
         return this.get_required_number_of_lots() === valid_product_lot.length;
     }
 
@@ -2371,10 +2398,6 @@ class Orderline {
 Registries.PModel.add(Orderline);
 exports.Orderline = Orderline;
 
-class OrderlineCollection extends ModelCollection {}
-Registries.PModel.add(OrderlineCollection);
-exports.OrderlineCollection = OrderlineCollection
-
 class Packlotline {
     constructor(attributes, options){
         this.cid = nextId++;
@@ -2407,28 +2430,6 @@ class Packlotline {
 }
 Registries.PModel.add(Packlotline);
 exports.Packlotline = Packlotline;
-
-class PacklotlineCollection extends ModelCollection {
-    constructor (models, options) {
-        super(...arguments);
-        this.order_line = options.order_line;
-    }
-    get_valid_lots(){
-        return this.getItems().filter((item) => {
-            return item.lot_name;
-        });
-    }
-    set_quantity_by_lot() {
-        var valid_lots_quantity = this.get_valid_lots().length;
-        if (this.order_line.quantity < 0){
-            valid_lots_quantity = -valid_lots_quantity;
-        }
-        this.order_line.set_quantity(valid_lots_quantity);
-    }
-}
-Registries.PModel.add(PacklotlineCollection);
-exports.PacklotlineCollection = PacklotlineCollection;
-
 
 // Every Paymentline contains a cashregister and an amount of money.
 class Payment {
@@ -2563,10 +2564,6 @@ class Payment {
 Registries.PModel.add(Payment);
 exports.Payment = Payment;
 
-class PaymentCollection extends ModelCollection {}
-Registries.PModel.add(PaymentCollection);
-exports.PaymentCollection = PaymentCollection;
-
 // An order more or less represents the content of a client's shopping cart (the OrderLines)
 // plus the associated payment information (the Paymentlines)
 // there is always an active ('selected') order in the Pos, a new one is created
@@ -2588,8 +2585,8 @@ class Order {
         this.temporary      = options.temporary || false;
         this.creation_date  = new Date();
         this.to_invoice     = false;
-        this.orderlines     = new (Registries.PModel.get(OrderlineCollection))();
-        this.paymentlines   = new (Registries.PModel.get(PaymentCollection))();
+        this.orderlines     = new PosCollection();
+        this.paymentlines   = new PosCollection();
         this.pos_session_id = this.pos.pos_session.id;
         this.employee       = this.pos.employee;
         this.finalized      = false; // if true, cannot be modified.
@@ -3538,17 +3535,6 @@ class Order {
 Registries.PModel.add(Order);
 exports.Order = Order;
 
-class OrderCollection extends ModelCollection {}
-Registries.PModel.add(OrderCollection);
-exports.OrderCollection = OrderCollection;
-
-// exports = {
-//     PosModel: PosModel,
-//     load_fields: load_fields,
-//     load_models: load_models,
-//     Orderline: Orderline,
-//     Order: Order,
-// };
 return exports;
 
 });
