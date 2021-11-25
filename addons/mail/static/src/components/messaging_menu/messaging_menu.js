@@ -2,8 +2,7 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
-const { onMounted, onWillUnmount } = owl;
+const { Component, onMounted, onWillUnmount } = owl;
 
 export class MessagingMenu extends Component {
 

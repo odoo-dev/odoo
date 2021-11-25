@@ -9,8 +9,7 @@ import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { click, getFixture, triggerEvent } from "../helpers/utils";
 
 const { DateTime } = luxon;
-const { Component, mount, tags } = owl;
-const { xml } = owl;
+const { Component, mount, xml } = owl;
 const serviceRegistry = registry.category("services");
 
 /**

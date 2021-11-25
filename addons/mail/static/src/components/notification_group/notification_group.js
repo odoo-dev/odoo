@@ -2,8 +2,7 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
-const { useRef } = owl;
+const { Component, useRef } = owl;
 
 export class NotificationGroup extends Component {
 

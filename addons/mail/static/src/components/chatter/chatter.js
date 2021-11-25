@@ -4,8 +4,7 @@ import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { useUpdate } from '@mail/component_hooks/use_update/use_update';
 import { useRefToModel } from '@mail/component_hooks/use_ref_to_model/use_ref_to_model';
 
-const { Component } = owl;
-const { useRef } = owl;
+const { Component, useRef } = owl;
 
 export class Chatter extends Component {
 

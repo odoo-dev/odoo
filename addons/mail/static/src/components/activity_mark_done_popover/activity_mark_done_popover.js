@@ -2,8 +2,7 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
-const { Component } = owl;
-const { onMounted, useRef } = owl;
+const { Component, onMounted, useRef } = owl;
 
 export class ActivityMarkDonePopover extends Component {
 
