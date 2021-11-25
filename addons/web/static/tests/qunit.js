@@ -3,6 +3,13 @@
 
     const { Component } = owl;
 
+    // -------------------------------------------------------------------------
+    // OWL 2 Compat
+    // -------------------------------------------------------------------------
+    const { mount } = owl;
+    owl.mount = (C, target, config = {}) =>
+        mount(C, target, Object.assign({ templates: window.__ODOO_TEMPLATES__ }, config));
+
     // -----------------------------------------------------------------------------
     // QUnit config
     // -----------------------------------------------------------------------------
@@ -363,12 +370,12 @@
         }
     });
     const oldError = QUnit.onError;
-    QUnit.onError = err => {
-        if (err.message === 'ResizeObserver loop limit exceeded') {
+    QUnit.onError = (err) => {
+        if (err.message === "ResizeObserver loop limit exceeded") {
             return true;
         }
         return oldError(err);
-    }
+    };
 
     // -----------------------------------------------------------------------------
     // Add sort button

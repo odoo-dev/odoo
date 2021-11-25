@@ -183,23 +183,17 @@ export class Dropdown extends Component {
      *
      * @param {CustomEvent<import("./dropdown_item").DropdownItemSelectedEventDetail>} ev
      */
-    onItemSelected(ev) {
+    onItemSelected({ detail }) {
         // Handle parent closing request
-        const { dropdownClosingRequest } = ev.detail;
-        const closeAll = dropdownClosingRequest.mode === ParentClosingMode.AllParents;
+        const closeAll = detail.dropdownClosingRequest.mode === ParentClosingMode.AllParents;
         const closeSelf =
-            dropdownClosingRequest.isFresh &&
-            dropdownClosingRequest.mode === ParentClosingMode.ClosestParent;
+            detail.dropdownClosingRequest.isFresh &&
+            detail.dropdownClosingRequest.mode === ParentClosingMode.ClosestParent;
         if (!this.props.manualOnly && (closeAll || closeSelf)) {
             this.close();
         }
         // Mark closing request as started
-        ev.detail.dropdownClosingRequest.isFresh = false;
-
-        // Now call the eventual callback
-        if (this.props.onDropdownItemSelected) {
-            this.props.onDropdownItemSelected(ev.detail);
-        }
+        detail.dropdownClosingRequest.isFresh = false;
     }
 
     /**
@@ -210,7 +204,7 @@ export class Dropdown extends Component {
      *
      * @see changeStateAndNotify()
      *
-     * @param {{detail: DropdownStateChangedPayload}} args
+     * @param {CustomEvent<DropdownStateChangedPayload>} ev
      */
     onDropdownStateChanged({ detail }) {
         if (this.el.contains(detail.emitter.el)) {

@@ -29,4 +29,3 @@ ActionContainer.template = xml`
         <t t-if="info.Component" t-component="info.Component" t-props="info.componentProps" t-key="info.id"/>
       </div>
     </t>`;
-console.log(ActionContainer.template);
