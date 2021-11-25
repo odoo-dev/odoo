@@ -49,7 +49,7 @@ odoo.define('point_of_sale.SetFiscalPositionButton', function(require) {
                 this.currentOrder.set_fiscal_position(selectedFiscalPosition);
                 // IMPROVEMENT: The following is the old implementation and I believe
                 // there could be a better way of doing it.
-                for (let line of this.currentOrder.orderlines.getItems()) {
+                for (let line of this.currentOrder.orderlines) {
                     line.set_quantity(line.quantity);
                 }
             }

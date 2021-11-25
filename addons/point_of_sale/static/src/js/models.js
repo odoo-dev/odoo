@@ -24,39 +24,32 @@ const { PosModelRegistry } = require('point_of_sale.Registries');
 const reactivity = require('@point_of_sale/js/reactivity');
 
 /**
- * TODO-REF-JCB This should behave like sequence (array) and set (dict).
- *  col.get(key);
- *  col.set(key, value);
- *  col.at(index);
- *  col.last();
- *  col.first();
- *  col.insertAt(index);
- *  col.removeAt(index);
- *  col.push(value);
- *  col.insertFirst(value);
- *  ... and so on ...
+ * TODO-REF-JCB If optimization is needed, then we implement this
+ * using a Balanced Binary Tree.
+ * But behaving like Object (indexed by cid) might not be
+ * needed. Let's see how it turns out.
+ *
+ * The goal is to make a type that behaves like an Array
+ * and an Object.
  */
-class PosCollection {
-    constructor() {
-        this._items = [];
-    }
-    getItems() {
-        return this._items;
+class PosCollection extends Array {
+    getByCID(cid) {
+        return this.find(item => item.cid == cid);
     }
     add(item) {
-        this._items.push(item);
+        this.push(item);
     }
     remove(item) {
-        const index = this._items.findIndex(_item => item.cid == _item.cid);
+        const index = this.findIndex(_item => item.cid == _item.cid);
         if (index < 0) return index;
-        this._items.splice(index, 1);
+        this.splice(index, 1);
         return index;
     }
     reset() {
-        this._items.length = 0;
+        this.length = 0;
     }
     at(index) {
-        return this._items[index];
+        return this[index];
     }
 }
 
@@ -442,10 +435,8 @@ class PosGlobalState extends PosModel {
         } while(partners.length);
     }
     set_start_order(){
-        var orders = this.orders.getItems();
-
-        if (orders.length && !this.selectedOrder) {
-            this.selectedOrder = orders[0]
+        if (this.orders.length && !this.selectedOrder) {
+            this.selectedOrder = this.orders[0]
         } else {
             this.add_new_order();
         }
@@ -463,7 +454,7 @@ class PosGlobalState extends PosModel {
 
     // return the list of unpaid orders
     get_order_list(){
-        return this.orders.getItems();
+        return this.orders;
     }
 
     //removes the current order
@@ -1671,7 +1662,7 @@ class Orderline extends PosModel {
         return orderline;
     }
     getPackLotLinesToEdit(isAllowOnlyOneLot) {
-        const currentPackLotLines = this.pack_lot_lines.getItems();
+        const currentPackLotLines = this.pack_lot_lines;
         let nExtraLines = Math.abs(this.quantity) - currentPackLotLines.length;
         nExtraLines = nExtraLines > 0 ? nExtraLines : 1;
         const tempLines = currentPackLotLines
@@ -1694,7 +1685,7 @@ class Orderline extends PosModel {
     setPackLotLines({ modifiedPackLotLines, newPackLotLines }) {
         // Set the new values for modified lot lines.
         let lotLinesToRemove = [];
-        for (let lotLine of this.pack_lot_lines.getItems()) {
+        for (let lotLine of this.pack_lot_lines) {
             const modifiedLotName = modifiedPackLotLines[lotLine.cid];
             if (modifiedLotName) {
                 lotLine.lot_name = modifiedLotName;
@@ -1830,7 +1821,7 @@ class Orderline extends PosModel {
     }
 
     get_lot_lines() {
-        return this.pack_lot_lines && this.pack_lot_lines.getItems();
+        return this.pack_lot_lines && this.pack_lot_lines;
     }
 
     get_required_number_of_lots(){
@@ -1844,7 +1835,7 @@ class Orderline extends PosModel {
     }
 
     get_valid_lots(){
-        return this.pack_lot_lines.getItems().filter((item) => {
+        return this.pack_lot_lines.filter((item) => {
             return item.lot_name;
         });
     }
@@ -1926,7 +1917,7 @@ class Orderline extends PosModel {
     export_as_JSON() {
         var pack_lot_ids = [];
         if (this.has_product_lot){
-            this.pack_lot_lines.getItems().forEach(item => {
+            this.pack_lot_lines.forEach(item => {
                 return pack_lot_ids.push([0, 0, item.export_as_JSON()]);
             });
         }
@@ -2386,7 +2377,7 @@ class Orderline extends PosModel {
     }
     is_last_line() {
         var order = this.pos.get_order();
-        var orderlines = order.orderlines.getItems();
+        var orderlines = order.orderlines;
         var last_id = orderlines[orderlines.length - 1].cid;
         var selectedLine = order? order.selected_orderline: null;
 
@@ -2722,11 +2713,11 @@ class Order extends PosModel {
     export_as_JSON() {
         var orderLines, paymentLines;
         orderLines = [];
-        this.orderlines.getItems().forEach(item => {
+        this.orderlines.forEach(item => {
             return orderLines.push([0, 0, item.export_as_JSON()]);
         });
         paymentLines = [];
-        this.paymentlines.getItems().forEach(_.bind( function(item) {
+        this.paymentlines.forEach(_.bind( function(item) {
             return paymentLines.push([0, 0, item.export_as_JSON()]);
         }, this));
         var json = {
@@ -2760,14 +2751,14 @@ class Order extends PosModel {
         var orderlines = [];
         var self = this;
 
-        this.orderlines.getItems().forEach(function(orderline){
+        this.orderlines.forEach(function(orderline){
             orderlines.push(orderline.export_for_printing());
         });
 
         // If order is locked (paid), the 'change' is saved as negative payment,
         // and is flagged with is_change = true. A receipt that is printed first
         // time doesn't show this negative payment so we filter it out.
-        var paymentlines = this.paymentlines.getItems()
+        var paymentlines = this.paymentlines
             .filter(function (paymentline) {
                 return !paymentline.is_change;
             })
@@ -2861,7 +2852,7 @@ class Order extends PosModel {
         return receipt;
     }
     is_empty(){
-        return this.orderlines.getItems().length === 0;
+        return this.orderlines.length === 0;
     }
     generate_unique_id() {
         // Generates a public identification number for the order.
@@ -2898,7 +2889,7 @@ class Order extends PosModel {
         this.select_orderline(this.get_last_orderline());
     }
     get_orderline(id){
-        var orderlines = this.orderlines.getItems();
+        var orderlines = this.orderlines;
         for(var i = 0; i < orderlines.length; i++){
             if(orderlines[i].id === id){
                 return orderlines[i];
@@ -2907,10 +2898,10 @@ class Order extends PosModel {
         return null;
     }
     get_orderlines(){
-        return this.orderlines.getItems();
+        return this.orderlines;
     }
     get_last_orderline(){
-        const orderlines = this.orderlines.getItems();
+        const orderlines = this.orderlines;
         return this.orderlines.at(orderlines.length -1);
     }
     get_tip() {
@@ -2994,7 +2985,7 @@ class Order extends PosModel {
         this.set_orderline_options(line, options);
 
         var to_merge_orderline;
-        for (var i = 0; i < this.orderlines.getItems().length; i++) {
+        for (var i = 0; i < this.orderlines.length; i++) {
             if(this.orderlines.at(i).can_be_merged_with(line) && options.merge !== false){
                 to_merge_orderline = this.orderlines.at(i);
             }
@@ -3098,7 +3089,7 @@ class Order extends PosModel {
         return newPaymentline;
     }
     get_paymentlines(){
-        return this.paymentlines.getItems();
+        return this.paymentlines;
     }
     /**
      * Retrieve the paymentline with the specified cid
@@ -3119,7 +3110,7 @@ class Order extends PosModel {
         this.paymentlines.remove(line);
     }
     clean_empty_paymentlines() {
-        var lines = this.paymentlines.getItems();
+        var lines = this.paymentlines;
         var empty = [];
         for ( var i = 0; i < lines.length; i++) {
             if (!lines[i].get_amount()) {
@@ -3169,7 +3160,7 @@ class Order extends PosModel {
     }
     /* ---- Payment Status --- */
     get_subtotal(){
-        return round_pr(this.orderlines.getItems().reduce((function(sum, orderLine){
+        return round_pr(this.orderlines.reduce((function(sum, orderLine){
             return sum + orderLine.get_display_price();
         }), 0), this.pos.currency.rounding);
     }
@@ -3177,12 +3168,12 @@ class Order extends PosModel {
         return this.get_total_without_tax() + this.get_total_tax();
     }
     get_total_without_tax() {
-        return round_pr(this.orderlines.getItems().reduce((function(sum, orderLine) {
+        return round_pr(this.orderlines.reduce((function(sum, orderLine) {
             return sum + orderLine.get_price_without_tax();
         }), 0), this.pos.currency.rounding);
     }
     get_total_discount() {
-        return round_pr(this.orderlines.getItems().reduce((function(sum, orderLine) {
+        return round_pr(this.orderlines.reduce((function(sum, orderLine) {
             sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
             if (orderLine.display_discount_policy() === 'without_discount'){
                 sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
@@ -3197,7 +3188,7 @@ class Order extends PosModel {
             // 2. Round that result
             // 3. Sum all those rounded amounts
             var groupTaxes = {};
-            this.orderlines.getItems().forEach(function (line) {
+            this.orderlines.forEach(function (line) {
                 var taxDetails = line.get_tax_details();
                 var taxIds = Object.keys(taxDetails);
                 for (var t = 0; t<taxIds.length; t++) {
@@ -3217,13 +3208,13 @@ class Order extends PosModel {
             }
             return sum;
         } else {
-            return round_pr(this.orderlines.getItems().reduce((function(sum, orderLine) {
+            return round_pr(this.orderlines.reduce((function(sum, orderLine) {
                 return sum + orderLine.get_tax();
             }), 0), this.pos.currency.rounding);
         }
     }
     get_total_paid() {
-        return round_pr(this.paymentlines.getItems().reduce((function(sum, paymentLine) {
+        return round_pr(this.paymentlines.reduce((function(sum, paymentLine) {
             if (paymentLine.is_done()) {
                 sum += paymentLine.get_amount();
             }
@@ -3234,7 +3225,7 @@ class Order extends PosModel {
         var details = {};
         var fulldetails = [];
 
-        this.orderlines.getItems().forEach(function(line){
+        this.orderlines.forEach(function(line){
             var ldetails = line.get_tax_details();
             for(var id in ldetails){
                 if(ldetails.hasOwnProperty(id)){
@@ -3263,7 +3254,7 @@ class Order extends PosModel {
             return total;
         }
 
-        this.orderlines.getItems().forEach(function(line){
+        this.orderlines.forEach(function(line){
             if ( self.pos.db.category_contains(categ_id,line.product.id) ) {
                 total += line.get_price_with_tax();
             }
@@ -3284,7 +3275,7 @@ class Order extends PosModel {
             tax_set[tax_id[i]] = true;
         }
 
-        this.orderlines.getItems().forEach(line => {
+        this.orderlines.forEach(line => {
             var taxes_ids = this.tax_ids || line.get_product().taxes_id;
             for (var i = 0; i < taxes_ids.length; i++) {
                 if (tax_set[taxes_ids[i]]) {
@@ -3301,7 +3292,7 @@ class Order extends PosModel {
             var change = this.get_total_paid() - this.get_total_with_tax() - this.get_rounding_applied();
         } else {
             var change = -this.get_total_with_tax();
-            var lines  = this.paymentlines.getItems();
+            var lines  = this.paymentlines;
             for (var i = 0; i < lines.length; i++) {
                 change += lines[i].get_amount();
                 if (lines[i] === paymentline) {
@@ -3316,7 +3307,7 @@ class Order extends PosModel {
             var due = this.get_total_with_tax() - this.get_total_paid() + this.get_rounding_applied();
         } else {
             var due = this.get_total_with_tax();
-            var lines = this.paymentlines.getItems();
+            var lines = this.paymentlines;
             for (var i = 0; i < lines.length; i++) {
                 if (lines[i] === paymentline) {
                     break;
@@ -3370,7 +3361,7 @@ class Order extends PosModel {
             return false;
 
         const only_cash = this.pos.config.only_round_cash_method;
-        var lines = this.paymentlines.getItems();
+        var lines = this.paymentlines;
 
         for(var i = 0; i < lines.length; i++) {
             var line = lines[i];
@@ -3386,7 +3377,7 @@ class Order extends PosModel {
         return this.get_due() <= 0 && this.check_paymentlines_rounding();
     }
     is_paid_with_cash(){
-        return !!this.paymentlines.getItems().find( function(pl){
+        return !!this.paymentlines.find( function(pl){
             return pl.payment_method.is_cash_count;
         });
     }
@@ -3408,7 +3399,7 @@ class Order extends PosModel {
         return true;
     }
     get_total_cost() {
-        return this.orderlines.getItems().reduce((function(sum, orderLine) {
+        return this.orderlines.reduce((function(sum, orderLine) {
             return sum + orderLine.get_total_cost();
         }), 0)
     }
@@ -3443,7 +3434,7 @@ class Order extends PosModel {
         return client ? client.name : "";
     }
     get_cardholder_name(){
-        var card_payment_line = this.paymentlines.getItems().find(pl => pl.cardholder_name);
+        var card_payment_line = this.paymentlines.find(pl => pl.cardholder_name);
         return card_payment_line ? card_payment_line.cardholder_name : "";
     }
     /* ---- Screen Status --- */

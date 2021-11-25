@@ -20,7 +20,7 @@ odoo.define('pos_restaurant.TicketButton', function (require) {
             get count() {
                 if (!this.env.pos || !this.env.pos.config) return 0;
                 if (this.env.pos.config.iface_floorplan && !this.env.pos.table) {
-                    return this.env.pos.orders.getItems().length;
+                    return this.env.pos.orders.length;
                 } else {
                     return super.count;
                 }

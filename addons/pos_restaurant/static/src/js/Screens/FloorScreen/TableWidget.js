@@ -39,7 +39,7 @@ odoo.define('pos_restaurant.TableWidget', function(require) {
                 ? table.order_count
                 : this.env.pos
                       .get_table_orders(table)
-                      .filter(o => o.orderlines.getItems().length !== 0 || o.paymentlines.getItems().length !== 0).length;
+                      .filter(o => o.orderlines.length !== 0 || o.paymentlines.length !== 0).length;
         }
         get orderCountClass() {
             const notifications = this._getNotifications();

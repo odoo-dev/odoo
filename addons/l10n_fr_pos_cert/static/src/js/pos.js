@@ -79,7 +79,7 @@ Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 class L10nFrOrderline extends Orderline {
     can_be_merged_with(orderline) {
         let order = this.pos.get_order();
-        let orderlines = order.orderlines.getItems();
+        let orderlines = order.orderlines;
         let lastOrderline = order.orderlines.at(orderlines.length - 1);
 
         if(this.pos.is_french_country() && (lastOrderline.product.id !== orderline.product.id || lastOrderline.quantity < 0)) {

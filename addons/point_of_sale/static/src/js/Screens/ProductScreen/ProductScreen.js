@@ -169,7 +169,7 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
             if (this.state.numpadMode === 'quantity' && this.env.pos.disallowLineQuantityChange()) {
                 let order = this.env.pos.get_order();
                 let selectedLine = order.get_selected_orderline();
-                let orderlines = order.orderlines.getItems();
+                let orderlines = order.orderlines;
                 let lastId = orderlines.length !== 0 && orderlines.at(orderlines.length - 1).cid;
                 let currentQuantity = this.env.pos.get_order().get_selected_orderline().get_quantity();
 

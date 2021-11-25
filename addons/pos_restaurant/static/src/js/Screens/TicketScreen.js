@@ -65,7 +65,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
                 if (this.env.pos.table) {
                     return super._getOrderList();
                 } else {
-                    return this.env.pos.orders.getItems();
+                    return this.env.pos.orders;
                 }
             }
             async settleTips() {
@@ -83,7 +83,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
             }
             async _onDeleteOrder() {
                 await super._onDeleteOrder(...arguments);
-                const orderlist = this.env.pos.table ? this.env.pos.get_order_list() : this.env.pos.orders.getItems();
+                const orderlist = this.env.pos.table ? this.env.pos.get_order_list() : this.env.pos.orders;
                 if (orderlist.length == 0) {
                     this.showScreen('FloorScreen');
                 }

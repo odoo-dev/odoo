@@ -1039,7 +1039,7 @@ odoo.define('pos_coupon.pos', function (require) {
             // We extend its functionality so that if a reward line is removed,
             // other reward lines from the same program are also deleted.
             if (quantity === 'remove' && this.is_program_reward) {
-                let related_rewards = this.order.orderlines.getItems().filter(
+                let related_rewards = this.order.orderlines.filter(
                     (line) => line.is_program_reward && line.program_id === this.program_id
                 );
                 for (let line of related_rewards) {

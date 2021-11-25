@@ -331,7 +331,7 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
                         .filter(
                             (o) =>
                                 o.server_id === undefined &&
-                                (o.orderlines.getItems().length !== 0 || o.paymentlines.getItems().length !== 0) &&
+                                (o.orderlines.length !== 0 || o.paymentlines.length !== 0) &&
                                 // do not count the orders that are already finalized
                                 !o.finalized
                         ).length;

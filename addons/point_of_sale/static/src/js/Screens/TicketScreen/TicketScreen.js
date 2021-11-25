@@ -157,7 +157,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             if (!order) return NumberBuffer.reset();
 
             const selectedOrderlineId = this.getSelectedOrderlineId();
-            const orderline = order.orderlines.getItems().find((line) => line.id == selectedOrderlineId);
+            const orderline = order.orderlines.find((line) => line.id == selectedOrderlineId);
             if (!orderline) return NumberBuffer.reset();
 
             const toRefundDetail = this._getToRefundDetail(orderline);
@@ -387,7 +387,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         _prepareAutoRefundOnOrder(order) {
             const selectedOrderlineId = this.getSelectedOrderlineId();
-            const orderline = order.orderlines.getItems().find((line) => line.id == selectedOrderlineId);
+            const orderline = order.orderlines.find((line) => line.id == selectedOrderlineId);
             if (!orderline) return;
 
             const toRefundDetail = this._getToRefundDetail(orderline);

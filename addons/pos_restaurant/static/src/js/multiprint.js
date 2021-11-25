@@ -133,7 +133,7 @@ Registries.PosModelRegistry.extend(models.Order, (Order) => {
 class PosResMultiprintOrder extends Order {
     build_line_resume(){
         var resume = {};
-        this.orderlines.getItems().forEach(function(line){
+        this.orderlines.forEach(function(line){
             if (line.mp_skip) {
                 return;
             }
@@ -152,7 +152,7 @@ class PosResMultiprintOrder extends Order {
     }
     saveChanges(){
         this.saved_resume = this.build_line_resume();
-        this.orderlines.getItems().forEach(function(line){
+        this.orderlines.forEach(function(line){
             line.set_dirty(false);
         });
     }
