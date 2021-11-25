@@ -6,7 +6,7 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
     const { useListener } = require('web.custom_hooks');
     const testUtils = require('web.test_utils');
     const makePosTestEnv = require('point_of_sale.test_env');
-    const { xml } = owl;;
+    const { xml } = owl;
     const { useState } = owl;
 
     QUnit.module('unit tests for PaymentScreen components', {});
