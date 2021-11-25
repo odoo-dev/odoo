@@ -3268,9 +3268,9 @@
                 scope = `{${params.join(", ")}}`;
             }
             if (ast.defaultContent) {
-                let name = this.generateId("defaultSlot");
+                let name = this.generateId("defaultContent");
                 const slot = new CodeTarget(name);
-                slot.signature = "(ctx, node, key) => {"; /** NXOWL **/
+                slot.signature = "(ctx, node, key) => {";
                 this.functions.push(slot);
                 const initialTarget = this.target;
                 const subCtx = createContext(ctx);
@@ -4107,7 +4107,7 @@
     function withDefault(value, defaultValue) {
         return value === undefined || value === null || value === false ? defaultValue : value;
     }
-    function callSlot(ctx, parent, key, name, dynamic, extra, defaultSlot) {
+    function callSlot(ctx, parent, key, name, dynamic, extra, defaultContent) {
         const slots = (ctx.props && ctx.props.slots) || {};
         const { __render, __ctx, __scope } = slots[name] || {};
         const slotScope = Object.create(__ctx || {});
@@ -4115,14 +4115,14 @@
             slotScope[__scope] = extra || {};
         }
         const slotBDom = __render ? __render(slotScope, parent, key) : null;
-        if (defaultSlot) {
+        if (defaultContent) {
             let child1 = undefined;
             let child2 = undefined;
             if (slotBDom) {
                 child1 = dynamic ? toggler(name, slotBDom) : slotBDom;
             }
             else {
-                child2 = defaultSlot(ctx, parent, key); /** NXOWL **/
+                child2 = defaultContent(ctx, parent, key);
             }
             return multi([child1, child2]);
         }
@@ -4339,8 +4339,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 throw new Error("Cannot mount component: the target is not a valid DOM element");
             }
             if (!document.body.contains(target)) {
-                // throw new Error("Cannot mount a component on a detached dom node");
-                // NXOWL
+                throw new Error("Cannot mount a component on a detached dom node");
             }
             const node = new ComponentNode(this.Root, this.props, this);
             this.root = node;
@@ -4953,8 +4952,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-11-24T10:27:03.103Z';
-    __info__.hash = 'b988a68';
+    __info__.date = '2021-11-25T09:26:59.711Z';
+    __info__.hash = '9217455';
     __info__.url = 'https://github.com/odoo/owl';
 
 
