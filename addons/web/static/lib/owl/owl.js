@@ -94,7 +94,7 @@
      */
     function createAttrUpdater(attr) {
         return function (value) {
-            if (value !== false && value !== undefined) { // NXOWL to fix in owl
+            if (value !== false) {
                 setAttribute.call(this, attr, value === true ? "" : value);
             }
         };
@@ -3100,7 +3100,7 @@
                 const templateVar = this.generateId("template");
                 this.addLine(`const ${templateVar} = ${subTemplate};`);
                 block = this.createBlock(block, "multi", ctx);
-                this.insertBlock(`call(${templateVar}, ctx, node, ${key})`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: !block }));
+                this.insertBlock(`call(this, ${templateVar}, ctx, node, ${key})`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: !block }));
             }
             else {
                 const id = this.generateId(`callTemplate_`);
@@ -4265,9 +4265,9 @@
         constructor() {
             this.rawTemplates = Object.create(globalTemplates);
             this.templates = {};
-            const call = (subTemplate, ctx, parent) => {
+            const call = (owner, subTemplate, ctx, parent) => {
                 const template = this.getTemplate(subTemplate);
-                return toggler(subTemplate, template(ctx, parent));
+                return toggler(subTemplate, template.call(owner, ctx, parent));
             };
             const getTemplate = (name) => this.getTemplate(name);
             this.utils = Object.assign({}, UTILS, { getTemplate, call });
@@ -4962,8 +4962,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-11-25T14:40:35.173Z';
-    __info__.hash = '13c3178';
+    __info__.date = '2021-11-25T16:31:56.139Z';
+    __info__.hash = 'a1d435c';
     __info__.url = 'https://github.com/odoo/owl';
 
 
