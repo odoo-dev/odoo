@@ -5,8 +5,7 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
     const { useListener } = require('web.custom_hooks');
     const testUtils = require('web.test_utils');
     const makePosTestEnv = require('point_of_sale.test_env');
-    const { xml } = owl;
-    const { useRef } = owl;
+    const { xml, useRef } = owl;
 
     QUnit.module('FloorScreen components', {});
 

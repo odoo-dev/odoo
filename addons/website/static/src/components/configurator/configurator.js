@@ -9,6 +9,7 @@ import {_t, _lt} from 'web.core';
 import {svgToPNG} from 'website.utils';
 import {useService} from "@web/core/utils/hooks";
 
+// NXOWL
 const {Component, Store, mount, QWeb} = owl;
 const {useDispatch, useStore, useGetters, useRef} = owl;
 const {Router, RouteComponent} = owl.router;
