@@ -2,7 +2,7 @@ odoo.define('point_of_sale.tests.NumberBuffer', function(require) {
     'use strict';
 
     const { Component, useState } = owl;
-    const { xml } = owl;;
+    const { xml } = owl;
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const makeTestEnvironment = require('web.test_env');
     const testUtils = require('web.test_utils');
