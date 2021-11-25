@@ -1860,7 +1860,7 @@ QUnit.module("Views", (hooks) => {
         checkLegend(assert, graph, "Count");
     });
 
-    QUnit.debug("props modifications", async function (assert) {
+    QUnit.test("props modifications", async function (assert) {
         assert.expect(16);
         const graph = await makeView({
             serverData,
