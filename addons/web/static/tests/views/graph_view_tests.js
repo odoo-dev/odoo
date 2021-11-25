@@ -1877,21 +1877,21 @@ QUnit.module("Views", (hooks) => {
                 </search>
             `,
         });
-        // checkModeIs(assert, graph, "bar");
-        // assert.strictEqual(getXAxeLabel(graph), "bar");
-        // assert.strictEqual(getYAxeLabel(graph), "Count");
-        // await selectMode(graph, "line");
-        // checkModeIs(assert, graph, "line");
-        // assert.strictEqual(getXAxeLabel(graph), "bar");
-        // await toggleMenu(graph, "Measures");
-        // await toggleMenuItem(graph, "Revenue");
-        // assert.strictEqual(getYAxeLabel(graph), "Revenue");
-        // assert.ok(true, "Message");
-        // await toggleGroupByMenu(graph);
-        // await toggleMenuItem(graph, "Color");
-        // checkModeIs(assert, graph, "line");
-        // assert.strictEqual(getXAxeLabel(graph), "Color");
-        // assert.strictEqual(getYAxeLabel(graph), "Revenue");
+        checkModeIs(assert, graph, "bar");
+        assert.strictEqual(getXAxeLabel(graph), "bar");
+        assert.strictEqual(getYAxeLabel(graph), "Count");
+        await selectMode(graph, "line");
+        checkModeIs(assert, graph, "line");
+        assert.strictEqual(getXAxeLabel(graph), "bar");
+        await toggleMenu(graph, "Measures");
+        await toggleMenuItem(graph, "Revenue");
+        assert.strictEqual(getYAxeLabel(graph), "Revenue");
+        assert.ok(true, "Message");
+        await toggleGroupByMenu(graph);
+        await toggleMenuItem(graph, "Color");
+        checkModeIs(assert, graph, "line");
+        assert.strictEqual(getXAxeLabel(graph), "Color");
+        assert.strictEqual(getYAxeLabel(graph), "Revenue");
     });
 
     QUnit.test("switching mode", async function (assert) {
