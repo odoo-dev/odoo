@@ -1402,7 +1402,6 @@
             this.children = [];
             this.appliedToDom = false;
             this.node = node;
-            node.fiber = this;
             this.parent = parent;
             if (parent) {
                 const root = parent.root;
@@ -1819,6 +1818,7 @@
             return fiber.promise.then(() => this.component);
         }
         async initiateRender(fiber) {
+            this.fiber = fiber;
             if (this.mounted.length) {
                 fiber.root.mounted.push(fiber);
             }
@@ -1835,21 +1835,33 @@
             }
         }
         async render() {
-            let fiber = this.fiber;
-            if (fiber && !fiber.bdom && !fibersInError.has(fiber)) {
-                return fiber.root.promise;
+            const current = this.fiber;
+            if (current && !current.bdom && !fibersInError.has(current)) {
+                return current.root.promise;
             }
-            if (!this.bdom && !fiber) {
+            if (!this.bdom && !current) {
                 // should find a way to return the future mounting promise
                 return;
             }
-            fiber = makeRootFiber(this);
+            const fiber = makeRootFiber(this);
+            this.fiber = fiber;
             this.app.scheduler.addFiber(fiber);
             await Promise.resolve();
             if (this.status === 2 /* DESTROYED */) {
                 return;
             }
-            if (this.fiber === fiber) {
+            // We only want to actually render the component if the following two
+            // conditions are true:
+            // * this.fiber: it could be null, in which case the render has been cancelled
+            // * (current || !fiber.parent): if current is not null, this means that the
+            //   render function was called when a render was already occurring. In this
+            //   case, the pending rendering was cancelled, and the fiber needs to be
+            //   rendered to complete the work.  If current is null, we check that the
+            //   fiber has no parent.  If that is the case, the fiber was downgraded from
+            //   a root fiber to a child fiber in the previous microtick, because it was
+            //   embedded in a rendering coming from above, so the fiber will be rendered
+            //   in the next microtick anyway, so we should not render it again.
+            if (this.fiber && (current || !fiber.parent)) {
                 this._render(fiber);
             }
             return fiber.root.promise;
@@ -1894,6 +1906,7 @@
         async updateAndRender(props, parentFiber) {
             // update
             const fiber = makeChildFiber(this, parentFiber);
+            this.fiber = fiber;
             if (this.willPatch.length) {
                 parentFiber.root.willPatch.push(fiber);
             }
@@ -2392,7 +2405,6 @@
     }
     class CodeTarget {
         constructor(name) {
-            this.signature = "";
             this.indentLevel = 0;
             this.loopLevel = 0;
             this.code = [];
@@ -2558,7 +2570,7 @@
         }
         generateFunctions(fn) {
             this.addLine("");
-            this.addLine(`const ${fn.name} = ${fn.signature}`);
+            this.addLine(`function ${fn.name}(ctx, node, key) {`);
             if (fn.hasCache) {
                 this.addLine(`let cache = ctx.cache || {};`);
                 this.addLine(`let nextCache = ctx.cache = {};`);
@@ -3169,7 +3181,6 @@
                 for (let slotName in ast.slots) {
                     let name = this.generateId("slot");
                     const slot = new CodeTarget(name);
-                    slot.signature = "(ctx, node, key) => {";
                     this.functions.push(slot);
                     this.target = slot;
                     const subCtx = createContext(ctx);
@@ -3270,7 +3281,6 @@
             if (ast.defaultContent) {
                 let name = this.generateId("defaultContent");
                 const slot = new CodeTarget(name);
-                slot.signature = "(ctx, node, key) => {";
                 this.functions.push(slot);
                 const initialTarget = this.target;
                 const subCtx = createContext(ctx);
@@ -4114,7 +4124,7 @@
         if (__scope) {
             slotScope[__scope] = extra || {};
         }
-        const slotBDom = __render ? __render(slotScope, parent, key) : null;
+        const slotBDom = __render ? __render.call(__ctx.__owl__.component, slotScope, parent, key) : null;
         if (defaultContent) {
             let child1 = undefined;
             let child2 = undefined;
@@ -4122,7 +4132,7 @@
                 child1 = dynamic ? toggler(name, slotBDom) : slotBDom;
             }
             else {
-                child2 = defaultContent(ctx, parent, key);
+                child2 = defaultContent.call(ctx.__owl__.component, ctx, parent, key);
             }
             return multi([child1, child2]);
         }
@@ -4952,8 +4962,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-11-25T09:26:59.711Z';
-    __info__.hash = '9217455';
+    __info__.date = '2021-11-25T14:40:35.173Z';
+    __info__.hash = '13c3178';
     __info__.url = 'https://github.com/odoo/owl';
 
 
