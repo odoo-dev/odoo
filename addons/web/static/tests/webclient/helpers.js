@@ -47,7 +47,7 @@ import { ClientActionAdapter, ViewAdapter } from "@web/legacy/action_adapters";
 import { commandService } from "@web/core/commands/command_service";
 import { CustomFavoriteItem } from "@web/search/favorite_menu/custom_favorite_item";
 
-const { Component, mount, xml } = owl;
+const { App, Component, xml } = owl;
 
 const actionRegistry = registry.category("actions");
 const serviceRegistry = registry.category("services");
@@ -266,14 +266,30 @@ export async function createWebClient(params) {
 
     const WebClientClass = params.WebClientClass || WebClient;
     const target = params && params.target ? params.target : getFixture();
-    const wc = await mount(WebClientClass, { env, target });
+
+    // FIXME NXOWL ?
+
+    const app = new App(WebClientClass);
+    env.app = app;
+    env.renderToString = (template, context) => {
+        const div = document.createElement("div");
+        const templateFn = app.getTemplate(template);
+        const bdom = templateFn(context);
+        owl.blockDom.mount(bdom, div);
+        return div.innerHTML;
+    };
+    app.configure({
+        env,
+        templates: window.__ODOO_TEMPLATES__,
+    });
+    const wc = await app.mount(target);
     registerCleanup(() => {
         for (const controller of controllers) {
             if (!controller.isDestroyed()) {
                 controller.destroy();
             }
         }
-        wc.destroy();
+        app.destroy();
     });
     // Wait for visual changes caused by a potential loadState
     await nextTick();
