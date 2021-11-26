@@ -13,8 +13,10 @@ export class WithSearch extends Component {
     setup() {
         this.Component = this.props.Component;
 
+        this.env = Object.create(this.env);
         if (!this.env.__getContext__) {
-            useSubEnv({ __getContext__: new CallbackRecorder() });
+            this.env.__getContext__ = new CallbackRecorder();
+            useSubEnv({ __getContext__: this.env.__getContext__ });
         }
 
         const SearchModelClass = this.Component.SearchModel || SearchModel;

@@ -23,10 +23,10 @@ export class FilterMenu extends Component {
     }
 
     /**
-     * @param {CustomEvent} ev
+     * @param {Object} detail
      */
-    onFilterSelected(ev) {
-        const { itemId, optionId } = ev.detail.payload;
+    onFilterSelected(detail) {
+        const { itemId, optionId } = detail.payload;
         if (optionId) {
             this.env.searchModel.toggleDateFilter(itemId, optionId);
         } else {
