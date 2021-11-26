@@ -55,11 +55,10 @@
                     <t t-set="noContentHelp" t-value="props.info.noContentHelp"/>
                 </t>
                 <Renderer
-                    class="o_renderer"
+                    class="{ o_graph_renderer: true, o_sample_data_disabled: model.useSampleModel }"
                     model="model"
-                    onGraphClicked="(domain) => onGraphClicked(domain)"
+                    onGraphClicked="(domain) => this.onGraphClicked(domain)"
                     />
-                    <!-- NXOWL t-att-class="{ o_sample_data_disabled: model.useSampleModel }" -->
             </t>
             <t t-else="" t-call="web.NoContentHelper">
                 <t t-set="title">Invalid data</t>

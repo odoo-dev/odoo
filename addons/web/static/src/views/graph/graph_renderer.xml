@@ -28,7 +28,7 @@
     </t>
 
     <t t-name="web.GraphRenderer" owl="1">
-        <div class="o_graph_renderer">
+        <div t-att-class="'o_graph_renderer ' + props.class ? props.class : ''">
             <div class="o_graph_canvas_container" t-ref="container">
                 <canvas t-ref="canvas" />
             </div>

@@ -1906,7 +1906,7 @@ QUnit.module("Views", (hooks) => {
         checkModeIs(assert, graph, "pie");
     });
 
-    QUnit.debug("switching measure", async function (assert) {
+    QUnit.test("switching measure", async function (assert) {
         assert.expect(6);
         const graph = await makeView({ serverData, type: "graph", resModel: "foo" });
         function checkMeasure(measure) {
