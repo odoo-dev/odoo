@@ -45,10 +45,10 @@ export class GroupByMenu extends Component {
     }
 
     /**
-     * @param {CustomEvent} ev
+     * @param {Object} detail
      */
-    onGroupBySelected(ev) {
-        const { itemId, optionId } = ev.detail.payload;
+    onGroupBySelected(detail) {
+        const { itemId, optionId } = detail.payload;
         if (optionId) {
             this.env.searchModel.toggleDateGroupBy(itemId, optionId);
         } else {

@@ -2,8 +2,10 @@
 <templates xml:space="preserve">
 
     <t t-name="web.FavoriteMenu" owl="1">
-        <Dropdown class="'o_favorite_menu btn-group'" togglerClass="'btn btn-light'">
-        <!-- NXOWL t-on-dropdown-item-selected="onFavoriteSelected" -->
+        <Dropdown class="'o_favorite_menu btn-group'"
+            togglerClass="'btn btn-light'"
+            onDropdownItemSelected="onFavoriteSelected.bind(this)"
+            >
             <t t-set-slot="toggler">
                 <i class="small mr-1" t-att-class="icon"/>
                 <span class="o_dropdown_title">Favorites</span>
@@ -14,11 +16,10 @@
                     <div role="separator" class="dropdown-divider"/>
                 </t>
                 <t t-if="item.type ==='favorite'">
-                    <DropdownItem class="o_menu_item"
+                    <DropdownItem class="{ o_menu_item: true, selected: item.isActive }"
                     payload="{ itemId: item.id }"
                     parentClosingMode="'none'"
                     >
-                    <!-- NXOWL t-att-class="{ selected: item.isActive }" -->
                         <span class="d-flex p-0 align-items-center justify-content-between">
                             <t t-esc="item.description"/>
                             <i class="o_icon_right fa fa-trash-o"
