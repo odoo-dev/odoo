@@ -113,7 +113,6 @@ export class GraphRenderer extends Component {
             mode: this.model.metaData.mode,
             tooltipItems: this.getTooltipItems(data, metaData, tooltipModel),
         });
-        debugger;
         const template = Object.assign(document.createElement("template"), { innerHTML });
         const tooltip = template.content.firstChild;
         this.containerRef.el.prepend(tooltip);

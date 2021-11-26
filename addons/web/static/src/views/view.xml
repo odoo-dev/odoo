@@ -14,11 +14,10 @@
                t-as="measure"
                t-key="measure_value.name">
                 <div t-if="!measure_first and measure == '__count'" role="separator" class="dropdown-divider"/>
-                <DropdownItem class="'o_menu_item dropdown-item'"
+                <DropdownItem class="{ o_menu_item: true, selected: activeMeasures.includes(measure) }"
                 payload="{ measure: measure_value.name }"
                 parentClosingMode="'none'"
                 >
-                <!-- NXOWL t-att-class="{ selected: activeMeasures.includes(measure) }" -->
                     <t t-esc="measures[measure].string"/>
                 </DropdownItem>
             </t>
