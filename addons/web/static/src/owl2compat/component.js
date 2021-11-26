@@ -29,7 +29,7 @@
         get el() {
             let bdom = this.__owl__.bdom;
             while (!bdom.el) {
-                bdom = bdom.child || bdom.bdom;
+                bdom = bdom.child || bdom.children[0] || bdom.bdom;
             }
             return bdom.el;
         }
