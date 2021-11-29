@@ -22,10 +22,10 @@ export class ComparisonMenu extends Component {
     }
 
     /**
-     * @param {CustomEvent}
+     * @param {Object} detail
      */
-    onComparisonSelected(ev) {
-        const { itemId } = ev.detail.payload;
+    onComparisonSelected(detail) {
+        const { itemId } = detail.payload;
         this.env.searchModel.toggleSearchItem(itemId);
     }
 }
