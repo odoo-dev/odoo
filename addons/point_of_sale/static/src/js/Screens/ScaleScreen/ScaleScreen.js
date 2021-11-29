@@ -49,7 +49,7 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
             });
         }
         async _setWeight() {
-            const reading = await this.env.pos.proxy.scale_read();
+            const reading = await this.env.proxy.scale_read();
             this.state.weight = reading.weight;
         }
         get _activePricelist() {

@@ -114,7 +114,7 @@ odoo.define('pos_restaurant.TipScreen', function (require) {
                     total: this.env.pos.format_currency(this.totalAmount),
                 });
 
-                if (this.env.pos.proxy.printer) {
+                if (this.env.proxy.printer) {
                     await this._printIoT(receipt);
                 } else {
                     await this._printWeb(receipt);
@@ -123,7 +123,7 @@ odoo.define('pos_restaurant.TipScreen', function (require) {
         }
 
         async _printIoT(receipt) {
-            const printResult = await this.env.pos.proxy.printer.print_receipt(receipt);
+            const printResult = await this.env.proxy.printer.print_receipt(receipt);
             if (!printResult.successful) {
                 await this.showPopup('ErrorPopup', {
                     title: printResult.message.title,

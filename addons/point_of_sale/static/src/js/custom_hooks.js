@@ -77,7 +77,7 @@ odoo.define('point_of_sale.custom_hooks', function (require) {
 
     function useBarcodeReader(callbackMap, exclusive = false) {
         const current = Component.current;
-        const barcodeReader = current.env.pos.barcode_reader;
+        const barcodeReader = current.env.barcode_reader;
         for (let [key, callback] of Object.entries(callbackMap)) {
             callbackMap[key] = callback.bind(current);
         }

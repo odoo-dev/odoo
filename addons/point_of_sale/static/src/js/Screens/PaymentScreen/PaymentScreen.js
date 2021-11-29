@@ -98,7 +98,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             this.render();
         }
         openCashbox() {
-            this.env.pos.proxy.printer.open_cashbox();
+            this.env.proxy.printer.open_cashbox();
         }
         async addTip() {
             // click_tip
@@ -170,7 +170,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
         }
         async _finalizeValidation() {
             if ((this.currentOrder.is_paid_with_cash() || this.currentOrder.get_change()) && this.env.pos.config.iface_cashdrawer) {
-                this.env.pos.proxy.printer.open_cashbox();
+                this.env.proxy.printer.open_cashbox();
             }
 
             this.currentOrder.initialize_validation_date();

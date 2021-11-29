@@ -6,6 +6,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const { loadCSS } = require('web.ajax');
     const { useListener } = require('web.custom_hooks');
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
+    const BarcodeParser = require('barcodes.BarcodeParser');
     const PosComponent = require('point_of_sale.PosComponent');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const PopupControllerMixin = require('point_of_sale.PopupControllerMixin');
@@ -30,7 +31,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('show-temp-screen', this.__showTempScreen);
             useListener('close-temp-screen', this.__closeTempScreen);
             useListener('close-pos', this._closePos);
-            useListener('loading-skip-callback', () => this.env.pos.proxy.stop_searching());
+            useListener('loading-skip-callback', () => this.env.proxy.stop_searching());
             useListener('play-sound', this._onPlaySound);
             useListener('set-sync-status', this._onSetSyncStatus);
             useListener('show-notification', this._onShowNotification);
@@ -66,9 +67,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
             // TODO-REF: Aim to remove these assignments.
             this.env.pos.do_action = this.props.webClient.do_action.bind(this.props.webClient);
-            this.env.pos.showLoadingSkip = () => {
-                this.state.loadingSkipButtonIsShown = true;
-            }
             this.env.pos.session = this.env.session;
             this.env.pos.rpc = this.rpc.bind(this);
             this.env.pos.env = this.env;
@@ -135,6 +133,14 @@ odoo.define('point_of_sale.Chrome', function(require) {
         async start() {
             try {
                 await this.env.pos.load_server_data();
+                await this.setupBarcodeParser();
+                if(this.env.pos.config.use_proxy){
+                    // TODO-REF: set listener to show customer display
+                    // if (this.config.iface_customer_facing_display) {
+                    //     this.on('change:selectedOrder', this.send_current_order_to_customer_facing_display, this);
+                    // }
+                    await this.connect_to_proxy();
+                }
                 // Load the saved `env.pos.toRefundLines` from localStorage when
                 // the PosGlobalState is ready.
                 Object.assign(this.env.pos.toRefundLines, this.env.pos.db.load('TO_REFUND_LINES') || {});
@@ -193,6 +199,47 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     exitButtonIsShown: true,
                 });
             }
+        }
+
+        setupBarcodeParser() {
+            const barcode_parser = new BarcodeParser({ nomenclature_id: this.env.pos.config.barcode_nomenclature_id });
+            this.env.barcode_reader.set_barcode_parser(barcode_parser);
+            return barcode_parser.is_loaded();
+        }
+
+        connect_to_proxy() {
+            return new Promise(function (resolve, reject) {
+                this.env.barcode_reader.disconnect_from_proxy();
+                this.state.loadingSkipButtonIsShown = true;
+                this.env.proxy.autoconnect({
+                    force_ip: this.env.pos.config.proxy_ip || undefined,
+                    progress: function(prog){},
+                }).then(
+                    function () {
+                        if (this.env.pos.config.iface_scan_via_proxy) {
+                            this.env.barcode_reader.connect_to_proxy();
+                        }
+                        resolve();
+                    },
+                    function (statusText, url) {
+                        // this should reject so that it can be captured when we wait for pos.ready
+                        // in the chrome component.
+                        // then, if it got really rejected, we can show the error.
+                        if (statusText == 'error' && window.location.protocol == 'https:') {
+                            reject({
+                                title: this.env._t('HTTPS connection to IoT Box failed'),
+                                body: _.str.sprintf(
+                                    this.env._t('Make sure you are using IoT Box v18.12 or higher. Navigate to %s to accept the certificate of your IoT Box.'),
+                                    url
+                                ),
+                                popup: 'alert',
+                            });
+                        } else {
+                            resolve();
+                        }
+                    }
+                );
+            });
         }
 
         openCashControl() {

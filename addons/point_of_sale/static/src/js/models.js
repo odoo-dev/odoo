@@ -2,10 +2,7 @@
 odoo.define('point_of_sale.models', function (require) {
 "use strict";
 
-var BarcodeParser = require('barcodes.BarcodeParser');
-var BarcodeReader = require('point_of_sale.BarcodeReader');
 var PosDB = require('point_of_sale.DB');
-var devices = require('point_of_sale.devices');
 var concurrency = require('web.concurrency');
 var config = require('web.config');
 var core = require('web.core');
@@ -85,9 +82,6 @@ class PosGlobalState extends PosModel {
     constructor(obj) {
         super(obj);
         this.flush_mutex = new Mutex();                   // used to make sure the orders are sent to the server once at time
-
-        this.proxy = new devices.ProxyDevice(this);              // used to communicate to the hardware devices via a local proxy
-        this.barcode_reader = new BarcodeReader({'pos': this, proxy:this.proxy});
 
         this.db = new PosDB();                       // a local database used to search trough products and categories & store pending orders
         this.debug = config.isDebug(); //debug mode
@@ -169,56 +163,6 @@ class PosGlobalState extends PosModel {
         await this.load_product_uom_unit();
         await this.load_orders();
         this.set_start_order();
-        if(this.config.use_proxy){
-            if (this.config.iface_customer_facing_display) {
-                this.on('change:selectedOrder', this.send_current_order_to_customer_facing_display, this);
-            }
-
-            return this.connect_to_proxy();
-        }
-    }
-    // releases ressources holds by the model at the end of life of the posmodel
-    destroy(){
-        // FIXME, should wait for flushing, return a deferred to indicate successfull destruction
-        // this.flush();
-        this.proxy.disconnect();
-        this.barcode_reader.disconnect_from_proxy();
-    }
-
-    connect_to_proxy () {
-        var self = this;
-        return new Promise(function (resolve, reject) {
-            self.barcode_reader.disconnect_from_proxy();
-            self.showLoadingSkip();
-            self.proxy.autoconnect({
-                force_ip: self.config.proxy_ip || undefined,
-                progress: function(prog){},
-            }).then(
-                function () {
-                    if (self.config.iface_scan_via_proxy) {
-                        self.barcode_reader.connect_to_proxy();
-                    }
-                    resolve();
-                },
-                function (statusText, url) {
-                    // this should reject so that it can be captured when we wait for pos.ready
-                    // in the chrome component.
-                    // then, if it got really rejected, we can show the error.
-                    if (statusText == 'error' && window.location.protocol == 'https:') {
-                        reject({
-                            title: _t('HTTPS connection to IoT Box failed'),
-                            body: _.str.sprintf(
-                              _t('Make sure you are using IoT Box v18.12 or higher. Navigate to %s to accept the certificate of your IoT Box.'),
-                              url
-                            ),
-                            popup: 'alert',
-                        });
-                    } else {
-                        resolve();
-                    }
-                }
-            );
-        });
     }
 
     async load_server_data(){
@@ -492,7 +436,7 @@ class PosGlobalState extends PosModel {
                 $(self.env.pos.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
                 var orderlines = $(self.env.pos.customer_display.document.body).find('.pos_orderlines_list');
                 orderlines.scrollTop(orderlines.prop("scrollHeight"));
-            } else if (self.env.pos.proxy.posbox_supports_display) {
+            } else if (self.env.proxy.posbox_supports_display) {
                 self.proxy.update_customer_facing_display(rendered_html);
             }
         });
@@ -1356,13 +1300,6 @@ PosGlobalState.prototype.models = [
                 self.company_logo.crossOrigin = "anonymous";
                 self.company_logo.src = '/web/binary/company_logo' + '?dbname=' + self.session.db + '&company=' + self.company.id + '&_' + Math.random();
             });
-        },
-    }, {
-        label: 'barcodes',
-        loaded: function(self) {
-            var barcode_parser = new BarcodeParser({'nomenclature_id': self.config.barcode_nomenclature_id});
-            self.barcode_reader.set_barcode_parser(barcode_parser);
-            return barcode_parser.is_loaded();
         },
     },
 ];

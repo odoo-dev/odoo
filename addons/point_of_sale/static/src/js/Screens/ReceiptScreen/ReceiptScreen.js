@@ -97,7 +97,7 @@ odoo.define('point_of_sale.ReceiptScreen', function (require) {
             }
             _shouldCloseImmediately() {
                 var invoiced_finalized = this.currentOrder.is_to_invoice() ? this.currentOrder.finalized : true;
-                return this.env.pos.proxy.printer && this.env.pos.config.iface_print_skip_screen && invoiced_finalized;
+                return this.env.proxy.printer && this.env.pos.config.iface_print_skip_screen && invoiced_finalized;
             }
             async _sendReceiptToCustomer() {
                 const printer = new Printer(null, this.env.pos);

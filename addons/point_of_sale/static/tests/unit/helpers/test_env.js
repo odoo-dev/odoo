@@ -25,7 +25,6 @@ odoo.define('point_of_sale.test_env', async function (require) {
     pos.rpc = env.services.rpc.bind(env.services);
     pos.session = env.session;
     pos.do_action = async () => {};
-    pos.showLoadingSkip = () => {};
     await pos.load_server_data();
 
     /**

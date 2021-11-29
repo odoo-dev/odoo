@@ -38,7 +38,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
         async onClickProxy() {
             try {
                 const renderedHtml = await this.env.pos.render_html_for_customer_facing_display();
-                let ownership = await this.env.pos.proxy.take_ownership_over_client_screen(
+                let ownership = await this.env.proxy.take_ownership_over_client_screen(
                     renderedHtml
                 );
                 if (typeof ownership === 'string') {
@@ -49,8 +49,8 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                 } else {
                     this.state.status = 'warning';
                 }
-                if (!this.env.pos.proxy.posbox_supports_display) {
-                    this.env.pos.proxy.posbox_supports_display = true;
+                if (!this.env.proxy.posbox_supports_display) {
+                    this.env.proxy.posbox_supports_display = true;
                     this._start();
                 }
             } catch (error) {
@@ -68,9 +68,9 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
 
             const self = this;
             async function loop() {
-                if (self.env.pos.proxy.posbox_supports_display) {
+                if (self.env.proxy.posbox_supports_display) {
                     try {
-                        let ownership = await self.env.pos.proxy.test_ownership_of_client_screen();
+                        let ownership = await self.env.proxy.test_ownership_of_client_screen();
                         if (typeof ownership === 'string') {
                             ownership = JSON.parse(ownership);
                         }
@@ -89,7 +89,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                             self.state.status = 'failure';
                         } else {
                             self.state.status = 'not_found';
-                            self.env.pos.proxy.posbox_supports_display = false;
+                            self.env.proxy.posbox_supports_display = false;
                         }
                         setTimeout(loop, 3000);
                     }

@@ -11,6 +11,7 @@ import { useBus } from "@web/core/utils/hooks";
 const { Component } = owl;
 import { registry } from "@web/core/registry";
 import devices from 'point_of_sale.devices';
+import BarcodeReader from 'point_of_sale.BarcodeReader';
 
 function setupResponsivePlugin(env) {
     const isMobile = () => window.innerWidth <= 768;
@@ -30,14 +31,19 @@ export class ChromeAdapter extends Component {
         this.legacyActionManager = useService("legacy_action_manager");
 
         const ExtendedPosModel = Registries.PosModelRegistry.get(PosGlobalState);
-        const pos = reactive(new ExtendedPosModel(), () => {});
+        const pos = new ExtendedPosModel();
+        const reactivePos = reactive(pos, () => {});
         const proxy_queue = new devices.JobQueue();           // used to prevent parallels communications to the proxy
+        const proxy = new devices.ProxyDevice(reactivePos);              // used to communicate to the hardware devices via a local proxy
+        const barcode_reader = new BarcodeReader({ pos: reactivePos, proxy });
 
-        window.posmodel = pos;
+        window.posmodel = reactivePos;
 
         this.env = owl.Component.env;
-        this.env.pos = pos;
+        this.env.pos = reactivePos;
         this.env.proxy_queue = proxy_queue;
+        this.env.proxy = proxy;
+        this.env.barcode_reader = barcode_reader;
 
         useBus(this.env.qweb, "update", () => this.render());
         setupResponsivePlugin(this.env);
