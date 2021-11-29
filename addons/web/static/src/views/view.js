@@ -8,7 +8,6 @@ import { deepCopy } from "@web/core/utils/objects";
 import { WithSearch } from "@web/search/with_search/with_search";
 import { useActionLinks } from "@web/views/helpers/view_hook";
 import { extractLayoutComponents } from "@web/views/layout";
-import { triggerHotkey } from "../../tests/helpers/utils";
 
 const viewRegistry = registry.category("views");
 
