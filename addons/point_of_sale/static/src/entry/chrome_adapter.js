@@ -10,6 +10,7 @@ import { configureGui } from "point_of_sale.Gui";
 import { useBus } from "@web/core/utils/hooks";
 const { Component } = owl;
 import { registry } from "@web/core/registry";
+import devices from 'point_of_sale.devices';
 
 function setupResponsivePlugin(env) {
     const isMobile = () => window.innerWidth <= 768;
@@ -30,11 +31,14 @@ export class ChromeAdapter extends Component {
 
         const ExtendedPosModel = Registries.PosModelRegistry.get(PosGlobalState);
         const pos = reactive(new ExtendedPosModel(), () => {});
+        const proxy_queue = new devices.JobQueue();           // used to prevent parallels communications to the proxy
 
         window.posmodel = pos;
 
         this.env = owl.Component.env;
         this.env.pos = pos;
+        this.env.proxy_queue = proxy_queue;
+
         useBus(this.env.qweb, "update", () => this.render());
         setupResponsivePlugin(this.env);
 

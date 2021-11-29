@@ -22,7 +22,7 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
         }
         willUnmount() {
             // stop the scale reading
-            this.env.pos.proxy_queue.clear();
+            this.env.proxy_queue.clear();
         }
         back() {
             this.props.resolve({ confirmed: false, payload: null });
@@ -43,7 +43,7 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
             }
         }
         _readScale() {
-            this.env.pos.proxy_queue.schedule(this._setWeight.bind(this), {
+            this.env.proxy_queue.schedule(this._setWeight.bind(this), {
                 duration: 500,
                 repeat: true,
             });
