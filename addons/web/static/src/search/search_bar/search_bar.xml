@@ -7,7 +7,7 @@
                 role="img"
                 aria-label="search"
                 tabindex="0"
-                t-on-keydown="() => this.onFacetKeydown(facet, facet_index)"
+                t-on-keydown="onFacetKeydown.bind(this, facet, facet_index)"
                 >
                 <t t-if="facet.icon">
                     <span t-attf-class="o_searchview_facet_label {{ facet.icon }}"/>
@@ -41,8 +41,8 @@
             placeholder="Search..."
             role="searchbox"
             t-ref="search-input"
-            t-on-keydown="() => this.onSearchKeydown"
-            t-on-input="() => this.onSearchInput"
+            t-on-keydown="onSearchKeydown"
+            t-on-input="onSearchInput"
         />
     </t>
 

@@ -8,7 +8,7 @@ const { Component } = owl;
  * <CheckBox
  *    value="boolean"
  *    disabled="boolean"
- *    t-on-change="_onValueChange"
+ *    onChange="_onValueChange"
  *    >
  *    Change the label text
  *  </CheckBox>
