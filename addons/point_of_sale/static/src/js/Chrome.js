@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.Chrome', function(require) {
     'use strict';
 
-    const { useState, useRef, useContext, useExternalListener } = owl.hooks;
+    const { useState, useRef, useExternalListener } = owl.hooks;
     const { debounce } = owl.utils;
     const { loadCSS } = require('web.ajax');
     const { useListener } = require('web.custom_hooks');
@@ -11,7 +11,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const PopupControllerMixin = require('point_of_sale.PopupControllerMixin');
     const Registries = require('point_of_sale.Registries');
     const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
-    const contexts = require('point_of_sale.PosContext');
     const { identifyError, posbus } = require('point_of_sale.utils');
     const { odooExceptionTitleMap } = require("@web/core/errors/error_dialogs");
     const { ConnectionLostError, ConnectionAbortedError, RPCError } = require('@web/core/network/rpc_service');
@@ -39,8 +38,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useBus(posbus, 'start-cash-control', this.openCashControl);
             NumberBuffer.activate();
 
-            this.chromeContext = useContext(contexts.chrome);
-
             this.state = useState({
                 uiState: 'LOADING', // 'LOADING' | 'READY' | 'CLOSING'
                 debugWidgetIsShown: true,
@@ -67,7 +64,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
             this.env.pos = reactivity.useState(this.env.pos);
 
-            // TODO: Aim to remove these assignments.
+            // TODO-REF: Aim to remove these assignments.
             this.env.pos.do_action = this.props.webClient.do_action.bind(this.props.webClient);
             this.env.pos.showLoadingSkip = () => {
                 this.state.loadingSkipButtonIsShown = true;
@@ -147,6 +144,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     ? this.env.pos.config.iface_start_categ_id[0]
                     : 0;
                 this.state.uiState = 'READY';
+                // TODO-REF: Check if the following commented line can be removed.
                 // this.env.pos.on('change:selectedOrder', this._showSavedScreen, this);
                 this._showStartScreen();
                 if (_.isEmpty(this.env.pos.db.product_by_category_id)) {
@@ -242,10 +240,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.mainScreen.component = component;
             this.mainScreenProps = props;
 
-            // 2. Set some options
-            this.chromeContext.showOrderSelector = !component.hideOrderSelector;
-
-            // 3. Save the screen to the order.
+            // 2. Save the screen to the order.
             //  - This screen is shown when the order is selected.
             if (!(component.prototype instanceof IndependentToOrderScreen) && name !== "ReprintReceiptScreen") {
                 this._setScreenData(name, props);

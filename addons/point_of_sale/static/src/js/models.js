@@ -25,12 +25,9 @@ const reactivity = require('@point_of_sale/js/reactivity');
 
 /**
  * TODO-REF-JCB If optimization is needed, then we implement this
- * using a Balanced Binary Tree.
+ * using a Balanced Binary Tree to behave like an Object and an Array.
  * But behaving like Object (indexed by cid) might not be
  * needed. Let's see how it turns out.
- *
- * The goal is to make a type that behaves like an Array
- * and an Object.
  */
 class PosCollection extends Array {
     getByCID(cid) {
