@@ -46,8 +46,8 @@ class PosHrPosModel extends PosGlobalState {
                     employee.pin = data.pin;
                 }
             });
-        }).then(() => {
-            return super.after_load_server_data(...arguments);
+        }).then(async () => {
+            await super.after_load_server_data(...arguments);
             this.hasLoggedIn = !this.config.module_pos_hr;
         });
     }
