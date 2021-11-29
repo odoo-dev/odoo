@@ -8,7 +8,6 @@ class PopoverController extends Component {
     setup() {
         this.state = useState({ displayed: false });
         this.targetObserver = new MutationObserver(this.onTargetMutate.bind(this));
-
         useExternalListener(window, "click", this.onClickAway, { capture: true });
     }
     mounted() {
@@ -57,8 +56,8 @@ PopoverController.defaultProps = {
     closeOnClickAway: true,
 };
 PopoverController.template = xml/*xml*/ `
-    <Popover t-props="popoverProps" t-on-popover-closed="props.close()">
-        <t t-component="props.Component" t-props="props.props" />
+    <Popover t-props="popoverProps">
+        <t t-component="props.Component" t-props="props.props"/>
     </Popover>
 `;
 
