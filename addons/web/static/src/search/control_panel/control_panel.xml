@@ -56,7 +56,7 @@
             <t t-foreach="env.config.breadcrumbs or []" t-as="breadcrumb" t-key="breadcrumb.jsId">
                 <li class="breadcrumb-item"
                     t-att-class="{ o_back_button: breadcrumb_last}"
-                    t-on-click.prevent="onBreadcrumbClicked(breadcrumb.jsId)"
+                    t-on-click.prevent="() => this.onBreadcrumbClicked(breadcrumb.jsId)"
                     >
                     <a href="#">
                         <t t-esc="breadcrumb.name"/>
