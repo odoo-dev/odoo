@@ -27,7 +27,7 @@ export class SearchBar extends Component {
         });
 
         // derived state
-        this.items = [];
+        this.items = useState([]); // NXOWL
         this.subItems = {};
 
         this.orm = useService("orm");
@@ -92,8 +92,7 @@ export class SearchBar extends Component {
 
         const trimmedQuery = this.state.query.trim();
 
-        this.items = [];
-
+        this.items.splice(0, this.items.length); // NXOWL
         if (!trimmedQuery) {
             return;
         }

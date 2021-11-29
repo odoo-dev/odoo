@@ -17,14 +17,14 @@
                 </t>
                 <t t-if="item.type ==='favorite'">
                     <DropdownItem class="{ o_menu_item: true, selected: item.isActive }"
-                    payload="{ itemId: item.id }"
-                    parentClosingMode="'none'"
-                    >
+                        payload="{ itemId: item.id }"
+                        parentClosingMode="'none'"
+                        >
                         <span class="d-flex p-0 align-items-center justify-content-between">
                             <t t-esc="item.description"/>
                             <i class="o_icon_right fa fa-trash-o"
                                 title="Delete item"
-                                t-on-click.stop="openConfirmationDialog(item.id)"
+                                t-on-click.stop="() => this.openConfirmationDialog(item.id)"
                             />
                         </span>
                     </DropdownItem>

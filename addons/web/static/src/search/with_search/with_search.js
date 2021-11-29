@@ -4,7 +4,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { SearchModel } from "@web/search/search_model";
 import { CallbackRecorder, useSetupAction } from "@web/webclient/actions/action_hook";
 
-const { Component, useSubEnv } = owl;
+const { Component, onWillStart, onWillUpdateProps, useSubEnv } = owl;
 
 export const SEARCH_KEYS = ["comparison", "context", "domain", "groupBy", "orderBy"];
 const OTHER_SEARCH_KEYS = ["irFilters", "searchViewArch", "searchViewFields", "searchViewId"];
@@ -36,25 +36,25 @@ export class WithSearch extends Component {
                 };
             },
         });
-    }
 
-    async willStart() {
-        const config = { ...this.props };
-        if (config.globalState && config.globalState.searchModel) {
-            config.state = JSON.parse(config.globalState.searchModel);
-            delete config.globalState;
-        }
-        await this.searchModel.load(config);
-    }
-
-    async willUpdateProps(nextProps) {
-        const config = {};
-        for (const key of SEARCH_KEYS) {
-            if (nextProps[key] !== undefined) {
-                config[key] = nextProps[key];
+        onWillStart(async () => {
+            const config = { ...this.props };
+            if (config.globalState && config.globalState.searchModel) {
+                config.state = JSON.parse(config.globalState.searchModel);
+                delete config.globalState;
             }
-        }
-        await this.searchModel.reload(config);
+            await this.searchModel.load(config);
+        });
+
+        onWillUpdateProps(async (nextProps) => {
+            const config = {};
+            for (const key of SEARCH_KEYS) {
+                if (nextProps[key] !== undefined) {
+                    config[key] = nextProps[key];
+                }
+            }
+            await this.searchModel.reload(config);
+        });
     }
 
     //-------------------------------------------------------------------------
