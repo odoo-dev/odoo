@@ -47,8 +47,7 @@
             </t>
             <t t-if="fields.length">
                 <div t-if="items.length" role="separator" class="dropdown-divider"/>
-                <CustomGroupByItem fields="fields" />
-                <!-- NXOWL t-on-add-custom-group="onAddCustomGroup" -->
+                <CustomGroupByItem fields="fields" onAddCustomGroup="onAddCustomGroup.bind(this)"/>
             </t>
         </Dropdown>
     </t>
