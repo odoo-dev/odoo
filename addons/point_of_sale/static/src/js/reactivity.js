@@ -44,6 +44,10 @@ function observeTargetKey(target, key, callback) {
         keyToCallbacks.set(key, new Set());
     }
     keyToCallbacks.get(key).add(callback);
+    if (!callbacksToTargets.has(callback)) {
+        callbacksToTargets.set(callback, new Set());
+    }
+    callbacksToTargets.get(callback).add(target);
 }
 /**
  * Notify Reactives that are observing a given target that a key has changed on
@@ -90,6 +94,7 @@ export function clearReactivesForCallback(callback) {
             callbacks.delete(callback);
         }
     }
+    targetsToClear.clear();
 }
 
 const reactiveCache = new WeakMap();
@@ -177,10 +182,6 @@ export function reactive(target, callback) {
             },
         });
         reactivesForTarget.set(callback, proxy);
-        if (!callbacksToTargets.has(callback)) {
-            callbacksToTargets.set(callback, new Set());
-        }
-        callbacksToTargets.get(callback).add(target);
     }
     return reactivesForTarget.get(callback);
 }
