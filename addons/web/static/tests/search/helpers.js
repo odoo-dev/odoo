@@ -10,7 +10,7 @@ import { viewService } from "@web/views/view_service";
 import { actionService } from "@web/webclient/actions/action_service";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture, mouseEnter, triggerEvent, triggerEvents } from "../helpers/utils";
+import { click, getFixture, mouseEnter, triggerEvent } from "../helpers/utils";
 
 const serviceRegistry = registry.category("services");
 const favoriteMenuRegistry = registry.category("favoriteMenu");
