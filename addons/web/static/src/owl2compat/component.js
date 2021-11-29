@@ -20,6 +20,11 @@
                     owl[hookName](method.bind(this));
                 }
             }
+            if (this.catchError) {
+                owl.onError((error) => {
+                    this.catchError(error);
+                });
+            }
         }
 
         static get current() {
