@@ -212,10 +212,10 @@ exports.PosModel = Backbone.Model.extend({
 
     },{
         model:  'res.company',
-        loaded: function(self,companies){ self.company = companies[0]; },
+        loaded: function(self, companies){ self.company = companies[0]; },
     },{
         model:  'decimal.precision',
-        loaded: function(self,dps){
+        loaded: function(self, dps){
             self.dp  = {};
             for (var i = 0; i < dps.length; i++) {
                 self.dp[dps[i].name] = dps[i].digits;
@@ -223,7 +223,7 @@ exports.PosModel = Backbone.Model.extend({
         },
     },{
         model:  'uom.uom',
-        loaded: function(self,units){
+        loaded: function(self, units){
             self.units = units;
             _.each(units, function(unit){
                 self.units_by_id[unit.id] = unit;
@@ -231,12 +231,12 @@ exports.PosModel = Backbone.Model.extend({
         }
     },{
         model:  'res.country.state',
-        loaded: function(self,states){
+        loaded: function(self, states){
             self.states = states;
         },
     },{
         model:  'res.country',
-        loaded: function(self,countries){
+        loaded: function(self, countries){
             self.countries = countries;
             self.company.country = null;
             for (var i = 0; i < countries.length; i++) {
@@ -267,14 +267,13 @@ exports.PosModel = Backbone.Model.extend({
         },
     },{
         model:  'pos.session',
-        loaded: function(self, pos_sessions, tmp){
+        loaded: function(self, pos_sessions){
             self.pos_session = pos_sessions[0];
-            self.pos_session.login_number = odoo.login_number;
             self.config_id = self.config_id || self.pos_session && self.pos_session.config_id[0];
         },
     },{
         model: 'pos.config',
-        loaded: function(self,configs){
+        loaded: function(self, configs){
             self.config = configs[0];
             self.config.use_proxy = self.config.is_posbox && (
                                     self.config.iface_electronic_scale ||
@@ -300,7 +299,7 @@ exports.PosModel = Backbone.Model.extend({
       }, {
         model:  'res.partner',
         label: 'load_partners',
-        loaded: function(self,partners){
+        loaded: function(self, partners){
             self.partners = partners;
             self.db.add_partners(partners);
         },
@@ -311,7 +310,7 @@ exports.PosModel = Backbone.Model.extend({
       },
     },{
         model:  'res.users',
-        loaded: function(self,users){
+        loaded: function(self, users){
             users.forEach(function(user) {
                 user.role = 'cashier';
                 user.groups_id.some(function(group_id) {
@@ -704,7 +703,7 @@ exports.PosModel = Backbone.Model.extend({
         let product_model = _.find(this.models, (model) => model.model === 'product.product');
         let productLoadingInfo = await this.rpc({
             model: 'pos.session',
-            method: 'get_loading_info',
+            method: 'get_loading_params',
             args: [[odoo.pos_session_id], 'product.product'],
             context: this.session.user_context,
         });
@@ -733,7 +732,7 @@ exports.PosModel = Backbone.Model.extend({
         let partners = [];
         let partnerLoadingInfo = await this.rpc({
             model: 'pos.session',
-            method: 'get_loading_info',
+            method: 'get_loading_params',
             args: [[odoo.pos_session_id], 'res.partner'],
             context: this.session.user_context,
         });

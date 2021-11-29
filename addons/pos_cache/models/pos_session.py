@@ -5,12 +5,12 @@ from odoo import models
 
 
 class PosSession(models.Model):
-    _inherit = "pos.session"
+    _inherit = 'pos.session'
 
     def get_products_from_cache(self):
-        loading_info = self._loader_info_product_product()
-        fields_str = str(loading_info["fields"])
-        domain_str = str([list(item) if isinstance(item, (list, tuple)) else item for item in loading_info["domain"]])
+        loading_info = self._loader_params_product_product()
+        fields_str = str(loading_info['fields'])
+        domain_str = str([list(item) if isinstance(item, (list, tuple)) else item for item in loading_info['domain']])
         pos_cache = self.env['pos.cache']
         cache_for_user = pos_cache.search([
             ('id', 'in', self.config_id.cache_ids.ids),

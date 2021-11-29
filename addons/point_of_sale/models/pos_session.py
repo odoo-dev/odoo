@@ -1548,16 +1548,16 @@ class PosSession(models.Model):
             "products": self._load_model('product.product'),
         }
 
-    def get_loading_info(self, model):
+    def get_loading_params(self, model):
         model_name = model.replace('.', '_')
-        if hasattr(self, '_loader_info_%s' % model_name):
-            return getattr(self, '_loader_info_%s' % model_name)()
-        raise NotImplementedError(_("The function to get loading info of %s has not been implemented.", model))
+        if hasattr(self, '_loader_params_%s' % model_name):
+            return getattr(self, '_loader_params_%s' % model_name)()
+        raise NotImplementedError(_("The function to get loading params of %s has not been implemented.", model))
 
     def _load_model(self, model):
         model_name = model.replace('.', '_')
-        if hasattr(self, '_get_pos_ui_%s' % model_name) and hasattr(self, '_loader_info_%s' % model_name):
-            return getattr(self, '_get_pos_ui_%s' % model_name)(getattr(self, '_loader_info_%s' % model_name)())
+        if hasattr(self, '_get_pos_ui_%s' % model_name) and hasattr(self, '_loader_params_%s' % model_name):
+            return getattr(self, '_get_pos_ui_%s' % model_name)(getattr(self, '_loader_params_%s' % model_name)())
         else:
             raise NotImplementedError(_("The function to load %s has not been implemented.", model))
 
@@ -1570,265 +1570,226 @@ class PosSession(models.Model):
 
     @api.model
     def _pos_ui_models_to_load(self):
-        return [
-            "res.company",
-            "decimal.precision",
-            "uom.uom",
-            "res.country.state",
-            "res.country",
-            "res.lang",
-            "account.tax",
-            "pos.session",
-            "pos.config",
-            "pos.bill",
-            "res.partner",
-            "stock.picking.type",
-            "res.users",
-            "product.pricelist",
-            "product.pricelist.item",
-            "account.bank.statement",
-            "product.category",
-            "res.currency",
-            "pos.category",
-            "product.product",
-            "product.packaging",
-            "product.attribute",
-            "product.attribute.value",
-            "product.template.attribute.value",
-            "account.cash.rounding",
-            "pos.payment.method",
-            "account.fiscal.position",
-            "account.fiscal.position.tax",
+        models_to_load = [
+            'res.company',
+            'decimal.precision',
+            'uom.uom',
+            'res.country.state',
+            'res.country',
+            'res.lang',
+            'account.tax',
+            'pos.session',
+            'pos.config',
+            'pos.bill',
+            'res.partner',
+            'stock.picking.type',
+            'res.users',
+            'product.pricelist',
+            'account.bank.statement',
+            'product.pricelist.item',
+            'product.category',
+            'res.currency',
+            'pos.category',
+            'product.product',
+            'product.packaging',
+            'account.cash.rounding',
+            'pos.payment.method',
+            'account.fiscal.position',
+            'account.fiscal.position.tax',
         ]
+        if self.config_id.product_configurator:
+            models_to_load.extend(['product.attribute', 'product.attribute.value', 'product.template.attribute.value'])
+        return models_to_load
 
-    def _loader_info_res_company(self):
+    def _loader_params_res_company(self):
         return {
-            "fields": ["currency_id", "email", "website", "company_registry", "vat", "name", "phone", "partner_id", "country_id", "state_id", "tax_calculation_rounding_method"],
-            "domain": [("id", "=", self.company_id.id)],
+            'domain': [('id', '=', self.company_id.id)],
+            'fields': [
+                'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id',
+                'country_id', 'state_id', 'tax_calculation_rounding_method'
+            ],
         }
 
     def _get_pos_ui_res_company(self, params):
-        return self.env["res.company"].search_read(params["domain"], params["fields"])
+        return self.env['res.company'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_decimal_precision(self):
-        return {
-            "fields": ["name", "digits"],
-            "domain": [],
-        }
+    def _loader_params_decimal_precision(self):
+        return {'domain': [], 'fields': ['name', 'digits']}
 
     def _get_pos_ui_decimal_precision(self, params):
-        return self.env["decimal.precision"].search_read(params["domain"], params["fields"])
+        return self.env['decimal.precision'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_uom_uom(self):
-        return {"fields": [], "domain": [], "context": {"active_test": False}}
+    def _loader_params_uom_uom(self):
+        return {'domain': [], 'fields': [], 'context': {'active_test': False}}
 
     def _get_pos_ui_uom_uom(self, params):
-        return self.env["uom.uom"].with_context(**params["context"]).search_read(params["domain"], params["fields"])
+        return self.env['uom.uom'].with_context(**params['context']).search_read(params['domain'], params['fields'])
 
-    def _loader_info_res_partner(self):
+    def _loader_params_res_country_state(self):
+        return {'domain': [], 'fields': ['name', 'country_id']}
+
+    def _get_pos_ui_res_country_state(self, params):
+        return self.env['res.country.state'].search_read(params['domain'], params['fields'])
+
+    def _loader_params_res_country(self):
+        return {'domain': [], 'fields': ['name', 'vat_label', 'code']}
+
+    def _get_pos_ui_res_country(self, params):
+        return self.env['res.country'].search_read(params['domain'], params['fields'])
+
+    def _loader_params_res_lang(self):
+        return {'domain': [], 'fields': ['name', 'code']}
+
+    def _get_pos_ui_res_lang(self, params):
+        return self.env['res.lang'].search_read(params['domain'], params['fields'])
+
+    def _loader_params_account_tax(self):
         return {
-            "domain": [],
-            "fields": [
-                "name",
-                "street",
-                "city",
-                "state_id",
-                "country_id",
-                "vat",
-                "lang",
-                "phone",
-                "zip",
-                "mobile",
-                "email",
-                "barcode",
-                "write_date",
-                "property_account_position_id",
-                "property_product_pricelist",
+            'domain': [('company_id', '=', self.company_id.id)],
+            'fields': [
+                'name', 'amount', 'price_include', 'include_base_amount', 'is_base_affected',
+                'amount_type', 'children_tax_ids'
+            ],
+        }
+
+    def _get_pos_ui_account_tax(self, params):
+        result = self.env['account.tax'].search_read(params['domain'], params['fields'])
+        account_taxes = {tax['id']: tax for tax in result}
+        tax_ids = account_taxes.keys()
+        real_tax_amounts = self.env['account.tax'].browse(tax_ids).get_real_tax_amount()
+        for real_tax in real_tax_amounts:
+            account_taxes[real_tax['id']]['amount'] = real_tax['amount']
+        return result
+
+    def _loader_params_pos_session(self):
+        return {
+            'domain': [('id', '=', self.id)],
+            'fields': [
+                'id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number', 'payment_method_ids',
+                'cash_register_id', 'state', 'login_number', 'update_stock_at_closing'
+            ],
+        }
+
+    def _get_pos_ui_pos_session(self, params):
+        return self.env['pos.session'].search_read(params['domain'], params['fields'])
+
+    def _loader_params_pos_config(self):
+        return {'domain': [('id', '=', self.config_id.id)], 'fields': []}
+
+    def _get_pos_ui_pos_config(self, params):
+        return self.env['pos.config'].search_read(params['domain'], params['fields'])
+
+    def _loader_params_pos_bill(self):
+        return {'domain': [('id', 'in', self.config_id.default_bill_ids.ids)], 'fields': ['name', 'value']}
+
+    def _get_pos_ui_pos_bill(self, params):
+        return self.env['pos.bill'].search_read(params['domain'], params['fields'])
+
+    def _loader_params_res_partner(self):
+        return {
+            'domain': [],
+            'fields': [
+                'name', 'street', 'city', 'state_id', 'country_id', 'vat', 'lang', 'phone', 'zip', 'mobile', 'email',
+                'barcode', 'write_date', 'property_account_position_id', 'property_product_pricelist'
             ],
         }
 
     def _get_pos_ui_res_partner(self, params):
         if not self.config_id.limited_partners_loading:
-            return self.env["res.partner"].search_read(params["domain"], params["fields"])
+            return self.env['res.partner'].search_read(params['domain'], params['fields'])
         partner_ids = [res[0] for res in self.config_id.get_limited_partners_loading()]
-        return self.env["res.partner"].browse(partner_ids).read(params["fields"])
+        return self.env['res.partner'].browse(partner_ids).read(params['fields'])
 
-    def _loader_info_res_country_state(self):
-        return {"domain": [], "fields": ["name", "country_id"]}
-
-    def _get_pos_ui_res_country_state(self, params):
-        return self.env["res.country.state"].search_read(params["domain"], params["fields"])
-
-    def _loader_info_res_country(self):
-        return {"domain": [], "fields": ["name", "vat_label", "code"]}
-
-    def _get_pos_ui_res_country(self, params):
-        return self.env["res.country"].search_read(params["domain"], params["fields"])
-
-    def _loader_info_res_lang(self):
-        return {"domain":[], "fields":["name", "code"]}
-
-    def _get_pos_ui_res_lang(self, params):
-        return self.env["res.lang"].search_read(params["domain"], params["fields"])
-
-    def _loader_info_account_tax(self):
-        return {
-            "domain": [("company_id", "=", self.company_id.id)],
-            "fields": ["name", "amount", "price_include", "include_base_amount", "is_base_affected", "amount_type", "children_tax_ids"],
-        }
-
-    def _get_pos_ui_account_tax(self, params):
-        result = self.env["account.tax"].search_read(params["domain"], params["fields"])
-        account_taxes = {tax['id']: tax for tax in result}
-        tax_ids = account_taxes.keys()
-        real_tax_amounts = self.env["account.tax"].browse(tax_ids).get_real_tax_amount()
-        for real_tax in real_tax_amounts:
-            account_taxes[real_tax["id"]]["amount"] = real_tax["amount"]
-        return result
-
-    def _loader_info_pos_session(self):
-        return {
-            "domain": [("id", "=", self.id)],
-            "fields": ["id", "name", "user_id", "config_id", "start_at", "stop_at", "sequence_number", "payment_method_ids", "cash_register_id", "state", "login_number", "update_stock_at_closing"],
-        }
-
-    def _get_pos_ui_pos_session(self, params):
-        return self.env["pos.session"].search_read(params["domain"], params["fields"])
-
-    def _loader_info_pos_config(self):
-        return {"domain": [("id", "=", self.config_id.id)], "fields": []}
-
-    def _get_pos_ui_pos_config(self, params):
-        return self.env["pos.config"].search_read(params["domain"], params["fields"])
-
-    def _loader_info_pos_bill(self):
-        return {"domain": [("id", "in", self.config_id.default_bill_ids.ids)], "fields": ['name', 'value']}
-
-    def _get_pos_ui_pos_bill(self, params):
-        return self.env["pos.bill"].search_read(params["domain"], params["fields"])
-
-    def _loader_info_stock_picking_type(self):
-        return {
-            "domain": [("id", "=", self.config_id.picking_type_id.id)],
-            "fields": ["use_create_lots", "use_existing_lots"],
-        }
+    def _loader_params_stock_picking_type(self):
+        return {'domain': [('id', '=', self.config_id.picking_type_id.id)], 'fields': ['use_create_lots', 'use_existing_lots']}
 
     def _get_pos_ui_stock_picking_type(self, params):
-        return self.env["stock.picking.type"].search_read(params["domain"], params["fields"])
+        return self.env['stock.picking.type'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_res_users(self):
+    def _loader_params_res_users(self):
         domain = [
-            ("company_ids", "in", self.config_id.company_id.id),
-            "|",
-            ("groups_id", "=", self.config_id.group_pos_manager_id.id),
-            ("groups_id", "=", self.config_id.group_pos_user_id.id),
+            ('company_ids', 'in', self.config_id.company_id.id),
+            '|',
+            ('groups_id', '=', self.config_id.group_pos_manager_id.id),
+            ('groups_id', '=', self.config_id.group_pos_user_id.id),
         ]
-        return {
-            "domain": domain,
-            "fields": ["name", "company_id", "id", "groups_id", "lang"],
-        }
+
+        return {'domain': domain, 'fields': ['name', 'company_id', 'id', 'groups_id', 'lang']}
 
     def _get_pos_ui_res_users(self, params):
-        return self.env["res.users"].search_read(params["domain"], params["fields"])
+        return self.env['res.users'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_product_pricelist(self):
+    def _loader_params_product_pricelist(self):
         if self.config_id.use_pricelist:
-            domain = [("id", "in", self.config_id.available_pricelist_ids.ids)]
+            domain = [('id', 'in', self.config_id.available_pricelist_ids.ids)]
         else:
-            domain = [("id", "=", self.config_id.pricelist_id.id)]
-        return {
-            "domain": domain,
-            "fields": ["name", "display_name", "discount_policy"],
-        }
+            domain = [('id', '=', self.config_id.pricelist_id.id)]
+
+        return {'domain': domain, 'fields': ['name', 'display_name', 'discount_policy']}
 
     def _get_pos_ui_product_pricelist(self, params):
-        return self.env["product.pricelist"].search_read(params["domain"], params["fields"])
+        return self.env['product.pricelist'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_account_bank_statement(self):
-        return {
-            "domain": [("id", "=", self.cash_register_id.id)],
-            "fields": ["id", "balance_start"],
-        }
+    def _loader_params_account_bank_statement(self):
+        return {'domain': [('id', '=', self.cash_register_id.id)], 'fields': ['id', 'balance_start']}
 
     def _get_pos_ui_account_bank_statement(self, params):
-        return self.env["account.bank.statement"].search_read(params["domain"], params["fields"])
+        return self.env['account.bank.statement'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_product_pricelist_item(self):
+    def _loader_params_product_pricelist_item(self):
         loaded_models = self._context.get('loaded_models')
         return {
-            "domain": [("pricelist_id", "in", [p["id"] for p in loaded_models["product.pricelist"]])],
-            "fields": [],
+            'domain': [('pricelist_id', 'in', [p['id'] for p in loaded_models['product.pricelist']])],
+            'fields': [],
         }
 
     def _get_pos_ui_product_pricelist_item(self, params):
-        return self.env["product.pricelist.item"].search_read(params["domain"], params["fields"])
+        return self.env['product.pricelist.item'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_product_category(self):
-        return {"domain": [], "fields": ["name", "parent_id"]}
+    def _loader_params_product_category(self):
+        return {'domain': [], 'fields': ['name', 'parent_id']}
 
     def _get_pos_ui_product_category(self, params):
-        return self.env["product.category"].search_read(params["domain"], params["fields"])
+        return self.env['product.category'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_res_currency(self):
+    def _loader_params_res_currency(self):
         return {
-            "domain": [("id", "in", [self.config_id.currency_id.id, self.company_id.currency_id.id])],
-            "fields": ["name", "symbol", "position", "rounding", "rate", "decimal_places"],
+            'domain': [('id', 'in', [self.config_id.currency_id.id, self.company_id.currency_id.id])],
+            'fields': ['name', 'symbol', 'position', 'rounding', 'rate'],
         }
 
     def _get_pos_ui_res_currency(self, params):
-        return self.env["res.currency"].search_read(params["domain"], params["fields"])
+        return self.env['res.currency'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_pos_category(self):
+    def _loader_params_pos_category(self):
+        domain = []
         if self.config_id.limit_categories and self.config_id.iface_available_categ_ids:
-            domain = [("id", "in", self.config_id.iface_available_categ_ids.ids)]
-        else:
-            domain = []
-        return {
-            "domain": domain,
-            "fields": ["id", "name", "parent_id", "child_id", "write_date"],
-        }
+            domain = [('id', 'in', self.config_id.iface_available_categ_ids.ids)]
+
+        return {'domain': domain, 'fields': ['id', 'name', 'parent_id', 'child_id', 'write_date']}
 
     def _get_pos_ui_pos_category(self, params):
-        return self.env["pos.category"].search_read(params["domain"], params["fields"])
+        return self.env['pos.category'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_product_product(self):
-        domain = ["&", "&", ("sale_ok", "=", True), ("available_in_pos", "=", True), "|", ("company_id", "=", self.config_id.company_id.id), ("company_id", "=", False)]
+    def _loader_params_product_product(self):
+        domain = [
+            '&', '&', ('sale_ok', '=', True), ('available_in_pos', '=', True), '|',
+            ('company_id', '=', self.config_id.company_id.id), ('company_id', '=', False)
+        ]
         if self.config_id.limit_categories and self.config_id.iface_available_categ_ids:
-            domain = AND(
-                [
-                    domain,
-                    [("pos_categ_id", "in", self.config_id.iface_available_categ_ids.ids)],
-                ]
-            )
+            domain = AND([domain, [('pos_categ_id', 'in', self.config_id.iface_available_categ_ids.ids)]])
         if self.config_id.iface_tipproduct:
-            domain = OR([domain, [("id", "=", self.config_id.tip_product_id.id)]])
+            domain = OR([domain, [('id', '=', self.config_id.tip_product_id.id)]])
 
         return {
-            "domain": domain,
-            "order": "sequence,default_code,name",
-            "fields": [
-                "display_name",
-                "lst_price",
-                "standard_price",
-                "categ_id",
-                "pos_categ_id",
-                "taxes_id",
-                "barcode",
-                "default_code",
-                "to_weight",
-                "uom_id",
-                "description_sale",
-                "description",
-                "product_tmpl_id",
-                "tracking",
-                "write_date",
-                "available_in_pos",
-                "attribute_line_ids",
-                "active",
+            'domain': domain,
+            'fields': [
+                'display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_id', 'taxes_id', 'barcode',
+                'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'product_tmpl_id', 'tracking',
+                'write_date', 'available_in_pos', 'attribute_line_ids', 'active'
             ],
-            "context": {
-                "display_default_code": False,
-            },
+            'order': 'sequence,default_code,name',
+            'context': {'display_default_code': False},
         }
 
     def _get_pos_ui_product_product(self, params):
@@ -1839,93 +1800,69 @@ class PosSession(models.Model):
             products = self.config_id.get_limited_products_loading(params['fields'])
         return products
 
-    def _loader_info_product_packaging(self):
-        return {
-            "domain": [("barcode", "!=", "")],
-            "fields": ["name", "barcode", "product_id", "qty"],
-        }
+    def _loader_params_product_packaging(self):
+        return {'domain': [('barcode', 'not in', ['', False])], 'fields': ['name', 'barcode', 'product_id', 'qty']}
 
     def _get_pos_ui_product_packaging(self, params):
-        return self.env["product.packaging"].search_read(params["domain"], params["fields"])
+        return self.env['product.packaging'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_product_attribute(self):
-        if not self.config_id.product_configurator:
-            return
-        return {
-            "domain": [("create_variant", "=", "no_variant")],
-            "fields": ["name", "display_type"],
-        }
+    def _loader_params_product_attribute(self):
+        return {'domain': [('create_variant', '=', 'no_variant')], 'fields': ['name', 'display_type']}
 
     def _get_pos_ui_product_attribute(self, params):
-        if params:
-            return self.env["product.attribute"].search_read(params["domain"], params["fields"])
+        return self.env['product.attribute'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_product_attribute_value(self):
-        loaded_models = self._context.get("loaded_models")
-        attributes = loaded_models["product.attribute"]
-        if not self.config_id.product_configurator:
-            return
+    def _loader_params_product_attribute_value(self):
+        loaded_models = self._context.get('loaded_models')
+        attributes = loaded_models['product.attribute']
         return {
-            "domain": [("attribute_id", "in", [attr["id"] for attr in attributes])],
-            "fields": ["name", "attribute_id", "is_custom", "html_color"],
+            'domain': [('attribute_id', 'in', [attr['id'] for attr in attributes])],
+            'fields': ['name', 'attribute_id', 'is_custom', 'html_color'],
         }
 
     def _get_pos_ui_product_attribute_value(self, params):
-        if params:
-            return self.env["product.attribute.value"].search_read(params["domain"], params["fields"])
+        return self.env['product.attribute.value'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_product_template_attribute_value(self):
-        loaded_models = self._context.get("loaded_models")
-        attributes = loaded_models["product.attribute"]
-        if not self.config_id.product_configurator:
-            return
+    def _loader_params_product_template_attribute_value(self):
+        loaded_models = self._context.get('loaded_models')
+        attributes = loaded_models['product.attribute']
         return {
-            "domain": [("attribute_id", "in", [attr["id"] for attr in attributes])],
-            "fields": ["product_attribute_value_id", "attribute_id", "attribute_line_id", "price_extra"],
+            'domain': [('attribute_id', 'in', [attr['id'] for attr in attributes])],
+            'fields': ['product_attribute_value_id', 'attribute_id', 'attribute_line_id', 'price_extra'],
         }
 
     def _get_pos_ui_product_template_attribute_value(self, params):
-        if params:
-            return self.env["product.template.attribute.value"].search_read(params["domain"], params["fields"])
+        return self.env['product.template.attribute.value'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_account_cash_rounding(self):
+    def _loader_params_account_cash_rounding(self):
         return {
-            "domain": [("id", "=", self.config_id.rounding_method.id)],
-            "fields": ["name", "rounding", "rounding_method"],
+            'domain': [('id', '=', self.config_id.rounding_method.id)],
+            'fields': ['name', 'rounding', 'rounding_method'],
         }
 
     def _get_pos_ui_account_cash_rounding(self, params):
-        return self.env["account.cash.rounding"].search_read(params["domain"], params["fields"])
+        return self.env['account.cash.rounding'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_pos_payment_method(self):
-        return {
-            "domain": [("id", "in", self.config_id.payment_method_ids.ids)],
-            "fields": ["name", "is_cash_count", "use_payment_terminal", "split_transactions", "type"],
-        }
+    def _loader_params_pos_payment_method(self):
+        return {'domain': [], 'fields': ['name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type']}
 
     def _get_pos_ui_pos_payment_method(self, params):
-        return self.env["pos.payment.method"].search_read(params["domain"], params["fields"])
+        return self.env['pos.payment.method'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_account_fiscal_position(self):
-        return {
-            "domain": [("id", "in", self.config_id.fiscal_position_ids.ids)],
-            "fields": [],
-        }
+    def _loader_params_account_fiscal_position(self):
+        return {'domain': [('id', 'in', self.config_id.fiscal_position_ids.ids)], 'fields': []}
 
     def _get_pos_ui_account_fiscal_position(self, params):
-        return self.env["account.fiscal.position"].search_read(params["domain"], params["fields"])
+        return self.env['account.fiscal.position'].search_read(params['domain'], params['fields'])
 
-    def _loader_info_account_fiscal_position_tax(self):
-        loaded_models = self._context.get("loaded_models")
-        fps = loaded_models["account.fiscal.position"]
-        fiscal_position_tax_ids = sum([fpos["tax_ids"] for fpos in fps], [])
-        return {
-            "domain": [("id", "in", fiscal_position_tax_ids)],
-            "fields": [],
-        }
+    def _loader_params_account_fiscal_position_tax(self):
+        loaded_models = self._context.get('loaded_models')
+        fps = loaded_models['account.fiscal.position']
+        fiscal_position_tax_ids = sum([fpos['tax_ids'] for fpos in fps], [])
+        return {'domain': [('id', 'in', fiscal_position_tax_ids)], 'fields': []}
 
     def _get_pos_ui_account_fiscal_position_tax(self, params):
-        return self.env["account.fiscal.position.tax"].search_read(params["domain"], params["fields"])
+        return self.env['account.fiscal.position.tax'].search_read(params['domain'], params['fields'])
 
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
