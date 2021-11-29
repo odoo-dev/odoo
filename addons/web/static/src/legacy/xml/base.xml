@@ -158,7 +158,7 @@
             t-attf-class="{{ icon || displayCaret || displayChevron ? 'd-flex align-items-center ' : ''}} {{ displayCaret || displayChevron ? 'pr-1 ' : ''}}"
             t-att-aria-expanded="state.open ? 'true' : 'false'"
             tabindex="-1"
-            t-on-click="()=>state.open = !state.open"
+            t-on-click="() => { state.open = !state.open }"
             t-on-keydown="()=>_onButtonKeydown"
             t-att-title="props.hotkeyTitle"
             t-att-data-hotkey="props.hotkey"
@@ -191,7 +191,7 @@
                 role="menuitemcheckbox"
                 href="#"
                 t-ref="fallback-focus"
-                t-on-click.prevent="()=>state.open = !state.open"
+                t-on-click.prevent="() => { state.open = !state.open }"
                 >
                 <t t-esc="props.description"/>
                 <i t-attf-class="o_icon_right fa fa-fw mr-n4 fa-caret-{{ state.open ? 'down' : 'right' }}"/>
