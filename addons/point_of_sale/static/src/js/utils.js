@@ -3,6 +3,7 @@ odoo.define('point_of_sale.utils', function (require) {
 
     const { EventBus } = owl.core;
     const { ConnectionAbortedError, ConnectionLostError } = require('@web/core/network/rpc_service');
+    const { Mutex } = require('web.concurrency');
 
     function getFileAsText(file) {
         return new Promise((resolve, reject) => {
@@ -62,5 +63,5 @@ odoo.define('point_of_sale.utils', function (require) {
         return errorToHandle || error;
     }
 
-    return { getFileAsText, nextFrame, posbus: new EventBus(), identifyError, isConnectionError };
+    return { getFileAsText, nextFrame, posbus: new EventBus(), identifyError, isConnectionError, posMutex: new Mutex() };
 });

@@ -3,17 +3,16 @@ odoo.define('point_of_sale.models', function (require) {
 "use strict";
 
 var PosDB = require('point_of_sale.DB');
-var concurrency = require('web.concurrency');
 var config = require('web.config');
 var core = require('web.core');
 var field_utils = require('web.field_utils');
 var time = require('web.time');
 var utils = require('web.utils');
 var { Gui } = require('point_of_sale.Gui');
+var { posMutex } = require('point_of_sale.utils');
 
 var QWeb = core.qweb;
 var _t = core._t;
-var Mutex = concurrency.Mutex;
 var round_di = utils.round_decimals;
 var round_pr = utils.round_precision;
 
@@ -81,7 +80,6 @@ class PosModel {
 class PosGlobalState extends PosModel {
     constructor(obj) {
         super(obj);
-        this.flush_mutex = new Mutex();                   // used to make sure the orders are sent to the server once at time
 
         this.db = new PosDB();                       // a local database used to search trough products and categories & store pending orders
         this.debug = config.isDebug(); //debug mode
@@ -488,7 +486,7 @@ class PosGlobalState extends PosModel {
         }
 
         return new Promise((resolve, reject) => {
-            self.flush_mutex.exec(async () => {
+            posMutex.exec(async () => {
                 try {
                     resolve(await self._flush_orders(self.db.get_orders(), opts));
                 } catch (error) {
@@ -504,7 +502,7 @@ class PosGlobalState extends PosModel {
         const order_id = self.db.add_order(order.export_as_JSON());
 
         return new Promise((resolve, reject) => {
-            self.flush_mutex.exec(async () => {
+            posMutex.exec(async () => {
                 const order = self.db.get_order(order_id);
                 try {
                     resolve(await self._flush_orders([order], opts));
@@ -530,7 +528,7 @@ class PosGlobalState extends PosModel {
                 reject({ code: 400, message: 'Missing Customer', data: {} });
             } else {
                 var order_id = self.db.add_order(order.export_as_JSON());
-                self.flush_mutex.exec(async () => {
+                posMutex.exec(async () => {
                     try {
                         const server_ids = await self._flush_orders([self.db.get_order(order_id)], {
                             timeout: 30000,
