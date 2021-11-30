@@ -94,7 +94,7 @@
      */
     function createAttrUpdater(attr) {
         return function (value) {
-            if (value !== false && value !== undefined) { // NXOWL to fix in owl
+            if (value !== false) {
                 setAttribute.call(this, attr, value === true ? "" : value);
             }
         };
@@ -432,26 +432,18 @@
     const nodeInsertBefore$2 = nodeProto$3.insertBefore;
     const characterDataSetData$1 = getDescriptor$2(characterDataProto$1, "data").set;
     const nodeRemoveChild$2 = nodeProto$3.removeChild;
-    class VText$1 {
+    class VSimpleNode {
         constructor(text) {
             this.text = text;
         }
-        mount(parent, afterNode) {
+        mountNode(node, parent, afterNode) {
             this.parentEl = parent;
-            const node = document.createTextNode(toText(this.text));
             nodeInsertBefore$2.call(parent, node, afterNode);
             this.el = node;
         }
         moveBefore(other, afterNode) {
             const target = other ? other.el : afterNode;
             nodeInsertBefore$2.call(this.parentEl, this.el, target);
-        }
-        patch(other) {
-            const text2 = other.text;
-            if (this.text !== text2) {
-                characterDataSetData$1.call(this.el, toText(text2));
-                this.text = text2;
-            }
         }
         beforeRemove() { }
         remove() {
@@ -464,8 +456,29 @@
             return this.text;
         }
     }
+    class VText$1 extends VSimpleNode {
+        mount(parent, afterNode) {
+            this.mountNode(document.createTextNode(toText(this.text)), parent, afterNode);
+        }
+        patch(other) {
+            const text2 = other.text;
+            if (this.text !== text2) {
+                characterDataSetData$1.call(this.el, toText(text2));
+                this.text = text2;
+            }
+        }
+    }
+    class VComment extends VSimpleNode {
+        mount(parent, afterNode) {
+            this.mountNode(document.createComment(toText(this.text)), parent, afterNode);
+        }
+        patch() { }
+    }
     function text(str) {
         return new VText$1(str);
+    }
+    function comment(str) {
+        return new VComment(str);
     }
     function toText(value) {
         switch (typeof value) {
@@ -1372,7 +1385,7 @@
             }
             return current;
         }
-        const fiber = new RootFiber(node);
+        const fiber = new RootFiber(node, null);
         if (node.willPatch.length) {
             fiber.willPatch.push(fiber);
         }
@@ -1415,18 +1428,13 @@
         }
     }
     class RootFiber extends Fiber {
-        constructor(node) {
-            super(node, null);
+        constructor() {
+            super(...arguments);
             this.counter = 1;
             // only add stuff in this if they have registered some hooks
             this.willPatch = [];
             this.patched = [];
             this.mounted = [];
-            this.counter = 1;
-            this.promise = new Promise((resolve, reject) => {
-                this.resolve = resolve;
-                this.reject = reject;
-            });
         }
         complete() {
             const node = this.node;
@@ -1449,13 +1457,6 @@
                 // Step 2: patching the dom
                 node.bdom.patch(this.bdom, Object.keys(node.children).length > 0);
                 this.appliedToDom = true;
-                // Step 3: calling all destroyed hooks
-                for (let node of __internal__destroyed) {
-                    for (let cb of node.destroyed) {
-                        cb();
-                    }
-                }
-                __internal__destroyed.length = 0;
                 // Step 4: calling all mounted lifecycle hooks
                 let mountedFibers = this.mounted;
                 while ((current = mountedFibers.pop())) {
@@ -1480,18 +1481,19 @@
                 node.fiber = null;
             }
             catch (e) {
-                if (!handleError({ fiber: current || this, error: e })) {
-                    this.reject(e);
-                }
+                handleError({ fiber: current || this, error: e });
             }
         }
     }
-    let __internal__destroyed = [];
     class MountFiber extends RootFiber {
         constructor(node, target, options = {}) {
-            super(node);
+            super(node, null);
             this.target = target;
             this.position = options.position || "last-child";
+            this.promise = new Promise((resolve, reject) => {
+                this.resolve = resolve;
+                this.reject = reject;
+            });
         }
         complete() {
             let current = this;
@@ -1522,6 +1524,7 @@
                     this.reject(e);
                 }
             }
+            this.resolve();
         }
     }
 
@@ -1796,7 +1799,7 @@
             this.mounted = [];
             this.willPatch = [];
             this.patched = [];
-            this.destroyed = [];
+            this.willDestroy = [];
             currentNode = this;
             this.app = app;
             this.parent = parent || null;
@@ -1837,10 +1840,9 @@
         async render() {
             const current = this.fiber;
             if (current && !current.bdom && !fibersInError.has(current)) {
-                return current.root.promise;
+                return;
             }
             if (!this.bdom && !current) {
-                // should find a way to return the future mounting promise
                 return;
             }
             const fiber = makeRootFiber(this);
@@ -1864,7 +1866,6 @@
             if (this.fiber && (current || !fiber.parent)) {
                 this._render(fiber);
             }
-            return fiber.root.promise;
         }
         _render(fiber) {
             try {
@@ -1876,32 +1877,26 @@
             }
         }
         destroy() {
-            if (this.status === 1 /* MOUNTED */) {
-                callWillUnmount(this);
+            let shouldRemove = this.status === 1 /* MOUNTED */;
+            this._destroy();
+            if (shouldRemove) {
                 this.bdom.remove();
             }
-            callDestroyed(this);
-            function callWillUnmount(node) {
-                const component = node.component;
-                for (let cb of node.willUnmount) {
-                    cb.call(component);
-                }
-                for (let child of Object.values(node.children)) {
-                    if (child.status === 1 /* MOUNTED */) {
-                        callWillUnmount(child);
-                    }
-                }
-            }
-            function callDestroyed(node) {
-                const component = node.component;
-                node.status = 2 /* DESTROYED */;
-                for (let child of Object.values(node.children)) {
-                    callDestroyed(child);
-                }
-                for (let cb of node.destroyed) {
+        }
+        _destroy() {
+            const component = this.component;
+            if (this.status === 1 /* MOUNTED */) {
+                for (let cb of this.willUnmount) {
                     cb.call(component);
                 }
             }
+            for (let child of Object.values(this.children)) {
+                child._destroy();
+            }
+            for (let cb of this.willDestroy) {
+                cb.call(component);
+            }
+            this.status = 2 /* DESTROYED */;
         }
         async updateAndRender(props, parentFiber) {
             // update
@@ -1947,25 +1942,10 @@
             this.fiber = null;
         }
         beforeRemove() {
-            visitRemovedNodes(this);
+            this._destroy();
         }
         remove() {
             this.bdom.remove();
-        }
-    }
-    function visitRemovedNodes(node) {
-        if (node.status === 1 /* MOUNTED */) {
-            const component = node.component;
-            for (let cb of node.willUnmount) {
-                cb.call(component);
-            }
-        }
-        for (let child of Object.values(node.children)) {
-            visitRemovedNodes(child);
-        }
-        node.status = 2 /* DESTROYED */;
-        if (node.destroyed.length) {
-            __internal__destroyed.push(node);
         }
     }
 
@@ -1998,19 +1978,15 @@
         flush() {
             this.tasks.forEach((fiber) => {
                 if (fiber.root !== fiber) {
-                    // this is wrong! should be something like
-                    // if (this.tasks.has(fiber.root)) {
-                    //   // parent rendering has completed
-                    //   fiber.resolve();
-                    //   this.tasks.delete(fiber);
-                    // }
                     this.tasks.delete(fiber);
                     return;
                 }
                 const hasError = fibersInError.has(fiber);
                 if (hasError && fiber.counter !== 0) {
                     this.tasks.delete(fiber);
-                    fiber.reject(fibersInError.get(fiber));
+                    if (fiber instanceof MountFiber) {
+                        fiber.reject(fibersInError.get(fiber));
+                    }
                     return;
                 }
                 if (fiber.node.status === 2 /* DESTROYED */) {
@@ -2020,7 +1996,6 @@
                 if (fiber.counter === 0) {
                     if (!hasError) {
                         fiber.complete();
-                        fiber.resolve();
                     }
                     this.tasks.delete(fiber);
                 }
@@ -2410,6 +2385,8 @@
             this.code = [];
             this.hasRoot = false;
             this.hasCache = false;
+            this.hasRef = false;
+            this.shouldProtectScope = false;
             this.name = name;
         }
         addLine(line, idx) {
@@ -2421,27 +2398,47 @@
                 this.code.splice(idx, 0, prefix + line);
             }
         }
+        generateCode() {
+            let result = [];
+            result.push(`function ${this.name}(ctx, node, key = "") {`);
+            if (this.hasRef) {
+                result.push(`  const refs = ctx.__owl__.refs;`);
+            }
+            if (this.shouldProtectScope) {
+                result.push(`  ctx = Object.create(ctx);`);
+                result.push(`  ctx[isBoundary] = 1`);
+            }
+            if (this.hasCache) {
+                result.push(`  let cache = ctx.cache || {};`);
+                result.push(`  let nextCache = ctx.cache = {};`);
+            }
+            for (let line of this.code) {
+                result.push(line);
+            }
+            if (!this.hasRoot) {
+                result.push(`return text('');`);
+            }
+            result.push(`}`);
+            return result.join("\n  ");
+        }
     }
     const TRANSLATABLE_ATTRS = ["label", "title", "placeholder", "alt"];
     const translationRE = /^(\s*)([\s\S]+?)(\s*)$/;
     class CodeGenerator {
-        constructor(name, ast, options) {
+        constructor(ast, options) {
             this.blocks = [];
             this.nextId = 1;
             this.nextBlockId = 1;
-            this.shouldProtectScope = false;
-            this.shouldDefineAssign = false;
-            this.hasRef = false;
             this.isDebug = false;
-            this.functions = [];
-            this.target = new CodeTarget("main");
+            this.targets = [];
+            this.target = new CodeTarget("template");
             this.staticCalls = [];
             this.translateFn = options.translateFn || ((s) => s);
             this.translatableAttributes = options.translatableAttributes || TRANSLATABLE_ATTRS;
             this.hasSafeContext = options.hasSafeContext || false;
             this.dev = options.dev || false;
             this.ast = ast;
-            this.templateName = name;
+            this.templateName = options.name;
         }
         generateCode() {
             const ast = this.ast;
@@ -2456,62 +2453,45 @@
                 translate: true,
                 tKeyExpr: null,
             });
-            let mainCode = this.target.code;
-            this.target.code = [];
-            this.target.indentLevel = 0;
             // define blocks and utility functions
-            this.addLine(`let { text, createBlock, list, multi, html, toggler, component } = bdom;`);
-            this.addLine(`let { withDefault, getTemplate, prepareList, withKey, zero, call, callSlot, capture, isBoundary, shallowEqual, setContextValue, toNumber, safeOutput } = helpers;`);
-            if (this.shouldDefineAssign) {
-                this.addLine(`let assign = Object.assign;`);
+            let mainCode = [
+                `  let { text, createBlock, list, multi, html, toggler, component, comment } = bdom;`,
+                `let { withDefault, getTemplate, prepareList, withKey, zero, call, callSlot, capture, isBoundary, shallowEqual, setContextValue, toNumber, safeOutput } = helpers;`,
+            ];
+            if (this.templateName) {
+                mainCode.push(`// Template name: "${this.templateName}"`);
             }
             for (let { id, template } of this.staticCalls) {
-                this.addLine(`const ${id} = getTemplate(${template});`);
+                mainCode.push(`const ${id} = getTemplate(${template});`);
             }
             // define all blocks
             if (this.blocks.length) {
-                this.addLine(``);
+                mainCode.push(``);
                 for (let block of this.blocks) {
                     if (block.dom) {
                         let xmlString = block.asXmlString();
                         if (block.dynamicTagName) {
                             xmlString = xmlString.replace(/^<\w+/, `<\${tag || '${block.dom.nodeName}'}`);
                             xmlString = xmlString.replace(/\w+>$/, `\${tag || '${block.dom.nodeName}'}>`);
-                            this.addLine(`let ${block.blockName} = tag => createBlock(\`${xmlString}\`);`);
+                            mainCode.push(`let ${block.blockName} = tag => createBlock(\`${xmlString}\`);`);
                         }
                         else {
-                            this.addLine(`let ${block.blockName} = createBlock(\`${xmlString}\`);`);
+                            mainCode.push(`let ${block.blockName} = createBlock(\`${xmlString}\`);`);
                         }
                     }
                 }
             }
-            // define all slots
-            for (let fn of this.functions) {
-                this.generateFunctions(fn);
+            // define all slots/defaultcontent function
+            if (this.targets.length) {
+                for (let fn of this.targets) {
+                    mainCode.push("");
+                    mainCode = mainCode.concat(fn.generateCode());
+                }
             }
-            // // generate main code
-            this.target.indentLevel = 0;
-            this.addLine(``);
-            this.addLine(`return function template(ctx, node, key = "") {`);
-            if (this.hasRef) {
-                this.addLine(`  const refs = ctx.__owl__.refs;`);
-            }
-            if (this.shouldProtectScope) {
-                this.addLine(`  ctx = Object.create(ctx);`);
-                this.addLine(`  ctx[isBoundary] = 1`);
-            }
-            if (this.target.hasCache) {
-                this.addLine(`  let cache = ctx.cache || {};`);
-                this.addLine(`  let nextCache = ctx.cache = {};`);
-            }
-            for (let line of mainCode) {
-                this.addLine(line);
-            }
-            if (!this.target.hasRoot) {
-                throw new Error("missing root block");
-            }
-            this.addLine("}");
-            const code = this.target.code.join("\n");
+            // generate main code
+            mainCode.push("");
+            mainCode = mainCode.concat("return " + this.target.generateCode());
+            const code = mainCode.join("\n  ");
             if (this.isDebug) {
                 const msg = `[Owl Debug]\n${code}`;
                 console.log(msg);
@@ -2567,18 +2547,6 @@
             else {
                 this.addLine(`let ${block.varName} = ${blockExpr};`);
             }
-        }
-        generateFunctions(fn) {
-            this.addLine("");
-            this.addLine(`function ${fn.name}(ctx, node, key) {`);
-            if (fn.hasCache) {
-                this.addLine(`let cache = ctx.cache || {};`);
-                this.addLine(`let nextCache = ctx.cache = {};`);
-            }
-            for (let line of fn.code) {
-                this.addLine(line);
-            }
-            this.addLine(`}`);
         }
         /**
          * Captures variables that are used inside of an expression. This is useful
@@ -2684,13 +2652,12 @@
             let { block, forceNewBlock } = ctx;
             const isNewBlock = !block || forceNewBlock;
             if (isNewBlock) {
-                block = this.createBlock(block, "block", ctx);
-                this.blocks.push(block);
+                block = this.createBlock(block, "comment", ctx);
+                this.insertBlock(`comment(\`${ast.value}\`)`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: forceNewBlock && !block }));
             }
-            const text = xmlDoc.createComment(ast.value);
-            block.insert(text);
-            if (isNewBlock) {
-                this.insertBlock("", block, ctx);
+            else {
+                const text = xmlDoc.createComment(ast.value);
+                block.insert(text);
             }
         }
         compileText(ast, ctx) {
@@ -2773,7 +2740,7 @@
             }
             // t-ref
             if (ast.ref) {
-                this.hasRef = true;
+                this.target.hasRef = true;
                 const isDynamic = INTERP_REGEXP.test(ast.ref);
                 if (isDynamic) {
                     const str = ast.ref.replace(INTERP_REGEXP, (expr) => "${" + this.captureExpression(expr.slice(2, -2), true) + "}");
@@ -2986,7 +2953,6 @@
             let id;
             if (ast.memo) {
                 this.target.hasCache = true;
-                this.shouldDefineAssign = true;
                 id = this.generateId();
                 this.addLine(`let memo${id} = ${compileExpr(ast.memo)}`);
                 this.addLine(`let vnode${id} = cache[key${this.target.loopLevel}];`);
@@ -3005,7 +2971,7 @@
             const subCtx = createContext(ctx, { block, index: loopVar });
             this.compileAST(ast.body, subCtx);
             if (ast.memo) {
-                this.addLine(`nextCache[key${this.target.loopLevel}] = assign(${c}[${loopVar}], {memo: memo${id}});`);
+                this.addLine(`nextCache[key${this.target.loopLevel}] = Object.assign(${c}[${loopVar}], {memo: memo${id}});`);
             }
             this.target.indentLevel--;
             this.target.loopLevel--;
@@ -3123,7 +3089,7 @@
             this.insertBlock(compileExpr(ast.name), block, Object.assign(Object.assign({}, ctx), { forceNewBlock: !block }));
         }
         compileTSet(ast, ctx) {
-            this.shouldProtectScope = true;
+            this.target.shouldProtectScope = true;
             const expr = ast.value ? compileExpr(ast.value || "") : "null";
             if (ast.body) {
                 const subCtx = createContext(ctx);
@@ -3181,7 +3147,7 @@
                 for (let slotName in ast.slots) {
                     let name = this.generateId("slot");
                     const slot = new CodeTarget(name);
-                    this.functions.push(slot);
+                    this.targets.push(slot);
                     this.target = slot;
                     const subCtx = createContext(ctx);
                     this.compileAST(ast.slots[slotName].content, subCtx);
@@ -3196,13 +3162,7 @@
                         }
                     }
                     const slotInfo = `{${params.join(", ")}}`;
-                    if (this.hasRef) {
-                        slot.code.unshift(`  const refs = ctx.__owl__.refs`);
-                        slotStr.push(`'${slotName}': ${slotInfo}`);
-                    }
-                    else {
-                        slotStr.push(`'${slotName}': ${slotInfo}`);
-                    }
+                    slotStr.push(`'${slotName}': ${slotInfo}`);
                 }
                 this.target = initialTarget;
                 slotDef = `{${slotStr.join(", ")}}`;
@@ -3281,7 +3241,7 @@
             if (ast.defaultContent) {
                 let name = this.generateId("defaultContent");
                 const slot = new CodeTarget(name);
-                this.functions.push(slot);
+                this.targets.push(slot);
                 const initialTarget = this.target;
                 const subCtx = createContext(ctx);
                 this.target = slot;
@@ -4057,7 +4017,6 @@
         return doc;
     }
 
-    let nextId = 1;
     function compile(template, options = {}) {
         // parsing
         const ast = parse(template);
@@ -4065,9 +4024,8 @@
         const hasSafeContext = template instanceof Node
             ? !(template instanceof Element) || template.querySelector("[t-set], [t-call]") === null
             : !template.includes("t-set") && !template.includes("t-call");
-        const name = options.name || `template_${nextId++}`;
         // code generation
-        const codeGenerator = new CodeGenerator(name, ast, Object.assign(Object.assign({}, options), { hasSafeContext }));
+        const codeGenerator = new CodeGenerator(ast, Object.assign(Object.assign({}, options), { hasSafeContext }));
         const code = codeGenerator.generateCode();
         // template function
         return new Function("bdom, helpers", code);
@@ -4231,7 +4189,7 @@
         safeOutput,
     };
 
-    const bdom = { text, createBlock, list, multi, html, toggler, component };
+    const bdom = { text, createBlock, list, multi, html, toggler, component, comment };
     const globalTemplates = {};
     function parseXML(xml) {
         const parser = new DOMParser();
@@ -4377,7 +4335,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
         }
         setup() { }
         render() {
-            return this.__owl__.render();
+            this.__owl__.render();
         }
     }
     Component.template = "";
@@ -4549,9 +4507,9 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
         const node = getCurrent();
         node.willUnmount.unshift(fn);
     }
-    function onDestroyed(fn) {
+    function onWillDestroy(fn) {
         const node = getCurrent();
-        node.destroyed.push(fn);
+        node.willDestroy.push(fn);
     }
     function onWillRender(fn) {
         const node = getCurrent();
@@ -4620,6 +4578,10 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             keyToCallbacks.set(key, new Set());
         }
         keyToCallbacks.get(key).add(callback);
+        if (!callbacksToTargets.has(callback)) {
+            callbacksToTargets.set(callback, new Set());
+        }
+        callbacksToTargets.get(callback).add(target);
     }
     /**
      * Notify Reactives that are observing a given target that a key has changed on
@@ -4665,6 +4627,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 callbacks.delete(callback);
             }
         }
+        targetsToClear.clear();
     }
     const reactiveCache = new WeakMap();
     /**
@@ -4751,10 +4714,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 },
             });
             reactivesForTarget.set(callback, proxy);
-            if (!callbacksToTargets.has(callback)) {
-                callbacksToTargets.set(callback, new Set());
-            }
-            callbacksToTargets.get(callback).add(target);
         }
         return reactivesForTarget.get(callback);
     }
@@ -4796,10 +4755,10 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
         const node = getCurrent();
         if (!batchedRenderFunctions.has(node)) {
             batchedRenderFunctions.set(node, batched(() => node.render()));
+            onWillUnmount(() => clearReactivesForCallback(render));
         }
         const render = batchedRenderFunctions.get(node);
         const reactiveState = reactive(state, render);
-        onWillUnmount(() => clearReactivesForCallback(render));
         return reactiveState;
     }
 
@@ -4914,6 +4873,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
         toggler,
         createBlock,
         html,
+        comment,
     };
     async function mount(C, target, config = {}) {
         const app = new App(C);
@@ -4936,11 +4896,11 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.loadFile = loadFile;
     exports.markup = markup;
     exports.mount = mount;
-    exports.onDestroyed = onDestroyed;
     exports.onError = onError;
     exports.onMounted = onMounted;
     exports.onPatched = onPatched;
     exports.onRendered = onRendered;
+    exports.onWillDestroy = onWillDestroy;
     exports.onWillPatch = onWillPatch;
     exports.onWillRender = onWillRender;
     exports.onWillStart = onWillStart;
@@ -4962,8 +4922,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-11-25T16:31:56.139Z';
-    __info__.hash = 'a1d435c';
+    __info__.date = '2021-11-30T08:55:23.289Z';
+    __info__.hash = 'e946967';
     __info__.url = 'https://github.com/odoo/owl';
 
 
