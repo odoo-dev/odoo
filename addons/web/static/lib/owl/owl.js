@@ -94,7 +94,7 @@
      */
     function createAttrUpdater(attr) {
         return function (value) {
-            if (value !== false) {
+            if (value !== false && value !== undefined) { // NXOWL to fix in owl
                 setAttribute.call(this, attr, value === true ? "" : value);
             }
         };
