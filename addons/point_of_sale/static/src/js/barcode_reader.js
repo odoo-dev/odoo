@@ -18,7 +18,6 @@ var BarcodeReader = core.Class.extend({
 
     init: function (attributes) {
         this.mutex = new Mutex();
-        this.pos = attributes.pos;
         this.action_callbacks = {};
         this.exclusive_callbacks = {};
         this.proxy = attributes.proxy;
