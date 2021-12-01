@@ -94,7 +94,7 @@
      */
     function createAttrUpdater(attr) {
         return function (value) {
-            if (value !== false && value !== undefined) { // NXOWL to fix in owl
+            if (value !== false) {
                 setAttribute.call(this, attr, value === true ? "" : value);
             }
         };
@@ -1318,29 +1318,34 @@
             if (isFirstRound && fiber) {
                 fiber.root.counter--;
             }
-            let propagate = true;
+            let stopped = false;
             for (const h of errorHandlers) {
                 try {
                     h(error);
-                    propagate = false;
+                    stopped = true;
+                    break;
                 }
                 catch (e) {
                     error = e;
                 }
             }
-            if (propagate) {
-                return _handleError(node.parent, error);
+            if (stopped) {
+                return true;
             }
-            return true;
         }
-        else {
-            return _handleError(node.parent, error);
-        }
+        return _handleError(node.parent, error);
     }
     function handleError(params) {
         const error = params.error;
         const node = "node" in params ? params.node : params.fiber.node;
         const fiber = "fiber" in params ? params.fiber : node.fiber;
+        // resets the fibers on components if possible. This is important so that
+        // new renderings can be properly included in the initial one, if any.
+        let current = fiber;
+        do {
+            current.node.fiber = current;
+            current = current.parent;
+        } while (current);
         fibersInError.set(fiber.root, error);
         const handled = _handleError(node, error, true);
         if (!handled) {
@@ -1377,6 +1382,7 @@
             if (fibersInError.has(current)) {
                 fibersInError.delete(current);
                 fibersInError.delete(root);
+                current.appliedToDom = false;
             }
             return current;
         }
@@ -1485,22 +1491,27 @@
             super(node, null);
             this.target = target;
             this.position = options.position || "last-child";
-            this.promise = new Promise((resolve, reject) => {
-                this.resolve = resolve;
-                this.reject = reject;
-            });
         }
         complete() {
             let current = this;
             try {
                 const node = this.node;
-                node.bdom = this.bdom;
-                if (this.position === "last-child" || this.target.childNodes.length === 0) {
-                    mount$1(node.bdom, this.target);
+                if (node.bdom) {
+                    // this is a complicated situation: if we mount a fiber with an existing
+                    // bdom, this means that this same fiber was already completed, mounted,
+                    // but a crash occurred in some mounted hook. Then, it was handled and
+                    // the new rendering is being applied.
+                    node.updateDom();
                 }
                 else {
-                    const firstChild = this.target.childNodes[0];
-                    mount$1(node.bdom, this.target, firstChild);
+                    node.bdom = this.bdom;
+                    if (this.position === "last-child" || this.target.childNodes.length === 0) {
+                        mount$1(node.bdom, this.target);
+                    }
+                    else {
+                        const firstChild = this.target.childNodes[0];
+                        mount$1(node.bdom, this.target, firstChild);
+                    }
                 }
                 node.status = 1 /* MOUNTED */;
                 this.appliedToDom = true;
@@ -1515,11 +1526,8 @@
                 node.fiber = null;
             }
             catch (e) {
-                if (!handleError({ fiber: current, error: e })) {
-                    this.reject(e);
-                }
+                handleError({ fiber: current, error: e });
             }
-            this.resolve();
         }
     }
 
@@ -1813,7 +1821,6 @@
             const fiber = new MountFiber(this, target, options);
             this.app.scheduler.addFiber(fiber);
             this.initiateRender(fiber);
-            return fiber.promise.then(() => this.component);
         }
         async initiateRender(fiber) {
             this.fiber = fiber;
@@ -1913,6 +1920,31 @@
             this.component.props = props;
             this._render(fiber);
         }
+        /**
+         * Finds a child that has dom that is not yet updated, and update it. This
+         * method is meant to be used only in the context of repatching the dom after
+         * a mounted hook failed and was handled.
+         */
+        updateDom() {
+            if (!this.fiber) {
+                return;
+            }
+            if (this.bdom === this.fiber.bdom) {
+                // If the error was handled by some child component, we need to find it to
+                // apply its change
+                for (let k in this.children) {
+                    const child = this.children[k];
+                    child.updateDom();
+                }
+            }
+            else {
+                // if we get here, this is the component that handled the error and rerendered
+                // itself, so we can simply patch the dom
+                this.bdom.patch(this.fiber.bdom, false);
+                this.fiber.appliedToDom = true;
+                this.fiber = null;
+            }
+        }
         // ---------------------------------------------------------------------------
         // Block DOM methods
         // ---------------------------------------------------------------------------
@@ -1941,6 +1973,67 @@
         }
         remove() {
             this.bdom.remove();
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+    //  hooks
+    // -----------------------------------------------------------------------------
+    function onWillStart(fn) {
+        const node = getCurrent();
+        node.willStart.push(fn);
+    }
+    function onWillUpdateProps(fn) {
+        const node = getCurrent();
+        node.willUpdateProps.push(fn);
+    }
+    function onMounted(fn) {
+        const node = getCurrent();
+        node.mounted.push(fn);
+    }
+    function onWillPatch(fn) {
+        const node = getCurrent();
+        node.willPatch.unshift(fn);
+    }
+    function onPatched(fn) {
+        const node = getCurrent();
+        node.patched.push(fn);
+    }
+    function onWillUnmount(fn) {
+        const node = getCurrent();
+        node.willUnmount.unshift(fn);
+    }
+    function onWillDestroy(fn) {
+        const node = getCurrent();
+        node.willDestroy.push(fn);
+    }
+    function onWillRender(fn) {
+        const node = getCurrent();
+        const renderFn = node.renderFn;
+        node.renderFn = () => {
+            fn();
+            return renderFn();
+        };
+    }
+    function onRendered(fn) {
+        const node = getCurrent();
+        const renderFn = node.renderFn;
+        node.renderFn = () => {
+            const result = renderFn();
+            fn();
+            return result;
+        };
+    }
+    function onError(fn) {
+        const node = getCurrent();
+        let handlers = nodeErrorHandlers.get(node);
+        if (handlers) {
+            handlers.push(fn);
+        }
+        else {
+            handlers = [];
+            handlers.push(fn);
+            nodeErrorHandlers.set(node, handlers);
         }
     }
 
@@ -1979,9 +2072,6 @@
                 const hasError = fibersInError.has(fiber);
                 if (hasError && fiber.counter !== 0) {
                     this.tasks.delete(fiber);
-                    if (fiber instanceof MountFiber) {
-                        fiber.reject(fibersInError.get(fiber));
-                    }
                     return;
                 }
                 if (fiber.node.status === 2 /* DESTROYED */) {
@@ -3703,10 +3793,7 @@
         }
         const condition = node.getAttribute("t-if");
         node.removeAttribute("t-if");
-        const content = parseNode(node, ctx);
-        if (!content) {
-            throw new Error("hmmm");
-        }
+        const content = parseNode(node, ctx) || { type: 0 /* Text */, value: "" };
         let nextElement = node.nextElementSibling;
         // t-elifs
         const tElifs = [];
@@ -4305,8 +4392,16 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 throw new Error("Cannot mount a component on a detached dom node");
             }
             const node = new ComponentNode(this.Root, this.props, this);
+            const promise = new Promise((resolve, reject) => {
+                onMounted(() => resolve(node.component));
+                onError((e) => {
+                    reject(e);
+                    throw e;
+                });
+            });
             this.root = node;
-            return node.mountComponent(target, options);
+            node.mountComponent(target, options);
+            return promise;
         }
         destroy() {
             if (this.root) {
@@ -4473,67 +4568,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             }
         }
         return true;
-    }
-
-    // -----------------------------------------------------------------------------
-    //  hooks
-    // -----------------------------------------------------------------------------
-    function onWillStart(fn) {
-        const node = getCurrent();
-        node.willStart.push(fn);
-    }
-    function onWillUpdateProps(fn) {
-        const node = getCurrent();
-        node.willUpdateProps.push(fn);
-    }
-    function onMounted(fn) {
-        const node = getCurrent();
-        node.mounted.push(fn);
-    }
-    function onWillPatch(fn) {
-        const node = getCurrent();
-        node.willPatch.unshift(fn);
-    }
-    function onPatched(fn) {
-        const node = getCurrent();
-        node.patched.push(fn);
-    }
-    function onWillUnmount(fn) {
-        const node = getCurrent();
-        node.willUnmount.unshift(fn);
-    }
-    function onWillDestroy(fn) {
-        const node = getCurrent();
-        node.willDestroy.push(fn);
-    }
-    function onWillRender(fn) {
-        const node = getCurrent();
-        const renderFn = node.renderFn;
-        node.renderFn = () => {
-            fn();
-            return renderFn();
-        };
-    }
-    function onRendered(fn) {
-        const node = getCurrent();
-        const renderFn = node.renderFn;
-        node.renderFn = () => {
-            const result = renderFn();
-            fn();
-            return result;
-        };
-    }
-    function onError(fn) {
-        const node = getCurrent();
-        let handlers = nodeErrorHandlers.get(node);
-        if (handlers) {
-            handlers.push(fn);
-        }
-        else {
-            handlers = [];
-            handlers.push(fn);
-            nodeErrorHandlers.set(node, handlers);
-        }
     }
 
     // Allows to get the target of a Reactive (used for making a new Reactive from the underlying object)
@@ -4917,8 +4951,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-12-01T09:08:02.847Z';
-    __info__.hash = '18fb67e';
+    __info__.date = '2021-12-01T12:42:32.627Z';
+    __info__.hash = 'e008966';
     __info__.url = 'https://github.com/odoo/owl';
 
 
