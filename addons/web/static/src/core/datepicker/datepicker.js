@@ -178,7 +178,7 @@ export class DatePicker extends Component {
             const date = this.parse(this.inputRef.el.value, this.options);
             if (!date.equals(this.props.date)) {
                 this.state.warning = date > DateTime.local();
-                this.trigger("datetime-changed", { date });
+                this.props.onDatetimeChanged(date);
             }
         } catch (err) {
             // Reset to default (= given) date.
@@ -248,6 +248,7 @@ DatePicker.props = {
     locale: { type: String, optional: true },
     maxDate: DateTime,
     minDate: DateTime,
+    onDatetimeChanged: Function,
     readonly: { type: Boolean, optional: true },
     useCurrent: Boolean,
     widgetParent: String,
