@@ -94,7 +94,7 @@
      */
     function createAttrUpdater(attr) {
         return function (value) {
-            if (value !== false && value !== undefined) { // NXOWL to fix in owl
+            if (value !== false) {
                 setAttribute.call(this, attr, value === true ? "" : value);
             }
         };
@@ -560,7 +560,6 @@
         switch (node.nodeType) {
             case Node.ELEMENT_NODE: {
                 // HTMLElement
-                let isActive = false;
                 let currentNS = parent && parent.currentNS;
                 const tagName = node.tagName;
                 let el = undefined;
@@ -569,14 +568,14 @@
                     const index = parseInt(tagName.slice(11), 10);
                     info.push({ type: "text", idx: index });
                     el = document.createTextNode("");
-                    isActive = true;
                 }
                 if (tagName.startsWith("block-child-")) {
-                    domParentTree.forceRef = true;
+                    if (!domParentTree.isRef) {
+                        addRef(domParentTree);
+                    }
                     const index = parseInt(tagName.slice(12), 10);
                     info.push({ type: "child", idx: index });
                     el = document.createTextNode("");
-                    isActive = true;
                 }
                 const attrs = node.attributes;
                 const ns = attrs.getNamedItem("block-ns");
@@ -594,7 +593,6 @@
                         const attrName = attrs[i].name;
                         const attrValue = attrs[i].value;
                         if (attrName.startsWith("block-handler-")) {
-                            isActive = true;
                             const idx = parseInt(attrName.slice(14), 10);
                             info.push({
                                 type: "handler",
@@ -603,7 +601,6 @@
                             });
                         }
                         else if (attrName.startsWith("block-attribute-")) {
-                            isActive = true;
                             const idx = parseInt(attrName.slice(16), 10);
                             info.push({
                                 type: "attribute",
@@ -613,14 +610,12 @@
                             });
                         }
                         else if (attrName === "block-attributes") {
-                            isActive = true;
                             info.push({
                                 type: "attributes",
                                 idx: parseInt(attrValue, 10),
                             });
                         }
                         else if (attrName === "block-ref") {
-                            isActive = true;
                             info.push({
                                 type: "ref",
                                 idx: parseInt(attrValue, 10),
@@ -637,7 +632,7 @@
                     nextSibling: null,
                     el,
                     info,
-                    refN: isActive ? 1 : 0,
+                    refN: 0,
                     currentNS,
                 };
                 if (node.firstChild) {
@@ -648,8 +643,6 @@
                         const tagName = childNode.tagName;
                         const index = parseInt(tagName.slice(12), 10);
                         info.push({ idx: index, type: "child", isOnlyChild: true });
-                        isActive = true;
-                        tree.refN = 1;
                     }
                     else {
                         tree.firstChild = buildTree(node.firstChild, tree, tree);
@@ -663,11 +656,8 @@
                         }
                     }
                 }
-                if (isActive) {
-                    let cur = tree;
-                    while ((cur = cur.parent)) {
-                        cur.refN++;
-                    }
+                if (tree.info.length) {
+                    addRef(tree);
                 }
                 return tree;
             }
@@ -690,6 +680,12 @@
         }
         throw new Error("boom");
     }
+    function addRef(tree) {
+        tree.isRef = true;
+        do {
+            tree.refN++;
+        } while ((tree = tree.parent));
+    }
     function parentTree(tree) {
         let parent = tree.parent;
         while (parent && parent.nextSibling === tree) {
@@ -698,16 +694,15 @@
         }
         return parent;
     }
-    function buildContext(tree, ctx, fromIdx, toIdx) {
+    function buildContext(tree, ctx, fromIdx) {
         if (!ctx) {
             const children = new Array(tree.info.filter((v) => v.type === "child").length);
             ctx = { collectors: [], locations: [], children, cbRefs: [], refN: tree.refN };
             fromIdx = 0;
-            tree.refN - 1;
         }
         if (tree.refN) {
             const initialIdx = fromIdx;
-            const isRef = tree.forceRef || tree.info.length > 0;
+            const isRef = tree.isRef;
             const firstChild = tree.firstChild ? tree.firstChild.refN : 0;
             const nextSibling = tree.nextSibling ? tree.nextSibling.refN : 0;
             //node
@@ -4922,8 +4917,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-11-30T08:55:23.289Z';
-    __info__.hash = 'e946967';
+    __info__.date = '2021-12-01T09:08:02.847Z';
+    __info__.hash = '18fb67e';
     __info__.url = 'https://github.com/odoo/owl';
 
 
