@@ -17,7 +17,7 @@ import {
     toggleMenuItem,
 } from "./helpers";
 
-const { Component, mount, useState, xml } = owl;
+const { App, Component, onWillUpdateProps, onWillStart, onWillRender, useState, xml } = owl;
 
 const serviceRegistry = registry.category("services");
 
@@ -298,11 +298,13 @@ QUnit.module("Search", (hooks) => {
         assert.expect(2);
 
         class TestComponent extends Component {
-            willStart() {
-                assert.deepEqual(this.props.domain, [["type", "=", "carnivorous"]]);
-            }
-            willUpdateProps(nextProps) {
-                assert.deepEqual(nextProps.domain, [["type", "=", "herbivorous"]]);
+            setup() {
+                onWillStart(() => {
+                    assert.deepEqual(this.props.domain, [["type", "=", "carnivorous"]]);
+                });
+                onWillUpdateProps((nextProps) => {
+                    assert.deepEqual(nextProps.domain, [["type", "=", "herbivorous"]]);
+                });
             }
         }
         TestComponent.template = xml`<div class="o_test_component">Test component content</div>`;
@@ -322,12 +324,18 @@ QUnit.module("Search", (hooks) => {
         Parent.template = xml`<WithSearch t-props="state"/>`;
         Parent.components = { WithSearch };
 
-        const parent = await mount(Parent, { env, target });
+        const app = new App(Parent);
+        env.app = app;
+        app.configure({
+            env,
+            templates: window.__ODOO_TEMPLATES__,
+        });
+        const parent = await app.mount(target);
 
         parent.state.domain = [["type", "=", "herbivorous"]];
 
         await nextTick();
 
-        parent.destroy();
+        app.destroy();
     });
 });
