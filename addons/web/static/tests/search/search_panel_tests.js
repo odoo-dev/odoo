@@ -1153,7 +1153,7 @@ QUnit.module("Search", (hooks) => {
         ]);
     });
 
-    QUnit.debug("concurrency: misordered get_filters", async (assert) => {
+    QUnit.skip("concurrency: misordered get_filters", async (assert) => {
         assert.expect(15);
 
         serverData.views["partner,false,search"] = /* xml */ `
