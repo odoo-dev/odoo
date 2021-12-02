@@ -10,28 +10,30 @@ import { makeMockServer } from "./mock_server";
 import { mocks } from "./mock_services";
 import { patchWithCleanup } from "./utils";
 
-export function clearRegistryWithCleanup(registry) {
+function prepareRegistry(registry, keepContent = false) {
+    const _addEventListener = registry.addEventListener;
+    const _removeEventListener = registry.removeEventListener;
     const patch = {
-        content: {},
+        content: keepContent ? { ...registry.content } : {},
         elements: null,
         entries: null,
         subRegistries: {},
-        // Preserve OnUpdate handlers
-        targetsCallbacks: new Map(registry.targetsCallbacks.entries()),
+        addEventListener(type, callback) {
+            _addEventListener(type, callback);
+            registerCleanup(() => {
+                _removeEventListener(type, callback);
+            });
+        },
     };
     patchWithCleanup(registry, patch);
 }
 
+export function clearRegistryWithCleanup(registry) {
+    prepareRegistry(registry);
+}
+
 function cloneRegistryWithCleanup(registry) {
-    const patch = {
-        content: { ...registry.content },
-        elements: null,
-        entries: null,
-        subRegistries: {},
-        // Preserve OnUpdate handlers
-        targetsCallbacks: new Map(registry.targetsCallbacks.entries()),
-    };
-    patchWithCleanup(registry, patch);
+    prepareRegistry(registry, true);
 }
 
 export function clearServicesMetadataWithCleanup() {
