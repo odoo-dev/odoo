@@ -81,7 +81,6 @@
                 t-att-class="{ active: state.active[section.id] === valueId }"
                 t-on-click="() => this.toggleCategory(section, value)"
                 >
-                <t t-log="state.active[section.id] === valueId"/>
                 <label class="o_search_panel_label mb0" t-att-class="{ o_with_counters: section.enableCounters }">
                     <div class="o_toggle_fold">
                         <i t-if="value.childrenIds.length"
