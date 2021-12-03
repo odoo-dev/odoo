@@ -528,37 +528,6 @@ class PosGlobalState extends PosModel {
         });
     }
 
-    // saves the order locally and try to send it to the backend and make an invoice
-    // returns a promise that succeeds when the order has been posted and successfully generated
-    // an invoice. This method can fail in various ways:
-    // error-no-client: the order must have an associated partner_id. You can retry to make an invoice once
-    //     this error is solved
-    // error-transfer: there was a connection error during the transfer. You can retry to make the invoice once
-    //     the network connection is up
-
-    // TODO-REF: This doesn't invoice anymore!
-    push_and_invoice_order (order) {
-        var self = this;
-        return new Promise((resolve, reject) => {
-            if (!order.get_client()) {
-                reject({ code: 400, message: 'Missing Customer', data: {} });
-            } else {
-                var order_id = self.db.add_order(order.export_as_JSON());
-                pos_env.posMutex.exec(async () => {
-                    try {
-                        const server_ids = await self._flush_orders([self.db.get_order(order_id)], {
-                            timeout: 30000,
-                            to_invoice: true,
-                        });
-                        resolve(server_ids);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-            }
-        });
-    }
-
     // wrapper around the _save_to_server that updates the synch status widget
     // Resolves to the backend ids of the synced orders.
     _flush_orders(orders, options) {
@@ -570,7 +539,7 @@ class PosGlobalState extends PosModel {
             for (let i = 0; i < server_ids.length; i++) {
                 self.validated_orders_name_server_id_map[server_ids[i].pos_reference] = server_ids[i].id;
             }
-            return _.pluck(server_ids, 'id');
+            return server_ids;
         }).catch(function(error){
             self.set_synch(self.failed ? 'error' : 'disconnected');
             throw error;

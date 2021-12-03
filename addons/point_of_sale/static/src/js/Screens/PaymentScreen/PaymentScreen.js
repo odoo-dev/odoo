@@ -176,36 +176,41 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             this.currentOrder.initialize_validation_date();
             this.currentOrder.finalized = true;
 
-            let syncedOrderBackendIds = [];
+            let syncOrderResult, hasError;
 
             try {
+                // 1. Save order to server.
+                syncOrderResult = await this.env.pos.push_single_order(this.currentOrder);
+
+                // 2. Invoice.
                 if (this.currentOrder.is_to_invoice()) {
-                    syncedOrderBackendIds = await this.env.pos.push_and_invoice_order(
-                        this.currentOrder
-                    );
-                    if (syncedOrderBackendIds.length) {
-                        const [orderWithInvoice] = await this.rpc({
-                            method: 'read',
-                            model: 'pos.order',
-                            args: [syncedOrderBackendIds, ['account_move']],
-                            kwargs: { load: false },
+                    if (syncOrderResult.length) {
+                        await this.env.legacyActionManager.do_action('account.account_invoices', {
+                            additional_context: {
+                                active_ids: [syncOrderResult[0].account_move],
+                            },
                         });
-                        // TODO-REF: Should properly handle "offline".
-                        // To reproduce: put debugger here, then stop the server.
-                        // When continue, there are multiple promises that are unhandled.
-                        await this.env.legacyActionManager
-                            .do_action('account.account_invoices', {
-                                additional_context: {
-                                    active_ids: [orderWithInvoice.account_move],
-                                },
-                            })
                     } else {
                         throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
                     }
-                } else {
-                    syncedOrderBackendIds = await this.env.pos.push_single_order(this.currentOrder);
+                }
+
+                // 3. Post process.
+                if (syncOrderResult.length && this.currentOrder.wait_for_push_order()) {
+                    const postPushResult = await this._postPushOrderResolve(
+                        this.currentOrder,
+                        syncOrderResult.map((res) => res.id)
+                    );
+                    if (!postPushResult) {
+                        this.showPopup('ErrorPopup', {
+                            title: this.env._t('Error: no internet connection.'),
+                            body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
+                        });
+                    }
                 }
             } catch (error) {
+                hasError = true;
+
                 if (error.code == 700)
                     this.error = true;
 
@@ -226,37 +231,25 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                         throw error;
                     }
                 }
-            }
-            if (syncedOrderBackendIds.length && this.currentOrder.wait_for_push_order()) {
-                const result = await this._postPushOrderResolve(
-                    this.currentOrder,
-                    syncedOrderBackendIds
-                );
-                if (!result) {
-                    await this.showPopup('ErrorPopup', {
-                        title: this.env._t('Error: no internet connection.'),
-                        body: this.env._t('Some, if not all, post-processing after syncing order failed.'),
+            } finally {
+                // Always show the next screen regardless of error since pos has to
+                // continue working even offline.
+                this.showScreen(this.nextScreen);
+
+                // Ask the user to sync the remaining unsynced orders.
+                if (!hasError && syncOrderResult && this.env.pos.db.get_orders().length) {
+                    const { confirmed } = await this.showPopup('ConfirmPopup', {
+                        title: this.env._t('Remaining unsynced orders'),
+                        body: this.env._t(
+                            'There are unsynced orders. Do you want to sync these orders?'
+                        ),
                     });
-                }
-            }
-
-            this.showScreen(this.nextScreen);
-
-            // If we succeeded in syncing the current order, and
-            // there are still other orders that are left unsynced,
-            // we ask the user if he is willing to wait and sync them.
-            if (syncedOrderBackendIds.length && this.env.pos.db.get_orders().length) {
-                const { confirmed } = await this.showPopup('ConfirmPopup', {
-                    title: this.env._t('Remaining unsynced orders'),
-                    body: this.env._t(
-                        'There are unsynced orders. Do you want to sync these orders?'
-                    ),
-                });
-                if (confirmed) {
-                    // NOTE: Not yet sure if this should be awaited or not.
-                    // If awaited, some operations like changing screen
-                    // might not work.
-                    this.env.pos.push_orders();
+                    if (confirmed) {
+                        // NOTE: Not yet sure if this should be awaited or not.
+                        // If awaited, some operations like changing screen
+                        // might not work.
+                        this.env.pos.push_orders();
+                    }
                 }
             }
         }
