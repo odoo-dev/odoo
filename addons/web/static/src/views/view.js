@@ -119,6 +119,7 @@ const STANDARD_PROPS = [
     "globalState",
 
     "activateFavorite",
+    "searchMenuTypes",
 
     // LEGACY: remove this later (clean when mappings old state <-> new state are established)
     "searchPanel",
