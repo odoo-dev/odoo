@@ -21,7 +21,8 @@ odoo.define('point_of_sale.NumpadWidget', function (require) {
             // IMPROVEMENT: This listener shouldn't be here because in core point_of_sale
             // there is no way of changing the cashier. Only when pos_hr is installed
             // that this listener makes sense.
-            // TODO JCB
+            // TODO-REF: should automatically change the mode to `quantity` when the cashier is
+            // changed to someone with no price control rights.
             // this.env.pos.on('change:cashier', () => {
             //     if (!this.hasPriceControlRights && this.props.activeMode === 'price') {
             //         this.trigger('set-numpad-mode', { mode: 'quantity' });

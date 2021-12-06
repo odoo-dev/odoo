@@ -6,12 +6,6 @@ odoo.define('pos_restaurant.TicketButton', function (require) {
 
     const PosResTicketButton = (TicketButton) =>
         class extends TicketButton {
-            mounted() {
-                this.env.posbus.on('table-set', this, this.render);
-            }
-            willUnmount() {
-                this.env.posbus.off('table-set', this);
-            }
             /**
              * If no table is set to pos, which means the current main screen
              * is floor screen, then the order count should be based on all the orders.

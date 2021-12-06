@@ -12,18 +12,6 @@ odoo.define('point_of_sale.TicketButton', function (require) {
                 this.showScreen('TicketScreen');
             }
         }
-        willPatch() {
-            this.env.posbus.off('order-deleted', this);
-        }
-        patched() {
-            this.env.posbus.on('order-deleted', this, this.render);
-        }
-        mounted() {
-            this.env.posbus.on('order-deleted', this, this.render);
-        }
-        willUnmount() {
-            this.env.posbus.off('order-deleted', this);
-        }
         get count() {
             if (this.env.pos) {
                 return this.env.pos.get_order_list().length;

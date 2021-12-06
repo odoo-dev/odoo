@@ -5,9 +5,6 @@ odoo.define('point_of_sale.PaymentLine', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class PaymentLine extends PosComponent {
-        get _line() {
-            return this.props.line;
-        }
         formatLineAmount(line) {
             return this.env.pos.format_currency_no_symbol(line.get_amount());
         }

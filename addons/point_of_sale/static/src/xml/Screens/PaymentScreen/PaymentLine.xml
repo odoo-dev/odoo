@@ -2,53 +2,53 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="PaymentLine" owl="1">
-                <t t-if="_line.selected">
+                <t t-if="props.line.selected">
                     <div>
                         <div class="paymentline selected"
-                             t-att-class="selectedLineClass(_line)"
-                             t-on-click="trigger('select-payment-line', { cid: _line.cid })">
+                             t-att-class="selectedLineClass(props.line)"
+                             t-on-click="trigger('select-payment-line', { cid: props.line.cid })">
                              <div class="payment-name">
-                                 <t t-esc="_line.payment_method.name" />
+                                 <t t-esc="props.line.payment_method.name" />
                              </div>
                             <div class="payment-amount">
-                                <t t-if="_line and _line.payment_status and ['done', 'waitingCard', 'waiting', 'reversing', 'reversed'].includes(_line.payment_status)">
-                                        <t t-esc="env.pos.format_currency_no_symbol(_line.get_amount())" />
+                                <t t-if="props.line and props.line.payment_status and ['done', 'waitingCard', 'waiting', 'reversing', 'reversed'].includes(props.line.payment_status)">
+                                        <t t-esc="env.pos.format_currency_no_symbol(props.line.get_amount())" />
                                 </t>
                                 <t t-else="">
-                                        <t t-esc="formatLineAmount(_line)" />
+                                        <t t-esc="formatLineAmount(props.line)" />
                                 </t>
                             </div>
-                            <t t-if="!_line.payment_status or !['done', 'reversed'].includes(_line.payment_status)">
+                            <t t-if="!props.line.payment_status or !['done', 'reversed'].includes(props.line.payment_status)">
                                 <div class="delete-button"
-                                    t-on-click="trigger('delete-payment-line', { cid: _line.cid })"
+                                    t-on-click="trigger('delete-payment-line', { cid: props.line.cid })"
                                     aria-label="Delete" title="Delete">
                                     <i class="fa fa-times-circle" />
                                 </div>
                             </t>
                         </div>
-                        <t t-if="_line and _line.payment_status">
-                            <PaymentScreenElectronicPayment line="_line" />
+                        <t t-if="props.line and props.line.payment_status">
+                            <PaymentScreenElectronicPayment line="props.line" />
                         </t>
                     </div>
                 </t>
                 <t t-else="">
                         <div class="paymentline"
-                             t-att-class="unselectedLineClass(_line)"
-                             t-on-click="trigger('select-payment-line', { cid: _line.cid })">
+                             t-att-class="unselectedLineClass(props.line)"
+                             t-on-click="trigger('select-payment-line', { cid: props.line.cid })">
                              <div class="payment-name">
-                                 <t t-esc="_line.payment_method.name" />
+                                 <t t-esc="props.line.payment_method.name" />
                              </div>
                             <div class="payment-amount">
-                                <t t-if="_line and _line.payment_status and ['done', 'waitingCard', 'waiting', 'reversing', 'reversed'].includes(_line.payment_status)">
-                                        <t t-esc="env.pos.format_currency_no_symbol(_line.get_amount())" />
+                                <t t-if="props.line and props.line.payment_status and ['done', 'waitingCard', 'waiting', 'reversing', 'reversed'].includes(props.line.payment_status)">
+                                        <t t-esc="env.pos.format_currency_no_symbol(props.line.get_amount())" />
                                 </t>
                                 <t t-else="">
-                                        <t t-esc="formatLineAmount(_line)" />
+                                        <t t-esc="formatLineAmount(props.line)" />
                                 </t>
                             </div>
-                            <t t-if="!_line.payment_status or !['done', 'reversed'].includes(_line.payment_status)">
+                            <t t-if="!props.line.payment_status or !['done', 'reversed'].includes(props.line.payment_status)">
                                 <div class="delete-button"
-                                    t-on-click="trigger('delete-payment-line', { cid: _line.cid })"
+                                    t-on-click="trigger('delete-payment-line', { cid: props.line.cid })"
                                     aria-label="Delete" title="Delete">
                                     <i class="fa fa-times-circle" />
                                 </div>

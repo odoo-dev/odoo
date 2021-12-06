@@ -5,8 +5,6 @@ odoo.define('point_of_sale.Orderline', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class Orderline extends PosComponent {
-        setup() {
-        }
         selectLine() {
             this.trigger('select-line', { orderline: this.props.line });
         }

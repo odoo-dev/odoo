@@ -6,12 +6,10 @@ odoo.define('point_of_sale.OrderSummary', function(require) {
     const { float_is_zero } = require('web.utils');
 
     class OrderSummary extends PosComponent {
-        setup() {
-        }
-        _getTotal() {
+        getTotal() {
             return this.env.pos.format_currency(this.props.order.get_total_with_tax());
         }
-        _getTax() {
+        getTax() {
             const total = this.props.order.get_total_with_tax();
             const totalWithoutTax = this.props.order.get_total_without_tax();
             const taxAmount = total - totalWithoutTax;
