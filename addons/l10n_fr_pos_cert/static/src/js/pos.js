@@ -30,6 +30,13 @@ class L10nFrPosModel extends PosGlobalState {
         let result = super.disallowLineQuantityChange(...arguments);
         return this.is_french_country() || result;
     }
+    cashierHasPriceControlRights() {
+        if (this.is_french_country()) {
+            return false;
+        } else {
+            return super.cashierHasPriceControlRights();
+        }
+    }
 }
 
 return L10nFrPosModel;

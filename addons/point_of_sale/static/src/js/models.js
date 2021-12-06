@@ -112,6 +112,10 @@ class PosGlobalState extends PosModel {
         // validation (order paid then sent to the backend).
         this.validated_orders_name_server_id_map = {};
 
+        this.PRODUCT_SCREEN = {
+            numpadMode: 'quantity',
+        };
+
         // Record<orderlineId, { 'qty': number, 'orderline': { qty: number, refundedQty: number, orderUid: string }, 'destinationOrderUid': string }>
         this.toRefundLines = {};
         this.TICKET_SCREEN_STATE = {
@@ -247,6 +251,9 @@ class PosGlobalState extends PosModel {
     set_cashier(employee){
         this.cashier = employee;
         this.db.set_cashier(this.cashier);
+    }
+    cashierHasPriceControlRights() {
+        return !this.config.restrict_price_control || this.cashier.role == 'manager';
     }
     createAutomaticallySavedOrder(json) {
         const options = {pos:this};

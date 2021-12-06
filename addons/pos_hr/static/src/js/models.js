@@ -60,6 +60,9 @@ class PosHrPosModel extends PosGlobalState {
             // We set the employee on that order to the currently set employee.
             selectedOrder.employee = employee;
         }
+        if (!this.cashierHasPriceControlRights() && this.PRODUCT_SCREEN.numpadMode === 'price') {
+            this.PRODUCT_SCREEN.numpadMode = 'quantity';
+        }
     }
 }
 

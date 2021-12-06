@@ -18,7 +18,7 @@ odoo.define('pos_sale.ProductScreen', function (require) {
                 if (this.currentOrder) {
                     const selectedOrderline = this.currentOrder.get_selected_orderline();
                     if (selectedOrderline && selectedOrderline.product.id === selectedOrderline.pos.config.down_payment_product_id[0]) {
-                        this.state.numpadMode = 'price';
+                        this.env.pos.PRODUCT_SCREEN.numpadMode = 'price';
                     }
                 }
             }

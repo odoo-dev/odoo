@@ -37,7 +37,6 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
             // the callbacks in `onMounted` hook.
             onMounted(() => NumberBuffer.reset());
             this.state = useState({
-                numpadMode: 'quantity',
                 mobile_pane: this.props.mobile_pane || 'right',
             });
         }
@@ -163,10 +162,10 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
             const { mode } = event.detail;
             NumberBuffer.capture();
             NumberBuffer.reset();
-            this.state.numpadMode = mode;
+            this.env.pos.PRODUCT_SCREEN.numpadMode = mode;
         }
         async _updateSelectedOrderline(event) {
-            if (this.state.numpadMode === 'quantity' && this.env.pos.disallowLineQuantityChange()) {
+            if (this.env.pos.PRODUCT_SCREEN.numpadMode === 'quantity' && this.env.pos.disallowLineQuantityChange()) {
                 let order = this.env.pos.get_order();
                 let selectedLine = order.get_selected_orderline();
                 let orderlines = order.orderlines;
@@ -190,18 +189,18 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
                 this._setValue(val);
                 if (val == 'remove') {
                     NumberBuffer.reset();
-                    this.state.numpadMode = 'quantity';
+                    this.env.pos.PRODUCT_SCREEN.numpadMode = 'quantity';
                 }
             }
         }
         _setValue(val) {
             if (this.currentOrder.get_selected_orderline()) {
-                if (this.state.numpadMode === 'quantity') {
+                if (this.env.pos.PRODUCT_SCREEN.numpadMode === 'quantity') {
                     const result = this.currentOrder.get_selected_orderline().set_quantity(val);
                     if (!result) NumberBuffer.reset();
-                } else if (this.state.numpadMode === 'discount') {
+                } else if (this.env.pos.PRODUCT_SCREEN.numpadMode === 'discount') {
                     this.currentOrder.get_selected_orderline().set_discount(val);
-                } else if (this.state.numpadMode === 'price') {
+                } else if (this.env.pos.PRODUCT_SCREEN.numpadMode === 'price') {
                     var selected_orderline = this.currentOrder.get_selected_orderline();
                     selected_orderline.price_manually_set = true;
                     selected_orderline.set_unit_price(val);
