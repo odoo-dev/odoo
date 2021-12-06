@@ -25,7 +25,7 @@ const reactivity = require('@point_of_sale/js/reactivity');
 const PRODUCT_ID_TO_IMAGE_CACHE = {};
 
 /**
- * TODO-REF-JCB If optimization is needed, then we implement this
+ * If optimization is needed, then we should implement this
  * using a Balanced Binary Tree to behave like an Object and an Array.
  * But behaving like Object (indexed by cid) might not be
  * needed. Let's see how it turns out.

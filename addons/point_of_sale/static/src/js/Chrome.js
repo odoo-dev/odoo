@@ -141,8 +141,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     ? this.env.pos.config.iface_start_categ_id[0]
                     : 0;
                 this.state.uiState = 'READY';
-                // TODO-REF: Check if the following commented line can be removed.
-                // this.env.pos.on('change:selectedOrder', this._showSavedScreen, this);
                 this._showStartScreen();
                 if (_.isEmpty(this.env.pos.db.product_by_category_id)) {
                     this._loadDemoData();
@@ -247,15 +245,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
         _showStartScreen() {
             const { name, props } = this.startScreen;
-            this.showScreen(name, props);
-        }
-        /**
-         * Show the screen saved in the order when the `selectedOrder` of pos is changed.
-         * @param {models.PosGlobalState} pos
-         * @param {models.Order} newSelectedOrder
-         */
-        _showSavedScreen(pos, newSelectedOrder) {
-            const { name, props } = this._getSavedScreen(newSelectedOrder);
             this.showScreen(name, props);
         }
         _getSavedScreen(order) {
