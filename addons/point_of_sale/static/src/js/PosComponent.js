@@ -60,9 +60,11 @@ odoo.define('point_of_sale.PosComponent', function (require) {
             this.trigger('close-notification');
         }
         render() {
-            // console.clear();
-            return super.render().then(() => {
-                console.log('Rendered:', this.constructor.name);
+            return super.render().then((res) => {
+                if (this.env.isDebug()) {
+                    console.log('Rendered:', this.constructor.name);
+                }
+                return res;
             })
         }
     }
