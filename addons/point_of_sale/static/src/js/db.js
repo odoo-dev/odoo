@@ -555,13 +555,6 @@ var PosDB = core.Class.extend({
         });
         this.save('unpaid_orders_to_remove', to_remove);
     },
-    set_cashier: function(cashier) {
-        // Always update if the user is the same as before
-        this.save('cashier', cashier || null);
-    },
-    get_cashier: function() {
-        return this.load('cashier');
-    }
 });
 
 return PosDB;

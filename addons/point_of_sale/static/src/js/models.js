@@ -238,19 +238,11 @@ class PosGlobalState extends PosModel {
             }
         }
     }
-
-    // returns the user who is currently the cashier for this point of sale
     get_cashier(){
-        // reset the cashier to the current user if session is new
-        if (this.db.load('pos_session_id') !== this.pos_session.id) {
-            this.set_cashier(this.employee);
-        }
-        return this.db.get_cashier() || this.cashier || this.employee;
+        return this.cashier;
     }
-    // changes the current cashier
     set_cashier(employee){
         this.cashier = employee;
-        this.db.set_cashier(this.cashier);
     }
     cashierHasPriceControlRights() {
         return !this.config.restrict_price_control || this.cashier.role == 'manager';
@@ -1012,7 +1004,6 @@ PosGlobalState.prototype.models = [
                                     self.config.iface_customer_facing_display_via_proxy);
 
             self.db.set_uuid(self.config.uuid);
-            self.set_cashier(self.get_cashier());
             // We need to do it here, since only then the local storage has the correct uuid
             self.db.save('pos_session_id', self.pos_session.id);
 
