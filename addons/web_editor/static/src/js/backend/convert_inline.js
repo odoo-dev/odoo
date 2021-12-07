@@ -1012,4 +1012,5 @@ export default {
     listGroupToTable: listGroupToTable,
     normalizeColors: normalizeColors,
     normalizeRem: normalizeRem,
+    toInline: toInline,
 };
