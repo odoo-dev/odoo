@@ -18,8 +18,8 @@ const { legacyExtraNextTick, patchWithCleanup } = require("@web/../tests/helpers
 var _t = core._t;
 
 FieldHtml.include({
-    _onLoadWysiwyg: function () {
-        this._super.apply(this, arguments);
+    _createWysiwygIntance: async function () {
+        await this._super.apply(this, arguments);
         if (FieldHtml._resolveTestPromise) {
             FieldHtml._resolveTestPromise();
         }

@@ -957,7 +957,9 @@ FieldHtml.include({
 
     _createWysiwygIntance: function () {
         return this._super(...arguments).then(() => {
-            this.cssRules = getCSSRules(this.wysiwyg.getEditable()[0].ownerDocument);
+            if (this.nodeOptions['style-inline'] && this.mode === "edit") {
+                this.cssRules = getCSSRules(this.wysiwyg.getEditable()[0].ownerDocument);
+            }
         });
     },
 
