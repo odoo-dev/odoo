@@ -3,7 +3,6 @@
 
     <record id="payment.payment_acquirer_transfer" model="payment.acquirer">
         <field name="provider">transfer</field>
-        <field name="state">enabled</field>
         <field name="redirect_form_view_id" ref="redirect_form"/>
         <field name="support_authorization">False</field>
         <field name="support_fees_computation">False</field>
@@ -11,6 +10,12 @@
         <field name="support_tokenization">False</field>
         <!-- Clear the default value to trigger the computation of the message -->
         <field name="pending_msg" eval="False"/>
+    </record>
+
+    <record id="payment_method_transfer" model="account.payment.method">
+        <field name="name">Transfer</field>
+        <field name="code">transfer</field>
+        <field name="payment_type">inbound</field>
     </record>
 
 </odoo>

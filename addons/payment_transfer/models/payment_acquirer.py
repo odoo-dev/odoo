@@ -56,3 +56,9 @@ class PaymentAcquirer(models.Model):
                 f'<h4>{_("Communication")}</h4>' \
                 f'<p>{_("Please use the order name as communication reference.")}</p>' \
                 f'</div>'
+
+    def _get_default_payment_method_id(self):
+        self.ensure_one()
+        if self.provider != 'transfer':
+            return super()._get_default_payment_method_id()
+        return self.env.ref('payment_transfer.payment_method_transfer').id
