@@ -1,12 +1,20 @@
 /** @odoo-module **/
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
+import { escape } from '@web/core/utils/strings';
 
 import Dialog from 'web.OwlDialog';
 
-const { Component, escape } = owl;
+const { Component } = owl;
 
 export class AttachmentDeleteConfirm extends Component {
+
+    /**
+     * @override
+     */
+    setup() {
+        this.dialogAPI = {}
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -44,7 +52,7 @@ export class AttachmentDeleteConfirm extends Component {
      * @private
      */
     _onClickCancel() {
-        this.root.comp._close();
+        this.dialogAPI.close();
     }
 
     /**
@@ -52,7 +60,7 @@ export class AttachmentDeleteConfirm extends Component {
      */
     async _onClickOk() {
         await this.attachment.remove();
-        this.root.comp._close();
+        this.dialogAPI.close();
         if (this.props.onAttachmentRemoved) {
             this.props.onAttachmentRemoved({
                 attachmentLocalId: this.props.attachmentLocalId,

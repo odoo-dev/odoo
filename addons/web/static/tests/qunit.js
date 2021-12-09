@@ -3,6 +3,13 @@
 
     const { Component } = owl;
 
+    // -------------------------------------------------------------------------
+    // OWL 2 Compat
+    // -------------------------------------------------------------------------
+    const { mount } = owl;
+    owl.mount = (C, target, config = {}) =>
+        mount(C, target, Object.assign({ templates: window.__ODOO_TEMPLATES__ }, config));
+
     // -----------------------------------------------------------------------------
     // QUnit config
     // -----------------------------------------------------------------------------
@@ -311,6 +318,10 @@
     QUnit.debug = (name, cb) => {
         QUnit.config.debug = true;
         QUnit.only(name, cb);
+    };
+
+    QUnit.skipNXOWL = (name, cb) => {
+        QUnit.skip(name, cb);
     };
 
     // Override global UnhandledRejection that is assigned wayyy before this file

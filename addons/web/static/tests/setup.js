@@ -11,10 +11,29 @@ import { prepareRegistriesWithCleanup } from "./helpers/mock_env";
 import { session as sessionInfo } from "@web/session";
 import { prepareLegacyRegistriesWithCleanup } from "./helpers/legacy_env_utils";
 
-const { QWeb, config, loadFile, whenReady } = owl;
+import { patch } from "@web/core/utils/patch";
+const { App, whenReady, loadFile } = owl;
 
-config.enableTransitions = false;
-QWeb.dev = true;
+patch(App.prototype, "TestOwlApp", {
+    setup() {
+        this.isBuilt = true;
+        this.dev = true;
+    },
+    destroy() {
+        if (!this.destroyed) {
+            this._super(...arguments);
+            this.destroyed = true;
+        }
+    },
+    addTemplate(name) {
+        if (this.isBuilt) {
+            registerCleanup(() => {
+                delete this.constructor.sharedTemplates[name];
+            });
+        }
+        return this._super(...arguments);
+    },
+});
 
 function stringifyObjectValues(obj, properties) {
     let res = "";
@@ -203,7 +222,7 @@ export async function setupTests() {
     });
 
     const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}?bundle=web.assets_qweb`;
-    // TODO replace by `processTemplates` when the legacy system is removed
+    // TODO replace by `processTemplates` when the legacy system is removed NXOWL TO DISCUSS ?
     let templates = await loadFile(templatesUrl);
     // as we currently have two qweb engines (owl and legacy), owl templates are
     // flagged with attribute `owl="1"`. The following lines removes the 'owl'
@@ -218,6 +237,11 @@ export async function setupTests() {
         owlTemplates.push(child.outerHTML);
     }
     templates = `<templates> ${owlTemplates.join("\n")} </templates>`;
-    window.__ODOO_TEMPLATES__ = templates;
+    const owlTemplatesXML = new DOMParser().parseFromString(templates, "text/xml");
+    Object.defineProperty(window, "__ODOO_TEMPLATES__", {
+        get() {
+            return owlTemplatesXML;
+        },
+    });
     await Promise.all([whenReady(), legacyProm]);
 }
