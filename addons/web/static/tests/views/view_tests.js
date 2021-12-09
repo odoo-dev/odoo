@@ -91,8 +91,7 @@ QUnit.module("Views", (hooks) => {
         viewRegistry.add("toy", ToyView);
         viewRegistry.add("toy_imp", ToyViewImp);
 
-        setupControlPanelServiceRegistry();
-
+        setupViewRegistries();
         const fakeActionService = {
             name: "action",
             start() {
@@ -457,9 +456,6 @@ QUnit.module("Views", (hooks) => {
                 type: "toy",
                 arch: `<toy>Specific arch content</toy>`,
                 fields: {},
-                actionMenus: {
-                    /** ... */
-                },
                 loadActionMenus: true,
             };
             await mount(View, target, { env, props });
