@@ -1,0 +1,191 @@
+.o_knowledge_form_view {
+    --default-sidebar-size: 300px;
+    --sidebar-size: clamp(300px, var(--default-sidebar-size), 50vw);
+
+    $o-knowledge-bg--active: #cceaf9; // TMP -> should match $o-searchpanel-active-bg
+
+
+    // = Navbar
+    // --------------------------------------------------------------------------
+    .o_breadcrumb_article_name:not(:focus) {
+        --o-input-border-color: transparent;
+    }
+    .o_breadcrumb_article_name:hover {
+        border-bottom: $input-border-width solid $o-brand-primary;
+    }
+
+    .o_toggle_favourite {
+        &.fa-star, &:hover {
+            color: #f3cc00;
+        }
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .o_knowledge_editor {
+        min-height: 100%;
+        .oe_form_field {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .note-editable {
+            border: none;
+            height: auto !important;
+        }
+        .note-editable,
+        .o_readonly {
+            flex-grow: 1;
+            padding: 1rem !important;
+        }
+    }
+
+    // = Sidebar
+    // --------------------------------------------------------------------------
+    .o_knowledge_aside {
+        width: var(--sidebar-size);
+        transition: width 0.15s linear;
+
+        .o_article_active, .o_article_icon_active {
+            background-color: $o-knowledge-bg--active;
+        }
+
+        .o_article_icon:hover {
+            background-color: rgba(#000, .1);
+        }
+
+        li {
+            padding: 0.2em 0;
+            position: relative;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li > ul > li:not(.ui-sortable-helper) {
+            margin-left: 1.28571429em * 0.5; // Workaround to get half .fa-fw icon's width.
+            padding-left: 0.8em;
+
+            &:before, &:after {
+                content: '';
+                background-color: $border-color;
+            }
+
+            &:before {
+                @include o-position-absolute($top: 1em, $left: 0);
+                width: .6em;
+                height: 1px;
+                margin: auto;
+            }
+
+            &:after {
+                @include o-position-absolute(0, auto, 0, 0);
+                width: 1px;
+                height: 100%;
+            }
+
+            &:last-child {
+                padding-bottom: 0;
+
+                &:after {
+                    height: 1em;
+                }
+            }
+        }
+
+        .o_section_header:not(:hover) .o_section_create,
+        .o_article:not(:hover) .o_article_create {
+            visibility: hidden;
+        }
+
+        .o_article_name a{
+            color: inherit;
+            text-decoration: none;
+        }
+    }
+
+    // = Resizer
+    // --------------------------------------------------------------------------
+    .o_knowledge_resizer {
+        // Use '$spacers' measures to match surrounding elements padding
+        $-resizer-spacing: map-get($spacers, 3);
+        $-resizer-line-width: map-get($spacers, 1);
+
+        @include o-position-absolute(0, auto, 0, $-resizer-spacing * -1);
+        cursor: ew-resize;
+        touch-action: none;
+
+        span {
+            @include o-position-absolute(0, auto, 0, $-resizer-spacing + ($-resizer-line-width * -0.5));
+        }
+    }
+
+    .o_knowledge_chatter_container {
+        li.nav-item {
+            display: none;
+        }
+        .o_FormRenderer_chatterContainer {
+            max-width: unset;
+            &.o-aside {
+                width: auto;
+                padding: 1rem;
+                border-left: 0px;
+            }
+        }
+    }
+
+    .dropdown-menu.o_knowledge_more_options_panel {
+        min-width: 225px;
+        width: 225px;
+        .o_m2o_avatar span {
+            overflow-wrap: break-word;
+        }
+    }
+}
+
+// Select2 style:
+
+.select2-container,
+.select2-results {
+    img {
+        width: 100%;
+        max-width: 20px;
+        max-height: 20px;
+    }
+}
+.select2-highlighted {
+    background: $o-brand-odoo !important;
+    color: $o-brand-secondary;
+}
+
+.o_knowledge_kanban_view {
+    .o_knowledge_kanban_card {
+        min-height: 10rem;
+    }
+}
+
+// Media queries:
+
+@include media-breakpoint-up(sm) {
+    .o_knowledge_form_view {
+        .o_scroll_view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    }
+}
+
+@include media-breakpoint-down(xs) {
+    .o_knowledge_form_view {
+        .o_knowledge_aside {
+            width: 100%;
+        }
+    }
+}
