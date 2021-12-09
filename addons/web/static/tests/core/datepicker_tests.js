@@ -6,11 +6,10 @@ import { uiService } from "@web/core/ui/ui_service";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
-import { click, getFixture, triggerEvent } from "../helpers/utils";
+import { click, getFixture, mount, triggerEvent } from "../helpers/utils";
 
 const { DateTime } = luxon;
-const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
 
 /**

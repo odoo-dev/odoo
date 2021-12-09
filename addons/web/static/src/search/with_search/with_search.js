@@ -4,8 +4,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { SearchModel } from "@web/search/search_model";
 import { CallbackRecorder, useSetupAction } from "@web/webclient/actions/action_hook";
 
-const { Component, hooks } = owl;
-const { useSubEnv } = hooks;
+const { Component, onWillStart, onWillUpdateProps, useSubEnv } = owl;
 
 export const SEARCH_KEYS = ["comparison", "context", "domain", "groupBy", "orderBy"];
 const OTHER_SEARCH_KEYS = ["irFilters", "searchViewArch", "searchViewFields", "searchViewId"];
@@ -14,44 +13,48 @@ export class WithSearch extends Component {
     setup() {
         this.Component = this.props.Component;
 
+        this.env = Object.create(this.env);
         if (!this.env.__getContext__) {
-            useSubEnv({ __getContext__: new CallbackRecorder() });
+            this.env.__getContext__ = new CallbackRecorder();
+            useSubEnv({ __getContext__: this.env.__getContext__ });
         }
 
         const SearchModelClass = this.Component.SearchModel || SearchModel;
-        this.env.searchModel = new SearchModelClass(this.env, {
+        this.searchModel = new SearchModelClass(this.env, {
             user: useService("user"),
             orm: useService("orm"),
             view: useService("view"),
         });
 
-        useBus(this.env.searchModel, "update", this.render);
+        useSubEnv({ searchModel: this.searchModel });
+
+        useBus(this.searchModel, "update", this.render);
         useSetupAction({
             getGlobalState: () => {
                 return {
-                    searchModel: JSON.stringify(this.env.searchModel.exportState()),
+                    searchModel: JSON.stringify(this.searchModel.exportState()),
                 };
             },
         });
-    }
 
-    async willStart() {
-        const config = { ...this.props };
-        if (config.globalState && config.globalState.searchModel) {
-            config.state = JSON.parse(config.globalState.searchModel);
-            delete config.globalState;
-        }
-        await this.env.searchModel.load(config);
-    }
-
-    async willUpdateProps(nextProps) {
-        const config = {};
-        for (const key of SEARCH_KEYS) {
-            if (nextProps[key] !== undefined) {
-                config[key] = nextProps[key];
+        onWillStart(async () => {
+            const config = { ...this.props };
+            if (config.globalState && config.globalState.searchModel) {
+                config.state = JSON.parse(config.globalState.searchModel);
+                delete config.globalState;
             }
-        }
-        await this.env.searchModel.reload(config);
+            await this.searchModel.load(config);
+        });
+
+        onWillUpdateProps(async (nextProps) => {
+            const config = {};
+            for (const key of SEARCH_KEYS) {
+                if (nextProps[key] !== undefined) {
+                    config[key] = nextProps[key];
+                }
+            }
+            await this.searchModel.reload(config);
+        });
     }
 
     //-------------------------------------------------------------------------
@@ -61,12 +64,16 @@ export class WithSearch extends Component {
     get componentProps() {
         const componentProps = { ...this.props.componentProps };
         for (const key of SEARCH_KEYS) {
-            componentProps[key] = this.env.searchModel[key];
+            componentProps[key] = this.searchModel[key];
         }
         componentProps.info = componentProps.info || {};
         for (const key of OTHER_SEARCH_KEYS) {
-            componentProps.info[key] = this.env.searchModel[key];
+            componentProps.info[key] = this.searchModel[key];
         }
+        // if (this.props.class) {
+        // NXOWL what if componentProps already contains class? Possible?
+        // --> rethink system with View and WithSearch
+        // }
         return componentProps;
     }
 }
@@ -104,5 +111,7 @@ WithSearch.props = {
     activateFavorite: { type: Boolean, optional: true },
     dynamicFilters: { type: Array, element: Object, optional: true },
     searchMenuTypes: { type: Array, element: String, optional: true },
+
+    class: { type: String, optional: true },
 };
 WithSearch.template = "web.WithSearch";

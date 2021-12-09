@@ -12,11 +12,10 @@ import { menuService } from "@web/webclient/menus/menu_service";
 import { WebClient } from "@web/webclient/webclient";
 import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { fakeTitleService } from "../helpers/mock_services";
-import { getFixture, patchWithCleanup, triggerEvent } from "../helpers/utils";
+import { destroy, getFixture, mount, patchWithCleanup, triggerEvent } from "../helpers/utils";
 import { session } from "@web/session";
 
-const { Component, tags, mount } = owl;
-const { xml } = tags;
+const { Component, xml } = owl;
 const mainComponentRegistry = registry.category("main_components");
 const serviceRegistry = registry.category("services");
 
@@ -44,7 +43,6 @@ QUnit.test("can be rendered", async (assert) => {
     const target = getFixture();
     const webClient = await mount(WebClient, { env, target });
     assert.containsOnce(webClient.el, "header > nav.o_main_navbar");
-    webClient.destroy();
 });
 
 QUnit.test("can render a main component", async (assert) => {
@@ -57,7 +55,6 @@ QUnit.test("can render a main component", async (assert) => {
     const target = getFixture();
     const webClient = await mount(WebClient, { env, target });
     assert.containsOnce(webClient.el, ".chocolate");
-    webClient.destroy();
 });
 
 QUnit.test("webclient for the superuser", async (assert) => {
@@ -67,7 +64,6 @@ QUnit.test("webclient for the superuser", async (assert) => {
     const target = getFixture();
     const webClient = await mount(WebClient, { env, target });
     assert.hasClass(webClient.el, "o_is_superuser");
-    webClient.destroy();
 });
 
 QUnit.test("webclient for a non superuser", async (assert) => {
@@ -77,7 +73,6 @@ QUnit.test("webclient for a non superuser", async (assert) => {
     const target = getFixture();
     const webClient = await mount(WebClient, { env, target });
     assert.doesNotHaveClass(webClient.el, "o_is_superuser");
-    webClient.destroy();
 });
 
 QUnit.test("control-click propagation stopped on <a href/>", async (assert) => {
@@ -116,7 +111,7 @@ QUnit.test("control-click propagation stopped on <a href/>", async (assert) => {
     await triggerEvent(standaloneComponent.el, "", "click", { ctrlKey: false });
     await triggerEvent(standaloneComponent.el, "", "click", { ctrlKey: true });
     assert.verifySteps(["click", "ctrl-click"]);
-    standaloneComponent.destroy();
+    destroy(standaloneComponent);
 
     // Register the component as a main one, mount the webclient and control-click the <a href/>
     clearRegistryWithCleanup(mainComponentRegistry);
@@ -127,5 +122,4 @@ QUnit.test("control-click propagation stopped on <a href/>", async (assert) => {
     await triggerEvent(webClient.el, ".MyComponent", "click", { ctrlKey: false });
     await triggerEvent(webClient.el, ".MyComponent", "click", { ctrlKey: true });
     assert.verifySteps(["click"]);
-    webClient.destroy();
 });

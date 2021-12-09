@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { useEffect } from "@web/core/utils/hooks";
 
-const { Component, hooks } = owl;
+const { Component, useExternalListener } = owl;
 
 /**
  * @typedef Common
@@ -16,7 +16,6 @@ const { Component, hooks } = owl;
  *
  * @typedef Simple
  * @property {string} message Message to be displayed on rainbowman card
- * @property {boolean} [messageIsHtml=false]
  *
  * @typedef Custom
  * @property {Component} Component
@@ -37,7 +36,7 @@ const { Component, hooks } = owl;
  */
 export class RainbowMan extends Component {
     setup() {
-        hooks.useExternalListener(document.body, "click", this.closeRainbowMan);
+        useExternalListener(document.body, "click", this.closeRainbowMan);
         this.delay = RainbowMan.rainbowFadeouts[this.props.fadeout];
         if (this.delay) {
             useEffect(

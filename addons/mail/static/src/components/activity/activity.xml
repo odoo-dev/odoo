@@ -133,8 +133,8 @@
                                     t-if="activityView.activity.thread"
                                     threadLocalId="activityView.activity.thread.localId"
                                     onAttachmentCreated="activityView.onAttachmentCreated"
-                                    t-ref="fileUploader"
                                 />
+                                <!-- NXOWL t-ref="fileUploader" -->
                             </t>
                             <button class="o_Activity_toolButton o_Activity_editButton btn btn-link" t-on-click="activityView.onClickEdit">
                                 <i class="fa fa-pencil"/> Edit

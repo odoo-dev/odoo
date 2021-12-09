@@ -13,7 +13,7 @@ class PosApp extends owl.Component {
         this.Components = registry.category("main_components").getEntries();
     }
 }
-PosApp.template = owl.tags.xml`
+PosApp.template = owl.xml`
   <body>
     <ChromeAdapter />
     <div>

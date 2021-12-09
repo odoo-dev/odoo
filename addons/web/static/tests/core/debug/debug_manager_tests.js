@@ -10,7 +10,6 @@ import { uiService } from "@web/core/ui/ui_service";
 import { useSetupView } from "@web/views/helpers/view_hook";
 import { ActionDialog } from "@web/webclient/actions/action_dialog";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
-import { registerCleanup } from "../../helpers/cleanup";
 import { makeTestEnv, prepareRegistriesWithCleanup } from "../../helpers/mock_env";
 import {
     fakeCommandService,
@@ -18,13 +17,18 @@ import {
     makeFakeLocalizationService,
     makeFakeUserService,
 } from "../../helpers/mock_services";
-import { click, getFixture, legacyExtraNextTick, patchWithCleanup } from "../../helpers/utils";
+import {
+    click,
+    getFixture,
+    legacyExtraNextTick,
+    mount,
+    patchWithCleanup,
+} from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerServerData } from "../../webclient/helpers";
 import { openViewItem } from "@web/webclient/debug_items";
 import { editSearchView, editView } from "@web/views/debug_items";
 
-const { Component, mount, tags } = owl;
-const { xml } = tags;
+const { Component, xml } = owl;
 
 export class DebugMenuParent extends Component {
     setup() {
@@ -102,7 +106,6 @@ QUnit.module("DebugMenu", (hooks) => {
             });
         const env = await makeTestEnv(testConfig);
         const debugManager = await mount(DebugMenuParent, { env, target });
-        registerCleanup(() => debugManager.destroy());
         let debugManagerEl = debugManager.el;
         await click(debugManager.el.querySelector("button.dropdown-toggle"));
         debugManagerEl = debugManager.el;
@@ -159,7 +162,6 @@ QUnit.module("DebugMenu", (hooks) => {
             });
         const env = await makeTestEnv(testConfig);
         const debugManager = await mount(DebugMenuParent, { env, target });
-        registerCleanup(() => debugManager.destroy());
         await click(debugManager.el.querySelector("button.dropdown-toggle"));
         const items = [...debugManager.el.querySelectorAll(".dropdown-menu .dropdown-item")];
         assert.deepEqual(
@@ -170,13 +172,10 @@ QUnit.module("DebugMenu", (hooks) => {
 
     QUnit.test("Don't display the DebugMenu if debug mode is disabled", async (assert) => {
         const env = await makeTestEnv(testConfig);
-        const actionDialog = await mount(ActionDialog, {
+        await mount(ActionDialog, {
             env,
             target,
             props: { close: () => {} },
-        });
-        registerCleanup(() => {
-            actionDialog.destroy();
         });
         assert.containsOnce(target, ".o_dialog");
         assert.containsNone(target, ".o_dialog .o_debug_manager .fa-bug");
@@ -227,13 +226,10 @@ QUnit.module("DebugMenu", (hooks) => {
             }
             patchWithCleanup(odoo, { debug: "1" });
             const env = await makeTestEnv(testConfig);
-            const actionDialog = await mount(WithCustom, {
+            await mount(WithCustom, {
                 env,
                 target,
                 props: { close: () => {} },
-            });
-            registerCleanup(() => {
-                actionDialog.destroy();
             });
             assert.containsOnce(target, ".o_dialog");
             assert.containsOnce(target, ".o_dialog .o_debug_manager .fa-bug");
@@ -277,7 +273,6 @@ QUnit.module("DebugMenu", (hooks) => {
         debugRegistry.category("default").add("regenerateAssets", regenerateAssets);
         const env = await makeTestEnv(testConfig);
         const debugManager = await mount(DebugMenuParent, { env, target });
-        registerCleanup(() => debugManager.destroy());
         await click(debugManager.el.querySelector("button.dropdown-toggle"));
         assert.containsOnce(debugManager.el, ".dropdown-menu .dropdown-item");
         const item = debugManager.el.querySelector(".dropdown-menu .dropdown-item");

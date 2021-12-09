@@ -138,7 +138,7 @@ QUnit.module("Search", (hooks) => {
                 }
             }
             ToyView.components = { FavoriteMenu, SearchBar };
-            ToyView.template = owl.tags.xml`
+            ToyView.template = owl.xml`
                 <div>
                     <SearchBar/>
                     <FavoriteMenu/>

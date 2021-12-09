@@ -4,15 +4,16 @@ import { browser } from "@web/core/browser/browser";
 import { computePositioning, DEFAULTS, usePosition } from "@web/core/position/position_hook";
 import { registerCleanup } from "../helpers/cleanup";
 import {
+    destroy,
     getFixture,
     mockAnimationFrame,
+    mount,
     nextTick,
     patchWithCleanup,
     triggerEvent,
 } from "../helpers/utils";
 
-const { Component, mount, tags } = owl;
-const { css, xml } = tags;
+const { App, Component, css, xml } = owl;
 let container;
 let reference;
 
@@ -91,14 +92,15 @@ QUnit.test("can add margin", async (assert) => {
     let margin = 0;
     Object.assign(TestComp.popperOptions, { margin });
     let popper = await mount(TestComp, { target: container });
+
     const popBox1 = popper.el.getBoundingClientRect();
-    popper.destroy();
+    destroy(popper);
 
     margin = 20;
     Object.assign(TestComp.popperOptions, { margin });
     popper = await mount(TestComp, { target: container });
     const popBox2 = popper.el.getBoundingClientRect();
-    popper.destroy();
+    destroy(popper);
 
     assert.strictEqual(popBox1.top + margin, popBox2.top);
 });
@@ -125,7 +127,7 @@ QUnit.test("has no effect when component is destroyed", async (assert) => {
         return originalReference;
     };
 
-    const popper = await mount(TestComp, { target: container });
+    const comp = await mount(TestComp, { target: container });
     assert.verifySteps(["reference called"], "reference called when component mounted");
 
     triggerEvent(document, null, "scroll");
@@ -136,7 +138,7 @@ QUnit.test("has no effect when component is destroyed", async (assert) => {
 
     triggerEvent(document, null, "scroll");
     await nextTick();
-    popper.destroy();
+    destroy(comp);
     execRegisteredCallbacks();
     assert.verifySteps(
         [],

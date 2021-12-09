@@ -5,7 +5,8 @@
         <Dropdown class="o_debug_manager"
           beforeOpen="getElements"
           position="'bottom-end'"
-          togglerClass="`o-dropdown--narrow ${env.inDialog?'btn btn-link':''}`">
+          togglerClass="`o-dropdown--narrow ${env.inDialog?'btn btn-link':''}`"
+          onDropdownItemSelected="(detail) => detail.payload.callback()">
             <t t-set-slot="toggler">
                 <i class="fa fa-bug"/>
             </t>
@@ -14,8 +15,9 @@
                     t-if="element.type == 'item'"
                     onSelected="element.callback"
                     href="element.href"
-                    t-esc="element.description"
-                />
+                    payload="element">
+                    <t t-esc="element.description"/>
+                </DropdownItem>
                 <div t-if="element.type == 'separator'" role="separator" class="dropdown-divider"/>
                 <t t-if="element.type == 'component'" t-component="element.Component" t-props="element.props"/>
             </t>

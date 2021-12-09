@@ -42,14 +42,15 @@ export function makeFakeLocalizationService(config = {}) {
         start: async (env) => {
             const _t = (str) => translatedTerms[str] || str;
             env._t = _t;
-            env.qweb.translateFn = _t;
+            // env.qweb.translateFn = _t;
+            // NXOWL: configure app in some way
         },
     };
 }
 
 function buildMockRPC(mockRPC) {
     return async function (...args) {
-        if (this instanceof Component && this.__owl__.status === 5) {
+        if (this instanceof Component && this.__owl__.status === 2 /** NXOWL CHECK **/) {
             return new Promise(() => {});
         }
         if (mockRPC) {
@@ -154,7 +155,8 @@ export function makeFakeRouterService(params = {}) {
     return {
         start({ bus }) {
             const router = routerService.start(...arguments);
-            bus.on("test:hashchange", null, (hash) => {
+            bus.addEventListener("test:hashchange", (ev) => {
+                const hash = ev.detail;
                 browser.location.hash = objectToUrlEncodedString(hash);
             });
             registerCleanup(router.cancelPushes);
@@ -258,12 +260,16 @@ export function makeFakeUserService(hasGroup = () => false) {
 }
 
 export function makeFakeHTTPService(getResponse, postResponse) {
-    getResponse = getResponse || ((route, readMethod) => {
-        return readMethod === "json" ? {} : "";
-    });
-    postResponse = postResponse || ((route, params, readMethod) => {
-        return readMethod === "json" ? {} : "";
-    });
+    getResponse =
+        getResponse ||
+        ((route, readMethod) => {
+            return readMethod === "json" ? {} : "";
+        });
+    postResponse =
+        postResponse ||
+        ((route, params, readMethod) => {
+            return readMethod === "json" ? {} : "";
+        });
     return {
         start() {
             return {
@@ -272,7 +278,7 @@ export function makeFakeHTTPService(getResponse, postResponse) {
                 },
                 async post(...args) {
                     return postResponse(...args);
-                }
+                },
             };
         },
     };

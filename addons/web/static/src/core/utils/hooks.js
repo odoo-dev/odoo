@@ -2,7 +2,7 @@
 
 import { SERVICES_METADATA } from "@web/env";
 
-const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent } = owl.hooks;
+const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent } = owl;
 
 /**
  * This file contains various custom hooks.
@@ -75,8 +75,9 @@ export function useBus(bus, eventName, callback) {
     const component = useComponent();
     useEffect(
         () => {
-            bus.on(eventName, component, callback);
-            return () => bus.off(eventName, component);
+            const listener = callback.bind(component);
+            bus.addEventListener(eventName, listener);
+            return () => bus.removeEventListener(eventName, listener);
         },
         () => []
     );
@@ -215,11 +216,11 @@ export function useListener(eventName, querySelector, handler, options = {}) {
 
 function _protectMethod(component, caller, fn) {
     return async (...args) => {
-        if (component.__owl__.status === 5 /* DESTROYED */) {
+        if (component.__owl__.status === 2 /** NXOWL CHECK **/ /* DESTROYED */) {
             throw new Error("Component is destroyed");
         }
         const result = await fn.call(caller, ...args);
-        return component.__owl__.status === 5 ? new Promise(() => {}) : result;
+        return component.__owl__.status === 2 /** NXOWL CHECK **/ ? new Promise(() => {}) : result;
     };
 }
 
@@ -249,18 +250,4 @@ export function useService(serviceName) {
         }
     }
     return service;
-}
-
-/**
- * Executes "callback" when the component is being destroyed
- * @param  {Function} callback
- */
-export function onDestroyed(callback) {
-    const component = useComponent();
-    const _destroy = component.__destroy;
-    component.__destroy = (...args) => {
-        _destroy.call(component, ...args);
-        // callback is called after super to guarantee the component is actually destroyed
-        callback();
-    };
 }

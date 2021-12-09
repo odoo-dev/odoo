@@ -20,10 +20,10 @@ odoo.define('web.test_utils_create', function (require) {
     const Registry = require('web.Registry');
     const testUtilsMock = require('web.test_utils_mock');
     const Widget = require('web.Widget');
+    const { getFixture, mount, useChild } = require('@web/../tests/helpers/utils');
+    const { registerCleanup } = require("@web/../tests/helpers/cleanup");
 
-    const { Component } = owl;
-    const { useRef, useState } = owl.hooks;
-    const { xml } = owl.tags;
+    const { Component, useState, xml } = owl;
 
     /**
      * Similar as createView, but specific for calendar views. Some calendar
@@ -83,27 +83,22 @@ odoo.define('web.test_utils_create', function (require) {
         }
         const cleanUp = await testUtilsMock.addMockEnvironmentOwl(Component, params);
         class Parent extends Component {
-            constructor() {
-                super(...arguments);
+            setup() {
                 this.Component = constructor;
                 this.state = useState(params.props || {});
-                this.component = useRef('component');
                 for (const eventName in params.intercepts || {}) {
                     customHooks.useListener(eventName, params.intercepts[eventName]);
                 }
+                useChild();
             }
         }
-        Parent.template = xml`<t t-component="Component" t-props="state" t-ref="component"/>`;
-        const parent = new Parent();
-        await parent.mount(prepareTarget(params.debug), { position: 'first-child' });
-        const child = parent.component.comp;
-        const originalDestroy = child.destroy;
-        child.destroy = function () {
-            child.destroy = originalDestroy;
-            cleanUp();
-            parent.destroy();
-        };
-        return child;
+        Parent.template = xml`<t t-component="Component" t-props="state"/>`;
+
+        const target = getFixture();
+        const env = Component.env;
+        const parent = await mount(Parent, { env, target });
+        registerCleanup(cleanUp);
+        return parent.child;
     }
 
     /**
@@ -165,7 +160,7 @@ odoo.define('web.test_utils_create', function (require) {
                 super();
                 this.searchModel = new ActionModel(extensions, globalConfig);
                 this.state = useState(props);
-                this.controlPanel = useRef("controlPanel");
+                useChild();
             }
             async willStart() {
                 await this.searchModel.load();
@@ -181,25 +176,16 @@ odoo.define('web.test_utils_create', function (require) {
             }
         }
         Parent.components = { ControlPanel };
-        Parent.env = env;
         Parent.template = xml`
             <ControlPanel
-                t-ref="controlPanel"
                 t-props="state"
                 searchModel="searchModel"
             />`;
 
-        const parent = new Parent();
-        await parent.mount(prepareTarget(debug), { position: 'first-child' });
-
-        const controlPanel = parent.controlPanel.comp;
-        const destroy = controlPanel.destroy;
-        controlPanel.destroy = function () {
-            controlPanel.destroy = destroy;
-            parent.destroy();
-        };
-        controlPanel.getQuery = () => parent.searchModel.get('query');
-
+        const target = getFixture();
+        const parent = await mount(Parent, { env, target });
+        const controlPanel = parent.child;
+        controlPanel.getQuery = () => parent.searchModel.get("query");
         return controlPanel;
     }
 

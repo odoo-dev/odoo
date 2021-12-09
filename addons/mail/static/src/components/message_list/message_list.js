@@ -4,8 +4,7 @@ import { registerMessagingComponent } from '@mail/utils/messaging_component';
 import { useRenderedValues } from '@mail/component_hooks/use_rendered_values/use_rendered_values';
 import { useUpdate } from '@mail/component_hooks/use_update/use_update';
 
-const { Component } = owl;
-const { onWillPatch, useRef } = owl.hooks;
+const { Component, onWillPatch, useRef } = owl;
 
 export class MessageList extends Component {
 

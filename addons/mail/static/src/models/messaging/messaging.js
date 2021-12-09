@@ -6,7 +6,7 @@ import { OnChange } from '@mail/model/model_onchange';
 import { insertAndReplace, replace, link, unlink } from '@mail/model/model_field_command';
 import { makeDeferred } from '@mail/utils/deferred/deferred';
 
-const { EventBus } = owl.core;
+const { EventBus } = owl;
 
 registerModel({
     name: 'Messaging',

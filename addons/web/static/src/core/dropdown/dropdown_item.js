@@ -1,6 +1,7 @@
 /** @odoo-module **/
 import { DROPDOWN } from "./dropdown";
-const { Component, QWeb } = owl;
+
+const { Component } = owl;
 
 /**
  * @enum {string}
@@ -70,6 +71,10 @@ DropdownItem.props = {
         type: Function,
         optional: true,
     },
+    class: {
+        type: [String, Object],
+        optional: true,
+    },
     parentClosingMode: {
         type: ParentClosingMode,
         optional: true,
@@ -80,6 +85,10 @@ DropdownItem.props = {
     },
     href: {
         type: String,
+        optional: true,
+    },
+    slots: {
+        type: Object,
         optional: true,
     },
     title: {
@@ -94,5 +103,4 @@ DropdownItem.props = {
 DropdownItem.defaultProps = {
     parentClosingMode: ParentClosingMode.AllParents,
 };
-
-QWeb.registerComponent("DropdownItem", DropdownItem);
+owl.Component._components.DropdownItem = DropdownItem;

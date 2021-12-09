@@ -8,7 +8,7 @@ import { nextTick, patchWithCleanup } from "../helpers/utils";
 
 async function createRouter(params = {}) {
     const env = params.env || {};
-    env.bus = env.bus || new owl.core.EventBus();
+    env.bus = env.bus || new owl.EventBus();
     if (params.onPushState) {
         const originalPushState = browser.history.pushState;
         const onPushState = params.onPushState;

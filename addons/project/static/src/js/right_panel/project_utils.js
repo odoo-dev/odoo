@@ -4,7 +4,7 @@ import { _lt } from 'web.core';
 import fieldUtils from 'web.field_utils';
 import { ComponentAdapter } from 'web.OwlCompatibility';
 import { FormViewDialog } from 'web.view_dialogs';
-const { useState, useRef } = owl.hooks;
+const { useState, useRef } = owl;
 
 class MilestoneComponent extends owl.Component {
     constructor() {

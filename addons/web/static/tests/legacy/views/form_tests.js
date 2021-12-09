@@ -22,7 +22,6 @@ var Widget = require('web.Widget');
 var _t = core._t;
 var createView = testUtils.createView;
 
-const { registerCleanup } = require("@web/../tests/helpers/cleanup");
 const { getFixture, legacyExtraNextTick, patchWithCleanup } = require("@web/../tests/helpers/utils");
 const { createWebClient, doAction } = require('@web/../tests/webclient/helpers');
 const { makeTestEnv } = require("@web/../tests/helpers/mock_env");
@@ -8351,7 +8350,7 @@ QUnit.module('Views', {
                 return JSON.stringify(this.props.record.data);
             }
         }
-        MyComponent.template = owl.tags.xml`<div t-esc="value"/>`;
+        MyComponent.template = owl.xml`<div t-esc="value"/>`;
         widgetRegistryOwl.add('test', MyComponent);
 
         const form = await createView({

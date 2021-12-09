@@ -24,7 +24,7 @@ import {
 } from '@web/legacy/utils';
 import * as legacySession from 'web.session';
 
-owl.Component.env = legacyEnv;
+// owl.Component.env = legacyEnv;
 
 (async function boot() {
     await owl.utils.whenReady();

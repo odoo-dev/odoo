@@ -8,8 +8,7 @@ import { sortBy } from "@web/core/utils/arrays";
 import { useAssets } from "@web/core/assets";
 import { useEffect } from "@web/core/utils/hooks";
 
-const { Component, hooks } = owl;
-const { useRef } = hooks;
+const { Component, useRef } = owl;
 
 const NO_DATA = _lt("No data");
 
@@ -108,7 +107,7 @@ export class GraphRenderer extends Component {
         }
         const chartAreaTop = this.chart.chartArea.top;
         const viewContentTop = this.el.getBoundingClientRect().top;
-        const innerHTML = this.env.qweb.renderToString("web.GraphRenderer.CustomTooltip", {
+        const innerHTML = this.env.renderToString("web.GraphRenderer.CustomTooltip", {
             maxWidth: getMaxWidth(this.chart.chartArea),
             measure: measures[measure].string,
             mode: this.model.metaData.mode,
@@ -628,4 +627,4 @@ export class GraphRenderer extends Component {
 }
 
 GraphRenderer.template = "web.GraphRenderer";
-GraphRenderer.props = ["model", "onGraphClicked"];
+GraphRenderer.props = ["class?", "model", "onGraphClicked"];

@@ -9,8 +9,7 @@ odoo.define('web.GroupByMenu', function (require) {
 
     class GroupByMenu extends Component {
 
-        constructor() {
-            super(...arguments);
+        setup() {
             this.icon = FACET_ICONS.groupBy;
 
             this.fields = Object.values(this.props.fields)

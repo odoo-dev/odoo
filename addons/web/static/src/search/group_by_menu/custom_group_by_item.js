@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
-const { Component, hooks } = owl;
-const { useState } = hooks;
+const { Component, useState } = owl;
 
 export class CustomGroupByItem extends Component {
     setup() {
@@ -9,10 +8,6 @@ export class CustomGroupByItem extends Component {
         if (this.props.fields.length) {
             this.state.fieldName = this.props.fields[0].name;
         }
-    }
-
-    onApply() {
-        this.trigger("add-custom-group", { fieldName: this.state.fieldName });
     }
 }
 

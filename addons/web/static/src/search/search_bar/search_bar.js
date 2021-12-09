@@ -7,8 +7,7 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { fuzzyTest } from "@web/core/utils/search";
 
-const { Component, hooks } = owl;
-const { useExternalListener, useRef, useState } = hooks;
+const { Component, useExternalListener, useRef, useState } = owl;
 const parsers = registry.category("parsers");
 
 const CHAR_FIELDS = ["char", "html", "many2many", "many2one", "one2many", "text"];
@@ -28,7 +27,7 @@ export class SearchBar extends Component {
         });
 
         // derived state
-        this.items = [];
+        this.items = useState([]); // NXOWL
         this.subItems = {};
 
         this.orm = useService("orm");
@@ -93,8 +92,7 @@ export class SearchBar extends Component {
 
         const trimmedQuery = this.state.query.trim();
 
-        this.items = [];
-
+        this.items.splice(0, this.items.length); // NXOWL
         if (!trimmedQuery) {
             return;
         }

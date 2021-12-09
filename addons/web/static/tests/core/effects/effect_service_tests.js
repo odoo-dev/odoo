@@ -7,10 +7,16 @@ import { userService } from "@web/core/user_service";
 import { session } from "@web/session";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { makeFakeLocalizationService } from "../../helpers/mock_services";
-import { click, getFixture, mockTimeout, nextTick, patchWithCleanup } from "../../helpers/utils";
-import { registerCleanup } from "../../helpers/cleanup";
+import {
+    click,
+    getFixture,
+    mockTimeout,
+    mount,
+    nextTick,
+    patchWithCleanup,
+} from "../../helpers/utils";
 
-const { Component, mount, tags } = owl;
+const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
 const mainComponentRegistry = registry.category("main_components");
 
@@ -20,7 +26,7 @@ class Parent extends Component {
         this.NotificationContainer = mainComponentRegistry.get("NotificationContainer");
     }
 }
-Parent.template = tags.xml`
+Parent.template = xml`
     <div>
       <t t-component="EffectContainer.Component" t-props="EffectContainer.props" />
       <t t-component="NotificationContainer.Component" t-props="NotificationContainer.props" />
@@ -31,7 +37,6 @@ async function makeParent() {
     const env = await makeTestEnv({ serviceRegistry });
     const target = getFixture();
     const parent = await mount(Parent, { env, target });
-    registerCleanup(() => parent.destroy());
     return parent;
 }
 
@@ -40,8 +45,7 @@ QUnit.module("Effect Service", (hooks) => {
     let execRegisteredTimeouts;
     hooks.beforeEach(() => {
         effectParams = {
-            message: "<div>Congrats!</div>",
-            messageIsHtml: true,
+            message: owl.markup("<div>Congrats!</div>"),
         };
 
         execRegisteredTimeouts = mockTimeout();
@@ -111,7 +115,7 @@ QUnit.module("Effect Service", (hooks) => {
     QUnit.test("rendering a rainbowman with an escaped message", async function (assert) {
         const parent = await makeParent();
 
-        parent.env.services.effect.add({ ...effectParams, messageIsHtml: false });
+        parent.env.services.effect.add(effectParams);
         await nextTick();
         execRegisteredTimeouts();
 
@@ -119,7 +123,7 @@ QUnit.module("Effect Service", (hooks) => {
         assert.containsOnce(parent.el, ".o_reward_rainbow");
         assert.strictEqual(
             parent.el.querySelector(".o_reward_msg_content").textContent,
-            "<div>Congrats!</div>"
+            "Congrats!"
         );
     });
 
@@ -131,7 +135,7 @@ QUnit.module("Effect Service", (hooks) => {
                 assert.deepEqual(this.props, props, "should have received these props");
             }
         }
-        Custom.template = tags.xml`<div class="custom">foo is <t t-esc="props.foo"/></div>`;
+        Custom.template = xml`<div class="custom">foo is <t t-esc="props.foo"/></div>`;
 
         const parent = await makeParent();
         parent.env.services.effect.add({ Component: Custom, props });

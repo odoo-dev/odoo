@@ -15,9 +15,7 @@ import { OnboardingBanner } from "@web/views/onboarding_banner";
 import { View } from "@web/views/view";
 import { actionService } from "@web/webclient/actions/action_service";
 
-const { Component, mount, hooks, tags } = owl;
-const { useState } = hooks;
-const { xml } = tags;
+const { Component, mount, useState, xml } = owl;
 
 const serviceRegistry = registry.category("services");
 const viewRegistry = registry.category("views");
@@ -1592,7 +1590,5 @@ QUnit.module("Views", (hooks) => {
         parent.state.domain = [["type", "=", "herbivorous"]];
 
         await nextTick();
-
-        parent.destroy();
     });
 });

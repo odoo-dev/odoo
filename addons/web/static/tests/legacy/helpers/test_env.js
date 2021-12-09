@@ -18,14 +18,15 @@ odoo.define('web.test_env', async function (require) {
      * @returns {Proxy}
      */
     function makeTestEnvironment(env = {}, providedRPC = null) {
-        if (!qweb) {
-            // avoid parsing templates at every test because it takes a lot of
-            // time and they never change
-            qweb = new owl.QWeb({ templates: session.owlTemplates });
-        }
-        registerCleanup(() => {
-            qweb.subscriptions = {};
-        });
+        // if (!qweb) {
+        //     // avoid parsing templates at every test because it takes a lot of
+        //     // time and they never change
+        //     qweb = new owl.QWeb({ templates: session.owlTemplates });
+        // }
+        // registerCleanup(() => {
+        //     qweb.subscriptions = {};
+        // });
+        // NXOWL
 
         const defaultTranslationParamters = {
             code: "en_US",
@@ -102,6 +103,7 @@ odoo.define('web.test_env', async function (require) {
      */
     QUnit.on('OdooBeforeTestHook', function () {
         owl.Component.env = makeTestEnvironment();
+        // NXOWL
     });
 
     return makeTestEnvironment;

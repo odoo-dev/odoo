@@ -2,7 +2,8 @@
 <templates xml:space="preserve">
 
     <t t-name="web.WebClient" owl="1">
-        <body class="o_web_client" t-att-class="{'o_is_superuser': user.userId === 1, 'o_rtl': localization.direction === 'rtl' }">
+        <!-- TODO NXOWL -->
+        <div class="o_web_client" t-att-class="{'o_is_superuser': user.userId === 1, 'o_rtl': localization.direction === 'rtl' }">
             <NotUpdatable>
                 <NavBar/>
             </NotUpdatable>
@@ -10,7 +11,7 @@
                 <ActionContainer/>
             </NotUpdatable>
             <MainComponentsContainer/>
-        </body>
+        </div>
     </t>
 
 </templates>

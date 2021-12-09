@@ -58,9 +58,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
          * @param {string} [props.options.mode=readonly] should be 'readonly' or 'edit'
          * @param {string} [props.options.viewType=default]
          */
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this._canQuickEdit = this.constructor.isQuickEditable;
             this._isValid = true;
             // this is the last value that was set by the user, unparsed. This is

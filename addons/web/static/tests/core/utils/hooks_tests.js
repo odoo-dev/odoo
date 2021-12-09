@@ -1,13 +1,12 @@
 /** @odoo-module **/
 
 import { uiService } from "@web/core/ui/ui_service";
-import { useAutofocus, useBus, useEffect, useListener, useService, onDestroyed } from "@web/core/utils/hooks";
+import { useAutofocus, useBus, useListener, useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../../helpers/mock_env";
-import { click, getFixture, nextTick } from "../../helpers/utils";
-import { registerCleanup } from "../../helpers/cleanup";
+import { click, destroy, getFixture, mount, nextTick } from "../../helpers/utils";
 
-const { Component, mount, tags, useState } = owl;
+const { Component, xml, useState, useEffect } = owl;
 const serviceRegistry = registry.category("services");
 
 QUnit.module("utils", () => {
@@ -20,7 +19,7 @@ QUnit.module("utils", () => {
                     useAutofocus();
                 }
             }
-            MyComponent.template = tags.xml`
+            MyComponent.template = xml`
                 <span>
                     <input type="text" autofocus="" />
                 </span>
@@ -38,8 +37,6 @@ QUnit.module("utils", () => {
             comp.render();
             await nextTick();
             assert.strictEqual(document.activeElement, comp.el.querySelector("input"));
-
-            comp.destroy();
         });
 
         QUnit.test("useAutofocus: conditional autofocus", async function (assert) {
@@ -49,7 +46,7 @@ QUnit.module("utils", () => {
                     this.showInput = true;
                 }
             }
-            MyComponent.template = tags.xml`
+            MyComponent.template = xml`
                 <span>
                     <input t-if="showInput" type="text" autofocus="" />
                 </span>
@@ -75,8 +72,6 @@ QUnit.module("utils", () => {
             comp.render();
             await nextTick();
             assert.strictEqual(document.activeElement, comp.el.querySelector("input"));
-
-            comp.destroy();
         });
 
         QUnit.module("useBus");
@@ -90,7 +85,7 @@ QUnit.module("utils", () => {
                     assert.step("callback");
                 }
             }
-            MyComponent.template = tags.xml`<div/>`;
+            MyComponent.template = xml`<div/>`;
 
             const env = await makeTestEnv();
             const target = getFixture();
@@ -99,12 +94,10 @@ QUnit.module("utils", () => {
             await nextTick();
             assert.verifySteps(["callback"]);
 
-            comp.unmount();
+            destroy(comp);
             env.bus.trigger("test-event");
             await nextTick();
             assert.verifySteps([]);
-
-            comp.destroy();
         });
 
         QUnit.module("useEffect");
@@ -131,7 +124,7 @@ QUnit.module("utils", () => {
                         });
                     }
                 }
-                MyComponent.template = tags.xml`<div/>`;
+                MyComponent.template = xml`<div/>`;
 
                 const env = await makeTestEnv();
                 const target = getFixture();
@@ -139,10 +132,11 @@ QUnit.module("utils", () => {
 
                 assert.step("before state mutation");
                 component.state.value++;
+                component.render();
                 // Wait for an owl render
                 await new Promise((resolve) => requestAnimationFrame(resolve));
                 assert.step("after state mutation");
-                await component.unmount();
+                destroy(component);
 
                 assert.verifySteps([
                     "value is 0",
@@ -193,7 +187,7 @@ QUnit.module("utils", () => {
                         );
                     }
                 }
-                MyComponent.template = tags.xml`<div/>`;
+                MyComponent.template = xml`<div/>`;
 
                 const env = await makeTestEnv();
                 const target = getFixture();
@@ -203,16 +197,18 @@ QUnit.module("utils", () => {
 
                 assert.step("before state mutation: a");
                 component.state.a++;
+                component.render();
                 // Wait for an owl render
                 await new Promise((resolve) => requestAnimationFrame(resolve));
                 assert.step("after state mutation: a");
 
                 assert.step("before state mutation: b");
                 component.state.b++;
+                component.render();
                 // Wait for an owl render
                 await new Promise((resolve) => requestAnimationFrame(resolve));
                 assert.step("after state mutation: b");
-                await component.unmount();
+                destroy(component);
 
                 assert.verifySteps([
                     // All effects run on mount
@@ -270,7 +266,7 @@ QUnit.module("utils", () => {
                         );
                     }
                 }
-                MyComponent.template = tags.xml`<div t-esc="state.value"/>`;
+                MyComponent.template = xml`<div t-esc="state.value"/>`;
 
                 const env = await makeTestEnv();
                 const target = getFixture();
@@ -278,6 +274,7 @@ QUnit.module("utils", () => {
 
                 assert.step("before state mutation");
                 component.state.value++;
+                component.render();
                 // Wait for an owl render
                 await new Promise((resolve) => requestAnimationFrame(resolve));
                 assert.equal(
@@ -286,7 +283,7 @@ QUnit.module("utils", () => {
                     "Value was correctly changed inside the component"
                 );
                 assert.step("after state mutation");
-                await component.unmount();
+                destroy(component);
 
                 assert.verifySteps([
                     "value is 0",
@@ -307,14 +304,11 @@ QUnit.module("utils", () => {
                     useListener("click", () => assert.step("click"));
                 }
             }
-            MyComponent.template = tags.xml`<button>Click Me</button>`;
+            MyComponent.template = xml`<button>Click Me</button>`;
 
             const env = await makeTestEnv();
             const target = getFixture();
             const comp = await mount(MyComponent, { env, target });
-            registerCleanup(() => {
-                comp.destroy();
-            });
 
             await click(comp.el);
             assert.verifySteps(["click"]);
@@ -327,7 +321,7 @@ QUnit.module("utils", () => {
                     useListener("click", "button", () => assert.step("click"));
                 }
             }
-            MyComponent.template = tags.xml`
+            MyComponent.template = xml`
                 <div>
                     <button t-if="flag">Click Here</button>
                     <button t-else="">
@@ -338,9 +332,6 @@ QUnit.module("utils", () => {
             const env = await makeTestEnv();
             const target = getFixture();
             const comp = await mount(MyComponent, { env, target });
-            registerCleanup(() => {
-                comp.destroy();
-            });
 
             await click(comp.el);
             assert.verifySteps([]);
@@ -349,6 +340,7 @@ QUnit.module("utils", () => {
 
             comp.flag = false;
             await comp.render();
+            await nextTick(); // NXOWL: why?
             await click(comp.el.querySelector("button span"));
             assert.verifySteps(["click"]);
         });
@@ -360,7 +352,7 @@ QUnit.module("utils", () => {
                     useListener("click", "button", () => assert.step("click"), { capture: true });
                 }
             }
-            MyComponent.template = tags.xml`
+            MyComponent.template = xml`
                 <div>
                     <button t-if="flag">Click Here</button>
                     <button t-else="">
@@ -371,9 +363,6 @@ QUnit.module("utils", () => {
             const env = await makeTestEnv();
             const target = getFixture();
             const comp = await mount(MyComponent, { env, target });
-            registerCleanup(() => {
-                comp.destroy();
-            });
 
             await click(comp.el);
             assert.verifySteps([]);
@@ -394,7 +383,7 @@ QUnit.module("utils", () => {
                     useService("toy_service");
                 }
             }
-            MyComponent.template = tags.xml`<div/>`;
+            MyComponent.template = xml`<div/>`;
 
             const env = await makeTestEnv();
             const target = getFixture();
@@ -411,7 +400,7 @@ QUnit.module("utils", () => {
                     this.toyService = useService("toy_service");
                 }
             }
-            MyComponent.template = tags.xml`<div/>`;
+            MyComponent.template = xml`<div/>`;
 
             serviceRegistry.add("toy_service", {
                 name: "toy_service",
@@ -425,25 +414,6 @@ QUnit.module("utils", () => {
 
             const comp = await mount(MyComponent, { env, target });
             assert.strictEqual(comp.toyService, null);
-            comp.unmount();
-        });
-
-        QUnit.module("onDestroyed");
-
-        QUnit.test("onDestroyed is called", async (assert) => {
-            assert.expect(3);
-            class MyComponent extends Component {
-                setup() {
-                    onDestroyed(() => assert.step("onDestroyed"));
-                }
-            }
-            MyComponent.template = tags.xml`<div/>`;
-
-            const target = getFixture();
-            const component = await owl.mount(MyComponent, {target});
-            assert.verifySteps([]);
-            component.destroy();
-            assert.verifySteps(["onDestroyed"]);
         });
     });
 });

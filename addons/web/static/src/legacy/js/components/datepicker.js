@@ -5,8 +5,7 @@ odoo.define('web.DatePickerOwl', function (require) {
     const time = require('web.time');
     const { useAutofocus } = require('web.custom_hooks');
 
-    const { Component, hooks } = owl;
-    const { useExternalListener, useRef, useState } = hooks;
+    const { Component, useExternalListener, useRef, useState } = owl;
 
     let datePickerId = 0;
 
@@ -24,9 +23,7 @@ odoo.define('web.DatePickerOwl', function (require) {
      * @extends Component
      */
     class DatePicker extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.inputRef = useRef('input');
             this.state = useState({ warning: false });
 

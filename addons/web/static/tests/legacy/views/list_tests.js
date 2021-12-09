@@ -9304,7 +9304,7 @@ QUnit.module('Views', {
                 return JSON.stringify(this.props.record.data);
             }
         }
-        MyComponent.template = owl.tags.xml`<div t-esc="value"/>`;
+        MyComponent.template = owl.xml`<div t-esc="value"/>`;
         widgetRegistryOwl.add('test', MyComponent);
 
         const list = await createView({
@@ -12125,7 +12125,7 @@ QUnit.module('Views', {
                 willUnmountCalls++;
             }
         }
-        MyField.template = owl.tags.xml`<span>Hello World</span>`;
+        MyField.template = owl.xml`<span>Hello World</span>`;
         fieldRegistryOwl.add('my_owl_field', MyField);
 
         const list = await createView({

@@ -96,8 +96,8 @@
                         title: NEW_PROJECT_MILESTONE,
                         multi_select: true,
                     }"
-                    t-ref="dialog"
                 />
+                    <!-- NXOWL t-ref="dialog" -->
             </span>
         </div>
     </t>
@@ -130,8 +130,8 @@
                         disable_multiple_selection: true,
                         deletable: true
                     }"
-                    t-ref="dialog"
                 />
+                    <!-- NXOWL t-ref="dialog" -->
             </span>
         </div>
     </t>

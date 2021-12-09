@@ -11,8 +11,7 @@ import { extractLayoutComponents } from "@web/views/layout";
 
 const viewRegistry = registry.category("views");
 
-const { Component, hooks } = owl;
-const { useSubEnv } = hooks;
+const { Component, useSubEnv } = owl;
 
 /** @typedef {Object} Config
  *  @property {integer|false} actionId
@@ -145,13 +144,15 @@ export class View extends Component {
         this.viewService = useService("view");
         this.withSearchProps = null;
 
+        // NXOWL: not acceptable I think
+        this.env = Object.create(this.env);
+        this.env.keepLast = new KeepLast();
+        this.config = { ...getDefaultConfig(), ...this.env.config };
         useSubEnv({
-            keepLast: new KeepLast(),
-            config: {
-                ...getDefaultConfig(),
-                ...this.env.config,
-            },
+            keepLast: this.env.keepLast,
+            config: this.config,
         });
+        //
         useActionLinks({ resModel });
     }
 
@@ -163,7 +164,7 @@ export class View extends Component {
         // determine views for which descriptions should be obtained
         let { viewId, searchViewId } = this.props;
 
-        const views = deepCopy(this.env.config.views);
+        const views = deepCopy(this.config.views);
         const view = views.find((v) => v[1] === type) || [];
         if (view.length) {
             view[0] = viewId !== undefined ? viewId : view[0];
@@ -197,7 +198,7 @@ export class View extends Component {
             // a loadViews is done to complete the missing information
             const viewDescriptions = await this.viewService.loadViews(
                 { context, resModel, views },
-                { actionId: this.env.config.actionId, loadActionMenus, loadIrFilters }
+                { actionId: this.config.actionId, loadActionMenus, loadIrFilters }
             );
             // Note: if this.props.views is different from views, the cached descriptions
             // will certainly not be reused! (but for the standard flow this will work as
@@ -215,7 +216,7 @@ export class View extends Component {
                     irFilters = searchViewDescription.irFilters;
                 }
             }
-            this.env.config.views = views;
+            this.config.views = views;
         }
 
         if (!arch) {
@@ -239,7 +240,7 @@ export class View extends Component {
             ViewClass = viewRegistry.get(subType);
         }
 
-        Object.assign(this.env.config, {
+        Object.assign(this.config, {
             viewId: viewDescription.viewId,
             viewType: type,
             viewSubType: subType,

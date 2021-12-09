@@ -9,8 +9,7 @@ import { _lt } from 'web.core';
 import { format } from 'web.field_utils';
 import { getLangDatetimeFormat } from 'web.time';
 
-const { Component, useState } = owl;
-const { onWillUnmount, useRef } = owl.hooks;
+const { Component, useState, onWillUnmount, useRef } = owl;
 
 const READ_MORE = _lt("Read More");
 const READ_LESS = _lt("Read Less");

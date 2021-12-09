@@ -52,4 +52,5 @@ export class ChromeAdapter extends Component {
         });
     }
 }
-ChromeAdapter.template = owl.tags.xml`<PosChrome t-ref="chrome" webClient="legacyActionManager"/>`;
+ChromeAdapter.template = owl.xml`<PosChrome webClient="legacyActionManager"/>`;
+// NXOWL t-ref="chrome"

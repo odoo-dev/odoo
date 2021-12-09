@@ -5,8 +5,7 @@ import { useComponentToModel } from '@mail/component_hooks/use_component_to_mode
 import { useDragVisibleDropZone } from '@mail/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone';
 import { useRefToModel } from '@mail/component_hooks/use_ref_to_model/use_ref_to_model';
 
-const { Component } = owl;
-const { useRef } = owl.hooks;
+const { Component, useRef } = owl;
 
 export class AttachmentBox extends Component {
 

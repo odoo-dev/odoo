@@ -27,8 +27,7 @@ import { registry } from "./core/registry";
  */
 export function makeEnv() {
     return {
-        qweb: new owl.QWeb(),
-        bus: new owl.core.EventBus(),
+        bus: new owl.EventBus(),
         services: {},
         debug: odoo.debug,
         _t: () => {
@@ -57,12 +56,12 @@ export const SERVICES_METADATA = {};
  */
 export async function startServices(env) {
     const toStart = new Set();
-    serviceRegistry.on("UPDATE", null, async (payload) => {
+    serviceRegistry.addEventListener("UPDATE", async (ev) => {
         // Wait for all synchronous code so that if new services that depend on
         // one another are added to the registry, they're all present before we
         // start them regardless of the order they're added to the registry.
         await Promise.resolve();
-        const { operation, key: name, value: service } = payload;
+        const { operation, key: name, value: service } = ev.detail;
         if (operation === "delete") {
             // We hardly see why it would be usefull to remove a service.
             // Furthermore we could encounter problems with dependencies.

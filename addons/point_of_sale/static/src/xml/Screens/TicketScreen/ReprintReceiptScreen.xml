@@ -16,7 +16,8 @@
                         <i class="fa fa-print"></i> Print Receipt
                     </div>
                     <div class="pos-receipt-container">
-                        <OrderReceipt order="props.order" t-ref="order-receipt" />
+                        <OrderReceipt order="props.order"/>
+                         <!-- NXOWL t-ref="order-receipt"  -->
                     </div>
                 </div>
             </div>

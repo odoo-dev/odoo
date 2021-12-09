@@ -14,8 +14,7 @@ import { View } from "@web/views/view";
 import { ActionDialog } from "./action_dialog";
 import { CallbackRecorder } from "./action_hook";
 
-const { Component, hooks, tags } = owl;
-const { useRef, useSubEnv } = hooks;
+const { Component, useRef, useSubEnv, xml } = owl;
 
 const actionHandlersRegistry = registry.category("action_handlers");
 const actionRegistry = registry.category("actions");
@@ -74,9 +73,9 @@ export class InvalidButtonParamsError extends Error {}
 const CTX_KEY_REGEX = /^(?:(?:default_|search_default_|show_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids|orderedBy)$/;
 
 // only register this template once for all dynamic classes ControllerComponent
-const ControllerComponentTemplate = tags.xml`<t t-component="Component" t-props="props"
-    t-ref="component"
-    t-on-history-back="onHistoryBack"/>`;
+const ControllerComponentTemplate = xml`<t t-component="Component" t-props="props"/>`;
+// t-ref="component" NXOWL
+// t-on-history-back="onHistoryBack"
 
 function makeActionManager(env) {
     const keepLast = new KeepLast();
@@ -94,7 +93,7 @@ function makeActionManager(env) {
         _loadAction(actionRequest, options.additionalContext);
     }
 
-    env.bus.on("CLEAR-CACHES", null, () => {
+    env.bus.addEventListener("CLEAR-CACHES", () => {
         actionCache = {};
     });
 
@@ -552,7 +551,8 @@ function makeActionManager(env) {
                     this.__beforeLeave__ = new CallbackRecorder();
                     this.__getGlobalState__ = new CallbackRecorder();
                     this.__getLocalState__ = new CallbackRecorder();
-                    useBus(env.bus, "CLEAR-UNCOMMITTED-CHANGES", (callbacks) => {
+                    useBus(env.bus, "CLEAR-UNCOMMITTED-CHANGES", (ev) => {
+                        const callbacks = ev.detail;
                         const beforeLeaveFns = this.__beforeLeave__.callbacks;
                         callbacks.push(...beforeLeaveFns);
                     });

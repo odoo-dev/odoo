@@ -2,7 +2,7 @@
 
 import { browser } from "@web/core/browser/browser";
 
-const { Component, tags, useState } = owl;
+const { Component, useState, xml } = owl;
 
 export class BlockUI extends Component {
     setup() {
@@ -42,8 +42,8 @@ export class BlockUI extends Component {
             line2: "",
         });
 
-        this.props.bus.on("BLOCK", this, this.block);
-        this.props.bus.on("UNBLOCK", this, this.unblock);
+        this.props.bus.addEventListener("BLOCK", this.block.bind(this));
+        this.props.bus.addEventListener("UNBLOCK", this.unblock.bind(this));
     }
 
     replaceMessage(index) {
@@ -70,7 +70,7 @@ export class BlockUI extends Component {
     }
 }
 
-BlockUI.template = tags.xml`
+BlockUI.template = xml`
     <div t-att-class="state.blockUI ? 'o_blockUI' : ''">
       <t t-if="state.blockUI">
         <div class="o_spinner">

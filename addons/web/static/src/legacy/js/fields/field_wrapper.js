@@ -124,9 +124,8 @@ odoo.define('web.FieldWrapper', function (require) {
             // instantiated yet when the renderer first asks if it is set
             // (only the wrapper is instantiated), so we instantiate one
             // with the same props, get its 'isSet' status, and destroy it.
-            const c = new this.Component(null, this.props);
+            const c = new this.Component(this.props, this.env);
             const isSet = c.isSet;
-            c.destroy();
             return isSet;
         }
         isValid() {
@@ -137,9 +136,8 @@ odoo.define('web.FieldWrapper', function (require) {
             // instantiated yet when the renderer first asks if it is set
             // (only the wrapper is instantiated), so we instantiate one
             // with the same props, get its 'isValid' status, and destroy it.
-            const c = new this.Component(null, this.props);
+            const c = new this.Component(this.props, this.env);
             const isValid = c.isValid;
-            c.destroy();
             return isValid;
         }
         removeInvalidClass() {

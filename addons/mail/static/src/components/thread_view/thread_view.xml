@@ -23,8 +23,8 @@
                                 getScrollableElement= "props.getScrollableElement"
                                 hasScrollAdjust="props.hasScrollAdjust"
                                 threadViewLocalId="threadView.localId"
-                                t-ref="messageList"
                             />
+                                <!-- NXOWL t-ref="messageList" -->
                         </t>
                         <t t-elif="threadView.threadCache.hasLoadingFailed">
                             <div class="o_ThreadView_loadingFailed">

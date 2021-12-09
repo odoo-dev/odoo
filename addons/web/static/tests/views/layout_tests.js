@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { getFixture } from "@web/../tests/helpers/utils";
+import { getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeWithSearch, setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { registry } from "@web/core/registry";
@@ -8,9 +8,7 @@ import { Layout } from "@web/views/layout";
 import { getDefaultConfig } from "@web/views/view";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 
-const { Component, hooks, mount, tags } = owl;
-const { xml } = tags;
-const { useSubEnv } = hooks;
+const { Component, xml, useSubEnv } = owl;
 
 const serviceRegistry = registry.category("services");
 

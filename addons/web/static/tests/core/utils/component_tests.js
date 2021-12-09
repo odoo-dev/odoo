@@ -2,9 +2,9 @@
 
 import { NotUpdatable, ErrorHandler } from "@web/core/utils/components";
 import { makeTestEnv } from "../../helpers/mock_env";
-import { getFixture } from "../../helpers/utils";
+import { getFixture, mount } from "../../helpers/utils";
 
-const { Component, mount } = owl;
+const { Component, xml } = owl;
 
 QUnit.module("utils", () => {
     QUnit.module("components");
@@ -18,9 +18,9 @@ QUnit.module("utils", () => {
                 assert.step("willupdateprops");
             }
         }
-        Child.template = owl.tags.xml`<div>hey</div>`;
+        Child.template = owl.xml`<div>hey</div>`;
         class Parent extends Component {}
-        Parent.template = owl.tags.xml`
+        Parent.template = xml`
           <div>
             <Child/>
             <NotUpdatable><Child/></NotUpdatable>
@@ -33,12 +33,11 @@ QUnit.module("utils", () => {
 
         await parent.render();
         assert.verifySteps(["willupdateprops"]);
-        parent.destroy();
     });
 
     QUnit.test("ErrorHandler component", async function (assert) {
         class Boom extends Component {}
-        Boom.template = owl.tags.xml`<div><t t-esc="this.will.throw"/></div>`;
+        Boom.template = owl.xml`<div><t t-esc="this.will.throw"/></div>`;
 
         class Parent extends Component {
             setup() {
@@ -49,7 +48,7 @@ QUnit.module("utils", () => {
                 this.render();
             }
         }
-        Parent.template = owl.tags.xml`
+        Parent.template = xml`
         <div>
           <t t-if="flag">
             <ErrorHandler onError="() => this.handleError()">
@@ -63,8 +62,7 @@ QUnit.module("utils", () => {
         Parent.components = { Boom, ErrorHandler };
 
         const target = getFixture();
-        const parent = await mount(Parent, { env: makeTestEnv(), target });
+        await mount(Parent, { env: makeTestEnv(), target });
         assert.strictEqual(target.innerHTML, "<div> not boom </div>");
-        parent.destroy();
     });
 });

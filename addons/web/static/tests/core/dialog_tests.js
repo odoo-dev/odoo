@@ -6,11 +6,10 @@ import { uiService } from "@web/core/ui/ui_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { Dialog } from "@web/core/dialog/dialog";
 import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture, nextTick } from "../helpers/utils";
+import { click, destroy, getFixture, mount } from "../helpers/utils";
 import { makeFakeDialogService } from "../helpers/mock_services";
 
-const { hooks, mount } = owl;
-const { useRef, useState } = hooks;
+const { onMounted, onPatched, useState } = owl;
 const serviceRegistry = registry.category("services");
 let parent;
 let target;
@@ -28,9 +27,18 @@ class SimpleDialog extends Dialog {
         this.size = "size" in this.props ? this.props.size : this.constructor.size;
         this.fullscreen =
             "fullscreen" in this.props ? this.props.fullscreen : this.constructor.fullscreen;
+
+        const setRef = () => {
+            if (this.props.setModalRef) {
+                this.props.setModalRef(this.modalRef.el);
+            }
+        };
+
+        onMounted(setRef);
+        onPatched(setRef);
     }
 }
-SimpleDialog.bodyTemplate = owl.tags.xml`<t t-slot="default"/>`;
+SimpleDialog.bodyTemplate = owl.xml`<t t-slot="default"/>`;
 
 QUnit.module("Components", (hooks) => {
     hooks.beforeEach(async () => {
@@ -41,7 +49,6 @@ QUnit.module("Components", (hooks) => {
     });
     hooks.afterEach(() => {
         if (parent) {
-            parent.unmount();
             parent = undefined;
         }
     });
@@ -52,7 +59,7 @@ QUnit.module("Components", (hooks) => {
         assert.expect(8);
         class Parent extends Dialog {}
         Parent.title = "Wow(l) Effect";
-        Parent.bodyTemplate = owl.tags.xml`
+        Parent.bodyTemplate = owl.xml`
             <t>
                 Hello!
             </t>
@@ -84,7 +91,7 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("simple rendering with two dialogs", async function (assert) {
         assert.expect(3);
         class Parent extends owl.Component {}
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
               <div>
                   <SimpleDialog title="'First Title'">
                       Hello!
@@ -118,7 +125,7 @@ QUnit.module("Components", (hooks) => {
             }
         }
 
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
             <MyDialog close="close">
                 Hello!
             </MyDialog>
@@ -142,7 +149,7 @@ QUnit.module("Components", (hooks) => {
                 }
             }
 
-            Parent.template = owl.tags.xml`
+            Parent.template = owl.xml`
                 <MyDialog close="close">
                     Hello!
                 </MyDialog>
@@ -158,7 +165,7 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("render custom footer buttons is possible", async function (assert) {
         assert.expect(2);
         class SimpleButtonsDialog extends Dialog {}
-        SimpleButtonsDialog.footerTemplate = owl.tags.xml`
+        SimpleButtonsDialog.footerTemplate = owl.xml`
             <div>
                 <button class="btn btn-primary">The First Button</button>
                 <button class="btn btn-primary">The Second Button</button>
@@ -172,7 +179,7 @@ QUnit.module("Components", (hooks) => {
                 });
             }
         }
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
               <div>
                   <SimpleButtonsDialog/>
               </div>
@@ -189,10 +196,10 @@ QUnit.module("Components", (hooks) => {
         class SubComponent extends owl.Component {
             _onClick() {
                 assert.step("subcomponent-clicked");
-                this.trigger("subcomponent-clicked");
+                this.props.onClicked();
             }
         }
-        SubComponent.template = owl.tags.xml`
+        SubComponent.template = owl.xml`
               <div class="o_subcomponent" t-esc="props.text" t-on-click="_onClick"/>
           `;
         class Parent extends owl.Component {
@@ -201,9 +208,9 @@ QUnit.module("Components", (hooks) => {
             }
         }
         Parent.components = { SimpleDialog, SubComponent };
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
               <SimpleDialog>
-                  <SubComponent text="'Wow(l) Effect'" t-on-subcomponent-clicked="_onSubcomponentClicked"/>
+                  <SubComponent text="'Wow(l) Effect'" onClicked="_onSubcomponentClicked"/>
               </SimpleDialog>
           `;
         const env = await makeTestEnv();
@@ -218,7 +225,7 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("dialog without header/footer", async function (assert) {
         assert.expect(4);
         class Parent extends owl.Component {}
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
               <SimpleDialog renderHeader="false" renderFooter="false"/>
           `;
         const env = await makeTestEnv();
@@ -233,7 +240,7 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("dialog size can be chosen", async function (assert) {
         assert.expect(5);
         class Parent extends owl.Component {}
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
       <div>
         <SimpleDialog contentClass="'xl'" size="'modal-xl'"/>
         <SimpleDialog contentClass="'lg'"/>
@@ -265,7 +272,7 @@ QUnit.module("Components", (hooks) => {
     QUnit.test("dialog can be rendered on fullscreen", async function (assert) {
         assert.expect(2);
         class Parent extends owl.Component {}
-        Parent.template = owl.tags.xml`
+        Parent.template = owl.xml`
               <div><SimpleDialog fullscreen="true"/></div>
           `;
         Parent.components = { SimpleDialog };
@@ -280,28 +287,31 @@ QUnit.module("Components", (hooks) => {
         class Parent extends owl.Component {
             setup() {
                 this.ui = useService("ui");
-                this.dialog = useRef("dialogRef");
+                this.modal = null;
                 assert.strictEqual(
                     this.ui.activeElement,
                     document,
                     "UI active element should be the default (document) as Parent is not mounted yet"
                 );
             }
+            setModalRef(modalEl) {
+                this.modal = modalEl;
+            }
             mounted() {
-                const dialogModalEl = this.dialog.comp.modalRef.el;
                 assert.strictEqual(
                     this.ui.activeElement,
-                    dialogModalEl,
+                    this.modal,
                     "UI active element should be the dialog modal"
                 );
             }
         }
         const env = await makeTestEnv();
-        Parent.template = owl.tags.xml`<div><SimpleDialog t-ref="dialogRef"/></div>`;
+        Parent.template = owl.xml`<div><SimpleDialog setModalRef="setModalRef.bind(this)"/></div>`;
         Parent.components = { SimpleDialog };
-        parent = await mount(Parent, { env, target });
 
-        parent.unmount();
+        const parent = await mount(Parent, { env, target });
+        destroy(parent);
+
         assert.strictEqual(
             env.services.ui.activeElement,
             document,

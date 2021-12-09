@@ -5,8 +5,7 @@ odoo.define('web.CustomFavoriteItem', function (require) {
     const { useAutofocus } = require('web.custom_hooks');
     const { useModel } = require('web.Model');
 
-    const { Component, hooks, useState } = owl;
-    const { useRef } = hooks;
+    const { Component, useRef, useState } = owl;
 
     let favoriteId = 0;
 
@@ -30,9 +29,7 @@ odoo.define('web.CustomFavoriteItem', function (require) {
      * and save the context to a new filter.
      */
     class CustomFavoriteItem extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             const favId = favoriteId++;
             this.useByDefaultId = `o_favorite_use_by_default_${favId}`;
             this.shareAllUsersId = `o_favorite_share_all_users_${favId}`;

@@ -8,10 +8,8 @@ import { patch, unpatch } from "@web/core/utils/patch";
 import { session } from "@web/session";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
-import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { getFixture, mount, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
-
-const { mount } = owl;
 
 const terms = { Hello: "Bonjour" };
 const serviceRegistry = registry.category("services");
@@ -21,7 +19,7 @@ QUnit.module("Translations");
 
 QUnit.test("can translate a text node", async (assert) => {
     assert.expect(1);
-    TestComponent.template = owl.tags.xml`<div>Hello</div>`;
+    TestComponent.template = owl.xml`<div>Hello</div>`;
     serviceRegistry.add("localization", makeFakeLocalizationService());
     const env = await makeTestEnv();
     patch(translatedTerms, "add translations", terms);
@@ -34,7 +32,7 @@ QUnit.test("can translate a text node", async (assert) => {
 QUnit.test("can lazy translate", async (assert) => {
     assert.expect(3);
 
-    TestComponent.template = owl.tags.xml`<div><t t-esc="constructor.someLazyText" /></div>`;
+    TestComponent.template = owl.xml`<div><t t-esc="constructor.someLazyText" /></div>`;
     TestComponent.someLazyText = _lt("Hello");
     assert.strictEqual(TestComponent.someLazyText.toString(), "Hello");
     assert.strictEqual(TestComponent.someLazyText.valueOf(), "Hello");
@@ -50,7 +48,7 @@ QUnit.test("can lazy translate", async (assert) => {
 
 QUnit.test("_t is in env", async (assert) => {
     assert.expect(1);
-    TestComponent.template = owl.tags.xml`<div><t t-esc="env._t('Hello')"/></div>`;
+    TestComponent.template = owl.xml`<div><t t-esc="env._t('Hello')"/></div>`;
     serviceRegistry.add("localization", makeFakeLocalizationService());
     const env = await makeTestEnv();
     patch(translatedTerms, "add translations", terms);
@@ -66,7 +64,7 @@ QUnit.test("luxon is configured in the correct lang", async (assert) => {
         luxon.Settings.defaultLocale = defaultLocale;
     });
     patchWithCleanup(session, {
-        user_context: {...session.user_context, lang: "fr_BE"},
+        user_context: { ...session.user_context, lang: "fr_BE" },
     });
     patchWithCleanup(browser, {
         fetch() {

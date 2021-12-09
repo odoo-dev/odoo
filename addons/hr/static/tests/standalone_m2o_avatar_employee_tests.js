@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-    const { xml } = owl.tags;
+    const { xml } = owl;
 
     import AbstractRendererOwl from 'web.AbstractRendererOwl';
     import BasicView from "web.BasicView";

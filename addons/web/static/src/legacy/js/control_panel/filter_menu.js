@@ -16,8 +16,7 @@ odoo.define('web.FilterMenu', function (require) {
      */
     class FilterMenu extends Component {
 
-        constructor() {
-            super(...arguments);
+        setup() {
             this.icon = FACET_ICONS.filter;
             this.model = useModel('searchModel');
         }

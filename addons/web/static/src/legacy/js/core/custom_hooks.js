@@ -1,8 +1,7 @@
-odoo.define('web.custom_hooks', function (require) {
+odoo.define("web.custom_hooks", function () {
     "use strict";
 
-    const { Component } = owl;
-    const { useEffect } = require("@web/core/utils/hooks");
+    const { useComponent, useEffect } = owl;
 
     /**
      * Focus a given selector as soon as it appears in the DOM and if it was not
@@ -14,7 +13,7 @@ odoo.define('web.custom_hooks', function (require) {
      * @returns {Function} function that forces the focus on the next update if visible.
      */
     function useAutofocus(params = {}) {
-        const comp = Component.current;
+        const comp = useComponent();
         // Prevent autofocus in mobile
         if (comp.env.device.isMobileDevice) {
             return () => {};
@@ -78,7 +77,7 @@ odoo.define('web.custom_hooks', function (require) {
             throw new Error('The handler must be a function');
         }
 
-        const comp = Component.current;
+        const comp = useComponent();
         let boundHandler;
         if (querySelector) {
             boundHandler = function (ev) {

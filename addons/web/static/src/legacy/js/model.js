@@ -4,8 +4,7 @@ odoo.define("web.Model", function (require) {
     const { groupBy, partitionBy } = require("web.utils");
     const Registry = require("web.Registry");
 
-    const { Component, core } = owl;
-    const { EventBus, Observer } = core;
+    const { Component, EventBus, useComponent, onWillDestroy, onWillRender } = owl;
     const isNotNull = (val) => val !== null && val !== undefined;
 
     /**
@@ -445,6 +444,8 @@ odoo.define("web.Model", function (require) {
 
     Model.Extension = ModelExtension;
 
+    let nextId = 1;
+    const componentIds = new WeakMap();
     /**
      * This is more or less the hook 'useContextWithCB' from owl only slightly
      * simplified.
@@ -453,7 +454,7 @@ odoo.define("web.Model", function (require) {
      * @returns {model}
      */
     function useModel(modelName) {
-        const component = Component.current;
+        const component = useComponent();
         const model = component.env[modelName];
         if (!(model instanceof Model)) {
             throw new Error(`No Model found when connecting '${
@@ -462,38 +463,32 @@ odoo.define("web.Model", function (require) {
         }
 
         const mapping = model.mapping;
-        const __owl__ = component.__owl__;
-        const componentId = __owl__.id;
-        if (!__owl__.observer) {
-            __owl__.observer = new Observer();
-            __owl__.observer.notifyCB = component.render.bind(component);
+        if (!componentIds.has(component)) {
+            componentIds.set(component, nextId++);
         }
-        const currentCB = __owl__.observer.notifyCB;
-        __owl__.observer.notifyCB = function () {
+        const componentId = componentIds.get(component);
+        const currentCB = component.render.bind(component);
+        component.render = function () {
             if (model.rev > mapping[componentId]) {
                 return;
             }
             currentCB();
         };
         mapping[componentId] = 0;
-        const renderFn = __owl__.renderFn;
-        __owl__.renderFn = function (comp, params) {
+        onWillRender(() => {
             mapping[componentId] = model.rev;
-            return renderFn(comp, params);
-        };
+        });
 
-        model.on("update", component, async (modelRev) => {
+        const onUpdate = async (modelRev) => {
             if (mapping[componentId] < modelRev) {
                 mapping[componentId] = modelRev;
                 await component.render();
             }
-        });
-
-        const __destroy = component.__destroy;
-        component.__destroy = (parent) => {
-            model.off("update", component);
-            __destroy.call(component, parent);
         };
+        model.addEventListener("update", onUpdate);
+        onWillDestroy(() => {
+            model.removeEventListener("update", onUpdate);
+        });
 
         return model;
     }

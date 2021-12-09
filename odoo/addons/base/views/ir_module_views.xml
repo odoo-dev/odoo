@@ -215,7 +215,8 @@
         <record id="open_module_tree" model="ir.actions.act_window">
             <field name="name">Apps</field>
             <field name="res_model">ir.module.module</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">graph,kanban,tree,form</field>
+            <!-- NXOWL kanban,tree,form -->
             <field name="context">{'search_default_app':1}</field>
             <field name="search_view_id" ref="view_module_filter"/>
             <field name="help" type="html">

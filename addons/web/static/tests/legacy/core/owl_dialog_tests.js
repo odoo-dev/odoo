@@ -6,17 +6,14 @@ odoo.define('web.owl_dialog_tests', function (require) {
     const makeTestEnvironment = require('web.test_env');
     const Dialog = require('web.OwlDialog');
     const testUtils = require('web.test_utils');
-    const { registry } = require("@web/core/registry");
-    const { makeFakeDialogService } = require("@web/../tests/helpers/mock_services");
 
     const { makeLegacyDialogMappingTestEnv } = require('@web/../tests/helpers/legacy_env_utils');
     const { Dialog: WowlDialog } = require("@web/core/dialog/dialog");
-    const { getFixture, nextTick, patchWithCleanup } = require("@web/../tests/helpers/utils");
+    const { getFixture, nextTick  } = require("@web/../tests/helpers/utils");
     const { createWebClient, doAction } = require("@web/../tests/webclient/helpers");
 
-    const { Component, tags, useState, mount } = owl;
+    const { Component, useState, mount, xml } = owl;
     const EscapeKey = { key: 'Escape', keyCode: 27, which: 27 };
-    const { xml } = tags;
 
     QUnit.module('core', {}, function () {
         QUnit.module('OwlDialog');
@@ -58,8 +55,8 @@ odoo.define('web.owl_dialog_tests', function (require) {
                     subtitle="state.subtitle"
                     technical="state.technical"
                     title="state.title"
-                    t-on-dialog-closed="_onDialogClosed"
                     >
+                    <!-- t-on-dialog-closed="_onDialogClosed" NXOWL -->
                     <SubComponent text="state.textContent"/>
                     <t t-set="buttons">
                         <button class="btn btn-primary" t-on-click="_onButtonClicked">The Button</button>
@@ -192,8 +189,8 @@ odoo.define('web.owl_dialog_tests', function (require) {
                 <div>
                     <Dialog t-foreach="dialogIds" t-as="dialogId" t-key="dialogId"
                         contentClass="'dialog_' + dialogId"
-                        t-on-dialog-closed="_onDialogClosed(dialogId)"
-                    />
+                        />
+                        <!-- NXOWL t-on-dialog-closed="_onDialogClosed(dialogId)"-->
                 </div>`;
 
             const parent = new Parent();
@@ -289,7 +286,9 @@ odoo.define('web.owl_dialog_tests', function (require) {
                 }
             }
             OwlDialogWrapper.template = xml`
-                <Dialog t-on-dialog-closed="props.close()" />
+                <Dialog
+                />
+                <!-- NXOWL t-on-dialog-closed="props.close()" -->
             `;
             OwlDialogWrapper.components = { Dialog };
             class WowlDialogSubClass extends WowlDialog{

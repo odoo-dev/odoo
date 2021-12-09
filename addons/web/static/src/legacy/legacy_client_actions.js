@@ -9,23 +9,23 @@ import { useSetupAction } from "../webclient/actions/action_hook";
 import { ClientActionAdapter } from "./action_adapters";
 import { breadcrumbsToLegacy } from "./backend_utils";
 
-const { Component, hooks, tags } = owl;
+const { Component, useRef, xml } = owl;
 const actionRegistry = registry.category("actions");
 
-const legacyClientActionTemplate = tags.xml`
+const legacyClientActionTemplate = xml`
     <ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget"
-                         onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
-                         t-on-scrollTo.stop="onScrollTo"/>`;
+                         onReverseBreadcrumb="onReverseBreadcrumb"/>`;
 
+// NXOWL t-ref="controller"
+// NXOWL t-on-scrollTo.stop="onScrollTo"
 // registers an action from the legacy action registry to the wowl one, ensuring
 // that widget actions are actually Components
 function registerClientAction(name, action) {
     if (action.prototype instanceof Widget) {
         // the action is a widget, wrap it into a Component and register that component
         class Action extends Component {
-            constructor() {
-                super(...arguments);
-                this.controllerRef = hooks.useRef("controller");
+            setup() {
+                this.controllerRef = useRef("controller");
                 this.Widget = action;
                 const options = {};
                 for (const key in this.props) {

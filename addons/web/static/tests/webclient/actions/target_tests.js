@@ -345,11 +345,11 @@ QUnit.module("ActionManager", (hooks) => {
                 throw new Error("my error");
             }
         }
-        ErrorClientAction.template = owl.tags.xml`<div/>`;
+        ErrorClientAction.template = owl.xml`<div/>`;
         registry.category("actions").add("failing", ErrorClientAction);
 
         class ClientActionTargetNew extends owl.Component {}
-        ClientActionTargetNew.template = owl.tags.xml`<div class="my_action_new" />`;
+        ClientActionTargetNew.template = owl.xml`<div class="my_action_new" />`;
         registry.category("actions").add("clientActionNew", ClientActionTargetNew);
 
         class ClientAction extends owl.Component {
@@ -367,7 +367,7 @@ QUnit.module("ActionManager", (hooks) => {
                 }
             }
         }
-        ClientAction.template = owl.tags.xml`<div class="my_action" t-on-click="onClick" />`;
+        ClientAction.template = owl.xml`<div class="my_action" t-on-click="onClick" />`;
         registry.category("actions").add("clientAction", ClientAction);
 
         const errorDialogOpened = makeDeferred();

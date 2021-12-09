@@ -5,9 +5,7 @@ odoo.define('web.popover_tests', function (require) {
     const Popover = require('web.Popover');
     const testUtils = require('web.test_utils');
 
-    const { Component, tags, hooks } = owl;
-    const { useRef, useState } = hooks;
-    const { xml } = tags;
+    const { Component, useRef, useState, xml } = owl;
 
     QUnit.module('core', {}, function () {
         QUnit.module('Popover');
@@ -34,10 +32,11 @@ odoo.define('web.popover_tests', function (require) {
             // Popover should be included as a globally available Component
             Parent.components = { SubComponent };
             Parent.env = makeTestEnvironment();
+            // NXOWL t-ref="popoverRef" on Popover
             Parent.template = xml`
                 <div>
                     <button id="passiveTarget">🚫</button>
-                    <Popover t-ref="popoverRef"
+                    <Popover
                         position="state.position"
                         title="state.title"
                         >

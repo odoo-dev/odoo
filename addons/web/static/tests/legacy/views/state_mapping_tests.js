@@ -27,7 +27,6 @@ import { browser } from "@web/core/browser/browser";
 
 const serviceRegistry = registry.category("services");
 const viewRegistry = registry.category("views");
-const searchModelRegistry = registry.category("search_models");
 
 let serverData;
 QUnit.module("Views", (hooks) => {
@@ -81,7 +80,7 @@ QUnit.module("Views", (hooks) => {
         ToyView.icon = "fab fa-android";
         ToyView.multiRecord = true;
         ToyView.searchMenuTypes = ["filter", "groupBy", "comparison", "favorite"];
-        ToyView.template = owl.tags.xml`
+        ToyView.template = owl.xml`
             <div class="o_toy_view">
                 <ControlPanel />
             </div>
@@ -400,6 +399,72 @@ QUnit.module("Views", (hooks) => {
 
             assert.containsOnce(webClient, ".o_switch_view.o_legacy_toy.active");
             assert.verifySteps([`{"locationId":"The place to be"}`]);
+        }
+    );
+
+    QUnit.skip(
+        "owl2test",
+        async function (assert) {
+            serverData.views[
+                "foo,1,legacy_toy"
+            ] = `<legacy_toy js_class="legacy_toy_with_extension"/>`;
+
+            class SearchModelExtension extends SearchModel {
+                setup() {
+                    super.setup(...arguments);
+                    this.toyExtension = { locationId: "Grand-Rosière" };
+                }
+
+                exportState() {
+                    const exportedState = super.exportState(...arguments);
+                    exportedState.toyExtension = this.toyExtension;
+                    return exportedState;
+                }
+
+                _importState(state) {
+                    super._importState(state);
+                    this.toyExtension = state.toyExtension;
+                    assert.step(JSON.stringify(state.toyExtension));
+                }
+            }
+
+            const ToyView = viewRegistry.get("toy");
+            ToyView.SearchModel = SearchModelExtension;
+
+            class ToyExtension extends ActionModel.Extension {
+                importState(state) {
+                    super.importState(state); // done even if state is undefined in legacy code
+                    assert.step(JSON.stringify(state) || "no state");
+                }
+                prepareState() {
+                    Object.assign(this.state, {
+                        locationId: "The place to be",
+                    });
+                }
+            }
+            ActionModel.registry.add("toyExtension", ToyExtension);
+
+            const LegacyToyView = legacyViewRegistry.get("legacy_toy");
+
+            const LegacyToyViewWithExtension = LegacyToyView.extend({
+                _createSearchModel(params, extraExtensions = {}) {
+                    Object.assign(extraExtensions, { toyExtension: {} });
+                    return this._super(params, extraExtensions);
+                },
+            });
+            legacyViewRegistry.add("legacy_toy_with_extension", LegacyToyViewWithExtension);
+
+            const webClient = await createWebClient({ serverData });
+
+            await doAction(webClient, {
+                name: "Action name",
+                res_model: "foo",
+                type: "ir.actions.act_window",
+                views: [
+                    [false, "toy"],
+                    [1, "legacy_toy"],
+                ],
+            });
         }
     );
 });

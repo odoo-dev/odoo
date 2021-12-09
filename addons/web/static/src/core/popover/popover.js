@@ -18,6 +18,7 @@ Popover.defaultProps = {
     position: "bottom",
 };
 Popover.props = {
+    close: { type: Function },
     popoverClass: {
         optional: true,
         type: String,

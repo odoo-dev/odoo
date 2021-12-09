@@ -7,8 +7,7 @@ odoo.define('web.CustomFilterItem', function (require) {
     const field_utils = require('web.field_utils');
     const { useModel } = require('web.Model');
 
-    const { Component, hooks } = owl;
-    const { useState } = hooks;
+    const { Component, useState } = owl;
 
     /**
      * Filter generator menu
@@ -43,9 +42,7 @@ odoo.define('web.CustomFilterItem', function (require) {
      *                     ]
      */
     class CustomFilterItem extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.model = useModel('searchModel');
 
             this.conditions = useState([]);

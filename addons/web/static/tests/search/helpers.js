@@ -16,7 +16,7 @@ import { click, getFixture, mouseEnter, triggerEvent } from "../helpers/utils";
 const serviceRegistry = registry.category("services");
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
-const { Component, mount } = owl;
+const { App, Component } = owl;
 
 export const setupControlPanelServiceRegistry = () => {
     serviceRegistry.add("action", actionService);
@@ -51,11 +51,20 @@ export const makeWithSearch = async (params) => {
     const env = await makeTestEnv({ serverData, mockRPC, config });
 
     const target = getFixture();
-    const withSearch = await mount(WithSearch, { env, props, target });
 
-    registerCleanup(() => withSearch.destroy());
+    const app = new App(WithSearch, props);
+    env.app = app;
+    app.configure({
+        env,
+        templates: window.__ODOO_TEMPLATES__,
+    });
+    const withSearch = await app.mount(target);
 
-    const component = Object.values(withSearch.__owl__.children)[0];
+    registerCleanup(() => app.destroy());
+
+    const withSearchNode = withSearch.__owl__;
+    const componentNode = Object.values(withSearchNode.children)[0];
+    const component = componentNode.component;
 
     return component;
 };

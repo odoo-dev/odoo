@@ -8,8 +8,7 @@ odoo.define('web.SearchBar', function (require) {
     const { fuzzyTest } = require('@web/core/utils/search');
 
     const CHAR_FIELDS = ['char', 'html', 'many2many', 'many2one', 'one2many', 'text'];
-    const { Component, hooks } = owl;
-    const { useExternalListener, useRef, useState } = hooks;
+    const { Component, useExternalListener, useRef, useState } = owl;
 
     let sourceId = 0;
 
@@ -38,9 +37,7 @@ odoo.define('web.SearchBar', function (require) {
      * @extends Component
      */
     class SearchBar extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.focusOnUpdate = useAutofocus();
             this.inputRef = useRef('search-input');
             this.model = useModel('searchModel');

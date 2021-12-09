@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
     'use strict';
 
-    const { useState } = owl.hooks;
+    const { useState } = owl;
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 

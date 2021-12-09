@@ -23,7 +23,7 @@
                     <i class="fa fa-circle-o" role="img" aria-label="Round Shape" title="Round Shape"></i>
                 </span>
             </span>
-            <span class="edit-button" t-on-click.stop="state.isColorPicker = !state.isColorPicker">
+            <span class="edit-button" t-on-click.stop="() => { state.isColorPicker = !state.isColorPicker }">
                 <i class="fa fa-tint" role="img" aria-label="Tint" title="Tint"></i>
             </span>
             <div t-if="state.isColorPicker and props.selectedTable" class="color-picker fg-picker">

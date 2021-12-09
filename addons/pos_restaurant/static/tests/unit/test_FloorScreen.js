@@ -5,8 +5,7 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
     const { useListener } = require('web.custom_hooks');
     const testUtils = require('web.test_utils');
     const makePosTestEnv = require('point_of_sale.test_env');
-    const { xml } = owl.tags;
-    const { useRef } = owl.hooks;
+    const { xml, useRef } = owl;
 
     QUnit.module('FloorScreen components', {});
 
@@ -68,10 +67,10 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
         Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div class="floor-map">
-                <EditableTable table="table" t-ref="table-ref" />
+                <EditableTable table="table"/>
             </div>
         `;
-
+        // NXOWL t-ref="table-ref"
         const parent = new Parent();
         await parent.mount(testUtils.prepareTarget());
 

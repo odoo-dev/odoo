@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.TextInputPopup', function(require) {
     'use strict';
 
-    const { useState, useRef } = owl.hooks;
+    const { useState, useRef } = owl;
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registries = require('point_of_sale.Registries');
     const { _lt } = require('@web/core/l10n/translation');

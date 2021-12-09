@@ -40,8 +40,8 @@
                             getScrollableElement="getScrollableElement"
                             hasScrollAdjust="chatter.hasMessageListScrollAdjust"
                             threadViewLocalId="chatter.threadView.localId"
-                            t-ref="thread"
                         />
+                            <!-- NXOWL t-ref="thread" -->
                     </t>
                 </div>
             </t>

@@ -5,7 +5,7 @@ odoo.define('web.basic_view_tests', function (require) {
     const BasicRenderer = require("web.BasicRenderer");
     const testUtils = require('web.test_utils');
     const widgetRegistryOwl = require('web.widgetRegistry');
-    const { xml } = owl.tags;
+    const { xml } = owl;
 
     const createView = testUtils.createView;
 

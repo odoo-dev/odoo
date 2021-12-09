@@ -6,6 +6,8 @@ import { patch, unpatch } from "@web/core/utils/patch";
 import { registerCleanup } from "./cleanup";
 import { download } from "@web/core/network/download";
 
+const { App, onMounted, onPatched, useComponent } = owl;
+
 /**
  * Patch the native Date object
  *
@@ -339,4 +341,40 @@ export function mockAnimationFrame() {
         }
         callbacks.clear();
     };
+}
+
+export async function mount(Comp, { props, target, env }) {
+    const app = new App(Comp, props);
+    registerCleanup(() => {
+        app.destroy();
+    });
+    env = env || {};
+    const configuration = {
+        env,
+        templates: window.__ODOO_TEMPLATES__,
+        dev: env.debug,
+    };
+    if (env.services && "localization" in env.services) {
+        configuration.translateFn = env._t;
+    }
+    app.configure(configuration);
+    return app.mount(target);
+}
+
+export function destroy(comp) {
+    if (comp.__owl__ !== comp.__owl__.app.root) {
+        throw new Error("This method should only be called on root component");
+    }
+    comp.__owl__.destroy();
+}
+
+// partial replacement of t-ref on component
+export function useChild() {
+    const node = useComponent().__owl__;
+    const setChild = () => {
+        const componentNode = Object.values(node.children)[0];
+        node.component.child = componentNode.component;
+    };
+    onMounted(setChild);
+    onPatched(setChild);
 }

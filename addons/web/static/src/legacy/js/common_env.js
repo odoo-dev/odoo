@@ -49,7 +49,6 @@ odoo.define("web.commonEnv", function (require) {
         bus,
         device,
         isDebug,
-        qweb: new owl.QWeb({ translateFn: _t }),
         services: {
             ajaxJsonRPC() {
                 return jsonRpc(...arguments);

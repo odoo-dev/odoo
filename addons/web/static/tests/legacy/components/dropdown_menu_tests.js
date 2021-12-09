@@ -3,8 +3,11 @@ odoo.define('web.dropdown_menu_tests', function (require) {
 
     const DropdownMenu = require('web.DropdownMenu');
     const testUtils = require('web.test_utils');
+    const makeTestEnvironment  = require("web.test_env");
+    const { mount } = require("@web/../tests/helpers/utils");
 
     const { createComponent } = testUtils;
+    const { Component, useState, xml } = owl;
 
     QUnit.module('Components', {
         beforeEach: function () {
@@ -64,8 +67,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
 
             assert.containsNone(dropdown, '.dropdown-menu',
                 "Clicking outside of the dropdown should close it");
-
-            dropdown.destroy();
         });
 
         QUnit.test('only one dropdown rendering at same time (owl vs bootstrap dropdown)', async function (assert) {
@@ -121,7 +122,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
                 "bs dropdown menu should not be visible");
 
             bsDropdown.remove();
-            dropdown.destroy();
         });
 
         QUnit.test('click on an item without options should toggle it', async function (assert) {
@@ -149,8 +149,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             await testUtils.dom.click(firstItemEl);
             assert.doesNotHaveClass(firstItemEl, 'selected');
             assert.isVisible(firstItemEl);
-
-            dropdown.destroy();
         });
 
         QUnit.test('click on an item should not change url', async function (assert) {
@@ -167,8 +165,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             await testUtils.dom.click(dropdown.el.querySelector('.o_menu_item > a'));
             assert.strictEqual(window.location.href, initialHref,
                 "the url should not have changed after a click on an item");
-
-            dropdown.destroy();
         });
 
         QUnit.test('options rendering', async function (assert) {
@@ -192,8 +188,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             await testUtils.dom.click(firstItemEl);
             assert.hasClass(firstItemEl.querySelector('i'), 'o_icon_right fa fa-caret-right');
             assert.containsN(dropdown, '.dropdown-divider, .dropdown-item', 3);
-
-            dropdown.destroy();
         });
 
         QUnit.test('close menu closes also submenus', async function (assert) {
@@ -213,8 +207,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
 
             await testUtils.dom.click(dropdown.el.querySelector('button'));
             assert.containsN(dropdown, '.dropdown-divider, .dropdown-item', 3);
-
-            dropdown.destroy();
         });
 
         QUnit.test('click on an option should trigger the event "item_option_clicked" with appropriate data', async function (assert) {
@@ -280,8 +272,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             optionELs = dropdown.el.querySelectorAll('.o_menu_item .o_item_option > a');
             assert.doesNotHaveClass(optionELs[0], 'selected');
             assert.doesNotHaveClass(optionELs[1], 'selected');
-
-            dropdown.destroy();
         });
 
         QUnit.test('keyboard navigation', async function (assert) {
@@ -350,29 +340,28 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             await navigate('Escape', true); // Close the dropdown
 
             assert.containsNone(dropdown, '.dropdown-menu', "Dropdown should be folded");
-
-            dropdown.destroy();
         });
 
         QUnit.test('interactions between multiple dropdowns', async function (assert) {
             assert.expect(7);
 
-            const props = { items: this.items };
-            class Parent extends owl.Component {
-                constructor() {
-                    super(...arguments);
-                    this.state = owl.useState(props);
+            const items = this.items;
+            class Parent extends Component {
+                setup() {
+                    this.state = useState({ items });
                 }
             }
             Parent.components = { DropdownMenu };
-            Parent.template = owl.tags.xml`
+            Parent.template = xml`
                 <div>
-                    <DropdownMenu class="first" title="'First'" items="state.items"/>
-                    <DropdownMenu class="second" title="'Second'" items="state.items"/>
+                    <DropdownMenu title="'First'" items="state.items"/>
+                    <DropdownMenu title="'Second'" items="state.items"/>
                 </div>`;
-            const parent = new Parent();
-            await parent.mount(testUtils.prepareTarget(), { position: 'first-child' });
+            const env = makeTestEnvironment();
+            const target = testUtils.prepareTarget();
 
+            const parent = await mount(Parent, { env, target });
+    
             const [menu1, menu2] = parent.el.querySelectorAll('.dropdown');
 
             assert.containsNone(parent, '.dropdown-menu');
@@ -380,20 +369,19 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             await testUtils.dom.click(menu1.querySelector('button'));
 
             assert.containsOnce(parent, '.dropdown-menu');
-            assert.containsOnce(parent, '.dropdown.first .dropdown-menu');
+            const [first, second] = parent.el.querySelectorAll(".dropdown");
+            assert.containsOnce(first, '.dropdown-menu');
 
             await testUtils.dom.click(menu2.querySelector('button'));
 
             assert.containsOnce(parent, '.dropdown-menu');
-            assert.containsOnce(parent, '.dropdown.second .dropdown-menu');
+            assert.containsOnce(second, '.dropdown-menu');
 
             await testUtils.dom.click(menu2.querySelector('.o_menu_item a'));
             await testUtils.dom.click(menu1.querySelector('button'));
 
             assert.containsOnce(parent, '.dropdown-menu');
-            assert.containsOnce(parent, '.dropdown.first .dropdown-menu');
-
-            parent.destroy();
+            assert.containsOnce(first, '.dropdown-menu');
         });
 
         QUnit.test("dropdown doesn't get close on mousedown inside and mouseup outside dropdown", async function (assert) {
@@ -405,19 +393,20 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             assert.expect(5);
 
             const items = this.items;
-            class Parent extends owl.Component {
-                constructor() {
-                    super(...arguments);
+            class Parent extends Component {
+                setup() {
                     this.items = items;
                 }
             }
             Parent.components = { DropdownMenu };
-            Parent.template = owl.tags.xml`
+            Parent.template = xml`
                 <div>
-                    <DropdownMenu class="first" title="'First'" items="items"/>
+                    <DropdownMenu title="'First'" items="items"/>
                 </div>`;
-            const parent = new Parent();
-            await parent.mount(testUtils.prepareTarget(), { position: "first-child" });
+            const env = makeTestEnvironment();
+            const target = testUtils.prepareTarget();
+
+            const parent = await mount(Parent, { env, target });
 
             const menu = parent.el.querySelector(".dropdown");
             assert.doesNotHaveClass(menu, "show", "dropdown should not be open");
@@ -435,8 +424,6 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             await testUtils.dom.triggerEvents(parent.el, "click");
             assert.hasClass(menu, "show", "dropdown should still be open");
             assert.hasClass(firstItemEl.querySelector("i"), "o_icon_right fa fa-caret-down");
-
-            parent.destroy();
         });
     });
 });

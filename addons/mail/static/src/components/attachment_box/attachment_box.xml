@@ -16,8 +16,8 @@
                         <DropZone
                             className="'o_AttachmentBox_dropZone'"
                             onDropzoneFilesDropped="_onDropZoneFilesDropped"
-                            t-ref="dropzone"
                         />
+                            <!-- NXOWL t-ref="dropzone" -->
                     </t>
                     <t t-if="attachmentBoxView.chatter.attachmentList">
                         <AttachmentList
@@ -34,8 +34,8 @@
                 <FileUploader
                     threadLocalId="attachmentBoxView.chatter.thread.localId"
                     onAttachmentCreated="attachmentBoxView.onAttachmentCreated"
-                    t-ref="fileUploader"
                 />
+                    <!-- NXOWL t-ref="fileUploader" -->
             </t>
         </div>
     </t>

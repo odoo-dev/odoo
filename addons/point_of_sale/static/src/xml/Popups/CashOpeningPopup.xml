@@ -22,7 +22,8 @@
                     <div class="button" t-on-click="startSession()">Open session</div>
                 </footer>
             </div>
-            <MoneyDetailsPopup t-ref="moneyDetails" t-on-money-details-validated="updateCashOpening"/>
+            <MoneyDetailsPopup t-on-money-details-validated="updateCashOpening"/>
+        <!-- NXOWL t-ref="moneyDetails"  -->
         </div>
     </t>
 </templates>

@@ -1,5 +1,5 @@
 /** @odoo-module **/
-const { Component, hooks, tags } = owl;
+const { Component, useRef, xml } = owl;
 
 import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "../webclient/actions/action_hook";
@@ -24,19 +24,19 @@ function getJsClassWidget(fieldsInfo) {
     return legacyViewRegistry.get(key);
 }
 
-const legacyViewTemplate = tags.xml`
+const legacyViewTemplate = xml`
     <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"
-                 widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
-                 t-on-scrollTo.stop="onScrollTo"/>`;
+                 widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" />`;
+// t-ref="controller" NXOWL
+// t-on-scrollTo.stop="onScrollTo"
 
 // registers a view from the legacy view registry to the wowl one, but wrapped
 // into an Owl Component
 function registerView(name, LegacyView) {
     class Controller extends Component {
-        constructor() {
-            super(...arguments);
+        setup() {
             this.vm = useService("view");
-            this.controllerRef = hooks.useRef("controller");
+            this.controllerRef = useRef("controller");
             this.Widget = Widget; // fool the ComponentAdapter with a simple Widget
             this.View = LegacyView;
             this.viewInfo = {};
@@ -89,11 +89,11 @@ function registerView(name, LegacyView) {
             this.widget = this.props.state && this.props.state.__legacy_widget__;
             this.onReverseBreadcrumb =
                 this.props.state && this.props.state.__on_reverse_breadcrumb__;
-            useSetupAction({
-                beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
-                getGlobalState: () => getGlobalState(this.controllerRef.comp.exportState()),
-                getLocalState: () => getLocalState(this.controllerRef.comp.exportState()),
-            });
+            // useSetupAction({
+            //     beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
+            //     getGlobalState: () => getGlobalState(this.controllerRef.comp.exportState()),
+            //     getLocalState: () => getLocalState(this.controllerRef.comp.exportState()),
+            // });
             this.onScrollTo = (ev) => {
                 setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });
             };

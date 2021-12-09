@@ -1,7 +1,7 @@
 odoo.define("base.abstract_controller_tests", function (require) {
 "use strict";
 
-const { xml } = owl.tags;
+const { xml } = owl;
 
 var testUtils = require("web.test_utils");
 var createView = testUtils.createView;

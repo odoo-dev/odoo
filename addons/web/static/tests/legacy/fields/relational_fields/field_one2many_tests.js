@@ -10049,7 +10049,7 @@ QUnit.module('fields', {}, function () {
                 }
             }
 
-            TestField.template = owl.tags.xml`<span>test</span>`;
+            TestField.template = owl.xml`<span>test</span>`;
             fieldRegistryOwl.add('test_field', TestField);
 
             const def = testUtils.makeTestPromise();

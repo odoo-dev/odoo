@@ -14,7 +14,7 @@ odoo.define('web.CustomCheckbox', function (require) {
      *     value="boolean"
      *     disabled="boolean"
      *     text="'Change the label text'"
-     *     t-on-change="_onValueChange"
+     *     onChange="_onValueChange"
      *     />
      * 
      * @extends Component
@@ -27,9 +27,13 @@ odoo.define('web.CustomCheckbox', function (require) {
          * @param {boolean} [props.disabled=false]
          * @param {string} [props.text]
          */
-        constructor() {
-            super(...arguments);
+        setup() {
             this._id = `checkbox-comp-${utils.generateID()}`;
+        }
+        onChange(ev) {
+            if (this.props.onChange) {
+                this.props.onChange(ev);
+            }
         }
     }
 
@@ -40,6 +44,10 @@ odoo.define('web.CustomCheckbox', function (require) {
         },
         disabled: {
             type: Boolean,
+            optional: 1,
+        },
+        onChange: {
+            type: Function,
             optional: 1,
         },
         value: {

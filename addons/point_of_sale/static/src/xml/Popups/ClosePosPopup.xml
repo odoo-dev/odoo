@@ -99,7 +99,8 @@
                     <div class="button" t-att-class="{'disabled': !canCloseSession()}" t-on-click="closeSession()">Close Session</div>
                 </footer>
             </div>
-            <MoneyDetailsPopup t-ref="moneyDetails" t-on-money-details-validated="updateCountedCash"/>
+            <MoneyDetailsPopup t-on-money-details-validated="updateCountedCash"/>
+         <!-- NXOWL t-ref="moneyDetails"  -->
         </div>
     </t>
 

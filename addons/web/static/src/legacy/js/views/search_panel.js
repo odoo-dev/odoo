@@ -2,8 +2,7 @@
 
     import { Model, useModel } from "web.Model";
 
-    const { Component, hooks } = owl;
-    const { useState, useSubEnv } = hooks;
+    const { Component, useState, useSubEnv } = owl;
 
     /**
      * Search panel
@@ -17,6 +16,8 @@
      */
     class SearchPanel extends Component {
         setup() {
+            this.env = Object.create(this.env);
+            this.env.searchModel = this.props.searchModel;
             useSubEnv({ searchModel: this.props.searchModel });
 
             this.state = useState({

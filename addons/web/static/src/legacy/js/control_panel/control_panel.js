@@ -11,8 +11,7 @@ odoo.define('web.ControlPanel', function (require) {
     const SearchBar = require('web.SearchBar');
     const { useModel } = require('web.Model');
 
-    const { Component, hooks } = owl;
-    const { useRef, useSubEnv } = hooks;
+    const { Component, useRef, useSubEnv } = owl;
 
     /**
      * TODO: remove this whole mechanism as soon as `cp_content` is completely removed.
@@ -97,11 +96,13 @@ odoo.define('web.ControlPanel', function (require) {
      * @extends Component
      */
     class ControlPanel extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.additionalContent = getAdditionalContent(this.props);
 
+            this.env = Object.create(this.env);
+            // this.env.action = this.props.action;
+            this.env.searchModel = this.props.searchModel;
+            this.env.view = this.props.view;
             useSubEnv({
                 action: this.props.action,
                 searchModel: this.props.searchModel,

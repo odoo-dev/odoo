@@ -4,8 +4,7 @@ odoo.define('web.DropdownMenu', function (require) {
     const { _t } = require('web.core');
     const DropdownMenuItem = require('web.DropdownMenuItem');
 
-    const { Component, hooks } = owl;
-    const { useExternalListener, useRef, useState } = hooks;
+    const { Component, useExternalListener, useRef, useState } = owl;
 
     /**
      * Dropdown menu
@@ -29,9 +28,7 @@ odoo.define('web.DropdownMenu', function (require) {
      * @extends Component
      */
     class DropdownMenu extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.dropdownMenu = useRef('dropdown');
             this.state = useState({ open: false });
 

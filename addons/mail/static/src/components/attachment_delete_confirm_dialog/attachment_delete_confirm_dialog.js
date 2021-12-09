@@ -4,8 +4,7 @@ import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
 import Dialog from 'web.OwlDialog';
 
-const { Component } = owl;
-const { useRef } = owl.hooks;
+const { Component, useRef } = owl;
 
 export class AttachmentDeleteConfirmDialog extends Component {
 
