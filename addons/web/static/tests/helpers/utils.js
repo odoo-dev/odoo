@@ -345,8 +345,16 @@ export function mockAnimationFrame() {
 
 export async function mount(Comp, { props, target, env }) {
     const app = new App(Comp, props);
+    const destroy = app.destroy.bind(app);
+    let alreadyDestroyed = false;
+    app.destroy = () => {
+        alreadyDestroyed = true;
+        destroy();
+    };
     registerCleanup(() => {
-        app.destroy();
+        if (!alreadyDestroyed) {
+            app.destroy();
+        }
     });
     env = env || {};
     const configuration = {
@@ -377,4 +385,18 @@ export function useChild() {
     };
     onMounted(setChild);
     onPatched(setChild);
+}
+
+const lifeCycleHooks = ['onError', 'onMounted', 'onPatched', 'onRendered', 'onWillDestroy', 'onWillPatch', 'onWillRender', 'onWillStart', 'onWillUnmount', 'onWillUpdateProps'];
+export function useLogLifeCycle(logFn, name = "") {
+    const component = owl.useComponent();
+    let loggedName = `${component.constructor.name}`;
+    if (name) {
+        loggedName = `${component.constructor.name} ${name}`;
+    }
+    for (const hook of lifeCycleHooks) {
+        owl[hook](() => {
+            logFn(`${hook} ${loggedName}`);
+        });
+    }
 }

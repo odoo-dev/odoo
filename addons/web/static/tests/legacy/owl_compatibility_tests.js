@@ -17,7 +17,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
     const nextTick = testUtils.nextTick;
     const addMockEnvironmentOwl = testUtils.mock.addMockEnvironmentOwl;
 
-    const { mount } = require("@web/../tests/helpers/utils");
+    const { mount, useLogLifeCycle } = require("@web/../tests/helpers/utils");
 
     const {
         Component,
@@ -321,9 +321,8 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             assert.verifySteps(['render', 'update', 'render']);
         });
 
-        QUnit.skip("sub widget methods are correctly called", async function (assert) {
-            // LPE Fixme: outdated ??
-            assert.expect(8);
+        QUnit.test("sub widget methods are correctly called", async function (assert) {
+            assert.expect(5);
 
             const MyWidget = Widget.extend({
                 on_attach_callback: function () {
@@ -354,12 +353,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
 
             assert.verifySteps(['on_attach_callback']);
 
-            parent.unmount();
-            await parent.mount(target);
-
-            assert.verifySteps(['on_detach_callback', 'on_attach_callback']);
-
-            parent.destroy();
+            parent.__owl__.app.destroy();
 
             assert.verifySteps(['on_detach_callback', 'destroy']);
         });
@@ -661,8 +655,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             assert.verifySteps(['a', 'c']);
         });
 
-        QUnit.skip("adapter keeps same el as sub widget (modify)", async function (assert) {
-            // LPE Fixme: doesn't seem to have much relevance now, does it ?
+        QUnit.test("adapter contains the el of sub widget as firstChild (modify)", async function (assert) {
             assert.expect(7);
 
             let myWidget;
@@ -713,20 +706,22 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             const target = testUtils.prepareTarget();
             const parent = await mount(Parent, { target });
 
-            assert.strictEqual(parent.el, myWidget.el);
-            await testUtils.dom.click(parent.el);
+            const widgetEl = myWidget.el;
+
+            assert.strictEqual(target.firstChild, widgetEl);
+            await testUtils.dom.click(widgetEl);
 
             parent.state.name = "AAB";
             await nextTick();
 
-            assert.strictEqual(parent.el, myWidget.el);
-            await testUtils.dom.click(parent.el);
+            assert.strictEqual(widgetEl, myWidget.el);
+            await testUtils.dom.click(widgetEl);
 
             parent.state.name = "MCM";
             await nextTick();
 
-            assert.strictEqual(parent.el, myWidget.el);
-            await testUtils.dom.click(parent.el);
+            assert.strictEqual(widgetEl, myWidget.el);
+            await testUtils.dom.click(widgetEl);
 
             assert.verifySteps(["GED", "AAB", "MCM"]);
         });
@@ -885,17 +880,19 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             assert.verifySteps(["willUnmount", "willDestroy"]);
         });
 
-        QUnit.skip("isMounted with several sub components", async function (assert) {
-            assert.expect(9);
+        QUnit.test("lifecycle with several sub components", async function (assert) {
+            assert.expect(21);
 
-            let c1;
-            let c2;
-            class MyComponent extends Component {}
+            class MyComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert), this.props.id);
+                }
+            }
             MyComponent.template = xml`<div>Component <t t-esc="props.id"/></div>`;
             const MyWidget = WidgetAdapter.extend({
                 start() {
-                    c1 = new ComponentWrapper(this, MyComponent, {id: 1});
-                    c2 = new ComponentWrapper(this, MyComponent, {id: 2});
+                    const c1 = new ComponentWrapper(this, MyComponent, {id: 1});
+                    const c2 = new ComponentWrapper(this, MyComponent, {id: 2});
                     return Promise.all([c1.mount(this.el), c2.mount(this.el)]);
                 }
             });
@@ -905,39 +902,54 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             await widget.appendTo(target);
 
             assert.strictEqual(widget.el.innerHTML, '<div>Component 1</div><div>Component 2</div>');
-            assert.ok(c1.__owl__.status === ISMOUNTED);
-            assert.ok(c2.__owl__.status === ISMOUNTED);
+            assert.verifySteps([
+                "onWillStart MyComponent 1",
+                "onWillStart MyComponent 2",
+                "onWillRender MyComponent 1",
+                "onRendered MyComponent 1",
+                "onWillRender MyComponent 2",
+                "onRendered MyComponent 2",
+                "onMounted MyComponent 1",
+                "onMounted MyComponent 2"
+            ]);
 
             widget.$el.detach();
             widget.on_detach_callback();
-
-            assert.ok(c1.__owl__.status !== ISMOUNTED);
-            assert.ok(c2.__owl__.status !== ISMOUNTED);
+            assert.verifySteps([
+                "onWillUnmount MyComponent 1",
+                "onWillUnmount MyComponent 2"
+            ]);
 
             widget.$el.appendTo(target);
             widget.on_attach_callback();
-
-            assert.ok(c1.__owl__.status === ISMOUNTED);
-            assert.ok(c2.__owl__.status === ISMOUNTED);
+            assert.verifySteps([
+                "onMounted MyComponent 1",
+                "onMounted MyComponent 2"
+            ]);
 
             widget.destroy();
-
-            assert.ok(c1.__owl__.status === ISDESTROYED);
-            assert.ok(c2.__owl__.status === ISDESTROYED);
+            assert.verifySteps([
+                "onWillUnmount MyComponent 1",
+                "onWillDestroy MyComponent 1",
+                "onWillUnmount MyComponent 2",
+                "onWillDestroy MyComponent 2"
+            ]);
         });
 
-        QUnit.skip("isMounted with several levels of sub components", async function (assert) {
-            assert.expect(5);
+        QUnit.test("lifecycle with several levels of sub components", async function (assert) {
+            assert.expect(21);
 
-            let child;
             class MyChildComponent extends Component {
-                constructor() {
-                    super(...arguments);
-                    child = this;
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
                 }
             }
             MyChildComponent.template = xml`<div>child</div>`;
-            class MyComponent extends Component {}
+            class MyComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
             MyComponent.template = xml`<div><MyChildComponent/></div>`;
             MyComponent.components = { MyChildComponent };
             const MyWidget = WidgetAdapter.extend({
@@ -952,21 +964,303 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             await widget.appendTo(target);
 
             assert.strictEqual(widget.el.innerHTML, '<div><div>child</div></div>');
-            assert.ok(child.__owl__.status === ISMOUNTED);
+            assert.verifySteps([
+                "onWillStart MyComponent",
+                "onWillRender MyComponent",
+                "onWillStart MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
 
             widget.$el.detach();
             widget.on_detach_callback();
-
-            assert.ok(child.__owl__.status !== ISMOUNTED);
+            assert.verifySteps([
+                "onWillUnmount MyComponent",
+                "onWillUnmount MyChildComponent"
+            ]);
 
             widget.$el.appendTo(target);
             widget.on_attach_callback();
-
-            assert.ok(child.__owl__.status === ISMOUNTED);
+            assert.verifySteps([
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
 
             widget.destroy();
+            assert.verifySteps([
+                "onWillUnmount MyComponent",
+                "onWillUnmount MyChildComponent",
+                "onWillDestroy MyChildComponent",
+                "onWillDestroy MyComponent"
+            ]);
+        });
 
-            assert.ok(child.__owl__.status === ISDESTROYED);
+        QUnit.test("lifecycle mount in fragment", async function (assert) {
+            assert.expect(17);
+
+            class MyChildComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
+            MyChildComponent.template = xml`<div>child</div>`;
+            class MyComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
+            MyComponent.template = xml`<div><MyChildComponent/></div>`;
+            MyComponent.components = { MyChildComponent };
+            const MyWidget = WidgetAdapter.extend({
+                start() {
+                    let component = new ComponentWrapper(this, MyComponent, {});
+                    return component.mount(this.el);
+                }
+            });
+
+            const target = testUtils.prepareTarget();
+            const widget = new MyWidget();
+            const fragment = document.createElement("div");
+            await widget.appendTo(fragment);
+
+            assert.strictEqual(widget.el.innerHTML, '<div><div>child</div></div>');
+            assert.verifySteps([
+                "onWillStart MyComponent",
+                "onWillRender MyComponent",
+                "onWillStart MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+            ]);
+
+            widget.$el.appendTo(target);
+            widget.on_attach_callback();
+            assert.verifySteps([
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
+
+            widget.on_attach_callback();
+            assert.verifySteps([]);
+
+            widget.destroy();
+            assert.verifySteps([
+                "onWillUnmount MyComponent",
+                "onWillUnmount MyChildComponent",
+                "onWillDestroy MyChildComponent",
+                "onWillDestroy MyComponent"
+            ]);
+        });
+
+        QUnit.test("lifecycle mount/unmount", async function (assert) {
+            assert.expect(37);
+
+            class MyChildComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
+            MyChildComponent.template = xml`<div>child</div>`;
+            class MyComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
+            MyComponent.template = xml`<div><MyChildComponent/></div>`;
+            MyComponent.components = { MyChildComponent };
+
+            const target = testUtils.prepareTarget();
+            const widget = new ComponentWrapper(null, MyComponent, {});
+            await widget.mount(target);
+
+            assert.strictEqual(target.innerHTML, "<div><div>child</div></div>");
+            assert.verifySteps([
+                "onWillStart MyComponent",
+                "onWillRender MyComponent",
+                "onWillStart MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
+
+            widget.unmount();
+            assert.strictEqual(target.innerHTML, "");
+            assert.verifySteps([
+                "onWillUnmount MyComponent",
+                "onWillUnmount MyChildComponent",
+            ]);
+
+            await widget.mount();
+
+            assert.verifySteps([
+                "onWillUpdateProps MyComponent",
+                "onWillRender MyComponent",
+                "onWillUpdateProps MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
+            assert.strictEqual(target.innerHTML, "<div><div>child</div></div>");
+
+            widget.unmount();
+            assert.strictEqual(target.innerHTML, "");
+            assert.verifySteps([
+                "onWillUnmount MyComponent",
+                "onWillUnmount MyChildComponent",
+            ]);
+
+            await widget.mount();
+
+            assert.verifySteps([
+                "onWillUpdateProps MyComponent",
+                "onWillRender MyComponent",
+                "onWillUpdateProps MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
+        });
+
+        QUnit.test("lifecycle mount/unmount/update", async function (assert) {
+            assert.expect(24);
+
+            class MyChildComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
+            MyChildComponent.template = xml`<div>child <t t-esc="props.text" /></div>`;
+            class MyComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
+            MyComponent.template = xml`<div><MyChildComponent t-props="props" /></div>`;
+            MyComponent.components = { MyChildComponent };
+
+            const target = testUtils.prepareTarget();
+            const widget = new ComponentWrapper(null, MyComponent, {
+                text: "takeNoMess"
+            });
+            await widget.mount(target);
+
+            assert.strictEqual(target.innerHTML, "<div><div>child takeNoMess</div></div>");
+            assert.verifySteps([
+                "onWillStart MyComponent",
+                "onWillRender MyComponent",
+                "onWillStart MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
+
+            widget.unmount();
+            assert.strictEqual(target.innerHTML, "");
+            assert.verifySteps([
+                "onWillUnmount MyComponent",
+                "onWillUnmount MyChildComponent",
+            ]);
+
+            await widget.update({
+                text: "leveeBreaks"
+            });
+
+            assert.verifySteps([
+                "onWillUpdateProps MyComponent",
+                "onWillRender MyComponent",
+                "onWillUpdateProps MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
+            assert.strictEqual(target.innerHTML, "<div><div>child leveeBreaks</div></div>");
+        });
+
+        QUnit.test("lifecycle mount/unmount/update/render", async function (assert) {
+            assert.expect(36);
+
+            class MyChildComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
+            MyChildComponent.template = xml`<div>child <t t-esc="props.text" /></div>`;
+            class MyComponent extends Component {
+                setup() {
+                    useLogLifeCycle(assert.step.bind(assert));
+                }
+            }
+            MyComponent.template = xml`<div><MyChildComponent t-props="props" /></div>`;
+            MyComponent.components = { MyChildComponent };
+
+            const target = testUtils.prepareTarget();
+            const widget = new ComponentWrapper(null, MyComponent, {
+                text: "takeNoMess"
+            });
+            await widget.mount(target);
+
+            assert.strictEqual(target.innerHTML, "<div><div>child takeNoMess</div></div>");
+            assert.verifySteps([
+                "onWillStart MyComponent",
+                "onWillRender MyComponent",
+                "onWillStart MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
+
+            widget.unmount();
+            assert.strictEqual(target.innerHTML, "");
+            assert.verifySteps([
+                "onWillUnmount MyComponent",
+                "onWillUnmount MyChildComponent",
+            ]);
+
+            await widget.update({
+                text: "leveeBreaks"
+            });
+
+            assert.verifySteps([
+                "onWillUpdateProps MyComponent",
+                "onWillRender MyComponent",
+                "onWillUpdateProps MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onMounted MyChildComponent",
+                "onMounted MyComponent"
+            ]);
+            assert.strictEqual(target.innerHTML, "<div><div>child leveeBreaks</div></div>");
+
+            await widget.render();
+            assert.verifySteps([
+                "onWillUpdateProps MyComponent",
+                "onWillRender MyComponent",
+                "onWillUpdateProps MyChildComponent",
+                "onRendered MyComponent",
+                "onWillRender MyChildComponent",
+                "onRendered MyChildComponent",
+                "onWillPatch MyComponent",
+                "onWillPatch MyChildComponent",
+                "onPatched MyChildComponent",
+                "onPatched MyComponent"
+            ]);
+            assert.strictEqual(target.innerHTML, "<div><div>child leveeBreaks</div></div>");
         });
 
         QUnit.test("sub component can be updated (in DOM)", async function (assert) {
@@ -1034,7 +1328,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             widget.destroy();
         });
 
-        QUnit.skip("update a destroyed sub component", async function (assert) {
+        QUnit.test("update a destroyed sub component", async function (assert) {
             assert.expect(1);
 
             class MyComponent extends Component {}
