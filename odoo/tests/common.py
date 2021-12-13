@@ -20,6 +20,7 @@ import pathlib
 import platform
 import pprint
 import re
+import secrets
 import shutil
 import signal
 import subprocess
@@ -54,8 +55,8 @@ from odoo.exceptions import AccessError
 from odoo.modules.registry import Registry
 from odoo.osv.expression import normalize_domain, TRUE_LEAF, FALSE_LEAF
 from odoo.service import security
-from odoo.sql_db import BaseCursor, Cursor
-from odoo.tools import float_compare, single_email_re, profiler, lower_logging
+from odoo.sql_db import BaseCursor, Cursor, db_connect
+from odoo.tools import float_compare, single_email_re, profiler, lower_logging, Namespace
 from odoo.tools.misc import find_in_path
 from odoo.tools.safe_eval import safe_eval
 
@@ -71,6 +72,7 @@ _logger = logging.getLogger(__name__)
 # The odoo library is supposed already configured.
 ADDONS_PATH = odoo.tools.config['addons_path']
 HOST = '127.0.0.1'
+PORT = odoo.tools.config['http_port']
 # Useless constant, tests are aware of the content of demo data
 ADMIN_USER_ID = odoo.SUPERUSER_ID
 
@@ -188,9 +190,8 @@ class OdooSuite(unittest.suite.TestSuite):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from odoo.http import root
-        if not root._loaded:
-            root.load_addons()
-            root._loaded = True
+        if root.statics is None:
+            root.load_statics()
 
     if sys.version_info < (3, 8):
         # Partial backport of bpo-24412, merged in CPython 3.8
@@ -1502,6 +1503,9 @@ class HttpCase(TransactionCase):
             self.registry.enter_test_mode(self.cr)
             self.addCleanup(self.registry.leave_test_mode)
 
+        self.session_id = ''
+        self.session = Namespace()
+
         self.xmlrpc_common = xmlrpclib.ServerProxy(self.xmlrpc_url + 'common', transport=Transport(self.cr))
         self.xmlrpc_db = xmlrpclib.ServerProxy(self.xmlrpc_url + 'db', transport=Transport(self.cr))
         self.xmlrpc_object = xmlrpclib.ServerProxy(self.xmlrpc_url + 'object', transport=Transport(self.cr))
@@ -1523,7 +1527,7 @@ class HttpCase(TransactionCase):
 
     def url_open(self, url, data=None, files=None, timeout=10, headers=None, allow_redirects=True, head=False):
         if url.startswith('/'):
-            url = "http://%s:%s%s" % (HOST, odoo.tools.config['http_port'], url)
+            url = self.base_url() + url
         if head:
             return self.opener.head(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=False)
         if data or files:
@@ -1551,17 +1555,22 @@ class HttpCase(TransactionCase):
             self._logger.info('remaining requests')
             odoo.tools.misc.dumpstacks()
 
-    def logout(self, keep_db=True):
-        self.session.logout(keep_db=True)
-        odoo.http.root.session_store.save(self.session)
+    def logout(self):
+        with db_connect(self.cr.dbname).cursor() as cr:
+            cr.execute('DELETE FROM ir_session WHERE sid=%s', [self.session_id])
+
+        self.session_id = ''
+        self.session = Namespace()
 
     def authenticate(self, user, password):
         db = get_db_name()
-        if getattr(self, 'session', None):
-            odoo.http.root.session_store.delete(self.session)
 
-        self.session = session  = odoo.http.root.session_store.new()
-        session.db = db
+        if self.session_id:
+            with db_connect(self.cr.dbname).cursor() as cr:
+                cr.execute('DELETE FROM ir_session WHERE sid=%s', [self.session_id])
+
+        self.session_id = secrets.token_urlsafe()
+        self.session = Namespace(odoo.http.DEFAULT_SESSION, sid=self.session_id)
 
         if user: # if authenticated
             # Flush and clear the current transaction.  This is useful, because
@@ -1571,14 +1580,22 @@ class HttpCase(TransactionCase):
             self.cr.clear()
             uid = self.registry['res.users'].authenticate(db, user, password, {'interactive': False})
             env = api.Environment(self.cr, uid, {})
-            session.uid = uid
-            session.login = user
-            session.session_token = uid and security.compute_session_token(session, env)
-            session.context = dict(env['res.users'].context_get() or {})
-            session.context['uid'] = uid
-            session._fix_lang(session.context)
+            self.session.uid = uid
+            self.session.login = user
+            self.session.session_token = uid and security.compute_session_token(self.session, env)
+            self.session.context = env['res.users'].context_get()
 
-        odoo.http.root.session_store.save(session)
+        with db_connect(self.cr.dbname).cursor() as cr:
+            cr.execute("""
+                INSERT INTO ir_session (sid, data, create_date, write_date)
+                VALUES (%(sid)s, %(data)s, NOW(), NOW())
+                ON CONFLICT (sid)
+                    DO UPDATE SET data=%(data)s, write_date=NOW()
+            """, {
+                'sid': self.session.sid,
+                'data': json.dumps(self.session, ensure_ascii=False, sort_keys=True),
+            })
+
         # Reset the opener: turns out when we set cookies['foo'] we're really
         # setting a cookie on domain='' path='/'.
         #
@@ -1593,12 +1610,12 @@ class HttpCase(TransactionCase):
         # An alternative would be to set the cookie to None (unsetting it
         # completely) or clear-ing session.cookies.
         self.opener = Opener(self.cr)
-        self.opener.cookies['session_id'] = session.sid
+        self.opener.cookies['session_id'] = f'{self.session_id}.{db}'
         if self.browser:
             self._logger.info('Setting session cookie in browser')
-            self.browser.set_cookie('session_id', session.sid, '/', HOST)
+            self.browser.set_cookie('session_id', f'{self.session_id}.{db}', '/', HOST)
 
-        return session
+        return self.session
 
     def browser_js(self, url_path, code, ready='', login=None, timeout=60, **kw):
         """ Test js code running in the browser
@@ -1660,7 +1677,7 @@ class HttpCase(TransactionCase):
 
     @classmethod
     def base_url(cls):
-        return "http://%s:%s" % (HOST, odoo.tools.config['http_port'])
+        return f"http://{HOST}:{PORT}"
 
     def start_tour(self, url_path, tour_name, step_delay=None, **kwargs):
         """Wrapper for `browser_js` to start the given `tour_name` with the
