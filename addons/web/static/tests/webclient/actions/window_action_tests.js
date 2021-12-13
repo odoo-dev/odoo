@@ -2014,23 +2014,18 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.skip(
+    QUnit.test(
         "do not call clearUncommittedChanges() when target=new and dialog is opened",
         async function (assert) {
-            assert.expect(2);
             const webClient = await createWebClient({ serverData });
             // Open Partner form view and enter some text
             await doAction(webClient, 3, { viewType: "form" });
-            await legacyExtraNextTick();
-            await testUtils.fields.editInput(
-                target.querySelector(".o_input[name=display_name]"),
-                "TEST"
-            );
+            assert.containsOnce(target, ".o_action_manager .o_form_view .o_form_editable");
+            await editInput(target, ".o_input[name=display_name]", "TEST");
             // Open dialog without saving should not ask to discard
             await doAction(webClient, 5);
-            await legacyExtraNextTick();
-            assert.containsOnce(target, ".o_dialog");
-            assert.containsOnce(target, ".o_dialog .o_act_window .o_view_controller");
+            assert.containsOnce(target, ".o_action_manager .o_form_view .o_form_editable");
+            assert.containsOnce(target, ".o_dialog .o_view_controller");
         }
     );
 
@@ -2077,7 +2072,7 @@ QUnit.module("ActionManager", (hooks) => {
         );
     });
 
-    QUnit.skip("do not restore after action button clicked", async function (assert) {
+    QUnit.test("do not restore after action button clicked", async function (assert) {
         assert.expect(5);
         const mockRPC = async (route, args) => {
             if (route === "/web/dataset/call_button" && args.method === "do_something") {
@@ -2158,7 +2153,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.skip("doAction supports being passed globalState prop", async function (assert) {
+    QUnit.test("doAction supports being passed globalState prop", async function (assert) {
         assert.expect(1);
         const searchModel = JSON.stringify({
             nextGroupId: 2,
@@ -2179,7 +2174,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         const mockRPC = async (route, args) => {
             if (args.method === "web_search_read") {
-                assert.deepEqual(args.domain, [["id", "=", 99]]);
+                assert.deepEqual(args.kwargs.domain, [["id", "=", 99]]);
             }
         };
 
@@ -2249,7 +2244,7 @@ QUnit.module("ActionManager", (hooks) => {
 
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 24);
-        await click(target, ".o_form_view button");
+        await click(target, ".o_form_view button[name='5']");
 
         await warningOpened;
         assert.containsOnce(target, ".modal");
@@ -2277,7 +2272,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.verifySteps(["web_search_read"]);
     });
 
-    QUnit.skip("pushState also changes the title of the tab", async (assert) => {
+    QUnit.test("pushState also changes the title of the tab", async (assert) => {
         assert.expect(3);
 
         const webClient = await createWebClient({ serverData });
