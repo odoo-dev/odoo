@@ -98,6 +98,10 @@ class IrHttp(models.AbstractModel):
                 args[key] = val.with_user(request.env.uid)
 
     @classmethod
+    def _post_dispatch(cls, response):
+        request._post_dispatch(response)
+
+    @classmethod
     def _is_cors_preflight(cls, endpoint):
         return http.is_cors_preflight(endpoint)
 
@@ -355,7 +359,7 @@ class IrHttp(models.AbstractModel):
         return status, content, filename, mimetype, filehash
 
     def _binary_set_headers(self, status, content, filename, mimetype, unique, filehash=None, download=False):
-        headers = [('Content-Type', mimetype), ('X-Content-Type-Options', 'nosniff')]
+        headers = [('Content-Type', mimetype), ('X-Content-Type-Options', 'nosniff'), ('Content-Security-Policy', "default-src 'none'")]
         # cache
         etag = bool(request) and request.httprequest.headers.get('If-None-Match')
         status = status or 200

@@ -106,6 +106,7 @@ endpoint
   The @route(...) decorated method.
 """
 
+import cgi
 import collections
 import contextlib
 import functools
@@ -215,6 +216,9 @@ ROUTING_KEYS = {
     'alias', 'host', 'methods',
 }
 
+# The mimetypes of safe image types
+SAFE_IMAGE_MIMETYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/x-icon'}
+
 # The duration of a user session before it is considered expired,
 # three months.
 SESSION_LIFETIME = 60 * 60 * 24 * 90
@@ -319,39 +323,20 @@ def serialize_exception(exception):
         'context': getattr(exception, 'context', {}),
     }
 
-def set_header_field(headers, name, value):
-    """ Return new headers based on `headers` but with `value` set for the
-    header field `name`.
-
-    :param headers: the existing headers
-    :type headers: list of tuples (name, value)
-
-    :param name: the header field name
-    :type name: string
-
-    :param value: the value to set for the `name` header
-    :type value: string
-
-    :return: the updated headers
-    :rtype: list of tuples (name, value)
-    """
-    dictheaders = dict(headers)
-    dictheaders[name] = value
-    return list(dictheaders.items())
-
 def set_safe_image_headers(headers, content):
     """Return new headers based on `headers` but with `Content-Length` and
     `Content-Type` set appropriately depending on the given `content` only if it
     is safe to do, as well as `X-Content-Type-Options: nosniff` so that if the
     file is of an unsafe type, it is not interpreted as that type if the
-    `Content-type` header was already set to a different mimetype"""
+    `Content-type` header was already set to a different mimetype
+    """
+    headers = werkzeug.datastructures.Headers(headers)
     content_type = guess_mimetype(content)
-    safe_types = ['image/jpeg', 'image/png', 'image/gif', 'image/x-icon']
-    if content_type in safe_types:
-        headers = set_header_field(headers, 'Content-Type', content_type)
-    headers = set_header_field(headers, 'X-Content-Type-Options', 'nosniff')
-    headers = set_header_field(headers, 'Content-Length', len(content))
-    return headers
+    if content_type in SAFE_IMAGE_MIMETYPES:
+        headers['Content-Type'] = content_type
+    headers['X-Content-Type-Options'] = 'nosniff'
+    headers['Content-Length'] = len(content)
+    return list(headers)
 
 
 # =========================================================
@@ -778,6 +763,10 @@ class Request:
                     self.session.profile_session = None
 
         return contextlib.nullcontext()
+
+    def _inject_future_response(self, response):
+        response.headers.extend(self.future_response.headers)
+        return response
 
     # =====================================================
     # Session
@@ -1316,10 +1305,6 @@ class Request:
     # =====================================================
     # Routing
     # =====================================================
-    def _inject_future_response(self, response):
-        response.headers.extend(self.future_response.headers)
-        return response
-
     def _pre_dispatch(self, rule, args):
         """
         Prepare the system before dispatching the request to its
@@ -1352,6 +1337,10 @@ class Request:
             _logger.warning("Request's content type is %s but %r is type %s.", self.type, routing['routes'][0], routing['type'])
             raise BadRequest(f"Request's inferred type is {self.type} but {routing['routes'][0]!r} is type={routing['type']!r}.")
 
+    def _post_dispatch(self, response):
+        self._inject_future_response(response)
+        application.set_csp(response)
+
     def _serve_static(self):
         """ Serve a static file from the file system. """
         module, _, path = self.httprequest.path[1:].partition('/static/')
@@ -1376,7 +1365,7 @@ class Request:
             response = self._json_dispatch(rule.endpoint, args)
         else:
             response = self._http_dispatch(rule.endpoint, args)
-        self._inject_future_response(response)
+        self._post_dispatch(response)
         return response
 
     def _serve_db(self, dbname, session_id):
@@ -1444,7 +1433,7 @@ class Request:
             self.params = self.get_http_params()
             response = ir_http._serve_fallback()
             if response:
-                self._inject_future_response(response)
+                self._post_dispatch(response)
                 return response
             raise
 
@@ -1458,7 +1447,7 @@ class Request:
             response = self._json_dispatch(rule.endpoint, args)
         else:
             response = self._http_dispatch(rule.endpoint, args)
-        self._inject_future_response(response)
+        ir_http._post_dispatch(response)
         return response
 
 
@@ -1501,6 +1490,17 @@ class Application(object):
         if not db:
             return self.nodb_routing_map
         return request.registry['ir.http'].routing_map()
+
+    def set_csp(self, response):
+        headers = response.headers
+        if 'Content-Security-Policy' in headers:
+            return
+
+        mime, _params = cgi.parse_header(headers.get('Content-Type', ''))
+        if not mime.startswith('image/'):
+            return
+
+        headers['Content-Security-Policy'] = "default-src 'none'"
 
     def __call__(self, environ, start_response):
         """
