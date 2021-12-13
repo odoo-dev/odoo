@@ -1,4 +1,3 @@
-from contextlib import closing
 from functools import partial
 import logging
 from psycopg2 import IntegrityError, OperationalError, errorcodes
@@ -11,7 +10,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 from odoo.models import check_method_name
 from odoo.tools import DotDict
-from odoo.tools.translate import translate, translate_sql_constraint
+from odoo.tools.translate import translate_sql_constraint
 from odoo.tools.translate import _
 
 from . import security
@@ -21,6 +20,7 @@ _logger = logging.getLogger(__name__)
 
 PG_CONCURRENCY_ERRORS_TO_RETRY = (errorcodes.LOCK_NOT_AVAILABLE, errorcodes.SERIALIZATION_FAILURE, errorcodes.DEADLOCK_DETECTED)
 MAX_TRIES_ON_CONCURRENCY_FAILURE = 5
+
 
 def dispatch(method, params):
     db, uid, passwd = params[0], int(params[1]), params[2]
@@ -80,14 +80,13 @@ def _as_validation_error(env, exc):
         field = DotDict({'name': unknown.lower(), 'string': unknown})
 
     if exc.pgcode == errorcodes.NOT_NULL_VIOLATION:
-        return ValidationError(_("""\
-The operation cannot be completed:
-- Create/update: a mandatory field is not set.
-- Delete: another model requires the record being deleted. If possible, archive it instead.
-
-Model: %(model_name)s (%(model_tech_name)s)
-Field: %(field_name)s (%(field_tech_name)s)
-""",
+        return ValidationError(_(
+            "The operation cannot be completed:\n"
+            "- Create/update: a mandatory field is not set.\n"
+            "- Delete: another model requires the record being deleted."
+            " If possible, archive it instead.\n\n"
+            "Model: %(model_name)s (%(model_tech_name)s)\n"
+            "Field: %(field_name)s (%(field_tech_name)s)\n",
             model_name=model._description,
             model_tech_name=model._name,
             field_name=field.string,
@@ -95,12 +94,11 @@ Field: %(field_name)s (%(field_tech_name)s)
         ))
 
     if exc.pgcode == errorcodes.FOREIGN_KEY_VIOLATION:
-        return ValidationError(_("""\
-The operation cannot be completed: another model requires the record being deleted. If possible, archive it instead.
-
-Model: %(model_name)s (%(model_tech_name)s)
-Constraint: %(constraint)s
-""",
+        return ValidationError(_(
+            "The operation cannot be completed: another model requires "
+            "the record being deleted. If possible, archive it instead.\n\n"
+            "Model: %(model_name)s (%(model_tech_name)s)\n"
+            "Constraint: %(constraint)s\n",
             model_name=model._description,
             model_tech_name=model._name,
             constraint=exc.diag.constraint_name,
@@ -150,9 +148,9 @@ def retrying(func, env):
                     _logger.info("%s, maximum number of tries reached!", errorcodes.lookup(exc.pgcode))
                     raise
 
-            wait_time = random.uniform(0.0, 2 ** tryno)
-            _logger.info("%s, %s tries left, try again in %.04f sec...", errorcodes.lookup(exc.pgcode), tryleft, wait_time)
-            time.sleep(wait_time)
+                wait_time = random.uniform(0.0, 2 ** tryno)
+                _logger.info("%s, %s tries left, try again in %.04f sec...", errorcodes.lookup(exc.pgcode), tryleft, wait_time)
+                time.sleep(wait_time)
         else:
             # handled in the "if not tryleft" case
             raise RuntimeError("unreachable")

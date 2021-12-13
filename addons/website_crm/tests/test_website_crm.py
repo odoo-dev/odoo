@@ -10,14 +10,14 @@ class TestWebsiteCrm(odoo.tests.HttpCase):
     def test_tour(self):
         # change action to create opportunity
         self.start_tour("/", 'website_crm_pre_tour', login='admin')
-        self.start_tour("/", 'website_crm_tour')
 
-        # check result
-        record = self.env['crm.lead'].search([('description', '=', '### TOUR DATA ###')])
-        self.assertEqual(len(record), 1)
-        self.assertEqual(record.contact_name, 'John Smith')
-        self.assertEqual(record.email_from, 'john@smith.com')
-        self.assertEqual(record.partner_name, 'Odoo S.A.')
+        with odoo.tests.RecordCapturer(self.env['crm.lead'], []) as capt:
+            self.start_tour("/", 'website_crm_tour')
+
+        self.assertEqual(len(capt.records), 1)
+        self.assertEqual(capt.records.contact_name, 'John Smith')
+        self.assertEqual(capt.records.email_from, 'john@smith.com')
+        self.assertEqual(capt.records.partner_name, 'Odoo S.A.')
 
     def test_catch_logged_partner_info_tour(self):
         user_login = 'admin'
@@ -27,14 +27,16 @@ class TestWebsiteCrm(odoo.tests.HttpCase):
 
         # no edit on prefilled data from logged partner : propagate partner_id on created lead
         self.start_tour("/", 'website_crm_pre_tour', login=user_login)
-        self.start_tour("/", "website_crm_catch_logged_partner_info_tour", login=user_login)
-        created_lead = self.env['crm.lead'].search([('description', '=', '### TOUR DATA PREFILL ###')])
-        self.assertEqual(created_lead.partner_id, user_partner)
+
+        with odoo.tests.RecordCapturer(self.env['crm.lead'], []) as capt:
+            self.start_tour("/", "website_crm_catch_logged_partner_info_tour", login=user_login)
+        self.assertEqual(capt.records.partner_id, user_partner)
 
         # edited contact us partner info : do not propagate partner_id on lead
-        self.start_tour("/", "website_crm_tour", login=user_login)
-        created_lead = self.env['crm.lead'].search([('description', '=', '### TOUR DATA ###')])
-        self.assertFalse(created_lead.partner_id)
+        with odoo.tests.RecordCapturer(self.env['crm.lead'], []) as capt:
+            self.start_tour("/", "website_crm_tour", login=user_login)
+        self.assertFalse(capt.records.partner_id)
+
         # check partner has not been changed
         self.assertEqual(user_partner.email, partner_email)
         self.assertEqual(user_partner.phone, partner_phone)

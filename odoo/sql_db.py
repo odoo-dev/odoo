@@ -436,9 +436,9 @@ class Cursor(BaseCursor):
             _logger.setLevel(level)
             self.sql_log = previous
 
-    @check
     def close(self):
-        return self._close(False)
+        if not self._closed:
+            return self._close(False)
 
     def _close(self, leak=False):
         global sql_counter

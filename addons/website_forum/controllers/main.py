@@ -273,7 +273,7 @@ class WebsiteForum(WebsiteProfile):
         if not request.session.uid:
             return {'error': 'anonymous_user'}
         favourite = not question.user_favourite
-        question.sudo().favourite_ids = [(favourite and 4 or 3, request.uid)]
+        question.sudo().favourite_ids = [(4 if favourite else 3, request.uid)]
         if favourite:
             # Automatically add the user as follower of the posts that he
             # favorites (on unfavorite we chose to keep him as a follower until
@@ -428,7 +428,7 @@ class WebsiteForum(WebsiteProfile):
     def post_upvote(self, forum, post, **kwargs):
         if not request.session.uid:
             return {'error': 'anonymous_user'}
-        if request.uid == post.create_uid.id:
+        if request.env.uid == post.create_uid.id:
             return {'error': 'own_post'}
         upvote = True if not post.user_vote > 0 else False
         return post.vote(upvote=upvote)
@@ -437,7 +437,7 @@ class WebsiteForum(WebsiteProfile):
     def post_downvote(self, forum, post, **kwargs):
         if not request.session.uid:
             return {'error': 'anonymous_user'}
-        if request.uid == post.create_uid.id:
+        if request.env.uid == post.create_uid.id:
             return {'error': 'own_post'}
         upvote = True if post.user_vote < 0 else False
         return post.vote(upvote=upvote)

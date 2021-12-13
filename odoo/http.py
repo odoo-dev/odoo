@@ -199,6 +199,10 @@ DEFAULT_SESSION = {
     'login': None,
     'uid': None,
     'session_token': None,
+    # profiling
+    'profile_session': None,
+    'profile_collectors': None,
+    'profile_params': None,
 }
 
 # The request mimetypes that transport JSON in their body.
@@ -211,7 +215,7 @@ ROUTING_KEYS = {
     'alias', 'host', 'methods',
 }
 
-# The duration of a user session before it is considered expirated,
+# The duration of a user session before it is considered expired,
 # three months.
 SESSION_LIFETIME = 60 * 60 * 24 * 90
 
@@ -226,6 +230,14 @@ STATIC_CACHE_LONG = 60 * 60 * 24 * 365
 # =========================================================
 # Helpers
 # =========================================================
+
+class SessionExpiredException(Exception):
+    pass
+
+def content_disposition(filename):
+    return "attachment; filename*=UTF-8''{}".format(
+        url_quote(filename, safe='')
+    )
 
 def db_list(force=False, httprequest=None):
     """
@@ -295,10 +307,59 @@ def send_file(filepath_or_fp, **send_file_kwargs):
     else:  # file-object
         return request.send_file(filepath_or_fp, **send_file_kwargs)
 
+def serialize_exception(exception):
+    name = type(exception).__name__
+    module = type(exception).__module__
+
+    return {
+        'name': f'{module}.{name}' if module else name,
+        'debug': traceback.format_exc(),
+        'message': ustr(exception),
+        'arguments': exception.args,
+        'context': getattr(exception, 'context', {}),
+    }
+
+def set_header_field(headers, name, value):
+    """ Return new headers based on `headers` but with `value` set for the
+    header field `name`.
+
+    :param headers: the existing headers
+    :type headers: list of tuples (name, value)
+
+    :param name: the header field name
+    :type name: string
+
+    :param value: the value to set for the `name` header
+    :type value: string
+
+    :return: the updated headers
+    :rtype: list of tuples (name, value)
+    """
+    dictheaders = dict(headers)
+    dictheaders[name] = value
+    return list(dictheaders.items())
+
+def set_safe_image_headers(headers, content):
+    """Return new headers based on `headers` but with `Content-Length` and
+    `Content-Type` set appropriately depending on the given `content` only if it
+    is safe to do, as well as `X-Content-Type-Options: nosniff` so that if the
+    file is of an unsafe type, it is not interpreted as that type if the
+    `Content-type` header was already set to a different mimetype"""
+    content_type = guess_mimetype(content)
+    safe_types = ['image/jpeg', 'image/png', 'image/gif', 'image/x-icon']
+    if content_type in safe_types:
+        headers = set_header_field(headers, 'Content-Type', content_type)
+    headers = set_header_field(headers, 'X-Content-Type-Options', 'nosniff')
+    headers = set_header_field(headers, 'Content-Length', len(content))
+    return headers
+
 
 # =========================================================
 # Controller and routes
 # =========================================================
+
+addons_manifest = {}  # TODO @juc, move to odoo.modules.module
+
 
 class Controller:
     """
@@ -541,7 +602,7 @@ class Response(werkzeug.wrappers.Response):
             werkzeug.exceptions.HTTPException, str, bytes, NoneType]
         :param str fname: The endpoint function name wherefrom the
             result emanated, used for logging.
-        :return: The created :class:`~odoo.http.Response`.
+        :returns: The created :class:`~odoo.http.Response`.
         :rtype: Response
         :raises TypeError: When ``result`` type is none of the above-
             mentioned type.
@@ -591,7 +652,7 @@ class Response(werkzeug.wrappers.Response):
 
 class FutureResponse:
     """ werkzeug.Response mock class that only serves as placeholder for
-        headers to inject in the final response. """
+        headers to be injected in the final response. """
     charset = 'utf-8'
     max_cookie_size = 4093
 
@@ -641,6 +702,34 @@ class Request:
         """
         self.update_env(context=dict(self.env.context, **overrides))
 
+    @property
+    def context(self):
+        return self.env.context
+
+    @context.setter
+    def context(self, value):
+        raise NotImplementedError("Use request.update_context instead.")
+
+    @property
+    def uid(self):
+        return self.env.uid
+
+    @uid.setter
+    def uid(self, value):
+        raise NotImplementedError("Use request.update_env instead.")
+
+    @property
+    def cr(self):
+        return self.env.cr
+
+    @cr.setter
+    def cr(self, value):
+        if value is None:
+            raise NotImplementedError("Close the cursor instead.")
+        raise ValueError("You cannot replace the cursor attached to the current request.")
+
+    _cr = cr
+
     # =====================================================
     # Helpers
     # =====================================================
@@ -657,6 +746,39 @@ class Request:
 
         return lang
 
+    def _get_profiler_context_manager(self):
+        """
+        Get a profiler when the profiling is enabled and the requested
+        URL is profile-safe. Otherwise, get a context-manager that does
+        nothing.
+        """
+        if self.session.profile_session and self.db:
+            if self.session.profile_expiration < str(datetime.now()):
+                # avoid having session profiling for too long if user forgets to disable profiling
+                self.session.profile_session = None
+                _logger.warning("Profiling expiration reached, disabling profiling")
+            elif 'set_profiling' in self.httprequest.path:
+                _logger.debug("Profiling disabled on set_profiling route")
+            elif self.httprequest.path.startswith('/longpolling'):
+                _logger.debug("Profiling disabled for longpolling")
+            elif odoo.evented:
+                # only longpolling should be in a evented server, but this is an additional safety
+                _logger.debug("Profiling disabled for evented server")
+            else:
+                try:
+                    return profiler.Profiler(
+                        db=self.db,
+                        description=self.httprequest.full_path,
+                        profile_session=self.session.profile_session,
+                        collectors=self.session.profile_collectors,
+                        params=self.session.profile_params,
+                    )
+                except Exception:
+                    _logger.exception("Failure during Profiler creation")
+                    self.session.profile_session = None
+
+        return contextlib.nullcontext()
+
     # =====================================================
     # Session
     # =====================================================
@@ -669,21 +791,21 @@ class Request:
             string when the info is missing or could not be determined.
         :rtype: Tuple[str, str]
 
-        The session identifier is retrieve from the, in priority:
+        The session identifier is retrieved from the, in priority:
           * ``session_id`` query-string;
           * ``X-Openerp-Session-Id`` header (deprecated);
           * ``session_id`` cookie (usually set).
 
-        The database is retrieve from the, in priority:
+        The database is retrieved from the, in priority:
           * ``db`` query-string option;
           * ``session_id`` query-string option;
           * ``X-Openerp-Session-Id`` header (deprecated);
           * ``session_id`` cookie (usually set);
           * database list if there is only one database available.
 
-        Because the two information share the same query-string option,
-        cookie and header, the two are to be concatenated with a single
-        dot separating the two: ``<session_id>.<dbname>``.
+        Because the they both share the same query-string option, cookie
+        and header, they are concatenated with a single dot separating
+        them: ``<session_id>.<dbname>``.
         """
         sid, _, requested_db = (
                self.httprequest.args.get('session_id')
@@ -957,6 +1079,66 @@ class Request:
         hm_expected = hmac.new(secret.encode('ascii'), msg, hashlib.sha1).hexdigest()
         return consteq(hm, hm_expected)
 
+    def redirect(self, location, code=303, local=True):
+        # compatibility, Werkzeug support URL as location
+        if isinstance(location, URL):
+            location = location.to_url()
+        if local:
+            location = url_parse(location).replace(scheme='', netloc='').to_url()
+        if self.db:
+            return self.env['ir.http']._redirect(location, code)
+        return werkzeug.utils.redirect(location, code, Response=Response)
+
+    def redirect_query(self, location, query=None, code=303, local=True):
+        if query:
+            location += '?' + url_encode(query)
+        return self.redirect(location, code=code, local=local)
+
+    def render(self, template, qcontext=None, lazy=True, **kw):
+        """ Lazy render of a QWeb template.
+
+        The actual rendering of the given template will occur at then end of
+        the dispatching. Meanwhile, the template and/or qcontext can be
+        altered or even replaced by a static response.
+
+        :param basestring template: template to render
+        :param dict qcontext: Rendering context to use
+        :param bool lazy: whether the template rendering should be deferred
+                          until the last possible moment
+        :param kw: forwarded to werkzeug's Response object
+        """
+        response = Response(template=template, qcontext=qcontext, **kw)
+        if not lazy:
+            return response.render()
+        return response
+
+    def not_found(self, description=None):
+        """ Shortcut for a `HTTP 404
+        <http://tools.ietf.org/html/rfc7231#section-6.5.4>`_ (Not Found)
+        response
+        """
+        return NotFound(description)
+
+    def make_response(self, data, headers=None, cookies=None):
+        """ Helper for non-HTML responses, or HTML responses with custom
+        response headers or cookies.
+
+        While handlers can just return the HTML markup of a page they want to
+        send as a string if non-HTML data is returned they need to create a
+        complete response object, or the returned data will not be correctly
+        interpreted by the clients.
+
+        :param basestring data: response body
+        :param headers: HTTP headers to set on the response
+        :type headers: ``[(name, value)]``
+        :param collections.Mapping cookies: cookies to set on the client
+        """
+        response = Response(data, headers=headers)
+        if cookies:
+            for k, v in cookies.items():
+                response.set_cookie(k, v)
+        return response
+
     def get_http_params(self):
         """
         Extract key=value pairs from the query string and the forms
@@ -1005,10 +1187,11 @@ class Request:
 
     def _http_handle_error(self, exc):
         """
-        Handle any exception that occured while dispatching a request to
-        a `type='http'` route. Also handle exceptions that occured when
-        no route matched the request path, that no fallback page could
-        be delivered and that the request ``Content-Type`` was not json.
+        Handle any exception that occurred while dispatching a request
+        to a `type='http'` route. Also handle exceptions that occurred
+        when no route matched the request path, when no fallback page
+        could be delivered and that the request ``Content-Type`` was not
+        json.
 
         :param exc Exception: the exception that occured.
         :returns: an HTTP error response
@@ -1135,6 +1318,12 @@ class Request:
         return response
 
     def _pre_dispatch(self, rule, args):
+        """
+        Prepare the system before dispatching the request to its
+        controller. This method is often overridden in ir.http to
+        extract some info from the request query-string or headers and
+        to save them in the session or in the context.
+        """
         routing = rule.endpoint.routing
         set_header = self.future_response.headers.set
 
@@ -1152,9 +1341,13 @@ class Request:
                 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
             werkzeug.exceptions.abort(self._inject_future_response(Response()))
 
-        if self.type != routing['type']:
-            _logger.warning("Request's content type is %s but '%s' is type %s.", self.type, routing['routes'][0], routing['type'])
-            raise BadRequest(f"Request's content type is {self.type} but '{routing['routes'][0]}' is type {routing['type']}.")
+        if self.type == 'http' and routing['type'] == 'json':
+            # Don't test for self.type != routing['type'] because it is
+            # possible one want to send a json-encoded body to a
+            # @route(type='http'). Not all json-encoded bodies are
+            # json-rpc2, e.g. REST.
+            _logger.warning("Request's content type is %s but %r is type %s.", self.type, routing['routes'][0], routing['type'])
+            raise BadRequest(f"Request's inferred type is {self.type} but {routing['routes'][0]!r} is type={routing['type']!r}.")
 
     def _serve_static(self):
         """ Serve a static file from the file system. """
@@ -1189,16 +1382,17 @@ class Request:
         request to ``_serve_ir_http``.
 
         :param str dbname: the name of the database to connect to.
-        :param str session_id: optionnal secret session identifier to
-            use to fetch the user's session from the database. When
-            missing, a new random secret session identifier is granted
-            and saved in the response cookies.
+        :param str session_id: optional secret session identifier to use
+            to fetch the user's session from the database. When missing,
+            a new random secret session identifier is granted and saved
+            in the response cookies.
         """
         self.db = threading.current_thread().dbname = dbname
         self.session_id = session_id = session_id or secrets.token_urlsafe()
         self._set_cookie_session_id(session_id, dbname)
 
-        with self.manage_session():
+        with self.manage_session(), \
+             self._get_profiler_context_manager():
             try:
                 self.registry = Registry(dbname)
                 self.registry.check_signaling()
@@ -1267,6 +1461,7 @@ class Request:
 # =========================================================
 # WSGI Layer
 # =========================================================
+
 class Application(object):
     """ Odoo WSGI application """
     # See also: https://www.python.org/dev/peps/pep-3333
@@ -1298,6 +1493,11 @@ class Application(object):
             nodb_routing_map.add(rule)
 
         return nodb_routing_map
+
+    def get_db_router(self, db):
+        if not db:
+            return self.nodb_routing_map
+        return request.registry['ir.http'].routing_map()
 
     def __call__(self, environ, start_response):
         """
@@ -1384,5 +1584,6 @@ class Application(object):
 
         finally:
             _request_stack.pop()
+
 
 app = application = root = Application()

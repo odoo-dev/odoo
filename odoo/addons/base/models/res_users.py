@@ -15,6 +15,7 @@ from collections import defaultdict
 from hashlib import sha256
 from itertools import chain, repeat
 
+import babel.core
 import decorator
 import pytz
 from lxml import etree
@@ -643,10 +644,23 @@ class Users(models.Model):
         # use read() to not read other fields: this must work while modifying
         # the schema of models res.users or res.partner
         values = user.read(list(name_to_key), load=False)[0]
-        return frozendict({
+
+        context = {
             key: values[name]
             for name, key in name_to_key.items()
-        })
+        }
+
+        # ensure the language is set and is compatible with the web client
+        lang = context.get('lang') or (request and request.default_lang()) or 'en_US'
+        if lang == 'ar_AR':
+            context['lang'] = 'ar'
+        if lang in babel.core.LOCALE_ALIASES:
+            context['lang'] = babel.core.LOCALE_ALIASES[lang]
+
+        # ensure uid is set
+        context['uid'] = self.env.uid
+
+        return frozendict(context)
 
     @api.model
     def action_get(self):

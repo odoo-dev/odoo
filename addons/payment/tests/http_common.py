@@ -26,10 +26,7 @@ class PaymentHttpCommon(PaymentTestUtils, HttpCase):
     def _build_jsonrpc_payload(self, params):
         """Helper to properly build jsonrpc payload"""
         if not getattr(self, 'session', None):
-            # We need to create a session (public if no login & passwd)
-            # before generating a csrf token
             self.authenticate('', '')
-        params['csrf_token'] = http.WebRequest.csrf_token(self)
         return {
             "jsonrpc": "2.0",
             "method": "call",

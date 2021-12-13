@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from freezegun import freeze_time
+from urllib.parse import urlparse, parse_qs
 
 from odoo.tests import tagged
 from odoo.tools import mute_logger
@@ -221,7 +222,9 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
 
         # Pay without a partner specified --> redirection to login page
         response = self.portal_pay(**route_values)
-        self.assertTrue(response.url.startswith(self._build_url('/web/login?redirect=')))
+        url = urlparse(response.url)
+        self.assertEqual(url.path, '/web/login')
+        self.assertIn('redirect', parse_qs(url.query))
 
         # Pay without a partner specified (but loggged) --> pay with the partner of current user.
         self.authenticate(self.portal_user.login, self.portal_user.login)
@@ -235,7 +238,9 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
 
         # Pay without a partner specified --> redirection to login page
         response = self.portal_pay(**route_values)
-        self.assertTrue(response.url.startswith(self._build_url('/web/login?redirect=')))
+        url = urlparse(response.url)
+        self.assertEqual(url.path, '/web/login')
+        self.assertIn('redirect', parse_qs(url.query))
 
         # Pay without a partner specified (but loggged) --> pay with the partner of current user.
         self.authenticate(self.portal_user.login, self.portal_user.login)

@@ -16,7 +16,7 @@ from odoo.http import request
 from odoo import registry as registry_get
 
 from odoo.addons.auth_signup.controllers.main import AuthSignupHome as Home
-from odoo.addons.web.controllers.main import db_monodb, ensure_db, set_cookie_and_redirect, login_and_redirect
+from odoo.addons.web.controllers.main import ensure_db, set_cookie_and_redirect, login_and_redirect
 
 
 _logger = logging.getLogger(__name__)
@@ -168,25 +168,20 @@ class OAuthController(http.Controller):
     @http.route('/auth_oauth/oea', type='http', auth='none')
     def oea(self, **kw):
         """login user via Odoo Account provider"""
-        dbname = kw.pop('db', None)
-        if not dbname:
-            dbname = db_monodb()
-        if not dbname:
-            return BadRequest()
-        if not http.db_filter([dbname]):
+        if not request.db:
             return BadRequest()
 
-        registry = registry_get(dbname)
+        registry = registry_get(request.db)
         with registry.cursor() as cr:
             try:
                 env = api.Environment(cr, SUPERUSER_ID, {})
                 provider = env.ref('auth_oauth.provider_openerp')
             except ValueError:
-                return set_cookie_and_redirect('/web?db=%s' % dbname)
+                return set_cookie_and_redirect('/web?db=%s' % request.db)
             assert provider._name == 'auth.oauth.provider'
 
         state = {
-            'd': dbname,
+            'd': request.db,
             'p': provider.id,
             'c': {'no_user_creation': True},
         }
