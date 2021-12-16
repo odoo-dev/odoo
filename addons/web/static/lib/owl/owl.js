@@ -80,7 +80,7 @@
         return new VToggler(key, child);
     }
 
-    const { setAttribute, removeAttribute } = Element.prototype;
+    const { setAttribute: elemSetAttribute, removeAttribute } = Element.prototype;
     const tokenList = DOMTokenList.prototype;
     const tokenListAdd = tokenList.add;
     const tokenListRemove = tokenList.remove;
@@ -92,11 +92,22 @@
      * attributes, properties and classs are all managed by the functions in this
      * file.
      */
+    function setAttribute(key, value) {
+        switch (value) {
+            case false:
+            case undefined:
+                removeAttribute.call(this, key);
+                break;
+            case true:
+                elemSetAttribute.call(this, key, "");
+                break;
+            default:
+                elemSetAttribute.call(this, key, value);
+        }
+    }
     function createAttrUpdater(attr) {
         return function (value) {
-            if (value !== false && value !== undefined) {
-                setAttribute.call(this, attr, value === true ? "" : value);
-            }
+            setAttribute.call(this, attr, value);
         };
     }
     function attrsSetter(attrs) {
@@ -1350,12 +1361,14 @@
         fibersInError.set(fiber.root, error);
         const handled = _handleError(node, error, true);
         if (!handled) {
+            console.warn(`[Owl] Unhandled error. Destroying the root component`);
             try {
                 node.app.destroy();
             }
-            catch (e) { }
+            catch (e) {
+                console.error(e);
+            }
         }
-        return handled;
     }
 
     /**
@@ -1583,14 +1596,9 @@
      * This is why it is only done in 'dev' mode.
      */
     const validateProps = function (name, props, parent) {
-        return;
         const ComponentClass = (typeof name !== "string" ? name : parent.constructor.components[name]);
-        const propsDef = ComponentClass.props;
-        if ((!propsDef && !props)) {
-            return;
-        }
         applyDefaultProps(props, ComponentClass);
-
+        const propsDef = ComponentClass.props;
         if (propsDef instanceof Array) {
             // list of strings (prop names)
             for (const propName of propsDef) {
@@ -4402,10 +4410,12 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
         }
         mountNode(node, target, options) {
             const promise = new Promise((resolve, reject) => {
+                let isResolved = false;
                 // manually set a onMounted callback.
                 // that way, we are independant from the current node.
                 node.mounted.push(() => {
                     resolve(node.component);
+                    isResolved = true;
                 });
                 // Manually add the last resort error handler on the node
                 let handlers = nodeErrorHandlers.get(node);
@@ -4414,7 +4424,12 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                     nodeErrorHandlers.set(node, handlers);
                 }
                 handlers.unshift((e) => {
-                    reject(e);
+                    if (isResolved) {
+                        console.error(e);
+                    }
+                    else {
+                        reject(e);
+                    }
                     throw e;
                 });
             });
@@ -5029,8 +5044,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-12-15T14:34:46.623Z';
-    __info__.hash = 'd7de25e';
+    __info__.date = '2021-12-16T14:10:44.802Z';
+    __info__.hash = 'a8ffcaf';
     __info__.url = 'https://github.com/odoo/owl';
 
 
