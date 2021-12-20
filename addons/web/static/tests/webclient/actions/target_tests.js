@@ -372,9 +372,9 @@ QUnit.module("ActionManager", (hooks) => {
 
         const errorDialogOpened = makeDeferred();
         patchWithCleanup(ClientErrorDialog.prototype, {
-            mounted() {
+            setup() {
                 this._super(...arguments);
-                errorDialogOpened.resolve();
+                owl.onMounted(() => errorDialogOpened.resolve());
             },
         });
 

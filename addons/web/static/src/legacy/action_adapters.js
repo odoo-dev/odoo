@@ -31,6 +31,9 @@ class ActionAdapter extends ComponentAdapter {
         let originalUpdateControlPanel;
         useEffect(
             () => {
+                if (this.wowlEnv.inDialog) {
+                    this.wowlEnv.setLegacyControllerWidget(this.widget);
+                }
                 const query = this.widget.getState();
                 Object.assign(query, this.tempQuery);
                 this.tempQuery = null;
@@ -50,12 +53,15 @@ class ActionAdapter extends ComponentAdapter {
                 };
                 core.bus.trigger("DOM_updated");
 
+                this.widget.el.addEventListener("history-back", this.wowlEnv.__onHistoryBack__);
+
                 return () => {
                     this.__widget.updateControlPanel = originalUpdateControlPanel;
                     this.wowlEnv.bus.removeEventListener(
                         "ACTION_MANAGER:UPDATE",
                         onActionManagerUpdate
                     );
+                    this.__widget.el.removeEventListener("history-back", this.wowlEnv.__onHistoryBack__);
                 };
             },
             () => []
@@ -124,6 +130,8 @@ class ActionAdapter extends ComponentAdapter {
                     type: "warning",
                 });
             }
+        } else if (ev.name === "history_back") {
+            this.wowlEnv.__onHistoryBack__();
         } else {
             super._trigger_up(ev);
         }

@@ -20,7 +20,6 @@ class ActionDialog extends Dialog {
     setup() {
         super.setup();
         useOwnDebugContext();
-        this.actionRef = useRef("actionRef");
         const actionProps = this.props && this.props.actionProps;
         const action = actionProps && actionProps.action;
         this.actionType = action && action.type;
@@ -55,18 +54,21 @@ class LegacyAdaptedActionDialog extends ActionDialog {
         useEffect(
             () => {
                 if (this.isLegacy) {
-                    // Retrieve the widget climbing the wrappers
-                    const componentController = this.actionRef.comp;
-                    const controller = componentController.componentRef.comp;
-                    const viewAdapter = controller.controllerRef.comp;
-                    const widget = viewAdapter.widget;
                     // Render legacy footer buttons
                     const footer = this.modalRef.el.querySelector("footer");
-                    widget.renderButtons($(footer));
+                    this.legacyController.renderButtons($(footer));
                 }
             },
             () => []
-        ); // TODO: should this depend on actionRef.comp?
+        );
+
+        if (this.isLegacy) {
+            owl.useSubEnv({
+                setLegacyControllerWidget: (widget) => {
+                    this.legacyController = widget;
+                }
+            });
+        }
     }
 }
 LegacyAdaptedActionDialog.footerTemplate = "web.LegacyAdaptedActionDialogFooter";

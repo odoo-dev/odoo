@@ -14,7 +14,11 @@
             return this.addEventListener(type, callback);
         }
         off(type, target) {
-            for (const callback of this.targetsCallbacks.get(target)) {
+            const cbs = this.targetsCallbacks.get(target);
+            if (!cbs) {
+                return;
+            }
+            for (const callback of cbs) {
                 this.removeEventListener(type, callback);
             }
         }
