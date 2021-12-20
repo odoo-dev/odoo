@@ -15,12 +15,10 @@
                t-key="measure_value.name">
                 <div t-if="!measure_first and measure == '__count'" role="separator" class="dropdown-divider"/>
                 <DropdownItem class="{ o_menu_item: true, selected: activeMeasures.includes(measure) }"
-                    t-att-class="{ selected: activeMeasures.includes(measure) }"
-                    parentClosingMode="'none'"
-                    onSelected="() => this.onMeasureSelected({ measure: measure_value.name })"
-                    >
-                    <t t-esc="measures[measure].string"/>
-                </DropdownItem>
+                  parentClosingMode="'none'"
+                  t-esc="measures[measure].string"
+                  onSelected="() => this.onMeasureSelected({ measure: measure_value.name })"
+                />
             </t>
         </Dropdown>
   </t>

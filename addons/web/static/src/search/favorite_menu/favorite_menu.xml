@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.FavoriteMenu" owl="1">
-        <Dropdown class="o_favorite_menu btn-group" togglerClass="'btn btn-light'">
+        <Dropdown class="'o_favorite_menu btn-group'" togglerClass="'btn btn-light'">
             <t t-set-slot="toggler">
                 <i class="small mr-1" t-att-class="icon"/>
                 <span class="o_dropdown_title">Favorites</span>

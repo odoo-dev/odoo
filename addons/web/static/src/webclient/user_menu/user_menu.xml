@@ -12,10 +12,9 @@
                         t-if="element.type == 'item'"
                         href="element.href"
                         dataset="{ menu: element.id }"
+                        t-esc="element.description"
                         onSelected="element.callback"
-                        />
-                        <t t-esc="element.description"/>
-                    </UserMenuItem>
+                    />
                     <div t-if="element.type == 'separator'" role="separator" class="dropdown-divider"/>
                 </t>
             </t>

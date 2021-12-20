@@ -32,7 +32,6 @@
         t-if="state.open"
         class="o-dropdown--menu dropdown-menu d-block"
         t-att-class="props.menuClass"
-        t-on-dropdown-item-selected="({detail}) => props.onDropdownItemSelected and props.onDropdownItemSelected(detail)"
         t-ref="menuRef"
       >
         <t t-slot="default" />

@@ -46,7 +46,7 @@ QUnit.module("Components", () => {
     // of type file
     QUnit.module("FileInput");
 
-    QUnit.todo("Upload a file: default props", async function (assert) {
+    QUnit.test("Upload a file: default props", async function (assert) {
         // NXOWL wait fix
         assert.expect(6);
 

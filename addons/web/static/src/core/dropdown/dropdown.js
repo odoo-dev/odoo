@@ -305,10 +305,6 @@ Dropdown.props = {
         type: String,
         optional: true,
     },
-    onDropdownItemSelected: {
-        type: Function,
-        optional: true,
-    },
     position: {
         type: String,
         optional: true,

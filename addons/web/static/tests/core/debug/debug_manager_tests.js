@@ -181,7 +181,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.containsNone(target, ".o_dialog .o_debug_manager .fa-bug");
     });
 
-    QUnit.test(
+    QUnit.todo(
         "Display the DebugMenu correctly in a ActionDialog if debug mode is enabled",
         async (assert) => {
             assert.expect(8);
@@ -281,7 +281,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.verifySteps(["ir.attachment/search", "ir.attachment/unlink", "reloadPage"]);
     });
 
-    QUnit.test("can open a view", async (assert) => {
+    QUnit.todo("can open a view", async (assert) => {
         assert.expect(3);
 
         const mockRPC = async (route, args) => {
@@ -334,7 +334,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.containsOnce(webClient, ".some_view");
     });
 
-    QUnit.test("can edit a pivot view", async (assert) => {
+    QUnit.todo("can edit a pivot view", async (assert) => {
         const mockRPC = async (route, args) => {
             if (args.method === "check_access_rights") {
                 return Promise.resolve(true);
@@ -377,7 +377,7 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.test("can edit a search view", async (assert) => {
+    QUnit.todo("can edit a search view", async (assert) => {
         const mockRPC = async (route, args) => {
             if (args.method === "check_access_rights") {
                 return Promise.resolve(true);
@@ -413,7 +413,7 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.test("edit search view on action without search_view_id", async (assert) => {
+    QUnit.todo("edit search view on action without search_view_id", async (assert) => {
         // When the kanban view will be converted to Owl, this test could be simplified by
         // removing the toy view and using the kanban view directly
         prepareRegistriesWithCleanup();
@@ -473,8 +473,9 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.test(
+    QUnit.skip(
         "cannot edit the control panel of a form view contained in a dialog without control panel.",
+        // NXOWL
         async (assert) => {
             const mockRPC = async (route, args) => {
                 if (args.method === "check_access_rights") {

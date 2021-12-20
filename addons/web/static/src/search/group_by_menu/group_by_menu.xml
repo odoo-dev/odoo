@@ -27,10 +27,9 @@
                             </t>
                             <DropdownItem class="{ o_item_option: true, selected: option.isActive }"
                                 parentClosingMode="'none'"
+                                t-esc="option.description"
                                 onSelected="() => this.onGroupBySelected({ itemId: item.id, optionId: option.id})"
-                                />
-                                <t t-esc="option.description"/>
-                            </DropdownItem>
+                            />
                             <t t-set="subGroup" t-value="option.groupNumber"/>
                         </t>
                     </Dropdown>
@@ -40,9 +39,7 @@
                         parentClosingMode="'none'"
                         t-esc="item.description"
                         onSelected="() => this.onGroupBySelected({ itemId: item.id })"
-                        />
-                        <t t-esc="item.description"/>
-                    </DropdownItem>
+                    />
                 </t>
                 <t t-set="currentGroup" t-value="item.groupNumber"/>
             </t>
