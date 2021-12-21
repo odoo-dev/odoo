@@ -4,7 +4,6 @@ import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { memoize } from "@web/core/utils/functions";
 import { sprintf } from "@web/core/utils/strings";
-import { isBroadlyFalsy } from "../utils/misc";
 
 const { DateTime } = luxon;
 
@@ -202,7 +201,7 @@ export function formatDateTime(value, options = {}) {
  * @returns {DateTime | false} Luxon DateTime object
  */
 export function parseDate(value, options = {}) {
-    if (isBroadlyFalsy(value)) {
+    if (!value) {
         return false;
     }
     return parseDateTime(value, { timezone: false, ...options }).startOf("day");
@@ -238,7 +237,7 @@ export function parseDate(value, options = {}) {
  * @returns {DateTime | false} Luxon DateTime object
  */
 export function parseDateTime(value, options = {}) {
-    if (isBroadlyFalsy(value)) {
+    if (!value) {
         return false;
     }
 
