@@ -131,7 +131,6 @@ const STANDARD_PROPS = [
 export class View extends Component {
     setup() {
         const { arch, fields, resModel, searchViewArch, searchViewFields, type } = this.props;
-
         if (!resModel) {
             throw Error(`View props should have a "resModel" key`);
         }
