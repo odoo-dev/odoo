@@ -12,6 +12,7 @@ class Article(models.Model):
 
     name = fields.Char(string="Title", default="New Article")
     body = fields.Html(string="Article Body")
+    icon = fields.Char(string='Article Icon', default='fa-file')
 
     parent_id = fields.Many2one("knowledge.article", string="Parent Article")
     child_ids = fields.One2many("knowledge.article", "parent_id", string="Child Articles")
