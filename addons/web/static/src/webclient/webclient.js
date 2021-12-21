@@ -36,7 +36,7 @@ export class WebClient extends Component {
         useBus(this.env.bus, "ROUTE_CHANGE", this.loadRouterState);
         useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", (mode) => {
             if (mode !== "new") {
-                this.el.classList.toggle("o_fullscreen", mode === "fullscreen");
+                document.body.classList.toggle("o_fullscreen", mode === "fullscreen");
             }
         });
         useEffect(
@@ -46,7 +46,9 @@ export class WebClient extends Component {
             () => []
         );
         useExternalListener(window, "click", this.onGlobalClick, { capture: true });
-        useTooltip();
+        // <div class="o_web_client" t-att-class="{'o_is_superuser': user.userId === 1, 'o_rtl': localization.direction === 'rtl' }">
+        // some useEffect to put on body the right classes???
+        // useTooltip();
     }
 
     mounted() {

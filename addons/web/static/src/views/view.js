@@ -153,7 +153,7 @@ export class View extends Component {
             config: this.config,
         });
         //
-        useActionLinks({ resModel });
+        // useActionLinks({ resModel });
     }
 
     async willStart() {
