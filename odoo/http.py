@@ -1369,7 +1369,7 @@ class Request:
         router = app.nodb_routing_map.bind_to_environ(self.httprequest.environ)
         rule, args = router.match(return_rule=True)
         self._pre_dispatch(rule, args)
-        if self.type == 'json':
+        if rule.endpoint.routing['type'] == 'json':
             response = self._json_dispatch(rule.endpoint, args)
         else:
             response = self._http_dispatch(rule.endpoint, args)
@@ -1450,7 +1450,7 @@ class Request:
 
         ir_http._authenticate(rule.endpoint)
         ir_http._pre_dispatch(rule, args)
-        if self.type == 'json':
+        if rule.endpoint.routing['type'] == 'json':
             response = self._json_dispatch(rule.endpoint, args)
         else:
             response = self._http_dispatch(rule.endpoint, args)
@@ -1478,8 +1478,7 @@ class Application(object):
                 manifest = get_manifest(module)
                 static_path = opj(addons_path, module, 'static')
                 if (manifest
-                        and manifest['installable']
-                        and manifest['assets']
+                        and (manifest['installable'] or manifest['assets'])
                         and os.path.isdir(static_path)):
                     mod2path[module] = static_path
         return mod2path
