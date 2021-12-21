@@ -62,7 +62,6 @@ export const localizationService = {
             multiLang: userLocalization.multi_lang,
             thousandsSep: userLocalization.thousands_sep,
             weekStart: userLocalization.week_start,
-            shouldParsersFallBackOnEnglishLocalization: true,
         });
     },
 };
