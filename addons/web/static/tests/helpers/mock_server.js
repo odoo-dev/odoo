@@ -111,7 +111,7 @@ export function _getView(params) {
         modifiersNames.forEach((attr) => {
             const mod = node.getAttribute(attr);
             if (mod) {
-                const v = evaluateExpr(mod, { context });
+                const v = evaluateExpr(mod, { context }) ? true : false;
                 if (inTreeView && !inListHeader && attr === "invisible") {
                     modifiers.column_invisible = v;
                 } else if (v || !(attr in modifiers) || !Array.isArray(modifiers[attr])) {
