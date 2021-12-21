@@ -826,7 +826,7 @@ class Request:
         if len(all_dbs) == 1:
             return sid, all_dbs[0]
 
-        return sid, ''
+        return sid, None
 
     def _set_cookie_session_id(self, session_id, dbname):
         """
@@ -1410,9 +1410,6 @@ class Request:
             with contextlib.closing(self.registry.cursor()) as cr:
                 self.env = odoo.api.Environment(cr, self.session.uid, self.session.context)
                 threading.current_thread().uid = self.env.uid
-                if 'lang' not in self.env.context:
-                    self.update_context(lang=self.default_lang())
-
                 try:
                     return service_model.retrying(self._serve_ir_http, self.env)
                 except Exception as exc:
@@ -1432,6 +1429,10 @@ class Request:
         Delegate most of the processing to the ir.http model that is
         extensible by applications.
         """
+        if 'lang' not in self.context:
+            self.session.context['lang'] = self.default_lang()
+            self.update_context(lang=self.session.context['lang'])
+
         ir_http = self.env['ir.http']
 
         try:
@@ -1509,10 +1510,6 @@ class Application(object):
             server that this application must call in order to send the
             HTTP response status line and the response headers.
         """
-        if environ['REQUEST_METHOD'] == 'GET' and '//' in environ['PATH_INFO']:
-            return werkzeug.utils.redirect(
-                environ['PATH_INFO'].replace('//', '/'), 301)
-
         if odoo.tools.config['proxy_mode'] and environ.get("HTTP_X_FORWARDED_HOST"):
             # The ProxyFix middleware has a side effect of updating the
             # environ, see https://github.com/pallets/werkzeug/pull/2184
@@ -1521,6 +1518,11 @@ class Application(object):
             def fake_start_response(status, headers):
                 return
             ProxyFix(fake_app)(environ, fake_start_response)
+
+        if environ['REQUEST_METHOD'] == 'GET' and '//' in environ['PATH_INFO']:
+            response = werkzeug.utils.redirect(
+                environ['PATH_INFO'].replace('//', '/'), 301)
+            return response(environ, start_response)
 
         httprequest = werkzeug.wrappers.Request(environ)
         httprequest.parameter_storage_class = (

@@ -369,7 +369,8 @@ class IrHttp(models.AbstractModel):
 
         4/ Redirect the browser when the lang is missing from the URL
            but another lang than the default one has been requested. The
-           requested lang is injected before the original path.
+           requested lang is injected before the original path. Note
+           that you don't redirect POST requests.
 
         5/ Redirect the browser when the lang is present in the URL but
            it is the default lang. The lang is removed from the original
@@ -412,9 +413,10 @@ class IrHttp(models.AbstractModel):
             request.env['ir.http']._auth_method_public()  # it calls update_env
             nearest_url_lang = cls.get_nearest_lang(request.env['res.lang']._lang_get_code(url_lang_str))
             cookie_lang = cls.get_nearest_lang(request.httprequest.cookies.get('frontend_lang'))
+            context_lang = real_env.context['lang']
             default_lang = cls._get_default_lang()
             request.lang = request.env['res.lang']._lang_get(
-                nearest_url_lang or cookie_lang or default_lang._get_cached('code')
+                nearest_url_lang or cookie_lang or context_lang or default_lang._get_cached('code')
             )
         finally:
             request.env = real_env
@@ -431,7 +433,7 @@ class IrHttp(models.AbstractModel):
             request.lang = default_lang
 
         # See /4, missing lang in url
-        elif not url_lang_str:
+        elif not url_lang_str and request.httprequest.method != 'POST':
             redirect = request.redirect_query(f'/{request.lang.url_code}{path}', request.httprequest.args)
             redirect.set_cookie('frontend_lang', request.lang._get_cached('code'))
             werkzeug.exceptions.abort(redirect)

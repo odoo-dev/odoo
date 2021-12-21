@@ -41,7 +41,8 @@ class ModelConverter(werkzeug.routing.BaseConverter):
         self.regex = r'([0-9]+)'
 
     def to_python(self, value):
-        env = request.env(user=RequestUID(value=value, converter=self))
+        _uid = RequestUID(value=value, converter=self)
+        env = api.Environment(request.cr, _uid, request.context)
         return env[self.model].browse(int(value))
 
     def to_url(self, value):
@@ -57,7 +58,8 @@ class ModelsConverter(werkzeug.routing.BaseConverter):
         self.regex = r'([0-9,]+)'
 
     def to_python(self, value):
-        env = request.env(user=RequestUID(value=value, converter=self))
+        _uid = RequestUID(value=value, converter=self)
+        env = api.Environment(request.cr, _uid, request.context)
         return env[self.model].browse(int(v) for v in value.split(','))
 
     def to_url(self, value):

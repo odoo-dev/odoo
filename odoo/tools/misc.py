@@ -1570,8 +1570,10 @@ class DotDict(dict):
         return DotDict(val) if type(val) is dict else val
 
 
-class Namespace(DotDict):
+class Namespace(dict):
     """ Namespace that supports both .dot and ["dot"] notations """
+    def __getattr__(self, attrib):
+        return self[attrib]
 
     def __setattr__(self, attrib, value):
         self[attrib] = value
