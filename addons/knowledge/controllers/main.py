@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+import json
 from odoo import http
 from odoo.http import request
 
@@ -15,7 +17,7 @@ class KnowledgeDataSet(DataSet):
     @http.route('/knowledge/article/<int:article_id>/rename', type='json', auth="user")
     def article_rename(self, article_id, title):
         request.env['knowledge.article'].browse(article_id).write({'name': title})
-        return True
+        return title
 
     @http.route('/knowledge/article/<int:article_id>/move', type='json', auth="user")
     def article_move(self, article_id, target_parent_id=False, before_article_id=False, private=False):
@@ -55,6 +57,14 @@ class KnowledgeDataSet(DataSet):
         article.unlink()
         return True
 
+    @http.route('/knowledge/article/<int:article_id>/duplicate', type='json', auth="user")
+    def article_duplicate(self, article_id):
+        article = request.env['knowledge.article'].browse(article_id)
+        if not article.exists():
+            return False
+        # TODO: Duplicate the article
+        return True
+
     @http.route('/knowledge/article/create', type='json', auth="user")
     def article_create(self, title=False, target_parent_id=False, private=False):
         Article = request.env['knowledge.article']
@@ -74,12 +84,8 @@ class KnowledgeDataSet(DataSet):
                 'body': title
             })
         article = Article.create(values)
-        
-        return {
-            'id': article.id,
-            'parent_id': article.parent_id.id,
-            'name': article.name,
-        }
+
+        return article.id
 
     # ------------------------
     # Articles tree generation
