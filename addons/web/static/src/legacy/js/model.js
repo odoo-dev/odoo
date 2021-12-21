@@ -427,6 +427,8 @@ odoo.define("web.Model", function (require) {
          * @private
          */
         async _notifyComponents() {
+            this.dispatchEvent(new Event("update"));
+            return;
             const rev = ++this.rev;
             const subscriptions = this.subscriptions.update || [];
             const groups = partitionBy(subscriptions, (s) =>

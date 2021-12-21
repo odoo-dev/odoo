@@ -523,6 +523,7 @@ odoo.define('web.OwlCompatibility', function (require) {
             this.app = app;
             this.app.configure({ env: owl.Component.env,  templates: window.__ODOO_TEMPLATES__ });
             this.node = this._makeOwlNode();
+            this.env = this.node.component.env;
             app.root = this.node;
             this.__owl__ = Object.create(this.node);
             this.componentRef = { comp: null };
@@ -558,7 +559,7 @@ odoo.define('web.OwlCompatibility', function (require) {
         // OWL 1 - like API //
         //------------------//
 
-        async mount(target) {
+        async mount(target, options) {
             if (this.status === "mounted" || this.status === "willMount") {
                 return this.render();
             } else if (this.status === "destroyed") {
@@ -567,11 +568,14 @@ odoo.define('web.OwlCompatibility', function (require) {
             if (target) {
                 this.target = target;
             }
+            if (options) {
+                this.mountOptions = options;
+            }
             if (this.status === "unmounted") {
                 prepareForRemount(this.node);
             }
             this.status = "willMount";
-            const prom = this.app.mountNode(this.node, this.target);
+            const prom = this.app.mountNode(this.node, this.target, this.mountOptions);
             prepareForFinish(this.node);
             await prom;
             if (document.contains(this.target)) {

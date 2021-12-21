@@ -48,13 +48,13 @@ var AbstractView = Factory.extend({
     // viewType is the type of the view, like 'form', 'kanban', 'list'...
     viewType: undefined,
     // determines if a search bar is available
-    withSearchBar: false,
+    withSearchBar: true,
     // determines the search menus available and their orders
     searchMenuTypes: [],
     // determines if a control panel should be instantiated
-    withControlPanel: false,
+    withControlPanel: true,
     // determines if a search panel could be instantiated
-    withSearchPanel: false,
+    withSearchPanel: true,
     // determines the MVC components to use
     config: _.extend({}, Factory.prototype.config, {
         Model: AbstractModel,

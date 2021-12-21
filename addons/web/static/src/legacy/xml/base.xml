@@ -12,7 +12,7 @@
                         class="breadcrumb-item"
                         t-att-class="{ o_back_button: bc_index === props.breadcrumbs.length - 1 }"
                         t-att-accesskey="bc_last and 'b'"
-                        t-on-click.prevent="()=>trigger('breadcrumb-clicked', { controllerID: bc.controllerID })"
+                        t-on-click.prevent="()=>this.trigger('breadcrumb-clicked', { controllerID: bc.controllerID })"
                         title="Previous menu"
                         >
                         <a href="#">
@@ -358,7 +358,7 @@
                 role="img"
                 aria-label="Remove"
                 title="Remove"
-                t-on-click="()=>_onFacetRemove(facet)"
+                t-on-click="()=>this._onFacetRemove(facet)"
             />
         </div>
         <input type="text"
@@ -369,21 +369,21 @@
             role="searchbox"
             title="Search for records"
             t-ref="search-input"
-            t-on-keydown="()=>_onSearchKeydown"
-            t-on-input="()=>_onSearchInput"
+            t-on-keydown="_onSearchKeydown"
+            t-on-input="_onSearchInput"
         />
         <ul t-if="state.sources.length" class="dropdown-menu o_searchview_autocomplete dropdown-menu show" role="menu">
             <li t-foreach="state.sources" t-as="src" t-key="src.id"
                 t-att-id="src.id"
                 class="o_menu_item"
                 t-att-class="{ o_indent: src.parent and !src.parent.selection, o_selection_focus: src_index === state.focusedItem }"
-                t-on-click="()=>_selectSource(src)"
-                t-on-mousemove="()=>_onSourceMousemove(src_index)"
+                t-on-click="()=>this._selectSource(src)"
+                t-on-mousemove="()=>this._onSourceMousemove(src_index)"
                 >
                 <a t-if="src.expand"
                     href="#"
                     class="o_expand"
-                    t-on-click.stop.prevent="()=>_expandSource(src, !src.expanded)"
+                    t-on-click.stop.prevent="()=>this._expandSource(src, !src.expanded)"
                     >
                     <i t-attf-class="fa fa-caret-{{ src.expanded ? 'down' : 'right' }}"/>
                 </a>
