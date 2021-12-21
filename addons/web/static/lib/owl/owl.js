@@ -1326,9 +1326,6 @@
         }
         const errorHandlers = nodeErrorHandlers.get(node);
         if (errorHandlers) {
-            if (isFirstRound && fiber) {
-                fiber.root.counter--;
-            }
             let stopped = false;
             // execute in the opposite order
             for (let i = errorHandlers.length - 1; i >= 0; i--) {
@@ -1342,6 +1339,9 @@
                 }
             }
             if (stopped) {
+                if (isFirstRound && fiber) {
+                    fiber.root.counter--;
+                }
                 return true;
             }
         }
@@ -1476,9 +1476,13 @@
             this.willPatch = [];
             this.patched = [];
             this.mounted = [];
+            // A fiber is typically locked when it is completing and the patch has not, or is being applied.
+            // i.e.: render triggered in onWillUnmount or in willPatch will be delayed
+            this.locked = false;
         }
         complete() {
             const node = this.node;
+            this.locked = true;
             let current = undefined;
             try {
                 // Step 1: calling all willPatch lifecycle hooks
@@ -1498,6 +1502,10 @@
                 // Step 2: patching the dom
                 node.bdom.patch(this.bdom, Object.keys(node.children).length > 0);
                 this.appliedToDom = true;
+                this.locked = false;
+                // unregistering the fiber before mounted since it can do another render
+                // and that the current rendering is obviously completed
+                node.fiber = null;
                 // Step 4: calling all mounted lifecycle hooks
                 let mountedFibers = this.mounted;
                 while ((current = mountedFibers.pop())) {
@@ -1518,10 +1526,9 @@
                         }
                     }
                 }
-                // unregistering the fiber
-                node.fiber = null;
             }
             catch (e) {
+                this.locked = false;
                 handleError({ fiber: current || this, error: e });
             }
         }
@@ -1553,6 +1560,9 @@
                         mount$1(node.bdom, this.target, firstChild);
                     }
                 }
+                // unregistering the fiber before mounted since it can do another render
+                // and that the current rendering is obviously completed
+                node.fiber = null;
                 node.status = 1 /* MOUNTED */;
                 this.appliedToDom = true;
                 let mountedFibers = this.mounted;
@@ -1563,7 +1573,6 @@
                         }
                     }
                 }
-                node.fiber = null;
             }
             catch (e) {
                 handleError({ fiber: current, error: e });
@@ -1589,6 +1598,12 @@
     //------------------------------------------------------------------------------
     // Prop validation helper
     //------------------------------------------------------------------------------
+    function getPropDescription(staticProps) {
+        if (staticProps instanceof Array) {
+            return Object.fromEntries(staticProps.map((p) => (p.endsWith("?") ? [p.slice(0, -1), false] : [p, true])));
+        }
+        return staticProps || { "*": true };
+    }
     /**
      * Validate the component props (or next props) against the (static) props
      * description.  This is potentially an expensive operation: it may needs to
@@ -1598,47 +1613,33 @@
     const validateProps = function (name, props, parent) {
         const ComponentClass = (typeof name !== "string" ? name : parent.constructor.components[name]);
         applyDefaultProps(props, ComponentClass);
-        const propsDef = ComponentClass.props;
-        if (propsDef instanceof Array) {
-            // list of strings (prop names)
-            for (const propName of propsDef) {
-                if (propName[propName.length - 1] === "?") {
-                    // optional prop
-                    break;
-                }
-                if (!(propName in props)) {
+        let propsDef = getPropDescription(ComponentClass.props);
+        const allowAdditionalProps = "*" in propsDef;
+        for (let propName in propsDef) {
+            if (propName === "*") {
+                continue;
+            }
+            if (props[propName] === undefined) {
+                if (propsDef[propName] && !propsDef[propName].optional) {
                     throw new Error(`Missing props '${propName}' (component '${ComponentClass.name}')`);
                 }
-            }
-            for (let key in props) {
-                if (!propsDef.includes(key) && !propsDef.includes(key + "?")) {
-                    throw new Error(`Unknown prop '${key}' given to component '${ComponentClass.name}'`);
+                else {
+                    continue;
                 }
+            }
+            let isValid;
+            try {
+                isValid = isValidProp(props[propName], propsDef[propName]);
+            }
+            catch (e) {
+                e.message = `Invalid prop '${propName}' in component ${ComponentClass.name} (${e.message})`;
+                throw e;
+            }
+            if (!isValid) {
+                throw new Error(`Invalid Prop '${propName}' in component '${ComponentClass.name}'`);
             }
         }
-        else if (propsDef) {
-            // propsDef is an object now
-            for (let propName in propsDef) {
-                if (props[propName] === undefined) {
-                    if (propsDef[propName] && !propsDef[propName].optional) {
-                        throw new Error(`Missing props '${propName}' (component '${ComponentClass.name}')`);
-                    }
-                    else {
-                        continue;
-                    }
-                }
-                let isValid;
-                try {
-                    isValid = isValidProp(props[propName], propsDef[propName]);
-                }
-                catch (e) {
-                    e.message = `Invalid prop '${propName}' in component ${ComponentClass.name} (${e.message})`;
-                    throw e;
-                }
-                if (!isValid) {
-                    throw new Error(`Invalid Prop '${propName}' in component '${ComponentClass.name}'`);
-                }
-            }
+        if (!allowAdditionalProps) {
             for (let propName in props) {
                 if (!(propName in propsDef)) {
                     throw new Error(`Unknown prop '${propName}' given to component '${ComponentClass.name}'`);
@@ -1702,88 +1703,13 @@
         return result;
     }
 
-    const globalStylesheets = {};
-    function registerSheet(id, css) {
-        const sheet = document.createElement("style");
-        sheet.innerHTML = processSheet(css);
-        globalStylesheets[id] = sheet;
+    let currentNode = null;
+    function getCurrent() {
+        return currentNode;
     }
-    /**
-     * Apply the stylesheets defined by the component. Note that we need to make
-     * sure all inherited stylesheets are applied as well, in a reverse order to
-     * ensure that <style/> will be applied to the DOM in the order they are
-     * included in the document. We then delete the `style` key from the constructor
-     * to make sure we do not apply it again.
-     */
-    function applyStyles(ComponentClass) {
-        const toApply = [];
-        while (ComponentClass && ComponentClass.style) {
-            if (ComponentClass.hasOwnProperty("style")) {
-                toApply.push([ComponentClass.style, ComponentClass.name]);
-                delete ComponentClass.style;
-            }
-            ComponentClass = Object.getPrototypeOf(ComponentClass);
-        }
-        while (toApply.length) {
-            const [styleId, componentName] = toApply.pop();
-            activateSheet(styleId, componentName);
-        }
+    function useComponent() {
+        return currentNode.component;
     }
-    function activateSheet(id, name) {
-        const sheet = globalStylesheets[id];
-        if (!sheet) {
-            throw new Error(`Invalid css stylesheet for component '${name}'. Did you forget to use the 'css' tag helper?`);
-        }
-        sheet.dataset.component = name;
-        document.head.appendChild(sheet);
-    }
-    function processSheet(str) {
-        const tokens = str.split(/(\{|\}|;)/).map((s) => s.trim());
-        const selectorStack = [];
-        const parts = [];
-        let rules = [];
-        function generateSelector(stackIndex, parentSelector) {
-            const parts = [];
-            for (const selector of selectorStack[stackIndex]) {
-                let part = (parentSelector && parentSelector + " " + selector) || selector;
-                if (part.includes("&")) {
-                    part = selector.replace(/&/g, parentSelector || "");
-                }
-                if (stackIndex < selectorStack.length - 1) {
-                    part = generateSelector(stackIndex + 1, part);
-                }
-                parts.push(part);
-            }
-            return parts.join(", ");
-        }
-        function generateRules() {
-            if (rules.length) {
-                parts.push(generateSelector(0) + " {");
-                parts.push(...rules);
-                parts.push("}");
-                rules = [];
-            }
-        }
-        while (tokens.length) {
-            let token = tokens.shift();
-            if (token === "}") {
-                generateRules();
-                selectorStack.pop();
-            }
-            else {
-                if (tokens[0] === "{") {
-                    generateRules();
-                    selectorStack.push(token.split(/\s*,\s*/));
-                    tokens.shift();
-                }
-                if (tokens[0] === ";") {
-                    rules.push("  " + token + ";");
-                }
-            }
-        }
-        return parts.join("\n");
-    }
-
     function component(name, props, key, ctx, parent) {
         let node = ctx.children[key];
         let isDynamic = typeof name !== "string";
@@ -1822,13 +1748,6 @@
         }
         return node;
     }
-    // -----------------------------------------------------------------------------
-    //  Component VNode
-    // -----------------------------------------------------------------------------
-    let currentNode = null;
-    function getCurrent() {
-        return currentNode;
-    }
     class ComponentNode {
         constructor(C, props, app, parent) {
             this.fiber = null;
@@ -1852,9 +1771,6 @@
             this.childEnv = env;
             this.component = new C(props, env, this);
             this.renderFn = app.getTemplate(C.template).bind(this.component, this.component, this);
-            if (C.style) {
-                applyStyles(C);
-            }
             this.component.setup();
         }
         mountComponent(target, options) {
@@ -1880,7 +1796,12 @@
             }
         }
         async render() {
-            const current = this.fiber;
+            let current = this.fiber;
+            if (current && current.root.locked) {
+                await Promise.resolve();
+                // situation may have changed after the microtask tick
+                current = this.fiber;
+            }
             if (current && !current.bdom && !fibersInError.has(current)) {
                 return;
             }
@@ -2308,7 +2229,7 @@
                     if (groupType === "LEFT_BRACE" &&
                         isLeftSeparator(prevToken) &&
                         isRightSeparator(nextToken)) {
-                        tokens.splice(i + 1, 0, { type: "COLON", value: ":" }, Object.assign({}, token));
+                        tokens.splice(i + 1, 0, { type: "COLON", value: ":" }, { ...token });
                         nextToken = tokens[i + 1];
                     }
                     if (prevToken.type === "OPERATOR" && prevToken.value === ".") {
@@ -2722,7 +2643,10 @@
             const isNewBlock = !block || forceNewBlock;
             if (isNewBlock) {
                 block = this.createBlock(block, "comment", ctx);
-                this.insertBlock(`comment(\`${ast.value}\`)`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: forceNewBlock && !block }));
+                this.insertBlock(`comment(\`${ast.value}\`)`, block, {
+                    ...ctx,
+                    forceNewBlock: forceNewBlock && !block,
+                });
             }
             else {
                 const text = xmlDoc.createComment(ast.value);
@@ -2738,7 +2662,10 @@
             }
             if (!block || forceNewBlock) {
                 block = this.createBlock(block, "text", ctx);
-                this.insertBlock(`text(\`${value}\`)`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: forceNewBlock && !block }));
+                this.insertBlock(`text(\`${value}\`)`, block, {
+                    ...ctx,
+                    forceNewBlock: forceNewBlock && !block,
+                });
             }
             else {
                 const createFn = ast.type === 0 /* Text */ ? xmlDoc.createTextNode : xmlDoc.createComment;
@@ -2903,7 +2830,7 @@
             }
             if (!block || forceNewBlock) {
                 block = this.createBlock(block, "text", ctx);
-                this.insertBlock(`text(${expr})`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: forceNewBlock && !block }));
+                this.insertBlock(`text(${expr})`, block, { ...ctx, forceNewBlock: forceNewBlock && !block });
             }
             else {
                 const idx = block.insertData(expr);
@@ -3144,14 +3071,20 @@
                 this.addLine(`const ${templateVar} = ${subTemplate};`);
                 block = this.createBlock(block, "multi", ctx);
                 this.helpers.add("call");
-                this.insertBlock(`call(this, ${templateVar}, ctx, node, ${key})`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: !block }));
+                this.insertBlock(`call(this, ${templateVar}, ctx, node, ${key})`, block, {
+                    ...ctx,
+                    forceNewBlock: !block,
+                });
             }
             else {
                 const id = this.generateId(`callTemplate_`);
                 this.helpers.add("getTemplate");
                 this.staticCalls.push({ id, template: subTemplate });
                 block = this.createBlock(block, "multi", ctx);
-                this.insertBlock(`${id}.call(this, ctx, node, ${key})`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: !block }));
+                this.insertBlock(`${id}.call(this, ctx, node, ${key})`, block, {
+                    ...ctx,
+                    forceNewBlock: !block,
+                });
             }
             if (ast.body && !ctx.isLast) {
                 this.addLine(`ctx = ctx.__proto__;`);
@@ -3165,7 +3098,7 @@
                 }
             }
             block = this.createBlock(block, "multi", ctx);
-            this.insertBlock(compileExpr(ast.name), block, Object.assign(Object.assign({}, ctx), { forceNewBlock: !block }));
+            this.insertBlock(compileExpr(ast.name), block, { ...ctx, forceNewBlock: !block });
         }
         compileTSet(ast, ctx) {
             this.target.shouldProtectScope = true;
@@ -3355,7 +3288,7 @@
                 this.insertAnchor(block);
             }
             block = this.createBlock(block, "multi", ctx);
-            this.insertBlock(blockString, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: false }));
+            this.insertBlock(blockString, block, { ...ctx, forceNewBlock: false });
         }
         compileTTranslation(ast, ctx) {
             if (ast.content) {
@@ -3367,26 +3300,6 @@
     // -----------------------------------------------------------------------------
     // AST Type definition
     // -----------------------------------------------------------------------------
-    var ASTType;
-    (function (ASTType) {
-        ASTType[ASTType["Text"] = 0] = "Text";
-        ASTType[ASTType["Comment"] = 1] = "Comment";
-        ASTType[ASTType["DomNode"] = 2] = "DomNode";
-        ASTType[ASTType["Multi"] = 3] = "Multi";
-        ASTType[ASTType["TEsc"] = 4] = "TEsc";
-        ASTType[ASTType["TIf"] = 5] = "TIf";
-        ASTType[ASTType["TSet"] = 6] = "TSet";
-        ASTType[ASTType["TCall"] = 7] = "TCall";
-        ASTType[ASTType["TOut"] = 8] = "TOut";
-        ASTType[ASTType["TForEach"] = 9] = "TForEach";
-        ASTType[ASTType["TKey"] = 10] = "TKey";
-        ASTType[ASTType["TComponent"] = 11] = "TComponent";
-        ASTType[ASTType["TDebug"] = 12] = "TDebug";
-        ASTType[ASTType["TLog"] = 13] = "TLog";
-        ASTType[ASTType["TSlot"] = 14] = "TSlot";
-        ASTType[ASTType["TCallBlock"] = 15] = "TCallBlock";
-        ASTType[ASTType["TTranslation"] = 16] = "TTranslation";
-    })(ASTType || (ASTType = {}));
     function parse(xml) {
         const node = xml instanceof Element ? xml : parseXML$1(`<t>${xml}</t>`).firstChild;
         normalizeXML(node);
@@ -3584,7 +3497,11 @@
             return tesc;
         }
         if (ast.type === 2 /* DomNode */) {
-            return Object.assign(Object.assign({}, ast), { ref, content: [tesc] });
+            return {
+                ...ast,
+                ref,
+                content: [tesc],
+            };
         }
         if (ast.type === 11 /* TComponent */) {
             throw new Error("t-esc is not supported on Component nodes");
@@ -3613,7 +3530,11 @@
         }
         if (ast.type === 2 /* DomNode */) {
             tOut.body = ast.content.length ? ast.content : null;
-            return Object.assign(Object.assign({}, ast), { ref, content: [tOut] });
+            return {
+                ...ast,
+                ref,
+                content: [tOut],
+            };
         }
         return tOut;
     }
@@ -3740,7 +3661,10 @@
                 return ast;
             }
             if (ast && ast.type === 11 /* TComponent */) {
-                return Object.assign(Object.assign({}, ast), { slots: { default: { content: tcall } } });
+                return {
+                    ...ast,
+                    slots: { default: { content: tcall } },
+                };
             }
         }
         const body = parseChildren(node, ctx);
@@ -4096,7 +4020,7 @@
             ? !(template instanceof Element) || template.querySelector("[t-set], [t-call]") === null
             : !template.includes("t-set") && !template.includes("t-call");
         // code generation
-        const codeGenerator = new CodeGenerator(ast, Object.assign(Object.assign({}, options), { hasSafeContext }));
+        const codeGenerator = new CodeGenerator(ast, { ...options, hasSafeContext });
         const code = codeGenerator.generateCode();
         // template function
         return new Function("bdom, helpers", code);
@@ -4307,15 +4231,22 @@
         return doc;
     }
     class TemplateSet {
-        constructor() {
+        constructor(config = {}) {
             this.rawTemplates = Object.create(globalTemplates);
             this.templates = {};
-            const call = (owner, subTemplate, ctx, parent) => {
-                const template = this.getTemplate(subTemplate);
-                return toggler(subTemplate, template.call(owner, ctx, parent));
-            };
-            const getTemplate = (name) => this.getTemplate(name);
-            this.utils = Object.assign({}, UTILS, { getTemplate, call });
+            this.utils = Object.assign({}, UTILS, {
+                call: (owner, subTemplate, ctx, parent) => {
+                    const template = this.getTemplate(subTemplate);
+                    return toggler(subTemplate, template.call(owner, ctx, parent));
+                },
+                getTemplate: (name) => this.getTemplate(name),
+            });
+            this.dev = config.dev || false;
+            this.translateFn = config.translateFn;
+            this.translatableAttributes = config.translatableAttributes;
+            if (config.templates) {
+                this.addTemplates(config.templates);
+            }
         }
         addTemplate(name, template, options = {}) {
             if (name in this.rawTemplates && !options.allowDuplicate) {
@@ -4341,12 +4272,7 @@
                 if (rawTemplate === undefined) {
                     throw new Error(`Missing template: "${name}"`);
                 }
-                const templateFn = compile(rawTemplate, {
-                    name,
-                    dev: this.dev,
-                    translateFn: this.translateFn,
-                    translatableAttributes: this.translatableAttributes,
-                });
+                const templateFn = this._compileTemplate(name, rawTemplate);
                 // first add a function to lazily get the template, in case there is a
                 // recursive call to the template name
                 this.templates[name] = (context, parent) => this.templates[name](context, parent);
@@ -4355,40 +4281,42 @@
             }
             return this.templates[name];
         }
+        _compileTemplate(name, template) {
+            return compile(template, {
+                name,
+                dev: this.dev,
+                translateFn: this.translateFn,
+                translatableAttributes: this.translatableAttributes,
+            });
+        }
     }
+    // -----------------------------------------------------------------------------
+    //  xml tag helper
+    // -----------------------------------------------------------------------------
+    function xml(...args) {
+        const name = `__template__${xml.nextId++}`;
+        const value = String.raw(...args);
+        globalTemplates[name] = value;
+        return name;
+    }
+    xml.nextId = 1;
 
     const DEV_MSG = `Owl is running in 'dev' mode.
 
 This is not suitable for production use.
 See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for more information.`;
     class App extends TemplateSet {
-        constructor(Root, props) {
-            super();
-            this.env = Object.freeze({});
+        constructor(Root, config = {}) {
+            super(config);
             this.scheduler = new Scheduler(window.requestAnimationFrame.bind(window));
             this.root = null;
             this.Root = Root;
-            this.props = props;
-        }
-        configure(config) {
             if (config.dev) {
-                this.dev = config.dev;
                 console.info(DEV_MSG);
             }
-            if (config.env) {
-                const descrs = Object.getOwnPropertyDescriptors(config.env);
-                this.env = Object.freeze(Object.defineProperties({}, descrs));
-            }
-            if (config.translateFn) {
-                this.translateFn = config.translateFn;
-            }
-            if (config.translatableAttributes) {
-                this.translatableAttributes = config.translatableAttributes;
-            }
-            if (config.templates) {
-                this.addTemplates(config.templates);
-            }
-            return this;
+            const descrs = Object.getOwnPropertyDescriptors(config.env || {});
+            this.env = Object.freeze(Object.defineProperties({}, descrs));
+            this.props = config.props || {};
         }
         mount(target, options) {
             this.checkTarget(target);
@@ -4442,6 +4370,9 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             }
         }
     }
+    async function mount(C, target, config = {}) {
+        return new App(C, config).mount(target, config);
+    }
 
     // -----------------------------------------------------------------------------
     //  Component Class
@@ -4452,27 +4383,13 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             this.env = env;
             this.__owl__ = node;
         }
-        get el() {
-            const node = this.__owl__;
-            return node.bdom ? node.bdom.firstNode() : undefined;
-        }
         setup() { }
         render() {
             this.__owl__.render();
         }
     }
     Component.template = "";
-    Component.style = "";
 
-    // -----------------------------------------------------------------------------
-    //  Status
-    // -----------------------------------------------------------------------------
-    var STATUS;
-    (function (STATUS) {
-        STATUS[STATUS["NEW"] = 0] = "NEW";
-        STATUS[STATUS["MOUNTED"] = 1] = "MOUNTED";
-        STATUS[STATUS["DESTROYED"] = 2] = "DESTROYED";
-    })(STATUS || (STATUS = {}));
     function status(component) {
         switch (component.__owl__.status) {
             case 0 /* NEW */:
@@ -4483,27 +4400,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 return "destroyed";
         }
     }
-
-    // -----------------------------------------------------------------------------
-    //  Global templates
-    // -----------------------------------------------------------------------------
-    function xml(...args) {
-        const name = `__template__${xml.nextId++}`;
-        const value = String.raw(...args);
-        globalTemplates[name] = value;
-        return name;
-    }
-    xml.nextId = 1;
-    // -----------------------------------------------------------------------------
-    //  Global stylesheets
-    // -----------------------------------------------------------------------------
-    function css(strings, ...args) {
-        const name = `__sheet__${css.nextId++}`;
-        const value = String.raw(strings, ...args);
-        registerSheet(name, value);
-        return name;
-    }
-    css.nextId = 1;
 
     const VText = text("").constructor;
     class VPortal extends VText {
@@ -4997,14 +4893,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
         html,
         comment,
     };
-    async function mount(C, target, config = {}) {
-        const app = new App(C);
-        return app.configure(config).mount(target);
-    }
-    function useComponent() {
-        const current = getCurrent();
-        return current.component;
-    }
     const __info__ = {};
 
     exports.App = App;
@@ -5014,7 +4902,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.Portal = Portal;
     exports.__info__ = __info__;
     exports.blockDom = blockDom;
-    exports.css = css;
     exports.loadFile = loadFile;
     exports.markup = markup;
     exports.mount = mount;
@@ -5044,8 +4931,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-12-16T14:10:44.802Z';
-    __info__.hash = 'a8ffcaf';
+    __info__.date = '2021-12-21T11:32:42.962Z';
+    __info__.hash = '0b1c4dd';
     __info__.url = 'https://github.com/odoo/owl';
 
 
