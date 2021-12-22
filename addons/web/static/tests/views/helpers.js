@@ -71,12 +71,6 @@ export const makeView = async (params) => {
         props.fields = Object.assign({}, props.fields, fvg.fields);
         props.searchViewArch = props.searchViewArch || "<search/>";
         props.searchViewFields = props.searchViewFields || Object.assign({}, props.fields);
-        if (props.loadActionMenus) {
-            props.actionMenus = props.actionMenus === undefined ? {} : props.actionMenus;
-        }
-        if (props.loadIrFilters) {
-            props.irFilters = props.irFilters === undefined ? [] : props.irFilters;
-        }
     }
 
     /** Legacy Environment, for compatibility sakes
