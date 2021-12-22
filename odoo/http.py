@@ -955,6 +955,7 @@ class Request:
         See :meth:`~odoo.http.request.send_file`: for the complete list
         of parameters.
         """
+        # @secu, open() in master, should we file_open() instead ?
         fd = open(path, 'rb')  # closed by werkzeug
         return self.send_file(fd, **send_file_kwargs)
 
