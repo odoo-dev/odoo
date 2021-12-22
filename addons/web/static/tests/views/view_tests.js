@@ -426,6 +426,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `<toy>Specific arch content</toy>`,
                 fields: {},
                 loadActionMenus: true,
+                actionMenus: {},
             });
             assert.hasClass(view.el, "o_toy_view");
             assert.strictEqual(view.el.innerHTML, `<toy>Specific arch content</toy>`);
@@ -597,7 +598,6 @@ QUnit.module("Views", (hooks) => {
                 searchViewArch: `<search/>`,
                 searchViewFields: {},
                 loadIrFilters: true,
-                irFilters: false,
             });
             assert.hasClass(view.el, "o_toy_view");
             assert.strictEqual(view.el.innerText, "Specific arch content");
