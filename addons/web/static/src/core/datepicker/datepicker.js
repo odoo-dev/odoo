@@ -187,19 +187,21 @@ export class DatePicker extends Component {
      * date value has changed.
      */
     onDateChange() {
+        let date;
         try {
-            const date = this.parse(this.inputRef.el.value, this.options);
-            this.state.warning = date > DateTime.local();
-            const areEqual =
-                date instanceof DateTime && this.props.date instanceof DateTime
-                    ? date.equals(this.props.date)
-                    : date === this.props.date;
-            if (!areEqual) {
-                this.props.onDateTimeChanged(date);
-            }
+            date = this.parse(this.inputRef.el.value, this.options);
         } catch (_err) {
             // Reset to default (= given) date.
             this.updateInput();
+            return;
+        }
+        this.state.warning = date > DateTime.local();
+        const areEqual =
+            date instanceof DateTime && this.props.date instanceof DateTime
+                ? date.equals(this.props.date)
+                : date === this.props.date;
+        if (!areEqual) {
+            this.props.onDateTimeChanged(date);
         }
     }
 
