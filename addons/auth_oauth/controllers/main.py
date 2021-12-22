@@ -74,7 +74,7 @@ class OAuthLogin(Home):
         if not redirect.startswith(('//', 'http://', 'https://')):
             redirect = '%s%s' % (request.httprequest.url_root, redirect[1:] if redirect[0] == '/' else redirect)
         state = dict(
-            d=request.session.db,
+            d=request.db,
             p=provider['id'],
             r=werkzeug.urls.url_quote_plus(redirect),
         )
