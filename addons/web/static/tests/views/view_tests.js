@@ -452,6 +452,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `<toy>Specific arch content</toy>`,
                 fields: {},
                 loadActionMenus: true,
+                actionMenus: {},
             });
             assert.containsOnce(target, ".o_toy_view");
             assert.strictEqual(
@@ -635,7 +636,6 @@ QUnit.module("Views", (hooks) => {
                 searchViewArch: `<search/>`,
                 searchViewFields: {},
                 loadIrFilters: true,
-                irFilters: false,
             });
             assert.containsOnce(target, ".o_toy_view");
             assert.strictEqual(
