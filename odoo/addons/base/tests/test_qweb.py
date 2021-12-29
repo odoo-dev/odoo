@@ -6,6 +6,7 @@ import json
 import os.path
 import re
 import markupsafe
+import itertools
 
 from lxml import etree, html
 from lxml.builder import E
@@ -1594,6 +1595,2855 @@ class TestQWebBasic(TransactionCase):
         rendered = self.env['ir.qweb']._render(view.id)
 
         self.assertEqual(str(rendered), result)
+
+class TestQwebCache(TransactionCase):
+    def test_01_render_xml_cache_base(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div t-cache="cache_id" class="toto">
+                        <table>
+                            <tr><td><span t-esc="value[0]"/></td></tr>
+                            <tr><td><span t-esc="value[1]"/></td></tr>
+                            <tr><td><span t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        expected_result = etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>1</span></td></tr>
+                    <tr><td><span>2</span></td></tr>
+                    <tr><td><span>3</span></td></tr>
+                </table>
+            </div>
+        """)
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        result = etree.fromstring(view1._render({'cache_id': 1, 'value': [1, 2, 3]}))
+        self.assertEqual(result, expected_result, 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({'cache_id': 1, 'value': [10, 20, 30]}))
+        self.assertEqual(result, expected_result, 'Next rendering use cache')
+
+    def test_02_render_xml_cache_different(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="toto">
+                        <table t-cache="cache_id">
+                            <tr><td><span t-esc="value[0]"/></td></tr>
+                            <tr><td><span t-esc="value[1]"/></td></tr>
+                            <tr><td><span t-esc="value[2]"/></td></tr>
+                        </table>
+                        <table t-cache="cache_id2">
+                            <tr><td><span t-esc="value2[0]"/></td></tr>
+                            <tr><td><span t-esc="value2[1]"/></td></tr>
+                            <tr><td><span t-esc="value2[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': 1,
+            'cache_id2': 1,
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>1</span></td></tr>
+                    <tr><td><span>2</span></td></tr>
+                    <tr><td><span>3</span></td></tr>
+                </table>
+                <table>
+                    <tr><td><span>1</span></td></tr>
+                    <tr><td><span>2</span></td></tr>
+                    <tr><td><span>3</span></td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache with different cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (2, 5, 6),
+            'cache_id2': (2, 5, 5),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>41</span></td></tr>
+                    <tr><td><span>42</span></td></tr>
+                    <tr><td><span>43</span></td></tr>
+                </table>
+                <table>
+                    <tr><td><span>51</span></td></tr>
+                    <tr><td><span>52</span></td></tr>
+                    <tr><td><span>53</span></td></tr>
+                </table>
+            </div>
+        """), 'Use different cache id')
+
+    def test_03_render_xml_cache_contains_false(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div t-cache="cache_id" class="toto">
+                        <table>
+                            <tr><td><span t-esc="value[0]"/></td></tr>
+                            <tr t-cache="None"><td><span t-esc="value[1]"/></td></tr>
+                            <tr><td><span t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        result = etree.fromstring(view1._render({'cache_id': 1, 'value': [1, 2, 3]}))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>1</span></td></tr>
+                    <tr><td><span>2</span></td></tr>
+                    <tr><td><span>3</span></td></tr>
+                </table>
+            </div>
+        """), 'First rendering add compiled values in cache')
+
+        result = etree.fromstring(view1._render({'cache_id': 1, 'value': [10, 20, 30]}))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>1</span></td></tr>
+                    <tr><td><span>20</span></td></tr>
+                    <tr><td><span>3</span></td></tr>
+                </table>
+            </div>
+        """), 'Next rendering use cache exept for t-cache="None"')
+
+    def test_04_render_xml_cache_recursive(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="toto">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <tr>
+                                <td>
+                                    <table t-cache="cache_id2">
+                                        <tr><td><t t-esc="value2[0]"/></td></tr>
+                                        <tr><td><t t-esc="value2[1]"/></td></tr>
+                                        <tr><td><t t-esc="value2[2]"/></td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'Second rendering (change inside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>31</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>33</td></tr>
+                </table>
+            </div>
+        """), 'Third rendering (change main cache id, old cache inside)')
+
+    def test_05_render_xml_cache_false_recursive(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="toto">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <tr t-cache="None">
+                                <td>
+                                    <table t-cache="cache_id2">
+                                        <tr><td><t t-esc="value2[0]"/></td></tr>
+                                        <tr><td><t t-esc="value2[1]"/></td></tr>
+                                        <tr><td><t t-esc="value2[2]"/></td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'Second rendering (change inside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>31</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>33</td></tr>
+                </table>
+            </div>
+        """), 'Third rendering (change main cache id, old cache inside)')
+
+    def test_06_render_xml_no_cache_base(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div t-cache="cache_id" class="toto">
+                        <table>
+                            <tr><td><span t-esc="value[0]"/></td></tr>
+                            <tr><td><span t-esc="value[1]"/></td></tr>
+                            <tr><td><span t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=False)
+
+        result = etree.fromstring(view1._render({'cache_id': 1, 'value': [1, 2, 3]}))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>1</span></td></tr>
+                    <tr><td><span>2</span></td></tr>
+                    <tr><td><span>3</span></td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({'cache_id': 1, 'value': [10, 20, 30]}))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>10</span></td></tr>
+                    <tr><td><span>20</span></td></tr>
+                    <tr><td><span>30</span></td></tr>
+                </table>
+            </div>
+        """), 'Next rendering use cache')
+
+    def test_07_render_xml_no_cache_different(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="toto">
+                        <table t-cache="cache_id">
+                            <tr><td><span t-esc="value[0]"/></td></tr>
+                            <tr><td><span t-esc="value[1]"/></td></tr>
+                            <tr><td><span t-esc="value[2]"/></td></tr>
+                        </table>
+                        <table t-cache="cache_id2">
+                            <tr><td><span t-esc="value2[0]"/></td></tr>
+                            <tr><td><span t-esc="value2[1]"/></td></tr>
+                            <tr><td><span t-esc="value2[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=False)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': 1,
+            'cache_id2': 1,
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>1</span></td></tr>
+                    <tr><td><span>2</span></td></tr>
+                    <tr><td><span>3</span></td></tr>
+                </table>
+                <table>
+                    <tr><td><span>10</span></td></tr>
+                    <tr><td><span>20</span></td></tr>
+                    <tr><td><span>30</span></td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache with different cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (2, 5, 6),
+            'cache_id2': (2, 5, 5),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>41</span></td></tr>
+                    <tr><td><span>42</span></td></tr>
+                    <tr><td><span>43</span></td></tr>
+                </table>
+                <table>
+                    <tr><td><span>51</span></td></tr>
+                    <tr><td><span>52</span></td></tr>
+                    <tr><td><span>53</span></td></tr>
+                </table>
+            </div>
+        """), 'Use different cache id')
+
+    def test_08_render_xml_no_cache_contains_false(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div t-cache="cache_id" class="toto">
+                        <table>
+                            <tr><td><span t-esc="value[0]"/></td></tr>
+                            <tr t-cache="None"><td><span t-esc="value[1]"/></td></tr>
+                            <tr><td><span t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=False)
+
+        result = etree.fromstring(view1._render({'cache_id': 1, 'value': [1, 2, 3]}))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>1</span></td></tr>
+                    <tr><td><span>2</span></td></tr>
+                    <tr><td><span>3</span></td></tr>
+                </table>
+            </div>
+        """), 'First rendering add compiled values in cache')
+
+        result = etree.fromstring(view1._render({'cache_id': 1, 'value': [10, 20, 30]}))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td><span>10</span></td></tr>
+                    <tr><td><span>20</span></td></tr>
+                    <tr><td><span>30</span></td></tr>
+                </table>
+            </div>
+        """), 'Next rendering use cache exept for t-cache="None"')
+
+    def test_09_render_xml_no_cache_recursive(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="toto">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <tr>
+                                <td>
+                                    <table t-cache="cache_id2">
+                                        <tr><td><t t-esc="value2[0]"/></td></tr>
+                                        <tr><td><t t-esc="value2[1]"/></td></tr>
+                                        <tr><td><t t-esc="value2[2]"/></td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=False)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>41</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>43</td></tr>
+                </table>
+            </div>
+        """), 'Second rendering (change inside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>31</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>33</td></tr>
+                </table>
+            </div>
+        """), 'Third rendering (change main cache id, old cache inside)')
+
+    def test_10_render_xml_no_cache_false_recursive(self):
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="toto">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <tr t-cache="None">
+                                <td>
+                                    <table t-cache="cache_id2">
+                                        <tr><td><t t-esc="value2[0]"/></td></tr>
+                                        <tr><td><t t-esc="value2[1]"/></td></tr>
+                                        <tr><td><t t-esc="value2[2]"/></td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=False)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>41</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>43</td></tr>
+                </table>
+            </div>
+        """), 'Second rendering (change inside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>31</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>33</td></tr>
+                </table>
+            </div>
+        """), 'Third rendering (change main cache id, old cache inside)')
+
+    def test_11_render_xml_cache_with_t_set(self):
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_page">
+                    <section t-cache="cache_id">
+                        <t t-set="counter" t-value="counter + 100"/>
+                        <article t-cache="None"><t t-out="counter"/></article>
+                        <div>cache: <t t-out="counter"/></div>
+                    </section>
+                </t>
+            """
+        })
+
+        render = template_page._render({
+            'cache_id': 1,
+            'counter': 1,
+        })
+        result = """
+            <section>
+                <article>101</article>
+                <div>cache: 101</div>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 1 (1 != 101: cached t-set should is applied on first rendering)')
+
+        render = template_page._render({
+            'cache_id': 1,
+            'counter': 2,
+        })
+        result = """
+            <section>
+                <article>2</article>
+                <div>cache: 101</div>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 2 (102 != 2: cached t-set should not applied)')
+
+        render = template_page._render({
+            'cache_id': 3,
+            'counter': 3,
+        })
+        result = """
+            <section>
+                <article>103</article>
+                <div>cache: 103</div>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 3 (3 != 103: cached t-set should applied because the new cache key is created)')
+
+    def test_12_render_xml_cache_with_t_set_out_of_cache(self):
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_page">
+                    <root>
+                        <t t-set="counter" t-value="counter + 100"/>
+                        <section t-cache="cache_id">
+                            <article t-cache="None"><t t-out="counter"/></article>
+                            <div>cache: <t t-out="counter"/></div>
+                        </section>
+                    </root>
+                </t>
+            """
+        })
+
+        render = template_page._render({
+            'cache_id': 1,
+            'counter': 1,
+        })
+        result = """
+            <root>
+                <section>
+                    <article>101</article>
+                    <div>cache: 101</div>
+                </section>
+            </root>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 1 (1 != 101: cached t-set should is applied on first rendering)')
+
+        render = template_page._render({
+            'cache_id': 1,
+            'counter': 2,
+        })
+        result = """
+            <root>
+                <section>
+                    <article>102</article>
+                    <div>cache: 101</div>
+                </section>
+            </root>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 2 (2 != 102: cached t-set should be applied the template part are rendered every time)')
+
+        render = template_page._render({
+            'cache_id': 3,
+            'counter': 3,
+        })
+        result = """
+            <root>
+                <section>
+                    <article>103</article>
+                    <div>cache: 103</div>
+                </section>
+            </root>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 3 (3 != 103: cached t-set should applied because the new cache key is created)')
+
+    def test_13_render_xml_cache_with_t_set_complexe(self):
+        template = self.env['ir.ui.view'].create({
+            'name': "base.template",
+            'type': 'qweb',
+            'arch': """
+                <t name="base.template">
+                    <t t-cache="None">
+                        <span>base.template (cache None): <t t-esc="value_0"/>, <t t-esc="value_1"/>, <t t-esc="value_2"/></span>
+                        <t t-set="value_2" t-value="20" t-cache="key"/>
+                        <t t-set="value_1" t-value="20"/>
+                    </t>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template', 'ir.ui.view', %s, 'base')", [template.id])
+
+        page = self.env['ir.ui.view'].create({
+            'name': "base.page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.page">
+                    <div t-cache="key">
+                        <t t-set="value_0" t-value="10"/>
+                        <t t-set="value_1" t-value="10"/>
+                        <t t-set="value_2" t-value="10" t-cache="None"/>
+
+                        <t t-call="base.template"/>
+
+                        <t t-cache="None">
+                            <span>base.page (cache None): <t t-esc="value_0"/>, <t t-esc="value_1"/>, <t t-esc="value_2"/></span>
+                            <t t-set="value_1" t-value="15"/>
+                        </t>
+                        <span>base.page (cache key): <t t-esc="value_0"/>, <t t-esc="value_1"/>, <t t-esc="value_2"/></span>
+                    </div>
+                </t>
+            """
+        })
+
+        page._render({'key': 1, 'value_0': 5, 'value_1': 5, 'value_2': 5})
+        render = page._render({'key': 1, 'value_0': 5, 'value_1': 5, 'value_2': 5})
+        result = """
+            <div>
+                <span>base.template (cache None): 5, 5, 10</span>
+                <span>base.page (cache None): 5, 5, 10</span>
+                <span>base.page (cache key): 10, 15, 10</span>
+            </div>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering with cache')
+
+        render = page._render({'key': 2, 'value_0': 5, 'value_1': 5, 'value_2': 5})
+        result = """
+            <div>
+                <span>base.template (cache None): 10, 10, 10</span>
+                <span>base.page (cache None): 10, 10, 10</span>
+                <span>base.page (cache key): 10, 15, 10</span>
+            </div>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering with new cache key')
+
+    def test_14_render_xml_cache_propagation_in_tcall(self):
+        view0 = self.env['ir.ui.view'].create({
+            'name': "section",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.section">
+                    <section>
+                        <t t-set="counter" t-value="counter + 100"/>
+                        <article t-cache="None"><t t-out="counter"/><t t-out="check()"/></article>
+                    </section>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('section', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        view1 = self.env['ir.ui.view'].create({
+            'name': "root",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.root">
+                    <root t-cache="cache_id">
+                        <t t-call="base.section"/>
+                    </root>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        check_memory_leak = itertools.count()
+        render = view1._render({
+            'cache_id': 1,
+            'counter': 1,
+            'check': lambda: next(check_memory_leak) and '' or '',
+        })
+        result = """
+            <root>
+                <section>
+                    <article>101</article>
+                </section>
+            </root>
+        """
+        self.assertEqual(str(check_memory_leak), 'count(1)', 'rendering 1: value should be called only once')
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), '1 != 101: cached t-set should be applied')
+
+        render = view1._render({
+            'cache_id': 1,
+            'counter': 2,
+            'check': lambda: '',
+        })
+        result = """
+            <root>
+                <section>
+                    <article>2</article>
+                </section>
+            </root>
+        """
+        self.assertEqual(str(check_memory_leak), 'count(1)', 'rendering 2: value should be called only once')
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), '102 != 2: cached t-set should not applied')
+
+        render = view1._render({
+            'cache_id': 3,
+            'counter': 3,
+            'check': lambda: '',
+        })
+        result = """
+            <root>
+                <section>
+                    <article>103</article>
+                </section>
+            </root>
+        """
+        self.assertEqual(str(check_memory_leak), 'count(1)', 'rendering 3: value should be called only once')
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), '3 != 103: cached t-set should be applied')
+
+    def test_15_render_xml_cache_no_cache_tcall_in_tcall_slave_cache(self):
+        view0 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <tr>
+                        <td>
+                            <table t-cache="cache_id2">
+                                <tr><td><t t-esc="value2[0]"/></td></tr>
+                                <tr><td><t t-esc="value2[1]"/></td></tr>
+                                <tr><td><t t-esc="value2[2]"/></td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="toto">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <t t-call="base.dummy" t-cache="None"/>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'Second rendering (change inside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="toto">
+                <table>
+                    <tr><td>31</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>33</td></tr>
+                </table>
+            </div>
+        """), 'Third rendering (change main cache id, old cache inside)')
+
+    def test_16_render_xml_cache_0_in_tcall_slave_cache_no_cache_out0(self):
+        view0 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="dummy">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <t t-out="0" t-cache="None"/>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view0 = view0.with_context(use_qweb_cache=False)
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy1",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy1">
+                    <t t-call="base.dummy">
+                        <tr t-cache="cache_id2">
+                            <td>
+                                <table>
+                                    <tr><td><t t-esc="value2[0]"/></td></tr>
+                                    <tr><td><t t-esc="value2[1]"/></td></tr>
+                                    <tr><td><t t-esc="value2[2]"/></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=False)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <div class="dummy">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+
+        self.assertEqual(result, etree.fromstring("""
+            <div class="dummy">
+                <table>
+                    <tr><td>41</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>43</td></tr>
+                </table>
+            </div>
+        """), 'Second rendering (change inside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': [51, 52, 53]
+        }))
+
+        self.assertEqual(result, etree.fromstring("""
+            <div class="dummy">
+                <table>
+                    <tr><td>31</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>33</td></tr>
+                </table>
+            </div>
+        """), 'Third rendering (change main cache id, old cache inside)')
+
+    def test_17_render_xml_cache_value_cache_no_cache_tcall_in_tcall_slave_cache_no_cache_outvalue(self):
+        view0 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="dummy">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <t t-out="row" t-cache="None"/>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view0 = view0.with_context(use_qweb_cache=False)
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy1",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy1">
+                    <t t-set="row">
+                        <tr t-cache="str(cache_id2) + '_2'">
+                            <td>
+                                <table>
+                                    <tr><td><t t-esc="value2[0]"/></td></tr>
+                                    <tr><td><t t-esc="value2[1]"/></td></tr>
+                                    <tr><td><t t-esc="value2[2]"/></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </t>
+                    <section t-cache="cache_id2">
+                        <t t-call="base.dummy" t-cache="None"/>
+                    </section>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=False)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>10</td></tr>
+                                    <tr><td>20</td></tr>
+                                    <tr><td>30</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>41</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>51</td></tr>
+                                    <tr><td>52</td></tr>
+                                    <tr><td>53</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>43</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'Second rendering (change inside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>31</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>51</td></tr>
+                                    <tr><td>52</td></tr>
+                                    <tr><td>53</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>33</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'Third rendering (change main cache id, old cache inside)')
+
+    def test_18_render_xml_cache_tcall_in_tcall_slave_cache_no_cache_out0(self):
+        # raw = "0" is equivalent to a cache = "False" because the template can
+        # be called by anyone and the content of 0 does not belong to dummy.
+        view0 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="dummy">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <t t-out="0" t-cache="None"/>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        view0 = view0.with_context(use_qweb_cache=False)
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        # TR is in the main cache but is used by dumy's cache when raw = "0".
+        # This means that the value dict must have this one and therefore we
+        # cannot send the one by default.
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy1",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy1">
+                    <section t-cache="cache_id2">
+                        <t t-call="base.dummy">
+                            <tr>
+                                <td>
+                                    <table>
+                                        <tr><td><t t-esc="value2[0]"/></td></tr>
+                                        <tr><td><t t-esc="value2[1]"/></td></tr>
+                                        <tr><td><t t-esc="value2[2]"/></td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </t>
+                    </section>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=False)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>10</td></tr>
+                                    <tr><td>20</td></tr>
+                                    <tr><td>30</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>41</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>51</td></tr>
+                                    <tr><td>52</td></tr>
+                                    <tr><td>53</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>43</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'Second rendering (change inside cache id)')
+
+    def test_19_render_xml_cache_0_in_tcall_slave_cache_no_cache_out0(self):
+        view0 = self.env['ir.ui.view'].create({
+            'name': "layout",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.layout">
+                    <div class="layout">
+                        <table t-cache="layout_cache_id">
+                            <tr><td><t t-out="layout_value[0]"/></td></tr>
+                            <t t-out="0" t-cache="None"/>
+                            <tr><td><t t-out="layout_value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('layout', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <t t-call="base.layout">
+                        <tr t-cache="dummy_cache_id">
+                            <td>
+                                <table>
+                                    <tr><td><t t-out="dummy_value[0]"/></td></tr>
+                                    <tr><td><t t-out="dummy_value[1]"/></td></tr>
+                                    <tr><td><t t-out="dummy_value[2]"/></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = view1._render({
+            'layout_cache_id': (1, 0),
+            'dummy_cache_id': (2, 0),
+            'layout_value': [1, 2, 3],
+            'dummy_value': [10, 20, 30],
+        })
+        self.assertEqual(etree.fromstring(result), etree.fromstring("""
+            <div class="layout">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), '1) rendering (add in cache)')
+
+        # same cache keys
+        result = view1._render({
+            'layout_cache_id': (1, 0),
+            'dummy_cache_id': (2, 0),
+        })
+        self.assertEqual(etree.fromstring(result), etree.fromstring("""
+            <div class="layout">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), '2) use same cache keys')
+
+        # update dummy information
+        result = view1._render({
+            'layout_cache_id': (1, 0),
+            'dummy_cache_id': (2, 1),
+            'layout_value': [41, 42, 43],
+            'dummy_value': [51, 52, 53],
+        })
+        self.assertEqual(etree.fromstring(result), etree.fromstring("""
+            <div class="layout">
+                <table>
+                    <tr><td>1</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>51</td></tr>
+                                <tr><td>52</td></tr>
+                                <tr><td>53</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>3</td></tr>
+                </table>
+            </div>
+        """), '3) rendering (change inside cache id)')
+
+        # update layout information
+        result = view1._render({
+            'layout_cache_id': (1, 1),
+            'dummy_cache_id': (2, 0),
+            'layout_value': [31, 32, 33],
+            'dummy_value': [51, 52, 53],
+        })
+
+        self.assertEqual(etree.fromstring(result), etree.fromstring("""
+            <div class="layout">
+                <table>
+                    <tr><td>31</td></tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td>10</td></tr>
+                                <tr><td>20</td></tr>
+                                <tr><td>30</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr><td>33</td></tr>
+                </table>
+            </div>
+        """), '4) rendering (change main cache id, old cache inside)')
+
+    def test_20_render_xml_cache_value_cache_no_cache_tcall_in_tcall_slave_cache_no_cache_outvalue(self):
+        view0 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="dummy">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <t t-out="row" t-cache="None"/>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy1",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy1">
+                    <t t-set="row">
+                        <tr t-cache="str(cache_id2) + '_2'">
+                            <td>
+                                <table>
+                                    <tr><td><t t-esc="value2[0]"/></td></tr>
+                                    <tr><td><t t-esc="value2[1]"/></td></tr>
+                                    <tr><td><t t-esc="value2[2]"/></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </t>
+                    <section t-cache="cache_id2">
+                        <t t-call="base.dummy" t-cache="None"/>
+                    </section>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>10</td></tr>
+                                    <tr><td>20</td></tr>
+                                    <tr><td>30</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>51</td></tr>
+                                    <tr><td>52</td></tr>
+                                    <tr><td>53</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'Second rendering (change inside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>31</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>10</td></tr>
+                                    <tr><td>20</td></tr>
+                                    <tr><td>30</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>33</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'Third rendering (change main cache id, old cache inside)')
+
+    def test_21_render_xml_cache_tcall_in_tcall_slave_cache_no_cache_out0(self):
+        # raw = "0" is equivalent to a cache = "False" because the template can
+        # be called by anyone and the content of 0 does not belong to dummy.
+        view0 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="dummy">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <t t-out="0" t-cache="None"/>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        # TR is in the main cache but is used by dumy's cache when raw = "0".
+        # This means that the value dict must have this one and therefore we
+        # cannot send the one by default.
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy1",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy1">
+                    <section t-cache="cache_id2">
+                        <t t-call="base.dummy">
+                            <tr>
+                                <td>
+                                    <table>
+                                        <tr><td><t t-esc="value2[0]"/></td></tr>
+                                        <tr><td><t t-esc="value2[1]"/></td></tr>
+                                        <tr><td><t t-esc="value2[2]"/></td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </t>
+                    </section>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': [10, 20, 30]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>10</td></tr>
+                                    <tr><td>20</td></tr>
+                                    <tr><td>30</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [41, 42, 43],
+            'value2': [51, 52, 53]
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr><td>51</td></tr>
+                                    <tr><td>52</td></tr>
+                                    <tr><td>53</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'Second rendering (change inside cache id)')
+
+    def test_22_render_xml_cache_0_in_tcall_slave_cache_no_cache_out0(self):
+        view0 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="dummy">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <t t-out="0" t-cache="None"/>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy1",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy1">
+                    <section>
+                        <t t-call="base.dummy">
+                            <tr t-cache="cache_id2"><td><t t-esc="value2"/></td></tr>
+                        </t>
+                    </section>
+                </t>
+            """
+        })
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        view2 = self.env['ir.ui.view'].create({
+            'name': "dummy1",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy2">
+                    <section>
+                        <t t-call="base.dummy">
+                            <tr class="temp2" t-cache="cache_id2"><td><t t-esc="value2"/></td></tr>
+                        </t>
+                    </section>
+                </t>
+            """
+        })
+        view2 = view2.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [1, 2, 3],
+            'value2': 10
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr><td>10</td></tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'First rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [21, 22, 23],
+            'value2': 20
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr><td>10</td></tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'Second rendering from cache')
+
+        result = etree.fromstring(view2._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [31, 32, 33],
+            'value2': 30
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr class="temp2"><td>30</td></tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'First rendering with template 2')
+
+        result = etree.fromstring(view2._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [41, 42, 43],
+            'value2': 40
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>1</td></tr>
+                        <tr class="temp2"><td>30</td></tr>
+                        <tr><td>3</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), 'Second rendering from cache for template 2')
+
+    def test_23_render_xml_cache_in_tcall_slave_cache_no_cache_out_template_value(self):
+        view0 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div class="dummy">
+                        <table t-cache="cache_id">
+                            <tr><td><t t-esc="value[0]"/></td></tr>
+                            <tr t-cache="None"><td><t t-esc="value[1]"/></td></tr>
+                            <tr><td><t t-esc="value[2]"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy1",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy1">
+                    <section t-cache="cache_id2">
+                        <t t-call="base.dummy">not used content</t>
+                    </section>
+                </t>
+            """
+        })
+
+        view1 = view1.with_context(use_qweb_cache=True)
+
+        # use same cache id, display the same content
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [11, 12, 13],
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>11</td></tr>
+                        <tr><td>12</td></tr>
+                        <tr><td>13</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), '1) rendering (add in cache)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 0),
+            'value': [21, 22, 23],
+        }))
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>11</td></tr>
+                        <tr><td>22</td></tr>
+                        <tr><td>13</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), '2) rendering (same cache, update cache false value)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 0),
+            'cache_id2': (2, 1),
+            'value': [31, 32, 33],
+        }))
+
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>11</td></tr>
+                        <tr><td>32</td></tr>
+                        <tr><td>13</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), '3) rendering (change outside cache id)')
+
+        result = etree.fromstring(view1._render({
+            'cache_id': (1, 1),
+            'cache_id2': (2, 0),
+            'value': [41, 42, 43],
+        }))
+
+        self.assertEqual(result, etree.fromstring("""
+            <section>
+                <div class="dummy">
+                    <table>
+                        <tr><td>41</td></tr>
+                        <tr><td>42</td></tr>
+                        <tr><td>43</td></tr>
+                    </table>
+                </div>
+            </section>
+        """), '4) rendering (change inside cache)')
+
+    def test_24_render_xml_cache_0_in_0_tcall_slave_cache_no_cache_out0_in_first_tcall_slave_cache_no_cache_out0(self):
+        template_layout = self.env['ir.ui.view'].create({
+            'name': "template_layout",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_layout">
+                    <html t-cache="True">
+                        <body>
+                            <t t-out="0" t-cache="None"/>
+                        </body>
+                    </html>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_layout', 'ir.ui.view', %s, 'base')", [template_layout.id])
+
+        template_header = self.env['ir.ui.view'].create({
+            'name': "template_header",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_header">
+                    <header t-cache="header_cache_id">
+                        <div t-cache="None">
+                            <t t-out="0"/>
+                            <span t-esc="header_value"/>
+                        </div>
+                        <span t-esc="cached_header_value"/>
+                    </header>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_header', 'ir.ui.view', %s, 'base')", [template_header.id])
+
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_page">
+                    <t t-call="base.template_layout">
+                        <page t-cache="page_cache_id">
+                            <t t-call="base.template_header">
+                                <span t-esc="inside_value"/>
+                            </t>
+                            <span t-esc="cached_value"/>
+                        </page>
+                    </t>
+                </t>
+            """
+        })
+
+        render = template_page._render({
+            'page_cache_id': 1,
+            'header_cache_id': 1,
+            'inside_value': 11,
+            'cached_value': 12,
+            'header_value': 101,
+            'cached_header_value': 102,
+        })
+        result = """
+            <html>
+                <body>
+                    <page>
+                        <header>
+                            <div>
+                                <span>11</span>
+                                <span>101</span>
+                            </div>
+                            <span>102</span>
+                        </header>
+                        <span>12</span>
+                    </page>
+                </body>
+            </html>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 1')
+
+        render = template_page._render({
+            'page_cache_id': 1,
+            'header_cache_id': 1,
+            'inside_value': 21,
+            'cached_value': 22,
+            'header_value': 201,
+            'cached_header_value': 202,
+        })
+        result = """
+            <html>
+                <body>
+                    <page>
+                        <header>
+                            <div>
+                                <span>11</span>
+                                <span>201</span>
+                            </div>
+                            <span>102</span>
+                        </header>
+                        <span>12</span>
+                    </page>
+                </body>
+            </html>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 2')
+
+        render = template_page._render({
+            'page_cache_id': 2,
+            'header_cache_id': 1,
+            'inside_value': 31,
+            'cached_value': 32,
+            'header_value': 301,
+            'cached_header_value': 302,
+        })
+        result = """
+            <html>
+                <body>
+                    <page>
+                        <header>
+                            <div>
+                                <span>31</span>
+                                <span>301</span>
+                            </div>
+                            <span>102</span>
+                        </header>
+                        <span>32</span>
+                    </page>
+                </body>
+            </html>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 3')
+
+        render = template_page._render({
+            'page_cache_id': 1,
+            'header_cache_id': 2,
+            'inside_value': 41,
+            'cached_value': 42,
+            'header_value': 401,
+            'cached_header_value': 402,
+        })
+        result = """
+            <html>
+                <body>
+                    <page>
+                        <header>
+                            <div>
+                                <span>11</span>
+                                <span>401</span>
+                            </div>
+                            <span>402</span>
+                        </header>
+                        <span>12</span>
+                    </page>
+                </body>
+            </html>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 4')
+
+    def test_25_render_xml_cache_tcall_slave_tcall_no_cache_value(self):
+        """The counter value are wrapped into a cache and used inside a t-call"""
+
+        template_menu = self.env['ir.ui.view'].create({
+            'name': "template_menu",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_menu">
+                    <menu t-cache="None"><t t-out="counter"/></menu>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_menu', 'ir.ui.view', %s, 'base')", [template_menu.id])
+
+        template_header = self.env['ir.ui.view'].create({
+            'name': "template_header",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_header">
+                    <header><t t-call="base.template_menu"/></header>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_header', 'ir.ui.view', %s, 'base')", [template_header.id])
+
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_page">
+                    <page t-cache="page_cache_id">
+                        <t t-call="base.template_header"/>
+                        <t t-out="counter"/>
+                    </page>
+                </t>
+            """
+        })
+
+        render = template_page._render({
+            'page_cache_id': 11,
+            'counter': 'counter 11',
+        })
+        result = """
+            <page>
+                <header>
+                    <menu>counter 11</menu>
+                </header>
+                counter 11
+            </page>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 1')
+
+        render = template_page._render({
+            'page_cache_id': 11,
+            'counter': 'counter 11',
+        })
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 2 (equal 1)')
+
+        render = template_page._render({
+            'page_cache_id': 11,
+            'counter': 'counter 33',
+        })
+        result = """
+            <page>
+                <header>
+                    <menu>counter 33</menu>
+                </header>
+                counter 11
+            </page>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 3 (same cache, update value used in t-cache="None")')
+
+        render = template_page._render({
+            'page_cache_id': 44,
+            'counter': 'counter 44',
+        })
+        result = """
+            <page>
+                <header>
+                    <menu>counter 44</menu>
+                </header>
+                counter 44
+            </page>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 4 (new cache key, new values)')
+
+    def test_26_render_xml_cache_tcall_slave_update_then_tcall_no_cache_out0(self):
+        """The counter value are wrapped into a cache and used inside a t-call"""
+
+        template_menu = self.env['ir.ui.view'].create({
+            'name': "template_menu",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_menu">
+                    <menu t-cache="None"><t t-out="0"/> <t t-out="counter"/></menu>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_menu', 'ir.ui.view', %s, 'base')", [template_menu.id])
+
+        template_header = self.env['ir.ui.view'].create({
+            'name': "template_header",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_header">
+                    <header>
+                        <t t-call="base.template_menu"><h1>Mon titre: <t t-out="0"/></h1></t>
+                    </header>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_header', 'ir.ui.view', %s, 'base')", [template_header.id])
+
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_page">
+                    <page t-cache="page_cache_id">
+                        <t t-call="base.template_header"><t t-out="title"/></t>
+                    </page>
+                </t>
+            """
+        })
+
+        render = template_page._render({
+            'page_cache_id': 11,
+            'counter': 'counter 11',
+            'title': 'title 11',
+        })
+        result = """
+            <page>
+                <header>
+                    <menu><h1>Mon titre: title 11</h1> counter 11</menu>
+                </header>
+            </page>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 1')
+
+        render = template_page._render({
+            'page_cache_id': 11,
+            'counter': 'counter 22',
+            'title': 'title 22',
+        })
+        result = """
+            <page>
+                <header>
+                    <menu><h1>Mon titre: title 11</h1> counter 22</menu>
+                </header>
+            </page>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 2 (same cache, update value, t-out="0" with t-cache="None" use the cached gen0)')
+
+        render = template_page._render({
+            'page_cache_id': 33,
+            'counter': 'counter 33',
+            'title': 'title 33',
+        })
+        result = """
+            <page>
+                <header>
+                    <menu><h1>Mon titre: title 33</h1> counter 33</menu>
+                </header>
+            </page>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 3 (new cache key, new values)')
+
+    def test_27_render_xml_cache_0_in_0_tcall_slave_update_value_in_first_tcall_slave_cache_no_cache_out0(self):
+        template_layout = self.env['ir.ui.view'].create({
+            'name': "template_layout",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_layout">
+                    <html t-cache="True">
+                        <body>
+                            <t t-out="0" t-cache="None"/>
+                        </body>
+                    </html>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_layout', 'ir.ui.view', %s, 'base')", [template_layout.id])
+
+
+        template_menu = self.env['ir.ui.view'].create({
+            'name': "template_menu",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_menu">
+                    <menu>
+                        <div t-cache="None">
+                            <title><t t-out="title"/></title>
+                            <span t-out="menu_counter"/>
+                        </div>
+                        <div>
+                            <menu-out t-out="0"/>
+                        </div>
+                    </menu>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_menu', 'ir.ui.view', %s, 'base')", [template_menu.id])
+
+
+        template_header = self.env['ir.ui.view'].create({
+            'name': "template_header",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_header">
+                    <header>
+                        <t t-set="menu_counter" t-value="menu_counter + 100"/>
+                        <t t-set="val" t-cache="None"><h1>Mon titre: <t t-out="title"/></h1></t>
+                        <t t-call="base.template_menu" t-set-title="val">
+                            <t t-out="0"/>
+                            header text
+                        </t>
+                    </header>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template_header', 'ir.ui.view', %s, 'base')", [template_header.id])
+
+
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_page">
+                    <t t-call="base.template_layout">
+                        <page t-cache="page_cache_id">
+                            <t t-call="base.template_header" t-set-title="template_page_record_title">
+                                <span t-esc="template_page_record_html"/>
+                            </t>
+                            <div>
+                                <span t-esc="template_page_record_name"/>
+                                <span t-esc="template_page_counter" t-cache="None"/>
+                            </div>
+                        </page>
+                    </t>
+                </t>
+            """
+        })
+
+
+        render = template_page._render({
+            'menu_counter': 1,
+            'page_cache_id': 11,
+            'template_page_record_title': 'title 11',
+            'template_page_record_name': 'name 11',
+            'template_page_record_html': 'html 11',
+            'template_page_counter': 1100,
+        })
+        result = """
+            <html>
+                <body>
+                    <page>
+                        <header>
+                            <menu>
+                                <div>
+                                    <title><h1>Mon titre: title 11</h1></title>
+                                    <span>101</span>
+                                </div>
+                                <div>
+                                    <menu-out>
+                                        <span>html 11</span>
+                                        header text
+                                    </menu-out>
+                                </div>
+                            </menu>
+                        </header>
+                        <div>
+                            <span>name 11</span>
+                            <span>1100</span>
+                        </div>
+                    </page>
+                </body>
+            </html>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), '1 != 101: should t-set +=100 called when create/use t-cache')
+
+        render = template_page._render({
+            'menu_counter': 1,
+            'page_cache_id': 11,
+            'template_page_record_title': 'title 22',
+            'template_page_record_name': 'name 22',
+            'template_page_record_html': 'html 22',
+            'template_page_counter': 2200,
+        })
+        result = """
+            <html>
+                <body>
+                    <page>
+                        <header>
+                            <menu>
+                                <div>
+                                    <title><h1>Mon titre: title 22</h1></title>
+                                    <span>1</span>
+                                </div>
+                                <div>
+                                    <menu-out>
+                                        <span>html 11</span>
+                                        header text
+                                    </menu-out>
+                                </div>
+                            </menu>
+                        </header>
+                        <div>
+                            <span>name 11</span>
+                            <span>2200</span>
+                        </div>
+                    </page>
+                </body>
+            </html>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'use cache, counter 1 and not 101 because t-set +=100 are not called')
+
+        render = template_page._render({
+            'menu_counter': 2,
+            'page_cache_id': 11,
+            'template_page_record_title': 'title 33',
+            'template_page_record_name': 'name 33',
+            'template_page_record_html': 'html 33',
+            'template_page_counter': 3300,
+        })
+        self.assertEqual(etree.fromstring(render), etree.fromstring("""
+            <html>
+                <body>
+                    <page>
+                        <header>
+                            <menu>
+                                <div>
+                                    <title><h1>Mon titre: title 33</h1></title>
+                                    <span>2</span>
+                                </div>
+                                <div>
+                                    <menu-out>
+                                        <span>html 11</span>
+                                        header text
+                                    </menu-out>
+                                </div>
+                            </menu>
+                        </header>
+                        <div>
+                            <span>name 11</span>
+                            <span>3300</span>
+                        </div>
+                    </page>
+                </body>
+            </html>
+        """), 'update menu counter, use cache for record')
+
+    def test_28_render_xml_cache_with_t_foreach(self):
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_page">
+                    <section>
+                        <article t-foreach="articles" t-as="obj"><t t-cache="(cache_id, obj['id'])"><t t-out="obj['name']"/>:<t t-out="counter()"/></t></article>
+                    </section>
+                </t>
+            """
+        })
+
+        counter = itertools.count()
+        render = template_page._render({
+            'cache_id': 1,
+            'articles': [{'id': 10, 'name': 'n10'}, {'id': 20, 'name': 'n20'}, {'id': 30, 'name': 'n30'}],
+            'counter': lambda: next(counter),
+        })
+        result = """
+            <section>
+                <article>n10:0</article>
+                <article>n20:1</article>
+                <article>n30:2</article>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 1')
+
+        render = template_page._render({
+            'cache_id': 1,
+            'articles': [{'id': 10, 'name': 'n11'}, {'id': 20, 'name': 'n21'}, {'id': 30, 'name': 'n31'}],
+            'counter': lambda: next(counter),
+        })
+        result = """
+            <section>
+                <article>n10:0</article>
+                <article>n20:1</article>
+                <article>n30:2</article>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 2 (value should be displayed from cache)')
+
+        render = template_page._render({
+            'cache_id': 2,
+            'articles': [{'id': 10, 'name': 'n12'}, {'id': 20, 'name': 'n22'}, {'id': 30, 'name': 'n32'}],
+            'counter': lambda: next(counter),
+        })
+        result = """
+            <section>
+                <article>n12:3</article>
+                <article>n22:4</article>
+                <article>n32:5</article>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 3 (should use neew values)')
+
+    def test_29_render_xml_cache_no_cache_with_t_foreach(self):
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="template_page">
+                    <section t-cache="True">
+                        <article t-foreach="articles" t-as="obj" t-cache="None"><t t-cache="(cache_id, obj['id'])"><t t-out="obj['name']"/>:<t t-out="counter()"/></t></article>
+                    </section>
+                </t>
+            """
+        })
+
+        counter = itertools.count()
+        render = template_page._render({
+            'cache_id': 1,
+            'articles': [{'id': 10, 'name': 'n10'}, {'id': 20, 'name': 'n20'}, {'id': 30, 'name': 'n30'}],
+            'counter': lambda: next(counter),
+        })
+        result = """
+            <section>
+                <article>n10:0</article>
+                <article>n20:1</article>
+                <article>n30:2</article>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 1')
+
+        render = template_page._render({
+            'cache_id': 1,
+            'articles': [{'id': 10, 'name': 'n11'}, {'id': 20, 'name': 'n21'}, {'id': 30, 'name': 'n31'}],
+            'counter': lambda: next(counter),
+        })
+        result = """
+            <section>
+                <article>n10:0</article>
+                <article>n20:1</article>
+                <article>n30:2</article>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 2 (value should be displayed from cache)')
+
+        render = template_page._render({
+            'cache_id': 2,
+            'articles': [{'id': 10, 'name': 'n12'}, {'id': 20, 'name': 'n22'}, {'id': 30, 'name': 'n32'}],
+            'counter': lambda: next(counter),
+        })
+        result = """
+            <section>
+                <article>n12:3</article>
+                <article>n22:4</article>
+                <article>n32:5</article>
+            </section>
+        """
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'rendering 3 (should use neew values)')
+
+    def test_30_render_xml_nested_cache_t_call(self):
+        template = self.env['ir.ui.view'].create({
+            'name': "base.template",
+            'type': 'qweb',
+            'arch': """
+                <t name="base.template">
+                    <t t-out="0"/>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('template', 'ir.ui.view', %s, 'base')", [template.id])
+
+        layout = self.env['ir.ui.view'].create({
+            'name': "base.layout",
+            'type': 'qweb',
+            'arch': """
+                <t name="base.layout">
+                    <t t-cache="1">
+                        <t t-cache="2">
+                            <t t-call="base.template">
+                                <h1>Layout</h1>
+                            </t>
+                        </t>
+                    </t>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('layout', 'ir.ui.view', %s, 'base')", [layout.id])
+
+        page = self.env['ir.ui.view'].create({
+            'name': "base.page",
+            'type': 'qweb',
+            'arch': """
+                <t name="base.page">
+                    <t t-call="base.layout">
+                        <h2>Base</h2>
+                    </t>
+                </t>
+            """
+        })
+
+        render = page._render({})
+        result = """<h1>Layout</h1>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'first rendering')
+
+        render = page._render({})
+        result = """<h1>Layout</h1>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result))
+
+    def test_31_render_xml_cache_nested_t_call(self):
+        post_author = self.env['ir.ui.view'].create({
+            'name': "post_author",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.post_author">
+                    <footer t-att-class="classname" t-cache="None"/>
+                    <date t-if="not hide_date">2021</date>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('post_author', 'ir.ui.view', %s, 'base')", [post_author.id])
+
+        record_cover = self.env['ir.ui.view'].create({
+            'name': "record_cover",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.record_cover">
+                    <header t-att-class="classname"><t t-out="record"/><t t-out="0"/></header>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('record_cover', 'ir.ui.view', %s, 'base')", [record_cover.id])
+
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.template_page" t-cache="True">
+                    <t t-if="value == 1" t-set="classes" t-value="'classname_1'"/>
+                    <t t-if="value == 2" t-set="classes" t-value="'classname_2'"/>
+
+                    <a href="#" t-attf-class="d-block #{classes or 'mb-2'}">
+                        <t t-call="base.record_cover">
+                            <t t-set="record" t-value="value"/>
+                            <t t-set="classname" t-value="'cover_%s' % value"/>
+
+                            <t t-if="True" t-call="base.post_author" t-cache="None">
+                                <t t-set="classname" t-value="'author_%s' % value" t-cache="None"/>
+                                <t t-set="hide_date" t-value="True"/>
+                            </t>
+                        </t>
+                    </a>
+                </t>
+            """
+        })
+
+        render = template_page._render({
+            'value': 1,
+        })
+        result = """
+            <a href="#" class="d-block classname_1">
+                <header class="cover_1">
+                    1
+                    <footer class="author_1"></footer>
+                </header>
+            </a>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'first rendering')
+
+        render = template_page._render({
+            'value': 2,
+        })
+        result = """
+            <a href="#" class="d-block classname_1">
+                <header class="cover_1">
+                    1
+                    <footer class="author_2"></footer>
+                </header>
+            </a>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result))
+
+    def test_32_render_xml_cache_t_foreach_t_call(self):
+        dummy = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <footer t-att-class="classname"><t t-out="num"/></footer>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [dummy.id])
+
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.template_page">
+                    <section t-cache="True">
+                        <t t-foreach="[1,2,3]" t-as="num">
+                            <t t-call="base.dummy">
+                                <t t-set="classname" t-value="'test_%s' % num"/>
+                            </t>
+                        </t>
+                    </section>
+                </t>
+            """
+        })
+
+        render = template_page._render()
+        result = """
+            <section>
+                <footer class="test_1">1</footer>
+                <footer class="test_2">2</footer>
+                <footer class="test_3">3</footer>
+            </section>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'first rendering')
+
+        render = template_page._render()
+        result = """
+            <section>
+                <footer class="test_1">1</footer>
+                <footer class="test_2">2</footer>
+                <footer class="test_3">3</footer>
+            </section>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result))
+
+    def test_32_render_xml_cache_None_t_call_t_set(self):
+        dummy = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <footer t-att-class="classname"><t t-out="num"/></footer>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [dummy.id])
+
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.template_page">
+                    <section>
+                        <t t-cache="None" t-call="base.dummy">
+                            <t t-set="classname" t-value="'test_%s' % num"/>
+                        </t>
+                    </section>
+                </t>
+            """
+        })
+
+        render = template_page._render({'num': 1})
+        result = """
+            <section>
+                <footer class="test_1">1</footer>
+            </section>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'first rendering')
+
+        render = template_page._render({'num': 2})
+        result = """
+            <section>
+                <footer class="test_2">2</footer>
+            </section>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result))
+
+    def test_33_render_xml_cache_tcall_targ(self):
+        dummy = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.dummy">
+                    <div><t t-cache="None" t-out="num"/></div>
+                </t>
+            """
+        })
+        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [dummy.id])
+
+        template_page = self.env['ir.ui.view'].create({
+            'name': "template_page",
+            'type': 'qweb',
+            'arch': """
+                <t t-name="base.template_page">
+                    <section t-cache="cache_id"><t t-call="base.dummy" t-set-num="a"/></section>
+                </t>
+            """
+        })
+
+        render = template_page._render({'cache_id': 1, 'a': 1})
+        result = """
+            <section>
+                <div>1</div>
+            </section>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result), 'first rendering')
+
+        render = template_page._render({'cache_id': 1, 'a': 2})
+        result = """
+            <section>
+                <div>2</div>
+            </section>"""
+        self.assertEqual(etree.fromstring(render), etree.fromstring(result))
 
 class FileSystemLoader(object):
     def __init__(self, path):

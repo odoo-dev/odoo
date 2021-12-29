@@ -515,14 +515,17 @@ class IrQWeb(models.AbstractModel):
                   instead of `str`)
         :rtype: MarkupSafe
         """
-        compile_options = dict(self.env.context, dev_mode='qweb' in tools.config['dev_mode'])
+        ir_qweb = self
+        if 'use_qweb_cache' not in ir_qweb.env.context:
+            ir_qweb = ir_qweb.with_context(use_qweb_cache=True)
+        compile_options = dict(ir_qweb.env.context, dev_mode='qweb' in tools.config['dev_mode'])
         compile_options.update(options)
 
         if values and T_CALL_SLOT in values:
             raise ValueError('values[0] should be unset when call the _render method and only set into the template.')
 
-        render_template = self._compile(template, compile_options)
-        rendering = render_template(self, values or {})
+        render_template = ir_qweb._compile(template, compile_options)
+        rendering = render_template(ir_qweb, values or {})
         result = ''.join(rendering)
 
         return Markup(result)
@@ -579,13 +582,16 @@ class IrQWeb(models.AbstractModel):
             if element.text:
                 element.text = re.compile(r'^(\n[ \t]*)+(\n[ \t])').sub(r'\2', element.text)
 
+            _options['_all_def'] = []
             _options['_text_concat'] = []
             self._append_text("", _options) # To ensure the template function is a generator and doesn't become a regular function
             code_lines = (
-                [f'def {def_name}(self, compile_options, values, log):']
+                [f'def {def_name}(self, compile_options, values, gen0, log):']
                 + self._compile_node(element, _options, 1)
                 + self._flush_text(_options, 1, rstrip=True)
             )
+            for lines in _options['_all_def']:
+                code_lines.extend(lines)
         except QWebException:
             raise
         except Exception as e:
@@ -615,12 +621,16 @@ class IrQWeb(models.AbstractModel):
 
         # return the wrapped function
 
-        def render_template(self, values):
+        def render_template(self, values, gen0=None):
             try:
-                log = {'last_path_node': None}
+                log = {'last_path_node': None, 'options': options}
                 values = self._prepare_values(values, options)
-                yield from compiled_fn(self, options, values, log)
-            except (QWebException, TransactionRollbackError) as e:
+                if gen0 is None:
+                    gen0 = []
+                else:
+                    yield (template, template, options)
+                yield from compiled_fn(self, options, values, gen0, log)
+            except (QWebException, TransactionRollbackError):
                 raise
             except Exception as e:
                 raise QWebException("Error while render the template",
@@ -745,6 +755,9 @@ class IrQWeb(models.AbstractModel):
             'Mapping': Mapping,
             'Markup': Markup,
             'escape': escape,
+            'hasattr': hasattr,
+            'next': next,
+            'frozendict': frozendict,
             'VOID_ELEMENTS': VOID_ELEMENTS,
             **_BUILTINS,
         }
@@ -1043,6 +1056,7 @@ class IrQWeb(models.AbstractModel):
             'elif', # Must be the first because compiled by the previous if.
             'else', # Must be the first because compiled by the previous if.
             'debug',
+            'cache',
             'groups',
             'as', 'foreach',
             'if',
@@ -1450,17 +1464,23 @@ class IrQWeb(models.AbstractModel):
                 code.append(indent_code(f"values.update({self._compile_expr(varname)})", level))
             else:
                 # set the content as value
-                def_name = self._make_name("qweb_t_set")
                 content = (
-                    self._compile_directive(el, options, 'inner-content', level + 1) +
-                    self._flush_text(options, level + 1))
+                    self._compile_directive(el, options, 'inner-content', 1) +
+                    self._flush_text(options, 1))
                 if content:
-                    code.append(indent_code(f"def {def_name}(self, compile_options, values, log):", level))
-                    code.extend(content)
-                    expr = f"Markup(''.join({def_name}(self, compile_options, values, log)))"
+                    def_name = self._make_name(f"template_{isinstance(options['ref'], int) and options['ref'] or ''}_t_set_")
+                    options['_all_def'].append([f"def {def_name}(self, compile_options, values, gen0, log):"] + content)
+                    code.append(indent_code(f"""
+                            t_set = []
+                            for item in {def_name}(self, compile_options, values, gen0, log):
+                                if isinstance(item, tuple):
+                                    t_set.extend(item[1])
+                                else:
+                                    t_set.append(item)
+                            values[{varname!r}] = Markup(''.join(t_set))
+                        """, level))
                 else:
-                    expr = "''"
-                code.append(indent_code(f"values[{varname!r}] = {expr}", level))
+                    code.append(indent_code(f"values[{repr(varname)}] = ''", level))
 
         for key in list(el.attrib):
             if key.startswith('t-set-') or key.startswith('t-setf-'):
@@ -1706,10 +1726,16 @@ class IrQWeb(models.AbstractModel):
                     values[{expr_as + '_odd'!r}] = index % 2
                     values[{expr_as + '_even'!r}] = not values[{expr_as + '_odd'!r}]
                     values[{expr_as + '_parity'!r}] = 'odd' if values[{expr_as + '_odd'!r}] else 'even'
+                    is_foreach_nested = '__qweb_is_foreach_nested__' in values
+                    values['__qweb_is_foreach_nested__'] = True
             """, level))
 
         code.append(indent_code(f'log["last_path_node"] = {options["root"].getpath(el)!r} ', level + 1))
         code.extend(content_foreach or indent_code('continue', level + 1))
+        code.append(indent_code("""
+                if not is_foreach_nested:
+                    values.pop('__qweb_is_foreach_nested__')
+            """, level + 1))
 
         return code
 
@@ -1774,7 +1800,7 @@ class IrQWeb(models.AbstractModel):
         if expr == T_CALL_SLOT and code_options != 'True':
             code.append(indent_code("if True:", level))
             code.extend(tag_open)
-            code.append(indent_code("yield from values.get('0', [])", level + 1))
+            code.append(indent_code("yield from gen0", level + 1))
             code.extend(tag_close)
             return code
         elif ttype == 't-field':
@@ -1792,7 +1818,7 @@ class IrQWeb(models.AbstractModel):
             force_display_dependent = True
         else:
             if expr == T_CALL_SLOT:
-                code.append(indent_code("content = Markup(''.join(values.get('0', [])))", level))
+                code.append(indent_code("content = Markup(''.join(gen0))", level))
             else:
                 code.append(indent_code(f"content = {self._compile_expr(expr)}", level))
 
@@ -1914,21 +1940,75 @@ class IrQWeb(models.AbstractModel):
         The code will contain the call of the template and a function from the
         compilation of the content of this element.
         """
-        expr = el.attrib.pop('t-call')
-
-        if el.attrib.get('t-call-options'): # retro-compatibility
-            el.attrib.set('t-options', el.attrib.pop('t-call-options'))
-
+        expr = el.attrib.get('t-call')
+        el.attrib.pop('t-consumed-options', 'None')
         nsmap = options.get('nsmap')
 
+        template = self._compile_format(expr)
         code = self._flush_text(options, level, rstrip=el.tag.lower() == 't')
 
+        def_name = self._make_name(f"template_{isinstance(options['ref'], int) and options['ref'] or ''}_t_call")
+
+        # values from content (t-out="0" and t-set inside the content)
+        code_content = [f"def {def_name}_content(self, compile_options, values, gen0, log):"]
+        code_content.extend(self._compile_directive(el, options, 'inner-content', 1))
+        self._append_text('', options) # To ensure the template function is a generator and doesn't become a regular function
+        code_content.extend(self._flush_text(options, 1, rstrip=True))
+        options['_all_def'].append(code_content)
+
+        # values from t-set and t-set-*
+        code_set = [f"def {def_name}_set(self, compile_options, values, gen0, log):"]
+        code_set.extend(self._compile_directive(el, options, 'set', 1))
+        code_set.append(indent_code("return None", 1))
+        options['_all_def'].append(code_set)
+
+        # generate params
+        code_params = [f"def {def_name}_params(self, compile_options, values, gen0, log):"]
+
+        # generate params: call arg (from t-arg and content)
+
+        code_params.append(indent_code(f"""
+                t_call_values = values.copy()
+                {def_name}_set(self, compile_options, t_call_values, gen0, log)
+
+                t_call_gen0 = []
+                if values.get('__qweb_is_cache_nested__') is not None and '__qweb_is_foreach_nested__' not in values:
+                    def {def_name}_cache():
+                        # create the cache and load content in same time to have every t-set
+                        # called in the right order.
+                        cache = []
+                        for item in {def_name}_content(self, compile_options, t_call_values, gen0, log):
+                            t_call_gen0.append(item)
+                            if isinstance(item, tuple):
+                                cache.append(item[0])
+                            else:
+                                cache.append(item)
+                        return cache
+                    cache_id = (values['__qweb_is_cache_nested__'], {repr(def_name + '_gen0')})
+                    cache_content = self._cache_content(compile_options, cache_id, {def_name}_cache)
+                    if t_call_gen0:
+                        cache_content = None
+                else:
+                    cache_content = {def_name}_content(self, compile_options, t_call_values, gen0, log)
+                if cache_content:
+                    for item in cache_content:
+                        if hasattr(item, '__call__'):
+                            t_call_gen0.append((item, list(item(self, compile_options, t_call_values, gen0, log))))
+                        else:
+                            t_call_gen0.append(item)
+            """, 1))
+
         # options
-        code.append(indent_code(f"""
+        code_params.append(indent_code(f"""
             t_options = values.pop('__qweb_options__', {{}})
             t_call_options = compile_options.copy()
-            t_call_options.update({{'caller_template': {str(options.get('template'))!r}, 'last_path_node': {str(options['root'].getpath(el))!r} }})
-            """, level))
+            t_call_options['caller_path_node'] = {str(options['root'].getpath(el))!r}
+            t_call_options['caller_template'] = t_call_options.pop('template', None)
+            t_call_options['caller_ref'] = t_call_options.pop('ref', None)
+            t_call_options.pop('template', None)
+        """, 1))
+
+        # t_call_options namespace
         if nsmap:
             # update this dict with the current nsmap so that the callee know
             # if he outputting the xmlns attributes is relevenat or not
@@ -1937,33 +2017,57 @@ class IrQWeb(models.AbstractModel):
                 if isinstance(key, str):
                     nsmap.append(f'{key!r}:{value!r}')
                 else:
-                    nsmap.append(f'None:{value!r}')
-            code.append(indent_code(f"t_call_options.update(nsmap={{{', '.join(nsmap)}}})", level))
+                    nsmap.append(f'None:{repr(value)}')
+            code_params.append(indent_code(f"t_call_options.update(nsmap={{{', '.join(nsmap)}}})", 1))
 
-        # values (t-out="0" from content and variables from t-set and t-set-*)
-        def_name = self._make_name("t_call_values")
-        code.append(indent_code(f"def {def_name}(self, compile_options, values, log):", level))
-        code.extend(self._compile_directive(el, options, 'inner-content', level + 1))
-        code.extend(self._compile_directive(el, options, 'set', level + 1))
-        self._append_text('', options) # To ensure the template function is a generator and doesn't become a regular function
-        code.extend(self._flush_text(options, level + 1, rstrip=True))
-        code.append(indent_code("t_call_values = values.copy()", level))
-        code.append(indent_code(f"t_call_values['0'] = Markup(''.join({def_name}(self, compile_options, t_call_values, log)))", level))
+        # generate params from self, t-lang, and t-options
+        code_params.append(indent_code("t_call_self = self", 1))
+        code_params.append(indent_code("""
+            t_call_self = self
+            t_call_options.update(t_options)
+            lang = t_call_options.get('lang')
+            if compile_options.get('lang') != lang:
+                t_call_self = self.with_context(lang=lang)
+            """, 1))
 
-        template = self._compile_format(expr)
+        # generate params: apply on values
+        code_params.append(indent_code(f"""
+                values['__qweb_{def_name}_params__'] = (t_call_self, t_call_options, t_call_values, t_call_gen0)
+                return []
+            """, 1))
 
-        # call
-        if el.attrib.pop('t-consumed-options', 'None') == 'True':
-            code.append(indent_code("t_call_options.update(t_options)", level))
-            code.append(indent_code(f"""
-                if compile_options.get('lang') != t_call_options.get('lang'):
-                    self_lang = self.with_context(lang=t_call_options.get('lang'))
-                    yield from self_lang._compile({template}, t_call_options)(self_lang, t_call_values)
+        options['_all_def'].append(code_params)
+
+        # wrapper: call
+        code.append(indent_code(f"""
+                {def_name}_params(self, compile_options, values, gen0, log) # to have the params on the first and render the content in order
+                t_call_self, {def_name}_options, t_call_values, t_call_gen0 = values['__qweb_{def_name}_params__']
+                render_template = t_call_self._compile({template}, {def_name}_options)
+                content = render_template(t_call_self, t_call_values, t_call_gen0)
+                {def_name}_template, {def_name}_ref, {def_name}_options = next(content)
+                if '__qweb_is_cache_nested__' in values:
+                    yield ({def_name}_params, []) # to set params when use the cache, but don't re-create params for the first rendering
+                    def wrapper(fn):
+                        def t_call_associate_values(self, compile_options, values, gen0, log):
+                            t_call_self, unused_options, t_call_values, t_call_gen0 = values['__qweb_{def_name}_params__']
+                            old_log_options = log['options']
+                            log['options'] = {def_name}_options
+                            yield from fn(t_call_self, {def_name}_options, t_call_values, t_call_gen0, log)
+                            log['options'] = old_log_options
+                        return t_call_associate_values
+                    for item in content:
+                        if hasattr(item, '__call__'):
+                            fn = wrapper(item)
+                            yield (fn , fn(self, compile_options, values, gen0, log))
+                        elif isinstance(item, tuple):
+                            yield (wrapper(item[0]), item[1])
+                        else:
+                            yield item
                 else:
-                    yield from self._compile({template}, t_call_options)(self, t_call_values)
-                """, level))
-        else:
-            code.append(indent_code(f"yield from self._compile({template}, t_call_options)(self, t_call_values)", level))
+                    yield from content
+            """, level))
+
+        el.attrib.pop('t-call')
 
         return code
 
@@ -2021,6 +2125,80 @@ class IrQWeb(models.AbstractModel):
                     yield tagName
                     yield '>'
                 """, level))
+
+        return code
+
+    def _compile_directive_cache(self, el, options, level):
+        expr = el.attrib.pop('t-cache')
+        code = self._flush_text(options, level)
+
+        def_name = self._make_name(f"template_{isinstance(options['ref'], int) and options['ref'] or ''}_t_cache")
+        def_code = [indent_code(f"""def {def_name}(self, compile_options, values, gen0, log):""", 0)]
+        def_content = self._compile_directives(el, options, 1)
+        if def_content and not options['_text_concat']:
+            self._append_text('', options) # To ensure the template function is a generator and doesn't become a regular function
+        def_code.extend(def_content)
+        def_code.extend(self._flush_text(options, 1))
+        options['_all_def'].append(def_code)
+
+        code_wrapper = [indent_code(f"""
+            def {def_name}_wrapper(self, compile_options, values, gen0, log):
+                cache_id = {self._compile_expr(expr)}
+                is_nested = '__qweb_is_cache_nested__' in values
+                old_cache_id = values.get('__qweb_is_cache_nested__')
+                values['__qweb_is_cache_nested__'] = cache_id
+                content = []
+                if cache_id is not None:
+                    def {def_name}_cache():
+                        # create the cache and load content in same time to have every t-set
+                        # called in the right order.
+                        cache = []
+                        for item in {def_name}(self, compile_options, values, gen0, log):
+                            if hasattr(item, '__call__'):
+                                cache.append(item)
+                                content.append((item, list(item(self, compile_options, values, gen0, log))))
+                            elif isinstance(item, tuple):
+                                cache.append(item[0])
+                                content.append(item)
+                            else:
+                                cache.append(item)
+                                content.append(item)
+                        return cache
+                    cache_content = self._cache_content(compile_options, cache_id, {def_name}_cache)
+                    if content:
+                        cache_content = None
+                else:
+                    cache_content = {def_name}(self, compile_options, values, gen0, log)
+                if cache_content:
+                    for item in cache_content:
+                        if hasattr(item, '__call__'):
+                            content.append((item, list(item(self, compile_options, values, gen0, log))))
+                        else:
+                            content.append(item)
+                if is_nested:
+                    values['__qweb_is_cache_nested__'] = old_cache_id
+                else:
+                    values.pop('__qweb_is_cache_nested__', None)
+
+                return content
+            """, 0)]
+        options['_all_def'].append(code_wrapper)
+
+        code.append(indent_code(f"""
+            if '__qweb_is_cache_nested__' in values:
+                yield ({def_name}_wrapper, list({def_name}_wrapper(self, compile_options, values, gen0, log)))
+            else:
+                content = []
+                stack = list({def_name}_wrapper(self, compile_options, values, gen0, log))
+                stack.reverse()
+                while stack:
+                    item = stack.pop()
+                    if isinstance(item, tuple):
+                        item[1].reverse()
+                        stack.extend(item[1])
+                    else:
+                        yield item
+            """, level))
 
         return code
 
@@ -2114,6 +2292,11 @@ class IrQWeb(models.AbstractModel):
         else:
             return self._generate_asset_nodes_cache(bundle, css, js, debug, async_load, defer_load, lazy_load, media)
 
+    def _cache_content(self, options, cache_id, get_value):
+        if not self.env.context.get('use_qweb_cache'):
+            return get_value()
+        return self.__cache_content(options, cache_id, get_value)
+
     # other methods used for the asset bundles
 
     @tools.conditional(
@@ -2182,6 +2365,14 @@ class IrQWeb(models.AbstractModel):
     def _get_asset_link_urls(self, bundle):
         asset_nodes = self._get_asset_nodes(bundle, js=False)
         return [node[1]['href'] for node in asset_nodes if node[0] == 'link']
+
+    @tools.conditional(
+        'xml' not in tools.config['dev_mode'],
+        tools.ormcache('cache_id', 'options.get("ref")', 'tuple(options.get(k) for k in self._get_template_cache_keys())'),
+    )
+    def __cache_content(self, options, cache_id, get_value):
+        return get_value()
+
 
 def render(template_name, values, load, **options):
     """ Rendering of a qweb template without database and outside the registry.

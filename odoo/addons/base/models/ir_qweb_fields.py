@@ -712,7 +712,8 @@ class Contact(models.AbstractModel):
 
         opf = options.get('fields') or ["name", "address", "phone", "mobile", "email"]
         sep = options.get('separator')
-        template_options = options.get('template_options', {})
+        template_options = options.get('template_options', {}).copy()
+        template_options.pop('ref_xml')
         if sep:
             opsep = escape(sep)
         elif template_options.get('no_tag_br'):
