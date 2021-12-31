@@ -119,41 +119,19 @@ const KnowledgeFormController = FormController.extend({
         dialog.open();
     },
 
-    _onNewLink: function () {
-        const $content = $(QWeb.render('knowledge.knowledge_add_a_link_modal'));
-        const dialog = new Dialog(this, {
-            title: _t('Add a Link'),
-            $content: $content,
-            buttons: [{
-                text: _('Save'),
-                classes: 'btn-primary',
-                click: async () => {
-                    console.log('Creating a new link...');
-                }
-            }, {
-                text: _('Discard'),
-                click: async () => {
-                    console.log('Discard...');
-                    dialog.close();
-                }
-            }]
-        });
-        dialog.open();
-    },
-
     _onShare: function () {
         const $content = $(QWeb.render('knowledge.knowledge_share_an_article_modal'));
         const dialog = new Dialog(this, {
             title: _t('Share a Link'),
             $content: $content,
             buttons: [{
-                text: _('Save'),
+                text: _t('Save'),
                 classes: 'btn-primary',
                 click: async () => {
                     console.log('sharing the article...');
                 }
             }, {
-                text: _('Discard'),
+                text: _t('Discard'),
                 click: async () => {
                     console.log('Discard...');
                     dialog.close();
