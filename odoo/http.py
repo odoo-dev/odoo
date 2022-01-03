@@ -1327,13 +1327,9 @@ class Request:
             set_header('Access-Control-Max-Age', CORS_MAX_AGE)
             set_header('Access-Control-Allow-Headers',
                 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
-            werkzeug.exceptions.abort(self._inject_future_response(Response()))
+            werkzeug.exceptions.abort(self._inject_future_response(Response(status=204)))
 
-        if self.type == 'http' and routing['type'] == 'json':
-            # Don't test for self.type != routing['type'] because it is
-            # possible one want to send a json-encoded body to a
-            # @route(type='http'). Not all json-encoded bodies are
-            # json-rpc2, e.g. REST.
+        if self.type != routing['type']:
             _logger.warning("Request's content type is %s but %r is type %s.", self.type, routing['routes'][0], routing['type'])
             raise BadRequest(f"Request's inferred type is {self.type} but {routing['routes'][0]!r} is type={routing['type']!r}.")
 
