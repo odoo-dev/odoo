@@ -4,7 +4,8 @@
 import json
 import random
 import uuid
-import werkzeug
+
+from werkzeug.urls import url_encode, url_join, url_parse
 
 from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import AccessError, UserError
@@ -290,14 +291,10 @@ class Survey(models.Model):
     @api.depends('session_code')
     def _compute_session_link(self):
         for survey in self:
-            if survey.session_code:
-                survey.session_link = werkzeug.urls.url_join(
-                    survey.get_base_url(),
-                    '/s/%s' % survey.session_code)
-            else:
-                survey.session_link = werkzeug.urls.url_join(
-                    survey.get_base_url(),
-                    survey.get_start_url())
+            root = survey.get_base_url()
+            path = f'/s/{survey.session_code}' if survey.session_code else survey.get_start_url()
+            qs = url_encode({'db': self.env.cr.dbname})
+            survey.session_link = url_parse(url_join(root, path)).replace(query=qs).to_url()
 
     @api.depends('scoring_type', 'question_and_page_ids.save_as_nickname')
     def _compute_session_show_leaderboard(self):
@@ -880,7 +877,7 @@ class Survey(models.Model):
     def action_start_survey(self, answer=None):
         """ Open the website page with the survey form """
         self.ensure_one()
-        url = '%s?%s' % (self.get_start_url(), werkzeug.urls.url_encode({'answer_token': answer and answer.access_token or None}))
+        url = '%s?%s' % (self.get_start_url(), url_encode({'answer_token': answer and answer.access_token or None}))
         return {
             'type': 'ir.actions.act_url',
             'name': "Start Survey",
@@ -891,7 +888,7 @@ class Survey(models.Model):
     def action_print_survey(self, answer=None):
         """ Open the website page with the survey printable view """
         self.ensure_one()
-        url = '%s?%s' % (self.get_print_url(), werkzeug.urls.url_encode({'answer_token': answer and answer.access_token or None}))
+        url = '%s?%s' % (self.get_print_url(), url_encode({'answer_token': answer and answer.access_token or None}))
         return {
             'type': 'ir.actions.act_url',
             'name': "Print Survey",

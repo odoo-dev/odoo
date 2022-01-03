@@ -3,7 +3,8 @@
 
 import logging
 import re
-import werkzeug
+
+from werkzeug.urls import url_encode, url_join, url_parse
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
@@ -99,7 +100,13 @@ class SurveyInvite(models.TransientModel):
     @api.depends('survey_id.access_token')
     def _compute_survey_start_url(self):
         for invite in self:
-            invite.survey_start_url = werkzeug.urls.url_join(invite.survey_id.get_base_url(), invite.survey_id.get_start_url()) if invite.survey_id else False
+            if invite.survey_id:
+                root = invite.survey_id.get_base_url()
+                path = invite.survey_id.get_start_url()
+                qs = url_encode({'db': self.env.cr.dbname})
+                invite.survey_start_url = url_parse(url_join(root, path)).replace(query=qs).to_url()
+            else:
+                invite.survey_start_url = False
 
     # Overrides of mail.composer.mixin
     @api.depends('survey_id')  # fake trigger otherwise not computed in new mode
