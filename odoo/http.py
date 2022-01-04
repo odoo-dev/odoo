@@ -928,12 +928,14 @@ class Request:
         login = self.session.pop('pre_login')
         uid = self.session.pop('pre_uid')
         self.update_env(user=uid)
-        self.update_context(**self.env['res.users'].context_get())
+
+        user_context = self.env['res.users'].context_get()
+        self.update_context(**user_context)
 
         self.session.update({
             'login': login,
             'uid': uid,
-            'context': submap(self.env.context, ['lang']),
+            'context': user_context,
             'session_token': self.env.user._compute_session_token(self.session_id),
         })
 
