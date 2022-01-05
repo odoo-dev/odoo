@@ -353,7 +353,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _match(cls, path):
         """
-        Grant multilang support to URL matching by using http
+        Grant multilang support to URL matching by using http 3xx
         redirections and URL rewrite. This method also grants various
         attributes such as ``lang`` and ``is_frontend`` on the current
         ``request`` object.
@@ -369,24 +369,30 @@ class IrHttp(models.AbstractModel):
 
         4/ Redirect the browser when the lang is missing from the URL
            but another lang than the default one has been requested. The
-           requested lang is injected before the original path. Note
-           that you don't redirect POST requests.
+           requested lang is injected before the original path.
 
-        5/ Redirect the browser when the lang is present in the URL but
+        5) Use the url as-is when the lang is missing from the URL, that
+           another lang than the default one has been requested but that
+           it is forbidden to redirect (e.g. POST)
+
+        6/ Redirect the browser when the lang is present in the URL but
            it is the default lang. The lang is removed from the original
            URL.
 
-        6/ Redirect the browser when the lang present in the URL does
-           not match the preferred lang url code (e.g. fr_FR -> fr)
+        7/ Redirect the browser when the lang present in the URL is an
+           alias of the preferred lang url code (e.g. fr_FR -> fr)
 
-        7/ Rewrite the URL when the lang is present in the URL, that it
+        8/ Redirect the browser when the requested page is the homepage
+           but that there is a trailing slash.
+
+        9/ Rewrite the URL when the lang is present in the URL, that it
            matches and that this lang is not the default one. The URL is
            rewritten to remove the lang.
 
         Note: The "requested lang" is (in order) either (1) the lang in
               the URL or (2) the lang in the ``frontend_lang`` request
               cookie or (3) the lang in the context or (4) the default
-              lang.
+              lang of the website.
         """
 
         # The URL has been rewritten already
@@ -404,6 +410,7 @@ class IrHttp(models.AbstractModel):
 
         _, url_lang_str, *rest = path.split('/', 2)
         path_no_lang = '/' + (rest[0] if rest else '')
+        allow_redirect = request.httprequest.method != 'POST'
 
         # There is no user on the environment yet but the following code
         # requires one to set the lang on the request. Temporary grant
@@ -426,41 +433,49 @@ class IrHttp(models.AbstractModel):
 
         # See /2, no lang in url and default website
         if not url_lang_str and request.lang == default_lang:
-            pass
+            _logger.debug("%r (lang: %r) no lang in url and default website, continue", path, request.lang.url_code)
 
-        # See /3, missing lang in url but bot
+        # See /3, missing lang in url but user-agent is a bot
         elif not url_lang_str and request.env['ir.http'].is_a_bot():
+            _logger.debug("%r (lang: %r) missing lang in url but user-agent is a bot, continue", path, request.lang.url_code)
             request.lang = default_lang
 
-        # See /4, missing lang in url
-        elif not url_lang_str and request.httprequest.method != 'POST':
+        # See /4, no lang in url and should not redirect (e.g. POST), continue
+        elif not url_lang_str and not allow_redirect:
+            _logger.debug("%r (lang: %r) no lang in url and should not redirect (e.g. POST), continue", path, request.lang.url_code)
+
+        # See /5, missing lang in url, /home -> /fr/home
+        elif not url_lang_str:
+            _logger.debug("%r (lang: %r) missing lang in url, redirect", path, request.lang.url_code)
             redirect = request.redirect_query(f'/{request.lang.url_code}{path}', request.httprequest.args)
             redirect.set_cookie('frontend_lang', request.lang._get_cached('code'))
             werkzeug.exceptions.abort(redirect)
 
-        # See /5, default lang in url
-        elif url_lang_str == default_lang.url_code:
+        # See /6, default lang in url, /en/home -> /home
+        elif url_lang_str == default_lang.url_code and allow_redirect:
+            _logger.debug("%r (lang: %r) default lang in url, redirect", path, request.lang.url_code)
             redirect = request.redirect_query(path_no_lang, request.httprequest.args)
             redirect.set_cookie('frontend_lang', default_lang._get_cached('code'))
             werkzeug.exceptions.abort(redirect)
 
-        # See /6, lang in URL is not the preferred lang
-        elif url_lang_str != request.lang.url_code:
+        # See /7, lang alias in url, /fr_FR/home -> /fr/home
+        elif url_lang_str != request.lang.url_code and allow_redirect:
+            _logger.debug("%r (lang: %r) lang alias in url, redirect", path, request.lang.url_code)
             redirect = request.redirect_query(f'/{request.lang.url_code}{path_no_lang}', request.httprequest.args, code=301)
             redirect.set_cookie('frontend_lang', request.lang._get_cached('code'))
             werkzeug.exceptions.abort(redirect)
 
-        # See /7, other lang in url
-        else:  # url_lang == request.lang.url_code
+        # See /8, homepage with trailing slash. /fr_BE/ -> /fr_BE
+        elif path == f'/{url_lang_str}/' and allow_redirect:
+            _logger.debug("%r (lang: %r) homepage with trailing slash, redirect", path, request.lang.url_code)
+            redirect = request.redirect_query(path[:-1], request.httprequest.args, code=301)
+            redirect.set_cookie('frontend_lang', default_lang._get_cached('code'))
+            werkzeug.exceptions.abort(redirect)
 
-            # Special case to remove homepage trailing slash. /fr_BE/ -> /fr_BE
-            if path == f'/{url_lang_str}/':
-                redirect = request.redirect_query(path[:-1], request.httprequest.args, code=301)
-                redirect.set_cookie('frontend_lang', default_lang._get_cached('code'))
-                werkzeug.exceptions.abort(redirect)
-
+        # See /9, valid lang in url
+        elif url_lang_str == request.lang.url_code:
             # Rewrite the URL to remove the lang
-            _logger.debug('Reroute %s to %s with lang %s', path, path_no_lang, request.lang._get_cached('code'))
+            _logger.debug("%r (lang: %r) valid lang in url, rewrite url and continue", path, request.lang.url_code)
             environ = request.httprequest.environ.copy()
             environ['PATH_INFO'] = path_no_lang
             environ['RAW_URI'] = environ['RAW_URI'].partition(url_lang_str)[2]
@@ -471,6 +486,9 @@ class IrHttp(models.AbstractModel):
             threading.current_thread().url = httprequest.url
             request.httprequest = httprequest
             path = path_no_lang
+
+        else:
+            _logger.warning("%r (lang: %r) couldn't not correctly route this frontend request, url used as-is.", path, request.lang.url_code)
 
         # Re-match using rewritten route and really raise for 404 errors
         try:
