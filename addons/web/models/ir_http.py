@@ -67,6 +67,12 @@ class Http(models.AbstractModel):
         session_uid = request.session.uid
         version_info = odoo.service.common.exp_version()
 
+        if session_uid:
+            request.session.context = self.env['res.users'].context_get()
+            user_context = dict(request.session.context)
+        else:
+            user_context = {}
+
         IrConfigSudo = self.env['ir.config_parameter'].sudo()
         max_file_upload_size = int(IrConfigSudo.get_param(
             'web.max_file_upload_size',
@@ -77,7 +83,7 @@ class Http(models.AbstractModel):
             "uid": session_uid,
             "is_system": user._is_system() if session_uid else False,
             "is_admin": user._is_admin() if session_uid else False,
-            "user_context": dict(request.session.context) if session_uid else {},
+            "user_context": user_context,
             "db": request.db,
             "server_version": version_info.get('server_version'),
             "server_version_info": version_info.get('server_version_info'),
