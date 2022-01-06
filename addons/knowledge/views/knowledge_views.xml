@@ -43,7 +43,7 @@
                 <sheet>
                     <div class="container-fluid h-100">
                         <div class="row h-100">
-                            <div class="col-sm-3 p-0 border-right">
+                            <div class="col-sm-3 p-0 border-right overflow-auto">
                                 <div class="d-flex flex-column h-100">
                                     <!-- Search bar -->
                                     <div class="p-3">
@@ -59,7 +59,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-9 p-0">
+                            <div class="col-sm-9 p-0 o_knowledge_form_right_panel">
                                 <div class="d-flex flex-column h-100">
                                     <!-- Article header -->
                                     <div class="d-sm-flex flex-row justify-content-between">
@@ -109,6 +109,12 @@
                                     <!-- Article body -->
                                     <div class="flex-grow-1 position-relative">
                                         <field name="body" widget="html" no_label="1"/>
+                                    </div>
+                                </div>
+                                <div class="o_knowledge_chatter_container">
+                                    <div class="oe_chatter">
+                                        <field name="message_follower_ids" groups="base.group_user"/>
+                                        <field name="message_ids"/>
                                     </div>
                                 </div>
                             </div>
