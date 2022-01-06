@@ -168,8 +168,8 @@ def _get_login_redirect_url(uid, redirect=None):
     qs['redirect'] = redirect
     return parsed.replace(query=werkzeug.urls.url_encode(qs)).to_url()
 
-def login_and_redirect(db, login, key, redirect_url='/web'):
-    uid = request.session_authenticate_start(db, login, key)
+def login_and_redirect(login, key, redirect_url='/web'):
+    uid = request.session_authenticate_start(login, key)
     redirect_url = _get_login_redirect_url(uid, redirect_url)
     return set_cookie_and_redirect(redirect_url)
 

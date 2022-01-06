@@ -130,7 +130,7 @@ class OAuthController(http.Controller):
         with registry.cursor() as cr:
             try:
                 env = api.Environment(cr, SUPERUSER_ID, context)
-                credentials = env['res.users'].sudo().auth_oauth(provider, kw)
+                _db, login, key = env['res.users'].sudo().auth_oauth(provider, kw)
                 cr.commit()
                 action = state.get('a')
                 menu = state.get('m')
@@ -142,7 +142,7 @@ class OAuthController(http.Controller):
                     url = '/web#action=%s' % action
                 elif menu:
                     url = '/web#menu_id=%s' % menu
-                resp = login_and_redirect(*credentials, redirect_url=url)
+                resp = login_and_redirect(login, key, redirect_url=url)
                 # Since /web is hardcoded, verify user has right to land on it
                 if werkzeug.urls.url_parse(resp.location).path == '/web' and not request.env.user.has_group('base.group_user'):
                     resp.location = '/'
