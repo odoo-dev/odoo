@@ -7,6 +7,7 @@ from odoo import fields, models, api
 class Article(models.Model):
     _name = "knowledge.article"
     _description = "Contains the knowledge of a specific subject."
+    _inherit = ['mail.thread']
     # _order = "is_user_favourite, favourite_count, last_edition_date desc, level, sequence"
     _order = "level, sequence"
 
