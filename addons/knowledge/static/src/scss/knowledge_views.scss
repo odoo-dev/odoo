@@ -23,7 +23,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
+        right: -17px;
         bottom: 0;
         height: auto !important;
     }
@@ -49,6 +49,26 @@
         }
         .o_placeholder {
             background-color: #eee;
+        }
+    }
+
+    .o_knowledge_form_right_panel {
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        .o_knowledge_chatter_container {
+            border-top: 1px solid $o-gray-300;
+            li.nav-item {
+                display: none;
+            }
+            .o_FormRenderer_chatterContainer {
+                max-width: unset;
+                &.o-aside {
+                    width: auto;
+                    padding: 1rem;
+                    border-left: 0px;
+                }
+            }
         }
     }
 }
