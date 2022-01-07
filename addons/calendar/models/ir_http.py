@@ -12,7 +12,7 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _auth_method_calendar(cls):
-        token = request.httprequest.args.get('token', '')
+        token = request.get_http_params().get('token', '')
 
         error_message = False
 
@@ -22,7 +22,7 @@ class IrHttp(models.AbstractModel):
         elif request.session.uid and request.session.login != 'anonymous':
             # if valid session but user is not match
             user = request.env['res.users'].sudo().browse(request.session.uid)
-            if attendee.partner_id != request.env.user.partner_id:
+            if attendee.partner_id != user.partner_id:
                 error_message = """Invitation cannot be forwarded via email. This event/meeting belongs to %s and you are logged in as %s. Please ask organizer to add you.""" % (attendee.email, user.email)
         if error_message:
             raise BadRequest(error_message)
