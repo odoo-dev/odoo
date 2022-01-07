@@ -550,7 +550,7 @@ def _generate_routing_rules(modules, nodb_only, converters=None):
                 # the merged routing ONLY on the duplicated function to
                 # ensure method's immutability.
                 endpoint = functools.partial(method)
-                functools.update_wrapper(endpoint, method, assigned=())
+                functools.update_wrapper(endpoint, method)
                 endpoint.routing = merged_routing
 
                 yield (url, endpoint)
