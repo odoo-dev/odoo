@@ -145,19 +145,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 if (_.isEmpty(this.env.pos.db.product_by_category_id)) {
                     this._loadDemoData();
                 }
-                setTimeout(() => {
-                    // push order in the background, no need to await
-                    this.env.pos.push_orders();
-                    // Allow using the app even if not all the images are loaded.
-                    // Basically, preload the images in the background.
-                    this._preloadImages();
-                    if (this.env.pos.config.limited_partners_loading && this.env.pos.config.partner_load_background) {
-                        this.env.pos.loadPartnersBackground();
-                    }
-                    if (this.env.pos.config.limited_products_loading && this.env.pos.config.product_load_background) {
-                        this.env.pos.loadProductsBackground().then(() => this.render());
-                    }
-                });
+                setTimeout(() => this._runBackgroundTasks());
             } catch (error) {
                 let title = 'Unknown Error',
                     body;
@@ -187,6 +175,20 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     body,
                     exitButtonIsShown: true,
                 });
+            }
+        }
+
+        _runBackgroundTasks() {
+            // push order in the background, no need to await
+            this.env.pos.push_orders();
+            // Allow using the app even if not all the images are loaded.
+            // Basically, preload the images in the background.
+            this._preloadImages();
+            if (this.env.pos.config.limited_partners_loading && this.env.pos.config.partner_load_background) {
+                this.env.pos.loadPartnersBackground();
+            }
+            if (this.env.pos.config.limited_products_loading && this.env.pos.config.product_load_background) {
+                this.env.pos.loadProductsBackground().then(() => this.render());
             }
         }
 
