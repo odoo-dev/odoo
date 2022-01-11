@@ -101,8 +101,13 @@ export function makeLegacyCommandService(legacyEnv) {
                 }
             }
 
+            function openMainPalette(config = {}) {
+                command.openMainPalette(config);
+            }
+
             legacyEnv.bus.on("set_legacy_command", null, setLegacyCommand);
             legacyEnv.bus.on("remove_legacy_command", null, removeLegacyCommand);
+            legacyEnv.bus.on("openMainPalette", null, openMainPalette);
         },
     };
 }
