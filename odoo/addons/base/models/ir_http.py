@@ -212,7 +212,10 @@ class IrHttp(models.AbstractModel):
             # regenerate its EndPoint. The routing map should be static.
             routing_map = werkzeug.routing.Map(strict_slashes=False, converters=cls._get_converters())
             for url, endpoint in cls._generate_routing_rules(mods, converters=cls._get_converters()):
-                rule = werkzeug.routing.Rule(url, endpoint=endpoint, **submap(endpoint.routing, ROUTING_KEYS))
+                routing = submap(endpoint.routing, ROUTING_KEYS)
+                if routing['methods'] is not None and 'OPTIONS' not in routing['methods']:
+                    routing['methods'] = routing['methods'] + ['OPTIONS']
+                rule = werkzeug.routing.Rule(url, endpoint=endpoint, **routing)
                 rule.merge_slashes = False
                 routing_map.add(rule)
             cls._routing_map[key] = routing_map
