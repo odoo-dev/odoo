@@ -623,12 +623,12 @@ QUnit.module("Search", (hooks) => {
         assert.strictEqual(floatInput.value, "4,2");
 
         await editConditionValue(controlPanel, 0, "4,2,");
-        assert.strictEqual(floatInput.value, "4,2");
+        assert.strictEqual(floatInput.value, "42,0"); // because of the en localization fallback in parsers.
 
         await editConditionValue(controlPanel, 0, "DefinitelyValidFloat");
 
         // The input here is a string, resulting in a parsing error instead of 0
-        assert.strictEqual(floatInput.value, "4,2");
+        assert.strictEqual(floatInput.value, "42,0");
     });
 
     QUnit.test("add custom filter with multiple values", async function (assert) {
