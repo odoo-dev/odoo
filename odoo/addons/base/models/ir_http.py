@@ -98,8 +98,8 @@ class IrHttp(models.AbstractModel):
                 args[key] = val.with_user(request.env.uid)
 
     @classmethod
-    def _post_dispatch(cls, response):
-        request._post_dispatch(response)
+    def _post_dispatch(cls, rule, args, response):
+        request._post_dispatch(rule, args, response)
 
     @classmethod
     def _is_cors_preflight(cls, endpoint):
@@ -176,14 +176,6 @@ class IrHttp(models.AbstractModel):
         if isinstance(result, Response) and result.is_qweb:
             result.flatten()
         return result
-
-    @classmethod
-    def _http_handle_error(cls, exception):
-        return request._http_handle_error(exception)
-
-    @classmethod
-    def _json_handle_error(cls, exception):
-        return request._json_handle_error(exception)
 
     @classmethod
     def _redirect(cls, location, code=303):

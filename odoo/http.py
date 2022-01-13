@@ -431,7 +431,7 @@ def route(route=None, **routing):
         fname = f"<function {endpoint.__module__}.{endpoint.__name__}>"
 
         # Sanitize the routing
-        assert 'type' not in routing or routing['type'] in ('http', 'json')
+        assert  routing.get('type', 'http') in Request._dispatchers.keys()
         if route:
             routing['routes'] = route if isinstance(route, list) else [route]
         wrong = routing.pop('method', None)
@@ -654,6 +654,8 @@ class Request:
     Wrapper around the incomming HTTP request with deserialized request
     parameters, session utilities and request dispatching logic.
     """
+
+    _dispatchers = {}
 
     def __init__(self, httprequest):
         self.httprequest = httprequest
@@ -1148,34 +1150,6 @@ class Request:
         params.pop('session_id', None)
         return params
 
-    def _http_dispatch(self, endpoint, args):
-        """
-        Perform http-related actions such as deserializing the request
-        body and query-string or checking cors/csrf while dispatching a
-        request to a ``type='http'`` route.
-
-        See :meth:`~odoo.http.Response.load`: method for the compatible
-        endpoint return types.
-        """
-        self.params = dict(self.get_http_params(), **args)
-
-        # Check for CSRF token for relevant requests
-        if self.httprequest.method not in ('GET', 'HEAD', 'OPTIONS', 'TRACE') and endpoint.routing.get('csrf', True):
-            if not self.db:
-                return self.redirect('/web/database/selector')
-
-            token = self.params.pop('csrf_token', None)
-            if not self.validate_csrf(token):
-                if token is not None:
-                    _logger.warning("CSRF validation failed on path '%s'", self.httprequest.path)
-                else:
-                    _logger.warning("No CSRF token provided for path '%s' https://www.odoo.com/documentation/15.0/reference/addons/http.html#csrf for more details.", request.httprequest.path)
-                raise werkzeug.exceptions.BadRequest('Session expired (invalid CSRF token)')
-
-        if self.db:
-            return self.env['ir.http']._dispatch(endpoint)
-        else:
-            return endpoint(**self.params)
 
     def _http_handle_error(self, exc):
         """
@@ -1209,53 +1183,6 @@ class Request:
     # =====================================================
     # JSON-RPC2 Controllers
     # =====================================================
-    def _json_dispatch(self, endpoint, args):
-        """
-        `JSON-RPC 2 <http://www.jsonrpc.org/specification>`_ over HTTP.
-
-        Our implementation differs from the specification on two points:
-
-        1. The ``method`` member of the JSON-RPC request payload is
-           ignored as the HTTP path is already used to route the request
-           to the controller.
-        2. We only support parameter structures by-name, i.e. the
-           ``params`` member of the JSON-RPC request payload MUST be a
-           JSON Object and not a JSON Array.
-
-        In addition, it is possible to pass a context that replaces
-        the session context via a special ``context`` argument that is
-        removed prior to calling the endpoint.
-
-        Sucessful request::
-
-          --> {"jsonrpc": "2.0", "method": "call", "params": {"context": {}, "arg1": "val1" }, "id": null}
-
-          <-- {"jsonrpc": "2.0", "result": { "res1": "val1" }, "id": null}
-
-        Request producing a error::
-
-          --> {"jsonrpc": "2.0", "method": "call", "params": {"context": {}, "arg1": "val1" }, "id": null}
-
-          <-- {"jsonrpc": "2.0", "error": {"code": 1, "message": "End user error message.", "data": {"code": "codestring", "debug": "traceback" } }, "id": null}
-
-        """
-        body = self.httprequest.get_data().decode(self.httprequest.charset)
-        try:
-            self.jsonrequest = json.loads(body)
-        except ValueError:
-            _logger.info('%s: Invalid JSON data\n%s', self.httprequest.path, body)
-            raise werkzeug.exceptions.BadRequest(f"Invalid JSON data:\n{body}")
-
-        self.params = dict(self.jsonrequest.get('params', {}), **args)
-        ctx = self.params.pop('context', None)
-        if ctx is not None and self.db:
-            self.update_env(context=ctx)
-
-        if self.db:
-            result = self.env['ir.http']._dispatch(endpoint)
-        else:
-            result = endpoint(**self.params)
-        return self._json_response(result, request_id=self.jsonrequest.get('id'))
 
     def _json_response(self, result=None, error=None, request_id=None):
         status = 200
@@ -1306,36 +1233,10 @@ class Request:
     # Routing
     # =====================================================
     def _pre_dispatch(self, rule, args):
-        """
-        Prepare the system before dispatching the request to its
-        controller. This method is often overridden in ir.http to
-        extract some info from the request query-string or headers and
-        to save them in the session or in the context.
-        """
-        routing = rule.endpoint.routing
-        set_header = self.future_response.headers.set
+        return self._get_request_dispatcher(rule, args)._pre_dispatch(rule, args)
 
-        cors = routing.get('cors')
-        if cors:
-            set_header('Access-Control-Allow-Origin', cors)
-            set_header('Access-Control-Allow-Methods', (
-                     'POST' if routing['type'] == 'json'
-                else ', '.join(routing['methods'] or ['GET', 'POST'])
-            ))
-
-        if cors and self.httprequest.method == 'OPTIONS':
-            set_header('Access-Control-Max-Age', CORS_MAX_AGE)
-            set_header('Access-Control-Allow-Headers',
-                'Origin, X-Requested-With, Content-Type, Accept, Authorization')
-            werkzeug.exceptions.abort(self._inject_future_response(Response(status=204)))
-
-        if self.type != routing['type']:
-            _logger.warning("Request's content type is %s but %r is type %s.", self.type, routing['routes'][0], routing['type'])
-            raise BadRequest(f"Request's inferred type is {self.type} but {routing['routes'][0]!r} is type={routing['type']!r}.")
-
-    def _post_dispatch(self, response):
-        self._inject_future_response(response)
-        application.set_csp(response)
+    def _post_dispatch(self, rule, args, response):
+        return self._get_request_dispatcher(rule, args, response)._post_dispatch(rule, args, response)
 
     def _serve_static(self):
         """ Serve a static file from the file system. """
@@ -1349,6 +1250,15 @@ class Request:
         except OSError:  # cover both missing file and invalid permissions
             raise NotFound(f'File "{path}" not found in module {module}.\n')
 
+    def _get_request_dispatcher(self, rule, args):
+        routing_type = rule.endpoint.routing.get('type', 'http')
+        dispatcher_class = self._dispatchers.get(routing_type)
+        if not dispatcher:
+            raise BadRequest(
+                f"No request dispatcher found for routing type {routing_type}"
+            )
+        return dispatcher_class(self)
+
     def _serve_nodb(self):
         """
         Dispatch the request to its matching controller in a
@@ -1356,12 +1266,10 @@ class Request:
         """
         router = app.nodb_routing_map.bind_to_environ(self.httprequest.environ)
         rule, args = router.match(return_rule=True)
-        self._pre_dispatch(rule, args)
-        if rule.endpoint.routing['type'] == 'json':
-            response = self._json_dispatch(rule.endpoint, args)
-        else:
-            response = self._http_dispatch(rule.endpoint, args)
-        self._post_dispatch(response)
+        dispatcher = self._get_request_dispatcher(rule, args)
+        dispatcher._pre_dispatch(rule, args)
+        response = dispatcher._dispatch(rule, args)
+        dispatcher._post_dispatch(rule, args, response)
         return response
 
     def _serve_db(self, dbname, session_id):
@@ -1429,7 +1337,8 @@ class Request:
             self.params = self.get_http_params()
             response = ir_http._serve_fallback()
             if response:
-                self._post_dispatch(response)
+                self._request._inject_future_response(response)
+                application.set_csp(response)
                 return response
             raise
 
@@ -1439,13 +1348,237 @@ class Request:
 
         ir_http._authenticate(rule.endpoint)
         ir_http._pre_dispatch(rule, args)
-        if rule.endpoint.routing['type'] == 'json':
-            response = self._json_dispatch(rule.endpoint, args)
-        else:
-            response = self._http_dispatch(rule.endpoint, args)
-        ir_http._post_dispatch(response)
+        self._get_request_dispatcher(rule, args)._dispatch(rule, args)
+        ir_http._post_dispatch(rule, args, response)
         return response
 
+
+from abc import ABC, abstractmethod
+
+
+class RequestDispatcher(ABC):
+
+    _routing_type: str
+
+    def __init__(self, request):
+        self._request = request
+
+    @abstractmethod
+    def _dispatch(self, rule, args):
+        pass
+
+    @abstractmethod
+    def _handle_error(self, exc):
+        pass
+
+    def _validate_routing_type(self, rule, args):
+        routing = rule.endpoint.routing
+        if self._request.type != routing['type']:
+            _logger.warning("Request's content type is %s but %r is type %s.",
+                            self._request.type, routing['routes'][0], routing['type'])
+            raise BadRequest(
+                f"Request's inferred type is {self._request.type} but {routing['routes'][0]!r} is type={routing['type']!r}.")
+
+    def _pre_dispatch(self, rule, args):
+        """
+        Prepare the system before dispatching the request to its
+        controller. This method is often overridden in ir.http to
+        extract some info from the request query-string or headers and
+        to save them in the session or in the context.
+        """
+        routing = rule.endpoint.routing
+        set_header = self._request.future_response.headers.set
+
+        cors = routing.get('cors')
+        if cors:
+            set_header('Access-Control-Allow-Origin', cors)
+            set_header('Access-Control-Allow-Methods', (
+                'POST' if routing['type'] == 'json'
+                else ', '.join(routing['methods'] or ['GET', 'POST'])
+            ))
+
+        if cors and self._request.httprequest.method == 'OPTIONS':
+            set_header('Access-Control-Max-Age', CORS_MAX_AGE)
+            set_header('Access-Control-Allow-Headers',
+                       'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+            werkzeug.exceptions.abort(
+                self._request._inject_future_response(Response(status=204)))
+        self._validate_routing_type()
+
+    def _post_dispatch(self, rule, args, response):
+        self._request._inject_future_response(response)
+        application.set_csp(response)
+
+    @classmethod
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        Request._dispatchers[cls._routing_type] = cls
+
+
+class JsonRequestDispatcher(RequestDispatcher):
+    _routing_type = "json"
+
+    def __init__(self, request):
+        super().__init__(request)
+        self.jsonrequest = {}
+
+    def _dispatch(self, rule, args):
+        """
+        `JSON-RPC 2 <http://www.jsonrpc.org/specification>`_ over HTTP.
+
+        Our implementation differs from the specification on two points:
+
+        1. The ``method`` member of the JSON-RPC request payload is
+           ignored as the HTTP path is already used to route the request
+           to the controller.
+        2. We only support parameter structures by-name, i.e. the
+           ``params`` member of the JSON-RPC request payload MUST be a
+           JSON Object and not a JSON Array.
+
+        In addition, it is possible to pass a context that replaces
+        the session context via a special ``context`` argument that is
+        removed prior to calling the endpoint.
+
+        Sucessful request::
+
+          --> {"jsonrpc": "2.0", "method": "call", "params": {"context": {}, "arg1": "val1" }, "id": null}
+
+          <-- {"jsonrpc": "2.0", "result": { "res1": "val1" }, "id": null}
+
+        Request producing a error::
+
+          --> {"jsonrpc": "2.0", "method": "call", "params": {"context": {}, "arg1": "val1" }, "id": null}
+
+          <-- {"jsonrpc": "2.0", "error": {"code": 1, "message": "End user error message.", "data": {"code": "codestring", "debug": "traceback" } }, "id": null}
+
+        """
+        httprequest = self._request.httprequest
+        body = httprequest.get_data().decode(httprequest.charset)
+        try:
+            self.jsonrequest = json.loads(body)
+        except ValueError:
+            _logger.info('%s: Invalid JSON data\n%s', httprequest.path,
+                         body)
+            raise werkzeug.exceptions.BadRequest(f"Invalid JSON data:\n{body}")
+
+        self._request.params = dict(self.jsonrequest.get('params', {}), **args)
+        ctx = self._request.params.pop('context', None)
+        if ctx is not None and self.db:
+            self._request.update_env(context=ctx)
+
+        if self.db:
+            result = self._request.env['ir.http']._dispatch(endpoint)
+        else:
+            result = endpoint(**self.params)
+        return self._response(result)
+
+    def _handle_error(self, exc):
+        """
+                Handle any exception that occured while dispatching a request to
+                a `type='json'` route. Also handle exceptions that occured when
+                no route matched the request path, that no fallback page could
+                be delivered and that the request ``Content-Type`` was json.
+
+                :param exc Exception: the exception that occured.
+                :returns: an HTTP error response
+                :rtype: Response
+                """
+        error = {
+            'code': 200,  # this code is the JSON-RPC level code, it is
+            # distinct from the HTTP status code. This
+            # code is ignored and the value 200 (while
+            # misleading) is totally arbitrary.
+            'message': "Odoo Server Error",
+            'data': serialize_exception(exc),
+        }
+        if isinstance(exc, NotFound):
+            error['http_status'] = 404
+            error['code'] = 404
+            error['message'] = "404: Not Found"
+        elif isinstance(exc, SessionExpiredException):
+            error['code'] = 100
+            error['message'] = "Odoo Session Expired"
+
+        return self._response(error=error)
+
+    def _response(self, result=None, error=None):
+        request_id = self.jsonrequest.get('id')
+        status = 200
+        response = {'jsonrpc': '2.0', 'id': request_id}
+        if error is not None:
+            response['error'] = error
+            status = error.pop('http_status', 200)
+        if result is not None:
+            response['result'] = result
+
+        body = json.dumps(response, default=date_utils.json_default)
+
+        return Response(body, status=status, headers=[
+            ('Content-Type', 'application/json'),
+            ('Content-Length', len(body)),
+        ])
+
+
+class HttpRequestDispatcher(RequestDispatcher):
+    _routing_type = "http"
+
+    def _dispatch(self, rule, args):
+        """
+        Perform http-related actions such as deserializing the request
+        body and query-string or checking cors/csrf while dispatching a
+        request to a ``type='http'`` route.
+
+        See :meth:`~odoo.http.Response.load`: method for the compatible
+        endpoint return types.
+        """
+        self._request.params = dict(self._request.get_http_params(), **args)
+
+        # Check for CSRF token for relevant requests
+        if self._request.httprequest.method not in ('GET', 'HEAD', 'OPTIONS', 'TRACE') and endpoint.routing.get('csrf', True):
+            if not self._request.db:
+                return self._request.redirect('/web/database/selector')
+
+            token = self._request.params.pop('csrf_token', None)
+            if not self._request.validate_csrf(token):
+                if token is not None:
+                    _logger.warning("CSRF validation failed on path '%s'", self._request.httprequest.path)
+                else:
+                    _logger.warning("No CSRF token provided for path '%s' https://www.odoo.com/documentation/15.0/reference/addons/http.html#csrf for more details.", request.httprequest.path)
+                raise werkzeug.exceptions.BadRequest('Session expired (invalid CSRF token)')
+
+        if self._request.db:
+            return self._request.env['ir.http']._dispatch(endpoint)
+        else:
+            return endpoint(**self._request.params)
+
+    def _handle_error(self, exc):
+        """
+        Handle any exception that occurred while dispatching a request
+        to a `type='http'` route. Also handle exceptions that occurred
+        when no route matched the request path, when no fallback page
+        could be delivered and that the request ``Content-Type`` was not
+        json.
+
+        :param exc Exception: the exception that occured.
+        :returns: an HTTP error response
+        :rtype: werkzeug.wrapper.Response
+        """
+        if isinstance(exc, SessionExpiredException):
+            redirect = self._request.redirect_query('/web/login', {
+                'redirect': (
+                    f'/web/proxy/post{self._request.httprequest.full_path}'
+                    if self._request.httprequest.method == 'POST'
+                    else self._request.httprequest.url
+                ),
+            })
+            redirect.set_cookie('session_id', f'.{self._request.db}', max_age=SESSION_LIFETIME, httponly=True)
+            return redirect
+
+        return (exc if isinstance(exc, HTTPException)
+           else Forbidden(exc.args[0]) if isinstance(exc, (AccessDenied, AccessError))
+           else BadRequest(exc.args[0]) if isinstance(exc, UserError)
+           else InternalServerError()  # hide the real error
+        )
 
 # =========================================================
 # WSGI Layer
