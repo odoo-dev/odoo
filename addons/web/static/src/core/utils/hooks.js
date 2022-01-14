@@ -103,7 +103,7 @@ export function useBus(bus, eventName, callback) {
  *
  *   useListener('click', 'button', () => { console.log('clicked'); });
  *
- * Note: components that alter the event's target (e.g. Portal) are not
+ * Note: components that alter the event's target and the t-portal directive are not
  * expected to behave as expected with event delegation.
  *
  * @param {string} eventName the name of the event

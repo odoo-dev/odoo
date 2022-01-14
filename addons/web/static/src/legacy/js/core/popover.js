@@ -1,7 +1,7 @@
 odoo.define('web.Popover', function (require) {
     'use strict';
 
-    const { Component, Portal, useRef, useState } = owl;
+    const { Component, useRef, useState } = owl;
 
     /**
      * Popover
@@ -319,7 +319,6 @@ odoo.define('web.Popover', function (require) {
 
     }
 
-    Popover.components = { Portal };
     Popover.template = 'Popover';
     Popover.defaultProps = {
         position: 'bottom',

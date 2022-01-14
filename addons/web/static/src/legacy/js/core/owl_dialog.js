@@ -1,7 +1,7 @@
 odoo.define('web.OwlDialog', function (require) {
     "use strict";
 
-    const { Component, Portal, useRef } = owl;
+    const { Component, useRef } = owl;
     const SIZE_CLASSES = {
         'extra-large': 'modal-xl',
         'large': 'modal-lg',
@@ -241,7 +241,6 @@ odoo.define('web.OwlDialog', function (require) {
 
     Dialog.displayed = [];
 
-    Dialog.components = { Portal };
     Dialog.defaultProps = {
         backdrop: 'static',
         renderFooter: true,

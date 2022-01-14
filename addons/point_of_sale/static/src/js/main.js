@@ -26,7 +26,6 @@ PosApp.template = owl.xml`
 PosApp.components = { ChromeAdapter };
 
 function startPosApp() {
-    Registries.Component.add(owl.misc.Portal);
     Registries.Component.freeze();
     startWebClient(PosApp);
 }

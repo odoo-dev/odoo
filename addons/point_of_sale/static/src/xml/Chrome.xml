@@ -20,7 +20,7 @@
                 </div>
             </div>
             <t t-if="state.uiState === 'READY'">
-                <Portal target="'.pos .status-buttons-portal'">
+                <t t-portal="'.pos .status-buttons-portal'">
                     <div class="status-buttons">
                         <CashierName />
                         <SaleDetailsButton t-if="env.pos.proxy.printer" />
@@ -29,7 +29,7 @@
                         <SyncNotification />
                         <HeaderButton />
                     </div>
-                </Portal>
+                </t>
                 <div class="pos-content">
                     <div class="window">
                         <div class="subwindow">
