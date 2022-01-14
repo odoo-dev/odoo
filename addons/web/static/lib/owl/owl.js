@@ -4191,6 +4191,7 @@
         return new VPortal(target, content(ctx, parent, key));
     }
     function callSlot(ctx, parent, key, name, dynamic, extra, defaultContent) {
+        key = key + "__slot_" + name;
         const slots = (ctx.props && ctx.props.slots) || {};
         const { __render, __ctx, __scope } = slots[name] || {};
         const slotScope = Object.create(__ctx || {});
@@ -5021,8 +5022,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2022-01-14T09:14:53.455Z';
-    __info__.hash = '287a6d5';
+    __info__.date = '2022-01-14T15:00:19.436Z';
+    __info__.hash = '483335d';
     __info__.url = 'https://github.com/odoo/owl';
 
 
