@@ -24,7 +24,6 @@ export class Layout extends Component {
         this.display = display;
     }
     get controlPanelSlots() {
-        // NXOWL
         const slots = { ...this.props.slots };
         delete slots.default;
         return slots;

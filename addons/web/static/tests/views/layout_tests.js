@@ -95,8 +95,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(root, ".o_content > .toy_content");
     });
 
-    // NXOWL hum, don't know what happens --> maybe for LPE
-    QUnit.skipNXOWL("Nested layouts", async (assert) => {
+    QUnit.test("Nested layouts", async (assert) => {
         assert.expect(10);
 
         // Component C: bottom (no control panel)
