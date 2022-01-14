@@ -692,9 +692,9 @@ registerModel({
                     notificationTitle = author.nameOrDisplayName;
                 }
             }
-            const notificationContent = owl.utils.escape(
-                htmlToTextContentInline(message.body).substr(0, PREVIEW_MSG_MAX_SIZE)
-            );
+            const div = document.createElement("div");
+            div.innerText = htmlToTextContentInline(message.body).substr(0, PREVIEW_MSG_MAX_SIZE);
+            const notificationContent = div.innerHTML;
             this.env.services['bus_service'].sendNotification({
                 message: notificationContent,
                 title: notificationTitle,

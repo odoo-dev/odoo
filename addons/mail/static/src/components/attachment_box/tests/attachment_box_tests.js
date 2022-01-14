@@ -216,7 +216,7 @@ QUnit.test('attachment box: drop attachments', async function (assert) {
     );
 });
 
-QUnit.test('view attachments', async function (assert) {
+QUnit.skipNXOWL('view attachments', async function (assert) {
     assert.expect(7);
 
     this.data['res.partner'].records.push({ id: 100 });
@@ -293,7 +293,7 @@ QUnit.test('view attachments', async function (assert) {
     );
 });
 
-QUnit.test('remove attachment should ask for confirmation', async function (assert) {
+QUnit.skipNXOWL('remove attachment should ask for confirmation', async function (assert) {
     assert.expect(5);
 
     this.data['res.partner'].records.push({ id: 100 });

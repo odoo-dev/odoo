@@ -47,13 +47,13 @@
             <t name="beforeThread"/>
             <ThreadView
                 className="'o_Discuss_thread'"
-                t-att-class="{ 'o-mobile': messaging.device.isMobile }"
                 hasComposerCurrentPartnerAvatar="!messaging.device.isMobile"
                 hasComposerDiscardButton="discuss.thread === messaging.inbox"
                 hasComposerThreadName="discuss.thread === messaging.inbox"
                 hasComposerThreadTyping="true"
                 localId="discuss.threadView.localId"
             />
+            <!-- NXOWL t-att-class="{ 'o-mobile': messaging.device.isMobile }" -->
         </t>
         <t t-if="!discuss.thread and (!messaging.device.isMobile or discuss.activeMobileNavbarTabId === 'mailbox')">
             <div class="o_Discuss_noThread">

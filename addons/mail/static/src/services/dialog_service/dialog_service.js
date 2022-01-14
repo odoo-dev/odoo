@@ -5,6 +5,8 @@ import { getMessagingComponent } from "@mail/utils/messaging_component";
 import AbstractService from 'web.AbstractService';
 import { bus } from 'web.core';
 
+const { App } = owl;
+
 export const DialogService = AbstractService.extend({
     dependencies: ['messaging'],
     /**
@@ -50,9 +52,12 @@ export const DialogService = AbstractService.extend({
             this.component = undefined;
         }
         const DialogManagerComponent = getMessagingComponent("DialogManager");
-        this.component = new DialogManagerComponent(null);
+        const app = new App(DialogManagerComponent, {
+            env: owl.Component.env,
+            templates: window.__ODOO_TEMPLATES__,
+        });
         const parentNode = this._getParentNode();
-        await this.component.mount(parentNode);
+        this.component = await app.mount(parentNode);
     },
 
     //--------------------------------------------------------------------------

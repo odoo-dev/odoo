@@ -34,9 +34,9 @@
                         <t t-if="notificationView.constructor.name === 'NotificationRequestView'">
                             <NotificationRequest
                                 className="'o_NotificationList_notificationRequest'"
-                                t-att-class="{ 'o-mobile': messaging.device.isMobile }"
                                 localId="notificationView.localId"
                             />
+                            <!-- NXOWL t-att-class="{ 'o-mobile': messaging.device.isMobile }" -->
                         </t>
                         <t t-if="!notificationView_last">
                             <div class="o_NotificationList_separator"/>

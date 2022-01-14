@@ -1,5 +1,5 @@
 (function () {
-    const { Component, useComponent } = owl;
+    const { Component, useComponent, onWillDestroy } = owl;
     const capitalize = (s) => (s ? s[0].toUpperCase() + s.slice(1) : "");
     const oldLifecycleMethods = [
         "mounted",
@@ -27,7 +27,12 @@
                     this.catchError(error);
                 });
             }
+            if (this.destroy) {
+                onWillDestroy(this.destroy.bind(this));
+            }
         }
+
+        destroy() {}
 
         static get current() {
             return useComponent();
@@ -74,10 +79,14 @@
 
     Object.defineProperty(owl.Component, "components", {
         get() {
-            return Object.assign({}, owl.Component._components, this._components);
+            return this._components;
         },
         set(val) {
-            this._components = val;
+            this._components = new Proxy(val, {
+                get(target, key) {
+                    return target[key] || owl.Component._components[key];
+                },
+            });
         },
     });
     owl.Component._components = {};

@@ -29,7 +29,7 @@ QUnit.module('attachment_image_tests.js', {
     },
 });
 
-QUnit.test('auto layout with image', async function (assert) {
+QUnit.skipNXOWL('auto layout with image', async function (assert) {
     assert.expect(3);
 
     const { createMessageComponent } = await this.start();

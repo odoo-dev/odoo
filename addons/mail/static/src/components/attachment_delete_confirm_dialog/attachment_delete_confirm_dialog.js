@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
+import { escape } from '@web/core/utils/strings';
 
 import Dialog from 'web.OwlDialog';
 
@@ -25,7 +26,7 @@ export class AttachmentDeleteConfirmDialog extends Component {
     getBody() {
         return _.str.sprintf(
             this.env._t(`Do you really want to delete "%s"?`),
-            owl.utils.escape(this.attachment.displayName)
+            escape(this.attachment.displayName)
         );
     }
 

@@ -4,7 +4,7 @@ import { getMessagingComponent } from "@mail/utils/messaging_component";
 
 import AbstractAction from 'web.AbstractAction';
 
-const { Component } = owl;
+const { App, Component } = owl;
 
 export const DiscussWidget = AbstractAction.extend({
     template: 'mail.widgets.Discuss',
@@ -57,14 +57,12 @@ export const DiscussWidget = AbstractAction.extend({
     /**
      * @override {web.AbstractAction}
      */
-    on_attach_callback() {
+    async on_attach_callback() {
         this._super(...arguments);
         if (this.component) {
             // prevent twice call to on_attach_callback (FIXME)
             return;
         }
-        const DiscussComponent = getMessagingComponent("Discuss");
-        this.component = new DiscussComponent();
         this._pushStateActionManagerEventListener = ev => {
             ev.stopPropagation();
             if (this._lastPushStateActiveThread === this.discuss.thread) {
@@ -85,7 +83,13 @@ export const DiscussWidget = AbstractAction.extend({
             'o-show-rainbow-man',
             this._showRainbowManEventListener
         );
-        return this.component.mount(this.el);
+
+        const DiscussComponent = getMessagingComponent("Discuss");
+        const app = new App(DiscussComponent, {
+            env: owl.Component.env,
+            templates: window.__ODOO_TEMPLATES__,
+        });
+        this.component = await app.mount(this.el);
     },
     /**
      * @override {web.AbstractAction}

@@ -3,6 +3,7 @@
 import { registerModel } from '@mail/model/model_core';
 import { attr, many2one, one2one } from '@mail/model/model_field';
 import { clear, insertAndReplace, link, unlink } from '@mail/model/model_field_command';
+import { escape } from '@web/core/utils/strings';
 
 registerModel({
     name: 'Discuss',
@@ -64,14 +65,14 @@ registerModel({
             this.update({ addingChannelValue: req.term });
             const threads = await this.messaging.models['Thread'].searchChannelsToOpen({ limit: 10, searchTerm: req.term });
             const items = threads.map((thread) => {
-                const escapedName = owl.utils.escape(thread.name);
+                const escapedName = escape(thread.name);
                 return {
                     id: thread.id,
                     label: escapedName,
                     value: escapedName,
                 };
             });
-            const escapedValue = owl.utils.escape(req.term);
+            const escapedValue = escape(req.term);
             // XDU FIXME could use a component but be careful with owl's
             // renderToString https://github.com/odoo/owl/issues/708
             items.push({
@@ -107,7 +108,7 @@ registerModel({
          * @param {function} res
          */
         handleAddChatAutocompleteSource(req, res) {
-            const value = owl.utils.escape(req.term);
+            const value = escape(req.term);
             this.messaging.models['Partner'].imSearch({
                 callback: partners => {
                     const suggestions = partners.map(partner => {

@@ -19,6 +19,7 @@ odoo.define('web.OwlCompatibility', function (require) {
         onWillDestroy,
         useSubEnv,
         xml,
+        status,
     } = owl;
 
     const widgetSymbol = odoo.widgetSymbol;
@@ -497,7 +498,7 @@ odoo.define('web.OwlCompatibility', function (require) {
          * @param {string} evType
          */
         _addListener(evType) {
-            if (this.parentWidget && !this._handledEvents.has(evType)) {
+            if (this.parentWidget && !this._handledEvents.has(evType) && status(this) === "mounted") {
                 this._handledEvents.add(evType);
                 this.el.addEventListener(evType, ev => {
                     // as the WrappeComponent has the same root node as the
