@@ -86,7 +86,7 @@
     </t>
 
     <t t-name="web.legacy.PivotGroupByMenu" owl="1">
-        <Dropdown class="o_pivot_field_menu" toggler="'parent'">
+        <Dropdown class="'o_pivot_field_menu'" toggler="'parent'">
             <t t-set="currentGroup" t-value="null"/>
             <t t-foreach="items" t-as="item" t-key="item.id">
                 <t t-if="item.groupNumber and currentGroup !== null and currentGroup !== item.groupNumber">
@@ -112,8 +112,9 @@
                 <t t-set="currentGroup" t-value="item.groupNumber"/>
             </t>
             <t t-if="props.fields.length and props.hasSearchArchGroupBys">
+                <t t-debug=""/>
                 <li t-if="items.length" class="dropdown-divider" role="separator"/>
-                <PivotCustomGroupByItem fields="props.fields"/>
+                <CustomGroupByItem fields="props.fields" onAddCustomGroup.bind="onAddCustomGroup"/>
             </t>
         </Dropdown>
     </t>

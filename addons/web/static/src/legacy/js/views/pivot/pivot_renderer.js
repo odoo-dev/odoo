@@ -2,38 +2,10 @@
 
     import OwlAbstractRenderer from '../abstract_renderer_owl';
     import field_utils from 'web.field_utils';
-    import { DEFAULT_INTERVAL, INTERVAL_OPTIONS, getIntervalOptions } from 'web.searchUtils';
+    import { INTERVAL_OPTIONS, getIntervalOptions } from 'web.searchUtils';
+    import { CustomGroupByItem } from "@web/search/group_by_menu/custom_group_by_item";
 
     const { Component, useEffect, useExternalListener, useState } = owl;
-
-    class PivotCustomGroupByItem extends Component {
-        constructor() {
-            super(...arguments);
-            this.canBeOpened = true;
-            this.state = useState({ fieldName: this.props.fields[0].name });
-        }
-
-        //---------------------------------------------------------------------
-        // Handlers
-        //---------------------------------------------------------------------
-
-        /**
-         * @private
-         */
-        onApply() {
-            const { fieldName } = this.state;
-            const { type } = this.props.fields.find(f => f.name === fieldName);
-            let interval = null;
-            if (['date', 'datetime'].includes(type)) {
-                interval = DEFAULT_INTERVAL;
-            }
-            this.trigger('groupby-menu-selection', { fieldName, interval, custom: true });
-            this.state.open = false;
-        }
-    }
-
-    PivotCustomGroupByItem.template = "web.CustomGroupByItem";
-    PivotCustomGroupByItem.props = { fields: Array };
 
     export class PivotGroupByMenu extends Component {
 
@@ -78,6 +50,16 @@
         //---------------------------------------------------------------------
 
         /**
+         * @override
+         * @param {CustomEvent} ev
+         */
+        onAddCustomGroup(fieldName) {
+            const { type } = this.props.fields.find(f => f.fieldName === fieldName);
+            const interval = ["date","datetime"].includes(type) ? "month" : null;
+            this.trigger('groupby-menu-selection', { fieldName, interval  });
+        }
+
+        /**
          * @param {string} fieldName
          * @param {string|null} interval
         */
@@ -92,7 +74,7 @@
     }
 
     PivotGroupByMenu.template = "web.legacy.PivotGroupByMenu";
-    PivotGroupByMenu.components = { PivotCustomGroupByItem };
+    PivotGroupByMenu.components = { CustomGroupByItem };
     PivotGroupByMenu.props = {
         customGroupBys: Map,
         fields: Object,

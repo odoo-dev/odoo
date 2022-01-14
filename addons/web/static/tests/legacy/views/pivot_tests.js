@@ -740,7 +740,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skipNXOWL('pivot renders group dropdown same as search groupby dropdown if group bys are specified in search arch', async function (assert) {
+    QUnit.test('pivot renders group dropdown same as search groupby dropdown if group bys are specified in search arch', async function (assert) {
         assert.expect(6);
 
         const pivot = await createView({
@@ -798,7 +798,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skipNXOWL('pivot group dropdown sync with search groupby dropdown', async function (assert) {
+    QUnit.test('pivot group dropdown sync with search groupby dropdown', async function (assert) {
         assert.expect(6);
 
         const pivot = await createView({
@@ -852,7 +852,7 @@ QUnit.module('Views', {
         await testUtils.dom.click(pivot.$('.o_pivot_field_menu .o_add_custom_group_menu .dropdown-menu button'));
         // click on closed header to open groupby selection dropdown
         await testUtils.dom.click(pivot.el.querySelector('tbody tr:last-child .o_pivot_header_cell_closed'));
-        assert.containsN(pivot, '.o_pivot_field_menu .o_menu_item', 4,
+        assert.containsN(pivot, '.o_pivot_field_menu .o_menu_item', 3,
             "should have 4 dropdown items pivot groupby dropdown");
 
         // applying custom groupby in pivot groupby dropdown will not update search dropdown
@@ -863,7 +863,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skipNXOWL('pivot groupby dropdown renders custom search at the end with separator', async function (assert) {
+    QUnit.test('pivot groupby dropdown renders custom search at the end with separator', async function (assert) {
         assert.expect(5);
 
         const pivot = await createView({
@@ -904,7 +904,7 @@ QUnit.module('Views', {
             "pivot groupby menu should have two separators"
         );
         assert.hasClass(
-            items[items.length - 1].nextSibling,
+            items[items.length - 1].nextElementSibling,
             "dropdown-divider",
             "pivot groupby menu separator is placed after all menu items"
         );
@@ -912,7 +912,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skipNXOWL('pivot custom groupby: grouping on date field use default interval month', async function (assert) {
+    QUnit.test('pivot custom groupby: grouping on date field use default interval month', async function (assert) {
         assert.expect(1);
 
         let checkReadGroup = false;
@@ -953,7 +953,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skipNXOWL('pivot view without group by specified in search arch', async function (assert) {
+    QUnit.test('pivot view without group by specified in search arch', async function (assert) {
         assert.expect(3);
 
         const pivot = await createView({
@@ -984,7 +984,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skipNXOWL('pivot view do not show custom group selection if there are no groupable fields', async function (assert) {
+    QUnit.test('pivot view do not show custom group selection if there are no groupable fields', async function (assert) {
         assert.expect(4);
 
         for (const fieldName of ["bar", "company_type", "customer", "date", "other_product_id"]) {
@@ -1033,7 +1033,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skipNXOWL('pivot custom groupby: adding a custom group close the pivot groupby menu', async function (assert) {
+    QUnit.test('pivot custom groupby: adding a custom group close the pivot groupby menu', async function (assert) {
         assert.expect(2);
 
         const pivot = await createView({
@@ -1902,7 +1902,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.skipNXOWL('correctly group data after flip (1)', async function (assert) {
+    QUnit.test('correctly group data after flip (1)', async function (assert) {
         assert.expect(4);
 
         serverData.views = {
@@ -1965,11 +1965,9 @@ QUnit.module('Views', {
                 "Total"
             ]
         );
-
-        webClient.destroy();
     });
 
-    QUnit.skipNXOWL('correctly group data after flip (2)', async function (assert) {
+    QUnit.test('correctly group data after flip (2)', async function (assert) {
         assert.expect(5);
 
         serverData.views = {
@@ -2045,8 +2043,6 @@ QUnit.module('Views', {
                 "Total"
             ]
         );
-
-        webClient.destroy();
     });
 
     QUnit.test('correctly group data after flip (3))', async function (assert) {
