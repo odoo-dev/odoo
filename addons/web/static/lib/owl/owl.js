@@ -322,8 +322,9 @@
     // Multi NODE
     // -----------------------------------------------------------------------------
     class VMulti {
-        constructor(children) {
+        constructor(children, deepRemove) {
             this.children = children;
+            this.deepRemove = deepRemove;
         }
         mount(parent, afterNode) {
             const children = this.children;
@@ -408,7 +409,7 @@
         }
         remove() {
             const parentEl = this.parentEl;
-            if (this.isOnlyChild) {
+            if (this.isOnlyChild && !this.deepRemove) {
                 nodeSetTextContent$1.call(parentEl, "");
             }
             else {
@@ -433,8 +434,8 @@
             return this.children.map((c) => c.toString()).join("");
         }
     }
-    function multi(children) {
-        return new VMulti(children);
+    function multi(children, deepRemove = false) {
+        return new VMulti(children, deepRemove);
     }
 
     const getDescriptor$2 = (o, p) => Object.getOwnPropertyDescriptor(o, p);
@@ -528,7 +529,7 @@
      * @param str
      * @returns a new block type, that can build concrete blocks
      */
-    function createBlock(str) {
+    function createBlock(str, deepRemove = false) {
         if (str in cache) {
             return cache[str];
         }
@@ -544,7 +545,7 @@
         const context = buildContext(tree);
         // step 3: build the final block class
         const template = tree.el;
-        const Block = buildBlock(template, context);
+        const Block = buildBlock(template, context, deepRemove);
         cache[str] = Block;
         return Block;
     }
@@ -823,7 +824,7 @@
     // -----------------------------------------------------------------------------
     // building the concrete block class
     // -----------------------------------------------------------------------------
-    function buildBlock(template, ctx) {
+    function buildBlock(template, ctx, deepRemove) {
         let B = createBlockClass(template, ctx);
         if (ctx.cbRefs.length) {
             const refs = ctx.cbRefs;
@@ -845,6 +846,14 @@
                 }
             };
             B.prototype.beforeRemove = VMulti.prototype.beforeRemove;
+            if (deepRemove) {
+                const blockRemove = B.prototype.remove;
+                const vMultiRemove = VMulti.prototype.remove;
+                B.prototype.remove = function () {
+                    blockRemove.call(this);
+                    vMultiRemove.call(this);
+                };
+            }
             return (data, children = []) => new B(data, children);
         }
         return (data) => new B(data);
@@ -990,8 +999,9 @@
     // List Node
     // -----------------------------------------------------------------------------
     class VList {
-        constructor(children) {
+        constructor(children, deepRemove) {
             this.children = children;
+            this.deepRemove = deepRemove;
         }
         mount(parent, afterNode) {
             const children = this.children;
@@ -1034,7 +1044,7 @@
             const isOnlyChild = this.isOnlyChild;
             const parent = this.parentEl;
             // fast path: no new child => only remove
-            if (ch2.length === 0 && isOnlyChild) {
+            if (ch2.length === 0 && isOnlyChild && !this.deepRemove) {
                 if (withBeforeRemove) {
                     for (let i = 0, l = ch1.length; i < l; i++) {
                         beforeRemove.call(ch1[i]);
@@ -1053,7 +1063,6 @@
             let endVn1 = ch1[endIdx1];
             let endVn2 = ch2[endIdx2];
             let mapping = undefined;
-            // let noFullRemove = this.hasNoComponent;
             while (startIdx1 <= endIdx1 && startIdx2 <= endIdx2) {
                 // -------------------------------------------------------------------
                 if (startVn1 === null) {
@@ -1156,7 +1165,7 @@
         }
         remove() {
             const { parentEl, anchor } = this;
-            if (this.isOnlyChild) {
+            if (this.isOnlyChild && !this.deepRemove) {
                 nodeSetTextContent.call(parentEl, "");
             }
             else {
@@ -1179,8 +1188,8 @@
             return this.children.map((c) => c.toString()).join("");
         }
     }
-    function list(children) {
-        return new VList(children);
+    function list(children, deepRemove = false) {
+        return new VList(children, deepRemove);
     }
     function createMapping(ch1, startIdx1, endIdx2) {
         let mapping = {};
@@ -1500,12 +1509,8 @@
                 }
                 current = undefined;
                 // Step 2: patching the dom
-                node.bdom.patch(this.bdom, Object.keys(node.children).length > 0);
-                this.appliedToDom = true;
+                node.patch();
                 this.locked = false;
-                // unregistering the fiber before mounted since it can do another render
-                // and that the current rendering is obviously completed
-                node.fiber = null;
                 // Step 4: calling all mounted lifecycle hooks
                 let mountedFibers = this.mounted;
                 while ((current = mountedFibers.pop())) {
@@ -1926,7 +1931,11 @@
             this.bdom.moveBefore(other ? other.bdom : null, afterNode);
         }
         patch() {
-            this.bdom.patch(this.fiber.bdom, false);
+            const hasChildren = Object.keys(this.children).length > 0;
+            this.bdom.patch(this.fiber.bdom, hasChildren);
+            if (hasChildren) {
+                this.cleanOutdatedChildren();
+            }
             this.fiber.appliedToDom = true;
             this.fiber = null;
         }
@@ -1935,6 +1944,19 @@
         }
         remove() {
             this.bdom.remove();
+        }
+        cleanOutdatedChildren() {
+            const children = this.children;
+            for (const key in children) {
+                const node = children[key];
+                const status = node.status;
+                if (status !== 1 /* MOUNTED */) {
+                    delete children[key];
+                    if (status !== 2 /* DESTROYED */) {
+                        node.destroy();
+                    }
+                }
+            }
         }
     }
 
@@ -2301,7 +2323,7 @@
     // BlockDescription
     // -----------------------------------------------------------------------------
     class BlockDescription {
-        constructor(target, type) {
+        constructor(target, type, deepRemove = false) {
             this.dynamicTagName = null;
             this.isRoot = false;
             this.hasDynamicChildren = false;
@@ -2314,6 +2336,7 @@
             this.blockName = "block" + this.id;
             this.target = target;
             this.type = type;
+            this.deepRemove = deepRemove;
         }
         static generateId(prefix) {
             this.nextDataIds[prefix] = (this.nextDataIds[prefix] || 0) + 1;
@@ -2345,7 +2368,7 @@
                 return `${this.blockName}(${params})`;
             }
             else if (this.type === "list") {
-                return `list(c_block${this.id})`;
+                return `list(c_block${this.id}${this.deepRemove ? ", true" : ""})`;
             }
             return expr;
         }
@@ -2463,6 +2486,7 @@
             for (let { id, template } of this.staticCalls) {
                 mainCode.push(`const ${id} = getTemplate(${template});`);
             }
+            const deepRemove = "deepRemove" in this.ast ? this.ast.deepRemove : false;
             // define all blocks
             if (this.blocks.length) {
                 mainCode.push(``);
@@ -2472,10 +2496,10 @@
                         if (block.dynamicTagName) {
                             xmlString = xmlString.replace(/^<\w+/, `<\${tag || '${block.dom.nodeName}'}`);
                             xmlString = xmlString.replace(/\w+>$/, `\${tag || '${block.dom.nodeName}'}>`);
-                            mainCode.push(`let ${block.blockName} = tag => createBlock(\`${xmlString}\`);`);
+                            mainCode.push(`let ${block.blockName} = tag => createBlock(\`${xmlString}\`${deepRemove ? ", true" : ""});`);
                         }
                         else {
-                            mainCode.push(`let ${block.blockName} = createBlock(\`${xmlString}\`);`);
+                            mainCode.push(`let ${block.blockName} = createBlock(\`${xmlString}\`${deepRemove ? ", true" : ""});`);
                         }
                     }
                 }
@@ -2497,6 +2521,17 @@
             }
             return code;
         }
+        compileInNewTarget(prefix, ast, ctx) {
+            const name = this.generateId(prefix);
+            const initialTarget = this.target;
+            const target = new CodeTarget(name);
+            this.targets.push(target);
+            this.target = target;
+            const subCtx = createContext(ctx);
+            this.compileAST(ast, subCtx);
+            this.target = initialTarget;
+            return name;
+        }
         addLine(line) {
             this.target.addLine(line);
         }
@@ -2504,17 +2539,14 @@
             this.ids[prefix] = (this.ids[prefix] || 0) + 1;
             return prefix + this.ids[prefix];
         }
-        generateBlockName() {
-            return `block${this.blocks.length + 1}`;
-        }
         insertAnchor(block) {
             const tag = `block-child-${block.children.length}`;
             const anchor = xmlDoc.createElement(tag);
             block.insert(anchor);
         }
-        createBlock(parentBlock, type, ctx) {
+        createBlock(parentBlock, type, ctx, deepRemove = false) {
             const hasRoot = this.target.hasRoot;
-            const block = new BlockDescription(this.target, type);
+            const block = new BlockDescription(this.target, type, deepRemove);
             if (!hasRoot && !ctx.preventRoot) {
                 this.target.hasRoot = true;
                 block.isRoot = true;
@@ -2635,6 +2667,8 @@
                 case 16 /* TTranslation */:
                     this.compileTTranslation(ast, ctx);
                     break;
+                case 17 /* TPortal */:
+                    this.compileTPortal(ast, ctx);
             }
         }
         compileDebug(ast, ctx) {
@@ -2814,6 +2848,7 @@
                         index: block.childNumber,
                         forceNewBlock: false,
                         isLast: ctx.isLast && i === children.length - 1,
+                        tKeyExpr: ctx.tKeyExpr,
                     });
                     this.compileAST(child, subCtx);
                 }
@@ -2827,7 +2862,7 @@
                     const children = block.children.slice();
                     let current = children.shift();
                     for (let i = codeIdx; i < code.length; i++) {
-                        if (code[i].trimStart().startsWith(`let ${current.varName}`)) {
+                        if (code[i].trimStart().startsWith(`let ${current.varName} `)) {
                             code[i] = code[i].replace(`let ${current.varName}`, current.varName);
                             current = children.shift();
                             if (!current)
@@ -2873,7 +2908,7 @@
             if (ast.body) {
                 const nextId = BlockDescription.nextBlockId;
                 const subCtx = createContext(ctx);
-                this.compileAST({ type: 3 /* Multi */, content: ast.body }, subCtx);
+                this.compileAST({ type: 3 /* Multi */, content: ast.body, deepRemove: false }, subCtx);
                 this.helpers.add("withDefault");
                 expr = `withDefault(${expr}, b${nextId})`;
             }
@@ -2922,7 +2957,7 @@
                     const children = block.children.slice();
                     let current = children.shift();
                     for (let i = codeIdx; i < code.length; i++) {
-                        if (code[i].trimStart().startsWith(`let ${current.varName}`)) {
+                        if (code[i].trimStart().startsWith(`let ${current.varName} `)) {
                             code[i] = code[i].replace(`let ${current.varName}`, current.varName);
                             current = children.shift();
                             if (!current)
@@ -2933,7 +2968,7 @@
                 }
                 // note: this part is duplicated from end of compilemulti:
                 const args = block.children.map((c) => c.varName).join(", ");
-                this.insertBlock(`multi([${args}])`, block, ctx);
+                this.insertBlock(`multi([${args}]${ast.deepRemove ? ", true" : ""})`, block, ctx);
             }
         }
         compileTForeach(ast, ctx) {
@@ -2941,7 +2976,7 @@
             if (block) {
                 this.insertAnchor(block);
             }
-            block = this.createBlock(block, "list", ctx);
+            block = this.createBlock(block, "list", ctx, ast.deepRemove);
             this.target.loopLevel++;
             const loopVar = `i${this.target.loopLevel}`;
             this.addLine(`ctx = Object.create(ctx);`);
@@ -3054,7 +3089,7 @@
                         const children = block.children.slice();
                         let current = children.shift();
                         for (let i = codeIdx; i < code.length; i++) {
-                            if (code[i].trimStart().startsWith(`let ${current.varName}`)) {
+                            if (code[i].trimStart().startsWith(`let ${current.varName} `)) {
                                 code[i] = code[i].replace(`let ${current.varName}`, current.varName);
                                 current = children.shift();
                                 if (!current)
@@ -3065,7 +3100,7 @@
                     }
                 }
                 const args = block.children.map((c) => c.varName).join(", ");
-                this.insertBlock(`multi([${args}])`, block, ctx);
+                this.insertBlock(`multi([${args}]${ast.deepRemove ? ", true" : ""})`, block, ctx);
             }
         }
         compileTCall(ast, ctx) {
@@ -3076,7 +3111,7 @@
                 this.helpers.add("isBoundary");
                 const nextId = BlockDescription.nextBlockId;
                 const subCtx = createContext(ctx, { preventRoot: true });
-                this.compileAST({ type: 3 /* Multi */, content: ast.body }, subCtx);
+                this.compileAST({ type: 3 /* Multi */, content: ast.body, deepRemove: false }, subCtx);
                 if (nextId !== BlockDescription.nextBlockId) {
                     this.helpers.add("zero");
                     this.addLine(`ctx[zero] = b${nextId};`);
@@ -3129,15 +3164,9 @@
             this.helpers.add("isBoundary").add("withDefault");
             const expr = ast.value ? compileExpr(ast.value || "") : "null";
             if (ast.body) {
-                const initialTarget = this.target;
                 this.helpers.add("LazyValue");
-                let name = this.generateId("value");
-                const fn = new CodeTarget(name);
-                this.targets.push(fn);
-                this.target = fn;
-                const subCtx = createContext(ctx);
-                this.compileAST({ type: 3 /* Multi */, content: ast.body }, subCtx);
-                this.target = initialTarget;
+                const bodyAst = { type: 3 /* Multi */, content: ast.body, deepRemove: false };
+                const name = this.compileInNewTarget("value", bodyAst, ctx);
                 let value = `new LazyValue(${name}, ctx, node)`;
                 value = ast.value ? (value ? `withDefault(${expr}, ${value})` : expr) : value;
                 this.addLine(`ctx[\`${ast.name}\`] = ${value};`);
@@ -3198,14 +3227,9 @@
                     this.addLine(`const ${ctxStr} = capture(ctx);`);
                 }
                 let slotStr = [];
-                const initialTarget = this.target;
                 for (let slotName in ast.slots) {
-                    let name = this.generateId("slot");
-                    const slot = new CodeTarget(name);
-                    this.targets.push(slot);
-                    this.target = slot;
-                    const subCtx = createContext(ctx);
-                    this.compileAST(ast.slots[slotName].content, subCtx);
+                    const slotAst = ast.slots[slotName].content;
+                    const name = this.compileInNewTarget("slot", slotAst, ctx);
                     const params = [`__render: ${name}, __ctx: ${ctxStr}`];
                     const scope = ast.slots[slotName].scope;
                     if (scope) {
@@ -3219,7 +3243,6 @@
                     const slotInfo = `{${params.join(", ")}}`;
                     slotStr.push(`'${slotName}': ${slotInfo}`);
                 }
-                this.target = initialTarget;
                 slotDef = `{${slotStr.join(", ")}}`;
             }
             if (slotDef && !(ast.dynamicProps || hasSlotsProp)) {
@@ -3295,14 +3318,7 @@
                 scope = `{${params.join(", ")}}`;
             }
             if (ast.defaultContent) {
-                let name = this.generateId("defaultContent");
-                const slot = new CodeTarget(name);
-                this.targets.push(slot);
-                const initialTarget = this.target;
-                const subCtx = createContext(ctx);
-                this.target = slot;
-                this.compileAST(ast.defaultContent, subCtx);
-                this.target = initialTarget;
+                const name = this.compileInNewTarget("defaultContent", ast.defaultContent, ctx);
                 blockString = `callSlot(ctx, node, key, ${slotName}, ${dynamic}, ${scope}, ${name})`;
             }
             else {
@@ -3326,6 +3342,17 @@
                 this.compileAST(ast.content, Object.assign({}, ctx, { translate: false }));
             }
         }
+        compileTPortal(ast, ctx) {
+            this.helpers.add("callPortal");
+            let { block } = ctx;
+            const name = this.compileInNewTarget("portalContent", ast.content, ctx);
+            const blockString = `callPortal(ctx, node, key, ${ast.target}, ${name})`;
+            if (block) {
+                this.insertAnchor(block);
+            }
+            block = this.createBlock(block, "multi", ctx);
+            this.insertBlock(blockString, block, { ...ctx, forceNewBlock: false });
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -3348,6 +3375,7 @@
         return (parseTDebugLog(node, ctx) ||
             parseTForEach(node, ctx) ||
             parseTIf(node, ctx) ||
+            parseTPortal(node, ctx) ||
             parseTCall(node, ctx) ||
             parseTCallBlock(node) ||
             parseTEscNode(node, ctx) ||
@@ -3492,9 +3520,6 @@
                 attrs[attr] = value;
             }
         }
-        if (children.length === 1 && children[0].type === 9 /* TForEach */) {
-            children[0].isOnlyChild = true;
-        }
         return {
             type: 2 /* DomNode */,
             tag: tagName,
@@ -3603,9 +3628,8 @@
             elem,
             body,
             memo,
+            deepRemove: needDeepRemove(body),
             key,
-            isOnlyChild: false,
-            hasNoComponent: hasNoComponent(body),
             hasNoFirst,
             hasNoLast,
             hasNoIndex,
@@ -3613,54 +3637,36 @@
         };
     }
     /**
-     * @returns true if we are sure the ast does not contain any component
+     * @returns true if we are sure that a deep remove (without optimisation) is needed, for exemple
+     * if there is a portal.
      */
-    function hasNoComponent(ast) {
+    function needDeepRemove(ast) {
         switch (ast.type) {
+            case 3 /* Multi */:
+            case 9 /* TForEach */:
+            case 5 /* TIf */:
+                return ast.deepRemove;
+            case 17 /* TPortal */:
+                return true;
             case 11 /* TComponent */:
             case 8 /* TOut */:
             case 7 /* TCall */:
             case 15 /* TCallBlock */:
             case 14 /* TSlot */:
-                return false;
-            case 6 /* TSet */:
             case 0 /* Text */:
             case 1 /* Comment */:
             case 4 /* TEsc */:
-                return true;
+                return false;
             case 10 /* TKey */:
-                return hasNoComponent(ast.content);
+                return needDeepRemove(ast.content);
             case 12 /* TDebug */:
             case 13 /* TLog */:
             case 16 /* TTranslation */:
-                return ast.content ? hasNoComponent(ast.content) : true;
-            case 9 /* TForEach */:
-                return ast.hasNoComponent;
-            case 3 /* Multi */:
-            case 2 /* DomNode */: {
-                for (let elem of ast.content) {
-                    if (!hasNoComponent(elem)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            case 5 /* TIf */: {
-                if (!hasNoComponent(ast.content)) {
-                    return false;
-                }
-                if (ast.tElif) {
-                    for (let elem of ast.tElif) {
-                        if (!hasNoComponent(elem.content)) {
-                            return false;
-                        }
-                    }
-                }
-                if (ast.tElse && !hasNoComponent(ast.tElse)) {
-                    return false;
-                }
-                return true;
-            }
+                return ast.content ? needDeepRemove(ast.content) : false;
+            case 6 /* TSet */:
+                return ast.body ? ast.body.some((ast) => needDeepRemove(ast)) : false;
+            case 2 /* DomNode */:
+                return ast.content.some((ast) => needDeepRemove(ast));
         }
     }
     function parseTKey(node, ctx) {
@@ -3749,12 +3755,20 @@
             tElse = parseNode(nextElement, ctx);
             nextElement.remove();
         }
+        let deepRemove = needDeepRemove(content);
+        if (tElifs) {
+            deepRemove = deepRemove || tElifs.some((ast) => needDeepRemove(ast));
+        }
+        if (tElse) {
+            deepRemove = deepRemove || needDeepRemove(tElse);
+        }
         return {
             type: 5 /* TIf */,
             condition,
             content,
             tElif: tElifs.length ? tElifs : null,
             tElse,
+            deepRemove,
         };
     }
     // -----------------------------------------------------------------------------
@@ -3900,6 +3914,31 @@
         };
     }
     // -----------------------------------------------------------------------------
+    // Portal
+    // -----------------------------------------------------------------------------
+    function parseTPortal(node, ctx) {
+        if (!node.hasAttribute("t-portal")) {
+            return null;
+        }
+        if (node.tagName !== "t") {
+            throw new Error(`Directive 't-portal' can only be used on <t> nodes (used on a <${node.tagName}>)`);
+        }
+        const target = node.getAttribute("t-portal");
+        node.removeAttribute("t-portal");
+        const content = parseNode(node, ctx);
+        if (!content) {
+            return {
+                type: 0 /* Text */,
+                value: "",
+            };
+        }
+        return {
+            type: 17 /* TPortal */,
+            target,
+            content,
+        };
+    }
+    // -----------------------------------------------------------------------------
     // helpers
     // -----------------------------------------------------------------------------
     /**
@@ -3932,7 +3971,11 @@
             case 1:
                 return children[0];
             default:
-                return { type: 3 /* Multi */, content: children };
+                return {
+                    type: 3 /* Multi */,
+                    content: children,
+                    deepRemove: children.some((ast) => needDeepRemove(ast)),
+                };
         }
     }
     /**
@@ -4094,12 +4137,58 @@
         return new Markup(value);
     }
 
+    const VText = text("").constructor;
+    class VPortal extends VText {
+        constructor(selector, realBDom) {
+            super("");
+            this.target = null;
+            this.selector = selector;
+            this.realBDom = realBDom;
+        }
+        mount(parent, anchor) {
+            super.mount(parent, anchor);
+            this.target = document.querySelector(this.selector);
+            if (!this.target) {
+                let el = this.el;
+                while (el && el.parentElement instanceof HTMLElement) {
+                    el = el.parentElement;
+                }
+                this.target = el && el.querySelector(this.selector);
+                if (!this.target) {
+                    throw new Error("invalid portal target");
+                }
+            }
+            this.realBDom.mount(this.target, null);
+        }
+        beforeRemove() {
+            this.realBDom.beforeRemove();
+        }
+        remove() {
+            super.remove();
+            this.realBDom.remove();
+            this.realBDom = null;
+        }
+        patch(other) {
+            super.patch(other);
+            if (this.realBDom) {
+                this.realBDom.patch(other.realBDom, true);
+            }
+            else {
+                this.realBDom = other.realBDom;
+                this.realBDom.mount(this.target, null);
+            }
+        }
+    }
+
     /**
      * This file contains utility functions that will be injected in each template,
      * to perform various useful tasks in the compiled code.
      */
     function withDefault(value, defaultValue) {
         return value === undefined || value === null || value === false ? defaultValue : value;
+    }
+    function callPortal(ctx, parent, key, target, content) {
+        return new VPortal(target, content(ctx, parent, key));
     }
     function callSlot(ctx, parent, key, name, dynamic, extra, defaultContent) {
         const slots = (ctx.props && ctx.props.slots) || {};
@@ -4251,6 +4340,7 @@
         zero: Symbol("zero"),
         isBoundary,
         callSlot,
+        callPortal,
         capture,
         withKey,
         prepareList,
@@ -4464,66 +4554,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 return "destroyed";
         }
     }
-
-    const VText = text("").constructor;
-    class VPortal extends VText {
-        constructor(selector, realBDom) {
-            super("");
-            this.target = null;
-            this.selector = selector;
-            this.realBDom = realBDom;
-        }
-        mount(parent, anchor) {
-            super.mount(parent, anchor);
-            this.target = document.querySelector(this.selector);
-            if (!this.target) {
-                let el = this.el;
-                while (el && el.parentElement instanceof HTMLElement) {
-                    el = el.parentElement;
-                }
-                this.target = el && el.querySelector(this.selector);
-                if (!this.target) {
-                    throw new Error("invalid portal target");
-                }
-            }
-            this.realBDom.mount(this.target, null);
-        }
-        beforeRemove() {
-            this.realBDom.beforeRemove();
-        }
-        remove() {
-            super.remove();
-            this.realBDom.remove();
-            this.realBDom = null;
-        }
-        patch(other) {
-            super.patch(other);
-            if (this.realBDom) {
-                this.realBDom.patch(other.realBDom, true);
-            }
-            else {
-                this.realBDom = other.realBDom;
-                this.realBDom.mount(this.target, null);
-            }
-        }
-    }
-    class Portal extends Component {
-        constructor(props, env, node) {
-            super(props, env, node);
-            node._render = function (fiber) {
-                const bdom = new VPortal(props.target, this.renderFn());
-                fiber.bdom = bdom;
-                fiber.root.counter--;
-            };
-        }
-    }
-    Portal.template = xml `<t t-slot="default"/>`;
-    Portal.props = {
-        target: {
-            type: String,
-        },
-        slots: true,
-    };
 
     class Memo extends Component {
         constructor(props, env, node) {
@@ -4960,7 +4990,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.Component = Component;
     exports.EventBus = EventBus;
     exports.Memo = Memo;
-    exports.Portal = Portal;
     exports.__info__ = __info__;
     exports.blockDom = blockDom;
     exports.loadFile = loadFile;
@@ -4992,8 +5021,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-12-28T12:54:17.905Z';
-    __info__.hash = '5b1132f';
+    __info__.date = '2022-01-14T09:14:53.455Z';
+    __info__.hash = '287a6d5';
     __info__.url = 'https://github.com/odoo/owl';
 
 
