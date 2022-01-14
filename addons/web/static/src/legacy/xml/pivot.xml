@@ -112,7 +112,6 @@
                 <t t-set="currentGroup" t-value="item.groupNumber"/>
             </t>
             <t t-if="props.fields.length and props.hasSearchArchGroupBys">
-                <t t-debug=""/>
                 <li t-if="items.length" class="dropdown-divider" role="separator"/>
                 <CustomGroupByItem fields="props.fields" onAddCustomGroup.bind="onAddCustomGroup"/>
             </t>

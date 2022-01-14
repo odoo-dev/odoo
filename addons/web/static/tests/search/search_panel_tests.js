@@ -2035,7 +2035,7 @@ QUnit.module("Search", (hooks) => {
         assert.containsOnce(webclient, ".o_content.o_component_with_search_panel .o_search_panel");
     });
 
-    QUnit.skipNXOWL("search panel state is shared between views", async (assert) => {
+    QUnit.test("search panel state is shared between views", async (assert) => {
         assert.expect(16);
 
         const webclient = await createWebClient({
@@ -2085,7 +2085,7 @@ QUnit.module("Search", (hooks) => {
         ]);
     });
 
-    QUnit.skipNXOWL("search panel filters are kept between switch views", async (assert) => {
+    QUnit.test("search panel filters are kept between switch views", async (assert) => {
         assert.expect(17);
 
         const webclient = await createWebClient({
@@ -2141,7 +2141,7 @@ QUnit.module("Search", (hooks) => {
         ]);
     });
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "search panel filters are kept when switching to a view with no search panel",
         async (assert) => {
             assert.expect(13);
