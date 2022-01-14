@@ -597,7 +597,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('basic folding/unfolding', async function (assert) {
+    QUnit.skipNXOWL('basic folding/unfolding', async function (assert) {
         assert.expect(7);
 
         var rpcCount = 0;
@@ -654,7 +654,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('more folding/unfolding', async function (assert) {
+    QUnit.skipNXOWL('more folding/unfolding', async function (assert) {
         assert.expect(1);
 
         var pivot = await createView({
@@ -684,7 +684,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('fold and unfold header group', async function (assert) {
+    QUnit.skipNXOWL('fold and unfold header group', async function (assert) {
         assert.expect(3);
 
         var pivot = await createView({
@@ -711,7 +711,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('unfold second header group', async function (assert) {
+    QUnit.skipNXOWL('unfold second header group', async function (assert) {
         assert.expect(4);
 
         var pivot = await createView({
@@ -738,7 +738,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot renders group dropdown same as search groupby dropdown if group bys are specified in search arch', async function (assert) {
+    QUnit.skipNXOWL('pivot renders group dropdown same as search groupby dropdown if group bys are specified in search arch', async function (assert) {
         assert.expect(6);
 
         const pivot = await createView({
@@ -796,7 +796,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot group dropdown sync with search groupby dropdown', async function (assert) {
+    QUnit.skipNXOWL('pivot group dropdown sync with search groupby dropdown', async function (assert) {
         assert.expect(6);
 
         const pivot = await createView({
@@ -861,7 +861,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot groupby dropdown renders custom search at the end with separator', async function (assert) {
+    QUnit.skipNXOWL('pivot groupby dropdown renders custom search at the end with separator', async function (assert) {
         assert.expect(5);
 
         const pivot = await createView({
@@ -910,7 +910,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot custom groupby: grouping on date field use default interval month', async function (assert) {
+    QUnit.skipNXOWL('pivot custom groupby: grouping on date field use default interval month', async function (assert) {
         assert.expect(1);
 
         let checkReadGroup = false;
@@ -951,7 +951,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot view without group by specified in search arch', async function (assert) {
+    QUnit.skipNXOWL('pivot view without group by specified in search arch', async function (assert) {
         assert.expect(3);
 
         const pivot = await createView({
@@ -982,7 +982,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot view do not show custom group selection if there are no groupable fields', async function (assert) {
+    QUnit.skipNXOWL('pivot view do not show custom group selection if there are no groupable fields', async function (assert) {
         assert.expect(4);
 
         for (const fieldName of ["bar", "company_type", "customer", "date", "other_product_id"]) {
@@ -1031,7 +1031,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot custom groupby: adding a custom group close the pivot groupby menu', async function (assert) {
+    QUnit.skipNXOWL('pivot custom groupby: adding a custom group close the pivot groupby menu', async function (assert) {
         assert.expect(2);
 
         const pivot = await createView({
@@ -1248,7 +1248,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('can be grouped with the update function', async function (assert) {
+    QUnit.skipNXOWL('can be grouped with the update function', async function (assert) {
         assert.expect(4);
 
         var pivot = await createView({
@@ -1303,7 +1303,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('can expand all rows', async function (assert) {
+    QUnit.skipNXOWL('can expand all rows', async function (assert) {
         assert.expect(7);
 
         var nbReadGroups = 0;
@@ -1353,7 +1353,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('expand all with a delay', async function (assert) {
+    QUnit.skipNXOWL('expand all with a delay', async function (assert) {
         assert.expect(3);
 
         var def;
@@ -1468,7 +1468,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('getOwnedQueryParams correctly returns measures and groupbys', async function (assert) {
+    QUnit.skipNXOWL('getOwnedQueryParams correctly returns measures and groupbys', async function (assert) {
         assert.expect(3);
 
         var pivot = await createView({
@@ -1514,7 +1514,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('correctly remove pivot_ keys from the context', async function (assert) {
+    QUnit.skipNXOWL('correctly remove pivot_ keys from the context', async function (assert) {
         assert.expect(5);
 
         this.data.partner.fields.amount = {string: "Amount", type: "float", group_operator: 'sum'};
@@ -1598,7 +1598,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('Unload Filter, reset display, load another filter', async function (assert) {
+    QUnit.skipNXOWL('Unload Filter, reset display, load another filter', async function (assert) {
         assert.expect(18);
 
         var pivot = await createView({
@@ -1687,7 +1687,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('Reload, group by columns, reload', async function (assert) {
+    QUnit.skipNXOWL('Reload, group by columns, reload', async function (assert) {
         assert.expect(2);
 
         var pivot = await createView({
@@ -1729,7 +1729,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('folded groups remain folded at reload', async function (assert) {
+    QUnit.skipNXOWL('folded groups remain folded at reload', async function (assert) {
         assert.expect(5);
 
         var pivot = await createView({
@@ -1794,7 +1794,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('Empty results keep groupbys', async function (assert) {
+    QUnit.skipNXOWL('Empty results keep groupbys', async function (assert) {
         assert.expect(2);
 
         var pivot = await createView({
@@ -1868,7 +1868,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('clear table cells data after closeGroup', async function (assert) {
+    QUnit.skipNXOWL('clear table cells data after closeGroup', async function (assert) {
         assert.expect(2);
 
         const pivot = await createView({
@@ -1900,7 +1900,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('correctly group data after flip (1)', async function (assert) {
+    QUnit.skipNXOWL('correctly group data after flip (1)', async function (assert) {
         assert.expect(4);
 
         serverData.views = {
@@ -1967,7 +1967,7 @@ QUnit.module('Views', {
         webClient.destroy();
     });
 
-    QUnit.test('correctly group data after flip (2)', async function (assert) {
+    QUnit.skipNXOWL('correctly group data after flip (2)', async function (assert) {
         assert.expect(5);
 
         serverData.views = {
@@ -2047,7 +2047,7 @@ QUnit.module('Views', {
         webClient.destroy();
     });
 
-    QUnit.test('correctly group data after flip (3))', async function (assert) {
+    QUnit.skipNXOWL('correctly group data after flip (3))', async function (assert) {
         assert.expect(10);
         var pivot = await createView({
             View: PivotView,
@@ -2165,7 +2165,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('correctly uses pivot_ keys from the context (at reload)', async function (assert) {
+    QUnit.skipNXOWL('correctly uses pivot_ keys from the context (at reload)', async function (assert) {
         assert.expect(8);
 
         this.data.partner.fields.amount = {string: "Amount", type: "float", group_operator: 'sum'};
@@ -2370,7 +2370,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('m2o as measure, drilling down into data', async function (assert) {
+    QUnit.skipNXOWL('m2o as measure, drilling down into data', async function (assert) {
         assert.expect(1);
 
         var pivot = await createView({
@@ -2415,7 +2415,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot view with same many2one field as a measure and grouped by (and drill down)', async function (assert) {
+    QUnit.skipNXOWL('pivot view with same many2one field as a measure and grouped by (and drill down)', async function (assert) {
         assert.expect(1);
 
         var pivot = await createView({
@@ -2436,7 +2436,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('Row and column groupbys plus a domain', async function (assert) {
+    QUnit.skipNXOWL('Row and column groupbys plus a domain', async function (assert) {
         assert.expect(3);
 
         var pivot = await createView({
@@ -2485,7 +2485,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('parallel data loading should discard all but the last one', async function (assert) {
+    QUnit.skipNXOWL('parallel data loading should discard all but the last one', async function (assert) {
         assert.expect(2);
 
         var def;
@@ -2565,7 +2565,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('pivot view can be flipped', async function (assert) {
+    QUnit.skipNXOWL('pivot view can be flipped', async function (assert) {
         assert.expect(5);
 
         var rpcCount = 0;
@@ -2607,7 +2607,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('rendering of pivot view with comparison', async function (assert) {
+    QUnit.skipNXOWL('rendering of pivot view with comparison', async function (assert) {
         assert.expect(8);
 
         this.data.partner.records[0].date = '2016-12-15';
@@ -3257,7 +3257,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('group bys added via control panel and expand Header do not stack', async function (assert) {
+    QUnit.skipNXOWL('group bys added via control panel and expand Header do not stack', async function (assert) {
         assert.expect(8);
 
         var pivot = await createView({
@@ -3362,7 +3362,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('display only one dropdown menu', async function (assert) {
+    QUnit.skipNXOWL('display only one dropdown menu', async function (assert) {
         assert.expect(1);
 
         var pivot = await createView({
@@ -3554,7 +3554,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('empty pivot view with action helper', async function (assert) {
+    QUnit.skipNXOWL('empty pivot view with action helper', async function (assert) {
         assert.expect(4);
 
         const pivot = await createView({
@@ -3585,7 +3585,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('empty pivot view with sample data', async function (assert) {
+    QUnit.skipNXOWL('empty pivot view with sample data', async function (assert) {
         assert.expect(7);
 
         const pivot = await createView({
@@ -3619,7 +3619,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.test('non empty pivot view with sample data', async function (assert) {
+    QUnit.skipNXOWL('non empty pivot view with sample data', async function (assert) {
         assert.expect(7);
 
         const pivot = await createView({

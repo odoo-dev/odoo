@@ -2864,7 +2864,7 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-    QUnit.test('editable list: overflowing table (3 columns)', async function (assert) {
+    QUnit.skipNXOWL('editable list: overflowing table (3 columns)', async function (assert) {
         assert.expect(4);
 
         const longText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -4961,7 +4961,7 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-    QUnit.test('Do not display nocontent when it is an empty html tag', async function (assert) {
+    QUnit.skipNXOWL('Do not display nocontent when it is an empty html tag', async function (assert) {
         assert.expect(2);
 
         this.data.foo.records = [];
@@ -12154,7 +12154,7 @@ QUnit.module('Views', {
         assert.strictEqual(willUnmountCalls, 8);
     });
 
-    QUnit.test('editable list view: multi edition of owl field component', async function (assert) {
+    QUnit.skipNXOWL('editable list view: multi edition of owl field component', async function (assert) {
         // this test could be removed as soon as all field widgets will be written in owl
         assert.expect(5);
 

@@ -96,7 +96,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     // NXOWL hum, don't know what happens --> maybe for LPE
-    QUnit.skip("Nested layouts", async (assert) => {
+    QUnit.skipNXOWL("Nested layouts", async (assert) => {
         assert.expect(10);
 
         // Component C: bottom (no control panel)

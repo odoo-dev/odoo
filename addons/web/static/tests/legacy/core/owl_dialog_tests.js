@@ -18,7 +18,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
     QUnit.module('core', {}, function () {
         QUnit.module('OwlDialog');
 
-        QUnit.test("Rendering of all props", async function (assert) {
+        QUnit.skipNXOWL("Rendering of all props", async function (assert) {
             assert.expect(35);
 
             class SubComponent extends Component {
@@ -168,7 +168,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
             parent.destroy();
         });
 
-        QUnit.test("Interactions between multiple dialogs", async function (assert) {
+        QUnit.skipNXOWL("Interactions between multiple dialogs", async function (assert) {
             assert.expect(22);
 
             const { legacyEnv } = await makeLegacyDialogMappingTestEnv();
@@ -274,7 +274,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
             parent.destroy();
         });
 
-        QUnit.test("Interactions between legacy owl dialogs and new owl dialogs", async function (assert) {
+        QUnit.skipNXOWL("Interactions between legacy owl dialogs and new owl dialogs", async function (assert) {
             assert.expect(7);
             const { legacyEnv, env } = await makeLegacyDialogMappingTestEnv();
 
@@ -341,7 +341,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
             parent.destroy();
         });
 
-        QUnit.test("Z-index toggling and interactions", async function (assert) {
+        QUnit.skipNXOWL("Z-index toggling and interactions", async function (assert) {
             assert.expect(3);
 
             function createCustomModal(className) {
@@ -402,7 +402,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
             backEndModal.destroy();
         });
 
-        QUnit.test("remove tabindex on inactive dialog", async (assert) => {
+        QUnit.skipNXOWL("remove tabindex on inactive dialog", async (assert) => {
             const serverData = {
                 actions: {
                     1: {

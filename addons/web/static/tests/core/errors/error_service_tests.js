@@ -276,8 +276,7 @@ QUnit.test("handle uncaught CORS errors", async (assert) => {
     await errorCb(errorEvent);
 });
 
-QUnit.todo("check retry", async (assert) => {
-    // NXOWL
+QUnit.test("check retry", async (assert) => {
     assert.expect(3);
 
     errorHandlerRegistry.add("__test_handler__", () => {

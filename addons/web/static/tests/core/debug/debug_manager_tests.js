@@ -334,7 +334,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.containsOnce(webClient, ".some_view");
     });
 
-    QUnit.todo("can edit a pivot view", async (assert) => {
+    QUnit.test("can edit a pivot view", async (assert) => {
         const mockRPC = async (route, args) => {
             if (args.method === "check_access_rights") {
                 return Promise.resolve(true);
@@ -377,7 +377,7 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.todo("can edit a search view", async (assert) => {
+    QUnit.test("can edit a search view", async (assert) => {
         const mockRPC = async (route, args) => {
             if (args.method === "check_access_rights") {
                 return Promise.resolve(true);
@@ -413,7 +413,7 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.todo("edit search view on action without search_view_id", async (assert) => {
+    QUnit.test("edit search view on action without search_view_id", async (assert) => {
         // When the kanban view will be converted to Owl, this test could be simplified by
         // removing the toy view and using the kanban view directly
         prepareRegistriesWithCleanup();
@@ -473,9 +473,8 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.skip(
+    QUnit.skipNXOWL(
         "cannot edit the control panel of a form view contained in a dialog without control panel.",
-        // NXOWL
         async (assert) => {
             const mockRPC = async (route, args) => {
                 if (args.method === "check_access_rights") {

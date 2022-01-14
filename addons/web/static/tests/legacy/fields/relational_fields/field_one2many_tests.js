@@ -9879,7 +9879,7 @@ QUnit.module('fields', {}, function () {
             delete fieldRegistry.map.my_relational_field;
         });
 
-        QUnit.test("Editable list's field widgets call on_attach_callback on row update", async function (assert) {
+        QUnit.skipNXOWL("Editable list's field widgets call on_attach_callback on row update", async function (assert) {
             // We use here a badge widget (owl component, does have a on_attach_callback method) and check its decoration
             // is properly managed in this scenario.       
             assert.expect(3);

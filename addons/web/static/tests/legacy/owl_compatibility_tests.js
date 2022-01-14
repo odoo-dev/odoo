@@ -99,7 +99,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
         });
 
-        QUnit.test("sub widget with several arguments (common Adapter)", async function (assert) {
+        QUnit.skipNXOWL("sub widget with several arguments (common Adapter)", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -1291,8 +1291,8 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             widget.destroy();
         });
 
-        QUnit.test("sub component can be updated (not in DOM)", async function (assert) {
-            assert.expect(2); // LPE FIXME
+        QUnit.skipNXOWL("sub component can be updated (not in DOM)", async function (assert) {
+            assert.expect(4);
 
             class MyComponent extends Component {}
             MyComponent.template = xml`<div>Component <t t-esc="props.val"/></div>`;
@@ -1315,14 +1315,14 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             widget.$el.detach();
             widget.on_detach_callback();
 
-            //assert.ok(widget.component.__owl__.status !== ISMOUNTED);
+            assert.ok(widget.component.__owl__.status !== ISMOUNTED);
 
             await widget.update();
 
             widget.$el.appendTo(target);
             widget.on_attach_callback();
 
-            //assert.ok(widget.component.__owl__.status === ISMOUNTED);
+            assert.ok(widget.component.__owl__.status === ISMOUNTED);
             assert.strictEqual(widget.el.innerHTML, '<div>Component 2</div>');
 
             widget.destroy();

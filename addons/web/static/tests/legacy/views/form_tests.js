@@ -1615,7 +1615,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.test('readonly attrs on lines are re-evaluated on field change 2', async function (assert) {
+    QUnit.skipNXOWL('readonly attrs on lines are re-evaluated on field change 2', async function (assert) {
         assert.expect(4);
 
         this.data.partner.records[0].product_ids = [37];
@@ -5169,7 +5169,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.test('navigation with tab key in form view', async function (assert) {
+    QUnit.skipNXOWL('navigation with tab key in form view', async function (assert) {
         assert.expect(3);
 
         var form = await createView({

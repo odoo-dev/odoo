@@ -158,7 +158,7 @@ QUnit.module("utils", () => {
         );
 
         // NXOWL must be related to change in useEffect in owl2
-        QUnit.skip(
+        QUnit.skipNXOWL(
             "useEffect: dependencies prevent effects from rerunning when unchanged",
             async function (assert) {
                 assert.expect(21);

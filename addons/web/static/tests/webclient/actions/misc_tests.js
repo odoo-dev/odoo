@@ -252,7 +252,7 @@ QUnit.module("ActionManager", (hooks) => {
         testUtils.mock.unpatch(Widget);
     });
 
-    QUnit.skip(
+    QUnit.skipNXOWL(
         "no memory leaks when executing an action while switching view",
         async function (assert) {
             assert.expect(1);
@@ -330,10 +330,9 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.skip(
+    QUnit.skipNXOWL(
         "no memory leaks when executing an action while loading data of default view",
         async function (assert) {
-
             // Should be fixed with https://github.com/odoo/owl/pull/1054
             assert.expect(1);
             let def;

@@ -77,7 +77,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
     });
 
-    QUnit.test("initial loading with action id", async (assert) => {
+    QUnit.skipNXOWL("initial loading with action id", async (assert) => {
         assert.expect(4);
         const hash = "#action=1001";
         Object.assign(browser.location, { hash });
@@ -94,7 +94,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.verifySteps([]);
     });
 
-    QUnit.test("initial loading with action tag", async (assert) => {
+    QUnit.skipNXOWL("initial loading with action tag", async (assert) => {
         assert.expect(3);
         const hash = "#action=__test__client__action__";
         Object.assign(browser.location, { hash });
@@ -943,12 +943,12 @@ QUnit.module("ActionManager", (hooks) => {
 
             serverData.views = {
                 ...serverData.views,
-                "partner,false,search":`
+                "partner,false,search": `
                     <search>
                         <filter name="filter" string="Filter" domain="[('foo', '=', 'yop')]"/>
                     </search>
                 `,
-            }
+            };
 
             const webClient = await createWebClient({ serverData });
 

@@ -213,7 +213,7 @@ QUnit.module("Tooltip hook", () => {
         assert.hasClass(parent.el.querySelector(".o_popover"), "o-popper-position--lm");
     });
 
-    QUnit.todo("tooltip with a template, no info", async (assert) => {
+    QUnit.skipNXOWL("tooltip with a template, no info", async (assert) => {
         class MyComponent extends Component {}
         MyComponent.template = xml`
             <button data-tooltip-template="my_tooltip_template">Action</button>
@@ -228,7 +228,7 @@ QUnit.module("Tooltip hook", () => {
         assert.strictEqual(parent.el.querySelector(".o-tooltip").innerHTML, "<i>tooltip</i>");
     });
 
-    QUnit.todo("tooltip with a template and info", async (assert) => {
+    QUnit.skipNXOWL("tooltip with a template and info", async (assert) => {
         class MyComponent extends Component {
             get info() {
                 return JSON.stringify({ x: 3, y: "abc" });

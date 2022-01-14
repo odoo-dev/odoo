@@ -328,7 +328,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('specify active category value in context and manually change category', async function (assert) {
+    QUnit.skipNXOWL('specify active category value in context and manually change category', async function (assert) {
         assert.expect(5);
 
         const kanban = await createView({
@@ -389,7 +389,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('use category (on many2one) to refine search', async function (assert) {
+    QUnit.skipNXOWL('use category (on many2one) to refine search', async function (assert) {
         assert.expect(14);
 
         var kanban = await createView({
@@ -454,7 +454,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('use category (on selection) to refine search', async function (assert) {
+    QUnit.skipNXOWL('use category (on selection) to refine search', async function (assert) {
         assert.expect(14);
 
         var kanban = await createView({
@@ -581,7 +581,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('use two categories to refine search', async function (assert) {
+    QUnit.skipNXOWL('use two categories to refine search', async function (assert) {
         assert.expect(14);
 
         var kanban = await createView({
@@ -666,7 +666,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('category with parent_field', async function (assert) {
+    QUnit.skipNXOWL('category with parent_field', async function (assert) {
         assert.expect(33);
 
         this.data.company.records.push({id: 40, name: 'child company 1', parent_id: 5});
@@ -767,7 +767,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('category with no parent_field', async function (assert) {
+    QUnit.skipNXOWL('category with no parent_field', async function (assert) {
         assert.expect(10);
 
         var kanban = await createView({
@@ -821,7 +821,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('can (un)fold parent category values', async function (assert) {
+    QUnit.skipNXOWL('can (un)fold parent category values', async function (assert) {
         assert.expect(7);
 
         this.data.company.records.push({id: 40, name: 'child company 1', parent_id: 5});
@@ -873,7 +873,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('fold status is kept at reload', async function (assert) {
+    QUnit.skipNXOWL('fold status is kept at reload', async function (assert) {
         assert.expect(4);
 
         this.data.company.records.push({id: 40, name: 'child company 1', parent_id: 5});
@@ -919,7 +919,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('concurrency: delayed search_reads', async function (assert) {
+    QUnit.skipNXOWL('concurrency: delayed search_reads', async function (assert) {
         assert.expect(19);
 
         var def;
@@ -1004,7 +1004,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("concurrency: single category", async function (assert) {
+    QUnit.skipNXOWL("concurrency: single category", async function (assert) {
         assert.expect(12);
 
         let prom = testUtils.makeTestPromise();
@@ -1185,7 +1185,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('concurrency: misordered get_filters', async function (assert) {
+    QUnit.skipNXOWL('concurrency: misordered get_filters', async function (assert) {
         assert.expect(15);
 
         var def;
@@ -1317,7 +1317,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('use filter (on many2one) to refine search', async function (assert) {
+    QUnit.skipNXOWL('use filter (on many2one) to refine search', async function (assert) {
         assert.expect(32);
 
         var kanban = await createView({
@@ -1423,7 +1423,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('use filter (on selection) to refine search', async function (assert) {
+    QUnit.skipNXOWL('use filter (on selection) to refine search', async function (assert) {
         assert.expect(32);
 
         var kanban = await createView({
@@ -1529,7 +1529,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("only reload categories and filters when domains change (counters disabled, selection)", async function (assert) {
+    QUnit.skipNXOWL("only reload categories and filters when domains change (counters disabled, selection)", async function (assert) {
         assert.expect(8);
 
         const kanban = await createView({
@@ -1595,7 +1595,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("only reload categories and filters when domains change (counters disabled, many2one)", async function (assert) {
+    QUnit.skipNXOWL("only reload categories and filters when domains change (counters disabled, many2one)", async function (assert) {
         assert.expect(8);
 
         const kanban = await createView({
@@ -1661,7 +1661,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('category counters', async function (assert) {
+    QUnit.skipNXOWL('category counters', async function (assert) {
         assert.expect(16);
 
         var kanban = await createView({
@@ -1762,7 +1762,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('category selection without counters', async function (assert) {
+    QUnit.skipNXOWL('category selection without counters', async function (assert) {
         assert.expect(10);
 
         var kanban = await createView({
@@ -1854,7 +1854,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('filter with groupby', async function (assert) {
+    QUnit.skipNXOWL('filter with groupby', async function (assert) {
         assert.expect(42);
 
         this.data.company.records.push({id: 11, name: 'camptocamp', category_id: 7});
@@ -2038,7 +2038,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('filter with domain depending on category', async function (assert) {
+    QUnit.skipNXOWL('filter with domain depending on category', async function (assert) {
         assert.expect(22);
 
         var kanban = await createView({
@@ -2118,7 +2118,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('specify active filter values in context', async function (assert) {
+    QUnit.skipNXOWL('specify active filter values in context', async function (assert) {
         assert.expect(4);
 
         var expectedDomain = [
@@ -2397,7 +2397,7 @@ QUnit.module('Views', {
         assert.containsOnce(webClient, '.o_content.o_component_with_search_panel .o_search_panel');
     });
 
-    QUnit.test('search panel state is shared between views', async function (assert) {
+    QUnit.skipNXOWL('search panel state is shared between views', async function (assert) {
         assert.expect(16);
 
         const mockRPC = (route, args) => {
@@ -2444,7 +2444,7 @@ QUnit.module('Views', {
         ]);
     });
 
-    QUnit.test('search panel filters are kept between switch views', async function (assert) {
+    QUnit.skipNXOWL('search panel filters are kept between switch views', async function (assert) {
         assert.expect(17);
 
         const mockRPC = (route, args) => {
@@ -2663,7 +2663,7 @@ QUnit.module('Views', {
     });
 
 
-    QUnit.test("Reload categories with counters when filter values are selected", async function (assert) {
+    QUnit.skipNXOWL("Reload categories with counters when filter values are selected", async function (assert) {
         assert.expect(8);
 
         const kanban = await createView({
@@ -2722,7 +2722,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("many2one: select one, expand, hierarchize, counters", async function (assert) {
+    QUnit.skipNXOWL("many2one: select one, expand, hierarchize, counters", async function (assert) {
         assert.expect(5);
 
         this.data.company.records.push({ id: 50, name: 'agrobeurre', parent_id: 5 });
@@ -2764,7 +2764,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("many2one: select one, no expand, hierarchize, counters", async function (assert) {
+    QUnit.skipNXOWL("many2one: select one, no expand, hierarchize, counters", async function (assert) {
         assert.expect(5);
 
         this.data.company.records.push({ id: 50, name: 'agrobeurre', parent_id: 5 });
@@ -2880,7 +2880,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("many2one: select one, expand, hierarchize, no counters", async function (assert) {
+    QUnit.skipNXOWL("many2one: select one, expand, hierarchize, no counters", async function (assert) {
         assert.expect(5);
 
         this.data.company.records.push({ id: 50, name: 'agrobeurre', parent_id: 5 });
@@ -2922,7 +2922,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("many2one: select one, no expand, hierarchize, no counters", async function (assert) {
+    QUnit.skipNXOWL("many2one: select one, no expand, hierarchize, no counters", async function (assert) {
         assert.expect(5);
 
         this.data.company.records.push({ id: 50, name: 'agrobeurre', parent_id: 5 });
@@ -3882,7 +3882,7 @@ QUnit.module('Views', {
     // Model domain and count domain distinction
     //-------------------------------------------------------------------------
 
-    QUnit.test("selection: select multi, no expand, counters, extra_domain", async function (assert) {
+    QUnit.skipNXOWL("selection: select multi, no expand, counters, extra_domain", async function (assert) {
         assert.expect(5);
 
         this.data.partner.records.shift();
@@ -4001,7 +4001,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("a selected value becomming invalid should no more impact the view", async function (assert) {
+    QUnit.skipNXOWL("a selected value becomming invalid should no more impact the view", async function (assert) {
         assert.expect(13);
 
         const kanban = await createView({
@@ -4071,7 +4071,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test("Categories with default attributes should be udpated when external domain changes", async function (assert) {
+    QUnit.skipNXOWL("Categories with default attributes should be udpated when external domain changes", async function (assert) {
         assert.expect(8);
 
         const kanban = await createView({

@@ -109,7 +109,7 @@ QUnit.module("Views", (hooks) => {
     // load_views
     ////////////////////////////////////////////////////////////////////////////
 
-    QUnit.test("simple rendering", async function (assert) {
+    QUnit.skipNXOWL("simple rendering", async function (assert) {
         assert.expect(10);
 
         const ToyView = viewRegistry.get("toy");
@@ -656,7 +656,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("can click on action-bound links -- 1", async (assert) => {
+    QUnit.skipNXOWL("can click on action-bound links -- 1", async (assert) => {
         assert.expect(5);
 
         const expectedAction = {
@@ -711,7 +711,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["/web/dataset/call_kw/animal/setTheControl"]);
     });
 
-    QUnit.test("can click on action-bound links -- 2", async (assert) => {
+    QUnit.skipNXOWL("can click on action-bound links -- 2", async (assert) => {
         assert.expect(3);
 
         const expectedAction = {
@@ -755,7 +755,7 @@ QUnit.module("Views", (hooks) => {
         await click(toy.el.querySelector("a"));
     });
 
-    QUnit.test("can click on action-bound links -- 3", async (assert) => {
+    QUnit.skipNXOWL("can click on action-bound links -- 3", async (assert) => {
         assert.expect(3);
 
         const expectedAction = {
@@ -807,7 +807,7 @@ QUnit.module("Views", (hooks) => {
         await click(toy.el.querySelector("a"));
     });
 
-    QUnit.test("renders banner_route", async (assert) => {
+    QUnit.skipNXOWL("renders banner_route", async (assert) => {
         assert.expect(3);
         serverData.views["animal,1,toy"] = `
             <toy banner_route="/mybody/isacage">
@@ -835,7 +835,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".setmybodyfree");
     });
 
-    QUnit.test("renders banner_route with js and css assets", async (assert) => {
+    QUnit.skipNXOWL("renders banner_route with js and css assets", async (assert) => {
         assert.expect(7);
         serverData.views["animal,1,toy"] = `
             <toy banner_route="/mybody/isacage">
@@ -899,7 +899,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(toy, "link");
     });
 
-    QUnit.test("banner can re-render with new HTML", async (assert) => {
+    QUnit.skipNXOWL("banner can re-render with new HTML", async (assert) => {
         assert.expect(10);
         assert.expect(8);
 
@@ -949,7 +949,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".banner2");
     });
 
-    QUnit.test("banner does not reload on render", async (assert) => {
+    QUnit.skipNXOWL("banner does not reload on render", async (assert) => {
         assert.expect(5);
         serverData.views["animal,1,toy"] = `
             <toy banner_route="/mybody/isacage">
@@ -986,7 +986,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".setmybodyfree");
     });
 
-    QUnit.test("click on action-bound links in banner (concurrency)", async (assert) => {
+    QUnit.skipNXOWL("click on action-bound links in banner (concurrency)", async (assert) => {
         assert.expect(1);
 
         const prom = makeDeferred();
@@ -1052,7 +1052,7 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
     });
 
-    QUnit.test("real life banner", async (assert) => {
+    QUnit.skipNXOWL("real life banner", async (assert) => {
         assert.expect(10);
 
         serverData.views["animal,1,toy"] = `
@@ -1274,7 +1274,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([`View props should have a "type" key`]);
     });
 
-    QUnit.test("'arch' cannot be passed as prop alone", async function (assert) {
+    QUnit.skipNXOWL("'arch' cannot be passed as prop alone", async function (assert) {
         assert.expect(2);
         const env = await makeTestEnv({ serverData });
         const target = getFixture();
@@ -1366,7 +1366,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("empty prop 'noContentHelp'", async function (assert) {
+    QUnit.skipNXOWL("empty prop 'noContentHelp'", async function (assert) {
         assert.expect(1);
 
         class ToyView extends Component {
@@ -1555,7 +1555,7 @@ QUnit.module("Views", (hooks) => {
     // update props
     ////////////////////////////////////////////////////////////////////////////
 
-    QUnit.test("react to prop 'domain' changes", async function (assert) {
+    QUnit.skipNXOWL("react to prop 'domain' changes", async function (assert) {
         assert.expect(2);
 
         class ToyView extends Component {
