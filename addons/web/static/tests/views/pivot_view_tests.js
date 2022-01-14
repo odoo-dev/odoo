@@ -40,6 +40,8 @@ import { browser } from "@web/core/browser/browser";
 
 const serviceRegistry = registry.category("services");
 
+const { markup } = owl;
+
 /**
  * Helper function that returns, given a pivot instance, the values of the
  * table, separated by ','.
@@ -842,7 +844,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("basic folding/unfolding", async function (assert) {
+    QUnit.test("basic folding/unfolding", async function (assert) {
         assert.expect(7);
 
         let rpcCount = 0;
@@ -901,7 +903,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("more folding/unfolding", async function (assert) {
+    QUnit.test("more folding/unfolding", async function (assert) {
         assert.expect(1);
 
         const pivot = await makeView({
@@ -934,7 +936,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("fold and unfold header group", async function (assert) {
+    QUnit.test("fold and unfold header group", async function (assert) {
         assert.expect(3);
 
         const pivot = await makeView({
@@ -960,7 +962,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(pivot, "thead tr", 3);
     });
 
-    QUnit.skipNXOWL("unfold second header group", async function (assert) {
+    QUnit.test("unfold second header group", async function (assert) {
         assert.expect(4);
 
         const pivot = await makeView({
@@ -1058,91 +1060,84 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipNXOWL(
-        "pivot group dropdown sync with search groupby dropdown",
-        async function (assert) {
-            const pivot = await makeView({
-                type: "pivot",
-                resModel: "partner",
-                serverData,
-                arch: `
+    QUnit.test("pivot group dropdown sync with search groupby dropdown", async function (assert) {
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
                 <pivot>
                     <field name="product_id" type="row"/>
                     <field name="foo" type="measure"/>
                 </pivot>`,
-                searchViewArch: `
+            searchViewArch: `
                 <search>
                     <filter name="bar" string="bar" context="{'group_by': 'bar'}"/>
                     <filter name="product_id" string="product" context="{'group_by': 'product_id'}"/>
                 </search>`,
-            });
+        });
 
-            // open group by dropdown
-            await toggleGroupByMenu(pivot);
-            assert.containsN(
-                pivot,
-                ".o_control_panel .o_cp_bottom_right .dropdown-menu .o_menu_item",
-                2,
-                "should have 2 dropdown items in searchview groupby"
-            );
+        // open group by dropdown
+        await toggleGroupByMenu(pivot);
+        assert.containsN(
+            pivot,
+            ".o_control_panel .o_cp_bottom_right .dropdown-menu .o_menu_item",
+            2,
+            "should have 2 dropdown items in searchview groupby"
+        );
 
-            // click on closed header to open dropdown
-            await click(pivot.el, "tbody tr:last-child .o_pivot_header_cell_closed");
-            assert.containsN(
-                pivot,
-                ".dropdown-menu .o_menu_item",
-                2,
-                "should have 2 dropdown items in pivot groupby"
-            );
+        // click on closed header to open dropdown
+        await click(pivot.el, "tbody tr:last-child .o_pivot_header_cell_closed");
+        assert.containsN(
+            pivot,
+            ".dropdown-menu .o_menu_item",
+            2,
+            "should have 2 dropdown items in pivot groupby"
+        );
 
-            // add a custom group in searchview groupby
-            await toggleGroupByMenu(pivot);
-            await toggleAddCustomGroup(pivot);
-            await applyGroup(pivot);
-            assert.containsN(
-                pivot,
-                ".o_control_panel .o_cp_bottom_right .dropdown-menu .o_menu_item",
-                3,
-                "should have 3 dropdown items in searchview groupby now"
-            );
-            await click(pivot.el, "tbody tr:last-child .o_pivot_header_cell_closed");
-            assert.containsN(
-                pivot,
-                ".dropdown-menu .o_menu_item",
-                2,
-                "should still have 2 dropdown items in pivot groupby"
-            );
+        // add a custom group in searchview groupby
+        await toggleGroupByMenu(pivot);
+        await toggleAddCustomGroup(pivot);
+        await applyGroup(pivot);
+        assert.containsN(
+            pivot,
+            ".o_control_panel .o_cp_bottom_right .dropdown-menu .o_menu_item",
+            3,
+            "should have 3 dropdown items in searchview groupby now"
+        );
+        await click(pivot.el, "tbody tr:last-child .o_pivot_header_cell_closed");
+        assert.containsN(
+            pivot,
+            ".dropdown-menu .o_menu_item",
+            2,
+            "should still have 2 dropdown items in pivot groupby"
+        );
 
-            // add a custom group in pivot groupby
-            await mouseEnter(pivot.el, ".dropdown-menu .o_add_custom_group_menu .dropdown-toggle");
-            pivot.el.querySelector(".dropdown-menu .o_add_custom_group_menu select").value = "date";
-            await triggerEvent(
-                pivot.el,
-                ".dropdown-menu .o_add_custom_group_menu select",
-                "change"
-            );
-            await click(pivot.el, ".dropdown-menu .o_add_custom_group_menu .dropdown-menu .btn");
-            // click on closed header to open groupby selection dropdown
-            await click(pivot.el, "tbody tr:last-child .o_pivot_header_cell_closed");
-            assert.containsN(
-                pivot,
-                ".dropdown-menu .o_menu_item",
-                3,
-                "should have 3 dropdown items in pivot groupby dropdown"
-            );
+        // add a custom group in pivot groupby
+        await mouseEnter(pivot.el, ".dropdown-menu .o_add_custom_group_menu .dropdown-toggle");
+        pivot.el.querySelector(".dropdown-menu .o_add_custom_group_menu select").value = "date";
+        await triggerEvent(pivot.el, ".dropdown-menu .o_add_custom_group_menu select", "change");
+        await click(pivot.el, ".dropdown-menu .o_add_custom_group_menu .dropdown-menu .btn");
+        // click on closed header to open groupby selection dropdown
+        await click(pivot.el, "tbody tr:last-child .o_pivot_header_cell_closed");
+        assert.containsN(
+            pivot,
+            ".dropdown-menu .o_menu_item",
+            3,
+            "should have 3 dropdown items in pivot groupby dropdown"
+        );
 
-            // applying custom groupby in pivot groupby dropdown will not update search dropdown
-            await toggleGroupByMenu(pivot);
-            assert.containsN(
-                pivot,
-                ".o_control_panel .o_cp_bottom_right .dropdown-menu .o_menu_item",
-                3,
-                "should still have 3 dropdown items in searchview groupby dropdown"
-            );
-        }
-    );
+        // applying custom groupby in pivot groupby dropdown will not update search dropdown
+        await toggleGroupByMenu(pivot);
+        assert.containsN(
+            pivot,
+            ".o_control_panel .o_cp_bottom_right .dropdown-menu .o_menu_item",
+            3,
+            "should still have 3 dropdown items in searchview groupby dropdown"
+        );
+    });
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "pivot groupby dropdown renders custom search at the end with separator",
         async function (assert) {
             const pivot = await makeView({
@@ -1191,7 +1186,7 @@ QUnit.module("Views", (hooks) => {
                 "pivot groupby menu should only have one separator"
             );
             assert.hasClass(
-                items[items.length - 1].nextSibling,
+                items[items.length - 1].nextElementSibling,
                 "dropdown-divider",
                 "pivot groupby menu separator is placed after all menu items"
             );
@@ -1219,19 +1214,19 @@ QUnit.module("Views", (hooks) => {
                 "pivot groupby menu should now have two separators"
             );
             assert.hasClass(
-                items[items.length - 1].previousSibling,
+                items[items.length - 1].previousElementSibling,
                 "dropdown-divider",
                 "last pivot groupby menu item is placed after a separator"
             );
             assert.hasClass(
-                items[items.length - 1].nextSibling,
+                items[items.length - 1].nextElementSibling,
                 "dropdown-divider",
                 "a pivot groupby menu separator is placed after all menu items"
             );
         }
     );
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "pivot custom groupby: grouping on date field use default interval month",
         async function (assert) {
             assert.expect(1);
@@ -1388,7 +1383,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "pivot custom groupby: adding a custom group close the pivot groupby menu",
         async function (assert) {
             assert.expect(3);
@@ -1639,7 +1634,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("can be grouped with the search view", async function (assert) {
+    QUnit.test("can be grouped with the search view", async function (assert) {
         assert.expect(4);
 
         const pivot = await makeView({
@@ -1706,7 +1701,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("can expand all rows", async function (assert) {
+    QUnit.test("can expand all rows", async function (assert) {
         assert.expect(7);
 
         let nbReadGroups = 0;
@@ -1767,7 +1762,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(pivot, "tbody tr", 8, "should have 8 rows again");
     });
 
-    QUnit.skipNXOWL("expand all with a delay", async function (assert) {
+    QUnit.test("expand all with a delay", async function (assert) {
         assert.expect(4);
 
         let def;
@@ -1888,15 +1883,13 @@ QUnit.module("Views", (hooks) => {
                 </pivot>`,
         });
 
-        assert.hasAttrValue(
-            pivot.el.querySelector(".o_pivot_download"),
-            "disabled",
-            "disabled",
+        assert.ok(
+            pivot.el.querySelector(".o_pivot_download").disabled,
             "download button should be disabled"
         );
     });
 
-    QUnit.skipNXOWL("correctly save measures and groupbys to favorite", async function (assert) {
+    QUnit.test("correctly save measures and groupbys to favorite", async function (assert) {
         assert.expect(3);
 
         let expectedContext;
@@ -1957,7 +1950,7 @@ QUnit.module("Views", (hooks) => {
         await saveFavorite(pivot);
     });
 
-    QUnit.skipNXOWL("correctly remove pivot_ keys from the context", async function (assert) {
+    QUnit.test("correctly remove pivot_ keys from the context", async function (assert) {
         assert.expect(5);
 
         // in this test, we use "foo" as a measure
@@ -2072,7 +2065,7 @@ QUnit.module("Views", (hooks) => {
         await saveFavorite(pivot);
     });
 
-    QUnit.skipNXOWL("Apply two groupby, and remove facet", async function (assert) {
+    QUnit.test("Apply two groupby, and remove facet", async function (assert) {
         serverData.views = {
             "partner,false,pivot": `
                     <pivot>
@@ -2233,7 +2226,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "Adding a Favorite at anytime should modify the row/column groupby",
         async function (assert) {
             serverData.views = {
@@ -2333,7 +2326,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipNXOWL("Unload Filter, reset display, load another filter", async function (assert) {
+    QUnit.test("Unload Filter, reset display, load another filter", async function (assert) {
         assert.expect(18);
 
         const pivot = await makeView({
@@ -2486,7 +2479,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("Reload, group by columns, reload", async function (assert) {
+    QUnit.test("Reload, group by columns, reload", async function (assert) {
         assert.expect(2);
 
         let expectedContext;
@@ -2549,7 +2542,7 @@ QUnit.module("Views", (hooks) => {
         await saveFavorite(pivot);
     });
 
-    QUnit.skipNXOWL("folded groups remain folded at reload", async function (assert) {
+    QUnit.test("folded groups remain folded at reload", async function (assert) {
         assert.expect(5);
 
         const pivot = await makeView({
@@ -2617,7 +2610,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCurrentValues(pivot), values.join(","));
     });
 
-    QUnit.skipNXOWL("Empty results keep groupbys", async function (assert) {
+    QUnit.test("Empty results keep groupbys", async function (assert) {
         assert.expect(6);
 
         const expectedContext = {
@@ -2741,7 +2734,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("clear table cells data after closeGroup", async function (assert) {
+    QUnit.test("clear table cells data after closeGroup", async function (assert) {
         assert.expect(2);
 
         const pivot = await makeView({
@@ -2774,7 +2767,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(pivot.el.querySelectorAll(".o_pivot_cell_value")[3].innerText, ""); // December 2016 xphone
     });
 
-    QUnit.skipNXOWL("correctly group data after flip (1)", async function (assert) {
+    QUnit.test("correctly group data after flip (1)", async function (assert) {
         assert.expect(4);
 
         serverData.views = {
@@ -2824,7 +2817,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("correctly group data after flip (2)", async function (assert) {
+    QUnit.test("correctly group data after flip (2)", async function (assert) {
         assert.expect(5);
 
         serverData.views = {
@@ -2883,29 +2876,27 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL(
-        "correctly uses pivot_ keys from the context (at reload)",
-        async function (assert) {
-            assert.expect(8);
+    QUnit.test("correctly uses pivot_ keys from the context (at reload)", async function (assert) {
+        assert.expect(8);
 
-            // in this test, we use "foo" as a measure
-            serverData.models.partner.fields.foo.store = true;
-            serverData.models.partner.fields.amount = {
-                string: "Amount",
-                type: "float",
-                group_operator: "sum",
-            };
+        // in this test, we use "foo" as a measure
+        serverData.models.partner.fields.foo.store = true;
+        serverData.models.partner.fields.amount = {
+            string: "Amount",
+            type: "float",
+            group_operator: "sum",
+        };
 
-            const pivot = await makeView({
-                type: "pivot",
-                resModel: "partner",
-                serverData,
-                arch: `
+        const pivot = await makeView({
+            type: "pivot",
+            resModel: "partner",
+            serverData,
+            arch: `
                 <pivot>
                     <field name="date" interval="day" type="col"/>
                     <field name="amount" type="measure"/>
                 </pivot>`,
-                searchViewArch: `
+            searchViewArch: `
                 <search>
                     <filter
                         name="filter_with_context"
@@ -2918,57 +2909,56 @@ QUnit.module("Views", (hooks) => {
                         }"
                     />
                 </search>`,
-            });
+        });
 
-            assert.strictEqual(
-                pivot.el.querySelector("tbody tr").querySelectorAll("td.o_pivot_cell_value")[4]
-                    .innerText,
-                "0.00",
-                "the active measure should be amount"
-            );
+        assert.strictEqual(
+            pivot.el.querySelector("tbody tr").querySelectorAll("td.o_pivot_cell_value")[4]
+                .innerText,
+            "0.00",
+            "the active measure should be amount"
+        );
 
-            await toggleFilterMenu(pivot);
-            await toggleMenuItem(pivot, "My fake favorite");
+        await toggleFilterMenu(pivot);
+        await toggleMenuItem(pivot, "My fake favorite");
 
-            assert.containsOnce(
-                pivot,
-                "thead .o_pivot_header_cell_opened",
-                "column: should have one opened header"
-            );
-            assert.containsOnce(
-                pivot,
-                "thead .o_pivot_header_cell_closed:contains(First)",
-                "column: should display one closed header with 'First'"
-            );
-            assert.containsOnce(
-                pivot,
-                "thead .o_pivot_header_cell_closed:contains(Second)",
-                "column: should display one closed header with 'Second'"
-            );
+        assert.containsOnce(
+            pivot,
+            "thead .o_pivot_header_cell_opened",
+            "column: should have one opened header"
+        );
+        assert.containsOnce(
+            pivot,
+            "thead .o_pivot_header_cell_closed:contains(First)",
+            "column: should display one closed header with 'First'"
+        );
+        assert.containsOnce(
+            pivot,
+            "thead .o_pivot_header_cell_closed:contains(Second)",
+            "column: should display one closed header with 'Second'"
+        );
 
-            assert.containsOnce(
-                pivot,
-                "tbody .o_pivot_header_cell_opened",
-                "row: should have one opened header"
-            );
-            assert.containsOnce(
-                pivot,
-                "tbody .o_pivot_header_cell_closed:contains(xphone)",
-                "row: should display one closed header with 'xphone'"
-            );
-            assert.containsOnce(
-                pivot,
-                "tbody .o_pivot_header_cell_closed:contains(xpad)",
-                "row: should display one closed header with 'xpad'"
-            );
+        assert.containsOnce(
+            pivot,
+            "tbody .o_pivot_header_cell_opened",
+            "row: should have one opened header"
+        );
+        assert.containsOnce(
+            pivot,
+            "tbody .o_pivot_header_cell_closed:contains(xphone)",
+            "row: should display one closed header with 'xphone'"
+        );
+        assert.containsOnce(
+            pivot,
+            "tbody .o_pivot_header_cell_closed:contains(xpad)",
+            "row: should display one closed header with 'xpad'"
+        );
 
-            assert.strictEqual(
-                pivot.el.querySelector("tbody tr").querySelectorAll("td")[2].innerText,
-                "32",
-                "selected measure should be foo, with total 32"
-            );
-        }
-    );
+        assert.strictEqual(
+            pivot.el.querySelector("tbody tr").querySelectorAll("td")[2].innerText,
+            "32",
+            "selected measure should be foo, with total 32"
+        );
+    });
 
     QUnit.test("correctly use group_by key from the context", async function (assert) {
         assert.expect(7);
@@ -3190,7 +3180,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("m2o as measure, drilling down into data", async function (assert) {
+    QUnit.test("m2o as measure, drilling down into data", async function (assert) {
         assert.expect(1);
 
         const pivot = await makeView({
@@ -3244,7 +3234,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "pivot view with same many2one field as a measure and grouped by (and drill down)",
         async function (assert) {
             assert.expect(1);
@@ -3272,7 +3262,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipNXOWL("Row and column groupbys plus a domain", async function (assert) {
+    QUnit.test("Row and column groupbys plus a domain", async function (assert) {
         assert.expect(3);
 
         const expectedContext = {
@@ -3331,7 +3321,7 @@ QUnit.module("Views", (hooks) => {
         await saveFavorite(pivot);
     });
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "parallel data loading should discard all but the last one",
         async function (assert) {
             assert.expect(6);
@@ -3438,7 +3428,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("pivot view can be flipped", async function (assert) {
+    QUnit.test("pivot view can be flipped", async function (assert) {
         assert.expect(5);
 
         var rpcCount = 0;
@@ -3475,7 +3465,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCurrentValues(pivot), values.join());
     });
 
-    QUnit.skipNXOWL("rendering of pivot view with comparison", async function (assert) {
+    QUnit.test("rendering of pivot view with comparison", async function (assert) {
         assert.expect(8);
 
         serverData.models.partner.records[0].date = "2016-12-15";
@@ -3661,7 +3651,7 @@ QUnit.module("Views", (hooks) => {
         await saveFavorite(pivot);
     });
 
-    QUnit.skipNXOWL("export data in excel with comparison", async function (assert) {
+    QUnit.test("export data in excel with comparison", async function (assert) {
         assert.expect(12);
 
         serverData.models.partner.records[0].date = "2016-12-15";
@@ -3718,21 +3708,13 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(pivot, "p.o_view_nocontent_empty_folder", "there should be no data");
         // export data should be impossible since the pivot buttons
         // are deactivated (exception: the 'Measures' button).
-        assert.ok(
-            pivot.el
-                .querySelector(".o_control_panel button.o_pivot_download")
-                .getAttribute("disabled")
-        );
+        assert.ok(pivot.el.querySelector(".o_control_panel button.o_pivot_download").disabled);
 
         await toggleFilterMenu(pivot);
         await toggleMenuItem(pivot, "Date");
         await toggleMenuItemOption(pivot, "Date", "December");
         await toggleMenuItemOption(pivot, "Date", "October");
-        assert.notOk(
-            pivot.el
-                .querySelector(".o_control_panel button.o_pivot_download")
-                .getAttribute("disabled")
-        );
+        assert.notOk(pivot.el.querySelector(".o_control_panel button.o_pivot_download").disabled);
 
         // With the data above, the time ranges contain some records.
         // export data. Should execute 'get_file'
@@ -4484,7 +4466,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "group bys added via control panel and expand Header do not stack",
         async function (assert) {
             assert.expect(8);
@@ -4561,7 +4543,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipNXOWL("display only one dropdown menu", async function (assert) {
+    QUnit.test("display only one dropdown menu", async function (assert) {
         assert.expect(1);
 
         const pivot = await makeView({
@@ -4679,7 +4661,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL("empty pivot view with action helper", async function (assert) {
+    QUnit.test("empty pivot view with action helper", async function (assert) {
         serverData.views = {
             "partner,false,pivot": `
                 <pivot>
@@ -4696,7 +4678,7 @@ QUnit.module("Views", (hooks) => {
             resModel: "partner",
             serverData,
             context: { search_default_small_than_0: true },
-            noContentHelp: '<p class="abc">click to add a foo</p>',
+            noContentHelp: markup('<p class="abc">click to add a foo</p>'),
             config: {
                 views: [[false, "search"]],
             },
@@ -4711,7 +4693,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(pivot, "table");
     });
 
-    QUnit.skipNXOWL("empty pivot view with sample data", async function (assert) {
+    QUnit.test("empty pivot view with sample data", async function (assert) {
         serverData.views = {
             "partner,false,pivot": `
                 <pivot sample="1">
@@ -4729,7 +4711,7 @@ QUnit.module("Views", (hooks) => {
             resModel: "partner",
             serverData,
             context: { search_default_small_than_0: true },
-            noContentHelp: '<p class="abc">click to add a foo</p>',
+            noContentHelp: markup('<p class="abc">click to add a foo</p>'),
             config: {
                 views: [[false, "search"]],
             },
@@ -4747,7 +4729,7 @@ QUnit.module("Views", (hooks) => {
         assert.doesNotHaveClass(pivot.el.querySelector("table"), "o_sample_data_disabled");
     });
 
-    QUnit.skipNXOWL("non empty pivot view with sample data", async function (assert) {
+    QUnit.test("non empty pivot view with sample data", async function (assert) {
         serverData.views = {
             "partner,false,pivot": `
                 <pivot sample="1">
@@ -4764,7 +4746,7 @@ QUnit.module("Views", (hooks) => {
             type: "pivot",
             resModel: "partner",
             serverData,
-            noContentHelp: '<p class="abc">click to add a foo</p>',
+            noContentHelp: markup('<p class="abc">click to add a foo</p>'),
             config: {
                 views: [[false, "search"]],
             },
@@ -4828,53 +4810,50 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["read_group", "read_group"]);
     });
 
-    QUnit.skipNXOWL(
-        "expanded groups are kept when leaving and coming back",
-        async function (assert) {
-            serverData.views = {
-                "partner,false,pivot": `
+    QUnit.test("expanded groups are kept when leaving and coming back", async function (assert) {
+        serverData.views = {
+            "partner,false,pivot": `
                 <pivot>
                     <field name="customer" type="row"/>
                 </pivot>`,
-                "partner,false,search": `<search/>`,
-                "partner,false,list": '<tree><field name="foo"/></tree>',
-            };
+            "partner,false,search": `<search/>`,
+            "partner,false,list": '<tree><field name="foo"/></tree>',
+        };
 
-            const webClient = await createWebClient({ serverData });
+        const webClient = await createWebClient({ serverData });
 
-            await doAction(webClient, {
-                res_model: "partner",
-                type: "ir.actions.act_window",
-                views: [
-                    [false, "pivot"],
-                    [false, "list"],
-                ],
-            });
+        await doAction(webClient, {
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [
+                [false, "pivot"],
+                [false, "list"],
+            ],
+        });
 
-            assert.containsOnce(webClient, ".o_pivot_view");
-            assert.strictEqual(getCurrentValues(webClient), ["4", "2", "2"].join(","));
+        assert.containsOnce(webClient, ".o_pivot_view");
+        assert.strictEqual(getCurrentValues(webClient), ["4", "2", "2"].join(","));
 
-            // drill down first row group (group by company_type)
-            await click(webClient.el.querySelector("tbody .o_pivot_header_cell_closed"));
-            await click(webClient.el.querySelector(".o_pivot .dropdown-menu .dropdown-item"));
+        // drill down first row group (group by company_type)
+        await click(webClient.el.querySelector("tbody .o_pivot_header_cell_closed"));
+        await click(webClient.el.querySelector(".o_pivot .dropdown-menu .dropdown-item"));
 
-            assert.strictEqual(getCurrentValues(webClient), ["4", "2", "1", "1", "2"].join(","));
+        assert.strictEqual(getCurrentValues(webClient), ["4", "2", "1", "1", "2"].join(","));
 
-            // switch to list view
-            await click(webClient.el.querySelector(".o_control_panel .o_switch_view.o_list"));
-            await legacyExtraNextTick();
+        // switch to list view
+        await click(webClient.el.querySelector(".o_control_panel .o_switch_view.o_list"));
+        await legacyExtraNextTick();
 
-            assert.containsOnce(webClient, ".o_list_view");
+        assert.containsOnce(webClient, ".o_list_view");
 
-            // switch back to pivot
-            await click(webClient.el.querySelector(".o_control_panel .o_switch_view.o_pivot"));
+        // switch back to pivot
+        await click(webClient.el.querySelector(".o_control_panel .o_switch_view.o_pivot"));
 
-            assert.containsOnce(webClient, ".o_pivot_view");
-            assert.strictEqual(getCurrentValues(webClient), ["4", "2", "1", "1", "2"].join(","));
-        }
-    );
+        assert.containsOnce(webClient, ".o_pivot_view");
+        assert.strictEqual(getCurrentValues(webClient), ["4", "2", "1", "1", "2"].join(","));
+    });
 
-    QUnit.skipNXOWL("sorted rows are kept when leaving and coming back", async function (assert) {
+    QUnit.test("sorted rows are kept when leaving and coming back", async function (assert) {
         serverData.views = {
             "partner,false,pivot": `
                 <pivot>
@@ -4918,7 +4897,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCurrentValues(webClient), ["32", "20", "12"].join(","));
     });
 
-    QUnit.skipNXOWL("correctly handle concurrent reloads", async function (assert) {
+    QUnit.test("correctly handle concurrent reloads", async function (assert) {
         serverData.views = {
             "partner,false,pivot": `
                 <pivot>
@@ -5174,7 +5153,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(getCurrentValues(pivot), ["20", "20"].join(","));
     });
 
-    QUnit.skipNXOWL("expand a group while loading a filter", async function (assert) {
+    QUnit.test("expand a group while loading a filter", async function (assert) {
         let def;
         const pivot = await makeView({
             type: "pivot",

@@ -73,7 +73,7 @@
                     customGroupBys="model.metaData.customGroupBys"
                     showActiveItems="false"
                     onItemSelected="(payload) => this.onGroupBySelected(isXAxis ? 'col' : 'row', payload)"
-                    onAddCustomGroupBy="() => this.onAddCustomGroupBy(isXAxis ? 'col' : 'row')"
+                    onAddCustomGroupBy="this.onAddCustomGroupBy.bind(this, isXAxis ? 'col' : 'row', cell.groupId)"
                 />
             </t>
             <span t-esc="cell.title"/>
