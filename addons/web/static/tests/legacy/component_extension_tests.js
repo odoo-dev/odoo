@@ -67,7 +67,7 @@ odoo.define('web.component_extension_tests', function (require) {
             }
         });
 
-        QUnit.skipNXOWL("useListener in inheritance setting", async function (assert) {
+        QUnit.test("useListener in inheritance setting", async function (assert) {
             assert.expect(12);
             const env = makeTestEnvironment({}, () => Promise.reject());
 
@@ -87,6 +87,7 @@ odoo.define('web.component_extension_tests', function (require) {
 
             class Child extends Parent {
                 setup() {
+                    super.setup();
                     useListener('custom2', this._onCustom2);
                     useListener('custom3', this._onCustom3);
                 }
