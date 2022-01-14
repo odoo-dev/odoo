@@ -1615,7 +1615,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.skipNXOWL('readonly attrs on lines are re-evaluated on field change 2', async function (assert) {
+    QUnit.test('readonly attrs on lines are re-evaluated on field change 2', async function (assert) {
         assert.expect(4);
 
         this.data.partner.records[0].product_ids = [37];
