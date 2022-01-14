@@ -807,7 +807,7 @@ QUnit.module("Views", (hooks) => {
         await click(toy.el.querySelector("a"));
     });
 
-    QUnit.skipNXOWL("renders banner_route", async (assert) => {
+    QUnit.test("renders banner_route", async (assert) => {
         assert.expect(3);
         serverData.views["animal,1,toy"] = `
             <toy banner_route="/mybody/isacage">
@@ -835,7 +835,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".setmybodyfree");
     });
 
-    QUnit.skipNXOWL("renders banner_route with js and css assets", async (assert) => {
+    QUnit.test("renders banner_route with js and css assets", async (assert) => {
         assert.expect(7);
         serverData.views["animal,1,toy"] = `
             <toy banner_route="/mybody/isacage">
@@ -899,7 +899,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(toy, "link");
     });
 
-    QUnit.skipNXOWL("banner can re-render with new HTML", async (assert) => {
+    QUnit.test("banner can re-render with new HTML", async (assert) => {
         assert.expect(10);
         assert.expect(8);
 
@@ -949,7 +949,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".banner2");
     });
 
-    QUnit.skipNXOWL("banner does not reload on render", async (assert) => {
+    QUnit.test("banner does not reload on render", async (assert) => {
         assert.expect(5);
         serverData.views["animal,1,toy"] = `
             <toy banner_route="/mybody/isacage">
@@ -986,7 +986,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".setmybodyfree");
     });
 
-    QUnit.skipNXOWL("click on action-bound links in banner (concurrency)", async (assert) => {
+    QUnit.test("click on action-bound links in banner (concurrency)", async (assert) => {
         assert.expect(1);
 
         const prom = makeDeferred();
@@ -1052,7 +1052,7 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
     });
 
-    QUnit.skipNXOWL("real life banner", async (assert) => {
+    QUnit.test("real life banner", async (assert) => {
         assert.expect(10);
 
         serverData.views["animal,1,toy"] = `
