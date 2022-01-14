@@ -18,6 +18,8 @@ const cpHelpers = require('@web/../tests/search/helpers');
 var createView = testUtils.createView;
 var patchDate = testUtils.mock.patchDate;
 
+const { markup } = owl;
+
 /**
  * Helper function that returns, given a pivot instance, the values of the
  * table, separated by ','.
@@ -738,7 +740,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('pivot renders group dropdown same as search groupby dropdown if group bys are specified in search arch', async function (assert) {
+    QUnit.skipNXOWL('pivot renders group dropdown same as search groupby dropdown if group bys are specified in search arch', async function (assert) {
         assert.expect(6);
 
         const pivot = await createView({
@@ -796,7 +798,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('pivot group dropdown sync with search groupby dropdown', async function (assert) {
+    QUnit.skipNXOWL('pivot group dropdown sync with search groupby dropdown', async function (assert) {
         assert.expect(6);
 
         const pivot = await createView({
@@ -861,7 +863,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('pivot groupby dropdown renders custom search at the end with separator', async function (assert) {
+    QUnit.skipNXOWL('pivot groupby dropdown renders custom search at the end with separator', async function (assert) {
         assert.expect(5);
 
         const pivot = await createView({
@@ -910,7 +912,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('pivot custom groupby: grouping on date field use default interval month', async function (assert) {
+    QUnit.skipNXOWL('pivot custom groupby: grouping on date field use default interval month', async function (assert) {
         assert.expect(1);
 
         let checkReadGroup = false;
@@ -951,7 +953,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('pivot view without group by specified in search arch', async function (assert) {
+    QUnit.skipNXOWL('pivot view without group by specified in search arch', async function (assert) {
         assert.expect(3);
 
         const pivot = await createView({
@@ -982,7 +984,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('pivot view do not show custom group selection if there are no groupable fields', async function (assert) {
+    QUnit.skipNXOWL('pivot view do not show custom group selection if there are no groupable fields', async function (assert) {
         assert.expect(4);
 
         for (const fieldName of ["bar", "company_type", "customer", "date", "other_product_id"]) {
@@ -1031,7 +1033,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('pivot custom groupby: adding a custom group close the pivot groupby menu', async function (assert) {
+    QUnit.skipNXOWL('pivot custom groupby: adding a custom group close the pivot groupby menu', async function (assert) {
         assert.expect(2);
 
         const pivot = await createView({
@@ -1900,7 +1902,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('correctly group data after flip (1)', async function (assert) {
+    QUnit.skipNXOWL('correctly group data after flip (1)', async function (assert) {
         assert.expect(4);
 
         serverData.views = {
@@ -1967,7 +1969,7 @@ QUnit.module('Views', {
         webClient.destroy();
     });
 
-    QUnit.todo('correctly group data after flip (2)', async function (assert) {
+    QUnit.skipNXOWL('correctly group data after flip (2)', async function (assert) {
         assert.expect(5);
 
         serverData.views = {
@@ -3554,7 +3556,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('empty pivot view with action helper', async function (assert) {
+    QUnit.test('empty pivot view with action helper', async function (assert) {
         assert.expect(4);
 
         const pivot = await createView({
@@ -3585,7 +3587,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('empty pivot view with sample data', async function (assert) {
+    QUnit.test('empty pivot view with sample data', async function (assert) {
         assert.expect(7);
 
         const pivot = await createView({
@@ -3619,7 +3621,7 @@ QUnit.module('Views', {
         pivot.destroy();
     });
 
-    QUnit.todo('non empty pivot view with sample data', async function (assert) {
+    QUnit.test('non empty pivot view with sample data', async function (assert) {
         assert.expect(7);
 
         const pivot = await createView({
