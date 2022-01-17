@@ -234,7 +234,7 @@ QUnit.test('chat window new message: fold', async function (assert) {
     );
 });
 
-QUnit.test('open chat from "new message" chat window should open chat in place of this "new message" chat window', async function (assert) {
+QUnit.skipNXOWL('open chat from "new message" chat window should open chat in place of this "new message" chat window', async function (assert) {
     /**
      * InnerWith computation uses following info:
      * ([mocked] global window width: @see `mail/static/src/utils/test_utils.js:start()` method)
@@ -357,7 +357,7 @@ QUnit.test('open chat from "new message" chat window should open chat in place o
     );
 });
 
-QUnit.test('new message chat window should close on selecting the user if chat with the user is already open', async function (assert) {
+QUnit.skipNXOWL('new message chat window should close on selecting the user if chat with the user is already open', async function (assert) {
     assert.expect(2);
 
     this.data['res.partner'].records.push({ id: 131, name: "Partner 131" });
@@ -413,7 +413,7 @@ QUnit.test('new message chat window should close on selecting the user if chat w
     );
 });
 
-QUnit.test('new message autocomplete should automatically select first result', async function (assert) {
+QUnit.skipNXOWL('new message autocomplete should automatically select first result', async function (assert) {
     assert.expect(1);
 
     this.data['res.partner'].records.push({ id: 131, name: "Partner 131" });

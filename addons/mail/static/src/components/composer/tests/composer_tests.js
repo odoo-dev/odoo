@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { insertAndReplace } from '@mail/model/model_field_command';
+import { insertAndReplace, replace } from '@mail/model/model_field_command';
 import {
     afterEach,
     afterNextRender,
@@ -1232,59 +1232,24 @@ QUnit.test('composer: drop attachments', async function (assert) {
         model: 'mail.channel',
     });
     await createComposerComponent(thread.composer);
-    const files = [
-        await createFile({
-            content: 'hello, world',
-            contentType: 'text/plain',
-            name: 'text.txt',
-        }),
-        await createFile({
-            content: 'hello, worlduh',
-            contentType: 'text/plain',
-            name: 'text2.txt',
-        }),
-    ];
-    await afterNextRender(() => dragenterFiles(document.querySelector('.o_Composer')));
-    assert.ok(
-        document.querySelector('.o_Composer_dropZone'),
-        "should have a drop zone"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Composer .o_AttachmentCard`).length,
-        0,
-        "should have no attachment before files are dropped"
-    );
-
-    await afterNextRender(() =>
-        dropFiles(
-            document.querySelector('.o_Composer_dropZone'),
-            files
-        )
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Composer .o_AttachmentCard`).length,
-        2,
-        "should have 2 attachments in the composer after files dropped"
-    );
-
-    await afterNextRender(() => dragenterFiles(document.querySelector('.o_Composer')));
-    await afterNextRender(async () =>
-        dropFiles(
-            document.querySelector('.o_Composer_dropZone'),
-            [
-                await createFile({
-                    content: 'hello, world',
-                    contentType: 'text/plain',
-                    name: 'text3.txt',
-                })
-            ]
-        )
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Composer .o_AttachmentCard`).length,
-        3,
-        "should have 3 attachments in the box after files dropped"
-    );
+    await afterNextRender(() => {
+        this.messaging.models['Attachment'].insert({
+            composer: replace(thread.composer),
+            filename: 'text.txt',
+            mimetype: 'text/plain',
+            id: 1,
+        });
+    });
+    await afterNextRender(async () => {
+        const attachment = this.messaging.models['Attachment'].insert({
+            composer: replace(thread.composer),
+            filename: 'text2.txt',
+            mimetype: 'text/plain',
+            id: 2,
+        });
+        await Promise.resolve(); // Need this for problem to occur
+        attachment.delete();
+    });
 });
 
 QUnit.test('composer: paste attachments', async function (assert) {

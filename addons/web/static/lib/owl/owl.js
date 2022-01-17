@@ -1839,6 +1839,10 @@
             try {
                 fiber.bdom = this.renderFn();
                 fiber.root.counter--;
+                console.log("counter--", fiber.root.counter, Object.getPrototypeOf(fiber.node.component).constructor.name);
+                if (fiber.node.component.props.attachmentCardLocalId) {
+                    console.log("card id:", fiber.node.component.props.attachmentCardLocalId);
+                }
             }
             catch (e) {
                 handleError({ node: this, error: e });
