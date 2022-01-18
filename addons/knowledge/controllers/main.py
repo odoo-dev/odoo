@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
-from odoo import http
+from odoo import http, _
 from odoo.http import request
 
 from odoo.addons.web.controllers.main import DataSet
@@ -61,8 +61,9 @@ class KnowledgeDataSet(DataSet):
         article = request.env['knowledge.article'].browse(article_id)
         if not article.exists():
             return False
-        # TODO: Duplicate the article
-        return True
+        new_article = article.copy({'name': _('%s (copy)') % article.name})
+
+        return new_article.id
 
     @http.route('/knowledge/article/create', type='json', auth="user")
     def article_create(self, title=False, target_parent_id=False, private=False):
