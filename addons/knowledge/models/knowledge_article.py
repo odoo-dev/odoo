@@ -38,8 +38,8 @@ class Article(models.Model):
     is_user_favourite = fields.Boolean(string="Favourite?", compute="_compute_is_user_favourite",
                                        inverse="_inverse_is_user_favourite", search="_search_is_user_favourite")
     favourite_user_ids = fields.Many2many("res.users", "knowledge_favourite_user_rel", "article_id", "user_id",
-                                          string="Favourites")
-    favourite_count = fields.Integer(string="#Is Favourite")
+                                          string="Favourites", copy=False)
+    favourite_count = fields.Integer(string="#Is Favourite", copy=False)
 
     # Published
     website_published = fields.Boolean(string="Website Published")

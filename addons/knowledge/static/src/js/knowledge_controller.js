@@ -216,8 +216,16 @@ const KnowledgeFormController = FormController.extend({
      * @param {integer} id - Target id
      */
     _do_duplicate: async function (id) {
-        const result = await this._rpc({
+        const articleId = await this._rpc({
             route: `/knowledge/article/${id}/duplicate`
+        });
+        if (!articleId) {
+            return;
+        }
+        this.do_action('knowledge.action_show_article', {
+            additional_context: {
+                res_id: articleId
+            }
         });
     },
 
