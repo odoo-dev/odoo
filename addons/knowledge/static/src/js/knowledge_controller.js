@@ -11,6 +11,7 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
         'click .btn-archive': '_onArchive',
+        'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
         'click i.o_toggle_favourite': '_onToggleFavourite',
         'input .o_breadcrumb_article_name': '_adjustInputSize',
@@ -142,6 +143,16 @@ const KnowledgeFormController = FormController.extend({
         }
         // go to home page
         this.do_action('knowledge.action_home_page', {});
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _onSearch: function (event) {
+        // TODO: change to this.env.services.commandes.openMainPalette when form views are migrated to owl
+        bus.trigger("openMainPalette", {
+            searchValue: "?",
+        });
     },
 
     _onToggleFavourite: async function (event) {
