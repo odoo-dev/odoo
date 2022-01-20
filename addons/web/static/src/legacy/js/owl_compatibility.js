@@ -683,7 +683,10 @@ odoo.define('web.OwlCompatibility', function (require) {
             if (this.status === "destroyed") {
                 return;
             }
-            Object.assign(this.props, nextProps);
+            const props = this.node.component.props.props;
+            const nextComponentProps = Object.assign({}, props, nextProps);
+            this.node.component.props.props = nextComponentProps;
+            this.props = nextComponentProps;
             if (this.status === "unmounted") {
                 return this.mount(this.target);
             } else {

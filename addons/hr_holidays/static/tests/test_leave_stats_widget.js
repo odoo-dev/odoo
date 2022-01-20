@@ -85,8 +85,7 @@ odoo.define('hr_holidays.leave_stats_widget_tests', function (require) {
             };
         }
     }, function () {
-        QUnit.skipNXOWL('leave stats renders correctly', async function (assert) {
-            // SKIPNXOWL t-foreach without t-key (x2) -> add id as key
+        QUnit.test('leave stats renders correctly', async function (assert) {
             assert.expect(5);
             var self = this;
             var form = await createView({
@@ -118,7 +117,7 @@ odoo.define('hr_holidays.leave_stats_widget_tests', function (require) {
             assert.strictEqual($leavesDepartmentBody.find('div.o_horizontal_separator:contains(R&D)').length, 1, "it should have R&D title");
             form.destroy();
         });
-        QUnit.skipNXOWL('leave stats reload when employee/department changes', async function (assert) {
+        QUnit.test('leave stats reload when employee/department changes', async function (assert) {
             assert.expect(2);
             var form = await createView({
                 View: FormView,
