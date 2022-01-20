@@ -38,6 +38,8 @@
             'knowledge/static/src/js/widgets/knowledge_dialogs.js',
             'knowledge/static/src/js/widgets/knowledge_permission_panel.js',
             'knowledge/static/src/js/widgets/knowledge_emoji_picker.js',
+            'knowledge/static/src/webclient/commands/*.js',
+            'knowledge/static/src/models/*/*.js',
         ],
         'web.assets_frontend': [
             'knowledge/static/src/scss/knowledge_views.scss',
@@ -49,7 +51,8 @@
         'web.assets_qweb': [
             'knowledge/static/src/components/*/*.xml',
             'knowledge/static/src/xml/knowledge_editor.xml',
-            'knowledge/static/src/xml/knowledge_templates.xml'
-        ]
+            'knowledge/static/src/xml/knowledge_templates.xml',
+            'knowledge/static/src/xml/chatter_topbar.xml',
+        ],
     }
 }

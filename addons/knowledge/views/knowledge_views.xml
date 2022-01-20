@@ -22,7 +22,7 @@
                     <aside class="o_knowledge_aside d-print-none flex-shrink-0 p-0 bg-white">
                         <div class="d-flex flex-column h-100">
                             <!-- Search bar -->
-                            <div class="d-flex align-items-center border-bottom bg-light m-3 o_cursor_pointer">
+                            <div id="knowledge_search_bar" class="d-flex align-items-center border-bottom bg-light m-3 o_cursor_pointer">
                                 <div class="flex-grow-1 px-2 py-1">Search an article...</div>
                                 <i class="oi oi-search pr-2" title="search"/>
                             </div>

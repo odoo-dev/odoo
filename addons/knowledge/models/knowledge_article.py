@@ -719,6 +719,40 @@ class Article(models.Model):
 
         return article.id
 
+    def get_user_sorted_articles(self, search_query, fields, order_by, limit):
+        """ Called when using the Command palette to search for articles matching the search_query.
+        As the article should be sorted also in function of the current user's favourite sequence, a search_read rpc
+        won't be enough to returns the articles in the correct order.
+        This method returns a list of article proposal matching the search_query sorted by:
+            - is_user_favourite
+            - Favourite sequence
+            - Favourite count
+        and returned result mimic a search_read result structure.
+        """
+        search_domain = ["|", ("name", "ilike", search_query), ("parent_id.name", "ilike", search_query)]
+        articles = self.search(search_domain, order=order_by, limit=limit)
+
+        favourite_articles = articles.filtered(
+            lambda a: a.is_user_favourite).sorted(
+                key=lambda a: a.favourite_user_ids.filtered(
+                    lambda f: f.user_id == self.env.user
+                ).sequence)
+        sorted_articles = favourite_articles | (articles - favourite_articles)
+
+        # TODO DBE: don't we have something that does that already ?
+        def get_field_info(article, field_name):
+            field = article._fields[field_name]
+            if field.type in ('many2one', 'one2many', 'many2many'):
+                rec = article[field_name]
+                return [rec.id, rec.display_name] if rec else False
+            else:
+                return article[field_name]
+
+        return [
+            {field: get_field_info(article, field) for field in fields}
+            for article in sorted_articles
+        ]
+
     # Permission and members handling methods
     # ---------------------------------------
 
