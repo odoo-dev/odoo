@@ -46,8 +46,8 @@
                             <div class="col-sm-3 p-0 border-right overflow-auto">
                                 <div class="d-flex flex-column h-100">
                                     <!-- Search bar -->
-                                    <div class="p-3">
-                                        <input type="text" class="form-control" placeholder="Search an Article..."/>
+                                    <div class="p-3" id="knowledge_search_bar">
+                                        <input type="text" class="form-control" placeholder="Search an Article..." disabled="True"/>
                                     </div>
                                     <!-- File explorer -->
                                     <div class="flex-grow-1 position-relative">
