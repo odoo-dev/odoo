@@ -7,6 +7,7 @@ import { htmlToTextContentInline } from '@mail/js/utils';
 import { escape } from '@web/core/utils/strings';
 import { str_to_datetime } from 'web.time';
 import { Markup } from 'web.utils';
+import { renderToString } from "@web/core/utils/render";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 
@@ -678,7 +679,7 @@ registerModel({
                     // hack: notification template does not support OWL components,
                     // so we simply use their template to make HTML as if it comes
                     // from component
-                    const channelIcon = this.env.qweb.renderToString('mail.ThreadIcon', {
+                    const channelIcon = renderToString('mail.ThreadIcon', {
                         env: this.env,
                         thread: channel,
                     });

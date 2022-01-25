@@ -46,8 +46,9 @@ import { ClientActionAdapter, ViewAdapter } from "@web/legacy/action_adapters";
 import { commandService } from "@web/core/commands/command_service";
 import { CustomFavoriteItem } from "@web/search/favorite_menu/custom_favorite_item";
 import { standaloneAdapter } from "web.OwlCompatibility";
+import { renderToString } from "@web/core/utils/render";
 
-const { App, blockDom, Component, onMounted, xml } = owl;
+const { App, Component, onMounted, xml } = owl;
 
 const actionRegistry = registry.category("actions");
 const serviceRegistry = registry.category("services");
@@ -273,18 +274,10 @@ export async function createWebClient(params) {
 
     // FIXME NXOWL ?
     const app = new App(WebClientClass, {
-        env: {
-            ...env,
-            renderToString(template, context) {
-                const div = document.createElement("div");
-                const templateFn = app.getTemplate(template);
-                const bdom = templateFn(context);
-                blockDom.mount(bdom, div);
-                return div.innerHTML;
-            },
-        },
+        env,
         templates: window.__ODOO_TEMPLATES__,
     });
+    renderToString.app = app;
     const wc = await app.mount(target);
     registerCleanup(() => {
         for (const controller of controllers) {

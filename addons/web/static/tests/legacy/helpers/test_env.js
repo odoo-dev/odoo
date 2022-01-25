@@ -5,7 +5,8 @@ odoo.define('web.test_env', async function (require) {
     const { buildQuery } = require('web.rpc');
     const session = require('web.session');
 
-    const { App, blockDom, Component } = owl;
+    const { renderToString } = require('@web/core/utils/render');
+    const { App, Component } = owl;
 
     let app;
 
@@ -21,6 +22,7 @@ odoo.define('web.test_env', async function (require) {
     function makeTestEnvironment(env = {}, providedRPC = null) {
         if (!app) {
             app = new App(null, { templates: window.__ODOO_TEMPLATES__ });
+            renderToString.app = app;
         }
 
         const defaultTranslationParamters = {
@@ -59,13 +61,6 @@ odoo.define('web.test_env', async function (require) {
                 SIZES: { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 },
             }, env.device),
             isDebug: env.isDebug || (() => false),
-            renderToString(template, context = {}) {
-                const div = document.createElement("div");
-                const templateFn = app.getTemplate(template);
-                const bdom = templateFn(context);
-                blockDom.mount(bdom, div);
-                return div.innerHTML;
-            },
             services: Object.assign({
                 ajax: {
                     rpc() {

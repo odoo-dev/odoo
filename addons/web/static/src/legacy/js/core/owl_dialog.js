@@ -7,6 +7,7 @@ odoo.define('web.OwlDialog', function (require) {
         'large': 'modal-lg',
         'small': 'modal-sm',
     };
+    const { renderToString } = require('@web/core/utils/render');
 
     /**
      * Dialog (owl version)
@@ -180,7 +181,7 @@ odoo.define('web.OwlDialog', function (require) {
                 $(this.mainButton)
                     .tooltip({
                         delay: { show: 200, hide: 0 },
-                        title: () => this.env.qweb.renderToString('web.DialogButton.tooltip', {
+                        title: () => renderToString('web.DialogButton.tooltip', {
                             title: this.mainButton.innerText.toUpperCase(),
                         }),
                         trigger: 'manual',

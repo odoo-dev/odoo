@@ -6,6 +6,7 @@ import { formatFloat } from "@web/fields/formatters";
 import { SEP } from "./graph_model";
 import { sortBy } from "@web/core/utils/arrays";
 import { useAssets } from "@web/core/assets";
+import { renderToString } from "@web/core/utils/render";
 
 const { Component, useEffect, useRef } = owl;
 
@@ -108,7 +109,7 @@ export class GraphRenderer extends Component {
         }
         const chartAreaTop = this.chart.chartArea.top;
         const viewContentTop = this.el.getBoundingClientRect().top;
-        const innerHTML = this.env.renderToString("web.GraphRenderer.CustomTooltip", {
+        const innerHTML = renderToString("web.GraphRenderer.CustomTooltip", {
             maxWidth: getMaxWidth(this.chart.chartArea),
             measure: measures[measure].string,
             mode: this.model.metaData.mode,

@@ -3,11 +3,12 @@
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { getFixture } from "@web/../tests/helpers/utils";
+import { renderToString } from "@web/core/utils/render";
 import { getDefaultConfig, View } from "@web/views/view";
 import { _fieldsViewGet } from "../helpers/mock_server";
 import { addLegacyMockEnvironment } from "../webclient/helpers";
 
-const { App, blockDom } = owl;
+const { App } = owl;
 
 /**
  * @typedef {{
@@ -83,20 +84,12 @@ export const makeView = async (params) => {
 
     // FIXME NXOWL ?
     const app = new App(View, {
-        env: {
-            ...env,
-            renderToString(template, context) {
-                const div = document.createElement("div");
-                const templateFn = app.getTemplate(template);
-                const bdom = templateFn(context);
-                blockDom.mount(bdom, div);
-                return div.innerHTML;
-            },
-        },
+        env,
         props,
         templates: window.__ODOO_TEMPLATES__,
     });
 
+    renderToString.app = app;
     const view = await app.mount(target);
 
     registerCleanup(() => app.destroy());

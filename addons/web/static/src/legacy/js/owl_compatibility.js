@@ -530,16 +530,7 @@ odoo.define('web.OwlCompatibility', function (require) {
 
             const env = owl.Component.env;
             const appConfig = {
-                env: {
-                    ...env,
-                    renderToString(template, context) {
-                        const div = document.createElement("div");
-                        const templateFn = app.getTemplate(template);
-                        const bdom = templateFn(context);
-                        owl.blockDom.mount(bdom, div);
-                        return div.innerHTML;
-                    },
-                },
+                env,
                 templates: window.__ODOO_TEMPLATES__,
                 dev: env.isDebug(),
                 translatableAttributes: ["label", "title", "placeholder", "alt", "data-tooltip"],

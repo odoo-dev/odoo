@@ -4,6 +4,7 @@ odoo.define('pos_restaurant.TipScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const PosComponent = require('point_of_sale.PosComponent');
     const { parse } = require('web.field_utils');
+    const { renderToString } = require('@web/core/utils/render');
 
     const { onMounted } = owl;
 
@@ -111,7 +112,7 @@ odoo.define('pos_restaurant.TipScreen', function (require) {
 
             for (let i = 0; i < receipts.length; i++) {
                 const data = receipts[i];
-                var receipt = this.env.qweb.renderToString('TipReceipt', {
+                var receipt = renderToString('TipReceipt', {
                     receipt: this.currentOrder.getOrderReceiptEnv().receipt,
                     data: data,
                     total: this.env.pos.format_currency(this.totalAmount),

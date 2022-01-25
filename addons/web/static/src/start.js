@@ -7,6 +7,7 @@ import { processTemplates } from "./core/assets";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { session } from "@web/session";
+import { renderToString } from "./core/utils/render";
 
 const { App, whenReady } = owl;
 
@@ -44,21 +45,13 @@ export async function startWebClient(Webclient) {
     const legacyEnv = await legacySetupProm;
     mapLegacyEnvToWowlEnv(legacyEnv, env);
     const app = new App(Webclient, {
-        env: {
-            ...env,
-            renderToString(template, context) {
-                const div = document.createElement("div");
-                const templateFn = app.getTemplate(template);
-                const bdom = templateFn(context);
-                owl.blockDom.mount(bdom, div);
-                return div.innerHTML;
-            },
-        },
+        env,
         dev: env.debug,
         templates: templates.cloneNode(true),
         translatableAttributes: ["label", "title", "placeholder", "alt", "data-tooltip"],
         translateFn: _t,
     });
+    renderToString.app = app;
     const root = await app.mount(document.body);
     const classList = document.body.classList;
     if (localization.direction === "rtl") {

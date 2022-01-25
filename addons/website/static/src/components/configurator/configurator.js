@@ -8,6 +8,7 @@ import {ColorpickerWidget} from 'web.Colorpicker';
 import {_t, _lt} from 'web.core';
 import {svgToPNG} from 'website.utils';
 import {useService} from "@web/core/utils/hooks";
+import { renderToString } from "@web/core/utils/render";
 
 // NXOWL
 const { Component, QWeb, RouteComponent, Router, Store, loadFile, mount, useDispatch, useGetters, useRef, useStore, whenReady } = owl;
@@ -674,7 +675,7 @@ async function makeEnvironment() {
     qweb.addTemplates(loaderTemplate);
     qweb.addTemplates(configuratorTemplates);
 
-    env.loader = qweb.renderToString('website.ThemePreview.Loader', {
+    env.loader = renderToString('website.ThemePreview.Loader', {
         showTips: true
     });
     const services = Component.env.services;

@@ -6,9 +6,8 @@
  *
  */
 
+import { renderToString } from '@web/core/utils/render';
 import * as mvc from 'web.mvc';
-
-const { Component } = owl;
 
 // Renderers may display sample data when there is no real data to display. In
 // this case the data is displayed with opacity and can't be clicked. Moreover,
@@ -154,7 +153,7 @@ export default mvc.Renderer.extend({
         } else {
             templateName = "web.NoContentHelper";
         }
-        const innerHTML = Component.env.renderToString(templateName, context);
+        const innerHTML = renderToString(templateName, context);
         const template = Object.assign(document.createElement("template"), { innerHTML });
         this.el.append(template.content.firstChild);
     },
