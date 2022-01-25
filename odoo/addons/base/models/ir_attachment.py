@@ -658,3 +658,35 @@ class IrAttachment(models.Model):
         domain = [('type', '=', 'binary'), ('url', '=', url)] + (extra_domain or [])
         fieldNames = ['__last_update', 'datas', 'mimetype'] + (extra_fields or [])
         return self.search_read(domain, fieldNames, order=order, limit=1)
+
+    def get_lazy_raw(self):
+        """ Returns lazily fetched raw data.
+            NOT a computed field in order to get a new generator for every call.
+        """
+        self.ensure_one()
+        for attachment in self:
+            if self.store_fname:
+
+                class FileContent(object):
+                    def __init__(self):
+                        self.data = False
+
+                    def __len__(self):
+                        return os.path.getsize(attachment._full_path(attachment.store_fname))
+
+                    def __bool__(self):
+                        return os.path.exists(attachment._full_path(attachment.store_fname))
+
+                    def __next__(self):
+                        if not self.data:
+                            self.data = True
+                            return attachment.raw
+                        else:
+                            raise StopIteration
+
+                    def __iter__(self):
+                        return self
+
+                return FileContent()
+            else:
+                return self.db_datas

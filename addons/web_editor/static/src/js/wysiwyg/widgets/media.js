@@ -643,7 +643,7 @@ var FileWidget = SearchableMediaWidget.extend({
                         'data': dataURL.split(',')[1],
                         'res_id': this.options.res_id,
                         'res_model': this.options.res_model,
-                        'filetype': this.widgetType,
+                        'filetype': this.widgetType || "file",
                     }
                 }, index);
                 if (!attachment.error) {

@@ -12,8 +12,6 @@ from odoo.tools import file_open, image_process, ustr
 from odoo.tools.misc import str2bool
 from odoo.addons.web.controllers.main import HomeStaticTemplateHelpers
 
-from odoo.tools.mimetypes import guess_mimetype
-
 
 _logger = logging.getLogger(__name__)
 
@@ -191,21 +189,19 @@ class Http(models.AbstractModel):
             else:
                 return self._response_by_status(status, headers, content)
 
-        content_base64 = placeholder_content or base64.b64decode(content)
-        headers.append(('Content-Length', len(content_base64)))
-        content_type = guess_mimetype(content_base64)
-        if content_type == 'video/mp4':
-            '''
-            Setting CSP required in order to play same origin videos as BG videos.
-            It presents no additional security risk when set to 'self', for more info
-            check https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/media-src.
-            '''
-            try:
-                previous_csp = headers.index(('Content-Security-Policy', "default-src 'none'"))
-                headers[previous_csp] = ('Content-Security-Policy', "media-src 'self'")
-            except ValueError:
-                headers.append(('Content-Security-Policy', "media-src 'self'"))
-        response = request.make_response(content_base64, headers)
+        # Setting CSP required in order to play same origin videos as BG videos.
+        # It presents no additional security risk when set to 'self', for more info
+        # check https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/media-src.
+        previous_csp = [header for header in headers if 'Content-Security-Policy' in header]
+        xaccel_header = [header for header in headers if 'X-Accel-Redirect' in header]
+        if previous_csp:
+            headers[headers.index(previous_csp[0])] = ('Content-Security-Policy', headers[headers.index(previous_csp[0])][1] + ";media-src 'self'")
+        else:
+            headers.append(('Content-Security-Policy', "media-src 'self'"))
+
+        content = placeholder_content or (content if not xaccel_header else "")
+        headers.append(('Content-Length', len(content)))
+        response = request.make_response(content, headers)
         return response
 
     @api.model
@@ -226,6 +222,7 @@ class Http(models.AbstractModel):
             field='raw', download=None, width=0, height=0, crop=False, quality=0):
         if status in [301, 304] or (status != 200 and download):
             return self._response_by_status(status, headers, image)
+
         if not image:
             placeholder_filename = False
             if model in self.env:
@@ -237,12 +234,18 @@ class Http(models.AbstractModel):
             status = 200
             if not (width or height):
                 width, height = odoo.tools.image_guess_size_from_field_name(field)
-        try:
-            content = image_process(image, size=(int(width), int(height)), crop=crop, quality=int(quality))
-        except Exception:
-            return request.not_found()
-        headers = http.set_safe_image_headers(headers, content)
-        response = request.make_response(content, headers)
+
+        content = None
+        process_image = width or height or crop or quality
+        if process_image and not [header for header in headers if 'X-Accel-Redirect' in header]:
+            if not isinstance(image, (bytes, str)):
+                image = next(image)
+            try:
+                content = image_process(image, size=(int(width), int(height)), crop=crop, quality=int(quality))
+            except Exception:
+                return request.not_found()
+            headers = http.set_safe_image_headers(headers, content)
+        response = request.make_response(content or image, headers)
         response.status_code = status
         return response
 

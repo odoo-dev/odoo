@@ -305,7 +305,7 @@ class IrHttp(models.AbstractModel):
 
     def _binary_record_content(
             self, record, field='raw', filename=None,
-            filename_field='name', default_mimetype='application/octet-stream', xaccel_header=None):
+            filename_field='name', default_mimetype='application/octet-stream'):
 
         model = record._name
         mimetype = 'mimetype' in record and record.mimetype or False
@@ -315,19 +315,20 @@ class IrHttp(models.AbstractModel):
         field_def = record._fields[field]
         if field_def.type == 'binary' and field_def.attachment and not field_def.related:
             if model != 'ir.attachment':
-                field_attachment = self.env['ir.attachment'].sudo().search_read(domain=[('res_model', '=', model), ('res_id', '=', record.id), ('res_field', '=', field)], fields=['raw', 'mimetype', 'checksum'], limit=1)
+                Attachment_sudo = self.env['ir.attachment'].sudo()
+                field_attachment = Attachment_sudo.search_read(domain=[('res_model', '=', model), ('res_id', '=', record.id), ('res_field', '=', field)], fields=['mimetype', 'checksum', 'raw'], limit=1)
                 if field_attachment:
                     mimetype = field_attachment[0]['mimetype']
                     content = field_attachment[0]['raw']
                     filehash = field_attachment[0]['checksum']
             else:
                 mimetype = record['mimetype']
-                content = record['raw']
+                content = record.get_lazy_raw()
                 filehash = record['checksum']
 
         if not content:
             if model == 'ir.attachment':
-                content = record.raw
+                content = record.get_lazy_raw()
             elif (
                 field_def.related_field and
                 field_def.related_field.name == 'raw' and
@@ -405,9 +406,6 @@ class IrHttp(models.AbstractModel):
         :param str default_mimetype: default mintype if no mintype found
         :param str access_token: optional token for unauthenticated access
                                  only available  for ir.attachment
-        :param bool allow_xaccel: optional argument to allow or forbid xaccel
-                                  serving - setting to False will force fetch
-                                  raw binary data instead of only a header
 
         :returns: (status, headers, content)
         """
@@ -415,11 +413,12 @@ class IrHttp(models.AbstractModel):
         xaccel_header = None
 
         if not record:
-            return (status or 404, [], None)
+            return status or 404, [], None
 
-        if odoo.tools.config['xaccel'] and allow_xaccel and hasattr(record, "store_fname") and record.store_fname:
-            # Uses NGINX location /xaccel/ to serve files through NGINX instead of reading them
-            xaccel_header = ('X-Accel-Redirect', f"/xaccel/{record.store_fname}")
+        if odoo.tools.config['xaccel'] and hasattr(record, "store_fname") and record.store_fname:
+            # Uses NGINX location /protected_odoo_filestore/ to serve files through NGINX
+            # instead of reading the binaries using Odoo workers
+            xaccel_header = ('X-Accel-Redirect', f"/protected_odoo_filestore/{record.store_fname}")
 
         content, headers, status = None, [], None
 
@@ -431,7 +430,10 @@ class IrHttp(models.AbstractModel):
                 default_mimetype='application/octet-stream')
 
         status, headers = self._binary_set_headers(
-            status, filename, mimetype, unique, filehash=filehash, download=download)
+            status, filename, mimetype, unique, filehash=filehash, download=download, xaccel_header=xaccel_header)
+
+        if not xaccel_header and not isinstance(content, (bytes, str)):
+            content = next(content)
 
         return status, headers, content
 
