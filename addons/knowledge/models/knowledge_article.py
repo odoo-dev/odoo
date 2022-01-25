@@ -2,14 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api
+from odoo.osv import expression
 
 
 class Article(models.Model):
     _name = "knowledge.article"
     _description = "Contains the knowledge of a specific subject."
     _inherit = ['mail.thread']
-    # _order = "is_user_favourite, favourite_count, last_edition_date desc, level, sequence"
-    _order = "level, sequence"
+    _order = "favourite_count, last_edition_date desc, level, sequence"
+    # _order = "level, sequence"
 
     name = fields.Char(string="Title", default="New Article")
     body = fields.Html(string="Article Body")
@@ -143,8 +144,69 @@ class Article(models.Model):
                 article.child_ids.write({"parent_id": parent.id})
         return super(Article, self).unlink()
 
-    #TODO override search method (see crm/models/crm_lead.py #750) to allow order on is_user_favourite
-    # <field name="my_activity_date_deadline" string="My Deadline" widget="remaining_days" options="{'allow_order': '1'}"/>
+    @api.model
+    def search(self, args, offset=0, limit=None, order=None, count=False):
+        """ Override to support ordering on is_user_favourite.
+
+        Ordering through web client calls search_read with an order parameter set.
+        Search_read then calls search. In this override we therefore override search
+        to intercept a search without count with an order on is_user_favourite.
+        In that case we do the search in two steps.
+
+        First step: fill with current user's favourite results
+
+          * Search articles that are favourite of the current user.
+          * Results of that search will be at the top of returned results. Use limit
+            None because we have to search all favourite articles.
+          * Finally take only a subset of those articles to fill with
+            results matching asked offset / limit.
+
+        Second step: fill with other results. If first step does not gives results
+        enough to match offset and limit parameters we fill with a search on other
+        articles. We keep the asked domain and ordering while filtering out already
+        scanned articles to keep a coherent results.
+
+        All other search and search_read are left untouched by this override to avoid
+        side effects. Search_count is not affected by this override.
+        """
+        if count or not order or 'is_user_favourite' not in order:
+            return super(Article, self).search(args, offset=offset, limit=limit, order=order, count=count)
+        order_items = [order_item.strip().lower() for order_item in (order or self._order).split(',')]
+        favourite_asc = any('is_user_favourite asc' in item for item in order_items)
+
+        # Search articles that are favourite of the current user.
+        my_articles_domain = expression.AND([[('favourite_user_ids', 'in', [self.env.user.id])], args])
+        my_articles_order = ', '.join(item for item in order_items if 'is_user_favourite' not in item)
+        articles_ids = super(Article, self).search(my_articles_domain, offset=0, limit=None, order=my_articles_order, count=count).ids
+
+        # keep only requested window (offset + limit, or offset+)
+        my_articles_ids_keep = articles_ids[offset:(offset + limit)] if limit else articles_ids[offset:]
+        # keep list of already skipped article ids to exclude them from future search
+        my_articles_ids_skip = articles_ids[:(offset + limit)] if limit else articles_ids
+
+        # do not go further if limit is achieved
+        if limit and len(my_articles_ids_keep) >= limit:
+            return self.browse(my_articles_ids_keep)
+
+        # Fill with remaining articles. If a limit is given, simply remove count of
+        # already fetched. Otherwise keep none. If an offset is set we have to
+        # reduce it by already fetch results hereabove. Order is updated to exclude
+        # is_user_favourite when calling super() .
+        article_limit = (limit - len(my_articles_ids_keep)) if limit else None
+        if offset:
+            article_offset = max((offset - len(articles_ids), 0))
+        else:
+            article_offset = 0
+        article_order = ', '.join(item for item in order_items if 'is_user_favourite' not in item)
+
+        other_article_res = super(Article, self).search(
+            expression.AND([[('id', 'not in', my_articles_ids_skip)], args]),
+            offset=article_offset, limit=article_limit, order=article_order, count=count
+        )
+        if favourite_asc in order_items:
+            return other_article_res + self.browse(my_articles_ids_keep)
+        else:
+            return self.browse(my_articles_ids_keep) + other_article_res
 
     def _get_highest_parent(self):
         self.ensure_one()
