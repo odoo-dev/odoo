@@ -71,6 +71,7 @@ commandProviderRegistry.add("knowledge", {
         // retrieve the following fields
         const fields = ['id', 'name', 'is_user_favourite', 'parent_id', 'icon'];
         const limit = 10;
+        const orderBy =  [{ name: "is_user_favourite", desc: false }, { name: "favourite_count", desc: true }];
         const articlesData = await Component.env.services.rpc({
             model: "knowledge.article",
             method: "search_read",
@@ -79,6 +80,7 @@ commandProviderRegistry.add("knowledge", {
                 fields,
                 limit,
             },
+            orderBy,
         });
 
         if (articlesData.length === 0) {
