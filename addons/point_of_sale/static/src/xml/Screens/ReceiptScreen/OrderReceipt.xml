@@ -135,7 +135,7 @@
             </div>
 
             <div class="after-footer">
-                <t t-foreach="receipt.paymentlines" t-as="line">
+                <t t-foreach="receipt.paymentlines" t-as="line" t-key="line_index">
                     <t t-if="line.ticket">
                         <br />
                         <div class="pos-payment-terminal-receipt">

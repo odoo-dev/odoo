@@ -6,13 +6,14 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
     const { posbus } = require('point_of_sale.utils');
+    const { debounce } = require("@web/core/utils/timing");
 
     const { onMounted, onWillUnmount, useRef } = owl;
 
     class ProductsWidgetControlPanel extends PosComponent {
         setup() {
             this.searchWordInput = useRef('search-word-input');
-            this.updateSearch = debounce(this.updateSearch, 100); // NXOWL debounce
+            this.updateSearch = debounce(this.updateSearch, 100);
 
             onMounted(() => {
                 posbus.on('search-product-from-info-popup', this, this.searchProductFromInfo)

@@ -15,8 +15,7 @@ odoo.define('point_of_sale.tests.NumberBuffer', function(require) {
         assert.expect(3);
 
         class Root extends Component {
-            constructor() {
-                super();
+            setup() {
                 this.state = useState({ buffer: '' });
                 NumberBuffer.activate();
                 NumberBuffer.use({

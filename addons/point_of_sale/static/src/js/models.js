@@ -14,7 +14,7 @@ var time = require('web.time');
 var utils = require('web.utils');
 var { Gui } = require('point_of_sale.Gui');
 
-const { Context } = owl;
+const { reactive } = owl;
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -2838,14 +2838,14 @@ exports.Order = Backbone.Model.extend({
         this.set({ client: null });
 
         this.uiState = {
-            ReceiptScreen: new Context({
+            ReceiptScreen: reactive({
                 inputEmail: '',
                 // if null: not yet tried to send
                 // if false/true: tried sending email
                 emailSuccessful: null,
                 emailNotice: '',
             }),
-            TipScreen: new Context({
+            TipScreen: reactive({
                 inputTipAmount: '',
             })
         };

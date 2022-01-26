@@ -6,12 +6,11 @@ odoo.define('pos_restaurant.TipScreen', function (require) {
     const { parse } = require('web.field_utils');
     const { renderToString } = require('@web/core/utils/render');
 
-    const { onMounted } = owl;
+    const { onMounted, useState } = owl;
 
     class TipScreen extends PosComponent {
         setup() {
-            // NXOWL no more Context/useContext
-            this.state = useContext(this.currentOrder.uiState.TipScreen);
+            this.state = useState(this.currentOrder.uiState.TipScreen);
             this._totalAmount = this.currentOrder.get_total_with_tax();
 
             onMounted(() => {

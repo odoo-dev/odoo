@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.Gui', function (require) {
     'use strict';
 
-    const { Component, component } = owl;
+    const { Component } = owl;
 
     /**
      * This module bridges the data classes (such as those defined in

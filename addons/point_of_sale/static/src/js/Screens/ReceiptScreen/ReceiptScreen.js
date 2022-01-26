@@ -7,7 +7,7 @@ odoo.define('point_of_sale.ReceiptScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const AbstractReceiptScreen = require('point_of_sale.AbstractReceiptScreen');
 
-    const { useRef } = owl;
+    const { useRef, useState } = owl;
     const ReceiptScreen = (AbstractReceiptScreen) => {
         class ReceiptScreen extends AbstractReceiptScreen {
             setup() {
@@ -16,8 +16,7 @@ odoo.define('point_of_sale.ReceiptScreen', function (require) {
                 this.orderReceipt = useRef('order-receipt');
                 const order = this.currentOrder;
                 const client = order.get_client();
-                // NXOWL no more Context/useContext
-                this.orderUiState = useContext(order.uiState.ReceiptScreen);
+                this.orderUiState = useState(order.uiState.ReceiptScreen);
                 this.orderUiState.inputEmail = this.orderUiState.inputEmail || (client && client.email) || '';
                 this.is_email = is_email;
 

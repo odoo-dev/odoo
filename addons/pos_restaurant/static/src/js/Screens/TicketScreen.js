@@ -125,8 +125,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
     class TipCell extends PosComponent {
         setup() {
             this.state = useState({ isEditing: false });
-            // NXOWL no more Context/useContext
-            this.orderUiState = useContext(this.props.order.uiState.TipScreen);
+            this.orderUiState = useState(this.props.order.uiState.TipScreen);
             useAutofocus({ selector: 'input' });
         }
         get tipAmountStr() {

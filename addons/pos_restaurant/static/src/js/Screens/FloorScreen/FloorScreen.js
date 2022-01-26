@@ -13,8 +13,8 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
          * @param {Object} props
          * @param {Object} props.floor
          */
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
             this._setTableColor = debounce(this._setTableColor, 70); // NXOWL debounce
             this._setFloorColor = debounce(this._setFloorColor, 70);
             useListener('select-table', this._onSelectTable);

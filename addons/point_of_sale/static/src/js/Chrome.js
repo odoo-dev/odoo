@@ -14,6 +14,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const { odooExceptionTitleMap } = require("@web/core/errors/error_dialogs");
     const { ConnectionLostError, ConnectionAbortedError, RPCError } = require('@web/core/network/rpc_service');
     const { useBus } = require("@web/core/utils/hooks");
+    const { debounce } = require("@web/core/utils/timing");
 
     // This is kind of a trick.
     // We get a reference to the whole exports so that
@@ -21,17 +22,26 @@ odoo.define('point_of_sale.Chrome', function(require) {
     // we instantiate the extended one.
     const models = require('point_of_sale.models');
 
-    const { onMounted, onWillUnmount, onWillDestroy, onError, useState, useRef, useExternalListener } = owl;
+    const {
+        onMounted,
+        onWillUnmount,
+        onWillDestroy,
+        onError,
+        useState,
+        useSubEnv,
+        useRef,
+        useExternalListener,
+    } = owl;
 
     /**
      * Chrome is the root component of the PoS App.
      */
     class Chrome extends PopupControllerMixin(PosComponent) {
         setup() {
+            super.setup();
             useExternalListener(window, 'beforeunload', this._onBeforeUnload);
             useListener('show-main-screen', this.__showScreen);
-            // NXOWL no more debounce
-            // useListener('toggle-debug-widget', debounce(this._toggleDebugWidget, 100));
+            useListener('toggle-debug-widget', debounce(this._toggleDebugWidget, 100));
             useListener('toggle-mobile-searchbar', this._toggleMobileSearchBar);
             useListener('show-temp-screen', this.__showTempScreen);
             useListener('close-temp-screen', this.__closeTempScreen);
@@ -43,8 +53,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('close-notification', this._onCloseNotification);
             useBus(posbus, 'start-cash-control', this.openCashControl);
             NumberBuffer.activate();
-            // NXOWL no more Context/useContext
-            this.chromeContext = useContext(contexts.chrome);
+            this.chromeContext = useState(contexts.chrome);
 
             this.state = useState({
                 uiState: 'LOADING', // 'LOADING' | 'READY' | 'CLOSING'
@@ -95,6 +104,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
             onError((error) => {
                 console.error(error);
             });
+
+            this.props.setupIsDone(this);
         }
 
         // GETTERS //
@@ -149,7 +160,10 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     showLoadingSkip: this.showLoadingSkip.bind(this),
                     setLoadingProgress: this.setLoadingProgress.bind(this),
                 };
-                this.env.pos = new models.PosModel(posModelDefaultAttributes);
+                this.env = Object.create(this.env, {
+                    pos: { value: new models.PosModel(posModelDefaultAttributes) }
+                });
+                useSubEnv(this.env);
                 await this.env.pos.ready;
                 // Load the saved `env.pos.toRefundLines` from localStorage when
                 // the PosModel is ready.

@@ -13,8 +13,8 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const { onMounted, useState } = owl;
 
     class ProductScreen extends ControlButtonsMixin(PosComponent) {
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
             useListener('update-selected-orderline', this._updateSelectedOrderline);
             useListener('new-orderline-selected', this._newOrderlineSelected);
             useListener('set-numpad-mode', this._setNumpadMode);

@@ -15,8 +15,8 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         assert.expect(7);
 
         class Parent extends PosComponent {
-            constructor() {
-                super();
+            setup() {
+                super.setup();
                 useListener('click-customer', () => assert.step('click-customer'));
                 useListener('click-pay', () => assert.step('click-pay'));
                 this.state = useState({ client: null });
@@ -68,8 +68,8 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         assert.expect(25);
 
         class Parent extends PosComponent {
-            constructor() {
-                super(...arguments);
+            setup() {
+                super.setup();
                 useListener('set-numpad-mode', this.setNumpadMode);
                 useListener('numpad-click-input', this.numpadClickInput);
                 this.state = useState({ mode: 'quantity' });
@@ -214,8 +214,8 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         };
 
         class Parent extends PosComponent {
-            constructor() {
-                super(...arguments);
+            setup() {
+                super.setup();
                 this.state = useState({ selectedCategoryId: 0 });
                 useListener('switch-category', this.switchCategory);
                 useListener('update-search', this.updateSearch);
@@ -401,8 +401,8 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         ];
 
         class Parent extends PosComponent {
-            constructor() {
-                super(...arguments);
+            setup() {
+                super.setup();
                 this.state = useState({ searchWord: '', products: dummyProducts });
                 useListener('click-product', this._clickProduct);
             }

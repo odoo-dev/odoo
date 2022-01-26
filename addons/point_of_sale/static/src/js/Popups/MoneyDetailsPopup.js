@@ -4,7 +4,7 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
-    const { useState } = owl;
+    const { useRef, useState } = owl;
 
     /**
      * Even if this component has a "confirm and cancel"-like buttons, this should not be an AbstractAwaitablePopup.
@@ -18,6 +18,9 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
                 moneyDetails: Object.fromEntries(this.env.pos.bills.map(bill => ([bill.value, 0]))),
                 total: 0,
             });
+            if (this.props.manualInputCashCount) {
+                this.reset();
+            }
         }
         get firstHalfMoneyDetails() {
             const moneyDetailsKeys = Object.keys(this.state.moneyDetails).sort((a, b) => a - b);
@@ -27,18 +30,9 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
             const moneyDetailsKeys = Object.keys(this.state.moneyDetails).sort((a, b) => a - b);
             return moneyDetailsKeys.slice(moneyDetailsKeys.length/2, moneyDetailsKeys.length);
         }
-        isClosed() {
-            return this.el.classList.contains('invisible')
-        }
-        openPopup() {
-            this.el.classList.remove('invisible');
-        }
         updateMoneyDetailsAmount() {
             let total = Object.entries(this.state.moneyDetails).reduce((total, money) => total + money[0] * money[1], 0);
             this.state.total = this.env.pos.round_decimals_currency(total);
-        }
-        _closePopup() {
-            this.el.classList.add('invisible');
         }
         confirm() {
             let moneyDetailsNotes = this.state.total  ? 'Money details: \n' : null;
@@ -47,9 +41,8 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
                     moneyDetailsNotes += `  - ${this.state.moneyDetails[bill.value]} x ${this.env.pos.format_currency(bill.value)}\n`;
                 }
             })
-            const payload = { total: this.state.total, moneyDetailsNotes, moneyDetails: { ...this.state.moneyDetails }};
-            this.trigger('money-details-validated', payload);
-            this._closePopup();
+            const payload = { total: this.state.total, moneyDetailsNotes, moneyDetails: { ...this.state.moneyDetails } };
+            this.props.onConfirm(payload);
         }
         reset() {
             for (let key in this.state.moneyDetails) { this.state.moneyDetails[key] = 0 }
@@ -57,7 +50,7 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
         }
         discard() {
             this.reset();
-            this._closePopup();
+            this.props.onDiscard();
         }
     }
 

@@ -15,8 +15,8 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
         assert.expect(2);
 
         class Parent extends PosComponent {
-            constructor() {
-                super(...arguments);
+            setup() {
+                super.setup();
                 useListener('new-payment-line', this._newPaymentLine);
             }
             _newPaymentLine() {
@@ -119,8 +119,8 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
         assert.expect(12);
 
         class Parent extends PosComponent {
-            constructor() {
-                super();
+            setup() {
+                super.setup();
                 useListener('delete-payment-line', this._onDeletePaymentLine);
                 useListener('select-payment-line', this._onSelectPaymentLine);
             }
@@ -235,8 +235,8 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
         }
 
         class Parent extends PosComponent {
-            constructor() {
-                super();
+            setup() {
+                super.setup();
                 this.line = new SimulatedPaymentLine();
                 useListener('send-payment-request', () => assert.step('send-payment-request'));
                 useListener('send-force-done', () => assert.step('send-force-done'));

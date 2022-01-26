@@ -11,7 +11,7 @@
                     <!-- Breadcrumbs -->
                     <div class="breadcrumbs">
                         <span class="breadcrumb">
-                            <span class="breadcrumb-button breadcrumb-home" t-on-click="trigger('switch-category', 0)">
+                            <span class="breadcrumb-button breadcrumb-home" t-on-click="() => this.trigger('switch-category', 0)">
                                 <i class="fa fa-home" role="img" aria-label="Home" title="Home"></i>
                             </span>
                         </span>
