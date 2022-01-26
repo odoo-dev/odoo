@@ -2371,7 +2371,7 @@ QUnit.module('Views', {
         assert.containsNone(target, '.o_content .o_search_panel');
     });
 
-    QUnit.skipNXOWL('search panel with view_types attribute', async function (assert) {
+    QUnit.skip('search panel with view_types attribute', async function (assert) {
         assert.expect(6);
 
         serverData.views['partner,false,search'] =
@@ -2384,20 +2384,20 @@ QUnit.module('Views', {
 
 
         registry.category("views").add("pivot", PivotView, { force: true });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
 
-        assert.containsOnce(target, '.o_content.o_controller_with_searchpanel .o_kanban_view');
-        assert.containsOnce(target, '.o_content.o_controller_with_searchpanel .o_search_panel');
+        assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_kanban_view');
+        assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_search_panel');
 
-        await switchView(target, 'list');
+        await switchView(webClient, 'list');
         await legacyExtraNextTick();
-        assert.containsOnce(target, '.o_content .o_list_view');
-        assert.containsNone(target, '.o_content .o_search_panel');
+        assert.containsOnce(webClient, '.o_content .o_list_view');
+        assert.containsNone(webClient, '.o_content .o_search_panel');
 
-        await switchView(target, 'pivot');
-        assert.containsOnce(target, '.o_content.o_component_with_search_panel .o_pivot');
-        assert.containsOnce(target, '.o_content.o_component_with_search_panel .o_search_panel');
+        await switchView(webClient, 'pivot');
+        assert.containsOnce(webClient, '.o_content.o_component_with_search_panel .o_legacy_pivot');
+        assert.containsOnce(webClient, '.o_content.o_component_with_search_panel .o_search_panel');
     });
 
     QUnit.test('search panel state is shared between views', async function (assert) {
@@ -2499,38 +2499,38 @@ QUnit.module('Views', {
         ]);
     });
 
-    QUnit.skipNXOWL('search panel filters are kept when switching to a view with no search panel', async function (assert) {
+    QUnit.skip('search panel filters are kept when switching to a view with no search panel', async function (assert) {
         assert.expect(13);
 
         registry.category("views").add("pivot", PivotView, { force: true });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
 
-        assert.containsOnce(target, '.o_content.o_controller_with_searchpanel .o_kanban_view');
-        assert.containsOnce(target, '.o_content.o_controller_with_searchpanel .o_search_panel');
-        assert.containsNone(target, '.o_search_panel_filter_value input:checked');
-        assert.containsN(target, '.o_kanban_record:not(.o_kanban_ghost)', 4);
+        assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_kanban_view');
+        assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_search_panel');
+        assert.containsNone(webClient, '.o_search_panel_filter_value input:checked');
+        assert.containsN(webClient, '.o_kanban_record:not(.o_kanban_ghost)', 4);
 
         // select gold filter
-        await testUtils.dom.click($(target).find('.o_search_panel_filter input[type="checkbox"]:nth(0)'));
+        await testUtils.dom.click($(webClient.el).find('.o_search_panel_filter input[type="checkbox"]:nth(0)'));
         await legacyExtraNextTick();
-        assert.containsOnce(target, '.o_search_panel_filter_value input:checked');
-        assert.containsN(target, '.o_kanban_record:not(.o_kanban_ghost)', 1);
+        assert.containsOnce(webClient, '.o_search_panel_filter_value input:checked');
+        assert.containsN(webClient, '.o_kanban_record:not(.o_kanban_ghost)', 1);
 
         // switch to pivot
-        await switchView(target, 'pivot');
+        await switchView(webClient, 'pivot');
         await legacyExtraNextTick();
-        assert.containsOnce(target, '.o_content .o_pivot');
-        assert.containsNone(target, '.o_content .o_search_panel');
-        assert.strictEqual($(target).find('.o_pivot_cell_value').text(), '15');
+        assert.containsOnce(webClient, '.o_content .o_legacy_pivot');
+        assert.containsNone(webClient, '.o_content .o_search_panel');
+        assert.strictEqual($(webClient.el).find('.o_pivot_cell_value').text(), '15');
 
         // switch to list
-        await switchView(target, 'list');
+        await switchView(webClient, 'list');
         await legacyExtraNextTick();
-        assert.containsOnce(target, '.o_content.o_controller_with_searchpanel .o_list_view');
-        assert.containsOnce(target, '.o_content.o_controller_with_searchpanel .o_search_panel');
-        assert.containsOnce(target, '.o_search_panel_filter_value input:checked');
-        assert.containsN(target, '.o_data_row', 1);
+        assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_list_view');
+        assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_search_panel');
+        assert.containsOnce(webClient, '.o_search_panel_filter_value input:checked');
+        assert.containsN(webClient, '.o_data_row', 1);
     });
 
     QUnit.test('after onExecuteAction, selects "All" as default category value', async function (assert) {
