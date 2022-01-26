@@ -3,6 +3,88 @@
 /// and the UI components rules.
 ///
 
+.o_frontend_to_backend_logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 30px;
+    border-radius: 0 0 50rem 0;
+    background-color: $o-enterprise-color;
+    background-image: url("https://odoocdn.com/openerp_website/static/src/img/assets/svg/odoo_logo_inverted.svg");
+    background-size: 80% auto;
+    background-position: top left;
+    background-repeat: no-repeat;
+    color: white;
+    box-shadow: 0 0 5px 1px white, 0 0 0px 2px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+.o_frontend_to_backend_btn, .o_frontend_to_backend_edit_btn, .o_frontend_to_backend_apps_btn {
+    opacity: 0;
+    transform-origin: -100px -100px;
+    transform: rotateZ(180deg);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background-color: $o-enterprise-color;
+    color: white;
+    font-size: 12px;
+    border-radius: 50rem;
+    box-shadow: 0 0 5px 1px white, 0 0 0px 2px rgba(0, 0, 0, 0.5);
+
+    &:hover {
+        background-color: darken($o-enterprise-color, 15%);
+        color: white;
+    }
+}
+.o_frontend_to_backend_btn {
+    animation-delay: 200ms !important;
+    top: 45px;
+    left: 5px;
+    background-image: url("https://download.odoocdn.com/icons/website/static/description/icon.svg");
+    background-size: cover;
+    background-position: center;
+}
+.o_frontend_to_backend_edit_btn {
+    animation-delay: 100ms !important;
+    top: 37px;
+    left: 45px;
+}
+.o_frontend_to_backend_apps_btn {
+    animation-delay: 0ms !important;
+    top: 5px;
+    left: 70px;
+}
+.o_frontend_to_backend_nav {
+    @include o-position-absolute(0, auto, auto, 0);
+    position: fixed;
+    z-index: $zindex-modal;
+
+    &:hover {
+        overflow: hidden;
+        padding: 0 100px 100px 0;
+
+        .o_frontend_to_backend_btn, .o_frontend_to_backend_edit_btn, .o_frontend_to_backend_apps_btn {
+            animation: o_frontend_to_backend_btn_animation 600ms ease 0s 1 normal forwards;
+        }
+    }
+}
+
+@keyframes o_frontend_to_backend_btn_animation {
+    0% {
+        opacity: 0;
+        transform: rotateZ(180deg);
+    }
+    100% {
+        opacity: 1.0;
+        transform: rotateZ(0deg);
+    }
+}
+
 // LAYOUTING
 body {
     // Set frontend direction that will be flipped with
