@@ -156,6 +156,9 @@ const AbstractAction = Widget.extend(ActionMixin, {
      * @override
      */
     destroy: function() {
+        if (this._controlPanelWrapper) {
+            this._controlPanelWrapper.destroy();
+        }
         this._super.apply(this, arguments);
         ActionMixin.destroy.call(this);
     },

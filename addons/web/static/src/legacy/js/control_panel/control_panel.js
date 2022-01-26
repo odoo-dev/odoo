@@ -11,7 +11,7 @@ odoo.define('web.ControlPanel', function (require) {
     const SearchBar = require('web.SearchBar');
     const { useModel } = require('web.Model');
 
-    const { Component, useRef, useSubEnv } = owl;
+    const { Component, useRef, onWillDestroy, useSubEnv } = owl;
 
     /**
      * TODO: remove this whole mechanism as soon as `cp_content` is completely removed.
@@ -124,6 +124,24 @@ odoo.define('web.ControlPanel', function (require) {
             this.fields = this._formatFields(this.props.fields);
 
             this.sprintf = _.str.sprintf;
+
+            onWillDestroy(() => {
+                const content =  this.props.cp_content;
+                if (content) {
+                    if (content.$buttons) {
+                        content.$buttons.remove();
+                    }
+                    if (content.$searchview) {
+                        content.$searchview.remove();
+                    }
+                    if (content.$pager) {
+                        content.$pager.remove();
+                    }
+                    if (content.$searchview_buttons) {
+                        content.$searchview_buttons.remove();
+                    }
+                }
+            });
         }
 
         mounted() {

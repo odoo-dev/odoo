@@ -110,6 +110,15 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         if (this.$buttons) {
             this.$buttons.off();
         }
+        if (this._controlPanelWrapper) {
+            this._controlPanelWrapper.destroy();
+        }
+        if (this._searchPanelWrapper) {
+            this._searchPanelWrapper.destroy();
+        }
+        if (this.renderer) {
+            this.renderer.destroy();
+        }
         ActionMixin.destroy.call(this);
         this._super.apply(this, arguments);
     },
