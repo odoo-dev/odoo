@@ -99,10 +99,6 @@ odoo.define('web.ControlPanel', function (require) {
         setup() {
             this.additionalContent = getAdditionalContent(this.props);
 
-            this.env = Object.create(this.env);
-            // this.env.action = this.props.action;
-            this.env.searchModel = this.props.searchModel;
-            this.env.view = this.props.view;
             useSubEnv({
                 action: this.props.action,
                 searchModel: this.props.searchModel,
@@ -159,7 +155,9 @@ odoo.define('web.ControlPanel', function (require) {
             // the lifespan of a ControlPanel instance, so we only need to update
             // the view information.
             if ('view' in nextProps) {
-                this.env.view = nextProps.view;
+                useSubEnv({
+                    view: nextProps.view,
+                });
             }
             if ('fields' in nextProps) {
                 this.fields = this._formatFields(nextProps.fields);

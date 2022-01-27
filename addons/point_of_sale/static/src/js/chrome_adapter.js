@@ -28,8 +28,7 @@ export class ChromeAdapter extends Component {
         this.PosChrome = Registries.Component.get(Chrome);
         this.legacyActionManager = useService("legacy_action_manager");
 
-        this.env = Component.env;
-        useSubEnv(this.env);
+        useSubEnv(Component.env);
         // useBus(this.env.qweb, "update", () => this.render()); // NXOWL ?
         setupResponsivePlugin(this.env);
     }

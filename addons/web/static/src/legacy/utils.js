@@ -325,7 +325,7 @@ export function useLegacyRefs() {
         };
     }
 
-    owl.useSubEnv({
+    owl.useChildSubEnv({
         legacyRefs,
     });
 

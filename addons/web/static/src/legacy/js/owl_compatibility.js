@@ -482,11 +482,9 @@ odoo.define('web.OwlCompatibility', function (require) {
             });
             this.parentWidget = this.props.parentWidget;
             this._handledEvents = new Set();
-            const env = Object.assign(Object.create(this.env), {
+            useSubEnv({
                 [widgetSymbol]: this._addListener.bind(this)
             });
-            this.env = env;
-            useSubEnv(env);
         }
         /**
          * Adds an event handler that will redirect the given Owl event to an

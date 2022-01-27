@@ -14,7 +14,7 @@ import { View } from "@web/views/view";
 import { ActionDialog } from "./action_dialog";
 import { CallbackRecorder } from "./action_hook";
 
-const { Component, markup, useSubEnv, xml } = owl;
+const { Component, markup, useChildSubEnv, xml } = owl;
 
 const actionHandlersRegistry = registry.category("action_handlers");
 const actionRegistry = registry.category("actions");
@@ -552,9 +552,9 @@ function makeActionManager(env) {
                 this.Component = controller.Component;
                 this.titleService = useService("title");
                 useDebugCategory("action", { action });
-                useSubEnv({
+                useChildSubEnv({
                     config: controller.config,
-                    __onHistoryBack__: this.onHistoryBack.bind(this)
+                    __onHistoryBack__: this.onHistoryBack.bind(this),
                 });
                 if (action.target !== "new") {
                     this.__beforeLeave__ = new CallbackRecorder();
@@ -565,7 +565,7 @@ function makeActionManager(env) {
                         const beforeLeaveFns = this.__beforeLeave__.callbacks;
                         callbacks.push(...beforeLeaveFns);
                     });
-                    useSubEnv({
+                    useChildSubEnv({
                         __beforeLeave__: this.__beforeLeave__,
                         __getGlobalState__: this.__getGlobalState__,
                         __getLocalState__: this.__getLocalState__,

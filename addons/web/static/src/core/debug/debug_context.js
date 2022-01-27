@@ -3,7 +3,7 @@
 import { registry } from "../registry";
 import { memoize } from "../utils/functions";
 
-const { useComponent, useEffect, useEnv, useSubEnv } = owl;
+const { useComponent, useEffect, useEnv, useChildSubEnv } = owl;
 const debugRegistry = registry.category("debug");
 
 const getAccessRights = memoize(async function getAccessRights(orm) {
@@ -67,7 +67,7 @@ export function createDebugContext(env, { categories = [] } = {}) {
 
 export function useOwnDebugContext({ categories = [] } = {}) {
     const debugContext = createDebugContext(useEnv(), { categories });
-    useSubEnv(debugContext);
+    useChildSubEnv(debugContext);
 
     // NXOWL: not acceptable I think
     const component = useComponent();

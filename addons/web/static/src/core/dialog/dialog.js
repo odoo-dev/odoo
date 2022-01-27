@@ -3,7 +3,7 @@
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useActiveElement } from "../ui/ui_service";
 
-const { Component, useRef, useSubEnv, xml } = owl;
+const { Component, useRef, useChildSubEnv, xml } = owl;
 
 export class Dialog extends Component {
     setup() {
@@ -17,7 +17,7 @@ export class Dialog extends Component {
         useHotkey("escape", () => {
             this.close();
         });
-        useSubEnv({ inDialog: true });
+        useChildSubEnv({ inDialog: true });
         this.close = this.close.bind(this);
         this.contentClass = this.constructor.contentClass;
         this.fullscreen = this.constructor.fullscreen;

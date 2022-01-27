@@ -8,7 +8,7 @@ import { Layout } from "@web/views/layout";
 import { getDefaultConfig } from "@web/views/view";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 
-const { Component, xml, useSubEnv } = owl;
+const { Component, xml, useChildSubEnv } = owl;
 
 const serviceRegistry = registry.category("services");
 
@@ -102,7 +102,7 @@ QUnit.module("Views", (hooks) => {
 
         class ToyC extends Component {
             setup() {
-                useSubEnv({
+                useChildSubEnv({
                     searchModel: {
                         display: {
                             controlPanel: false,
@@ -125,7 +125,7 @@ QUnit.module("Views", (hooks) => {
 
         class ToyB extends Component {
             setup() {
-                useSubEnv({
+                useChildSubEnv({
                     config: {
                         ...getDefaultConfig(),
                         SearchPanel,

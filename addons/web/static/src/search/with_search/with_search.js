@@ -4,7 +4,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { SearchModel } from "@web/search/search_model";
 import { CallbackRecorder, useSetupAction } from "@web/webclient/actions/action_hook";
 
-const { Component, onWillStart, onWillUpdateProps, useSubEnv } = owl;
+const { Component, onWillStart, onWillUpdateProps, useSubEnv, useChildSubEnv } = owl;
 
 export const SEARCH_KEYS = ["comparison", "context", "domain", "groupBy", "orderBy"];
 const OTHER_SEARCH_KEYS = ["irFilters", "searchViewArch", "searchViewFields", "searchViewId"];
@@ -13,10 +13,8 @@ export class WithSearch extends Component {
     setup() {
         this.Component = this.props.Component;
 
-        this.env = Object.create(this.env);
         if (!this.env.__getContext__) {
-            this.env.__getContext__ = new CallbackRecorder();
-            useSubEnv({ __getContext__: this.env.__getContext__ });
+            useSubEnv({ __getContext__: new CallbackRecorder() });
         }
 
         const SearchModelClass = this.Component.SearchModel || SearchModel;
@@ -26,7 +24,7 @@ export class WithSearch extends Component {
             view: useService("view"),
         });
 
-        useSubEnv({ searchModel: this.searchModel });
+        useChildSubEnv({ searchModel: this.searchModel });
 
         useBus(this.searchModel, "update", this.render);
         useSetupAction({

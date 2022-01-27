@@ -512,7 +512,7 @@
     const nodeGetFirstChild = getDescriptor$1(nodeProto$2, "firstChild").get;
     const nodeGetNextSibling = getDescriptor$1(nodeProto$2, "nextSibling").get;
     const NO_OP$1 = () => { };
-    const cache = {};
+    const cache$1 = {};
     /**
      * Compiling blocks is a multi-step process:
      *
@@ -529,8 +529,8 @@
      * @returns a new block type, that can build concrete blocks
      */
     function createBlock(str) {
-        if (str in cache) {
-            return cache[str];
+        if (str in cache$1) {
+            return cache$1[str];
         }
         // step 0: prepare html base element
         const doc = new DOMParser().parseFromString(`<t>${str}</t>`, "text/xml");
@@ -545,7 +545,7 @@
         // step 3: build the final block class
         const template = tree.el;
         const Block = buildBlock(template, context);
-        cache[str] = Block;
+        cache$1[str] = Block;
         return Block;
     }
     // -----------------------------------------------------------------------------
@@ -2493,7 +2493,9 @@
         // Mark all variables that have been used locally.
         // This assumes the expression has only one scope (incorrect but "good enough for now")
         for (const token of tokens) {
-            if (token.type === "SYMBOL" && localVars.has(token.value)) {
+            if (token.type === "SYMBOL" && token.varName && localVars.has(token.value)) {
+                token.originalValue = token.value;
+                token.value = `_${token.value}`;
                 token.isLocal = true;
             }
         }
@@ -3026,27 +3028,31 @@
             if (ast.model) {
                 const { hasDynamicChildren, baseExpr, expr, eventType, shouldNumberize, shouldTrim, targetAttr, specialInitTargetAttr, } = ast.model;
                 const baseExpression = compileExpr(baseExpr);
-                const id = this.generateId();
-                this.addLine(`const bExpr${id} = ${baseExpression};`);
+                const bExprId = this.generateId("bExpr");
+                this.addLine(`const ${bExprId} = ${baseExpression};`);
                 const expression = compileExpr(expr);
+                const exprId = this.generateId("expr");
+                this.addLine(`const ${exprId} = ${expression};`);
+                const fullExpression = `${bExprId}[${exprId}]`;
                 let idx;
                 if (specialInitTargetAttr) {
-                    idx = block.insertData(`${baseExpression}[${expression}] === '${attrs[targetAttr]}'`, "attr");
+                    idx = block.insertData(`${fullExpression} === '${attrs[targetAttr]}'`, "attr");
                     attrs[`block-attribute-${idx}`] = specialInitTargetAttr;
                 }
                 else if (hasDynamicChildren) {
-                    tModelSelectedExpr = `bValue${id}`;
-                    this.addLine(`let ${tModelSelectedExpr} = ${baseExpression}[${expression}]`);
+                    const bValueId = this.generateId("bValue");
+                    tModelSelectedExpr = `${bValueId}`;
+                    this.addLine(`let ${tModelSelectedExpr} = ${fullExpression}`);
                 }
                 else {
-                    idx = block.insertData(`${baseExpression}[${expression}]`, "attr");
+                    idx = block.insertData(`${fullExpression}`, "attr");
                     attrs[`block-attribute-${idx}`] = targetAttr;
                 }
                 this.helpers.add("toNumber");
                 let valueCode = `ev.target.${targetAttr}`;
                 valueCode = shouldTrim ? `${valueCode}.trim()` : valueCode;
                 valueCode = shouldNumberize ? `toNumber(${valueCode})` : valueCode;
-                const handler = `[(ev) => { bExpr${id}[${expression}] = ${valueCode}; }]`;
+                const handler = `[(ev) => { ${fullExpression} = ${valueCode}; }]`;
                 idx = block.insertData(handler, "hdlr");
                 attrs[`block-handler-${idx}`] = eventType;
             }
@@ -3477,7 +3483,7 @@
             let propString = propStr;
             if (ast.dynamicProps) {
                 if (!props.length) {
-                    propString = `${compileExpr(ast.dynamicProps)}`;
+                    propString = `Object.assign({}, ${compileExpr(ast.dynamicProps)})`;
                 }
                 else {
                     propString = `Object.assign({}, ${compileExpr(ast.dynamicProps)}, ${propStr})`;
@@ -3590,15 +3596,27 @@
     // -----------------------------------------------------------------------------
     // AST Type definition
     // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // Parser
+    // -----------------------------------------------------------------------------
+    const cache = new WeakMap();
     function parse(xml) {
-        const node = xml instanceof Element ? xml : parseXML$1(`<t>${xml}</t>`).firstChild;
-        normalizeXML(node);
-        const ctx = { inPreTag: false, inSVG: false };
-        const ast = parseNode(node, ctx);
+        if (typeof xml === "string") {
+            const elem = parseXML$1(`<t>${xml}</t>`).firstChild;
+            return _parse(elem);
+        }
+        let ast = cache.get(xml);
         if (!ast) {
-            return { type: 0 /* Text */, value: "" };
+            // we clone here the xml to prevent modifying it in place
+            ast = _parse(xml.cloneNode(true));
+            cache.set(xml, ast);
         }
         return ast;
+    }
+    function _parse(xml) {
+        normalizeXML(xml);
+        const ctx = { inPreTag: false, inSVG: false };
+        return parseNode(xml, ctx) || { type: 0 /* Text */, value: "" };
     }
     function parseNode(node, ctx) {
         if (!(node instanceof Element)) {
@@ -3700,8 +3718,7 @@
         let model = null;
         for (let attr of nodeAttrsNames) {
             const value = node.getAttribute(attr);
-            if (attr === "t-name") {}
-            else if (attr.startsWith("t-on")) {
+            if (attr.startsWith("t-on")) {
                 if (attr === "t-on") {
                     throw new Error("Missing event name with t-on directive");
                 }
@@ -3751,7 +3768,7 @@
                     ctx.tModelInfo = model;
                 }
             }
-            else {
+            else if (attr !== "t-name") {
                 if (attr.startsWith("t-") && !attr.startsWith("t-att")) {
                     throw new Error(`Unknown QWeb directive: '${attr}'`);
                 }
@@ -4356,7 +4373,6 @@
             xml = xml instanceof Document ? xml : parseXML(xml);
             for (const template of xml.querySelectorAll("[t-name]")) {
                 const name = template.getAttribute("t-name");
-                // template.removeAttribute("t-name");
                 this.addTemplate(name, template, options);
             }
         }
@@ -4917,6 +4933,11 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     function useEnv() {
         return getCurrent().component.env;
     }
+    function extendEnv(currentEnv, extension) {
+        const env = Object.create(currentEnv);
+        const descrs = Object.getOwnPropertyDescriptors(extension);
+        return Object.freeze(Object.defineProperties(env, descrs));
+    }
     /**
      * This hook is a simple way to let components use a sub environment.  Note that
      * like for all hooks, it is important that this is only called in the
@@ -4924,9 +4945,13 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
      */
     function useSubEnv(envExtension) {
         const node = getCurrent();
-        const env = Object.create(node.childEnv);
-        const descrs = Object.getOwnPropertyDescriptors(envExtension);
-        node.childEnv = Object.freeze(Object.defineProperties(env, descrs));
+        const newEnv = extendEnv(node.component.env, envExtension);
+        node.component.env = extendEnv(node.component.env, envExtension);
+        node.childEnv = newEnv;
+    }
+    function useChildSubEnv(envExtension) {
+        const node = getCurrent();
+        node.childEnv = extendEnv(node.childEnv, envExtension);
     }
     // -----------------------------------------------------------------------------
     // useEffect
@@ -5028,6 +5053,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.reactive = reactive;
     exports.status = status;
     exports.toRaw = toRaw;
+    exports.useChildSubEnv = useChildSubEnv;
     exports.useComponent = useComponent;
     exports.useEffect = useEffect;
     exports.useEnv = useEnv;
@@ -5042,8 +5068,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2022-01-25T11:48:02.435Z';
-    __info__.hash = 'c813a1c';
+    __info__.date = '2022-01-27T13:42:23.913Z';
+    __info__.hash = '4b88787';
     __info__.url = 'https://github.com/odoo/owl';
 
 

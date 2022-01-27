@@ -160,10 +160,9 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     showLoadingSkip: this.showLoadingSkip.bind(this),
                     setLoadingProgress: this.setLoadingProgress.bind(this),
                 };
-                this.env = Object.create(this.env, {
+                useSubEnv({
                     pos: { value: new models.PosModel(posModelDefaultAttributes) }
                 });
-                useSubEnv(this.env);
                 await this.env.pos.ready;
                 // Load the saved `env.pos.toRefundLines` from localStorage when
                 // the PosModel is ready.

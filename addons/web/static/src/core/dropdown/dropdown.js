@@ -13,7 +13,7 @@ const {
     useExternalListener,
     useRef,
     useState,
-    useSubEnv,
+    useChildSubEnv,
 } = owl;
 
 const DIRECTION_CARET_CLASS = {
@@ -75,7 +75,7 @@ export class Dropdown extends Component {
 
         // Set up nested dropdowns ---------------------------------------------
         this.parentDropdown = this.env[DROPDOWN];
-        useSubEnv({
+        useChildSubEnv({
             [DROPDOWN]: {
                 close: this.close.bind(this),
                 closeAllParents: () => {

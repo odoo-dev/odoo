@@ -55,7 +55,7 @@ export function useViewArch(arch, params = {}) {
 export function useActionLinks({ resModel, reload }) {
     const selector = `a[type="action"]`;
     const component = useComponent();
-    const keepLast = component.keepLast || component.env.keepLast;
+    const keepLast = component.env.keepLast;
 
     const orm = useService("orm");
     const { doAction } = useService("action");

@@ -13,7 +13,6 @@ export class MessagingMenuContainer extends Component {
     setup() {
         // for now, the legacy env is needed for internal functions such as
         // `useModels` to work
-        this.env = Component.env;
         useSubEnv(Component.env);
         useModels();
         super.setup();
