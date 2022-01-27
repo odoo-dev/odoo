@@ -18,6 +18,7 @@ odoo.define('point_of_sale.HeaderLockButton', function(require) {
             this.state.title = isMouseOver ? 'Lock' : 'Unlocked';
         }
     }
+    HeaderLockButton.template = "HeaderLockButton";
 
     Registries.Component.add(HeaderLockButton);
 

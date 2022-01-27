@@ -14,8 +14,8 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
         assert.expect(9);
 
         class Parent extends PosComponent {
-            constructor() {
-                super();
+            setup() {
+                super.setup();
                 useListener('select-table', () => assert.step('select-table'));
             }
             get table() {
@@ -53,8 +53,8 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
         assert.expect(11);
 
         class Parent extends PosComponent {
-            constructor() {
-                super();
+            setup() {
+                super.setup();
                 useListener('save-table', () => assert.step('save-table'));
                 this.tableRef = useRef('table-ref');
             }
@@ -100,8 +100,8 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
         assert.expect(26);
 
         class Parent extends PosComponent {
-            constructor() {
-                super();
+            setup() {
+                super.setup();
                 useListener('create-table', () => assert.step('create-table'));
                 useListener('duplicate-table', () => assert.step('duplicate-table'));
                 useListener('rename-table', () => assert.step('rename-table'));
