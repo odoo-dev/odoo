@@ -79,7 +79,7 @@ const AbstractAction = Widget.extend(ActionMixin, {
         this.searchModelConfig = {
             context: Object.assign({}, action.context),
             domain: action.domain || [],
-            env: Component.env, // FIXME NXOWL
+            env: Component.env,
             searchMenuTypes: this.searchMenuTypes,
         };
         this.extensions = {};

@@ -356,7 +356,6 @@ odoo.define('web.OwlCompatibility', function (require) {
          */
         destroy() {
             for (const wrapper of children.get(this) || []) {
-                // component.env.qweb.off("update", component); // NXOWL
                 wrapper.destroy();
             }
             children.delete(this);

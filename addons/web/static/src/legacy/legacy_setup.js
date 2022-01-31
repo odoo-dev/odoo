@@ -26,7 +26,6 @@ export const legacySetupProm = new Promise((resolve) => {
 // build the legacy env and set it on Component (this was done in main.js,
 // with the starting of the webclient)
 (async () => {
-    // config.mode = legacyEnv.isDebug() ? "dev" : "prod"; // FIXME NXOWL
     AbstractService.prototype.deployServices(legacyEnv);
     Component.env = legacyEnv;
     const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);

@@ -10,6 +10,7 @@ import { useService } from "@web/core/utils/hooks";
 import { ViewNotFoundError } from "../webclient/actions/action_service";
 import { cleanDomFromBootstrap, wrapSuccessOrFail, useLegacyRefs } from "./utils";
 import { mapDoActionOptionAPI } from "./backend_utils";
+import { setScrollPosition } from "@web/core/utils/scrolling";
 
 const {
     Component,
@@ -87,6 +88,10 @@ class ActionAdapter extends ComponentAdapter {
                 this.__widget.on_detach_callback();
             }
         });
+
+        this.onScrollTo = (payload) => {
+            setScrollPosition(this, { left: payload.left, top: payload.top });
+        };
     }
 
     get actionId() {
@@ -150,6 +155,8 @@ class ActionAdapter extends ComponentAdapter {
             }
         } else if (ev.name === "history_back") {
             this.wowlEnv.config.historyBack();
+        } else if (ev.name === "scrollTo") {
+            this.onScrollTo(payload);
         } else {
             super._trigger_up(ev);
         }

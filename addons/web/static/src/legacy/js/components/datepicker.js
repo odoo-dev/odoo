@@ -58,7 +58,7 @@ odoo.define('web.DatePickerOwl', function (require) {
                 this._datetimepicker('destroy');
             });
 
-            let update = false;
+            let newDateReceived = false;
 
             onWillUpdateProps((nextProps) => {
                 for (const prop in nextProps) {
@@ -67,15 +67,14 @@ odoo.define('web.DatePickerOwl', function (require) {
                     }
                     this._datetimepicker(prop, nextProps[prop]);
                 }
-                // NXOWL
                 if (nextProps.date) {
-                    update = true;
+                    newDateReceived = true;
                 }
             });
 
             onPatched(() => {
-                if (update) {
-                    update = false;
+                if (newDateReceived) {
+                    newDateReceived = false;
                     this.inputRef.el.value = this._formatDate(this.props.date);
                 }
             });

@@ -12,7 +12,6 @@ import {
     getLocalState,
     searchModelStateToLegacy,
 } from "./backend_utils";
-import { setScrollPosition } from "../core/utils/scrolling";
 import { registry } from "@web/core/registry";
 import { loadPublicAsset } from "@web/core/assets";
 
@@ -28,8 +27,6 @@ function getJsClassWidget(fieldsInfo) {
 const legacyViewTemplate = xml`
     <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"
                  widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" />`;
-// t-ref="controller" NXOWL
-// t-on-scrollTo.stop="onScrollTo"
 
 // registers a view from the legacy view registry to the wowl one, but wrapped
 // into an Owl Component
@@ -96,9 +93,6 @@ function registerView(name, LegacyView) {
                 getGlobalState: () => getGlobalState(legacyRefs.component.exportState()),
                 getLocalState: () => getLocalState(legacyRefs.component.exportState()),
             });
-            this.onScrollTo = (ev) => {
-                setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });
-            };
         }
 
         async willStart() {

@@ -4,7 +4,6 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { action_registry as legacyActionRegistry } from "web.core";
 import Widget from "web.Widget";
-import { setScrollPosition } from "../core/utils/scrolling";
 import { useSetupAction } from "../webclient/actions/action_hook";
 import { ClientActionAdapter } from "./action_adapters";
 import { breadcrumbsToLegacy } from "./backend_utils";
@@ -17,7 +16,6 @@ const legacyClientActionTemplate = xml`
     <ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget"
                          onReverseBreadcrumb="onReverseBreadcrumb"/>`;
 
-// NXOWL t-on-scrollTo.stop="onScrollTo"
 // registers an action from the legacy action registry to the wowl one, ensuring
 // that widget actions are actually Components
 function registerClientAction(name, action) {
@@ -55,9 +53,6 @@ function registerClientAction(name, action) {
                     beforeLeave: () => legacyRefs.widget && legacyRefs.widget.canBeRemoved(),
                     getLocalState: () => legacyRefs.component && legacyRefs.component.exportState(),
                 });
-                this.onScrollTo = (ev) => {
-                    setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });
-                };
             }
         }
         Action.template = legacyClientActionTemplate;

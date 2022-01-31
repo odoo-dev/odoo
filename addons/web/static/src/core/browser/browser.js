@@ -36,7 +36,7 @@ export const browser = {
     XMLHttpRequest: window.XMLHttpRequest,
     localStorage,
     sessionStorage,
-    fetch: (window.fetch || (() => {})).bind(window), // TOREVIEW NXOWL
+    fetch: window.fetch.bind(window),
 };
 
 Object.defineProperty(browser, "location", {

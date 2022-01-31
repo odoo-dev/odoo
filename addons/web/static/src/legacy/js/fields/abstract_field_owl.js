@@ -82,6 +82,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
                  *
                  */
                 // check if studio broken NXOWL
+                // LPE: check with AAB
                 this.el.setAttribute('name', this.name);
                 this.el.classList.add('o_field_widget');
                 this.el.classList.toggle('o_quick_editable', this._canQuickEdit);
