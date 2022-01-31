@@ -1883,7 +1883,7 @@
         complete() {
             let current = this;
             try {
-                validateTarget(this.target);
+                // validateTarget(this.target); NXOWL
                 const node = this.node;
                 if (node.bdom) {
                     // this is a complicated situation: if we mount a fiber with an existing
