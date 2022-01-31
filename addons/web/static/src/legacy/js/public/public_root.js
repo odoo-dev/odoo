@@ -400,7 +400,10 @@ export async function createPublicRoot(RootWidget) {
         translateFn: _t,
     });
 
-    const adapter = await app.mount(document.body); // Used for _trigger_up compat layer
+    // We have a two fold constrain
+    // - the adapter is here to provide a triiger_up to map to new services
+    // - it needs to be in the dom to eventually transmit events to the publicRoot widget via the body
+    const adapter = await app.mount(document.body);
     const publicRoot = new RootWidget(adapter);
     await Promise.all([
         // NXOWL check with DAM
