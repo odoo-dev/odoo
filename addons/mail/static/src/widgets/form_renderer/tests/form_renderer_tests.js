@@ -597,7 +597,8 @@ QUnit.test('chatter should become enabled when creation done', async function (a
     );
 });
 
-QUnit.test('read more/less links are not duplicated when switching from read to edit mode', async function (assert) {
+// OWL-NEW-RENDERING
+QUnit.skip('read more/less links are not duplicated when switching from read to edit mode', async function (assert) {
     assert.expect(5);
 
     this.data['mail.message'].records.push({
@@ -686,7 +687,8 @@ QUnit.test('read more/less links are not duplicated when switching from read to 
     );
 });
 
-QUnit.test('read more links becomes read less after being clicked', async function (assert) {
+// OWL-NEW-RENDERING
+QUnit.skip('read more links becomes read less after being clicked', async function (assert) {
     assert.expect(6);
 
     this.data['mail.message'].records = [{
