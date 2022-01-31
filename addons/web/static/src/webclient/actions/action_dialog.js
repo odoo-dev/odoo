@@ -30,10 +30,10 @@ ActionDialog.components = { ...Dialog.components, DebugMenu };
 ActionDialog.template = "web.ActionDialog";
 ActionDialog.bodyTemplate = "web.ActionDialogBody";
 ActionDialog.props = {
+    ...Dialog.props,
     ActionComponent: { optional: true },
     actionProps: { optional: true },
     title: { optional: true },
-    close: Function,
 };
 
 /**

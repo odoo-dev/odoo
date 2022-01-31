@@ -10,10 +10,10 @@ const { xml } = owl;
 const debugRegistry = registry.category("debug");
 
 class FieldViewGetDialog extends Dialog {}
-FieldViewGetDialog.props = Object.assign({}, Dialog.props, {
+FieldViewGetDialog.props = {
+    ...Dialog.props,
     arch: { type: String },
-    close: Function,
-});
+};
 FieldViewGetDialog.bodyTemplate = xml`<pre t-esc="props.arch"/>`;
 FieldViewGetDialog.title = _lt("Fields View Get");
 
@@ -93,5 +93,5 @@ debugRegistry
     .category("view")
     .add("viewSeparator", viewSeparator)
     .add("fieldsViewGet", fieldsViewGet)
-    // NXOWL .add("editView", editView) // BOI
+    .add("editView", editView)
     .add("editSearchView", editSearchView);
