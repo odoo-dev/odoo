@@ -630,8 +630,6 @@ odoo.define('web.OwlCompatibility', function (require) {
 
         destroy() {
             if (["willMount", "unmounted"].includes(this.status)) {
-                // NXOWL: not sure with willMount --> useEffect cleanup not defined
-                // because onMounted is not called and destroy is called
                 recursiveCall(this.node, false, (node) => {
                     node.willUnmount = [];
                 });
