@@ -66,7 +66,6 @@ odoo.define('point_of_sale.Draggable', function(require) {
                 this.limitAreaHeight = this.limitAreaBoundingRect.height;
     
                 // absolutely position the element then remove the transform.
-                //NXOWL use a t-ref instead?
                 const elBoundingRect = this.el.getBoundingClientRect();
                 this.el.style.top = `${elBoundingRect.top}px`;
                 this.el.style.left = `${elBoundingRect.left}px`;
