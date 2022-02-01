@@ -6,16 +6,10 @@ import { popoverService } from "@web/core/popover/popover_service";
 import { useTooltip } from "@web/core/tooltip/tooltip_hook";
 import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
-import {
-    destroy,
-    getFixture,
-    mount,
-    nextTick,
-    patchWithCleanup,
-    triggerEvent,
-} from "../../helpers/utils";
+import { destroy, getFixture, nextTick, patchWithCleanup, triggerEvent } from "../../helpers/utils";
+import { registerCleanup } from "../../helpers/cleanup";
 
-const { Component, useState, xml } = owl;
+const { App, Component, useState, xml } = owl;
 
 const mainComponents = registry.category("main_components");
 
@@ -24,16 +18,16 @@ const mainComponents = registry.category("main_components");
  *
  * @param {Component} Child a child Component that contains nodes with "data-tooltip" attribute
  * @param {Object} [options]
- * @param {function} options.mockSetTimeout the mocked setTimeout to use (by default, calls the
+ * @param {function} [options.mockSetTimeout] the mocked setTimeout to use (by default, calls the
  *   callback directly)
- * @param {function} options.mockSetInterval the mocked setInterval to use (by default, calls the
+ * @param {function} [options.mockSetInterval] the mocked setInterval to use (by default, calls the
  *   callback directly)
- * @param {function} options.mockClearTimeout the mocked clearTimeout to use (by default, does nothing)
- * @param {function} options.mockClearInterval the mocked clearInterval to use (by default, does nothing)
+ * @param {function} [options.mockClearTimeout] the mocked clearTimeout to use (by default, does nothing)
+ * @param {function} [options.mockClearInterval] the mocked clearInterval to use (by default, does nothing)
+ * @param {{[templateName:string]: string}} [options.templates] additional templates
  * @returns {Promise<Component>}
  */
 async function makeParent(Child, options = {}) {
-    const { templates } = options;
     const target = getFixture();
 
     // add the popover service to the registry -> will add the PopoverContainer
@@ -66,7 +60,18 @@ async function makeParent(Child, options = {}) {
         clearInterval: options.mockClearInterval || (() => {}),
     });
 
-    return mount(Parent, { env, target, templates });
+    const app = new App(Parent, {
+        env,
+        target,
+        templates: window.__ODOO_TEMPLATES__,
+        dev: env.debug,
+    });
+    registerCleanup(() => app.destroy());
+    for (const [name, template] of Object.entries(options.templates || {})) {
+        app.addTemplate(name, template);
+    }
+
+    return app.mount(target);
 }
 
 QUnit.module("Tooltip hook", () => {

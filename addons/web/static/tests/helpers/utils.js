@@ -343,7 +343,7 @@ export function mockAnimationFrame() {
     };
 }
 
-export async function mount(Comp, { props, target, env, templates }) {
+export async function mount(Comp, { props, target, env }) {
     env = env || {};
     const configuration = {
         env,
@@ -355,13 +355,6 @@ export async function mount(Comp, { props, target, env, templates }) {
         configuration.translateFn = env._t;
     }
     const app = new App(Comp, configuration);
-    // Additional templates
-    // NXOWL to discuss: maybe there is a way to modify the tagging template xml
-    // function in order to use a self reference inside the template string ?
-    // The following for-of loop covers the only "recursive template" use case...
-    for (const [name, template] of Object.entries(templates || {})) {
-        app.addTemplate(name, template);
-    }
     registerCleanup(() => app.destroy());
     return app.mount(target);
 }

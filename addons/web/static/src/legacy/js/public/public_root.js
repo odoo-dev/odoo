@@ -407,11 +407,7 @@ export async function createPublicRoot(RootWidget) {
     const wowlEnv = makeEnv();
 
     const templates = await loadBundleTemplates("web.assets_frontend");
-    Object.defineProperty(window, "__ODOO_TEMPLATES__", {
-        get() {
-            return templates.cloneNode(true);
-        },
-    });
+    window.__ODOO_TEMPLATES__ = templates;
     await startServices(wowlEnv);
     mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv);
     class RootParent extends Component {}
