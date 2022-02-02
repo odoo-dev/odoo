@@ -358,7 +358,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/underscore.string/lib/underscore.string.js',
             'web/static/lib/moment/moment.js',
             'web/static/lib/owl/owl.js',
-            'web/static/src/owl_next_adapter.js',
+            'web/static/src/owl2_compatibility/*.js',
             'web/static/src/legacy/js/component_extension.js',
             'web/static/lib/jquery/jquery.js',
             'web/static/lib/jquery.ui/jquery-ui.js',
@@ -404,7 +404,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/core/ajax.js',
             'web/static/src/legacy/js/core/browser_detection.js',
             'web/static/src/legacy/js/core/bus.js',
-            'web/static/src/legacy/js/core/custom_hooks.js',
             'web/static/src/legacy/js/core/class.js',
             'web/static/src/legacy/js/core/collections.js',
             'web/static/src/legacy/js/core/concurrency.js',
@@ -451,6 +450,11 @@ This module provides the core of the Odoo Web Client.
             # No tours are defined in web, but the bundle "assets_tests" is
             # first called in web.
             'web/static/tests/legacy/helpers/test_utils_file.js'
+        ],
+        # remove this bundle alongside the owl2 compatibility layer
+        'web.tests_assets_common': [
+            ('include', 'web.assets_common'),
+            ('after', 'web/static/src/owl2_compatibility/app.js', 'web/static/tests/owl2_compatibility_app.js'),
         ],
         'web.tests_assets': [
             'web/static/lib/qunit/qunit-2.9.1.css',
