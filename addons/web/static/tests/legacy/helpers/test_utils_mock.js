@@ -413,12 +413,6 @@ async function addMockEnvironmentOwl(Component, params, mockServer) {
     const originalEnv = Component.env;
     const __env = makeTestEnvironment(env, mockServer.performRpc.bind(mockServer));
     owl.Component.env = __env;
-    // const setupComp = Component.prototype.setup;
-    // Component.prototype.setup = function () {
-    //     this.env = __env;
-    //     this.__owl__.childEnv = __env;
-    //     setupComp.call(this);
-    // };
 
     // while we have a mix between Owl and legacy stuff, some of them triggering
     // events on the env.bus (a new Bus instance especially created for the current

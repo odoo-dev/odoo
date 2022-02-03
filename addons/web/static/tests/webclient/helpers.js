@@ -36,7 +36,13 @@ import {
     makeFakeRouterService,
     makeFakeHTTPService,
 } from "../helpers/mock_services";
-import { getFixture, legacyExtraNextTick, nextTick, patchWithCleanup } from "../helpers/utils";
+import {
+    getFixture,
+    legacyExtraNextTick,
+    mount,
+    nextTick,
+    patchWithCleanup,
+} from "../helpers/utils";
 import session from "web.session";
 import LegacyMockServer from "web.MockServer";
 import Widget from "web.Widget";
@@ -46,9 +52,8 @@ import { ClientActionAdapter, ViewAdapter } from "@web/legacy/action_adapters";
 import { commandService } from "@web/core/commands/command_service";
 import { CustomFavoriteItem } from "@web/search/favorite_menu/custom_favorite_item";
 import { standaloneAdapter } from "web.OwlCompatibility";
-import { renderToString } from "@web/core/utils/render";
 
-const { App, Component, onMounted, xml } = owl;
+const { Component, onMounted, xml } = owl;
 
 const actionRegistry = registry.category("actions");
 const serviceRegistry = registry.category("services");
@@ -271,21 +276,13 @@ export async function createWebClient(params) {
 
     const WebClientClass = params.WebClientClass || WebClient;
     const target = params && params.target ? params.target : getFixture();
-
-    const app = new App(WebClientClass, {
-        env,
-        dev: env.debug,
-        templates: window.__ODOO_TEMPLATES__,
-    });
-    renderToString.app = app;
-    const wc = await app.mount(target);
+    const wc = await mount(WebClientClass, { env, target });
     registerCleanup(() => {
         for (const controller of controllers) {
             if (!controller.isDestroyed()) {
                 controller.destroy();
             }
         }
-        app.destroy();
     });
     // Wait for visual changes caused by a potential loadState
     await nextTick();

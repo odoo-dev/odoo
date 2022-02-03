@@ -1,14 +1,10 @@
 /** @odoo-module **/
 
-import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { getFixture } from "@web/../tests/helpers/utils";
-import { renderToString } from "@web/core/utils/render";
+import { getFixture, mount } from "@web/../tests/helpers/utils";
 import { getDefaultConfig, View } from "@web/views/view";
 import { _fieldsViewGet } from "../helpers/mock_server";
 import { addLegacyMockEnvironment } from "../webclient/helpers";
-
-const { App } = owl;
 
 /**
  * @typedef {{
@@ -78,27 +74,14 @@ export const makeView = async (params) => {
         });
     }
     addLegacyMockEnvironment(env, legacyParams);
-    //
 
     const target = getFixture();
-
-    const app = new App(View, {
-        env,
-        dev: env.debug,
-        props,
-        templates: window.__ODOO_TEMPLATES__,
-    });
-
-    renderToString.app = app;
-    const view = await app.mount(target);
-
-    registerCleanup(() => app.destroy());
+    const view = await mount(View, { env, props, target });
 
     const viewNode = view.__owl__;
     const withSearchNode = Object.values(viewNode.children)[0];
     const concreteViewNode = Object.values(withSearchNode.children)[0];
     const concreteView = concreteViewNode.component;
-    //
 
     return concreteView;
 };
