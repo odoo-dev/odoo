@@ -80,7 +80,7 @@ odoo.define('web.popover_tests', function (require) {
                 return hasCorrectClass && correctLeft && correctTop;
             }
 
-            const parent = await mount(Parent, { env, target });
+            const parent = await mount(Parent, target, { env });
             const body = document.querySelector('body');
             let popover, title;
             // Show/hide
@@ -169,7 +169,7 @@ odoo.define('web.popover_tests', function (require) {
 
             const body = document.querySelector('body');
 
-            await mount(Parent, { env, target });
+            await mount(Parent, target, { env });
             // Show first popover
             assert.containsNone(body, '.o_popover');
             await click(body, '#firstTarget');
@@ -207,7 +207,7 @@ odoo.define('web.popover_tests', function (require) {
             const target = testUtils.prepareTarget();
             const env = makeTestEnvironment();
 
-            await mount(Parent, { env, target });
+            await mount(Parent, target, { env });
 
             const body = document.querySelector('body');
             assert.containsOnce(body, '#open');
@@ -251,7 +251,7 @@ odoo.define('web.popover_tests', function (require) {
             const target = testUtils.prepareTarget();
             const env = makeTestEnvironment();
 
-            await mount(Parent, { env, target });
+            await mount(Parent, target, { env });
 
             const body = document.querySelector('body');
             assert.containsOnce(body, '#open');

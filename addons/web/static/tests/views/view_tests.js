@@ -1282,7 +1282,7 @@ QUnit.module("Views", (hooks) => {
         const target = getFixture();
         const props = { resModel: "animal", type: "toy", arch: "<toy/>" };
         try {
-            await mount(View, { env, props, target });
+            await mount(View, target, { env, props });
         } catch (error) {
             assert.step(error.message);
         }
@@ -1574,7 +1574,7 @@ QUnit.module("Views", (hooks) => {
         Parent.components = { View };
 
         const target = getFixture();
-        const parent = await mount(Parent, { env, target });
+        const parent = await mount(Parent, target, { env });
 
         parent.state.domain = [["type", "=", "herbivorous"]];
 

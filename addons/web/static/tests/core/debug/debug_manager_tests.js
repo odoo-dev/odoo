@@ -105,7 +105,7 @@ QUnit.module("DebugMenu", (hooks) => {
                 return null;
             });
         const env = await makeTestEnv(testConfig);
-        const debugManager = await mount(DebugMenuParent, { env, target });
+        const debugManager = await mount(DebugMenuParent, target, { env });
         let debugManagerEl = debugManager.el;
         await click(debugManager.el.querySelector("button.dropdown-toggle"));
         debugManagerEl = debugManager.el;
@@ -161,7 +161,7 @@ QUnit.module("DebugMenu", (hooks) => {
                 };
             });
         const env = await makeTestEnv(testConfig);
-        const debugManager = await mount(DebugMenuParent, { env, target });
+        const debugManager = await mount(DebugMenuParent, target, { env });
         await click(debugManager.el.querySelector("button.dropdown-toggle"));
         const items = [...debugManager.el.querySelectorAll(".dropdown-menu .dropdown-item")];
         assert.deepEqual(
@@ -172,9 +172,8 @@ QUnit.module("DebugMenu", (hooks) => {
 
     QUnit.test("Don't display the DebugMenu if debug mode is disabled", async (assert) => {
         const env = await makeTestEnv(testConfig);
-        await mount(ActionDialog, {
+        await mount(ActionDialog, target, {
             env,
-            target,
             props: { close: () => {} },
         });
         assert.containsOnce(target, ".o_dialog");
@@ -226,9 +225,8 @@ QUnit.module("DebugMenu", (hooks) => {
             }
             patchWithCleanup(odoo, { debug: "1" });
             const env = await makeTestEnv(testConfig);
-            await mount(WithCustom, {
+            await mount(WithCustom, target, {
                 env,
-                target,
                 props: { close: () => {} },
             });
             assert.containsOnce(target, ".o_dialog");
@@ -272,7 +270,7 @@ QUnit.module("DebugMenu", (hooks) => {
         });
         debugRegistry.category("default").add("regenerateAssets", regenerateAssets);
         const env = await makeTestEnv(testConfig);
-        const debugManager = await mount(DebugMenuParent, { env, target });
+        const debugManager = await mount(DebugMenuParent, target, { env });
         await click(debugManager.el.querySelector("button.dropdown-toggle"));
         assert.containsOnce(debugManager.el, ".dropdown-menu .dropdown-item");
         const item = debugManager.el.querySelector(".dropdown-menu .dropdown-item");

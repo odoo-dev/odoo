@@ -57,7 +57,7 @@ QUnit.module("Tours", (hooks) => {
         };
         const env = await makeTestEnv({ mockRPC });
 
-        const debugManager = await mount(DebugMenuParent, { env, target });
+        const debugManager = await mount(DebugMenuParent, target, { env });
 
         await click(debugManager.el.querySelector("button.dropdown-toggle"));
 

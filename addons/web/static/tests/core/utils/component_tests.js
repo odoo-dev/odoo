@@ -30,7 +30,7 @@ QUnit.module("utils", () => {
         Parent.components = { Child, NotUpdatable };
 
         const target = getFixture();
-        const parent = await mount(Parent, { env: makeTestEnv(), target });
+        const parent = await mount(Parent, target, { env: makeTestEnv() });
         assert.verifySteps(["mounted", "mounted"]);
 
         await parent.render();
@@ -64,7 +64,7 @@ QUnit.module("utils", () => {
         Parent.components = { Boom, ErrorHandler };
 
         const target = getFixture();
-        await mount(Parent, { env: makeTestEnv(), target });
+        await mount(Parent, target, { env: makeTestEnv() });
         assert.strictEqual(target.innerHTML, "<div> not boom </div>");
     });
 });

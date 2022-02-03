@@ -75,9 +75,7 @@ export const makeView = async (params) => {
     }
     addLegacyMockEnvironment(env, legacyParams);
 
-    const target = getFixture();
-    const view = await mount(View, { env, props, target });
-
+    const view = await mount(View, getFixture(), { env, props });
     const viewNode = view.__owl__;
     const withSearchNode = Object.values(viewNode.children)[0];
     const concreteViewNode = Object.values(withSearchNode.children)[0];

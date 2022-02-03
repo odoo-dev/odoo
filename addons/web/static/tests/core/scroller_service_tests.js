@@ -35,7 +35,7 @@ QUnit.test("Ignore empty hrefs", async (assert) => {
             </button>
         </div>`;
 
-    const comp = await mount(MyComponent, { env, target });
+    const comp = await mount(MyComponent, target, { env });
 
     /**
      * To determine whether the hash changed we need to use a custom hash for
@@ -103,7 +103,7 @@ QUnit.test("Simple rendering with a scroll", async (assert) => {
             <div id="scrollToHere">sroll here!</div>
         </div>
     `;
-    const comp = await mount(MyComponent, { env, target: scrollableParent });
+    await mount(MyComponent, scrollableParent, { env });
 
     assert.strictEqual(scrollableParent.scrollTop, 0);
     await click(scrollableParent, ".btn.btn-primary");
@@ -166,7 +166,7 @@ QUnit.test("Rendering with multiple anchors and scrolls", async (assert) => {
             <a href="#anchor2" class="link2">TO ANCHOR 2</a>
         </div>
     `;
-    const comp = await mount(MyComponent, { env, target: scrollableParent });
+    await mount(MyComponent, scrollableParent, { env });
     assert.strictEqual(scrollableParent.scrollTop, 0);
     await click(scrollableParent, ".link1");
 
@@ -213,7 +213,7 @@ QUnit.test("clicking anchor when no scrollable", async (assert) => {
             </div>
         </div>
     `;
-    const comp = await mount(MyComponent, { env, target: scrollableParent });
+    await mount(MyComponent, scrollableParent, { env });
     assert.strictEqual(scrollableParent.scrollTop, 0);
     await click(scrollableParent, ".btn.btn-primary");
     assert.ok(scrollableParent.scrollTop === 0, "no scroll happened");
@@ -288,7 +288,7 @@ QUnit.test("clicking anchor when multi levels scrollables", async (assert) => {
                 </p>
         </div>
     `;
-    const comp = await mount(MyComponent, { env, target: scrollableParent });
+    await mount(MyComponent, scrollableParent, { env });
 
     const border = (el) => {
         // Returns the state of the element in relation to the borders
@@ -361,7 +361,7 @@ QUnit.test("Simple scroll to HTML elements", async (assert) => {
             </p>
         </div>
     `;
-    const comp = await mount(MyComponent, { env, target: scrollableParent });
+    await mount(MyComponent, scrollableParent, { env });
     assert.strictEqual(scrollableParent.scrollTop, 0);
 
     // The element must be contained in the scrollable parent (top and bottom)

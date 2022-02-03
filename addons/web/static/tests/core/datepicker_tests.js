@@ -40,11 +40,10 @@ const mountPicker = async (Picker, props) => {
     `;
 
     const env = await makeTestEnv();
-    const target = getFixture();
     if (!props.onDateTimeChanged) {
         props.onDateTimeChanged = () => {};
     }
-    const parent = await mount(Parent, { env, props: { Picker, props }, target });
+    const parent = await mount(Parent, getFixture(), { env, props: { Picker, props } });
     return parent;
 };
 

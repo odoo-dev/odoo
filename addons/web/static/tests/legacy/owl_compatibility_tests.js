@@ -65,7 +65,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
         });
@@ -95,7 +95,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
         });
@@ -135,7 +135,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            await mount(Parent, { target });
+            await mount(Parent, target);
         });
 
         QUnit.test("sub widget with several arguments (specific Adapter)", async function (assert) {
@@ -169,7 +169,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
         });
@@ -200,7 +200,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
         });
@@ -247,7 +247,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
 
@@ -309,7 +309,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { AsyncComponent, MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hi World!</div><div>Hello World!</div>');
 
@@ -354,7 +354,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.verifySteps(['on_attach_callback']);
 
@@ -386,7 +386,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>widget</div><div>component</div>');
         });
@@ -418,7 +418,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             widget.trigger_up('some-event', { value: 'a' });
             widget.trigger_up('some_event', { value: 'b' }); // _ are converted to -
@@ -453,7 +453,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             });
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target, env: owl.Component.env });
+            const parent = await mount(Parent, target, { env: owl.Component.env });
 
             assert.strictEqual(parent.el.innerHTML, '<div></div>');
             assert.verifySteps(['some/route 2']);
@@ -498,7 +498,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { env, target });
+            const parent = await mount(Parent, target, { env });
         });
 
         QUnit.test("sub widget that requests the session", async function (assert) {
@@ -525,7 +525,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             });
 
             const target = testUtils.prepareTarget();
-            await mount(Parent, { target, env: owl.Component.env });
+            await mount(Parent, target, { env: owl.Component.env });
             cleanUp();
         });
 
@@ -558,7 +558,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             });
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target, env: owl.Component.env });
+            const parent = await mount(Parent, target, { env: owl.Component.env });
 
             assert.strictEqual(parent.el.innerHTML, '<div></div>');
 
@@ -596,7 +596,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hi</div>');
 
@@ -640,7 +640,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hi</div>');
             myWidget.trigger_up('some-event', { value: 'a' });
@@ -709,7 +709,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             const widgetEl = myWidget.el;
 
@@ -780,7 +780,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, { target });
+            const parent = await mount(Parent, target);
 
             assert.containsOnce(target, ".widget_id_0");
 
@@ -1517,7 +1517,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
 
 
             const target = testUtils.prepareTarget();
-            const parent = await mount(Parent, {target});
+            const parent = await mount(Parent, target);
 
             assert.strictEqual(parent.el.innerHTML, '<div><span>Component</span></div>');
 

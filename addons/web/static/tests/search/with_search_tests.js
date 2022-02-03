@@ -327,7 +327,7 @@ QUnit.module("Search", (hooks) => {
         Parent.template = xml`<WithSearch t-props="state"/>`;
         Parent.components = { WithSearch };
 
-        const parent = await mount(Parent, { env, target });
+        const parent = await mount(Parent, target, { env });
         parent.state.domain = [["type", "=", "herbivorous"]];
 
         await nextTick();

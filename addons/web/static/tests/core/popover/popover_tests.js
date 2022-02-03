@@ -34,8 +34,7 @@ QUnit.module("Popover", {
 });
 
 QUnit.test("popover can have custom class", async (assert) => {
-    await mount(Popover, {
-        target: fixture,
+    await mount(Popover, fixture, {
         props: { target: popoverTarget, popoverClass: "custom-popover" },
     });
 
@@ -43,8 +42,7 @@ QUnit.test("popover can have custom class", async (assert) => {
 });
 
 QUnit.test("popover is rendered nearby target (default)", async (assert) => {
-    await mount(Popover, {
-        target: fixture,
+    await mount(Popover, fixture, {
         props: { target: popoverTarget },
     });
 
@@ -53,8 +51,7 @@ QUnit.test("popover is rendered nearby target (default)", async (assert) => {
 });
 
 QUnit.test("popover is rendered nearby target (bottom)", async (assert) => {
-    await mount(Popover, {
-        target: fixture,
+    await mount(Popover, fixture, {
         props: { target: popoverTarget, position: "bottom" },
     });
 
@@ -63,8 +60,7 @@ QUnit.test("popover is rendered nearby target (bottom)", async (assert) => {
 });
 
 QUnit.test("popover is rendered nearby target (top)", async (assert) => {
-    await mount(Popover, {
-        target: fixture,
+    await mount(Popover, fixture, {
         props: { target: popoverTarget, position: "top" },
     });
 
@@ -73,8 +69,7 @@ QUnit.test("popover is rendered nearby target (top)", async (assert) => {
 });
 
 QUnit.test("popover is rendered nearby target (left)", async (assert) => {
-    await mount(Popover, {
-        target: fixture,
+    await mount(Popover, fixture, {
         props: { target: popoverTarget, position: "left" },
     });
 
@@ -83,8 +78,7 @@ QUnit.test("popover is rendered nearby target (left)", async (assert) => {
 });
 
 QUnit.test("popover is rendered nearby target (right)", async (assert) => {
-    await mount(Popover, {
-        target: fixture,
+    await mount(Popover, fixture, {
         props: { target: popoverTarget, position: "right" },
     });
 

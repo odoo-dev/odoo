@@ -29,7 +29,7 @@ async function createSwitchCompanyMenu(routerParams = {}, toggleDelay = 0) {
     }
     const env = await makeTestEnv();
     const target = getFixture();
-    const scMenu = await mount(SwitchCompanyMenu, { env, target });
+    const scMenu = await mount(SwitchCompanyMenu, target, { env });
     return scMenu;
 }
 

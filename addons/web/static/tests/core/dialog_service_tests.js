@@ -58,7 +58,7 @@ QUnit.test("Simple rendering with a single dialog", async (assert) => {
     assert.expect(4);
     class CustomDialog extends Dialog {}
     CustomDialog.title = "Welcome";
-    await mount(PseudoWebClient, { env, target });
+    await mount(PseudoWebClient, target, { env });
     assert.containsNone(target, ".o_dialog_container .o_dialog");
     env.services.dialog.add(CustomDialog);
     await nextTick();
@@ -74,7 +74,7 @@ QUnit.test("Simple rendering and close a single dialog", async (assert) => {
     class CustomDialog extends Dialog {}
     CustomDialog.title = "Welcome";
 
-    await mount(PseudoWebClient, { env, target });
+    await mount(PseudoWebClient, target, { env });
     assert.containsNone(target, ".o_dialog_container .o_dialog");
 
     const removeDialog = env.services.dialog.add(CustomDialog);
@@ -100,7 +100,7 @@ QUnit.test("rendering with two dialogs", async (assert) => {
             this.title = this.props.title;
         }
     }
-    await mount(PseudoWebClient, { env, target });
+    await mount(PseudoWebClient, target, { env });
     assert.containsNone(target, ".o_dialog_container .o_dialog");
     env.services.dialog.add(CustomDialog, { title: "Hello" });
     await nextTick();
@@ -126,7 +126,7 @@ QUnit.test("multiple dialogs can become the UI active element", async (assert) =
             this.title = this.props.title;
         }
     }
-    await mount(PseudoWebClient, { env, target });
+    await mount(PseudoWebClient, target, { env });
 
     env.services.dialog.add(CustomDialog, { title: "Hello" });
     await nextTick();
@@ -171,7 +171,7 @@ QUnit.test("Interactions between multiple dialogs", async (assert) => {
             this.title = this.props.title;
         }
     }
-    await mount(PseudoWebClient, { env, target });
+    await mount(PseudoWebClient, target, { env });
 
     env.services.dialog.add(CustomDialog, { title: "Hello" });
     await nextTick();
@@ -251,7 +251,7 @@ QUnit.test("dialog component crashes", async (assert) => {
     serviceRegistry.add("error", errorService);
     serviceRegistry.add("localization", makeFakeLocalizationService());
 
-    await mount(PseudoWebClient, { env, target });
+    await mount(PseudoWebClient, target, { env });
 
     env.services.dialog.add(FailingDialog);
     await prom;

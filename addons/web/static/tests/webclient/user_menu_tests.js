@@ -84,7 +84,7 @@ QUnit.test("can be rendered", async (assert) => {
             },
         };
     });
-    userMenu = await mount(UserMenu, { env, target });
+    userMenu = await mount(UserMenu, target, { env });
     let userMenuEl = userMenu.el;
     assert.containsOnce(userMenuEl, "img.o_user_avatar");
     assert.strictEqual(
@@ -121,7 +121,7 @@ QUnit.test("can be rendered", async (assert) => {
 QUnit.test("display the correct name in debug mode", async (assert) => {
     patchWithCleanup(odoo, { debug: "1" });
     env = await makeTestEnv();
-    userMenu = await mount(UserMenu, { env, target });
+    userMenu = await mount(UserMenu, target, { env });
     let userMenuEl = userMenu.el;
     assert.containsOnce(userMenuEl, "img.o_user_avatar");
     assert.containsOnce(userMenuEl, "span.oe_topbar_name");
@@ -156,7 +156,7 @@ QUnit.test("can execute the callback of settings", async (assert) => {
 
     env = await makeTestEnv(testConfig);
     userMenuRegistry.add("profile", preferencesItem);
-    userMenu = await mount(UserMenu, { env, target });
+    userMenu = await mount(UserMenu, target, { env });
     await click(userMenu.el.querySelector("button.dropdown-toggle"));
     assert.containsOnce(userMenu.el, ".dropdown-menu .dropdown-item");
     const item = userMenu.el.querySelector(".dropdown-menu .dropdown-item");

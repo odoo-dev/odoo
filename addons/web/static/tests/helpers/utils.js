@@ -343,7 +343,8 @@ export function mockAnimationFrame() {
     };
 }
 
-export async function mount(Comp, { props, target, env }) {
+export async function mount(Comp, target, config = {}) {
+    let { props, env } = config;
     env = env || {};
     const configuration = {
         env,

@@ -276,7 +276,7 @@ export async function createWebClient(params) {
 
     const WebClientClass = params.WebClientClass || WebClient;
     const target = params && params.target ? params.target : getFixture();
-    const wc = await mount(WebClientClass, { env, target });
+    const wc = await mount(WebClientClass, target, { env });
     registerCleanup(() => {
         for (const controller of controllers) {
             if (!controller.isDestroyed()) {

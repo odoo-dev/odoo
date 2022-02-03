@@ -29,7 +29,7 @@ QUnit.module("Components", (hooks) => {
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        const container = await mount(MainComponentsContainer, { env, target, props: {} });
+        const container = await mount(MainComponentsContainer, target, { env, props: {} });
         assert.equal(
             container.el.outerHTML,
             "<div><span>MainComponentA</span><span>MainComponentB</span></div>"
@@ -56,7 +56,7 @@ QUnit.module("Components", (hooks) => {
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        const container = await mount(MainComponentsContainer, { env, target, props: {} });
+        const container = await mount(MainComponentsContainer, target, { env, props: {} });
         assert.equal(
             container.el.outerHTML,
             "<div><span>MainComponentA</span><span>MainComponentB</span></div>"
@@ -101,7 +101,7 @@ QUnit.module("Components", (hooks) => {
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        const container = await mount(MainComponentsContainer, { env, target, props: {} });
+        const container = await mount(MainComponentsContainer, target, { env, props: {} });
         assert.equal(
             container.el.outerHTML,
             "<div><span>MainComponentA</span><span>MainComponentB</span></div>"

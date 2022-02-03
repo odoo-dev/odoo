@@ -66,7 +66,7 @@ QUnit.module("Components", (hooks) => {
             `;
 
         const env = await makeTestEnv();
-        parent = await mount(Parent, { env, target, props: {} });
+        parent = await mount(Parent, target, { env, props: {} });
         assert.containsOnce(target, ".o_dialog");
         assert.containsOnce(
             target,
@@ -103,7 +103,7 @@ QUnit.module("Components", (hooks) => {
           `;
         Parent.components = { SimpleDialog };
         const env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsN(target, ".o_dialog", 2);
         assert.deepEqual(
             [...target.querySelectorAll("header .modal-title")].map((el) => el.textContent),
@@ -131,7 +131,7 @@ QUnit.module("Components", (hooks) => {
             </MyDialog>
         `;
         Parent.components = { MyDialog };
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsOnce(target, ".o_dialog");
         await click(target, ".o_dialog header button.close");
         assert.verifySteps(["close"]);
@@ -155,7 +155,7 @@ QUnit.module("Components", (hooks) => {
                 </MyDialog>
             `;
             Parent.components = { MyDialog };
-            parent = await mount(Parent, { env, target });
+            parent = await mount(Parent, target, { env });
             assert.containsOnce(target, ".o_dialog");
             await click(target, ".o_dialog footer button");
             assert.verifySteps(["close"]);
@@ -187,7 +187,7 @@ QUnit.module("Components", (hooks) => {
           `;
         Parent.components = { SimpleButtonsDialog };
         const env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsOnce(target, ".o_dialog");
         assert.containsN(target, ".o_dialog footer button", 2);
     });
@@ -215,7 +215,7 @@ QUnit.module("Components", (hooks) => {
               </SimpleDialog>
           `;
         const env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsOnce(target, ".o_dialog");
         assert.containsOnce(target, ".o_dialog main .o_subcomponent");
         assert.strictEqual(target.querySelector(".o_subcomponent").textContent, "Wow(l) Effect");
@@ -231,7 +231,7 @@ QUnit.module("Components", (hooks) => {
           `;
         const env = await makeTestEnv();
         Parent.components = { SimpleDialog };
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsOnce(target, ".o_dialog");
         assert.containsNone(target, ".o_dialog header");
         assert.containsOnce(target, "main", "a dialog has always a main node");
@@ -250,7 +250,7 @@ QUnit.module("Components", (hooks) => {
       </div>`;
         Parent.components = { SimpleDialog };
         const env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsN(target, ".o_dialog", 4);
         assert.containsOnce(
             target,
@@ -278,7 +278,7 @@ QUnit.module("Components", (hooks) => {
           `;
         Parent.components = { SimpleDialog };
         const env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsOnce(target, ".o_dialog");
         assert.hasClass(target.querySelector(".o_dialog .modal"), "o_modal_full");
     });
@@ -310,7 +310,7 @@ QUnit.module("Components", (hooks) => {
         Parent.template = xml`<div><SimpleDialog setModalRef="setModalRef.bind(this)"/></div>`;
         Parent.components = { SimpleDialog };
 
-        const parent = await mount(Parent, { env, target });
+        const parent = await mount(Parent, target, { env });
         destroy(parent);
 
         assert.strictEqual(

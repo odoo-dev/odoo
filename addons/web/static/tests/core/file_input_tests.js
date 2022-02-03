@@ -28,10 +28,9 @@ async function createFileInput(config) {
         target.addEventListener("uploaded", config.onUploaded);
     }
 
-    const fileInput = await mount(FileInput, {
+    const fileInput = await mount(FileInput, target, {
         env,
         props: config.props,
-        target,
     });
     return fileInput;
 }

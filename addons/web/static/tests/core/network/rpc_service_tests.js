@@ -139,7 +139,7 @@ QUnit.test("rpc coming from destroyed components are left pending", async (asser
         serviceRegistry,
     });
     const target = getFixture();
-    const component = await mount(MyComponent, { env, target });
+    const component = await mount(MyComponent, target, { env });
     let isResolved = false;
     let isFailed = false;
     component
@@ -172,7 +172,7 @@ QUnit.test("rpc initiated from destroyed components throw exception", async (ass
         serviceRegistry,
     });
     const target = getFixture();
-    const component = await mount(MyComponent, { env, target });
+    const component = await mount(MyComponent, target, { env });
     destroy(component);
     try {
         await component.rpc("/my/route");

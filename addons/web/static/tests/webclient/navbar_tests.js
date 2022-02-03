@@ -51,7 +51,7 @@ QUnit.module("Navbar", {
 QUnit.test("can be rendered", async (assert) => {
     const env = await makeTestEnv(baseConfig);
     const target = getFixture();
-    const navbar = await mount(NavBar, { env, target });
+    const navbar = await mount(NavBar, target, { env });
     assert.containsOnce(
         navbar.el,
         ".o_navbar_apps_menu button.dropdown-toggle",
@@ -62,7 +62,7 @@ QUnit.test("can be rendered", async (assert) => {
 QUnit.test("dropdown menu can be toggled", async (assert) => {
     const env = await makeTestEnv(baseConfig);
     const target = getFixture();
-    const navbar = await mount(NavBar, { env, target });
+    const navbar = await mount(NavBar, target, { env });
     const dropdown = navbar.el.querySelector(".o_navbar_apps_menu");
     await click(dropdown, "button.dropdown-toggle");
     assert.containsOnce(dropdown, ".dropdown-menu");
@@ -81,7 +81,7 @@ QUnit.test("data-menu-xmlid attribute on AppsMenu items", async (assert) => {
     };
     const env = await makeTestEnv(baseConfig);
     const target = getFixture();
-    const navbar = await mount(NavBar, { env, target });
+    const navbar = await mount(NavBar, target, { env });
 
     // check apps
     const appsMenu = navbar.el.querySelector(".o_navbar_apps_menu");
@@ -114,7 +114,7 @@ QUnit.test("data-menu-xmlid attribute on AppsMenu items", async (assert) => {
 QUnit.test("navbar can display current active app", async (assert) => {
     const env = await makeTestEnv(baseConfig);
     const target = getFixture();
-    const navbar = await mount(NavBar, { env, target });
+    const navbar = await mount(NavBar, target, { env });
     const dropdown = navbar.el.querySelector(".o_navbar_apps_menu");
     // Open apps menu
     await click(dropdown, "button.dropdown-toggle");
@@ -137,7 +137,7 @@ QUnit.test("navbar can display current active app", async (assert) => {
 QUnit.test("navbar can display systray items", async (assert) => {
     const env = await makeTestEnv(baseConfig);
     const target = getFixture();
-    const navbar = await mount(NavBar, { env, target });
+    const navbar = await mount(NavBar, target, { env });
     assert.containsOnce(navbar.el, "li.my-item");
 });
 
@@ -158,7 +158,7 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
     systrayRegistry.add("addon.myitem4", { Component: MyItem4 });
     const env = await makeTestEnv(baseConfig);
     const target = getFixture();
-    const navbar = await mount(NavBar, { env, target });
+    const navbar = await mount(NavBar, target, { env });
     const menuSystray = navbar.el.getElementsByClassName("o_menu_systray")[0];
     assert.containsN(menuSystray, "li", 4, "four systray items should be displayed");
     assert.strictEqual(menuSystray.innerText, "my item 3\nmy item 4\nmy item 2\nmy item 1");
@@ -192,7 +192,7 @@ QUnit.test("can adapt with 'more' menu sections behavior", async (assert) => {
 
     // Set menu and mount
     env.services.menu.setCurrentMenu(1);
-    const navbar = await mount(MyNavbar, { env, target });
+    const navbar = await mount(MyNavbar, target, { env });
     assert.containsN(
         navbar.el,
         ".o_menu_sections > *:not(.o_menu_sections_more):not(.d-none)",
@@ -275,7 +275,7 @@ QUnit.test(
         target.style.width = "600px";
 
         const env = await makeTestEnv(baseConfig);
-        const navbar = await mount(MyNavbar, { env, target });
+        const navbar = await mount(MyNavbar, target, { env });
         assert.strictEqual(navbar.currentAppSections.length, 0, "0 app sub menus");
         assert.strictEqual(navbar.el.offsetWidth, 600);
         assert.strictEqual(adaptCount, 1);
@@ -377,7 +377,7 @@ QUnit.test("'more' menu sections properly updated on app change", async (assert)
 
     // Set App1 menu and mount
     env.services.menu.setCurrentMenu(1);
-    const navbar = await mount(NavBar, { env, target });
+    const navbar = await mount(NavBar, target, { env });
 
     // Force minimal width and dispatch window resize event
     navbar.el.style.width = "0%";
@@ -441,7 +441,7 @@ QUnit.test("Do not execute adapt when navbar is destroyed", async (assert) => {
 
     // Set menu and mount
     env.services.menu.setCurrentMenu(1);
-    const navbar = await mount(MyNavbar, { env, target });
+    const navbar = await mount(MyNavbar, target, { env });
     assert.verifySteps(["adapt NavBar"]);
     window.dispatchEvent(new Event("resize"));
     prom.resolve();

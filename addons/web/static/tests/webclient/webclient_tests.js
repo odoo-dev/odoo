@@ -43,7 +43,7 @@ QUnit.test("can be rendered", async (assert) => {
     assert.expect(1);
     const env = await makeTestEnv(baseConfig);
     const target = getFixture();
-    await mount(WebClient, { env, target });
+    await mount(WebClient, target, { env });
     assert.containsOnce(target, "header > nav.o_main_navbar");
 });
 
@@ -55,7 +55,7 @@ QUnit.test("can render a main component", async (assert) => {
     mainComponentRegistry.add("mycomponent", { Component: MyComponent });
     const env = await makeTestEnv(baseConfig);
     const target = getFixture();
-    await mount(WebClient, { env, target });
+    await mount(WebClient, target, { env });
     assert.containsOnce(target, ".chocolate");
 });
 
@@ -90,7 +90,7 @@ QUnit.test("control-click propagation stopped on <a href/>", async (assert) => {
     let env = await makeTestEnv(baseConfig);
 
     // Mount the component as standalone and control-click the <a href/>
-    const standaloneComponent = await mount(MyComponent, { env, target });
+    const standaloneComponent = await mount(MyComponent, target, { env });
     assert.verifySteps([]);
     await triggerEvent(standaloneComponent.el, "", "click", { ctrlKey: false });
     await triggerEvent(standaloneComponent.el, "", "click", { ctrlKey: true });
@@ -101,7 +101,7 @@ QUnit.test("control-click propagation stopped on <a href/>", async (assert) => {
     clearRegistryWithCleanup(mainComponentRegistry);
     mainComponentRegistry.add("mycomponent", { Component: MyComponent });
     env = await makeTestEnv(baseConfig);
-    await mount(WebClient, { env, target });
+    await mount(WebClient, target, { env });
     assert.verifySteps([]);
     await triggerEvent(target, ".MyComponent", "click", { ctrlKey: false });
     await triggerEvent(target, ".MyComponent", "click", { ctrlKey: true });

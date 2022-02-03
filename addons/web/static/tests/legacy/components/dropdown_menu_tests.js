@@ -360,7 +360,7 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             const env = makeTestEnvironment();
             const target = testUtils.prepareTarget();
 
-            const parent = await mount(Parent, { env, target });
+            const parent = await mount(Parent, target, { env });
 
             const [menu1, menu2] = parent.el.querySelectorAll('.dropdown');
 
@@ -406,7 +406,7 @@ odoo.define('web.dropdown_menu_tests', function (require) {
             const env = makeTestEnvironment();
             const target = testUtils.prepareTarget();
 
-            const parent = await mount(Parent, { env, target });
+            const parent = await mount(Parent, target, { env });
 
             const menu = parent.el.querySelector(".dropdown");
             assert.doesNotHaveClass(menu, "show", "dropdown should not be open");

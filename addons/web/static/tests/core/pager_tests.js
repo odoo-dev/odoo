@@ -33,7 +33,7 @@ PagerController.components = { Pager };
 async function makePager(props) {
     serviceRegistry.add("ui", uiService);
     const env = await makeTestEnv();
-    const pager = await mount(PagerController, { env, target: getFixture(), props });
+    const pager = await mount(PagerController, getFixture(), { env, props });
     return pager;
 }
 

@@ -45,7 +45,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<Dropdown/>`;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.strictEqual(
             parent.el.outerHTML,
             '<div class="o-dropdown dropdown o-dropdown--no-caret"><button class="dropdown-toggle"></button></div>'
@@ -59,7 +59,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<DropdownItem>coucou</DropdownItem>`;
         Parent.components = { DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.strictEqual(parent.el.outerHTML, '<span class="dropdown-item">coucou</span>');
     });
 
@@ -68,7 +68,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<DropdownItem href="'#'">coucou</DropdownItem>`;
         Parent.components = { DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.strictEqual(parent.el.outerHTML, '<a class="dropdown-item" href="#">coucou</a>');
     });
 
@@ -93,7 +93,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             </Dropdown>`;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         // The item containing the link class contains an href prop,
         // which will turn it into <a href=> So it must be defaultPrevented
         // The other one not contain any href props, it must not be defaultPrevented,
@@ -112,7 +112,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         </Dropdown>`;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         await click(parent.el, "button.dropdown-toggle");
         assert.hasClass(parent.el, "dropdown one");
         const toggler = parent.el.querySelector(".dropdown-toggle");
@@ -138,7 +138,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<Dropdown beforeOpen="beforeOpen"/>`;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         await click(parent.el, "button.dropdown-toggle");
         assert.verifySteps(["beforeOpen"]);
         assert.containsNone(parent.el, ".dropdown-menu");
@@ -162,7 +162,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.template = xml`<Dropdown startOpen="true" beforeOpen="beforeOpen"/>`;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.verifySteps(["beforeOpen"]);
         assert.containsOnce(parent.el, ".dropdown-menu");
     });
@@ -177,7 +177,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         await click(parent.el, "button.dropdown-toggle");
         assert.containsOnce(parent.el, ".dropdown-menu");
         await click(parent.el, "div.outside");
@@ -193,7 +193,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         await click(parent.el, "button.dropdown-toggle");
         await click(parent.el, ".dropdown-menu .dropdown-item");
         assert.containsNone(parent.el, ".dropdown-menu");
@@ -212,7 +212,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         await click(parent.el, "button.dropdown-toggle");
         await click(parent.el, ".dropdown-menu .dropdown-item");
     });
@@ -228,7 +228,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         await click(parent.el, "button.dropdown-toggle:last-child");
         await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
         await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
@@ -246,7 +246,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsN(parent.el, ".dropdown-menu", 3);
     });
 
@@ -264,7 +264,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         await click(parent.el, "button.dropdown-toggle:last-child");
         await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
         await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
@@ -284,7 +284,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         await click(parent.el, "button.dropdown-toggle:last-child");
         await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
         assert.containsN(parent.el, ".dropdown-menu", 2);
@@ -312,7 +312,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         // Open the 2-level dropdowns
         await click(parent.el, "button.dropdown-toggle:last-child");
         await mouseEnter(parent.el, "button.dropdown-toggle:last-child");
@@ -446,7 +446,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
             Parent.components = { Dropdown };
             env = await makeTestEnv();
-            parent = await mount(Parent, { env, target });
+            parent = await mount(Parent, target, { env });
             // Click on ONE
             const one = parent.el.querySelector(".one");
             await click(one, "button");
@@ -495,7 +495,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
             Parent.components = { Dropdown };
             env = await makeTestEnv();
-            parent = await mount(Parent, { env, target });
+            parent = await mount(Parent, target, { env });
             // Click on FOO
             await click(parent.el, ".foo button");
             assert.containsOnce(parent.el, ".dropdown-menu");
@@ -521,7 +521,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
             Parent.components = { Dropdown };
             env = await makeTestEnv();
-            parent = await mount(Parent, { env, target });
+            parent = await mount(Parent, target, { env });
             // Click on BAR1
             await click(parent.el, ".bar1 button");
             assert.containsOnce(parent.el, ".dropdown-menu");
@@ -549,7 +549,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         // Click on one
         await click(parent.el, ".one button");
         assert.containsOnce(parent.el, ".dropdown-menu");
@@ -587,7 +587,7 @@ QUnit.module("Components", ({ beforeEach }) => {
       `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsNone(parent.el, ".dropdown-menu", "menu is closed at start");
 
         triggerHotkey("m", true);
@@ -680,7 +680,7 @@ QUnit.module("Components", ({ beforeEach }) => {
 
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsOnce(parent, ".dropdown");
         assert.containsNone(parent, ".dropdown .dropdown-menu");
         assert.containsNone(parent, ".dropdown button.dropdown-toggle");
@@ -712,7 +712,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         `;
         Parent.components = { Dropdown, DropdownItem };
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsNone(parent.el, ".dropdown-menu", "menus are closed at start");
 
         // Highlighting and selecting items
@@ -803,7 +803,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.components = { Dropdown, DropdownItem };
         serviceRegistry.add("localization", makeFakeLocalizationService({ direction: "rtl" }));
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsNone(parent.el, ".dropdown-menu", "menus are closed at start");
 
         // Highlighting and selecting items
@@ -847,7 +847,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             `;
             Parent.components = { Dropdown, DropdownItem };
             env = await makeTestEnv();
-            parent = await mount(Parent, { env, target });
+            parent = await mount(Parent, target, { env });
             assert.containsNone(parent.el, ".dropdown-menu", "menus are closed at start");
 
             // Open main dropdown
@@ -887,7 +887,7 @@ QUnit.module("Components", ({ beforeEach }) => {
                 };
             },
         });
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.containsNone(parent.el, ".dropdown-menu", "menus are closed at start");
         assert.strictEqual(hotkeyRegistrationsCount, 0, "no hotkey registered");
 
@@ -934,7 +934,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         Parent.components = { Dropdown };
 
         env = await makeTestEnv();
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, target, { env });
         assert.strictEqual(
             parent.el.querySelector("button.dropdown-toggle").dataset.tooltip,
             "My tooltip"

@@ -37,7 +37,7 @@ QUnit.module("Popover hook", {
         registry.category("services").add("popover", popoverService);
         target = getFixture();
         env = await makeTestEnv();
-        await mount(PseudoWebClient, { env, target });
+        await mount(PseudoWebClient, target, { env });
         popoverTarget = target.querySelector("#anchor");
     },
 });
@@ -53,11 +53,11 @@ QUnit.test("close popover when component is unmounted", async (assert) => {
     }
     CompWithPopover.template = xml`<div />`;
 
-    const comp1 = await mount(CompWithPopover, { env, target });
+    const comp1 = await mount(CompWithPopover, target, { env });
     comp1.popover.add(popoverTarget, Comp, { id: "comp1" });
     await nextTick();
 
-    const comp2 = await mount(CompWithPopover, { env, target });
+    const comp2 = await mount(CompWithPopover, target, { env });
     comp2.popover.add(popoverTarget, Comp, { id: "comp2" });
     await nextTick();
 

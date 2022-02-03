@@ -90,7 +90,7 @@ QUnit.module("ActionManager", (hooks) => {
 
         assert.verifySteps(["/web/action/load", "/web/webclient/load_menus"]);
 
-        await mount(WebClient, { env, target: getFixture() });
+        await mount(WebClient, getFixture(), { env });
 
         assert.verifySteps([]);
     });
@@ -106,7 +106,7 @@ QUnit.module("ActionManager", (hooks) => {
 
         assert.verifySteps(["/web/webclient/load_menus"]);
 
-        await mount(WebClient, { env, target: getFixture() });
+        await mount(WebClient, getFixture(), { env });
 
         assert.verifySteps([]);
     });

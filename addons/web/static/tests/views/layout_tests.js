@@ -58,7 +58,7 @@ QUnit.module("Views", (hooks) => {
         ToyComponent.components = { Layout };
 
         const env = await makeTestEnv({ config: {} });
-        const comp = await mount(ToyComponent, { target: getFixture(), env });
+        const comp = await mount(ToyComponent, getFixture(), { env });
 
         assert.hasClass(comp.el, "o_toy_view o_view_sample_data");
         assert.containsNone(comp, ".o_control_panel");

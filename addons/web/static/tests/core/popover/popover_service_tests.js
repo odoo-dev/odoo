@@ -40,7 +40,7 @@ QUnit.module("Popover service", {
 
         fixture = getFixture();
         env = await makeTestEnv();
-        await mount(PseudoWebClient, { env, target: fixture });
+        await mount(PseudoWebClient, fixture, { env });
         popovers = env.services.popover;
         popoverTarget = fixture.querySelector("#anchor");
     },

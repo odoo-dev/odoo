@@ -20,7 +20,7 @@ odoo.define('web.component_extension_tests', function (require) {
 
             const env = makeTestEnvironment({}, () => Promise.resolve());
 
-            const parent = await mount(Parent, { env, target });
+            const parent = await mount(Parent, target, { env });
 
             parent.rpc({}).then(() => { throw new Error(); });
             destroy(parent);
@@ -37,7 +37,7 @@ odoo.define('web.component_extension_tests', function (require) {
             Parent.template = xml`<div/>`;
 
             const env = makeTestEnvironment({}, () => Promise.reject());
-            const parent = await mount(Parent, { env, target });
+            const parent = await mount(Parent, target, { env });
 
             parent.rpc({}).catch(() => { throw new Error(); });
             destroy(parent);
@@ -61,7 +61,7 @@ odoo.define('web.component_extension_tests', function (require) {
             const env = makeTestEnvironment({}, () => Promise.reject());
 
             try {
-                await mount(Parent, { target, env })
+                await mount(Parent, target, { env })
             } catch (e) {
                 assert.strictEqual(e.message, 'The handler must be a function');
             }
@@ -99,8 +99,8 @@ odoo.define('web.component_extension_tests', function (require) {
                 }
             }
 
-            const parent = await mount(Parent, { env, target });
-            const child = await mount(Child, { env, target });
+            const parent = await mount(Parent, target, { env });
+            const child = await mount(Child, target, { env });
 
             parent.trigger('custom1');
             assert.verifySteps(['Parent custom1']);
@@ -138,7 +138,7 @@ odoo.define('web.component_extension_tests', function (require) {
             `;
 
             const env = makeTestEnvironment({}, () => Promise.reject());
-            const parent = await mount(Parent, { env, target });
+            const parent = await mount(Parent, target, { env });
 
             parent.el.querySelector('p').dispatchEvent(new Event('custom1', {bubbles: true}));
             assert.verifySteps([]);
@@ -166,7 +166,7 @@ odoo.define('web.component_extension_tests', function (require) {
             target.classList.add('custom-class');
             const env = makeTestEnvironment({}, () => Promise.reject());
 
-            const parent = await mount(Parent, { env, target });
+            const parent = await mount(Parent, target, { env });
 
             parent.el.querySelector('p').dispatchEvent(new Event('custom1', {bubbles: true}));
             assert.verifySteps([]);
@@ -203,7 +203,7 @@ odoo.define('web.component_extension_tests', function (require) {
             Root.template = xml`<div class="root"><Leaf/></div>`;
             Root.components = { Leaf };
 
-            await mount(Root, { target });
+            await mount(Root, target);
 
             const rootNode = document.body.querySelector('.root');
             const leafNode = document.body.querySelector('.leaf');

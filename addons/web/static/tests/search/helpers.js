@@ -47,8 +47,7 @@ export const makeWithSearch = async (params) => {
     delete props.config;
 
     const env = await makeTestEnv({ serverData, mockRPC, config });
-    const target = getFixture();
-    const withSearch = await mount(WithSearch, { env, props, target });
+    const withSearch = await mount(WithSearch, getFixture(), { env, props });
     const withSearchNode = withSearch.__owl__;
     const componentNode = Object.values(withSearchNode.children)[0];
     const component = componentNode.component;

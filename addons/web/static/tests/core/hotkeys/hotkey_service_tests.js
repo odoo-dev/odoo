@@ -70,7 +70,7 @@ QUnit.test("data-hotkey", async (assert) => {
     triggerHotkey(key, true);
     await nextTick();
 
-    const comp = await mount(MyComponent, { env, target });
+    const comp = await mount(MyComponent, target, { env });
 
     triggerHotkey(key, true);
     await nextTick();
@@ -101,7 +101,7 @@ QUnit.test("invisible data-hotkeys are not enabled. ", async (assert) => {
     triggerHotkey(key, true);
     await nextTick();
 
-    const comp = await mount(MyComponent, { env, target });
+    const comp = await mount(MyComponent, target, { env });
 
     triggerHotkey(key, true);
     await nextTick();
@@ -125,7 +125,7 @@ QUnit.test("hook", async (assert) => {
     triggerHotkey(key);
     await nextTick();
 
-    const comp = await mount(TestComponent, { env, target });
+    const comp = await mount(TestComponent, target, { env });
 
     triggerHotkey(key);
     await nextTick();
@@ -194,7 +194,7 @@ QUnit.test("the overlay of hotkeys is correctly displayed", async (assert) => {
         <button t-on-click="onClick" data-hotkey="c"/>
         </div>
     `;
-    const comp = await mount(MyComponent, { env, target });
+    const comp = await mount(MyComponent, target, { env });
     const getOverlays = () =>
         [...comp.el.querySelectorAll(".o_web_hotkey_overlay")].map((el) => el.innerText);
 
@@ -240,7 +240,7 @@ QUnit.test("the overlay of hotkeys is correctly displayed on MacOs", async (asse
         <button t-on-click="onClick" data-hotkey="c"/>
         </div>
     `;
-    const comp = await mount(MyComponent, { env, target });
+    const comp = await mount(MyComponent, target, { env });
     const getOverlays = () =>
         [...comp.el.querySelectorAll(".o_web_hotkey_overlay")].map((el) => el.innerText);
 
@@ -317,7 +317,7 @@ QUnit.test("[data-hotkey] alt is required", async (assert) => {
     }
     TestComponent.template = xml`<div><button t-on-click="onClick" data-hotkey="${key}"/></div>`;
 
-    const comp = await mount(TestComponent, { env, target });
+    const comp = await mount(TestComponent, target, { env });
 
     triggerHotkey(key, true);
     await nextTick();
@@ -371,7 +371,7 @@ QUnit.test("[data-hotkey] never allow repeat", async (assert) => {
     }
     TestComponent.template = xml`<div><button t-on-click="onClick" data-hotkey="${key}"/></div>`;
 
-    const comp = await mount(TestComponent, { env, target });
+    const comp = await mount(TestComponent, target, { env });
 
     triggerHotkey(key, true);
     await nextTick();
@@ -435,7 +435,7 @@ QUnit.test("component can register many hotkeys", async (assert) => {
     </div>
   `;
 
-    const comp = await mount(MyComponent, { env, target });
+    const comp = await mount(MyComponent, target, { env });
     triggerHotkey("a", true);
     triggerHotkey("b", true);
     triggerHotkey("c", true);
@@ -493,8 +493,8 @@ QUnit.test("many components can register same hotkeys", async (assert) => {
     </div>
   `;
 
-    await mount(MyComponent1, { env, target });
-    await mount(MyComponent2, { env, target });
+    await mount(MyComponent1, target, { env });
+    await mount(MyComponent2, target, { env });
     triggerHotkey("a", true);
     triggerHotkey("b", true);
     triggerHotkey("c", true);
@@ -535,12 +535,12 @@ QUnit.test("registrations and elements belong to the correct UI owner", async (a
     }
     MyComponent2.template = xml`<div><button data-hotkey="b" t-on-click="onClick"/></div>`;
 
-    await mount(MyComponent1, { env, target });
+    await mount(MyComponent1, target, { env });
     triggerHotkey("a");
     triggerHotkey("b", true);
     await nextTick();
 
-    const comp2 = await mount(MyComponent2, { env, target });
+    const comp2 = await mount(MyComponent2, target, { env });
     triggerHotkey("a");
     triggerHotkey("b", true);
     await nextTick();
@@ -578,7 +578,7 @@ QUnit.test("replace the overlayModifier for non-MacOs", async (assert) => {
         <button t-on-click="onClick" data-hotkey="b"/>
         </div>
     `;
-    await mount(MyComponent, { env, target });
+    await mount(MyComponent, target, { env });
 
     const key = "b";
     triggerHotkey(`alt+shift+${key}`);
@@ -616,7 +616,7 @@ QUnit.test("replace the overlayModifier for MacOs", async (assert) => {
         <button t-on-click="onClick" data-hotkey="b"/>
         </div>
     `;
-    await mount(MyComponent, { env, target });
+    await mount(MyComponent, target, { env });
 
     const key = "b";
     triggerHotkey(`alt+shift+${key}`);

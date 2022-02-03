@@ -96,7 +96,7 @@ odoo.define('web.test_utils_create', function (require) {
 
         const target = getFixture();
         const env = Component.env;
-        const parent = await mount(Parent, { env, target });
+        const parent = await mount(Parent, target, { env });
         registerCleanup(cleanUp);
         registerCleanup(() => {
             destroy(parent);
@@ -184,7 +184,7 @@ odoo.define('web.test_utils_create', function (require) {
             />`;
 
         const target = getFixture();
-        const parent = await mount(Parent, { env, target });
+        const parent = await mount(Parent, target, { env });
         const controlPanel = parent.child;
         controlPanel.getQuery = () => parent.searchModel.get("query");
         registerCleanup(() => {

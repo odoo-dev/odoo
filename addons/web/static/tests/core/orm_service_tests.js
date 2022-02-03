@@ -272,7 +272,7 @@ QUnit.test("useModel is specialized for component", async (assert) => {
     MyComponent.template = xml`<div/>`;
 
     const target = getFixture();
-    const component = await mount(MyComponent, { env, target });
+    const component = await mount(MyComponent, target, { env });
     assert.notStrictEqual(component.orm, env.services.orm);
 });
 

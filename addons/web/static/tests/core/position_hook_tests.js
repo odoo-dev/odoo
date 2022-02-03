@@ -89,21 +89,21 @@ QUnit.module("usePosition Hook", {
 });
 
 QUnit.test("default position is bottom", async (assert) => {
-    const popper = await mount(TestComp, { target: container });
+    const popper = await mount(TestComp, container);
     assert.ok(isWellPositioned(popper.el, "bottom"));
 });
 
 QUnit.test("can add margin", async (assert) => {
     let margin = 0;
     Object.assign(TestComp.popperOptions, { margin });
-    let popper = await mount(TestComp, { target: container });
+    let popper = await mount(TestComp, container);
 
     const popBox1 = popper.el.getBoundingClientRect();
     destroy(popper);
 
     margin = 20;
     Object.assign(TestComp.popperOptions, { margin });
-    popper = await mount(TestComp, { target: container });
+    popper = await mount(TestComp, container);
     const popBox2 = popper.el.getBoundingClientRect();
     destroy(popper);
 
@@ -119,7 +119,7 @@ QUnit.test("can use a t-ref as popper", async (assert) => {
             </div>
         `,
     });
-    const comp = await mount(TestComp, { target: container });
+    const comp = await mount(TestComp, container);
     assert.notOk(isWellPositioned(comp.el));
     assert.ok(isWellPositioned(comp.el.querySelector("#popper")));
 });
@@ -132,7 +132,7 @@ QUnit.test("has no effect when component is destroyed", async (assert) => {
         return originalReference;
     };
 
-    const comp = await mount(TestComp, { target: container });
+    const comp = await mount(TestComp, container);
     assert.verifySteps(["reference called"], "reference called when component mounted");
 
     triggerEvent(document, null, "scroll");
@@ -154,7 +154,7 @@ QUnit.test("has no effect when component is destroyed", async (assert) => {
 const getPositionTest = (position, positionToCheck) => {
     return async (assert) => {
         Object.assign(TestComp.popperOptions, { position });
-        const popper = await mount(TestComp, { target: container });
+        const popper = await mount(TestComp, container);
         positionToCheck = positionToCheck || position;
         assert.ok(isWellPositioned(popper.el, positionToCheck));
     };
@@ -192,7 +192,7 @@ const CONTAINER_STYLE_MAP = {
 const getRepositionTest = (from, to, containerStyleChanges) => {
     return async (assert) => {
         Object.assign(TestComp.popperOptions, { position: from });
-        const popper = await mount(TestComp, { target: container });
+        const popper = await mount(TestComp, container);
         assert.ok(isWellPositioned(popper.el, from), `points to ${from} direction`);
 
         // Change container style and force update

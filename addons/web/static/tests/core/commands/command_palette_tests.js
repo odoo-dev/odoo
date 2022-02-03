@@ -61,7 +61,7 @@ QUnit.module("Command Palette Dialog", {
 });
 
 QUnit.test("empty providers", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const config = {
         providers: [],
     };
@@ -84,7 +84,7 @@ QUnit.test("empty providers", async (assert) => {
 });
 
 QUnit.test("custom empty message", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const emptyMessageByNamespace = {
         default: "Empty Default",
         "@": "Empty @",
@@ -127,7 +127,7 @@ QUnit.test("custom empty message", async (assert) => {
 });
 
 QUnit.test("custom placeholder", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const config = {
         placeholder: "placeholder test",
         providers: [],
@@ -146,7 +146,7 @@ QUnit.test("custom placeholder", async (assert) => {
 });
 
 QUnit.test("add a footer", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const config = {
         providers: [],
         FooterComponent,
@@ -169,7 +169,7 @@ QUnit.test("command with a Custom Component", async (assert) => {
         </div>
     `;
 
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const action = () => {};
     const providers = [
         {
@@ -210,7 +210,7 @@ QUnit.test("command with a Custom Component", async (assert) => {
 });
 
 QUnit.test("multi namespace with provider", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const action = () => {};
     const providers = [
         {
@@ -262,7 +262,7 @@ QUnit.test("multi namespace with provider", async (assert) => {
 });
 
 QUnit.test("apply a fuzzysearch on the namespace default not on the others", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const action = () => {};
     const providers = [
         {
@@ -326,7 +326,7 @@ QUnit.test("apply a fuzzysearch on the namespace default not on the others", asy
 });
 
 QUnit.test("multi provider with the same namespace", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const action = () => {};
     const providers = [
         {
@@ -370,7 +370,7 @@ QUnit.test("multi provider with the same namespace", async (assert) => {
 });
 
 QUnit.test("check the concurrency during a research", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const imSearchDef = makeDeferred();
     const provide = async (env, options) => {
         if (options.searchValue) {
@@ -415,7 +415,7 @@ QUnit.test("check the concurrency during a research", async (assert) => {
 QUnit.test(
     "open the command palette with a searchValue already in the searchbar",
     async (assert) => {
-        testComponent = await mount(TestComponent, { env, target });
+        testComponent = await mount(TestComponent, target, { env });
         const action = () => {};
         const providers = [
             {
@@ -463,7 +463,7 @@ QUnit.test(
 );
 
 QUnit.test("open the command palette with a namespace already in the searchbar", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const action = () => {};
     const providers = [
         {
@@ -510,7 +510,7 @@ QUnit.test("open the command palette with a namespace already in the searchbar",
 });
 
 QUnit.test("multi provider with categories", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const categoriesByNamespace = {
         default: ["cat1", "cat2"],
         "@": ["@cat1", "@cat2"],
@@ -635,7 +635,7 @@ QUnit.test("multi provider with categories", async (assert) => {
 });
 
 QUnit.test("don't display by categories if there is a search value", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const categoriesByNamespace = {
         default: ["cat1", "cat2"],
     };
@@ -695,7 +695,7 @@ QUnit.test("don't display by categories if there is a search value", async (asse
 });
 
 QUnit.test("click on command", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const commands = [
         {
             name: "Command1",
@@ -735,7 +735,7 @@ QUnit.test("click on command", async (assert) => {
 });
 
 QUnit.test("press enter on command", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const commands = [
         {
             name: "Command1",
@@ -779,7 +779,7 @@ QUnit.test("press enter on command", async (assert) => {
 });
 
 QUnit.test("keyboard navigation scroll", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const commands = [
         { name: "Command1" },
         { name: "Command2" },
@@ -937,7 +937,7 @@ QUnit.test("keyboard navigation scroll", async (assert) => {
 });
 
 QUnit.test("multi level command", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const emptyMessageByNamespace = {
         default: "Empty Default",
     };
@@ -1009,7 +1009,7 @@ QUnit.test("multi level command", async (assert) => {
 });
 
 QUnit.test("command palette dialog can be rendered and closed on outside click", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
 
     const config = {
         providers: [],
@@ -1029,7 +1029,7 @@ QUnit.test("command palette dialog can be rendered and closed on outside click",
 QUnit.test("navigate in the command palette with the arrows", async (assert) => {
     assert.expect(6);
 
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const action = () => {};
     const commands = [
         {
@@ -1090,7 +1090,7 @@ QUnit.test("navigate in the command palette with the arrows", async (assert) => 
 QUnit.test("navigate in the command palette with an empty list", async (assert) => {
     assert.expect(6);
 
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const providers = [
         {
             provide: () => [],
@@ -1118,7 +1118,7 @@ QUnit.test("navigate in the command palette with an empty list", async (assert) 
 });
 
 QUnit.test("bold the searchValue on the commands", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const action = () => {};
     const providers = [
         {
@@ -1173,7 +1173,7 @@ QUnit.test("bold the searchValue on the commands", async (assert) => {
 });
 
 QUnit.test("bold the searchValue on the commands with special char", async (assert) => {
-    testComponent = await mount(TestComponent, { env, target });
+    testComponent = await mount(TestComponent, target, { env });
     const action = () => {};
     const providers = [
         {

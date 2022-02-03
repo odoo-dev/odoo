@@ -46,7 +46,7 @@ odoo.define('point_of_sale.tests.NumberBuffer', function(require) {
             </div>
         `;
 
-        await mount(Root, { env, target });
+        await mount(Root, target, { env });
 
         const oneButton = target.querySelector('button.one');
         const twoButton = target.querySelector('button.two');

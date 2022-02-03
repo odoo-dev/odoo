@@ -65,9 +65,8 @@ odoo.define('web.owl_dialog_tests', function (require) {
                     </t>
                 </Dialog>`;
 
-            const parent = await mount(Parent, {
+            const parent = await mount(Parent, getFixture(), {
                 env: makeTestEnvironment(),
-                target: getFixture(),
             });
             const dialog = document.querySelector('.o_dialog');
 
@@ -193,9 +192,8 @@ odoo.define('web.owl_dialog_tests', function (require) {
                         />
                 </div>`;
 
-            const parent = await mount(Parent, {
+            const parent = await mount(Parent, getFixture(), {
                 env: legacyEnv,
-                target: getFixture(),
             });
 
             // Dialog 1 : Owl
@@ -317,7 +315,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
                 </div>`;
 
             const target = getFixture();
-            const parent = await mount(Parent, {env, target });
+            const parent = await mount(Parent, target, { env });
 
             parent.dialogs.push({ id: 1, class: WowlDialogSubClass });
             await nextTick();
@@ -369,9 +367,8 @@ odoo.define('web.owl_dialog_tests', function (require) {
                     <Dialog/>
                 </div>`;
 
-            const parent1 = await mount(Parent1, {
+            const parent1 = await mount(Parent1, getFixture(), {
                 env: makeTestEnvironment(),
-                target: getFixture(),
             });
 
             class Parent2 extends Component {
@@ -385,9 +382,8 @@ odoo.define('web.owl_dialog_tests', function (require) {
                     <Dialog t-if="state.showSecondDialog"/>
                 </div>`;
 
-            const parent2 = await mount(Parent2, {
+            const parent2 = await mount(Parent2, getFixture(), {
                 env: makeTestEnvironment(),
-                target: getFixture(),
             });
 
             const frontEndModal = createCustomModal('modal');

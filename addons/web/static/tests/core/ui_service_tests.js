@@ -28,7 +28,7 @@ QUnit.test("block and unblock once ui with ui service", async (assert) => {
     const env = await makeTestEnv({ ...baseConfig });
     ({ Component: BlockUI, props } = registry.category("main_components").get("BlockUI"));
     const ui = env.services.ui;
-    await mount(BlockUI, { env, target, props });
+    await mount(BlockUI, target, { env, props });
     let blockUI = target.querySelector(".o_blockUI");
     assert.strictEqual(blockUI, null, "ui should not be blocked");
     ui.block();
@@ -45,7 +45,7 @@ QUnit.test("use block and unblock several times to block ui with ui service", as
     const env = await makeTestEnv({ ...baseConfig });
     ({ Component: BlockUI, props } = registry.category("main_components").get("BlockUI"));
     const ui = env.services.ui;
-    await mount(BlockUI, { env, target, props });
+    await mount(BlockUI, target, { env, props });
     let blockUI = target.querySelector(".o_blockUI");
     assert.strictEqual(blockUI, null, "ui should not be blocked");
     ui.block();
@@ -77,7 +77,7 @@ QUnit.test("a component can be the active element", async (assert) => {
     const ui = env.services.ui;
     assert.deepEqual(ui.activeElement, document);
 
-    const comp = await mount(MyComponent, { env, target });
+    const comp = await mount(MyComponent, target, { env });
     assert.deepEqual(ui.activeElement, comp.el);
 
     destroy(comp);
@@ -102,7 +102,7 @@ QUnit.test("a component can be the  UI active element: with t-ref delegation", a
     const ui = env.services.ui;
     assert.deepEqual(ui.activeElement, document);
 
-    const comp = await mount(MyComponent, { env, target });
+    const comp = await mount(MyComponent, target, { env });
     assert.deepEqual(ui.activeElement, comp.el.querySelector("div#owner"));
     comp.hasRef = false;
     comp.render();

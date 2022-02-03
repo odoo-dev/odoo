@@ -36,7 +36,7 @@ Parent.template = xml`
 async function makeParent() {
     const env = await makeTestEnv({ serviceRegistry });
     const target = getFixture();
-    const parent = await mount(Parent, { env, target });
+    const parent = await mount(Parent, target, { env });
     return parent;
 }
 

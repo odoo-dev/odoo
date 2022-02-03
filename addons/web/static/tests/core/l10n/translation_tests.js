@@ -26,7 +26,7 @@ QUnit.test("can translate a text node", async (assert) => {
     const env = await makeTestEnv();
     patch(translatedTerms, "add translations", terms);
     const target = getFixture();
-    await mount(TestComponent, { env, target });
+    await mount(TestComponent, target, { env });
     assert.strictEqual(target.innerText, "Bonjour");
     unpatch(translatedTerms, "add translations");
 });
@@ -43,7 +43,7 @@ QUnit.test("can lazy translate", async (assert) => {
     const env = await makeTestEnv();
     patch(translatedTerms, "add translations", terms);
     const target = getFixture();
-    await mount(TestComponent, { env, target });
+    await mount(TestComponent, target, { env });
     assert.strictEqual(target.innerText, "Bonjour");
     unpatch(translatedTerms, "add translations");
 });
@@ -55,7 +55,7 @@ QUnit.test("_t is in env", async (assert) => {
     const env = await makeTestEnv();
     patch(translatedTerms, "add translations", terms);
     const target = getFixture();
-    await mount(TestComponent, { env, target });
+    await mount(TestComponent, target, { env });
     assert.strictEqual(target.innerText, "Bonjour");
     unpatch(translatedTerms, "add translations");
 });

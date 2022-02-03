@@ -30,7 +30,7 @@ QUnit.module("utils", () => {
 
             const env = await makeTestEnv();
             const target = getFixture();
-            const comp = await mount(MyComponent, { env, target });
+            const comp = await mount(MyComponent, target, { env });
             await nextTick();
 
             assert.strictEqual(document.activeElement, comp.inputRef.el);
@@ -58,7 +58,7 @@ QUnit.module("utils", () => {
 
             const env = await makeTestEnv();
             const target = getFixture();
-            const comp = await mount(MyComponent, { env, target });
+            const comp = await mount(MyComponent, target, { env });
             await nextTick();
 
             assert.strictEqual(document.activeElement, comp.inputRef.el);
@@ -91,7 +91,7 @@ QUnit.module("utils", () => {
 
             const env = await makeTestEnv();
             const target = getFixture();
-            const comp = await mount(MyComponent, { env, target });
+            const comp = await mount(MyComponent, target, { env });
             env.bus.trigger("test-event");
             await nextTick();
             assert.verifySteps(["callback"]);
@@ -114,7 +114,7 @@ QUnit.module("utils", () => {
 
             const env = await makeTestEnv();
             const target = getFixture();
-            const comp = await mount(MyComponent, { env, target });
+            const comp = await mount(MyComponent, target, { env });
 
             await click(comp.el);
             assert.verifySteps(["click"]);
@@ -137,7 +137,7 @@ QUnit.module("utils", () => {
 
             const env = await makeTestEnv();
             const target = getFixture();
-            const comp = await mount(MyComponent, { env, target });
+            const comp = await mount(MyComponent, target, { env });
 
             await click(comp.el);
             assert.verifySteps([]);
@@ -168,7 +168,7 @@ QUnit.module("utils", () => {
 
             const env = await makeTestEnv();
             const target = getFixture();
-            const comp = await mount(MyComponent, { env, target });
+            const comp = await mount(MyComponent, target, { env });
 
             await click(comp.el);
             assert.verifySteps([]);
@@ -194,7 +194,7 @@ QUnit.module("utils", () => {
             const env = await makeTestEnv();
             const target = getFixture();
             try {
-                await mount(MyComponent, { env, target });
+                await mount(MyComponent, target, { env });
             } catch (e) {
                 assert.strictEqual(e.message, "Service toy_service is not available");
             }
@@ -218,7 +218,7 @@ QUnit.module("utils", () => {
             const env = await makeTestEnv();
             const target = getFixture();
 
-            const comp = await mount(MyComponent, { env, target });
+            const comp = await mount(MyComponent, target, { env });
             assert.strictEqual(comp.toyService, null);
         });
     });
