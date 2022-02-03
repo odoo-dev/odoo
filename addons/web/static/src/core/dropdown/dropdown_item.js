@@ -54,10 +54,6 @@ export class DropdownItem extends Component {
 }
 DropdownItem.template = "web.DropdownItem";
 DropdownItem.props = {
-    onClicked: {
-        type: Function,
-        optional: true,
-    },
     onSelected: {
         type: Function,
         optional: true,
