@@ -17,7 +17,6 @@ const { App, whenReady, loadFile } = owl;
 
 patch(App.prototype, "TestOwlApp", {
     setup() {
-        this.isBuilt = true;
         this.dev = true;
     },
     destroy() {
@@ -27,11 +26,9 @@ patch(App.prototype, "TestOwlApp", {
         }
     },
     addTemplate(name) {
-        if (this.isBuilt) {
-            registerCleanup(() => {
-                delete this.constructor.sharedTemplates[name];
-            });
-        }
+        registerCleanup(() => {
+            delete this.constructor.sharedTemplates[name];
+        });
         return this._super(...arguments);
     },
 });
