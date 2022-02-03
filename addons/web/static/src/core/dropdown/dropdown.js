@@ -59,7 +59,9 @@ export class Dropdown extends Component {
             // Close on outside click listener
             useExternalListener(window, "click", this.onWindowClicked);
             // Listen to all dropdowns state changes
-            useBus(Dropdown.bus, "state-changed", this.onDropdownStateChanged);
+            useBus(Dropdown.bus, "state-changed", ({ detail }) =>
+                this.onDropdownStateChanged(detail)
+            );
         }
 
         // Set up UI active element related behavior ---------------------------
@@ -206,26 +208,26 @@ export class Dropdown extends Component {
      *
      * @see changeStateAndNotify()
      *
-     * @param {CustomEvent<DropdownStateChangedPayload>} ev
+     * @param {DropdownStateChangedPayload} args
      */
-    onDropdownStateChanged({ detail }) {
-        if (this.el.contains(detail.emitter.el)) {
+    onDropdownStateChanged(args) {
+        if (this.el.contains(args.emitter.el)) {
             // Do not listen to events emitted by self or children
             return;
         }
 
         // Emitted by direct siblings ?
-        if (detail.emitter.el.parentElement === this.el.parentElement) {
+        if (args.emitter.el.parentElement === this.el.parentElement) {
             // Sync the group status
-            this.state.groupIsOpen = detail.newState.groupIsOpen;
+            this.state.groupIsOpen = args.newState.groupIsOpen;
 
             // Another dropdown is now open ? Close myself without notifying siblings.
-            if (this.state.open && detail.newState.open) {
+            if (this.state.open && args.newState.open) {
                 this.state.open = false;
             }
         } else {
             // Another dropdown is now open ? Close myself and notify the world (i.e. siblings).
-            if (this.state.open && detail.newState.open) {
+            if (this.state.open && args.newState.open) {
                 this.close();
             }
         }
