@@ -45,9 +45,6 @@ const mountPicker = async (Picker, props) => {
         props.onDateTimeChanged = () => {};
     }
     const parent = await mount(Parent, { env, props: { Picker, props }, target });
-    registerCleanup(() => {
-        destroy(parent);
-    });
     return parent;
 };
 

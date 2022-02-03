@@ -7,16 +7,13 @@ import { getFixture, mount, nextTick } from "../helpers/utils";
 
 const { Component, useState, xml } = owl;
 const mainComponentsRegistry = registry.category("main_components");
-let container;
+
 let target;
 
 QUnit.module("Components", (hooks) => {
     hooks.beforeEach(async () => {
         target = getFixture();
         clearRegistryWithCleanup(mainComponentsRegistry);
-    });
-    hooks.afterEach(() => {
-        container = undefined;
     });
 
     QUnit.module("MainComponentsContainer");
@@ -32,7 +29,7 @@ QUnit.module("Components", (hooks) => {
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        container = await mount(MainComponentsContainer, { env, target, props: {} });
+        const container = await mount(MainComponentsContainer, { env, target, props: {} });
         assert.equal(
             container.el.outerHTML,
             "<div><span>MainComponentA</span><span>MainComponentB</span></div>"
@@ -59,7 +56,7 @@ QUnit.module("Components", (hooks) => {
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        container = await mount(MainComponentsContainer, { env, target, props: {} });
+        const container = await mount(MainComponentsContainer, { env, target, props: {} });
         assert.equal(
             container.el.outerHTML,
             "<div><span>MainComponentA</span><span>MainComponentB</span></div>"
@@ -104,7 +101,7 @@ QUnit.module("Components", (hooks) => {
 
         mainComponentsRegistry.add("MainComponentA", { Component: MainComponentA, props: {} });
         mainComponentsRegistry.add("MainComponentB", { Component: MainComponentB, props: {} });
-        container = await mount(MainComponentsContainer, { env, target, props: {} });
+        const container = await mount(MainComponentsContainer, { env, target, props: {} });
         assert.equal(
             container.el.outerHTML,
             "<div><span>MainComponentA</span><span>MainComponentB</span></div>"

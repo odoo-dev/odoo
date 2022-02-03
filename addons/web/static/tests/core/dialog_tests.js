@@ -9,7 +9,7 @@ import { makeTestEnv } from "../helpers/mock_env";
 import { click, destroy, getFixture, mount } from "../helpers/utils";
 import { makeFakeDialogService } from "../helpers/mock_services";
 
-const { Component, onMounted, onPatched, useState, xml } = owl;
+const { Component, useEffect, useState, xml } = owl;
 const serviceRegistry = registry.category("services");
 let parent;
 let target;
@@ -34,8 +34,7 @@ class SimpleDialog extends Dialog {
             }
         };
 
-        onMounted(setRef);
-        onPatched(setRef);
+        useEffect(setRef);
     }
 }
 SimpleDialog.bodyTemplate = xml`<t t-slot="default"/>`;
