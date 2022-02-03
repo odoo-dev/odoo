@@ -14,10 +14,9 @@ NotUpdatable.template = xml`<t t-slot="default" />`;
 export class ErrorHandler extends Component {
     setup() {
         onError((error) => {
-            if (this.props.onError) {
-                this.props.onError(error);
-            }
+            this.props.onError(error);
         });
     }
 }
 ErrorHandler.template = xml`<t t-slot="default" />`;
+ErrorEvent.props = ["onError"];
