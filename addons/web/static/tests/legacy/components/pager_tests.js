@@ -6,6 +6,20 @@ odoo.define('web.pager_tests', function (require) {
 
     const { createComponent } = testUtils;
 
+    const { Component, xml, useState } = owl;
+
+    class PagerController extends Component {
+        setup() {
+            this.state = useState({ ...this.props });
+        }
+        async updateProps(nextProps) {
+            Object.assign(this.state, nextProps);
+            await testUtils.nextTick();
+        }
+    }
+    PagerController.template = xml`<Pager t-props="state" />`;
+    PagerController.components = { Pager };
+
     QUnit.module('Components', {}, function () {
 
         QUnit.module('Pager');
@@ -13,15 +27,13 @@ odoo.define('web.pager_tests', function (require) {
         QUnit.test('basic interactions', async function (assert) {
             assert.expect(2);
 
-            const pager = await createComponent(Pager, {
+            const pager = await createComponent(PagerController, {
                 props: {
                     currentMinimum: 1,
                     limit: 4,
                     size: 10,
-                },
-                intercepts: {
-                    'pager-changed': function (ev) {
-                        Object.assign(this.state, ev.detail);
+                    onPagerChanged: function (detail) {
+                        pager.updateProps(detail);
                     },
                 },
             });
@@ -38,15 +50,13 @@ odoo.define('web.pager_tests', function (require) {
         QUnit.test('edit the pager', async function (assert) {
             assert.expect(4);
 
-            const pager = await createComponent(Pager, {
+            const pager = await createComponent(PagerController, {
                 props: {
                     currentMinimum: 1,
                     limit: 4,
                     size: 10,
-                },
-                intercepts: {
-                    'pager-changed': function (ev) {
-                        Object.assign(this.state, ev.detail);
+                    onPagerChanged: function (detail) {
+                        pager.updateProps(detail);
                     },
                 },
             });
@@ -70,14 +80,12 @@ odoo.define('web.pager_tests', function (require) {
         QUnit.test("keydown on pager with same value", async function (assert) {
             assert.expect(7);
 
-            const pager = await createComponent(Pager, {
+            const pager = await createComponent(PagerController, {
                 props: {
                     currentMinimum: 1,
                     limit: 4,
                     size: 10,
-                },
-                intercepts: {
-                    "pager-changed": () => assert.step("pager-changed"),
+                    onPagerChanged: () => assert.step("pager-changed"),
                 },
             });
 
@@ -99,15 +107,13 @@ odoo.define('web.pager_tests', function (require) {
         QUnit.test('pager value formatting', async function (assert) {
             assert.expect(8);
 
-            const pager = await createComponent(Pager, {
+            const pager = await createComponent(PagerController, {
                 props: {
                     currentMinimum: 1,
                     limit: 4,
                     size: 10,
-                },
-                intercepts: {
-                    'pager-changed': function (ev) {
-                        Object.assign(this.state, ev.detail);
+                    onPagerChanged: (detail) => {
+                        pager.updateProps(detail);
                     },
                 },
             });
@@ -133,21 +139,19 @@ odoo.define('web.pager_tests', function (require) {
             assert.expect(9);
 
             const reloadPromise = testUtils.makeTestPromise();
-            const pager = await createComponent(Pager, {
+            const pager = await createComponent(PagerController, {
                 props: {
                     currentMinimum: 1,
                     limit: 4,
                     size: 10,
-                },
-                intercepts: {
                     // The goal here is to test the reactivity of the pager; in a
                     // typical views, we disable the pager after switching page
                     // to avoid switching twice with the same action (double click).
-                    'pager-changed': async function (ev) {
+                    onPagerChanged: async function (detail) {
                         // 1. Simulate a (long) server action
                         await reloadPromise;
                         // 2. Update the view with loaded data
-                        Object.assign(this.state, ev.detail);
+                        pager.updateProps(detail);
                     },
                 },
             });

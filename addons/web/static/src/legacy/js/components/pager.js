@@ -154,10 +154,7 @@ odoo.define('web.Pager', function (require) {
                 // have to disable the edition manually here.
                 this.state.editing = false;
             }
-            this.trigger('pager-changed', { currentMinimum, limit });
-            if (this.props.onPagerChanged) {
-                this.props.onPagerChanged({ detail: { currentMinimum, limit } });
-            }
+            this.props.onPagerChanged({ currentMinimum, limit });
         }
 
         //---------------------------------------------------------------------
@@ -220,7 +217,7 @@ odoo.define('web.Pager', function (require) {
         size: { type: Number, optional: 1 },
         validate: Function,
         withAccessKey: Boolean,
-        onPagerChanged: { type: Function, optional: 1},
+        onPagerChanged: Function,
     };
     Pager.template = 'web.legacy.Pager';
 
