@@ -43,6 +43,7 @@
         setup() {}
     };
     owl.App.sharedTemplates = sharedTemplates;
+    owl.App.validateTarget = () => {};
     /**
      * Returns a promise resolved the next time OWL stops rendering.
      *

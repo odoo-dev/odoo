@@ -1883,8 +1883,8 @@
         complete() {
             let current = this;
             try {
-                // validateTarget(this.target); NXOWL
                 const node = this.node;
+                node.app.constructor.validateTarget(this.target);
                 if (node.bdom) {
                     // this is a complicated situation: if we mount a fiber with an existing
                     // bdom, this means that this same fiber was already completed, mounted,
@@ -2669,10 +2669,22 @@
             this.isDebug = false;
             this.targets = [];
             this.target = new CodeTarget("template");
+            this.translatableAttributes = TRANSLATABLE_ATTRS;
             this.staticCalls = [];
             this.helpers = new Set();
             this.translateFn = options.translateFn || ((s) => s);
-            this.translatableAttributes = options.translatableAttributes || TRANSLATABLE_ATTRS;
+            if (options.translatableAttributes) {
+                const attrs = new Set(TRANSLATABLE_ATTRS);
+                for (let attr of options.translatableAttributes) {
+                    if (attr.startsWith("-")) {
+                        attrs.delete(attr.slice(1));
+                    }
+                    else {
+                        attrs.add(attr);
+                    }
+                }
+                this.translatableAttributes = [...attrs];
+            }
             this.hasSafeContext = options.hasSafeContext || false;
             this.dev = options.dev || false;
             this.ast = ast;
@@ -4052,6 +4064,8 @@
         }
         const dynamicProps = node.getAttribute("t-props");
         node.removeAttribute("t-props");
+        const defaultSlotScope = node.getAttribute("t-slot-scope");
+        node.removeAttribute("t-slot-scope");
         const props = {};
         for (let name of node.getAttributeNames()) {
             const value = node.getAttribute(name);
@@ -4111,6 +4125,9 @@
             const defaultContent = parseChildNodes(clone, ctx);
             if (defaultContent) {
                 slots.default = { content: defaultContent };
+                if (defaultSlotScope) {
+                    slots.default.scope = defaultSlotScope;
+                }
             }
         }
         return { type: 11 /* TComponent */, name, isDynamic, dynamicProps, props, slots };
@@ -4592,7 +4609,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             this.props = config.props || {};
         }
         mount(target, options) {
-            validateTarget(target);
+            App.validateTarget(target);
             const node = this.makeNode(this.Root, this.props);
             const prom = this.mountNode(node, target, options);
             this.root = node;
@@ -4635,6 +4652,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             }
         }
     }
+    App.validateTarget = validateTarget;
     async function mount(C, target, config = {}) {
         return new App(C, config).mount(target, config);
     }
@@ -5069,14 +5087,13 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.useSubEnv = useSubEnv;
     exports.whenReady = whenReady;
     exports.xml = xml;
-    exports.batched = batched;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2022-01-31T16:02:34.789Z';
-    __info__.hash = 'fa7a393';
+    __info__.date = '2022-02-03T14:14:18.149Z';
+    __info__.hash = '5a7928d';
     __info__.url = 'https://github.com/odoo/owl';
 
 
