@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import { PivotGroupByMenu } from "@web/views/pivot/pivot_group_by_menu";
+import { CheckBox } from "@web/core/checkbox/checkbox";
 import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
+import { PivotGroupByMenu } from "@web/views/pivot/pivot_group_by_menu";
 import fieldUtils from "web.field_utils";
 
 const { Component, onWillUpdateProps } = owl;
@@ -147,5 +148,5 @@ export class PivotRenderer extends Component {
     }
 }
 PivotRenderer.template = "web.PivotRenderer";
-PivotRenderer.components = { PivotGroupByMenu };
+PivotRenderer.components = { CheckBox, PivotGroupByMenu };
 PivotRenderer.props = ["model", "onCellClicked"];

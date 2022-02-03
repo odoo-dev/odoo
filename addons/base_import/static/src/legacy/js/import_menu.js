@@ -1,6 +1,7 @@
 odoo.define('base_import.ImportMenu', function (require) {
     "use strict";
 
+    const { DropdownItem } = require('@web/core/dropdown/dropdown_item');
     const FavoriteMenu = require('web.FavoriteMenu');
     const { useModel } = require('web.Model');
 
@@ -55,6 +56,7 @@ odoo.define('base_import.ImportMenu', function (require) {
 
     ImportMenu.props = {};
     ImportMenu.template = "base_import.ImportRecords";
+    ImportMenu.components = { DropdownItem };
 
     FavoriteMenu.registry.add('import-menu', ImportMenu, 1);
 

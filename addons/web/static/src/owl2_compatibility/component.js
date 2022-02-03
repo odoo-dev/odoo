@@ -74,18 +74,4 @@
         }
     };
     owl.Component.env = {};
-
-    Object.defineProperty(owl.Component, "components", {
-        get() {
-            return this._components;
-        },
-        set(val) {
-            this._components = new Proxy(val, {
-                get(target, key) {
-                    return target[key] || owl.Component._components[key];
-                },
-            });
-        },
-    });
-    owl.Component._components = {};
 })();

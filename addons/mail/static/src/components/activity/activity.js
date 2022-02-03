@@ -2,6 +2,8 @@
 
 import { registerMessagingComponent } from '@mail/utils/messaging_component';
 
+import Popover from "web.Popover";
+
 const { Component } = owl;
 
 export class Activity extends Component {
@@ -18,6 +20,7 @@ export class Activity extends Component {
 Object.assign(Activity, {
     props: { localId: String },
     template: 'mail.Activity',
+    components: { Popover },
 });
 
 registerMessagingComponent(Activity);

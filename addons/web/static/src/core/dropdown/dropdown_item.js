@@ -94,4 +94,3 @@ DropdownItem.props = {
 DropdownItem.defaultProps = {
     parentClosingMode: ParentClosingMode.AllParents,
 };
-owl.Component._components.DropdownItem = DropdownItem;

@@ -1,6 +1,8 @@
 odoo.define('web.FavoriteMenu', function (require) {
     "use strict";
 
+    const { Dropdown } = require("@web/core/dropdown/dropdown");
+    const { DropdownItem } = require("@web/core/dropdown/dropdown_item");
     const Dialog = require('web.OwlDialog');
     const { FACET_ICONS } = require("web.searchUtils");
     const Registry = require('web.Registry');
@@ -80,7 +82,7 @@ odoo.define('web.FavoriteMenu', function (require) {
     }
 
     FavoriteMenu.registry = new Registry();
-    FavoriteMenu.components = { Dialog };
+    FavoriteMenu.components = { Dialog, Dropdown, DropdownItem };
     FavoriteMenu.template = 'web.Legacy.FavoriteMenu';
 
     return FavoriteMenu;

@@ -59,7 +59,7 @@
                     class="breadcrumb-item"
                     t-att-class="{ o_back_button: isPenultimate}"
                     t-on-click.prevent="() => this.onBreadcrumbClicked(breadcrumb.jsId)"
-                    >   
+                    >
                     <a href="#">
                         <t t-if="breadcrumb.name" t-esc="breadcrumb.name"/>
                         <em t-else="" class="text-warning">Unnamed</em>

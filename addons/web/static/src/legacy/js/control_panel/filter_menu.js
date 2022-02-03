@@ -1,6 +1,8 @@
 odoo.define('web.FilterMenu', function (require) {
     "use strict";
 
+    const { Dropdown } = require("@web/core/dropdown/dropdown");
+    const { DropdownItem } = require("@web/core/dropdown/dropdown_item");
     const CustomFilterItem = require('web.CustomFilterItem');
     const { FACET_ICONS } = require("web.searchUtils");
     const { useModel } = require('web.Model');
@@ -60,6 +62,7 @@ odoo.define('web.FilterMenu', function (require) {
         class: { String, optional: true },
     };
     FilterMenu.template = "web.legacy.FilterMenu";
+    FilterMenu.components = { CustomFilterItem, Dropdown, DropdownItem };
 
     return FilterMenu;
 });

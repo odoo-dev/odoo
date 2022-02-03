@@ -39,10 +39,7 @@ odoo.define('web.Popover', function (require) {
              */
             this._hasGlobalEventListeners = false;
 
-            useEffect(() => {
-                this._compute();
-            });
-
+            useEffect(() => this._compute());
             onWillUnmount(() => {
                 if (this._hasGlobalEventListeners) {
                     this._removeGlobalEventListeners();
@@ -360,6 +357,5 @@ odoo.define('web.Popover', function (require) {
         },
     };
 
-    owl.Component._components.Popover = Popover;
     return Popover;
 });

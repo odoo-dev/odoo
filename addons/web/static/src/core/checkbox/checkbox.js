@@ -27,4 +27,3 @@ CheckBox.nextId = 1;
 CheckBox.defaultProps = {
     onChange: () => {},
 };
-owl.Component._components.CheckBox = CheckBox;

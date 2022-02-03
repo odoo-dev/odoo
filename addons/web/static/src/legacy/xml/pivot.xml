@@ -76,7 +76,7 @@
     </t>
 
     <t t-name="web.legacy.PivotGroupBySelection" owl="1">
-        <PivotGroupByMenu 
+        <PivotGroupByMenu
             customGroupBys="customGroupBys"
             fields="props.groupableFields"
             hasSearchArchGroupBys="hasSearchArchGroupBys"

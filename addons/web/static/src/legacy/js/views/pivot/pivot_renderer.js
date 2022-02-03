@@ -1,5 +1,7 @@
 /** @odoo-module alias=web.PivotRenderer **/
 
+    import { Dropdown } from "@web/core/dropdown/dropdown";
+    import { DropdownItem } from "@web/core/dropdown/dropdown_item";
     import OwlAbstractRenderer from '../abstract_renderer_owl';
     import field_utils from 'web.field_utils';
     import { INTERVAL_OPTIONS, getIntervalOptions } from 'web.searchUtils';
@@ -74,7 +76,8 @@
     }
 
     PivotGroupByMenu.template = "web.legacy.PivotGroupByMenu";
-    PivotGroupByMenu.components = { CustomGroupByItem };
+    PivotGroupByMenu.components = { CustomGroupByItem, Dropdown, DropdownItem };
+
     PivotGroupByMenu.props = {
         customGroupBys: Map,
         fields: Object,

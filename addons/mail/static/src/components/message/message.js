@@ -8,6 +8,7 @@ import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 import { _lt } from 'web.core';
 import { format } from 'web.field_utils';
+import Popover from "web.Popover";
 import { getLangDatetimeFormat } from 'web.time';
 
 const { Component, onWillUnmount, useRef, useState } = owl;
@@ -566,6 +567,7 @@ export class Message extends Component {
 Object.assign(Message, {
     props: { localId: String },
     template: 'mail.Message',
+    components: { Popover },
 });
 
 registerMessagingComponent(Message);

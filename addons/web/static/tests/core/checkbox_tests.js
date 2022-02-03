@@ -32,6 +32,7 @@ QUnit.module("Components", (hooks) => {
 
         class Parent extends Component {}
         Parent.template = xml`<CheckBox>ragabadabadaba</CheckBox>`;
+        Parent.components = { CheckBox };
 
         const parent = await mount(Parent, { env, target });
         assert.containsOnce(target, "div.custom-checkbox");
@@ -48,6 +49,7 @@ QUnit.module("Components", (hooks) => {
             }
         }
         Parent.template = xml`<CheckBox onChange="onChange"/>`;
+        Parent.components = { CheckBox };
 
         await mount(Parent, { env, target });
         assert.containsOnce(target, "div.custom-checkbox");

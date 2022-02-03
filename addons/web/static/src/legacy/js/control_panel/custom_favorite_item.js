@@ -1,6 +1,8 @@
 odoo.define('web.CustomFavoriteItem', function (require) {
     "use strict";
 
+    const { CheckBox } = require("@web/core/checkbox/checkbox");
+    const { Dropdown } = require("@web/core/dropdown/dropdown");
     const FavoriteMenu = require('web.FavoriteMenu');
     const { useAutofocus } = require('web.custom_hooks');
     const { useModel } = require('web.Model');
@@ -143,6 +145,7 @@ odoo.define('web.CustomFavoriteItem', function (require) {
 
     CustomFavoriteItem.props = {};
     CustomFavoriteItem.template = "web.CustomFavoriteItem";
+    CustomFavoriteItem.components = { CheckBox, Dropdown };
     CustomFavoriteItem.groupNumber = 3; // have 'Save Current Search' in its own group
 
     FavoriteMenu.registry.add('favorite-generator-menu', CustomFavoriteItem, 0);
