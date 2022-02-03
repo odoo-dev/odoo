@@ -10,7 +10,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr t-foreach="tooltipItems" t-as="tooltipItem" t-key="tooltipItem_index">
+                    <tr t-foreach="tooltipItems" t-as="tooltipItem" t-key="tooltipItem.id">
                         <td>
                             <span class="o_square" t-attf-style="background-color: {{ tooltipItem.boxColor }}" />
                             <span class="o_label" t-attf-style="max-width: {{ maxWidth }}" t-esc="tooltipItem.label" />

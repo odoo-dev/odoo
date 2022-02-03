@@ -4,7 +4,7 @@ import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
-const { Component, useState } = owl;
+const { Component, onWillDestroy, useState } = owl;
 
 /**
  * Loading Indicator
@@ -25,6 +25,10 @@ export class LoadingIndicator extends Component {
         this.rpcIds = new Set();
         this.env.bus.addEventListener("RPC:REQUEST", this.requestCall.bind(this));
         this.env.bus.addEventListener("RPC:RESPONSE", this.responseCall.bind(this));
+        onWillDestroy(() => {
+            this.env.bus.removeEventListener("RPC:REQUEST", this.requestCall.bind(this));
+            this.env.bus.removeEventListener("RPC:RESPONSE", this.responseCall.bind(this));
+        });
         this.uiService = useService("ui");
     }
 

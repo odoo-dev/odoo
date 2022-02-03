@@ -24,7 +24,7 @@ export class WithSearch extends Component {
             view: useService("view"),
         });
 
-        useChildSubEnv({ searchModel: this.searchModel });
+        useSubEnv({ searchModel: this.searchModel });
 
         useBus(this.searchModel, "update", this.render);
         useSetupAction({
