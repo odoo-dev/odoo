@@ -2043,8 +2043,7 @@ QUnit.module("Search", (hooks) => {
         assert.containsOnce(target, ".o_content.o_component_with_search_panel .o_search_panel");
     });
 
-    // OWL-NEW-RENDERING
-    QUnit.skip("search panel state is shared between views", async (assert) => {
+    QUnit.test("search panel state is shared between views", async (assert) => {
         assert.expect(16);
 
         const webclient = await createWebClient({
@@ -2095,8 +2094,7 @@ QUnit.module("Search", (hooks) => {
         ]);
     });
 
-    // OWL-NEW-RENDERING
-    QUnit.skip("search panel filters are kept between switch views", async (assert) => {
+    QUnit.test("search panel filters are kept between switch views", async (assert) => {
         assert.expect(17);
 
         const webclient = await createWebClient({
@@ -3260,8 +3258,7 @@ QUnit.module("Search", (hooks) => {
         assert.containsNone(comp, ".o_search_panel_filter_value");
     });
 
-    // OWL-NEW-RENDERING
-    QUnit.skip(
+    QUnit.test(
         "a selected value becomming invalid should no more impact the view",
         async (assert) => {
             assert.expect(8);

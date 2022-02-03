@@ -584,11 +584,15 @@ odoo.define('web.OwlCompatibility', function (require) {
             if (options) {
                 this.mountOptions = options;
             }
-            if (this.status === "unmounted") {
+            const remount = this.status === "unmounted";
+            if (remount) {
                 prepareForRemount(this.node);
             }
             this.status = "willMount";
             const prom = this.app.mountNode(this.node, this.target, this.mountOptions);
+            if (remount) {
+                this.node.fiber.force = true;
+            }
             prepareForFinish(this.node);
             await prom;
             if (document.contains(this.target)) {
@@ -609,7 +613,7 @@ odoo.define('web.OwlCompatibility', function (require) {
 
         render() {
             if (this.renderProm) {
-                this.node.render();
+                this.node.render(true);
                 return this.renderProm;
             }
             this.renderProm = new Promise((resolve, reject) => {
@@ -620,7 +624,7 @@ odoo.define('web.OwlCompatibility', function (require) {
                 this.renderResolve = null;
                 this.renderReject = null;
             });
-            this.node.render();
+            this.node.render(true);
             return this.renderProm;
         }
 
