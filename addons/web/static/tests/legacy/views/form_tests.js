@@ -564,7 +564,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC});
+        const webClient = await createWebClient({ serverData, mockRPC});
         await doAction(webClient, {
             res_id: 1,
             type: 'ir.actions.act_window',
@@ -1216,7 +1216,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target,  serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
 
         await testUtils.dom.click(target.querySelector('.o_list_button_add'));
@@ -7294,7 +7294,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target,  serverData });
+        const webClient = await createWebClient({ serverData });
         patchWithCleanup(_t.database, {
             multi_lang: true,
         });
@@ -9292,7 +9292,7 @@ QUnit.module('Views', {
             'partner,false,search': '<search></search>',
         };
 
-        const webClient = await createWebClient({ target,  serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
 
         await testUtils.dom.click('.o_control_panel .o-kanban-button-new');
@@ -10225,7 +10225,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target,  serverData , mockRPC });
+        const webClient = await createWebClient({ serverData , mockRPC });
 
         await doAction(webClient, 1);
 
@@ -10289,7 +10289,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target,  serverData , mockRPC });
+        const webClient = await createWebClient({ serverData , mockRPC });
 
         await doAction(webClient, 1);
 
@@ -10367,7 +10367,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target,  serverData , mockRPC });
+        const webClient = await createWebClient({ serverData , mockRPC });
 
         await doAction(webClient, 1);
 
@@ -10523,7 +10523,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target,  serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, 1);
 

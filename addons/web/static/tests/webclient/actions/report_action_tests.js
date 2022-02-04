@@ -37,7 +37,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return Promise.resolve("ok");
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 7, { onClose: () => assert.step("on_close") });
         assert.verifySteps([
             "/web/webclient/load_menus",
@@ -59,7 +59,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return Promise.resolve("ok");
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 5, { onClose: () => assert.step("on_close") });
         assert.containsOnce(
             document.body,
@@ -103,7 +103,7 @@ QUnit.module("ActionManager", (hooks) => {
                     return Promise.resolve("upgrade");
                 }
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             await doAction(webClient, 7);
             assert.verifySteps([
                 "/web/webclient/load_menus",
@@ -152,7 +152,7 @@ QUnit.module("ActionManager", (hooks) => {
                     this.iframe.setAttribute("src", "about:blank");
                 },
             });
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             await doAction(webClient, 7);
             assert.containsOnce(
                 target,
@@ -206,7 +206,7 @@ QUnit.module("ActionManager", (hooks) => {
                 this.iframe.setAttribute("src", "about:blank");
             },
         });
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 12);
         assert.containsOnce(target, ".o_report_iframe", "should have opened the client action");
         assert.verifySteps([
@@ -240,7 +240,7 @@ QUnit.module("ActionManager", (hooks) => {
                     return Promise.resolve("ok");
                 }
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             const ui = webClient.env.services.ui;
             const onBlock = () => {
                 assert.step("block");
@@ -282,7 +282,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return "ok";
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         let customHandlerCalled = false;
         registry.category("ir.actions.report handlers").add("custom_handler", async (action) => {
             if (action.id === 7 && !customHandlerCalled) {
@@ -335,7 +335,7 @@ QUnit.module("ActionManager", (hooks) => {
                 this.iframe.setAttribute("src", "about:blank");
             },
         });
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         const action = {
             context: {
@@ -369,7 +369,7 @@ QUnit.module("ActionManager", (hooks) => {
             },
         });
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 12); // 12 is a html report action in serverData
 

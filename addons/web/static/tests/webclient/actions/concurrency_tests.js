@@ -33,7 +33,7 @@ QUnit.module("ActionManager", (hooks) => {
                 await def;
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         doAction(webClient, 4);
         doAction(webClient, 8);
         def.resolve();
@@ -63,7 +63,7 @@ QUnit.module("ActionManager", (hooks) => {
                 await defs.shift();
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 4);
         // kanban view is loaded, switch to list view
         await cpHelpers.switchView(target, "list");
@@ -97,7 +97,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return 1;
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         doAction(webClient, 2);
         doAction(webClient, 4);
         def.resolve();
@@ -118,7 +118,7 @@ QUnit.module("ActionManager", (hooks) => {
                 await def;
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         // create a situation with 3 breadcrumbs: kanban/form/list
         await doAction(webClient, 4);
         await testUtils.dom.click($(target).find(".o_kanban_record:first"));
@@ -156,7 +156,7 @@ QUnit.module("ActionManager", (hooks) => {
                     await def;
                 }
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             webClient.env.bus.trigger("test:hashchange", {
                 action: 4,
                 id: 2,
@@ -214,7 +214,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return serverData.actions[1];
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         // execute action 3 and open a record in form view
         await doAction(webClient, 3);
         await testUtils.dom.click($(target).find(".o_list_view .o_data_row:first"));
@@ -274,7 +274,7 @@ QUnit.module("ActionManager", (hooks) => {
                     await def;
                 }
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             await doAction(webClient, 3);
             assert.containsOnce(target, ".o_list_view", "should display the list view of action 3");
             // switch to the form view (this request is blocked)
@@ -332,7 +332,7 @@ QUnit.module("ActionManager", (hooks) => {
                 await def;
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         // execute a first action (its 'load_views' RPC is blocked)
         doAction(webClient, 3);
         await testUtils.nextTick();
@@ -370,7 +370,7 @@ QUnit.module("ActionManager", (hooks) => {
                 await def;
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         // execute a first action (its 'search_read' RPC is blocked)
         doAction(webClient, 3);
         await testUtils.nextTick();
@@ -407,7 +407,7 @@ QUnit.module("ActionManager", (hooks) => {
                 await def;
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_list_view");
         assert.containsN(target, ".o_list_view .o_data_row", 5);
@@ -446,7 +446,7 @@ QUnit.module("ActionManager", (hooks) => {
             }
             ClientAction.template = xml`<div class="client_action">ClientAction</div>`;
             actionRegistry.add("slowAction", ClientAction);
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             doAction(webClient, "slowAction");
             await nextTick();
             await legacyExtraNextTick();
@@ -471,7 +471,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return Promise.resolve(def);
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_list_view");
         def = testUtils.makeTestPromise();
@@ -510,7 +510,7 @@ QUnit.module("ActionManager", (hooks) => {
                 await Promise.resolve(defs.shift());
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_list_view");
         doAction(webClient, 4, { clearBreadcrumbs: true });
@@ -549,7 +549,7 @@ QUnit.module("ActionManager", (hooks) => {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_list_view");
 
@@ -612,7 +612,7 @@ QUnit.module("ActionManager", (hooks) => {
         ToyView.type = "toy";
         registry.category("views").add("toy", ToyView);
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: "partner",

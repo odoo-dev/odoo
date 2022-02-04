@@ -67,7 +67,7 @@ QUnit.module('core', {}, function () {
             }
         };
         const target = getFixture();
-        const webClient = await createWebClient({ target, mockRPC});
+        const webClient = await createWebClient({ mockRPC});
         await doAction(webClient, "TestAction");
         await nextTick();
         assert.containsOnce(target, ".o_dialog");

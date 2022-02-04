@@ -72,8 +72,7 @@ QUnit.module("Calendar Notification", (hooks) => {
                 }
             };
 
-            const webClient = await createWebClient({
-                target,
+            await createWebClient({
                 legacyParams: { serviceRegistry: legacyServicesRegistry },
                 mockRPC,
             });
@@ -143,8 +142,7 @@ QUnit.module("Calendar Notification", (hooks) => {
             };
             serviceRegistry.add("action", fakeActionService, { force: true });
 
-            const webClient = await createWebClient({
-                target,
+            await createWebClient({
                 legacyParams: { serviceRegistry: legacyServicesRegistry },
                 mockRPC,
             });
@@ -202,8 +200,7 @@ QUnit.module("Calendar Notification", (hooks) => {
                 }
             };
 
-            const webClient = await createWebClient({
-                target,
+            await createWebClient({
                 legacyParams: { serviceRegistry: legacyServicesRegistry },
                 mockRPC,
             });

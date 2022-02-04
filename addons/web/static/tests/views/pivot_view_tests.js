@@ -2080,7 +2080,7 @@ QUnit.module("Views", (hooks) => {
                     </search>`,
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: "partner",
@@ -2139,7 +2139,7 @@ QUnit.module("Views", (hooks) => {
             },
         ];
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: "partner",
@@ -2188,7 +2188,7 @@ QUnit.module("Views", (hooks) => {
                     </search>`,
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: "partner",
@@ -2253,7 +2253,7 @@ QUnit.module("Views", (hooks) => {
                 },
             ];
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
 
             await doAction(webClient, {
                 res_model: "partner",
@@ -2779,7 +2779,7 @@ QUnit.module("Views", (hooks) => {
             "partner,false,form": '<form><field name="foo"/></form>',
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: "partner",
@@ -2829,7 +2829,7 @@ QUnit.module("Views", (hooks) => {
             "partner,false,form": '<form><field name="foo"/></form>',
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: "partner",
@@ -4137,7 +4137,7 @@ QUnit.module("Views", (hooks) => {
                 }
             };
 
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
 
             await doAction(webClient, {
                 res_model: "partner",
@@ -4778,7 +4778,7 @@ QUnit.module("Views", (hooks) => {
         const mockRPC = (route, args) => {
             assert.step(args.method || route);
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, {
             res_model: "partner",
@@ -4820,7 +4820,7 @@ QUnit.module("Views", (hooks) => {
             "partner,false,list": '<tree><field name="foo"/></tree>',
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: "partner",
@@ -4864,7 +4864,7 @@ QUnit.module("Views", (hooks) => {
             "partner,false,list": '<tree><field name="foo"/></tree>',
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: "partner",
@@ -4919,7 +4919,7 @@ QUnit.module("Views", (hooks) => {
                 }
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, {
             res_model: "partner",

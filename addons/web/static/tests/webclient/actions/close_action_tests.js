@@ -29,7 +29,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("close the currently opened dialog", async function (assert) {
         assert.expect(2);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         // execute an action in target="new"
         await doAction(webClient, 5);
         assert.containsOnce(
@@ -46,7 +46,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("close dialog by clicking on the header button", async function (assert) {
         assert.expect(5);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         // execute an action in target="new"
         function onClose() {
             assert.step("on_close");
@@ -65,7 +65,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test('execute "on_close" only if there is no dialog to close', async function (assert) {
         assert.expect(3);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         // execute an action in target="new"
         await doAction(webClient, 5);
         function onClose() {
@@ -84,7 +84,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("close action with provided infos", async function (assert) {
         assert.expect(1);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         const options = {
             onClose: function (infos) {
                 assert.strictEqual(
@@ -113,7 +113,7 @@ QUnit.module("ActionManager", (hooks) => {
                 controller = this;
             },
         });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         function onClose() {
             assert.step("on_close");
         }
@@ -135,7 +135,7 @@ QUnit.module("ActionManager", (hooks) => {
                 controller = this;
             },
         });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 1);
         assert.containsOnce(target, ".o_kanban_view");
@@ -169,7 +169,7 @@ QUnit.module("ActionManager", (hooks) => {
                     controller = this;
                 },
             });
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1); // kanban
             await doAction(webClient, 3); // list
             assert.containsOnce(target, ".o_list_view");
@@ -202,7 +202,7 @@ QUnit.module("ActionManager", (hooks) => {
             });
             serverData.views["partner,false,pivot"] = "<pivot/>";
             serviceRegistry.add("user", makeFakeUserService());
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1); // kanban
             await doAction(webClient, {
                 id: 3,
@@ -237,7 +237,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return readOnFirstRecordDef;
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 3);
         // open first record in form view. this will crash and will not
         // display a form view

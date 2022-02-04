@@ -2001,7 +2001,7 @@ QUnit.module('Views', {
                 '</search>',
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 11);
         await testUtils.dom.click($(target).find('.o_list_button_add'));
@@ -3983,7 +3983,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 11);
 
         assert.containsNone(target, '.o_cp_action_menus', 'sidebar should be invisible');
@@ -10006,7 +10006,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target,serverData, mockRPC});
+        const webClient = await createWebClient({ serverData, mockRPC});
         await doAction(webClient, 11);
 
         assert.containsOnce(target, '.o_list_view');
@@ -11667,7 +11667,7 @@ QUnit.module('Views', {
             'foo,false,search': '<search><field name="foo" string="Foo"/></search>',
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 2);
 
@@ -12314,7 +12314,7 @@ QUnit.module('Views', {
             'foo,2,list': '<tree editable="top"><field name="foo"/></tree>',
             'foo,3,list': '<tree editable="top"><field name="foo"/></tree>',
         };
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 1);
 
@@ -12358,7 +12358,7 @@ QUnit.module('Views', {
             'foo,2,list': '<tree editable="top"><field name="foo"/></tree>',
             'foo,3,list': '<tree editable="top"><field name="foo"/></tree>',
         };
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 1);
 
@@ -12400,7 +12400,7 @@ QUnit.module('Views', {
             'foo,2,list': '<tree editable="top"><field name="foo" required="1"/></tree>',
             'foo,3,list': '<tree editable="top"><field name="foo"/></tree>',
         };
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 1);
 

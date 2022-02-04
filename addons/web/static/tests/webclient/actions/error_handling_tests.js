@@ -26,7 +26,7 @@ QUnit.module("ActionManager", (hooks) => {
         Boom.template = xml`<div><t t-esc="a.b.c"/></div>`;
         actionRegistry.add("Boom", Boom);
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         assert.strictEqual(target.querySelector(".o_action_manager").innerHTML, "");
         await doAction(webClient, "1");
         const contents = target.querySelector(".o_action_manager").innerHTML;
@@ -69,7 +69,7 @@ QUnit.module("ActionManager", (hooks) => {
             </div>`;
         actionRegistry.add("Boom", Boom);
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "Boom");
         assert.containsOnce(target, ".my_button");
 

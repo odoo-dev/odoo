@@ -1914,7 +1914,7 @@ QUnit.module('Views', {
             'partner,false,form': '<form><field name="foo"/></form>',
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: 'partner',
@@ -1979,7 +1979,7 @@ QUnit.module('Views', {
             'partner,false,form': '<form><field name="foo"/></form>',
         };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: 'partner',

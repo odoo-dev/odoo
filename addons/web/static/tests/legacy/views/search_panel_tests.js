@@ -2348,7 +2348,7 @@ QUnit.module('Views', {
         assert.expect(8);
 
         registry.category("services").add("user", makeFakeUserService());
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 1);
 
@@ -2409,7 +2409,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData , mockRPC });
+        const webClient = await createWebClient({ serverData , mockRPC });
 
         await doAction(webClient, 1);
 
@@ -2456,7 +2456,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData , mockRPC });
+        const webClient = await createWebClient({ serverData , mockRPC });
         await doAction(webClient, 1);
 
         assert.containsNone(target, '.o_search_panel_filter_value input:checked');
@@ -2536,7 +2536,7 @@ QUnit.module('Views', {
     QUnit.test('after onExecuteAction, selects "All" as default category value', async function (assert) {
         assert.expect(4);
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 2);
 
         await testUtils.dom.click($(target).find('.o_form_view button:contains("multi view")'));
@@ -2553,7 +2553,7 @@ QUnit.module('Views', {
         assert.expect(2);
 
         serverData.actions[2].context = {search_panel: false};
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 2);
 
         await testUtils.dom.click($(target).find('.o_form_view button:contains("multi view")'));
@@ -2572,7 +2572,7 @@ QUnit.module('Views', {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1);
 
         await switchView(target, 'list');

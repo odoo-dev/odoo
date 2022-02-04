@@ -136,7 +136,7 @@ QUnit.module('base_settings_tests', {
                 }
             };
 
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
 
             await doAction(webClient, 1);
             await testUtils.dom.click($(target).find('button[name="4"]'));
@@ -220,7 +220,7 @@ QUnit.module('base_settings_tests', {
                 }
             };
 
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
 
             await doAction(webClient, 1);
             assert.containsNone(
@@ -449,7 +449,7 @@ QUnit.module('base_settings_tests', {
                 }
             };
 
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             await doAction(webClient, 1);
             assert.strictEqual($(target).find(".breadcrumb").text(), "First action");
 
@@ -579,7 +579,7 @@ QUnit.module('base_settings_tests', {
                 }
             };
 
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
 
             await doAction(webClient, 1);
             assert.containsNone(

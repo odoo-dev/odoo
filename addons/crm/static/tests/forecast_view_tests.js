@@ -219,7 +219,6 @@ QUnit.module("Views", (hooks) => {
             legacyViewRegistry.add("legacy_toy", LegacyForecastView);
 
             const webClient = await createWebClient({
-                target,
                 serverData,
                 mockRPC(_, args) {
                     if (args.method === "web_read_group") {

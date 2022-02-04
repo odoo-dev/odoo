@@ -2753,7 +2753,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("action name is displayed in breadcrumbs", async function (assert) {
         const target = getFixture();
-        const webClient = await createWebClient({ serverData, target });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             name: "Glou glou",
             res_model: "foo",
@@ -3288,7 +3288,7 @@ QUnit.module("Views", (hooks) => {
         assert.expect(3);
         serverData.views["foo,false,list"] = `<list/>`;
         const target = getFixture();
-        const webClient = await createWebClient({ serverData, target });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             name: "Foo Action 1",
             res_model: "foo",

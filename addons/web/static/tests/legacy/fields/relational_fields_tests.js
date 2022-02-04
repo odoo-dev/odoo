@@ -1041,7 +1041,7 @@ QUnit.module('relational_fields', {
         };
         const serverData = { models: this.data, views}
         const target = getFixture();
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             res_id: 1,
             type: 'ir.actions.act_window',

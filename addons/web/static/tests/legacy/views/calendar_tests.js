@@ -2906,7 +2906,7 @@ QUnit.module('Views', {
         };
 
         const target = getFixture();
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 1);
         assert.containsNone(target, ".o_control_panel .o_search_options .o_group_by_menu",

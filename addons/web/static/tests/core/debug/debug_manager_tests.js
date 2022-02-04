@@ -322,7 +322,7 @@ QUnit.module("DebugMenu", (hooks) => {
             "partner,1,form": `<form><div class="some_view"/></form>`,
         });
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        await createWebClient({ serverData, mockRPC });
         await click(target.querySelector(".o_debug_manager button"));
         await click(target.querySelector(".o_debug_manager .dropdown-item"));
         await legacyExtraNextTick();
@@ -365,7 +365,7 @@ QUnit.module("DebugMenu", (hooks) => {
         };
         serverData.views["ir.ui.view,false,form"] = `<form><field name="id"/></form>`;
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1234);
         await click(target.querySelector(".o_debug_manager button"));
         await click(target.querySelector(".o_debug_manager .dropdown-item"));
@@ -401,7 +401,7 @@ QUnit.module("DebugMenu", (hooks) => {
         };
         serverData.views["ir.ui.view,false,form"] = `<form><field name="id"/></form>`;
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1);
         await click(target.querySelector(".o_debug_manager button"));
         await click(target.querySelector(".o_debug_manager .dropdown-item"));
@@ -459,7 +459,7 @@ QUnit.module("DebugMenu", (hooks) => {
         serverData.views["partner,false,toy"] = `<toy></toy>`;
         serverData.views["partner,293,search"] = `<search></search>`;
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 1);
         assert.containsOnce(target, ".o-toy-view");
 
@@ -490,7 +490,7 @@ QUnit.module("DebugMenu", (hooks) => {
 
             const serverData = getActionManagerServerData();
 
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             // opens a form view in a dialog without a control panel.
             await doAction(webClient, 5);
             await click(target.querySelector(".o_dialog .o_debug_manager button"));

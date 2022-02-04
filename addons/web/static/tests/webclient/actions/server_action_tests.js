@@ -23,7 +23,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return Promise.resolve(1); // execute action 1
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 2);
         assert.containsOnce(target, ".o_control_panel", "should have rendered a control panel");
         assert.containsOnce(target, ".o_kanban_view", "should have rendered a kanban view");
@@ -45,7 +45,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return Promise.resolve(false);
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         // execute an action in target="new"
         function onClose() {
             assert.step("close handler");
@@ -87,7 +87,7 @@ QUnit.module("ActionManager", (hooks) => {
                 return Promise.resolve(1); // execute action 1
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 2);
     });
 });

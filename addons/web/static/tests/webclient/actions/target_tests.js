@@ -36,7 +36,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async (route, args) => {
             assert.step((args && args.method) || route);
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 5);
         assert.containsOnce(
             document.body,
@@ -67,7 +67,7 @@ QUnit.module("ActionManager", (hooks) => {
             assert.strictEqual(closeInfo, "smallCandle");
             assert.step("Close Action");
         }
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 5, { onClose });
         // a target=new action shouldn't activate the on_close
         await doAction(webClient, 5);
@@ -86,7 +86,7 @@ QUnit.module("ActionManager", (hooks) => {
           <button string="Create" type="object" class="infooter"/>
         </footer>
       </form>`;
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 5);
         assert.containsNone(
             $(".o_technical_modal .modal-body")[0],
@@ -148,7 +148,7 @@ QUnit.module("ActionManager", (hooks) => {
                 };
             }
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         assert.verifySteps(["/web/webclient/load_menus"]);
         await doAction(webClient, 4);
         assert.verifySteps([
@@ -193,7 +193,7 @@ QUnit.module("ActionManager", (hooks) => {
             },
         });
         core.action_registry.add("test", ClientAction);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             tag: "test",
             target: "new",
@@ -213,7 +213,7 @@ QUnit.module("ActionManager", (hooks) => {
                 '<button string="Create" type="object" class="infooter"/>' +
                 "</footer>" +
                 "</form>";
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 5);
             assert.containsNone(target, '.o_technical_modal .modal-body button[special="save"]');
             assert.containsNone(target, ".o_technical_modal .modal-body button.infooter");
@@ -239,7 +239,7 @@ QUnit.module("ActionManager", (hooks) => {
                 },
             });
             core.action_registry.add("test", ClientAction);
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, {
                 tag: "test",
                 target: "new",
@@ -283,7 +283,7 @@ QUnit.module("ActionManager", (hooks) => {
                     });
                 }
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
 
             await doAction(webClient, 999);
 
@@ -313,7 +313,7 @@ QUnit.module("ActionManager", (hooks) => {
             },
         };
         registry.category("services").add("title", mockedTitleService);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         // sanity check: execute an action in target="current"
         await doAction(webClient, 1);
@@ -409,7 +409,7 @@ QUnit.module("ActionManager", (hooks) => {
             const mockRPC = async (route, args) => {
                 assert.step(args.method || route);
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             await doAction(webClient, 6);
             assert.containsOnce(
                 target,
@@ -428,7 +428,7 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("breadcrumbs and actions with target inline", async function (assert) {
         serverData.actions[4].views = [[false, "form"]];
         serverData.actions[4].target = "inline";
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 4);
         assert.containsNone(target, ".o_control_panel");
         await doAction(webClient, 1, { clearBreadcrumbs: true });
@@ -447,7 +447,7 @@ QUnit.module("ActionManager", (hooks) => {
         'correctly execute act_window actions in target="fullscreen"',
         async function (assert) {
             serverData.actions[1].target = "fullscreen";
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1);
             await nextTick(); // wait for the webclient template to be re-rendered
             assert.containsOnce(target, ".o_control_panel", "should have rendered a control panel");
@@ -461,7 +461,7 @@ QUnit.module("ActionManager", (hooks) => {
         serverData.views[
             "partner,false,form"
         ] = `<form><button name="1" type="action" class="oe_stat_button" /></form>`;
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 6);
         await legacyExtraNextTick();
         assert.containsOnce(target, ".o_main_navbar");
@@ -480,7 +480,7 @@ QUnit.module("ActionManager", (hooks) => {
         serverData.views[
             "partner,false,form"
         ] = `<form><button name="1" type="action" class="oe_stat_button" /></form>`;
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 6);
         assert.containsNone(target, ".o_main_navbar");
         await testUtils.dom.click($(target).find("button[name=1]"));
@@ -503,7 +503,7 @@ QUnit.module("ActionManager", (hooks) => {
             serverData.actions[1].target = "fullscreen";
             serverData.views["partner,false,form"] =
                 '<form><button name="24" type="action" class="oe_stat_button"/></form>';
-            await createWebClient({ target, serverData });
+            await createWebClient({ serverData });
             await nextTick(); // wait for the load state (default app)
             await legacyExtraNextTick();
             assert.containsOnce(target, "nav .o_menu_brand");

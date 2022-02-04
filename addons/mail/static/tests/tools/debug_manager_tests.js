@@ -38,7 +38,7 @@ QUnit.test("Manage Messages", async function (assert) {
     }
 
     const target = getFixture();
-    const wc = await createWebClient({ target, serverData, mockRPC });
+    const wc = await createWebClient({ serverData, mockRPC });
     await doAction(wc, 3, { viewType: "form", props: { resId: 5 } });
     await legacyExtraNextTick();
     await click(target, ".o_debug_manager .dropdown-toggle");

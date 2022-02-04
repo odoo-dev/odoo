@@ -65,7 +65,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
         QUnit.test("basic rendering", async function (assert) {
             assert.expect(1);
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1);
 
             assert.strictEqual(
@@ -79,7 +79,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
             assert.expect(4);
 
             patchWithCleanup(browser, { setTimeout: (fn) => fn() });
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1);
 
             // add a facet
@@ -105,7 +105,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
 
             let searchReadCount = 0;
 
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 legacyParams: {
                     getTZOffset() {
@@ -223,7 +223,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
             assert.expect(3);
 
             let searchReadCount = 0;
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 mockRPC: (route, args) => {
                     if (route === '/web/dataset/search_read') {
@@ -256,7 +256,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
 
             let searchReadCount = 0;
             const firstLoading = testUtils.makeTestPromise();
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 mockRPC: (route, args) => {
                     if (route === '/web/dataset/search_read') {
@@ -323,7 +323,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
             registry.category("services").add("user", makeFakeUserService());
 
             let rpcs;
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 mockRPC: () => { rpcs++; },
             });
@@ -340,7 +340,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
         QUnit.test('selecting (no result) triggers a re-render', async function (assert) {
             assert.expect(3);
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1);
 
             const searchInput = target.querySelector('.o_searchview_input');
@@ -369,7 +369,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
             // not handled but are triggered to ensure they do not interfere.
             const TEST = "TEST";
             const テスト = "テスト";
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1);
 
             const searchInput = target.querySelector('.o_searchview_input');
@@ -442,7 +442,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
         QUnit.test('open search view autocomplete on paste value using mouse', async function (assert) {
             assert.expect(1);
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1);
 
             // Simulate paste text through the mouse.
@@ -468,7 +468,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
                 </search>
             `;
 
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 mockRPC: (route, { domain }) => {
                     if (route === '/web/dataset/search_read') {
@@ -499,7 +499,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
         QUnit.test('"null" as autocomplete value', async function (assert) {
             assert.expect(4);
 
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 mockRPC: (route, { domain }) => {
                     if (route === '/web/dataset/search_read') {
@@ -532,7 +532,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
                 <search><field name="bool"/></search>
             `;
 
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 mockRPC: (route, { domain }) => {
                     if (route === '/web/dataset/search_read') {
@@ -577,7 +577,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
                 <search><field name="status"/></search>
             `;
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1);
 
             await testUtils.controlPanel.editSearch(target, "n");
@@ -604,7 +604,7 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
                 </search>
             `;
 
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 mockRPC: (route, { domain }) => {
                     if (route === '/web/dataset/search_read') {

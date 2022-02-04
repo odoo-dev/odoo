@@ -31,7 +31,7 @@ QUnit.module("ActionManager", (hooks) => {
         patchWithCleanup(session, { show_effect: true });
         clearRegistryWithCleanup(mainComponentRegistry);
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
         assert.containsOnce(target, ".o_kanban_view");
         assert.containsNone(target, ".o_reward");
@@ -72,7 +72,7 @@ QUnit.module("ActionManager", (hooks) => {
         };
         clearRegistryWithCleanup(mainComponentRegistry);
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 6);
         await click(target.querySelector('button[name="object"]'));
         assert.containsOnce(target, ".o_reward");
@@ -97,7 +97,7 @@ QUnit.module("ActionManager", (hooks) => {
         };
         clearRegistryWithCleanup(mainComponentRegistry);
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 6);
         await click(target.querySelector('button[name="object"]'));
         await legacyExtraNextTick();

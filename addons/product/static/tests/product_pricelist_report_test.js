@@ -7,7 +7,6 @@ const { createWebClient, doAction } = require('@web/../tests/webclient/helpers')
 const { getFixture, patchWithCleanup  } = require("@web/../tests/helpers/utils");
 
 let serverData;
-let target;
 
 QUnit.module('Product Pricelist', {
     beforeEach: function () {
@@ -60,7 +59,7 @@ QUnit.module('Product Pricelist', {
         };
 
         const target = getFixture();
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, {
             id: 1,
             name: 'Generate Pricelist',

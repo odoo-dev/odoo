@@ -103,7 +103,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("properly handle case when action id does not exist", async (assert) => {
         assert.expect(2);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         patchWithCleanup(window, { console: hushConsole }, { pure: true });
         patchWithCleanup(webClient.env.services.notification, {
             add(message) {
@@ -216,7 +216,7 @@ QUnit.module("ActionManager", (hooks) => {
                 this._super.apply(this, arguments);
             },
         });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 8);
         const n = delta;
         await doAction(webClient, 4);
@@ -248,7 +248,7 @@ QUnit.module("ActionManager", (hooks) => {
                 this._super.apply(this, arguments);
             },
         });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         const n = delta;
         await doAction(webClient, 5);
         await doAction(webClient, { type: "ir.actions.act_window_close" });
@@ -277,7 +277,7 @@ QUnit.module("ActionManager", (hooks) => {
                     await Promise.resolve(def);
                 }
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             await doAction(webClient, 4);
             const n = delta;
             await doAction(webClient, 3, { clearBreadcrumbs: true });
@@ -315,7 +315,7 @@ QUnit.module("ActionManager", (hooks) => {
                     await Promise.resolve(def);
                 }
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             // execute action 4 to know the number of widgets it instantiates
             await doAction(webClient, 4);
             const n = delta;
@@ -355,7 +355,7 @@ QUnit.module("ActionManager", (hooks) => {
                     await Promise.resolve(def);
                 }
             };
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
             // execute action 4 to know the number of widgets it instantiates
             await doAction(webClient, 4);
             const n = delta;
@@ -377,7 +377,7 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test('action with "no_breadcrumbs" set to true', async function (assert) {
         assert.expect(2);
         serverData.actions[4].context = { no_breadcrumbs: true };
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_control_panel .breadcrumb-item");
         // push another action flagged with 'no_breadcrumbs=true'
@@ -388,7 +388,7 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("document's title is updated when an action is executed", async function (assert) {
         assert.expect(8);
         const defaultTitle = { zopenerp: "Odoo" };
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         let currentTitle = webClient.env.services.title.getParts();
         assert.deepEqual(currentTitle, defaultTitle);
         let currentHash = webClient.env.services.router.current.hash;
@@ -442,7 +442,7 @@ QUnit.module("ActionManager", (hooks) => {
                 },
             });
             core.action_registry.add("ClientAction", ClientAction);
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, "ClientAction");
             assert.containsOnce(target, ".my_button");
             await testUtils.dom.click(target.querySelector(".my_button"));
@@ -465,7 +465,7 @@ QUnit.module("ActionManager", (hooks) => {
                 controller = this;
             },
         });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 4);
         await doAction(webClient, 3);
         assert.containsN(target, ".o_control_panel .breadcrumb-item", 2);
@@ -515,7 +515,7 @@ QUnit.module("ActionManager", (hooks) => {
           <form><field name="foo"/></form>
         </field>
       </form>`;
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 3);
             assert.containsOnce(target, ".o_list_view");
             await testUtils.dom.click(target.querySelector(".o_list_view .o_data_row"));
@@ -540,7 +540,7 @@ QUnit.module("ActionManager", (hooks) => {
           <form><field name="foo"/></form>
         </field>
       </form>`;
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 3);
             assert.containsOnce(target, ".o_list_view");
             await testUtils.dom.click($(target).find(".o_list_view .o_data_row:first"));
@@ -571,7 +571,7 @@ QUnit.module("ActionManager", (hooks) => {
                 </footer>
             </form>
         `;
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, 25);
 
@@ -608,7 +608,7 @@ QUnit.module("ActionManager", (hooks) => {
                 <field name="display_name" />
             </form>
         `;
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, 24);
 

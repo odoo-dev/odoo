@@ -1986,7 +1986,7 @@ QUnit.module("Search", (hooks) => {
                 </searchpanel>
             </search>`;
 
-        const webclient = await createWebClient({ target, serverData });
+        const webclient = await createWebClient({ serverData });
 
         await doAction(webclient, 1);
 
@@ -2026,7 +2026,7 @@ QUnit.module("Search", (hooks) => {
                 </searchpanel>
             </search>`;
 
-        const webclient = await createWebClient({ target, serverData });
+        const webclient = await createWebClient({ serverData });
 
         await doAction(webclient, 1);
 
@@ -2049,7 +2049,6 @@ QUnit.module("Search", (hooks) => {
         assert.expect(16);
 
         const webclient = await createWebClient({
-            target,
             serverData,
             async mockRPC(route, { domain }) {
                 if (route === "/web/dataset/search_read") {
@@ -2100,7 +2099,6 @@ QUnit.module("Search", (hooks) => {
         assert.expect(17);
 
         const webclient = await createWebClient({
-            target,
             serverData,
             async mockRPC(route, { domain }) {
                 if (route === "/web/dataset/search_read") {
@@ -2158,7 +2156,7 @@ QUnit.module("Search", (hooks) => {
         async (assert) => {
             assert.expect(13);
 
-            const webclient = await createWebClient({ target, serverData });
+            const webclient = await createWebClient({ serverData });
 
             await doAction(webclient, 1);
 
@@ -2194,7 +2192,7 @@ QUnit.module("Search", (hooks) => {
     QUnit.test('after onExecuteAction, selects "All" as default category value', async (assert) => {
         assert.expect(3);
 
-        const webclient = await createWebClient({ target, serverData });
+        const webclient = await createWebClient({ serverData });
 
         await doAction(webclient, 1, { viewType: "form" });
         await click(target.querySelector(".o_form_view button"));
@@ -2211,7 +2209,6 @@ QUnit.module("Search", (hooks) => {
             assert.expect(3);
 
             const webclient = await createWebClient({
-                target,
                 serverData,
                 async mockRPC(route, { method }) {
                     if (/search_panel_/.test(method || route)) {
@@ -2287,7 +2284,7 @@ QUnit.module("Search", (hooks) => {
                 </searchpanel>
             </search>`;
 
-        const webclient = await createWebClient({ target, serverData });
+        const webclient = await createWebClient({ serverData });
 
         await doAction(webclient, 1, { viewType: "form" });
 

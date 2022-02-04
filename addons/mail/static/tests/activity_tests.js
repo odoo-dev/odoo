@@ -399,7 +399,7 @@ QUnit.test("activity view: no group_by_menu and no comparison_menu", async funct
 
     patchWithCleanup(session.user_context, { lang: "zz_ZZ" });
 
-    const webClient = await createWebClient({ target, serverData, mockRPC , legacyParams: {withLegacyMockServer: true}});
+    const webClient = await createWebClient({ serverData, mockRPC , legacyParams: {withLegacyMockServer: true}});
 
     await doAction(webClient, 1);
 
@@ -520,7 +520,7 @@ QUnit.test("Activity view: discard an activity creation dialog", async function 
         }
     };
 
-    const webClient = await createWebClient({ target, serverData, mockRPC, legacyParams: {withLegacyMockServer: true} });
+    const webClient = await createWebClient({ serverData, mockRPC, legacyParams: {withLegacyMockServer: true} });
     await doAction(webClient, 1);
 
     await testUtils.dom.click(
@@ -576,7 +576,7 @@ QUnit.test('Activity view: many2one_avatar_user widget in activity view', async 
         'task,false,search': '<search></search>'
     };
 
-    const webClient = await createWebClient({ target, serverData, legacyParams: { withLegacyMockServer: true } });
+    const webClient = await createWebClient({ serverData, legacyParams: { withLegacyMockServer: true } });
     await doAction(webClient, 1);
 
     await legacyExtraNextTick();
@@ -650,7 +650,7 @@ QUnit.test("Schedule activity dialog uses the same search view as activity view"
         }
     }
 
-    const webClient = await createWebClient({ target, serverData, mockRPC, legacyParams: {withLegacyMockServer: true} });
+    const webClient = await createWebClient({ serverData, mockRPC, legacyParams: {withLegacyMockServer: true} });
 
     // open an activity view (with default search arch)
     await doAction(webClient, {
@@ -716,7 +716,7 @@ QUnit.test('Activity view: apply progressbar filter', async function (assert) {
         'task,false,search': '<search></search>',
     };
 
-    const webClient = await createWebClient({ target, serverData, legacyParams: { withLegacyMockServer: true } });
+    const webClient = await createWebClient({ serverData, legacyParams: { withLegacyMockServer: true } });
 
     await doAction(webClient, 1);
 

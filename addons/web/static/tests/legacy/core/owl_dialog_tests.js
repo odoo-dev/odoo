@@ -466,7 +466,7 @@ odoo.define('web.owl_dialog_tests', function (require) {
             };
 
             const target = getFixture();
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, 1);
 
             await testUtils.dom.click(target.querySelector(`.fc-event[data-event-id="1"]`));

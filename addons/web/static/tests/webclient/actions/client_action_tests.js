@@ -25,7 +25,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("can display client actions in Dialog", async function (assert) {
         assert.expect(2);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             name: "Dialog Test",
             target: "new",
@@ -38,7 +38,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("can display client actions as main, then in Dialog", async function (assert) {
         assert.expect(3);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "__test__client__action__");
         assert.containsOnce(target, ".o_action_manager .test_client_action");
         await doAction(webClient, {
@@ -54,7 +54,7 @@ QUnit.module("ActionManager", (hooks) => {
         "can display client actions in Dialog, then as main destroys Dialog",
         async function (assert) {
             assert.expect(4);
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             await doAction(webClient, {
                 target: "new",
                 tag: "__test__client__action__",
@@ -82,7 +82,7 @@ QUnit.module("ActionManager", (hooks) => {
         };
         core.action_registry.add("HelloWorldTestLeg", ClientAction);
         registerCleanup(() => delete core.action_registry.map.HelloWorldTestLeg);
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, "HelloWorldTestLeg");
         assert.containsNone(
             document.body,
@@ -106,7 +106,7 @@ QUnit.module("ActionManager", (hooks) => {
         const mockRPC = async function (route, args) {
             assert.step((args && args.method) || route);
         };
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, "HelloWorldTest");
         assert.containsNone(
             document.body,
@@ -128,7 +128,7 @@ QUnit.module("ActionManager", (hooks) => {
             await Promise.resolve();
             return 1; // execute action 1
         });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "my_action");
         assert.containsOnce(target, ".o_kanban_view");
     });
@@ -142,7 +142,7 @@ QUnit.module("ActionManager", (hooks) => {
                 assert.step("my_action");
             });
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
             webClient.env.bus.addEventListener("CLEAR-UNCOMMITTED-CHANGES", () => {
                 assert.step("CLEAR-UNCOMMITTED-CHANGES");
             });
@@ -166,7 +166,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         core.action_registry.add("HelloWorldTest", ClientAction);
         registerCleanup(() => delete core.action_registry.map.HelloWorldTest);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "HelloWorldTest");
         assert.strictEqual(
             $(".o_control_panel:visible").length,
@@ -213,7 +213,7 @@ QUnit.module("ActionManager", (hooks) => {
 
         core.action_registry.add("HelloWorldTest", ClientAction);
         registerCleanup(() => delete core.action_registry.map.HelloWorldTest);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         let currentTitle = webClient.env.services.title.current;
         assert.strictEqual(currentTitle, '{"zopenerp":"Odoo"}');
         let currentHash = webClient.env.services.router.current.hash;
@@ -243,7 +243,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         core.action_registry.add("HelloWorldTest", ClientAction);
         registerCleanup(() => delete core.action_registry.map.HelloWorldTest);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "HelloWorldTest");
         assert.containsOnce(target, ".custom-control-panel", "should have a custom control panel");
     });
@@ -266,7 +266,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         core.action_registry.add("HelloWorldTest", ClientAction);
         registerCleanup(() => delete core.action_registry.map.HelloWorldTest);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "HelloWorldTest");
         assert.strictEqual(
             $("ol.breadcrumb").text(),
@@ -308,7 +308,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         core.action_registry.add("ClientAction", ClientAction);
         core.action_registry.add("ClientAction2", ClientAction2);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "ClientAction");
         assert.containsOnce(target, ".breadcrumb-item");
         assert.strictEqual(
@@ -344,7 +344,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
         ClientAction.template = xml`<div class="my_owl_action" t-on-click="onClick">owl client action</div>`;
         actionRegistry.add("OwlClientAction", ClientAction);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 8);
         await doAction(webClient, "OwlClientAction");
         assert.containsOnce(target, ".my_owl_action");
@@ -365,7 +365,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
         ClientAction.template = xml`<div class="my_owl_action"></div>`;
         actionRegistry.add("OwlClientAction", ClientAction);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "OwlClientAction", {
             props: { division: "bell" },
         });
@@ -381,7 +381,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         core.action_registry.add("ClientAction", ClientAction);
         registerCleanup(() => delete core.action_registry.map.ClientAction);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "ClientAction", {
             props: { division: "bell" },
         });
@@ -389,7 +389,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("test display_notification client action", async function (assert) {
         assert.expect(6);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
         assert.containsOnce(target, ".o_kanban_view");
         await doAction(webClient, {
@@ -429,7 +429,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("test display_notification client action with links", async function (assert) {
         assert.expect(8);
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
         assert.containsOnce(target, ".o_kanban_view");
         await doAction(webClient, {
@@ -501,7 +501,7 @@ QUnit.module("ActionManager", (hooks) => {
     });
 
     QUnit.test("test next action on display_notification client action", async function (assert) {
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         const options = {
             onClose: function () {
                 assert.step("onClose");

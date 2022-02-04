@@ -112,7 +112,7 @@ QUnit.module("Views", (hooks) => {
 
             const unpatchDate = mock.patchDate(2021, 6, 1, 10, 0, 0);
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
 
             await doAction(webClient, {
                 name: "Action name",
@@ -229,7 +229,7 @@ QUnit.module("Views", (hooks) => {
                 },
             ];
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
 
             await doAction(webClient, {
                 name: "Action name",
@@ -263,7 +263,7 @@ QUnit.module("Views", (hooks) => {
             assert.expect(5);
 
             patchWithCleanup(browser, { setTimeout: (fn) => fn() });
-            const webClient = await createWebClient({ target,
+            const webClient = await createWebClient({
                 serverData,
                 mockRPC(_, args) {
                     if (args.method === "create_or_replace") {
@@ -354,7 +354,7 @@ QUnit.module("Views", (hooks) => {
             });
             legacyViewRegistry.add("legacy_toy_with_extension", LegacyToyViewWithExtension);
 
-            const webClient = await createWebClient({ target, serverData });
+            const webClient = await createWebClient({ serverData });
 
             await doAction(webClient, {
                 name: "Action name",

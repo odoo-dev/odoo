@@ -915,7 +915,7 @@ QUnit.module('Views', {
 
         const target = getFixture();
 
-        const webClient = await createWebClient({ serverData, target });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             res_model: 'foo',

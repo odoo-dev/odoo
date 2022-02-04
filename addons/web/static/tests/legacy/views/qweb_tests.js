@@ -48,7 +48,7 @@ QUnit.module("Views", {
         };
 
         const target = getFixture();
-        const webClient = await createWebClient({target, serverData, mockRPC});
+        const webClient = await createWebClient({ serverData, mockRPC});
 
         let resolved = false;
         const doActionProm = doAction(webClient, {

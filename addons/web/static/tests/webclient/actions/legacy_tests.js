@@ -43,7 +43,7 @@ QUnit.module("ActionManager", (hooks) => {
             },
         });
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_list_view");
         list.trigger_up("warning", {
@@ -69,7 +69,7 @@ QUnit.module("ActionManager", (hooks) => {
             },
         });
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_list_view");
         list.trigger_up("warning", {
@@ -147,7 +147,7 @@ QUnit.module("ActionManager", (hooks) => {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, "customLegacy");
         assert.containsOnce(target, ".custom-action");
         assert.verifySteps([]);
@@ -199,7 +199,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         core.action_registry.add("customLegacy", LegacyAction);
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
         await doAction(webClient, "customLegacy");
         await click(target.querySelectorAll(".breadcrumb-item")[0]);
@@ -282,7 +282,7 @@ QUnit.module("ActionManager", (hooks) => {
         };
         const serverData = { models, views };
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, {
             id: 1,
@@ -312,7 +312,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         core.action_registry.add("clientAction", ClientAction);
         registerCleanup(() => delete core.action_registry.map.clientAction);
-        const webClient = await createWebClient({ target });
+        const webClient = await createWebClient({});
 
         await doAction(webClient, {
             type: "ir.actions.client",
@@ -361,7 +361,7 @@ QUnit.module("ActionManager", (hooks) => {
         });
         core.action_registry.add("clientAction", ClientAction);
         registerCleanup(() => delete core.action_registry.map.clientAction);
-        const webClient = await createWebClient({ target });
+        const webClient = await createWebClient({});
 
         await doAction(webClient, {
             type: "ir.actions.client",
@@ -406,7 +406,7 @@ QUnit.module("ActionManager", (hooks) => {
             },
         });
         SystrayMenu.Items.push(FakeSystrayItemWidget);
-        await createWebClient({ target, serverData });
+        await createWebClient({ serverData });
         assert.verifySteps(["do action"]);
         delete SystrayMenu.Items.FakeSystrayItemWidget;
     });
@@ -435,7 +435,7 @@ QUnit.module("ActionManager", (hooks) => {
                 this._super();
             },
         });
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "testClientAction");
         assert.verifySteps(["ClientActionAdapter"]);
         await doAction(webClient, 1);
@@ -470,7 +470,7 @@ QUnit.module("ActionManager", (hooks) => {
         core.action_registry.add("testClientAction", MyAction);
         registerCleanup(() => delete core.action_registry.map.testClientAction);
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, "testClientAction");
         assert.verifySteps(['id: 0 props: {"breadcrumbs":[]}']);
 
@@ -492,7 +492,7 @@ QUnit.module("ActionManager", (hooks) => {
         core.action_registry.add("clientAction", ClientAction);
         registerCleanup(() => delete core.action_registry.map.clientAction);
 
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_list_view");

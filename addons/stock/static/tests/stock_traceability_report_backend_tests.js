@@ -128,7 +128,6 @@ odoo.define('stock.stock_traceability_report_backend_tests', function (require) 
 
             const target = getFixture();
             const webClient = await createWebClient({
-                target,
                 serverData,
                 mockRPC: function (route) {
                     if (route === '/web/dataset/call_kw/stock.traceability.report/get_html') {

@@ -434,7 +434,7 @@ QUnit.module('mail', {}, function () {
             'res.users': this.data['res.users'],
         }
         const serverData = { models, views}
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             res_id: 1,
             type: 'ir.actions.act_window',
@@ -482,7 +482,7 @@ QUnit.module('mail', {}, function () {
             'res.users': this.data['res.users'],
         }
         const serverData = { models, views}
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             res_id: 1,
             type: 'ir.actions.act_window',
@@ -527,7 +527,7 @@ QUnit.module('mail', {}, function () {
             'res.users': this.data['res.users'],
         }
         const serverData = { models, views}
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             res_id: 1,
             type: 'ir.actions.act_window',
@@ -576,7 +576,7 @@ QUnit.module('mail', {}, function () {
             'res.users': this.data['res.users'],
         }
         const serverData = { models, views}
-        const webClient = await createWebClient({ target, serverData });
+        const webClient = await createWebClient({ serverData });
         await doAction(webClient, {
             res_id: 1,
             type: 'ir.actions.act_window',

@@ -167,7 +167,6 @@ QUnit.module("Search", (hooks) => {
             ];
 
             const webClient = await createWebClient({
-                target,
                 serverData,
                 mockRPC: async (_, args) => {
                     if (args.model === "ir.filters" && args.method === "unlink") {

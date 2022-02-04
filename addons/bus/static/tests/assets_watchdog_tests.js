@@ -56,7 +56,6 @@ QUnit.module("Bus Assets WatchDog", (hooks) => {
         };
 
         await createWebClient({
-            target,
             legacyParams: { serviceRegistry: legacyServicesRegistry },
             mockRPC,
         });

@@ -70,7 +70,7 @@ QUnit.module("Menu Command Provider", {
 });
 
 QUnit.test("displays only apps if the search value is '/'", async (assert) => {
-    await createWebClient({ target, serverData });
+    await createWebClient({ serverData });
     assert.containsNone(target, ".o_menu_brand");
 
     triggerHotkey("control+k");
@@ -86,7 +86,7 @@ QUnit.test("displays only apps if the search value is '/'", async (assert) => {
 });
 
 QUnit.test("displays apps and menu items if the search value is not only '/'", async (assert) => {
-    await createWebClient({ target, serverData });
+    await createWebClient({ serverData });
 
     triggerHotkey("control+k");
     await nextTick();
@@ -100,7 +100,7 @@ QUnit.test("displays apps and menu items if the search value is not only '/'", a
 });
 
 QUnit.test("opens an app", async (assert) => {
-    await createWebClient({ target, serverData });
+    await createWebClient({ serverData });
     assert.containsNone(target, ".o_menu_brand");
 
     triggerHotkey("control+k");
@@ -119,7 +119,7 @@ QUnit.test("opens an app", async (assert) => {
 });
 
 QUnit.test("opens a menu items", async (assert) => {
-    await createWebClient({ target, serverData });
+    await createWebClient({ serverData });
     assert.containsNone(target, ".o_menu_brand");
 
     triggerHotkey("control+k");

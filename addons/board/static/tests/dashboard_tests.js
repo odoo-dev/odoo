@@ -881,7 +881,7 @@ odoo.define("board.dashboard_tests", function (require) {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, {
             id: 1,
@@ -942,7 +942,7 @@ odoo.define("board.dashboard_tests", function (require) {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, {
             id: 1,
@@ -1005,7 +1005,7 @@ odoo.define("board.dashboard_tests", function (require) {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, {
             id: 1,
@@ -1247,7 +1247,7 @@ odoo.define("board.dashboard_tests", function (require) {
 
             patchWithCleanup(browser, { setTimeout: (fn) => fn() }); // makes mouseEnter work
 
-            const webClient = await createWebClient({ target, serverData, mockRPC });
+            const webClient = await createWebClient({ serverData, mockRPC });
 
             await doAction(webClient, {
                 id: 1,
@@ -1296,7 +1296,7 @@ odoo.define("board.dashboard_tests", function (require) {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, {
             id: 1,
@@ -1404,7 +1404,7 @@ odoo.define("board.dashboard_tests", function (require) {
             }
         };
 
-        const webClient = await createWebClient({ target, serverData, mockRPC });
+        const webClient = await createWebClient({ serverData, mockRPC });
 
         await doAction(webClient, {
             id: 1,
