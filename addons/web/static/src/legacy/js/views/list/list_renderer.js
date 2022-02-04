@@ -827,7 +827,7 @@ var ListRenderer = BasicRenderer.extend({
             currentMinimum,
             limit,
             size,
-            onPagerChanged: this._onPagerChanged.bind(this),
+            onPagerChanged: this._onPagerChanged.bind(this, group),
         });
         const pagerMounting = pager.mount(target).then(() => {
             // Prevent pager clicks to toggle the group.
@@ -1405,9 +1405,7 @@ var ListRenderer = BasicRenderer.extend({
      * @param {OwlEvent} ev
      * @param {Object} group
      */
-    _onPagerChanged: async function (ev, group) {
-        ev.stopPropagation();
-        const { currentMinimum, limit } = ev.detail;
+    _onPagerChanged: async function (group, { currentMinimum, limit }) {
         this.trigger_up('load', {
             id: group.id,
             limit: limit,
