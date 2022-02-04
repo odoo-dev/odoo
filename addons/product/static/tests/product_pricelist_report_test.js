@@ -34,7 +34,6 @@ QUnit.module('Product Pricelist', {
                 }
             };
             serverData = { models: this.data };
-            target = getFixture();
         },
 }, function () {
     QUnit.test('Pricelist Client Action', async function (assert) {
