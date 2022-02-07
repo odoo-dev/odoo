@@ -74,7 +74,6 @@ odoo.define('web.Popover', function (require) {
             if (this.props.onClosed) {
                 this.props.onClosed();
             }
-            this.trigger('o-popover-closed');
         }
 
         /**
@@ -170,12 +169,10 @@ odoo.define('web.Popover', function (require) {
                 if (props.onOpened) {
                     props.onOpened();
                 }
-                this.trigger('o-popover-opened');
             } else {
                 if (props.onClosed) {
                     props.onClosed();
                 }
-                this.trigger('o-popover-closed');
             }
             if (!props.propagateClick) {
                 ev.stopPropagation();
