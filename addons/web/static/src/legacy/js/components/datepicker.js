@@ -3,7 +3,7 @@ odoo.define('web.DatePickerOwl', function (require) {
 
     const field_utils = require('web.field_utils');
     const time = require('web.time');
-    const { useAutofocus } = require('web.custom_hooks');
+    const { useAutofocus } = require("@web/core/utils/hooks");
 
     const {
         Component,

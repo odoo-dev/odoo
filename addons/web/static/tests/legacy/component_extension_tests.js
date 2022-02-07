@@ -6,7 +6,7 @@ odoo.define('web.component_extension_tests', function (require) {
     const { destroy, getFixture, mount } = require("@web/../tests/helpers/utils");
 
     const { Component, xml } = owl;
-    const { useListener } = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
 
     let target;
     QUnit.module("web", { beforeEach() { target = getFixture(); }}, function () {

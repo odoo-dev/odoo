@@ -13,7 +13,7 @@ odoo.define('web.test_utils_create', function (require) {
     const ActionMenus = require('web.ActionMenus');
     const concurrency = require('web.concurrency');
     const ControlPanel = require('web.ControlPanel');
-    const customHooks = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
     const dom = require('web.dom');
     const makeTestEnvironment = require('web.test_env');
     const ActionModel = require('web.ActionModel');
@@ -87,7 +87,7 @@ odoo.define('web.test_utils_create', function (require) {
                 this.Component = constructor;
                 this.state = useState(params.props || {});
                 for (const eventName in params.intercepts || {}) {
-                    customHooks.useListener(eventName, params.intercepts[eventName]);
+                    useListener(eventName, params.intercepts[eventName]);
                 }
                 useChild();
             }

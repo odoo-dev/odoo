@@ -5,7 +5,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
-    const { useListener, useAutofocus } = require('web.custom_hooks');
+    const { useAutofocus, useListener } = require("@web/core/utils/hooks");
     const { parse } = require('web.field_utils');
 
     const { onMounted, onWillUnmount, useState } = owl;

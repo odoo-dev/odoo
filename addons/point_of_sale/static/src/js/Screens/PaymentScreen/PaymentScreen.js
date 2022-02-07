@@ -5,7 +5,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const { useErrorHandlers } = require('point_of_sale.custom_hooks');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
-    const { useListener } = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
     const Registries = require('point_of_sale.Registries');
     const { isConnectionError } = require('point_of_sale.utils');
 

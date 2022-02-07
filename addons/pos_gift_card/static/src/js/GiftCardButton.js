@@ -3,9 +3,8 @@ odoo.define("pos_gift_card.GiftCardButton", function (require) {
 
   const PosComponent = require("point_of_sale.PosComponent");
   const ProductScreen = require("point_of_sale.ProductScreen");
-  const { useListener } = require("web.custom_hooks");
+  const { useListener } = require("@web/core/utils/hooks");
   const Registries = require("point_of_sale.Registries");
-  const { Gui } = require("point_of_sale.Gui");
 
   class GiftCardButton extends PosComponent {
     setup() {

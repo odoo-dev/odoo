@@ -1,7 +1,7 @@
 odoo.define('web.DropdownMenuItem', function (require) {
     "use strict";
 
-    const { useListener } = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
 
     const { Component, useExternalListener, useRef, useState } = owl;
 

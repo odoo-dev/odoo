@@ -2,7 +2,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
     "use strict";
 
     const field_utils = require('web.field_utils');
-    const { useListener } = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
 
     const { Component, onWillUpdateProps, useEffect } = owl;
 

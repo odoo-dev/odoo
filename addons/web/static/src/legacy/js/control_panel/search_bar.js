@@ -3,7 +3,7 @@ odoo.define('web.SearchBar', function (require) {
 
     const Domain = require('web.Domain');
     const field_utils = require('web.field_utils');
-    const { useAutofocus } = require('web.custom_hooks');
+    const { useAutofocus } = require("@web/core/utils/hooks");
     const { useModel } = require('web.Model');
     const { fuzzyTest } = require('@web/core/utils/search');
 

@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.PopupControllerMixin', function(require) {
     'use strict';
 
-    const { useListener } = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
 
     const { useState } = owl;
 

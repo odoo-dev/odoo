@@ -4,7 +4,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
     const { debounce } = require("@web/core/utils/timing");
-    const { useListener } = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
 
     const { onWillUnmount } = owl;
 

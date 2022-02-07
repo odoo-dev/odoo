@@ -1,7 +1,7 @@
 odoo.define('pos_sale.SaleOrderManagementControlPanel', function (require) {
     'use strict';
 
-    const { useAutofocus, useListener } = require('web.custom_hooks');
+    const { useAutofocus, useListener } = require("@web/core/utils/hooks");
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
     const SaleOrderFetcher = require('pos_sale.SaleOrderFetcher');

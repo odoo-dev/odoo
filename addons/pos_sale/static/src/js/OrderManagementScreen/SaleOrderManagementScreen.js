@@ -3,7 +3,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
 
     const { sprintf } = require('web.utils');
     const { parse } = require('web.field_utils');
-    const { useListener } = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
     const ControlButtonsMixin = require('point_of_sale.ControlButtonsMixin');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const Registries = require('point_of_sale.Registries');

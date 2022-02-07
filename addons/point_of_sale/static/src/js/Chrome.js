@@ -2,7 +2,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     'use strict';
 
     const { loadCSS } = require('web.ajax');
-    const { useListener } = require('web.custom_hooks');
+    const { useListener } = require("@web/core/utils/hooks");
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
     const BarcodeParser = require('barcodes.BarcodeParser');
     const PosComponent = require('point_of_sale.PosComponent');

@@ -6,7 +6,7 @@ odoo.define('board.AddToBoardMenu', function (require) {
     const { Dropdown } = require('@web/core/dropdown/dropdown');
     const FavoriteMenu = require('web.FavoriteMenu');
     const { sprintf } = require('web.utils');
-    const { useAutofocus } = require('web.custom_hooks');
+    const { useAutofocus } = require("@web/core/utils/hooks");
 
     const { Component, useState } = owl;
 

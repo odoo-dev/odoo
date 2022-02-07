@@ -402,7 +402,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/core/ajax.js',
             'web/static/src/legacy/js/core/browser_detection.js',
             'web/static/src/legacy/js/core/bus.js',
-            'web/static/src/legacy/js/core/custom_hooks.js',
             'web/static/src/legacy/js/core/class.js',
             'web/static/src/legacy/js/core/collections.js',
             'web/static/src/legacy/js/core/concurrency.js',

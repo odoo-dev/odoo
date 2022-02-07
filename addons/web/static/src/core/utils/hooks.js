@@ -36,6 +36,11 @@ export function useAutofocus(refName = "autofocus") {
     if (comp.env.isSmall) {
         return () => {};
     }
+    // LEGACY
+    if (comp.env.device && comp.env.device.isMobileDevice) {
+        return () => {};
+    }
+    // LEGACY
     let ref = useRef(refName);
     let forceFocusCount = 0;
     useEffect(

@@ -1,7 +1,7 @@
 odoo.define('web.Pager', function (require) {
     "use strict";
 
-    const { useAutofocus } = require('web.custom_hooks');
+    const { useAutofocus } = require("@web/core/utils/hooks");
 
     const { Component, onWillUpdateProps, useState } = owl;
 
