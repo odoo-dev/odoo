@@ -126,7 +126,13 @@ odoo.define('web.FieldWrapper', function (require) {
             // instantiated yet when the renderer first asks if it is set
             // (only the wrapper is instantiated), so we instantiate one
             // with the same props, get its 'isSet' status, and destroy it.
-            const app = new App(null, { env: this.env, templates: window.__ODOO_TEMPLATES__});
+            const app = new App(null, {
+                templates: window.__ODOO_TEMPLATES__,
+                env: this.env,
+                dev: this.env.isDebug(),
+                translateFn: owl.Component.env._t,
+                translatableAttributes: ["data-tooltip"],
+            });
             const node = app.makeNode(this.Component, this.props);
             const isSet = node.component.isSet;
             app.destroy();
@@ -140,7 +146,13 @@ odoo.define('web.FieldWrapper', function (require) {
             // instantiated yet when the renderer first asks if it is set
             // (only the wrapper is instantiated), so we instantiate one
             // with the same props, get its 'isValid' status, and destroy it.
-            const app = new App(null, { env: this.env, templates: window.__ODOO_TEMPLATES__});
+            const app = new App(null, {
+                templates: window.__ODOO_TEMPLATES__,
+                env: this.env,
+                dev: this.env.isDebug(),
+                translateFn: owl.Component.env._t,
+                translatableAttributes: ["data-tooltip"],
+            });
             const node = app.makeNode(this.Component, this.props);
             const isValid = node.component.isValid;
             app.destroy();

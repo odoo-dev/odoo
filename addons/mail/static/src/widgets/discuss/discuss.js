@@ -85,8 +85,11 @@ export const DiscussWidget = AbstractAction.extend({
         );
 
         this.app = new App(DiscussContainer, {
-            env: owl.Component.env,
             templates: window.__ODOO_TEMPLATES__,
+            env: owl.Component.env,
+            dev: owl.Component.env.isDebug(),
+            translateFn: owl.Component.env._t,
+            translatableAttributes: ["data-tooltip"],
         });
         await this.app.mount(this.el);
     },

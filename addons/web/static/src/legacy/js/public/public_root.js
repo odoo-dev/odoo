@@ -20,7 +20,7 @@ import {
     mapLegacyEnvToWowlEnv,
     makeLegacyRainbowManService,
 } from "../../utils";
-import { ComponentAdapter } from "web.OwlCompatibility";
+import { standaloneAdapter } from "web.OwlCompatibility";
 
 import { loadBundleTemplates } from "@web/core/assets";
 import { makeEnv, startServices } from "@web/env";
@@ -31,7 +31,7 @@ import { _t } from "@web/core/l10n/translation";
 
 
 const serviceRegistry = registry.category("services");
-const { Component, App, xml, mount, whenReady } = owl;
+const { Component, App, whenReady } = owl;
 
 // Load localizations outside the PublicRoot to not wait for DOM ready (but
 // wait for them in PublicRoot)
@@ -410,28 +410,16 @@ export async function createPublicRoot(RootWidget) {
     window.__ODOO_TEMPLATES__ = templates;
     await startServices(wowlEnv);
     mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv);
-    class RootParent extends Component {}
-    RootParent.template = xml``;
-    const app = new App(ComponentAdapter, {
-        templates: window.__ODOO_TEMPLATES__,
-        env: legacyEnv,
-        props: { Component: RootParent },
-        dev: legacyEnv.isDebug(),
-        translatableAttributes: ["data-tooltip"],
-        translateFn: _t,
-    });
-
-    // We have a two fold constrain
-    // - the adapter is here to provide a triiger_up to map to new services
-    // - it needs to be in the dom to eventually transmit events to the publicRoot widget via the body
-    const adapter = await app.mount(document.body);
-    const publicRoot = new RootWidget(adapter);
+    // The root widget's parent is a standalone adapter so that it has _trigger_up
+    const publicRoot = new RootWidget(standaloneAdapter({ Component }));
     await Promise.all([
-        mount(MainComponentsContainer, document.body, {
+        new App(MainComponentsContainer, {
             env: wowlEnv,
             dev: wowlEnv.debug,
             templates: window.__ODOO_TEMPLATES__,
-        }),
+            translateFn: _t,
+            translatableAttributes: ["data-tooltip"],
+        }).mount(document.body),
         publicRoot.attachTo(document.body),
     ]);
     return publicRoot;

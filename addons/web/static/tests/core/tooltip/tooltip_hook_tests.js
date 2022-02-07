@@ -64,7 +64,7 @@ async function makeParent(Child, options = {}) {
         env,
         target,
         templates: window.__ODOO_TEMPLATES__,
-        dev: env.debug,
+        test: true,
     });
     registerCleanup(() => app.destroy());
     for (const [name, template] of Object.entries(options.templates || {})) {

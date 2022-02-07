@@ -349,7 +349,7 @@ export async function mount(Comp, target, config = {}) {
     const configuration = {
         env,
         templates: window.__ODOO_TEMPLATES__,
-        dev: env.debug,
+        test: true,
         props,
     };
     if (env.services && "localization" in env.services) {

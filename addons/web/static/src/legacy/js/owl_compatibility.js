@@ -287,11 +287,15 @@ odoo.define('web.OwlCompatibility', function (require) {
         }
     }
 
-    function standaloneAdapter(props, env) {
-        if (!env) {
-            env = owl.Component.env;
-        }
-        const app = new App(null, { env, templates: window.__ODOO_TEMPLATES__});
+    function standaloneAdapter(props) {
+        const env = owl.Component.env;
+        const app = new App(null, {
+            templates: window.__ODOO_TEMPLATES__,
+            env,
+            dev: env.isDebug(),
+            translatableAttributes: ["data-tooltip"],
+            translateFn: env._t,
+        });
         const node = app.makeNode(ComponentAdapter, props);
         return node.component;
     }

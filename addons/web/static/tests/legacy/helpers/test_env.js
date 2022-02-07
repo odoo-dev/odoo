@@ -21,7 +21,7 @@ odoo.define('web.test_env', async function (require) {
      */
     function makeTestEnvironment(env = {}, providedRPC = null) {
         if (!app) {
-            app = new App(null, { templates: window.__ODOO_TEMPLATES__ });
+            app = new App(null, { templates: window.__ODOO_TEMPLATES__, test: true });
             renderToString.app = app;
         }
 

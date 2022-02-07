@@ -376,7 +376,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         const app = new App(Parent, {
             env,
             templates: window.__ODOO_TEMPLATES__,
-            dev: env.debug,
+            test: true,
         });
         registerCleanup(() => app.destroy());
         app.addTemplate(

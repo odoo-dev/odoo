@@ -24,7 +24,19 @@
     }
 
     owl.App = class extends App {
-        constructor() {
+        constructor(_, config) {
+            if (!config.test) {
+                const missingKeys = ["dev", "translateFn", "translatableAttributes"].filter(
+                    (key) => !(key in config)
+                );
+                if (missingKeys.length) {
+                    throw new Error(
+                        `Attempted to create an App without some required key(s) (${missingKeys.join(
+                            ", "
+                        )})`
+                    );
+                }
+            }
             super(...arguments);
             this.setup();
             hookIntoScheduler(this.scheduler);

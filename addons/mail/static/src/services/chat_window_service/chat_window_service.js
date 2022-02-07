@@ -53,8 +53,11 @@ export const ChatWindowService = AbstractService.extend({
         }
         const ChatWindowManagerComponent = getMessagingComponent("ChatWindowManager");
         this.app = new App(ChatWindowManagerComponent, {
-            env: owl.Component.env,
             templates: window.__ODOO_TEMPLATES__,
+            env: owl.Component.env,
+            dev: owl.Component.env.isDebug(),
+            translateFn: owl.Component.env._t,
+            translatableAttributes: ["data-tooltip"],
         });
         const parentNode = this._getParentNode();
         await this.app.mount(parentNode);
