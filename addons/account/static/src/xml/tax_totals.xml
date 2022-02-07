@@ -21,7 +21,7 @@
                         </span>
                     </t>
                     <t t-else="">
-                        <span class="o_tax_group_edit" t-on-click.prevent="setState('edit')">
+                        <span class="o_tax_group_edit" t-on-click.prevent="() => this.setState('edit')">
                             <i class="fa fa-pencil"/>
                             <span class="o_tax_group_amount_value">
                                 <t t-esc="props.taxGroup.formatted_tax_group_amount"/>

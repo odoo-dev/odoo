@@ -7,7 +7,7 @@
                 role="img"
                 aria-label="search"
                 tabindex="0"
-                t-on-keydown="onFacetKeydown.bind(this, facet, facet_index)"
+                t-on-keydown="ev => this.onFacetKeydown(facet, facet_index, ev)"
                 >
                 <t t-if="facet.icon">
                     <span t-attf-class="o_searchview_facet_label {{ facet.icon }}"/>

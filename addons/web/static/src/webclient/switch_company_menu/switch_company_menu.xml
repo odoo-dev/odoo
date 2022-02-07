@@ -30,7 +30,7 @@
                 tabindex="0"
                 class="border-right toggle_company"
                 t-attf-class="{{isCurrent ? 'border-primary' : ''}}"
-                t-on-click.stop="toggleCompany.bind(this, company.id)">
+                t-on-click.stop="() => this.toggleCompany(company.id)">
 
                 <span class="btn btn-light border-0 p-2">
                     <i class="fa fa-fw py-2" t-att-class="isCompanySelected ? 'fa-check-square text-primary' : 'fa-square-o'"/>
@@ -45,7 +45,7 @@
                 tabindex="0"
                 class="d-flex flex-grow-1 align-items-center py-0 log_into pl-2"
                 t-att-class="isCurrent ? 'alert-primary ml-1 mr-2' : 'btn btn-light font-weight-normal border-0'"
-                t-on-click="logIntoCompany.bind(this, company.id)">
+                t-on-click="() => this.logIntoCompany(company.id)">
 
                 <span
                     class='company_label pr-3'

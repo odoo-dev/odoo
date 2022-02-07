@@ -114,7 +114,7 @@
                 t-attf-id="{{ section.id }}_input_{{ valueId }}"
                 t-att-checked="state.active[section.id][valueId]"
                 class="custom-control-input"
-                t-on-click="toggleFilterValue.bind(this, section.id, valueId)"
+                t-on-click="ev => this.toggleFilterValue(section.id, valueId, ev)"
             />
             <label class="o_search_panel_label custom-control-label"
                 t-attf-for="{{ section.id }}_input_{{ valueId }}"

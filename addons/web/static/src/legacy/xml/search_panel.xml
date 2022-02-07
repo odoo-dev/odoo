@@ -34,7 +34,7 @@
                                 <input type="checkbox"
                                     class="custom-control-input"
                                     t-attf-id="{{ section.id }}_input_{{ groupId }})"
-                                    t-on-click="_toggleFilterGroup.bind(this, section.id, group)"
+                                    t-on-click="() => this._toggleFilterGroup(section.id, group)"
                                 />
                                 <label t-attf-for="{{ section.id }}_input_{{ groupId }})"
                                     class="o_search_panel_label custom-control-label"
@@ -114,7 +114,7 @@
                 t-attf-id="{{ section.id }}_input_{{ valueId }}"
                 t-att-checked="state.active[section.id][valueId]"
                 class="custom-control-input"
-                t-on-click="_toggleFilterValue.bind(this, section.id, valueId)"
+                t-on-click="ev => this._toggleFilterValue(section.id, valueId, ev)"
             />
             <label class="o_search_panel_label custom-control-label"
                 t-attf-for="{{ section.id }}_input_{{ valueId }}"

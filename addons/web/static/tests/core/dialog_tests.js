@@ -307,7 +307,7 @@ QUnit.module("Components", (hooks) => {
             }
         }
         const env = await makeTestEnv();
-        Parent.template = xml`<div><SimpleDialog setModalRef="setModalRef.bind(this)"/></div>`;
+        Parent.template = xml`<div><SimpleDialog setModalRef="el => this.setModalRef(el)"/></div>`;
         Parent.components = { SimpleDialog };
 
         const parent = await mount(Parent, target, { env });

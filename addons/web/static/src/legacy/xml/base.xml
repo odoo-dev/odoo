@@ -317,7 +317,7 @@
                 aria-label="Previous page"
                 title="Previous page"
                 tabindex="-1"
-                t-on-click="_changeSelection.bind(this, -1)"
+                t-on-click="ev => this._changeSelection(-1, ev)"
             />
             <button type="button"
                 class="fa fa-chevron-right btn btn-secondary o_pager_next rounded-right"
@@ -326,7 +326,7 @@
                 aria-label="Next page"
                 title="Next page"
                 tabindex="-1"
-                t-on-click="_changeSelection.bind(this, 1)"
+                t-on-click="ev => this._changeSelection(1, ev)"
             />
         </span>
     </nav>

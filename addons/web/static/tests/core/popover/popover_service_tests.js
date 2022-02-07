@@ -133,7 +133,7 @@ QUnit.test("sub component triggers close", async (assert) => {
     assert.containsOnce(fixture, ".o_popover_container");
 
     class Comp extends Component {}
-    Comp.template = xml`<div id="comp" t-on-click="trigger.bind(this, 'popover-closed')">in popover</div>`;
+    Comp.template = xml`<div id="comp" t-on-click="() => this.trigger('popover-closed')">in popover</div>`;
 
     popovers.add(popoverTarget, Comp, {});
     await nextTick();

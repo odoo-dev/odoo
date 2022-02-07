@@ -77,7 +77,8 @@ export class PivotRenderer extends Component {
      * Handle the adding of a custom groupby (inside the view, not the searchview).
      *
      * @param {"col"|"row"} type
-     * @param {CustomEvent} ev
+     * @param {Array[]} groupId
+     * @param {string} fieldName
      */
     onAddCustomGroupBy(type, groupId, fieldName) {
         this.model.addGroupBy({ groupId, fieldName, custom: true, type });
