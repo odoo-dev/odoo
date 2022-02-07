@@ -177,9 +177,6 @@ odoo.define('web.Popover', function (require) {
                 }
                 this.trigger('o-popover-closed');
             }
-            if (!props.propagateClick) {
-                ev.stopPropagation();
-            }
         }
 
         /**
