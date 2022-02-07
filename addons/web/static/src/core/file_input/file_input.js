@@ -82,6 +82,6 @@ FileInput.props = {
     model: { type: String, optional: 1 },
     multi_upload: { type: Boolean, optional: 1 },
     onUpload: { type: Function, optional: 1 },
-    slots: { type: Object, optional: true },
+    slots: { type: Object, optional: 1 },
 };
 FileInput.template = "web.FileInput";

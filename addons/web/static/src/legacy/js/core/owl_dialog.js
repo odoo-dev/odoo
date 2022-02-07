@@ -276,8 +276,8 @@ odoo.define('web.OwlDialog', function (require) {
             type: Object,
             optional: 1,
             shape: {
-                default: { optional: true },
-                buttons: { optional: true },
+                default: { optional: 1 },
+                buttons: { optional: 1 },
             },
         },
     };

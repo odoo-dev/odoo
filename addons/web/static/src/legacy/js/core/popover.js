@@ -349,7 +349,7 @@ odoo.define('web.Popover', function (require) {
         titleAttribute: { type: String, optional: true },
         slots: {
             type: Object,
-            optional: 1,
+            optional: true,
             shape: {
                 default: { optional: true },
                 opened: { optional: true },
