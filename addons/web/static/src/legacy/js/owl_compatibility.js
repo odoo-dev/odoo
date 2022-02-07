@@ -393,7 +393,7 @@ odoo.define('web.OwlCompatibility', function (require) {
     /**
      * Make the node able to distinguish between
      * mounting in the DOM and mounting outside of if.
-     * @param  {ComponentNode]} node
+     * @param  {ComponentNode} node
      */
     function prepareForFinish(node) {
         const fiber = node.fiber;
@@ -403,6 +403,9 @@ odoo.define('web.OwlCompatibility', function (require) {
             // just trigger mounted hooks on the Proxy, not on any other node
             if (!document.contains(this.target)) {
                 this.mounted = [this];
+                // We skipped a bunch of mounted calls.
+                // Following calls to patched may crash because of this.
+                // (e.g. useEffect dependencies set in mounted and used in patched)
             }
             complete.call(this);
         };

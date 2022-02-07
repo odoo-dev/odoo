@@ -11,15 +11,7 @@ odoo.define('web.ControlPanel', function (require) {
     const SearchBar = require('web.SearchBar');
     const { useModel } = require('web.Model');
 
-    const {
-        Component,
-        useRef,
-        onMounted,
-        onPatched,
-        onWillDestroy,
-        onWillUpdateProps,
-        useSubEnv,
-    } = owl;
+    const { Component, onMounted, onPatched, onWillDestroy, onWillUpdateProps, useRef, useSubEnv } = owl;
 
     /**
      * TODO: remove this whole mechanism as soon as `cp_content` is completely removed.
@@ -107,15 +99,14 @@ odoo.define('web.ControlPanel', function (require) {
         setup() {
             this.additionalContent = getAdditionalContent(this.props);
 
-            const subEnv = {
+            let subEnvView = this.props.view;
+            useSubEnv({
                 action: this.props.action,
                 searchModel: this.props.searchModel,
-            };
-            this.subEnvView = this.props.view;
-            Object.defineProperty(subEnv, "view", {
-                get: () => this.subEnvView,
+                get view() {
+                    return subEnvView;
+                },
             });
-            useSubEnv(subEnv);
 
             // Connect to the model
             // TODO: move this in enterprise whenever possible
@@ -136,7 +127,7 @@ odoo.define('web.ControlPanel', function (require) {
             this.sprintf = _.str.sprintf;
 
             onWillDestroy(() => {
-                const content =  this.props.cp_content;
+                const content = this.props.cp_content;
                 if (content) {
                     if (content.$buttons) {
                         content.$buttons.remove();
@@ -153,26 +144,21 @@ odoo.define('web.ControlPanel', function (require) {
                 }
             });
 
-            onMounted(() => {
-                this._attachAdditionalContent();
+            // Cannot use useEffect. See prepareForFinish in owl_compatibility.js
+            onMounted(() => this._attachAdditionalContent());
+            onPatched(() => this._attachAdditionalContent());
+            onWillUpdateProps((nextProps) => {
+                // Note: action and searchModel are not likely to change during
+                // the lifespan of a ControlPanel instance, so we only need to update
+                // the view information.
+                if ("view" in nextProps) {
+                    subEnvView = nextProps.view;
+                }
+                if ("fields" in nextProps) {
+                    this.fields = this._formatFields(nextProps.fields);
+                }
+                this.additionalContent = getAdditionalContent(nextProps);
             });
-            onPatched(() => {
-                this._attachAdditionalContent();
-            });
-            onWillUpdateProps(this.onWillUpdateProps);
-        }
-
-        async onWillUpdateProps(nextProps) {
-            // Note: action and searchModel are not likely to change during
-            // the lifespan of a ControlPanel instance, so we only need to update
-            // the view information.
-            if ('view' in nextProps) {
-                this.subEnvView = nextProps.view;
-            }
-            if ('fields' in nextProps) {
-                this.fields = this._formatFields(nextProps.fields);
-            }
-            this.additionalContent = getAdditionalContent(nextProps);
         }
 
         //---------------------------------------------------------------------
