@@ -209,7 +209,7 @@ export function cleanDomFromBootstrap() {
 export function makeLegacyNotificationService(legacyEnv) {
     return {
         dependencies: ["notification"],
-        start(env) {
+        start(env, { notification }) {
             let notifId = 0;
             const idsToRemoveFn = {};
 
@@ -240,7 +240,7 @@ export function makeLegacyNotificationService(legacyEnv) {
                     };
                 });
 
-                const removeFn = env.services.notification.add(owl.markup(_.escape(message)), {
+                const removeFn = notification.add(message, {
                     sticky,
                     title,
                     type,
