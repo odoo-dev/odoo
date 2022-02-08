@@ -212,11 +212,11 @@ odoo.define('web.Pager', function (require) {
     };
     Pager.props = {
         currentMinimum: { type: Number, optional: 1 },
-        editable: Boolean,
+        editable: { type: Boolean, optional: true },
         limit: { validate: l => !isNaN(l), optional: 1 },
         size: { type: Number, optional: 1 },
-        validate: Function,
-        withAccessKey: Boolean,
+        validate: { type: Function, optional: true },
+        withAccessKey: { type: Boolean, optional: true },
         onPagerChanged: Function,
     };
     Pager.template = 'web.legacy.Pager';

@@ -341,6 +341,7 @@ odoo.define('web.Popover', function (require) {
         position: {
             type: String,
             validate: (p) => ['top', 'bottom', 'left', 'right'].includes(p),
+            optional: true,
         },
         title: { type: String, optional: true },
         titleAttribute: { type: String, optional: true },

@@ -216,18 +216,18 @@ odoo.define('web.ControlPanel', function (require) {
     };
     ControlPanel.props = {
         action: Object,
-        breadcrumbs: Array,
+        breadcrumbs: { type: Array, optional: true },
         searchModel: ActionModel,
         cp_content: { type: Object, optional: 1 },
-        fields: Object,
+        fields: { type: Object, optional: true },
         pager: { validate: p => typeof p === 'object' || p === null, optional: 1 },
-        searchMenuTypes: Array,
+        searchMenuTypes: { type: Array, optional: true },
         actionMenus: { validate: s => typeof s === 'object' || s === null, optional: 1 },
         title: { type: String, optional: 1 },
         view: { type: Object, optional: 1 },
-        views: Array,
-        withBreadcrumbs: Boolean,
-        withSearchBar: Boolean,
+        views: { type: Array, optional: true },
+        withBreadcrumbs: { type: Boolean, optional: true },
+        withSearchBar: { type: Boolean, optional: true },
     };
     ControlPanel.template = 'web.Legacy.ControlPanel';
 

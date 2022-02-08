@@ -162,6 +162,6 @@ Pager.props = {
     limit: Number,
     total: Number,
     onUpdate: Function,
-    isEditable: Boolean,
-    withAccessKey: Boolean,
+    isEditable: { type: Boolean, optional: true },
+    withAccessKey: { type: Boolean, optional: true },
 };

@@ -87,8 +87,14 @@ Object.assign(ThreadView, {
             type: Function,
             optional: true,
         },
-        showComposerAttachmentsExtensions: Boolean,
-        showComposerAttachmentsFilenames: Boolean,
+        showComposerAttachmentsExtensions: {
+            type: Boolean,
+            optional: true,
+        },
+        showComposerAttachmentsFilenames: {
+            type: Boolean,
+            optional: true,
+        },
     },
     template: 'mail.ThreadView',
 });

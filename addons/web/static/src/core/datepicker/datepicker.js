@@ -241,7 +241,7 @@ DatePicker.props = {
         },
         optional: true,
     },
-    calendarWeeks: Boolean,
+    calendarWeeks: { type: Boolean, optional: true },
     format: { type: String, optional: true },
     icons: {
         type: Object,
@@ -256,14 +256,15 @@ DatePicker.props = {
             today: String,
             up: String,
         },
+        optional: true,
     },
     keyBinds: { validate: (kb) => typeof kb === "object" || kb === null, optional: true },
     locale: { type: String, optional: true },
-    maxDate: DateTime,
-    minDate: DateTime,
+    maxDate: { type: DateTime, optional: true },
+    minDate: { type: DateTime, optional: true },
     readonly: { type: Boolean, optional: true },
-    useCurrent: Boolean,
-    widgetParent: String,
+    useCurrent: { type: Boolean, optional: true },
+    widgetParent: { type: String, optional: true },
 };
 DatePicker.template = "web.DatePicker";
 

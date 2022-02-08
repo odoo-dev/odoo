@@ -157,8 +157,14 @@ Object.assign(AutocompleteInput, {
             type: Function,
             optional: true,
         },
-        isFocusOnMount: Boolean,
-        isHtml: Boolean,
+        isFocusOnMount: {
+            type: Boolean,
+            optional: true,
+        },
+        isHtml: {
+            type: Boolean,
+            optional: true,
+        },
         onFocusin: {
             type: Function,
             optional: true,
@@ -167,7 +173,10 @@ Object.assign(AutocompleteInput, {
             type: Function,
             optional: true,
         },
-        placeholder: String,
+        placeholder: {
+            type: String,
+            optional: true,
+        },
         select: {
             type: Function,
             optional: true,

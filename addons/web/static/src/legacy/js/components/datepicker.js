@@ -227,7 +227,7 @@ odoo.define('web.DatePickerOwl', function (require) {
             },
             optional: 1,
         },
-        calendarWeeks: Boolean,
+        calendarWeeks: { type: Boolean, optional: true },
         format: { type: String, optional: 1 },
         icons: {
             type: Object,
@@ -242,14 +242,15 @@ odoo.define('web.DatePickerOwl', function (require) {
                 today: String,
                 up: String,
             },
+            optional: true,
         },
         keyBinds: { validate: kb => typeof kb === 'object' || kb === null, optional: 1 },
-        locale: String,
-        maxDate: moment,
-        minDate: moment,
+        locale: { type: String, optional: true },
+        maxDate: { type: moment, optional: true },
+        minDate: { type: moment, optional: true },
         readonly: { type: Boolean, optional: 1 },
-        useCurrent: Boolean,
-        widgetParent: String,
+        useCurrent: { type: Boolean, optional: true },
+        widgetParent: { type: String, optional: true },
     };
     DatePicker.template = "web.Legacy.DatePicker";
 

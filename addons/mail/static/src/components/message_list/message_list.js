@@ -400,7 +400,10 @@ Object.assign(MessageList, {
             type: Function,
             optional: true,
         },
-        hasScrollAdjust: Boolean,
+        hasScrollAdjust: {
+            type: Boolean,
+            optional: true,
+        },
         localId: String,
     },
     template: 'mail.MessageList',

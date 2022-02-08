@@ -254,9 +254,9 @@ Object.assign(ChatWindow, {
     },
     props: {
         localId: String,
-        hasCloseAsBackButton: Boolean,
-        isExpandable: Boolean,
-        isFullscreen: Boolean,
+        hasCloseAsBackButton: { type: Boolean, optional: true },
+        isExpandable: { type: Boolean, optional: true },
+        isFullscreen: { type: Boolean, optional: true },
     },
     template: 'mail.ChatWindow',
 });

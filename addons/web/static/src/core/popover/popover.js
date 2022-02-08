@@ -26,6 +26,7 @@ Popover.props = {
     position: {
         type: String,
         validate: (p) => ["top", "bottom", "left", "right"].includes(p),
+        optional: true,
     },
     target: HTMLElement,
     slots: {

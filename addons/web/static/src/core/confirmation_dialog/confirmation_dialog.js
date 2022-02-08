@@ -30,6 +30,7 @@ ConfirmationDialog.props = {
                 typeof m === "string" || (typeof m === "object" && typeof m.toString === "function")
             );
         },
+        optional: true,
     },
     body: String,
     confirm: { type: Function, optional: true },

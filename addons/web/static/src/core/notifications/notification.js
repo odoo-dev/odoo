@@ -50,6 +50,7 @@ Notification.props = {
                 onClick: Function,
             },
         },
+        optional: true,
     },
     close: { type: Function },
 };
