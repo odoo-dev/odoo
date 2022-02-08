@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <menuitem action="coupon.coupon_program_action_promo_program" id="menu_promotion_type_config" name="Promotion Programs" parent="website_sale.menu_catalog" groups="sales_team.group_sale_manager" sequence="50"/>
-    <menuitem id="menu_coupon_type_config" action="coupon.coupon_program_action_coupon_program" name="Coupon Programs" parent="website_sale.menu_catalog" groups="sales_team.group_sale_manager" sequence="51"/>
+    <menuitem action="coupon.coupon_program_action_promo_program" id="menu_promotion_type_config" name="Promotion Programs" parent="website_sale.menu_catalog" groups="sales_team.group_sale_manager" sequence="50" active="0"/>
+    <menuitem id="menu_coupon_type_config" action="coupon.coupon_program_action_coupon_program" name="Coupon Programs" parent="website_sale.menu_catalog" groups="sales_team.group_sale_manager" sequence="51" active="0"/>
 
     <record model="ir.ui.view" id="sale_coupon_program_view_form_common_website">
         <field name="name">coupon.program.common.form</field>
