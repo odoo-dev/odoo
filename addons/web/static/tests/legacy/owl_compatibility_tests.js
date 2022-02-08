@@ -17,7 +17,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
     const nextTick = testUtils.nextTick;
     const addMockEnvironmentOwl = testUtils.mock.addMockEnvironmentOwl;
 
-    const { mount, useLogLifeCycle } = require("@web/../tests/helpers/utils");
+    const { mount, useLogLifeCycle, destroy } = require("@web/../tests/helpers/utils");
 
     const {
         Component,
@@ -358,7 +358,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
 
             assert.verifySteps(['on_attach_callback']);
 
-            parent.__owl__.app.destroy();
+            destroy(parent);
 
             assert.verifySteps(['on_detach_callback', 'destroy']);
         });

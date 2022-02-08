@@ -364,6 +364,19 @@ export function destroy(comp) {
     comp.__owl__.app.destroy();
 }
 
+export function findChildren(comp, predicate = (e) => e) {
+    let queue = [];
+    [].unshift.apply(queue, Object.values(comp.__owl__.children));
+
+    while (queue.length > 0) {
+        const curNode = queue.pop();
+        if (predicate(curNode)) {
+            return curNode;
+        }
+        [].unshift.apply(queue, Object.values(curNode.component.__owl__.children));
+    }
+}
+
 // partial replacement of t-ref on component
 export function useChild() {
     const node = useComponent().__owl__;

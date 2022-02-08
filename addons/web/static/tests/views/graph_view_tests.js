@@ -8,6 +8,7 @@ import {
     nextTick,
     patchDate,
     triggerEvent,
+    findChildren,
 } from "@web/../tests/helpers/utils";
 import {
     editFavoriteName,
@@ -40,7 +41,7 @@ function getGraphModelMetaData(graph) {
 }
 
 export function getGraphRenderer(graph) {
-    const layoutNode = Object.values(graph.__owl__.children)[0];
+    const layoutNode = findChildren(graph);
     return Object.values(layoutNode.children)
         .map((c) => c.component)
         .find((c) => c.chart);

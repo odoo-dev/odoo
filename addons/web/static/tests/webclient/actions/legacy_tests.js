@@ -4,7 +4,13 @@ import { registry } from "@web/core/registry";
 import testUtils from "web.test_utils";
 import ListController from "web.ListController";
 import ListView from "web.ListView";
-import { click, getFixture, legacyExtraNextTick, patchWithCleanup } from "../../helpers/utils";
+import {
+    click,
+    destroy,
+    getFixture,
+    legacyExtraNextTick,
+    patchWithCleanup,
+} from "../../helpers/utils";
 import { registerCleanup } from "../../helpers/cleanup";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { createWebClient, doAction, getActionManagerServerData } from "./../helpers";
@@ -205,7 +211,7 @@ QUnit.module("ActionManager", (hooks) => {
         await click(target.querySelectorAll(".breadcrumb-item")[0]);
         await legacyExtraNextTick();
 
-        webClient.__owl__.app.destroy();
+        destroy(webClient);
 
         assert.verifySteps([
             "mounted 1",
