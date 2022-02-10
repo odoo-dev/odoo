@@ -708,7 +708,7 @@
     function buildContext(tree, ctx, fromIdx) {
         if (!ctx) {
             const children = new Array(tree.info.filter((v) => v.type === "child").length);
-            ctx = { collectors: [], locations: [], children, cbRefs: [], refN: tree.refN };
+            ctx = { collectors: [], locations: [], children, cbRefs: [], refN: tree.refN, refList: [] };
             fromIdx = 0;
         }
         if (tree.refN) {
@@ -810,11 +810,11 @@
                     break;
                 }
                 case "ref":
-                    ctx.cbRefs.push(info.idx);
+                    const index = ctx.cbRefs.push(info.idx) - 1;
                     ctx.locations.push({
                         idx: info.idx,
                         refIdx: info.refIdx,
-                        setData: setRef,
+                        setData: makeRefSetter(index, ctx.refList),
                         updateData: NO_OP$1,
                     });
             }
@@ -826,12 +826,21 @@
     function buildBlock(template, ctx) {
         let B = createBlockClass(template, ctx);
         if (ctx.cbRefs.length) {
-            const refs = ctx.cbRefs;
+            const cbRefs = ctx.cbRefs;
+            const refList = ctx.refList;
+            let cbRefsNumber = cbRefs.length;
             B = class extends B {
+                mount(parent, afterNode) {
+                    refList.push(new Array(cbRefsNumber));
+                    super.mount(parent, afterNode);
+                    for (let cbRef of refList.pop()) {
+                        cbRef();
+                    }
+                }
                 remove() {
                     super.remove();
-                    for (let ref of refs) {
-                        let fn = this.data[ref];
+                    for (let cbRef of cbRefs) {
+                        let fn = this.data[cbRef];
                         fn(null);
                     }
                 }
@@ -867,7 +876,7 @@
         const nodeCloneNode = nodeProto$2.cloneNode;
         const nodeInsertBefore = nodeProto$2.insertBefore;
         const elementRemove = elementProto.remove;
-        return class Block {
+        class Block {
             constructor(data) {
                 this.data = data;
             }
@@ -882,44 +891,56 @@
                 const target = other ? other.el : afterNode;
                 nodeInsertBefore.call(this.parentEl, this.el, target);
             }
+            toString() {
+                const div = document.createElement("div");
+                this.mount(div, null);
+                return div.innerHTML;
+            }
             mount(parent, afterNode) {
                 const el = nodeCloneNode.call(template, true);
                 nodeInsertBefore.call(parent, el, afterNode);
-                if (isDynamic) {
-                    // collecting references
-                    const refs = new Array(refN);
-                    this.refs = refs;
-                    refs[0] = el;
-                    for (let i = 0; i < colN; i++) {
-                        const w = collectors[i];
-                        refs[w.idx] = w.getVal.call(refs[w.prevIdx]);
+                this.el = el;
+                this.parentEl = parent;
+            }
+            patch(other, withBeforeRemove) { }
+        }
+        if (isDynamic) {
+            Block.prototype.mount = function mount(parent, afterNode) {
+                const el = nodeCloneNode.call(template, true);
+                // collecting references
+                const refs = new Array(refN);
+                this.refs = refs;
+                refs[0] = el;
+                for (let i = 0; i < colN; i++) {
+                    const w = collectors[i];
+                    refs[w.idx] = w.getVal.call(refs[w.prevIdx]);
+                }
+                // applying data to all update points
+                if (locN) {
+                    const data = this.data;
+                    for (let i = 0; i < locN; i++) {
+                        const loc = locations[i];
+                        loc.setData.call(refs[loc.refIdx], data[i]);
                     }
-                    // applying data to all update points
-                    if (locN) {
-                        const data = this.data;
-                        for (let i = 0; i < locN; i++) {
-                            const loc = locations[i];
-                            loc.setData.call(refs[loc.refIdx], data[i]);
-                        }
-                    }
-                    // preparing all children
-                    if (childN) {
-                        const children = this.children;
-                        for (let i = 0; i < childN; i++) {
-                            const child = children[i];
-                            if (child) {
-                                const loc = childrenLocs[i];
-                                const afterNode = loc.afterRefIdx ? refs[loc.afterRefIdx] : null;
-                                child.isOnlyChild = loc.isOnlyChild;
-                                child.mount(refs[loc.parentRefIdx], afterNode);
-                            }
+                }
+                nodeInsertBefore.call(parent, el, afterNode);
+                // preparing all children
+                if (childN) {
+                    const children = this.children;
+                    for (let i = 0; i < childN; i++) {
+                        const child = children[i];
+                        if (child) {
+                            const loc = childrenLocs[i];
+                            const afterNode = loc.afterRefIdx ? refs[loc.afterRefIdx] : null;
+                            child.isOnlyChild = loc.isOnlyChild;
+                            child.mount(refs[loc.parentRefIdx], afterNode);
                         }
                     }
                 }
                 this.el = el;
                 this.parentEl = parent;
-            }
-            patch(other, withBeforeRemove) {
+            };
+            Block.prototype.patch = function patch(other, withBeforeRemove) {
                 if (this === other) {
                     return;
                 }
@@ -965,19 +986,17 @@
                         }
                     }
                 }
-            }
-            toString() {
-                const div = document.createElement("div");
-                this.mount(div, null);
-                return div.innerHTML;
-            }
-        };
+            };
+        }
+        return Block;
     }
     function setText(value) {
         characterDataSetData.call(this, toText(value));
     }
-    function setRef(fn) {
-        fn(this);
+    function makeRefSetter(index, refs) {
+        return function setRef(fn) {
+            refs[refs.length - 1][index] = () => fn(this);
+        };
     }
 
     const getDescriptor = (o, p) => Object.getOwnPropertyDescriptor(o, p);
@@ -1315,14 +1334,23 @@
             return;
         }
         applyDefaultProps(props, ComponentClass);
+        const defaultProps = ComponentClass.defaultProps || {};
         let propsDef = getPropDescription(ComponentClass.props);
         const allowAdditionalProps = "*" in propsDef;
         for (let propName in propsDef) {
             if (propName === "*") {
                 continue;
             }
+            const propDef = propsDef[propName];
+            let isMandatory = !!propDef;
+            if (typeof propDef === "object" && "optional" in propDef) {
+                isMandatory = !propDef.optional;
+            }
+            if (isMandatory && propName in defaultProps) {
+                throw new Error(`A default value cannot be defined for a mandatory prop (name: '${propName}', component: ${ComponentClass.name})`);
+            }
             if (props[propName] === undefined) {
-                if (propsDef[propName] && !propsDef[propName].optional) {
+                if (isMandatory) {
                     throw new Error(`Missing props '${propName}' (component '${ComponentClass.name}')`);
                 }
                 else {
@@ -1331,7 +1359,7 @@
             }
             let isValid;
             try {
-                isValid = isValidProp(props[propName], propsDef[propName]);
+                isValid = isValidProp(props[propName], propDef);
             }
             catch (e) {
                 e.message = `Invalid prop '${propName}' in component ${ComponentClass.name} (${e.message})`;
@@ -1791,7 +1819,7 @@
             safeKey = `lazy_value`;
             block = value.evaluate();
         }
-        else if (typeof value === "string") {
+        else if (value instanceof String || typeof value === "string") {
             safeKey = "string_unsafe";
             block = text(value);
         }
@@ -2092,8 +2120,8 @@
         complete() {
             let current = this;
             try {
-                // validateTarget(this.target); NXOWL
                 const node = this.node;
+                node.app.constructor.validateTarget(this.target);
                 if (node.bdom) {
                     // this is a complicated situation: if we mount a fiber with an existing
                     // bdom, this means that this same fiber was already completed, mounted,
@@ -2156,7 +2184,7 @@
      * @see reactive
      */
     function useState(state) {
-        const node = currentNode;
+        const node = getCurrent();
         let render = batchedRenderFunctions.get(node);
         if (!render) {
             render = batched(node.render.bind(node));
@@ -2927,10 +2955,22 @@
             this.isDebug = false;
             this.targets = [];
             this.target = new CodeTarget("template");
+            this.translatableAttributes = TRANSLATABLE_ATTRS;
             this.staticCalls = [];
             this.helpers = new Set();
             this.translateFn = options.translateFn || ((s) => s);
-            this.translatableAttributes = options.translatableAttributes || TRANSLATABLE_ATTRS;
+            if (options.translatableAttributes) {
+                const attrs = new Set(TRANSLATABLE_ATTRS);
+                for (let attr of options.translatableAttributes) {
+                    if (attr.startsWith("-")) {
+                        attrs.delete(attr.slice(1));
+                    }
+                    else {
+                        attrs.add(attr);
+                    }
+                }
+                this.translatableAttributes = [...attrs];
+            }
             this.hasSafeContext = options.hasSafeContext || false;
             this.dev = options.dev || false;
             this.ast = ast;
@@ -3696,29 +3736,48 @@
             }
             return parts.join("__");
         }
+        /**
+         * Formats a prop name and value into a string suitable to be inserted in the
+         * generated code. For example:
+         *
+         * Name              Value            Result
+         * ---------------------------------------------------------
+         * "number"          "state"          "number: ctx['state']"
+         * "something"       ""               "something: undefined"
+         * "some-prop"       "state"          "'some-prop': ctx['state']"
+         * "onClick.bind"    "onClick"        "onClick: bind(ctx, ctx['onClick'])"
+         */
+        formatProp(name, value) {
+            value = this.captureExpression(value);
+            if (name.includes(".")) {
+                let [_name, suffix] = name.split(".");
+                if (suffix === "bind") {
+                    this.helpers.add("bind");
+                    name = _name;
+                    value = `bind(ctx, ${value || undefined})`;
+                }
+                else {
+                    throw new Error("Invalid prop suffix");
+                }
+            }
+            name = /^[a-z_]+$/i.test(name) ? name : `'${name}'`;
+            return `${name}: ${value || undefined}`;
+        }
+        formatPropObject(obj) {
+            const params = [];
+            for (const [n, v] of Object.entries(obj)) {
+                params.push(this.formatProp(n, v));
+            }
+            return params.join(", ");
+        }
         compileComponent(ast, ctx) {
             let { block } = ctx;
             // props
+            const hasSlotsProp = "slots" in ast.props;
             const props = [];
-            let hasSlotsProp = false;
-            for (let propName in ast.props) {
-                let propValue = this.captureExpression(ast.props[propName]) || undefined;
-                if (propName.includes(".")) {
-                    let [name, suffix] = propName.split(".");
-                    if (suffix === "bind") {
-                        this.helpers.add("bind");
-                        propName = name;
-                        propValue = `bind(ctx, ${propValue})`;
-                    }
-                    else {
-                        throw new Error("Invalid prop suffix");
-                    }
-                }
-                propName = /^[a-z_]+$/i.test(propName) ? propName : `'${propName}'`;
-                props.push(`${propName}: ${propValue}`);
-                if (propName === "slots") {
-                    hasSlotsProp = true;
-                }
+            const propExpr = this.formatPropObject(ast.props);
+            if (propExpr) {
+                props.push(propExpr);
             }
             // slots
             const hasSlot = !!Object.keys(ast.slots).length;
@@ -3740,9 +3799,7 @@
                         params.push(`__scope: "${scope}"`);
                     }
                     if (ast.slots[slotName].attrs) {
-                        for (const [n, v] of Object.entries(ast.slots[slotName].attrs)) {
-                            params.push(`${n}: ${compileExpr(v) || undefined}`);
-                        }
+                        params.push(this.formatPropObject(ast.slots[slotName].attrs));
                     }
                     const slotInfo = `{${params.join(", ")}}`;
                     slotStr.push(`'${slotName}': ${slotInfo}`);
@@ -3810,14 +3867,7 @@
             else {
                 slotName = "'" + ast.name + "'";
             }
-            let scope = null;
-            if (ast.attrs) {
-                const params = [];
-                for (const [n, v] of Object.entries(ast.attrs)) {
-                    params.push(`${n}: ${compileExpr(v) || undefined}`);
-                }
-                scope = `{${params.join(", ")}}`;
-            }
+            const scope = ast.attrs ? `{${this.formatPropObject(ast.attrs)}}` : null;
             if (ast.defaultContent) {
                 const name = this.compileInNewTarget("defaultContent", ast.defaultContent, ctx);
                 blockString = `callSlot(ctx, node, key, ${slotName}, ${dynamic}, ${scope}, ${name})`;
@@ -4307,6 +4357,8 @@
         }
         const dynamicProps = node.getAttribute("t-props");
         node.removeAttribute("t-props");
+        const defaultSlotScope = node.getAttribute("t-slot-scope");
+        node.removeAttribute("t-slot-scope");
         const props = {};
         for (let name of node.getAttributeNames()) {
             const value = node.getAttribute(name);
@@ -4366,6 +4418,9 @@
             const defaultContent = parseChildNodes(clone, ctx);
             if (defaultContent) {
                 slots.default = { content: defaultContent };
+                if (defaultSlotScope) {
+                    slots.default.scope = defaultSlotScope;
+                }
             }
         }
         return { type: 11 /* TComponent */, name, isDynamic, dynamicProps, props, slots };
@@ -4847,7 +4902,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             this.props = config.props || {};
         }
         mount(target, options) {
-            validateTarget(target);
+            App.validateTarget(target);
             const node = this.makeNode(this.Root, this.props);
             const prom = this.mountNode(node, target, options);
             this.root = node;
@@ -4890,6 +4945,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             }
         }
     }
+    App.validateTarget = validateTarget;
     async function mount(C, target, config = {}) {
         return new App(C, config).mount(target, config);
     }
@@ -5075,7 +5131,6 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.blockDom = blockDom;
     exports.loadFile = loadFile;
     exports.markRaw = markRaw;
-    exports.batched = batched;
     exports.markup = markup;
     exports.mount = mount;
     exports.onError = onError;
@@ -5101,14 +5156,13 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     exports.useSubEnv = useSubEnv;
     exports.whenReady = whenReady;
     exports.xml = xml;
-    exports.batched = batched;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '2.0.0-alpha1';
-    __info__.date = '2022-01-31T07:57:34.379Z';
-    __info__.hash = '490734d';
+    __info__.version = '2.0.0-alpha.1';
+    __info__.date = '2022-02-10T10:57:16.790Z';
+    __info__.hash = '79c1627';
     __info__.url = 'https://github.com/odoo/owl';
 
 
