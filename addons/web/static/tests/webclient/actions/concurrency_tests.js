@@ -538,8 +538,7 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    // OWL-NEW-RENDERING
-    QUnit.skip("click multiple times to open a record", async function (assert) {
+    QUnit.test("click multiple times to open a record", async function (assert) {
         assert.expect(5);
 
         const def = testUtils.makeTestPromise();

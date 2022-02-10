@@ -516,8 +516,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.containsN(target, ".o_data_row", 5);
     });
 
-    // OWL-NEW-RENDERING
-    QUnit.skip("there is no flickering when switching between views", async function (assert) {
+    QUnit.test("there is no flickering when switching between views", async function (assert) {
         assert.expect(20);
         let def;
         const mockRPC = async (route, args) => {
