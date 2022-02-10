@@ -13,7 +13,6 @@ var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
 var widgetRegistry = require('web.widget_registry');
 const widgetRegistryOwl = require('web.widgetRegistry');
-const {Markup} = require('web.utils');
 const { registry } = require('@web/core/registry');
 const legacyViewRegistry = require('web.view_registry');
 
