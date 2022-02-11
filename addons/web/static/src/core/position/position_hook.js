@@ -247,12 +247,7 @@ export function usePosition(reference, popper, options) {
     };
     useEffect(update);
     const throttledUpdate = throttleForAnimation(update);
-    const throttledScrollUpdate = throttleForAnimation((ev) => {
-        if (popperRef.el && !popperRef.el.contains(ev.target)) {
-            update();
-        }
-    });
-    useExternalListener(document, "scroll", throttledScrollUpdate, { capture: true });
+    useExternalListener(document, "scroll", throttledUpdate, { capture: true });
     useExternalListener(window, "resize", throttledUpdate);
     onWillUnmount(throttledUpdate.cancel);
 }
