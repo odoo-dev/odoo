@@ -59,3 +59,16 @@ class TestEveryModel(TransactionCase):
                 with self.subTest(msg=f"Compute method of {field} should work on new record."):
                     with self.env.cr.savepoint():
                         model.new()[field.name]
+
+    def test_related_fields_traversing_x2many(self):
+        for model_class in self.registry.values():
+            for field in model_class._fields.values():
+                if not field.related:
+                    continue
+
+                with self.subTest(msg=f"Related field traversing x2many {field}: {field.related}"):
+                    model_name = model_class._name
+                    for rel_name in field.related.split('.')[:-1]:
+                        rel_field = self.registry[model_name]._fields[rel_name]
+                        self.assertNotIn(rel_field.type, ('one2many', 'many2many'))
+                        model_name = rel_field.comodel_name
