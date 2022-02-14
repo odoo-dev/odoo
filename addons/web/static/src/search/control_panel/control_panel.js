@@ -20,7 +20,9 @@ const MAPPING = {
 export class ControlPanel extends Component {
     setup() {
         this.actionService = useService("action");
-        this.pagerProps = useState(this.env.config.pagerProps);
+        this.pagerProps = this.env.config.pagerProps
+            ? useState(this.env.config.pagerProps)
+            : undefined;
     }
 
     /**
