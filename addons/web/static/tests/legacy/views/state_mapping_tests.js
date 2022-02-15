@@ -105,8 +105,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.module("State Mappings");
 
-    // OWL-NEW-RENDERING
-    QUnit.skip(
+    QUnit.test(
         "legacy and new views can share search model state (no favorite)",
         async function (assert) {
             assert.expect(10);
