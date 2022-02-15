@@ -1541,7 +1541,7 @@
      * @returns the underlying value
      */
     function toRaw(value) {
-        return value[TARGET];
+        return value[TARGET] || value;
     }
     const targetToKeysToCallbacks = new WeakMap();
     /**
