@@ -218,7 +218,7 @@ export class SearchModel extends EventBus {
         // OWL-NEW-RENDERING
         // maybe we need to do the same for the other
         // not needed for the reload ??
-        this.globalContext = context ? { ...(owl.toRaw(context) || context) } : {};
+        this.globalContext = owl.toRaw(context || {});
         this.globalDomain = domain || [];
         this.globalGroupBy = groupBy || [];
         this.globalOrderBy = orderBy || [];
