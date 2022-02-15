@@ -1209,7 +1209,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skip("rendering with loaded arch attribute 'js_class'", async function (assert) {
+    QUnit.skipWOWL("rendering with loaded arch attribute 'js_class'", async function (assert) {
         assert.expect(4);
         await makeView({
             serverData,
@@ -1232,7 +1232,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skip("rendering with given arch attribute 'js_class'", async function (assert) {
+    QUnit.skipWOWL("rendering with given arch attribute 'js_class'", async function (assert) {
         assert.expect(2);
         await makeView({
             serverData,
@@ -1251,7 +1251,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skip(
+    QUnit.skipWOWL(
         "rendering with loaded arch attribute 'js_class' and given jsClass",
         async function (assert) {
             assert.expect(3);
@@ -1279,7 +1279,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skip(
+    QUnit.skipWOWL(
         "rendering with given arch attribute 'js_class' and given jsClass",
         async function (assert) {
             assert.expect(1);
