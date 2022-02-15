@@ -2380,7 +2380,6 @@ QUnit.module('Views', {
     });
 
     QUnit.skip('search panel with view_types attribute', async function (assert) {
-        // #long-term-skipped-test
         assert.expect(6);
 
         serverData.views['partner,false,search'] =
@@ -2509,7 +2508,6 @@ QUnit.module('Views', {
     });
 
     QUnit.skip('search panel filters are kept when switching to a view with no search panel', async function (assert) {
-        // #long-term-skipped-test
         assert.expect(13);
 
         registry.category("views").add("pivot", PivotView, { force: true });
