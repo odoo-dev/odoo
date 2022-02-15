@@ -1162,7 +1162,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(view.el.innerText, "Arch content (id=false)");
     });
 
-    QUnit.skip("rendering with loaded arch attribute 'js_class'", async function (assert) {
+    QUnit.skipWOWL("rendering with loaded arch attribute 'js_class'", async function (assert) {
         assert.expect(4);
         const view = await makeView({
             serverData,
@@ -1182,7 +1182,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(view.el.innerText, "Arch content (id=2)");
     });
 
-    QUnit.skip("rendering with given arch attribute 'js_class'", async function (assert) {
+    QUnit.skipWOWL("rendering with given arch attribute 'js_class'", async function (assert) {
         assert.expect(2);
         const view = await makeView({
             serverData,
@@ -1198,7 +1198,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(view.el.innerText, "Specific arch content for specific class");
     });
 
-    QUnit.skip(
+    QUnit.skipWOWL(
         "rendering with loaded arch attribute 'js_class' and given jsClass",
         async function (assert) {
             assert.expect(3);
@@ -1226,7 +1226,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skip(
+    QUnit.skipWOWL(
         "rendering with given arch attribute 'js_class' and given jsClass",
         async function (assert) {
             assert.expect(1);
