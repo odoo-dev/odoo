@@ -119,14 +119,9 @@ QUnit.module("Search", (hooks) => {
             resModel: "foo",
             Component: ControlPanel,
             config: {
-                getPagerProps() {
-                    return pagerInfo;
-                },
+                pagerProps: pagerProps,
             },
             searchMenuTypes: [],
-            componentProps: {
-                pagerProps,
-            },
         });
         assert.containsOnce(controlPanel.el, ".o_pager");
 
