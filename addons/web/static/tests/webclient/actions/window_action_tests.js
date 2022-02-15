@@ -633,13 +633,9 @@ QUnit.module("ActionManager", (hooks) => {
         // open a record in form view
         await click(target.querySelector(".o_list_view .o_data_row"));
         await legacyExtraNextTick();
-        await testUtils.dom.click(
-            $(target).find(".o_form_view button:contains(Execute action)")
-        );
+        await testUtils.dom.click($(target).find(".o_form_view button:contains(Execute action)"));
         assert.containsN(target, ".o_control_panel .breadcrumb li", 3);
-        var $previousBreadcrumb = $(target)
-            .find(".o_control_panel .breadcrumb li.active")
-            .prev();
+        var $previousBreadcrumb = $(target).find(".o_control_panel .breadcrumb li.active").prev();
         assert.strictEqual(
             $previousBreadcrumb.attr("data-hotkey"),
             "b",
@@ -647,9 +643,7 @@ QUnit.module("ActionManager", (hooks) => {
         );
         await testUtils.dom.click($previousBreadcrumb);
         assert.containsN(target, ".o_control_panel .breadcrumb li", 2);
-        var $previousBreadcrumb = $(target)
-            .find(".o_control_panel .breadcrumb li.active")
-            .prev();
+        var $previousBreadcrumb = $(target).find(".o_control_panel .breadcrumb li.active").prev();
         assert.strictEqual(
             $previousBreadcrumb.attr("data-hotkey"),
             "b",
@@ -1817,9 +1811,7 @@ QUnit.module("ActionManager", (hooks) => {
             await testUtils.dom.click($(target).find(".o_statusbar_buttons button[name=4]"));
             assert.containsOnce(target, ".o_kanban_view");
             // go back using the breadcrumbs
-            await testUtils.dom.click(
-                $(target).find(".o_control_panel .breadcrumb-item:nth(1) a")
-            );
+            await testUtils.dom.click($(target).find(".o_control_panel .breadcrumb-item:nth(1) a"));
             assert.containsOnce(target, ".o_form_view");
             assert.strictEqual(
                 $(target).find(".o_field_widget[name=display_name]").text(),
@@ -1838,21 +1830,15 @@ QUnit.module("ActionManager", (hooks) => {
             assert.containsOnce(target, ".o_list_view");
             await click(target.querySelector(".o_list_button_add"));
             assert.containsOnce(target, ".o_form_view");
-            assert.containsOnce(webClient, ".o_form_view .o_form_editable");
-            await editInput(
-                target,
-                ".o_field_widget[name=display_name] input",
-                "another record"
-            );
+            assert.containsOnce(target, ".o_form_view .o_form_editable");
+            await editInput(target, ".o_field_widget[name=display_name] input", "another record");
             await click(target.querySelector(".o_form_button_save"));
             assert.containsOnce(target, ".o_form_view .o_form_readonly");
             // execute an action from the second record
             await testUtils.dom.click($(target).find(".o_statusbar_buttons button[name=4]"));
             assert.containsOnce(target, ".o_kanban_view");
             // go back using the breadcrumbs
-            await testUtils.dom.click(
-                $(target).find(".o_control_panel .breadcrumb-item:nth(1) a")
-            );
+            await testUtils.dom.click($(target).find(".o_control_panel .breadcrumb-item:nth(1) a"));
             assert.containsOnce(target, ".o_form_view");
             assert.containsOnce(target, ".o_form_view .o_form_readonly");
             assert.strictEqual(
