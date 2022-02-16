@@ -49,8 +49,7 @@ QUnit.module("base_automation", {}, function () {
         },
     });
 
-    // OWL-NEW-RENDERING
-    QUnit.skip("Error due to an automated action", async function (assert) {
+    QUnit.test("Error due to an automated action", async function (assert) {
         assert.expect(4);
 
         const error = new RPCError();
@@ -73,7 +72,11 @@ QUnit.module("base_automation", {}, function () {
 
         patchWithCleanup(BaseAutomationErrorDialog.prototype, {
             setup() {
-                assert.equal(this.props.data.context, errorContext, "Received the correct error context");
+                assert.equal(
+                    owl.toRaw(this.props.data.context),
+                    errorContext,
+                    "Received the correct error context"
+                );
                 this._super();
             },
         });
