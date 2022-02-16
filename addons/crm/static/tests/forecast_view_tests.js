@@ -167,8 +167,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     /** @todo remove this legacy test when conversion of all forecast views is done */
-    // OWL-NEW-RENDERING
-    QUnit.skip(
+    QUnit.test(
         "legacy and new forecast views can share search model state",
         async function (assert) {
             assert.expect(16);
