@@ -156,8 +156,7 @@ QUnit.module('base_settings_tests', {
         }
     );
 
-        // OWL-NEW-RENDERING
-        QUnit.skip(
+        QUnit.test(
         "clicking on any button in setting should show discard warning if setting form is dirty",
         async function (assert) {
             assert.expect(11);
@@ -523,8 +522,7 @@ QUnit.module('base_settings_tests', {
         form.destroy();
     });
 
-        // OWL-NEW-RENDERING
-        QUnit.skip(
+        QUnit.test(
         'call "call_button/execute" when clicking on a button in dirty settings',
         async function (assert) {
             assert.expect(7);
