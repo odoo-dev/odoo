@@ -208,7 +208,7 @@ QUnit.module("ActionManager", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         // execute action 3 and open a record in form view
         await doAction(webClient, 3);
-        await click(target.querySelector(".o_list_view .o_data_row"));
+        await click(target.querySelector(".o_list_view .o_data_cell"));
         assert.containsOnce(target, ".o_form_view", "should display the form view of action 3");
         // click on 'Call method' button (this request is blocked)
         await click(target.querySelector('.o_form_view button[name="object"]'));
@@ -268,7 +268,7 @@ QUnit.module("ActionManager", (hooks) => {
             assert.containsOnce(target, ".o_list_view", "should display the list view of action 3");
             // switch to the form view (this request is blocked)
             def = makeDeferred();
-            await click(target.querySelector(".o_list_view .o_data_row"));
+            await click(target.querySelector(".o_list_view .o_data_cell"));
             assert.containsOnce(
                 target,
                 ".o_list_view",
@@ -400,7 +400,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.containsN(target, ".o_list_view .o_data_row", 5);
         assert.containsOnce(target, ".o_control_panel .o_list_buttons");
         // open a record in form view
-        await click(target.querySelector(".o_list_view .o_data_row"));
+        await click(target.querySelector(".o_list_view .o_data_cell"));
         assert.containsOnce(target, ".o_form_view");
         assert.containsNone(target, ".o_control_panel .o_list_buttons");
         assert.containsOnce(target, ".o_control_panel .o_form_buttons_view");
@@ -526,14 +526,16 @@ QUnit.module("ActionManager", (hooks) => {
         await doAction(webClient, 3);
         assert.containsOnce(target, ".o_list_view");
 
-        await click(target.querySelector(".o_list_view .o_data_row"));
+        await click(target.querySelector(".o_list_view .o_data_cell"));
         assert.containsOnce(target, ".o_form_view");
 
         await click(target.querySelector(".o_back_button"));
         assert.containsOnce(target, ".o_list_view");
 
-        await click(target.querySelectorAll(".o_list_view .o_data_row")[0]);
-        await click(target.querySelectorAll(".o_list_view .o_data_row")[1]);
+        const row1 = target.querySelectorAll(".o_list_view .o_data_row")[0];
+        const row2 = target.querySelectorAll(".o_list_view .o_data_row")[1];
+        await click(row1.querySelector(".o_data_cell"));
+        await click(row2.querySelector(".o_data_cell"));
         assert.containsOnce(target, ".o_form_view");
         assert.strictEqual(
             target.querySelector(".breadcrumb-item.active").innerText,
