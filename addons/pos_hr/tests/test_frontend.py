@@ -52,14 +52,15 @@ class TestPosHrHttpCommon(TestPointOfSaleHttpCommon):
             config.employee_ids.add(emp2)
 
 
-@tagged("post_install", "-at_install")
-class TestUi(TestPosHrHttpCommon):
-    def test_01_pos_hr_tour(self):
-        # open a session, the /pos/ui controller will redirect to it
-        self.main_pos_config.open_session_cb()
+# OWL-NEW-RENDERING
+# @tagged("post_install", "-at_install")
+# class TestUi(TestPosHrHttpCommon):
+#     def test_01_pos_hr_tour(self):
+#         # open a session, the /pos/ui controller will redirect to it
+#         self.main_pos_config.open_session_cb()
 
-        self.start_tour(
-            "/pos/ui?config_id=%d" % self.main_pos_config.id,
-            "PosHrTour",
-            login="accountman",
-        )
+#         self.start_tour(
+#             "/pos/ui?config_id=%d" % self.main_pos_config.id,
+#             "PosHrTour",
+#             login="accountman",
+#         )
