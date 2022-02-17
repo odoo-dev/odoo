@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="snippet_options" inherit_id="website.snippet_options" name="Slides Snippet Options">
+    <xpath expr="." position="inside">
+        <div data-selector="main:has(.o_wslides_course_header)" data-page-options="True" data-no-check="true" data-force-name="Course Page">
+            <we-checkbox string="Buy Now Button"
+                         data-customize-website-views="website_sale_slides.course_option_buy_course_now"
+                         data-no-preview="true"
+                         data-reload="/"/>
+        </div>
+    </xpath>
+</template>
+
+</odoo>
