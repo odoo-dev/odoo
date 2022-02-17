@@ -122,7 +122,7 @@ odoo.define('web.ControlPanel', function (require) {
                 searchViewButtons: useRef('searchViewButtons'),
             };
 
-            this.fields = this._formatFields(this.props.fields);
+            this.fields = this._formatFields(owl.toRaw(this.props.fields || {}));
 
             this.sprintf = _.str.sprintf;
 
@@ -155,7 +155,7 @@ odoo.define('web.ControlPanel', function (require) {
                     subEnvView = nextProps.view;
                 }
                 if ("fields" in nextProps) {
-                    this.fields = this._formatFields(nextProps.fields);
+                    this.fields = this._formatFields(owl.toRaw(nextProps.fields));
                 }
                 this.additionalContent = getAdditionalContent(nextProps);
             });
