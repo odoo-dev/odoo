@@ -479,38 +479,36 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             public_pricelist,
         )
 
-# OWL-NEW-RENDERING
-# @odoo.tests.tagged('post_install', '-at_install')
-# class TestUi(TestPointOfSaleHttpCommon):
-    # OWL-NEW-RENDERING
-    # def test_01_pos_basic_order(self):
+@odoo.tests.tagged('post_install', '-at_install')
+class TestUi(TestPointOfSaleHttpCommon):
+    def test_01_pos_basic_order(self):
 
-    #     self.main_pos_config.write({
-    #         'iface_tipproduct': True,
-    #         'tip_product_id': self.tip.id,
-    #     })
+        self.main_pos_config.write({
+            'iface_tipproduct': True,
+            'tip_product_id': self.tip.id,
+        })
 
-    #     # open a session, the /pos/ui controller will redirect to it
-    #     self.main_pos_config.open_session_cb()
+        # open a session, the /pos/ui controller will redirect to it
+        self.main_pos_config.open_session_cb()
 
-    #     # needed because tests are run before the module is marked as
-    #     # installed. In js web will only load qweb coming from modules
-    #     # that are returned by the backend in module_boot. Without
-    #     # this you end up with js, css but no qweb.
-    #     self.env['ir.module.module'].search([('name', '=', 'point_of_sale')], limit=1).state = 'installed'
+        # needed because tests are run before the module is marked as
+        # installed. In js web will only load qweb coming from modules
+        # that are returned by the backend in module_boot. Without
+        # this you end up with js, css but no qweb.
+        self.env['ir.module.module'].search([('name', '=', 'point_of_sale')], limit=1).state = 'installed'
 
-    #     self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_pricelist', login="accountman")
-    #     self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_basic_order', login="accountman")
-    #     self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ProductScreenTour', login="accountman")
-    #     self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenTour', login="accountman")
-    #     self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ReceiptScreenTour', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_pricelist', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_basic_order', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ProductScreenTour', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenTour', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ReceiptScreenTour', login="accountman")
 
-    #     for order in self.env['pos.order'].search([]):
-    #         self.assertEqual(order.state, 'paid', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))
+        for order in self.env['pos.order'].search([]):
+            self.assertEqual(order.state, 'paid', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))
 
-    #     # check if email from ReceiptScreenTour is properly sent
-    #     email_count = self.env['mail.mail'].search_count([('email_to', '=', 'test@receiptscreen.com')])
-    #     self.assertEqual(email_count, 1)
+        # check if email from ReceiptScreenTour is properly sent
+        email_count = self.env['mail.mail'].search_count([('email_to', '=', 'test@receiptscreen.com')])
+        self.assertEqual(email_count, 1)
 
     # OWL-NEW-RENDERING
     # def test_02_pos_with_invoiced(self):
@@ -521,11 +519,10 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
     #     self.assertEqual(n_invoiced, 1, 'There should be 1 invoiced order.')
     #     self.assertEqual(n_paid, 2, 'There should be 2 paid order.')
 
-    # OWL-NEW-RENDERING
-    # def test_04_product_configurator(self):
-    #     self.main_pos_config.write({ 'product_configurator': True })
-    #     self.main_pos_config.open_session_cb()
-    #     self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config, 'ProductConfiguratorTour', login="accountman")
+    def test_04_product_configurator(self):
+        self.main_pos_config.write({ 'product_configurator': True })
+        self.main_pos_config.open_session_cb()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config, 'ProductConfiguratorTour', login="accountman")
 
     # OWL-NEW-RENDERING
     # def test_05_ticket_screen(self):
