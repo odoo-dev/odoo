@@ -91,7 +91,7 @@ odoo.define('web.SearchBar', function (require) {
          * @returns {Object}
          */
         _createSource(filter) {
-            const field = this.props.fields[filter.fieldName];
+            const field = owl.toRaw(this.props.fields)[filter.fieldName];
             const type = field.type === "reference" ? "char" : field.type;
             const source = {
                 active: true,

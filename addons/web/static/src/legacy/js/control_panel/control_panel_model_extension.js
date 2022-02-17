@@ -158,7 +158,7 @@ odoo.define("web/static/src/js/control_panel/control_panel_model_extension.js", 
             this.actionContext = Object.assign({}, this.config.context);
             this.searchMenuTypes = this.config.searchMenuTypes || [];
             this.favoriteFilters = this.config.favoriteFilters || [];
-            this.fields = this.config.fields || {};
+            this.fields = owl.toRaw(this.config.fields || {});
             this.searchDefaults = {};
             for (const key in this.actionContext) {
                 const match = /^search_default_(.*)$/.exec(key);
