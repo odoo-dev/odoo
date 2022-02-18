@@ -322,7 +322,7 @@ export async function mouseEnter(el, selector) {
 }
 
 export async function editInput(el, selector, value) {
-    const input = el.querySelector(selector);
+    const input = findElement(el, selector);
     input.value = value;
     await triggerEvent(input, null, "input");
     return triggerEvent(input, null, "change");
