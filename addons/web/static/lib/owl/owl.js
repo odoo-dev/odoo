@@ -212,7 +212,7 @@
     }
     function makePropSetter(name) {
         return function setProp(value) {
-            this[name] = value;
+            this[name] = value || "";
         };
     }
     function isProp(tag, key) {
@@ -1983,21 +1983,18 @@
     function makeChildFiber(node, parent) {
         let current = node.fiber;
         if (current) {
-            let root = parent.root;
-            cancelFibers(root, current.children);
+            cancelFibers(current.children);
             current.root = null;
         }
         return new Fiber(node, parent);
     }
-    function makeRootFiber(node, force) {
+    function makeRootFiber(node) {
         let current = node.fiber;
         if (current) {
             let root = current.root;
-            root.counter -= cancelFibers(root, current.children);
+            root.counter = root.counter + 1 - cancelFibers(current.children);
             current.children = [];
-            root.counter++;
             current.bdom = null;
-            current.force = force;
             if (fibersInError.has(current)) {
                 fibersInError.delete(current);
                 fibersInError.delete(root);
@@ -2012,21 +2009,19 @@
         if (node.patched.length) {
             fiber.patched.push(fiber);
         }
-        fiber.force = force;
         return fiber;
     }
     /**
      * @returns number of not-yet rendered fibers cancelled
      */
-    function cancelFibers(root, fibers) {
+    function cancelFibers(fibers) {
         let result = 0;
         for (let fiber of fibers) {
             fiber.node.fiber = null;
-            fiber.root = root;
             if (!fiber.bdom) {
                 result++;
             }
-            result += cancelFibers(root, fiber.children);
+            result += cancelFibers(fiber.children);
         }
         return result;
     }
@@ -2238,8 +2233,7 @@
             }
             node = new ComponentNode(C, props, ctx.app, ctx);
             ctx.children[key] = node;
-            const fiber = makeChildFiber(node, parentFiber);
-            node.initiateRender(fiber);
+            node.initiateRender(new Fiber(node, parentFiber));
         }
         return node;
     }
@@ -2299,15 +2293,22 @@
                 // situation may have changed after the microtask tick
                 current = this.fiber;
             }
-            if (current && !current.bdom && !fibersInError.has(current)) {
-                if (current.force || force === false) {
+            if (current) {
+                if (!current.bdom && !fibersInError.has(current)) {
+                    if (force) {
+                        // we want the render from this point on to be with force=true
+                        current.force = force;
+                    }
                     return;
                 }
+                // if current rendering was with force=true, we want this one to be the same
+                force = force || current.force;
             }
-            if (!this.bdom && !current) {
+            else if (!this.bdom) {
                 return;
             }
-            const fiber = makeRootFiber(this, force);
+            const fiber = makeRootFiber(this);
+            fiber.force = force;
             this.fiber = fiber;
             this.app.scheduler.addFiber(fiber);
             await Promise.resolve();
@@ -2464,53 +2465,86 @@
         }
     }
 
+    function wrapError(fn, hookName) {
+        const error = new Error(`The following error occurred in ${hookName}: `);
+        return (...args) => {
+            try {
+                const result = fn(...args);
+                if (result instanceof Promise) {
+                    return result.catch((cause) => {
+                        error.cause = cause;
+                        if (cause instanceof Error) {
+                            error.message += `"${cause.message}"`;
+                        }
+                        throw error;
+                    });
+                }
+                return result;
+            }
+            catch (cause) {
+                if (cause instanceof Error) {
+                    error.message += `"${cause.message}"`;
+                }
+                throw error;
+            }
+        };
+    }
     // -----------------------------------------------------------------------------
     //  hooks
     // -----------------------------------------------------------------------------
     function onWillStart(fn) {
         const node = getCurrent();
-        node.willStart.push(fn.bind(node.component));
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.willStart.push(decorate(fn.bind(node.component), "onWillStart"));
     }
     function onWillUpdateProps(fn) {
         const node = getCurrent();
-        node.willUpdateProps.push(fn.bind(node.component));
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.willUpdateProps.push(decorate(fn.bind(node.component), "onWillUpdateProps"));
     }
     function onMounted(fn) {
         const node = getCurrent();
-        node.mounted.push(fn.bind(node.component));
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.mounted.push(decorate(fn.bind(node.component), "onMounted"));
     }
     function onWillPatch(fn) {
         const node = getCurrent();
-        node.willPatch.unshift(fn.bind(node.component));
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.willPatch.unshift(decorate(fn.bind(node.component), "onWillPatch"));
     }
     function onPatched(fn) {
         const node = getCurrent();
-        node.patched.push(fn.bind(node.component));
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.patched.push(decorate(fn.bind(node.component), "onPatched"));
     }
     function onWillUnmount(fn) {
         const node = getCurrent();
-        node.willUnmount.unshift(fn.bind(node.component));
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.willUnmount.unshift(decorate(fn.bind(node.component), "onWillUnmount"));
     }
     function onWillDestroy(fn) {
         const node = getCurrent();
-        node.willDestroy.push(fn.bind(node.component));
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.willDestroy.push(decorate(fn.bind(node.component), "onWillDestroy"));
     }
     function onWillRender(fn) {
         const node = getCurrent();
         const renderFn = node.renderFn;
-        node.renderFn = () => {
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.renderFn = decorate(() => {
             fn.call(node.component);
             return renderFn();
-        };
+        }, "onWillRender");
     }
     function onRendered(fn) {
         const node = getCurrent();
         const renderFn = node.renderFn;
-        node.renderFn = () => {
+        const decorate = node.app.dev ? wrapError : (fn) => fn;
+        node.renderFn = decorate(() => {
             const result = renderFn();
             fn.call(node.component);
             return result;
-        };
+        }, "onRendered");
     }
     function onError(callback) {
         const node = getCurrent();
@@ -4023,6 +4057,9 @@
         if (tagName === "t" && !dynamicTag) {
             return null;
         }
+        if (tagName.startsWith("block-")) {
+            throw new Error(`Invalid tag name: '${tagName}'`);
+        }
         ctx = Object.assign({}, ctx);
         if (tagName === "pre") {
             ctx.inPreTag = true;
@@ -4087,6 +4124,9 @@
                     ctx = Object.assign({}, ctx);
                     ctx.tModelInfo = model;
                 }
+            }
+            else if (attr.startsWith("block-")) {
+                throw new Error(`Invalid attribute: '${attr}'`);
             }
             else if (attr !== "t-name") {
                 if (attr.startsWith("t-") && !attr.startsWith("t-att")) {
@@ -4705,7 +4745,13 @@
             if (!(name in this.templates)) {
                 const rawTemplate = this.rawTemplates[name];
                 if (rawTemplate === undefined) {
-                    throw new Error(`Missing template: "${name}"`);
+                    let extraInfo = "";
+                    try {
+                        const componentName = getCurrent().component.constructor.name;
+                        extraInfo = ` (for component "${componentName}")`;
+                    }
+                    catch { }
+                    throw new Error(`Missing template: "${name}"${extraInfo}`);
                 }
                 const templateFn = this._compileTemplate(name, rawTemplate);
                 // first add a function to lazily get the template, in case there is a
@@ -4881,10 +4927,13 @@
     // interactions with other code, such as test frameworks that override them
     Scheduler.requestAnimationFrame = window.requestAnimationFrame.bind(window);
 
-    const DEV_MSG = `Owl is running in 'dev' mode.
+    const DEV_MSG = () => {
+        const hash = window.owl ? window.owl.__info__.hash : "master";
+        return `Owl is running in 'dev' mode.
 
 This is not suitable for production use.
-See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for more information.`;
+See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration for more information.`;
+    };
     class App extends TemplateSet {
         constructor(Root, config = {}) {
             super(config);
@@ -4895,7 +4944,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 this.dev = true;
             }
             if (this.dev && !config.test) {
-                console.info(DEV_MSG);
+                console.info(DEV_MSG());
             }
             const descrs = Object.getOwnPropertyDescriptors(config.env || {});
             this.env = Object.freeze(Object.defineProperties({}, descrs));
@@ -5160,9 +5209,9 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '2.0.0-alpha.1';
-    __info__.date = '2022-02-10T10:57:16.790Z';
-    __info__.hash = '79c1627';
+    __info__.version = '2.0.0-alpha.2';
+    __info__.date = '2022-02-21T14:05:40.760Z';
+    __info__.hash = '8ed3466';
     __info__.url = 'https://github.com/odoo/owl';
 
 
