@@ -755,7 +755,7 @@ var SnippetEditor = Widget.extend({
 
         var i = 0;
         var defs = _.map(this.templateOptions, val => {
-            if (!val.selector.is(this.$target)) {
+            if (!val.selector.is(this.$target) || !val.selector.closest(this.$target).length) {
                 return;
             }
             if (val.data.forceName) {
