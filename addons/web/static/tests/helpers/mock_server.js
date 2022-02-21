@@ -445,6 +445,7 @@ export class MockServer {
         ) {
             return;
         }
+
         switch (args.method) {
             case "render_public_asset": {
                 return true;
@@ -1636,6 +1637,7 @@ export class MockServer {
     }
 
     mockWebSearchRead(modelName, args, kwargs) {
+        console.log(this);
         const result = this.mockSearchReadController({
             model: modelName,
             domain: kwargs.domain || args[0],
