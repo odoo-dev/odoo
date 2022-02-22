@@ -308,10 +308,10 @@
         errorMessages.push(info);
     });
 
-    QUnit.debug = (name, cb) => {
+    QUnit.debug = (...args) => {
         document.body.classList.add("debug");
         QUnit.config.debug = true;
-        QUnit.only(name, cb);
+        QUnit.only(...args);
     };
 
     // Override global UnhandledRejection that is assigned wayyy before this file

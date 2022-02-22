@@ -155,6 +155,9 @@ FormRenderer.include({
      * @override
      */
     _updateView() {
+        if (this._hasChatter()) {
+            this._chatterContainerTarget.remove();
+        }
         this._super(...arguments);
         if (this._hasChatter()) {
             this.$chatterContainerHook.replaceWith(this._chatterContainerTarget);
