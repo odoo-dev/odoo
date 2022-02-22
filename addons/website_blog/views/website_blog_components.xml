@@ -122,7 +122,7 @@ Options:
 </template>
 
 <!-- (Option) Sidebar Blog: Follow Us -->
-<template id="opt_sidebar_blog_index_follow_us" name="Follow Us" priority="1" inherit_id="website_blog.sidebar_blog_index" active="True" customize_show="True">
+<template id="opt_sidebar_blog_index_follow_us" name="Follow Us" priority="1" inherit_id="website_blog.sidebar_blog_index" active="True">
     <xpath expr="//div[@id='o_wblog_sidebar']" position="inside">
         <div class="o_wblog_sidebar_block pb-5">
             <h6 class="text-uppercase pb-2 mb-4 border-bottom font-weight-bold">Follow Us</h6>
@@ -147,7 +147,7 @@ Options:
 </template>
 
 <!-- (Option) Sidebar Blog: Archives -->
-<template id="opt_sidebar_blog_index_archives" name="Archives" priority="2" inherit_id="website_blog.sidebar_blog_index" active="True" customize_show="True">
+<template id="opt_sidebar_blog_index_archives" name="Archives" priority="2" inherit_id="website_blog.sidebar_blog_index" active="True">
     <xpath expr="//div[@id='o_wblog_sidebar']" position="inside">
         <div class="o_wblog_sidebar_block pb-5">
             <h6 class="text-uppercase pb-2 mb-4 border-bottom font-weight-bold">Archives</h6>
@@ -159,7 +159,7 @@ Options:
 </template>
 
 <!-- (Option) Sidebar Blog: Show tags -->
-<template id="opt_sidebar_blog_index_tags" name="Tags List" priority="3" inherit_id="website_blog.sidebar_blog_index" active="True" customize_show="True">
+<template id="opt_sidebar_blog_index_tags" name="Tags List" priority="3" inherit_id="website_blog.sidebar_blog_index" active="True">
     <xpath expr="//div[@id='o_wblog_sidebar']" position="inside">
 
         <div t-if="other_tags or tag_category" class="o_wblog_sidebar_block pb-5">

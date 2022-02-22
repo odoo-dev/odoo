@@ -92,7 +92,7 @@ list of filtered posts (by date or tag).
 <!-- (Option) Blog: Show latest-post as top banner
     Replace top-banner content with the latest published post
 -->
-<template id="opt_blog_cover_post" name="Top banner - Name / Latest Post" inherit_id="website_blog.blog_post_short" active="True" customize_show="True">
+<template id="opt_blog_cover_post" name="Top banner - Name / Latest Post" inherit_id="website_blog.blog_post_short" active="True">
     <xpath expr="//div[@id='o_wblog_blog_top_droppable']" position="replace">
         <div t-if="first_post or blog" class="container">
             <div class="row py-4">
@@ -135,7 +135,7 @@ list of filtered posts (by date or tag).
 </template>
 
 <!-- (Option) Blog: Show latest-post as top banner : 'Full Width' design -->
-<template id="opt_blog_cover_post_fullwidth_design" name="Full-Width Cover" inherit_id="website_blog.opt_blog_cover_post" active="True" customize_show="True">
+<template id="opt_blog_cover_post_fullwidth_design" name="Full-Width Cover" inherit_id="website_blog.opt_blog_cover_post" active="True">
     <xpath expr="//div[hasclass('container')]" position="replace">
         <t t-if="blog or first_post" t-call="website.record_cover">
             <t t-set="_record" t-value="blog or first_post"/>
@@ -169,7 +169,7 @@ list of filtered posts (by date or tag).
 
 
 <!-- (Option) Blog: Sidebar : Show -->
-<template id="opt_blog_sidebar_show" name="Show Sidebar" inherit_id="website_blog.blog_post_short" active="False" customize_show="True">
+<template id="opt_blog_sidebar_show" name="Show Sidebar" inherit_id="website_blog.blog_post_short" active="False">
     <xpath expr="//div[@id='o_wblog_posts_loop_container']" position="after">
         <div t-if="opt_blog_list_view" class="border-right d-none d-lg-block" style="opacity: 0.5"/>
         <div t-attf-class="col-12 col-md-3 d-flex #{opt_blog_list_view and 'col-lg-4' or 'ml-lg-5'}">
@@ -181,18 +181,18 @@ list of filtered posts (by date or tag).
 <!-- (Option) Blog: Posts List: Cards design
     Wrap posts in a standard bts cards components
 -->
-<template id="opt_blog_cards_design" name="'Cards' Design" inherit_id="website_blog.blog_post_short" active="False" customize_show="True"/>
+<template id="opt_blog_cards_design" name="'Cards' Design" inherit_id="website_blog.blog_post_short" active="False"/>
 
 
 <!-- (Option) Blog: Show Posts in list-view
     Display post in a list rather than a grid
 -->
-<template id="opt_blog_list_view" name="List View" inherit_id="website_blog.blog_post_short" active="False" customize_show="True"/>
+<template id="opt_blog_list_view" name="List View" inherit_id="website_blog.blog_post_short" active="False"/>
 
 <!-- (Option) Blog: Increase readability
     Increase font-size, adapt layout
 -->
-<template id="opt_blog_readable" name="Increase Readability" inherit_id="website_blog.blog_post_short" active="True" customize_show="True"/>
+<template id="opt_blog_readable" name="Increase Readability" inherit_id="website_blog.blog_post_short" active="True"/>
 
 
 <!-- ====== Blog Post Complete Layout ==========================================
@@ -235,7 +235,7 @@ list of filtered posts (by date or tag).
             </div>
         </section>
 
-        <section id="o_wblog_post_main" t-attf-class="container pt-4 pb-5 #{'anim' in request.params and 'o_wblog_post_main_transition'}">
+        <section id="o_wblog_post_main" t-attf-class="container pt-4 pb-5 #{'anim' in request.params and '_transition'}">
             <!-- Sidebar-enabled Layout -->
             <div t-if="opt_blog_post_sidebar" t-attf-class="mx-auto #{opt_blog_post_readable and 'o_wblog_read_with_sidebar'}">
                 <div t-attf-class="d-flex flex-column flex-lg-row #{opt_blog_post_readable and 'justify-content-between'}">
