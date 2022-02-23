@@ -1871,8 +1871,9 @@ class Form(object):
             view_id = env.ref(view).id
         else:
             view_id = view or False
-        fvg = recordp.fields_view_get(view_id, 'form')
+        fvg = recordp.get_view(view_id, 'form')
         fvg['tree'] = etree.fromstring(fvg['arch'])
+        fvg['fields'] = self._get_view_fields(fvg['tree'], recordp)
 
         object.__setattr__(self, '_view', fvg)
 
@@ -1891,6 +1892,12 @@ class Form(object):
         else:
             self._init_from_defaults(self._model)
 
+    def _get_view_fields(self, node, model):
+        level = node.xpath('count(ancestor::field)')
+        fnames = set(el.get('name') for el in node.xpath('.//field[count(ancestor::field) = %s]' % level))
+        fields = {fname: info for fname, info in model.fields_get().items() if fname in fnames}
+        return fields
+
     def _o2m_set_edition_view(self, descr, node, level):
         default_view = next(
             (m for m in node.get('mode', 'tree').split(',') if m != 'form'),
@@ -1903,25 +1910,25 @@ class Form(object):
         # always fetch for simplicity, ensure we always have a tree and
         # a form view
         submodel = self._env[descr['relation']]
-        views = submodel.with_context(**refs) \
-            .load_views([(False, 'tree'), (False, 'form')])['fields_views']
-        # embedded views should take the priority on externals
-        views.update(descr['views'])
-        # re-set all resolved views on the descriptor
-        descr['views'] = views
+        views = {view.tag: view for view in node.xpath('./*[descendant::field]')}
+        for view_type in ['tree', 'form']:
+            # embedded views should take the priority on externals
+            if view_type not in views:
+                sub_fvg = submodel.with_context(**refs).get_view(view_type=view_type)
+                sub_node = etree.fromstring(sub_fvg['arch'])
+                views[view_type] = sub_node
+                node.append(sub_node)
         # if the default view is a kanban or a non-editable list, the
         # "edition controller" is the form view
-        edition = views['form']
-        edition['tree'] = etree.fromstring(edition['arch'])
-        if default_view == 'tree':
-            subarch = etree.fromstring(views['tree']['arch'])
-            if subarch.get('editable'):
-                edition = views['tree']
-                edition['tree'] = subarch
+        edition_view = 'tree' if default_view == 'tree' and views['tree'].get('editable') else 'form'
+        edition = {
+            'fields': self._get_view_fields(views[edition_view], submodel),
+            'tree': views[edition_view],
+        }
 
         # don't recursively process o2ms in o2ms
         self._process_fvg(submodel, edition, level=level-1)
-        descr['views']['edition'] = edition
+        descr['edition_view'] = edition
 
     def __str__(self):
         return "<%s %s(%s)>" % (
@@ -1931,8 +1938,7 @@ class Form(object):
         )
 
     def _process_fvg(self, model, fvg, level=2):
-        """ Post-processes to augment the fields_view_get with:
-
+        """ Post-processes to augment the view_get with:
         * an id field (may not be present if not in the view but needed)
         * pre-processed modifiers (map of modifier name to json-loaded domain)
         * pre-processed onchanges list
@@ -1942,7 +1948,7 @@ class Form(object):
         modifiers = fvg['modifiers'] = {'id': {'required': False, 'readonly': True}}
         contexts = fvg['contexts'] = {}
         order = fvg['fields_ordered'] = []
-        for f in fvg['tree'].xpath('//field[not(ancestor::field)]'):
+        for f in fvg['tree'].xpath('.//field[count(ancestor::field) = %s]' % fvg['tree'].xpath('count(ancestor::field)')):
             fname = f.get('name')
             order.append(fname)
 
@@ -1962,7 +1968,7 @@ class Form(object):
             if level and descr['type'] == 'one2many':
                 self._o2m_set_edition_view(descr, f, level)
 
-        fvg['onchange'] = model._onchange_spec(fvg)
+        fvg['onchange'] = model._onchange_spec({'arch': etree.tostring(fvg['tree'])})
 
     def _init_from_defaults(self, model):
         vals = self._values
@@ -2207,7 +2213,7 @@ class Form(object):
                     continue
 
             if descr['type'] == 'one2many':
-                subview = descr['views']['edition']
+                subview = descr['edition_view']
                 fields_ = subview['fields']
                 oldvals = v
                 v = []
@@ -2293,7 +2299,7 @@ class Form(object):
         values = {}
         for k, v in record.items():
             if fields[k]['type'] == 'one2many':
-                subfields = fields[k]['views']['edition']['fields']
+                subfields = fields[k]['edition_view']['fields']
                 it = values[k] = []
                 for (c, rid, vs) in v:
                     if c == 1 and isinstance(vs, UpdateDict):
@@ -2317,7 +2323,7 @@ class Form(object):
             return value[0]
         elif descr['type'] == 'one2many':
             # ignore o2ms nested in o2ms
-            if not descr['views']:
+            if not descr['edition_view']:
                 return []
 
             if current is None:
@@ -2326,7 +2332,7 @@ class Form(object):
             c = {t[1] for t in current if t[0] in (1, 2)}
             current_values = {c[1]: c[2] for c in current if c[0] == 1}
             # which view should this be???
-            subfields = descr['views']['edition']['fields']
+            subfields = descr['edition_view']['fields']
             # TODO: simplistic, unlikely to work if e.g. there's a 5 inbetween other commands
             for command in value:
                 if command[0] == 0:
@@ -2402,7 +2408,7 @@ class O2MForm(Form):
         object.__setattr__(self, '_model', m)
 
         # copy so we don't risk breaking it too much (?)
-        fvg = dict(proxy._descr['views']['edition'])
+        fvg = dict(proxy._descr['edition_view'])
         object.__setattr__(self, '_view', fvg)
         self._process_fvg(m, fvg)
 
@@ -2503,7 +2509,7 @@ class O2MProxy(X2MProxy):
         # reify records to a list so they can be manipulated easily?
         self._records = []
         model = self._model
-        fields = self._descr['views']['edition']['fields']
+        fields = self._descr['edition_view']['fields']
         for (command, rid, values) in self._parent._values[self._field]:
             if command == 0:
                 self._records.append(values)
