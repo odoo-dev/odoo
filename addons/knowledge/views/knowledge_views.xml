@@ -129,7 +129,7 @@
                                     <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
                                     <div class="o_knowledge_editor d-flex border-bottom bg-white px-5">
                                         <field name="body" widget="html" no_label="1" default_focus="1"
-                                            options="{'resizable': False}"
+                                            options="{'resizable': False, 'knowledge_commands': true}"
                                             attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
                                     </div>
                                     <!-- Chatter -->
