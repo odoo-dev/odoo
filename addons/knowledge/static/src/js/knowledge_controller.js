@@ -24,7 +24,15 @@ const KnowledgeFormController = FormController.extend({
         emoji_click: '_onEmojiClick',
     }),
 
+    /**
+     * Register the fact that the current @see FormController is one from
+     * Knowledge in order not to try and search for a matching record for
+     * @see KnowledgeService .
+     *
+     * @override
+     */
     init: function (parent, model, renderer, params) {
+        this.knowledgeFormController = true;
         this.renderer = renderer;
         this._super.apply(this, arguments);
     },
