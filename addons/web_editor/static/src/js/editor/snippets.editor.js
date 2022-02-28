@@ -2941,7 +2941,12 @@ var SnippetsMenu = Widget.extend({
      */
     _onOptionsTabClick: function (ev) {
         if (!ev.currentTarget.classList.contains('active')) {
-            this._activateEmptyOptionsTab();
+            const pageOptions = this.templateOptions.find(template => template.data.pageOptions && this.$body.find(template.base_selector).length);
+            if (pageOptions) {
+                this._activateSnippet(this.$body.find(pageOptions.base_selector));
+            } else {
+                this._activateEmptyOptionsTab();
+            }
         }
     },
     /**
