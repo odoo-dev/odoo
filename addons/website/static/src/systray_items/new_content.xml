@@ -24,7 +24,7 @@
                     <p>Page</p>
                 </NewContentElement>
 
-                <t t-foreach="sortedNewContentElements" t-as="element" t-key="element.moduleXmlId" t-if="isSystem">
+                <t t-foreach="sortedNewContentElements" t-as="element" t-key="element.moduleXmlId" t-if="'isDisplayed' in element ? element.isDisplayed : isSystem ">
                     <NewContentElement onClick="() => this.onClickNewContent(element)" status="element.status" title="element.title">
                         <t t-call="{{ element.icon }}"/>
                         <p><t t-esc="element.title"/></p>
