@@ -24,6 +24,13 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         });
 
         onMounted(() => {
+            // useExternalListener only work on setup, but save button doesn't exist on setup
+            this.widget.el.querySelector('[data-action="save"]').addEventListener('click', this._onSaveButtonClick.bind(this));
+            this.widget.el.querySelector('[data-action="cancel"]').addEventListener('click', this._onDiscardButtonClick.bind(this));
+            this._setObserver();
+            if (this.props.target) {
+                this.widget.snippetsMenu.activateSnippet($(this.props.target));
+            }
             this.websiteService.context.edition = 'started';
             // Initializing Page Options
             this.pageOptions = {};
@@ -96,6 +103,57 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         };
     }
     /**
+     * Sets the observer so that if any change happen to the body and such
+     * changes should be saved, the class 'o_dirty' is added to elements
+     * that were changed.
+     */
+    _setObserver() {
+        // 1. Make sure every .o_not_editable is not editable.
+        // 2. Observe changes to mark dirty structures and fields.
+        const processRecords = (records) => {
+            records = this.widget.odooEditor.filterMutationRecords(records);
+            // Skip the step for this stack because if the editor undo the first
+            // step that has a dirty element, the following code would have
+            // generated a new stack and break the "redo" of the editor.
+            this.widget.odooEditor.automaticStepSkipStack();
+            for (const record of records) {
+                const $savable = $(record.target).closest(this.savableSelector);
+
+                if (record.attributeName === 'contenteditable') {
+                    continue;
+                }
+                $savable.not('.o_dirty').each(function () {
+                    const $el = $(this);
+                    if (!$el.closest('[data-oe-readonly]').length) {
+                        $el.addClass('o_dirty');
+                    }
+                });
+            }
+        };
+        this.observer = new MutationObserver(processRecords);
+        const observe = () => {
+            if (this.observer) {
+                this.observer.observe(this.iframe.el.contentDocument.body, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeOldValue: true,
+                    characterData: true,
+                });
+            }
+        };
+        observe();
+
+        this.widget.odooEditor.addEventListener('observerUnactive', () => {
+            if (this.observer) {
+                processRecords(this.observer.takeRecords());
+                this.observer.disconnect();
+            }
+        });
+        this.widget.odooEditor.addEventListener('observerActive', observe);
+    }
+    /**
+     * Adds automatic editor messages on drag&drop zone elements.
      * Get the areas on the page that should be editable.
      *
      * @returns {Node[]} list of nodes that can be edited.
@@ -120,6 +178,17 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         switch (event.name) {
             case 'widgets_start_request':
                 this._websiteRootEvent('widgets_start_request', event.data);
+                break;
+            case 'reload_editable':
+                return this.props.reloadCallback(event, this.widget.el);
+            case 'request_save':
+                await this.save();
+                if (event.data.onSuccess) {
+                    event.data.onSuccess();
+                }
+                break;
+            case 'action_demand':
+                event.data.onSuccess(this._handle_action(event.data.actionName, event.data.params));
                 break;
             case 'snippet_dropped':
                 this._websiteRootEvent('widgets_start_request', event.data);
@@ -146,5 +215,12 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
     async _websiteRootEvent(type, eventData = {}) {
         const websiteRootInstance = await this.iframe.el.contentWindow.websiteRootInstance;
         websiteRootInstance.trigger_up(type, {...eventData});
+    }
+    async _onSaveButtonClick(event) {
+        await this.save();
+        return this.props.quitCallback();
+    }
+    async _onDiscardButtonClick(event) {
+        return this.props.quitCallback();
     }
 }

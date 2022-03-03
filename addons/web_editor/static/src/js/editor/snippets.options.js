@@ -4120,6 +4120,7 @@ const SnippetOptionWidget = Widget.extend({
         if (requiresReload) {
             this.trigger_up('request_save', {
                 reloadEditor: true,
+                option_selector: this.data.selector,
             });
         }
     },
