@@ -18,9 +18,19 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         this.websiteService = useWowlService('website');
         this.userService = useWowlService('user');
 
+        this.oeStructureSelector = '#wrapwrap .oe_structure[data-oe-xpath][data-oe-id]';
+        this.oeFieldSelector = '#wrapwrap [data-oe-field]';
+        this.oeCoverSelector = '#wrapwrap .s_cover[data-res-model], #wrapwrap .o_record_cover_container[data-res-model]';
+        if (options.savableSelector) {
+            this.savableSelector = options.savableSelector;
+        } else {
+            this.savableSelector = `${this.oeStructureSelector}, ${this.oeFieldSelector}, ${this.oeCoverSelector}`;
+        }
+
         onWillStart(() => {
             this.editable.classList.add('o_editable');
             this.editableFromEditorMenu(this.$editable).addClass('o_editable');
+            this._addEditorMessages();
         });
 
         onMounted(() => {
@@ -40,6 +50,23 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
             }
         });
         super.setup();
+    }
+    /**
+     * @override
+     */
+    updateWidget(nextProps) {
+        if (!nextProps.state.edition) {
+            this.widget.destroy();
+        }
+    }
+    /**
+     * Stop the widgets and save the content.
+     *
+     * @returns {Promise} the save promise from the Wysiwyg widget.
+     */
+    async save() {
+        await this._websiteRootEvent('widgets_stop_request');
+        return this.widget.saveContent(false);
     }
      /**
      * Returns the editable areas on the page.
@@ -154,6 +181,16 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
     }
     /**
      * Adds automatic editor messages on drag&drop zone elements.
+     *
+     * @private
+     */
+    _addEditorMessages() {
+        const $wrap = this.$editable.find('.oe_structure.oe_empty, [data-oe-type="html"]');
+        this.$editorMessageElement = $wrap.not('[data-editor-message]')
+                .attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+        $wrap.filter(':empty').attr('contenteditable', false);
+    }
+    /**
      * Get the areas on the page that should be editable.
      *
      * @returns {Node[]} list of nodes that can be edited.
