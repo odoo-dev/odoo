@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="website.WebsiteEditorComponent" owl="1">
+        <t t-if="this.state.edition">
+            <WysiwygAdapterComponent Component="this.Wysiwyg" iframe="this.iframe" />
+        </t>
+    </t>
+</templates>

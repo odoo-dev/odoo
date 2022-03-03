@@ -19,6 +19,11 @@ exports.loadWysiwyg = loadWysiwyg;
  * @param {object} options The wysiwyg options
  */
 exports.createWysiwyg = async (parent, options, additionnalAssets = []) => {
+    const Wysiwyg = await getWysiwygClass(options, additionnalAssets);
+    return new Wysiwyg(parent, options);
+};
+
+async function getWysiwygClass(options, additionnalAssets = []) {
     const wysiwygAlias = options.wysiwygAlias || 'web_editor.wysiwyg';
     if (!wysiwygPromise) {
         wysiwygPromise = new Promise(async (resolve) => {
@@ -36,9 +41,9 @@ exports.createWysiwyg = async (parent, options, additionnalAssets = []) => {
         });
     }
     await wysiwygPromise;
-    const Wysiwyg = odoo.__DEBUG__.services[wysiwygAlias];
-    return new Wysiwyg(parent, options);
-};
+    return odoo.__DEBUG__.services[wysiwygAlias];
+}
+exports.getWysiwygClass = getWysiwygClass;
 
 exports.loadFromTextarea = async (parent, textarea, options) => {
     var loading = textarea.nextElementSibling;

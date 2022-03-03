@@ -3,7 +3,8 @@
 ///
 
 // OVERRIDES FOR EDITOR WITH SNIPPETS
-body.editor_enable.editor_has_snippets {
+body.editor_enable.editor_has_snippets,
+iframe.editor_enable.editor_has_snippets {
     padding-right: $o-we-sidebar-width !important;
 
     #web_editor-top-edit .note-popover .popover {

@@ -149,6 +149,12 @@ Wysiwyg.include({
     /**
      * @override
      */
+    _insertSnippetMenu() {
+        return this.snippetsMenu.appendTo(this.$el);
+    },
+    /**
+     * @override
+     */
     _saveElement: async function ($el, context, withLang) {
         var promises = [];
 

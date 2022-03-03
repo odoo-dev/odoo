@@ -3,9 +3,10 @@
 
     <t t-name="website.WebsiteEditorClientAction" owl="1">
         <div class="o_website_editor">
-            <iframe t-att-src="iframeFallbackUrl" t-ref="iframefallback"/>
-            <iframe t-att-src="initialUrl" t-ref="iframe"/>
+            <iframe t-att-src="iframeFallbackUrl" t-ref="iframefallback" t-att-class="this.websiteContext.edition === 'started' ? 'd-none' : ''"/>
+            <iframe t-att-src="initialUrl" t-ref="iframe" t-att-class="this.websiteContext.edition === 'started' ? 'editor_enable editor_has_snippets' : ''"/>
         </div>
+        <WebsiteEditorComponent iframe="this.iframe" />
     </t>
 
 </templates>

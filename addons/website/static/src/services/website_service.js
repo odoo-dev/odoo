@@ -26,8 +26,11 @@ export const websiteService = {
         let currentMetadata = {};
         const context = reactive({
             showNewContentModal: false,
+            edition: false,
+            isEditionReady: false,
         });
         let pageDocument;
+        let contentWindow;
         return {
             set currentWebsiteId(id) {
                 currentWebsiteId = id;
@@ -62,6 +65,12 @@ export const websiteService = {
             },
             get pageDocument() {
                 return pageDocument;
+            },
+            set contentWindow(window) {
+                contentWindow = window;
+            },
+            get contentWindow() {
+                return contentWindow;
             },
             goToWebsite({ websiteId = currentWebsiteId || websites[0].id, path = '/' } = {}) {
                 action.doAction('website.website_editor', {
