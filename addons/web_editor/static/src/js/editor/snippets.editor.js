@@ -161,7 +161,7 @@ var SnippetEditor = Widget.extend({
         this.templateOptions = templateOptions;
         this.isTargetParentEditable = false;
         this.isTargetMovable = false;
-        this.$scrollingElement = $().getScrollingElement(this.ownerDocument);
+        this.$scrollingElement = $().getScrollingElement(this.$editable.ownerDocument);
         if (!this.$scrollingElement[0]) {
             this.$scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
@@ -199,7 +199,7 @@ var SnippetEditor = Widget.extend({
                     handle: '.o_move_handle',
                     helper: () => {
                         var $clone = this.$el.clone().css({width: '24px', height: '24px', border: 0});
-                        $clone.appendTo(this.$body).removeClass('d-none');
+                        $clone.appendTo(this.$el[0].ownerDocument.body).removeClass('d-none');
                         return $clone;
                     },
                     start: this._onDragAndDropStart.bind(this),
@@ -1327,6 +1327,9 @@ var SnippetsMenu = Widget.extend({
         this.$document.on('click.snippets_menu', '*', onClick);
         // Needed as bootstrap stop the propagation of click events for dropdowns
         this.$document.on('mouseup.snippets_menu', '.dropdown-toggle', onClick);
+        if (this.$body[0].document !== this.ownerDocument) {
+            this.$body.on('click.snippets_menu', '*', onClick);
+        }
 
         core.bus.on('deactivate_snippet', this, this._onDeactivateSnippet);
 
@@ -1358,7 +1361,7 @@ var SnippetsMenu = Widget.extend({
 
         // Hide the active overlay when scrolling.
         // Show it again and recompute all the overlays after the scroll.
-        this.$scrollingElement = $().getScrollingElement(this.ownerDocument);
+        this.$scrollingElement = $().getScrollingElement(this.$body[0].ownerDocument);
         if (!this.$scrollingElement[0]) {
             this.$scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
@@ -2402,7 +2405,7 @@ var SnippetsMenu = Widget.extend({
         var $toInsert, dropped, $snippet;
 
         let dragAndDropResolve;
-        let $scrollingElement = $().getScrollingElement(this.ownerDocument);
+        let $scrollingElement = $().getScrollingElement(this.$body[0].ownerDocument);
         if (!$scrollingElement[0]) {
             $scrollingElement = $(this.ownerDocument).find('.o_editable');
         }
@@ -2415,6 +2418,7 @@ var SnippetsMenu = Widget.extend({
                     dragSnip.querySelectorAll('.o_delete_btn, .o_rename_btn').forEach(
                         el => el.remove()
                     );
+                    self.$el[0].ownerDocument.body.append(dragSnip);
                     return dragSnip;
                 },
                 start: function () {
@@ -3134,11 +3138,11 @@ var SnippetsMenu = Widget.extend({
             if (data.reloadEditor) {
                 data.reload = false;
                 const oldOnSuccess = data.onSuccess;
-                data.onSuccess = async function () {
+                data.onSuccess = async () => {
                     if (oldOnSuccess) {
                         await oldOnSuccess.call(this, ...arguments);
                     }
-                    window.location.href = window.location.origin + window.location.pathname + '?enable_editor=1';
+                    this.trigger_up('reload_editable', {...data});
                 };
             }
             this.trigger_up('request_save', data);
