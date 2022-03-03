@@ -25,6 +25,12 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
 
         onMounted(() => {
             this.websiteService.context.edition = 'started';
+            // Initializing Page Options
+            this.pageOptions = {};
+            const pageOptionEls = this.iframe.el.contentDocument.querySelectorAll('.o_page_option_data');
+            for (const pageOptionEl of pageOptionEls) {
+                this.pageOptions[pageOptionEl.name] = pageOptionEl.value;
+            }
         });
         super.setup();
     }
@@ -98,5 +104,47 @@ export class WysiwygAdapterComponent extends ComponentAdapter {
         const savableElements = this.iframe.el.contentDocument
                                 .querySelectorAll('input, [data-oe-readonly],[data-oe-type="monetary"],[data-oe-many2one-id], [data-oe-field="arch"]:empty');
         return Array.from(savableElements).filter(element => !element.closest('.o_not_editable'));
+    }
+    /**
+     * This method provides support for the legacy event system.
+     * It sends events to the root_widget in the iframe when it needs
+     * to (e.g widgets_stop_request). It also provides support for the
+     * action_demand. See {@link _handle_action}.
+     * If the event is not supported it uses the super class method's.
+     * See {@link ComponentAdapter._trigger_up}.
+     *
+     * @override
+     * @param {Event} event
+     */
+    async _trigger_up(event) {
+        switch (event.name) {
+            case 'widgets_start_request':
+                this._websiteRootEvent('widgets_start_request', event.data);
+                break;
+            case 'snippet_dropped':
+                this._websiteRootEvent('widgets_start_request', event.data);
+                break;
+            case 'context_get':
+                event.data.callback(this.userService.context);
+                break;
+        }
+        return super._trigger_up(...arguments);
+    }
+
+    _handle_action(actionName, params) {
+        if (actionName === 'get_page_option') {
+            return this.pageOptions[params];
+        }
+        switch (actionName) {
+            case 'get_page_option':
+                return this.pageOptions[params];
+            case 'toggle_page_option':
+                console.warn('Cannot toggle page option yet', params);
+        }
+        console.warn('action ', actionName, 'is not yet supported');
+    }
+    async _websiteRootEvent(type, eventData = {}) {
+        const websiteRootInstance = await this.iframe.el.contentWindow.websiteRootInstance;
+        websiteRootInstance.trigger_up(type, {...eventData});
     }
 }

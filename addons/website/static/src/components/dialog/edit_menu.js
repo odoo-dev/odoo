@@ -5,7 +5,7 @@ import { WebsiteDialog } from './dialog';
 
 const { Component, useState, useEffect, onWillStart } = owl;
 
-class MenuDialog extends WebsiteDialog {
+export class MenuDialog extends WebsiteDialog {
     setup() {
         super.setup();
 

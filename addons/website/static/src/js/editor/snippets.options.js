@@ -111,7 +111,7 @@ const FontFamilyPickerUserValueWidget = SelectUserValueWidget.extend({
      * @override
      */
     start: async function () {
-        const style = window.getComputedStyle(document.documentElement);
+        const style = window.getComputedStyle(this.$target[0].ownerDocument.documentElement);
         const nbFonts = parseInt(weUtils.getCSSVariableValue('number-of-fonts', style));
         const googleFontsProperty = weUtils.getCSSVariableValue('google-fonts', style);
         this.googleFonts = googleFontsProperty ? googleFontsProperty.split(/\s*,\s*/g) : [];
@@ -478,15 +478,16 @@ options.Class.include({
      * @override
      */
     _computeWidgetState: async function (methodName, params) {
+        const style = window.getComputedStyle(this.$target[0].ownerDocument.documentElement);
         switch (methodName) {
             case 'customizeWebsiteViews': {
                 return this._getEnabledCustomizeValues(params.possibleValues, true);
             }
             case 'customizeWebsiteVariable': {
-                return weUtils.getCSSVariableValue(params.variable);
+                return weUtils.getCSSVariableValue(params.variable, style);
             }
             case 'customizeWebsiteColor': {
-                return weUtils.getCSSVariableValue(params.color);
+                return weUtils.getCSSVariableValue(params.color, style);
             }
             case 'customizeWebsiteAssets': {
                 return this._getEnabledCustomizeValues(params.possibleValues, false);
@@ -669,7 +670,7 @@ options.Class.include({
         });
         let $allLinks = $();
         const proms = _.map(bundles, (bundleURLs, bundleName) => {
-            var $links = $('link[href*="' + bundleName + '"]');
+            var $links = this.$target[0].ownerDocument.defaultView.$('link[href*="' + bundleName + '"]');
             $allLinks = $allLinks.add($links);
             var $newLinks = $();
             _.each(bundleURLs, url => {
@@ -1401,7 +1402,8 @@ options.registry.menu_data = options.Class.extend({
      * @override
      */
     start: function () {
-        wLinkPopoverWidget.createFor(this, this.$target[0], { wysiwyg: $('#wrapwrap').data('wysiwyg') });
+        const wysiwyg = $(this.ownerDocument.getElementById('wrapwrap')).data('wysiwyg');
+        wLinkPopoverWidget.createFor(this, this.$target[0], { wysiwyg });
         return this._super(...arguments);
     },
     /**
