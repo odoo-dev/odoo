@@ -1531,7 +1531,7 @@ var SnippetsMenu = Widget.extend({
             kwargs: {
                 context: this.options.context,
             },
-        });
+        }, { shadow: true });
         this.cacheSnippetTemplate[this.options.snippets] = this._defLoadSnippets;
         return this._defLoadSnippets;
     },
