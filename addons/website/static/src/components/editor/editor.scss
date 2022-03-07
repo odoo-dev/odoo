@@ -4,8 +4,6 @@
     right: 0;
     bottom: 0;
     height: 100%;
-    // backdrop doesn't work on firefox yet
-    backdrop-filter: blur(8px);
     width: $o-we-sidebar-width;
     background-color: $o-we-sidebar-content-backdrop-bg;
     color: $o-we-fg-lighter;
