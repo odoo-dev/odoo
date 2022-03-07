@@ -130,6 +130,60 @@
             </field>
         </record>
 
+        <record id="website_page_properties_view_form" model="ir.ui.view">
+            <field name="name">website.page.properties.form.view</field>
+            <field name="model">website.page</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <notebook>
+                            <page string="Name">
+                                <group col="1">
+                                    <group class="mt-3 mb-3">
+                                        <field name="name" string="Page Name" class="form-control"/>
+                                    </group>
+                                    <group>
+                                        <field name="website_id" groups="website.group_multi_website" invisible="1"/>
+                                        <field name="url" string="Page URL" widget="page_url"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Publish">
+                                <group>
+                                    <group class="mt-4 mb-3">
+                                        <field name="is_homepage" string="Use as Homepage" widget="boolean_toggle"/>
+                                    </group>
+                                    <group class="mb-3">
+                                        <field name="website_indexed" string="Indexed" widget="boolean_toggle"/>
+                                    </group>
+                                    <group class="mb-3">
+                                        <field name="is_published" string="Publish" widget="boolean_toggle"/>
+                                    </group>
+                                    <group class="mb-4">
+                                        <field name="date_publish" widget="datetime"/>
+                                    </group>
+                                    <group>
+                                        <field name="menu_ids" widget="one2many" mode="tree">
+                                            <tree editable="bottom">
+                                                <field name="name"/>
+                                                <field name="url"/>
+                                                <field name="new_window"/>
+                                            </tree>
+                                        </field>
+                                    </group>
+                                    <group>
+                                        <field name="visibility"/>
+                                        <field name="visibility_password_display" attrs="{'invisible': [('visibility', '!=', 'password')]}" password="True" string="Password"/>
+                                        <field name="groups_id" attrs="{'invisible': [('visibility', '!=', 'restricted_group')]}" string="Authorized Group"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
         <record id="website_pages_tree_view" model="ir.ui.view">
             <field name="name">website.page.list</field>
             <field name="model">website.page</field>
@@ -563,6 +617,12 @@
             parent="menu_site"
             sequence="30"
             name="Edit Menu"
+            action="website.website_editor"/>
+
+        <menuitem id="menu_page_properties"
+            parent="menu_site"
+            sequence="40"
+            name="Page Properties"
             action="website.website_editor"/>
 
         <menuitem id="menu_website_dashboard"
