@@ -199,14 +199,6 @@ Wysiwyg.include({
     },
 });
 
-function reload() {
-    if (window.location.href.match(/\?enable_editor/)) {
-        window.location.reload();
-    } else {
-        window.location.href = window.location.href.replace(/\?(enable_editor=1&)?|#.*|$/, '?enable_editor=1&');
-    }
-}
-
 options.registry.WebsiteSaleGridLayout = options.Class.extend({
 
     /**
@@ -244,7 +236,7 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
             params: {
                 'ppg': ppg,
             },
-        }).then(() => reload());
+        }).then(() => this.trigger_up('reload_editable', {option_selector: this.data.selector}));
     },
     /**
      * @see this.selectClass for params
@@ -256,7 +248,7 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
             params: {
                 'ppr': this.ppr,
             },
-        }).then(reload);
+        }).then(() => this.trigger_up('reload_editable', {option_selector: this.data.selector}));
     },
     /**
      * @see this.selectClass for params
@@ -268,7 +260,7 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
             params: {
                 'default_sort': this.default_sort,
             },
-        }).then(reload);
+        }).then(() => this.trigger_up('reload_editable', {option_selector: this.data.selector}));
     },
 
     //--------------------------------------------------------------------------
@@ -427,7 +419,7 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
                 product_id: this.productTemplateID,
                 sequence: widgetValue,
             },
-        }).then(reload);
+        }).then(() => this.trigger_up('reload_editable', {option_selector: this.data.selector}));
     },
 
     //--------------------------------------------------------------------------
@@ -627,7 +619,7 @@ options.registry.WebsiteSaleProductsItem = options.Class.extend({
                 x: x,
                 y: y,
             },
-        }).then(reload);
+        }).then(() => this.trigger_up('reload_editable', {option_selector: this.data.selector}));
     },
 });
 });
