@@ -17,10 +17,10 @@
                             <button type="button" class="close" aria-label="Close" tabindex="-1" t-on-click="close">×</button>
                         </header>
                         <main class="modal-body">
-                            <t t-call="{{ constructor.bodyTemplate }}"/>
+                            <t t-call="{{ bodyTemplate }}"/>
                         </main>
-                        <footer t-if="renderFooter" class="modal-footer justify-content-start">
-                            <t t-call="{{ constructor.footerTemplate }}" />
+                        <footer t-if="renderFooter" class="modal-footer justify-content-start" t-ref="dialogFooter">
+                            <t t-call="{{ footerTemplate }}" />
                         </footer>
                     </div>
                 </div>
