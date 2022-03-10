@@ -12,9 +12,8 @@ import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
 import { click, getFixture, mount, triggerEvent } from "../helpers/utils";
 import { applyFilter, toggleMenu } from "@web/../tests/search/helpers";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 
-const { xml } = owl;
+const { Component, xml } = owl;
 const { DateTime } = luxon;
 const serviceRegistry = registry.category("services");
 
@@ -37,7 +36,7 @@ const mountPicker = async (Picker, props) => {
         )
         .add("ui", uiService);
 
-    class Parent extends LegacyComponent {}
+    class Parent extends Component {}
     Parent.template = xml/* xml */ `
         <t t-component="props.Picker" t-props="props.props"/>
     `;
@@ -472,7 +471,7 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test("start with no value", async function (assert) {
         assert.expect(6);
 
-        const picker = await mountPicker(DateTimePicker, {
+        await mountPicker(DateTimePicker, {
             onDateTimeChanged(date) {
                 assert.step("datetime-changed");
                 assert.strictEqual(
@@ -483,12 +482,12 @@ QUnit.module("Components", ({ beforeEach }) => {
             },
         });
 
-        const input = picker.el.querySelector(".o_datepicker_input");
+        const input = target.querySelector(".o_datepicker_input");
         assert.strictEqual(input.value, "");
 
         assert.verifySteps([]);
         input.value = "08/02/1997 15:45:05";
-        await triggerEvent(picker.el, ".o_datepicker_input", "change");
+        await triggerEvent(target, ".o_datepicker_input", "change");
 
         assert.verifySteps(["datetime-changed"]);
         assert.strictEqual(input.value, "08/02/1997 15:45:05");
