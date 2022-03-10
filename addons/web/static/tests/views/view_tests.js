@@ -9,7 +9,6 @@ import {
     nextTick,
     patchWithCleanup,
 } from "@web/../tests/helpers/utils";
-import { setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { registry } from "@web/core/registry";
 import { OnboardingBanner } from "@web/views/onboarding_banner";
