@@ -25,7 +25,7 @@ export function patchDate(year, month, day, hours, minutes, seconds) {
     var actualDate = new RealDate();
     var fakeDate = new RealDate(year, month, day, hours, minutes, seconds);
     var timeInterval = actualDate.getTime() - fakeDate.getTime();
-
+    // eslint-disable-next-line no-global-assign
     Date = (function (NativeDate) {
         function Date(Y, M, D, h, m, s, ms) {
             var length = arguments.length;
@@ -55,7 +55,7 @@ export function patchDate(year, month, day, hours, minutes, seconds) {
                 date.constructor = Date;
                 return date;
             } else {
-                var date = new NativeDate();
+                const date = new NativeDate();
                 var time = date.getTime();
                 time -= timeInterval;
                 date.setTime(time);
@@ -317,8 +317,7 @@ export function click(el, selector) {
     return triggerEvent(el, selector, "click", { bubbles: true, cancelable: true });
 }
 
-export function clickEdit(view) {
-    const htmlElement = view.el;
+export function clickEdit(htmlElement) {
     if (htmlElement.querySelectorAll(".o_form_button_edit").length) {
         return click(htmlElement, ".o_form_button_edit");
     } else if (htmlElement.querySelectorAll(".o_list_button_edit").length) {
@@ -328,8 +327,7 @@ export function clickEdit(view) {
     }
 }
 
-export function clickSave(view) {
-    const htmlElement = view.el;
+export function clickSave(htmlElement) {
     if (htmlElement.querySelectorAll(".o_form_button_save").length) {
         return click(htmlElement, ".o_form_button_save");
     } else if (htmlElement.querySelectorAll(".o_list_button_save").length) {
@@ -459,7 +457,7 @@ export function destroy(comp) {
 }
 
 export function findChildren(comp, predicate = (e) => e) {
-    let queue = [];
+    const queue = [];
     [].unshift.apply(queue, Object.values(comp.__owl__.children));
 
     while (queue.length > 0) {
