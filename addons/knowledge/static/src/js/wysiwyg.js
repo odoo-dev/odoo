@@ -1,15 +1,11 @@
-odoo.define('knowledge.wysiwyg', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const core = require('web.core');
-const QWeb = core.qweb;
-
-const { DocumentWidget } = require('wysiwyg.widgets.media');
-const MediaDialog = require('wysiwyg.widgets.MediaDialog');
-const Link = require('wysiwyg.widgets.Link');
-const weWidgets = require('web_editor.widget');
-const Wysiwyg = require('web_editor.wysiwyg');
-const { setCursorStart } = require('@web_editor/../lib/odoo-editor/src/OdooEditor');
+import { qweb as QWeb } from 'web.core';
+import { DocumentWidget } from 'wysiwyg.widgets.media';
+import MediaDialog from 'wysiwyg.widgets.MediaDialog';
+import Wysiwyg from 'web_editor.wysiwyg';
+import { KnowledgeArticleLinkModal } from 'knowledge.wysiwyg.article_link';
+import { preserveCursor, setCursorStart } from '@web_editor/../lib/odoo-editor/src/OdooEditor';
 
 const CustomDocumentWidget = DocumentWidget.extend({
     /**
@@ -102,6 +98,15 @@ Wysiwyg.include({
      */
     _getCommands: function () {
         const commands = this._super();
+        commands.push({
+            groupName: 'Medias',
+            title: 'Article',
+            description: 'Link an article.',
+            fontawesome: 'fa-file',
+            callback: () => {
+                this._insertArticleLink();
+            },
+        });
         if (this.options.knowledge_commands) {
             commands.push({
                 groupName: 'Knowledge',
@@ -177,8 +182,32 @@ Wysiwyg.include({
         this._notifyNewBehaviors(container);
     },
     /**
+     * Insert a /article block (through a dialog)
+     */
+    _insertArticleLink: function () {
+        const restoreSelection = preserveCursor(this.odooEditor.document);
+        const dialog = new KnowledgeArticleLinkModal(this, {});
+        dialog.on('save', this, data => {
+            restoreSelection();
+            const linkHtml = $(QWeb.render('knowledge.wysiwyg_article_link', {
+                icon: data.icon,
+                text: data.text,
+                href: '/knowledge/article/' + data.id,
+                article_id: data.id,
+            }))[0].outerHTML;
+            const [anchor] = this.odooEditor.execCommand('insertHTML', linkHtml);
+            this._notifyNewBehaviors(anchor);
+            dialog.close();
+        });
+        dialog.on('closed', this, () => {
+            restoreSelection();
+        });
+        dialog.open();
+    },
+    /**
      * Notify the @see FieldHtmlInjector when a /file block is inserted
      *
+     * @private
      * @override
      */
     _onMediaDialogSave(params, element) {
@@ -194,22 +223,4 @@ Wysiwyg.include({
         }
         return result;
     },
-});
-
-const CustomLinkWidget = Link.extend({
-    template: 'wysiwyg.widgets.link',
-    _getLinkOptions: function () {
-        return [];
-    },
-});
-
-weWidgets.LinkDialog.include({
-    /**
-     * @param {...any} args
-     * @returns
-     */
-    getLinkWidget: function (...args) {
-        return new CustomLinkWidget(this, ...args);
-    }
-});
 });
