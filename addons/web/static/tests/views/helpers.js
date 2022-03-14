@@ -73,6 +73,8 @@ export const makeView = async (params) => {
         props.searchViewFields = props.searchViewFields || Object.assign({}, props.fields);
     }
 
+    props.selectRecord = props.selectRecord || (() => {});
+    props.createRecord = props.createRecord || (() => {});
     /** Legacy Environment, for compatibility sakes
      *  Remove this as soon as we drop the legacy support
      */
