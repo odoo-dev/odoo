@@ -325,12 +325,13 @@ export class Record extends DataPoint {
             this.resId = state.resId;
         }
         if (!this.resId) {
-            this.resId = this.model.nextVirtualId--;
+            this.resId = false;
+            this.virtualId = this.model.nextVirtualId;
         }
         this.resIds =
             (params.resIds ? toRaw(params.resIds) : null) || // FIXME WOWL reactivity
             state.resIds ||
-            (this.isVirtual ? [] : [this.resId]);
+            (this.resId ? [this.resId] : []);
 
         this.parentActiveFields = params.parentActiveFields || false;
         this.onChanges = params.onChanges || (() => {});
@@ -347,7 +348,7 @@ export class Record extends DataPoint {
         this._onChangePromise = Promise.resolve({});
         this._domains = {};
 
-        this.mode = params.mode || (this.isVirtual ? "edit" : state.mode || "readonly");
+        this.mode = params.mode || (this.resId ? state.mode || "readonly" : "edit");
         this._onWillSwitchMode = params.onRecordWillSwitchMode || (() => {});
         markRaw(this);
 
@@ -402,7 +403,7 @@ export class Record extends DataPoint {
     }
 
     get isVirtual() {
-        return isVirtual(this.resId);
+        return !this.resId;
     }
 
     get isInEdition() {
@@ -511,7 +512,7 @@ export class Record extends DataPoint {
             return;
         }
         let data;
-        if (isVirtual(this.resId)) {
+        if (this.isVirtual) {
             const onchangeValues = await this._performOnchange();
             data = {
                 ...this._generateDefaultValues(),
@@ -809,6 +810,7 @@ export class Record extends DataPoint {
             orderBy,
             field: this.fields[fieldName],
             resIds: this.data[fieldName] || [],
+            commands: this._changes[fieldName],
             views,
             viewMode,
             onChanges: () => {
@@ -821,10 +823,10 @@ export class Record extends DataPoint {
                 }
             },
         });
+
         this._values[fieldName] = list;
         this.data[fieldName] = list;
         if (!this.isInvisible(fieldName)) {
-            list.applyCommands(this._changes[fieldName]);
             this._changes[fieldName] = list;
             return list.load();
         }
@@ -1776,33 +1778,59 @@ export class Group extends DataPoint {
     }
 }
 
-const isVirtual = (resId) => resId < 0;
-const removeId = (ids, id) => {
-    const index = ids.indexOf(id);
-    if (index > -1) {
-        ids.splice(index, 1);
+const add = (arr, el) => {
+    const index = arr.indexOf(el);
+    if (index === -1) {
+        arr.push(el);
     }
 };
 
+const remove = (arr, el) => {
+    const index = arr.indexOf(el);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+};
+
+// To put elsewhere
+
+// local commands
+const CREATE = 0;
+const UPDATE = 1;
+const DELETE = 2;
+const FORGET = 3;
+const LINK_TO = 4;
+
+// global commands
+const DELETE_ALL = 5;
+const REPLACE_WITH = 6;
+
 export class StaticList extends DataPoint {
     setup(params, state) {
-        this.resIds = params.resIds || [];
-        this.orderBy = params.orderBy || [];
+        this._serverIds = params.resIds || [];
+
+        this._commands = [];
+
+        this._commandsById = {}; // to remove?
+
+        this._commands = this._getNormalizedCommands([], params.commands || []); // modifies commands and this._commandsById in places
+
         this.offset = params.offset || 0;
         this.limit = params.limit || state.limit || this.constructor.DEFAULT_LIMIT;
         this.initialLimit = this.limit;
+        this.editable = params.editable; // ("bottom" or "top")
 
-        this.deletedIds = new Set([]);
-        this.addedIds = new Set([]);
-        this.virtualIds = [];
+        this.currentIds = this._getCurrentIds(this._serverIds, this._commands);
+
+        this.orderBy = params.orderBy || [];
 
         // async computation that depends on previous params
         // to be initialized
-        this._ids = null;
-        this.displayedIds = [];
-        this._cache = {};
+        this.records = [];
 
-        this.isOne2Many = params.field.type === "one2many"; // bof
+        this._cache = {};
+        this._mapping = {}; // maps record.resId || record.virtualId to record.id
+
         this.views = params.views || {};
         this.viewMode = params.viewMode;
 
@@ -1826,116 +1854,116 @@ export class StaticList extends DataPoint {
                 this.editedRecord = record;
             }
             if (this.notYetValidated) {
-                const resId = this.notYetValidated;
+                const virtualId = this.notYetValidated;
                 this.notYetValidated = null;
-                removeId(this.virtualIds, resId);
-                removeId(this.displayedIds, resId);
-                delete this._cache[resId]; // won't be used anymore (we know that record is virtual)
+                this.applyCommand(Commands.delete(virtualId));
+                delete this._cache[this._mapping[virtualId]]; // won't be used anymore
             }
         };
     }
 
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    get count() {
+        return this.currentIds.length;
+    }
+
     /**
-     * @returns {Record[]}
+     * Add a true record in relation
+     * @param {Object} params
+     * @param {number} param.resId
      */
-    get records() {
-        const records = [];
-        for (const resId of this.displayedIds) {
-            const record = this._cache[resId];
-            if (!record) {
-                records.push({ resId }); // fix problem with evalContext --> system is wrong
-                // throw new Error("record should have been in cache");
-                continue;
-            }
-            records.push(record);
+    async add(params) {
+        if (!params.resId) {
+            throw new Error("you rascal");
         }
-        return records;
-    }
 
-    async createRecord({ mode, resId }) {
-        const record = this.model.createDataPoint("record", {
-            // context: makeContext([this.context, this.rawContext, context], this.getEvalContext()),
-            resModel: this.resModel,
-            resId,
-            fields: this.fields,
-            mode,
-            activeFields: this.activeFields,
-            viewMode: this.viewMode,
-            views: this.views,
-            onRecordWillSwitchMode: this.onRecordWillSwitchMode,
-            onChanges: () => {
-                this.onChanges();
-                if (record.resId === this.notYetValidated) {
-                    this.notYetValidated = null;
-                }
-            },
-        });
-        this._cache[record.resId] = record;
-        await record.load();
-        return record;
-    }
+        const { resId } = params;
+        this.limit++;
+        this.applyCommand(Commands.linkTo(resId));
 
-    delete(resId) {
-        if (isVirtual(resId)) {
-            removeId(this.virtualIds, resId);
-            delete this._cache[resId];
-        } else {
-            this.deletedIds.add(resId);
+        if (!this._mapping[resId]) {
+            await this._createRecord(params);
         }
-        removeId(this.displayedIds, resId);
-        this._ids = null;
+
+        this.records = this._getRecords();
         this.onChanges();
-        this.model.notify();
+        this.model.notify(); // should be in onChanges?
     }
 
-    async add(resId) {
-        if (this.deletedIds.has(resId)) {
-            this.deletedIds.delete(resId);
-        } else {
-            if (!this._cache[resId]) {
-                await this.createRecord({ resId });
-            }
-            this.addedIds.add(resId);
+    /**
+     * Add a new record in relation
+     * @param {Object} params
+     */
+    async addNew(params) {
+        if (params.resId) {
+            throw new Error("you rascal");
         }
 
-        this.displayedIds.push(resId);
-        this.limit = this.limit + 1; // might be not good
-        this._ids = null;
-        this.onChanges();
-        this.model.notify();
-    }
+        const record = await this._createRecord(params);
+        record._onWillSwitchMode(record, "edit");
 
-    async addNew(context) {
-        const record = await this.createRecord({ context, mode: "edit" });
-        record._onWillSwitchMode(record, "edit"); // bof
-        const { resId } = record;
-        this.virtualIds.push(resId);
+        this.limit++;
+        this.applyCommand(Commands.create(record.virtualId, record.data));
+
         for (const fieldName in this.activeFields) {
             if (this.fields[fieldName].type === "boolean") {
                 continue;
             }
             if (record.isRequired(fieldName) && !record.data[fieldName]) {
-                this.notYetValidated = resId;
+                this.notYetValidated = record.virtualId;
                 break;
             }
         }
 
-        this.displayedIds.push(resId);
-        this.limit = this.limit + 1; // might be not good
-        this._ids = null;
+        this.records = this._getRecords();
         this.onChanges();
         this.model.notify();
     }
 
+    applyCommand(command) {
+        this.applyCommands([command]);
+    }
+
+    /**
+     * @param {Array[]} commands  array of commands
+     */
     applyCommands(commands) {
-        for (const command of commands || []) {
-            if (command[0] === 6) {
-                this.resIds = [];
-                for (const resId of command[2]) {
-                    this.addedIds.add(resId);
-                }
+        this._commands = this._getNormalizedCommands(this._commands, commands);
+        this.currentIds = this._getCurrentIds(this.currentIds, commands);
+    }
+
+    /**
+     * @param {RecordId} recordId
+     */
+    delete(recordId) {
+        const record = this._cache[recordId];
+        if (record.isVirtual) {
+            delete this._cache[recordId];
+        }
+        const id = record.resId || record.virtualId;
+        this.applyCommand(Commands.delete(id));
+
+        this.records = this._getRecords();
+        this.onChanges();
+        this.model.notify();
+    }
+
+    discard() {
+        for (const record of Object.values(this._cache)) {
+            if (record.isVirtual) {
+                delete this._cache[record.id];
+            } else {
+                record.discard();
             }
         }
+        this.limit = this.initialLimit;
+        this._commands = [];
+        this._commandsById = {};
+        this.currentIds = [...this._serverIds];
+        this.load();
     }
 
     exportState() {
@@ -1944,23 +1972,7 @@ export class StaticList extends DataPoint {
         };
     }
 
-    get count() {
-        return this.ids.length;
-    }
-
-    get ids() {
-        if (!this._ids) {
-            this._ids = [
-                ...this.resIds.filter((resId) => !this.deletedIds.has(resId)),
-                ...this.addedIds,
-                ...this.virtualIds,
-            ];
-        }
-        return this._ids;
-    }
-
     async load() {
-        this._ids = null;
         if (!this.count) {
             return;
         }
@@ -1997,15 +2009,16 @@ export class StaticList extends DataPoint {
             // 1) populate values for already fetched records
             let recordValues = {};
             let resIds = [];
-            for (const resId of this.ids) {
-                const record = this._cache[resId];
-                if (record) {
-                    recordValues[resId] = {};
+            for (const id of this.currentIds) {
+                const recordId = this._mapping[id];
+                if (recordId) {
+                    const record = this._cache[recordId];
+                    recordValues[id] = {};
                     for (const fieldName of orderFieldNames) {
-                        recordValues[resId][fieldName] = record.data[fieldName];
+                        recordValues[id][fieldName] = record.data[fieldName];
                     }
                 } else {
-                    resIds.push(resId);
+                    resIds.push(id); // id is a resId
                 }
             }
             // 2) fetch values for non loaded records
@@ -2019,27 +2032,50 @@ export class StaticList extends DataPoint {
                     }
                 }
             }
-            // 3) sort resIds
-            this.ids.sort((id1, id2) => {
+            // 3) sort this.currentIds
+            this.currentIds.sort((id1, id2) => {
                 return compareRecords(recordValues[id1], recordValues[id2]);
             });
         }
-        this.displayedIds = this.ids.slice(this.offset, this.offset + this.limit);
-        const proms = [];
-        for (const resId of this.displayedIds) {
-            let record = this._cache[resId];
-            if (!record) {
-                proms.push(this.createRecord({ resId }));
-            }
-        }
 
-        await Promise.all(proms);
+        await this._completeCache();
 
         if (!hasSeveralPages && orderFieldNames.length) {
-            this.displayedIds.sort((resId1, resId2) => {
-                return compareRecords(this._cache[resId1].data, this._cache[resId2].data);
+            this.currentIds.sort((id1, id2) => {
+                const recId1 = this._mapping[id1];
+                const recId2 = this._mapping[id2];
+                return compareRecords(this._cache[recId1].data, this._cache[recId2].data);
             });
         }
+
+        this.records = this._getRecords();
+    }
+
+    /**
+     * @returns {Array[] | null}
+     */
+    getCommands() {
+        if (this._commands.length) {
+            const hasGlobalCommand =
+                this._commands && [DELETE_ALL, REPLACE_WITH].includes(this._commands[0][0]);
+            if (hasGlobalCommand) {
+                return [...this._commands];
+            }
+            const extraCommands = [];
+            for (const resId of this._serverIds) {
+                if (!this._commandsById[resId]) {
+                    extraCommands.push(Commands.linkTo(resId));
+                }
+            }
+            return [...this._commands, ...extraCommands];
+        }
+        return null;
+    }
+
+    async replaceWith(resIds) {
+        this.applyCommand(Commands.replaceWith(resIds));
+        await this.load();
+        this.model.notify();
     }
 
     async sortBy(fieldName) {
@@ -2048,71 +2084,207 @@ export class StaticList extends DataPoint {
         } else {
             this.orderBy = { name: fieldName, asc: true };
         }
-
         await this.load();
         this.model.notify();
     }
 
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
-     * @returns {Array[] | null}
+     * Add missing records to cache
      */
-    getCommands() {
-        const commands = [];
-        let hasChanged = false;
-        if (this.isOne2Many) {
-            for (const resId of this.resIds) {
-                const record = this._cache[resId];
-                if (this.deletedIds.has(resId)) {
-                    hasChanged = true;
-                    commands.push(Commands.delete(resId));
-                } else {
-                    // we should now what are the changed records
-                    if (record) {
-                        const changes = record.getChanges();
-                        if (Object.keys(changes).length) {
-                            hasChanged = true;
-                            commands.push(Commands.update(resId, changes));
-                        } else {
-                            commands.push(Commands.linkTo(resId));
-                        }
-                    }
-                }
+    async _completeCache() {
+        const displayedIds = this._getDisplayedIds();
+        const proms = [];
+        for (const id of displayedIds) {
+            const recordId = this._mapping[id];
+            if (!recordId) {
+                const resId = id; // id is necessarily a resId (for now)
+                proms.push(this._createRecord({ resId }));
             }
-            for (const resId of this.virtualIds) {
-                const record = this._cache[resId];
-                const changes = record.getChanges();
-                hasChanged = true;
-                commands.push(Commands.create(resId, changes));
-            }
-            if (this.addedIds.size) {
-                hasChanged = true;
-                commands.push(Commands.replaceWith([...this.addedIds]));
-            }
-        } else {
-            hasChanged = true;
-            commands.push(Commands.replaceWith(this.ids));
         }
-        if (hasChanged) {
-            return commands;
-        }
-        return false;
+        return Promise.all(proms);
     }
 
-    async update() {}
+    async _createRecord(params) {
+        const record = this.model.createDataPoint("record", {
+            resModel: this.resModel,
+            fields: this.fields,
+            activeFields: this.activeFields,
+            viewMode: this.viewMode,
+            views: this.views,
+            onRecordWillSwitchMode: this.onRecordWillSwitchMode,
+            onChanges: () => {
+                this.onChanges();
+                this.applyCommand(
+                    Commands.update(record.resId || record.virtualId, record.getChanges())
+                );
+                if (record.virtualId === this.notYetValidated) {
+                    this.notYetValidated = null;
+                }
+            },
+            ...params,
+        });
+        const id = record.resId || record.virtualId; // is resId sometimes changed after record creation?
+        this._mapping[id] = record.id;
+        this._cache[record.id] = record;
+        await record.load();
+        return record;
+    }
 
-    discard() {
-        for (const record of Object.values(this._cache)) {
-            if (isVirtual(record.resId)) {
-                delete this._cache[record.resId];
-            } else {
-                record.discard();
+    _getCurrentIds(currentIds, commands) {
+        let nextIds = [...currentIds];
+        for (const command of commands) {
+            const code = command[0];
+            const id = command[1];
+            switch (code) {
+                case 0: // create
+                    if (nextIds.indexOf(id) === -1) {
+                        const index =
+                            this.editable === "top" ? this.offset : this.offset + this.limit - 1;
+                        nextIds.splice(index, 0, id);
+                    } else {
+                        throw new Error("you rascal");
+                    }
+                    break;
+                case 1: // update
+                    add(nextIds, id);
+                    break;
+                case 2: // delete
+                case 3: // forget
+                    remove(nextIds, id);
+                    break;
+                case 4: // linkTo
+                    add(nextIds, id);
+                    break;
+                case 5: // deleteAll
+                case 6: // replaceWith
+                    nextIds = command[2] || [];
+                    break;
             }
         }
-        this.deletedIds.clear();
-        this.addedIds.clear();
-        this.virtualIds = [];
-        this.limit = this.initialLimit;
-        this.load();
+        return nextIds;
+    }
+
+    /**
+     * Returns the array of visible ids (resId or virutalId)
+     * @returns {Record[]}
+     */
+    _getDisplayedIds() {
+        const hasSeveralPages = this.limit < this.count;
+        let displayedIds = this.currentIds.slice(0);
+        if (hasSeveralPages) {
+            displayedIds = this.currentIds.slice(this.offset, this.offset + this.limit);
+        }
+        return displayedIds;
+    }
+
+    /**
+     * Concat two arrays of commands and normalize the result
+     * The first array must be normalized.
+     * ! modifies in place the commands themselves ! TODO fix this
+     * @param {Array[]} normalizedCommands normalized array of commands
+     * @param {Array[]} commands  array of commands
+     * @returns {Array[]} a normalized array of commands
+     */
+    _getNormalizedCommands(normalizedCommands, commands) {
+        let nextCommands = [...normalizedCommands];
+        for (const command of commands) {
+            const code = command[0];
+            const id = command[1];
+
+            if ([DELETE_ALL, REPLACE_WITH].includes(code)) {
+                this._commandsById = {};
+                nextCommands = [command];
+                continue;
+            } else if (!this._commandsById[id]) {
+                // possible problem with same ids (0) returned by server in accounting
+                // -> add a test
+                this._commandsById[id] = { [code]: command };
+                nextCommands.push(command);
+                continue;
+            }
+
+            switch (code) {
+                case UPDATE:
+                    // we assume that delete/forget cannot be found in this._commandsById[id]
+                    // we can find create/linkTo/update
+                    // we merge create/update and update/update
+                    if (this._commandsById[id][CREATE]) {
+                        this._commandsById[id][CREATE][2] = Object.assign(
+                            this._commandsById[id][CREATE][2],
+                            command[2]
+                        );
+                    } else if (this._commandsById[id][UPDATE]) {
+                        this._commandsById[id][UPDATE][2] = Object.assign(
+                            this._commandsById[id][UPDATE][2],
+                            command[2]
+                        );
+                    } else {
+                        if (this._commandsById[id][LINK_TO]) {
+                            remove(nextCommands, this._commandsById[id][LINK_TO]);
+                            delete this._commandsById[id][LINK_TO];
+                        }
+
+                        this._commandsById[id][UPDATE] = command;
+                        nextCommands.push(command);
+                    }
+                    break;
+                case DELETE:
+                    // we assume that delete/forget cannot be found in this._commandsById[id]
+                    // we can find create/linkTo/update
+                    // if one finds create, we erase everything
+                    // else we add delete and remove linkTo/update
+                    if (this._commandsById[id][UPDATE]) {
+                        remove(nextCommands, this._commandsById[id][UPDATE]);
+                    }
+                    if (this._commandsById[id][CREATE]) {
+                        remove(nextCommands, this._commandsById[id][CREATE]);
+                        delete this._commandsById[id];
+                    } else {
+                        if (this._commandsById[id][LINK_TO]) {
+                            remove(nextCommands, this._commandsById[id][LINK_TO]);
+                        }
+                        this._commandsById[id] = { [DELETE]: command };
+                        nextCommands.push(command);
+                    }
+                    break;
+                case FORGET:
+                    // we assume that delete/forget cannot be found in this._commandsById[id]
+                    // we can find create/linkTo/update
+                    // if one finds linkTo, we erase linkTo and forget
+                    if (this._commandsById[id][LINK_TO]) {
+                        remove(nextCommands, this._commandsById[id][LINK_TO]);
+                        delete this._commandsById[id][LINK_TO];
+                        // do we need to remove update?
+                    } else {
+                        this._commandsById[id][FORGET] = command;
+                        nextCommands.push(command);
+                    }
+                    break;
+                case LINK_TO:
+                    // we assume that that create/delete cannot be found in this._commandsById[id]
+                    if (this._commandsById[id][FORGET]) {
+                        delete this._commandsById[id][FORGET];
+                        remove(nextCommands, this._commandsById[id][FORGET]);
+                    } else {
+                        this._commandsById[id][LINK_TO] = command;
+                        nextCommands.push(command);
+                    }
+                    break;
+            }
+        }
+        return nextCommands;
+    }
+
+    /**
+     * Returns visible records
+     * @returns {Record[]}
+     */
+    _getRecords() {
+        return this._getDisplayedIds().map((id) => this._cache[this._mapping[id]]);
     }
 }
 
@@ -2128,8 +2300,6 @@ export class RelationalModel extends Model {
         this.orm = new RequestBatcherORM(rpc, user);
         this.keepLast = new KeepLast();
         this.mutex = new Mutex();
-
-        this.nextVirtualId = -1;
 
         this.onCreate = params.onCreate;
         this.quickCreateView = params.quickCreateView;
@@ -2153,6 +2323,8 @@ export class RelationalModel extends Model {
 
         // this.db = Object.create(null);
         this.root = null;
+
+        this.nextId = 1;
 
         // debug
         window.basicmodel = this;
@@ -2220,6 +2392,10 @@ export class RelationalModel extends Model {
             }
         }
         return new DpClass(this, params, state);
+    }
+
+    get nextVirtualId() {
+        return `virtual_${this.nextId++}`;
     }
 
     /**
