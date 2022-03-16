@@ -39,10 +39,11 @@
                             </div>
                         </div>
                     </aside>
-                    <div class="flex-grow-1 position-relative p-0">
+                    <div class="flex-grow-1 position-relative">
+                        <div class="o_knowledge_resizer d-none d-sm-block" />
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
-                            <div class="o_knowledge_header d-print-none d-sm-flex flex-row justify-content-between bg-white border-bottom">
+                            <div class="o_knowledge_header d-sm-flex border-bottom justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <!-- Breadcrumbs -->
                                     <ol class="breadcrumb align-items-center p-3" role="navigation">
@@ -66,6 +67,9 @@
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
                                             <a type="button" role="button" class="btn btn-secondary btn-share dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                 <i class="fa fa-share-alt"/> Share
+                                            </a>
+                                            <a type="button" role="button" class="btn btn-secondary btn-chatter">
+                                                <i class="rounded-circle text-center fa fa-comments" title="Open chatter"/>
                                             </a>
                                             <div class="o_knowledge_share_panel dropdown-menu" role="menu">
                                                 <div class="px-3 pb-2">
@@ -126,48 +130,60 @@
                             </div>
                             <div class="flex-grow-1 position-relative">
                                 <div class="o_scroll_view">
-                                        <!-- Article Cover -->
-                                        <div class="o_knowledge_cover">
-                                            <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)]}"/>
-                                        </div>
+                                    <div class="row p-0 m-0" style="min-height: 100%">
+                                        <div class="d-flex col-12 col-lg position-relative p-0">
+                                            <div class="o_scroll_view_lg">
+                                                <!-- Article body -->
+                                                <div class="o_knowledge_body h-100">
+                                                    <!-- Article Cover -->
+                                                    <div class="o_knowledge_cover">
+                                                        <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)]}"/>
+                                                    </div>
 
-                                        <!-- Full Width handling -->
-                                        <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
+                                                    <!-- Full Width handling -->
+                                                    <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
 
-                                        <!-- Icon and Cover buttons -->
-                                        <div class="text-primary bg-white o_knowledge_icon_cover_buttons mt-2" attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}">
-                                            <a type="button" role="button" attrs="{'invisible': [('icon', '!=', False)]}" class="btn btn-secondary btn-outline-secondary mr-2 pl-1 o_knowledge_add_icon">
-                                                <i class="fa fa-fw fa-smile-o" style="font-size: 1.5em;" title="Add icon"/> Add icon
-                                            </a>
-                                            <a type="button" role="button" attrs="{'invisible': [('cover', '!=', False)]}" class="btn btn-secondary btn-outline-secondary o_knowledge_add_cover">
-                                                <i class="fa fa-fw fa-picture-o" style="font-size: 1.5em;" title="Add cover"/> Add cover
-                                            </a>
-                                        </div>
+                                                    <!-- Icon and Cover buttons -->
+                                                    <div class="text-primary bg-white o_knowledge_icon_cover_buttons mt-2" attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}">
+                                                        <a type="button" role="button" attrs="{'invisible': [('icon', '!=', False)]}" class="btn btn-secondary btn-outline-secondary mr-2 pl-1 o_knowledge_add_icon">
+                                                            <i class="fa fa-fw fa-smile-o" style="font-size: 1.5em;" title="Add icon"/> Add icon
+                                                        </a>
+                                                        <a type="button" role="button" attrs="{'invisible': [('cover', '!=', False)]}" class="btn btn-secondary btn-outline-secondary o_knowledge_add_cover">
+                                                            <i class="fa fa-fw fa-picture-o" style="font-size: 1.5em;" title="Add cover"/> Add cover
+                                                        </a>
+                                                    </div>
 
-                                        <!-- Article Icon -->
-                                        <span class="d-none" attrs="{'invisible': [('cover', '!=', False)]}" />
-                                        <div class="o_knowledge_icon" attrs="{'invisible': [('icon', '=', False)]}">
-                                            <div class="o_article_emoji_dropdown dropdown">
-                                                <a href="#" class="o_article_big_emoji o_article_emoji dropdown-toggle o-no-caret"
-                                                   type="button" data-toggle="dropdown" aria-expanded="true"
-                                                   attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
-                                                <p class="o_article_big_emoji o_article_emoji o-no-caret"
-                                                   attrs="{'invisible': ['&amp;', ('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
-                                                <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
-                                                    aria-labelledby="o_article_emoji" />
+                                                    <!-- Article Icon -->
+                                                    <span class="d-none" attrs="{'invisible': [('cover', '!=', False)]}" />
+                                                    <div class="o_knowledge_icon" attrs="{'invisible': [('icon', '=', False)]}">
+                                                        <div class="o_article_emoji_dropdown dropdown">
+                                                            <a href="#" class="o_article_big_emoji o_article_emoji dropdown-toggle o-no-caret"
+                                                               type="button" data-toggle="dropdown" aria-expanded="true"
+                                                               attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
+                                                            <p class="o_article_big_emoji o_article_emoji o-no-caret"
+                                                               attrs="{'invisible': ['&amp;', ('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
+                                                            <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
+                                                                aria-labelledby="o_article_emoji" />
+                                                        </div>
+                                                    </div>
+                                                    <!-- Article body -->
+                                                    <div class="o_knowledge_editor d-flex bg-white px-5">
+                                                        <field name="body" widget="html" no_label="1" default_focus="1"
+                                                            options="{'resizable': False, 'knowledge_commands': true}"
+                                                            attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <!-- Article body -->
-                                        <div class="o_knowledge_editor d-flex border-bottom bg-white px-5">
-                                            <field name="body" widget="html" no_label="1" default_focus="1"
-                                                options="{'resizable': False, 'knowledge_commands': true}"
-                                                attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
-                                    </div>
-                                    <!-- Chatter -->
-                                    <div class="o_knowledge_chatter_container">
-                                        <div class="oe_chatter">
-                                            <field name="message_follower_ids" groups="base.group_user"/>
-                                            <field name="message_ids"/>
+                                        <!-- Chatter -->
+                                        <div class="o_knowledge_chatter col-12 col-lg-4 border-left position-relative d-none p-0">
+                                            <div class="o_scroll_view_lg">
+                                                <div class="oe_chatter">
+                                                    <field name="message_follower_ids" groups="base.group_user"/>
+                                                    <field name="activity_ids"/>
+                                                    <field name="message_ids"/>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

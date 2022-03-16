@@ -27,9 +27,7 @@
     .o_scroll_view {
         background: white;
     }
-
     .o_knowledge_editor {
-        min-height: 100%;
         .oe_form_field {
             display: flex;
             flex-direction: column;
@@ -152,7 +150,7 @@
         }
     }
 
-    .o_knowledge_chatter_container {
+    .o_knowledge_chatter {
         li.nav-item {
             display: none;
         }
@@ -206,6 +204,20 @@
 }
 
 // Media queries:
+
+@include media-breakpoint-up(lg) {
+    .o_knowledge_form_view {
+        .o_scroll_view_lg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    }
+}
 
 @include media-breakpoint-up(sm) {
     .o_knowledge_form_view {
