@@ -3469,7 +3469,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, "tr.o_data_row");
     });
 
-    QUnit.test("one2many list (editable): discarding required empty data", async function (assert) {
+    QUnit.skip("one2many list (editable): discarding required empty data", async function (assert) {
         serverData.models.turtle.fields.turtle_foo.required = true;
         delete serverData.models.turtle.fields.turtle_foo.default;
 
@@ -9430,7 +9430,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("o2m add a line custom control create non-editable", async function (assert) {
+    QUnit.skip("o2m add a line custom control create non-editable", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
