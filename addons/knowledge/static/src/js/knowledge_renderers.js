@@ -232,6 +232,11 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
     },
 
+    _renderArticleEmoji: function () {
+        const { data } = this.state;
+        this.$el.find('.o_article_big_emoji').text(data.icon);
+    },
+
     /**
      * @override
      * @returns {Promise}
@@ -240,6 +245,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         const result = await this._super.apply(this, arguments);
         this._renderBreadcrumb();
         await this._renderTree();
+        this._renderArticleEmoji();
         this._renderPermissionPanel();
         this._setResizeListener();
         return result;
@@ -264,11 +270,10 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * Renders the emoji picker
      */
     _renderEmojiPicker: function () {
-        this.$el.find('.o_article_dropdown').one('click', event => {
+        this.$el.find('.o_article_emoji_dropdown').one('click', event => {
             const $dropdown = $(event.currentTarget);
-            const $article = $dropdown.closest('.o_article');
             const $picker = new EmojiPickerWidget(this, {
-                article_id: $article.data('article-id')
+                article_id: $dropdown.data('article-id') || this.state.res_id
             });
             $picker.attachTo($dropdown);
         });

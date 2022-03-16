@@ -73,21 +73,19 @@
                         <i t-if="article.child_ids" t-att-class="'align-self-center fa fa-fw fa-caret-' + ('down' if article.id in unfolded_articles else 'right')"/>
                         <i t-else="" class="pl-3 align-self-center"/>
                     </button>
-                    <div class="dropdown">
-                        <div class="o_article_dropdown btn-group dropdown">
-                            <a t-attf-class="o_article_icon p-1 {{'o_article_icon_active text-900' if isActive else ''}}" type="button"
-                                t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true"
-                                t-if="article.user_can_write and not article.is_locked">
-                                <t t-if="article.icon" t-out="article.icon"/>
-                                <t t-else="">📄</t>
-                            </a>
-                            <a t-else="" t-attf-class="p-1">
-                                <t t-if="article.icon" t-out="article.icon"/>
-                                <t t-else="">📄</t>
-                            </a>
-                            <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
-                                t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>
-                        </div>
+                    <div class="o_article_emoji_dropdown dropdown" t-att-data-article-id="article.id">
+                        <a t-attf-class="o_article_emoji p-1 {{'o_article_emoji_active text-900' if isActive else ''}}" type="button"
+                            t-attf-id="o_article_emoji_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true"
+                            t-if="article.user_can_write and not article.is_locked">
+                            <t t-if="article.icon" t-out="article.icon"/>
+                            <t t-else="">📄</t>
+                        </a>
+                        <a t-else="" t-attf-class="p-1">
+                            <t t-if="article.icon" t-out="article.icon"/>
+                            <t t-else="">📄</t>
+                        </a>
+                        <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
+                            t-attf-aria-labelledby="o_article_emoji_dropdown_#{article.id}"/>
                     </div>
                     <div class="o_article_name flex-grow-1 text-truncate o_cursor_pointer">
                         <t t-out="article.name"/>

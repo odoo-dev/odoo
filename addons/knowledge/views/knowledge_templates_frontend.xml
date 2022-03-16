@@ -29,7 +29,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-8 p-0 overflow-auto'">
+                    <div class="col-sm-10 p-0 overflow-auto'">
                         <div class="d-flex flex-column h-100">
                             <!-- Article header -->
                             <div class="o_knowledge_header d-sm-flex flex-row justify-content-between">
@@ -44,6 +44,21 @@
                             </div>
                             <div class="flex-grow-1 position-relative">
                                 <div class="o_scroll_view">
+                                    <!-- Article Cover -->
+                                    <div class="o_knowledge_cover" t-if="article.cover">
+                                        <span class="o_knowledge_cover_image">
+                                            <img t-attf-src="data:image/png;base64,{{ article.cover }}" />
+                                        </span>
+                                    </div>
+
+                                    <!-- Full Width handling -->
+                                    <span t-attf-class="o_knowledge_article_view_form_dynamic_width d-none #{'o_invisible_modifier' if not article.full_width else ''}"/>
+
+                                    <!-- Article Icon -->
+                                    <span t-attf-class="d-none #{'o_invisible_modifier' if article.cover else ''}"/>
+                                    <div t-attf-class="o_knowledge_icon #{'o_full_width' if article.full_width else ''}" t-att-invisible="not article.icon">
+                                        <t t-out="article.icon" />
+                                    </div>
                                     <!-- Article body -->
                                     <div class="o_knowledge_editor d-flex pl-3">
                                         <div t-attf-class="o_knowledge_article #{'o_full_width' if article.full_width else ''}" t-out="article.body" />
@@ -106,7 +121,7 @@
                     <i class="fa fa-fw fa-caret-down align-self-center" />
                 </button>
                 <div class="btn-group dropdown">
-                    <i t-attf-class="fa fa-fw #{article.icon}" />
+                    <t t-out="article.icon" />
                 </div>
                 <div class="o_article_name flex-grow-1 text-truncate">
                     <a t-out="article.name" t-attf-href="/article/{{article.id}}" />
