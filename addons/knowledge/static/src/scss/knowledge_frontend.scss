@@ -24,6 +24,29 @@
         padding-left: 0;
     }
 
+    .o_knowledge_cover {
+        z-index: 1;
+        margin-bottom: -63px;
+        // height: 30vh;
+        .o_knowledge_cover_image {
+            width: 100%;
+            img {
+                display: block;
+                object-fit: cover;
+                border-radius: 0px;
+                width: 100%;
+                height: 30vh;
+            }
+        }
+    }
+
+    .o_knowledge_icon {
+        z-index: 3;
+        position: relative;
+        font-size: 80px;
+        padding-left: 3rem;
+    }
+
     // Sidebar
     // --------------------------------------------------------------------------
     .o_knowledge_aside {

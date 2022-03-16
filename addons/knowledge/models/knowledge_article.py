@@ -200,7 +200,8 @@ class Article(models.Model):
     active = fields.Boolean(default=True)
     name = fields.Char(string="Title", default="New Article")
     body = fields.Html(string="Article Body")
-    icon = fields.Char(string='Article Icon', default='📄')
+    icon = fields.Char(string='Article Icon')
+    cover = fields.Binary('Cover Image')
     author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
     is_locked = fields.Boolean(string='Locked', default=False)
     full_width = fields.Boolean(string='Full width', default=False)
@@ -298,7 +299,7 @@ class Article(models.Model):
 
     def name_get(self):
         """Override the `name_get` function to add the article icon"""
-        return [(rec.id, "%s %s" % (rec.icon, rec.name)) for rec in self]
+        return [(rec.id, "%s %s" % (rec.icon or "📄", rec.name)) for rec in self]
 
     _sql_constraints = [
         ('check_permission_on_root', 'check(parent_id IS NOT NULL OR (parent_id IS NULL and internal_permission IS NOT NULL))', 'Root articles must have internal permission.')

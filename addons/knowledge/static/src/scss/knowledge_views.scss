@@ -22,6 +22,12 @@
         cursor: pointer;
     }
 
+    .o_knowledge_header,
+    .o_knowledge_aside,
+    .o_scroll_view {
+        background: white;
+    }
+
     .o_knowledge_editor {
         min-height: 100%;
         .oe_form_field {
@@ -40,13 +46,24 @@
             padding-bottom: 1rem !important;
         }
     }
-
+    .o_knowledge_add_icon, .o_knowledge_add_cover{
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0.4s, opacity 0.4s linear;
+    }
+    .o_knowledge_body:hover .o_knowledge_add_icon, .o_knowledge_body:hover .o_knowledge_add_cover{
+        visibility: visible;
+        opacity: 1;
+    }
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_icon,
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_icon_cover_buttons,
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .note-editable,
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .o_readonly {
         width: 750px;
         max-width: 100%;
         margin-left: auto;
         margin-right: auto;
+        padding-left: 0;
     }
 
     // = Sidebar
@@ -59,11 +76,11 @@
         width: var(--sidebar-size);
         transition: width 0.15s linear;
 
-        .o_article_active, .o_article_icon_active {
+        .o_article_active, .o_article_emoji_active {
             background-color: $o-knowledge-bg--active;
         }
 
-        .o_article_icon:hover {
+        .o_article_emoji:hover {
             background-color: rgba(#000, .1);
         }
 
@@ -112,8 +129,8 @@
         .o_article_handle:not(:hover) .o_article_create {
             visibility: hidden;
         }
-
-        .o_article_name a{
+        .o_article_name a {
+            cursor: pointer;
             color: inherit;
             text-decoration: none;
         }
@@ -149,7 +166,7 @@
         }
     }
 
-    .dropdown-menu.o_knowledge_emoji_panel {
+    .dropdown-menu.o_article_emoji_dropdown_panel {
         min-width: 200px;
         width: 200px;
     }
@@ -200,6 +217,30 @@
             bottom: 0;
             overflow-y: auto;
             overflow-x: hidden;
+        }
+        .o_knowledge_cover {
+            z-index: 1;
+            // height: 30vh;
+            .o_knowledge_cover_image {
+                width: 100%;
+                img {
+                    display: block;
+                    object-fit: cover;
+                    border-radius: 0px;
+                    width: 100%;
+                    height: 30vh;
+                }
+            }
+        }
+        span.o_invisible_modifier + .o_knowledge_icon {
+            margin-top: -70px;
+        }
+        .o_knowledge_icon {
+            z-index: 3;
+            margin-bottom: -20px;
+            position: relative;
+            font-size: 80px;
+            padding-left: 3rem;
         }
     }
 }

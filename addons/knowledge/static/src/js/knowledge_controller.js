@@ -4,9 +4,12 @@ import { _t, bus } from 'web.core';
 import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 import { MoveArticleToDialog } from 'knowledge.dialogs';
+import emojis from '@mail/js/emojis';
 
 const KnowledgeFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
+        'click .o_knowledge_add_icon': '_onAddRandomIcon',
+        'click .o_knowledge_add_cover': '_onAddCover',
         'click .btn-duplicate': '_onDuplicate',
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
@@ -38,6 +41,25 @@ const KnowledgeFormController = FormController.extend({
     },
 
     // Listeners:
+
+    _onAddRandomIcon: function() {
+        const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
+        }
+        var unicode = emojis[Math.floor(Math.random() * emojis.length)]['unicode'];
+        this.trigger_up('emoji_click', {
+            articleId: id,
+            unicode: unicode,
+        });
+    },
+
+    _onAddCover: async function() {
+        if (this.mode === 'readonly') {
+            await this._setMode('edit');
+        }
+        this.$('.o_input_file').click();
+    },
 
     /**
      * @override
@@ -196,10 +218,25 @@ const KnowledgeFormController = FormController.extend({
             args: [[articleId], { icon: unicode }],
         });
         if (result) {
-            this.$el.find(`[data-article-id="${articleId}"]`).each(function() {
-                const $icon = $(this).find('.o_article_icon:first');
-                $icon.text(unicode);
-            });
+            const { id } = this.getState();
+            if (id == articleId) {
+                const addIconButton = this.$('.o_knowledge_add_icon');
+                const addIcon = !addIconButton.hasClass('d-none') && !addIconButton.hasClass('o_invisible_modifier');
+                addIconButton.toggleClass('d-none', unicode);
+                this.$el.find('.o_article_big_emoji').text(unicode ? unicode : '');
+                // TODO DBE: find a way to remove / add the icon manually without having to reload the view
+                // (as the changes are saved and the side bar is updated anyway)
+                if (addIcon || !unicode) {  // refresh the form view to display the icon if there was no icon yet or if icon is deleted.
+                    this.trigger_up('field_changed', {
+                        dataPointID: this.handle,
+                        changes: {
+                            icon: unicode
+                        }
+                    });
+                }
+                this.saveChanges(this.handle);
+            }
+            this.$el.find(`.o_article_emoji_dropdown[data-article-id="${articleId}"] > .o_article_emoji`).text(unicode ? unicode : '📄');
         }
     },
 
