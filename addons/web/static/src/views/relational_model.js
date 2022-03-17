@@ -501,10 +501,7 @@ export class Record extends DataPoint {
     }
 
     isInvalid(fieldName) {
-        for (const invalid of this._invalidFields) {
-            if (invalid.fieldName === fieldName) return true;
-        }
-        return false;
+        return this._invalidFields.has(fieldName);
     }
 
     async load() {
@@ -799,7 +796,7 @@ export class Record extends DataPoint {
         }
         const limit = views[viewMode] && views[viewMode].limit;
         const orderBy = views[viewMode] && views[viewMode].defaultOrder;
-        const list = this.model.createDataPoint("list", {
+        const list = this.model.createDataPoint("static_list", {
             resModel: this.fields[fieldName].relation,
             fields,
             activeFields,
@@ -809,7 +806,7 @@ export class Record extends DataPoint {
             limit,
             orderBy,
             field: this.fields[fieldName],
-            resIds: this.data[fieldName] || [],
+            resIds: this.data[fieldName],
             commands: this._changes[fieldName],
             views,
             viewMode,
@@ -1813,7 +1810,8 @@ export class StaticList extends DataPoint {
         this.offset = params.offset || 0;
         this.limit = params.limit || state.limit || this.constructor.DEFAULT_LIMIT;
         this.initialLimit = this.limit;
-        this.editable = params.editable; // ("bottom" or "top")
+
+        this.editable = params.editable || false; // ("bottom" or "top")
 
         this.currentIds = this._getCurrentIds(this._serverIds, this._commands);
 
@@ -1837,9 +1835,6 @@ export class StaticList extends DataPoint {
 
         this.editedRecord = null;
         this.onRecordWillSwitchMode = async (record, mode) => {
-            if (params.onRecordWillSwitchMode) {
-                params.onRecordWillSwitchMode(record, mode);
-            }
             const editedRecord = this.editedRecord;
             this.editedRecord = null;
             if (editedRecord) {
@@ -1853,6 +1848,9 @@ export class StaticList extends DataPoint {
                 this.notYetValidated = null;
                 this.applyCommand(Commands.delete(virtualId));
                 delete this._cache[this._mapping[virtualId]]; // won't be used anymore
+                this.records = this._getRecords();
+                this.onChanges();
+                this.model.notify();
             }
         };
     }
@@ -1903,15 +1901,7 @@ export class StaticList extends DataPoint {
         this.limit++;
         this.applyCommand(Commands.create(record.virtualId, record.data));
 
-        for (const fieldName in this.activeFields) {
-            if (this.fields[fieldName].type === "boolean") {
-                continue;
-            }
-            if (record.isRequired(fieldName) && !record.data[fieldName]) {
-                this.notYetValidated = record.virtualId;
-                break;
-            }
-        }
+        this._checkValidity(record);
 
         this.records = this._getRecords();
         this.onChanges();
@@ -2088,6 +2078,23 @@ export class StaticList extends DataPoint {
     //--------------------------------------------------------------------------
 
     /**
+     * @param {Record} record
+     */
+    _checkValidity(record) {
+        this.notYetValidated = null;
+        // should be related to viewMode I think
+        for (const fieldName in this.activeFields) {
+            if (this.fields[fieldName].type === "boolean") {
+                continue;
+            }
+            if (record.isRequired(fieldName) && !record.data[fieldName]) {
+                this.notYetValidated = record.virtualId;
+                break;
+            }
+        }
+    }
+
+    /**
      * Add missing records to cache
      */
     async _completeCache() {
@@ -2117,7 +2124,7 @@ export class StaticList extends DataPoint {
                     Commands.update(record.resId || record.virtualId, record.getChanges())
                 );
                 if (record.virtualId === this.notYetValidated) {
-                    this.notYetValidated = null;
+                    this._checkValidity(record);
                 }
             },
             ...params,
@@ -2164,7 +2171,7 @@ export class StaticList extends DataPoint {
     }
 
     /**
-     * Returns the array of visible ids (resId or virutalId)
+     * Returns the array of visible ids (resId or virtualId)
      * @returns {Record[]}
      */
     _getDisplayedIds() {
@@ -2372,9 +2379,7 @@ export class RelationalModel extends Model {
                 break;
             }
             case "list": {
-                if (params.resIds) {
-                    DpClass = this.constructor.StaticList;
-                } else if ((params.groupBy || []).length) {
+                if ((params.groupBy || []).length) {
                     DpClass = this.constructor.DynamicGroupList;
                 } else {
                     DpClass = this.constructor.DynamicRecordList;
@@ -2383,6 +2388,10 @@ export class RelationalModel extends Model {
             }
             case "record": {
                 DpClass = this.constructor.Record;
+                break;
+            }
+            case "static_list": {
+                DpClass = this.constructor.StaticList;
                 break;
             }
         }

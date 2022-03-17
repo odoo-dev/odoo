@@ -3469,7 +3469,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, "tr.o_data_row");
     });
 
-    QUnit.skip("one2many list (editable): discarding required empty data", async function (assert) {
+    QUnit.test("one2many list (editable): discarding required empty data", async function (assert) {
         serverData.models.turtle.fields.turtle_foo.required = true;
         delete serverData.models.turtle.fields.turtle_foo.default;
 
