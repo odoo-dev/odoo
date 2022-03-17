@@ -817,11 +817,6 @@ export class Record extends DataPoint {
                 this.onChanges();
                 this._changes[fieldName] = list;
             },
-            onRecordWillSwitchMode: (record, mode) => {
-                if (mode === "edit") {
-                    this.switchMode("edit");
-                }
-            },
         });
 
         this._values[fieldName] = list;

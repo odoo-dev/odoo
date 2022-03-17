@@ -3502,12 +3502,12 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector("label.o_form_label"));
         assert.containsNone(target, "tr.o_data_row");
 
-        // // click on Add an item again, then click on save
-        // await addRow(target);
-        // await clickSave(target);
-        // assert.containsNone(target, "tr.o_data_row");
+        // click on Add an item again, then click on save
+        await addRow(target);
+        await clickSave(target);
+        assert.containsNone(target, "tr.o_data_row");
 
-        // assert.verifySteps(["read", "onchange", "onchange"]);
+        assert.verifySteps(["read", "onchange", "onchange"]);
     });
 
     QUnit.test("editable one2many list, adding line when only one page", async function (assert) {
@@ -10849,7 +10849,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skip(
+    QUnit.skipWOWL(
         "one2many with many2many_tags in list and list in form with a limit",
         async function (assert) {
             // This test is skipped for now, as it doesn't work, and it can't be fixed in the current
@@ -10857,12 +10857,10 @@ QUnit.module("Fields", (hooks) => {
             // limit is 80, and it would be useless to display so many records with a many2many_tags
             // widget. So it would be nice if we could make it work in the future, but it's no big
             // deal for now.
-            assert.expect(6);
-
             serverData.models.partner.records[0].p = [1];
             serverData.models.partner.records[0].turtles = [1, 2, 3];
 
-            const form = await makeView({
+            await makeView({
                 type: "form",
                 resModel: "partner",
                 serverData,
@@ -10885,15 +10883,18 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
             });
 
-            assert.containsOnce(form, ".o_field_widget[name=p] .o_data_row");
-            assert.containsN(form, ".o_data_row .o_field_many2manytags .badge", 3);
+            assert.containsOnce(target, ".o_field_widget[name=p] .o_data_row");
+            assert.containsN(target, ".o_data_row .o_field_many2manytags .badge", 3);
 
-            await click(form.$(".o_data_row"));
+            await click(target.querySelector(".o_data_row"));
 
             assert.containsOnce(document.body, ".modal .o_form_view");
             assert.containsN(document.body, ".modal .o_field_widget[name=turtles] .o_data_row", 2);
-            assert.isVisible($(".modal .o_field_x2many_list .o_pager"));
-            assert.strictEqual($(".modal .o_field_x2many_list .o_pager").text().trim(), "1-2 / 3");
+            assert.isVisible(target.querySelector(".modal .o_field_x2many_list .o_pager"));
+            assert.strictEqual(
+                target.querySelector(".modal .o_field_x2many_list .o_pager").innerText.trim(),
+                "1-2 / 3"
+            );
         }
     );
 
