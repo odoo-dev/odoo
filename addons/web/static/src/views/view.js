@@ -240,9 +240,9 @@ export class View extends Component {
         const sample = rootNode.getAttribute("sample");
 
         // determine ViewClass to instantiate (if not already done)
-        // if (subType) {
-        //     ViewClass = viewRegistry.get(subType);
-        // }
+        if (subType) {
+            ViewClass = viewRegistry.get(subType);
+        }
 
         Object.assign(this.env.config, {
             viewId: viewDescription.id,
