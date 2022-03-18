@@ -20,9 +20,6 @@ class ActionDialog extends Dialog {
     setup() {
         super.setup();
         useOwnDebugContext();
-        const actionProps = this.props && this.props.actionProps;
-        const action = actionProps && actionProps.action;
-        this.actionType = action && action.type;
         this.title = "title" in this.props ? this.props.title : this.constructor.title;
     }
 }
@@ -33,6 +30,7 @@ ActionDialog.props = {
     ...Dialog.props,
     ActionComponent: { optional: true },
     actionProps: { optional: true },
+    actionType: { optional: true },
     title: { optional: true },
 };
 
