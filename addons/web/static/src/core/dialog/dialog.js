@@ -28,6 +28,14 @@ export class Dialog extends Component {
         this.size = this.constructor.size;
         this.technical = this.constructor.technical;
         this.title = this.constructor.title;
+
+        //WOWL: To discuss
+        if (this.props.parent) {
+            const parent = owl.toRaw(this.props.parent);
+            parent.__owl__.willDestroy.push(() => {
+                this.close();
+            });
+        }
     }
 
     /**
@@ -50,6 +58,7 @@ Dialog.title = "Odoo";
 Dialog.bodyTemplate = xml`<div/>`;
 Dialog.footerTemplate = "web.DialogFooterDefault";
 Dialog.props = {
+    parent: { type: Object, optional: true },
     close: Function,
     isActive: { optional: true },
     "*": true,
