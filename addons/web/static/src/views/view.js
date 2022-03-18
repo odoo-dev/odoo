@@ -250,6 +250,7 @@ export class View extends Component {
             viewType: type,
             viewSubType: subType,
             bannerRoute,
+            noBreadcrumbs: this.props.noBreadcrumbs,
             ...extractLayoutComponents(ViewClass),
         });
 
