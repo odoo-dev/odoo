@@ -704,6 +704,7 @@ function makeActionManager(env) {
                 // TODO add size
                 ActionComponent: ControllerComponent,
                 actionProps: controller.props,
+                actionType: action.type,
             };
             if (action.name) {
                 actionDialogProps.title = action.name;
