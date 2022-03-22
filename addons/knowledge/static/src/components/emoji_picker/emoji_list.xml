@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="knowledge.EmojiList" t-inherit="mail.EmojiList" t-inherit-mode="primary" owl="1">
+        <xpath expr="//div[hasclass('o_EmojiList')]" position="before">
+            <div class="o_EmojiList_emoji" style="text-align: right; color: red;" t-on-click="ev => emojiListView.onClickEmoji(ev)" title="Delete">
+                <i class="fa fa-times-circle"/> Delete
+            </div>
+        </xpath>
+    </t>
+
+</templates>

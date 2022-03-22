@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import PermissionPanelWidget from './widgets/knowledge_permission_panel.js';
+import EmojiPickerWidget from './widgets/knowledge_emoji_picker.js';
 import FormRenderer from 'web.FormRenderer';
 import localStorage from 'web.local_storage';
 
@@ -9,7 +10,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     className: 'o_knowledge_form_view',
     events: _.extend({}, FormRenderer.prototype.events, {
         'click .o_article_caret': '_onFold',
-        'click .o_article_dropdown i': '_onIconClick',
         'click .o_article_name': '_onOpen',
         'click .o_article_create, .o_section_create': '_onCreate',
         'click .o_knowledge_share_panel': '_preventDropdownClose',
@@ -41,6 +41,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
             // Update unfoldedArticles with active article and all its parents.
             localStorage.setItem('unfoldedArticles', res.unfolded_articles);
+            this._renderEmojiPicker();
         }).catch(error => {
             $container.empty();
         });
@@ -199,30 +200,6 @@ const KnowledgeFormRenderer = FormRenderer.extend({
     },
 
     /**
-     * When the user clicks on a new icon
-     * @param {Event} event
-     */
-    _onIconClick: async function (event) {
-        event.stopPropagation();
-        const $target = $(event.target);
-        const $li = $target.closest('li');
-        const id = $li.data('article-id');
-        const name = $target.data('icon-name');
-        const result = await this._rpc({
-            model: 'knowledge.article',
-            method: 'write',
-            args: [[id], { icon: name }],
-        });
-        if (result) {
-            this.$el.find(`[data-article-id="${id}"]`).each(function() {
-                const $icon = $(this).find('.o_article_icon:first i');
-                $icon.removeClass();
-                $icon.addClass(`fa fa-fw ${name}`);
-            });
-        }
-    },
-
-    /**
      * @param {Event} event
      */
     _onCreate: function (event) {
@@ -281,6 +258,20 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
         const $container = this.$el.find('.breadcrumb');
         $container.prepend(items);
+    },
+
+    /**
+     * Renders the emoji picker
+     */
+    _renderEmojiPicker: function () {
+        this.$el.find('.o_article_dropdown').one('click', event => {
+            const $dropdown = $(event.currentTarget);
+            const $article = $dropdown.closest('.o_article');
+            const $picker = new EmojiPickerWidget(this, {
+                article_id: $article.data('article-id')
+            });
+            $picker.attachTo($dropdown);
+        });
     },
 
     /**
