@@ -109,7 +109,7 @@
         }
 
         .o_section_header:not(:hover) .o_section_create,
-        .o_article:not(:hover) .o_article_create {
+        .o_article_handle:not(:hover) .o_article_create {
             visibility: hidden;
         }
 
@@ -149,6 +149,10 @@
         }
     }
 
+    .dropdown-menu.o_knowledge_emoji_panel {
+        min-width: 200px;
+        width: 200px;
+    }
     .dropdown-menu.o_knowledge_more_options_panel {
         min-width: 225px;
         width: 225px;

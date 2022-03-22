@@ -184,7 +184,7 @@
                         <div class="oe_kanban_global_click">
                             <div class="o_knowledge_kanban_card d-flex flex-column">
                                 <div class="d-flex align-items-center">
-                                    <i t-attf-class="fa fa-w #{ record.icon.raw_value }" title="record.icon.raw_value"/>
+                                    <span t-out="record.icon.raw_value"/>
                                     <div class="flex-grow-1 lead text-truncate px-2">
                                         <field name="name"/>
                                     </div>

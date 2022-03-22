@@ -144,7 +144,8 @@ const MoveArticleToDialog = Dialog.extend({
                     const src = escapeMarkup(this.getLoggedUserPicture());
                     markup.push(`<img src="${src}" class="rounded-circle mr-1"/>`);
                 } else if (typeof data.icon !== 'undefined') {
-                    markup.push(`<i class="fa fa-w ${escapeMarkup(data.icon)} mr-1"/>`);
+                    const icon = data.icon || '📄';
+                    markup.push(`<span class="mr-1">${escapeMarkup(icon)}</span>`);
                 }
                 markup.push(escapeMarkup(data.text));
                 return markup.join('');
@@ -163,7 +164,8 @@ const MoveArticleToDialog = Dialog.extend({
                     const src = escapeMarkup(this.getLoggedUserPicture());
                     markup.unshift(`<img src="${src}" class="rounded-circle mr-1"/>`);
                 } else if (typeof result.icon !== 'undefined') {
-                    markup.unshift(`<i class="fa fa-w ${escapeMarkup(result.icon)} mr-1"/>`);
+                    const icon = result.icon || '📄';
+                    markup.unshift(`<span class="mr-1">${escapeMarkup(icon)}</span>`);
                 }
                 return markup.join('');
             },

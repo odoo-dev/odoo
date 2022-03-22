@@ -20,6 +20,7 @@ const KnowledgeFormController = FormController.extend({
         create: '_onCreate',
         move: '_onMove',
         reload_tree: '_onReloadTree',
+        emoji_click: '_onEmojiClick',
     }),
 
     init: function (parent, model, renderer, params) {
@@ -163,6 +164,24 @@ const KnowledgeFormController = FormController.extend({
             this.renderer._setTreeFavoriteListener();
             this.renderer._renderEmojiPicker();
         });
+   },
+
+    /**
+     * @param {Event} event
+     */
+    _onEmojiClick: async function (event) {
+        const { articleId, unicode } = event.data;
+        const result = await this._rpc({
+            model: 'knowledge.article',
+            method: 'write',
+            args: [[articleId], { icon: unicode }],
+        });
+        if (result) {
+            this.$el.find(`[data-article-id="${articleId}"]`).each(function() {
+                const $icon = $(this).find('.o_article_icon:first');
+                $icon.text(unicode);
+            });
+        }
     },
 
     // API calls:

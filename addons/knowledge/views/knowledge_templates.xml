@@ -68,26 +68,25 @@
                 t-att-data-article-id="article.id"  t-att-data-category="article.category"
                 t-att-data-favourite-sequence="favourite_sequence">
                 <t t-set="isActive" t-value="article.id == active_article_id"/>
-                <div t-attf-class="o_article d-flex #{ 'o_article_active font-weight-bold' if isActive else 'text-muted' }">
+                <div t-attf-class="o_article_handle d-flex align-items-center #{ 'o_article_active font-weight-bold' if isActive else 'text-muted' }">
                     <button t-if="not hideChildren and article.child_ids" class="o_article_caret btn btn-link text-muted p-0" type="button">
                         <i t-if="article.child_ids" t-att-class="'align-self-center fa fa-fw fa-caret-' + ('down' if article.id in unfolded_articles else 'right')"/>
                         <i t-else="" class="pl-3 align-self-center"/>
                     </button>
                     <div class="dropdown">
-                        <a t-attf-class="o_article_icon p-1 {{'o_article_icon_active text-900' if isActive else ''}}" type="button"
-                           t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
-                            <i t-attf-class="fa fa-fw #{article.icon}"/>
-                        </a>
-                        <div class="o_article_dropdown dropdown-menu p-0" role="menu" t-attf-aria-labelledby="o_article_dropdown_#{article.id}">
-                            <i class="fa fa-fw fa-file" data-icon-name="fa-file"/>
-                            <i class="fa fa-fw fa-book" data-icon-name="fa-book"/>
-                            <i class="fa fa-fw fa-user" data-icon-name="fa-user"/>
-                            <i class="fa fa-fw fa-address-book" data-icon-name="fa-address-book"/>
-                            <i class="fa fa-fw fa-calendar" data-icon-name="fa-calendar"/>
-                            <i class="fa fa-fw fa-code" data-icon-name="fa-code"/>
-                            <i class="fa fa-fw fa-car" data-icon-name="fa-car"/>
-                            <i class="fa fa-fw fa-comment" data-icon-name="fa-comment"/>
-                            <i class="fa fa-fw fa-bullhorn" data-icon-name="fa-bullhorn"/>
+                        <div class="o_article_dropdown btn-group dropdown">
+                            <a t-attf-class="o_article_icon p-1 {{'o_article_icon_active text-900' if isActive else ''}}" type="button"
+                                t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true"
+                                t-if="article.user_can_write and not article.is_locked">
+                                <t t-if="article.icon" t-out="article.icon"/>
+                                <t t-else="">📄</t>
+                            </a>
+                            <a t-else="" t-attf-class="p-1">
+                                <t t-if="article.icon" t-out="article.icon"/>
+                                <t t-else="">📄</t>
+                            </a>
+                            <div class="o_knowledge_emoji_panel dropdown-menu rounded p-0" role="menu"
+                                t-attf-aria-labelledby="o_article_dropdown_#{article.id}"/>
                         </div>
                     </div>
                     <div class="o_article_name flex-grow-1 text-truncate o_cursor_pointer">
