@@ -21,7 +21,7 @@ function traverseElementTree(tree, cb) {
     }
 }
 
-export function _fieldsViewGet(params) {
+export function _getView(params) {
     let processedNodes = params.processedNodes || [];
     const { arch, context, fields, modelName } = params;
     function isNodeProcessed(node) {
@@ -31,6 +31,7 @@ export function _fieldsViewGet(params) {
     const onchanges = params.models[modelName].onchanges || {};
     const fieldNodes = {};
     const groupbyNodes = {};
+    const relatedModels = new Set([modelName]);
     let doc;
     if (typeof arch === "string") {
         const domParser = new DOMParser();
@@ -151,21 +152,24 @@ export function _fieldsViewGet(params) {
             const canWrite = node.getAttribute("can_write");
             node.setAttribute("can_write", canWrite || "true");
         }
+        // TODO: inline views if not already done
         if (field.type === "one2many" || field.type === "many2many") {
-            field.views = {};
-            Array.from(node.children).forEach((children) => {
-                if (children.tagName) {
-                    // skip text nodes
-                    relModel = field.relation;
+            relModel = field.relation;
+            relatedModels.add(relModel);
+            Array.from(node.children).forEach((childNode) => {
+                if (childNode.tagName) {
                     relFields = Object.assign({}, params.models[relModel].fields);
-                    field.views[children.tagName] = _fieldsViewGet({
+                    // this is hackhish, but _getView modifies the subview document in place,
+                    // especially to generate the "modifiers" attribute
+                    const { models } = _getView({
                         models: params.models,
-                        arch: children,
+                        arch: childNode,
                         modelName: relModel,
                         fields: relFields,
-                        context: Object.assign({}, context, { base_model_name: modelName }),
+                        context,
                         processedNodes,
                     });
+                    [...models].forEach((modelName) => relatedModels.add(modelName));
                 }
             });
         }
@@ -181,10 +185,11 @@ export function _fieldsViewGet(params) {
         }
         field.views = {};
         relModel = field.relation;
+        relatedModels.add(relModel);
         relFields = Object.assign({}, params.models[relModel].fields);
         processedNodes.push(node);
         // postprocess simulation
-        field.views.groupby = _fieldsViewGet({
+        const { models } = _getView({
             models: params.models,
             arch: node,
             modelName: relModel,
@@ -192,9 +197,7 @@ export function _fieldsViewGet(params) {
             context,
             processedNodes,
         });
-        while (node.firstChild) {
-            node.removeChild(node.firstChild);
-        }
+        [...models].forEach((modelName) => relatedModels.add(modelName));
     });
     const xmlSerializer = new XMLSerializer();
     const processedArch = xmlSerializer.serializeToString(doc);
@@ -206,9 +209,9 @@ export function _fieldsViewGet(params) {
     });
     return {
         arch: processedArch,
-        fields: fieldsInView,
         model: modelName,
         type: doc.tagName === "tree" ? "list" : doc.tagName,
+        models: relatedModels,
     };
 }
 
@@ -298,7 +301,7 @@ export class MockServer {
         // def.abort = abort;
     }
 
-    fieldsViewGet(modelName, args, kwargs) {
+    getView(modelName, args, kwargs) {
         if (!(modelName in this.models)) {
             throw new Error(`Model ${modelName} was not defined in mock server data`);
         }
@@ -331,7 +334,7 @@ export class MockServer {
             fields[fieldName].name = fieldName;
         }
         // var viewOptions = params.viewOptions || {};
-        const fvg = _fieldsViewGet({
+        const view = _getView({
             arch,
             modelName,
             fields,
@@ -339,13 +342,12 @@ export class MockServer {
             models: this.models,
         });
         if (kwargs.options.toolbar) {
-            fvg.toolbar = this.models[modelName].toolbar || {};
+            view.toolbar = this.models[modelName].toolbar || {};
         }
         if (viewId !== undefined) {
-            fvg.view_id = viewId;
-            fvg.name = key;
+            view.id = viewId;
         }
-        return fvg;
+        return view;
     }
 
     /**
@@ -419,8 +421,8 @@ export class MockServer {
                 return this.mockCreate(args.model, args.args[0]);
             case "fields_get":
                 return this.mockFieldsGet(args.model);
-            case "load_views":
-                return this.mockLoadViews(args.model, args.kwargs);
+            case "get_views":
+                return this.mockGetViews(args.model, args.kwargs);
             case "name_create":
                 return this.mockNameCreate(args.model, args.args[0]);
             case "name_get":
@@ -536,19 +538,20 @@ export class MockServer {
         return menus;
     }
 
-    mockLoadViews(modelName, kwargs) {
-        const fieldsViews = {};
+    mockGetViews(modelName, kwargs) {
+        const views = {};
+        const models = {};
+        models[modelName] = this.mockFieldsGet(modelName);
         kwargs.views.forEach(([viewId, viewType]) => {
-            fieldsViews[viewType] = this.fieldsViewGet(modelName, [viewId, viewType], kwargs);
+            views[viewType] = this.getView(modelName, [viewId, viewType], kwargs);
+            if (kwargs.options.load_filters && viewType === "search") {
+                views[viewType].filters = this.models[modelName].filters || [];
+            }
+            for (const modelName of views[viewType].models) {
+                models[modelName] = models[modelName] || this.mockFieldsGet(modelName);
+            }
         });
-        const result = {
-            fields: this.mockFieldsGet(modelName),
-            fields_views: fieldsViews,
-        };
-        if (kwargs.options.load_filters) {
-            result.filters = this.models[modelName].filters || [];
-        }
-        return result;
+        return { models, views };
     }
 
     /**
