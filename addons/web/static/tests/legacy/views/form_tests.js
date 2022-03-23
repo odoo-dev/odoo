@@ -539,7 +539,7 @@ QUnit.module('Views', {
         };
 
         const mockRPC = (route, args) => {
-            if (args.method === 'load_views') {
+            if (args.method === 'get_views') {
                 var context = args.kwargs.context;
                 if (args.model === 'product') {
                     assert.strictEqual(context.tree_view_ref, 'some_tree_view',
@@ -6154,7 +6154,7 @@ QUnit.module('Views', {
             "the row should contains the 2 fields defined in the form view");
         assert.strictEqual($(modal_row).text(), "gold2",
             "the value of the fields should be fetched and displayed");
-        assert.verifySteps(['read', 'read', 'load_views', 'read', 'read'],
+        assert.verifySteps(['read', 'read', 'get_views', 'read', 'read'],
             "there should be 4 read rpcs");
         form.destroy();
     });
@@ -8184,10 +8184,10 @@ QUnit.module('Views', {
         assert.verifySteps([
             "read", // main record
             "get_formview_id", // id of first form view opened in a dialog
-            "load_views", // arch of first form view opened in a dialog
+            "get_views", // arch of first form view opened in a dialog
             "read", // first dialog
             "get_formview_id", // id of second form view opened in a dialog
-            "load_views", // arch of second form view opened in a dialog
+            "get_views", // arch of second form view opened in a dialog
             "read", // second dialog
             "write", // save second dialog
             "read", // reload first dialog
@@ -8761,7 +8761,7 @@ QUnit.module('Views', {
             }
         });
 
-        assert.verifySteps(['partner_type:load_views', 'partner:read', 'partner_type:read']);
+        assert.verifySteps(['partner_type:get_views', 'partner:read', 'partner_type:read']);
 
         form.destroy();
     });
