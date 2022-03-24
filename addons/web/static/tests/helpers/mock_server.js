@@ -3,6 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { Domain } from "@web/core/domain";
 import { evaluateExpr } from "@web/core/py_js/py";
+import { deepCopy } from "@web/core/utils/objects";
 import { registry } from "@web/core/registry";
 import { makeFakeRPCService, makeMockFetch } from "./mock_services";
 import { patchWithCleanup } from "./utils";
@@ -23,7 +24,8 @@ function traverseElementTree(tree, cb) {
 
 export function _getView(params) {
     let processedNodes = params.processedNodes || [];
-    const { arch, context, fields, modelName } = params;
+    const { arch, context, modelName } = params;
+    const fields = deepCopy(params.fields);
     function isNodeProcessed(node) {
         return processedNodes.findIndex((n) => n.isSameNode(node)) > -1;
     }
