@@ -35,8 +35,7 @@ FieldHtml.include({
         }
     },
     /**
-     * historyUndo (ctrl+z), historyRedo (ctrl+y) and paste are events which can
-     * cause the insertion of new elements which may need a
+     * Some events can cause the insertion of new elements which may need a
      * @see KnowledgeBehavior and/or @see KnowledgeToolbar , so the
      * @see FieldHtmlInjector needs to be notified.
      *
@@ -45,9 +44,20 @@ FieldHtml.include({
     _onLoadWysiwyg: function () {
         this._super.apply(this, arguments);
         this._addFieldHtmlInjector();
-        this.wysiwyg.odooEditor.addEventListener('historyUndo', () => this.$content.trigger('refresh_injector'));
-        this.wysiwyg.odooEditor.addEventListener('historyRedo', () => this.$content.trigger('refresh_injector'));
-        this.$content[0].addEventListener('paste', () => this.$content.trigger('refresh_injector'));
+        /**
+         * setTimeout is called so that the refresh_injector event is dispatched
+         * at the start of the next event cycle. This is to ensure that other
+         * handlers for those events have execution priority over the refresh.
+         * In particular, the content to drop in the editor would be inserted
+         * after the refreshInjector without setTimeout.
+         */
+        const refreshInjector = () => setTimeout(function () {
+            this.$content.trigger('refresh_injector');
+        }.bind(this));
+        this.wysiwyg.odooEditor.addEventListener('historyUndo', refreshInjector);
+        this.wysiwyg.odooEditor.addEventListener('historyRedo', refreshInjector);
+        this.$content[0].addEventListener('paste', refreshInjector);
+        this.$content[0].addEventListener('drop', refreshInjector);
     },
     /**
      * Add a plugin (@see KnowledgePlugin ) for the @see OdooEditor which
