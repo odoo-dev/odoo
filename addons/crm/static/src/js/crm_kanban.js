@@ -1,49 +1,46 @@
 /** @odoo-module **/
 
+import { registry } from "@web/core/registry";
+import { KanbanDynamicGroupList, KanbanModel } from "@web/views/kanban/kanban_model";
+import { KanbanView } from "@web/views/kanban/kanban_view";
+
+export class CRMKanbanDynamicGroupList extends KanbanDynamicGroupList {
     /**
-     * This Kanban Model make sure we display a rainbowman
+     * This Kanban Model makes sure we display a rainbowman
      * message when a lead is won after we moved it in the
-     * correct column and when it's grouped by stage_id (default).
+     * correct column and when it's grouped by the default group by (stage_id).
+     *
+     * @override
      */
+    async moveRecord() {
+        const record = await super.moveRecord(...arguments);
 
-    import KanbanModel from 'web.KanbanModel';
-    import KanbanView from 'web.KanbanView';
-    import viewRegistry from 'web.view_registry';
-
-    var CrmKanbanModel = KanbanModel.extend({
-        /**
-         * Check if the kanban view is grouped by "stage_id" before checking if the lead is won
-         * and displaying a possible rainbowman message.
-         * @override
-         */
-        moveRecord: async function (recordID, groupID, parentID) {
-            var result = await this._super(...arguments);
-            if (this.localData[parentID].groupedBy[0] === this.defaultGroupedBy[0]) {
-                const message = await this._rpc({
-                    model: 'crm.lead',
-                    method : 'get_rainbowman_message',
-                    args: [[parseInt(this.localData[recordID].res_id)]],
-                });
-                if (message) {
-                    this.trigger_up('show_effect', {
-                        message: message,
-                        type: 'rainbow_man',
-                    });
-                }
+        if (this.model.defaultGroupBy && this.firstGroupBy === this.model.defaultGroupBy) {
+            const message = await this.model.orm.call("crm.lead", "get_rainbowman_message", [
+                [record.resId],
+            ]);
+            if (message) {
+                this.model.effectService.add({ type: "rainbow_man", message });
             }
-            return result;
-        },
-    });
+        }
 
-    var CrmKanbanView = KanbanView.extend({
-        config: _.extend({}, KanbanView.prototype.config, {
-            Model: CrmKanbanModel,
-        }),
-    });
+        return record;
+    }
+}
 
-    viewRegistry.add('crm_kanban', CrmKanbanView);
+export class CRMKanbanModel extends KanbanModel {
+    setup(_params, services) {
+        super.setup(...arguments);
 
-    export default {
-        CrmKanbanModel: CrmKanbanModel,
-        CrmKanbanView: CrmKanbanView,
-    };
+        this.effectService = services.effect;
+    }
+}
+
+CRMKanbanModel.DynamicGroupList = CRMKanbanDynamicGroupList;
+CRMKanbanModel.services = [...KanbanModel.services, "effect"];
+
+export class CRMKanbanView extends KanbanView {}
+
+CRMKanbanView.Model = CRMKanbanModel;
+
+registry.category("views").add("crm_kanban", CRMKanbanView);
