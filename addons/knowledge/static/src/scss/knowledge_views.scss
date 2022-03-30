@@ -36,8 +36,26 @@
         .note-editable,
         .o_readonly {
             flex-grow: 1;
-            padding: 1rem !important;
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
         }
+    }
+
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .note-editable,
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .o_readonly {
+        width: 750px; /* Almost same as Notion (900px - 96px padding (left and right) )*/
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* For frontend View. */
+    // TODO: when frontend scss file will be done, place the following in that file.
+    .o_knowledge_article:not(.o_full_width) {
+        width: 750px; /* Almost same as Notion (900px - 96px padding (left and right) )*/
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     // = Sidebar
