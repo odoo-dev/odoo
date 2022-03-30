@@ -36,8 +36,17 @@
         .note-editable,
         .o_readonly {
             flex-grow: 1;
-            padding: 1rem !important;
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
         }
+    }
+
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .note-editable,
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .o_readonly {
+        width: 750px;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     // = Sidebar

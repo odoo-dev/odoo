@@ -203,6 +203,7 @@ class Article(models.Model):
     icon = fields.Char(string='Article Icon', default='fa-file')
     author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
     is_locked = fields.Boolean(string='Locked', default=False)
+    full_width = fields.Boolean(string='Full width', default=False)
     share_link = fields.Char('Link', compute='_compute_share_link', store=False, readonly=True)
 
     # Hierarchy and sequence

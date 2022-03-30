@@ -99,6 +99,11 @@
                                                 <button class="dropdown-item btn-archive" type="object" name="action_archive">
                                                     <i class="fa fa-fw fa-archive"/> Archive
                                                 </button>
+                                                <div class="dropdown-divider"/>
+                                                <div class="px-3" attrs="{'invisible': [('user_can_write', '=', False)]}">
+                                                    <field name="full_width" widget="boolean_toggle" force_save="1"/>
+                                                    <label for="full_width" class="m-0"/>
+                                                </div>
                                                 <div class="dropdown-divider"
                                                     attrs="{'invisible': ['&amp;', ('last_edition_id', '=', False), ('last_edition_date', '=', False)]}"/>
                                                 <div class="px-4 py-2 mx-1" attrs="{'invisible': [('last_edition_id', '=', False)]}">
@@ -121,7 +126,8 @@
                             <div class="flex-grow-1 position-relative">
                                 <div class="o_scroll_view">
                                     <!-- Article body -->
-                                    <div class="o_knowledge_editor d-flex border-bottom bg-white">
+                                    <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
+                                    <div class="o_knowledge_editor d-flex border-bottom bg-white px-5">
                                         <field name="body" widget="html" no_label="1" default_focus="1"
                                             options="{'resizable': False}"
                                             attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>

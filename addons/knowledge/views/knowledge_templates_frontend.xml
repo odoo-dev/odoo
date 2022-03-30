@@ -46,7 +46,7 @@
                                 <div class="o_scroll_view">
                                     <!-- Article body -->
                                     <div class="o_knowledge_editor d-flex pl-3">
-                                        <div t-out="article.body" />
+                                        <div t-attf-class="o_knowledge_article #{'o_full_width' if article.full_width else ''}" t-out="article.body" />
                                     </div>
                                 </div>
                             </div>

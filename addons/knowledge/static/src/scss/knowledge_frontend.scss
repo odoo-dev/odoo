@@ -13,6 +13,17 @@
         cursor: pointer;
     }
 
+    // Body, cover and icon
+    // --------------------------------------------------------------------------
+    .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_icon,
+    .o_knowledge_article:not(.o_full_width) {
+        width: 750px;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 0;
+    }
+
     // Sidebar
     // --------------------------------------------------------------------------
     .o_knowledge_aside {
