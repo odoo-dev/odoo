@@ -422,4 +422,40 @@
             addSortButton();
         }
     });
+
+    // -----------------------------------------------------------------------------
+    // Add statistics
+    // -----------------------------------------------------------------------------
+
+    let passedEl;
+    let failedEl;
+    function insertStats() {
+        const toolbar = document.querySelector("#qunit-testrunner-toolbar .qunit-url-config");
+        const statsEl = document.createElement("label");
+        passedEl = document.createElement("span");
+        passedEl.classList.add("text-success", "ml-5", "mr-3");
+        statsEl.appendChild(passedEl);
+        failedEl = document.createElement("span");
+        failedEl.classList.add("text-danger");
+        statsEl.appendChild(failedEl);
+        toolbar.appendChild(statsEl);
+    }
+
+    let testCount = 0;
+    let testFailedCount = 0;
+    QUnit.testDone(({ skipped, failed }) => {
+        if (!passedEl) {
+            insertStats();
+        }
+        if (!skipped) {
+            testCount++;
+            if (failed > 0) {
+                testFailedCount++;
+            }
+            passedEl.innerText = `${testCount - testFailedCount} tests passed`;
+            if (testFailedCount > 0) {
+                failedEl.innerText = `${testFailedCount} tests failed`;
+            }
+        }
+    });
 })();
