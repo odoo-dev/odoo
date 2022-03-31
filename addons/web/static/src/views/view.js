@@ -214,14 +214,14 @@ export class View extends Component {
                 searchViewId = searchViewId || searchViewDescription.id;
                 if (!searchViewArch) {
                     searchViewArch = searchViewDescription.arch;
-                    searchViewFields = result.models[resModel];
+                    searchViewFields = result.fields;
                 }
                 if (!irFilters) {
                     irFilters = searchViewDescription.irFilters;
                 }
             }
             this.env.config.views = views;
-            fields = fields || result.models[resModel];
+            fields = fields || result.fields;
         }
 
         if (!arch) {

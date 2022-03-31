@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { deepCopy } from "@web/core/utils/objects";
 import { registry } from "@web/core/registry";
 import { generateLegacyLoadViewsResult } from "@web/legacy/legacy_load_views";
 
@@ -78,9 +79,17 @@ export const viewService = {
                     .call(resModel, "get_views", [], { context, views, options: loadViewsOptions })
                     .then((result) => {
                         const { models, views } = result;
+                        const modelsCopy = deepCopy(models); // for legacy views
+                        const fields = models[resModel];
+                        for (const field of Object.values(fields)) {
+                            // add relatedFields for relational fields in view
+                            if (field.relation) {
+                                field.relatedFields = models[field.relation] || {};
+                            }
+                        }
                         const viewDescriptions = {
-                            __legacy__: generateLegacyLoadViewsResult(resModel, views, models),
-                            models,
+                            __legacy__: generateLegacyLoadViewsResult(resModel, views, modelsCopy),
+                            fields,
                             views: {},
                         };
                         for (const viewType in views) {
