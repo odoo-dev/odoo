@@ -565,7 +565,6 @@ QUnit.module("ActionManager", (hooks) => {
 
         // open first record
         await click(target.querySelector(".o_data_row .o_data_cell"));
-        await legacyExtraNextTick();
 
         assert.containsOnce(target, ".o_form_view");
         assert.containsN(target, ".breadcrumb-item", 2);
@@ -597,7 +596,6 @@ QUnit.module("ActionManager", (hooks) => {
 
         // open first record
         await click(target.querySelector(".o_data_row .o_data_cell"));
-        await legacyExtraNextTick();
         assert.containsOnce(target, ".o_form_view");
         assert.containsN(target, ".breadcrumb-item", 2);
         assert.strictEqual(
@@ -611,7 +609,6 @@ QUnit.module("ActionManager", (hooks) => {
 
         // go back to form view
         await click(target.querySelectorAll(".breadcrumb-item")[1]);
-        await legacyExtraNextTick();
         assert.containsOnce(target, ".o_form_view");
         assert.containsN(target, ".breadcrumb-item", 2);
         assert.strictEqual(
