@@ -329,7 +329,7 @@ class DataPoint {
     _parseServerValue(field, value) {
         switch (field.type) {
             case "char": {
-                return value || "";
+                return value;
             }
             case "date": {
                 return value ? deserializeDate(value) : false;
