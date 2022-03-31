@@ -638,7 +638,7 @@ QUnit.module("ActionManager", (hooks) => {
         await legacyExtraNextTick();
         await testUtils.dom.click($(target).find(".o_form_view button:contains(Execute action)"));
         assert.containsN(target, ".o_control_panel .breadcrumb li", 3);
-        var $previousBreadcrumb = $(target).find(".o_control_panel .breadcrumb li.active").prev();
+        let $previousBreadcrumb = $(target).find(".o_control_panel .breadcrumb li.active").prev();
         assert.strictEqual(
             $previousBreadcrumb.attr("data-hotkey"),
             "b",
@@ -646,7 +646,7 @@ QUnit.module("ActionManager", (hooks) => {
         );
         await testUtils.dom.click($previousBreadcrumb);
         assert.containsN(target, ".o_control_panel .breadcrumb li", 2);
-        var $previousBreadcrumb = $(target).find(".o_control_panel .breadcrumb li.active").prev();
+        $previousBreadcrumb = $(target).find(".o_control_panel .breadcrumb li.active").prev();
         assert.strictEqual(
             $previousBreadcrumb.attr("data-hotkey"),
             "b",
@@ -1000,11 +1000,9 @@ QUnit.module("ActionManager", (hooks) => {
         await doAction(webClient, 3);
 
         // open a record in form view
-        await click(target.querySelector(".o_list_view .o_data_row"));
-        await legacyExtraNextTick();
+        await click(target.querySelector(".o_list_view .o_data_row .o_data_cell"));
 
         await click(target.querySelector(".o_statusbar_buttons button"));
-        await legacyExtraNextTick();
         assert.strictEqual(
             target.querySelector(".o_list_view .o_nocontent_help p").innerText,
             "I am not a helper"
