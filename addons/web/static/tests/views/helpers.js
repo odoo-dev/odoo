@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import { deepCopy } from "@web/core/utils/objects";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { getFixture, mount } from "@web/../tests/helpers/utils";
 import { getDefaultConfig, View } from "@web/views/view";
@@ -53,14 +54,10 @@ export const makeView = async (params) => {
     const env = await makeTestEnv({ serverData, mockRPC, config });
 
     if (props.arch) {
-        const defaultFields = serverData.models[props.resModel].fields;
-        if (!props.fields) {
-            props.fields = Object.assign({}, defaultFields);
-            // write the field name inside the field description (as done by fields_get)
-            for (const fieldName in props.fields) {
-                props.fields[fieldName].name = fieldName;
-            }
-        }
+        const models = {
+            [props.resModel]: deepCopy(props.fields || serverData.models[props.resModel].fields),
+        };
+        props.fields = models[props.resModel];
         const view = _getView({
             arch: props.arch,
             modelName: props.resModel,
@@ -68,6 +65,18 @@ export const makeView = async (params) => {
             context: props.context || {},
             models: serverData.models,
         });
+        for (const model of view.models) {
+            models[model] = models[model] || deepCopy(serverData.models[model].fields);
+        }
+        for (const fieldName in props.fields) {
+            const field = props.fields[fieldName];
+            // write the field name inside the field description (as done by fields_get)
+            field.fieldName = fieldName;
+            // add relatedFields for x2many fields with subviews
+            if (["one2many", "many2many"].includes(field.type)) {
+                field.relatedFields = models[field.relation] || {};
+            }
+        }
         props.arch = view.arch;
         props.searchViewArch = props.searchViewArch || "<search/>";
         props.searchViewFields = props.searchViewFields || Object.assign({}, props.fields);

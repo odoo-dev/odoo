@@ -241,7 +241,7 @@ export class SearchModel extends EventBus {
                 }
             );
             Object.assign(searchViewDescription, result.views.search);
-            searchViewFields = searchViewFields || result.models[resModel];
+            searchViewFields = searchViewFields || result.fields;
         }
         if (searchViewArch) {
             searchViewDescription.arch = searchViewArch;
