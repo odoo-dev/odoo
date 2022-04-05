@@ -23,8 +23,6 @@ export class Dialog extends Component {
         this.fullscreen = this.constructor.fullscreen;
         this.renderFooter = this.constructor.renderFooter;
         this.renderHeader = this.constructor.renderHeader;
-        this.bodyTemplate = this.constructor.bodyTemplate;
-        this.footerTemplate = this.constructor.footerTemplate;
         this.size = this.constructor.size;
         this.technical = this.constructor.technical;
         this.title = this.constructor.title;
