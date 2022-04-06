@@ -429,6 +429,9 @@ class Article(models.Model):
             article.inherited_permission = article_permission
             article.inherited_permission_parent_id = parent if parent != article else False
 
+    def _get_additional_access_domain(self):
+        return []
+
     def _search_user_has_access(self, operator, value):
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise ValueError("unsupported search operator")
@@ -440,20 +443,22 @@ class Article(models.Model):
         articles_with_access = [id for id, permission in member_permissions.items() if permission != 'none']
 
         # If searching articles for which user has access.
+        domain = self._get_additional_access_domain()
         if (value and operator == '=') or (not value and operator == '!='):
             if self.env.user.has_group('base.group_system'):
                 return expression.TRUE_DOMAIN
             elif self.env.user.share:
-                return [('id', 'in', articles_with_access)]
-            return ['|', '&', ('id', 'in', list(article_permissions.keys())), ('id', 'not in', articles_with_no_access),
-                         ('id', 'in', articles_with_access)]
+                return expression.OR([domain, [('id', 'in', articles_with_access)]])
+            return expression.OR([domain, ['|', '&', ('id', 'in', list(article_permissions.keys())), ('id', 'not in', articles_with_no_access),
+                         ('id', 'in', articles_with_access)]])
         # If searching articles for which user has NO access.
+        domain = [expression.NOT_OPERATOR, domain]
         if self.env.user.has_group('base.group_system'):
             return expression.FALSE_DOMAIN
         elif self.env.user.share:
-            return [('id', 'not in', articles_with_access)]
-        return ['|', '&', ('id', 'not in', list(article_permissions.keys())), ('id', 'not in', articles_with_access),
-                     ('id', 'in', articles_with_no_access)]
+            return expression.AND([domain, [('id', 'not in', articles_with_access)]])
+        return expression.AND([domain, ['|', '&', ('id', 'not in', list(article_permissions.keys())), ('id', 'not in', articles_with_access),
+                     ('id', 'in', articles_with_no_access)]])
 
     def _search_user_can_write(self, operator, value):
         if operator not in ('=', '!=') or not isinstance(value, bool):
