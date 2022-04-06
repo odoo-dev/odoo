@@ -40,7 +40,7 @@ class KnowledgeController(http.Controller):
         user = request.env.user
         # for external_users, need to sudo to access article.user_has_access and other fields needed to render the page.
         article = article.sudo()
-        if user._is_public() or not article.user_has_access:
+        if not self._check_access(article):
             raise werkzeug.exceptions.Forbidden()
         if user.has_group('base.group_user'):
             return redirect("/web#id=%s&model=knowledge.article&action=%s&menu_id=%s" % (
@@ -54,6 +54,10 @@ class KnowledgeController(http.Controller):
         values = {'article': article}
         values.update(self.get_tree_values(article.id))
         return values
+
+    def _check_access(self, article):
+        """ Check the access of the given article for the current user. """
+        return not request.env.user._is_public() and article.user_has_access
 
     # ---------------------------
     # Frontend action controllers
