@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "../registry";
-// import { Dialog } from "./dialog";
+import { Dialog } from "./dialog";
 import { DialogContainer } from "./dialog_container";
 
 const { EventBus } = owl;
@@ -34,10 +34,9 @@ export const dialogService = {
         });
 
         function add(dialogClass, props, options = {}) {
-            // FIXME WOWL: this is to allow SimpleDialog, not sure if we should keep this
-            // if (!(dialogClass.prototype instanceof Dialog)) {
-            //     throw new Error(`${dialogClass.name} must be a subclass of Dialog`);
-            // }
+            if (!(dialogClass.prototype instanceof Dialog)) {
+                throw new Error(`${dialogClass.name} must be a subclass of Dialog`);
+            }
 
             const id = ++dialogId;
             function close() {

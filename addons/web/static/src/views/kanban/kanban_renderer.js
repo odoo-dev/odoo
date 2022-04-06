@@ -2,8 +2,10 @@
 
 import { ColorList } from "@web/core/colorlist/colorlist";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { Dialog } from "@web/core/dialog/dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
@@ -22,7 +24,6 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { KanbanColumnQuickCreate } from "./kanban_column_quick_create";
 import { KanbanRecordQuickCreate } from "./kanban_record_quick_create";
-import { SimpleDialog } from "@web/core/dialog/dialog";
 
 const { Component, markup, useState, useRef, onWillDestroy, onWillStart, onMounted } = owl;
 const { COLORS } = ColorList;
@@ -36,8 +37,9 @@ const isNull = (value) => [null, undefined].includes(value);
 
 const formatterRegistry = registry.category("formatters");
 
-class KanbanCoverImageDialog extends Component {
+class KanbanCoverImageDialog extends Dialog {
     setup() {
+        super.setup();
         this.id = _.uniqueId("o_cover_image_upload");
         this.orm = useService("orm");
         const { record, fieldName } = this.props;
@@ -83,8 +85,10 @@ class KanbanCoverImageDialog extends Component {
         this.props.close();
     }
 }
-KanbanCoverImageDialog.template = "web.KanbanCoverImageDialog";
-KanbanCoverImageDialog.components = { SimpleDialog };
+
+KanbanCoverImageDialog.bodyTemplate = "web.KanbanCoverImageDialogBody";
+KanbanCoverImageDialog.footerTemplate = "web.KanbanCoverImageDialogFooter";
+KanbanCoverImageDialog.title = _lt("Set a Cover Image");
 
 export class KanbanRenderer extends Component {
     setup() {
