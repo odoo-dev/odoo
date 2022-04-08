@@ -47,6 +47,7 @@ Dialog.technical = true;
 Dialog.title = "Odoo";
 Dialog.bodyTemplate = xml`<div/>`;
 Dialog.footerTemplate = "web.DialogFooterDefault";
+Dialog.dialogTemplate = "web.DialogTemplateDefault";
 Dialog.props = {
     parent: { type: Object, optional: true },
     close: Function,

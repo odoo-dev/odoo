@@ -21,11 +21,20 @@ class ActionDialog extends Dialog {
         super.setup();
         useOwnDebugContext();
         this.title = "title" in this.props ? this.props.title : this.constructor.title;
+        useEffect(
+            () => {
+                if (this.props.actionType === "ir.actions.act_window") {
+                    const main = this.modalRef.el.querySelector("main.modal-body");
+                    main.classList.add("o_act_window");
+                }
+            },
+            () => []
+        );
     }
 }
 ActionDialog.components = { ...Dialog.components, DebugMenu };
 ActionDialog.template = "web.ActionDialog";
-ActionDialog.bodyTemplate = "web.ActionDialogBody";
+ActionDialog.dialogTemplate = "web.ActionDialogBody";
 ActionDialog.props = {
     ...Dialog.props,
     ActionComponent: { optional: true },
@@ -62,6 +71,6 @@ class LegacyAdaptedActionDialog extends ActionDialog {
         );
     }
 }
-LegacyAdaptedActionDialog.footerTemplate = "web.LegacyAdaptedActionDialogFooter";
+LegacyAdaptedActionDialog.dialogTemplate = "web.LegacyAdaptedActionDialogTemplate";
 
 export { LegacyAdaptedActionDialog as ActionDialog };

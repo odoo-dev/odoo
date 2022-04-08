@@ -16,16 +16,30 @@
                             </h4>
                             <button type="button" class="close" aria-label="Close" tabindex="-1" t-on-click="close">×</button>
                         </header>
-                        <main class="modal-body">
-                            <t t-call="{{ constructor.bodyTemplate }}"/>
-                        </main>
-                        <footer t-if="renderFooter" class="modal-footer justify-content-start" t-ref="dialogFooter">
-                            <t t-call="{{ constructor.footerTemplate }}" />
-                        </footer>
+                        <t t-call="{{ constructor.dialogTemplate }}">
+                            <t t-set="renderFooter" t-value="renderFooter"/>
+                        </t>
                     </div>
                 </div>
             </div>
         </div>
+    </t>
+
+    <t t-name="web.DialogTemplateDefault" owl="1">
+        <t t-call="web.DialogContentLayout">
+            <t t-set="bodyTemplate" t-value="constructor.bodyTemplate"/>
+            <t t-set="renderFooter" t-value="renderFooter"/>
+            <t t-set="footerTemplate" t-value="constructor.footerTemplate"/>
+        </t>
+    </t>
+
+    <t t-name="web.DialogContentLayout" owl="1">
+        <main class="modal-body">
+            <t t-if="bodyTemplate" t-call="{{ bodyTemplate }}"/>
+        </main>
+        <footer t-if="renderFooter" class="modal-footer justify-content-start">
+            <t t-if="footerTemplate" t-call="{{ footerTemplate }}" />
+        </footer>
     </t>
 
     <t t-name="web.DialogFooterDefault" owl="1">
