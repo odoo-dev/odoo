@@ -9,7 +9,7 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { useModel } from "../helpers/model";
 import { RelationalModel } from "../relational_model";
 
-const { onWillStart, useRef } = owl;
+const { onWillStart } = owl;
 
 export class FormViewDialog extends Dialog {
     setup() {
@@ -19,8 +19,6 @@ export class FormViewDialog extends Dialog {
         this.archInfo = this.props.archInfo;
         this.title = this.props.title;
         this.record = this.props.record;
-
-        this.dialogFooterRef = useRef("dialogFooter");
 
         if (!this.record) {
             this.model = useModel(RelationalModel, {
@@ -106,7 +104,7 @@ export class FormViewDialog extends Dialog {
     }
 
     disableButtons() {
-        const btns = this.dialogFooterRef.el.querySelectorAll(".o_cp_buttons button");
+        const btns = this.modalRef.el.querySelectorAll(".modal-footer button");
         for (const btn of btns) {
             btn.setAttribute("disabled", "1");
         }
