@@ -3939,8 +3939,11 @@
                 let slotStr = [];
                 for (let slotName in ast.slots) {
                     const slotAst = ast.slots[slotName];
-                    const name = this.compileInNewTarget("slot", slotAst.content, ctx, slotAst.on);
-                    const params = [`__render: ${name}, __ctx: ${ctxStr}`];
+                    const params = [];
+                    if (slotAst.content) {
+                        const name = this.compileInNewTarget("slot", slotAst.content, ctx, slotAst.on);
+                        params.push(`__render: ${name}, __ctx: ${ctxStr}`);
+                    }
                     const scope = ast.slots[slotName].scope;
                     if (scope) {
                         params.push(`__scope: "${scope}"`);
@@ -4042,7 +4045,7 @@
                 if (dynamic) {
                     let name = this.generateId("slot");
                     this.define(name, slotName);
-                    blockString = `toggler(${name}, callSlot(ctx, node, key, ${name}), ${dynamic}, ${scope})`;
+                    blockString = `toggler(${name}, callSlot(ctx, node, key, ${name}, ${dynamic}, ${scope}))`;
                 }
                 else {
                     blockString = `callSlot(ctx, node, key, ${slotName}, ${dynamic}, ${scope})`;
@@ -4583,28 +4586,26 @@
                 slotNode.removeAttribute("t-set-slot");
                 slotNode.remove();
                 const slotAst = parseNode(slotNode, ctx);
-                if (slotAst) {
-                    let on = null;
-                    let attrs = null;
-                    let scope = null;
-                    for (let attributeName of slotNode.getAttributeNames()) {
-                        const value = slotNode.getAttribute(attributeName);
-                        if (attributeName === "t-slot-scope") {
-                            scope = value;
-                            continue;
-                        }
-                        else if (attributeName.startsWith("t-on-")) {
-                            on = on || {};
-                            on[attributeName.slice(5)] = value;
-                        }
-                        else {
-                            attrs = attrs || {};
-                            attrs[attributeName] = value;
-                        }
+                let on = null;
+                let attrs = null;
+                let scope = null;
+                for (let attributeName of slotNode.getAttributeNames()) {
+                    const value = slotNode.getAttribute(attributeName);
+                    if (attributeName === "t-slot-scope") {
+                        scope = value;
+                        continue;
                     }
-                    slots = slots || {};
-                    slots[name] = { content: slotAst, on, attrs, scope };
+                    else if (attributeName.startsWith("t-on-")) {
+                        on = on || {};
+                        on[attributeName.slice(5)] = value;
+                    }
+                    else {
+                        attrs = attrs || {};
+                        attrs[attributeName] = value;
+                    }
                 }
+                slots = slots || {};
+                slots[name] = { content: slotAst, on, attrs, scope };
             }
             // default slot
             const defaultContent = parseChildNodes(clone, ctx);
