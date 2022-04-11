@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record model="ir.actions.act_window" id="knowledge_invite_members">
+        <field name="name">Invite people</field>
+        <field name="res_model">knowledge.invite.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_article_id': active_id}</field>
+    </record>
+
     <record id="knowledge_article_view_dashboard" model="ir.ui.view">
         <field name="name">knowledge.article.view.form</field>
         <field name="model">knowledge.article</field>
@@ -9,6 +17,7 @@
                 <field name="category" invisible="1"/>
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="user_can_write" invisible="1"/>
+                <field name="user_permission" invisible="1"/>
                 <div class="d-sm-flex h-100">
                     <aside class="o_knowledge_aside d-print-none flex-shrink-0 p-0 bg-white">
                         <div class="d-flex flex-column h-100">
@@ -49,12 +58,24 @@
                                 </div>
                                 <!-- Buttons -->
                                 <div class="d-flex flex-shrink-0 align-items-center pr-2">
-                                    <a type="button" role="button" class="btn btn-secondary btn-create">
+                                    <a type="button" role="button" class="btn btn-secondary btn-create text-capitalize">
                                         <i class="fa fa-plus-circle"/> Create
                                     </a>
-                                    <a type="button" role="button" class="btn btn-secondary btn-share">
-                                        <i class="fa fa-share-alt"/> Share
-                                    </a>
+                                    <div class="btn-group" role="toolbar" aria-label="options">
+                                        <div class="o-dropdown dropdown o-dropdown--no-caret">
+                                            <a type="button" role="button" class="btn btn-secondary btn-share dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fa fa-share-alt"/> Share
+                                            </a>
+                                            <div class="o_knowledge_share_panel dropdown-menu" role="menu">
+                                                <div class="px-3 pb-2">
+                                                    <button type="action" name="%(knowledge_invite_members)d" class="btn btn-primary w-100" attrs="{'invisible': [('user_can_write', '=', False)]}">
+                                                        <i class="fa fa-plus"/> Invite
+                                                    </button>
+                                                </div>
+                                                <div class="o_knowledge_permission_panel"/>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
                                             <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
