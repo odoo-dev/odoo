@@ -80,21 +80,26 @@ class ArticleMembers(models.Model):
     article_id = fields.Many2one('knowledge.article', 'Article', ondelete='cascade', required=True)
     partner_id = fields.Many2one('res.partner', index=True, ondelete='cascade', required=True)
     permission = fields.Selection([
-        ('none', 'None'),
-        ('read', 'Read'),
-        ('write', 'Write'),
+        ('none', 'No access'),
+        ('read', 'Can read'),
+        ('write', 'Can write'),
     ], required=True, default='read')
     article_permission = fields.Selection([
-        ('none', 'None'),
-        ('read', 'Read'),
-        ('write', 'Write'),
+        ('none', 'No access'),
+        ('read', 'Can read'),
+        ('write', 'Can write'),
     ], string="Article Permission", compute='_compute_article_permission', store=True)
-    # used to highlight the current user in the share wizard.
-    is_current_user = fields.Boolean(string="Is Me ?", compute="_compute_is_current_user")
+    has_higher_permission = fields.Boolean(
+        compute='_compute_has_higher_permission',
+        help="If True, the member has a higher permission then the one set on the article.")
 
     _sql_constraints = [
         ('partner_unique', 'unique(article_id, partner_id)', 'You already added this partner in this article.')
     ]
+
+    def name_get(self):
+        """Override the `name_get` function"""
+        return [(rec.id, "%s" % (rec.partner_id.display_name)) for rec in self]
 
     @api.constrains('article_permission', 'permission')
     def _check_members(self):
@@ -111,6 +116,13 @@ class ArticleMembers(models.Model):
                 if len(write_members) == 0:
                     raise ValidationError(_("You must have at least one writer."))
 
+    @api.constrains('partner_id', 'permission')
+    def _check_external_member_permission(self):
+        for member in self:
+            if member.partner_id.partner_share and member.permission != 'read':
+                raise ValidationError(_('An external user can only have a "read" permission'))
+
+    # TODO DBE: seems that this could be removed and directly use _get_internal_permission in check method. To Check!
     @api.depends("article_id")
     def _compute_article_permission(self):
         articles_permission = self.article_id._get_internal_permission(article_ids=self.article_id.ids)
@@ -118,9 +130,12 @@ class ArticleMembers(models.Model):
             # using article.ids[0] to avoid <NewId> issues when adding a new member.
             member.article_permission = articles_permission[member.article_id.ids[0]]
 
-    def _compute_is_current_user(self):
+    @api.depends("article_id", "permission")
+    def _compute_has_higher_permission(self):
+        permission_level = {'none': 0, 'read': 1, 'write': 2}
+        articles_permission = self.article_id._get_internal_permission(article_ids=self.article_id.ids)
         for member in self:
-            member.is_current_user = self.env.user in member.partner_id.user_ids
+            member.has_higher_permission = permission_level[member.permission] > permission_level[articles_permission[member.article_id.ids[0]]]
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_no_writer(self):
@@ -165,10 +180,10 @@ class Article(models.Model):
 
     # Access rules and members + implied category
     internal_permission = fields.Selection([
-        ('none', 'None'),
-        ('read', 'Read'),
-        ('write', 'Write'),
-    ], required=False, help="Basic permission for all internal users. External users can still have permissions if they are added to the members.")
+        ('none', 'No access'),
+        ('read', 'Can read'),
+        ('write', 'Can write'),
+    ], string='Internal Permission', required=False, help="Basic permission for all internal users. External users can still have permissions if they are added to the members.")
     # partner_ids = fields.Many2many("res.partner", string="Article Members", compute="_compute_partner_ids",
     #     inverse="_inverse_partner_ids", search="_search_partner_ids", compute_sudo=True,
     #     help="Article members are the partners that have specific access rules on the related article.")
@@ -697,55 +712,82 @@ class Article(models.Model):
     # Permission and members handling methods
     # ---------------------------------------
 
-    def set_article_permission(self, permission):
+    def _set_internal_permission(self, permission):
+        """
+        Set the internal permission of the article.
+        :param permission (str): permission ('none', 'read' or 'write')
+        """
         self.ensure_one()
-        if self.user_can_write:
-            self.write({'internal_permission': permission})
+        if not self.user_can_write:
+            return False
+        return self.write({'internal_permission': permission})
 
-    def set_member_permission(self, partner_id, permission):
+    def _set_member_permission(self, member_id, permission):
+        """
+        Set the permission of the given member on the article.
+        :param member_id (int): member id
+        :param permission (str): permission ('none', 'read' or 'write')
+        """
         self.ensure_one()
-        if self.user_can_write:
-            member = self.sudo().article_member_ids.filtered(lambda member: member.partner_id.id == partner_id)
-            member.write({'permission': permission})
+        if not self.user_can_write:
+            return False
+        member = self.article_member_ids.filtered(lambda member: member.id == member_id)
+        return member.write({'permission': permission})
 
-    # def remove_member(self, partner_id):
-    #     self.ensure_one()
-    #     if self.user_can_write:
-    #         member = self.main_article_id.sudo().article_member_ids.filtered(lambda member: member.partner_id.id == partner_id)
-    #         member.unlink()
-
-    def invite_member(self, access_rule, partner_id=False, email=False, send_mail=True):
+    def _remove_member(self, member_id):
+        """
+        Remove a member from the article.
+        :param member_id (int): member id
+        """
         self.ensure_one()
-        if self.user_can_write:
-            # A priori no reason to give a wrong partner_id at this stage as user must be logged in and have access.
-            partner = self.env['res.partner'].browse(partner_id)
-            self.sudo()._invite_member(access_rule, partner=partner, email=email, send_mail=send_mail)
-        else:
-            raise UserError(_("You cannot give access to this article as you are not editor."))
+        member = self.article_member_ids.filtered(lambda member: member.id == member_id)
+        remove_self, upgrade_self = self.env.user.partner_id == member.partner_id, False
+        if remove_self:
+            upgrade_self = not member.has_higher_permission
+        if not self.user_can_write and upgrade_self:
+            return False
+        return member.unlink()
 
-    def _invite_member(self, access_rule, partner=False, email=False, send_mail=True):
+    def invite_members(self, partner_ids, permission, send_mail=True):
+        """
+        Invite new members to the article.
+        :param partner_ids (Model<res.partner>): Recordset of res.partner
+        :param permission (string): permission ('none', 'read' or 'write')
+        :param send_mail (boolean): Flag indicating whether an email should be sent
+        """
         self.ensure_one()
-        if not email and not partner:
-            raise UserError(_('You need to provide an email address or a partner to invite a member.'))
-        if email and not partner:
-            try:
-                partner = self.env["res.partner"].find_or_create(email, assert_valid_email=True)
-            except ValueError:
-                raise ValueError(_('The given email address is incorrect.'))
+        if not self.user_can_write:
+            raise AccessError(_("You cannot give access to this article as you are not editor."))
+        share_partner_ids = partner_ids.filtered(lambda partner: partner.partner_share)
+        article = self.sudo()
+        if permission != 'none':
+            article._invite_members(share_partner_ids, 'read', send_mail=send_mail)
+        article._invite_members(partner_ids - share_partner_ids, permission, send_mail=send_mail)
 
-        # add member
-        member = self.article_member_ids.filtered(lambda member: member.partner_id == partner)
-        if member:
-            member.write({'permission': access_rule})
-        else:
-            self.write({
-                'article_member_ids': [(0, 0, {
-                    'partner_id': partner.id,
-                    'permission': access_rule
-                })]
+    def _invite_members(self, partner_ids, permission, send_mail=True):
+        """
+        :param partner_ids (Model<res.partner>): Recordset of res.partner
+        :param permission (string): permission ('none', 'read' or 'write')
+        :param send_mail (boolean): Flag indicating whether an email should be sent
+        """
+        self.ensure_one()
+        if not partner_ids:
+            return
+        members = self.article_member_ids.filtered_domain([('partner_id', 'in', partner_ids.ids)])
+        if members:
+            members.write({'permission': permission})
+        partners = partner_ids - members.mapped('partner_id')
+        if not partners:
+            return
+        self.write({
+            'article_member_ids': [(0, 0, {
+                'partner_id': partner.id,
+                'permission': permission
+            }) for partner in partners]
         })
-        if not member and send_mail:
-            self._send_invite_mail(partner)
+        if permission != 'none' and send_mail:
+            for partner in partners:
+                self._send_invite_mail(partner)
 
     def _send_invite_mail(self, partner):
         self.ensure_one()

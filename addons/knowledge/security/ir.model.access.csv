@@ -11,3 +11,6 @@ access_knowledge_article_favourite_manager,access.knowledge.article.favourite.ma
 access_knowledge_article_favourite_user,access.knowledge.article.favourite.user,knowledge.model_knowledge_article_favourite,base.group_user,1,1,1,1
 access_knowledge_article_favourite_portal,access.knowledge.article.favourite.portal,knowledge.model_knowledge_article_favourite,base.group_portal,1,1,1,1
 access_knowledge_article_favourite_all,access.knowledge.article.favourite.all,knowledge.model_knowledge_article_favourite,,0,0,0,0
+
+access_knowledge_invite_wizard_manager,access.knowledge.invite.wizard.manager,knowledge.model_knowledge_invite_wizard,base.group_system,1,1,1,1
+access_knowledge_invite_wizard_user,access.knowledge.invite.wizard.user,knowledge.model_knowledge_invite_wizard,base.group_user,1,1,1,0

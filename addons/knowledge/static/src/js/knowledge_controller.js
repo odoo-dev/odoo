@@ -1,19 +1,15 @@
 /** @odoo-module */
 
-import core from 'web.core'; 
+import { _t, bus } from 'web.core';
 import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 import { MoveArticleToDialog } from 'knowledge.dialogs';
-
-var QWeb = core.qweb;
-var _t = core._t;
 
 const KnowledgeFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
         'click .btn-duplicate': '_onDuplicate',
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
-        'click .btn-share': '_onShare',
         'click .btn-archive': '_onArchive',
         'change .o_breadcrumb_article_name': '_onRename',
         'click i.o_toggle_favourite': '_onToggleFavourite',
@@ -23,6 +19,7 @@ const KnowledgeFormController = FormController.extend({
     custom_events: Object.assign({}, FormController.prototype.custom_events, {
         create: '_onCreate',
         move: '_onMove',
+        reload_tree: '_onReloadTree',
     }),
 
     init: function (parent, model, renderer, params) {
@@ -129,25 +126,12 @@ const KnowledgeFormController = FormController.extend({
         dialog.open();
     },
 
-    _onShare: function () {
-        const $content = $(QWeb.render('knowledge.knowledge_share_an_article_modal'));
-        const dialog = new Dialog(this, {
-            title: _t('Share a Link'),
-            $content: $content,
-            buttons: [{
-                text: _t('Save'),
-                classes: 'btn-primary',
-                click: async () => {
-                    console.log('sharing the article...');
-                }
-            }, {
-                text: _t('Discard'),
-                click: async () => {
-                    dialog.close();
-                }
-            }]
-        });
-        dialog.open();
+    /**
+     * @param {Event} event
+     */
+    _onReloadTree: function (event) {
+        // TODO JBN: Create a widget for the tree and reload it without reloading the whole view.
+        this.reload();
     },
 
     _onArchive: function () {

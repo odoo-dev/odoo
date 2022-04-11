@@ -139,8 +139,13 @@
     .dropdown-menu.o_knowledge_more_options_panel {
         min-width: 225px;
         width: 225px;
-        .o_m2o_avatar span {
-            overflow-wrap: break-word;
+    }
+    .dropdown-menu.o_knowledge_share_panel {
+        width: 350px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        .o_m2m_avatar {
+            max-width: 30px;
         }
     }
 }

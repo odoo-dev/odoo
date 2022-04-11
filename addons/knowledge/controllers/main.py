@@ -20,7 +20,7 @@ class KnowledgeController(http.Controller):
         if not article.exists():
             return werkzeug.exceptions.NotFound()  # (or BadRequest ?)
 
-        partner = article.main_article_id.sudo().article_member_ids.partner_id.filtered(lambda p: p.id == partner_id)
+        partner = article.sudo().article_member_ids.partner_id.filtered(lambda p: p.id == partner_id)
         if not partner:
             raise werkzeug.exceptions.Forbidden()
 
@@ -128,3 +128,97 @@ class KnowledgeController(http.Controller):
     def display_children(self, parent_id):
         template = request.env['ir.qweb']._render('knowledge.articles_template', self.get_tree_values(parent_id=parent_id))
         return template
+
+    # ------------------------
+    # Article permission panel
+    # ------------------------
+
+    @http.route('/knowledge/get_article_permission_panel_data', type='json', auth='user')
+    def get_article_permission_panel_data(self, article_id):
+        """
+        Returns a dictionnary containing all values required to render the permission panel.
+        :param article_id: (int) article id
+        """
+        article = request.env['knowledge.article'].sudo().browse(article_id)
+        members = []
+        for member in article.article_member_ids:
+            member_values = {
+                'id': member.id,
+                'partner_id': member.partner_id.id,
+                'partner_name': member.partner_id.name,
+                'permission': member.permission,
+                'has_higher_permission': member.has_higher_permission,
+                'user_ids': member.partner_id.user_ids.mapped('id'),
+                'is_external': not member.partner_id.user_ids
+            }
+            # Optional values:
+            if member.partner_id.company_name:
+                member_values['company_name'] = member.partner_id.company_name
+            members.append(member_values)
+        internal_permission_field = request.env['knowledge.article']._fields['internal_permission']
+        permission_field = request.env['knowledge.article.member']._fields['permission']
+        return {
+            'internal_permission_options': internal_permission_field.get_description(request.env).get('selection', []),
+            'internal_permission': article.internal_permission,
+            'members_options': permission_field.get_description(request.env).get('selection', []),
+            'members': members
+        }
+
+    @http.route('/article/set_member_permission', type='json', auth='user')
+    def article_set_member_permission(self, article_id, member_id, permission, **post):
+        """
+        Sets the permission of the given member for the given article.
+        **Note**: The user needs "write" permission to change the permission of a user.
+        :param article_id: (int) article id
+        :param member_id: (int) member id
+        :param permission: (string) permission
+        """
+        article = request.env['knowledge.article'].sudo().browse(article_id)
+        previous_category = article.category
+        if not article.exists() or not article._set_member_permission(member_id, permission):
+            return {'success': False}
+        result = {'success': True}
+        if article.category != previous_category:
+            result['reload_tree'] = True
+        return result
+
+    @http.route('/article/remove_member', type='json', auth='user')
+    def article_remove_member(self, article_id, member_id):
+        """
+        Removes the given member from the given article.
+        The function returns a dictionary indicating whether the request succeeds (see: `success` key).
+        The dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
+        listing all articles should be reloaded. This can happen when the article moves from one section to another.
+        **Note**: The user needs "write" permission to remove another member from
+        the list. The user can always remove themselves from the list.
+        :param article_id: (int) article id
+        :param member_id: (int) member id
+        """
+        article = request.env['knowledge.article'].sudo().browse(article_id)
+        previous_category = article.category
+        if not article.exists() or not article._remove_member(member_id):
+            return {'success': False}
+        result = {'success': True}
+        if article.category != previous_category:
+            result['reload_tree'] = True
+        return result
+
+    @http.route('/article/set_internal_permission', type='json', auth='user')
+    def article_set_internal_permission(self, article_id, permission, **post):
+        """
+        Sets the internal permission of the given article.
+        The function returns a dictionary indicating whether the request succeeds (see: `success` key).
+        The dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
+        listing all articles should be reloaded. This can happen when the article moves from one section to another.
+        **Note**: The user needs "write" permission to update the internal permission of the article.
+        :param article_id: (int) article id
+        :param permission: (string) permission
+        """
+        article = request.env['knowledge.article'].sudo().browse(article_id)
+        previous_category = article.category
+        if not article._set_internal_permission(permission):
+            return {'success': False}
+        result = {'success': True}
+        if article.category != previous_category:
+            result['reload_tree'] = True
+        return result
