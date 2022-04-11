@@ -66,15 +66,6 @@
         padding-left: 0;
     }
 
-    /* For frontend View. */
-    // TODO: when frontend scss file will be done, place the following in that file.
-    .o_knowledge_article:not(.o_full_width) {
-        width: 750px; /* Almost same as Notion (900px - 96px padding (left and right) )*/
-        max-width: 100%;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
     // = Sidebar
     // --------------------------------------------------------------------------
     .o_knowledge_aside {
