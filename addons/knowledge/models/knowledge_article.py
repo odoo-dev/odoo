@@ -165,6 +165,7 @@ class Article(models.Model):
     icon = fields.Char(string='Article Icon', default='fa-file')
     author_ids = fields.Many2many("res.users", string="Authors", default=lambda self: self.env.user)
     is_locked = fields.Boolean(string='Locked', default=False)
+    share_link = fields.Char('Link', compute='_compute_share_link', store=False, readonly=True)
 
     # Hierarchy and sequence
     parent_id = fields.Many2one("knowledge.article", string="Parent Article")
@@ -273,6 +274,10 @@ class Article(models.Model):
     #
     # def _search_partner_ids(self, operator, value):
     #     return [('article_member_ids.partner_id', operator, value)]
+
+    def _compute_share_link(self):
+        for article in self:
+            article.share_link = url_join(article.get_base_url(), 'article/%s' % article.id)
 
     @api.depends_context('uid')
     @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')

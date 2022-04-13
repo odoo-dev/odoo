@@ -151,6 +151,7 @@
                 <field name="icon" invisible="1"/>
                 <field name="is_locked" invisible="1"/>
                 <field name="user_can_write" invisible="1"/>
+                <field name="share_link" invisible="1"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click">
@@ -169,6 +170,10 @@
                                     <field name="category"/>
                                 </div>
                                 <div class="d-flex justify-content-end align-items-center">
+                                    <div class="flex-grow-1">
+                                        <field name="share_link" widget="CopyClipboardButton"
+                                            options="{'label': 'Copy Link'}"/>
+                                    </div>
                                     <field name="activity_ids" widget="kanban_activity"/>
                                 </div>
                             </div>
