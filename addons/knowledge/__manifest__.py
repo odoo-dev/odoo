@@ -28,9 +28,13 @@
     'license': 'LGPL-3',
     'assets': {
         'web.assets_backend': [
+            ('remove', 'web_editor/static/src/scss/web_editor.backend.scss'),
+            'web/static/fonts/fonts.scss',
             'knowledge/static/src/components/*/*.scss',
             'knowledge/static/src/components/*/*.js',
             'knowledge/static/src/scss/knowledge_views.scss',
+            'knowledge/static/src/scss/knowledge_editor.scss',
+            'knowledge/static/src/components/*/*.js',
             'knowledge/static/src/js/knowledge_controller.js',
             'knowledge/static/src/js/knowledge_model.js',
             'knowledge/static/src/js/knowledge_renderers.js',

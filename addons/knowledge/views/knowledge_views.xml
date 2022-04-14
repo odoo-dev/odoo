@@ -19,8 +19,8 @@
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="user_can_write" invisible="1"/>
                 <field name="user_permission" invisible="1"/>
-                <div class="d-sm-flex h-100">
-                    <aside class="o_knowledge_aside d-print-none flex-shrink-0 p-0 bg-white">
+                <div class="d-sm-flex h-100 bg-white">
+                    <aside class="o_knowledge_aside d-print-none flex-shrink-0 p-0">
                         <div class="d-flex flex-column h-100">
                             <!-- Search bar -->
                             <div id="knowledge_search_bar" class="d-flex align-items-center border-bottom bg-light m-3 o_cursor_pointer">
@@ -134,7 +134,7 @@
                                         <div class="d-flex col-12 col-lg position-relative p-0">
                                             <div class="o_scroll_view_lg">
                                                 <!-- Article body -->
-                                                <div class="o_knowledge_body h-100">
+                                                <div class="o_knowledge_body d-flex flex-column">
                                                     <!-- Article Cover -->
                                                     <div class="o_knowledge_cover">
                                                         <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)]}"/>
@@ -167,7 +167,7 @@
                                                         </div>
                                                     </div>
                                                     <!-- Article body -->
-                                                    <div class="o_knowledge_editor d-flex bg-white px-5">
+                                                    <div class="o_knowledge_editor d-flex flex-grow-1">
                                                         <field name="body" widget="html" no_label="1" default_focus="1"
                                                             options="{'resizable': False, 'knowledge_commands': true}"
                                                             attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
@@ -176,7 +176,7 @@
                                             </div>
                                         </div>
                                         <!-- Chatter -->
-                                        <div class="o_knowledge_chatter col-12 col-lg-4 border-left position-relative d-none p-0">
+                                        <div class="o_knowledge_chatter col-12 col-lg-4 position-relative d-none p-0">
                                             <div class="o_scroll_view_lg">
                                                 <div class="oe_chatter">
                                                     <field name="message_follower_ids" groups="base.group_user"/>
