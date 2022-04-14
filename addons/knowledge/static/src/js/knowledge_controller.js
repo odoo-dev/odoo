@@ -52,7 +52,6 @@ const KnowledgeFormController = FormController.extend({
         this.trigger_up('emoji_click', {
             articleId: id,
             unicode: unicode,
-            addIcon: true,
         });
     },
 
@@ -222,7 +221,7 @@ const KnowledgeFormController = FormController.extend({
      * @param {Event} event
      */
     _onEmojiClick: async function (event) {
-        const { articleId, unicode, addIcon } = event.data;
+        const { articleId, unicode } = event.data;
         const result = await this._rpc({
             model: 'knowledge.article',
             method: 'write',
@@ -231,7 +230,9 @@ const KnowledgeFormController = FormController.extend({
         if (result) {
             const { id } = this.getState();
             if (id == articleId) {
-                this.$el.find('.o_knowledge_add_icon').toggleClass('d-none', unicode);
+                const addIconButton = this.$('.o_knowledge_add_icon');
+                const addIcon = !addIconButton.hasClass('d-none') && !addIconButton.hasClass('o_invisible_modifier');
+                addIconButton.toggleClass('d-none', unicode);
                 this.$el.find('.o_article_big_emoji').text(unicode ? unicode : '');
                 // TODO DBE: find a way to remove / add the icon manually without having to reload the view
                 // (as the changes are saved and the side bar is updated anyway)
