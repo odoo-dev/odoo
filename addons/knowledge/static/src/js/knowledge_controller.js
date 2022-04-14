@@ -324,6 +324,7 @@ const KnowledgeFormController = FormController.extend({
                 confirmation_message = _t("Set as Private");
             }
             Dialog.confirm(this, message, {
+                cancel_callback: data.onReject,
                 buttons: [{
                             text: confirmation_message,
                             classes: 'btn-primary',

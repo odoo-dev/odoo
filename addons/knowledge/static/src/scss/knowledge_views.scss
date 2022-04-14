@@ -57,7 +57,7 @@
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_icon_cover_buttons,
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .note-editable,
     .o_knowledge_article_view_form_dynamic_width.o_invisible_modifier ~ .o_knowledge_editor .oe_form_field .o_readonly {
-        width: 750px; /* Almost same as Notion (900px - 96px padding (left and right) )*/
+        width: 750px;
         max-width: 100%;
         margin-left: auto;
         margin-right: auto;
@@ -66,6 +66,10 @@
 
     // = Sidebar
     // --------------------------------------------------------------------------
+    .o_section .o_tree {
+        min-height: 2rem;
+    }
+
     .o_knowledge_aside {
         width: var(--sidebar-size);
         transition: width 0.15s linear;
