@@ -6,6 +6,9 @@ import { _t } from 'web.core';
 import { useService } from '@web/core/utils/hooks';
 
 const { Component, onWillStart, useState } = owl;
+const permissionLevel = {'none': 0, 'read': 1, 'write': 2}
+const restrictMessage = _t("Are you sure you want to restrict this role and restrict access ? "
++ "This article will no longer inherit access settings from the parent page.");
 
 class PermissionPanel extends Component {
     /**
@@ -18,14 +21,18 @@ class PermissionPanel extends Component {
             loading: true,
             partner_id: session.partner_id
         })
-        onWillStart(async () => {
-            const data = await this.loadData();
-            this.state = {
-                ...this.state,
-                ...data,
-                loading: false
-            };
-        });
+        onWillStart(this.loadPanel);
+    }
+
+    async loadPanel () {
+        const data = await this.loadData();
+        this.state = {
+            ...this.state,
+            ...data,
+            loading: false
+        };
+        this.render();
+        this._showPanel();
     }
 
     /**
@@ -78,31 +85,37 @@ class PermissionPanel extends Component {
         const index = this.state.members.findIndex(current => {
             return current.partner_id === session.partner_id;
         });
-        const willLoseAccess = !($select.val() !== 'none' || (index >= 0 && this.state.members[index].permission !== 'none'));
+        const newPermission = $select.val();
+        const oldPermission = this.state.internal_permission;
+        const willRestrict = this.state.based_on && permissionLevel[newPermission] < permissionLevel[oldPermission]
+                                && permissionLevel[newPermission] < permissionLevel[this.state.parent_permission];
+        const willLoseAccess = $select.val() === 'none' && (index >= 0 && this.state.members[index].permission === 'none');
         const confirm = () => {
             this.rpc({
                 route: '/article/set_internal_permission',
                 params: {
                     article_id: this.props.article_id,
-                    permission: $select.val(),
+                    permission: newPermission,
                 }
             }).then(res => {
                 if (self._onChangedPermission(res, willLoseAccess)) {
-                    this.state.internal_permission = $select.val();
+                    self.state.internal_permission = newPermission;
+                    self.loadPanel();
                 }
             });
         };
 
-        if (!willLoseAccess) {
+        if (!willLoseAccess && !willRestrict) {
             confirm();
             return;
         }
 
         const discard = () => {
-            $select.val(this.state.internal_permission);
+            $select.val(oldPermission);
+            self.loadPanel();
         };
-        const message = _t('Are you sure you want to set the internal permission to "none" ? If you do, you will no longer have access to the article.');
-        this._showConfirmDialog(message, confirm, discard);
+        const loseAccessMessage = _t('Are you sure you want to set the internal permission to "none" ? If you do, you will no longer have access to the article.');
+        this._showConfirmDialog(willLoseAccess ? loseAccessMessage : restrictMessage, confirm, discard);
     }
 
     /**
@@ -119,31 +132,40 @@ class PermissionPanel extends Component {
             return;
         }
         const $select = $(event.target);
-        const willLoseAccess = !(!this.isLoggedUser(member) || $select.val() !== 'none');
+        const newPermission = $select.val();
+        const oldPermission = this.state.members[index].permission;
+        const willLoseAccess = this.isLoggedUser(member) && newPermission === 'none';
+        const willRestrict = this.state.based_on && permissionLevel[newPermission] < permissionLevel[oldPermission];
+        const willLoseWrite = this.isLoggedUser(member) && newPermission !== 'write' && oldPermission === 'write';
         const confirm = () => {
             this.rpc({
                 route: '/article/set_member_permission',
                 params: {
                     article_id: this.props.article_id,
+                    permission: newPermission,
                     member_id: member.id,
-                    permission: $select.val(),
+                    partner_id: member.based_on ? member.partner_id: false,
                 }
             }).then(res => {
                 if (self._onChangedPermission(res, willLoseAccess)) {
-                    this.state.members[index].permission = $select.val();
+                    self.state.members[index].permission = newPermission;
+                    self.loadPanel();
                 }
             });
         };
 
-        if (!willLoseAccess) {
+        if (!willLoseAccess && !willRestrict && !willLoseWrite) {
             confirm();
             return;
         }
 
         const discard = () => {
             $select.val(this.state.members[index].permission);
+            self.loadPanel();
         };
-        const message = _t('Are you sure you want to set your permission to "none"? If you do, you will no longer have access to the article.');
+        const loseAccessMessage = _t('Are you sure you want to set your permission to "none"? If you do, you will no longer have access to the article.');
+        const loseWriteMessage = _t('Are you sure you want to remove you own "Write" access ?');
+        const message = willLoseAccess ? loseAccessMessage : willLoseWrite ? loseWriteMessage : loseAccessMessage;
         this._showConfirmDialog(message, confirm, discard);
     }
 
@@ -160,28 +182,54 @@ class PermissionPanel extends Component {
         if (index < 0) {
             return;
         }
-        const willLoseAccess = !(!this.isLoggedUser(member) || this.state.internal_permission !== 'none');
+        const willRestrict = member.based_on ? true : false;
+        const willLoseAccess = this.isLoggedUser(member) && this.state.internal_permission === 'none';
         const confirm = () => {
             this.rpc({
                 route: '/article/remove_member',
                 params: {
                     article_id: this.props.article_id,
                     member_id: member.id,
+                    partner_id: member.based_on ? member.partner_id: false,
                 }
             }).then(res => {
                 if (self._onChangedPermission(res, willLoseAccess)) {
-                    this.state.members.splice(index, 1);
-                    this.render(); // TODO JBN: Remove me ?
+                    self.state.members.splice(index, 1);
+                    self.loadPanel();
                 }
             });
         };
 
-        if (!willLoseAccess) {
+        if (!willLoseAccess && !willRestrict) {
             confirm();
             return;
         }
 
-        const message = _t('Are you sure you want to withdraw from the members? If you do, you will no longer have access to the article.');
+        const loseAccessMessage = _t('Are you sure you want to withdraw from the members? If you do, you will no longer have access to the article.');
+        this._showConfirmDialog(willLoseAccess ? loseAccessMessage : restrictMessage, confirm);
+    }
+
+    /**
+     * Callback function called when user clicks on 'Restore' button.
+     * @param {Event} event
+     */
+    _onRestore (event) {
+        const self = this;
+        const articleId = this.props.article_id;
+        const confirm = () => {
+            this.rpc({
+                model: 'knowledge.article',
+                method: 'restore_article_access',
+                args: [[articleId]],
+            }).then(res => {
+                if (res) {
+                    self._onChangedPermission({success: res});
+                    self.loadPanel();
+                }
+            });
+        };
+
+        const message = _t('Are you sure you want to restore access?');
         this._showConfirmDialog(message, confirm);
     }
 
@@ -206,8 +254,9 @@ class PermissionPanel extends Component {
     * @param {function} discard
     */
     _showConfirmDialog (message, confirm, discard) {
+        const self = this;
         if (discard === undefined) {
-            const discard = () => {};
+            const discard = this.loadPanel;
         }
         Dialog.confirm(this, message, {
             buttons: [{
@@ -231,18 +280,30 @@ class PermissionPanel extends Component {
     * @param {Dict} result
     * @param {Boolean} lostAccess
     */
-    _onChangedPermission (result, lostAccess) {
+    _onChangedPermission (result, reloadAll, reloadArticleId) {
         if (!result.success) {
             return false;
-        } else if (lostAccess) {
+        } else if (reloadAll) {
             this.env.bus.trigger('do-action', {
                 action: 'knowledge.action_home_page',
+                options: {
+                    additional_context: {
+                        res_id: reloadArticleId
+                    }
+                }
             });
             return false;
         } else if (result.reload_tree) {
             this.env.bus.trigger('reload_tree', {});
         }
         return true;
+    }
+
+    _showPanel () {
+        // TODO DBE: get permission panel with owl brol ??
+        const $permissionPanel = $('.o_knowledge_share_panel');
+        $permissionPanel.addClass('show');
+        $permissionPanel.parent().addClass('show');
     }
 }
 

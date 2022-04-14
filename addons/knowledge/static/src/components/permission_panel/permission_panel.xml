@@ -7,20 +7,27 @@
             </div>
         </t>
         <t t-else="">
-            <div t-attf-class="d-flex align-items-center px-3 py-1">
+            <div t-if="!state.is_sync &amp;&amp; state.parent_name" class="d-flex align-items-center px-3 py-1 my-1 bg-light">
+                <span><i class="fa fa-eye"/> Access Restricted. May not be shared with everyone from
+                    <a t-att-href="state.parent_link" t-out="state.parent_name"/></span>
+                <button t-if="props.user_permission === 'write' || state.user_is_admin"
+                        class="btn btn-link" t-on-click="event => this._onRestore(event)" type="button">Restore</button>
+            </div>
+            <div class="d-flex align-items-center px-3 py-1">
                 <div class="flex-shrink-0">
                     <div class="o_company_icon rounded-circle d-flex justify-content-center align-items-center bg-light">
-                        <i class="fa fa-user"/>
+                        <i class="fa fa-building"/>
                     </div>
                 </div>
                 <div class="flex-grow-1 px-3">
                     Company members
+                    <div t-if="state.based_on" class="text-muted">Based on <a t-att-href="state.based_on_link" t-out="state.based_on"/></div>
                 </div>
                 <div class="flex-shrink-0 bg-white">
                     <select class="custom-select w-auto"
                         t-att-value="state.internal_permission"
                         t-on-change="_onChangeInternalPermission"
-                        t-att-disabled="props.user_permission === 'write' ? undefined : 'disabled'"
+                        t-att-disabled="state.user_is_admin || props.user_permission === 'write' ? undefined : 'disabled'"
                         aria-label="Internal Permission">
                         <t t-foreach="this.getInternalPermissionOptions()" t-as="option" t-key="option_index">
                             <option t-att-value="option[0]" t-out="option[1]" t-att-selected="option[0] === state.internal_permission ? 'selected' : undefined"/>
@@ -36,22 +43,35 @@
                             t-on-click="event => this._onMemberAvatarClick(event, member)"/>
                     </div>
                     <div class="flex-grow-1 px-3">
-                        <div t-out="member.partner_name"/>
+                        <div class="d-flex align-items-center">
+                            <i t-if="member.is_external" class="fa fa-envelope pr-1" title="External Guest"/>
+                            <div t-out="member.partner_name"/>
+                        </div>
                         <div t-if="member.company_name" t-out="member.company_name" class="text-muted"/>
+                        <div t-if="member.based_on" class="text-muted">Based on <a t-att-href="member.based_on_link" t-out="member.based_on"/></div>
                     </div>
                     <div class="flex-shrink-0 bg-white">
                         <div class="input-group">
                             <select class="custom-select w-auto"
                                 t-att-value="member.permission"
                                 t-on-change="event => this._onChangeMemberPermission(event, member)"
-                                t-att-disabled="props.user_permission === 'write' ? undefined : 'disabled'"
+                                t-att-disabled="member.is_external || (props.user_permission !== 'write' &amp;&amp; !state.user_is_admin) ? 'disabled' : undefined"
                                 aria-label="User Permission">
                                 <t t-foreach="this.getMemberPermissionOptions(member)" t-as="option" t-key="option_index">
                                     <option t-att-value="option[0]" t-out="option[1]" t-att-selected="option[0] === member.permission ? 'selected' : undefined"/>
                                 </t>
                             </select>
-                            <div t-if="props.user_permission === 'write' || state.partner_id === member.partner_id &amp;&amp; member.has_higher_permission" class="input-group-append">
-                                <button class="o_delete btn btn-outline-danger" t-on-click="event => this._onRemoveMember(event, member)" type="button">
+                            <div t-if="(state.user_is_admin || props.user_permission === 'write')
+                                        || (state.partner_id === member.partner_id &amp;&amp; member.has_higher_permission)"
+                                 class="input-group-append">
+                                <button t-if="!(member.based_on &amp;&amp; member.permission === 'none')"
+                                        class="o_delete btn btn-outline-danger"
+                                        t-on-click="event => this._onRemoveMember(event, member)" type="button">
+                                    <i class="fa fa-w fa-trash"/>
+                                </button>
+                                <button t-else="!(member.based_on &amp;&amp; member.permission === 'none')"
+                                        class="o_delete btn btn-outline-secondary" type="button" disabled="True"
+                                        title="To upgrade this person's access, either select a new access right from here, or from the article this access is based on.">
                                     <i class="fa fa-w fa-trash"/>
                                 </button>
                             </div>
@@ -59,6 +79,9 @@
                     </div>
                 </div>
             </t>
+            <div t-if="state.show_admin_tip" class="d-flex align-items-center px-3 py-1 my-1 bg-light">
+                As an administrator, you can always modify this article.
+            </div>
         </t>
     </t>
 </templates>

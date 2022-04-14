@@ -143,43 +143,94 @@ class KnowledgeController(http.Controller):
         Returns a dictionnary containing all values required to render the permission panel.
         :param article_id: (int) article id
         """
-        article = request.env['knowledge.article'].sudo().browse(article_id)
-        members = []
-        for member in article.article_member_ids:
+        Article = request.env['knowledge.article'].sudo()
+        Partner = request.env['res.partner']
+        article = Article.browse(article_id)
+        is_sync = not article.is_desynchronized
+        # Get member permission info
+        members_values = []
+        members_permission = article._get_article_member_permissions()[article.id]
+
+        # retrieve all involved partners info
+        results = request.env['res.partner'].search_read([('id', 'in', list(members_permission.keys()))], fields=['id', 'name', 'user_ids', 'partner_share'])
+        partners_info = {partner['id']: {'name': partner['name'], 'user_ids': partner['user_ids'], 'share': partner['partner_share']} for partner in results}
+
+        # retrieve all member browse records
+        members = request.env['knowledge.article.member']
+        member_partner_rel = {member["member_id"]: partner_id for partner_id, member in members_permission.items() if partner_id}
+        members = request.env['knowledge.article.member'].sudo().browse(list(member_partner_rel.keys())).exists() if member_partner_rel else members
+
+        # retrieve all involved "based on" articles info
+        based_on_article_ids = [members_permission[partner_id]['based_on'] for partner_id in partners_info.keys()]
+        results = Article.search_read([('id', 'in', based_on_article_ids)], fields=['id', 'display_name', 'share_link'])
+        based_on_articles = {article['id']: {'name': article['display_name'], 'link': article['share_link']} for article in results}
+
+        for member in members:
+            partner_id = member_partner_rel[member.id]
+            permission = members_permission[partner_id]['permission']
+            # if share partner and permission = none, don't show it in the permisison panel.
+            if permission == 'none' and partners_info[partner_id]['share']:
+                continue
+            based_on_article = based_on_articles.get(members_permission[partner_id]['based_on'], {})
+            # if article is desyncronized, don't show members based on parent articles.
+            if not is_sync and based_on_article:
+                continue
+            user_ids = partners_info[partner_id]['user_ids']
             member_values = {
                 'id': member.id,
-                'partner_id': member.partner_id.id,
-                'partner_name': member.partner_id.name,
-                'permission': member.permission,
+                'partner_id': partner_id,
+                'partner_name': partners_info[partner_id]['name'],
+                'permission': permission,
+                'based_on': based_on_article.get('name'),
+                'based_on_link': based_on_article.get('link'),
                 'has_higher_permission': member.has_higher_permission,
-                'user_ids': member.partner_id.user_ids.mapped('id'),
-                'is_external': not member.partner_id.user_ids
+                'user_ids': user_ids,
+                'is_external': not user_ids
             }
             # Optional values:
             if member.partner_id.company_name:
                 member_values['company_name'] = member.partner_id.company_name
-            members.append(member_values)
+            members_values.append(member_values)
         internal_permission_field = request.env['knowledge.article']._fields['internal_permission']
         permission_field = request.env['knowledge.article.member']._fields['permission']
+        user_is_admin = request.env.user.has_group('base.group_system')
         return {
             'internal_permission_options': internal_permission_field.get_description(request.env).get('selection', []),
-            'internal_permission': article.internal_permission,
+            'internal_permission': article.inherited_permission,
+            'parent_permission': article.parent_id.inherited_permission,
+            'based_on': article.inherited_permission_parent_id.display_name,
+            'based_on_link': article.inherited_permission_parent_id.share_link,
             'members_options': permission_field.get_description(request.env).get('selection', []),
-            'members': members
+            'members': members_values,
+            'is_sync': is_sync,
+            'parent_name': article.parent_id.display_name,
+            'parent_link': article.parent_id.share_link,
+            'user_is_admin': user_is_admin,
+            'show_admin_tip': user_is_admin and article.user_permission != 'write',
         }
 
     @http.route('/article/set_member_permission', type='json', auth='user')
-    def article_set_member_permission(self, article_id, member_id, permission, **post):
+    def article_set_member_permission(self, article_id, permission, member_id=False, partner_id=False, **post):
         """
         Sets the permission of the given member for the given article.
         **Note**: The user needs "write" permission to change the permission of a user.
         :param article_id: (int) article id
-        :param member_id: (int) member id
         :param permission: (string) permission
+        :param member_id: (int) member id
+        :param partner_id: (int) partner id. Typically given when the member is based on a parent article.
         """
-        article = request.env['knowledge.article'].sudo().browse(article_id)
+        article = request.env['knowledge.article'].sudo().browse(article_id).exists()
         previous_category = article.category
-        if not article.exists() or not article._set_member_permission(member_id, permission):
+        if partner_id:  # If based on
+            partner = request.env['res.partner'].browse(partner_id).exists()
+            if not article or not partner:
+                return {'success': False}
+            member = request.env['knowledge.article.member'].sudo().browse(member_id).exists()
+            downgrade = bool(member) and member.permission > permission
+            if (not downgrade and not article.invite_members(partner, permission, send_mail=False))\
+                    or (downgrade and not article._desync_access_from_parents(partner.ids, permission)):
+                return {'success': False}
+        elif not article or not article._set_member_permission(member_id, permission):
             return {'success': False}
         result = {'success': True}
         if article.category != previous_category:
@@ -187,7 +238,7 @@ class KnowledgeController(http.Controller):
         return result
 
     @http.route('/article/remove_member', type='json', auth='user')
-    def article_remove_member(self, article_id, member_id):
+    def article_remove_member(self, article_id, member_id, partner_id=False):
         """
         Removes the given member from the given article.
         The function returns a dictionary indicating whether the request succeeds (see: `success` key).
@@ -197,10 +248,20 @@ class KnowledgeController(http.Controller):
         the list. The user can always remove themselves from the list.
         :param article_id: (int) article id
         :param member_id: (int) member id
+        :param partner_id: (int) partner id. Typically given when the member is based on a parent article
+            and we need to desync the article from its parent (and ensure the partner to removed is well removed
+            after the desynchronization).
         """
         article = request.env['knowledge.article'].sudo().browse(article_id)
         previous_category = article.category
-        if not article.exists() or not article._remove_member(member_id):
+        if partner_id:  # If the permission is based on parent article -> Desync article
+            partner = request.env['res.partner'].browse(partner_id).exists()
+            article_member_partners_ids = article.article_member_ids.partner_id.ids
+            if not article or not partner or not article._desync_access_from_parents(article_member_partners_ids):
+                return {'success': False}
+            # remove the partner if was copied from parent
+            article.article_member_ids.filtered(lambda m: m.partner_id.id == partner_id).unlink()
+        elif not article.exists() or not article._remove_member(member_id):
             return {'success': False}
         result = {'success': True}
         if article.category != previous_category:
