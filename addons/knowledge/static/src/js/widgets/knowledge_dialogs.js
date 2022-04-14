@@ -90,14 +90,11 @@ const MoveArticleToDialog = Dialog.extend({
                     const { state } = this.props;
                     const results = await this._rpc({
                         model: 'knowledge.article',
-                        method: 'search_read',
+                        method: 'get_possible_parents',
+                        args: [state.data.id],
                         kwargs: {
-                            fields: ['id', 'icon', 'name'],
-                            domain: ['&',
-                                ['id', '!=', state.data.id],
-                                ['name', '=ilike', `%${term}%`],
-                            ],
-                        },
+                            term
+                        }
                     });
                     params.success({ term, results });
                 },

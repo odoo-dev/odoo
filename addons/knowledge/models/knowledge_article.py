@@ -6,6 +6,7 @@ import sys
 
 from collections import defaultdict
 from datetime import datetime
+from unittest import result
 from werkzeug.urls import url_join
 
 from odoo import fields, models, api, _
@@ -241,6 +242,11 @@ class Article(models.Model):
                 return False
             if not has_write_permission(article) and not has_write_member(article):
                 raise ValidationError(_("You must have at least one writer."))
+
+    @api.constrains('parent_id')
+    def _check_parent_id(self):
+        if not self._check_recursion():
+            raise ValidationError(_('You cannot create recursive articles.'))
 
     def name_get(self):
         """Override the `name_get` function to add the article icon"""
@@ -625,6 +631,15 @@ class Article(models.Model):
     #####################
     #  Business methods
     #####################
+
+    def get_possible_parents(self, term=""):
+        # do a search_read and exclude all articles in descendants
+        exclude_ids = self._get_descendants()
+        exclude_ids |= self
+        return self.search_read(
+            domain=['&', ['name', '=ilike', '%%%s%%' % term], ['id', 'not in', exclude_ids.ids]],
+            fields=['id', 'icon', 'name'],
+        )
 
     def move_to(self, parent_id=False, before_article_id=False, private=False):
         self.ensure_one()
