@@ -58,7 +58,7 @@ export class Dropdown extends Component {
         // Set up dynamic open/close behaviours --------------------------------
         if (!this.props.manualOnly) {
             // Close on outside click listener
-            useExternalListener(window, "click", this.onWindowClicked);
+            useExternalListener(window, "click", this.onWindowClicked, { capture: true }); // AAB WOWL check with BOI, do this in master
             // Listen to all dropdowns state changes
             useBus(Dropdown.bus, "state-changed", ({ detail }) =>
                 this.onDropdownStateChanged(detail)
