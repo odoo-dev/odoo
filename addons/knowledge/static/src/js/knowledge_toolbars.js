@@ -178,7 +178,8 @@ const FileToolbar = KnowledgeToolbar.extend({
                     ev.preventDefault();
                     const record = this.recordWithChatter;
                     if (record) {
-                        const data = await this._fetchData(this.container.querySelector('.o_knowledge_file_image > a'));
+                        const fileLink = this.container.querySelector('.o_knowledge_file_image > a');
+                        const data = await this._fetchData(fileLink);
                         if (!data) {
                             return;
                         }
@@ -186,7 +187,7 @@ const FileToolbar = KnowledgeToolbar.extend({
                         const attachment = await this._rpc({
                             route: '/web_editor/attachment/add_data',
                             params: {
-                                'name': name,
+                                'name': fileLink.getAttribute('title'),
                                 'data': dataURL.split(',')[1],
                                 'is_image': false,
                                 'res_id': this.recordWithChatter.res_id,
