@@ -46,7 +46,7 @@
                             <font style="color: inherit; background-color: inherit;">Select text to</font>
                             <font class="text-o-color-3 " style="background-color: inherit;"></font>
                             <font class="text-o-color-3 bg-o-color-1">Highlight</font>,
-                            <strike>strikethrough</strike>
+                            <span style="text-decoration-line: line-through;">strikethrough</span>
                             <span> or </span>
                             <font style="background-color: inherit; color: inherit; font-weight: bolder;">
                                 style
@@ -763,9 +763,9 @@
                                         <span style="font-size: 14px;"> in the same font size and style as the content of the text</span>
                                     </li>
                                     <li>
-                                        <span style="font-size: 14px;">Write it without any article (</span><strike style="font-style: italic; font-size: 14px;">the</strike>
+                                        <span style="font-size: 14px;">Write it without any article (</span><span style="text-decoration-line: line-through;font-style: italic; font-size: 14px;">the</span>
                                         <span style="font-style: italic; font-size: 14px;"> YourCompany, </span>
-                                        <strike style="font-style: italic; font-size: 14px;">an</strike>
+                                        <span style="text-decoration-line: line-through;font-style: italic; font-size: 14px;">an</span>
                                         <span style="font-style: italic; font-size: 14px;">  YourCompany
                     , ...</span><span style="font-size: 14px;">)</span>
                                     </li>
