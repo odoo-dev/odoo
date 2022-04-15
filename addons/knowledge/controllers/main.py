@@ -146,6 +146,8 @@ class KnowledgeController(http.Controller):
         Article = request.env['knowledge.article'].sudo()
         Partner = request.env['res.partner']
         article = Article.browse(article_id)
+        if not article.user_has_access:
+            return werkzeug.exceptions.Forbidden()
         is_sync = not article.is_desynchronized
         # Get member permission info
         members_values = []
@@ -219,7 +221,9 @@ class KnowledgeController(http.Controller):
         :param member_id: (int) member id
         :param partner_id: (int) partner id. Typically given when the member is based on a parent article.
         """
-        article = request.env['knowledge.article'].sudo().browse(article_id).exists()
+        article = request.env['knowledge.article'].sudo().browse(article_id)
+        if not article.user_can_write:
+            return werkzeug.exceptions.Forbidden()
         previous_category = article.category
         if partner_id:  # If based on
             partner = request.env['res.partner'].browse(partner_id).exists()
@@ -253,6 +257,8 @@ class KnowledgeController(http.Controller):
             after the desynchronization).
         """
         article = request.env['knowledge.article'].sudo().browse(article_id)
+        if not article.user_can_write:
+            return werkzeug.exceptions.Forbidden()
         previous_category = article.category
         if partner_id:  # If the permission is based on parent article -> Desync article
             partner = request.env['res.partner'].browse(partner_id).exists()
@@ -280,6 +286,8 @@ class KnowledgeController(http.Controller):
         :param permission: (string) permission
         """
         article = request.env['knowledge.article'].sudo().browse(article_id)
+        if not article.user_can_write:
+            return werkzeug.exceptions.Forbidden()
         previous_category = article.category
         if not article._set_internal_permission(permission):
             return {'success': False}
