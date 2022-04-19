@@ -73,7 +73,7 @@ export const makeView = async (params) => {
             // write the field name inside the field description (as done by fields_get)
             field.fieldName = fieldName;
             // add relatedFields for x2many fields with subviews
-            if (["one2many", "many2many"].includes(field.type)) {
+            if (["one2many", "many2many", "many2one"].includes(field.type)) {
                 field.relatedFields = models[field.relation] || {};
             }
         }
