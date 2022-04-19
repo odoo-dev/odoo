@@ -85,10 +85,10 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
                 if ($parent.length > 0) {
                     data.target_parent_id = $parent.data('article-id');
-                    const $next = $li.next();
-                    if ($next.length > 0) {
-                        data.before_article_id = $next.data('article-id');
-                    }
+                }
+                const $next = $li.next();
+                if ($next.length > 0) {
+                    data.before_article_id = $next.data('article-id');
                 }
 
                 this.trigger_up('move', {...data,

@@ -758,7 +758,7 @@ class Article(models.Model):
                     })]
                 })
 
-        article_sudo.sudo().write(values)
+        article_sudo.write(values)
         members_to_remove.unlink()
 
         return True
