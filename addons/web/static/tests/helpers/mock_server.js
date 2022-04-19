@@ -22,7 +22,7 @@ function traverseElementTree(tree, cb) {
     }
 }
 
-export function _getView(params) {
+function _getView(params) {
     let processedNodes = params.processedNodes || [];
     const { arch, context, modelName } = params;
     const fields = deepCopy(params.fields);

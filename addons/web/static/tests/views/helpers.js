@@ -51,39 +51,22 @@ export const makeView = async (params) => {
     delete props.legacyParams;
     delete props.config;
 
-    const env = await makeTestEnv({ serverData, mockRPC, config });
-
     if (props.arch) {
-        const models = {
-            [props.resModel]: deepCopy(props.fields || serverData.models[props.resModel].fields),
-        };
-        props.fields = models[props.resModel];
-        const view = _getView({
-            arch: props.arch,
-            modelName: props.resModel,
-            fields: props.fields,
-            context: props.context || {},
-            models: serverData.models,
-        });
-        for (const model of view.models) {
-            models[model] = models[model] || deepCopy(serverData.models[model].fields);
-        }
-        for (const fieldName in props.fields) {
-            const field = props.fields[fieldName];
-            // write the field name inside the field description (as done by fields_get)
-            field.fieldName = fieldName;
-            // add relatedFields for x2many fields with subviews
-            if (["one2many", "many2many", "many2one"].includes(field.type)) {
-                field.relatedFields = models[field.relation] || {};
-            }
-        }
-        props.arch = view.arch;
-        props.searchViewArch = props.searchViewArch || "<search/>";
-        props.searchViewFields = props.searchViewFields || Object.assign({}, props.fields);
+        serverData.views = serverData.views || {};
+        props.viewId = 100000001; // hopefully will not conflict with an id already in views
+        serverData.views[`${props.resModel},${props.viewId},${props.type}`] = props.arch;
+        delete props.arch;
+        props.searchViewId = 100000002; // hopefully will not conflict with an id already in views
+        const searchViewArch = props.searchViewArch || "<search/>";
+        serverData.views[`${props.resModel},${props.searchViewId},search`] = searchViewArch;
+        delete props.searchViewArch;
     }
+
+    const env = await makeTestEnv({ serverData, mockRPC, config });
 
     props.selectRecord = props.selectRecord || (() => {});
     props.createRecord = props.createRecord || (() => {});
+
     /** Legacy Environment, for compatibility sakes
      *  Remove this as soon as we drop the legacy support
      */
