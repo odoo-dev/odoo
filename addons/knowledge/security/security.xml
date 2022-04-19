@@ -35,13 +35,6 @@
         <field name="groups" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <record id="knowledge_member_write_articles" model="ir.rule">
-        <field name="name">Write article members</field>
-        <field name="model_id" ref="model_knowledge_article_member"/>
-        <field name="domain_force">[('article_id.user_can_write', '=', True)]</field>
-        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-    </record>
-
     <record id="knowledge_member_write_articles_system" model="ir.rule">
         <field name="name">All article members</field>
         <field name="model_id" ref="model_knowledge_article_member"/>
