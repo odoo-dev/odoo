@@ -16,9 +16,9 @@ KnowledgeCommand.template = xml`
         <span class="pr-2" t-else="">📄</span>
         <span class="pr-2"><t t-slot="name"/></span>
         <icon t-if="props.isFavourite" class="fa fa-star o_favorite pr-2"/>
-        <span t-if="props.parentName" t-out="'— '" class="text-muted small pr-2" />
-        <span t-if="props.parentName" class="o_command_name text-muted small">
-            <t t-foreach="props.splitParentName" t-as="name" t-key="name_index">
+        <span t-if="props.subjectName" t-out="'— '" class="text-muted small pr-2" />
+        <span t-if="props.subjectName" class="o_command_name text-muted small">
+            <t t-foreach="props.splitSubjectName" t-as="name" t-key="name_index">
                 <b t-if="name_index % 2" t-out="name"/>
                 <t t-else="" t-out="name"/>
             </t>
@@ -71,7 +71,7 @@ commandProviderRegistry.add("knowledge", {
             args: [[]],
             kwargs: {
                 search_query: options.searchValue,
-                fields: ['id', 'name', 'is_user_favourite', 'favourite_count', 'parent_id', 'icon'],
+                fields: ['id', 'name', 'is_user_favourite', 'favourite_count', 'main_article_id', 'icon'],
                 order_by: "is_user_favourite, favourite_count desc",
                 limit: 10,
             }
@@ -133,8 +133,8 @@ commandProviderRegistry.add("knowledge", {
             name: article.name,
             props: {
                 isFavourite: article.is_user_favourite,
-                parentName: article.parent_id[1],
-                splitParentName: splitCommandName(article.parent_id[1], options.searchValue),
+                subjectName: article.main_article_id[0] != article.id ? article.main_article_id[1] : false,
+                splitSubjectName: splitCommandName(article.main_article_id[1], options.searchValue),
                 icon_string: article.icon,
             },
         }));
