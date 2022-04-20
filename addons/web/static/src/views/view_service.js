@@ -81,12 +81,16 @@ export const viewService = {
                         const { models, views } = result;
                         const modelsCopy = deepCopy(models); // for legacy views
                         const fields = models[resModel];
-                        for (const field of Object.values(fields)) {
-                            // add relatedFields for relational fields in view
-                            if (field.relation) {
-                                field.relatedFields = models[field.relation] || {};
+                        // add relatedFields for relational fields in view
+                        function setRelatedFields(fields, models) {
+                            for (const field of Object.values(fields)) {
+                                if (field.relation && !field.relatedFields) {
+                                    field.relatedFields = models[field.relation] || {};
+                                    setRelatedFields(field.relatedFields, models);
+                                }
                             }
                         }
+                        setRelatedFields(models[resModel], models);
                         const viewDescriptions = {
                             __legacy__: generateLegacyLoadViewsResult(resModel, views, modelsCopy),
                             fields,
