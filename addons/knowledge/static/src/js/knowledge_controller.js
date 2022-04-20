@@ -36,7 +36,15 @@ const KnowledgeFormController = FormController.extend({
      * @override
      */
     init: function (parent, model, renderer, params) {
-        this.knowledgeFormController = true;
+        /**
+         * This property is used to specify that the current form view will
+         * get/use records stored in the @see KnowledgeService instead of
+         * replacing them (default). TODO ABD: maybe set this as an option of
+         * the form view (XML) so that other form views can easily specify that
+         * they will get/use records from the KnowledgeService instead of
+         * providing them.
+         */
+        this.ignoreKnowledgeRecordSearch = true;
         this.renderer = renderer;
         this._super.apply(this, arguments);
         this.onFieldSavedListeners = new Map();

@@ -21,7 +21,7 @@ FormController.include({
         if (this._isPotentialKnowledgeRecord()) {
             this._searchKnowledgeRecord();
         }
-        if (this.knowledgeFormController) {
+        if (this.ignoreKnowledgeRecordSearch) {
             this._unregisterObsoleteKnowledgeRecords(this.renderer.breadcrumbs);
         }
     },
@@ -35,7 +35,7 @@ FormController.include({
         if (this._isPotentialKnowledgeRecord()) {
             this._searchKnowledgeRecord();
         }
-        if (this.knowledgeFormController) {
+        if (this.ignoreKnowledgeRecordSearch) {
             this._unregisterObsoleteKnowledgeRecords(this.renderer.breadcrumbs);
         }
     },
@@ -79,7 +79,7 @@ FormController.include({
      * (saved new records will be registered upon @see update )
      */
     _isPotentialKnowledgeRecord: function () {
-        return !this.knowledgeFormController && this.withControlPanel && this.controlPanelProps.withBreadcrumbs &&
+        return !this.ignoreKnowledgeRecordSearch && this.withControlPanel && this.controlPanelProps.withBreadcrumbs &&
             this.controlPanelProps.action && this.controlPanelProps.action.controllers &&
             this.handle && !this.model.localData[this.handle].isNew();
     },
