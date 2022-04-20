@@ -94,6 +94,7 @@ This module provides the core of the Odoo Web Client.
             'base/static/src/js/res_config_settings.js',
 
             'web/static/src/core/utils/transitions.scss',
+            'web/static/src/poc/**/*',
             'web/static/src/core/**/*',
             'web/static/src/fields/**/*',
             'web/static/src/search/**/*',
