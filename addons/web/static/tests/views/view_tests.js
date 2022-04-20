@@ -9,8 +9,7 @@ import {
     nextTick,
     patchWithCleanup,
 } from "@web/../tests/helpers/utils";
-import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
-import { setupControlPanelServiceRegistry } from "@web/../tests/search/helpers";
+import { setupViewRegistries } from "@web/../tests/views/helpers";
 import { registry } from "@web/core/registry";
 import { OnboardingBanner } from "@web/views/onboarding_banner";
 import { View } from "@web/views/view";
@@ -421,7 +420,6 @@ QUnit.module("Views", (hooks) => {
                 arch: `<toy>Specific arch content</toy>`,
                 fields: {},
                 loadActionMenus: true,
-                // actionMenus: false,
             };
             await mount(View, target, { env, props });
             assert.containsOnce(target, ".o_toy_view");
@@ -459,7 +457,7 @@ QUnit.module("Views", (hooks) => {
                 arch: `<toy>Specific arch content</toy>`,
                 fields: {},
                 loadActionMenus: true,
-                // actionMenus: {},
+                actionMenus: {},
             };
             await mount(View, target, { env, props });
             assert.containsOnce(target, ".o_toy_view");
