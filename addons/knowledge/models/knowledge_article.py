@@ -215,9 +215,8 @@ class Article(models.Model):
     # Set default=0 to avoid false values and messed up sequence order inside same parent
     sequence = fields.Integer(string="Article Sequence", default=0,
                               help="The sequence is computed only among the articles that have the same parent.")
-    main_article_id = fields.Many2one('knowledge.article', string="Highest Parent", recursive=True,
-                                      compute="_compute_main_article_id", search="_search_main_article_id")
-    subject = fields.Char(string="Subject", related="main_article_id.display_name", store=True, related_sudo=True)
+    main_article_id = fields.Many2one('knowledge.article', string="Subject", recursive=True,
+                                      compute="_compute_main_article_id", store=True, compute_sudo=True)
 
     # Access rules and members + implied category
     internal_permission = fields.Selection([
@@ -265,7 +264,7 @@ class Article(models.Model):
     favourite_count = fields.Integer(string="#Is Favourite", copy=False, default=0)
 
     @api.constrains('is_desynchronized', 'parent_id')
-    def _check_members(self):
+    def _check_is_desynchronized(self):
         for article in self:
             if article.is_desynchronized and not article.parent_id:
                 raise ValidationError(_("A root article cannot be desynchronized."))
@@ -302,7 +301,7 @@ class Article(models.Model):
         return [(rec.id, "%s %s" % (rec.icon or "📄", rec.name)) for rec in self]
 
     _sql_constraints = [
-        ('check_permission_on_root', 'check(parent_id IS NOT NULL OR (parent_id IS NULL and internal_permission IS NOT NULL))', 'Root articles must have internal permission.')
+        ('check_permission_on_root', 'check(parent_id IS NOT NULL OR (parent_id IS NULL AND internal_permission IS NOT NULL))', 'Root articles must have internal permission.')
     ]
 
     ##############################
@@ -343,6 +342,9 @@ class Article(models.Model):
         article_permissions = self._get_internal_permission(article_ids=self.ids)
         member_permissions = self._get_partner_member_permissions(partner_id.id, article_ids=self.ids)
         for article in self:
+            if not article.ids:  # If article not created yet, set default permission value.
+                article.user_permission = 'write'
+                continue
             article_id = article.ids[0]
             if self.env.user.share:
                 article.user_permission = member_permissions.get(article_id, 'none')
@@ -629,6 +631,8 @@ class Article(models.Model):
         for vals in vals_list:
             vals['last_edition_id'] = self._uid
             vals['last_edition_date'] = fields.Datetime.now()
+            if not vals.get('parent_id') and not vals.get('internal_permission'):
+                vals['internal_permission'] = 'write'
 
         articles = super(Article, self).create(vals_list)
         for article, vals in zip(articles, vals_list):

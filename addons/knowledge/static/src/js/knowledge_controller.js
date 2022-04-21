@@ -43,11 +43,8 @@ const KnowledgeFormController = FormController.extend({
 
     // Listeners:
 
-    _onAddRandomIcon: function() {
-        const { id } = this.getState();
-        if (typeof id === 'undefined') {
-            return;
-        }
+    _onAddRandomIcon: async function() {
+        let id = await this._getId();
         var unicode = emojis[Math.floor(Math.random() * emojis.length)]['unicode'];
         this.trigger_up('emoji_click', {
             articleId: id,
@@ -56,6 +53,7 @@ const KnowledgeFormController = FormController.extend({
     },
 
     _onAddCover: async function() {
+        await this.saveRecord(this.handle);
         if (this.mode === 'readonly') {
             await this._setMode('edit');
         }
@@ -75,10 +73,7 @@ const KnowledgeFormController = FormController.extend({
     },
 
     _onRename: async function (e) {
-        const { id } = this.getState();
-        if (typeof id === 'undefined') {
-            return;
-        }
+        const id = await this._getId();
         await this._rename(id, e.currentTarget.value);
     },
 
@@ -128,11 +123,8 @@ const KnowledgeFormController = FormController.extend({
     /**
      * Opens the "Move To" modal
      */
-    _onOpenMoveToModal: function () {
-        const { id } = this.getState();
-        if (typeof id === 'undefined') {
-            return;
-        }
+    _onOpenMoveToModal: async function () {
+        const id = await this._getId();
         const state = this.model.get(this.handle);
         const dialog = new MoveArticleToDialog(this, {}, {
             state: state,
@@ -170,6 +162,7 @@ const KnowledgeFormController = FormController.extend({
     _onArchive: function () {
         const { id } = this.getState();
         if (typeof id === 'undefined') {
+            // TODO DBE: Discard the record instead
             return;
         }
         // go to home page
@@ -197,10 +190,7 @@ const KnowledgeFormController = FormController.extend({
 
     _onToggleFavourite: async function (event) {
         const self = this;
-        const { id } = this.getState();
-        if (typeof id === 'undefined') {
-            return;
-        }
+        const id = await this._getId();
         const result = await this._toggleFavourite(id);
         $(event.target).toggleClass('fa-star-o', !result).toggleClass('fa-star', result);
         event.target.title = result ? _t('Remove from favourites') : _t('Add to favourites');
@@ -373,6 +363,11 @@ const KnowledgeFormController = FormController.extend({
             method: 'action_toggle_favourite',
             args: [articleId]
         });
+    },
+
+    _getId: async function () {
+        await this.saveRecord(this.handle);
+        return this.getState()['id'];
     },
 });
 
