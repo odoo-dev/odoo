@@ -215,7 +215,7 @@
         <field name="arch" type="xml">
             <tree default_order="is_user_favourite desc, favourite_count desc">
                 <field name="sequence"/>
-                <field name="name"/>
+                <field name="display_name"/>
                 <field name="is_user_favourite" widget="boolean_favorite" nolabel="1" force_save="1" options="{'allow_order': '1'}"/>
                 <field name="favourite_count" invisible="1"/>
                 <field name="subject"/>
@@ -242,9 +242,8 @@
                         <div class="oe_kanban_global_click">
                             <div class="o_knowledge_kanban_card d-flex flex-column">
                                 <div class="d-flex align-items-center">
-                                    <span t-out="record.icon.raw_value"/>
-                                    <div class="flex-grow-1 lead text-truncate px-2">
-                                        <field name="name"/>
+                                    <div class="flex-grow-1 lead text-truncate">
+                                        <field name="display_name"/>
                                     </div>
                                     <field name="is_user_favourite" class="m-0" widget="boolean_favorite" nolabel="1" force_save="1"/>
                                     <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
