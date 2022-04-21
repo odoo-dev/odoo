@@ -10,7 +10,7 @@
     .o_breadcrumb_article_name:not(:focus) {
         --o-input-border-color: transparent;
     }
-    .o_breadcrumb_article_name:hover {
+    .o_breadcrumb_article_name:not(.o_readonly_modifier):hover {
         border-bottom: $input-border-width solid $o-brand-primary;
     }
 
