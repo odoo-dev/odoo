@@ -198,7 +198,7 @@ class Article(models.Model):
     _order = "favourite_count, create_date desc"
 
     active = fields.Boolean(default=True)
-    name = fields.Char(string="Title", default="New Article")
+    name = fields.Char(string="Title", default="New Article", required=True)
     body = fields.Html(string="Article Body")
     icon = fields.Char(string='Article Icon')
     cover = fields.Binary('Cover Image')
