@@ -118,15 +118,16 @@
                         </span>
                     </li>
                 </ul>
-                <div class="o_knowledge_file o_knowledge_toolbars_container o_knowledge_behavior_anchor o_knowledge_behavior_type_contents_container">
+                <div class="o_knowledge_file o_knowledge_toolbars_container o_knowledge_behavior_anchor o_knowledge_behavior_type_contents_container" contenteditable="false">
                     <div class="o_knowledge_file_image">
-                        <a href="https://www.odoo.com/web/content/31413934" class="o_image" title="Onboarding.pdf" alt="Onboarding.pdf" data-mimetype="application/pdf" contenteditable="false"></a>
+                        <a href="https://www.odoo.com/web/content/31413934?download=true" class="o_image" title="Onboarding.pdf" alt="Onboarding.pdf" data-mimetype="application/pdf" contenteditable="false"></a>
                     </div>
                     <div class="o_knowledge_file_description">
                         <div class="o_knowledge_file_name">Onboarding.pdf</div>
                         <div class="o_knowledge_file_extension">pdf</div>
                     </div>
-                    <div class="o_knowledge_toolbar_anchor o_knowledge_toolbar_type_file mt-auto ml-auto"></div>
+                    <div class="o_knowledge_toolbar_anchor o_knowledge_toolbar_type_file mt-auto ml-auto" contenteditable="false"><div class="o_knowledge_toolbar" contenteditable="false">
+                </div></div>
                 </div>
                 <br />
                 <h3>Navigation Basics 🐣</h3>
@@ -323,15 +324,16 @@
                     <span style="font-size: 14px;">Our catalog can be found here and is updated every 2 years. If you do not manage to find the specific model you are looking for, </span>
                     <span style="font-weight: bolder; text-decoration: underline; font-size: 14px;"><a href="mailto:fleet@company.com">contact our Fleet Officer</a></span><span style="font-size: 14px;">.</span>
                 </p>
-                <div class="o_knowledge_file o_knowledge_toolbars_container o_knowledge_behavior_anchor o_knowledge_behavior_type_contents_container">
+                <div class="o_knowledge_file o_knowledge_toolbars_container o_knowledge_behavior_anchor o_knowledge_behavior_type_contents_container" contenteditable="false">
                     <div class="o_knowledge_file_image">
-                        <a href="https://www.odoo.com/web/content/28674965" class="o_image" title="Onboarding.pdf" alt="Onboarding.pdf" data-mimetype="application/pdf" contenteditable="false"></a>
+                        <a href="https://www.odoo.com/web/content/28674965?download=true" class="o_image" title="Car_Catalog.pdf" alt="Car_Catalog.pdf" data-mimetype="application/pdf" contenteditable="false"></a>
                     </div>
                     <div class="o_knowledge_file_description">
                         <div class="o_knowledge_file_name">Car_Catalog.pdf</div>
                         <div class="o_knowledge_file_extension">pdf</div>
                     </div>
-                    <div class="o_knowledge_toolbar_anchor o_knowledge_toolbar_type_file mt-auto ml-auto"></div>
+                    <div class="o_knowledge_toolbar_anchor o_knowledge_toolbar_type_file mt-auto ml-auto" contenteditable="false"><div class="o_knowledge_toolbar" contenteditable="false">
+                </div></div>
                 </div>
                 <br />
                 <blockquote data-o-mail-quote="1">
@@ -708,15 +710,16 @@
                     <br />
                     <span style="font-size: 14px;">They can also be shared with customers, journalists and resellers.</span>
                 </p>
-                <div class="o_knowledge_file o_knowledge_toolbars_container o_knowledge_behavior_anchor o_knowledge_behavior_type_contents_container">
+                <div class="o_knowledge_file o_knowledge_toolbars_container o_knowledge_behavior_anchor o_knowledge_behavior_type_contents_container" contenteditable="false">
                     <div class="o_knowledge_file_image">
-                        <img class="img-fluid o_we_custom_image" src="https://odoocdn.com/openerp_website/static/src/img/assets/png/odoo_logo.png" />
+                        <a href="https://odoocdn.com/openerp_website/static/src/img/assets/png/odoo_logo.png?download=true" class="o_image" title="logo.jpg" alt="logo.jpg" data-mimetype="image/jpeg" contenteditable="false"></a>
                     </div>
                     <div class="o_knowledge_file_description">
                         <div class="o_knowledge_file_name">logo.jpg</div>
                         <div class="o_knowledge_file_extension">jpg</div>
                     </div>
-                    <div class="o_knowledge_toolbar_anchor o_knowledge_toolbar_type_file mt-auto ml-auto"></div>
+                    <div class="o_knowledge_toolbar_anchor o_knowledge_toolbar_type_file mt-auto ml-auto" contenteditable="false"><div class="o_knowledge_toolbar" contenteditable="false">
+                </div></div>
                 </div>
                 <br />
                 <h4>
