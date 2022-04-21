@@ -217,6 +217,7 @@ const FileToolbar = KnowledgeToolbar.extend({
                     if (response.ok) {
                         downloadLink.setAttribute('href', href);
                         downloadLink.setAttribute('download', '');
+                        downloadLink.setAttribute('target', '_blank');
                         downloadLink.click();
                     } else {
                         Dialog.alert(this,
