@@ -38,7 +38,7 @@ const CustomDocumentWidget = DocumentWidget.extend({
             },
         }));
         this.media = this.$media[0];
-        this.media.querySelector('.o_knowledge_file_image').innerHTML = file.outerHTML;
+        this.media.querySelector('.o_knowledge_file_image').replaceChildren(file);
         return this.media;
     }
 });
