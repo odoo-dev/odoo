@@ -245,9 +245,11 @@
         .o_knowledge_icon {
             z-index: 3;
             position: relative;
-            font-size: 80px;
+            &.o_large {
+                font-size: 80px;
+            }
         }
-        .o_knowledge_icon,
+        .o_knowledge_icon.o_large,
         .o_knowledge_icon_cover_buttons,
         .o_knowledge_editor .oe_form_field .note-editable,
         .o_knowledge_editor .oe_form_field .o_readonly {

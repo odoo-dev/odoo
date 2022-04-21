@@ -233,7 +233,7 @@ const KnowledgeFormController = FormController.extend({
                 const addIconButton = this.$('.o_knowledge_add_icon');
                 const addIcon = !addIconButton.hasClass('d-none') && !addIconButton.hasClass('o_invisible_modifier');
                 addIconButton.toggleClass('d-none', unicode);
-                this.$el.find('.o_article_big_emoji').text(unicode ? unicode : '');
+                this.$el.find('.o_article_editable_emoji').text(unicode ? unicode : '');
                 // TODO DBE: find a way to remove / add the icon manually without having to reload the view
                 // (as the changes are saved and the side bar is updated anyway)
                 if (addIcon || !unicode) {  // refresh the form view to display the icon if there was no icon yet or if icon is deleted.

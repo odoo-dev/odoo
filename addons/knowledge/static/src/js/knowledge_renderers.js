@@ -234,7 +234,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
     _renderArticleEmoji: function () {
         const { data } = this.state;
-        this.$el.find('.o_article_big_emoji').text(data.icon);
+        this.$el.find('.o_article_editable_emoji').text(data.icon);
     },
 
     /**
