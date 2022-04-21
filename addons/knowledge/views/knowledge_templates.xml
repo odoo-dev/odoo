@@ -9,7 +9,7 @@
             <div class="o_section_header d-flex h4 mb-0">
                 <div class="flex-grow-1 text-truncate">Workspace</div>
                 <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
-                    <i class="fa fa-fw fa-plus"/>
+                    <i class="fa fa-fw fa-plus" title="Create a new article" />
                 </button>
             </div>
             <ul class="o_tree">
@@ -34,7 +34,7 @@
             <div class="o_section_header d-flex h4 mb-0">
                 <div class="flex-grow-1 text-truncate">Private</div>
                 <button class="o_section_create btn btn-link text-secondary rounded p-0" type="button">
-                    <i class="fa fa-fw fa-plus"/>
+                    <i class="fa fa-fw fa-plus" title="Create a new article" />
                 </button>
             </div>
             <ul class="o_tree">
@@ -91,7 +91,7 @@
                         <t t-out="article.name"/>
                     </div>
                     <button t-if="not hideChildren" class="o_article_create btn p-0 opacity-75 opacity-100-hover" type="button">
-                        <i class="fa fa-fw fa-plus"/>
+                        <i class="fa fa-fw fa-plus" title="Create a new article" />
                     </button>
                 </div>
                 <ul t-if="not hideChildren and article.child_ids and article.id in unfolded_articles">
