@@ -11,5 +11,9 @@
     'application': False,
     'auto_install': True,
     'license': 'LGPL-3',
-    'assets': {},
+    'assets': {
+        'web.assets_backend': [
+            'website_knowledge/static/src/js/knowledge_controller.js',
+        ]
+    },
 }
