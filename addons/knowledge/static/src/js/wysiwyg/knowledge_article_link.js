@@ -77,7 +77,7 @@ const KnowledgeArticleLinkModal = Dialog.extend({
                         results: data.results.map(record => {
                             return {
                                 id: record.id,
-                                icon: record.icon,
+                                icon: record.icon || '📄',
                                 text: record.name,
                             }
                         })
