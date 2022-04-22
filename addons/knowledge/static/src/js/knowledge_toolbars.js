@@ -212,6 +212,7 @@ const FileToolbar = KnowledgeToolbar.extend({
                     // Roundabout way to click on the link, to avoid OdooEditor interference with the event
                     const downloadLink = document.createElement('a');
                     const originalLink = this.container.querySelector('.o_knowledge_file_image > a');
+                    const title = originalLink.getAttribute('title') ? `"${originalLink.getAttribute('title')}" `: "";
                     const href = originalLink.getAttribute('href');
                     const response = await fetch(href).then((response) => response);
                     if (response.ok) {
@@ -221,8 +222,12 @@ const FileToolbar = KnowledgeToolbar.extend({
                         downloadLink.click();
                     } else {
                         Dialog.alert(this,
-                            _t("This file is not available at this location anymore."), {
-                            title: `${response.status}: ${response.statusText}`,
+                            _t(`Oops, the file ${title}could not be found. Please replace this file box by a new one to re-upload the file.`), {
+                            title: _t(`Missing File`),
+                            buttons: [{
+                                text: _t("Close"),
+                                close: true,
+                            }]
                         });
                     }
                 }.bind(this);
