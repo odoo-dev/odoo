@@ -24,7 +24,7 @@ FormRenderer.include({
                     }
                 }
                 if (record.withHtmlField) {
-                    this.call('knowledgeService', 'addRecord', record);
+                    this.call('knowledgeService', 'registerRecord', record);
                     break;
                 }
                 record = this.call('knowledgeService', 'popToValidateWithHtmlField');

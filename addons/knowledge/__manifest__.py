@@ -71,5 +71,8 @@
             'knowledge/static/src/xml/chatter_topbar.xml',
             'knowledge/static/src/xml/knowledge_toolbars.xml',
         ],
+        'web.qunit_suite_tests': [
+            'knowledge/static/src/tests/test_services.js',
+        ],
     },
 }

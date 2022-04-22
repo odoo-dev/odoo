@@ -66,7 +66,7 @@ FormController.include({
                 }
             }
             if (isObsolete) {
-                this.call('knowledgeService', 'deleteRecord', record);
+                this.call('knowledgeService', 'unregisterRecord', record);
             }
         }
     },
@@ -148,7 +148,7 @@ FormController.include({
         };
         if (hasMessageIds) {
             knowledgeRecord.withChatter = true;
-            this.call('knowledgeService', 'addRecord', knowledgeRecord);
+            this.call('knowledgeService', 'registerRecord', knowledgeRecord);
         }
         for (let fieldName of this.knowledgeRecordFieldNames) {
             if (fieldName in formFields && fields[fieldName].type === 'html' && !fields[fieldName].readonly) {
@@ -169,6 +169,6 @@ FormController.include({
          * after rendering to determine if any of the catched fields are in fact
          * usable by the user. @see FormRenderer
          */
-        this.call('knowledgeService', 'addToValidateWithHtmlField', knowledgeRecord);
+        this.call('knowledgeService', 'pushToValidateWithHtmlField', knowledgeRecord);
     },
 });

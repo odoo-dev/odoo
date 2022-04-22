@@ -60,7 +60,7 @@ const KnowledgeService = AbstractService.extend({
      *
      * @param {Object} record
      */
-    addToValidateWithHtmlField(record) {
+    pushToValidateWithHtmlField(record) {
         if (record && record.fieldNames.length) {
             this._toValidateStackWithHtmlField.push(record);
         }
@@ -78,7 +78,7 @@ const KnowledgeService = AbstractService.extend({
      *
      * @param {Object} record
      */
-    addRecord(record) {
+    registerRecord(record) {
         if (!record) {
             return;
         }
@@ -105,7 +105,7 @@ const KnowledgeService = AbstractService.extend({
      *
      * @param {Object} record
      */
-    deleteRecord(record) {
+    unregisterRecord(record) {
         this._records.delete(record);
     },
     /**
