@@ -234,7 +234,9 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
     _renderArticleEmoji: function () {
         const { data } = this.state;
-        this.$el.find('.o_article_editable_emoji').text(data.icon);
+        const $dropdown = this.$el.find('.o_knowledge_icon > .o_article_emoji_dropdown');
+        $dropdown.attr('data-article-id', this.state.res_id);
+        $dropdown.find('.o_article_emoji').text(data.icon || '📄');
     },
 
     /**
@@ -268,12 +270,14 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
     /**
      * Renders the emoji picker
+     * @param {JQuery} [$container]
      */
-    _renderEmojiPicker: function () {
-        this.$el.find('.o_article_emoji_dropdown').one('click', event => {
+    _renderEmojiPicker: function ($container) {
+        $container = $container || this.$el;
+        $container.find('.o_article_emoji_dropdown').one('click', event => {
             const $dropdown = $(event.currentTarget);
             const $picker = new EmojiPickerWidget(this, {
-                article_id: $dropdown.data('article-id') || this.state.res_id
+                article_id: $dropdown.data('article-id')
             });
             $picker.attachTo($dropdown);
         });
@@ -319,6 +323,15 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             $(document).on('pointermove', onPointerMove);
             $(document).one('pointerup', onPointerUp);
         });
+    },
+
+    /**
+     * @param {integer} id - Article id
+     * @param {String} unicode
+     */
+    _setEmoji: function (id, unicode) {
+        const emojis = this.$el.find(`.o_article_emoji_dropdown[data-article-id="${id}"] > .o_article_emoji`);
+        emojis.text(unicode || '📄');
     },
 
     /**
