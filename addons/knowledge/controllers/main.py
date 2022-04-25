@@ -189,6 +189,7 @@ class KnowledgeController(http.Controller):
         members = request.env['knowledge.article.member']
         member_partner_rel = {member["member_id"]: partner_id for partner_id, member in members_permission.items() if partner_id}
         members = request.env['knowledge.article.member'].sudo().browse(list(member_partner_rel.keys())).exists() if member_partner_rel else members
+        write_members = members.filtered(lambda m: m.permission == 'write')
 
         # retrieve all involved "based on" articles info
         based_on_article_ids = [members_permission[partner_id]['based_on'] for partner_id in partners_info.keys()]
@@ -216,6 +217,7 @@ class KnowledgeController(http.Controller):
                 'has_higher_permission': member.has_higher_permission,
                 'user_ids': user_ids,
                 'is_external': not user_ids,
+                'is_unique_writer': len(write_members) == 1 and member == write_members and article.inherited_permission != "write",
             }
             # Optional values:
             if member.partner_id.email:
