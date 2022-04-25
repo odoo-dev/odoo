@@ -28,7 +28,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         return this._rpc({
             route: '/knowledge/get_tree',
             params: {
-                res_id: this.state.res_id,
+                active_article_id: this.state.res_id,
                 unfolded_articles: unfoldedArticles,
             }
         }).then(res => {
@@ -38,7 +38,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             this._setTreeFavoriteListener();
 
             // Update unfoldedArticles with active article and all its parents.
-            localStorage.setItem('unfoldedArticles', res.unfolded_articles);
+            localStorage.setItem('unfoldedArticles', res.unfolded_articles.join(";"));
         }).catch(error => {
             $container.empty();
         });

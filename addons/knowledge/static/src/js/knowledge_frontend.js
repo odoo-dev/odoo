@@ -115,7 +115,7 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
         const toggleWidget = $(e.currentTarget);
         const id = toggleWidget.data('articleId');
         const article = await this._rpc({
-            route: '/article/toggle_favourite',
+            route: '/knowledge/article/toggle_favourite',
             params: {
                 article_id: id,
             }
@@ -125,7 +125,7 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend({
         this._rpc({
             route: '/knowledge/get_favourite_tree_frontend',
             params: {
-                res_id: id,
+                active_article_id: id,
             }
 
         }).then(favouriteTemplate => {

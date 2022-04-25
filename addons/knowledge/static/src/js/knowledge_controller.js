@@ -171,7 +171,7 @@ const KnowledgeFormController = FormController.extend({
         this._rpc({
             route: '/knowledge/get_favourite_tree',
             params: {
-                res_id: id,
+                active_article_id: id,
             }
 
         }).then(favouriteTemplate => {

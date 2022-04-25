@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
+import hashlib
 import sys
 
 from collections import defaultdict
@@ -138,6 +139,18 @@ class ArticleMembers(models.Model):
             remaining_members = article.article_member_ids - members_by_articles[article.id]
             if not remaining_members.filtered(lambda m: m.permission == 'write'):
                 raise ValidationError(_("You must have at least one writer."))
+
+    def _get_invitation_hash(self):
+        """ We use a method instead of a field in order to reduce DB space."""
+        self.ensure_one()
+        return hashlib.sha1(
+            (
+                str(self.id)
+                + fields.Date.to_string(self.create_date)
+                + str(self.partner_id)
+                + str(self.article_id)
+            ).encode("utf-8")
+        ).hexdigest()
 
 
 class Article(models.Model):
@@ -775,7 +788,8 @@ class Article(models.Model):
 
     def _get_invite_url(self, partner):
         self.ensure_one()
-        return url_join(self.get_base_url(), "/article/%s/invite/%s" % (self.id, partner.id))
+        member = self.env['knowledge.article.member'].search([('article_id', '=', self.id), ('partner_id', '=', partner.id)])
+        return url_join(self.get_base_url(), "/knowledge/article/invite/%s/%s" % (member.id, member._get_invitation_hash()))
 
     ###########
     #  Tools

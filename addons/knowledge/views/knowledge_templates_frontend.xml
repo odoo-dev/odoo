@@ -69,7 +69,7 @@
                             <t t-out="favourite.article_id.icon" />
                         </button>
                         <div class="o_article_name flex-grow-1 text-truncate">
-                            <a t-out="favourite.article_id.name" t-attf-href="/article/{{favourite.article_id.id}}" />
+                            <a t-out="favourite.article_id.name" t-attf-href="/knowledge/article/{{favourite.article_id.id}}" />
                         </div>
                     </div>
                 </li>
@@ -108,8 +108,9 @@
                 <div class="btn-group dropdown">
                     <i t-attf-class="fa fa-fw #{article.icon}" />
                 </div>
-                <div class="o_article_name flex-grow-1 text-truncate">
-                    <a t-out="article.name" t-attf-href="/article/{{article.id}}" />
+                <t t-set="isActive" t-value="article.id == active_article_id"/>
+                <div t-attf-class="o_article_name flex-grow-1 text-truncate #{ 'font-weight-bold' if isActive else 'text-muted' }">
+                    <a t-out="article.name" t-attf-href="/knowledge/article/{{article.id}}" />
                 </div>
             </div>
             <ul t-if="article.child_ids">
