@@ -1953,7 +1953,7 @@ var ButtonCopyClipboard = AbstractField.extend(CopyClipboard, {
             if (this.nodeOptions && this.nodeOptions.label) {
                 $btn.text(_t(this.nodeOptions.label));
             }
-            this.$el.append($btn);
+            this.$el.empty().append($btn);
             this._initClipboard();
         }
     },
