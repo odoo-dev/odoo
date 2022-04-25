@@ -76,7 +76,9 @@
                                     </a>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
-                                            <a type="button" role="button" class="btn btn-secondary btn-share dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <a type="button" role="button" class="btn btn-secondary btn-share dropdown-toggle"
+                                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                               attrs="{'invisible': [('id', '=', False)]}">
                                                 <i class="fa fa-share-alt"/> Share
                                             </a>
                                             <a type="button" role="button" class="btn btn-secondary btn-chatter">
