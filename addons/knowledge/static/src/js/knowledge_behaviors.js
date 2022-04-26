@@ -127,7 +127,7 @@ const ArticleBehavior = KnowledgeBehavior.extend({
             });
             await actionPromise.catch(() => {
                 Dialog.alert(this,
-                    _t("This article was deleted."), {
+                    _t("This article was deleted or you don't have the rights to access it."), {
                     title: _t('Error'),
                 });
             });
