@@ -192,6 +192,9 @@ class PermissionPanel extends Component {
 
         const loseAccessMessage = _t('Are you sure you want to withdraw from the members? If you do, you will no longer have access to the article.');
         const message = willLoseAccess ? loseAccessMessage : willLoseWrite ? loseWriteMessage : loseAccessMessage;
+        const discard = () => {
+            self.loadPanel();
+        };
         this._showConfirmDialog(message, confirm, discard);
     }
 
