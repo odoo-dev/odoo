@@ -21,7 +21,7 @@
     </t>
     <t t-name="knowledge.wysiwyg_article_link">
         <a t-att-href="href" t-att-data-res_id="article_id"
-            class="btn btn-sm btn-outline-secondary o_knowledge_behavior_anchor o_knowledge_behavior_type_article">
+            class="btn btn-sm o_knowledge_behavior_anchor o_knowledge_behavior_type_article">
             <t t-out="icon"/> <t t-out="text"/>
         </a>
     </t>
