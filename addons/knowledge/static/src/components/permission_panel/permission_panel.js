@@ -134,7 +134,7 @@ class PermissionPanel extends Component {
                     partner_id: member.based_on ? member.partner_id: false,
                 }
             }).then(res => {
-                if (self._onChangedPermission(res, willLoseAccess)) {
+                if (self._onChangedPermission(res, willLoseAccess||willLoseWrite, willLoseWrite ? this.props.article_id : false)) {
                     self.loadPanel();
                 }
             });
@@ -181,6 +181,9 @@ class PermissionPanel extends Component {
             }).then(res => {
                 if (self._onChangedPermission(res, willLoseAccess)) {
                     self.loadPanel();
+                }
+                else {
+                    throw new Error('Error removing member');
                 }
             });
         };
@@ -272,7 +275,7 @@ class PermissionPanel extends Component {
     */
     _onChangedPermission (result, reloadAll, reloadArticleId) {
         if (!result.success) {
-            return false;
+            throw new Error('Error changing permission');
         } else if (reloadAll) {
             this.env.bus.trigger('do-action', {
                 action: 'knowledge.action_home_page',
