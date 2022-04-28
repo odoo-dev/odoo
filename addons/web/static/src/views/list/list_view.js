@@ -19,6 +19,7 @@ import { archParseBoolean } from "@web/views/helpers/utils";
 import { getActiveActions, getDecoration, processButton } from "../helpers/view_utils";
 import { RelationalModel, stringToOrderBy } from "../relational_model";
 import { ListRenderer } from "./list_renderer";
+import { ExportDataDialog } from "../view_dialogs/export_data_dialog";
 
 const { Component, onWillStart, useSubEnv, useEffect, useRef } = owl;
 
@@ -371,9 +372,14 @@ export class ListView extends Component {
      *
      * @private
      */
-    onExportData() {
-        console.log("onExportData");
-        // this._getExportDialogWidget().open();
+    async onExportData() {
+        const resIds = await this.getSelectedResIds();
+        const dialogProps = {
+            resIds,
+            context: this.props.context,
+            root: this.model.root,
+        };
+        this.dialogService.add(ExportDataDialog, dialogProps);
     }
     /**
      * Export Records in a xls file
