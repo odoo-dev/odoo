@@ -121,7 +121,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertFalse(readonly_article.user_can_write)
 
         _title = 'Fthagn'
-        new = Article.browse(Article.article_create(title=_title, parent_id=False, private=False))
+        new = Article.article_create(title=_title, parent_id=False, is_private=False)
         self.assertFalse(new.article_member_ids)
         self.assertEqual(new.body, f'<h1>{_title}</h1>')
         self.assertEqual(new.category, 'workspace')
@@ -131,7 +131,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertEqual(new.sequence, self._base_sequence + 1)
 
         _title = 'Fthagn, but private'
-        private = Article.browse(Article.article_create(title=_title, parent_id=False, private=True))
+        private = Article.article_create(title=_title, parent_id=False, is_private=True)
         self.assertEqual(private.article_member_ids.partner_id, self.env.user.partner_id)
         self.assertEqual(private.category, 'private')
         self.assertEqual(private.internal_permission, 'none')
@@ -139,7 +139,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertEqual(private.sequence, self._base_sequence + 2)
 
         _title = 'Fthagn, but with parent (workspace)'
-        child = Article.browse(Article.article_create(title=_title, parent_id=article.id, private=False))
+        child = Article.article_create(title=_title, parent_id=article.id, is_private=False)
         self.assertFalse(child.article_member_ids)
         self.assertEqual(child.category, 'workspace')
         self.assertFalse(child.internal_permission)
@@ -147,7 +147,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertEqual(child.sequence, 2, 'Already two children existing')
 
         _title = 'Fthagn, but with parent (private): forces private'
-        child_private = Article.browse(Article.article_create(title=_title, parent_id=private.id, private=False))
+        child_private = Article.article_create(title=_title, parent_id=private.id, is_private=False)
         self.assertFalse(child_private.article_member_ids)
         self.assertEqual(child_private.category, 'private')
         self.assertFalse(child_private.internal_permission)
@@ -156,11 +156,11 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
 
         _title = 'Fthagn, but private under non private: cracboum'
         with self.assertRaises(exceptions.ValidationError):
-            Article.article_create(title=_title, parent_id=article.id, private=True)
+            Article.article_create(title=_title, parent_id=article.id, is_private=True)
 
         _title = 'Fthagn, but with parent read only: cracboum'
         with self.assertRaises(exceptions.AccessError):
-            Article.article_create(title=_title, parent_id=readonly_article.id, private=False)
+            Article.article_create(title=_title, parent_id=readonly_article.id, is_private=False)
 
         private_nonmember = Article.sudo().create({
             'article_member_ids': [
@@ -174,7 +174,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         })
         _title = 'Fthagn, but with parent private none: cracboum'
         with self.assertRaises(exceptions.AccessError):
-            Article.article_create(title=_title, parent_id=private_nonmember.id, private=False)
+            Article.article_create(title=_title, parent_id=private_nonmember.id, is_private=False)
 
     @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail')
     @users('employee')

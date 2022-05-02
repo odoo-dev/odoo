@@ -248,7 +248,7 @@ const KnowledgeArticleFormController = FormController.extend({
             method: 'article_create',
             args: [[]],
             kwargs: {
-                private: data.category === 'private',
+                is_private: data.category === 'private',
                 parent_id: data.target_parent_id ? data.target_parent_id : false
             },
         });

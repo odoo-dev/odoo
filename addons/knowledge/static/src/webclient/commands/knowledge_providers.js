@@ -95,7 +95,7 @@ commandProviderRegistry.add("knowledge", {
                             args: [[]],
                             kwargs: {
                                 title: options.searchValue,
-                                private: true
+                                is_private: true
                             },
                         });
 

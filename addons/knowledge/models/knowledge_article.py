@@ -524,8 +524,15 @@ class Article(models.Model):
 
         max_sequence_by_parent = {}
         if vals_by_parent_id:
+            parent_ids = list(vals_by_parent_id.keys())
+            try:
+                self.check_access_rights('write')
+                self.env['knowledge.article'].browse(parent_ids).check_access_rule('write')
+            except AccessError:
+                raise AccessError(_("You cannot create an article under articles on which you cannot write"))
+
             read_group_results = self.env['knowledge.article'].sudo().read_group(
-                [('parent_id', 'in', list(vals_by_parent_id.keys()))],
+                [('parent_id', 'in', parent_ids)],
                 ['sequence:max'],
                 ['parent_id']
             )
@@ -751,44 +758,50 @@ class Article(models.Model):
     # HELPERS
     # ------------------------------------------------------------
 
-    def article_create(self, title=False, parent_id=False, private=False):
-        parent = self.browse(parent_id) if parent_id else False
+    @api.model
+    @api.returns('knowledge.article', lambda article: article.id)
+    def article_create(self, title=False, parent_id=False, is_private=False):
+        """ Helper to create articles, allowing to pre-compute some configuration
+        values.
 
-        if parent:
-            if not parent.user_can_write:
-                raise AccessError(_("You can't create an article under article '%s' as you can't write on it", parent.display_name))
-            if private:
-                if parent.category != "private":
-                    raise ValidationError(_("Cannot create an article under article '%s', which is a non-private parent", parent.display_name))
-                elif not parent.user_can_write:
-                    raise AccessError(_("You cannot create an article under article '%s' as you don't own it", parent.display_name))
-            private = parent.category == "private"
-
-        values = {
-            'parent_id': parent_id,
-            'sequence': self._get_max_sequence_inside_parent(parent_id)
-        }
-        if not parent:
-            # you cannot create an article without parent in shared directly.
-            values['internal_permission'] = 'none' if private else 'write'
-        # User cannot write on members, sudo is needed to allow to create a private article or create under a parent user can write on.
-        # for article without parent or not in private, access to members is not required to create an article
-        if (private or parent) and self.env.user.has_group('base.group_user'):
-            self = self.sudo()
-        if not parent and private:
-            # To be private, the article hierarchy need at least one member with write access.
-            values['article_member_ids'] = [(0, 0, {
-                'partner_id': self.env.user.partner_id.id,
-                'permission': 'write'
-            })]
-
+        :param str title: name of the article;
+        :param int parent_id: id of an existing article who will be the parent
+          of the newly created articled. Must be writable;
+        :param bool is_private: set current user as sole owner of the new article;
+        """
+        parent = self.browse(parent_id) if parent_id else self.env['knowledge.article']
+        values = {'parent_id': parent.id}
         if title:
             values.update({
                 'name': title,
                 'body': "<h1>" + title + "</h1>",
             })
 
-        return self.create(values).id
+        if parent:
+            if not is_private and parent.category == "private":
+                is_private = True
+            values['sequence'] = self._get_max_sequence_inside_parent(parent_id)
+        else:
+            # child do not have to setup an internal permission as it is inherited
+            values['internal_permission'] = 'none' if is_private else 'write'
+
+        if is_private:
+            if parent and parent.category != "private":
+                raise ValidationError(
+                    _("Cannot create an article under article %(parent_name)s which is a non-private parent",
+                      parent_name=parent.display_name)
+                )
+            if not parent:
+                values['article_member_ids'] = [(0, 0, {
+                    'partner_id': self.env.user.partner_id.id,
+                    'permission': 'write'
+                })]
+
+        # User cannot write on members, sudo is needed to allow to create a private article
+        # due to access to members
+        if is_private and self.env.user.has_group('base.group_user'):
+            return self.sudo().create(values).with_env(self.env)
+        return self.create(values)
 
     def get_user_sorted_articles(self, search_query):
         """ Called when using the Command palette to search for articles matching the search_query.
