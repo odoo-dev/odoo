@@ -288,7 +288,7 @@ class Article(models.Model):
 
         articles_with_access = {}
         if not self.env.user.share:
-            articles_with_access = self._get_internal_permission(check_access=True)
+            articles_with_access = self._get_internal_permission(filter_domain=[('internal_permission', '!=', 'none')])
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id)
         articles_with_no_member_access = [article_id for article_id, perm in member_permissions.items() if perm == 'none']
         articles_with_member_access = list(set(member_permissions.keys() - set(articles_with_no_member_access)))
@@ -335,7 +335,7 @@ class Article(models.Model):
                 return expression.FALSE_DOMAIN
             return expression.TRUE_DOMAIN
 
-        articles_with_access = self._get_internal_permission(check_write=True)
+        articles_with_access = self._get_internal_permission(filter_domain=[('internal_permission', '=', 'write')])
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id)
         articles_with_member_access = [article_id for article_id, perm in member_permissions.items() if perm == 'write']
         articles_with_no_member_access = list(set(member_permissions.keys() - set(articles_with_member_access)))
@@ -1033,7 +1033,7 @@ class Article(models.Model):
         })
 
     @api.model
-    def _get_internal_permission(self, check_access=False, check_write=False):
+    def _get_internal_permission(self, filter_domain=None):
         """ Compute article based permissions.
 
         Note: we don't use domain because we cannot include properly the where clause
@@ -1049,12 +1049,12 @@ class Article(models.Model):
             base_where_domain = "WHERE id in %s"
             args.append(tuple(self.ids))
 
-        where_clause = []
-        if check_access:
-            where_clause.append("internal_permission != 'none'")
-        elif check_write:
-            where_clause.append("internal_permission = 'write'")
-        where_clause = ("WHERE " + " AND ".join(where_clause)) if where_clause else ''
+        where_clause = ''
+        if filter_domain:
+            query = self.with_context(active_test=False)._where_calc(filter_domain)
+            table_name, where_clause, where_params = query.get_sql()
+            where_clause = f'WHERE {where_clause.replace(table_name, "article_perms")}'
+            args += where_params
 
         sql = f'''
     WITH RECURSIVE article_perms as (
