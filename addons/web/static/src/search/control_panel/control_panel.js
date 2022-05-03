@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { useCommand } from "@web/core/commands/command_hook";
 import { Pager } from "@web/core/pager/pager";
 import { useService } from "@web/core/utils/hooks";
 import { ComparisonMenu } from "../comparison_menu/comparison_menu";
@@ -23,6 +24,9 @@ export class ControlPanel extends Component {
         this.pagerProps = this.env.config.pagerProps
             ? useState(this.env.config.pagerProps)
             : undefined;
+        for (const view of this.env.config.viewSwitcherEntries) {
+            useCommand(`Switch to ${view.name} View`, () => this.onViewClicked(view.type))
+        }
     }
 
     /**
