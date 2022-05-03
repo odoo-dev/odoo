@@ -54,7 +54,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         # as portal
         article_desync = article_desync.with_user(self.user_portal)
         self.assertFalse(article_desync.user_can_write)
-        # TDE FIXME: currently has access but should not, member check should stop at desync
         self.assertFalse(article_desync.user_has_access, 'Permissions: member rights should not be fetch on parents')
 
     @mute_logger('odoo.addons.base.models.ir_rule')

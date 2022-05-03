@@ -25,7 +25,7 @@ class ArticleMember(models.Model):
         required=True, default='read')
     article_permission = fields.Selection(
         related='article_id.inherited_permission',
-        store=True)
+        readonly=True, store=True)
     has_higher_permission = fields.Boolean(
         compute='_compute_has_higher_permission',
         help="If True, the member has a higher permission then the one set on the article. "

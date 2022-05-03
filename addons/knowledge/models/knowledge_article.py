@@ -226,21 +226,26 @@ class Article(models.Model):
     @api.depends_context('uid')
     @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
     def _compute_user_permission(self):
-        """ Returns the explicit permission of the user. If the user has no specific permission
-        (via the members or the internal permission), user_permission will be False
-        (E.g.: Public users has no specific permission at all).
-        Share users only depends on the members as internal permission does not apply to them."""
+        """ Compute permission for current user. Public users never have any
+        permission. Shared users have permission based only on members permission
+        as internal permission never apply to them. Internal users combine both
+        internal and members permissions, taking the highest one. """
         if self.env.user._is_public():
             self.user_permission = False
             return
+
+        # split transient due to direct SQL query to perform
+        transient = self.filtered(lambda article: not article.ids)
+        transient.user_permission = 'write'  # not created yet, set default permission value
+        toupdate = self - transient
+        if not toupdate:
+            return
+
         articles_permissions = {}
         if not self.env.user.share:
             articles_permissions = self._get_internal_permission()
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
         for article in self:
-            if not article.ids:  # If article not created yet, set default permission value.
-                article.user_permission = 'write'
-                continue
             article_id = article.ids[0]
             if self.env.user.share:
                 article.user_permission = member_permissions.get(article_id, False)
@@ -251,15 +256,11 @@ class Article(models.Model):
     @api.depends_context('uid')
     @api.depends('user_permission')
     def _compute_user_has_access(self):
-        """ Compute if the current user has access to the article.
-        This is done by checking if the user is admin, or checking the internal permission of the article
-        and wether the user is member of the article. `.ids[0]` is used to avoid issues with <newId> records
-        """
+        """ Compute if the current user has access to the article. Admins have
+        all access, otherwise we check internal permissions of the article and
+        whether the user is member of the article. """
         if self.env.user.has_group('base.group_system'):
             self.user_has_access = True
-            return
-        if self.env.user._is_public():
-            self.user_has_access = False
             return
         for article in self:
             article.user_has_access = article.user_permission and article.user_permission != 'none'
@@ -323,6 +324,9 @@ class Article(models.Model):
     @api.depends_context('uid')
     @api.depends('user_permission')
     def _compute_user_can_write(self):
+        """ Compute if the current user has access to the article. Admins have
+        all access, share user can never write. Otherwise we check internal
+        permissions of the article and whether the user is member of the article. """
         if self.env.user.has_group('base.group_system'):
             self.user_can_write = True
             return
@@ -988,13 +992,23 @@ class Article(models.Model):
 
     @api.model
     def _get_internal_permission(self, check_access=False, check_write=False):
-        """ We don't use domain because we cannot include properly the where clause in the custom sql query.
-        The query's output table and fields names does not match the model we are working on"""
-        where_clause = []
+        """ Compute article based permissions.
+
+        Note: we don't use domain because we cannot include properly the where clause
+        in the custom sql query. The query's output table and fields names does not match
+        the model we are working on.
+        """
+        self.env['knowledge.article'].flush()
+        self.env['knowledge.article.member'].flush()
         args = []
-        if self.ids:
-            args = [tuple(self.ids)]
-            where_clause.append("article_id in %s")
+
+        base_where_domain = ''
+        filter_article_ids = self.ids
+        if filter_article_ids:
+            base_where_domain = "WHERE id in %s"
+            args.append(tuple(filter_article_ids))
+
+        where_clause = []
         if check_access:
             where_clause.append("internal_permission != 'none'")
         elif check_write:
@@ -1003,14 +1017,17 @@ class Article(models.Model):
 
         sql = f'''
     WITH RECURSIVE article_perms as (
-        SELECT id, id as article_id, parent_id, internal_permission
+        SELECT id, id as article_id, parent_id, internal_permission, is_desynchronized
           FROM knowledge_article
+          {base_where_domain}
          UNION
         SELECT parents.id, perms.article_id, parents.parent_id,
-               COALESCE(perms.internal_permission, parents.internal_permission)
+               COALESCE(perms.internal_permission, parents.internal_permission),
+               perms.is_desynchronized
           FROM knowledge_article parents
     INNER JOIN article_perms perms
             ON perms.parent_id=parents.id
+               AND perms.is_desynchronized IS NOT TRUE
                AND perms.internal_permission IS NULL
     )
     SELECT article_id, max(internal_permission)
@@ -1026,39 +1043,41 @@ class Article(models.Model):
         The articles can be filtered using the article_ids param.
 
         The member model is fully flushed before running the request. """
-
+        self.env['knowledge.article'].flush()
         self.env['knowledge.article.member'].flush()
-
-        where_add_clause = ""
         args = [partner_id]
-        if self.ids:
-            args = [tuple(self.ids)]
-            where_add_clause = " AND article_id in %s"
+
+        base_where_domain = ''
+        filter_article_ids = self.ids
+        if filter_article_ids:
+            base_where_domain = "WHERE perms1.id in %s"
+            args.append(tuple(filter_article_ids))
 
         sql = f'''
     WITH RECURSIVE article_perms as (
-        SELECT a.id, a.parent_id, m.permission
+        SELECT a.id, a.parent_id, m.permission, a.is_desynchronized
           FROM knowledge_article a
      LEFT JOIN knowledge_article_member m
             ON a.id=m.article_id and partner_id = %s
     ), article_rec as (
         SELECT perms1.id, perms1.id as article_id, perms1.parent_id,
-               perms1.permission
+               perms1.permission, perms1.is_desynchronized
           FROM article_perms as perms1
+          {base_where_domain}
          UNION
         SELECT perms2.id, perms_rec.article_id, perms2.parent_id,
-               COALESCE(perms_rec.permission, perms2.permission)
+               COALESCE(perms_rec.permission, perms2.permission),
+               perms2.is_desynchronized
           FROM article_perms as perms2
     INNER JOIN article_rec perms_rec
             ON perms_rec.parent_id=perms2.id
+               AND perms_rec.is_desynchronized IS NOT TRUE
                AND perms_rec.permission IS NULL
     )
     SELECT article_id, max(permission)
       FROM article_rec
      WHERE permission IS NOT NULL
-           {where_add_clause}
   GROUP BY article_id'''
-
         self._cr.execute(sql, args)
         return dict(self._cr.fetchall())
 
@@ -1085,6 +1104,9 @@ class Article(models.Model):
 
         Please note that these additional fields are not sanitized, the caller has the
         responsability to check that user can access those fields and that no injection is possible. """
+        self.env['knowledge.article'].flush()
+        self.env['knowledge.article.member'].flush()
+
         add_where_clause = ''
         args = []
         if self.ids:
