@@ -317,12 +317,12 @@ export class FormView extends Component {
         this.enableButtons(disabledButtons);
     }
 
-    discard() {
+    async discard() {
         if (this.props.discardRecord) {
             this.props.discardRecord(this.model.root);
             return;
         }
-        this.model.root.discard();
+        await this.model.root.discard();
         if (this.model.root.isVirtual) {
             this.env.config.historyBack();
         }
