@@ -6,6 +6,7 @@ const commandCategoryRegistry = registry.category("command_categories");
 commandCategoryRegistry
     .add("app", {}, { sequence: 10 })
     .add("smart_action", {}, { sequence: 15 })
+    .add("control_panel", {}, { sequence: 20 })
     .add("actions", {}, { sequence: 30 })
     .add("navbar", {}, { sequence: 40 })
     .add("default", {}, { sequence: 100 })

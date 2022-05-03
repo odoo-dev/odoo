@@ -25,7 +25,9 @@ export class ControlPanel extends Component {
             ? useState(this.env.config.pagerProps)
             : undefined;
         for (const view of this.env.config.viewSwitcherEntries) {
-            useCommand(`Switch to ${view.name} View`, () => this.onViewClicked(view.type))
+            useCommand(`Switch to ${view.name} View`, () => this.onViewClicked(view.type), {
+                category: "control_panel",
+            });
         }
     }
 
