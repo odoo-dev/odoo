@@ -265,50 +265,60 @@ class Article(models.Model):
             article.user_has_access = article.user_permission and article.user_permission != 'none'
 
     def _search_user_has_access(self, operator, value):
-        """ This search method will look at article permission and member permission
-        to return all the article the current user has access to.
-            - The admin (group_system) always has access to everything
-            - External users only have access to an article if they are r/w member on that article
-            - Internal users have access if:
-                - they are read or write member on the article
-                OR
-                - The article allow read or write access to all internal users AND the user
-                is not member with 'none' access
-            """
+        """ This search method looks at article and members permissions to return
+        all the article the current user has access to.
+
+        Heuristic is
+        - Admins (group_system) always has access to everything
+        - External users only have access to an article if they are r/w member
+          on that article;
+        - Internal users have access if:
+          - they are read or write member on the article
+          OR
+          - The article allow read or write access to all internal users AND the user
+            is not member with 'none' access
+        """
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise ValueError("unsupported search operator")
+        # system is always granted access
+        if self.env.user.has_group('base.group_system'):
+            if (value and operator == '=') or (not value and operator == '!='):
+                return expression.TRUE_DOMAIN
+            return expression.FALSE_DOMAIN
 
-        articles_with_access = self._get_internal_permission(check_access=True)
-
+        articles_with_access = {}
+        if not self.env.user.share:
+            articles_with_access = self._get_internal_permission(check_access=True)
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
-        articles_with_no_member_access = [id for id, permission in member_permissions.items() if permission == 'none']
+        articles_with_no_member_access = [article_id for article_id, perm in member_permissions.items() if perm == 'none']
         articles_with_member_access = list(set(member_permissions.keys() - set(articles_with_no_member_access)))
 
+        additional_domain = self._get_additional_access_domain()
+
         # If searching articles for which user has access.
-        domain = self._get_additional_access_domain()
         if (value and operator == '=') or (not value and operator == '!='):
-            if self.env.user.has_group('base.group_system'):
-                return expression.TRUE_DOMAIN
-            elif self.env.user.share:
-                return expression.OR([domain, [('id', 'in', articles_with_member_access)]])
-            return expression.OR([domain, [
-                '|',
-                    '&',
-                        ('id', 'in', list(articles_with_access.keys())),
-                        ('id', 'not in', articles_with_no_member_access),
-                    ('id', 'in', articles_with_member_access)]])
+            if self.env.user.share:
+                return expression.OR([additional_domain, [('id', 'in', articles_with_member_access)]])
+
+            return expression.OR([
+                additional_domain,
+                ['|',
+                    '&', ('id', 'in', list(articles_with_access.keys())), ('id', 'not in', articles_with_no_member_access),
+                    ('id', 'in', articles_with_member_access)]
+                ]
+            )
+
         # If searching articles for which user has NO access.
-        domain = [expression.NOT_OPERATOR, expression.normalize_domain(domain)]
-        if self.env.user.has_group('base.group_system'):
-            return expression.FALSE_DOMAIN
-        elif self.env.user.share:
-            return expression.AND([domain, [('id', 'not in', articles_with_member_access)]])
-        return expression.AND([domain, [
-            '|',
-                '&',
-                    ('id', 'not in', list(articles_with_access.keys())),
-                    ('id', 'not in', articles_with_member_access),
-                ('id', 'in', articles_with_no_member_access)]])
+        additional_domain = [expression.NOT_OPERATOR, expression.normalize_domain(additional_domain)]
+        if self.env.user.share:
+            return expression.AND([additional_domain, [('id', 'not in', articles_with_member_access)]])
+        return expression.AND([
+            additional_domain,
+            ['|',
+                '&', ('id', 'not in', list(articles_with_access.keys())), ('id', 'not in', articles_with_member_access),
+                ('id', 'in', articles_with_no_member_access)]
+            ]
+        )
 
     @api.depends_context('uid')
     @api.depends('user_permission')
@@ -324,38 +334,34 @@ class Article(models.Model):
 
     def _search_user_can_write(self, operator, value):
         if operator not in ('=', '!=') or not isinstance(value, bool):
-            raise NotImplementedError("unsupported search operator")
+            raise NotImplementedError("Unsupported search operator")
+
+        # system is always allowed to write
+        if self.env.user.has_group('base.group_system'):
+            if (value and operator == '=') or (not value and operator == '!='):
+                return expression.TRUE_DOMAIN
+            return expression.FALSE_DOMAIN
+        # share is never allowed to write
+        if self.env.user.share:
+            if (value and operator == '=') or (not value and operator == '!='):
+                return expression.FALSE_DOMAIN
+            return expression.TRUE_DOMAIN
 
         articles_with_access = self._get_internal_permission(check_write=True)
-
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
-        articles_with_member_access = [id for id, permission in member_permissions.items() if permission == 'write']
+        articles_with_member_access = [article_id for article_id, perm in member_permissions.items() if perm == 'write']
         articles_with_no_member_access = list(set(member_permissions.keys() - set(articles_with_member_access)))
 
         # If searching articles for which user has write access.
-        if self.env.user.has_group('base.group_system'):
-            return expression.TRUE_DOMAIN
-        elif self.env.user.share:
-            return [('id', 'in', articles_with_member_access)]
         if (value and operator == '=') or (not value and operator == '!='):
-            return [
-                '|',
-                    '&',
-                        ('id', 'in', list(articles_with_access.keys())),
-                        ('id', 'not in', articles_with_no_member_access),
-                    ('id', 'in', articles_with_member_access)
+            return ['|',
+                        '&', ('id', 'in', list(articles_with_access.keys())), ('id', 'not in', articles_with_no_member_access),
+                        ('id', 'in', articles_with_member_access)
             ]
         # If searching articles for which user has NO write access.
-        if self.env.user.has_group('base.group_system'):
-            return expression.FALSE_DOMAIN
-        elif self.env.user.share:
-            return [('id', 'not in', articles_with_member_access)]
-        return [
-            '|',
-                '&',
-                    ('id', 'not in', list(articles_with_access.keys())),
-                    ('id', 'not in', articles_with_member_access),
-                ('id', 'in', articles_with_no_member_access)
+        return ['|',
+                    '&', ('id', 'not in', list(articles_with_access.keys())), ('id', 'not in', articles_with_member_access),
+                    ('id', 'in', articles_with_no_member_access)
         ]
 
     @api.depends('root_article_id.internal_permission', 'root_article_id.article_member_ids.permission')
