@@ -259,11 +259,8 @@ class Article(models.Model):
     @api.depends('user_permission')
     def _compute_user_has_access(self):
         """ Compute if the current user has access to the article. Admins have
-        all access, otherwise we check internal permissions of the article and
+        all access (see ACLs), otherwise we check internal permissions of the article and
         whether the user is member of the article. """
-        if self.env.user.has_group('base.group_system'):
-            self.user_has_access = True
-            return
         for article in self:
             article.user_has_access = article.user_permission and article.user_permission != 'none'
 
@@ -296,42 +293,27 @@ class Article(models.Model):
         articles_with_no_member_access = [article_id for article_id, perm in member_permissions.items() if perm == 'none']
         articles_with_member_access = list(set(member_permissions.keys() - set(articles_with_no_member_access)))
 
-        additional_domain = self._get_additional_access_domain()
-
         # If searching articles for which user has access.
         if (value and operator == '=') or (not value and operator == '!='):
             if self.env.user.share:
-                return expression.OR([additional_domain, [('id', 'in', articles_with_member_access)]])
-
-            return expression.OR([
-                additional_domain,
-                ['|',
+                return [('id', 'in', articles_with_member_access)]
+            return ['|',
                     '&', ('id', 'in', list(articles_with_access.keys())), ('id', 'not in', articles_with_no_member_access),
                     ('id', 'in', articles_with_member_access)]
-                ]
-            )
 
         # If searching articles for which user has NO access.
-        additional_domain = [expression.NOT_OPERATOR, expression.normalize_domain(additional_domain)]
         if self.env.user.share:
-            return expression.AND([additional_domain, [('id', 'not in', articles_with_member_access)]])
-        return expression.AND([
-            additional_domain,
-            ['|',
+            return [('id', 'not in', articles_with_member_access)]
+        return ['|',
                 '&', ('id', 'not in', list(articles_with_access.keys())), ('id', 'not in', articles_with_member_access),
                 ('id', 'in', articles_with_no_member_access)]
-            ]
-        )
 
     @api.depends_context('uid')
     @api.depends('user_permission')
     def _compute_user_can_write(self):
         """ Compute if the current user has access to the article. Admins have
-        all access, share user can never write. Otherwise we check internal
+        all access (see ACLs), share user can never write. Otherwise we check internal
         permissions of the article and whether the user is member of the article. """
-        if self.env.user.has_group('base.group_system'):
-            self.user_can_write = True
-            return
         if self.env.user.share:
             self.user_can_write = False
             return
@@ -434,11 +416,6 @@ class Article(models.Model):
         if (value and operator == '=') or (not value and operator == '!='):
             return [('favorite_ids.user_id', 'in', [self.env.uid])]
         return [('favorite_ids.user_id', 'not in', [self.env.uid])]
-
-    def _get_additional_access_domain(self):
-        """ This method is meant to be overridden when website is installed (to add website_published)
-        Basically, this method is used to add additional domain part to the search domain on user_has_access field."""
-        return []
 
     # ------------------------------------------------------------
     # CRUD
@@ -591,6 +568,7 @@ class Article(models.Model):
         if vals.get('parent_id'):
             parent = self.browse(vals['parent_id'])
             try:
+                parent.check_access_rights('write')
                 parent.check_access_rule('write')
             except AccessError:
                 raise AccessError(_("You cannot move an article under %(parent_name)s as you cannot write on it",
@@ -668,10 +646,14 @@ class Article(models.Model):
 
     def action_toggle_favorite(self):
         """ Read access is sufficient for toggling its own favorite status. """
-        article = self.sudo()
-        if not article.user_has_access:
-            raise AccessError(_("You cannot add/remove the article '%s' to/from your favorites", article.display_name))
-        article.is_user_favorite = not article.is_user_favorite
+        try:
+            self.check_access_rights('read')
+            self.check_access_rule('read')
+        except AccessError:
+            # Return a meaningfull error message as this may be called through UI
+            raise AccessError(_("You cannot add or remove this article to your favorites"))
+        for article in self.sudo():
+            article.is_user_favorite = not article.is_user_favorite
         return self[0].is_user_favorite if self else False
 
     def action_set_favorite_sequence(self, sequence):
@@ -1337,10 +1319,13 @@ class Article(models.Model):
         """ Returns the descendants recordset of the current article. """
         return self.env['knowledge.article'].search([('id', 'not in', self.ids), ('parent_id', 'child_of', self.ids)])
 
-    def _get_parents(self):
-        """ Returns the parents recordset of the current article. """
-        parents = self.env['knowledge.article']
-        if self.parent_id.user_has_access:
-            parents |= self.parent_id
-            parents |= self.parent_id._get_parents()
-        return parents
+    def _get_readable_ancetors(self):
+        """ Returns the parents recordset of the current article. Do the computation
+        as sudo """
+        self.ensure_one()
+        ancestors = self.env['knowledge.article'].sudo()
+        current = self.sudo().parent_id
+        while current:
+            ancestors += current
+            current = current.parent_id
+        return ancestors._filter_access_rules_python('read').with_env(self.env)

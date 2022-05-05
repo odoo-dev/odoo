@@ -7,6 +7,7 @@
     'version': '1.0',
     'depends': ['knowledge', 'website'],
     'data': [
+        'security/ir_rule.xml',
         'views/knowledge_views.xml',
         'views/knowledge_templates_frontend.xml',
     ],

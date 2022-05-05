@@ -4,6 +4,7 @@ access_knowledge_article_portal,access.knowledge.article.portal,knowledge.model_
 access_knowledge_article_user,access.knowledge.article.user,knowledge.model_knowledge_article,base.group_user,1,1,1,0
 access_knowledge_article_system,access.knowledge.article.system,knowledge.model_knowledge_article,base.group_system,1,1,1,1
 access_knowledge_article_member_all,access.knowledge.article.member.all,knowledge.model_knowledge_article_member,,0,0,0,0
+access_knowledge_article_member_portal,access.knowledge.article.member.portal,knowledge.model_knowledge_article_member,base.group_portal,1,0,0,0
 access_knowledge_article_member_user,access.knowledge.article.member.user,knowledge.model_knowledge_article_member,base.group_user,1,0,0,0
 access_knowledge_article_member_system,access.knowledge.article.member.system,knowledge.model_knowledge_article_member,base.group_system,1,1,1,1
 access_knowledge_article_favorite_all,access.knowledge.article.favorite.all,knowledge.model_knowledge_article_favorite,,0,0,0,0

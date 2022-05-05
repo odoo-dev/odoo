@@ -44,9 +44,9 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
             sudo_favorites.mapped('user_id')  # access body should trigger acls
 
         # MEMBERS
-        with self.assertRaises(exceptions.AccessError,
-                               msg='No ACLs for portal'):
-            self.assertFalse(self.env['knowledge.article.member'].search([]))
+        my_members = self.env['knowledge.article.member'].search([])
+        self.assertEqual(len(my_members), 3)
+        self.assertEqual(my_members.partner_id, self.env.user.partner_id)
         sudo_members = self.article_roots.article_member_ids.with_env(self.env)
         with self.assertRaises(exceptions.AccessError,
                                msg='Breaking rule for portal'):
@@ -74,7 +74,8 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         })
         self.assertMembers(other_private, 'none', {self.partner_employee: 'write'})
         self.assertEqual(other_private.category, 'private')
-        self.assertTrue(other_private.user_can_write)
+        self.assertFalse(other_private.user_can_write, 'Can write based on permission is False but can perform write due to ACLs')
+        other_private.write({'name': 'Admin can do everything'})
 
         # create a child to it
         other_private_child = self.env['knowledge.article'].create({
@@ -84,7 +85,7 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         self.assertMembers(other_private_child, False, {})
         self.assertEqual(other_private_child.article_member_ids.partner_id, self.env['res.partner'])
         self.assertEqual(other_private_child.category, 'private')
-        self.assertTrue(other_private_child.user_can_write)
+        self.assertFalse(other_private_child.user_can_write, 'Can write based on permission is False but can perform write due to ACLs')
 
         # ARTICLE: WRITE
         other_private.write({'name': 'Can Update'})

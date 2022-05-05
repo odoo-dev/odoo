@@ -36,7 +36,7 @@
                 </div>
                 <ul t-if="not hideChildren and article.child_ids and article.id in unfolded_articles">
                     <t t-call="knowledge.articles_template">
-                        <t t-set="articles" t-value="article.child_ids.sorted('sequence').filtered(lambda child: child.user_has_access)"/>
+                        <t t-set="articles" t-value="article.child_ids.sorted('sequence')"/>
                     </t>
                 </ul>
             </li>
