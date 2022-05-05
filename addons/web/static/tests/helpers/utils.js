@@ -354,6 +354,12 @@ export async function mouseEnter(el, selector) {
 
 export async function editInput(el, selector, value) {
     const input = findElement(el, selector);
+    if (
+        !["INPUT", "TEXTAREA"].includes(input.tagName) ||
+        !["text", "textarea", "email", "number"].includes(input.type)
+    ) {
+        throw new Error("Only inputs tag and textarea tag can be edited with editInput.");
+    }
     input.value = value;
     await triggerEvent(input, null, "input");
     return triggerEvent(input, null, "change");
@@ -361,6 +367,9 @@ export async function editInput(el, selector, value) {
 
 export function editSelect(el, selector, value) {
     const select = findElement(el, selector);
+    if (select.tagName !== "SELECT") {
+        throw new Error("Only select tag can be edited with selectInput.");
+    }
     select.value = value;
     return triggerEvent(select, null, "change");
 }
@@ -638,9 +647,7 @@ export async function selectDropdownItem(target, fieldName, itemContent) {
 }
 
 export function getNodesTextContent(nodes) {
-    return Array.from(nodes)
-        .map((n) => n.textContent)
-        .join("");
+    return Array.from(nodes).map((n) => n.textContent);
 }
 
 /**
