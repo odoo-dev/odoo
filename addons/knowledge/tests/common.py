@@ -328,7 +328,7 @@ class KnowledgeArticlePermissionsCase(KnowledgeCommon):
              ],
              'internal_permission': 'write',
              'name': 'Open Paranoïa',
-             'parent_id': cls.article_headers[1].id,             
+             'parent_id': cls.article_headers[1].id,
             },
             {'name': 'Proprietary RPGs',
              'parent_id': cls.article_headers[1].id,

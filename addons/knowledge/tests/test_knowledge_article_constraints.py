@@ -38,7 +38,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
                 'parent_id': article_childs[1].id
             })
 
-    @mute_logger('odoo.addons.base.models.ir_rule')
+    @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
     @users('employee')
     def test_article_create(self):
         """ Testing the helper to create articles with right values. """
@@ -128,16 +128,18 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
 
         # Add employee2 as read member
         article.invite_members(self.partner_employee2, 'read')
-        self.assertTrue(article.category, 'workspace')
-        self.assertFalse(article.with_user(self.user_employee2).user_can_write)
-        self.assertTrue(article.with_user(self.user_employee2).user_has_access)
+
+        article_as2 = article.with_user(self.user_employee2)
+        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertFalse(article_as2.user_can_write)
+        self.assertTrue(article_as2.user_has_access)
 
         # Member should not be allowed to create an article under an article without "write" permission
         with self.assertRaises(exceptions.AccessError):
             self.env['knowledge.article'].with_user(self.user_employee2).create({
                 'internal_permission': 'write',
                 'name': 'My Own',
-                'parent_id': article.id,
+                'parent_id': article_as2.id,
             })
 
         # Member should not be allowed to create a private article under a non-owned article
@@ -148,7 +150,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         with self.assertRaises(exceptions.AccessError):
             self.env['knowledge.article'].with_user(self.user_employee2).create({
                 'name': 'My Own Private',
-                'parent_id': article.id,
+                'parent_id': article_as2.id,
             })
 
     @mute_logger('odoo.addons.base.models.ir_rule')
@@ -159,55 +161,63 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
 
         # Add employee2 as read member
         article.invite_members(self.partner_employee2, 'read')
-        self.assertTrue(article.category, 'workspace')
-        self.assertFalse(article.with_user(self.user_employee2).user_can_write)
-        self.assertTrue(article.with_user(self.user_employee2).user_has_access)
+
+        article_as2 = article.with_user(self.user_employee2)
+        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertFalse(article_as2.user_can_write)
+        self.assertTrue(article_as2.user_has_access)
 
         # Member should not be allowed to move an article under an article without "write" permission
         article_user2 = self.env['knowledge.article'].with_user(self.user_employee2).create({
             'internal_permission': 'write',
             'name': 'My Own',
         })
+        # TDE FIXME: currently does not raise, should
         with self.assertRaises(exceptions.AccessError):
-            article_user2.write({'parent_id': article.id})
+            article_user2.write({'parent_id': article_as2.id})
         with self.assertRaises(exceptions.AccessError):
-            article_user2.move_to(parent_id=article.id)
+            article_user2.move_to(parent_id=article_as2.id)
 
     @mute_logger('odoo.addons.base.models.ir_rule')
     @users('employee')
     def test_article_private_management(self):
         """ Checking the article private management. """
-        article = self.article_workspace.with_env(self.env)
+        article_workspace = self.article_workspace.with_env(self.env)
 
         # Private-like article whoe parent is not in private category is under workspace
         article_private_u2 = self.env['knowledge.article'].sudo().create({
             'article_member_ids': [(0, 0, {'partner_id': self.partner_employee2.id, 'permission': 'write'})],
             'internal_permission': 'none',
             'name': 'Private Child',
-            'parent_id': article.id,
-        })
-        self.assertEqual(article_private_u2.category, 'workspace')
+            'parent_id': article_workspace.id,
+        }).with_user(self.user_employee2)
         article_private_u2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
-        self.assertTrue(article_private_u2.with_user(self.user_employee2).user_can_write)
+        self.assertEqual(article_private_u2.category, 'workspace')
+        self.assertTrue(article_private_u2.user_can_write)
+
         # Effectively private: other user cannot read it
         article_private_u2_asuser = article_private_u2.with_user(self.env.user)
+        article_private_u2_asuser.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         with self.assertRaises(exceptions.AccessError):
             article_private_u2_asuser.body  # should trigger ACLs
 
         # Moving a private article under a workspace category makes it workspace
-        article_private = self._create_private_article('MyPrivate')
-        self.assertEqual(article_private.article_member_ids.partner_id, self.partner_employee)
-        self.assertTrue(article_private.category, 'private')
+        article_private = self._create_private_article('MyPrivate').with_user(self.env.user)
         article_private.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
-        self.assertTrue(article_private.with_user(self.env.user).user_can_write)
+        self.assertTrue(article_private.category, 'private')
+        self.assertTrue(article_private.user_can_write)
+
         # Effectively private: other user cannot read it
         article_private_asu2 = article_private.with_user(self.user_employee2)
+        article_private_asu2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         with self.assertRaises(exceptions.AccessError):
             article_private_asu2.body  # should trigger ACLs
+
         # Move to workspace, makes it workspace
-        article_private.move_to(parent_id=article.id)
+        article_private.move_to(parent_id=article_workspace.id)
         self.assertEqual(article_private.category, 'workspace')
         article_private_asu2 = article_private.with_user(self.user_employee2)
+        article_private_asu2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         # Still not accessible
         with self.assertRaises(exceptions.AccessError):
             article_private_asu2.body  # should trigger ACLs
