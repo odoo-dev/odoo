@@ -2,140 +2,64 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import exceptions
-from odoo.addons.knowledge.tests.common import KnowledgeCommon
+from odoo.addons.knowledge.tests.common import KnowledgeArticlePermissionsCase
 from odoo.tests.common import tagged, users
 from odoo.tools import mute_logger
 
 
 @tagged('knowledge_acl')
-class TestKnowledgeSecurity(KnowledgeCommon):
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        with mute_logger('odoo.models.unlink'):
-            cls.env['knowledge.article'].search([]).unlink()
-
-        cls.article_root_sudo = cls.env['knowledge.article'].sudo().create({
-            'article_member_ids': [(0, 0, {
-                'partner_id': cls.partner_admin.id,
-                'permission': 'write',
-            })],
-            'internal_permission': 'read',
-            'name': 'Article Library',
-        })
-        cls.article_hidden_sudo = cls.env['knowledge.article'].sudo().create({
-            'article_member_ids': [
-                (0, 0, {'partner_id': cls.partner_admin.id,
-                        'permission': 'write',}),
-            ],
-            'internal_permission': 'none',
-            'favorite_ids': [(0, 0, {'user_id': cls.user_admin.id})],
-            'name': 'Hidden Article',
-        })
-        cls.article_shared_sudo = cls.env['knowledge.article'].sudo().create({
-            'article_member_ids': [
-                (0, 0, {'partner_id': cls.partner_admin.id,
-                        'permission': 'write',}),
-                (0, 0, {'partner_id': cls.partner_employee.id,
-                        'permission': 'read',}),
-                (0, 0, {'partner_id': cls.partner_portal.id,
-                        'permission': 'read',}),
-            ],
-            'internal_permission': 'none',
-            'favorite_ids': [(0, 0, {'user_id': cls.user_admin.id}),
-                             (0, 0, {'user_id': cls.user_employee.id})
-            ],
-            'name': 'Shared Article',
-        })
+class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
+    """ Tests ACLs and low level access on models. Do not test the internals
+    of permission comuptation as those are done in another test suite. Here
+    we rely on them to check the create/read/write/unlink access checks. """
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
     @users('portal_test')
     def test_models_as_portal(self):
-        article_root = self.article_root_sudo.with_env(self.env)
+        article_root = self.article_roots[0].with_env(self.env)
 
         # ARTICLES
         with self.assertRaises(exceptions.AccessError,
-                               msg='No access given to portal'):
+                               msg="ACLs: No access given to portal"):
             article_root.body  # access body should trigger acls
 
-        article_hidden = self.article_hidden_sudo.with_env(self.env)
+        article_shared = self.article_roots[2].with_env(self.env)
         with self.assertRaises(exceptions.AccessError,
-                               msg='None access, not for portal'):
-            article_hidden.body  # access body should trigger acls
+                               msg="ACLs: Internal permission 'none', not for portal"):
+            article_shared.body  # access body should trigger acls
+
+        article_accessible = self.article_write_contents[2].with_env(self.env)
+        self.assertEqual(article_accessible.body, '<p>Writable Subarticle through inheritance</p>',
+                        "ACLs: should be accessible due to explicit 'read' member permission")
+        self.assertTrue(article_accessible.is_user_favorite)
 
         # FAVORITES
-        self.assertFalse(self.env['knowledge.article.favorite'].search([]))
-        favorites = self.article_shared_sudo.favorite_ids.with_env(self.env)
+        favs = self.env['knowledge.article.favorite'].search([])
+        self.assertEqual(len(favs), 1)
+        self.assertEqual(favs.article_id, article_accessible)
+        sudo_favorites = self.article_roots.favorite_ids.with_env(self.env)
+        self.assertEqual(len(sudo_favorites), 2)
         with self.assertRaises(exceptions.AccessError,
-                               msg='Breaking rule for portal'):
-            favorites.mapped('user_id')  # access body should trigger acls
+                               msg='ACLs: Breaking rule for portal'):
+            sudo_favorites.mapped('user_id')  # access body should trigger acls
 
         # MEMBERS
         with self.assertRaises(exceptions.AccessError,
                                msg='No ACLs for portal'):
             self.assertFalse(self.env['knowledge.article.member'].search([]))
-        members = self.article_shared_sudo.article_member_ids.with_env(self.env)
+        sudo_members = self.article_roots.article_member_ids.with_env(self.env)
         with self.assertRaises(exceptions.AccessError,
                                msg='Breaking rule for portal'):
-            members.mapped('partner_id')  # access body should trigger acls
-
-
-    @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
-    @users('employee')
-    def test_models_as_user(self):
-        article_root = self.article_root_sudo.with_env(self.env)
-        self.assertTrue(article_root.user_has_access)
-        self.assertFalse(article_root.user_can_write)
-
-        # ARTICLES
-        article_root.body  # access body should trigger acls
-        with self.assertRaises(exceptions.AccessError,
-                               msg='Read access only'):
-            article_root.write({'name': 'Hacked'})
-
-        article_hidden = self.article_hidden_sudo.with_env(self.env)
-        with self.assertRaises(exceptions.AccessError,
-                               msg='None access, not for user'):
-            article_hidden.body  # access body should trigger acls
-
-        # FAVORITES
-        my_favs = self.env['knowledge.article.favorite'].search([])
-        self.assertEqual(
-            my_favs,
-            self.article_shared_sudo.favorite_ids.filtered(lambda f: f.user_id == self.env.user),
-            'Favorites: employee should see its own favorites'
-        )
-        my_favs.mapped('user_id')  # access body should trigger acls
-        my_favs.write({'sequence': 0})
-        # TDE FIXME
-        # with self.assertRaises(exceptions.AccessError,
-        #                        msg='Should not be used to change article/user'):
-        #     my_favs.write({'article_id': self.article_hidden_sudo.id})
-        # with self.assertRaises(exceptions.AccessError,
-        #                        msg='Should not be used to change article/user'):
-        #     my_favs.write({'user_id': self.user_portal.id})
-
-        # MEMBERS
-        my_members = self.env['knowledge.article.member'].search([])
-        self.assertEqual(
-            my_members,
-            (self.article_shared_sudo + self.article_root_sudo).article_member_ids,
-            'Members: employee should see its own memberships'
-        )
-        my_members.mapped('partner_id')  # access body should trigger acls
-        with self.assertRaises(exceptions.AccessError,
-                               msg='No ACLs for write for user'):
-            my_members.write({'permission': 'write'})
+            sudo_members.mapped('partner_id')  # access body should trigger acls
 
     @mute_logger('odoo.models.unlink')
     @users('admin')
     def test_models_as_system(self):
         self.assertTrue(self.env.user.has_group('base.group_system'))
 
-        article_root = self.article_root_sudo.with_env(self.env)
-        article_root.body  # access body should trigger acls
-        article_hidden = self.article_hidden_sudo.with_env(self.env)
+        article_roots = self.article_roots.with_env(self.env)
+        article_roots.mapped('body')  # access body should trigger acls
+        article_hidden = self.article_read_contents[3].with_env(self.env)
         article_hidden.body  # access body should trigger acls
 
         # ARTICLE: CREATE/READ
@@ -148,7 +72,7 @@ class TestKnowledgeSecurity(KnowledgeCommon):
             'internal_permission': 'none',
             'name': 'Private for Employee',
         })
-        self.assertEqual(other_private.article_member_ids.partner_id, self.partner_employee)
+        self.assertMembers(other_private, 'none', {self.partner_employee: 'write'})
         self.assertEqual(other_private.category, 'private')
         self.assertEqual(other_private.owner_id, self.user_employee)
 
@@ -157,6 +81,7 @@ class TestKnowledgeSecurity(KnowledgeCommon):
             'name': 'Child of Private for Employee',
             'parent_id': other_private.id,
         })
+        self.assertMembers(other_private_child, False, {})
         self.assertEqual(other_private_child.article_member_ids.partner_id, self.env['res.partner'])
         self.assertEqual(other_private_child.category, 'private')
         self.assertEqual(other_private_child.owner_id, self.user_employee)
@@ -187,3 +112,62 @@ class TestKnowledgeSecurity(KnowledgeCommon):
         members = other_private.article_member_ids
         self.assertEqual(members, new_member)
         self.assertEqual(members.partner_id, self.partner_employee2)
+
+    @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
+    @users('employee')
+    def test_models_as_user(self):
+        article_roots = self.article_roots.with_env(self.env)
+
+        # ARTICLES
+        article_roots.mapped('body')  # access body should trigger acls
+        article_roots[0].write({'name': 'Hacked (or not)'})
+        with self.assertRaises(exceptions.AccessError,
+                               msg="ACLs: 'read' internal permission"):
+            article_roots[1].write({'name': 'Hacked'})
+        with self.assertRaises(exceptions.AccessError,
+                               msg="ACLs: 'read' member permission"):
+            article_roots[2].write({'name': 'Hacked'})
+
+        article_hidden = self.article_read_contents[3].with_env(self.env)
+        with self.assertRaises(exceptions.AccessError,
+                               msg="ACLs: 'none' internal permission"):
+            article_hidden.body  # access body should trigger acls
+
+        # FAVORITES
+        my_favs = self.env['knowledge.article.favorite'].search([])
+        self.assertEqual(
+            my_favs,
+            self.articles_all.favorite_ids.filtered(lambda f: f.user_id == self.env.user),
+            'Favorites: employee should see its own favorites'
+        )
+        my_favs.mapped('user_id')  # access body should trigger acls
+        my_favs.write({'sequence': 0})
+        # TDE FIXME: current does not crash, but it should
+        with self.assertRaises(exceptions.AccessError,
+                               msg="ACLs: should not be used to change article/user"):
+            my_favs[0].write({'article_id': article_roots[0].id})
+        with self.assertRaises(exceptions.AccessError,
+                               msg="ACLs: should not be used to change article/user"):
+            my_favs[0].write({'user_id': self.user_portal.id})
+
+        # MEMBERS
+        my_members = self.env['knowledge.article.member'].search([('article_id', 'in', self.article_roots.ids)])
+        self.assertEqual(len(my_members), 3)
+        self.assertEqual(
+            my_members,
+            self.article_roots.article_member_ids,
+            'Members: employee should memberships of visible '
+        )
+        # remove employee from Shared root, check he cannot read those members
+        self.article_roots[2].article_member_ids.filtered(lambda m: m.partner_id == self.partner_employee).unlink()
+        my_members = self.env['knowledge.article.member'].search([('article_id', 'in', self.article_roots.ids)])
+        self.assertEqual(len(my_members), 1)
+        self.assertEqual(
+            my_members,
+            self.article_roots[1].article_member_ids,
+            'Members: employee should see its own memberships'
+        )
+        my_members.mapped('partner_id')  # access body should trigger acls
+        with self.assertRaises(exceptions.AccessError,
+                               msg="ACLs: no ACLs for write for user"):
+            my_members.write({'permission': 'write'})
