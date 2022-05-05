@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 {
-    'name': 'Knowledge website',
-    'summary': 'Publish your articles on the web',
-    'version': '0.1',
+    'name': 'Knowledge Website',
+    'summary': 'Publish your articles',
+    'version': '1.0',
     'depends': ['knowledge', 'website'],
     'data': [
         'views/knowledge_views.xml',

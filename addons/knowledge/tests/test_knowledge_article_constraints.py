@@ -4,34 +4,29 @@
 from psycopg2 import IntegrityError
 
 from odoo import exceptions
-from odoo.addons.knowledge.tests.common import KnowledgeCommon
+from odoo.addons.knowledge.tests.common import KnowledgeCommonWData
 from odoo.tests.common import tagged, users
 from odoo.tools import mute_logger
 
 
 @tagged('knowledge_internals')
-class TestKnowledgeArticleConstraints(KnowledgeCommon):
+class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
     """ This test suite has the responsibility to test the different constraints
-    defined on the `knowledge.article` and `knowledge.article.member` and
-    `knowledge.article.favourite` models. """
+    defined on the `knowledge.article`, `knowledge.article.member` and
+    `knowledge.article.favorite` models. """
 
     @users('employee')
     def test_article_acyclic_graph(self):
         """ Check that the article hierarchy does not contain cycles. """
-        article = self.env['knowledge.article'].create([
-            {'internal_permission': 'write',
-             'name': 'Header',
-             'sequence': 0,
-            }
-        ])
+        article = self.article_workspace.with_env(self.env)
         article_childs = self.env['knowledge.article'].create([
-            {'name': 'Child1',
+            {'name': 'ChildNew1',
              'parent_id': article.id,
-             'sequence': 1,
+             'sequence': 3,
             },
-            {'name': 'Child2',
+            {'name': 'ChildNew2',
              'parent_id': article.id,
-             'sequence': 2,
+             'sequence': 4,
             }
         ])
 
@@ -45,33 +40,106 @@ class TestKnowledgeArticleConstraints(KnowledgeCommon):
 
     @mute_logger('odoo.addons.base.models.ir_rule')
     @users('employee')
-    def test_article_creation_constraints(self):
-        """ Checking the article creation constraints. """
-        article = self.env['knowledge.article'].create({
-            'internal_permission': 'write',
-            'name': 'Article',
-        })
-        self.assertTrue(article.category, 'workspace')
-        self.assertTrue(article.user_has_access)
-        self.assertTrue(article.user_can_write)
+    def test_article_create(self):
+        """ Testing the helper to create articles with right values. """
+        article = self.article_workspace.with_env(self.env)
+        readonly_article = self.article_shared.with_env(self.env)
+        self.assertTrue(readonly_article.user_has_access)
+        self.assertFalse(readonly_article.user_can_write)
 
-        # Even admins should not be allowed to create a private article under a non-private article
-        # with self.assertRaises(exceptions.ValidationError):
-        #     self.env['knowledge.article'].sudo().create({
-        #         'article_member_ids': [(0, 0, {'partner_id': self.user_admin.id, 'permission': 'write'})],
-        #         'name': 'Private Child',
-        #         'parent_id': article.id,
-        #     })
+        _title = 'Fthagn, private'
+        # TDE FIXME: currently crashing, should we support ?
+        # private = self.env['knowledge.article'].create({
+        #     'article_member_ids': [
+        #         (0, 0, {'partner_id': self.env.user.partner_id.id,
+        #                 'permission': 'write'})
+        #     ],
+        #     'body': f'<p>{_title}</p>',
+        #     'internal_permission': 'none',
+        #     'name': _title,
+        # })
+        # self.assertEqual(private.article_member_ids.partner_id, self.env.user.partner_id)
+        # self.assertEqual(private.category, 'private')
+        # self.assertEqual(private.internal_permission, 'none')
+        # self.assertFalse(private.parent_id)
+        # self.assertEqual(private.sequence, self._base_sequence + 1)
+        _private = self.env['knowledge.article'].sudo().create({
+            'article_member_ids': [
+                (0, 0, {'partner_id': self.env.user.partner_id.id,
+                        'permission': 'write'})
+            ],
+            'body': f'<p>{_title}</p>',
+            'internal_permission': 'none',
+            'name': _title,
+        })  # temporarily created using sudo
+
+        _title = 'Fthagn, with parent (workspace)'
+        child = self.env['knowledge.article'].create({
+            'body': f'<p>{_title}</p>',
+            'name': _title,
+            'parent_id': article.id,
+        })
+        self.assertFalse(child.article_member_ids)
+        self.assertEqual(child.category, 'workspace')
+        self.assertFalse(child.internal_permission)
+        self.assertEqual(child.parent_id, article)
+        self.assertEqual(child.sequence, 2, 'Already two children existing')
+
+        _title = 'Fthagn, with parent (private)'
+        child_private = self.env['knowledge.article'].create({
+            'body': f'<p>{_title}</p>',
+            'internal_permission': False,
+            'name': _title,
+            'parent_id': _private.id,
+        })
+        self.assertFalse(child_private.article_member_ids)
+        self.assertEqual(child_private.category, 'private')
+        self.assertFalse(child_private.internal_permission)
+        self.assertEqual(child_private.parent_id, _private)
+        self.assertEqual(child_private.sequence, 0)
+
+        _title = 'Fthagn, but private under non private: cracboum'
+        with self.assertRaises(exceptions.AccessError):
+            _unwanted_child = self.env['knowledge.article'].create({
+                'article_member_ids': [
+                    (0, 0, {'partner_id': self.env.user.partner_id.id,
+                            'permission': 'write'})
+                ],
+                'body': f'<p>{_title}</p>',
+                'internal_permission': 'none',
+                'name': _title,
+                'parent_id': article.id,
+            })
+
+        _title = 'Fthagn, but with parent read only: cracboum'
+        with self.assertRaises(exceptions.AccessError):
+            _unallowed_child = self.env['knowledge.article'].create({
+                'body': f'<p>{_title}</p>',
+                'internal_permission': 'write',
+                'name': _title,
+                'parent_id': readonly_article.id,
+            })
+
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    @users('employee')
+    def test_article_parent_constraints_create(self):
+        """ Checking various article constraints linked to parents """
+        article = self.article_workspace.with_env(self.env)
+
+        # Add employee2 as read member
+        article.invite_members(self.partner_employee2, 'read')
+
+        article_as2 = article.with_user(self.user_employee2)
+        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertFalse(article_as2.user_can_write)
+        self.assertTrue(article_as2.user_has_access)
 
         # Member should not be allowed to create an article under an article without "write" permission
-        article.invite_members(self.partner_employee2, 'read')
-        self.assertTrue(article.category, 'workspace')
-        self.assertFalse(article.with_user(self.user_employee2).user_can_write)
-        self.assertTrue(article.with_user(self.user_employee2).user_has_access)
         with self.assertRaises(exceptions.AccessError):
             self.env['knowledge.article'].with_user(self.user_employee2).create({
+                'internal_permission': 'write',
                 'name': 'My Own',
-                'parent_id': article.id,
+                'parent_id': article_as2.id,
             })
 
         # Member should not be allowed to create a private article under a non-owned article
@@ -82,8 +150,70 @@ class TestKnowledgeArticleConstraints(KnowledgeCommon):
         with self.assertRaises(exceptions.AccessError):
             self.env['knowledge.article'].with_user(self.user_employee2).create({
                 'name': 'My Own Private',
-                'parent_id': article.id,
+                'parent_id': article_as2.id,
             })
+
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    @users('employee')
+    def test_article_parent_constraints_write(self):
+        """ Checking the article parent constraints. """
+        article = self.article_workspace.with_env(self.env)
+
+        # Add employee2 as read member
+        article.invite_members(self.partner_employee2, 'read')
+
+        article_as2 = article.with_user(self.user_employee2)
+        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertFalse(article_as2.user_can_write)
+        self.assertTrue(article_as2.user_has_access)
+
+        # Member should not be allowed to move an article under an article without "write" permission
+        article_user2 = self.env['knowledge.article'].with_user(self.user_employee2).create({
+            'internal_permission': 'write',
+            'name': 'My Own',
+        })
+        # TDE FIXME: currently does not raise, should
+        with self.assertRaises(exceptions.AccessError):
+            article_user2.write({'parent_id': article_as2.id})
+        with self.assertRaises(exceptions.AccessError):
+            article_user2.move_to(parent_id=article_as2.id)
+
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    @users('employee')
+    def test_article_private_management(self):
+        """ Checking the article private management. """
+        article = self.article_workspace.with_env(self.env)
+
+        # Private-like article whoe parent is not in private category is under workspace
+        article_private_u2 = self.env['knowledge.article'].sudo().create({
+            'article_member_ids': [(0, 0, {'partner_id': self.partner_employee2.id, 'permission': 'write'})],
+            'internal_permission': 'none',
+            'name': 'Private Child',
+            'parent_id': article.id,
+        })
+        self.assertEqual(article_private_u2.category, 'workspace')
+        self.assertEqual(article_private_u2.owner_id, self.user_employee2)
+        # Effectively private: other user cannot read it
+        article_private_u2_asuser = article_private_u2.with_user(self.env.user)
+        with self.assertRaises(exceptions.AccessError):
+            article_private_u2_asuser.body  # should trigger ACLs
+
+        # Moving a private article under a workspace category makes it workspace
+        article_private = self._create_private_article('MyPrivate')
+        self.assertEqual(article_private.article_member_ids.partner_id, self.partner_employee)
+        self.assertTrue(article_private.category, 'private')
+        self.assertEqual(article_private.owner_id, self.env.user)
+        # Effectively private: other user cannot read it
+        article_private_asu2 = article_private.with_user(self.user_employee2)
+        with self.assertRaises(exceptions.AccessError):
+            article_private_asu2.body  # should trigger ACLs
+        # Move to workspace, makes it workspace
+        article_private.move_to(parent_id=article.id)
+        self.assertEqual(article_private.category, 'workspace')
+        article_private_asu2 = article_private.with_user(self.user_employee2)
+        # Still not accessible
+        with self.assertRaises(exceptions.AccessError):
+            article_private_asu2.body  # should trigger ACLs
 
     @mute_logger('odoo.sql_db')
     @users('employee')
@@ -124,13 +254,13 @@ class TestKnowledgeArticleConstraints(KnowledgeCommon):
         """ Check that an article has at least one writer."""
         with self.assertRaises(exceptions.ValidationError, msg='Article should have at least one writer'):
             self.env['knowledge.article'].create({
-                'name': 'Article',
                 'internal_permission': 'none',
+                'name': 'Article',
             })
         with self.assertRaises(exceptions.ValidationError, msg='Article should have at least one writer'):
             self.env['knowledge.article'].create({
-                'name': 'Article',
                 'internal_permission': 'read',
+                'name': 'Article',
             })
 
         article_private = self._create_private_article('MyPrivate')

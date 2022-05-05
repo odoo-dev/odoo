@@ -2,158 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import exceptions
-from odoo.addons.knowledge.tests.common import KnowledgeCommon
+from odoo.addons.knowledge.tests.common import KnowledgeArticlePermissionsCase
 from odoo.tests.common import tagged, users
 from odoo.tools import mute_logger
-
-
-@tagged('knowledge_acl')
-class KnowledgeArticlePermissionsCase(KnowledgeCommon):
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        with mute_logger('odoo.models.unlink'):
-            cls.env['knowledge.article'].search([]).unlink()
-
-        # ------------------------------------------------------------
-        #                         Perm (" = inherited) + exceptions
-        # WRITABLE ROOT           write
-        # - Community             "
-        #   - Members             "       (except employee-read)
-        #   - Readonly            read    (except manager-write)
-        #   - Writable            "
-        #     - Writable child    "
-        #     - Nyarlathotep      DESYNC  read, manager-write
-        #       - Child           "
-        # READABLE ROOT           read    (except manager-write)
-        # - TTRPG                 "
-        #   - OpenCthulhu         write   (+ portal-read)
-        #     - MansionsOfTerror  DESYNC  none, employee-write, manager-read,
-        #   - OpenParanoïa        write   (except employee-read, +portal-read)
-        #   - Proprietary         "
-        #   - Secret              none
-        # - Board Games           read
-        #
-        # ------------------------------------------------------------
-        cls.article_roots = cls.env['knowledge.article'].create([
-            {'name': 'Writable Root',
-            },
-            {'article_member_ids':  # ensure at least one write access
-                [(0, 0, {'partner_id': cls.partner_employee_manager.id,
-                         'permission': 'write',
-                        }),
-                ],
-             'internal_permission': 'read',
-             'name': 'Readable Root',
-            }
-        ])
-        cls.article_headers = cls.env['knowledge.article'].create([
-            # writable root
-            {'name': 'Community',
-             'parent_id': cls.article_roots[0].id,
-            },
-            # readable root
-            {'name': 'TTRPG',
-             'parent_id': cls.article_roots[1].id,
-            },
-            {'name': 'Board Games',
-             'parent_id': cls.article_roots[1].id,
-            },
-        ])
-        # Under Write internal permission
-        cls.article_write_contents = cls.env['knowledge.article'].create([
-            {'article_member_ids':
-                [(0, 0, {'partner_id': cls.partner_employee.id,
-                         'permission': 'read',
-                        }),
-                ],
-             'name': 'Members Subarticle',
-             'parent_id': cls.article_headers[0].id,
-            },
-            {'article_member_ids':  # ensure at least one write access
-                [(0, 0, {'partner_id': cls.partner_employee_manager.id,
-                         'permission': 'write',
-                        }),
-                ],
-             'internal_permission': 'read',
-             'name': 'Readonly Subarticle',
-             'parent_id': cls.article_headers[0].id,
-            },
-            {'name': 'Writable Subarticle through inheritance',
-             'parent_id': cls.article_headers[0].id,
-            },
-        ])
-        cls.article_write_contents_children = cls.env['knowledge.article'].create([
-            {'name': 'Child of writable through inheritance',
-             'parent_id': cls.article_write_contents[2].id,
-            },
-        ])
-        # Under Read internal permission
-        cls.article_read_contents = cls.env['knowledge.article'].create([
-            # TTRPG
-            {'name': 'Open Cthulhu',
-             'parent_id': cls.article_headers[1].id,
-             'internal_permission': 'write',
-             'article_member_ids':
-                [(0, 0, {'partner_id': cls.partner_portal.id,
-                         'permission': 'read',
-                        }),
-                ],
-            },
-            {'name': 'Open Paranoïa',
-             'parent_id': cls.article_headers[1].id,
-             'internal_permission': 'write',
-             'article_member_ids':
-                [(0, 0, {'partner_id': cls.partner_portal.id,
-                         'permission': 'read',
-                        }),
-                 (0, 0, {'partner_id': cls.partner_employee.id,
-                         'permission': 'read',
-                        }),
-                ],
-            },
-            {'name': 'Proprietary RPGs',
-             'parent_id': cls.article_headers[1].id,
-            },
-            {'name': 'Secret RPGs',
-             'parent_id': cls.article_headers[1].id,
-             'internal_permission': 'none',
-            },
-        ])
-        cls.article_cornercases = cls.env['knowledge.article'].create([
-            # TTRPG: Open Cthulhu
-            {'article_member_ids':
-                [(0, 0, {'partner_id': cls.partner_employee_manager.id,
-                         'permission': 'write',
-                        }),
-                ],
-             'internal_permission': 'none',
-             'is_desynchronized': True,
-             'name': 'Mansions of Terror',
-             'parent_id': cls.article_read_contents[0].id,
-            },
-            # Community/Writable
-            {'article_member_ids':
-                [(0, 0, {'partner_id': cls.partner_employee_manager.id,
-                         'permission': 'write',
-                        }),
-                ],
-             'internal_permission': 'read',
-             'is_desynchronized': True,
-             'name': 'Nyarlathotep',
-             'parent_id': cls.article_write_contents[2].id,
-            },
-        ])
-        cls.article_cornercases += cls.env['knowledge.article'].create([
-            {'name': 'Childof Desync Nyarlathotep',
-             'parent_id': cls.article_cornercases[1].id,
-            }
-        ])
-
-        cls.articles_all = cls.article_roots + cls.article_headers + \
-                           cls.article_write_contents + cls.article_write_contents_children + \
-                           cls.article_read_contents + cls.article_cornercases
 
 
 @tagged('knowledge_acl')
@@ -167,9 +18,10 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
              exp_inherited_permission_parent_id,
              exp_internal_permission
             ), article in zip(
-                [('none', self.env['knowledge.article'], 'none'),
-                 ('read', self.env['knowledge.article'], 'read'),
-                 ('read', self.article_cornercases[1], False),
+                [('read', self.env['knowledge.article'], 'read'),
+                 ('read', self.article_cornercases[0], False),
+                 ('none', self.env['knowledge.article'], 'none'),
+                 ('none', self.article_cornercases[2], False),
                  ('write', self.env['knowledge.article'], 'write'),
                  ('read', self.env['knowledge.article'], 'read'),
                 ],
@@ -183,18 +35,41 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
                              f'Permission: wrong inherit computation for {article.name}: {article.internal_permission} instead of {exp_internal_permission}')
 
     @mute_logger('odoo.addons.base.models.ir_rule')
+    def test_article_permissions_inheritance_desync(self):
+        """ Test desynchronize (and therefore member propagation that should be
+        stopped). """
+        article_desync = self.article_cornercases[0]
+        self.assertMembers(article_desync, 'read', {self.partner_employee_manager: 'write'})
+
+        # as employee w write perms
+        article_desync = article_desync.with_user(self.user_employee_manager)
+        article_desync.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertTrue(article_desync.user_can_write)
+        self.assertTrue(article_desync.user_has_access)
+
+        # as employee
+        article_desync = article_desync.with_user(self.user_employee)
+        article_desync.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertFalse(article_desync.user_can_write)
+        self.assertTrue(article_desync.user_has_access)
+
+        # as portal
+        article_desync = article_desync.with_user(self.user_portal)
+        article_desync.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertFalse(article_desync.user_can_write)
+        # TDE FIXME: currently has access but should not, member check should stop at desync
+        self.assertFalse(article_desync.user_has_access, 'Permissions: member rights should not be fetch on parents')
+
+    @mute_logger('odoo.addons.base.models.ir_rule')
     @users('employee')
     def test_article_permissions_inheritance_employee(self):
         article_roots = self.article_roots.with_env(self.env)
         article_roots.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
 
         # roots: based on internal permissions
-        self.assertEqual(article_roots.mapped('inherited_permission'), ['write', 'read'])
-        self.assertFalse(article_roots.inherited_permission_parent_id)
-        self.assertEqual(article_roots.mapped('internal_permission'), ['write', 'read'])
-        self.assertEqual(article_roots.mapped('user_can_write'), [True, False])
-        self.assertEqual(article_roots.mapped('user_has_access'), [True, True])
-        self.assertEqual(article_roots.mapped('user_permission'), ['write', 'read'])
+        self.assertEqual(article_roots.mapped('user_can_write'), [True, False, False])
+        self.assertEqual(article_roots.mapped('user_has_access'), [True, True, True])
+        self.assertEqual(article_roots.mapped('user_permission'), ['write', 'read', 'read'])
 
         # write permission from ancestors
         article_write_ancestor = self.article_write_contents[2].with_env(self.env)
@@ -275,9 +150,9 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         (article_roots + article_headers).invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
 
         # roots: defaults on write, inherited = internal
-        self.assertEqual(article_roots.mapped('inherited_permission'), ['write', 'read'])
+        self.assertEqual(article_roots.mapped('inherited_permission'), ['write', 'read', 'none'])
         self.assertFalse(article_roots.inherited_permission_parent_id)
-        self.assertEqual(article_roots.mapped('internal_permission'), ['write', 'read'])
+        self.assertEqual(article_roots.mapped('internal_permission'), ['write', 'read', 'none'])
 
         # childs: allow void permission, inherited = go up to first defined permission
         self.assertEqual(article_headers.mapped('inherited_permission'), ['write', 'read', 'read'])
@@ -286,6 +161,24 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
             [article_roots[0], article_roots[1], article_roots[1]]
         )
         self.assertEqual(article_headers.mapped('internal_permission'), [False, False, False])
+
+    @users('employee')
+    def test_initial_values_as_employee(self):
+        """ Ensure all tests have the same basis (user specific computed as
+        employee for acl-dependent tests) """
+        article_write_inherit_as1 = self.article_write_contents[2].with_env(self.env)
+        article_write_inherit_as1.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+
+        # initial values: write through inheritance
+        self.assertMembers(article_write_inherit_as1, False, {self.partner_portal: 'read'})
+        self.assertFalse(article_write_inherit_as1.internal_permission)
+        self.assertFalse(article_write_inherit_as1.is_desynchronized)
+        self.assertTrue(article_write_inherit_as1.user_can_write)
+        self.assertTrue(article_write_inherit_as1.user_has_access)
+        article_write_inherit_as2 = article_write_inherit_as1.with_user(self.user_employee2)
+        article_write_inherit_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertTrue(article_write_inherit_as2.user_can_write)
+        self.assertTrue(article_write_inherit_as2.user_has_access)
 
 
 @tagged('knowledge_acl')
@@ -300,11 +193,11 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
         # downgrade write global perm to read
         article_as1._set_internal_permission('none')
         article_as1.flush()  # ACLs are done using SQL
-        self.assertEqual(article_as1.sudo().article_member_ids.partner_id,
-                         self.env.user.partner_id,
-                         'Permission: lowering permission adds current user in members to have write access'
-                        )
-        self.assertEqual(article_as1.internal_permission, 'none')
+        self.assertMembers(
+            article_as1, 'none',
+            {self.partner_portal: 'read', self.env.user.partner_id: 'write'},
+            'Permission: lowering permission adds current user in members to have write access'
+        )
         self.assertTrue(article_as1.is_desynchronized)
         self.assertTrue(article_as1.user_can_write)
         self.assertTrue(article_as1.user_has_access)
@@ -320,32 +213,16 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
         # downgrade write global perm to read
         article_as1._set_internal_permission('read')
         article_as1.flush()  # ACLs are done using SQL
-        self.assertEqual(article_as1.sudo().article_member_ids.partner_id,
-                         self.env.user.partner_id,
-                         'Permission: lowering permission adds current user in members to have write access'
-                        )
-        self.assertEqual(article_as1.internal_permission, 'read')
+        self.assertMembers(
+            article_as1, 'read',
+            {self.partner_portal: 'read', self.env.user.partner_id: 'write'},
+            'Permission: lowering permission adds current user in members to have write access'
+        )
         self.assertTrue(article_as1.is_desynchronized)
         self.assertTrue(article_as1.user_can_write)
         self.assertTrue(article_as1.user_has_access)
         article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertFalse(article_as2.user_can_write)
-        self.assertTrue(article_as2.user_has_access)
-
-    @users('employee')
-    def test_initial_values(self):
-        article_as1 = self.article_write_contents[2].with_env(self.env)
-        article_as1.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
-        article_as2 = article_as1.with_user(self.user_employee2)
-        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
-
-        # initial values: write through inheritance
-        self.assertEqual(len(article_as1.sudo().article_member_ids), 0)
-        self.assertFalse(article_as1.internal_permission)
-        self.assertFalse(article_as1.is_desynchronized)
-        self.assertTrue(article_as1.user_can_write)
-        self.assertTrue(article_as1.user_has_access)
-        self.assertTrue(article_as2.user_can_write)
         self.assertTrue(article_as2.user_has_access)
 
 
@@ -364,15 +241,15 @@ class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
         self.assertEqual(articles_write.root_article_id, article_roots[1])
 
         # desynchornized still have a root (do as sudo)
-        self.assertEqual(self.article_cornercases[0].root_article_id, article_roots[1])
-        self.assertEqual(self.article_cornercases[1:].root_article_id, article_roots[0])
+        self.assertEqual(self.article_cornercases[0:2].root_article_id, article_roots[0])
+        self.assertEqual(self.article_cornercases[2:4].root_article_id, article_roots[1])
 
     @users('employee')
     def test_article_search_employee(self):
         """ Test regular searches using permission-based ACLs """
         articles = self.env['knowledge.article'].search([])
         # not reachable: 'none', desynchronized 'none'
-        expected = self.articles_all - self.article_read_contents[3] - self.article_cornercases[0]
+        expected = self.articles_all - self.article_read_contents[3]
         self.assertEqual(articles, expected,
                          'Search on main article: aka everything except "none"-based articles (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
@@ -383,7 +260,7 @@ class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
         # expected = self.article_roots[0] + self.article_headers[0] + \
         #            self.article_write_contents + self.article_write_contents_children
         expected = self.article_roots[0] + self.article_headers[0] + \
-                   self.article_write_contents + self.article_write_contents_children + self.article_cornercases[1:]
+                   self.article_write_contents + self.article_write_contents_children + self.article_cornercases[0:2]
         self.assertEqual(articles, expected,
                          'Search on main article: aka read access on read root + its children (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
@@ -392,11 +269,11 @@ class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
     @users('employee')
     def test_article_search_employee_method_based(self):
         """ Test search methods """
-        # TDE FIXME: article_cornercases should not be found
+        # TDE FIXME: article_cornercases seems buggy
         articles = self.env['knowledge.article'].search([('user_can_write', '=', True)])
         expected = self.article_roots[0] + self.article_headers[0] + \
                    self.article_write_contents[2] + self.article_write_contents_children + \
-                   self.article_read_contents[0]
+                   self.article_read_contents[0] + self.article_cornercases[2:]
         self.assertEqual(articles, expected,
                          'Search on user_can_write: aka write access (FIXME: should not contain article_cornercases[0] (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))

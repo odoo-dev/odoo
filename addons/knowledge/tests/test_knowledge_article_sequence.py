@@ -8,6 +8,7 @@ from odoo.tools import mute_logger
 
 @tagged('knowledge_sequence')
 class TestKnowledgeArticleSequence(KnowledgeCommon):
+    """ Test sequencing and auto-resequence of articles. """
 
     @classmethod
     def setUpClass(cls):
@@ -53,8 +54,6 @@ class TestKnowledgeArticleSequence(KnowledgeCommon):
             }
         ])
         cls.article_private2 = cls._create_private_article(cls, 'Article2', target_user=cls.user_employee)
-        for article in cls.article_children[0:3]:
-            article.action_toggle_favorite()
 
         # flush everything to ease resequencing and date-based computation
         (cls.article_root_noise + cls.article_private + cls.article_children + cls.article_private2).flush()
@@ -94,11 +93,6 @@ class TestKnowledgeArticleSequence(KnowledgeCommon):
         self.assertEqual(article_private.inherited_permission, 'none')
         self.assertEqual(set(article_children.mapped('inherited_permission')), set(['none']))
         self.assertEqual(article_private2.inherited_permission, 'none')
-        # favorites
-        self.assertFalse(article_private.is_user_favorite)
-        self.assertEqual(article_children.mapped('is_user_favorite'),
-                         [False, False, False, False])
-        self.assertFalse(article_private.is_user_favorite)
         # sequences
         self.assertSortedSequence(article_private + article_private2)
         self.assertSortedSequence(article_children[0:2] + article_children[3])
