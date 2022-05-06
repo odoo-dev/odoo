@@ -261,6 +261,7 @@ class TestKnowledgeArticleFields(KnowledgeCommonWData):
                 article.with_user(self.user_employee2).write({
                     'body': body_values[(index + 1) if index < (len(body_values)-1) else 0]
                 })
+                article.with_user(self.user_employee2).flush()
             self.assertEqual(article.last_edition_uid, self.user_employee2)
             self.assertEqual(article.last_edition_date, _reference_dt + timedelta(days=1))
 
