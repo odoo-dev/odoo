@@ -78,8 +78,14 @@ class Article(models.Model):
         compute="_compute_category", compute_sudo=True, store=True)
         # Stored to improve performance when loading the article tree. (avoid looping through members if 'workspace')
     # Same as write_uid/_date but limited to the body
-    last_edition_uid = fields.Many2one("res.users", string="Last Edited by")
-    last_edition_date = fields.Datetime(string="Last Edited on")
+    last_edition_uid = fields.Many2one(
+        "res.users", string="Last Edited by",
+        compute='_compute_last_edition_data', store=True,
+        readonly=False, copy=False)
+    last_edition_date = fields.Datetime(
+        string="Last Edited on",
+        compute='_compute_last_edition_data', store=True,
+        readonly=False, copy=False)
     # Favorite
     is_user_favorite = fields.Boolean(
         string="Is Favorited?",
@@ -384,6 +390,12 @@ class Article(models.Model):
         for article in self:
             article.favorite_count = favorites_count_by_article.get(article.id, 0)
 
+    @api.depends('body')
+    def _compute_last_edition_data(self):
+        """ Each change of body is considered as a content edition update. """
+        self.last_edition_uid = self.env.uid
+        self.last_edition_date = self.env.cr.now()
+
     @api.depends_context('uid')
     @api.depends('favorite_ids.user_id')
     def _compute_is_user_favorite(self):
@@ -497,8 +509,6 @@ class Article(models.Model):
             parent_id = vals.get('parent_id') or default_parent_id or False
             vals_by_parent_id.setdefault(parent_id, []).append(vals)
 
-            vals['last_edition_uid'] = self._uid
-            vals['last_edition_date'] = fields.Datetime.now()
             if not vals.get('parent_id') and not vals.get('internal_permission'):
                 vals['internal_permission'] = 'write'
 
@@ -532,12 +542,6 @@ class Article(models.Model):
 
     def write(self, vals):
         """ Add editor as author. Edition means writing on the body. """
-        if 'body' in vals:
-            vals.update({
-                "last_edition_uid": self._uid,
-                "last_edition_date": fields.Datetime.now(),
-            })
-
         result = super(Article, self).write(vals)
 
         if any(field in ['parent_id', 'sequence'] for field in vals):
