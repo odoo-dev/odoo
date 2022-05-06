@@ -72,7 +72,7 @@ export default {
                 $sortable.sortable('disable');
                 this._rpc({
                     model: 'knowledge.article',
-                    method: 'set_favorite_sequence',
+                    method: 'action_set_favorite_sequence',
                     args: [[$li.data('article-id')]],
                     kwargs: {sequence: sequence},
                 }).then(() => {

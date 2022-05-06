@@ -405,17 +405,13 @@ class Article(models.Model):
             article.is_user_favorite = self.env.user in article.favorite_ids.user_id
 
     def _inverse_is_user_favorite(self):
-        favorite_articles = not_fav_articles = self.env['knowledge.article']
-        for article in self:
-            if self.env.user in article.favorite_ids.user_id:  # unset as favorite
-                not_fav_articles |= article
-            else:  # set as favorite
-                favorite_articles |= article
+        to_fav = self.filtered(lambda article: self.env.user not in article.favorite_ids.user_id)
+        to_unfav = self - to_fav
 
-        favorite_articles.write({'favorite_ids': [(0, 0, {
-            'user_id': self.env.uid,
-        })]})
-        not_fav_articles.favorite_ids.filtered(lambda u: u.user_id == self.env.user).unlink()
+        if to_fav:
+            to_fav.favorite_ids = [(0, 0, {'user_id': self.env.uid})]
+        if to_unfav:
+            to_unfav.favorite_ids.filtered(lambda u: u.user_id == self.env.user).unlink()
 
     def _search_is_user_favorite(self, operator, value):
         if operator != "=":
@@ -423,8 +419,7 @@ class Article(models.Model):
 
         if value:
             return [('favorite_ids.user_id', 'in', [self.env.uid])]
-        else:
-            return [('favorite_ids.user_id', 'not in', [self.env.uid])]
+        return [('favorite_ids.user_id', 'not in', [self.env.uid])]
 
     def _get_additional_access_domain(self):
         """ This method is meant to be overridden when website is installed (to add website_published)
@@ -613,11 +608,21 @@ class Article(models.Model):
         self.is_locked = False
 
     def action_toggle_favorite(self):
+        """ Read access is sufficient for toggling its own favorite status. """
         article = self.sudo()
         if not article.user_has_access:
             raise AccessError(_("You cannot add/remove the article '%s' to/from your favorites", article.display_name))
         article.is_user_favorite = not article.is_user_favorite
-        return article.is_user_favorite
+        return self[0].is_user_favorite if self else False
+
+    def action_set_favorite_sequence(self, sequence):
+        self.ensure_one()
+        favorite = self.env["knowledge.article.favorite"].search([
+            ('user_id', '=', self.env.uid), ('article_id', '=', self.id)
+        ])
+        if not favorite:
+            raise UserError(_("You don't have the article '%s' in your favorites.", self.display_name))
+        return favorite._set_sequence(sequence)
 
     def action_archive(self):
         super(Article, self | self._get_descendants()).action_archive()
@@ -796,20 +801,6 @@ class Article(models.Model):
             {field: get_field_info(article, field) for field in fields}
             for article in sorted_articles
         ]
-
-    # ------------------------------------------------------------
-    # FAVORITES
-    # ------------------------------------------------------------
-
-    def set_favorite_sequence(self, sequence=False):
-        self.ensure_one()
-        favorite = self.env["knowledge.article.favorite"].search([
-            ('user_id', '=', self.env.uid), ('article_id', '=', self.id)
-        ])
-        if not favorite:
-            raise UserError(_("You don't have the article '%s' in your favorites.", self.display_name))
-
-        return favorite._set_sequence(sequence)
 
     # ------------------------------------------------------------
     # PERMISSIONS / MEMBERS
