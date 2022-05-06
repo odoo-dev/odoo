@@ -676,26 +676,34 @@ class Article(models.Model):
         return True
 
     def _resequence(self):
-        """ This method re-order the children of the same parent (brotherhood) if needed.
-         If an article have been moved from one parent to another, we don't need to resequence the children of the
-         old parent as the order remains unchanged. We only need to resequence the children of the new parent only if
-         the sequences of the children contains duplicates. When reordering an article, we assume that we always set
-         the sequence equals to the position we want it to be, and we use the write_date to differentiate the new order
-         between duplicates in sequence.
-         So if we want article D to be placed at 3rd position between A B et C: set D.sequence = 2, but C was already 2.
-         To know which one is the real 3rd in position, we use the write_date. The last modified is the real 3rd. """
+        """ This method reorders the children of the same parent (brotherhood) if
+        needed. If an article have been moved from one parent to another we do not
+        need to resequence the children of the old parent as the order remains
+        unchanged. We only need to resequence the children of the new parent only if
+        the sequences of the children contains duplicates.
+
+        When reordering an article, we assume that we always set the sequence
+        equals to the position we want it to be. When duplicates last modified
+        wins. We use write date, presence in self (indicating a write hence a
+        priority) and ID to differentiate new ordering between duplicates.
+
+        e.g. if we want article D to be placed at 3rd position between A B et C
+          * set D.sequence = 2;
+          * but C was already 2;
+          * D is in self: it wins. Or D has newer write_date: it wins. Or D has
+            been created more recently: it wins.
+        """
         parent_ids = self.mapped("parent_id").ids
         if any(not article.parent_id for article in self):
             parent_ids.append(False)
-        all_children = self.search(
-            [("parent_id", 'in', parent_ids)],
-            order="sequence ASC, write_date DESC"
-        )
-        # sort all_chidren: sequence ASC, then modified, then write date DESC
+
+        # fetch and sort all_chidren: sequence ASC, then modified, then write date DESC
+        all_children = self.search([("parent_id", 'in', parent_ids)])
         all_children = all_children.sorted(
             lambda article: (-1 * article.sequence,
                              article in self,
-                             article.write_date
+                             article.write_date,
+                             article.id
                              ),
             reverse=True  # due to date
         )
@@ -717,10 +725,11 @@ class Article(models.Model):
         for sequence in article_to_update_by_sequence:  # Call super to avoid loop in write
             super(Article, article_to_update_by_sequence[sequence]).write({'sequence': sequence})
 
+    @api.model
     def _get_max_sequence_inside_parent(self, parent_id):
         max_sequence_article = self.env['knowledge.article'].search(
             [('parent_id', '=', parent_id)],
-            order="sequence desc",
+            order="sequence DESC",
             limit=1
         )
         return max_sequence_article.sequence + 1 if max_sequence_article else 0
