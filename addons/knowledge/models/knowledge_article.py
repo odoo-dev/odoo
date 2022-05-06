@@ -144,7 +144,7 @@ class Article(models.Model):
                 raise ValidationError(_("The article '%s' needs at least one member with 'Write' access.", article.display_name))
 
     @api.constrains('parent_id')
-    def _check_parent_id(self):
+    def _check_parent_id_recursion(self):
         if not self._check_recursion():
             raise ValidationError(
                 _('Articles %s cannot be updated as this would create a recursive hierarchy.',
