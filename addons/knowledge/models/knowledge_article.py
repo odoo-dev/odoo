@@ -7,7 +7,7 @@ from collections import defaultdict
 from markupsafe import Markup
 from werkzeug.urls import url_join
 
-from odoo import fields, models, api, _
+from odoo import Command, fields, models, api, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import get_lang
@@ -512,17 +512,36 @@ class Article(models.Model):
     def create(self, vals_list):
         """ While creating records, automatically organize articles to be the
         last of their parent children, unless a sequence is given.
-        Also, set internal_permission 'default' value (write) if we create a root article,
-        and set the log_access custom fields."""
+
+        Also allow to create private articles, using sudo if that case is
+        found. """
+        defaults = self.default_get(['article_member_ids', 'internal_permission', 'parent_id'])
         vals_by_parent_id = {}
-        default_parent_id = self.default_get(['parent_id']).get('parent_id')
+        vals_as_sudo = []
+
         for vals in vals_list:
-            parent_id = vals.get('parent_id') or default_parent_id or False
+            can_sudo = False
+            # get values from vals or defaults
+            member_ids = vals.get('article_member_ids') or defaults.get('article_member_ids') or False
+            internal_permission = vals.get('internal_permission') or defaults.get('internal_permission') or False
+            parent_id = vals.get('parent_id') or defaults.get('parent_id') or False
+
+            # force write permission for workspace articles
+            if not parent_id and not internal_permission:
+                vals.update({'internal_permission': 'write',
+                             'parent_id': False,  # just be sure we don't grant privileges
+                })
+
+            # allow private articles creation
+            if not parent_id and internal_permission == 'none' and member_ids and len(member_ids) == 1:
+                self_member = member_ids[0][0] == Command.CREATE and member_ids[0][2].get('partner_id') == self.env.user.partner_id.id
+                if self_member:
+                    can_sudo = True
+
             vals_by_parent_id.setdefault(parent_id, []).append(vals)
+            vals_as_sudo.append(can_sudo)
 
-            if not vals.get('parent_id') and not vals.get('internal_permission'):
-                vals['internal_permission'] = 'write'
-
+        # compute all maximum sequences / parent
         max_sequence_by_parent = {}
         if vals_by_parent_id:
             parent_ids = list(vals_by_parent_id.keys())
@@ -544,6 +563,7 @@ class Article(models.Model):
                     index = read_group_result['parent_id'][0]
                 max_sequence_by_parent[index] = read_group_result['sequence']
 
+        # update sequences
         for parent_id, article_vals in vals_by_parent_id.items():
             current_sequence = 0
             if parent_id in max_sequence_by_parent:
@@ -556,7 +576,23 @@ class Article(models.Model):
                     vals['sequence'] = current_sequence
                     current_sequence += 1
 
-        return super(Article, self).create(vals_list)
+        # sort by sudo / not sudo
+        notsudo_articles = iter(super(Article, self).create([
+            vals for vals, can_sudo in zip(vals_list, vals_as_sudo)
+            if not can_sudo
+        ]))
+        sudo_articles = iter(super(Article, self.sudo()).create([
+            vals for vals, can_sudo in zip(vals_list, vals_as_sudo)
+            if can_sudo
+        ]).with_env(self.env))
+        articles = self.env['knowledge.article']
+        for vals, is_sudo in zip(vals_list, vals_as_sudo):
+            if is_sudo:
+                articles += next(sudo_articles)
+            else:
+                articles += next(notsudo_articles)
+
+        return articles
 
     def write(self, vals):
         # Move under a parent is considered as a write on it (permissions, ...)
@@ -803,11 +839,6 @@ class Article(models.Model):
                     'partner_id': self.env.user.partner_id.id,
                     'permission': 'write'
                 })]
-
-        # User cannot write on members, sudo is needed to allow to create a private article
-        # due to access to members
-        if is_private and self.env.user.has_group('base.group_user'):
-            return self.sudo().create(values).with_env(self.env)
         return self.create(values)
 
     def get_user_sorted_articles(self, search_query):

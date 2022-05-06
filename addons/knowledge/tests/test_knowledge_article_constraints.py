@@ -48,22 +48,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         self.assertFalse(readonly_article.user_can_write)
 
         _title = 'Fthagn, private'
-        # TDE FIXME: currently crashing, should we support ?
-        # private = self.env['knowledge.article'].create({
-        #     'article_member_ids': [
-        #         (0, 0, {'partner_id': self.env.user.partner_id.id,
-        #                 'permission': 'write'})
-        #     ],
-        #     'body': f'<p>{_title}</p>',
-        #     'internal_permission': 'none',
-        #     'name': _title,
-        # })
-        # self.assertEqual(private.article_member_ids.partner_id, self.env.user.partner_id)
-        # self.assertEqual(private.category, 'private')
-        # self.assertEqual(private.internal_permission, 'none')
-        # self.assertFalse(private.parent_id)
-        # self.assertEqual(private.sequence, self._base_sequence + 1)
-        _private = self.env['knowledge.article'].sudo().create({
+        private = self.env['knowledge.article'].create({
             'article_member_ids': [
                 (0, 0, {'partner_id': self.env.user.partner_id.id,
                         'permission': 'write'})
@@ -71,7 +56,12 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'body': f'<p>{_title}</p>',
             'internal_permission': 'none',
             'name': _title,
-        })  # temporarily created using sudo
+        })
+        self.assertEqual(private.article_member_ids.partner_id, self.env.user.partner_id)
+        self.assertEqual(private.category, 'private')
+        self.assertEqual(private.internal_permission, 'none')
+        self.assertFalse(private.parent_id)
+        self.assertEqual(private.sequence, self._base_sequence + 1)
 
         _title = 'Fthagn, with parent (workspace)'
         child = self.env['knowledge.article'].create({
@@ -90,12 +80,12 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'body': f'<p>{_title}</p>',
             'internal_permission': False,
             'name': _title,
-            'parent_id': _private.id,
+            'parent_id': private.id,
         })
         self.assertFalse(child_private.article_member_ids)
         self.assertEqual(child_private.category, 'private')
         self.assertFalse(child_private.internal_permission)
-        self.assertEqual(child_private.parent_id, _private)
+        self.assertEqual(child_private.parent_id, private)
         self.assertEqual(child_private.sequence, 0)
 
         _title = 'Fthagn, but private under non private: cracboum'
