@@ -541,7 +541,12 @@ class Article(models.Model):
         return super(Article, self).create(vals_list)
 
     def write(self, vals):
-        """ Add editor as author. Edition means writing on the body. """
+        # Move under a parent is considered as a write on it (permissions, ...)
+        if vals.get('parent_id'):
+            parent = self.browse(vals['parent_id'])
+            parent.check_access_rights('write')
+            parent.check_access_rule('write')
+
         result = super(Article, self).write(vals)
 
         if any(field in ['parent_id', 'sequence'] for field in vals):
