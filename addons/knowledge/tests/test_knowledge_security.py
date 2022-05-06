@@ -142,7 +142,6 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         )
         my_favs.mapped('user_id')  # access body should trigger acls
         my_favs.write({'sequence': 0})
-        # TDE FIXME: current does not crash, but it should
         with self.assertRaises(exceptions.AccessError,
                                msg="ACLs: should not be used to change article/user"):
             my_favs[0].write({'article_id': article_roots[0].id})

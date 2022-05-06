@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import api, exceptions, fields, models, _
 
 
 class ArticleFavorite(models.Model):
@@ -40,6 +40,11 @@ class ArticleFavorite(models.Model):
                 max_sequence_per_user[vals.get('user_id', current_user_id)] += 1
 
         return super(ArticleFavorite, self).create(vals_list)
+
+    def write(self, vals):
+        if ('article_id' in vals or 'user_id' in vals) and not self.env.is_admin():
+            raise exceptions.AccessError(_("Can not update the article or user of a favorite."))
+        return super().write(vals)
 
     def _set_sequence(self, sequence=False):
         """ Set user sequence of target favorite article."""
