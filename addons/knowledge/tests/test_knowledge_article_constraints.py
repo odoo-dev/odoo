@@ -172,7 +172,6 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'internal_permission': 'write',
             'name': 'My Own',
         })
-        # TDE FIXME: currently does not raise, should
         with self.assertRaises(exceptions.AccessError):
             article_user2.write({'parent_id': article_as2.id})
         with self.assertRaises(exceptions.AccessError):
