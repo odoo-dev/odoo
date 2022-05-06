@@ -1129,9 +1129,6 @@ class Article(models.Model):
 
         Please note that these additional fields are not sanitized, the caller has the
         responsability to check that user can access those fields and that no injection is possible. """
-
-        # TDE FIXME: replacing sys.maxsize temporarily
-        MAXSIZE = 99999  # should not have more, sys.maxsize is probably a bit too much
         domain = "WHERE partner_id is not null"
         args = []
         if self.ids:
@@ -1214,17 +1211,20 @@ class Article(models.Model):
 
         self._cr.execute(sql, args)
         results = self._cr.dictfetchall()
+
         # Now that we have, for each article, all the members found on themselves and their parents.
         # We need to keep only the first partners found (lowest level) for each article
         article_members = defaultdict(dict)
         min_level_dict = defaultdict(dict)
+
+        _nolevel = -1
         for result in results:
             article_id = result['article_id']
             origin_id = result['origin_id']
             partner_id = result['partner_id']
             level = result['min_level']
-            min_level = min_level_dict[article_id].get(partner_id, MAXSIZE)
-            if level < min_level:
+            min_level = min_level_dict[article_id].get(partner_id, _nolevel)
+            if min_level == _nolevel or level < min_level:
                 article_members[article_id][partner_id] = {
                     'member_id': result['member_id'],
                     'based_on': origin_id if origin_id != article_id else False,
