@@ -248,6 +248,7 @@ class Article(models.Model):
                 article.user_permission = member_permissions.get(article_id, False) \
                                           or articles_permissions[article_id]
 
+    @api.depends_context('uid')
     @api.depends('user_permission')
     def _compute_user_has_access(self):
         """ Compute if the current user has access to the article.
@@ -309,6 +310,7 @@ class Article(models.Model):
                     ('id', 'not in', articles_with_member_access),
                 ('id', 'in', articles_with_no_member_access)]])
 
+    @api.depends_context('uid')
     @api.depends('user_permission')
     def _compute_user_can_write(self):
         if self.env.user.has_group('base.group_system'):

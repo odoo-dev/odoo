@@ -130,7 +130,6 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         article.invite_members(self.partner_employee2, 'read')
 
         article_as2 = article.with_user(self.user_employee2)
-        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertFalse(article_as2.user_can_write)
         self.assertTrue(article_as2.user_has_access)
 
@@ -163,7 +162,6 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         article.invite_members(self.partner_employee2, 'read')
 
         article_as2 = article.with_user(self.user_employee2)
-        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertFalse(article_as2.user_can_write)
         self.assertTrue(article_as2.user_has_access)
 
@@ -190,25 +188,21 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'name': 'Private Child',
             'parent_id': article_workspace.id,
         }).with_user(self.user_employee2)
-        article_private_u2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertEqual(article_private_u2.category, 'workspace')
         self.assertTrue(article_private_u2.user_can_write)
 
         # Effectively private: other user cannot read it
         article_private_u2_asuser = article_private_u2.with_user(self.env.user)
-        article_private_u2_asuser.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         with self.assertRaises(exceptions.AccessError):
             article_private_u2_asuser.body  # should trigger ACLs
 
         # Moving a private article under a workspace category makes it workspace
         article_private = self._create_private_article('MyPrivate').with_user(self.env.user)
-        article_private.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertTrue(article_private.category, 'private')
         self.assertTrue(article_private.user_can_write)
 
         # Effectively private: other user cannot read it
         article_private_asu2 = article_private.with_user(self.user_employee2)
-        article_private_asu2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         with self.assertRaises(exceptions.AccessError):
             article_private_asu2.body  # should trigger ACLs
 
@@ -216,7 +210,6 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         article_private.move_to(parent_id=article_workspace.id)
         self.assertEqual(article_private.category, 'workspace')
         article_private_asu2 = article_private.with_user(self.user_employee2)
-        article_private_asu2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         # Still not accessible
         with self.assertRaises(exceptions.AccessError):
             article_private_asu2.body  # should trigger ACLs

@@ -43,19 +43,16 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
         # as employee w write perms
         article_desync = article_desync.with_user(self.user_employee_manager)
-        article_desync.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertTrue(article_desync.user_can_write)
         self.assertTrue(article_desync.user_has_access)
 
         # as employee
         article_desync = article_desync.with_user(self.user_employee)
-        article_desync.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertFalse(article_desync.user_can_write)
         self.assertTrue(article_desync.user_has_access)
 
         # as portal
         article_desync = article_desync.with_user(self.user_portal)
-        article_desync.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertFalse(article_desync.user_can_write)
         # TDE FIXME: currently has access but should not, member check should stop at desync
         self.assertFalse(article_desync.user_has_access, 'Permissions: member rights should not be fetch on parents')
@@ -64,7 +61,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
     @users('employee')
     def test_article_permissions_inheritance_employee(self):
         article_roots = self.article_roots.with_env(self.env)
-        article_roots.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
 
         # roots: based on internal permissions
         self.assertEqual(article_roots.mapped('user_can_write'), [True, False, False])
@@ -73,7 +69,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
         # write permission from ancestors
         article_write_ancestor = self.article_write_contents[2].with_env(self.env)
-        article_write_ancestor.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertEqual(article_write_ancestor.inherited_permission, 'write')
         self.assertEqual(article_write_ancestor.inherited_permission_parent_id, self.article_roots[0])
         self.assertFalse(article_write_ancestor.internal_permission)
@@ -81,7 +76,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
         # write permission from ancestors overridden by internal permission
         article_read_forced = self.article_write_contents[1].with_env(self.env)
-        article_read_forced.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertEqual(article_read_forced.inherited_permission, 'read')
         self.assertFalse(article_read_forced.inherited_permission_parent_id)
         self.assertEqual(article_read_forced.internal_permission, 'read')
@@ -89,7 +83,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
         # write permission from ancestors overridden by member permission
         article_read_member = self.article_write_contents[0].with_env(self.env)
-        article_read_member.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertEqual(article_read_member.inherited_permission, 'write')
         self.assertEqual(article_read_member.inherited_permission_parent_id, self.article_roots[0])
         self.assertFalse(article_read_member.internal_permission)
@@ -97,7 +90,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
         # forced lower than base article perm (see 'Community Paranoïa')
         article_lower = self.article_read_contents[1].with_env(self.env)
-        article_lower.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertEqual(article_lower.inherited_permission, 'write')
         self.assertFalse(article_lower.inherited_permission_parent_id)
         self.assertEqual(article_lower.internal_permission, 'write')
@@ -105,7 +97,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
         # read permission from ancestors
         article_read_ancestor = self.article_read_contents[2].with_env(self.env)
-        article_read_ancestor.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertEqual(article_read_ancestor.inherited_permission, 'read')
         self.assertEqual(article_read_ancestor.inherited_permission_parent_id, self.article_roots[1])
         self.assertFalse(article_read_ancestor.internal_permission)
@@ -113,7 +104,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
         # permission denied
         article_none = self.article_read_contents[3].with_env(self.env)
-        article_none.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         with self.assertRaises(exceptions.AccessError):
             article_none.name
 
@@ -121,13 +111,11 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
     @users('portal_test')
     def test_article_permissions_inheritance_portal(self):
         article_roots = self.article_roots.with_env(self.env)
-        article_roots.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
 
         with self.assertRaises(exceptions.AccessError):
             article_roots.mapped('internal_permission')
 
         article_members = self.article_read_contents[0:2].with_env(self.env)
-        article_members.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertEqual(article_members.mapped('inherited_permission'), ['write', 'write'])  # TDE: TOCHECK
         self.assertEqual(article_members.mapped('internal_permission'), ['write', 'write'])  # TDE: TOCHECK
         self.assertEqual(article_members.mapped('user_can_write'), [False, False], 'Portal: can never write')
@@ -147,7 +135,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
     def test_initial_values(self):
         article_roots = self.article_roots.with_env(self.env)
         article_headers = self.article_headers.with_env(self.env)
-        (article_roots + article_headers).invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
 
         # roots: defaults on write, inherited = internal
         self.assertEqual(article_roots.mapped('inherited_permission'), ['write', 'read', 'none'])
@@ -167,7 +154,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         """ Ensure all tests have the same basis (user specific computed as
         employee for acl-dependent tests) """
         article_write_inherit_as1 = self.article_write_contents[2].with_env(self.env)
-        article_write_inherit_as1.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
 
         # initial values: write through inheritance
         self.assertMembers(article_write_inherit_as1, False, {self.partner_portal: 'read'})
@@ -176,7 +162,6 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         self.assertTrue(article_write_inherit_as1.user_can_write)
         self.assertTrue(article_write_inherit_as1.user_has_access)
         article_write_inherit_as2 = article_write_inherit_as1.with_user(self.user_employee2)
-        article_write_inherit_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertTrue(article_write_inherit_as2.user_can_write)
         self.assertTrue(article_write_inherit_as2.user_has_access)
 
@@ -201,7 +186,6 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
         self.assertTrue(article_as1.is_desynchronized)
         self.assertTrue(article_as1.user_can_write)
         self.assertTrue(article_as1.user_has_access)
-        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         with self.assertRaises(exceptions.AccessError):
             article_as2.body  # trigger ACLs
 
@@ -221,7 +205,6 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
         self.assertTrue(article_as1.is_desynchronized)
         self.assertTrue(article_as1.user_can_write)
         self.assertTrue(article_as1.user_has_access)
-        article_as2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
         self.assertFalse(article_as2.user_can_write)
         self.assertTrue(article_as2.user_has_access)
 
