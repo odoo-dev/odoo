@@ -33,11 +33,11 @@ class ArticleMember(models.Model):
              "and remove the 'Remove Member' button in the permission panel if this is not the case.")
 
     _sql_constraints = [
-        ('partner_unique', 'unique(article_id, partner_id)', 'You already added this partner in this article.')
+        ('partner_unique', 'unique(article_id, partner_id)', 'You already added this partner on this article.')
     ]
 
     @api.constrains('article_permission', 'permission')
-    def _check_members(self, on_unlink=False):
+    def _check_member(self, on_unlink=False):
         """
         An article should always be available for update (aka: inherit write permission, or a member with write access).
         Since this constraint only triggers if we have at least one member on the article, another validation is done in
@@ -51,17 +51,17 @@ class ArticleMember(models.Model):
             return
 
         if on_unlink:
-            deleted_members_by_articles = dict.fromkeys(articles_to_check.ids, self.env['knowledge.article.member'])
+            deleted_members_by_article = dict.fromkeys(articles_to_check.ids, self.env['knowledge.article.member'])
             for member in self.filtered(lambda member: member.article_id in articles_to_check):
-                deleted_members_by_articles[member.article_id.id] |= member
+                deleted_members_by_article[member.article_id.id] |= member
 
         parents_members_permission = articles_to_check.parent_id._get_article_member_permissions()
         for article in articles_to_check:
             # Check on permission on members
             members_to_check = article.article_member_ids
             if on_unlink:
-                members_to_check -= deleted_members_by_articles[article.id]
-            if members_to_check.filtered(lambda m: m.permission == 'write'):
+                members_to_check -= deleted_members_by_article[article.id]
+            if any(m.permission == 'write' for m in members_to_check):
                 continue
 
             # we need to add the members on parents to check the validity
@@ -91,17 +91,13 @@ class ArticleMember(models.Model):
             member.has_higher_permission = ARTICLE_PERMISSION_LEVEL[member.permission] > ARTICLE_PERMISSION_LEVEL[articles_permission[member.article_id.ids[0]]]
 
     def init(self):
-        self._cr.execute("SELECT indexname FROM pg_indexes "
-                         "WHERE indexname = 'knowledge_article_member_article_partner_idx'")
-        if not self._cr.fetchone():
-            self._cr.execute("CREATE INDEX knowledge_article_member_article_partner_idx "
-                             "ON knowledge_article_member (article_id, partner_id)")
+        self._cr.execute("CREATE INDEX IF NOT EXISTS knowledge_article_member_article_partner_idx ON knowledge_article_member (article_id, partner_id)")
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_no_writer(self):
         """ When removing a member, the constraint is not triggered.
         We need to check manually on article with no write permission that we do not remove the last write member """
-        self._check_members(on_unlink=True)
+        self._check_member(on_unlink=True)
 
     def _get_invitation_hash(self):
         """ We use a method instead of a field in order to reduce DB space."""

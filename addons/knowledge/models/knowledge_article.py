@@ -121,7 +121,7 @@ class Article(models.Model):
     def _check_has_writer(self):
         """ If article has no member, the internal_permission must be write. as article must have at least one writer.
         If article has member, the validation is done in article.member model as we cannot trigger constraint depending
-        on fields from related model. see _check_members from 'knowledge.article.member' model for more details.
+        on fields from related model. see _check_member from 'knowledge.article.member' model for more details.
         Note : We cannot use the optimised sql request to get the permission and members as values are not yet in DB"""
         for article in self:
             def has_write_member(a, child_members=False):
@@ -807,9 +807,7 @@ class Article(models.Model):
                 'body': "<h1>" + title + "</h1>",
             })
 
-        article = self.create(values)
-
-        return article.id
+        return self.create(values).id
 
     def get_user_sorted_articles(self, search_query, fields, order_by, limit):
         """ Called when using the Command palette to search for articles matching the search_query.
@@ -851,8 +849,7 @@ class Article(models.Model):
 
     def set_favorite_sequence(self, sequence=False):
         self.ensure_one()
-        Favorite = self.env["knowledge.article.favorite"]
-        favorite = Favorite.search([
+        favorite = self.env["knowledge.article.favorite"].search([
             ('user_id', '=', self.env.uid), ('article_id', '=', self.id)
         ])
         if not favorite:
@@ -871,11 +868,12 @@ class Article(models.Model):
         self.ensure_one()
         if not self.parent_id:
             return False
-        members_permission = self._get_article_member_permissions()[self.id]
-        parents_members_permission = self.parent_id._get_article_member_permissions()[self.parent_id.id]
+        member_permission = (self | self.parent_id)._get_article_member_permissions()
+        article_members_permission = member_permission[self.id]
+        parents_members_permission = member_permission[self.parent_id.id]
 
         members_values = []
-        for partner, values in members_permission.items():
+        for partner, values in article_members_permission.items():
             permission = values['permission']
             if values["based_on"] or partner not in parents_members_permission \
                 or ARTICLE_PERMISSION_LEVEL[permission] > ARTICLE_PERMISSION_LEVEL[parents_members_permission[partner]['permission']]:
@@ -888,9 +886,9 @@ class Article(models.Model):
             'is_desynchronized': False
         })
 
-    def _desync_access_from_parents(self, partners=False, member_permission=False, internal_permission=False):
-        """ This method will copy all the inherited access from parents on the article, except for the given partner_id,
-        in any, in order to de-synchronize the article from its parents in terms of access.
+    def _desync_access_from_parents(self, partner_ids=False, member_permission=False, internal_permission=False):
+        """ This method will copy all the inherited access from parents on the article, except for the given partner_ids,
+        if any, in order to de-synchronize the article from its parents in terms of access.
         If member_permission is given, the method will then create a new member for the given partner_id with the given
         permission. """
         self.ensure_one()
@@ -902,16 +900,14 @@ class Article(models.Model):
             # if member already on self, do not add it.
             if not values['based_on'] or values['based_on'] == self.id:
                 continue
-            if partners and partner_id in partners.ids:
-                if member_permission:
-                    members_values.append((0, 0, {
-                        'partner_id': partner_id,
-                        'permission': member_permission
-                    }))
-                continue
+            new_member_permission = values['permission']
+
+            if partner_ids and partner_id in partner_ids.ids and member_permission:
+                new_member_permission = member_permission
+
             members_values.append((0, 0, {
                 'partner_id': partner_id,
-                'permission': values['permission']
+                'permission': new_member_permission
             }))
 
         return self.write({
@@ -983,7 +979,7 @@ class Article(models.Model):
 
     def invite_members(self, partners, permission):
         """
-        Invite new members to the article.
+        Invite the given partners to the current article.
         :param partner_ids (Model<res.partner>): Recordset of res.partner
         :param permission (string): permission ('none', 'read' or 'write')
         """
@@ -1280,8 +1276,8 @@ class Article(models.Model):
         member = self.env['knowledge.article.member'].search([('article_id', '=', self.id), ('partner_id', '=', partner.id)])
         return url_join(self.get_base_url(), "/knowledge/article/invite/%s/%s" % (member.id, member._get_invitation_hash()))
 
-    def get_possible_parents(self, term=""):
-        # do a search_read and exclude all articles in descendants
+    def get_valid_parent_options(self, term=""):
+        """ Returns the list of articles that can be set as parent for the current article (to avoid recursion)"""
         exclude_ids = self._get_descendants()
         exclude_ids |= self
         return self.search_read(

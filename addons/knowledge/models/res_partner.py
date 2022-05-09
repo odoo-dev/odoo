@@ -11,6 +11,6 @@ class Partner(models.Model):
     def unlink(self):
         """ This override will delete all the private articles linked to the deleted partners. """
         self.env['knowledge.article.member'].sudo().search([
-            ('partner_id', 'in', self.ids)]
-        ).article_id.filtered(lambda a: a.category == 'private').unlink()
+            ('partner_id', 'in', self.ids), ('article_id.category', '=', 'private')]
+        ).article_id.unlink()
         return super(Partner, self).unlink()

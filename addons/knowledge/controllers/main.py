@@ -228,7 +228,7 @@ class KnowledgeController(http.Controller):
     def article_set_member_permission(self, article_id, permission, member_id=False, inherited_member_id=False):
         """
         Sets the permission of the given member for the given article.
-        The dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
+        The returned dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
         listing all articles should be reloaded. This can happen when the article moves from one section to another.
         **Note**: The user needs "write" permission to change the permission of a user.
         :param article_id: (int) target article id
@@ -260,7 +260,7 @@ class KnowledgeController(http.Controller):
         """
         Removes the given member from the given article.
         The function returns a dictionary indicating whether the request succeeds (see: `success` key).
-        The dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
+        The returned dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
         listing all articles should be reloaded. This can happen when the article moves from one section to another.
         **Note**: The user needs "write" permission to remove another member from
         the list. The user can always remove themselves from the list.
@@ -292,7 +292,7 @@ class KnowledgeController(http.Controller):
         """
         Sets the internal permission of the given article.
         The function returns a dictionary indicating whether the request succeeds (see: `success` key).
-        The dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
+        The returned dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
         listing all articles should be reloaded. This can happen when the article moves from one section to another.
         **Note**: The user needs "write" permission to update the internal permission of the article.
         :param article_id: (int) article id
