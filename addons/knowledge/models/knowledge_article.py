@@ -1277,21 +1277,19 @@ class Article(models.Model):
         return url_join(self.get_base_url(), "/knowledge/article/invite/%s/%s" % (member.id, member._get_invitation_hash()))
 
     def get_valid_parent_options(self, term=""):
-        """ Returns the list of articles that can be set as parent for the current article (to avoid recursion)"""
-        exclude_ids = self._get_descendants()
-        exclude_ids |= self
+        """ Returns the list of articles that can be set as parent for the
+        current article (to avoid recursions) """
         return self.search_read(
-            domain=['&', ['name', '=ilike', '%%%s%%' % term], ['id', 'not in', exclude_ids.ids]],
+            domain=['&',
+                    ['name', '=ilike', '%%%s%%' % term],
+                    ['id', 'not in', (self._get_descendants() + self).ids]
+                   ],
             fields=['id', 'icon', 'name'],
         )
 
     def _get_descendants(self):
         """ Returns the descendants recordset of the current article. """
-        descendants = self.env['knowledge.article']
-        for child in self.child_ids:
-            descendants |= child
-            descendants |= child._get_descendants()
-        return descendants
+        return self.env['knowledge.article'].search([('parent_id', 'child_of', self.ids)])
 
     def _get_parents(self):
         """ Returns the parents recordset of the current article. """
