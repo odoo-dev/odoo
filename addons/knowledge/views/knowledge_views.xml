@@ -242,6 +242,11 @@
                                     <div class="flex-grow-1 lead text-truncate">
                                         <field name="display_name"/>
                                     </div>
+                                    <!-- When the user does not have 'write' access on an article, the user will not be
+                                         allowed to write on the `knowledge.article` model. Therefore, we can not use the
+                                         `boolean_favorite` widget as the model can block the write call issued by the widget.
+                                         To let the user add an article to their favorites, we will instead call an
+                                         intermediate action that will do a sudo call on the `knowledge.article` model. -->
                                     <a type="object" name="action_toggle_favorite" class="o_favorite o_field_widget"
                                         attrs="{'invisible': [('is_user_favorite', '=', False)]}">
                                         <i class="fa fa-star" title="Remove from favorites"/>
