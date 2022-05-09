@@ -1,14 +1,11 @@
-// TODO JBN: We can maybe reduce the bundle size by removing the font weights
-// we do not use (to check at the end of the project)
-
 $o-knowledge-font-configs: (
     'Roboto': (
         'family': ('Roboto', sans-serif),
-        'url': 'Roboto:300,300i,400,400i,700,700i',
+        'url': 'Roboto:400,400i,700,700i',
     ),
     'Source Sans Pro': (
         'family': ('Source Sans Pro', sans-serif),
-        'url': 'Source+Sans+Pro:300,300i,400,400i,700,700i',
+        'url': 'Source+Sans+Pro:400,400i,700,700i',
     )
 ) !default;
 
