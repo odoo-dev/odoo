@@ -17,7 +17,8 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         'click .breadcrumb a[data-controller-id]': '_onBreadcrumbItemClick',
         'click .o_article_caret': '_onFold',
         'click .o_article_name': '_onOpen',
-        'click .o_article_create, .o_section_create': '_onCreate',
+        'click .o_article_create': '_onBtnArticleCreateClick',
+        'click .o_section_create': '_onBtnSectionCreateClick',
         'click .o_knowledge_share_panel': '_preventDropdownClose',
         'click .o_knowledge_more_options_panel': '_preventDropdownClose',
     }),
@@ -131,22 +132,30 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
     },
 
     /**
-     * Callback function called when the user creates a new article.
+     * Callback function called when the user clicks on the '+' sign of a section
+     * (workspace, private, shared). The callback function will create a new article
+     * on the root of the target section.
      * @param {Event} event
      */
-    _onCreate: function (event) {
+    _onBtnSectionCreateClick: function (event) {
         const $target = $(event.currentTarget);
-        if ($target.hasClass('o_section_create')) {
-            const $section = $target.closest('.o_section');
-            this.trigger_up('create', {
-                category: $section.data('section')
-            });
-        } else if ($target.hasClass('o_article_create')) {
-            const $li = $target.closest('li');
-            this.trigger_up('create', {
-                target_parent_id: $li.data('article-id')
-            });
-        }
+        const $section = $target.closest('.o_section');
+        this.trigger_up('create', {
+            category: $section.data('section')
+        });
+    },
+
+    /**
+     * Callback function called when the user clicks on the '+' sign of an article
+     * list item. The callback function will create a new article under the target article.
+     * @param {Event} event
+     */
+    _onBtnArticleCreateClick: function (event) {
+        const $target = $(event.currentTarget);
+        const $li = $target.closest('li');
+        this.trigger_up('create', {
+            target_parent_id: $li.data('article-id')
+        });
     },
 
     /**
