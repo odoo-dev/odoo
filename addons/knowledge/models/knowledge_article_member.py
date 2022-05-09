@@ -86,7 +86,7 @@ class ArticleMember(models.Model):
 
     @api.depends("article_id", "permission")
     def _compute_has_higher_permission(self):
-        articles_permission = self.article_id._get_internal_permission(filter_article_ids=self.article_id.ids)
+        articles_permission = self.article_id._get_internal_permission()
         for member in self:
             member.has_higher_permission = ARTICLE_PERMISSION_LEVEL[member.permission] > ARTICLE_PERMISSION_LEVEL[articles_permission[member.article_id.ids[0]]]
 

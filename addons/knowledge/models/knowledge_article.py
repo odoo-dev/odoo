@@ -229,7 +229,7 @@ class Article(models.Model):
             return
         articles_permissions = {}
         if not self.env.user.share:
-            articles_permissions = self._get_internal_permission(filter_article_ids=self.ids)
+            articles_permissions = self._get_internal_permission()
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
         for article in self:
             if not article.ids:  # If article not created yet, set default permission value.
@@ -968,13 +968,13 @@ class Article(models.Model):
         })
 
     @api.model
-    def _get_internal_permission(self, filter_article_ids=False, check_access=False, check_write=False):
+    def _get_internal_permission(self, check_access=False, check_write=False):
         """ We don't use domain because we cannot include properly the where clause in the custom sql query.
         The query's output table and fields names does not match the model we are working on"""
         domain = []
         args = []
-        if filter_article_ids:
-            args = [tuple(filter_article_ids)]
+        if self.ids:
+            args = [tuple(self.ids)]
             domain.append("article_id in %s")
         if check_access:
             domain.append("internal_permission != 'none'")
