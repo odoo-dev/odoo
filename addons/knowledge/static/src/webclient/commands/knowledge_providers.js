@@ -71,7 +71,7 @@ commandProviderRegistry.add("knowledge", {
             args: [[]],
             kwargs: {
                 search_query: options.searchValue,
-                fields: ['id', 'name', 'is_user_favorite', 'favorite_count', 'main_article_id', 'icon'],
+                fields: ['id', 'name', 'is_user_favorite', 'favorite_count', 'root_article_id', 'icon'],
                 order_by: "is_user_favorite, favorite_count desc",
                 limit: 10,
             }
@@ -133,8 +133,8 @@ commandProviderRegistry.add("knowledge", {
             name: article.name,
             props: {
                 isFavorite: article.is_user_favorite,
-                subjectName: article.main_article_id[0] != article.id ? article.main_article_id[1] : false,
-                splitSubjectName: splitCommandName(article.main_article_id[1], options.searchValue),
+                subjectName: article.root_article_id[0] != article.id ? article.root_article_id[1] : false,
+                splitSubjectName: splitCommandName(article.root_article_id[1], options.searchValue),
                 icon_string: article.icon,
             },
         }));

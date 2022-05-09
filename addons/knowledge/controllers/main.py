@@ -91,7 +91,7 @@ class KnowledgeController(http.Controller):
         unfolded_articles = set() if not unfolded_articles else set(unfolded_articles)
         # root articles = starting point of the tree view : unfold only if root_article in (accessible) parents
         parents = active_article._get_parents()
-        if active_article.main_article_id in parents:
+        if active_article.root_article_id in parents:
             unfolded_articles |= set(parents.ids)
 
         root_articles = self._get_root_articles()

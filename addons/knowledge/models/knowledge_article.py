@@ -18,15 +18,21 @@ class Article(models.Model):
     _name = "knowledge.article"
     _description = "Knowledge Articles"
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = "favorite_count, create_date desc, id desc"
+    _order = "favorite_count, create_date desc, id desc"  # Ordering : Most popular first, then newest articles.
 
     active = fields.Boolean(default=True)
     name = fields.Char(string="Title", default=lambda self: _('New Article'), required=True)
     body = fields.Html(string="Article Body")
     icon = fields.Char(string='Article Icon')
     cover = fields.Binary(string='Cover Image')
-    is_locked = fields.Boolean(string='Locked')
-    full_width = fields.Boolean(string='Full width')
+    is_locked = fields.Boolean(
+        string='Locked',
+        help="When locked, users cannot write on the body or change the title, "
+             "even if they have write access on the article.")
+    full_width = fields.Boolean(
+        string='Full width',
+        help="When set, the article body will take the full width available on the article page. "
+             "Otherwise, the body will have large horizontal margins.")
     article_url = fields.Char('Article Url', compute='_compute_article_url', readonly=True)
     # Hierarchy and sequence
     parent_id = fields.Many2one("knowledge.article", string="Parent Article")
@@ -36,17 +42,18 @@ class Article(models.Model):
         help="If set, this article won't inherit access rules from its parents anymore.")
     sequence = fields.Integer(
         string="Article Sequence",
-        default=0, # Set default=0 to avoid false values and messed up sequence order inside same parent
+        default=0,  # Set default=0 to avoid false values and messed up sequence order inside same parent
         help="The sequence is computed only among the articles that have the same parent.")
-    main_article_id = fields.Many2one(
+    root_article_id = fields.Many2one(
         'knowledge.article', string="Subject", recursive=True,
-        compute="_compute_main_article_id", store=True, compute_sudo=True)
+        compute="_compute_root_article_id", store=True, compute_sudo=True,
+        help="The subject is the title of the highest parent in the article hierarchy.")
     # Access rules and members + implied category
     internal_permission = fields.Selection(
         [('none', 'No access'), ('read', 'Can read'), ('write', 'Can write')],
         string='Internal Permission', required=False,
         help="Default permission for all internal users. "
-             "External users can still have permissions if they are added to the members.")
+             "(External users can still have access to this article if they are added to its members)")
     inherited_permission = fields.Selection(
         [('none', 'No access'), ('read', 'Can read'), ('write', 'Can write')],
         string='Article Inherited Permission',
@@ -69,6 +76,7 @@ class Article(models.Model):
     category = fields.Selection(
         [('workspace', 'Workspace'), ('private', 'Private'), ('shared', 'Shared')],
         compute="_compute_category", compute_sudo=True, store=True)
+        # Stored to improve performance when loading the article tree. (avoid looping through members if 'workspace')
     owner_id = fields.Many2one(
         "res.users", string="Current Owner",
         compute="_compute_owner_id",
@@ -79,7 +87,7 @@ class Article(models.Model):
     last_edition_date = fields.Datetime(string="Last Edited on")
     # Favorite
     is_user_favorite = fields.Boolean(
-        string="Favorite?",
+        string="Is Favorited?",
         compute="_compute_is_user_favorite", search="_search_is_user_favorite",
         inverse="_inverse_is_user_favorite")
     favorite_ids = fields.One2many(
@@ -110,9 +118,9 @@ class Article(models.Model):
     # ------------------------------------------------------------
 
     @api.constrains('internal_permission', 'article_member_ids')
-    def _check_members(self):
+    def _check_has_writer(self):
         """ If article has no member, the internal_permission must be write. as article must have at least one writer.
-        If article has member, the validation is done in article.member model has we cannot trigger constraint depending
+        If article has member, the validation is done in article.member model as we cannot trigger constraint depending
         on fields from related model. see _check_members from 'knowledge.article.member' model for more details.
         Note : We cannot use the optimised sql request to get the permission and members as values are not yet in DB"""
         for article in self:
@@ -120,11 +128,10 @@ class Article(models.Model):
                 if not child_members:
                     child_members = self.env['knowledge.article.member']
                 article_members = a.article_member_ids
-                write_members = article_members.filtered(
-                    lambda m: m.permission == 'write' and m.partner_id not in child_members.mapped('partner_id'))
-                if write_members:
+                if any(m.permission == 'write' and m.partner_id not in child_members.mapped('partner_id')
+                       for m in article_members):
                     return True
-                elif a.parent_id:
+                elif a.parent_id and not a.is_desynchronized:
                     return has_write_member(a.parent_id, article_members | child_members)
                 return False
             if article.inherited_permission != 'write' and not has_write_member(article):
@@ -154,10 +161,10 @@ class Article(models.Model):
                 article.article_url = url_join(article.get_base_url(), 'knowledge/article/%s' % article.id)
 
     @api.depends('parent_id')
-    def _compute_main_article_id(self):
+    def _compute_root_article_id(self):
         wparent = self.filtered('parent_id')
         for article in self - wparent:
-            article.main_article_id = article
+            article.root_article_id = article
 
         if not wparent:
             return
@@ -177,7 +184,7 @@ class Article(models.Model):
                     )
                 ancestors += parent
                 parent = parent.parent_id
-            articles.main_article_id = ancestors[-1:]
+            articles.root_article_id = ancestors[-1:]
 
     @api.depends('parent_id', 'internal_permission')
     def _compute_inherited_permission(self):
@@ -218,23 +225,28 @@ class Article(models.Model):
     @api.depends_context('uid')
     @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
     def _compute_user_permission(self):
-        partner_id = self.env.user.partner_id
-        if not partner_id:
-            self.user_permission = 'none'
+        """ Returns the explicit permission of the user. If the user has no specific permission
+        (via the members or the internal permission), user_permission will be False
+        (E.g.: Public users has no specific permission at all).
+        Share users only depends on the members as internal permission does not apply to them."""
+        if self.env.user._is_public():
+            self.user_permission = False
             return
-        article_permissions = {}
+        articles_permissions = {}
         if not self.env.user.share:
-            article_permissions = self._get_internal_permission(filter_article_ids=self.ids)
-        member_permissions = self._get_partner_member_permissions(partner_id.id, filter_article_ids=self.ids)
+            articles_permissions = self._get_internal_permission(filter_article_ids=self.ids)
+        member_permissions = self._get_partner_member_permissions(
+            self.env.user.partner_id.id, filter_article_ids=self.ids)
         for article in self:
             if not article.ids:  # If article not created yet, set default permission value.
                 article.user_permission = 'write'
                 continue
             article_id = article.ids[0]
             if self.env.user.share:
-                article.user_permission = member_permissions.get(article_id, 'none')
+                article.user_permission = member_permissions.get(article_id, False)
             else:
-                article.user_permission = member_permissions.get(article_id, False) or article_permissions[article_id]
+                article.user_permission = member_permissions.get(article_id, False) \
+                                          or articles_permissions[article_id]
 
     @api.depends('user_permission')
     def _compute_user_has_access(self):
@@ -249,26 +261,27 @@ class Article(models.Model):
             self.user_has_access = False
             return
         for article in self:
-            article.user_has_access = article.user_permission != 'none'
+            article.user_has_access = article.user_permission and article.user_permission != 'none'
 
     def _search_user_has_access(self, operator, value):
-        """ This search method will look at article permission and member permission to return all the article the
-        current user has access to.
-            - The admin (group_system) has always access to everything
-            - External users have only access to an article if they are (read) member on that article
+        """ This search method will look at article permission and member permission
+        to return all the article the current user has access to.
+            - The admin (group_system) always has access to everything
+            - External users only have access to an article if they are r/w member on that article
             - Internal users have access if:
                 - they are read or write member on the article
                 OR
-                - The article allow read or write access to all internal users AND the user is not member with 'none' access
+                - The article allow read or write access to all internal users AND the user
+                is not member with 'none' access
             """
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise ValueError("unsupported search operator")
 
-        article_permissions = self._get_internal_permission(check_access=True)
+        articles_with_access = self._get_internal_permission(check_access=True)
 
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
-        articles_with_no_access = [id for id, permission in member_permissions.items() if permission == 'none']
-        articles_with_access = [id for id, permission in member_permissions.items() if permission != 'none']
+        articles_with_no_member_access = [id for id, permission in member_permissions.items() if permission == 'none']
+        articles_with_member_access = [id for id, permission in member_permissions.items() if permission != 'none']
 
         # If searching articles for which user has access.
         domain = self._get_additional_access_domain()
@@ -276,25 +289,25 @@ class Article(models.Model):
             if self.env.user.has_group('base.group_system'):
                 return expression.TRUE_DOMAIN
             elif self.env.user.share:
-                return expression.OR([domain, [('id', 'in', articles_with_access)]])
+                return expression.OR([domain, [('id', 'in', articles_with_member_access)]])
             return expression.OR([domain, [
                 '|',
                     '&',
-                        ('id', 'in', list(article_permissions.keys())),
-                        ('id', 'not in', articles_with_no_access),
-                    ('id', 'in', articles_with_access)]])
+                        ('id', 'in', list(articles_with_access.keys())),
+                        ('id', 'not in', articles_with_no_member_access),
+                    ('id', 'in', articles_with_member_access)]])
         # If searching articles for which user has NO access.
         domain = [expression.NOT_OPERATOR, expression.normalize_domain(domain)]
         if self.env.user.has_group('base.group_system'):
             return expression.FALSE_DOMAIN
         elif self.env.user.share:
-            return expression.AND([domain, [('id', 'not in', articles_with_access)]])
+            return expression.AND([domain, [('id', 'not in', articles_with_member_access)]])
         return expression.AND([domain, [
             '|',
                 '&',
-                    ('id', 'not in', list(article_permissions.keys())),
-                    ('id', 'not in', articles_with_access),
-                ('id', 'in', articles_with_no_access)]])
+                    ('id', 'not in', list(articles_with_access.keys())),
+                    ('id', 'not in', articles_with_member_access),
+                ('id', 'in', articles_with_no_member_access)]])
 
     @api.depends('user_permission')
     def _compute_user_can_write(self):
@@ -309,46 +322,46 @@ class Article(models.Model):
 
     def _search_user_can_write(self, operator, value):
         if operator not in ('=', '!=') or not isinstance(value, bool):
-            raise ValueError("unsupported search operator")
+            raise NotImplementedError("unsupported search operator")
 
-        article_permissions = self._get_internal_permission(check_write=True)
+        articles_with_access = self._get_internal_permission(check_write=True)
 
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
-        articles_with_no_access = [id for id, permission in member_permissions.items() if permission != 'write']
-        articles_with_access = [id for id, permission in member_permissions.items() if permission == 'write']
+        articles_with_no_member_access = [id for id, permission in member_permissions.items() if permission != 'write']
+        articles_with_member_access = [id for id, permission in member_permissions.items() if permission == 'write']
 
         # If searching articles for which user has write access.
         if self.env.user.has_group('base.group_system'):
             return expression.TRUE_DOMAIN
         elif self.env.user.share:
-            return [('id', 'in', articles_with_access)]
+            return [('id', 'in', articles_with_member_access)]
         if (value and operator == '=') or (not value and operator == '!='):
             return [
                 '|',
                     '&',
-                        ('id', 'in', list(article_permissions.keys())),
-                        ('id', 'not in', articles_with_no_access),
-                    ('id', 'in', articles_with_access)
+                        ('id', 'in', list(articles_with_access.keys())),
+                        ('id', 'not in', articles_with_no_member_access),
+                    ('id', 'in', articles_with_member_access)
             ]
         # If searching articles for which user has NO write access.
         if self.env.user.has_group('base.group_system'):
             return expression.FALSE_DOMAIN
         elif self.env.user.share:
-            return [('id', 'not in', articles_with_access)]
+            return [('id', 'not in', articles_with_member_access)]
         return [
             '|',
                 '&',
-                    ('id', 'not in', list(article_permissions.keys())),
-                    ('id', 'not in', articles_with_access),
-                ('id', 'in', articles_with_no_access)
+                    ('id', 'not in', list(articles_with_access.keys())),
+                    ('id', 'not in', articles_with_member_access),
+                ('id', 'in', articles_with_no_member_access)
         ]
 
-    @api.depends('main_article_id.internal_permission', 'main_article_id.article_member_ids.permission')
+    @api.depends('root_article_id.internal_permission', 'root_article_id.article_member_ids.permission')
     def _compute_category(self):
         for article in self:
-            if article.main_article_id.internal_permission != 'none':
+            if article.root_article_id.internal_permission != 'none':
                 article.category = 'workspace'
-            elif len(article.main_article_id.article_member_ids.filtered(lambda m: m.permission != 'none')) > 1:
+            elif len(article.root_article_id.article_member_ids.filtered(lambda m: m.permission != 'none')) > 1:
                 article.category = 'shared'
             else:
                 article.category = 'private'
@@ -422,9 +435,10 @@ class Article(models.Model):
     @api.depends('favorite_ids')
     def _compute_favorite_count(self):
         favorites = self.env['knowledge.article.favorite'].read_group(
-            [('article_id', 'in', self.ids)], ['article_id'], ['article_id'], lazy=False
+            [('article_id', 'in', self.ids)], ['article_id'], ['article_id']
         )
-        favorites_count_by_article = {favorite['article_id'][0]: favorite['__count'] for favorite in favorites}
+        favorites_count_by_article = {
+            favorite['article_id'][0]: favorite['article_id_count'] for favorite in favorites}
         for article in self:
             article.favorite_count = favorites_count_by_article.get(article.id, 0)
 
@@ -532,7 +546,9 @@ class Article(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """ While creating records, automatically organize articles to be the
-        last of their parent children, unless a sequence is given. """
+        last of their parent children, unless a sequence is given.
+        Also, set internal_permission 'default' value (write) if we create a root article,
+        and set the log_access custom fields."""
         vals_by_parent_id = {}
         default_parent_id = self.default_get(['parent_id']).get('parent_id')
         for vals in vals_list:
@@ -582,7 +598,6 @@ class Article(models.Model):
 
         result = super(Article, self).write(vals)
 
-        # use context key to stop reordering loop as "_resequence" calls write method.
         if any(field in ['parent_id', 'sequence'] for field in vals):
             self._resequence()
 
@@ -626,18 +641,15 @@ class Article(models.Model):
                 ('user_id', '=', self.env.uid), ('article_id.active', '=', True)
             ], limit=1).article_id
             if not article:
+                # retrieve workspace articles first, then private/shared ones.
                 article = self.search([
-                    ('active', '=', True),
-                    ('parent_id', '=', False),
-                    ('internal_permission', '!=', 'none')
-                ], limit=1, order='sequence')
-                if not article:
-                    article = self.search([('parent_id', '=', False)], limit=1, order='sequence')
+                    ('parent_id', '=', False)
+                ], limit=1, order='sequence, internal_permission desc')
         else:
             article = self.browse(res_id)
         mode = 'edit' if article.user_can_write else 'readonly'
         action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
-        action['res_id'] = res_id or article.id
+        action['res_id'] = article.id
         action['context'] = dict(ast.literal_eval(action.get('context')), form_view_initial_mode=mode)
         return action
 
@@ -650,7 +662,7 @@ class Article(models.Model):
     def action_toggle_favorite(self):
         article = self.sudo()
         if not article.user_has_access:
-            raise AccessError(_("You cannot add the article '%s' to your favorites", article.display_name))
+            raise AccessError(_("You cannot add/remove the article '%s' to/from your favorites", article.display_name))
         article.is_user_favorite = not article.is_user_favorite
         return article.is_user_favorite
 
@@ -688,22 +700,16 @@ class Article(models.Model):
 
         members_to_remove = self.env['knowledge.article.member']
         if not parent and private:  # If set private without parent, remove all members except current user.
-            member = self.article_member_ids.filtered(lambda m: m.partner_id == self.env.user.partner_id)
-            if member:
-                members_to_remove = self.article_member_ids.filtered(lambda m: m.id != member.id)
-                values.update({
-                    'article_member_ids': [(1, member.id, {
-                        'permission': 'write'
-                    })]
-                })
+            self_member = self.article_member_ids.filtered(lambda m: m.partner_id == self.env.user.partner_id)
+            if self_member:
+                members_to_remove = self.article_member_ids - self_member
+                values['article_member_ids'] = [(1, self_member.id, {'permission': 'write'})]
             else:
                 members_to_remove = self.article_member_ids
-                values.update({
-                    'article_member_ids': [(0, 0, {
-                        'partner_id': self.env.user.partner_id.id,
-                        'permission': 'write'
-                    })]
-                })
+                values['article_member_ids'] = [(0, 0, {
+                    'partner_id': self.env.user.partner_id.id,
+                    'permission': 'write'
+                })]
 
         # sudo to write on members
         self.sudo().write(values)
@@ -750,11 +756,10 @@ class Article(models.Model):
             for i, child in enumerate(children[duplicate_index:]):
                 article_to_update_by_sequence[i + start_sequence] |= child
 
-        for sequence in article_to_update_by_sequence:
+        for sequence in article_to_update_by_sequence:  # Call super to avoid loop in write
             super(Article, article_to_update_by_sequence[sequence]).write({'sequence': sequence})
 
     def _get_max_sequence_inside_parent(self, parent_id):
-        # TODO DBE: maybe order the childs_ids in desc on parent should be enough
         max_sequence_article = self.search(
             [('parent_id', '=', parent_id)],
             order="sequence desc",
@@ -783,21 +788,18 @@ class Article(models.Model):
             'sequence': self._get_max_sequence_inside_parent(parent_id)
         }
         if not parent:
-            values.update({
-                'internal_permission': 'none' if private else 'write', # you cannot create an article without parent in shared directly.,
-            })
+            # you cannot create an article without parent in shared directly.
+            values['internal_permission'] = 'none' if private else 'write'
         # User cannot write on members, sudo is needed to allow to create a private article or create under a parent user can write on.
         # for article without parent or not in private, access to members is not required to create an article
         if (private or parent) and self.env.user.has_group('base.group_user'):
             self = self.sudo()
         if not parent and private:
             # To be private, the article hierarchy need at least one member with write access.
-            values.update({
-                'article_member_ids': [(0, 0, {
-                    'partner_id': self.env.user.partner_id.id,
-                    'permission': 'write'
-                })]
-            })
+            values['article_member_ids'] = [(0, 0, {
+                'partner_id': self.env.user.partner_id.id,
+                'permission': 'write'
+            })]
 
         if title:
             values.update({
@@ -819,7 +821,7 @@ class Article(models.Model):
             - Favorite count
         and returned result mimic a search_read result structure.
         """
-        search_domain = ["|", ("name", "ilike", search_query), ("main_article_id.name", "ilike", search_query)]
+        search_domain = ["|", ("name", "ilike", search_query), ("root_article_id.name", "ilike", search_query)]
         articles = self.search(search_domain, order=order_by, limit=limit)
 
         favorite_articles = articles.filtered(

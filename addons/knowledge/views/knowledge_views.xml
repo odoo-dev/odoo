@@ -217,7 +217,7 @@
                 <field name="display_name"/>
                 <field name="is_user_favorite" widget="boolean_favorite" nolabel="1" force_save="1" options="{'allow_order': '1'}"/>
                 <field name="favorite_count"/>
-                <field name="main_article_id"/>
+                <field name="root_article_id"/>
                 <field name="last_edition_uid" widget="many2one_avatar_user"/>
                 <field name="last_edition_date"/>
                 <field name="owner_id" widget="many2one_avatar_user" groups="base.group_system"/>
@@ -279,7 +279,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="main_article_id"/>
+                <field name="root_article_id"/>
                 <field name="last_edition_uid"/>
 
                 <filter name="filter_active" string="Archived"  domain="[('active', '=' ,False)]"/>
