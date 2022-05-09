@@ -99,6 +99,8 @@ class KnowledgeController(http.Controller):
             "active_article": active_article,
             "workspace_articles": root_articles.filtered(lambda article: article.category == 'workspace'),
             "shared_articles": root_articles.filtered(lambda article: article.category == 'shared'),
+            "private_articles": root_articles.filtered(
+                lambda article: article.category == "private" and article.user_can_write),
             "unfolded_articles": unfolded_articles,
         }
         favorites = request.env['knowledge.article.favorite']
@@ -107,11 +109,6 @@ class KnowledgeController(http.Controller):
                 ("user_id", "=", request.env.user.id), ('article_id.active', '=', True)
             ])
         values["favorites"] = favorites
-        # To avoid computing owner_id, don't compute private_articles if share user (they cannot own an article)
-        private_articles = request.env['knowledge.article.favorite']
-        if not request.env.user.share:
-            private_articles = root_articles.filtered(lambda article: article.owner_id == request.env.user)
-        values['private_articles'] = private_articles
 
         return request.env['ir.qweb']._render(template, values)
 

@@ -77,11 +77,6 @@ class Article(models.Model):
         [('workspace', 'Workspace'), ('private', 'Private'), ('shared', 'Shared')],
         compute="_compute_category", compute_sudo=True, store=True)
         # Stored to improve performance when loading the article tree. (avoid looping through members if 'workspace')
-    owner_id = fields.Many2one(
-        "res.users", string="Current Owner",
-        compute="_compute_owner_id",
-        search="_search_owner_id",
-        help="When an article has an owner, it means this article is private for that owner.")
     # Same as write_uid/_date but limited to the body
     last_edition_uid = fields.Many2one("res.users", string="Last Edited by")
     last_edition_date = fields.Datetime(string="Last Edited on")
@@ -365,72 +360,6 @@ class Article(models.Model):
                 article.category = 'shared'
             else:
                 article.category = 'private'
-
-    @api.depends('internal_permission', 'article_member_ids.partner_id', 'article_member_ids.permission')
-    def _compute_owner_id(self):
-        # First, check on article
-        article_permissions = self._get_internal_permission(filter_article_ids=self.ids)
-        non_private_articles = self.filtered(lambda article: article_permissions[article.id] != 'none')
-        non_private_articles.owner_id = False
-
-        remaining_articles = self - non_private_articles
-        if not remaining_articles:
-            return
-
-        # Check on members
-        member_permissions = remaining_articles._get_article_member_permissions()
-        unique_write_members = {}
-        for article_id, members in member_permissions.items():
-            for partner_id, member in members.items():
-                if not member['permission'] == 'write':
-                    continue
-                has_other_members_with_access = any(
-                    member_values['permission'] in ['write', 'read']
-                    for member_values in list(members.values())
-                    if member_values['member_id'] != member['member_id']
-                )
-                if not has_other_members_with_access:
-                    unique_write_members[article_id] = partner_id
-                    break
-        unique_write_partners = self.env['res.partner'].browse([
-            partner_id for partner_id in unique_write_members.values()
-        ])
-        for article in remaining_articles:
-            unique_write_partner = unique_write_partners.filtered(lambda p: p.id == unique_write_members.get(article.id))
-            if unique_write_partner and not unique_write_partner.partner_share:
-                article.owner_id = unique_write_partner.user_ids[0]
-            else:
-                article.owner_id = False
-
-    def _search_owner_id(self, operator, value):
-        # get the user_id from name
-        if isinstance(value, str):
-            value = self.env['res.users'].search([('name', operator, value)]).ids
-            if not value:
-                return expression.FALSE_DOMAIN
-            operator = '='  # now we will search for articles that match the retrieved users.
-        # Assumes operator is '=' and value is a user_id or False
-        elif operator not in ('=', '!='):
-            raise NotImplementedError()
-
-        # if value = False and operator = '!=' -> We look for all the private articles.
-        domain = [('category', '=' if value or operator == '!=' else '!=', 'private')]
-        if value:
-            if isinstance(value, int):
-                value = [value]
-            users_partners = self.env['res.users'].browse(value).mapped('partner_id')
-            article_members = self._get_article_member_permissions()
-            def filter_on_permission(members, permission):
-                for partner_id, member_info in members.items():
-                    if member_info['permission'] == permission:
-                        yield partner_id
-
-            articles_with_access = [article_id
-                                    for article_id, members in article_members.items()
-                                    if any(partner_id in filter_on_permission(members, "write")
-                                           for partner_id in users_partners.ids)]
-            domain = expression.AND([domain, [('id', 'in' if operator == '=' else 'not in', articles_with_access)]])
-        return domain
 
     @api.depends('favorite_ids')
     def _compute_favorite_count(self):
@@ -775,12 +704,13 @@ class Article(models.Model):
         parent = self.browse(parent_id) if parent_id else False
 
         if parent:
-            if private and parent.category != "private":
-                raise ValidationError(_("Cannot create an article under article '%s', which is a non-private parent", parent.display_name))
             if not parent.user_can_write:
                 raise AccessError(_("You can't create an article under article '%s' as you can't write on it", parent.display_name))
-            if private and not parent.owner_id == self.env.user:
-                raise AccessError(_("You cannot create an article under article '%s' as you don't own it", parent.display_name))
+            if private:
+                if parent.category != "private":
+                    raise ValidationError(_("Cannot create an article under article '%s', which is a non-private parent", parent.display_name))
+                elif not parent.user_can_write:
+                    raise AccessError(_("You cannot create an article under article '%s' as you don't own it", parent.display_name))
             private = parent.category == "private"
 
         values = {

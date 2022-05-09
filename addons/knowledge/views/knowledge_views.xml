@@ -220,7 +220,6 @@
                 <field name="root_article_id"/>
                 <field name="last_edition_uid" widget="many2one_avatar_user"/>
                 <field name="last_edition_date"/>
-                <field name="owner_id" widget="many2one_avatar_user" groups="base.group_system"/>
             </tree>
         </field>
     </record>
@@ -284,7 +283,7 @@
 
                 <filter name="filter_active" string="Archived"  domain="[('active', '=' ,False)]"/>
                 <filter name="filter_favorites" string="My Favorites" domain="[('is_user_favorite', '=', True)]"/>
-                <filter name="filter_own_articles" string="My Articles" domain="[('owner_id', '=', uid)]"/>
+                <filter name="filter_own_privates" string="My Private Articles" domain="[('category', '=', 'private'), ('user_can_write', '=', True)]"/>
                 <filter name="filter_shared_articles" string="My Shared Articles" domain="[('category', '=', 'shared')]"/>
 
                 <group expand="0" string="Group By">
