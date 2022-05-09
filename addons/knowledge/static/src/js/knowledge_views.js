@@ -4,12 +4,10 @@ import FormView from 'web.FormView';
 import viewRegistry from 'web.view_registry';
 import { KnowledgeArticleFormController } from './knowledge_controller.js';
 import { KnowledgeArticleFormRenderer } from './knowledge_renderers.js';
-import { KnowledgeArticleFormModel } from './knowledge_model.js';
 
 const KnowledgeArticleFormView = FormView.extend({
     config: _.extend({}, FormView.prototype.config, {
         Controller: KnowledgeArticleFormController,
-        Model: KnowledgeArticleFormModel,
         Renderer: KnowledgeArticleFormRenderer,
     }),
     /**
