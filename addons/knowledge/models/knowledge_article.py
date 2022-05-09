@@ -956,15 +956,17 @@ class Article(models.Model):
                 _("You cannot give access to the article '%s' as you are not editor.", self.name))
 
         members_to_update = self.article_member_ids.filtered_domain([('partner_id', 'in', partners.ids)])
-        if members_to_update:
-            members_to_update.sudo().write({'permission': permission})
+        members_to_create = partners - members_to_update.mapped('partner_id')
 
-        remaining_partners = partners - members_to_update.mapped('partner_id')
+        members_to_write = [(0, 0, {
+            'partner_id': partner.id,
+            'permission': permission
+        }) for partner in members_to_create]
+        for member in members_to_update:
+            members_to_write.append((1, member.id, {'permission': permission}))
+
         self.sudo().write({
-            'article_member_ids': [(0, 0, {
-                'partner_id': partner.id,
-                'permission': permission
-            }) for partner in remaining_partners]
+            'article_member_ids': members_to_write
         })
 
     @api.model
