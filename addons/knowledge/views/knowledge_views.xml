@@ -17,6 +17,7 @@
                 <field name="icon" invisible="1"/>
                 <field name="category" invisible="1"/>
                 <field name="is_locked" invisible="1" readonly="1"/>
+                <field name="is_user_favorite" invisible="1"/>
                 <field name="user_can_write" invisible="1"/>
                 <field name="user_permission" invisible="1"/>
                 <div class="d-sm-flex h-100 bg-white">
@@ -62,7 +63,6 @@
                                             <field attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}" class="o_breadcrumb_article_name o_input" name="name"/>
                                         </li>
                                     </ol>
-                                    <field name="is_user_favorite" invisible="1"/>
                                     <i class="fa fa-star o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', False)]}" title="Remove from favorites"/>
                                     <i class="fa fa-star-o o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', True)]}" title="Add to favorites"/>
                                     <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
@@ -231,11 +231,11 @@
             <kanban class="o_knowledge_article_kanban_view">
                 <field name="icon" invisible="1"/>
                 <field name="is_locked" invisible="1"/>
+                <field name="is_user_favorite" invisible="1"/>
                 <field name="user_can_write" invisible="1"/>
                 <field name="article_url" invisible="1"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <field name="is_user_favorite" invisible="1"/>
                         <div class="oe_kanban_global_click">
                             <div class="o_knowledge_kanban_card d-flex flex-column">
                                 <div class="d-flex align-items-center">
