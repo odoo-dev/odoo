@@ -5,7 +5,6 @@ import werkzeug
 from werkzeug.utils import redirect
 
 from odoo import http, tools, _
-from odoo.addons.knowledge.models.tools import ARTICLE_PERMISSION_LEVEL
 from odoo.exceptions import AccessError, ValidationError
 from odoo.http import request
 
@@ -313,4 +312,3 @@ class KnowledgeController(http.Controller):
         if article.category != previous_category:
             return {'reload_tree': True}
         return {}
-
