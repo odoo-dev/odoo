@@ -161,7 +161,7 @@ class Article(models.Model):
             else:
                 article.article_url = url_join(article.get_base_url(), 'knowledge/article/%s' % article.id)
 
-    @api.depends('parent_id')
+    @api.depends('parent_id', 'parent_id.root_article_id')
     def _compute_root_article_id(self):
         wparent = self.filtered('parent_id')
         for article in self - wparent:
