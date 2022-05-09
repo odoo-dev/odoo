@@ -230,8 +230,7 @@ class Article(models.Model):
         articles_permissions = {}
         if not self.env.user.share:
             articles_permissions = self._get_internal_permission(filter_article_ids=self.ids)
-        member_permissions = self._get_partner_member_permissions(
-            self.env.user.partner_id.id, filter_article_ids=self.ids)
+        member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
         for article in self:
             if not article.ids:  # If article not created yet, set default permission value.
                 article.user_permission = 'write'
@@ -276,7 +275,7 @@ class Article(models.Model):
 
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
         articles_with_no_member_access = [id for id, permission in member_permissions.items() if permission == 'none']
-        articles_with_member_access = [id for id, permission in member_permissions.items() if permission != 'none']
+        articles_with_member_access = list(set(member_permissions.keys() - set(articles_with_no_member_access)))
 
         # If searching articles for which user has access.
         domain = self._get_additional_access_domain()
@@ -322,8 +321,8 @@ class Article(models.Model):
         articles_with_access = self._get_internal_permission(check_write=True)
 
         member_permissions = self._get_partner_member_permissions(self.env.user.partner_id.id)
-        articles_with_no_member_access = [id for id, permission in member_permissions.items() if permission != 'write']
         articles_with_member_access = [id for id, permission in member_permissions.items() if permission == 'write']
+        articles_with_no_member_access = list(set(member_permissions.keys() - set(articles_with_member_access)))
 
         # If searching articles for which user has write access.
         if self.env.user.has_group('base.group_system'):
@@ -703,7 +702,7 @@ class Article(models.Model):
             super(Article, article_to_update_by_sequence[sequence]).write({'sequence': sequence})
 
     def _get_max_sequence_inside_parent(self, parent_id):
-        max_sequence_article = self.search(
+        max_sequence_article = self.env['knowledge.article'].search(
             [('parent_id', '=', parent_id)],
             order="sequence desc",
             limit=1
@@ -1003,7 +1002,7 @@ class Article(models.Model):
         return dict(self._cr.fetchall())
 
     @api.model
-    def _get_partner_member_permissions(self, partner_id, filter_article_ids=False):
+    def _get_partner_member_permissions(self, partner_id):
         """ Retrieve the permission for the given partner for all articles.
         The articles can be filtered using the article_ids param.
 
@@ -1013,8 +1012,8 @@ class Article(models.Model):
 
         domain = "WHERE permission is not null"
         args = []
-        if filter_article_ids:
-            args = [tuple(filter_article_ids)]
+        if self.ids:
+            args = [tuple(self.ids)]
             domain += " AND article_id in %s"
 
         sql = '''
