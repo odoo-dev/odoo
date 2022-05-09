@@ -990,18 +990,18 @@ class Article(models.Model):
     def _get_internal_permission(self, check_access=False, check_write=False):
         """ We don't use domain because we cannot include properly the where clause in the custom sql query.
         The query's output table and fields names does not match the model we are working on"""
-        domain = []
+        where_clause = []
         args = []
         if self.ids:
             args = [tuple(self.ids)]
-            domain.append("article_id in %s")
+            where_clause.append("article_id in %s")
         if check_access:
-            domain.append("internal_permission != 'none'")
+            where_clause.append("internal_permission != 'none'")
         elif check_write:
-            domain.append("internal_permission = 'write'")
-        domain = ("WHERE " + " AND ".join(domain)) if domain else ''
+            where_clause.append("internal_permission = 'write'")
+        where_clause = ("WHERE " + " AND ".join(where_clause)) if where_clause else ''
 
-        sql = '''
+        sql = f'''
     WITH RECURSIVE article_perms as (
         SELECT id, id as article_id, parent_id, internal_permission
           FROM knowledge_article
@@ -1015,8 +1015,8 @@ class Article(models.Model):
     )
     SELECT article_id, max(internal_permission)
       FROM article_perms
-           %s
-  GROUP BY article_id''' % (domain)
+           {where_clause}
+  GROUP BY article_id'''
         self._cr.execute(sql, args)
         return dict(self._cr.fetchall())
 
@@ -1029,23 +1029,25 @@ class Article(models.Model):
 
         self.env['knowledge.article.member'].flush()
 
-        domain = "WHERE permission is not null"
-        args = []
+        where_add_clause = ""
+        args = [partner_id]
         if self.ids:
             args = [tuple(self.ids)]
-            domain += " AND article_id in %s"
+            where_add_clause = " AND article_id in %s"
 
-        sql = '''
+        sql = f'''
     WITH RECURSIVE article_perms as (
         SELECT a.id, a.parent_id, m.permission
           FROM knowledge_article a
      LEFT JOIN knowledge_article_member m
             ON a.id=m.article_id and partner_id = %s
     ), article_rec as (
-        SELECT perms1.id, perms1.id as article_id, perms1.parent_id, perms1.permission
+        SELECT perms1.id, perms1.id as article_id, perms1.parent_id,
+               perms1.permission
           FROM article_perms as perms1
          UNION
-        SELECT perms2.id, perms_rec.article_id, perms2.parent_id, COALESCE(perms_rec.permission, perms2.permission)
+        SELECT perms2.id, perms_rec.article_id, perms2.parent_id,
+               COALESCE(perms_rec.permission, perms2.permission)
           FROM article_perms as perms2
     INNER JOIN article_rec perms_rec
             ON perms_rec.parent_id=perms2.id
@@ -1053,8 +1055,9 @@ class Article(models.Model):
     )
     SELECT article_id, max(permission)
       FROM article_rec
-           %s
-  GROUP BY article_id''' % (partner_id, domain)
+     WHERE permission IS NOT NULL
+           {where_add_clause}
+  GROUP BY article_id'''
 
         self._cr.execute(sql, args)
         return dict(self._cr.fetchall())
@@ -1082,11 +1085,11 @@ class Article(models.Model):
 
         Please note that these additional fields are not sanitized, the caller has the
         responsability to check that user can access those fields and that no injection is possible. """
-        domain = "WHERE partner_id is not null"
+        add_where_clause = ''
         args = []
         if self.ids:
             args = [tuple(self.ids)]
-            domain += " AND article_id in %s"
+            add_where_clause += " AND article_id in %s"
 
         additional_select_fields = ''
         join_clause = ''
@@ -1129,38 +1132,39 @@ class Article(models.Model):
 
             additional_select_fields = ', %s' % ', '.join(select_fields)
 
-        sql = '''
+        sql = f'''
     WITH article_permission as (
         WITH RECURSIVE article_perms as (
-            SELECT a.id, a.parent_id, m.id as member_id, m.partner_id, m.permission
-            FROM knowledge_article a
-        LEFT JOIN knowledge_article_member m
+            SELECT a.id, a.parent_id, m.id as member_id, m.partner_id,
+                   m.permission
+              FROM knowledge_article a
+         LEFT JOIN knowledge_article_member m
                 ON a.id = m.article_id
         ), article_rec as (
-            SELECT perms1.id, perms1.id as article_id, perms1.parent_id, perms1.member_id,
-                perms1.partner_id, perms1.permission, perms1.id as origin_id, 0 as level
-            FROM article_perms as perms1
-            UNION
-            SELECT perms2.id, perms_rec.article_id, perms2.parent_id, perms2.member_id,
-                perms2.partner_id, perms2.permission, perms2.id as origin_id, perms_rec.level + 1
-            FROM article_perms as perms2
+            SELECT perms1.id, perms1.id as article_id, perms1.parent_id,
+                   perms1.member_id, perms1.partner_id, perms1.permission,
+                   perms1.id as origin_id, 0 as level
+              FROM article_perms as perms1
+             UNION
+            SELECT perms2.id, perms_rec.article_id, perms2.parent_id,
+                   perms2.member_id, perms2.partner_id, perms2.permission,
+                   perms2.id as origin_id, perms_rec.level + 1
+              FROM article_perms as perms2
         INNER JOIN article_rec perms_rec
                 ON perms_rec.parent_id=perms2.id
         )
-        SELECT article_id, origin_id, member_id, partner_id, permission, min(level) as min_level
-        FROM article_rec
-            %(where_clause)s
-        GROUP BY article_id, origin_id, member_id, partner_id, permission
+        SELECT article_id, origin_id, member_id, partner_id,
+               permission, min(level) as min_level
+          FROM article_rec
+         WHERE partner_id is not null
+               {add_where_clause}
+      GROUP BY article_id, origin_id, member_id, partner_id, permission
     )
     SELECT article_id, origin_id, member_id, partner_id, permission, min_level
-           %(additional_select_fields)s
+           {additional_select_fields}
     FROM article_permission
-    %(join_clause)s
-        ''' % {
-            'additional_select_fields': additional_select_fields,
-            'where_clause': domain,
-            'join_clause': join_clause,
-        }
+    {join_clause}
+        '''
 
         self._cr.execute(sql, args)
         results = self._cr.dictfetchall()
