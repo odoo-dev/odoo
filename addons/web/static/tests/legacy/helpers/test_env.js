@@ -61,7 +61,7 @@ odoo.define('web.test_env', async function (require) {
                 SIZES: { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 },
             }, env.device),
             isDebug: env.isDebug || (() => false),
-            services: makeTestEnvServices(env),
+            services: Object.assign({}, makeTestEnvServices(env)),
             session: Object.assign({
                 rpc(route, params, options) {
                     if (providedRPC) {
