@@ -38,7 +38,6 @@
             'knowledge/static/src/scss/knowledge_blocks.scss',
             'knowledge/static/src/components/*/*.js',
             'knowledge/static/src/js/knowledge_controller.js',
-            'knowledge/static/src/js/knowledge_model.js',
             'knowledge/static/src/js/knowledge_renderers.js',
             'knowledge/static/src/js/knowledge_views.js',
             'knowledge/static/src/js/widgets/knowledge_dialogs.js',
