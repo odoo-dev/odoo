@@ -13,7 +13,6 @@ const KnowledgeArticleFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
         'click .o_knowledge_add_icon': '_onAddRandomIcon',
         'click .o_knowledge_add_cover': '_onAddCover',
-        'click .btn-create': '_onCreate',
         'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
         'click i.o_toggle_favorite': '_onToggleFavorite',
@@ -126,16 +125,10 @@ const KnowledgeArticleFormController = FormController.extend({
     },
 
     /**
-     * @param {Event} event
+     * @param {OdooEvent} event
      */
     _onCreate: async function (event) {
-        if (event instanceof $.Event) {
-            await this._create({
-                category: 'private'
-            });
-        } else {
-            await this._create(event.data);
-        }
+        await this._create(event.data);
     },
 
     /**

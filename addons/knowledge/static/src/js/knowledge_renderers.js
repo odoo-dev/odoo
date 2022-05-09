@@ -11,6 +11,7 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
     className: 'o_knowledge_form_view',
     events: _.extend({}, FormRenderer.prototype.events, {
         'click .btn-chatter': '_onBtnChatterClick',
+        'click .btn-create': '_onBtnCreateClick',
         'click .btn-duplicate': '_onBtnDuplicateClick',
         'click .btn-move': '_onBtnMoveClick',
         'click .breadcrumb a[data-controller-id]': '_onBreadcrumbItemClick',
@@ -279,6 +280,15 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
         const $chatter = $('.o_knowledge_chatter');
         $chatter.toggleClass('d-none');
         $('.btn-chatter').toggleClass('active');
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _onBtnCreateClick: function (event) {
+        this.trigger_up('create', {
+            category: 'private'
+        });
     },
 
     /**
