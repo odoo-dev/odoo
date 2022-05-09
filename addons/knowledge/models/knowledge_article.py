@@ -353,10 +353,24 @@ class Article(models.Model):
 
     @api.depends('root_article_id.internal_permission', 'root_article_id.article_member_ids.permission')
     def _compute_category(self):
-        for article in self:
-            if article.root_article_id.internal_permission != 'none':
-                article.category = 'workspace'
-            elif len(article.root_article_id.article_member_ids.filtered(lambda m: m.permission != 'none')) > 1:
+        # compute workspace articles
+        workspace_articles = self.filtered(lambda a: a.root_article_id.internal_permission != 'none')
+        workspace_articles.category = 'workspace'
+
+        remaining_articles = self - workspace_articles
+        if not remaining_articles:
+            return
+
+        results = self.env['knowledge.article.member'].read_group([
+            ('article_id', 'in', remaining_articles.root_article_id.ids), ('permission', '!=', 'none')
+        ], ['article_id'], ['article_id'])  # each returned member is read on write.
+        access_member_per_root_article = dict.fromkeys(remaining_articles.root_article_id.ids, 0)
+        for result in results:
+            access_member_per_root_article[result['article_id'][0]] += result["article_id_count"]
+
+        for article in remaining_articles:
+            # should never crash as non workspace articles always have at least one member with access.
+            if access_member_per_root_article[article.root_article_id.id] > 1:
                 article.category = 'shared'
             else:
                 article.category = 'private'
