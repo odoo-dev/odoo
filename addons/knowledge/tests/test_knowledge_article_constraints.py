@@ -144,7 +144,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         article_private = self._create_private_article('MyPrivate')
         self.assertEqual(article_private.article_member_ids.partner_id, self.partner_employee)
         self.assertTrue(article_private.category, 'private')
-        self.assertEqual(article_private.owner_id, self.env.user)
+        self.assertTrue(article_private.user_can_write)
         with self.assertRaises(exceptions.AccessError):
             self.env['knowledge.article'].with_user(self.user_employee2).create({
                 'name': 'My Own Private',
@@ -187,7 +187,8 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'parent_id': article.id,
         })
         self.assertEqual(article_private_u2.category, 'workspace')
-        self.assertEqual(article_private_u2.owner_id, self.user_employee2)
+        article_private_u2.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertTrue(article_private_u2.with_user(self.user_employee2).user_can_write)
         # Effectively private: other user cannot read it
         article_private_u2_asuser = article_private_u2.with_user(self.env.user)
         with self.assertRaises(exceptions.AccessError):
@@ -197,7 +198,8 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         article_private = self._create_private_article('MyPrivate')
         self.assertEqual(article_private.article_member_ids.partner_id, self.partner_employee)
         self.assertTrue(article_private.category, 'private')
-        self.assertEqual(article_private.owner_id, self.env.user)
+        article_private.invalidate_cache(fnames=['user_can_write', 'user_has_access', 'user_permission'])
+        self.assertTrue(article_private.with_user(self.env.user).user_can_write)
         # Effectively private: other user cannot read it
         article_private_asu2 = article_private.with_user(self.user_employee2)
         with self.assertRaises(exceptions.AccessError):

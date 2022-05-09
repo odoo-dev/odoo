@@ -74,7 +74,7 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         })
         self.assertMembers(other_private, 'none', {self.partner_employee: 'write'})
         self.assertEqual(other_private.category, 'private')
-        self.assertEqual(other_private.owner_id, self.user_employee)
+        self.assertTrue(other_private.user_can_write)
 
         # create a child to it
         other_private_child = self.env['knowledge.article'].create({
@@ -84,7 +84,7 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         self.assertMembers(other_private_child, False, {})
         self.assertEqual(other_private_child.article_member_ids.partner_id, self.env['res.partner'])
         self.assertEqual(other_private_child.category, 'private')
-        self.assertEqual(other_private_child.owner_id, self.user_employee)
+        self.assertTrue(other_private_child.user_can_write)
 
         # ARTICLE: WRITE
         other_private.write({'name': 'Can Update'})
