@@ -538,7 +538,9 @@ class Article(models.Model):
                 if self_member:
                     can_sudo = True
 
-            vals_by_parent_id.setdefault(parent_id, []).append(vals)
+            # if no sequence, parent will have to be checked
+            if not vals.get('sequence'):
+                vals_by_parent_id.setdefault(parent_id, []).append(vals)
             vals_as_sudo.append(can_sudo)
 
         # compute all maximum sequences / parent
@@ -550,18 +552,7 @@ class Article(models.Model):
                 self.env['knowledge.article'].browse(parent_ids).check_access_rule('write')
             except AccessError:
                 raise AccessError(_("You cannot create an article under articles on which you cannot write"))
-
-            read_group_results = self.env['knowledge.article'].sudo().read_group(
-                [('parent_id', 'in', parent_ids)],
-                ['sequence:max'],
-                ['parent_id']
-            )
-            for read_group_result in read_group_results:
-                if not read_group_result['parent_id']:
-                    index = False
-                else:
-                    index = read_group_result['parent_id'][0]
-                max_sequence_by_parent[index] = read_group_result['sequence']
+            max_sequence_by_parent = self._get_max_sequence_inside_parents(parent_ids)
 
         # update sequences
         for parent_id, article_vals in vals_by_parent_id.items():
@@ -596,14 +587,22 @@ class Article(models.Model):
 
     def write(self, vals):
         # Move under a parent is considered as a write on it (permissions, ...)
+        _resequence = False
         if vals.get('parent_id'):
             parent = self.browse(vals['parent_id'])
             parent.check_access_rights('write')
             parent.check_access_rule('write')
+            if 'sequence' not in vals:
+                max_sequence = self._get_max_sequence_inside_parents(parent.ids).get(parent.id, -1)
+                vals['sequence'] = max_sequence + 1
+            else:
+                _resequence = True
 
         result = super(Article, self).write(vals)
 
-        if any(field in ['parent_id', 'sequence'] for field in vals):
+        # resequence only if a sequence was not already computed based on current
+        # parent maximum to avoid unnecessary recomputation of sequences
+        if _resequence:
             self._resequence()
 
         return result
@@ -704,9 +703,6 @@ class Article(models.Model):
         values = {'parent_id': parent_id}
         if before_article:
             values['sequence'] = before_article.sequence
-        else:
-            # get max sequence among articles with the same parent
-            values['sequence'] = self._get_max_sequence_inside_parent(parent_id)
         if not parent_id:
             # be sure to have an internal permission on the article if moved outside
             # of an hierarchy
@@ -789,13 +785,18 @@ class Article(models.Model):
             super(Article, article_to_update_by_sequence[sequence]).write({'sequence': sequence})
 
     @api.model
-    def _get_max_sequence_inside_parent(self, parent_id):
-        max_sequence_article = self.env['knowledge.article'].search(
-            [('parent_id', '=', parent_id)],
-            order="sequence DESC",
-            limit=1
+    def _get_max_sequence_inside_parents(self, parent_ids):
+        max_sequence_by_parent = {}
+        rg_results = self.env['knowledge.article'].sudo().read_group(
+            [('parent_id', 'in', parent_ids)],
+            ['sequence:max'],
+            ['parent_id']
         )
-        return max_sequence_article.sequence + 1 if max_sequence_article else 0
+        for rg_line in rg_results:
+            # beware name_get like returns either 0, either (id, 'name')
+            index = rg_line['parent_id'][0] if rg_line['parent_id'] else False
+            max_sequence_by_parent[index] = rg_line['sequence']
+        return max_sequence_by_parent
 
     # ------------------------------------------------------------
     # HELPERS
@@ -823,7 +824,6 @@ class Article(models.Model):
         if parent:
             if not is_private and parent.category == "private":
                 is_private = True
-            values['sequence'] = self._get_max_sequence_inside_parent(parent_id)
         else:
             # child do not have to setup an internal permission as it is inherited
             values['internal_permission'] = 'none' if is_private else 'write'

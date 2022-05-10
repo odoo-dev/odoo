@@ -154,7 +154,5 @@ class TestKnowledgeArticleSequence(KnowledgeCommon):
 
         new_private.write({'parent_id': existing_private.id})
         self.assertEqual(new_private.parent_id, existing_private, 'Sequencing: respect parent choice')
-        # TDE FIXME
-        self.assertEqual(new_private.sequence, 6, 'Sequencing: write does not update sequence')
-        # self.assertEqual(new_private.sequence, 2,
-        #                  'Sequencing: without any forced value, should be set last of all children')
+        self.assertEqual(new_private.sequence, 3,
+                         'Sequencing: without any forced value, should be set last of all children')
