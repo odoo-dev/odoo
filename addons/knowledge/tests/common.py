@@ -73,6 +73,17 @@ class KnowledgeCommon(MailCommon):
                 msg
             )
 
+    def assertSortedSequence(self, articles):
+        """ Assert that the articles are properly sorted according to their sequence
+        number
+
+        :param articles (Model<knowledge.article>): Recordset of knowledge.article
+        """
+        for k in range(len(articles) - 1):
+            self.assertTrue(
+                articles[k].sequence <= articles[k + 1].sequence,
+                f'Article sequence issue: {articles[k].name} ({articles[k].sequence}) which is not <= than {articles[k + 1].name} ({articles[k + 1].sequence})')
+
     def _create_private_article(self, name, target_user=None):
         """ Due to membership model constraints, create test records as sudo
         and return a record in current user environment. Creation itself is
@@ -98,13 +109,13 @@ class KnowledgeCommonWData(KnowledgeCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        # - Private         private      none (manager-w+)
-        #   - Child1        "            "
-        # - Shared          shared       none (admin-w+,employee-r+,manager-r+)
-        #   - Child1        "            "    (admin-w+,employee-w+)
-        # - Playground      workspace    w+
-        #   - Child1        "            "
-        #   - Child2        "            "
+        # - Private         seq=997   private      none (manager-w+)
+        #   - Child1        seq=0     "            "
+        # - Shared          seq=998   shared       none (admin-w+,employee-r+,manager-r+)
+        #   - Child1        seq=0     "            "    (admin-w+,employee-w+)
+        # - Playground      seq=999   workspace    w+
+        #   - Child1        seq=0     "            "
+        #   - Child2        seq=1     "            "
         cls._base_sequence = 999
         cls.article_workspace = cls.env['knowledge.article'].create(
             {'internal_permission': 'write',
@@ -168,6 +179,7 @@ class KnowledgeCommonWData(KnowledgeCommon):
              'parent_id': cls.article_private_manager.id,
             }
         ])
+        cls.env['knowledge.article'].flush()
 
 
 class KnowledgeArticlePermissionsCase(KnowledgeCommon):

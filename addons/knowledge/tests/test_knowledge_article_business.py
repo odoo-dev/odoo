@@ -176,6 +176,49 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         with self.assertRaises(exceptions.AccessError):
             Article.article_create(title=_title, parent_id=private_nonmember.id, private=False)
 
+    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail')
+    @users('employee')
+    def test_article_invite_members(self):
+        shared_children = self.shared_children.with_env(self.env)
+        self.assertMembers(shared_children, False,
+                           {self.partner_admin: 'write',
+                            self.partner_employee: 'write'})
+
+        # invite a mix of shared and internal people
+        partners = (self.customer + self.partner_employee_manager + self.partner_employee2).with_env(self.env)
+        with self.mock_mail_gateway():
+            shared_children.invite_members(partners, 'write')
+        self.assertMembers(shared_children, False,
+                           {self.partner_admin: 'write',
+                            self.partner_employee: 'write',
+                            self.customer: 'read',  # shared partners are always read only
+                            self.partner_employee_manager: 'write',
+                            self.partner_employee2: 'write'})
+
+        # employee2 is downgraded, employee_manager is removed
+        with self.mock_mail_gateway():
+            shared_children.invite_members(partners[2], 'read')
+        with self.mock_mail_gateway():
+            shared_children.invite_members(partners[1], 'none')
+
+        self.assertMembers(shared_children, False,
+                           {self.partner_admin: 'write',
+                            self.partner_employee: 'write',
+                            self.customer: 'read',
+                            self.partner_employee_manager: 'none',
+                            self.partner_employee2: 'read'})
+
+    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail')
+    @users('employee')
+    def test_article_invite_members_rights(self):
+        article_shared = self.article_shared.with_env(self.env)
+        self.assertFalse(article_shared.user_can_write)
+
+        partners = (self.customer + self.partner_employee_manager + self.partner_employee2).with_env(self.env)
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Invite: cannot invite with read permission'):
+            article_shared.invite_members(partners, 'write')
+
     @users('employee')
     def test_article_toggle_favorite(self):
         """ Testing the API for togging favorites. """
@@ -276,8 +319,10 @@ class TestKnowledgeCommonWDataInitialValue(KnowledgeCommonWData):
         # root
         article_workspace = self.article_workspace
         self.assertTrue(article_workspace.category, 'workspace')
+        self.assertEqual(article_workspace.sequence, 999)
         article_shared = self.article_shared
         self.assertTrue(article_shared.category, 'shared')
+        self.assertTrue(article_shared.sequence, 998)
 
         # workspace children
         workspace_children = article_workspace.child_ids
@@ -291,6 +336,7 @@ class TestKnowledgeCommonWDataInitialValue(KnowledgeCommonWData):
             [False, False]
         )
         self.assertEqual(workspace_children.root_article_id, article_workspace)
+        self.assertEqual(workspace_children.mapped('sequence'), [0, 1])
 
     @users('employee')
     def test_initial_values_as_employee(self):

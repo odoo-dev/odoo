@@ -171,41 +171,181 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
     @mute_logger('odoo.addons.base.models.ir_rule')
     @users('employee')
     def test_downgrade_internal_permission_none(self):
-        article_as1 = self.article_write_contents[2].with_env(self.env)
-        article_as2 = article_as1.with_user(self.user_employee2)
+        writable_as1 = self.article_write_contents[2].with_env(self.env)
+        writable_as2 = writable_as1.with_user(self.user_employee2)
+        self.assertEqual(writable_as2.user_has_access, True)
 
         # downgrade write global perm to read
-        article_as1._set_internal_permission('none')
-        article_as1.flush()  # ACLs are done using SQL
+        writable_as1._set_internal_permission('none')
+        writable_as1.flush()  # ACLs are done using SQL
         self.assertMembers(
-            article_as1, 'none',
-            {self.partner_portal: 'read', self.env.user.partner_id: 'write'},
+            writable_as1, 'none',
+            {self.partner_portal: 'read',  # untouched by downgrade
+             self.env.user.partner_id: 'write'},
             'Permission: lowering permission adds current user in members to have write access'
         )
-        self.assertTrue(article_as1.is_desynchronized)
-        self.assertTrue(article_as1.user_can_write)
-        self.assertTrue(article_as1.user_has_access)
+        self.assertTrue(writable_as1.is_desynchronized)
+        self.assertTrue(writable_as1.user_can_write)
+        self.assertTrue(writable_as1.user_has_access)
+
+        # check internal permission has been lowered
         with self.assertRaises(exceptions.AccessError):
-            article_as2.body  # trigger ACLs
+            writable_as2.body  # trigger ACLs
 
     @users('employee')
     def test_downgrade_internal_permission_read(self):
-        article_as1 = self.article_write_contents[2].with_env(self.env)
-        article_as2 = article_as1.with_user(self.user_employee2)
+        writable_as1 = self.article_write_contents[2].with_env(self.env)
+        writable_as2 = writable_as1.with_user(self.user_employee2)
+        self.assertEqual(writable_as2.user_has_access, True)
 
         # downgrade write global perm to read
-        article_as1._set_internal_permission('read')
-        article_as1.flush()  # ACLs are done using SQL
+        writable_as1._set_internal_permission('read')
+        writable_as1.flush()  # ACLs are done using SQL
         self.assertMembers(
-            article_as1, 'read',
+            writable_as1, 'read',
             {self.partner_portal: 'read', self.env.user.partner_id: 'write'},
             'Permission: lowering permission adds current user in members to have write access'
         )
-        self.assertTrue(article_as1.is_desynchronized)
-        self.assertTrue(article_as1.user_can_write)
-        self.assertTrue(article_as1.user_has_access)
-        self.assertFalse(article_as2.user_can_write)
-        self.assertTrue(article_as2.user_has_access)
+        self.assertTrue(writable_as1.is_desynchronized)
+        self.assertTrue(writable_as1.user_can_write)
+        self.assertTrue(writable_as1.user_has_access)
+        self.assertFalse(writable_as2.user_can_write)
+        self.assertTrue(writable_as2.user_has_access)
+
+    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.models.unlink')
+    @users('employee')
+    def test_remove_member_inherited_rights(self):
+        """ Remove a member from a child inheriting rights: will desync """
+        writable = self.article_write_contents[2].with_env(self.env)
+        self.assertTrue(writable.user_has_access)
+        self.assertTrue(writable.user_can_write)
+        self.assertMembers(writable, False,
+                           {self.partner_portal: 'read'})
+
+        # set partner employee manager as writable member of its root
+        writable_root = writable.root_article_id
+        writable_root._add_members(self.partner_employee_manager, 'write')
+        self.assertMembers(writable_root, 'write',
+                           {self.partner_employee_manager: 'write'})
+
+        # remove partner employee manager that has rights based on inheritance
+        manager_member = writable_root.article_member_ids.filtered(lambda m: m.partner_id == self.partner_employee_manager)
+        writable._remove_member(manager_member, is_based_on=True)
+        self.assertTrue(writable.is_desynchronized,
+                        'Permission: when removing a member having inherited rights it has be be desynchronized')
+        self.assertMembers(writable, 'write',
+                           {self.partner_portal: 'read'})
+
+        # resync
+        writable.restore_article_access()
+        self.assertFalse(writable.is_desynchronized)
+        self.assertMembers(writable, False,
+                           {self.partner_portal: 'read'})
+
+        # remove portal partner that has rights based on membership
+        portal_member = writable.article_member_ids.filtered(lambda m: m.partner_id == self.partner_portal)
+        writable._remove_member(portal_member)
+        self.assertFalse(writable.is_desynchronized)
+        self.assertMembers(writable, False, {})
+
+    @mute_logger('odoo.models.unlink')
+    @users('employee')
+    def test_set_member_permission(self):
+        """ Test setting member-specific permission """
+        writable = self.article_write_contents[2].with_env(self.env)
+        self.assertTrue(writable.user_has_access)
+        self.assertTrue(writable.user_can_write)
+
+        # set partner employee manager as readable member of its root
+        writable_root = writable.root_article_id
+        writable_root._add_members(self.partner_employee_manager, 'read')
+        self.assertMembers(writable_root, 'write',
+                           {self.partner_employee_manager: 'read'})
+
+        # update a member permission directly
+        portal_member = writable.article_member_ids.filtered(lambda m: m.partner_id == self.partner_portal)
+        writable._set_member_permission(portal_member, 'none')
+        self.assertMembers(writable, False,
+                           {self.partner_portal: 'none'})
+
+        # upgrade a permission based on inheritance
+        manager_member_root = writable_root.article_member_ids.filtered(lambda m: m.partner_id == self.partner_employee_manager)
+        writable._set_member_permission(manager_member_root, 'write', is_based_on=True)
+        self.assertFalse(writable.is_desynchronized)
+        self.assertMembers(writable, False,
+                           {self.partner_portal: 'none',
+                            self.partner_employee_manager: 'write'})
+
+        # now test downgrading
+        manager_member = writable.article_member_ids.filtered(lambda m: m.partner_id == self.partner_employee_manager)
+        writable_root._set_member_permission(manager_member_root, 'write')
+        writable._remove_member(manager_member)
+        self.assertMembers(writable_root, 'write',
+                           {self.partner_employee_manager: 'write'})
+        self.assertMembers(writable, False,
+                           {self.partner_portal: 'none'})
+
+        # downgrade a permission, should desynchronize from parent
+        writable._set_member_permission(manager_member_root, 'read', is_based_on=True)
+        self.assertTrue(writable.is_desynchronized,
+                        'Permission: when removing a member having inherited rights it has be be desynchronized')
+        self.assertMembers(writable, 'write',
+                           {self.partner_portal: 'none',
+                            self.partner_employee_manager: 'read'})
+
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    @users('employee')
+    def test_update_internal_permission_escalation(self):
+        """ Check no privilege escalation is possible """
+        # direct try at setting higher internal permission
+        readonly = self.article_read_contents[1].with_env(self.env)
+        self.assertTrue(readonly.user_has_access)
+        self.assertFalse(readonly.user_can_write)
+        writable = self.article_write_contents[2].with_env(self.env)
+        self.assertTrue(writable.user_has_access)
+        self.assertTrue(writable.user_can_write)
+
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Permission: that is plain stupid trying to do this'):
+            readonly.write({'internal_permission': 'write'})
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Permission: do not allow privilege escalation'):
+            readonly._set_internal_permission('write')
+
+        portal_member = writable.article_member_ids.filtered(lambda m: m.partner_id == self.partner_portal)
+        with self.assertRaises(exceptions.ValidationError,
+                               msg='Permission: share partner cannot gain write access'):
+            writable._set_member_permission(portal_member, 'write')
+
+    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.models.unlink')
+    @users('employee')
+    def test_update_permissions_rights(self):
+        """ Check no privilege escalation is possible """
+        # direct try at setting higher internal permission
+        readonly = self.article_read_contents[1].with_env(self.env)
+        self.assertTrue(readonly.user_has_access)
+        self.assertFalse(readonly.user_can_write)
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Permission: that is plain stupid trying to do this'):
+            readonly.write({'internal_permission': 'write'})
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Permission: do not allow privilege escalation'):
+            readonly._set_internal_permission('write')
+
+        other_member = readonly.article_member_ids.filtered(lambda m: m.partner_id == self.partner_portal)
+        # TDE FIXME: does not raise currently
+        # with self.assertRaises(exceptions.AccessError,
+        #                        msg='Permission: do not allow to remove members when having only read access'):
+        #     readonly._remove_member(other_member)
+        self.assertMembers(readonly, 'write', 
+                           {self.env.user.partner_id: 'read',
+                            self.partner_portal: 'read'})
+
+        # cannot gain privilege
+        my_member = readonly.article_member_ids.filtered(lambda m: m.partner_id == self.env.user.partner_id)
+        with self.assertRaises(exceptions.AccessError,
+                                msg='Permission: do not allow privilege escalation: write on root'):
+            readonly._remove_member(my_member)
 
 
 @tagged('knowledge_acl')

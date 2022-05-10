@@ -933,6 +933,8 @@ class Article(models.Model):
         If the member was based on a parent article, the current article will be desynchronized form its parent.
         We also ensure the partner to removed is removed after the desynchronization (if was copied from parent). """
         self.ensure_one()
+        if not member:
+            raise ValueError()
         if is_based_on:
             self._desync_access_from_parents(self.article_member_ids.partner_id)
             self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id).sudo().unlink()
