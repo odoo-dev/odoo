@@ -6,6 +6,7 @@
             <field name="icon">👋</field>
             <field name="parent_id" eval="False" />
             <field name="internal_permission">write</field>
+            <field name="active" eval="False"/>
             <field name="body" type="html">
                 <h1>
                     <span style="font-size: 36px;">Hello there</span>
