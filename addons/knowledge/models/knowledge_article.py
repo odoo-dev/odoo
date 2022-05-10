@@ -4,6 +4,7 @@
 import ast
 
 from collections import defaultdict
+from markupsafe import Markup
 from werkzeug.urls import url_join
 
 from odoo import fields, models, api, _
@@ -773,8 +774,8 @@ class Article(models.Model):
         values = {'parent_id': parent.id}
         if title:
             values.update({
+                'body': Markup('<h1>%s</h1>') % title,
                 'name': title,
-                'body': "<h1>" + title + "</h1>",
             })
 
         if parent:
