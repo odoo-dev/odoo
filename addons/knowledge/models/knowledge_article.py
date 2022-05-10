@@ -590,8 +590,11 @@ class Article(models.Model):
         _resequence = False
         if vals.get('parent_id'):
             parent = self.browse(vals['parent_id'])
-            parent.check_access_rights('write')
-            parent.check_access_rule('write')
+            try:
+                parent.check_access_rule('write')
+            except AccessError:
+                raise AccessError(_("You cannot move an article under %(parent_name)s as you cannot write on it",
+                                    parent_name=parent.display_name))
             if 'sequence' not in vals:
                 max_sequence = self._get_max_sequence_inside_parents(parent.ids).get(parent.id, -1)
                 vals['sequence'] = max_sequence + 1
