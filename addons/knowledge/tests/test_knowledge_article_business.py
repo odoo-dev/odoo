@@ -260,7 +260,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertEqual(workspace_children[0].parent_id, article_workspace)
 
         # other valid move: first child is moved to private section
-        workspace_children[0].move_to(parent_id=False, private=True)
+        workspace_children[0].move_to(parent_id=False, is_private=True)
         workspace_children.flush()
         self.assertMembers(workspace_children[0], 'none', {self.partner_employee: 'write'})
         self.assertEqual(workspace_children[0].category, 'private')

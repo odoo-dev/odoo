@@ -653,48 +653,54 @@ class Article(models.Model):
     # SEQUENCE / ORDERING
     # ------------------------------------------------------------
 
-    def move_to(self, parent_id=False, before_article_id=False, private=False):
-        self.ensure_one()
-        if not self.user_can_write:
-            raise AccessError(_("You are not allowed to move the article '%s'.", self.display_name))
-        parent = self.browse(parent_id) if parent_id else False
-        if parent and not parent.user_can_write:
-            raise AccessError(_("You are not allowed to move this article under the article '%s'.", parent.display_name))
-        before_article = self.browse(before_article_id) if before_article_id else False
+    def move_to(self, parent_id=False, before_article_id=False, is_private=False):
+        """ Move an article in the tree.
 
+        :param int parent_id: id of an article that will be the new parent;
+        :param int before_article_id: id of an article before which the article
+          should be moved. Otherwise it is put as last parent children;
+        :param bool is_private: set as private;
+        """
+        self.ensure_one()
+        parent = self.browse(parent_id) if parent_id else self.env['knowledge.article']
+        before_article = self.browse(before_article_id) if before_article_id else self.env['knowledge.article']
+
+        values = {'parent_id': parent_id}
         if before_article:
-            sequence = before_article.sequence
+            values['sequence'] = before_article.sequence
         else:
             # get max sequence among articles with the same parent
-            sequence = self._get_max_sequence_inside_parent(parent_id)
-
-        values = {
-            'parent_id': parent_id,
-            'sequence': sequence
-        }
+            values['sequence'] = self._get_max_sequence_inside_parent(parent_id)
         if not parent_id:
-            # If parent_id, the write method will set the internal_permission based on the parent.
-            # If set as root article: if moved to private -> set none; if moved to workspace -> set write
-            values['internal_permission'] = 'none' if private else 'write'
+            # be sure to have an internal permission on the article if moved outside
+            # of an hierarchy
+            values['internal_permission'] = 'none' if is_private else 'write'
 
-        members_to_remove = self.env['knowledge.article.member']
-        if not parent and private:  # If set private without parent, remove all members except current user.
-            self_member = self.article_member_ids.filtered(lambda m: m.partner_id == self.env.user.partner_id)
+        # if set as standalone private: remove members, ensure current user is the
+        # only member -> require sudo to bypass member ACLs
+        if not parent and is_private:
+            # explicitly check for rights before going into sudo
+            try:
+                self.check_access_rights('write')
+                (self + parent).check_access_rule('write')
+            except:
+                raise AccessError(
+                    _("You are not allowed to move this article under article %(parent_name)s",
+                      parent_name=parent.display_name)
+                )
+            self_sudo = self.sudo()
+            self_member = self_sudo.article_member_ids.filtered(lambda m: m.partner_id == self.env.user.partner_id)
+            member_command = [(2, member.id) for member in self_sudo.article_member_ids if member.partner_id != self.env.user.partner_id]
             if self_member:
-                members_to_remove = self.article_member_ids - self_member
-                values['article_member_ids'] = [(1, self_member.id, {'permission': 'write'})]
+                member_command.append((1, self_member.id, {'permission': 'write'}))
             else:
-                members_to_remove = self.article_member_ids
-                values['article_member_ids'] = [(0, 0, {
+                member_command.append((0, 0, {
                     'partner_id': self.env.user.partner_id.id,
                     'permission': 'write'
-                })]
-
-        # sudo to write on members
-        self.sudo().write(values)
-        members_to_remove.unlink()
-
-        return True
+                }))
+            values['article_member_ids'] = member_command
+            return self_sudo.write(values)
+        return self.write(values)
 
     def _resequence(self):
         """ This method reorders the children of the same parent (brotherhood) if

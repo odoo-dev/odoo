@@ -284,7 +284,7 @@ const KnowledgeArticleFormController = FormController.extend({
      */
     _confirmMove: async function (data) {
         data['params'] = {
-            private: data.newCategory === 'private'
+            is_private: data.newCategory === 'private'
         };
         if (typeof data.target_parent_id !== 'undefined') {
             data['params'].parent_id = data.target_parent_id;
