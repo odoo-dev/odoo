@@ -850,7 +850,7 @@ class Article(models.Model):
             - Favorite count
         and returned result mimic a search_read result structure.
         """
-        fields = ['id', 'name', 'is_user_favorite', 'favorite_count', 'root_article_id', 'icon']
+        asked_fields = ['id', 'name', 'is_user_favorite', 'favorite_count', 'root_article_id', 'icon']
         order_by = "is_user_favorite, favorite_count desc"
         limit = 10
         search_domain = ["|", ("name", "ilike", search_query), ("root_article_id.name", "ilike", search_query)]
@@ -870,7 +870,7 @@ class Article(models.Model):
                 return article[field_name]
 
         return [
-            {field: get_field_info(article, field) for field in fields}
+            {field: get_field_info(article, field) for field in asked_fields}
             for article in sorted_articles
         ]
 
