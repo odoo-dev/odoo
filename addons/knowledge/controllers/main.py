@@ -281,7 +281,7 @@ class KnowledgeController(http.Controller):
         previous_category = article.category
 
         try:
-            article._remove_member(member, bool(inherited_member_id))
+            article._remove_member(member)
         except (AccessError, ValidationError) as e:
             return {'error': e}
 

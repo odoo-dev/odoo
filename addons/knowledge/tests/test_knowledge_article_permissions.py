@@ -230,7 +230,7 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
 
         # remove partner employee manager that has rights based on inheritance
         manager_member = writable_root.article_member_ids.filtered(lambda m: m.partner_id == self.partner_employee_manager)
-        writable._remove_member(manager_member, is_based_on=True)
+        writable._remove_member(manager_member)
         self.assertTrue(writable.is_desynchronized,
                         'Permission: when removing a member having inherited rights it has be be desynchronized')
         self.assertMembers(writable, 'write',
@@ -333,19 +333,19 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
             readonly._set_internal_permission('write')
 
         other_member = readonly.article_member_ids.filtered(lambda m: m.partner_id == self.partner_portal)
-        # TDE FIXME: does not raise currently
-        # with self.assertRaises(exceptions.AccessError,
-        #                        msg='Permission: do not allow to remove members when having only read access'):
-        #     readonly._remove_member(other_member)
-        self.assertMembers(readonly, 'write', 
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Permission: do not allow to remove members when having only read access'):
+            readonly._remove_member(other_member)
+        self.assertMembers(readonly, 'write',
                            {self.env.user.partner_id: 'read',
                             self.partner_portal: 'read'})
 
-        # cannot gain privilege
+        # cannot gain privilege: setting none if I remove myself to ensure no gain is performed
         my_member = readonly.article_member_ids.filtered(lambda m: m.partner_id == self.env.user.partner_id)
-        with self.assertRaises(exceptions.AccessError,
-                                msg='Permission: do not allow privilege escalation: write on root'):
-            readonly._remove_member(my_member)
+        readonly._remove_member(my_member)
+        self.assertMembers(readonly, 'write',
+                           {self.env.user.partner_id: 'none',
+                            self.partner_portal: 'read'})
 
 
 @tagged('knowledge_acl')

@@ -964,25 +964,36 @@ class Article(models.Model):
             # TODO REMOVE SUDO if can write on member based on can_write on article
             member.sudo().write({'permission': permission})
 
-    def _remove_member(self, member, is_based_on=False):
+    def _remove_member(self, member):
         """ Remove a member from the article.
         If the member was based on a parent article, the current article will be desynchronized form its parent.
         We also ensure the partner to removed is removed after the desynchronization (if was copied from parent). """
         self.ensure_one()
         if not member:
             raise ValueError()
-        if is_based_on:
-            self._desync_access_from_parents(self.article_member_ids.partner_id)
-            self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id).sudo().unlink()
+
+        # belongs to current article members
+        current_membership = self.article_member_ids.filtered(lambda m: m == member)
+        if current_membership:
+            if member.partner_id == self.env.user.partner_id:
+                # TODO REMOVE SUDO if can write on member based on can_write on article
+                self.sudo().write({'article_member_ids': [(1, current_membership.id, {'permission': 'none'})]})
+            elif not self.user_can_write:
+                raise AccessError(
+                    _("You cannot remove the member %(member_name)s from article %(article_name)s",
+                      member_name=member.display_name,
+                      article_name=self.display_name
+                      ))
+            else:
+                # TODO REMOVE SUDO if can write on member based on can_write on article
+                self.sudo().write({'article_member_ids': [(2, current_membership.id)]})
+        # inherited rights from parent
         else:
-            member = self.article_member_ids.filtered(lambda m: m.id == member.id)
-            remove_self, upgrade_self = self.env.user.partner_id == member.partner_id, False
-            if remove_self:
-                upgrade_self = not member.has_higher_permission
-            if not self.user_can_write and upgrade_self:
-                raise AccessError(_("You cannot remove the member '%s' from article '%s'.", member.display_name, self.display_name))
             # TODO REMOVE SUDO if can write on member based on can_write on article
-            member.sudo().unlink()
+            self._desync_access_from_parents(self.article_member_ids.partner_id)
+            current_membership = self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id)
+            if current_membership:
+                self.sudo().write({'article_member_ids': [(2, current_membership.id)]})
 
     def invite_members(self, partners, permission):
         """
