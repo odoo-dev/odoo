@@ -1013,7 +1013,7 @@ class Article(models.Model):
         :param permission (string): permission ('none', 'read' or 'write')
         """
         self.ensure_one()
-        if not self.user_can_write:
+        if not self.env.su and not self.user_can_write:
             raise AccessError(
                 _("You cannot give access to the article '%s' as you are not editor.", self.name))
 
