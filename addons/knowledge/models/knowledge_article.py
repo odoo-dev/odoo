@@ -8,7 +8,7 @@ from markupsafe import Markup
 from werkzeug.urls import url_join
 
 from odoo import Command, fields, models, api, _
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.osv import expression
 from odoo.tools import get_lang
 

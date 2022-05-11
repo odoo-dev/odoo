@@ -63,7 +63,6 @@ export default {
              * @param {Object} ui
              */
             stop: (event, ui) => {
-                const $li = $(ui.item);
                 const favorite_ids = $sortable.find('.o_article').map(function () {
                     return $(this).data('favorite-article-id');
                 }).get();
