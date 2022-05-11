@@ -19,6 +19,8 @@
         'data/mail_templates.xml',
         'wizard/knowledge_invite_views.xml',
         'views/knowledge_article_views.xml',
+        'views/knowledge_article_favorite_views.xml',
+        'views/knowledge_article_member_views.xml',
         'views/knowledge_templates.xml',
         'views/knowledge_templates_common.xml',
         'views/knowledge_templates_frontend.xml',
