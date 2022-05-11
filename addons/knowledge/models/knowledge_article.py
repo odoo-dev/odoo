@@ -633,7 +633,7 @@ class Article(models.Model):
         else:
             article = self.browse(res_id)
         mode = 'edit' if article.user_can_write else 'readonly'
-        action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
+        action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_action_form')
         action['res_id'] = article.id
         action['context'] = dict(ast.literal_eval(action.get('context')), form_view_initial_mode=mode)
         return action

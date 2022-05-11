@@ -52,7 +52,7 @@ class KnowledgeController(http.Controller):
                 return werkzeug.exceptions.Forbidden()
             return redirect("/web#id=%s&model=knowledge.article&action=%s&menu_id=%s" % (
                 article.id,
-                request.env.ref("knowledge.knowledge_article_dashboard_action").id,
+                request.env.ref("knowledge.knowledge_article_action_form").id,
                 request.env.ref('knowledge.knowledge_menu_root').id
             ))
         return request.render('knowledge.knowledge_article_view_frontend', {

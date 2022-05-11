@@ -284,13 +284,13 @@
                 <filter name="filter_shared_articles" string="My Shared Articles" domain="[('category', '=', 'shared')]"/>
 
                 <group expand="0" string="Group By">
-                  <filter string="Category" name="group_by_category" domain="[]" context="{'group_by':'category'}"/>
+                    <filter string="Category" name="group_by_category" domain="[]" context="{'group_by':'category'}"/>
                 </group>
             </search>
         </field>
     </record>
 
-    <record model="ir.actions.act_window" id="knowledge_article_action">
+    <record id="knowledge_article_action" model="ir.actions.act_window">
         <field name="name">Articles</field>
         <field name="res_model">knowledge.article</field>
         <field name="view_mode">tree,kanban,form</field>
@@ -303,37 +303,11 @@
         </field>
     </record>
 
-    <record model="ir.actions.act_window" id="knowledge_article_dashboard_action">
+    <record id="knowledge_article_action_form" model="ir.actions.act_window">
         <field name="name">Articles</field>
         <field name="res_model">knowledge.article</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="knowledge.knowledge_article_view_form"/>
     </record>
 
-    <record id="action_home_page" model="ir.actions.server">
-        <field name="name">Articles</field>
-        <field name="model_id" ref="model_knowledge_article"/>
-        <field name="state">code</field>
-        <field name="code">action = model.action_home_page()</field>
-    </record>
-
-    <menuitem
-        id="knowledge_menu_root"
-        name="Knowledge"
-        web_icon="knowledge,static/description/icon.png"
-        sequence="17"/>
-
-    <menuitem
-        id="knowledge_menu_home"
-        name="Home"
-        parent="knowledge_menu_root"
-        action="knowledge.action_home_page"
-        sequence="1"/>
-
-    <menuitem
-        id="knowledge_menu_article"
-        name="Search"
-        parent="knowledge_menu_root"
-        action="knowledge.knowledge_article_action"
-        sequence="2"/>
 </odoo>

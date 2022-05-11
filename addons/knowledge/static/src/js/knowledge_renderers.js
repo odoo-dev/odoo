@@ -165,7 +165,7 @@ const KnowledgeArticleFormRenderer = FormRenderer.extend(KnowledgeTreePanelMixin
     _onOpen: async function (event) {
         event.stopPropagation();
         const $li = $(event.target).closest('li');
-        this.do_action('knowledge.action_home_page', {
+        this.do_action('knowledge.ir_actions_server_knowledge_home_page', {
             stackPosition: 'replaceCurrentAction',
             additional_context: {
                 res_id: $li.data('article-id')

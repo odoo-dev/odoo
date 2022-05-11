@@ -99,7 +99,7 @@ commandProviderRegistry.add("knowledge", {
                             },
                         });
 
-                        env.services.action.doAction('knowledge.action_home_page', {
+                        env.services.action.doAction('knowledge.ir_actions_server_knowledge_home_page', {
                             additionalContext: {
                                 res_id: articleId,
                             }
@@ -119,7 +119,7 @@ commandProviderRegistry.add("knowledge", {
         let result =  articlesData.map((article) => ({
             Component: KnowledgeCommand,
             action() {
-                env.services.action.doAction('knowledge.action_home_page', {
+                env.services.action.doAction('knowledge.ir_actions_server_knowledge_home_page', {
                     additionalContext: {
                         res_id: article.id,
                     }

@@ -119,7 +119,7 @@ const KnowledgeArticleFormController = FormController.extend({
     _onDuplicate: async function (event) {
         const handle = await this.model.duplicateRecord(this.handle);
         const { res_id } = this.model.get(handle);
-        this.do_action('knowledge.action_home_page', {
+        this.do_action('knowledge.ir_actions_server_knowledge_home_page', {
             additional_context: { res_id }
         });
     },
@@ -255,7 +255,7 @@ const KnowledgeArticleFormController = FormController.extend({
         if (!articleId) {
             return;
         }
-        this.do_action('knowledge.action_home_page', {
+        this.do_action('knowledge.ir_actions_server_knowledge_home_page', {
             stackPosition: 'replaceCurrentAction',
             additional_context: {
                 res_id: articleId

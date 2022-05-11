@@ -144,7 +144,7 @@ const ArticleBehavior = KnowledgeBehavior.extend({
         if (res_id) {
             event.stopPropagation();
             event.preventDefault();
-            const actionPromise = this.handler.do_action('knowledge.action_home_page', {
+            const actionPromise = this.handler.do_action('knowledge.ir_actions_server_knowledge_home_page', {
                 additional_context: {
                     res_id: res_id
                 }

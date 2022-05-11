@@ -69,7 +69,7 @@ class PermissionPanel extends Component {
      */
     openArticle (id) {
         this.env.bus.trigger('do-action', {
-            action: 'knowledge.action_home_page',
+            action: 'knowledge.ir_actions_server_knowledge_home_page',
             options: {
                 additional_context: {
                     res_id: id
