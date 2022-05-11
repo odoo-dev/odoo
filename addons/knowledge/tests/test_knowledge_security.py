@@ -171,3 +171,19 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         with self.assertRaises(exceptions.AccessError,
                                msg="ACLs: no ACLs for write for user"):
             my_members.write({'permission': 'write'})
+
+    @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
+    @users('employee')
+    def test_models_as_user_copy(self):
+        article_hidden = self.article_read_contents[3].with_env(self.env)
+        with self.assertRaises(exceptions.AccessError,
+                               msg="ACLs: 'none' internal permission"):
+            article_hidden.body  # access body should trigger acls
+
+        with self.assertRaises(exceptions.AccessError,
+                               msg="ACLs: copy should not allow to access hidden articles"):
+            _new_article = article_hidden.copy()
+
+        article_root_readonly = self.article_roots[0].with_env(self.env)
+        new_article = article_root_readonly.copy()
+        self.assertEqual(new_article.name, f'{article_root_readonly.name} (copy)')
