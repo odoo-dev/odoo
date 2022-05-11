@@ -52,6 +52,8 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertFalse(article_workspace.active)
         for article in wkspace_children + wkspace_grandchildren + wkspace_grandgrandchildren:
             self.assertFalse(article.active, 'Archive: should propagate to children')
+            self.assertEqual(article.root_article_id, article_workspace,
+                             'Archive: does not change hierarchy when archiving without breaking hierarchy')
 
         # reset as active
         (article_workspace + wkspace_children + wkspace_grandchildren + wkspace_grandgrandchildren).toggle_active()
@@ -73,9 +75,6 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
             lambda article: article.partner_id == self.partner_employee
         ).write({'permission': 'write'})
         # one additional read child and one additional none child
-        self.shared_children.article_member_ids.sudo().filtered(
-            lambda article: article.partner_id == self.partner_employee
-        ).write({'permission': 'read'})
         self.shared_children += self.env['knowledge.article'].sudo().create([
             {'article_member_ids': [
                 (0, 0, {'partner_id': self.partner_admin.id,
@@ -103,11 +102,19 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
             },
         ])
 
+        # prepare comparison data as sudo
+        writable_child_su = self.article_shared.child_ids.filtered(lambda article: article.name in ['Shared Child1'])
+        readonly_child_su = self.article_shared.child_ids.filtered(lambda article: article.name in ['Shared Child2'])
+        hidden_child_su = self.article_shared.child_ids.filtered(lambda article: article.name in ['Shared Child3'])
+
+        # perform archive as user
         article_shared = self.article_shared.with_env(self.env)
+        article_shared.invalidate_cache(fnames=['child_ids'])  # context dependent
         shared_children = article_shared.child_ids
-        self.assertEqual(shared_children,
-                         self.shared_children.filtered(lambda article: article.name in ['Shared Child1', 'Shared Child2']),
-                         'Should see only two first children')
+        writable_child, readonly_child = writable_child_su.with_env(self.env), readonly_child_su.with_env(self.env)
+        self.assertEqual(len(shared_children), 2)
+        self.assertEqual(shared_children, writable_child + readonly_child, 'Should see only two first children')
+
         article_shared.action_archive()
 
     @mute_logger('odoo.addons.base.models.ir_rule')
@@ -117,40 +124,36 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         Article = self.env['knowledge.article']
         article = self.article_workspace.with_env(self.env)
         readonly_article = self.article_shared.with_env(self.env)
-        self.assertTrue(readonly_article.user_has_access)
-        self.assertFalse(readonly_article.user_can_write)
 
         _title = 'Fthagn'
         new = Article.article_create(title=_title, parent_id=False, is_private=False)
+        self.assertMembers(new, 'write', {})
         self.assertFalse(new.article_member_ids)
         self.assertEqual(new.body, f'<h1>{_title}</h1>')
         self.assertEqual(new.category, 'workspace')
-        self.assertEqual(new.internal_permission, 'write')
         self.assertEqual(new.name, _title)
         self.assertFalse(new.parent_id)
         self.assertEqual(new.sequence, self._base_sequence + 1)
 
         _title = 'Fthagn, but private'
         private = Article.article_create(title=_title, parent_id=False, is_private=True)
-        self.assertEqual(private.article_member_ids.partner_id, self.env.user.partner_id)
+        self.assertMembers(private, 'none', {self.env.user.partner_id: 'write'})
         self.assertEqual(private.category, 'private')
-        self.assertEqual(private.internal_permission, 'none')
         self.assertFalse(private.parent_id)
         self.assertEqual(private.sequence, self._base_sequence + 2)
 
         _title = 'Fthagn, but with parent (workspace)'
         child = Article.article_create(title=_title, parent_id=article.id, is_private=False)
-        self.assertFalse(child.article_member_ids)
+        self.assertMembers(child, False, {})
         self.assertEqual(child.category, 'workspace')
-        self.assertFalse(child.internal_permission)
         self.assertEqual(child.parent_id, article)
         self.assertEqual(child.sequence, 2, 'Already two children existing')
 
         _title = 'Fthagn, but with parent (private): forces private'
         child_private = Article.article_create(title=_title, parent_id=private.id, is_private=False)
+        self.assertMembers(child_private, False, {})
         self.assertFalse(child_private.article_member_ids)
         self.assertEqual(child_private.category, 'private')
-        self.assertFalse(child_private.internal_permission)
         self.assertEqual(child_private.parent_id, private)
         self.assertEqual(child_private.sequence, 0)
 
@@ -176,34 +179,97 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         with self.assertRaises(exceptions.AccessError):
             Article.article_create(title=_title, parent_id=private_nonmember.id, is_private=False)
 
-    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail')
+    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink', 'odoo.tests')
     @users('employee')
     def test_article_invite_members(self):
-        shared_children = self.shared_children.with_env(self.env)
-        self.assertMembers(shared_children, False,
-                           {self.partner_admin: 'write',
-                            self.partner_employee: 'write'})
+        """ Test inviting members API. Create a hierarchy of 3 shared articles
+        and check privilege is not granted below invited articles. """
+        direct_child_read, direct_child_write = self.env['knowledge.article'].sudo().create([
+            {'article_member_ids': [
+                (0, 0, {'partner_id': self.partner_employee_manager.id,
+                        'permission': 'write',
+                       }),
+                (0, 0, {'partner_id': self.partner_employee.id,
+                        'permission': 'read',
+                       }),
+             ],
+             'internal_permission': False,
+             'name': 'Shared Readonly Child (should not propagate)',
+             'parent_id': self.shared_children.id,
+            },
+            {'article_member_ids': [
+                (0, 0, {'partner_id': self.partner_employee.id,
+                        'permission': 'write',
+                       }),
+             ],
+             'internal_permission': False,
+             'name': 'Shared Writable Child (propagate is ok)',
+             'parent_id': self.shared_children.id,
+            }
+        ]).with_env(self.env)
+        grand_child = self.env['knowledge.article'].sudo().create({
+            'article_member_ids': [
+                (0, 0, {'partner_id': self.partner_employee.id,
+                        'permission': 'write',
+                       }),
+            ],
+            'internal_permission': 'read',
+            'name': 'Shared GrandChild (blocked by readonly parent, should not propagate)',
+            'parent_id': direct_child_read.id,
+        }).with_env(self.env)
+
+        shared_article = self.shared_children.with_env(self.env)
+        self.assertMembers(shared_article, False,
+                           {self.partner_employee: 'write'})
+        self.assertMembers(direct_child_read, False,
+                           {self.partner_employee_manager: 'write',
+                            self.partner_employee: 'read'})
+        self.assertMembers(direct_child_write, False,
+                           {self.partner_employee: 'write'})
+        self.assertMembers(grand_child, 'read',
+                           {self.partner_employee: 'write'})
 
         # invite a mix of shared and internal people
         partners = (self.customer + self.partner_employee_manager + self.partner_employee2).with_env(self.env)
         with self.mock_mail_gateway():
-            shared_children.invite_members(partners, 'write')
-        self.assertMembers(shared_children, False,
-                           {self.partner_admin: 'write',
-                            self.partner_employee: 'write',
+            shared_article.invite_members(partners, 'write')
+        self.assertMembers(shared_article, False,
+                           {self.partner_employee: 'write',
                             self.customer: 'read',  # shared partners are always read only
                             self.partner_employee_manager: 'write',
-                            self.partner_employee2: 'write'})
+                            self.partner_employee2: 'write'},
+                           msg='Invite: should add rights for people')
+        self.assertMembers(direct_child_read, False,
+                           {self.partner_employee: 'read',
+                            self.customer: 'none',
+                            self.partner_employee_manager: 'write',
+                            self.partner_employee2: 'none'},
+                           msg='Invite: rights should be stopped for non writable children')
+        self.assertMembers(direct_child_write, False,
+                           {self.partner_employee: 'write'},
+                           msg='Invite: writable child should not be impacted')
+        self.assertMembers(grand_child, 'read',
+                           {self.partner_employee: 'write'},
+                           msg='Invite: descendants should not be impacted')
+
+        # check access is effectively granted
+        shared_article.with_user(self.user_employee2).check_access_rule('write')
+        direct_child_write.with_user(self.user_employee2).check_access_rule('write')
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Invite: access should have been blocked'):
+            direct_child_read.with_user(self.user_employee2).check_access_rule('read')
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Invite: access should have been blocked'):
+            grand_child.with_user(self.user_employee2).check_access_rule('read')
 
         # employee2 is downgraded, employee_manager is removed
         with self.mock_mail_gateway():
-            shared_children.invite_members(partners[2], 'read')
+            shared_article.invite_members(partners[2], 'read')
         with self.mock_mail_gateway():
-            shared_children.invite_members(partners[1], 'none')
+            shared_article.invite_members(partners[1], 'none')
 
-        self.assertMembers(shared_children, False,
-                           {self.partner_admin: 'write',
-                            self.partner_employee: 'write',
+        self.assertMembers(shared_article, False,
+                           {self.partner_employee: 'write',
                             self.customer: 'read',
                             self.partner_employee_manager: 'none',
                             self.partner_employee2: 'read'})
@@ -211,13 +277,18 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
     @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail')
     @users('employee')
     def test_article_invite_members_rights(self):
+        """ Testing trying to bypass granted privilege: inviting people require
+        write access. """
         article_shared = self.article_shared.with_env(self.env)
-        self.assertFalse(article_shared.user_can_write)
 
         partners = (self.customer + self.partner_employee_manager + self.partner_employee2).with_env(self.env)
         with self.assertRaises(exceptions.AccessError,
                                msg='Invite: cannot invite with read permission'):
             article_shared.invite_members(partners, 'write')
+
+        with self.assertRaises(exceptions.AccessError,
+                               msg='Invite: cannot try to reject people with read permission'):
+            article_shared.invite_members(partners, 'none')
 
     @users('employee')
     def test_article_toggle_favorite(self):
@@ -233,6 +304,7 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         playground_articles_asmanager = playground_articles.with_user(self.user_employee_manager)
         self.assertEqual(playground_articles_asmanager.mapped('is_user_favorite'), [False, False, False])
 
+    @mute_logger('odoo.addons.base.models.ir_rule')
     @users('employee')
     def test_article_move_to(self):
         """ Testing the API for moving articles. """
@@ -338,6 +410,7 @@ class TestKnowledgeCommonWDataInitialValue(KnowledgeCommonWData):
         self.assertEqual(workspace_children.root_article_id, article_workspace)
         self.assertEqual(workspace_children.mapped('sequence'), [0, 1])
 
+    @mute_logger('odoo.addons.base.models.ir_rule')
     @users('employee')
     def test_initial_values_as_employee(self):
         """ Ensure all tests have the same basis (user specific computed as
@@ -350,12 +423,16 @@ class TestKnowledgeCommonWDataInitialValue(KnowledgeCommonWData):
         self.assertTrue(article_shared.user_has_access)
         self.assertFalse(article_shared.user_can_write)
 
+        article_private = self.article_private_manager.with_env(self.env)
+        with self.assertRaises(exceptions.AccessError):
+            self.assertFalse(article_private.body)
+
 
 @tagged('post_install', '-at_install', 'knowledge_internals', 'knowledge_management')
 class TestKnowledgeShare(KnowledgeCommonWData):
     """ Test share feature. """
 
-    @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink', 'odoo.tests')
+    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink', 'odoo.tests')
     @users('employee2')
     def test_knowledge_article_share(self):
         # private article of "employee manager"
@@ -368,14 +445,12 @@ class TestKnowledgeShare(KnowledgeCommonWData):
                 'permission': 'write',
             })],
         })
+        article = knowledge_article_sudo.with_env(self.env)
+        self.assertFalse(article.user_has_access)
 
         # employee2 is not supposed to be able to share it
         with self.assertRaises(exceptions.AccessError):
-            self._knowledge_article_share(
-                knowledge_article_sudo,
-                self.partner_portal.ids,
-                'read',
-            )
+            self._knowledge_article_share(article, self.partner_portal.ids, 'read')
 
         # give employee2 read access on the document
         knowledge_article_sudo.write({
@@ -384,14 +459,11 @@ class TestKnowledgeShare(KnowledgeCommonWData):
                 'permission': 'read',
             })]
         })
+        self.assertTrue(article.user_has_access)
 
         # still not supposed to be able to share it
         with self.assertRaises(exceptions.AccessError):
-            self._knowledge_article_share(
-                knowledge_article_sudo,
-                self.partner_portal.ids,
-                'read',
-            )
+            self._knowledge_article_share(article, self.partner_portal.ids, 'read')
 
         # modify employee2 access to write
         knowledge_article_sudo.article_member_ids.filtered(
@@ -399,34 +471,28 @@ class TestKnowledgeShare(KnowledgeCommonWData):
         ).write({'permission': 'write'})
 
         # now they should be able to share it
-        self._knowledge_article_share(
-            knowledge_article_sudo,
-            self.partner_portal.ids,
-            'read',
-        )
+        with self.mock_mail_gateway(), self.mock_mail_app():
+            self._knowledge_article_share(article, self.partner_portal.ids, 'read')
 
         # check that portal user received an invitation link
-        invitation_message = self.env['mail.message'].search([
-            ('partner_ids', 'in', self.partner_portal.id)
-        ])
-        self.assertEqual(len(invitation_message), 1)
+        self.assertEqual(len(self._new_msgs), 1)
         self.assertIn(
             knowledge_article_sudo._get_invite_url(self.partner_portal),
-            invitation_message.body
+            self._new_msgs.body
         )
 
         with self.with_user('portal_test'):
             # portal should now have read access to the article
             # (re-browse to have the current user context for user_permission)
-            self.assertEqual(
-                self.env['knowledge.article'].browse(knowledge_article_sudo.id).user_permission,
-                'read')
+            article_asportal = knowledge_article_sudo.with_env(self.env)
+            self.assertTrue(article_asportal.user_has_access)
 
     def _knowledge_article_share(self, article, partner_ids, permission='write'):
         """ Re-browse the article to make sure we have the current user context on it.
         Necessary for all access fields compute methods in knowledge.article. """
 
-        return self.env['knowledge.invite'].sudo().create({
+        return self.env['knowledge.invite'].create({
             'article_id': self.env['knowledge.article'].browse(article.id).id,
             'partner_ids': partner_ids,
+            'permission': permission,
         }).action_invite_members()

@@ -44,8 +44,6 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         """ Testing the helper to create articles with right values. """
         article = self.article_workspace.with_env(self.env)
         readonly_article = self.article_shared.with_env(self.env)
-        self.assertTrue(readonly_article.user_has_access)
-        self.assertFalse(readonly_article.user_can_write)
 
         _title = 'Fthagn, private'
         private = self.env['knowledge.article'].create({
@@ -57,9 +55,8 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'internal_permission': 'none',
             'name': _title,
         })
-        self.assertEqual(private.article_member_ids.partner_id, self.env.user.partner_id)
+        self.assertMembers(private, 'none', {self.env.user.partner_id: 'write'})
         self.assertEqual(private.category, 'private')
-        self.assertEqual(private.internal_permission, 'none')
         self.assertFalse(private.parent_id)
         self.assertEqual(private.sequence, self._base_sequence + 1)
 
@@ -69,9 +66,8 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'name': _title,
             'parent_id': article.id,
         })
-        self.assertFalse(child.article_member_ids)
+        self.assertMembers(child, False, {})
         self.assertEqual(child.category, 'workspace')
-        self.assertFalse(child.internal_permission)
         self.assertEqual(child.parent_id, article)
         self.assertEqual(child.sequence, 2, 'Already two children existing')
 
@@ -82,9 +78,8 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'name': _title,
             'parent_id': private.id,
         })
-        self.assertFalse(child_private.article_member_ids)
+        self.assertMembers(child, False, {})
         self.assertEqual(child_private.category, 'private')
-        self.assertFalse(child_private.internal_permission)
         self.assertEqual(child_private.parent_id, private)
         self.assertEqual(child_private.sequence, 0)
 
@@ -133,7 +128,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
 
         # Member should not be allowed to create a private article under a non-owned article
         article_private = self._create_private_article('MyPrivate')
-        self.assertEqual(article_private.article_member_ids.partner_id, self.partner_employee)
+        self.assertMembers(article_private, 'none', {self.partner_employee: 'write'})
         self.assertTrue(article_private.category, 'private')
         self.assertTrue(article_private.user_can_write)
         with self.assertRaises(exceptions.AccessError):
@@ -231,8 +226,8 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'name': 'Article',
             'parent_id': article.id,
         })
+        self.assertMembers(article_child, False, {})
         self.assertEqual(article_child.category, 'workspace')
-        self.assertFalse(article_child.internal_permission)
         self.assertEqual(article_child.root_article_id, article)
         with self.assertRaises(IntegrityError, msg='An internal permission should be set for root article'):
             with self.cr.savepoint():
@@ -253,13 +248,11 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             })
 
         article_private = self._create_private_article('MyPrivate')
-        self.assertEqual(article_private.article_member_ids.partner_id, self.env.user.partner_id)
+        self.assertMembers(article_private, 'none', {self.partner_employee: 'write'})
         self.assertEqual(article_private.category, 'private')
 
         # take membership as sudo to really have access to unlink feature
         membership_sudo = article_private.sudo().article_member_ids
-        self.assertEqual(membership_sudo.partner_id, self.env.user.partner_id)
-
         # cannot remove last writer
         with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
             membership_sudo.unlink()
@@ -269,11 +262,19 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             article_private.sudo().write({
                 'article_member_ids': self.env['knowledge.article.member']
             })
+        with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
+            article_private.sudo().write({
+                'article_member_ids': [(2, membership_sudo.id)]
+            })
 
         # cannot transform last writer into rejected
         with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
             article_private.sudo().write({
                 'article_member_ids': [(1, membership_sudo.id, {'permission': 'none'})]
+            })
+        with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
+            article_private.sudo().write({
+                'article_member_ids': [(1, membership_sudo.id, {'permission': 'read'})]
             })
         with self.assertRaises(exceptions.ValidationError, msg='Cannot remove the last writer on an article'):
             article_private._add_members(membership_sudo.partner_id, 'none')
@@ -314,9 +315,10 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
                 })]
             })
         article.invite_members(customer, 'write')
-        # check that the permission has been set to "read" instead of "write"
-        member = article.article_member_ids.filtered(lambda m: m.partner_id == customer)
-        self.assertEqual(member.mapped('permission'), ['read'])
+        self.assertMembers(article, 'none',
+                           {self.env.user.partner_id: 'write',
+                            customer: 'read'},
+                           msg='Invite: share should not gain write access')
 
     @mute_logger('odoo.sql_db')
     @users('employee')

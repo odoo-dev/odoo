@@ -19,7 +19,6 @@ class TestWKnowledgeSecurity(KnowledgeArticlePermissionsCase):
                                msg="ACLs: Internal permission 'none', not for portal"):
             article_shared.body  # access body should trigger acls
 
-
         article_shared.sudo().website_published = True
         article_shared.body  # access body should trigger acls
         self.assertFalse(article_shared.is_user_favorite)

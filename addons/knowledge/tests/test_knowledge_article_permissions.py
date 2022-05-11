@@ -10,6 +10,21 @@ from odoo.tools import mute_logger
 @tagged('knowledge_acl')
 class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
+    @users('employee')
+    def test_article_main_parent(self):
+        """ Test root article computation """
+        article_roots = self.article_roots.with_env(self.env)
+
+        articles_write = (self.article_write_contents + self.article_write_contents_children).with_env(self.env)
+        self.assertEqual(articles_write.root_article_id, article_roots[0])
+
+        articles_write = self.article_read_contents.with_env(self.env)
+        self.assertEqual(articles_write.root_article_id, article_roots[1])
+
+        # desynchronized still have a root (do as sudo)
+        self.assertEqual(self.article_write_desync.root_article_id, article_roots[0])
+        self.assertEqual(self.article_read_desync.root_article_id, article_roots[1])
+
     def test_article_permissions_desync(self):
         """ Test computed fields based on permissions (independently from ACLs
         aka not user_permission, ...). Main use cases: desynchronized articles
@@ -19,13 +34,13 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
              exp_internal_permission
             ), article in zip(
                 [('read', self.env['knowledge.article'], 'read'),
-                 ('read', self.article_cornercases[0], False),
+                 ('read', self.article_write_desync[0], False),
                  ('none', self.env['knowledge.article'], 'none'),
-                 ('none', self.article_cornercases[2], False),
+                 ('none', self.article_read_desync[0], False),
                  ('write', self.env['knowledge.article'], 'write'),
                  ('read', self.env['knowledge.article'], 'read'),
                 ],
-                self.article_cornercases + self.article_roots
+                self.article_write_desync + self.article_read_desync + self.article_roots
             ):
             self.assertEqual(article.inherited_permission, exp_inherited_permission,
                              f'Permission: wrong inherit computation for {article.name}: {article.inherited_permission} instead of {exp_inherited_permission}')
@@ -38,7 +53,7 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
     def test_article_permissions_inheritance_desync(self):
         """ Test desynchronize (and therefore member propagation that should be
         stopped). """
-        article_desync = self.article_cornercases[0]
+        article_desync = self.article_write_desync[0]
         self.assertMembers(article_desync, 'read', {self.partner_employee_manager: 'write'})
 
         # as employee w write perms
@@ -62,9 +77,9 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         article_roots = self.article_roots.with_env(self.env)
 
         # roots: based on internal permissions
-        self.assertEqual(article_roots.mapped('user_can_write'), [True, False, False])
-        self.assertEqual(article_roots.mapped('user_has_access'), [True, True, True])
-        self.assertEqual(article_roots.mapped('user_permission'), ['write', 'read', 'read'])
+        self.assertEqual(article_roots.mapped('user_can_write'), [True, False, False, True])
+        self.assertEqual(article_roots.mapped('user_has_access'), [True, True, True, True])
+        self.assertEqual(article_roots.mapped('user_permission'), ['write', 'read', 'read', 'write'])
 
         # write permission from ancestors
         article_write_ancestor = self.article_write_contents[2].with_env(self.env)
@@ -131,14 +146,20 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         self.assertTrue(article.user_has_access)
         self.assertEqual(article.user_permission, 'write')
 
+
+@tagged('knowledge_internals', 'knowledge_management')
+class KnowledgeArticlePermissionsInitialValues(KnowledgeArticlePermissionsCase):
+    """ Test initial values or our test data once so that other tests do not have
+    to do it. """
+
     def test_initial_values(self):
         article_roots = self.article_roots.with_env(self.env)
         article_headers = self.article_headers.with_env(self.env)
 
         # roots: defaults on write, inherited = internal
-        self.assertEqual(article_roots.mapped('inherited_permission'), ['write', 'read', 'none'])
+        self.assertEqual(article_roots.mapped('inherited_permission'), ['write', 'read', 'none', 'none'])
         self.assertFalse(article_roots.inherited_permission_parent_id)
-        self.assertEqual(article_roots.mapped('internal_permission'), ['write', 'read', 'none'])
+        self.assertEqual(article_roots.mapped('internal_permission'), ['write', 'read', 'none', 'none'])
 
         # childs: allow void permission, inherited = go up to first defined permission
         self.assertEqual(article_headers.mapped('inherited_permission'), ['write', 'read', 'read'])
@@ -152,15 +173,16 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
     def test_initial_values_as_employee(self):
         """ Ensure all tests have the same basis (user specific computed as
         employee for acl-dependent tests) """
-        article_write_inherit_as1 = self.article_write_contents[2].with_env(self.env)
+        article_write_inherit = self.article_write_contents[2].with_env(self.env)
 
         # initial values: write through inheritance
-        self.assertMembers(article_write_inherit_as1, False, {self.partner_portal: 'read'})
-        self.assertFalse(article_write_inherit_as1.internal_permission)
-        self.assertFalse(article_write_inherit_as1.is_desynchronized)
-        self.assertTrue(article_write_inherit_as1.user_can_write)
-        self.assertTrue(article_write_inherit_as1.user_has_access)
-        article_write_inherit_as2 = article_write_inherit_as1.with_user(self.user_employee2)
+        self.assertMembers(article_write_inherit, False, {self.partner_portal: 'read'})
+        self.assertFalse(article_write_inherit.internal_permission)
+        self.assertFalse(article_write_inherit.is_desynchronized)
+        self.assertTrue(article_write_inherit.user_can_write)
+        self.assertTrue(article_write_inherit.user_has_access)
+
+        article_write_inherit_as2 = article_write_inherit.with_user(self.user_employee2)
         self.assertTrue(article_write_inherit_as2.user_can_write)
         self.assertTrue(article_write_inherit_as2.user_has_access)
 
@@ -351,38 +373,55 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
 @tagged('knowledge_acl')
 class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
 
-    @users('employee')
-    def test_article_main_parent(self):
-        """ Test root article computation """
-        article_roots = self.article_roots.with_env(self.env)
+    @users('admin')
+    def test_article_search_admin(self):
+        """ Test admin: can read / write everything but user_has_access and
+        user_can_write should still be based on real permissions. """
+        self.assertTrue(self.env.user.has_group('base.group_system'))
+        articles = self.env['knowledge.article'].search([])
+        expected = self.articles_all
+        self.assertEqual(articles, expected,
+                         'Search on user_can_write: aka write access (additional: %s, missing: %s)' %
+                         ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
+                        )
 
-        articles_write = (self.article_write_contents + self.article_write_contents_children).with_env(self.env)
-        self.assertEqual(articles_write.root_article_id, article_roots[0])
-
-        articles_write = self.article_read_contents.with_env(self.env)
-        self.assertEqual(articles_write.root_article_id, article_roots[1])
-
-        # desynchornized still have a root (do as sudo)
-        self.assertEqual(self.article_cornercases[0:2].root_article_id, article_roots[0])
-        self.assertEqual(self.article_cornercases[2:4].root_article_id, article_roots[1])
+        articles = self.env['knowledge.article'].search([('user_can_write', '=', True)])
+        expected = self.article_roots[0] + self.article_headers[0] + \
+                   self.article_write_contents[0] + self.article_write_contents[2] + \
+                   self.article_write_contents_children + \
+                   self.article_read_contents[0:2]
+        self.assertEqual(articles, expected,
+                         'Search on user_can_write: aka write access (additional: %s, missing: %s)' %
+                         ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
+                        )
 
     @users('employee')
     def test_article_search_employee(self):
         """ Test regular searches using permission-based ACLs """
+        # explicitly remove an article, check it is not included (nor its child)
+        self.article_write_desync[0].write({
+            'article_member_ids': [
+                (0, 0, {'partner_id': self.user_employee.partner_id.id,
+                        'permission': 'none'})]
+        })
         articles = self.env['knowledge.article'].search([])
-        # not reachable: 'none', desynchronized 'none'
-        expected = self.articles_all - self.article_read_contents[3]
+        # not reachable: 'none', desynchronized 'none' (and their children)
+        expected = self.articles_all - self.article_read_contents[3] - self.article_write_desync
         self.assertEqual(articles, expected,
                          'Search on main article: aka everything except "none"-based articles (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
                         )
 
+        # add its child as readable through membership and perform a new search
+        self.article_write_desync[1].write({
+            'article_member_ids': [
+                (0, 0, {'partner_id': self.user_employee.partner_id.id,
+                        'permission': 'read'})]
+        })
+
         articles = self.env['knowledge.article'].search([('root_article_id', '=', self.article_roots[0].id)])
-        # TDE FIXME: 2 desynchronized are considered as writeable, should not (membership should not propagate)
-        # expected = self.article_roots[0] + self.article_headers[0] + \
-        #            self.article_write_contents + self.article_write_contents_children
         expected = self.article_roots[0] + self.article_headers[0] + \
-                   self.article_write_contents + self.article_write_contents_children + self.article_cornercases[0:2]
+                   self.article_write_contents + self.article_write_contents_children + self.article_write_desync[1]
         self.assertEqual(articles, expected,
                          'Search on main article: aka read access on read root + its children (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
@@ -391,12 +430,12 @@ class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
     @users('employee')
     def test_article_search_employee_method_based(self):
         """ Test search methods """
-        # TDE FIXME: article_cornercases seems buggy
         articles = self.env['knowledge.article'].search([('user_can_write', '=', True)])
-        expected = self.article_roots[0] + self.article_headers[0] + \
+        expected = self.article_roots[0] + self.article_roots[3] + \
+                   self.article_headers[0] + \
                    self.article_write_contents[2] + self.article_write_contents_children + \
-                   self.article_read_contents[0] + self.article_cornercases[2:]
+                   self.article_read_contents[0] + self.article_read_desync
         self.assertEqual(articles, expected,
-                         'Search on user_can_write: aka write access (FIXME: should not contain article_cornercases[0] (additional: %s, missing: %s)' %
+                         'Search on user_can_write: aka write access (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
                         )
