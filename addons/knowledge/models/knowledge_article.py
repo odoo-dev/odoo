@@ -258,9 +258,11 @@ class Article(models.Model):
     @api.depends_context('uid')
     @api.depends('user_permission')
     def _compute_user_has_access(self):
-        """ Compute if the current user has access to the article. Admins have
-        all access (see ACLs), otherwise we check internal permissions of the article and
-        whether the user is member of the article. """
+        """ Compute if the current user has read access to the article based on
+        permissions and memberships.
+
+        Note that admins have all access through ACLs by default but fields are
+        still using the permission-based computation. """
         for article in self:
             article.user_has_access = article.user_permission and article.user_permission != 'none'
 
@@ -269,7 +271,6 @@ class Article(models.Model):
         all the article the current user has access to.
 
         Heuristic is
-        - Admins (group_system) always has access to everything
         - External users only have access to an article if they are r/w member
           on that article;
         - Internal users have access if:
@@ -280,11 +281,6 @@ class Article(models.Model):
         """
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise ValueError("unsupported search operator")
-        # system is always granted access
-        if self.env.user.has_group('base.group_system'):
-            if (value and operator == '=') or (not value and operator == '!='):
-                return expression.TRUE_DOMAIN
-            return expression.FALSE_DOMAIN
 
         articles_with_access = {}
         if not self.env.user.share:
@@ -311,9 +307,13 @@ class Article(models.Model):
     @api.depends_context('uid')
     @api.depends('user_permission')
     def _compute_user_can_write(self):
-        """ Compute if the current user has access to the article. Admins have
-        all access (see ACLs), share user can never write. Otherwise we check internal
-        permissions of the article and whether the user is member of the article. """
+        """ Compute if the current user has read access to the article based on
+        permissions and memberships.
+
+        Note that share user can never write and we therefore shorten the computation.
+
+        Note that admins have all access through ACLs by default but fields are
+        still using the permission-based computation. """
         if self.env.user.share:
             self.user_can_write = False
             return
@@ -324,11 +324,6 @@ class Article(models.Model):
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise NotImplementedError("Unsupported search operator")
 
-        # system is always allowed to write
-        if self.env.user.has_group('base.group_system'):
-            if (value and operator == '=') or (not value and operator == '!='):
-                return expression.TRUE_DOMAIN
-            return expression.FALSE_DOMAIN
         # share is never allowed to write
         if self.env.user.share:
             if (value and operator == '=') or (not value and operator == '!='):
