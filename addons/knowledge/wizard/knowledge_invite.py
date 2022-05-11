@@ -11,11 +11,12 @@ class KnowledgeInvite(models.TransientModel):
     article_id = fields.Many2one('knowledge.article', required=True, ondelete="cascade")
     have_share_partners = fields.Boolean(compute='_compute_have_share_partners')
     partner_ids = fields.Many2many('res.partner', string='Recipients', required=True)
-    permission = fields.Selection([
-        ('none', 'No access'),
-        ('read', 'Can read'),
-        ('write', 'Can write'),
-    ], required=True, default='read')
+    permission = fields.Selection(
+        [('none', 'No access'),
+         ('read', 'Can read'),
+         ('write', 'Can write'),
+        ],
+        required=True, default='read')
 
     def action_invite_members(self):
         self.article_id.invite_members(self.partner_ids, self.permission)
