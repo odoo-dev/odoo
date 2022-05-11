@@ -106,7 +106,7 @@
                                                 <a class="dropdown-item btn-duplicate" href="#" role="button">
                                                     <i class="fa fa-fw fa-copy"/> Duplicate
                                                 </a>
-                                                <button class="dropdown-item btn-archive" type="object" name="action_archive">
+                                                <button class="dropdown-item btn-archive" type="object" name="action_article_archive">
                                                     <i class="fa fa-fw fa-archive"/> Archive
                                                 </button>
                                                 <div class="dropdown-divider"/>

@@ -12,7 +12,7 @@ from odoo.tools import mute_logger
 
 @tagged('knowledge_internals', 'knowledge_management')
 class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
-    """ Test business API and main methods. """
+    """ Test business API and main tools or helpers methods. """
 
     @mute_logger('odoo.addons.base.models.ir_rule')
     @users('employee')
@@ -116,6 +116,18 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertEqual(shared_children, writable_child + readonly_child, 'Should see only two first children')
 
         article_shared.action_archive()
+        # check writable articles have been archived, readonly or hidden not
+        self.assertFalse(article_shared.active)
+        self.assertFalse(writable_child.active)
+        self.assertTrue(readonly_child.active)
+        self.assertTrue(hidden_child_su.active)
+        # check hierarchy
+        self.assertEqual(writable_child.parent_id, article_shared,
+                         'Archive: archived articles hierarchy does not change')
+        self.assertFalse(readonly_child.parent_id, 'Archive: article should be extracted in archive process as non writable')
+        self.assertEqual(readonly_child.root_article_id, readonly_child)
+        self.assertFalse(hidden_child_su.parent_id, 'Archive: article should be extracted in archive process as non writable')
+        self.assertEqual(hidden_child_su.root_article_id, hidden_child_su)
 
     @mute_logger('odoo.addons.base.models.ir_rule')
     @users('employee')

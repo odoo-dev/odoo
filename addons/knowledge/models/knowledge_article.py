@@ -610,6 +610,34 @@ class Article(models.Model):
                 article.child_ids.write({"parent_id": parent.id})
         return super(Article, self).unlink()
 
+    def action_archive(self):
+        """ When archiving
+
+          * archive the current article and all its writable descendants;
+          * unreachable descendants (none, read) are set as free articles without
+            root;
+        """
+        all_descendants_sudo = self.sudo()._get_descendants()
+        writable_descendants = all_descendants_sudo.with_env(self.env)._filter_access_rules_python('write')
+        other_descendants_sudo = all_descendants_sudo - writable_descendants
+
+        # copy rights to allow breaking the hierarchy while keeping access for members
+        for article_sudo in other_descendants_sudo:
+            article_sudo._copy_access_from_parents()
+
+        # create new root articles: direct children of archived articles that are not archived
+        new_roots_woperm = other_descendants_sudo.filtered(lambda article: article.parent_id in self and not article.internal_permission)
+        new_roots_wperm = other_descendants_sudo.filtered(lambda article: article.parent_id in self and article.internal_permission)
+        if new_roots_wperm:
+            new_roots_wperm.write({'parent_id': False})
+        for new_root in new_roots_woperm:
+            new_root.write({
+                'internal_permission': new_root.inherited_permission,
+                'parent_id': False,
+            })
+
+        return super(Article, self + writable_descendants).action_archive()
+
     # ------------------------------------------------------------
     # ACTIONS
     # ------------------------------------------------------------
@@ -651,8 +679,10 @@ class Article(models.Model):
             article.is_user_favorite = not article.is_user_favorite
         return self[0].is_user_favorite if self else False
 
-    def action_archive(self):
-        super(Article, self | self._get_descendants()).action_archive()
+    def action_article_archive(self):
+        """ Article specific archive: after archive, redirect to the home page
+        displaying accessible articles, instead of doing nothing. """
+        self.action_archive()
         return self.with_context(res_id=False).action_home_page()
 
     # ------------------------------------------------------------
@@ -1040,10 +1070,34 @@ class Article(models.Model):
           the custom permission to give. One of 'none', 'read', 'write';
         """
         self.ensure_one()
-        members_permission = self._get_article_member_permissions()[self.id]
         new_internal_permission = force_internal_permission or self.inherited_permission
+        members_commands = self._copy_access_from_parents(
+            force_partners=force_partners,
+            force_member_permission=force_member_permission
+        )
 
-        members_values = []
+        # TODO REMOVE SUDO if can write on member based on can_write on article
+        return self.sudo().write({
+            'internal_permission': new_internal_permission,
+            'article_member_ids': members_commands,
+            'is_desynchronized': True
+        })
+
+    def _copy_access_from_parents(self, force_partners=False, force_member_permission=False):
+        """ Copies copy all inherited accesses from parents on the article and
+        de-synchronize the article from its parent, allowing custom access management.
+        We allow to force permission of given partners.
+
+        :param string force_internal_permission: force a new internal permission
+          for the article. Otherwise fallback on inherited computed internal
+          permission;
+        :param Model<res.partner> force_partners: force permission of new members
+          related to those partners;
+        """
+        self.ensure_one()
+        members_permission = self._get_article_member_permissions()[self.id]
+
+        members_commands = []
         for partner_id, values in members_permission.items():
             # if member already on self, do not add it.
             if not values['based_on'] or values['based_on'] == self.id:
@@ -1053,17 +1107,11 @@ class Article(models.Model):
             else:
                 new_member_permission = values['permission']
 
-            members_values.append((0, 0, {
-                'partner_id': partner_id,
-                'permission': new_member_permission
-            }))
-
-        # TODO REMOVE SUDO if can write on member based on can_write on article
-        return self.sudo().write({
-            'internal_permission': new_internal_permission,
-            'article_member_ids': members_values,
-            'is_desynchronized': True
-        })
+            members_commands.append(
+                (0, 0, {'partner_id': partner_id,
+                        'permission': new_member_permission,
+                       }))
+        return members_commands
 
     @api.model
     def _get_internal_permission(self, filter_domain=None):
