@@ -4,11 +4,11 @@
 from odoo import api, fields, models
 
 
-class KnowledgeInviteWizard(models.TransientModel):
-    _name = 'knowledge.invite.wizard'
-    _description = 'Knowledge invite wizard'
+class KnowledgeInvite(models.TransientModel):
+    _name = 'knowledge.invite'
+    _description = 'Knowledge Invite Wizard'
 
-    article_id = fields.Many2one('knowledge.article')
+    article_id = fields.Many2one('knowledge.article', required=True, ondelete="cascade")
     have_share_partners = fields.Boolean(compute='_compute_have_share_partners')
     partner_ids = fields.Many2many('res.partner', string='Recipients', required=True)
     permission = fields.Selection([

@@ -15,12 +15,12 @@
     ],
     'data': [
         'data/knowledge_data.xml',
+        'wizard/knowledge_invite_views.xml',
         'views/mail_templates.xml',
         'views/knowledge_views.xml',
         'views/knowledge_templates.xml',
         'views/knowledge_templates_common.xml',
         'views/knowledge_templates_frontend.xml',
-        'wizard/knowledge_invite_wizard.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
     ],

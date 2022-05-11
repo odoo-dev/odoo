@@ -426,7 +426,7 @@ class TestKnowledgeShare(KnowledgeCommonWData):
         """ Re-browse the article to make sure we have the current user context on it.
         Necessary for all access fields compute methods in knowledge.article. """
 
-        return self.env['knowledge.invite.wizard'].sudo().create({
+        return self.env['knowledge.invite'].sudo().create({
             'article_id': self.env['knowledge.article'].browse(article.id).id,
             'partner_ids': partner_ids,
         }).action_invite_members()
