@@ -152,7 +152,7 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
 
         # MEMBERS
         my_members = self.env['knowledge.article.member'].search([('article_id', 'in', self.article_roots.ids)])
-        self.assertEqual(len(my_members), 3)
+        self.assertEqual(len(my_members), 4)
         self.assertEqual(
             my_members,
             self.article_roots.article_member_ids,
@@ -161,10 +161,10 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         # remove employee from Shared root, check he cannot read those members
         self.article_roots[2].article_member_ids.filtered(lambda m: m.partner_id == self.partner_employee).unlink()
         my_members = self.env['knowledge.article.member'].search([('article_id', 'in', self.article_roots.ids)])
-        self.assertEqual(len(my_members), 1)
+        self.assertEqual(len(my_members), 2)
         self.assertEqual(
             my_members,
-            self.article_roots[1].article_member_ids,
+            (self.article_roots[1] + self.article_roots[3]).article_member_ids,
             'Members: employee should see its own memberships'
         )
         my_members.mapped('partner_id')  # access body should trigger acls

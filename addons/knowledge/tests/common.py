@@ -56,7 +56,8 @@ class KnowledgeCommon(MailCommon):
         })
 
     def assertMembers(self, articles, exp_internal_permission, exp_partners_permissions, msg=None):
-        """ Custom assert for members, to ease writing tests.
+        """ Custom assert for members, to ease writing tests. Check state of
+        members on articles, as sudo to avoid ACLs-based misunderstanding.
 
         :param internal_permission: global internal permission of articles;
         :param partners_permission: dict of pid: permission that are members
@@ -112,7 +113,7 @@ class KnowledgeCommonWData(KnowledgeCommon):
         # - Private         seq=997   private      none (manager-w+)
         #   - Child1        seq=0     "            "
         # - Shared          seq=998   shared       none (admin-w+,employee-r+,manager-r+)
-        #   - Child1        seq=0     "            "    (admin-w+,employee-w+)
+        #   - Child1        seq=0     "            "    (employee-w+)
         # - Playground      seq=999   workspace    w+
         #   - Child1        seq=0     "            "
         #   - Child2        seq=1     "            "
@@ -150,9 +151,6 @@ class KnowledgeCommonWData(KnowledgeCommon):
         )
         cls.shared_children = cls.env['knowledge.article'].create([
             {'article_member_ids': [
-                (0, 0, {'partner_id': cls.partner_admin.id,
-                        'permission': 'write',
-                       }),
                 (0, 0, {'partner_id': cls.partner_employee.id,
                         'permission': 'write',
                        }),
@@ -212,8 +210,10 @@ class KnowledgeArticlePermissionsCase(KnowledgeCommon):
         #   - OpenParanoïa        write   (-employee-read, +portal-read)
         #   - Proprietary         " (r)
         #   - Secret              none
+        #     - Child             "
         # - Board Games           " (r)
         # SHARED ROOT             none    (+manager-write, +employee-read)
+        # PRIVATE ROOT            none    (+employee-write)
         #
         # ------------------------------------------------------------
         cls.article_roots = cls.env['knowledge.article'].create([
@@ -241,18 +241,26 @@ class KnowledgeArticlePermissionsCase(KnowledgeCommon):
                 (0, 0, {'user_id': cls.user_employee.id})
              ],
              'name': 'Shared Root',
+            },
+            {'article_member_ids': [
+                (0, 0, {'partner_id': cls.partner_employee.id,
+                        'permission': 'write',
+                       }),
+             ],
+             'internal_permission': 'none',
+             'name': 'Private Root',
             }
         ])
         cls.article_headers = cls.env['knowledge.article'].create([
-            # writable root
-            {'name': 'Community',
+            # writable
+            {'name': 'Write-Community',
              'parent_id': cls.article_roots[0].id,
             },
-            # readable root
-            {'name': 'TTRPG',
+            # readable
+            {'name': 'Read-TTRPG',
              'parent_id': cls.article_roots[1].id,
             },
-            {'name': 'Board Games',
+            {'name': 'Read-Board Games',
              'parent_id': cls.article_roots[1].id,
             },
         ])
@@ -299,7 +307,7 @@ class KnowledgeArticlePermissionsCase(KnowledgeCommon):
              'parent_id': cls.article_write_contents[2].id,
             },
         ])
-        cls.article_cornercases = cls.env['knowledge.article'].create([
+        cls.article_write_desync = cls.env['knowledge.article'].create([
             # Community/Writable
             {'article_member_ids': [
                 (0, 0, {'partner_id': cls.partner_employee_manager.id,
@@ -308,13 +316,13 @@ class KnowledgeArticlePermissionsCase(KnowledgeCommon):
              ],
              'internal_permission': 'read',
              'is_desynchronized': True,
-             'name': 'Nyarlathotep',
+             'name': 'Desync Nyarlathotep',
              'parent_id': cls.article_write_contents[2].id,
             },
         ])
-        cls.article_cornercases += cls.env['knowledge.article'].create([
+        cls.article_write_desync += cls.env['knowledge.article'].create([
             {'name': 'Childof Desync Nyarlathotep',
-             'parent_id': cls.article_cornercases[0].id,
+             'parent_id': cls.article_write_desync[0].id,
             },
         ])
 
@@ -350,7 +358,12 @@ class KnowledgeArticlePermissionsCase(KnowledgeCommon):
              'parent_id': cls.article_headers[1].id,
             },
         ])
-        cls.article_cornercases += cls.env['knowledge.article'].create([
+        cls.article_read_contents_children = cls.env['knowledge.article'].create([
+            {'name': 'Child of Secret RPGs',
+             'parent_id': cls.article_read_contents[3].id,
+            },
+        ])
+        cls.article_read_desync = cls.env['knowledge.article'].create([
             # Read/TTRPG: Open Cthulhu
             {'article_member_ids': [
                 (0, 0, {'partner_id': cls.partner_employee.id,
@@ -366,12 +379,14 @@ class KnowledgeArticlePermissionsCase(KnowledgeCommon):
              'parent_id': cls.article_read_contents[0].id,
             },
         ])
-        cls.article_cornercases += cls.env['knowledge.article'].create([
+        cls.article_read_desync += cls.env['knowledge.article'].create([
             {'name': 'Childof Desync Mansions',
-             'parent_id': cls.article_cornercases[2].id,
+             'parent_id': cls.article_read_desync[0].id,
             },
         ])
 
         cls.articles_all = cls.article_roots + cls.article_headers + \
                            cls.article_write_contents + cls.article_write_contents_children + \
-                           cls.article_read_contents + cls.article_cornercases
+                           cls.article_read_contents + cls.article_read_contents_children + \
+                           cls.article_write_desync + cls.article_read_desync
+        cls.env['knowledge.article'].flush()
