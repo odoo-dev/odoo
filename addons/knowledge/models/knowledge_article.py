@@ -850,9 +850,9 @@ class Article(models.Model):
     # ------------------------------------------------------------
 
     def restore_article_access(self):
-        """ This method will reset the permissions based on parent articles.
-        It will remove all the members except the members on the articles that are not on any parent
-        or that have higher permission than from parents."""
+        """ Resets permissions based on ancestors. It removes all members except
+        members on the articles that are not on any ancestor or that have higher
+        permission than from ancestors. """
         self.ensure_one()
         if not self.parent_id:
             return False
@@ -875,22 +875,25 @@ class Article(models.Model):
         })
 
     def invite_members(self, partners, permission):
-        """
-        Invite the given partners to the current article.
-        :param partner_ids (Model<res.partner>): Recordset of res.partner
-        :param permission (string): permission ('none', 'read' or 'write')
+        """ Invite the given partners to the current article. Inviting to remove
+        access is straightforward (just set permission). Inviting with rights
+        requires to check for privilege escalation in descendants.
+
+        :param Model<res.partner> partner_ids: recordset of invited partners;
+        :param string permission: permission of newly invited members, one of
+          'none', 'read' or 'write';
         """
         self.ensure_one()
-        share_partner_ids = partners.filtered(lambda partner: partner.partner_share)
-        if permission != 'none':
+        if permission == 'none':
+            self._add_members(partners, permission)
+        else:
+            share_partner_ids = partners.filtered(lambda partner: partner.partner_share)
             self._add_members(share_partner_ids, 'read')
             self._add_members(partners - share_partner_ids, permission)
             # prevent the invited user to get access to children articles the current user has no access to
             unreachable_children = self.sudo().child_ids.filtered(lambda c: not c.user_can_write)
             for child in unreachable_children:
                 child._add_members(partners, 'none', force_update=False)
-        else:
-            self._add_members(partners, permission)
 
         if permission != 'none':
             self._send_invite_mail(partners)
@@ -899,14 +902,18 @@ class Article(models.Model):
 
     def _set_internal_permission(self, permission):
         """ Set the internal permission of the article.
+
         Special cases:
-        - To ensure the user still has write access after modification,
-          add the user as write member if given permission != write
-        - When downgrading internal permission on a child article:
-            Desync it from parent.
-        - if we set same permission as parent and the article has no specific member:
-            Resync if on parent.
-        :param permission (str): permission ('none', 'read' or 'write') """
+          * to ensure the user still has write access after modification,
+            add the user as write member if given permission != write;
+          * when downgrading internal permission on a child article, desync it
+            from parent to stop inherited rights transmission;
+          * if we set same permission as parent and the article has no specific
+            member: resync if on parent;
+
+        :param str permission: internal permission to set, one of 'none', 'read'
+          or 'write';
+        """
         self.ensure_one()
         if self.user_can_write and permission != "write":
             self._add_members(self.env.user.partner_id, 'write')
@@ -914,7 +921,7 @@ class Article(models.Model):
         downgrade = not self.is_desynchronized and self.parent_id and \
                     ARTICLE_PERMISSION_LEVEL[self.parent_id.inherited_permission] > ARTICLE_PERMISSION_LEVEL[permission]
         if downgrade:
-            return self._desync_access_from_parents(internal_permission=permission)
+            return self._desync_access_from_parents(force_internal_permission=permission)
 
         values = {'internal_permission': permission}
         if permission == self.parent_id.inherited_permission and not self.article_member_ids:
@@ -925,17 +932,25 @@ class Article(models.Model):
         return self.write(values)
 
     def _set_member_permission(self, member, permission, is_based_on=False):
-        """ Set the given permission to the given member.
-        If the member was based on a parent article:
-            If the new permission is downgrading the member's access:
-                the current article will be desynchronized form its parent.
-            Else:
-                We add a new member with the given permission on the target article. """
+        """ Sets the given permission to the given member.
+
+        If the member has rights based on membership: simply update it.
+
+        If the member has rights based on a parent article (inherited rights)
+          If the new permission is downgrading the member's access
+            the article is desynchronized form its parent;
+          Else we add a new member with the higher permission;
+
+        :param Model<knowledge.article.member> member: member whose permission
+          is to be updated. Can be a member of 'self' or one of its ancestors;
+        :param str permission: new permission, one of 'none', 'read' or 'write';
+        :param bool is_based_on: whether rights are inherited or through membership;
+        """
         self.ensure_one()
         if is_based_on:
             downgrade = ARTICLE_PERMISSION_LEVEL[member.permission] > ARTICLE_PERMISSION_LEVEL[permission]
             if downgrade:
-                self._desync_access_from_parents(member.partner_id, permission)
+                self._desync_access_from_parents(force_partners=member.partner_id, force_member_permission=permission)
             else:
                 self._add_members(member.partner_id, permission)
         else:
@@ -943,9 +958,13 @@ class Article(models.Model):
             member.sudo().write({'permission': permission})
 
     def _remove_member(self, member):
-        """ Remove a member from the article.
-        If the member was based on a parent article, the current article will be desynchronized form its parent.
-        We also ensure the partner to removed is removed after the desynchronization (if was copied from parent). """
+        """ Removes a member from the article. If the member was based on a
+        parent article, the current article will be desynchronized form its parent.
+        We also ensure the partner to remove is removed after the desynchronization
+        if was copied from parent.
+
+        :param Model<knowledge.article.member>: member to remove
+        """
         self.ensure_one()
         if not member:
             raise ValueError()
@@ -968,7 +987,7 @@ class Article(models.Model):
         # inherited rights from parent
         else:
             # TODO REMOVE SUDO if can write on member based on can_write on article
-            self._desync_access_from_parents(self.article_member_ids.partner_id)
+            self._desync_access_from_parents(force_partners=self.article_member_ids.partner_id)
             current_membership = self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id)
             if current_membership:
                 # TODO : Either block removing if user grant higher access rights, either add user with permission none
@@ -976,10 +995,12 @@ class Article(models.Model):
                 self.sudo().write({'article_member_ids': [(2, current_membership.id)]})
 
     def _add_members(self, partners, permission, force_update=True):
-        """ This method will add a new member to the current article with the given permission.
-        If the given partner was already member on the current article, the permission is updated instead.
-        :param partners (Model<res.partner>): Recordset of res.partner
-        :param permission (string): permission ('none', 'read' or 'write')
+        """ Adds new members to the current article with the given permission.
+        If a given partner is already member permission is updated instead.
+
+        :param Model<res.partner> partners: recordset of res.partner for which
+          new members are added;
+        :param string permission: member permission, one of 'none', 'read' or 'write';
         :param boolean force_update: if already existing, force the new permission;
           this can be used to create default members and left existing one untouched;
         """
@@ -989,38 +1010,48 @@ class Article(models.Model):
                 _("You cannot give access to the article '%s' as you are not editor.", self.name))
 
         members_to_update = self.article_member_ids.filtered_domain([('partner_id', 'in', partners.ids)])
-        members_to_create = partners - members_to_update.mapped('partner_id')
+        partners_to_create = partners - members_to_update.mapped('partner_id')
 
-        members_to_write = [(0, 0, {
-            'partner_id': partner.id,
-            'permission': permission
-        }) for partner in members_to_create]
+        members_command = [
+            (0, 0, {'partner_id': partner.id,
+                    'permission': permission})
+            for partner in partners_to_create
+        ]
         if force_update:
-            for member in members_to_update:
-                members_to_write.append((1, member.id, {'permission': permission}))
+            members_command += [
+                (1, member.id, {'permission': permission})
+                for member in members_to_update
+            ]
 
-        return self.sudo().write({
-            'article_member_ids': members_to_write
-        })
+        return self.sudo().write({'article_member_ids': members_command})
 
-    def _desync_access_from_parents(self, partner_ids=False, member_permission=False, internal_permission=False):
-        """ This method will copy all the inherited access from parents on the article, except for the given partner_ids,
-        if any, in order to de-synchronize the article from its parents in terms of access.
-        If member_permission is given, the method will then create a new member for the given partner_id with the given
-        permission. """
+    def _desync_access_from_parents(self, force_internal_permission=False,
+                                    force_partners=False, force_member_permission=False):
+        """ Copies copy all inherited accesses from parents on the article and
+        de-synchronize the article from its parent, allowing custom access management.
+        We allow to force permission of given partners.
+
+        :param string force_internal_permission: force a new internal permission
+          for the article. Otherwise fallback on inherited computed internal
+          permission;
+        :param Model<res.partner> force_partners: force permission of new members
+          related to those partners;
+        :param string force_member_permission: used with force_partners to specify
+          the custom permission to give. One of 'none', 'read', 'write';
+        """
         self.ensure_one()
         members_permission = self._get_article_member_permissions()[self.id]
-        internal_permission = internal_permission or self.inherited_permission
+        new_internal_permission = force_internal_permission or self.inherited_permission
 
         members_values = []
         for partner_id, values in members_permission.items():
             # if member already on self, do not add it.
             if not values['based_on'] or values['based_on'] == self.id:
                 continue
-            new_member_permission = values['permission']
-
-            if partner_ids and partner_id in partner_ids.ids and member_permission:
-                new_member_permission = member_permission
+            if force_partners and force_member_permission and partner_id in force_partners.ids:
+                new_member_permission = force_member_permission
+            else:
+                new_member_permission = values['permission']
 
             members_values.append((0, 0, {
                 'partner_id': partner_id,
@@ -1029,7 +1060,7 @@ class Article(models.Model):
 
         # TODO REMOVE SUDO if can write on member based on can_write on article
         return self.sudo().write({
-            'internal_permission': internal_permission,
+            'internal_permission': new_internal_permission,
             'article_member_ids': members_values,
             'is_desynchronized': True
         })
