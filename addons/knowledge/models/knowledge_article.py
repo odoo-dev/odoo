@@ -995,9 +995,9 @@ class Article(models.Model):
             self._add_members(share_partner_ids, 'read')
             self._add_members(partners - share_partner_ids, permission)
             # prevent the invited user to get access to children articles the current user has no access to
-            descendants = self._get_descendants().filtered(lambda c: not c.user_can_write)
-            if descendants:
-                descendants._add_members(partners, 'none')
+            unreachable_children = self.sudo().child_ids.filtered(lambda c: not c.user_can_write)
+            for child in unreachable_children:
+                child._add_members(partners, 'none', force_update=False)
         else:
             self._add_members(partners, permission)
 
@@ -1006,11 +1006,13 @@ class Article(models.Model):
 
         return True
 
-    def _add_members(self, partners, permission):
+    def _add_members(self, partners, permission, force_update=True):
         """ This method will add a new member to the current article with the given permission.
         If the given partner was already member on the current article, the permission is updated instead.
         :param partners (Model<res.partner>): Recordset of res.partner
         :param permission (string): permission ('none', 'read' or 'write')
+        :param boolean force_update: if already existing, force the new permission;
+          this can be used to create default members and left existing one untouched;
         """
         self.ensure_one()
         if not self.env.su and not self.user_can_write:
@@ -1024,10 +1026,11 @@ class Article(models.Model):
             'partner_id': partner.id,
             'permission': permission
         }) for partner in members_to_create]
-        for member in members_to_update:
-            members_to_write.append((1, member.id, {'permission': permission}))
+        if force_update:
+            for member in members_to_update:
+                members_to_write.append((1, member.id, {'permission': permission}))
 
-        self.sudo().write({
+        return self.sudo().write({
             'article_member_ids': members_to_write
         })
 
