@@ -19,9 +19,24 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend(KnowledgeTree
      */
     start: function () {
         return this._super.apply(this, arguments).then(() => {
-            const id = this.$el.data('article-id');
-            this._renderTree(id, '/knowledge/tree_panel/portal');
+            return this._renderTree().then($container => {
+                if (!$container.data('portal-readonly-mode')) {
+                    this._renderEmojiPicker();
+                    this._setTreeListener();
+                }
+                this._setTreeFavoriteListener();
+            });
         });
+    },
+
+    /**
+     * @returns {Promise}
+     */
+    _renderTree: async function () {
+        return KnowledgeTreePanelMixin._renderTree.apply(this, [
+            this.$el.data('article-id'),
+            '/knowledge/tree_panel/portal'
+        ]);
     },
 
     /**

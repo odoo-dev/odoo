@@ -10,7 +10,7 @@
             <div t-if="!state.is_sync &amp;&amp; state.parent_name" class="d-flex align-items-center px-3 py-1 my-1 bg-light">
                 <span><i class="fa fa-eye"/> Access Restricted. May not be shared with everyone from
                     <a href="#" t-on-click="event => this._onOpen(event, state.parent_id)" t-out="state.parent_name"/></span>
-                <button t-if="props.user_permission === 'write' || state.user_is_admin"
+                <button t-if="state.user_permission === 'write' || state.is_admin"
                         class="btn btn-link" t-on-click="event => this._onRestore(event)" type="button">Restore</button>
             </div>
             <div class="d-flex align-items-center px-3 py-1">
@@ -24,19 +24,19 @@
                     <div t-if="state.based_on" class="text-muted">Based on <a href="#" t-on-click="event => this._onOpen(event, state.based_on_id)" t-out="state.based_on"/></div>
                 </div>
                 <div class="flex-shrink-0 bg-white">
-                    <select class="o_permission custom-select"
+                    <select class="o_permission custom-select rounded"
                         t-att-value="state.internal_permission"
                         t-on-change="_onChangeInternalPermission"
-                        t-att-disabled="state.user_is_admin || props.user_permission === 'write' ? undefined : 'disabled'"
+                        t-att-disabled="state.is_admin || state.user_permission === 'write' ? undefined : 'disabled'"
                         aria-label="Internal Permission">
-                        <t t-foreach="this.getInternalPermissionOptions()" t-as="option" t-key="option_index">
+                        <t t-foreach="state.internal_permission_options" t-as="option" t-key="option_index">
                             <option t-att-value="option[0]" t-out="option[1]" t-att-selected="option[0] === state.internal_permission ? 'selected' : undefined"/>
                         </t>
                     </select>
                 </div>
             </div>
             <t t-foreach="state.members" t-as="member" t-key="member_index">
-                <div t-attf-class="d-flex align-items-center px-3 py-1 {{ this.isLoggedUser(member) ? 'active' : '' }}">
+                <div t-attf-class="d-flex align-items-center px-3 py-1 {{ this._isLoggedUser(member) ? 'active' : '' }}">
                     <div class="flex-shrink-0">
                         <img class="rounded-circle o_m2m_avatar" t-if="member.partner_id"
                             t-attf-src="/web/image?model=res.partner&amp;field=avatar_128&amp;id={{ member.partner_id }}"
@@ -46,8 +46,8 @@
                         <div t-out="member.partner_name"/>
                         <div class="d-flex align-items-center text-muted">
                             <span t-if="member.partner_share"><i class="fa fa-user pr-1" title="External Guest"/>Guest</span>
-                            <span t-if="state.user_is_admin &amp;&amp; this.isLoggedUser(member)"><i class="fa fa-cog pr-1" title="Administrator"/>Admin</span>
-                            <span t-if="(member.partner_share || (state.user_is_admin &amp;&amp; this.isLoggedUser(member))) &amp;&amp; member.partner_email" class="px-1">•</span>
+                            <span t-if="state.is_admin &amp;&amp; this._isLoggedUser(member)"><i class="fa fa-cog pr-1" title="Administrator"/>Admin</span>
+                            <span t-if="(member.partner_share || (state.is_admin &amp;&amp; this._isLoggedUser(member))) &amp;&amp; member.partner_email" class="px-1">•</span>
                             <div class="o_member_email" t-if="member.partner_email" t-out="member.partner_email"/>
                         </div>
                         <div t-if="member.based_on" class="text-muted">Based on <a href="#" t-on-click="event => this._onOpen(event, member.based_on_id)" t-out="member.based_on"/></div>
@@ -55,23 +55,22 @@
                     <div class="flex-shrink-0">
                         <div class="input-group">
                             <div t-if="!(member.based_on &amp;&amp; member.permission === 'none') &amp;&amp; !member.is_unique_writer
-                                        &amp;&amp; (state.user_is_admin || props.user_permission === 'write' || state.partner_id === member.partner_id)"
+                                        &amp;&amp; (state.is_admin || state.user_permission === 'write' || state.partner_id === member.partner_id)"
                                  class="d-flex align-items-center mr-2">
                                 <i class="fa fa-w fa-times o_delete text-danger" title="Remove Member"
                                    t-on-click="event => this._onRemoveMember(event, member)" type="button">
                                 </i>
                             </div>
-                            <select t-attf-class="o_permission custom-select {{ member.partner_share ? 'readonly' : '' }}"
+                            <select t-attf-class="o_permission custom-select rounded {{ member.partner_share ? 'readonly' : '' }}"
                                 t-att-value="member.permission"
                                 t-on-change="event => this._onChangeMemberPermission(event, member)"
                                 t-att-disabled="member.is_unique_writer || member.partner_share
-                                    || (props.user_permission !== 'write' &amp;&amp; !state.user_is_admin) ? 'disabled' : undefined"
+                                    || (state.user_permission !== 'write' &amp;&amp; !state.is_admin) ? 'disabled' : undefined"
                                 aria-label="User Permission">
                                 <t t-foreach="this.state.members_options" t-as="option" t-key="option_index">
                                     <option t-att-value="option[0]" t-out="option[1]" t-att-selected="option[0] === member.permission ? 'selected' : undefined"/>
                                 </t>
                             </select>
-
                         </div>
                     </div>
                 </div>

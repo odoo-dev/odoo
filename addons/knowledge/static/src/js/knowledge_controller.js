@@ -25,6 +25,7 @@ const KnowledgeArticleFormController = FormController.extend({
         move: '_onMove',
         open_move_to_modal: '_onOpenMoveToModal',
         reload_tree: '_onReloadTree',
+        reload_view: '_onReloadView',
         emoji_click: '_onEmojiClick',
     }),
 
@@ -171,10 +172,18 @@ const KnowledgeArticleFormController = FormController.extend({
     },
 
     /**
+     * Reloads the tree listing all articles.
      * @param {Event} event
      */
     _onReloadTree: function (event) {
-        // TODO JBN: Create a widget for the tree and reload it without reloading the whole view.
+        this.renderer._reloadTree();
+    },
+
+    /**
+     * Reloads the whole view.
+     * @param {Event} event
+     */
+    _onReloadView: function (event) {
         this.reload();
     },
 
@@ -337,6 +346,7 @@ const KnowledgeArticleFormController = FormController.extend({
         }).then(result => {
             if (result) {
                 data.onSuccess();
+                this.renderer._reloadPanel();
             } else {
                 data.onReject();
             }

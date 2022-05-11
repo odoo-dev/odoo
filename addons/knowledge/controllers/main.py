@@ -229,7 +229,6 @@ class KnowledgeController(http.Controller):
 
         internal_permission_field = request.env['knowledge.article']._fields['internal_permission']
         permission_field = request.env['knowledge.article.member']._fields['permission']
-        user_is_admin = request.env.user._is_admin()
         return {
             'internal_permission_options': internal_permission_field.get_description(request.env).get('selection', []),
             'internal_permission': article.inherited_permission,
@@ -241,8 +240,7 @@ class KnowledgeController(http.Controller):
             'is_sync': is_sync,
             'parent_id': article.parent_id.id,
             'parent_name': article.parent_id.display_name,
-            'user_is_admin': user_is_admin,
-            'show_admin_tip': user_is_admin and article.user_permission != 'write',
+            'user_permission': article.user_permission
         }
 
     @http.route('/knowledge/article/set_member_permission', type='json', auth='user')
@@ -273,8 +271,10 @@ class KnowledgeController(http.Controller):
 
         try:
             article._set_member_permission(member, permission, bool(inherited_member_id))
-        except (AccessError, ValidationError):
-            return {'error': _("You cannot change the permission if this member.")}
+        except AccessError:
+            return {'error': _("You are not allowed to update the permission of this member")}
+        except ValidationError:
+            return {'error': _("You cannot change the permission of this member.")}
 
         if article.category != previous_category:
             return {'reload_tree': True}

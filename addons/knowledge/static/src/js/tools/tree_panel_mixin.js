@@ -13,10 +13,10 @@ export default {
      * automatically be displayed on page load.
      * @param {integer} active_article_id
      * @param {String} route
+     * @returns {Promise}
      */
     _renderTree: async function (active_article_id, route) {
         const $container = this.$('.o_knowledge_tree');
-        const portalReadonlyMode = $container.data('portalReadonlyMode');
         let unfoldedArticles = localStorage.getItem('unfoldedArticles');
         unfoldedArticles = unfoldedArticles ? unfoldedArticles.split(";").map(Number) : false;
         return this._rpc({
@@ -28,13 +28,7 @@ export default {
         }).then(htmlTree => {
             $container.empty();
             $container.append(htmlTree);
-            if (!portalReadonlyMode) {
-                this._setTreeListener();
-                this._renderEmojiPicker();
-            }
-            this._setTreeFavoriteListener();
-        }).catch(error => {
-            $container.empty();
+            return $container;
         });
     },
 
