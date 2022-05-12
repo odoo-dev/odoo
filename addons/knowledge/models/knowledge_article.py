@@ -702,6 +702,10 @@ class Article(models.Model):
         self.action_archive()
         return self.with_context(res_id=False).action_home_page()
 
+    def action_unarchive(self):
+        super(Article, self).action_unarchive()
+        return self.with_context(res_id=self.id).action_home_page()
+
     # ------------------------------------------------------------
     # SEQUENCE / ORDERING
     # ------------------------------------------------------------
