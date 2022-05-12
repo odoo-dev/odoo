@@ -12,7 +12,7 @@ from odoo.exceptions import AccessError, ValidationError
 from odoo.osv import expression
 from odoo.tools import get_lang
 
-from odoo.addons.knowledge.models.tools import ARTICLE_PERMISSION_LEVEL
+ARTICLE_PERMISSION_LEVEL = {'none': 0, 'read': 1, 'write': 2}
 
 
 class Article(models.Model):
@@ -728,8 +728,8 @@ class Article(models.Model):
         :param bool is_private: set as private;
         """
         self.ensure_one()
-        parent = self.browse(parent_id) if parent_id else self.env['knowledge.article']
-        before_article = self.browse(before_article_id) if before_article_id else self.env['knowledge.article']
+        parent = self.browse(parent_id)
+        before_article = self.browse(before_article_id)
 
         values = {'parent_id': parent_id}
         if before_article:
@@ -1014,7 +1014,7 @@ class Article(models.Model):
             the article is desynchronized form its parent;
           Else we add a new member with the higher permission;
 
-        :param Model<knowledge.article.member> member: member whose permission
+        :param <knowledge.article.member> member: member whose permission
           is to be updated. Can be a member of 'self' or one of its ancestors;
         :param str permission: new permission, one of 'none', 'read' or 'write';
         :param bool is_based_on: whether rights are inherited or through membership;
@@ -1035,7 +1035,7 @@ class Article(models.Model):
         We also ensure the partner to remove is removed after the desynchronization
         if was copied from parent.
 
-        :param Model<knowledge.article.member>: member to remove
+        :param <knowledge.article.member> member: member to remove
         """
         self.ensure_one()
         if not member:
@@ -1073,7 +1073,7 @@ class Article(models.Model):
         """ Adds new members to the current article with the given permission.
         If a given partner is already member permission is updated instead.
 
-        :param Model<res.partner> partners: recordset of res.partner for which
+        :param <res.partner> partners: recordset of res.partner for which
           new members are added;
         :param string permission: member permission, one of 'none', 'read' or 'write';
         :param boolean force_update: if already existing, force the new permission;
@@ -1109,7 +1109,7 @@ class Article(models.Model):
         :param string force_internal_permission: force a new internal permission
           for the article. Otherwise fallback on inherited computed internal
           permission;
-        :param Model<res.partner> force_partners: force permission of new members
+        :param <res.partner> force_partners: force permission of new members
           related to those partners;
         :param string force_member_permission: used with force_partners to specify
           the custom permission to give. One of 'none', 'read', 'write';
@@ -1135,7 +1135,7 @@ class Article(models.Model):
         :param string force_internal_permission: force a new internal permission
           for the article. Otherwise fallback on inherited computed internal
           permission;
-        :param Model<res.partner> force_partners: force permission of new members
+        :param <res.partner> force_partners: force permission of new members
           related to those partners;
         """
         self.ensure_one()
