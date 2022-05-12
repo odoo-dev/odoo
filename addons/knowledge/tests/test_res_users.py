@@ -12,7 +12,7 @@ class TestResUsers(KnowledgeCommon):
         internal_user = self.env['res.users'].with_context(**self._test_context).create({
             'email': 'hector@example.com',
             'login': 'hector',
-            'password': 'hector',
+            'password': 'hectorhector',
             'name': 'Hector Tue',
             'groups_id': [(4, self.env.ref('base.group_user').id)],
         })
@@ -28,7 +28,7 @@ class TestResUsers(KnowledgeCommon):
         portal_user = self.env['res.users'].with_context(**self._test_context).create({
             'email': 'patrick@example.com',
             'login': 'patrick',
-            'password': 'patrick',
+            'password': 'patrickpatrick',
             'name': 'Patrick Hochet',
             'groups_id': [(4, self.env.ref('base.group_portal').id)],
         })
@@ -43,7 +43,7 @@ class TestResUsers(KnowledgeCommon):
         ).create({
             'email': 'roberta@example.com',
             'login': 'roberta',
-            'password': 'roberta',
+            'password': 'robertaroberta',
             'name': 'Roberta Rabiscotée',
             'groups_id': [(4, self.env.ref('base.group_user').id)],
         })

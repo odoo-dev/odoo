@@ -1166,9 +1166,8 @@ class Article(models.Model):
         the model we are working on.
         """
         self.env['knowledge.article'].flush()
-        self.env['knowledge.article.member'].flush()
-        args = []
 
+        args = []
         base_where_domain = ''
         if self.ids:
             base_where_domain = "WHERE id in %s"
@@ -1210,9 +1209,8 @@ class Article(models.Model):
 
         The member model is fully flushed before running the request. """
         self.env['knowledge.article'].flush()
-        self.env['knowledge.article.member'].flush()
-        args = [partner.id]
 
+        args = [partner.id]
         base_where_domain = ''
         if self.ids:
             base_where_domain = "WHERE perms1.id in %s"
@@ -1272,7 +1270,6 @@ class Article(models.Model):
         has the responsibility to check that user can access those fields and
         that no injection is possible. """
         self.env['knowledge.article'].flush()
-        self.env['knowledge.article.member'].flush()
 
         add_where_clause = ''
         args = []
