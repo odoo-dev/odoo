@@ -64,7 +64,9 @@ class Article(models.Model):
         "knowledge.article", string="Inherited Permission Parent Article",
         compute="_compute_inherited_permission", compute_sudo=True,
         store=True, recursive=True)
-    article_member_ids = fields.One2many('knowledge.article.member', 'article_id', string='Members Information', copy=True)
+    article_member_ids = fields.One2many(
+        'knowledge.article.member', 'article_id', string='Members Information',
+        copy=True)
     user_has_access = fields.Boolean(
         string='Has Access',
         compute="_compute_user_has_access", search="_search_user_has_access")
@@ -123,10 +125,10 @@ class Article(models.Model):
     # ------------------------------------------------------------
 
     @api.constrains('internal_permission', 'article_member_ids')
-    def _check_has_writer(self):
+    def _check_is_writable(self):
         """ Articles must always have at least one writer. This constraint is done
         on article level, in coordination to the constraint on member model (see
-        ``_check_has_writer`` on ``knowledge.article.member``).
+        ``_check_is_writable`` on ``knowledge.article.member``).
 
         If article has no member the internal_permission must be write. If article
         has members validation is done in article.member model as we cannot trigger
@@ -1253,18 +1255,20 @@ class Article(models.Model):
           to retrieve more fields on the origin of the membership
         - knowledge.article.member to retrieve more fields on the membership
 
-        The expected format is:
-        {'model': [('field', 'field_alias')]}
+        The expected format is::
 
-        e.g: {
-            'res.partner': [
-                ('name', 'partner_name'),
-                ('email', 'partner_email'),
-            ]
-        }
+            {'model': [('field', 'field_alias')]}
+        e.g::
+            {
+                'res.partner': [
+                    ('name', 'partner_name'),
+                    ('email', 'partner_email'),
+                ]
+            }
 
-        Please note that these additional fields are not sanitized, the caller has the
-        responsability to check that user can access those fields and that no injection is possible. """
+        Please note that these additional fields are not sanitized, the caller
+        has the responsibility to check that user can access those fields and
+        that no injection is possible. """
         self.env['knowledge.article'].flush()
         self.env['knowledge.article.member'].flush()
 

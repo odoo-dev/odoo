@@ -32,10 +32,10 @@ class ArticleMember(models.Model):
     ]
 
     @api.constrains('article_permission', 'permission')
-    def _check_has_writer(self, on_unlink=False):
+    def _check_is_writable(self, on_unlink=False):
         """ Articles must always have at least one writer. This constraint is done
         on member level, in coordination to the constraint on article model (see
-        ``_check_has_writer`` on ``knowledge.article``).
+        ``_check_is_writable`` on ``knowledge.article``).
 
         Since this constraint only triggers if we have at least one member another
         validation is done on article model. The article_permission related field
@@ -104,7 +104,7 @@ class ArticleMember(models.Model):
     def _unlink_except_no_writer(self):
         """ When removing a member, the constraint is not triggered.
         We need to check manually on article with no write permission that we do not remove the last write member """
-        self._check_has_writer(on_unlink=True)
+        self._check_is_writable(on_unlink=True)
 
     def _get_invitation_hash(self):
         """ We use a method instead of a field in order to reduce DB space."""
