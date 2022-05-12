@@ -516,9 +516,14 @@ class Article(models.Model):
                              'parent_id': False,  # just be sure we don't grant privileges
                 })
 
-            # allow private articles creation
-            if not parent_id and internal_permission == 'none' and member_ids and len(member_ids) == 1:
-                self_member = member_ids[0][0] == Command.CREATE and member_ids[0][2].get('partner_id') == self.env.user.partner_id.id
+            # allow private articles creation if given values are considered as safe
+            check_for_sudo = not self.env.su and \
+                             not any(fname in vals for fname in ['favorite_ids', 'child_ids']) and \
+                             not parent_id and internal_permission == 'none' and \
+                             member_ids and len(member_ids) == 1
+            if check_for_sudo:
+                self_member = member_ids[0][0] == Command.CREATE and \
+                              member_ids[0][2].get('partner_id') == self.env.user.partner_id.id
                 if self_member:
                     can_sudo = True
 
