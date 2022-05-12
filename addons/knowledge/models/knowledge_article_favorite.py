@@ -30,11 +30,18 @@ class ArticleFavorite(models.Model):
         a correct ordering as much as possible. Some sequence could be given in create values, that could lead to
         duplicated sequence per user_id. That is not an issue as they will be resequenced the next time the user reorder
         their favorites. """
-        new_sequence = self.env['knowledge.article.favorite'].search([], order='sequence desc', limit=1).sequence + 1 or 0
+        default_sequence = 1
+        if any(not vals.get('sequence') for vals in vals_list):
+            favorite = self.env['knowledge.article.favorite'].search(
+                [('user_id', '=', self.env.uid)],
+                order='sequence DESC',
+                limit=1
+            )
+            default_sequence = favorite.sequence + 1 if favorite else default_sequence
         for vals in vals_list:
             if not vals.get('sequence'):
-                vals['sequence'] = new_sequence
-                new_sequence += 1
+                vals['sequence'] = default_sequence
+                default_sequence += 1
         return super(ArticleFavorite, self).create(vals_list)
 
     def write(self, vals):
