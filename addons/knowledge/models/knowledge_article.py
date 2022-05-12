@@ -883,7 +883,7 @@ class Article(models.Model):
         """
         search_domain = ["|", ("name", "ilike", search_query), ("root_article_id.name", "ilike", search_query)]
         articles = self.search(
-            search_domain + [("is_user_favorite", "=", True)],
+            expression.AND([search_domain, [("is_user_favorite", "=", True)]]),
             limit=limit
         )
         sorted_articles = articles.sorted(
@@ -897,7 +897,7 @@ class Article(models.Model):
         # fill with not favorites articles
         if len(sorted_articles) < limit:
             articles = self.search(
-                search_domain + [("is_user_favorite", "=", False)],
+                expression.AND([search_domain, [("is_user_favorite", "=", False)]]),
                 limit=(limit-len(sorted_articles))
             )
             sorted_articles += articles.sorted(
