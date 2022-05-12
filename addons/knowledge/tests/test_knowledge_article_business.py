@@ -357,10 +357,81 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
         self.assertFalse(workspace_children[0].parent_id)
         self.assertEqual(workspace_children.root_article_id, workspace_children[0])
 
+    @users('employee')
+    def test_article_sort_for_user(self):
+        """ Testing the sort + custom info returned by get_user_sorted_articles """
+        self.workspace_children.write({
+            'favorite_ids': [
+                (0, 0, {'user_id': user.id})
+                for user in self.user_admin + self.user_employee2 + self.user_employee_manager
+            ],
+        })
+        article_workspace = self.article_workspace.with_env(self.env)
+        workspace_children = self.workspace_children.with_env(self.env)
+        (article_workspace + workspace_children[1]).action_toggle_favorite()
+
+        new_root_child = self.env['knowledge.article'].create({
+            'name': 'Child3 without parent name in its name',
+            'parent_id': article_workspace.id,
+        })
+        (self.workspace_children + new_root_child).flush()
+
+        # ensure initial values
+        self.assertTrue(article_workspace.is_user_favorite)
+        self.assertEqual(article_workspace.favorite_count, 2)
+        self.assertEqual(article_workspace.user_favorite_sequence, 1)
+        self.assertFalse(workspace_children[0].is_user_favorite)
+        self.assertEqual(workspace_children[0].favorite_count, 3)
+        self.assertEqual(workspace_children[0].user_favorite_sequence, -1)
+        self.assertTrue(workspace_children[1].is_user_favorite)
+        self.assertEqual(workspace_children[1].favorite_count, 4)
+        self.assertEqual(workspace_children[1].user_favorite_sequence, 2)
+        self.assertFalse(new_root_child.is_user_favorite)
+        self.assertEqual(new_root_child.favorite_count, 0)
+        self.assertEqual(new_root_child.user_favorite_sequence, -1)
+
+        # search also includes descendants of articles having the term in their name
+        result = self.env['knowledge.article'].get_user_sorted_articles('laygroun')
+        expected = self.article_workspace + self.workspace_children[1] + self.workspace_children[0] + new_root_child
+        found_ids = [a['id'] for a in result]
+        self.assertEqual(found_ids, expected.ids)
+        # check returned result once (just to be sure)
+        workspace_info = next(article_result for article_result in result if article_result['id'] == article_workspace.id)
+        self.assertTrue(workspace_info['is_user_favorite'], article_workspace.name)
+        self.assertFalse(workspace_info['icon'])
+        self.assertEqual(workspace_info['favorite_count'], 2)
+        self.assertEqual(workspace_info['name'], article_workspace.name)
+        self.assertEqual(workspace_info['root_article_id'], (article_workspace.id, f'📄 {article_workspace.name}'))
+
 
 @tagged('knowledge_internals')
 class TestKnowledgeArticleFields(KnowledgeCommonWData):
     """ Test fields and their management. """
+
+    @users('employee')
+    def test_favorites(self):
+        """ Testing the API for toggling favorites. """
+        playground_articles = (self.article_workspace + self.workspace_children).with_env(self.env)
+        self.assertEqual(playground_articles.mapped('is_user_favorite'), [False, False, False])
+
+        playground_articles[0].write({'favorite_ids': [(0, 0, {'user_id': self.env.uid})]})
+        self.assertEqual(playground_articles.mapped('is_user_favorite'), [True, False, False])
+        self.assertEqual(playground_articles.mapped('user_favorite_sequence'), [1, -1, -1])
+        favorites = self.env['knowledge.article.favorite'].sudo().search([('user_id', '=', self.env.uid)])
+        self.assertEqual(favorites.article_id, playground_articles[0])
+        self.assertEqual(favorites.sequence, 1)
+
+        playground_articles[1].action_toggle_favorite()
+        self.assertEqual(playground_articles.mapped('is_user_favorite'), [True, True, False])
+        self.assertEqual(playground_articles.mapped('user_favorite_sequence'), [1, 2, -1])
+        favorites = self.env['knowledge.article.favorite'].sudo().search([('user_id', '=', self.env.uid)])
+        self.assertEqual(favorites.article_id, playground_articles[0:2])
+        self.assertEqual(favorites.mapped('sequence'), [1, 2])
+
+        playground_articles[2].with_user(self.user_employee2).action_toggle_favorite()
+        favorites = self.env['knowledge.article.favorite'].sudo().search([('user_id', '=', self.user_employee2.id)])
+        self.assertEqual(favorites.article_id, playground_articles[2])
+        self.assertEqual(favorites.sequence, 1, 'Favorite: should not be impacted by other people sequence')
 
     @users('employee')
     def test_fields_edition(self):
