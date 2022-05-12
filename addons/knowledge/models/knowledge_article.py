@@ -1031,7 +1031,7 @@ class Article(models.Model):
             self.sudo().write({'article_member_ids': members_command})
         # member to remove is on the article itself. Simply remove the member.
         elif current_membership:
-            if not self.user_has_write_access:
+            if not self.env.su and not self.user_has_write_access:
                 raise AccessError(
                     _("You cannot remove the member %(member_name)s from article %(article_name)s",
                       member_name=member.display_name,
