@@ -611,18 +611,20 @@ class Article(models.Model):
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        default = dict(default or {},
-                       name=_("%s (copy)", self.name))
+        defaults = dict(
+            {"name": _("%s (copy)", self.name)},
+            **(default or {})
+        )
         if not self.env.su and not self.user_has_write_access:
-            default.pop('article_member_ids', None)
-            default.pop('favorite_ids', None)
-            default.pop('child_ids', None)
+            defaults.pop('article_member_ids', None)
+            defaults.pop('favorite_ids', None)
+            defaults.pop('child_ids', None)
             if self.user_has_access:
-                default['article_member_ids'] = [
+                defaults['article_member_ids'] = [
                     (0, 0, {'partner_id': self.env.user.partner_id.id,
                             'permission': 'write'})
                 ]
-        return super().copy(default=default)
+        return super().copy(default=defaults)
 
     def unlink(self):
         for article in self:
