@@ -302,9 +302,110 @@ class TestKnowledgeArticleBusiness(KnowledgeCommonWData):
                                msg='Invite: cannot try to reject people with read permission'):
             article_shared.invite_members(partners, 'none')
 
+    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail')
+    @users('employee')
+    def test_article_invite_members_non_accessible_children(self):
+        """ Test that user cannot give access to non-accessible children article
+        when inviting people. """
+        private_parent = self.env['knowledge.article'].create([{
+            'article_member_ids': [(0, 0, {
+                'partner_id': self.partner_employee.id,
+                'permission': 'write',
+                })
+            ],
+            'internal_permission': 'none',
+            'name': 'Private parent',
+            'parent_id': False,
+        }])
+        child_no_access, child_read_access, child_write_access = self.env['knowledge.article'].sudo().create([
+            {'article_member_ids': [(0, 0, {
+                'partner_id': self.partner_employee.id,
+                'permission': 'none',
+                })
+             ],
+             'internal_permission': 'write',
+             'name': 'Shared No Access Child (should not propagate)',
+             'parent_id': private_parent.id,
+            },
+            {'article_member_ids': [(0, 0, {
+                'partner_id': self.partner_employee.id,
+                'permission': 'read',
+                })
+             ],
+             'internal_permission': 'write',
+             'name': 'Shared Read Child (should not propagate)',
+             'parent_id': private_parent.id,
+            },
+            {'internal_permission': False,
+             'name': 'Shared Inherited Write Child (should propagate)',
+             'parent_id': private_parent.id,
+            }
+        ]).with_env(self.env)
+        grandchild_no_access, grandchild_read_access, grandchild_write_access = self.env['knowledge.article'].sudo().create([
+            {'internal_permission': False,
+             'name': 'Shared inherit No access GrandChild (should not propagate)',
+             'parent_id': child_no_access.id,
+            },
+            {'internal_permission': False,
+             'name': 'Shared inherit read GrandChild (should not propagate)',
+             'parent_id': child_read_access.id,
+            },
+            {'internal_permission': False,
+             'name': 'Shared inherit write GrandChild (should propagate)',
+             'parent_id': child_write_access.id,
+            }
+        ]).with_env(self.env)
+
+        partners = self.partner_employee_manager.with_env(self.env)
+        with self.mock_mail_gateway():
+            private_parent.invite_members(partners, 'read')
+
+        # Manager got read on article
+        self.assertMembers(private_parent, 'none', {
+            self.partner_employee: 'write',
+            self.partner_employee_manager: 'read'
+        })
+
+        # CHILDREN
+        # Manager got none on child_read_access
+        self.assertMembers(child_read_access, 'write', {
+            self.partner_employee: 'read',
+            self.partner_employee_manager: 'none'
+        })
+
+        # Manager got none on child_no_access
+        self.assertMembers(child_no_access, 'write', {
+            self.partner_employee: 'none',
+            self.partner_employee_manager: 'none'
+        })
+
+        # Manager got inherited read on child_write_access
+        self.assertMembers(child_write_access, False, {})
+        self.assertTrue(child_write_access.user_has_write_access)
+        self.assertTrue(child_write_access.with_user(self.user_employee_manager).user_has_access)
+
+        # GRAND CHILDREN
+        # Manager got inherited none on child_read_access and Employee still have inherited member access
+        self.assertMembers(grandchild_read_access, False, {})
+        self.assertTrue(grandchild_read_access.user_has_access)
+        with self.assertRaises(exceptions.AccessError):
+            grandchild_read_access.with_user(self.user_employee_manager).body  # Acls should trigger AccessError
+
+        # Manager got inherited none on child_no_access and Employee still have no access
+        self.assertMembers(grandchild_no_access, False, {})
+        with self.assertRaises(exceptions.AccessError):
+            grandchild_no_access.body # Acls should trigger AccessError
+        with self.assertRaises(exceptions.AccessError):
+            grandchild_no_access.with_user(self.user_employee_manager).body  # Acls should trigger AccessError
+
+        # Manager got inherited read on grandchild_write_access and Employee still have write access
+        self.assertMembers(grandchild_write_access, False, {})
+        self.assertTrue(grandchild_write_access.user_has_write_access)
+        self.assertTrue(grandchild_write_access.with_user(self.user_employee_manager).user_has_access)
+
     @users('employee')
     def test_article_toggle_favorite(self):
-        """ Testing the API for togging favorites. """
+        """ Testing the API for toggling favorites. """
         playground_articles = (self.article_workspace + self.workspace_children).with_env(self.env)
         self.assertEqual(playground_articles.mapped('is_user_favorite'), [False, False, False])
 
