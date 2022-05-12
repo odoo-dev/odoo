@@ -6,7 +6,7 @@ import { registry } from "@web/core/registry";
 import { HotkeyCommandItem } from "@web/core/commands/default_providers";
 import { splitCommandName } from "@web/core/commands/command_palette";
 
-const { Component, xml } = owl;
+const { Component } = owl;
 
 // Articles command
 class KnowledgeCommand extends Component {}
