@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, tools, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
 
 
 class ArticleMember(models.Model):
@@ -93,6 +93,12 @@ class ArticleMember(models.Model):
 
     def init(self):
         self._cr.execute("CREATE INDEX IF NOT EXISTS knowledge_article_member_article_partner_idx ON knowledge_article_member (article_id, partner_id)")
+
+    def write(self, vals):
+        """ Whatever rights, avoid any attempt at privilege escalation. """
+        if ('article_id' in vals or 'partner_id' in vals) and not self.env.is_admin():
+            raise AccessError(_("Can not update the article or partner of a member."))
+        return super().write(vals)
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_no_writer(self):
