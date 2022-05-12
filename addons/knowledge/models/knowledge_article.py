@@ -91,8 +91,7 @@ class Article(models.Model):
     # Favorite
     is_user_favorite = fields.Boolean(
         string="Is Favorited",
-        compute="_compute_is_user_favorite", search="_search_is_user_favorite",
-        inverse="_inverse_is_user_favorite")
+        compute="_compute_is_user_favorite", search="_search_is_user_favorite")
     user_favorite_sequence = fields.Integer(string="User Favorite Sequence", compute="_compute_is_user_favorite")
     favorite_ids = fields.One2many(
         'knowledge.article.favorite', 'article_id',
@@ -402,15 +401,6 @@ class Article(models.Model):
             article.is_user_favorite = bool(favorite)
             article.user_favorite_sequence = favorite.sequence if favorite else -1
 
-    def _inverse_is_user_favorite(self):
-        to_fav = self.filtered(lambda article: self.env.user not in article.favorite_ids.user_id)
-        to_unfav = self - to_fav
-
-        if to_fav:
-            to_fav.favorite_ids = [(0, 0, {'user_id': self.env.uid})]
-        if to_unfav:
-            to_unfav.favorite_ids.filtered(lambda u: u.user_id == self.env.user).unlink()
-
     def _search_is_user_favorite(self, operator, value):
         if operator not in ('=', '!='):
             raise NotImplementedError("Unsupported search operation on favorite articles")
@@ -685,10 +675,18 @@ class Article(models.Model):
             self.check_access_rights('read')
             self.check_access_rule('read')
         except AccessError:
-            # Return a meaningfull error message as this may be called through UI
+            # Return a meaningful error message as this may be called through UI
             raise AccessError(_("You cannot add or remove this article to your favorites"))
-        for article in self.sudo():
-            article.is_user_favorite = not article.is_user_favorite
+
+        articles_sudo = self.sudo()
+        to_fav = articles_sudo.filtered(lambda article: self.env.user not in article.favorite_ids.user_id)
+        to_unfav = self - to_fav
+
+        if to_fav:
+            to_fav.write({'favorite_ids': [(0, 0, {'user_id': self.env.uid})]})
+        if to_unfav:
+            to_unfav.favorite_ids.filtered(lambda u: u.user_id == self.env.user).unlink()
+
         return self[0].is_user_favorite if self else False
 
     def action_article_archive(self):
