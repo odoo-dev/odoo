@@ -908,7 +908,8 @@ class Article(models.Model):
         if not self.parent_id:
             return False
         if not self.env.su and not self.user_has_write_access:
-            raise AccessError(_('You cannot restore the article %s.' % self.display_name))
+            raise AccessError(_('You cannot restore the article %(article_name)s',
+                                article_name=self.display_name))
         member_permission = (self | self.parent_id)._get_article_member_permissions()
         article_members_permission = member_permission[self.id]
         parents_members_permission = member_permission[self.parent_id.id]
