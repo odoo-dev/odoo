@@ -4,8 +4,6 @@
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError
 
-from odoo.addons.knowledge.models.tools import ARTICLE_PERMISSION_LEVEL
-
 
 class ArticleMember(models.Model):
     _name = 'knowledge.article.member'
@@ -26,10 +24,6 @@ class ArticleMember(models.Model):
     article_permission = fields.Selection(
         related='article_id.inherited_permission',
         readonly=True, store=True)
-    has_higher_permission = fields.Boolean(
-        compute='_compute_has_higher_permission',
-        help="If True, the member has a higher permission than the one set on the article. "
-             "Used to check if user will upgrade its own permission.")
 
     _sql_constraints = [
         ('unique_article_partner',
@@ -96,12 +90,6 @@ class ArticleMember(models.Model):
                       user_name=member.partner_id.display_name,
                       article_name=member.article_id.display_name
                       ))
-
-    @api.depends("article_id", "permission")
-    def _compute_has_higher_permission(self):
-        articles_permission = self.article_id._get_internal_permission()
-        for member in self:
-            member.has_higher_permission = ARTICLE_PERMISSION_LEVEL[member.permission] > ARTICLE_PERMISSION_LEVEL[articles_permission[member.article_id.ids[0]]]
 
     def init(self):
         self._cr.execute("CREATE INDEX IF NOT EXISTS knowledge_article_member_article_partner_idx ON knowledge_article_member (article_id, partner_id)")
