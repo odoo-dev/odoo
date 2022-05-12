@@ -89,7 +89,7 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         })
         self.assertMembers(other_private, 'none', {self.partner_employee: 'write'})
         self.assertEqual(other_private.category, 'private')
-        self.assertFalse(other_private.user_can_write, 'Can write based on permission is False but can perform write due to ACLs')
+        self.assertFalse(other_private.user_has_write_access, 'Can write based on permission is False but can perform write due to ACLs')
         other_private.write({'name': 'Admin can do everything'})
 
         # create a child to it
@@ -100,7 +100,7 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         self.assertMembers(other_private_child, False, {})
         self.assertEqual(other_private_child.article_member_ids.partner_id, self.env['res.partner'])
         self.assertEqual(other_private_child.category, 'private')
-        self.assertFalse(other_private_child.user_can_write, 'Can write based on permission is False but can perform write due to ACLs')
+        self.assertFalse(other_private_child.user_has_write_access, 'Can write based on permission is False but can perform write due to ACLs')
 
         # ARTICLE: WRITE
         other_private.write({'name': 'Can Update'})

@@ -2,12 +2,12 @@
 <odoo>
     <!-- Form view: -->
     <record id="knowledge_article_view_form" model="ir.ui.view">
-        <field name="name">knowledge.article.form.inherit</field>
+        <field name="name">knowledge.article.view.form.inherit.website</field>
         <field name="model">knowledge.article</field>
         <field name="inherit_id" ref="knowledge.knowledge_article_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('o_knowledge_share_panel')]/*[1]" position="before">
-                <field name="user_can_write" invisible="1"/>
+                <field name="user_has_write_access" invisible="1"/>
                 <div>
                     <div class="d-flex px-3">
                         <div class="o_knowledge_share_panel_icon align-self-center">
@@ -22,7 +22,7 @@
                             <div class="lead">Share to web</div>
                             <div>Publish and share with anyone</div>
                         </div>
-                        <div class="align-self-center" attrs="{'invisible': [('user_can_write', '=', False)]}">
+                        <div class="align-self-center" attrs="{'invisible': [('user_has_write_access', '=', False)]}">
                             <field name="website_published" widget="boolean_toggle" force_save="1"/>
                         </div>
                     </div>
@@ -30,7 +30,7 @@
                 <div class="px-3 my-2" attrs="{'invisible': [('website_published', '=', False)]}">
                     <field name="article_url" widget="CopyClipboardChar" readonly="1"/>
                 </div>
-                <div class="dropdown-divider" attrs="{'invisible': [('user_can_write', '=', False), ('website_published', '=', False)]}"></div>
+                <div class="dropdown-divider" attrs="{'invisible': [('user_has_write_access', '=', False), ('website_published', '=', False)]}"></div>
             </xpath>
         </field>
     </record>

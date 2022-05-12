@@ -66,9 +66,9 @@ class Article(models.Model):
     user_has_access = fields.Boolean(
         string='Has Access',
         compute="_compute_user_has_access", search="_search_user_has_access")
-    user_can_write = fields.Boolean(
+    user_has_write_access = fields.Boolean(
         string='Can Write',
-        compute="_compute_user_can_write", search="_search_user_can_write")
+        compute="_compute_user_has_write_access", search="_search_user_has_write_access")
     user_permission = fields.Selection(
         [('write', 'write'), ('read', 'read'), ('none', 'none')],
         string='User permission',
@@ -306,7 +306,7 @@ class Article(models.Model):
 
     @api.depends_context('uid')
     @api.depends('user_permission')
-    def _compute_user_can_write(self):
+    def _compute_user_has_write_access(self):
         """ Compute if the current user has read access to the article based on
         permissions and memberships.
 
@@ -315,12 +315,12 @@ class Article(models.Model):
         Note that admins have all access through ACLs by default but fields are
         still using the permission-based computation. """
         if self.env.user.share:
-            self.user_can_write = False
+            self.user_has_write_access = False
             return
         for article in self:
-            article.user_can_write = article.user_permission == 'write'
+            article.user_has_write_access = article.user_permission == 'write'
 
-    def _search_user_can_write(self, operator, value):
+    def _search_user_has_write_access(self, operator, value):
         if operator not in ('=', '!=') or not isinstance(value, bool):
             raise NotImplementedError("Unsupported search operator")
 
@@ -587,7 +587,7 @@ class Article(models.Model):
     def copy(self, default=None):
         default = dict(default or {},
                        name=_("%s (copy)", self.name))
-        if not self.env.su and not self.user_can_write:
+        if not self.env.su and not self.user_has_write_access:
             default.pop('article_member_ids', None)
             default.pop('favorite_ids', None)
             default.pop('child_ids', None)
@@ -645,7 +645,7 @@ class Article(models.Model):
             article = self._get_first_accessible_article()
         else:
             article = self.browse(res_id)
-        mode = 'edit' if article.user_can_write else 'readonly'
+        mode = 'edit' if article.user_has_write_access else 'readonly'
         action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_action_form')
         action['res_id'] = article.id
         action['context'] = dict(ast.literal_eval(action.get('context')), form_view_initial_mode=mode)
@@ -879,7 +879,7 @@ class Article(models.Model):
         self.ensure_one()
         if not self.parent_id:
             return False
-        if not self.env.su and not self.user_can_write:
+        if not self.env.su and not self.user_has_write_access:
             raise AccessError(_('You cannot restore the article %s.' % self.display_name))
         member_permission = (self | self.parent_id)._get_article_member_permissions()
         article_members_permission = member_permission[self.id]
@@ -913,7 +913,7 @@ class Article(models.Model):
             self._add_members(partners, permission)
         else:
             # prevent the invited user to get access to children articles the current user has no access to
-            unreachable_children = self.sudo().child_ids.filtered(lambda c: not c.user_can_write)
+            unreachable_children = self.sudo().child_ids.filtered(lambda c: not c.user_has_write_access)
             for child in unreachable_children:
                 child._add_members(partners, 'none', force_update=False)
 
@@ -941,7 +941,7 @@ class Article(models.Model):
           or 'write';
         """
         self.ensure_one()
-        if self.user_can_write and permission != "write":
+        if self.user_has_write_access and permission != "write":
             self._add_members(self.env.user.partner_id, 'write')
 
         downgrade = not self.is_desynchronized and self.parent_id and \
@@ -1009,7 +1009,7 @@ class Article(models.Model):
             self.sudo().write({'article_member_ids': members_command})
         # member to remove is on the article itself. Simply remove the member.
         elif current_membership:
-            if not self.user_can_write:
+            if not self.user_has_write_access:
                 raise AccessError(
                     _("You cannot remove the member %(member_name)s from article %(article_name)s",
                       member_name=member.display_name,
@@ -1037,7 +1037,7 @@ class Article(models.Model):
           this can be used to create default members and left existing one untouched;
         """
         self.ensure_one()
-        if not self.env.su and not self.user_can_write:
+        if not self.env.su and not self.user_has_write_access:
             raise AccessError(
                 _("You cannot give access to the article '%s' as you are not editor.", self.name))
 

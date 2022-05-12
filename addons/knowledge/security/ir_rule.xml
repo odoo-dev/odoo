@@ -21,7 +21,7 @@
     <record id="rule_knowledge_article_users_write" model="ir.rule">
         <field name="name">Articles: users/portal: write based on flag</field>
         <field name="model_id" ref="model_knowledge_article"/>
-        <field name="domain_force">[('user_can_write', '=', True)]</field>
+        <field name="domain_force">[('user_has_write_access', '=', True)]</field>
         <field name="groups" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
@@ -72,7 +72,7 @@
     <record id="rule_knowledge_invite_system" model="ir.rule">
         <field name="name">Invite: System invite members</field>
         <field name="model_id" ref="model_knowledge_invite"/>
-        <field name="domain_force">[('article_id.user_can_write', '=', True)]</field>
+        <field name="domain_force">[('article_id.user_has_write_access', '=', True)]</field>
         <field name="groups" eval="[(4, ref('base.group_system'))]"/>
     </record>
 </odoo>

@@ -58,17 +58,17 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
 
         # as employee w write perms
         article_desync = article_desync.with_user(self.user_employee_manager)
-        self.assertTrue(article_desync.user_can_write)
+        self.assertTrue(article_desync.user_has_write_access)
         self.assertTrue(article_desync.user_has_access)
 
         # as employee
         article_desync = article_desync.with_user(self.user_employee)
-        self.assertFalse(article_desync.user_can_write)
+        self.assertFalse(article_desync.user_has_write_access)
         self.assertTrue(article_desync.user_has_access)
 
         # as portal
         article_desync = article_desync.with_user(self.user_portal)
-        self.assertFalse(article_desync.user_can_write)
+        self.assertFalse(article_desync.user_has_write_access)
         self.assertFalse(article_desync.user_has_access, 'Permissions: member rights should not be fetch on parents')
 
     @mute_logger('odoo.addons.base.models.ir_rule')
@@ -77,7 +77,7 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         article_roots = self.article_roots.with_env(self.env)
 
         # roots: based on internal permissions
-        self.assertEqual(article_roots.mapped('user_can_write'), [True, False, False, True])
+        self.assertEqual(article_roots.mapped('user_has_write_access'), [True, False, False, True])
         self.assertEqual(article_roots.mapped('user_has_access'), [True, True, True, True])
         self.assertEqual(article_roots.mapped('user_permission'), ['write', 'read', 'read', 'write'])
 
@@ -132,7 +132,7 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         article_members = self.article_read_contents[0:2].with_env(self.env)
         self.assertEqual(article_members.mapped('inherited_permission'), ['write', 'write'])  # TDE: TOCHECK
         self.assertEqual(article_members.mapped('internal_permission'), ['write', 'write'])  # TDE: TOCHECK
-        self.assertEqual(article_members.mapped('user_can_write'), [False, False], 'Portal: can never write')
+        self.assertEqual(article_members.mapped('user_has_write_access'), [False, False], 'Portal: can never write')
         self.assertEqual(article_members.mapped('user_has_access'), [True, True], 'Portal: access through membership')
         self.assertEqual(article_members.mapped('user_permission'), ['read', 'read'])
 
@@ -142,7 +142,7 @@ class TestKnowledgeArticlePermissions(KnowledgeArticlePermissionsCase):
         article = self.env['knowledge.article'].new({'name': 'Transient'})
         self.assertFalse(article.inherited_permission)
         self.assertFalse(article.internal_permission)
-        self.assertTrue(article.user_can_write)
+        self.assertTrue(article.user_has_write_access)
         self.assertTrue(article.user_has_access)
         self.assertEqual(article.user_permission, 'write')
 
@@ -179,11 +179,11 @@ class KnowledgeArticlePermissionsInitialValues(KnowledgeArticlePermissionsCase):
         self.assertMembers(article_write_inherit, False, {self.partner_portal: 'read'})
         self.assertFalse(article_write_inherit.internal_permission)
         self.assertFalse(article_write_inherit.is_desynchronized)
-        self.assertTrue(article_write_inherit.user_can_write)
+        self.assertTrue(article_write_inherit.user_has_write_access)
         self.assertTrue(article_write_inherit.user_has_access)
 
         article_write_inherit_as2 = article_write_inherit.with_user(self.user_employee2)
-        self.assertTrue(article_write_inherit_as2.user_can_write)
+        self.assertTrue(article_write_inherit_as2.user_has_write_access)
         self.assertTrue(article_write_inherit_as2.user_has_access)
 
 
@@ -207,7 +207,7 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
             'Permission: lowering permission adds current user in members to have write access'
         )
         self.assertTrue(writable_as1.is_desynchronized)
-        self.assertTrue(writable_as1.user_can_write)
+        self.assertTrue(writable_as1.user_has_write_access)
         self.assertTrue(writable_as1.user_has_access)
 
         # check internal permission has been lowered
@@ -229,9 +229,9 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
             'Permission: lowering permission adds current user in members to have write access'
         )
         self.assertTrue(writable_as1.is_desynchronized)
-        self.assertTrue(writable_as1.user_can_write)
+        self.assertTrue(writable_as1.user_has_write_access)
         self.assertTrue(writable_as1.user_has_access)
-        self.assertFalse(writable_as2.user_can_write)
+        self.assertFalse(writable_as2.user_has_write_access)
         self.assertTrue(writable_as2.user_has_access)
 
     @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.models.unlink')
@@ -240,7 +240,7 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
         """ Remove a member from a child inheriting rights: will desync """
         writable = self.article_write_contents[2].with_env(self.env)
         self.assertTrue(writable.user_has_access)
-        self.assertTrue(writable.user_can_write)
+        self.assertTrue(writable.user_has_write_access)
         self.assertMembers(writable, False,
                            {self.partner_portal: 'read'})
 
@@ -276,7 +276,7 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
         """ Test setting member-specific permission """
         writable = self.article_write_contents[2].with_env(self.env)
         self.assertTrue(writable.user_has_access)
-        self.assertTrue(writable.user_can_write)
+        self.assertTrue(writable.user_has_write_access)
 
         # set partner employee manager as readable member of its root
         writable_root = writable.root_article_id
@@ -322,10 +322,10 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
         # direct try at setting higher internal permission
         readonly = self.article_read_contents[1].with_env(self.env)
         self.assertTrue(readonly.user_has_access)
-        self.assertFalse(readonly.user_can_write)
+        self.assertFalse(readonly.user_has_write_access)
         writable = self.article_write_contents[2].with_env(self.env)
         self.assertTrue(writable.user_has_access)
-        self.assertTrue(writable.user_can_write)
+        self.assertTrue(writable.user_has_write_access)
 
         with self.assertRaises(exceptions.AccessError,
                                msg='Permission: that is plain stupid trying to do this'):
@@ -346,7 +346,7 @@ class TestKnowledgeArticlePermissionsTools(KnowledgeArticlePermissionsCase):
         # direct try at setting higher internal permission
         readonly = self.article_read_contents[1].with_env(self.env)
         self.assertTrue(readonly.user_has_access)
-        self.assertFalse(readonly.user_can_write)
+        self.assertFalse(readonly.user_has_write_access)
         with self.assertRaises(exceptions.AccessError,
                                msg='Permission: that is plain stupid trying to do this'):
             readonly.write({'internal_permission': 'write'})
@@ -376,22 +376,22 @@ class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
     @users('admin')
     def test_article_search_admin(self):
         """ Test admin: can read / write everything but user_has_access and
-        user_can_write should still be based on real permissions. """
+        user_has_write_access should still be based on real permissions. """
         self.assertTrue(self.env.user.has_group('base.group_system'))
         articles = self.env['knowledge.article'].search([])
         expected = self.articles_all
         self.assertEqual(articles, expected,
-                         'Search on user_can_write: aka write access (additional: %s, missing: %s)' %
+                         'Search on user_has_write_access: aka write access (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
                         )
 
-        articles = self.env['knowledge.article'].search([('user_can_write', '=', True)])
+        articles = self.env['knowledge.article'].search([('user_has_write_access', '=', True)])
         expected = self.article_roots[0] + self.article_headers[0] + \
                    self.article_write_contents[0] + self.article_write_contents[2] + \
                    self.article_write_contents_children + \
                    self.article_read_contents[0:2]
         self.assertEqual(articles, expected,
-                         'Search on user_can_write: aka write access (additional: %s, missing: %s)' %
+                         'Search on user_has_write_access: aka write access (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
                         )
 
@@ -430,12 +430,12 @@ class TestKnowledgeArticleSearch(KnowledgeArticlePermissionsCase):
     @users('employee')
     def test_article_search_employee_method_based(self):
         """ Test search methods """
-        articles = self.env['knowledge.article'].search([('user_can_write', '=', True)])
+        articles = self.env['knowledge.article'].search([('user_has_write_access', '=', True)])
         expected = self.article_roots[0] + self.article_roots[3] + \
                    self.article_headers[0] + \
                    self.article_write_contents[2] + self.article_write_contents_children + \
                    self.article_read_contents[0] + self.article_read_desync
         self.assertEqual(articles, expected,
-                         'Search on user_can_write: aka write access (additional: %s, missing: %s)' %
+                         'Search on user_has_write_access: aka write access (additional: %s, missing: %s)' %
                          ((articles - expected).mapped('name'), (expected - articles).mapped('name'))
                         )

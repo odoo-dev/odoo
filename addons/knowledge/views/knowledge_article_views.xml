@@ -10,7 +10,7 @@
                 <field name="category" invisible="1"/>
                 <field name="is_locked" invisible="1" readonly="1"/>
                 <field name="is_user_favorite" invisible="1"/>
-                <field name="user_can_write" invisible="1"/>
+                <field name="user_has_write_access" invisible="1"/>
                 <field name="user_permission" invisible="1"/>
                 <div class="d-sm-flex h-100 bg-white">
                     <aside class="o_knowledge_aside d-print-none flex-shrink-0 p-0">
@@ -45,19 +45,19 @@
                                                 <div class="o_article_emoji_dropdown dropdown">
                                                     <a href="#" class="o_article_editable_emoji o_article_emoji dropdown-toggle o-no-caret"
                                                        type="button" data-toggle="dropdown" aria-expanded="true"
-                                                       attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
+                                                       attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}"/>
                                                     <span class="o_article_editable_emoji o_article_emoji o-no-caret"
-                                                       attrs="{'invisible': [('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
+                                                       attrs="{'invisible': [('is_locked', '=', False), ('user_has_write_access', '=', True)]}"/>
                                                     <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
                                                         aria-labelledby="o_article_emoji" />
                                                 </div>
                                             </div>
-                                            <field attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}" class="o_breadcrumb_article_name o_input" name="name"/>
+                                            <field attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}" class="o_breadcrumb_article_name o_input" name="name"/>
                                         </li>
                                     </ol>
                                     <i class="fa fa-star o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', False)]}" title="Remove from favorites"/>
                                     <i class="fa fa-star-o o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', True)]}" title="Add to favorites"/>
-                                    <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
+                                    <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_has_write_access', '=', False)]}">
                                         <i class="fa fa-fw fa-lock" title="locked"/>
                                     </div>
                                 </div>
@@ -78,7 +78,7 @@
                                             </a>
                                             <div class="o_knowledge_share_panel dropdown-menu" role="menu">
                                                 <div class="px-3 pb-2">
-                                                    <button type="action" name="%(knowledge_invite_action_from_article)d" class="btn btn-primary w-100" attrs="{'invisible': [('user_can_write', '=', False)]}">
+                                                    <button type="action" name="%(knowledge_invite_action_from_article)d" class="btn btn-primary w-100" attrs="{'invisible': [('user_has_write_access', '=', False)]}">
                                                         <i class="fa fa-plus"/> Invite
                                                     </button>
                                                 </div>
@@ -96,11 +96,11 @@
                                                     <i class="fa fa-fw fa-angle-double-right"/> Move To
                                                 </a>
                                                 <button class="dropdown-item btn-lock" href="#" type="object" name="action_set_lock"
-                                                    attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}">
+                                                    attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}">
                                                     <i class="fa fa-fw fa-lock"/> Lock
                                                 </button>
                                                 <button class="dropdown-item btn-lock" href="#" type="object" name="action_set_unlock"
-                                                    attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
+                                                    attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_has_write_access', '=', False)]}">
                                                     <i class="fa fa-fw fa-unlock"/> Unlock
                                                 </button>
                                                 <a class="dropdown-item btn-duplicate" href="#" role="button">
@@ -109,8 +109,8 @@
                                                 <button class="dropdown-item btn-archive" type="object" name="action_article_archive">
                                                     <i class="fa fa-fw fa-archive"/> Archive
                                                 </button>
-                                                <div class="dropdown-divider" attrs="{'invisible': [('user_can_write', '=', False)]}"/>
-                                                <div class="px-3" attrs="{'invisible': [('user_can_write', '=', False)]}">
+                                                <div class="dropdown-divider" attrs="{'invisible': [('user_has_write_access', '=', False)]}"/>
+                                                <div class="px-3" attrs="{'invisible': [('user_has_write_access', '=', False)]}">
                                                     <field name="full_width" widget="boolean_toggle" force_save="1"/>
                                                     <label for="full_width" class="m-0"/>
                                                 </div>
@@ -150,7 +150,7 @@
 
                                                     <!-- Icon and Cover buttons -->
                                                     <div class="o_knowledge_icon_cover_buttons text-primary bg-white d-print-none mt-2"
-                                                         attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}">
+                                                         attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}">
                                                         <a type="button" role="button" attrs="{'invisible': [('icon', '!=', False)]}"
                                                            class="btn btn-secondary btn-outline-secondary mr-2 pl-1 o_knowledge_add_icon">
                                                             <i class="fa fa-fw fa-smile-o" style="font-size: 1.5em;" title="Add icon"/> Add icon
@@ -167,9 +167,9 @@
                                                         <div class="o_article_emoji_dropdown dropdown">
                                                             <a href="#" class="o_article_emoji dropdown-toggle o-no-caret"
                                                                type="button" data-toggle="dropdown" aria-expanded="true"
-                                                               attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
+                                                               attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}"/>
                                                             <p class="o_article_emoji o-no-caret"
-                                                               attrs="{'invisible': [('is_locked', '=', False), ('user_can_write', '=', True)]}"/>
+                                                               attrs="{'invisible': [('is_locked', '=', False), ('user_has_write_access', '=', True)]}"/>
                                                             <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
                                                                 aria-labelledby="o_article_emoji" />
                                                         </div>
@@ -178,7 +178,7 @@
                                                     <div class="o_knowledge_editor d-flex flex-grow-1">
                                                         <field name="body" widget="html" no_label="1" default_focus="1"
                                                             options="{'resizable': False, 'knowledge_commands': true}"
-                                                            attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_can_write', '=', False)]}"/>
+                                                            attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -229,7 +229,7 @@
                 <field name="icon" invisible="1"/>
                 <field name="is_locked" invisible="1"/>
                 <field name="is_user_favorite" invisible="1"/>
-                <field name="user_can_write" invisible="1"/>
+                <field name="user_has_write_access" invisible="1"/>
                 <field name="article_url" invisible="1"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -252,7 +252,7 @@
                                         attrs="{'invisible': [('is_user_favorite', '=', True)]}">
                                         <i class="fa fa-star-o" title="Add to favorites"/>
                                     </a>
-                                    <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_can_write', '=', False)]}">
+                                    <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_has_write_access', '=', False)]}">
                                         <i class="fa fa-fw fa-lock" title="locked"/>
                                     </div>
                                 </div>
@@ -285,7 +285,7 @@
 
                 <filter name="filter_active" string="Archived"  domain="[('active', '=' ,False)]"/>
                 <filter name="filter_favorites" string="My Favorites" domain="[('is_user_favorite', '=', True)]"/>
-                <filter name="filter_own_privates" string="My Private Articles" domain="[('category', '=', 'private'), ('user_can_write', '=', True)]"/>
+                <filter name="filter_own_privates" string="My Private Articles" domain="[('category', '=', 'private'), ('user_has_write_access', '=', True)]"/>
                 <filter name="filter_shared_articles" string="My Shared Articles" domain="[('category', '=', 'shared')]"/>
 
                 <group expand="0" string="Group By">

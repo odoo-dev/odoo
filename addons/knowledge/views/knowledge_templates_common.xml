@@ -17,7 +17,7 @@
     <template id="articles_template">
         <t t-set="unfolded_articles" t-value="unfolded_articles or []"/>
         <t t-foreach="articles" t-as="article">
-            <t t-set="readonly" t-value="portal_readonly_mode or not article.user_can_write"/>
+            <t t-set="readonly" t-value="portal_readonly_mode or not article.user_has_write_access"/>
             <t t-set="favorite" t-value="favorites.filtered(lambda f: f.article_id == article) if favorites else False"/>
             <!-- readonly is used to for the drag and drop cancel.-->
             <li t-attf-class="o_article #{ 'readonly' if readonly else '' }" t-attf-id="article_#{article.id}"

@@ -434,11 +434,11 @@ class TestKnowledgeCommonWDataInitialValue(KnowledgeCommonWData):
         employee for acl-dependent tests) """
         article_workspace = self.article_workspace.with_env(self.env)
         self.assertTrue(article_workspace.user_has_access)
-        self.assertTrue(article_workspace.user_can_write)
+        self.assertTrue(article_workspace.user_has_write_access)
 
         article_shared = self.article_shared.with_env(self.env)
         self.assertTrue(article_shared.user_has_access)
-        self.assertFalse(article_shared.user_can_write)
+        self.assertFalse(article_shared.user_has_write_access)
 
         article_private = self.article_private_manager.with_env(self.env)
         with self.assertRaises(exceptions.AccessError):

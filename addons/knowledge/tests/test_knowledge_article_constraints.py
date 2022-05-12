@@ -115,7 +115,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         article.invite_members(self.partner_employee2, 'read')
 
         article_as2 = article.with_user(self.user_employee2)
-        self.assertFalse(article_as2.user_can_write)
+        self.assertFalse(article_as2.user_has_write_access)
         self.assertTrue(article_as2.user_has_access)
 
         # Member should not be allowed to create an article under an article without "write" permission
@@ -130,7 +130,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         article_private = self._create_private_article('MyPrivate')
         self.assertMembers(article_private, 'none', {self.partner_employee: 'write'})
         self.assertTrue(article_private.category, 'private')
-        self.assertTrue(article_private.user_can_write)
+        self.assertTrue(article_private.user_has_write_access)
         with self.assertRaises(exceptions.AccessError):
             self.env['knowledge.article'].with_user(self.user_employee2).create({
                 'name': 'My Own Private',
@@ -147,7 +147,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         article.invite_members(self.partner_employee2, 'read')
 
         article_as2 = article.with_user(self.user_employee2)
-        self.assertFalse(article_as2.user_can_write)
+        self.assertFalse(article_as2.user_has_write_access)
         self.assertTrue(article_as2.user_has_access)
 
         # Member should not be allowed to move an article under an article without "write" permission
@@ -174,7 +174,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
             'parent_id': article_workspace.id,
         }).with_user(self.user_employee2)
         self.assertEqual(article_private_u2.category, 'workspace')
-        self.assertTrue(article_private_u2.user_can_write)
+        self.assertTrue(article_private_u2.user_has_write_access)
 
         # Effectively private: other user cannot read it
         article_private_u2_asuser = article_private_u2.with_user(self.env.user)
@@ -184,7 +184,7 @@ class TestKnowledgeArticleConstraints(KnowledgeCommonWData):
         # Moving a private article under a workspace category makes it workspace
         article_private = self._create_private_article('MyPrivate').with_user(self.env.user)
         self.assertTrue(article_private.category, 'private')
-        self.assertTrue(article_private.user_can_write)
+        self.assertTrue(article_private.user_has_write_access)
 
         # Effectively private: other user cannot read it
         article_private_asu2 = article_private.with_user(self.user_employee2)

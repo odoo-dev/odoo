@@ -123,7 +123,7 @@ class KnowledgeController(http.Controller):
             "workspace_articles": root_articles.filtered(lambda article: article.category == 'workspace'),
             "shared_articles": root_articles.filtered(lambda article: article.category == 'shared'),
             "private_articles": root_articles.filtered(
-                lambda article: article.category == "private" and article.user_can_write),
+                lambda article: article.category == "private" and article.user_has_write_access),
             "unfolded_articles": unfolded_articles,
         }
         favorites = request.env['knowledge.article.favorite']
