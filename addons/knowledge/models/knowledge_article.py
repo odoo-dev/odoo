@@ -872,7 +872,7 @@ class Article(models.Model):
                 })]
         return self.create(values)
 
-    def get_user_sorted_articles(self, search_query):
+    def get_user_sorted_articles(self, search_query, limit=10):
         """ Called when using the Command palette to search for articles matching the search_query.
         As the article should be sorted also in function of the current user's favorite sequence, a search_read rpc
         won't be enough to returns the articles in the correct order.
@@ -881,29 +881,34 @@ class Article(models.Model):
             - Favorite count
         and returned result mimic a search_read result structure.
         """
-        asked_fields = ['id', 'name', 'is_user_favorite', 'favorite_count', 'root_article_id', 'icon']
-        order_by = "is_user_favorite, favorite_count desc"
-        limit = 10
         search_domain = ["|", ("name", "ilike", search_query), ("root_article_id.name", "ilike", search_query)]
-        articles = self.search(search_domain, order=order_by, limit=limit)
+        articles = self.search(
+            search_domain + [("is_user_favorite", "=", True)],
+            limit=limit
+        )
         sorted_articles = articles.sorted(
-            key=lambda a: (a.is_user_favorite, -1 * a.user_favorite_sequence),
+            key=lambda a: (-1 * a.user_favorite_sequence,
+                           a.favorite_count,
+                           a.write_date,
+                           a.id),
             reverse=True
         )
 
-        # TODO DBE: don't we have something that does that already ?
-        def get_field_info(article, field_name):
-            field = article._fields[field_name]
-            if field.type in ('many2one', 'one2many', 'many2many'):
-                rec = article[field_name]
-                return [rec.id, rec.sudo().display_name] if rec else False
-            else:
-                return article[field_name]
+        # fill with not favorites articles
+        if len(sorted_articles) < limit:
+            articles = self.search(
+                search_domain + [("is_user_favorite", "=", False)],
+                limit=(limit-len(sorted_articles))
+            )
+            sorted_articles += articles.sorted(
+                key=lambda a: (a.favorite_count,
+                               a.write_date,
+                               a.id),
+                reverse=True
+            )
 
-        return [
-            {field: get_field_info(article, field) for field in asked_fields}
-            for article in sorted_articles
-        ]
+        return sorted_articles.read(['id', 'name', 'is_user_favorite',
+                                     'favorite_count', 'root_article_id', 'icon'])
 
     # ------------------------------------------------------------
     # PERMISSIONS / MEMBERS

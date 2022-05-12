@@ -109,6 +109,8 @@ class KnowledgeCommonWData(KnowledgeCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        with mute_logger('odoo.models.unlink'):
+            cls.env['knowledge.article'].search([]).unlink()
 
         # - Private         seq=997   private      none (manager-w+)
         #   - Child1        seq=0     "            "
@@ -120,6 +122,10 @@ class KnowledgeCommonWData(KnowledgeCommon):
         cls._base_sequence = 999
         cls.article_workspace = cls.env['knowledge.article'].create(
             {'internal_permission': 'write',
+             'favorite_ids': [(0, 0, {'sequence': 1,
+                                      'user_id': cls.user_admin.id
+                                     }),
+             ],
              'name': 'Playground',
              'sequence': cls._base_sequence,
             }
