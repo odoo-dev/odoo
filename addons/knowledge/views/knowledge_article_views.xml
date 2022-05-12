@@ -101,35 +101,37 @@
                                                 <i class="fa fa-ellipsis-v"/>
                                             </a>
                                             <div class="o_knowledge_more_options_panel dropdown-menu" role="menu">
-                                                <a class="dropdown-item btn-move" href="#" role="button">
-                                                    <i class="fa fa-fw fa-angle-double-right"/> Move To
-                                                </a>
-                                                <button class="dropdown-item btn-lock" href="#" type="object" name="action_set_lock"
-                                                    attrs="{'invisible': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}">
-                                                    <i class="fa fa-fw fa-lock"/> Lock
-                                                </button>
-                                                <button class="dropdown-item btn-lock" href="#" type="object" name="action_set_unlock"
-                                                    attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_has_write_access', '=', False)]}">
-                                                    <i class="fa fa-fw fa-unlock"/> Unlock
-                                                </button>
-                                                <a class="dropdown-item btn-duplicate" href="#" role="button">
-                                                    <i class="fa fa-fw fa-copy"/> Duplicate
-                                                </a>
-                                                <button class="dropdown-item" type="object" name="action_article_archive"
-                                                        attrs="{'invisible': [('active', '=', False)]}">
-                                                    <i class="fa fa-fw fa-archive"/> Archive
-                                                </button>
-                                                <button class="dropdown-item" type="object" name="action_unarchive"
-                                                        attrs="{'invisible': [('active', '=', True)]}">
-                                                    <i class="fa fa-fw fa-archive"/> Unarchive
-                                                </button>
-                                                <div class="dropdown-divider" attrs="{'invisible': [('user_has_write_access', '=', False)]}"/>
-                                                <div class="px-3" attrs="{'invisible': [('user_has_write_access', '=', False)]}">
-                                                    <field name="full_width" widget="boolean_toggle" force_save="1"/>
-                                                    <label for="full_width" class="m-0"/>
+                                                <div attrs="{'invisible': [('user_has_write_access', '=', False)]}">
+                                                    <a class="dropdown-item btn-move" href="#" role="button">
+                                                        <i class="fa fa-fw fa-angle-double-right"/> Move To
+                                                    </a>
+                                                    <button class="dropdown-item btn-lock" href="#" type="object" name="action_set_lock"
+                                                        attrs="{'invisible': [('is_locked', '=', True)]}">
+                                                        <i class="fa fa-fw fa-lock"/> Lock
+                                                    </button>
+                                                    <button class="dropdown-item btn-lock" href="#" type="object" name="action_set_unlock"
+                                                        attrs="{'invisible': [('is_locked', '=', False)]}">
+                                                        <i class="fa fa-fw fa-unlock"/> Unlock
+                                                    </button>
+                                                    <a class="dropdown-item btn-duplicate" href="#" role="button">
+                                                        <i class="fa fa-fw fa-copy"/> Duplicate
+                                                    </a>
+                                                    <button class="dropdown-item" type="object" name="action_article_archive"
+                                                            attrs="{'invisible': [('active', '=', False)]}">
+                                                        <i class="fa fa-fw fa-archive"/> Archive
+                                                    </button>
+                                                    <button class="dropdown-item" type="object" name="action_unarchive"
+                                                            attrs="{'invisible': [('active', '=', True)]}">
+                                                        <i class="fa fa-fw fa-archive"/> Unarchive
+                                                    </button>
+                                                    <div class="dropdown-divider"/>
+                                                    <div class="px-3">
+                                                        <field name="full_width" widget="boolean_toggle" force_save="1"/>
+                                                        <label for="full_width" class="m-0"/>
+                                                    </div>
+                                                    <div class="dropdown-divider"
+                                                         attrs="{'invisible': [('last_edition_uid', '=', False), ('last_edition_date', '=', False)]}"/>
                                                 </div>
-                                                <div class="dropdown-divider"
-                                                    attrs="{'invisible': [('last_edition_uid', '=', False), ('last_edition_date', '=', False)]}"/>
                                                 <div class="px-4 py-2 mx-1" attrs="{'invisible': [('last_edition_uid', '=', False)]}">
                                                     <h6 class="small font-weight-bold m-0">Last Edited by:</h6>
                                                     <div class="d-flex">
