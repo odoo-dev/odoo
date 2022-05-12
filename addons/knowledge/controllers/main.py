@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import werkzeug
-from werkzeug.utils import redirect
 
 from odoo import http, tools, _
 from odoo.exceptions import AccessError, ValidationError
@@ -24,7 +23,7 @@ class KnowledgeController(http.Controller):
             return self._redirect_to_backend_view(article)
         if not article:
             return self._redirect_to_portal_view(False, hide_side_bar=True)
-        return redirect("/knowledge/article/%s" % article.id)
+        return request.redirect("/knowledge/article/%s" % article.id)
 
     @http.route('/knowledge/article/<int:article_id>', type='http', auth='user')
     def redirect_to_article(self, article_id):
@@ -60,9 +59,9 @@ class KnowledgeController(http.Controller):
                 partner.signup_prepare()
             partner.signup_get_auth_param()
             signup_url = partner._get_signup_url_for_action(url='/knowledge/article/%s' % article.id)[partner.id]
-            return redirect(signup_url)
+            return request.redirect(signup_url)
 
-        return redirect('/web/login?redirect=/knowledge/article/%s' % article.id)
+        return request.redirect('/web/login?redirect=/knowledge/article/%s' % article.id)
 
     def _fetch_article(self, article_id):
         """ Check the access of the given article for the current user. """
@@ -77,7 +76,7 @@ class KnowledgeController(http.Controller):
         return article
 
     def _redirect_to_backend_view(self, article):
-        return redirect("/web#id=%s&model=knowledge.article&action=%s&menu_id=%s" % (
+        return request.redirect("/web#id=%s&model=knowledge.article&action=%s&menu_id=%s" % (
             article.id if article else '',
             request.env.ref("knowledge.knowledge_article_action_form").id,
             request.env.ref('knowledge.knowledge_menu_root').id
