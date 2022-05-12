@@ -145,6 +145,7 @@ class KnowledgeController(http.Controller):
 
     @http.route('/knowledge/tree_panel/portal', type='json', auth='public')
     def get_tree_panel_portal(self, active_article_id=False, unfolded_articles=False):
+        """ Frontend access for left panel. """
         return self._prepare_articles_tree_html(
             'knowledge.knowledge_article_tree_frontend',
             self._fetch_article(active_article_id),
@@ -228,7 +229,7 @@ class KnowledgeController(http.Controller):
 
         internal_permission_field = request.env['knowledge.article']._fields['internal_permission']
         permission_field = request.env['knowledge.article.member']._fields['permission']
-        user_is_admin = request.env.user.has_group('base.group_system')
+        user_is_admin = request.env.user._is_admin()
         return {
             'internal_permission_options': internal_permission_field.get_description(request.env).get('selection', []),
             'internal_permission': article.inherited_permission,
