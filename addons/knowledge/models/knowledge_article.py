@@ -58,10 +58,12 @@ class Article(models.Model):
     inherited_permission = fields.Selection(
         [('write', 'Can write'), ('read', 'Can read'), ('none', 'No access')],
         string='Article Inherited Permission',
-        compute="_compute_inherited_permission", compute_sudo=True, recursive=True)
+        compute="_compute_inherited_permission", compute_sudo=True,
+        store=True, recursive=True)
     inherited_permission_parent_id = fields.Many2one(
         "knowledge.article", string="Inherited Permission Parent Article",
-        compute="_compute_inherited_permission", compute_sudo=True, recursive=True)
+        compute="_compute_inherited_permission", compute_sudo=True,
+        store=True, recursive=True)
     article_member_ids = fields.One2many('knowledge.article.member', 'article_id', string='Members Information', copy=True)
     user_has_access = fields.Boolean(
         string='Has Access',
