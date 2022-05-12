@@ -1,22 +1,21 @@
 /** @odoo-module **/
 
-import session from 'web.session';
-import Dialog from 'web.Dialog';
+import { session } from "@web/session";
+import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from 'web.core';
 import { useService } from '@web/core/utils/hooks';
 
 const { Component, onWillStart, useState } = owl;
 const permissionLevel = {'none': 0, 'read': 1, 'write': 2}
-const restrictMessage = _t("Are you sure you want to restrict this role and restrict access ? "
+const restrictMessage = _lt("Are you sure you want to restrict this role and restrict access ? "
 + "This article will no longer inherit access settings from the parent page.");
-const loseWriteMessage = _t('Are you sure you want to remove you own "Write" access ?');
+const loseWriteMessage = _lt('Are you sure you want to remove you own "Write" access ?');
 
 class PermissionPanel extends Component {
     /**
      * @override
      */
     setup () {
-        super.setup();
         this.rpc = useService('rpc');
         this.state = useState({
             loading: true,
@@ -39,8 +38,8 @@ class PermissionPanel extends Component {
     /**
      * @returns {Object}
      */
-    async loadData () {
-        return await this.rpc({
+    loadData () {
+        return this.rpc({
             route: '/knowledge/get_article_permission_panel_data',
             params: {
                 article_id: this.props.article_id
