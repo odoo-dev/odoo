@@ -217,7 +217,7 @@ class KnowledgeController(http.Controller):
                 'partner_email': member['partner_email'],
                 'permission': member['permission'],
                 'based_on': member['based_on_name'],
-                'based_on_id': member['based_on'],
+                'based_on_id': member['based_on'],  #TODO: change to display_name
                 'partner_share': member['partner_share'],
                 'is_unique_writer': member['permission'] == "write" and article.inherited_permission != "write" and not any(
                     other_member['permission'] == 'write'

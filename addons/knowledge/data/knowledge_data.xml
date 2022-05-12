@@ -354,7 +354,6 @@
                 <br />
             </field>
             <field name="parent_id" eval="ref('knowledge_article_sales_and_marketing')" />
-            <field name="internal_permission">write</field>
         </record>
         <record id="knowledge_article_brand_assets" model="knowledge.article">
             <field name="name">Brand Assets</field>
@@ -529,7 +528,6 @@
                 <br />
             </field>
             <field name="parent_id" eval="ref('knowledge_article_sales_and_marketing')" />
-            <field name="internal_permission">write</field>
         </record>
     </data>
 </odoo>
