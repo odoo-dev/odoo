@@ -409,7 +409,12 @@ class Article(models.Model):
 
         if (value and operator == '=') or (not value and operator == '!='):
             return [('favorite_ids.user_id', 'in', [self.env.uid])]
-        return [('favorite_ids.user_id', 'not in', [self.env.uid])]
+
+        # easier than a not in on a 2many field
+        favorited = self.env['knowledge.article.favorite'].sudo().search(
+            [('user_id', '=', self.env.uid)]
+        ).article_id
+        return [('id', 'not in', favorited.ids)]
 
     # ------------------------------------------------------------
     # CRUD
