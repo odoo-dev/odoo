@@ -16,8 +16,8 @@ class KnowledgeController(http.Controller):
 
     @http.route('/knowledge/home', type='http', auth='user')
     def access_knowledge_home(self):
-        """ This route will redirect internal users to the backend view of the article and the share users to the
-        frontend view instead."""
+        """ This route will redirect internal users to the backend view of the
+        article and the share users to the frontend view instead. """
         article = request.env["knowledge.article"]._get_first_accessible_article()
         if request.env.user.has_group('base.group_user') and not article:
             return self._redirect_to_backend_view(article)
@@ -27,8 +27,8 @@ class KnowledgeController(http.Controller):
 
     @http.route('/knowledge/article/<int:article_id>', type='http', auth='user')
     def redirect_to_article(self, article_id):
-        """ This route will redirect internal users to the backend view of the article and the share users to the
-        frontend view instead."""
+        """ This route will redirect internal users to the backend view of the
+        article and the share users to the frontend view instead."""
         article = self._fetch_article(article_id)
         if request.env.user.has_group('base.group_user'):
             if not article:
@@ -99,14 +99,15 @@ class KnowledgeController(http.Controller):
         return request.env["knowledge.article"].search([("parent_id", "=", False)], limit=limit, order=_order)
 
     def _prepare_articles_tree_html(self, template, active_article, unfolded_articles=False):
-        """
-        This method prepares all the info needed to render the article tree view side panel and returns the rendered
-        given template with those values.
-        :param active_article: (Model<knowledge.article>) Used to highlight the given article_id in the template
-        :param unfolded_articles: (list of ids) Used to display the children of the given article ids.
-            unfolded articles are saved into local storage. When reloading/opening the article page, previously
-            unfolded articles nodes must be opened.
-        :return: (Dict) that will be used to render templates in the articles tree side panel.
+        """ Prepares all the info needed to render the article tree view side panel
+        and returns the rendered given template with those values.
+
+        :param <knowledge.article> active_article: used to highlight the given
+          article_id in the template;
+        :param list unfolded_articles: List of IDs used to display the children
+          of the given article ids. Unfolded articles are saved into local storage.
+          When reloading/opening the article page, previously unfolded articles
+          nodes must be opened;
         """
         unfolded_articles = set() if not unfolded_articles else set(unfolded_articles)
         if active_article:
@@ -144,6 +145,7 @@ class KnowledgeController(http.Controller):
 
     @http.route('/knowledge/tree_panel/portal', type='json', auth='public')
     def get_tree_panel_portal(self, active_article_id=False, unfolded_articles=False):
+        """ Frontend access for left panel. """
         return self._prepare_articles_tree_html(
             'knowledge.knowledge_article_tree_frontend',
             self._fetch_article(active_article_id),
@@ -227,7 +229,7 @@ class KnowledgeController(http.Controller):
 
         internal_permission_field = request.env['knowledge.article']._fields['internal_permission']
         permission_field = request.env['knowledge.article.member']._fields['permission']
-        user_is_admin = request.env.user.has_group('base.group_system')
+        user_is_admin = request.env.user._is_admin()
         return {
             'internal_permission_options': internal_permission_field.get_description(request.env).get('selection', []),
             'internal_permission': article.inherited_permission,
