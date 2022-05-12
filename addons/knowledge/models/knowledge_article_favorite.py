@@ -19,7 +19,9 @@ class ArticleFavorite(models.Model):
     sequence = fields.Integer(default=0)
 
     _sql_constraints = [
-        ('unique_favorite', 'unique(article_id, user_id)', 'User already has this article in favorites.')
+        ('unique_article_user',
+         'unique(article_id, user_id)',
+         'User already has this article in favorites.')
     ]
 
     @api.model_create_multi
@@ -36,6 +38,7 @@ class ArticleFavorite(models.Model):
         return super(ArticleFavorite, self).create(vals_list)
 
     def write(self, vals):
+        """ Whatever rights, avoid any attempt at privilege escalation. """
         if ('article_id' in vals or 'user_id' in vals) and not self.env.is_admin():
             raise exceptions.AccessError(_("Can not update the article or user of a favorite."))
         return super().write(vals)

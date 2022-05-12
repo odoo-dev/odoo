@@ -52,11 +52,16 @@
                                                         aria-labelledby="o_article_emoji" />
                                                 </div>
                                             </div>
-                                            <field attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}" class="o_breadcrumb_article_name o_input" name="name"/>
+                                            <field attrs="{'readonly': ['|', ('is_locked', '=', True), ('user_has_write_access', '=', False)]}"
+                                                   class="o_breadcrumb_article_name o_input" name="name"/>
                                         </li>
                                     </ol>
-                                    <i class="fa fa-star o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', False)]}" title="Remove from favorites"/>
-                                    <i class="fa fa-star-o o_toggle_favorite o_cursor_pointer" attrs="{'invisible': [('is_user_favorite', '=', True)]}" title="Add to favorites"/>
+                                    <i class="fa fa-star o_toggle_favorite o_cursor_pointer"
+                                       title="Remove from favorites"
+                                       attrs="{'invisible': [('is_user_favorite', '=', False)]}"/>
+                                    <i class="fa fa-star-o o_toggle_favorite o_cursor_pointer"
+                                       title="Add to favorites"
+                                       attrs="{'invisible': [('is_user_favorite', '=', True)]}"/>
                                     <div attrs="{'invisible': ['|', ('is_locked', '=', False), ('user_has_write_access', '=', False)]}">
                                         <i class="fa fa-fw fa-lock" title="locked"/>
                                     </div>
@@ -78,7 +83,9 @@
                                             </a>
                                             <div class="o_knowledge_share_panel dropdown-menu" role="menu">
                                                 <div class="px-3 pb-2">
-                                                    <button type="action" name="%(knowledge_invite_action_from_article)d" class="btn btn-primary w-100" attrs="{'invisible': [('user_has_write_access', '=', False)]}">
+                                                    <button type="action" name="%(knowledge_invite_action_from_article)d"
+                                                            class="btn btn-primary w-100"
+                                                            attrs="{'invisible': [('user_has_write_access', '=', False)]}">
                                                         <i class="fa fa-plus"/> Invite
                                                     </button>
                                                 </div>
@@ -88,7 +95,8 @@
                                     </div>
                                     <div class="btn-group" role="toolbar" aria-label="options">
                                         <div class="o-dropdown dropdown o-dropdown--no-caret">
-                                            <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-hotkey="p">
+                                            <a type="button" role="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
+                                               aria-haspopup="true" aria-expanded="false" data-hotkey="p">
                                                 <i class="fa fa-ellipsis-v"/>
                                             </a>
                                             <div class="o_knowledge_more_options_panel dropdown-menu" role="menu">
@@ -143,10 +151,12 @@
                                                 <!-- Article body -->
                                                 <div class="o_knowledge_body d-flex flex-column">
                                                     <!-- Article Cover -->
-                                                    <field name="cover" widget="image" class="o_knowledge_cover_image" attrs="{'invisible': [('cover', '=', False)]}"/>
+                                                    <field name="cover" widget="image" class="o_knowledge_cover_image"
+                                                           attrs="{'invisible': [('cover', '=', False)]}"/>
 
                                                     <!-- Full Width handling -->
-                                                    <span class="o_knowledge_article_view_form_dynamic_width d-none" attrs="{'invisible': [('full_width', '=', False)]}"/>
+                                                    <span class="o_knowledge_article_view_form_dynamic_width d-none"
+                                                          attrs="{'invisible': [('full_width', '=', False)]}"/>
 
                                                     <!-- Icon and Cover buttons -->
                                                     <div class="o_knowledge_icon_cover_buttons text-primary bg-white d-print-none mt-2"
@@ -171,7 +181,7 @@
                                                             <p class="o_article_emoji o-no-caret"
                                                                attrs="{'invisible': [('is_locked', '=', False), ('user_has_write_access', '=', True)]}"/>
                                                             <div class="o_article_emoji_dropdown_panel dropdown-menu rounded p-0" role="menu"
-                                                                aria-labelledby="o_article_emoji" />
+                                                                 aria-labelledby="o_article_emoji" />
                                                         </div>
                                                     </div>
                                                     <!-- Article body -->
@@ -212,7 +222,8 @@
         <field name="arch" type="xml">
             <tree default_order="is_user_favorite desc, favorite_count desc">
                 <field name="display_name"/>
-                <field name="is_user_favorite" widget="boolean_favorite" nolabel="1" force_save="1" options="{'allow_order': '1'}"/>
+                <field name="is_user_favorite" widget="boolean_favorite" nolabel="1"
+                       force_save="1" options="{'allow_order': '1'}"/>
                 <field name="favorite_count"/>
                 <field name="root_article_id"/>
                 <field name="last_edition_uid" widget="many2one_avatar_user"/>
@@ -283,13 +294,17 @@
                 <field name="root_article_id"/>
                 <field name="last_edition_uid"/>
 
-                <filter name="filter_active" string="Archived"  domain="[('active', '=' ,False)]"/>
-                <filter name="filter_favorites" string="My Favorites" domain="[('is_user_favorite', '=', True)]"/>
-                <filter name="filter_own_privates" string="My Private Articles" domain="[('category', '=', 'private'), ('user_has_write_access', '=', True)]"/>
-                <filter name="filter_shared_articles" string="My Shared Articles" domain="[('category', '=', 'shared')]"/>
+                <filter name="filter_active" string="Archived"
+                    domain="[('active', '=' ,False)]"/>
+                <filter name="filter_favorites" string="My Favorites"
+                    domain="[('is_user_favorite', '=', True)]"/>
+                <filter name="filter_own_privates" string="My Private Articles"
+                    domain="[('category', '=', 'private'), ('user_has_write_access', '=', True)]"/>
+                <filter name="filter_shared_articles" string="My Shared Articles"
+                    domain="[('category', '=', 'shared')]"/>
 
                 <group expand="0" string="Group By">
-                    <filter string="Category" name="group_by_category" domain="[]" context="{'group_by':'category'}"/>
+                    <filter string="Category" name="group_by_category" domain="[]" context="{'group_by': 'category'}"/>
                 </group>
             </search>
         </field>

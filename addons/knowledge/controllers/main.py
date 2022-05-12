@@ -246,15 +246,20 @@ class KnowledgeController(http.Controller):
 
     @http.route('/knowledge/article/set_member_permission', type='json', auth='user')
     def article_set_member_permission(self, article_id, permission, member_id=False, inherited_member_id=False):
-        """
-        Sets the permission of the given member for the given article.
-        The returned dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
-        listing all articles should be reloaded. This can happen when the article moves from one section to another.
+        """ Sets the permission of the given member for the given article.
+
+        The returned result can also include a `reload_tree` entry that tells the
+        caller that the aside block listing all articles should be reloaded. This
+        happens when the article moves from one section to another.
+
         **Note**: The user needs "write" permission to change the permission of a user.
-        :param article_id: (int) target article id
-        :param permission: (string) permission to set on member
-        :param member_id: (int) id of the article's member
-        :param inherited_member_id: (int) member id of one of the parent's article (if based on)
+
+        :param int article_id: target article id;
+        :param string permission: permission to set on member, one of 'none',
+          'read' or 'write';
+        :param int member_id: id of a member of the given article;
+        :param int inherited_member_id: id of a member from one of the article's
+          parent (indicates rights are inherited from parents);
         """
         article = self._fetch_article(article_id)
         if not article:
@@ -277,16 +282,19 @@ class KnowledgeController(http.Controller):
 
     @http.route('/knowledge/article/remove_member', type='json', auth='user')
     def article_remove_member(self, article_id, member_id=False, inherited_member_id=False):
-        """
-        Removes the given member from the given article.
-        The function returns a dictionary indicating whether the request succeeds (see: `success` key).
-        The returned dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
-        listing all articles should be reloaded. This can happen when the article moves from one section to another.
+        """ Removes the given member from the given article.
+
+        The returned result can also include a `reload_tree` entry that tells the
+        caller that the aside block listing all articles should be reloaded. This
+        happens when the article moves from one section to another.
+
         **Note**: The user needs "write" permission to remove another member from
         the list. The user can always remove themselves from the list.
-        :param article_id: (int) target article id
-        :param member_id: (int) id of the article's member
-        :param inherited_member_id: (int) member id of one of the parent's article (if based on)
+
+        :param int article_id: target article id;
+        :param int member_id: id of a member of the given article;
+        :param int inherited_member_id: id of a member from one of the article's
+          parent (indicates rights are inherited from parents);
         """
         article = self._fetch_article(article_id)
         if not article:
@@ -309,14 +317,18 @@ class KnowledgeController(http.Controller):
 
     @http.route('/knowledge/article/set_internal_permission', type='json', auth='user')
     def article_set_internal_permission(self, article_id, permission):
-        """
-        Sets the internal permission of the given article.
-        The function returns a dictionary indicating whether the request succeeds (see: `success` key).
-        The returned dictionary can also include a `reload_tree` entry that will signify the caller that the aside block
-        listing all articles should be reloaded. This can happen when the article moves from one section to another.
-        **Note**: The user needs "write" permission to update the internal permission of the article.
-        :param article_id: (int) article id
-        :param permission: (string) permission
+        """ Sets the internal permission of the given article.
+
+        The returned result can also include a `reload_tree` entry that tells the
+        caller that the aside block listing all articles should be reloaded. This
+        happens when the article moves from one section to another.
+
+        **Note**: The user needs "write" permission to update the internal permission
+        of the article.
+
+        :param int article_id: target article id;
+        :param string permission: permission to set on member, one of 'none',
+          'read' or 'write';
         """
         article = self._fetch_article(article_id)
         if not article:

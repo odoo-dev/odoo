@@ -19,18 +19,18 @@ class Users(models.Model):
         if not article_template:
             return
         articles_to_create = [{
-            'name': '%s %s' % (article_template.name, user.name),
+            'article_member_ids': [(0, 0, {
+                'partner_id': user.partner_id.id,
+                'permission': 'write',
+            })],
             'body': article_template.body.replace('Hello there', 'Hello there, %s' % user.name),
             'icon': article_template.icon,
             'internal_permission': 'none',
-            'article_member_ids': [(0, 0, {
-                'partner_id': user.partner_id.id,
-                'permission': 'write'
-            })],
             'favorite_ids': [(0, 0, {
+                'sequence': 0,
                 'user_id': user.id,
-                'sequence': 0
-            })]
+            })],
+            'name': '%s %s' % (article_template.name, user.name),
         } for user in self]
         if articles_to_create:
             self.env['knowledge.article'].sudo().create(articles_to_create)

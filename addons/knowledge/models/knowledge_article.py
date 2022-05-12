@@ -19,7 +19,7 @@ class Article(models.Model):
     _name = "knowledge.article"
     _description = "Knowledge Article"
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = "favorite_count, create_date desc, id desc"  # Ordering : Most popular first, then newest articles.
+    _order = "favorite_count, create_date desc, id desc"
 
     active = fields.Boolean(default=True)
     name = fields.Char(string="Title", default=lambda self: _('New Article'), required=True, tracking=20)
@@ -76,7 +76,8 @@ class Article(models.Model):
     # categories and ownership
     category = fields.Selection(
         [('workspace', 'Workspace'), ('private', 'Private'), ('shared', 'Shared')],
-        compute="_compute_category", compute_sudo=True, store=True)
+        compute="_compute_category", compute_sudo=True, store=True,
+        help='Used to categozie articles in UI, depending on their main permission definitions.')
         # Stored to improve performance when loading the article tree. (avoid looping through members if 'workspace')
     # Same as write_uid/_date but limited to the body
     last_edition_uid = fields.Many2one(
@@ -89,7 +90,7 @@ class Article(models.Model):
         readonly=False, copy=False)
     # Favorite
     is_user_favorite = fields.Boolean(
-        string="Is Favorited?",
+        string="Is Favorited",
         compute="_compute_is_user_favorite", search="_search_is_user_favorite",
         inverse="_inverse_is_user_favorite")
     user_favorite_sequence = fields.Integer(string="User Favorite Sequence", compute="_compute_is_user_favorite")
@@ -122,10 +123,16 @@ class Article(models.Model):
 
     @api.constrains('internal_permission', 'article_member_ids')
     def _check_has_writer(self):
-        """ If article has no member, the internal_permission must be write. as article must have at least one writer.
-        If article has member, the validation is done in article.member model as we cannot trigger constraint depending
-        on fields from related model. see _check_member from 'knowledge.article.member' model for more details.
-        Note : We cannot use the optimised sql request to get the permission and members as values are not yet in DB"""
+        """ Articles must always have at least one writer. This constraint is done
+        on article level, in coordination to the constraint on member model (see
+        ``_check_has_writer`` on ``knowledge.article.member``).
+
+        If article has no member the internal_permission must be write. If article
+        has members validation is done in article.member model as we cannot trigger
+        the constraint depending on fields from related model.
+
+        Ǹote: computation is done in Py instead of using optimized SQL queries
+        because value are not yet in DB at this point."""
         for article in self:
             def has_write_member(a, child_members=False):
                 if not child_members:
@@ -134,7 +141,7 @@ class Article(models.Model):
                 if any(m.permission == 'write' and m.partner_id not in child_members.mapped('partner_id')
                        for m in article_members):
                     return True
-                elif a.parent_id and not a.is_desynchronized:
+                if a.parent_id and not a.is_desynchronized:
                     return has_write_member(a.parent_id, article_members | child_members)
                 return False
             if article.inherited_permission != 'write' and not has_write_member(article):
@@ -264,7 +271,7 @@ class Article(models.Model):
         Note that admins have all access through ACLs by default but fields are
         still using the permission-based computation. """
         for article in self:
-            article.user_has_access = article.user_permission and article.user_permission != 'none'
+            article.user_has_access = article.user_permission != 'none' if article.user_permission else False
 
     def _search_user_has_access(self, operator, value):
         """ This search method looks at article and members permissions to return
@@ -280,7 +287,7 @@ class Article(models.Model):
             is not member with 'none' access
         """
         if operator not in ('=', '!=') or not isinstance(value, bool):
-            raise ValueError("unsupported search operator")
+            raise NotImplementedError("unsupported search operator")
 
         articles_with_access = {}
         if not self.env.user.share:
@@ -482,11 +489,26 @@ class Article(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """ While creating records, automatically organize articles to be the
-        last of their parent children, unless a sequence is given.
+        """ Article permissions being quite strong, some custom behavior support
+        is necessary in order to let people create articles with a correct
+        configuration.
 
-        Also allow to create private articles, using sudo if that case is
-        found. """
+        Constraints
+          * creating an article under a parent requires to be able to write on
+            it. As anyway errors will raise we prevently raise a more user friendly
+            error;
+          * root articles without permission are forced to write to avoid issues
+            with constraints;
+
+        Notably
+          * automatically organize articles to be the last of their parent
+            children, unless a specific sequence is given;
+          * allow creation of private articles for him- or her-self. As creation
+            rights on member model are not granted, we detect private article
+            creation and sudo the creation of those. This requires some data
+            manipulation to sudo only those and keep requested ordering based
+            on vals_list;
+        """
         defaults = self.default_get(['article_member_ids', 'internal_permission', 'parent_id'])
         vals_by_parent_id = {}
         vals_as_sudo = []
@@ -641,14 +663,14 @@ class Article(models.Model):
 
     def action_home_page(self):
         res_id = self.env.context.get('res_id', False)
-        if not res_id:
-            article = self._get_first_accessible_article()
-        else:
-            article = self.browse(res_id)
+        article = self.browse(res_id) if res_id else self._get_first_accessible_article()
         mode = 'edit' if article.user_has_write_access else 'readonly'
         action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_action_form')
         action['res_id'] = article.id
-        action['context'] = dict(ast.literal_eval(action.get('context')), form_view_initial_mode=mode)
+        action['context'] = dict(
+            ast.literal_eval(action.get('context')),
+            form_view_initial_mode=mode,
+        )
         return action
 
     def action_set_lock(self):
@@ -775,7 +797,8 @@ class Article(models.Model):
             for i, child in enumerate(children[duplicate_index:]):
                 article_to_update_by_sequence[i + start_sequence] |= child
 
-        for sequence in article_to_update_by_sequence:  # Call super to avoid loop in write
+        for sequence in article_to_update_by_sequence:
+            # call super to avoid loops in write
             super(Article, article_to_update_by_sequence[sequence]).write({'sequence': sequence})
 
     @api.model
@@ -980,7 +1003,6 @@ class Article(models.Model):
             else:
                 self._add_members(member.partner_id, permission)
         else:
-            # TODO REMOVE SUDO if can write on member based on can_write on article
             member.sudo().write({'permission': permission})
 
     def _remove_member(self, member):
@@ -1015,9 +1037,8 @@ class Article(models.Model):
                       member_name=member.display_name,
                       article_name=self.display_name
                       ))
-            else:
-                # TODO REMOVE SUDO if can write on member based on can_write on article
-                self.sudo().write({'article_member_ids': [(2, current_membership.id)]})
+            # TODO REMOVE SUDO if can write on member based on can_write on article
+            self.sudo().write({'article_member_ids': [(2, current_membership.id)]})
         # Inherited rights from parent
         else:
             # TODO REMOVE SUDO if can write on member based on can_write on article
@@ -1078,11 +1099,10 @@ class Article(models.Model):
             force_member_permission=force_member_permission
         )
 
-        # TODO REMOVE SUDO if can write on member based on can_write on article
         return self.sudo().write({
-            'internal_permission': new_internal_permission,
             'article_member_ids': members_commands,
-            'is_desynchronized': True
+            'internal_permission': new_internal_permission,
+            'is_desynchronized': True,
         })
 
     def _copy_access_from_parents(self, force_partners=False, force_member_permission=False):
@@ -1361,6 +1381,7 @@ class Article(models.Model):
     # ------------------------------------------------------------
 
     def _send_invite_mail(self, partners):
+        # TDE NOTE: try to cleanup and batchize
         self.ensure_one()
         for partner in partners:
             subject = _("Invitation to access %s", self.name)

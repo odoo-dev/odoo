@@ -14,7 +14,7 @@ class ArticleMember(models.Model):
 
     article_id = fields.Many2one(
         'knowledge.article', 'Article',
-        ondelete='cascade', required=True, index=True)
+        index=True, ondelete='cascade', required=True)
     partner_id = fields.Many2one(
         'res.partner', 'Partner',
         index=True, ondelete='cascade', required=True)
@@ -32,18 +32,28 @@ class ArticleMember(models.Model):
              "Used to check if user will upgrade its own permission.")
 
     _sql_constraints = [
-        ('partner_unique', 'unique(article_id, partner_id)', 'You already added this partner on this article.')
+        ('unique_article_partner',
+         'unique(article_id, partner_id)',
+         'You already added this partner on this article.')
     ]
 
     @api.constrains('article_permission', 'permission')
-    def _check_member(self, on_unlink=False):
-        """
-        An article should always be available for update (aka: inherit write permission, or a member with write access).
-        Since this constraint only triggers if we have at least one member on the article, another validation is done in
-        'knowledge.article' model. The article_permission related field has been added and stored to force triggering
-        this constraint when article.permission is modified.
-        :param on_unlink: (Boolean) When called on unlink, we must remove the members in self
-            (the ones that will be deleted) to check if one of the remaining members has write access.
+    def _check_has_writer(self, on_unlink=False):
+        """ Articles must always have at least one writer. This constraint is done
+        on member level, in coordination to the constraint on article model (see
+        ``_check_has_writer`` on ``knowledge.article``).
+
+        Since this constraint only triggers if we have at least one member another
+        validation is done on article model. The article_permission related field
+        has been added and stored to force triggering this constraint when
+        article.permission is modified.
+
+        Ǹote: computation is done in Py instead of using optimized SQL queries
+        because value are not yet in DB at this point.
+
+        :param bool on_unlink: when called on unlink we must remove the members
+          in self (the ones that will be deleted) to check if one of the remaining
+          members has write access.
         """
         articles_to_check = self.article_id.filtered(lambda a: a.inherited_permission != 'write')
         if not articles_to_check:
@@ -79,9 +89,13 @@ class ArticleMember(models.Model):
 
     @api.constrains('partner_id', 'permission')
     def _check_external_member_permission(self):
-        for member in self:
-            if member.partner_id.partner_share and member.permission == 'write':
-                raise ValidationError(_("The external user %s cannot have a 'write' permission on article '%s'", member.partner_id.display_name, member.article_id.display_name))
+        for member in self.filtered(lambda member: member.permission == 'write'):
+            if member.partner_id.partner_share:
+                raise ValidationError(
+                    _("The external user %(user_name)s cannot have a 'write' permission on article %(article_name)s",
+                      user_name=member.partner_id.display_name,
+                      article_name=member.article_id.display_name
+                      ))
 
     @api.depends("article_id", "permission")
     def _compute_has_higher_permission(self):
@@ -96,7 +110,7 @@ class ArticleMember(models.Model):
     def _unlink_except_no_writer(self):
         """ When removing a member, the constraint is not triggered.
         We need to check manually on article with no write permission that we do not remove the last write member """
-        self._check_member(on_unlink=True)
+        self._check_has_writer(on_unlink=True)
 
     def _get_invitation_hash(self):
         """ We use a method instead of a field in order to reduce DB space."""
