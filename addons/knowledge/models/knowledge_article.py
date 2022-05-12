@@ -288,7 +288,7 @@ class Article(models.Model):
             is not member with 'none' access
         """
         if operator not in ('=', '!=') or not isinstance(value, bool):
-            raise NotImplementedError("unsupported search operator")
+            raise NotImplementedError("Unsupported search operator")
 
         articles_with_access = {}
         if not self.env.user.share:
@@ -1043,11 +1043,9 @@ class Article(models.Model):
                       member_name=member.display_name,
                       article_name=self.display_name
                       ))
-            # TODO REMOVE SUDO if can write on member based on can_write on article
             self.sudo().write({'article_member_ids': [(2, current_membership.id)]})
         # Inherited rights from parent
         else:
-            # TODO REMOVE SUDO if can write on member based on can_write on article
             self._desync_access_from_parents(force_partners=self.article_member_ids.partner_id)
             current_membership = self.article_member_ids.filtered(lambda m: m.partner_id == member.partner_id)
             if current_membership:

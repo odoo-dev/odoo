@@ -7,7 +7,7 @@ from odoo import api, exceptions, fields, models, _
 class ArticleFavorite(models.Model):
     _name = 'knowledge.article.favorite'
     _description = 'Favorite Article'
-    _order = 'sequence asc, id DESC'
+    _order = 'sequence ASC, id DESC'
     _rec_name = 'article_id'
 
     article_id = fields.Many2one(
@@ -30,6 +30,7 @@ class ArticleFavorite(models.Model):
         a correct ordering as much as possible. Some sequence could be given in create values, that could lead to
         duplicated sequence per user_id. That is not an issue as they will be resequenced the next time the user reorder
         their favorites. """
+        # TDE TODO: env.uid -> user_id
         default_sequence = 1
         if any(not vals.get('sequence') for vals in vals_list):
             favorite = self.env['knowledge.article.favorite'].search(

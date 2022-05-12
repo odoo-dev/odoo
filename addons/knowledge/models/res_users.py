@@ -15,6 +15,7 @@ class Users(models.Model):
         return users
 
     def _generate_tutorial_articles(self):
+        # TDE NOTE: make a qweb template to render the body instead
         article_template = self.sudo().env.ref('knowledge.knowledge_article_welcome', raise_if_not_found=False)
         if not article_template:
             return
