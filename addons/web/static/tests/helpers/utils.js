@@ -24,6 +24,10 @@ export function patchDate(year, month, day, hours, minutes, seconds) {
     var RealDate = window.Date;
     var actualDate = new RealDate();
     var fakeDate = new RealDate(year, month, day, hours, minutes, seconds);
+    const offset = luxon.Settings.defaultZone.offset();
+    if (offset) {
+        fakeDate.setMinutes(fakeDate.getMinutes() - offset - fakeDate.getTimezoneOffset());
+    }
     var timeInterval = actualDate.getTime() - fakeDate.getTime();
 
     // eslint-disable-next-line no-global-assign
