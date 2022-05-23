@@ -1,50 +1,23 @@
 /** @odoo-module **/
 
-import { createElement } from "@web/core/utils/xml";
-import { Dialog } from "@web/core/dialog/dialog";
-import { FormArchParser } from "@web/views/form/form_arch_parser";
-import { loadSubViews } from "@web/views/form/form_controller";
-import { FormRenderer } from "@web/views/form/form_renderer";
 import { evalDomain } from "@web/views/helpers/utils";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { makeContext } from "@web/core/context";
 import { Pager } from "@web/core/pager/pager";
 import { registry } from "@web/core/registry";
-import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import { sprintf } from "@web/core/utils/strings";
 import { standardFieldProps } from "@web/fields/standard_field_props";
-import { useBus, useChildRef, useService } from "@web/core/utils/hooks";
-import { useViewButtons } from "@web/views/view_button/hook";
-import { ViewButton } from "@web/views/view_button/view_button";
+import { useX2ManyInteractions, useX2ManyCrud, useActiveActions } from "@web/fields/x2many_utils";
 
-const { Component, onWillUnmount } = owl;
+const { Component } = owl;
 
 const X2M_RENDERERS = {
     list: ListRenderer,
     kanban: KanbanRenderer,
 };
 
-function useOwnedDialogs() {
-    const dialogService = useService("dialog");
-    const cbs = [];
-    onWillUnmount(() => {
-        cbs.forEach((cb) => cb());
-    });
-    const addDialog = (...args) => {
-        const close = dialogService.add(...args);
-        cbs.push(close);
-    };
-    return addDialog;
-}
-
 export class X2ManyField extends Component {
     setup() {
-        this.user = useService("user");
-        this.viewService = useService("view");
-
-        this.addDialog = useOwnedDialogs();
-
         this.activeField = this.props.record.activeFields[this.props.name];
         this.field = this.props.record.fields[this.props.name];
 
@@ -55,6 +28,30 @@ export class X2ManyField extends Component {
 
         this.viewMode = this.activeField.viewMode;
         this.Renderer = X2M_RENDERERS[this.viewMode];
+
+        this.x2ManyCrud = useX2ManyCrud(() => this.list, this.isMany2Many);
+
+        this.X2Many = useX2ManyInteractions({
+            activeField: this.activeField,
+            getList: () => this.list,
+            x2ManyCrud: this.x2ManyCrud,
+            editable: this.activeField.views[this.viewMode].editable,
+        });
+
+        const subViewActiveActions = this.activeField.views[this.viewMode].activeActions;
+        this.computeActiveActions = useActiveActions({
+            crudOptions: this.activeField.options,
+            isMany2Many: this.isMany2Many,
+            x2ManyCrud: this.x2ManyCrud,
+            subViewActiveActions,
+        });
+
+        owl.onWillRender(() => {
+            this.activeActions = this.computeActiveActions(
+                this.props.record.evalContext,
+                this.props.readonly ? "readonly" : "edit"
+            );
+        });
     }
 
     get list() {
@@ -101,50 +98,6 @@ export class X2ManyField extends Component {
         return props;
     }
 
-    get activeActions() {
-        // activeActions computed by getActiveActions is of the form
-        // interface ActiveActions {
-        //     edit: Boolean;
-        //     create: Boolean;
-        //     delete: Boolean;
-        //     duplicate: Boolean;
-        // }
-
-        // options set on field is of the form
-        // interface Options {
-        //     create: Boolean;
-        //     delete: Boolean;
-        //     link: Boolean;
-        //     unlink: Boolean;
-        // }
-
-        // We need to take care of tags "control" and "create" to set create stuff
-
-        const { evalContext } = this.props.record;
-        const { options, views } = this.activeField;
-        const subViewInfo = views[this.viewMode];
-
-        const canCreate =
-            !this.props.readonly &&
-            evalDomain(options.create || "1", evalContext) &&
-            subViewInfo.activeActions.create;
-        const canDelete =
-            !this.props.readonly &&
-            evalDomain(options.delete || "1", evalContext) &&
-            subViewInfo.activeActions.delete;
-        const canLink = !this.props.readonly && evalDomain(options.link || "1", evalContext);
-        const canUnlink = !this.props.readonly && evalDomain(options.unlink || "1", evalContext);
-
-        const result = { canCreate, canDelete };
-        if (this.isMany2Many) {
-            Object.assign(result, { canLink, canUnlink });
-        }
-        if ((this.isMany2Many && canUnlink) || (!this.isMany2Many && canDelete)) {
-            result.onDelete = this.removeRecordFromList.bind(this);
-        }
-        return result;
-    }
-
     get displayAddButton() {
         const { canCreate, canLink } = this.activeActions;
         return (
@@ -189,121 +142,23 @@ export class X2ManyField extends Component {
     }
 
     async openRecord(record) {
-        const form = await this._getFormViewInfo();
-        const newRecord = await this.list.model.duplicateDatapoint(record, {
-            mode: this.props.readonly ? "readonly" : "edit",
-            viewMode: "form",
-            fields: { ...form.fields },
-            views: { form },
-        });
-        const { canDelete, onDelete } = this.activeActions;
-        this.addDialog(X2ManyFieldDialog, {
-            archInfo: form,
-            record: newRecord,
-            save: async (record, { saveAndNew }) => {
-                if (record.id === newRecord.id) {
-                    await this.updateRecord(record);
-                } else {
-                    await this.saveRecordToList(record);
-                }
-                if (saveAndNew) {
-                    return this.list.model.addNewRecord(this.list, {
-                        resModel: this.list.resModel,
-                        activeFields: form.activeFields,
-                        fields: { ...form.fields },
-                        views: { form },
-                        mode: "edit",
-                        viewType: "form",
-                    });
-                }
-            },
-            title: sprintf(
-                this.env._t("Open: %s"),
-                this.props.record.activeFields[this.props.name].string
-            ),
-            delete: this.viewMode === "kanban" && canDelete ? () => onDelete(record) : null,
-        });
-    }
-
-    updateRecord(record) {
-        this.list.model.updateRecord(this.list, record);
+        return this.X2Many.openRecord(
+            record,
+            this.props.readonly ? "readonly" : "edit",
+            this.activeActions
+        );
     }
 
     async onAdd(context) {
-        const archInfo = this.activeField.views[this.viewMode];
-        const editable = archInfo.editable;
-        if (editable) {
-            if (!this.creatingRecord) {
-                this.creatingRecord = true;
-                try {
-                    await this.list.addNew({ context, mode: "edit", position: editable });
-                } finally {
-                    this.creatingRecord = false;
-                }
-            }
-        } else {
-            const form = await this._getFormViewInfo();
-            const recordParams = {
-                context,
-                resModel: this.list.resModel,
-                activeFields: form.activeFields,
-                fields: { ...form.fields },
-                views: { form },
-                mode: "edit",
-                viewType: "form",
-            };
-            const record = await this.list.model.addNewRecord(this.list, recordParams);
-            this.addDialog(X2ManyFieldDialog, {
-                archInfo: form,
-                record,
-                save: async (record, { saveAndNew }) => {
-                    await this.saveRecordToList(record);
-                    if (saveAndNew) {
-                        return this.list.model.addNewRecord(this.list, recordParams);
-                    }
-                },
-                title: sprintf(
-                    this.env._t("Create %s"),
-                    this.props.record.activeFields[this.props.name].string
-                ),
-            });
+        const record = this.props.record;
+        const domain = record.getFieldDomain(this.props.name).toList();
+        if (context) {
+            context = makeContext([record.getFieldContext(this.props.name), context]);
         }
-    }
-
-    async saveRecordToList(record) {
-        await this.list.add(record);
-    }
-
-    async removeRecordFromList(record) {
-        const list = this.list;
-        const operation = this.isMany2Many ? "FORGET" : "DELETE";
-        await list.delete(record.id, operation);
-    }
-
-    async _getFormViewInfo() {
-        let formViewInfo = this.activeField.views.form;
-        const comodel = this.list.resModel;
-        if (!formViewInfo) {
-            const { fields, relatedModels, views } = await this.viewService.loadViews({
-                context: {},
-                resModel: comodel,
-                views: [[false, "form"]],
-            });
-            const archInfo = new FormArchParser().parse(views.form.arch, relatedModels, comodel);
-            formViewInfo = { ...archInfo, fields }; // should be good to memorize this on activeField
+        if (this.isMany2Many) {
+            return this.X2Many.selectCreate({ domain, context, activeActions: this.activeActions });
         }
-
-        await loadSubViews(
-            formViewInfo.activeFields,
-            formViewInfo.fields,
-            {}, // context
-            comodel,
-            this.viewService,
-            this.user,
-            this.env.isSmall
-        );
-
-        return formViewInfo;
+        return this.X2Many.addRecord({ context });
     }
 }
 
@@ -313,125 +168,4 @@ X2ManyField.template = "web.X2ManyField";
 X2ManyField.useSubView = true;
 X2ManyField.supportedTypes = ["one2many"];
 registry.category("fields").add("one2many", X2ManyField);
-
-export class Many2ManyField extends X2ManyField {
-    onAdd(context) {
-        const { record, name } = this.props;
-        const domain = [
-            ...record.getFieldDomain(name).toList(),
-            "!",
-            ["id", "in", this.list.currentIds],
-        ];
-        context = makeContext([record.getFieldContext(name), context]);
-        this.addDialog(SelectCreateDialog, {
-            title: this.env._t("Select records"),
-            noCreate: !this.activeActions.canCreate,
-            multiSelect: this.activeActions.canLink, // LPE Fixme
-            resModel: this.list.resModel,
-            context,
-            domain,
-            onSelected: (resIds) => {
-                this.list.add(resIds, { isM2M: true });
-            },
-            onCreateEdit: super.onAdd.bind(this, context),
-        });
-    }
-
-    async saveRecordToList(record) {
-        await this.list.add(record, { isM2M: true });
-    }
-
-    updateRecord(record) {
-        this.list.model.updateRecord(this.list, record, { isM2M: true });
-    }
-}
-Many2ManyField.supportedTypes = ["many2many"];
-
-registry.category("fields").add("many2many", Many2ManyField);
-
-class X2ManyFieldDialog extends Component {
-    setup() {
-        super.setup();
-        this.archInfo = this.props.archInfo;
-        this.record = this.props.record;
-        this.title = this.props.title;
-
-        useBus(this.record.model, "update", () => this.render(true));
-
-        this.modalRef = useChildRef();
-
-        const reload = () => this.record.load();
-        useViewButtons(this.props.record.model, this.modalRef, { reload }); // maybe pass the model directly in props
-
-        if (this.archInfo.xmlDoc.querySelector("footer")) {
-            this.footerArchInfo = Object.assign({}, this.archInfo);
-            this.footerArchInfo.xmlDoc = createElement("t");
-            this.footerArchInfo.xmlDoc.append(
-                ...[...this.archInfo.xmlDoc.querySelectorAll("footer")]
-            );
-            this.footerArchInfo.arch = this.footerArchInfo.xmlDoc.outerHTML;
-            [...this.archInfo.xmlDoc.querySelectorAll("footer")].forEach((x) => x.remove());
-            this.archInfo.arch = this.archInfo.xmlDoc.outerHTML;
-        }
-    }
-
-    disableButtons() {
-        const btns = this.modalRef.el.querySelectorAll(".modal-footer button");
-        for (const btn of btns) {
-            btn.setAttribute("disabled", "1");
-        }
-        return btns;
-    }
-
-    discard() {
-        if (this.record.isInEdition) {
-            this.record.discard();
-        }
-        this.props.close();
-    }
-
-    enableButtons(btns) {
-        for (const btn of btns) {
-            btn.removeAttribute("disabled");
-        }
-    }
-
-    async save({ saveAndNew }) {
-        if (this.record.checkValidity()) {
-            this.record = await this.props.save(this.record, { saveAndNew });
-        } else {
-            return false;
-        }
-        if (!saveAndNew) {
-            this.props.close();
-        }
-        return true;
-    }
-
-    async remove() {
-        await this.props.delete();
-        this.props.close();
-    }
-
-    async saveAndNew() {
-        const disabledButtons = this.disableButtons();
-        const saved = await this.save({ saveAndNew: true });
-        if (saved) {
-            this.enableButtons(disabledButtons);
-            if (this.title) {
-                this.title = this.title.replace(this.env._t("Open:"), this.env._t("New:"));
-            }
-            this.render(true);
-        }
-    }
-}
-X2ManyFieldDialog.components = { Dialog, FormRenderer, ViewButton };
-X2ManyFieldDialog.props = {
-    archInfo: Object,
-    close: Function,
-    record: Object,
-    save: Function,
-    title: String,
-    delete: { optional: true },
-};
-X2ManyFieldDialog.template = "web.X2ManyFieldDialog";
+registry.category("fields").add("many2many", X2ManyField);
