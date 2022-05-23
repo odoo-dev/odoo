@@ -2,7 +2,7 @@
 
 import { SERVICES_METADATA } from "@web/env";
 
-const { status, useComponent, useEffect, useRef } = owl;
+const { status, useComponent, useEffect, useRef, onWillUnmount } = owl;
 
 /**
  * This file contains various custom hooks.
@@ -216,4 +216,17 @@ export function useForwardRefToParent(refname) {
         component.props[refname](ref);
     }
     return ref;
+}
+
+export function useOwnedDialogs() {
+    const dialogService = useService("dialog");
+    const cbs = [];
+    onWillUnmount(() => {
+        cbs.forEach((cb) => cb());
+    });
+    const addDialog = (...args) => {
+        const close = dialogService.add(...args);
+        cbs.push(close);
+    };
+    return addDialog;
 }
