@@ -134,6 +134,9 @@ export class AutoComplete extends Component {
 
         const option = this.sources[indices[0]].options[indices[1]];
         if (option.unselectable) {
+            if (option.action) {
+                return option.action();
+            }
             return;
         }
 
