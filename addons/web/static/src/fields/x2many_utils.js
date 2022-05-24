@@ -6,7 +6,7 @@ import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog
 import { FormArchParser } from "@web/views/form/form_arch_parser";
 import { loadSubViews } from "@web/views/form/form_controller";
 import { sprintf } from "@web/core/utils/strings";
-import { evalDomain } from "@web/views/basic_relational_model";
+import { evalDomain } from "@web/views/helpers/utils";
 import { useBus, useChildRef } from "../core/utils/hooks";
 import { useViewButtons } from "../views/view_button/hook";
 import { createElement } from "../core/utils/xml";
@@ -127,10 +127,15 @@ async function getFormViewInfo({ list, activeField, viewService, userService, en
     return formViewInfo;
 }
 
-export function useActiveActions({ subViewActiveActions, crudOptions, isMany2Many, x2ManyCrud }) {
+export function useActiveActions({
+    subViewActiveActions,
+    crudOptions = {},
+    isMany2Many,
+    getEvalParams,
+}) {
     const makeEvalAction = (actionName, subViewActiveActions, defaultBool = true) => {
         let evalFn;
-        if (actionName in crudOptions) {
+        if (crudOptions[actionName] !== undefined) {
             const action = crudOptions[actionName];
             evalFn = (evalContext) => evalDomain(action, evalContext);
         } else {
@@ -150,8 +155,7 @@ export function useActiveActions({ subViewActiveActions, crudOptions, isMany2Man
     const evalUnlink = makeEvalAction("unlink");
     const evalWrite = makeEvalAction("write", null, false);
 
-    function compute(evalContext, mode) {
-        const isReadonly = mode === "readonly";
+    function compute({ evalContext, readonly = true }) {
         // activeActions computed by getActiveActions is of the form
         // interface ActiveActions {
         //     edit: Boolean;
@@ -169,11 +173,11 @@ export function useActiveActions({ subViewActiveActions, crudOptions, isMany2Man
         // }
 
         // We need to take care of tags "control" and "create" to set create stuff
-        const canCreate = !isReadonly && evalCreate(evalContext);
-        const canDelete = !isReadonly && evalDelete(evalContext);
+        const canCreate = !readonly && evalCreate(evalContext);
+        const canDelete = !readonly && evalDelete(evalContext);
 
-        const canLink = !isReadonly && evalLink(evalContext);
-        const canUnlink = !isReadonly && evalUnlink(evalContext);
+        const canLink = !readonly && evalLink(evalContext);
+        const canUnlink = !readonly && evalUnlink(evalContext);
 
         const result = { canCreate, canDelete };
 
@@ -182,11 +186,28 @@ export function useActiveActions({ subViewActiveActions, crudOptions, isMany2Man
         }
 
         if ((isMany2Many && canUnlink) || (!isMany2Many && canDelete)) {
-            result.onDelete = x2ManyCrud.remove;
+            result.onDelete = crudOptions.onDelete;
         }
         return result;
     }
-    return compute;
+
+    let activeActions = null;
+
+    owl.onWillRender(() => {
+        activeActions = compute(getEvalParams());
+    });
+
+    return new Proxy(
+        {},
+        {
+            get(target, k) {
+                return activeActions[k];
+            },
+            has(target, k) {
+                return k in activeActions;
+            },
+        }
+    );
 }
 
 export function useX2ManyCrud(getList, isMany2Many) {
@@ -196,8 +217,25 @@ export function useX2ManyCrud(getList, isMany2Many) {
         await getList().delete(record.id, operation);
     }
 
-    async function saveToList(recordOrResIds) {
-        await getList().add(recordOrResIds, { isM2M: isMany2Many });
+    let saveToList;
+    if (isMany2Many) {
+        saveToList = (recordOrResIds) => {
+            let resIds;
+            const list = getList();
+            const currentIds = list.currentIds;
+            if (Array.isArray(recordOrResIds)) {
+                resIds = [...currentIds, ...recordOrResIds];
+            } else if (recordOrResIds.resId) {
+                resIds = [...currentIds, recordOrResIds.resId];
+            } else {
+                return getList().add(recordOrResIds, { isM2M: true });
+            }
+            return getList().replaceWith(resIds);
+        };
+    } else {
+        saveToList = (recordOrResIds) => {
+            return getList().add(recordOrResIds);
+        };
     }
 
     async function newRecordInList() {
@@ -267,11 +305,11 @@ export function useX2ManyInteractions({ activeField, x2ManyCrud, editable = fals
         });
     }
 
-    function selectCreate({ domain, context, activeActions = {} }) {
+    function selectCreate({ domain, context, filters, activeActions = {}, title }) {
         const list = x2ManyCrud.list;
         domain = [...domain, "!", ["id", "in", list.currentIds]];
         addDialog(SelectCreateDialog, {
-            title: env._t("Select records"),
+            title: title || env._t("Select records"),
             noCreate: !activeActions.canCreate,
             multiSelect: activeActions.canLink, // LPE Fixme
             resModel: list.resModel,
@@ -281,16 +319,16 @@ export function useX2ManyInteractions({ activeField, x2ManyCrud, editable = fals
                 return x2ManyCrud.saveToList(resIds);
             },
             onCreateEdit: () => addRecord({ context }),
+            dynamicFilters: filters,
         });
     }
 
     const viewService = useService("view");
     const userService = useService("user");
 
-    let creatingRecord = false;
-
     let addRecord;
     if (editable) {
+        let creatingRecord = false;
         addRecord = async ({ context }) => {
             if (!creatingRecord) {
                 creatingRecord = true;
@@ -302,37 +340,45 @@ export function useX2ManyInteractions({ activeField, x2ManyCrud, editable = fals
             }
         };
     } else {
-        addRecord = async ({ context }) => {
-            const list = x2ManyCrud.list;
-            const form = await getFormViewInfo({
-                list,
-                activeField,
-                viewService,
-                userService,
-                env,
-            });
-            const recordParams = {
-                context: makeContext([list.context, context]),
-                resModel: list.resModel,
-                activeFields: form.activeFields,
-                fields: { ...form.fields },
-                views: { form },
-                mode: "edit",
-                viewType: "form",
+        let isMany2Many = false;
+        if (isMany2Many) {
+            addRecord = ({ context }) => {};
+        } else {
+            addRecord = async ({ context }) => {
+                const list = x2ManyCrud.list;
+                const form = await getFormViewInfo({
+                    list,
+                    activeField,
+                    viewService,
+                    userService,
+                    env,
+                });
+                const recordParams = {
+                    context: makeContext([list.context, context]),
+                    resModel: list.resModel,
+                    activeFields: form.activeFields,
+                    fields: { ...form.fields },
+                    views: { form },
+                    mode: "edit",
+                    viewType: "form",
+                };
+                const record = await x2ManyCrud.newRecord(recordParams);
+                addDialog(X2ManyFieldDialog, {
+                    archInfo: form,
+                    record,
+                    save: async (record, { saveAndNew }) => {
+                        await x2ManyCrud.saveToList(record);
+                        if (saveAndNew) {
+                            const params = Object.assign({}, recordParams, {
+                                context: list.context,
+                            });
+                            return x2ManyCrud.newRecord(params);
+                        }
+                    },
+                    title: sprintf(env._t("Create %s"), activeField.string),
+                });
             };
-            const record = await x2ManyCrud.newRecord(recordParams);
-            addDialog(X2ManyFieldDialog, {
-                archInfo: form,
-                record,
-                save: async (record, { saveAndNew }) => {
-                    await x2ManyCrud.saveToList(record);
-                    if (saveAndNew) {
-                        return x2ManyCrud.newRecord(recordParams);
-                    }
-                },
-                title: sprintf(env._t("Open: %s"), activeField.string),
-            });
-        };
+        }
     }
 
     return {

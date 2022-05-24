@@ -12,8 +12,13 @@ export class FormViewDialog extends Component {
 
         this.modalRef = useChildRef();
 
+        const buttonTemplate = this.props.isToMany
+            ? "web.FormViewDialog.ToMany.buttons"
+            : "web.FormViewDialog.ToOne.buttons";
+
         this.viewProps = {
             type: "form",
+            buttonTemplate,
 
             context: this.props.context || {},
             display: {
@@ -29,11 +34,21 @@ export class FormViewDialog extends Component {
                 await this.props.onRecordDiscarded(record);
                 this.props.close();
             },
-            saveRecord: async (record) => {
+            saveRecord: async (record, { saveAndNew }) => {
                 const saved = await record.save({ stayInEdition: true, noReload: true });
                 if (saved) {
                     await this.props.onRecordSaved(record);
-                    this.props.close();
+                    if (saveAndNew) {
+                        const context = Object.assign({}, this.props.context);
+                        Object.keys(context).forEach((k) => {
+                            if (k.startsWith("default_")) {
+                                delete context[k];
+                            }
+                        });
+                        await record.model.load({ resId: null, context });
+                    } else {
+                        this.props.close();
+                    }
                 }
             },
         };
@@ -66,11 +81,13 @@ FormViewDialog.props = {
     viewId: { type: [Number, false], optional: true },
     preventCreate: { type: Boolean, optional: true },
     preventEdit: { type: Boolean, optional: true },
+    isToMany: { type: Boolean, optional: true },
 };
 FormViewDialog.defaultProps = {
     onRecordDiscarded: () => {},
     onRecordSaved: () => {},
     preventCreate: false,
     preventEdit: false,
+    isToMany: false,
 };
 FormViewDialog.template = "web.FormViewDialog";

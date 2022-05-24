@@ -7,6 +7,12 @@ import { useHotkey } from "../hotkeys/hotkey_hook";
 
 const { Component, onWillUnmount, useExternalListener, useRef, useState, useEffect } = owl;
 
+function useDebounced(callback, timeout) {
+    const debounced = debounce(callback, timeout);
+    onWillUnmount(() => debounced.cancel());
+    return debounced;
+}
+
 export class AutoComplete extends Component {
     setup() {
         this.nextSourceId = 0;
@@ -22,13 +28,20 @@ export class AutoComplete extends Component {
 
         this.inputRef = useRef("input");
         this.root = useRef("root");
-        this.debouncedOnInput = debounce(this.onInput.bind(this), this.constructor.timeout);
+        this.debouncedOnInput = useDebounced(this.onInput.bind(this), this.constructor.timeout);
         useExternalListener(window, "scroll", this.onWindowScroll, true);
 
         this.hotkey = useService("hotkey");
         this.hotkeysToRemove = [];
 
-        onWillUnmount(() => this.debouncedOnInput.cancel());
+        if (this.props.shouldForceClose) {
+            owl.onWillRender(() => {
+                if (this.isOpened && this.props.shouldForceClose()) {
+                    this.inputRef.el.value = this.props.value;
+                    this.close();
+                }
+            });
+        }
 
         // position and size
         const sourcesListRef = useRef("sourcesList");
@@ -135,7 +148,9 @@ export class AutoComplete extends Component {
         const option = this.sources[indices[0]].options[indices[1]];
         if (option.unselectable) {
             if (option.action) {
-                return option.action();
+                const res = option.action();
+                this.close();
+                return res;
             }
             return;
         }
@@ -316,6 +331,7 @@ Object.assign(AutoComplete, {
         onInput: { type: Function, optional: true },
         onChange: { type: Function, optional: true },
         onBlur: { type: Function, optional: true },
+        shouldForceClose: { type: Function, optional: true },
     },
     defaultProps: {
         placeholder: "",

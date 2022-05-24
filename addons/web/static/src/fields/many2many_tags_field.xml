@@ -22,6 +22,7 @@
                         autoSelect="true"
                         onSelect.bind="onSelect"
                         onInput.bind="onInput"
+                        shouldForceClose="forceCloseAutocomplete"
                     />
                     <a role="button" class="o_dropdown_button" draggable="false" />
                 </div>

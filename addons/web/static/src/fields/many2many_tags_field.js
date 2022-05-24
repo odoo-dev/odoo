@@ -12,11 +12,12 @@ import { Domain } from "@web/core/domain";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { SelectCreateDialog } from "../views/view_dialogs/select_create_dialog";
 
-import { useX2ManyInteractions, useX2ManyCrud } from "@web/fields/x2many_utils";
+import { useX2ManyCrud, useActiveActions } from "@web/fields/x2many_utils";
+import { useSelectCreate, useOpenMany2XRecord } from "./relational_utils";
+import { makeContext } from "@web/core/context";
 
-const { Component, useState, onWillDestroy } = owl;
+const { Component, useState, useEffect } = owl;
 
 class Many2ManyTagsFieldColorListPopover extends Component {}
 Many2ManyTagsFieldColorListPopover.template = "web.Many2ManyTagsFieldColorListPopover";
@@ -24,6 +25,20 @@ Many2ManyTagsFieldColorListPopover.components = {
     CheckBox,
     ColorList,
 };
+
+function useForceCloseAutocomplete(onShouldClose = () => {}) {
+    let forceCloseAutocomplete = false;
+    owl.onWillUpdateProps(() => {
+        onShouldClose();
+        forceCloseAutocomplete = true;
+    });
+
+    useEffect(() => {
+        forceCloseAutocomplete = false;
+    });
+
+    return () => forceCloseAutocomplete;
+}
 
 export class Many2ManyTagsField extends Component {
     setup() {
@@ -38,13 +53,61 @@ export class Many2ManyTagsField extends Component {
 
         this.x2ManyCrud = useX2ManyCrud(() => this.props.value, true);
 
-        this.x2Many = useX2ManyInteractions({
-            activeField: this.props.record.activeFields[this.props.name],
-            x2ManyCrud: this.x2ManyCrud,
+        const activeField = this.props.record.activeFields[this.props.name];
+
+        this.activeActions = useActiveActions({
+            isMany2Many: true,
+            crudOptions: {
+                create: this.props.canQuickCreate && activeField.options.create,
+                onDelete: this.x2ManyCrud.remove,
+            },
+            getEvalParams: () => {
+                return {
+                    evalContext: this.props.record.evalContext,
+                    readonly: this.props.readonly,
+                };
+            },
         });
 
-        onWillDestroy(() => {
-            this.dialogClose.forEach((close) => close());
+        const resModel = this.props.relation;
+
+        const onRecordSaved = async (record) => {
+            const list = this.props.value;
+            const currentIds = list.currentIds;
+            return list.replaceWith([...currentIds, record.resId]);
+        };
+
+        this.openMany2X = useOpenMany2XRecord({
+            resModel,
+            onRecordSaved,
+            activeField,
+            activeActions: this.activeActions,
+            isToMany: true,
+        });
+        const onCreateEdit = () => {
+            const context = this.props.record.getFieldContext(this.props.name);
+            return this.openMany2X({ context });
+        };
+
+        const onSelected = (resIds) => {
+            return this.x2ManyCrud.saveToList(resIds);
+        };
+
+        this.selectCreate = useSelectCreate({
+            resModel,
+            activeActions: this.activeActions,
+            onCreateEdit,
+            onSelected,
+        });
+
+        // this.x2Many = useX2ManyInteractions({
+        //     activeField,
+        //     editable: false,
+        //     x2ManyCrud: this.x2ManyCrud,
+        // });
+
+        this.forceCloseAutocomplete = useForceCloseAutocomplete(() => {
+            this.state.autocompleteValue = "";
         });
     }
     get tags() {
@@ -119,7 +182,7 @@ export class Many2ManyTagsField extends Component {
         }));
 
         if (
-            this.props.canQuickCreate &&
+            this.activeActions.canCreate &&
             request.length &&
             !this.tagExist(
                 request,
@@ -127,10 +190,30 @@ export class Many2ManyTagsField extends Component {
             )
         ) {
             options.push({
-                label: sprintf(this.env._t(`Create "%s"`), escape(request)),
-                realLabel: request,
+                label: sprintf(this.env._t(`Create "%s"`), request), // LPE FIXME: escape make spaces look like %20;
                 classList: "o_m2o_dropdown_option o_m2o_dropdown_option_create",
-                type: "create",
+                action: async () => {
+                    let created;
+                    try {
+                        created = await this.orm.call(
+                            this.props.relation,
+                            "name_create",
+                            [request],
+                            {
+                                context: this.props.context,
+                            }
+                        );
+                    } catch {
+                        const context = makeContext([
+                            this.props.context,
+                            { [`default_${this.props.nameCreateField}`]: request },
+                        ]);
+                        return this.openMany2X({ context });
+                    }
+                    const ids = [...this.props.value.currentIds, created[0]];
+                    this.props.value.replaceWith(ids);
+                },
+                unselectable: true,
             });
         }
 
@@ -139,6 +222,7 @@ export class Many2ManyTagsField extends Component {
                 label: this.env._t("Search More..."),
                 action: this.onSearchMore.bind(this, request),
                 classList: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
+                unselectable: true,
             });
         }
 
@@ -150,16 +234,17 @@ export class Many2ManyTagsField extends Component {
             });
         }
 
-        if (request.length && this.props.canQuickCreate) {
+        if (request.length && this.activeActions.canCreate) {
+            const context = makeContext([{ default_name: request }]);
             options.push({
                 label: this.env._t("Create and edit..."),
                 classList: "o_m2o_dropdown_option",
                 unselectable: true,
-                action: () => this.x2Many.addRecord({ context: this.props.context }),
+                action: () => this.openMany2X({ context }),
             });
         }
 
-        if (!options.length && !this.props.canQuickCreate) {
+        if (!records.length && !this.activeActions.canCreate) {
             options.push({
                 label: this.env._t("No records"),
                 classList: "o_m2o_no_result",
@@ -183,21 +268,8 @@ export class Many2ManyTagsField extends Component {
 
     onSelect(option) {
         this.state.autocompleteValue = "";
-        if (option.type === "more") {
-            this.onSearchMore(option.realLabel);
-        } else if (option.type === "create") {
-            this.orm
-                .call(this.props.relation, "name_create", [option.realLabel], {
-                    context: this.props.context,
-                })
-                .then((data) => {
-                    const ids = [...this.props.value.currentIds, data[0]];
-                    this.props.value.replaceWith(ids);
-                });
-        } else {
-            const ids = [...this.props.value.currentIds, option.value];
-            this.props.value.replaceWith(ids);
-        }
+        const ids = [...this.props.value.currentIds, option.value];
+        this.props.value.replaceWith(ids);
     }
 
     onDelete(tag) {
@@ -251,23 +323,16 @@ export class Many2ManyTagsField extends Component {
             ];
         }
 
-        this.dialogClose.push(
-            this.dialog.add(SelectCreateDialog, {
-                resModel: this.props.relation,
-                domain,
-                context,
-                title: sprintf(
-                    this.env._t("Search: %s"),
-                    this.props.record.activeFields[this.props.name].string
-                ),
-                multiSelect: true,
-                onSelected: (ids) => {
-                    this.props.value.replaceWith([...this.props.value.currentIds, ...ids]);
-                },
-                searchViewId: false,
-                dynamicFilters,
-            })
+        const title = sprintf(
+            this.env._t("Search: %s"),
+            this.props.record.activeFields[this.props.name].string
         );
+        this.selectCreate({
+            domain,
+            context,
+            filters: dynamicFilters,
+            title,
+        });
     }
 }
 
@@ -280,6 +345,7 @@ Many2ManyTagsField.components = {
     Popover: Many2ManyTagsFieldColorListPopover,
     TagItem,
 };
+
 Many2ManyTagsField.props = {
     ...standardFieldProps,
     canEditColor: { type: Boolean, optional: true },
@@ -290,11 +356,13 @@ Many2ManyTagsField.props = {
     domain: { type: Domain },
     context: { type: Object },
     searchLimit: { type: Number, optional: true },
+    nameCreateField: { type: String, optional: true },
 };
 Many2ManyTagsField.defaultProps = {
     canEditColor: true,
     canQuickCreate: true,
     searchLimit: 7,
+    nameCreateField: "name",
 };
 
 Many2ManyTagsField.displayName = _lt("Tags");
@@ -306,6 +374,7 @@ Many2ManyTagsField.fieldsToFetch = {
 Many2ManyTagsField.extractProps = (fieldName, record, attrs) => {
     return {
         colorField: attrs.options.color_field,
+        nameCreateField: attrs.options.create_name_field,
         canEditColor:
             !attrs.options.no_edit_color && record.activeFields[fieldName].viewType !== "list",
         relation: record.activeFields[fieldName].relation,
