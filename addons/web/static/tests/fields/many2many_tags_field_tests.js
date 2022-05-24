@@ -11,6 +11,7 @@ import {
     editInput,
     getFixture,
     getNodesTextContent,
+    makeDeferred,
     nextTick,
     patchWithCleanup,
     selectDropdownItem,
@@ -1255,52 +1256,66 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.debug(
         "many2many tags widget: save&new in edit mode doesn't close edit window",
         async function (assert) {
             assert.expect(5);
             for (var i = 1; i <= 10; i++) {
-                this.data.partner_type.records.push({ id: 100 + i, display_name: "Partner" + i });
+                serverData.models.partner_type.records.push({
+                    id: 100 + i,
+                    display_name: "Partner" + i,
+                });
             }
-            var form = await createView({
-                View: FormView,
-                model: "partner",
-                data: this.data,
+
+            serverData.views = {
+                "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+                "partner_type,false,search": '<search><field name="display_name"/></search>',
+                "partner_type,false,form": '<form><field name="display_name"/></form>',
+            };
+
+            const nameSearchProm = makeDeferred();
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
                 arch:
                     '<form string="Partners">' +
                     '<field name="display_name"/>' +
                     '<field name="timmy" widget="many2many_tags"/>' +
                     "</form>",
-                res_id: 1,
-                archs: {
-                    "partner_type,false,list": '<tree><field name="display_name"/></tree>',
-                    "partner_type,false,search": '<search><field name="display_name"/></search>',
-                    "partner_type,false,form": '<form><field name="display_name"/></form>',
+                resId: 1,
+                async mockRPC(route, args) {
+                    if (args.method === "name_search") {
+                        nameSearchProm.resolve();
+                    }
                 },
             });
-            await testUtils.form.clickEdit(form);
+            await clickEdit(target);
 
-            await testUtils.fields.many2one.createAndEdit("timmy", "Ralts");
-            assert.containsOnce($(document), ".modal .o_form_view", "should have opened the modal");
+            await editInput(target, `div[name="timmy"] input`, "Ralts");
+            await nameSearchProm;
+            await nextTick();
+            await clickOpenedDropdownItem(target, "timmy", "Create and edit...");
+            await nextTick();
+            //await testUtils.fields.many2one.createAndEdit("timmy", "Ralts");
+            assert.containsOnce($(target), ".modal .o_form_view", "should have opened the modal");
 
             // Create multiple records with save & new
-            await testUtils.fields.editInput($(".modal input:first"), "Ralts");
-            await testUtils.dom.click($(".modal .btn-primary:nth-child(2)"));
-            assert.containsOnce($(document), ".modal .o_form_view", "modal should still be open");
+            await editInput(target, ".modal input", "Ralts");
+            await click($(".modal .btn-primary:nth-child(2)")[0]);
+            assert.containsOnce($(target), ".modal .o_form_view", "modal should still be open");
             assert.equal($(".modal input:first")[0].value, "", "input should be empty");
 
             // Create another record and click save & close
-            await testUtils.fields.editInput($(".modal input:first"), "Pikachu");
-            await testUtils.dom.click($(".modal .btn-primary:first"));
-            assert.containsNone($(document), ".modal .o_list_view", "should have closed the modal");
+            await editInput(target, ".modal input", "Pikachu");
+            await click($(".modal .btn-primary:first")[0]);
+            assert.containsNone($(target), ".modal .o_list_view", "should have closed the modal");
             assert.containsN(
-                form,
-                '.o_field_many2manytags[name="timmy"] .badge',
+                target,
+                '.o_field_many2many_tags[name="timmy"] .badge',
                 2,
                 "many2many tag should now contain 2 records"
             );
-
-            form.destroy();
         }
     );
 

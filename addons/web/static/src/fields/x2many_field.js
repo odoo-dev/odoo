@@ -33,7 +33,6 @@ export class X2ManyField extends Component {
 
         this.X2Many = useX2ManyInteractions({
             activeField: this.activeField,
-            getList: () => this.list,
             x2ManyCrud: this.x2ManyCrud,
             editable: this.activeField.views[this.viewMode].editable,
         });

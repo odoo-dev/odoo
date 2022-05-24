@@ -14,6 +14,8 @@ import { sprintf } from "@web/core/utils/strings";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { SelectCreateDialog } from "../views/view_dialogs/select_create_dialog";
 
+import { useX2ManyInteractions, useX2ManyCrud } from "@web/fields/x2many_utils";
+
 const { Component, useState, onWillDestroy } = owl;
 
 class Many2ManyTagsFieldColorListPopover extends Component {}
@@ -33,6 +35,13 @@ export class Many2ManyTagsField extends Component {
         this.popover = usePopover();
         this.dialog = useService("dialog");
         this.dialogClose = [];
+
+        this.x2ManyCrud = useX2ManyCrud(() => this.props.value, true);
+
+        this.x2Many = useX2ManyInteractions({
+            activeField: this.props.record.activeFields[this.props.name],
+            x2ManyCrud: this.x2ManyCrud,
+        });
 
         onWillDestroy(() => {
             this.dialogClose.forEach((close) => close());
@@ -128,9 +137,8 @@ export class Many2ManyTagsField extends Component {
         if (this.props.searchLimit < records.length) {
             options.push({
                 label: this.env._t("Search More..."),
-                realLabel: request,
+                action: this.onSearchMore.bind(this, request),
                 classList: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
-                type: "more",
             });
         }
 
@@ -139,6 +147,15 @@ export class Many2ManyTagsField extends Component {
                 label: this.env._t("Start typing..."),
                 classList: "o_m2o_start_typing",
                 unselectable: true,
+            });
+        }
+
+        if (request.length && this.props.canQuickCreate) {
+            options.push({
+                label: this.env._t("Create and edit..."),
+                classList: "o_m2o_dropdown_option",
+                unselectable: true,
+                action: () => this.x2Many.addRecord({ context: this.props.context }),
             });
         }
 
