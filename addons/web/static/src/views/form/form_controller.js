@@ -313,10 +313,10 @@ export class FormController extends Component {
         await this.model.load({ resId: null });
     }
 
-    async save() {
+    async save(params = {}) {
         const disabledButtons = this.disableButtons();
         if (this.props.saveRecord) {
-            await this.props.saveRecord(this.model.root);
+            await this.props.saveRecord(this.model.root, params);
         } else {
             await this.model.root.save();
         }

@@ -38,18 +38,18 @@ export class X2ManyField extends Component {
         });
 
         const subViewActiveActions = this.activeField.views[this.viewMode].activeActions;
-        this.computeActiveActions = useActiveActions({
-            crudOptions: this.activeField.options,
+        this.activeActions = useActiveActions({
+            crudOptions: Object.assign({}, this.activeField.options, {
+                onDelete: this.x2ManyCrud.remove,
+            }),
             isMany2Many: this.isMany2Many,
-            x2ManyCrud: this.x2ManyCrud,
             subViewActiveActions,
-        });
-
-        owl.onWillRender(() => {
-            this.activeActions = this.computeActiveActions(
-                this.props.record.evalContext,
-                this.props.readonly ? "readonly" : "edit"
-            );
+            getEvalParams: () => {
+                return {
+                    evalContext: this.props.record.evalContext,
+                    readonly: this.props.readonly,
+                };
+            },
         });
     }
 

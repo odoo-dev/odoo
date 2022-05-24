@@ -29,7 +29,7 @@ export const formView = {
             ...genericProps,
             Model: view.Model,
             Renderer: view.Renderer,
-            buttonTemplate: view.buttonTemplate,
+            buttonTemplate: genericProps.buttonTemplate || view.buttonTemplate,
             Compiler: view.Compiler,
             archInfo,
         };
