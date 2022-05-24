@@ -9,14 +9,10 @@ const { Component } = owl;
 
 export class BooleanToggleField extends Component {
     /**
-     * @param {{ key: string }} params
+     * @param {boolean} newValue
      */
-    onKeydown({ key }) {
-        switch (key) {
-            case "Enter":
-                this.props.update(!this.props.value);
-                break;
-        }
+    onChange(newValue) {
+        this.props.update(newValue);
     }
 }
 

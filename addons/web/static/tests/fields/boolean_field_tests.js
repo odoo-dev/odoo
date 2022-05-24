@@ -172,7 +172,7 @@ QUnit.module("Fields", (hooks) => {
 
         assert.containsN(
             target,
-            "tbody td:not(.o_list_record_selector) .custom-checkbox input",
+            "tbody td:not(.o_list_record_selector) .custom-checkbox",
             5,
             "should have 5 checkboxes"
         );
@@ -194,7 +194,7 @@ QUnit.module("Fields", (hooks) => {
             cell.querySelector(".custom-checkbox input:checked").disabled,
             "input should not have the disabled property in edit mode"
         );
-        await click(cell, ".custom-checkbox input:checked");
+        await click(cell, ".custom-checkbox");
 
         // save
         await click(target.querySelector(".o_list_button_save"));
@@ -205,7 +205,7 @@ QUnit.module("Fields", (hooks) => {
         );
         assert.containsN(
             target,
-            "tbody td:not(.o_list_record_selector) .custom-checkbox input",
+            "tbody td:not(.o_list_record_selector) .custom-checkbox",
             5,
             "should still have 5 checkboxes"
         );
@@ -218,14 +218,14 @@ QUnit.module("Fields", (hooks) => {
 
         // Re-Edit the line and fake-check the checkbox
         await click(cell);
-        await click(cell, ".custom-checkbox input");
-        await click(cell, ".custom-checkbox input");
+        await click(cell, ".custom-checkbox");
+        await click(cell, ".custom-checkbox");
 
         // Save
         await click(target.querySelector(".o_list_button_save"));
         assert.containsN(
             target,
-            "tbody td:not(.o_list_record_selector) .custom-checkbox input",
+            "tbody td:not(.o_list_record_selector) .custom-checkbox",
             5,
             "should still have 5 checkboxes"
         );
@@ -237,21 +237,26 @@ QUnit.module("Fields", (hooks) => {
         );
 
         // Re-Edit the line to check the checkbox back but this time click on
-        // the checkbox directly in readonly mode !
+        // the checkbox directly in readonly mode.
+        // This should not toggle the checkbox and only pass the record in edition.
         cell = target.querySelector("tr.o_data_row td:not(.o_list_record_selector)");
-        await click(cell, ".custom-checkbox input");
+        await click(cell, ".o_field_boolean");
 
+        assert.notOk(
+            cell.querySelector(".custom-checkbox input").disabled,
+            "input should not have the disabled property in edit mode"
+        );
         assert.containsN(
             target,
-            "tbody td:not(.o_list_record_selector) .custom-checkbox input",
+            "tbody td:not(.o_list_record_selector) .custom-checkbox",
             5,
             "should still have 5 checkboxes"
         );
         assert.containsN(
             target,
             "tbody td:not(.o_list_record_selector) .custom-checkbox input:checked",
-            4,
-            "should now have 4 checked input back"
+            3,
+            "should still have only 3 checked input"
         );
     });
 
@@ -282,7 +287,7 @@ QUnit.module("Fields", (hooks) => {
             "checkbox should still be disabled"
         );
 
-        await click(target, ".o_field_boolean input");
+        await click(target, ".o_field_boolean .custom-checkbox");
         assert.containsOnce(
             target,
             ".o_field_boolean input:checked",

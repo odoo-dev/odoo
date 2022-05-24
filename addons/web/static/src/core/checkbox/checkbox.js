@@ -1,6 +1,8 @@
 /** @odoo-module **/
 
-const { Component } = owl;
+import { useHotkey } from "../hotkeys/hotkey_hook";
+
+const { Component, useRef } = owl;
 
 /**
  * Custom checkbox
@@ -9,9 +11,9 @@ const { Component } = owl;
  *    value="boolean"
  *    disabled="boolean"
  *    onChange="_onValueChange"
- *    >
+ * >
  *    Change the label text
- *  </CheckBox>
+ * </CheckBox>
  *
  * @extends Component
  */
@@ -19,19 +21,33 @@ const { Component } = owl;
 export class CheckBox extends Component {
     setup() {
         this.id = `checkbox-comp-${CheckBox.nextId++}`;
+        this.rootRef = useRef("root");
+        useHotkey(
+            "Enter",
+            ({ area }) => {
+                const oldValue = area.querySelector("input").checked;
+                this.props.onChange(!oldValue);
+            },
+            { area: () => this.rootRef.el, bypassEditableProtection: true }
+        );
     }
 
-    /**
-     * When a click is triggered on an input directly with
-     * Javascript, the disabled attribute is not respected
-     * and the value is changed. This assures a disabled
-     * CheckBox can't be forced to update
-     */
-    onChange(ev) {
-        if (this.props.disabled) {
-            ev.target.checked = !ev.target.checked;
+    onClick(ev) {
+        if (["INPUT", "LABEL"].includes(ev.target.tagName)) {
+            // The onChange will handle these cases.
             return;
         }
+        const input = this.rootRef.el.querySelector("input");
+        input.focus();
+
+        if (!this.props.disabled) {
+            input.checked = !input.checked;
+        }
+
+        this.props.onChange(input.checked);
+    }
+
+    onChange(ev) {
         this.props.onChange(ev.target.checked);
     }
 }
@@ -40,7 +56,6 @@ CheckBox.template = "web.CheckBox";
 CheckBox.nextId = 1;
 CheckBox.defaultProps = {
     onChange: () => {},
-    onKeydown: () => {},
 };
 CheckBox.props = {
     id: {
@@ -60,10 +75,6 @@ CheckBox.props = {
         optional: true,
     },
     onChange: {
-        type: Function,
-        optional: true,
-    },
-    onKeydown: {
         type: Function,
         optional: true,
     },

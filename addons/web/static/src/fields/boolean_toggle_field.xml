@@ -8,7 +8,6 @@
             value="props.value or false"
             disabled="props.readonly"
             onChange="props.update"
-            onKeydown.bind="onKeydown"
         >
             &#8203; <!-- Zero width space needed to set height -->
             <i class="fa" t-att-class="props.value ? 'fa-check-circle' : 'fa-times-circle'" />

@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { CheckBox } from "@web/core/checkbox/checkbox";
+import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { translatedTerms } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
@@ -15,6 +16,7 @@ let target;
 QUnit.module("Components", (hooks) => {
     hooks.beforeEach(async () => {
         target = getFixture();
+        serviceRegistry.add("hotkey", hotkeyService);
     });
 
     QUnit.module("CheckBox");
