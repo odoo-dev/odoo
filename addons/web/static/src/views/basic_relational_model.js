@@ -369,6 +369,13 @@ export class Record extends DataPoint {
         if (preventSwitch === false) {
             return;
         }
+
+        if (mode === "edit") {
+            // wait for potential pending changes to be saved (done with widgets
+            // allowing to edit in readonly)
+            await this.model.__bm__.mutex.getUnlockedDef();
+        }
+
         if (mode === "readonly") {
             for (const fieldName in this.activeFields) {
                 if (["one2many", "many2many"].includes(this.fields[fieldName].type)) {
@@ -594,6 +601,7 @@ export class Record extends DataPoint {
      * @returns {Promise<boolean>}
      */
     async save(options = { stayInEdition: false, noReload: false, savePoint: false }) {
+        const shouldSwitchToReadonly = !options.stayInEdition && this.isInEdition;
         let resolveSavePromise;
         this._savePromise = new Promise((r) => {
             resolveSavePromise = r;
@@ -627,7 +635,7 @@ export class Record extends DataPoint {
             return false;
         }
         this.__syncData(true);
-        if (!options.stayInEdition) {
+        if (shouldSwitchToReadonly) {
             this.switchMode("readonly");
         }
         this.model.notify();
