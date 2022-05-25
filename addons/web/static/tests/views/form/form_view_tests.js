@@ -9444,20 +9444,24 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(writeCalls, 1, "should save once");
     });
 
-    QUnit.skipWOWL("domain returned by onchange is cleared on discard", async function (assert) {
+    QUnit.test("domain returned by onchange is cleared on discard", async function (assert) {
         assert.expect(5);
 
         serverData.models.partner.onchanges = {
             foo: function () {},
         };
 
-        var domain = ["id", "=", 1];
-        var expectedDomain = domain;
+        const domain = [["id", "=", 1]];
+        let expectedDomain = domain;
         await makeView({
             type: "form",
             resModel: "partner",
             serverData,
-            arch: '<form><field name="foo"/><field name="trululu"/></form>',
+            arch: `
+                <form>
+                    <field name="foo"/>
+                    <field name="trululu"/>
+                </form>`,
             mockRPC(route, args) {
                 if (args.method === "onchange" && args.args[0][0] === 1) {
                     // onchange returns a domain only on record 1
@@ -9470,14 +9474,13 @@ QUnit.module("Views", (hooks) => {
                 if (args.method === "name_search") {
                     assert.deepEqual(args.kwargs.args, expectedDomain);
                 }
-                return this._super.apply(this, arguments);
             },
             resId: 1,
-            viewOptions: {
-                ids: [1, 2],
-                mode: "edit",
-            },
+            resIds: [1, 2],
         });
+
+        // switch to edit mode
+        await click(target.querySelector(".o_form_button_edit"));
 
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo] input").value,
@@ -9489,9 +9492,11 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, ".o_field_widget[name=foo] input", "new value");
 
         // open many2one dropdown to check if the domain is applied
-        await testUtils.fields.many2one.clickOpenDropdown("trululu");
+        target.querySelector(".o-autocomplete.dropdown input").focus(); // autocomplete closes with the blur, so it must have the focus
+        await click(target.querySelector(".o-autocomplete.dropdown input"));
 
         // switch to another record (should ask to discard changes, and reset the domain)
+        target.querySelector(".o_pager_next").focus(); // change the focus before click, this will close the autocomplete
         await click(target.querySelector(".o_pager_next"));
 
         assert.containsNone(document.body, ".modal", "should not open modal");
@@ -9504,36 +9509,43 @@ QUnit.module("Views", (hooks) => {
 
         // open many2one dropdown to check if the domain is applied
         expectedDomain = [];
-        await testUtils.fields.many2one.clickOpenDropdown("trululu");
+        await click(target.querySelector(".o-autocomplete.dropdown input"));
     });
 
-    QUnit.skipWOWL("discard after a failed save", async function (assert) {
-        assert.expect(2);
+    QUnit.test("discard after a failed save (and close notifications)", async function (assert) {
+        patchWithCleanup(browser, { setTimeout: () => 1 });
 
         serverData.views = {
-            "partner,false,form":
-                "<form>" +
-                '<field name="date" required="true"/>' +
-                '<field name="foo" required="true"/>' +
-                "</form>",
-            "partner,false,kanban":
-                '<kanban><templates><t t-name="kanban-box">' + "</t></templates></kanban>",
+            "partner,false,form": `
+                <form>
+                    <field name="date" required="true"/>
+                    <field name="foo" required="true"/>
+                </form>`,
+            "partner,false,kanban": `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="foo" />
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
             "partner,false,search": "<search></search>",
         };
 
         const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
 
-        await click(".o_control_panel .o-kanban-button-new");
-        await legacyExtraNextTick();
+        await click(target.querySelector(".o_control_panel .o-kanban-button-new"));
 
         //cannot save because there is a required field
-        await click(".o_control_panel .o_form_button_save");
-        await legacyExtraNextTick();
-        await click(".o_control_panel .o_form_button_cancel");
-        await legacyExtraNextTick();
-        assert.containsNone(webClient, ".o_form_view");
-        assert.containsOnce(webClient, ".o_kanban_view");
+        await click(target.querySelector(".o_control_panel .o_form_button_save"));
+        assert.containsOnce(target, ".o_notification");
+        await click(target.querySelector(".o_control_panel .o_form_button_cancel"));
+        assert.containsNone(target, ".o_form_view");
+        assert.containsOnce(target, ".o_kanban_view");
+        assert.containsNone(target, ".o_notification");
     });
 
     QUnit.test(

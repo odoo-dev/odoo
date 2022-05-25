@@ -240,6 +240,7 @@ export class Record extends DataPoint {
         this._onChangePromise = Promise.resolve({});
         this._savePromise = Promise.resolve();
         this._domains = {};
+        this._closeInvalidFieldsNotification = () => {};
 
         this._requiredFields = {};
         for (const [fieldName, activeField] of Object.entries(this.activeFields)) {
@@ -615,14 +616,19 @@ export class Record extends DataPoint {
         this.model.env.bus.trigger("RELATIONAL_MODEL:WILL_SAVE", { proms });
         await Promise.all(proms);
         await this._updatePromise;
+        this._closeInvalidFieldsNotification();
         if (!this.checkValidity()) {
             const invalidFields = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
             }, this);
-            this.model.notificationService.add(markup(`<ul>${invalidFields.join("")}</ul>`), {
-                title: this.model.env._t("Invalid fields: "),
-                type: "danger",
-            });
+            this._closeInvalidFieldsNotification = this.model.notificationService.add(
+                markup(`<ul>${invalidFields.join("")}</ul>`),
+                {
+                    title: this.model.env._t("Invalid fields: "),
+                    type: "danger",
+                }
+            );
+            resolveSavePromise();
             return false;
         }
         const saveOptions = {
@@ -708,8 +714,7 @@ export class Record extends DataPoint {
     async delete() {
         await this.model.__bm__.deleteRecords([this.__bm_handle__], this.resModel);
         if (this.resIds.length) {
-            await this.model.__bm__.reload(this.__bm_handle__);
-            this.__syncData();
+            await this.load();
         }
         this.model.notify();
     }
@@ -725,7 +730,9 @@ export class Record extends DataPoint {
 
     async discard() {
         await this._savePromise;
+        this._closeInvalidFieldsNotification();
         this.model.__bm__.discardChanges(this.__bm_handle__);
+        this._invalidFields = new Set();
         this.__syncData();
         if (this.resId) {
             this.switchMode("readonly");
