@@ -1413,10 +1413,10 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("many2one field and list navigation", async function (assert) {
+    QUnit.test("many2one field and list navigation", async function (assert) {
         assert.expect(3);
 
-        const list = await makeView({
+        await makeView({
             type: "list",
             resModel: "partner",
             serverData,
@@ -1428,16 +1428,20 @@ QUnit.module("Fields", (hooks) => {
         });
 
         // edit first input, to trigger autocomplete
-        await click(target, ".o_data_row .o_data_cell");
-        await testUtils.fields.editInput(list.$(".o_data_cell input"), "");
+        await click(target.querySelector(".o_data_row .o_data_cell"));
+        await editInput(target, ".o_data_cell input", "");
 
         // press keydown, to select first choice
-        await testUtils.fields.triggerKeydown(list.$(".o_data_cell input").focus(), "down");
+        const input = target.querySelector(".o_data_cell input");
+        await triggerEvent(input, null, "keydown", { key: "arrowdown" });
 
         // we now check that the dropdown is open (and that the focus did not go
         // to the next line)
-        var $dropdown = list.$(".o_field_many2one input").autocomplete("widget");
-        assert.ok($dropdown.is(":visible"), "dropdown should be visible");
+        assert.containsOnce(
+            target.querySelector(".o_field_many2one"),
+            ".o-autocomplete.dropdown",
+            "autocomplete dropdown should be visible"
+        );
         assert.hasClass(
             target.querySelector(".o_data_row"),
             "o_selected_row",
