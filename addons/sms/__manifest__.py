@@ -42,6 +42,7 @@ The service is provided by the In App Purchase Odoo platform.
         'mail.assets_discuss_public': [
             'sms/static/src/components/*/*',
             'sms/static/src/models/*.js',
+            ('remove', 'sms/static/src/components/phone_field/*'),
         ],
         'web.assets_backend': [
             'sms/static/src/js/fields_phone_widget.js',
