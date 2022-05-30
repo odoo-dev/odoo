@@ -5,7 +5,7 @@ import {
     combineAttributes,
     createElement,
     createTextNode,
-    transformStringForExpression,
+    toStringExpression,
 } from "@web/core/utils/xml";
 
 /**
@@ -168,7 +168,7 @@ const copyAttributes = (el, compiled) => {
         let att = el.getAttribute(attName);
         if (att) {
             if (isComponent) {
-                att = `'${att.replace(/'/g, "\\'")}'`;
+                att = toStringExpression(att);
             }
             compiled.setAttribute(attName, att);
         }
@@ -485,7 +485,9 @@ export class ViewCompiler {
             fieldInfo: `fieldNodes['${fieldId}']`,
         };
         let labelText = label.textContent || fieldString;
-        labelText = labelText ? `'${labelText}'` : `record.fields['${fieldName}'].string`;
+        labelText = labelText
+            ? toStringExpression(labelText)
+            : `record.fields['${fieldName}'].string`;
         return createElement("FormLabel", {
             "t-props": objectToString(props),
             string: labelText,
@@ -609,7 +611,7 @@ export class ViewCompiler {
                         fieldName: `'${fieldName}'`,
                         record: "record",
                         string: child.hasAttribute("string")
-                            ? `'${child.getAttribute("string")}'`
+                            ? toStringExpression(child.getAttribute("string"))
                             : `record.fields.${fieldName}.string`,
                         fieldInfo: `fieldNodes[${fieldId}]`,
                     };
@@ -763,7 +765,7 @@ export class ViewCompiler {
             append(noteBook, pageSlot);
 
             const pageId = `page_${this.id++}`;
-            const pageTitle = transformStringForExpression(
+            const pageTitle = toStringExpression(
                 child.getAttribute("string") || child.getAttribute("name") || ""
             );
             pageSlot.setAttribute("t-set-slot", pageId);

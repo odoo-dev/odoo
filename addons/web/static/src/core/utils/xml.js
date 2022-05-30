@@ -176,7 +176,7 @@ export function stringToOrderBy(string) {
  * @param  {string} str The initial value: a pure string to be interpreted as such
  * @return {string}     the valid string to be injected into a component's node props.
  */
-export function transformStringForExpression(str) {
+export function toStringExpression(str) {
     const delimiter = `"`;
     const newStr = str.replaceAll(delimiter, `\\${delimiter}`);
     return `${delimiter}${newStr}${delimiter}`;
