@@ -15,7 +15,7 @@ import { isX2Many } from "@web/views/helpers/view_utils";
 import { useViewButtons } from "@web/views/view_button/hook";
 import { localization } from "@web/core/l10n/localization";
 
-const { Component, onWillStart, useEffect, useRef, onRendered } = owl;
+const { Component, onWillStart, useEffect, useRef, onRendered, useState } = owl;
 
 const viewRegistry = registry.category("views");
 
@@ -225,6 +225,10 @@ export class FormController extends Component {
                 () => [this.model.root.isInEdition]
             );
         }
+
+        // translate notification banner stufff
+        this.showingTranslatableFieldReminderNotification = useState({});
+        this.cachedMultiResIdtranslatableFieldsInNotification = useState({});
     }
 
     beforeUnload() {
@@ -317,16 +321,7 @@ export class FormController extends Component {
     async save(params = {}) {
         const disabledButtons = this.disableButtons();
 
-        // This piece of code handles the notification displayed
-        // when a translatable field is edited.
-        // The banner doesn't go away unless close button is clicked.
-        if (this.shouldShowTranslatableFieldReminderNotification) {
-            this.showingTranslatableFieldReminderNotification = true;
-            this.translatableFieldsInNotification = new Set([
-                ...(this.translatableFieldsInNotification || []),
-                ...this.model.root.dirtyTranslatableFields,
-            ]);
-        }
+        this.showTranslatableFieldReminderNotificationBanner();
 
         if (this.props.saveRecord) {
             await this.props.saveRecord(this.model.root, params);
@@ -349,6 +344,31 @@ export class FormController extends Component {
 
     get shouldShowTranslatableFieldReminderNotification() {
         return localization.multiLang && this.model.root.dirtyTranslatableFields.length;
+    }
+
+    showTranslatableFieldReminderNotificationBanner() {
+        // This piece of code handles the notification displayed
+        // when a translatable field is edited.
+        // The banner doesn't go away unless close button is clicked.
+        if (this.shouldShowTranslatableFieldReminderNotification) {
+            this.showingTranslatableFieldReminderNotification[this.model.root.resId] = true;
+            this.cachedMultiResIdtranslatableFieldsInNotification = {
+                [this.model.root.resId]: new Set([
+                    ...(this.cachedMultiResIdtranslatableFieldsInNotification[
+                        this.model.root.resId
+                    ] || []),
+                    ...this.model.root.dirtyTranslatableFields,
+                ]),
+            };
+            this.translatableFieldsInNotification = [
+                ...this.cachedMultiResIdtranslatableFieldsInNotification[this.model.root.resId],
+            ];
+        }
+    }
+
+    closeTranslatableFieldReminderNotificationBanner() {
+        this.showingTranslatableFieldReminderNotification[this.model.root.resId] = false;
+        this.cachedMultiResIdtranslatableFieldsInNotification[this.model.root.resId] = [];
     }
 }
 

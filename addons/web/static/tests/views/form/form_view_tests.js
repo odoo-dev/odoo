@@ -7525,8 +7525,6 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("display translation alert", async function (assert) {
-        assert.expect(2);
-
         serverData.models.partner.fields.foo.translate = true;
         serverData.models.partner.fields.display_name.translate = true;
 
@@ -7562,56 +7560,54 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("translation alerts are preserved on pager change", async function (assert) {
-        assert.expect(5);
-
+    QUnit.test("translation alerts are preserved on pager change", async function (assert) {
         serverData.models.partner.fields.foo.translate = true;
 
-        var multi_lang = _t.database.multi_lang;
-        _t.database.multi_lang = true;
+        patchWithCleanup(localization, {
+            multiLang: true,
+        });
 
         await makeView({
             type: "form",
-            resModel: "partner",
             serverData,
-            arch: "<form>" + "<sheet>" + '<field name="foo"/>' + "</sheet>" + "</form>",
+            resModel: "partner",
+            arch: `<form><sheet><field name="foo"/></sheet></form>`,
             resIds: [1, 2],
             resId: 1,
         });
 
-        await click(target.querySelector(".o_form_button_edit"));
-        await editInput(target, '.o_field_widget[name="foo"] input', "test");
-        await click(target.querySelector(".o_form_button_save"));
+        await clickEdit(target);
+        await editInput(target, '[name="foo"] input', "test");
+        await clickSave(target);
 
-        assert.containsOnce(target, ".o_form_view .alert > div", "should have a translation alert");
+        assert.containsOnce(target, ".alert .o_field_translate", "should have a translation alert");
 
         // click on the pager to switch to the next record
         await click(target.querySelector(".o_pager_next"));
         assert.containsNone(
             target,
-            ".o_form_view .alert > div",
+            ".alert .o_field_translate",
             "should not have a translation alert"
         );
-
         // click on the pager to switch back to the previous record
         await click(target.querySelector(".o_pager_previous"));
-        assert.containsOnce(target, ".o_form_view .alert > div", "should have a translation alert");
-
+        assert.containsOnce(target, ".alert .o_field_translate", "should have a translation alert");
         // remove translation alert by click X and check alert even after form reload
-        await click(target.querySelector(".o_form_view .alert > .close"));
+        await click(target.querySelector(".alert .close"));
         assert.containsNone(
             target,
-            ".o_form_view .alert > div",
+            ".alert .o_field_translate",
             "should not have a translation alert"
         );
 
-        // await form.reload();
+        await click(target.querySelector(".o_pager_next"));
+        await click(target.querySelector(".o_pager_previous"));
+
         assert.containsNone(
             target,
-            ".o_form_view .alert > div",
+            ".alert .o_field_translate",
             "should not have a translation alert after reload"
         );
-        _t.database.multi_lang = multi_lang;
     });
 
     QUnit.skipWOWL("translation alerts preserved on reverse breadcrumb", async function (assert) {
