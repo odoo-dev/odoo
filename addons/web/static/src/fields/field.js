@@ -139,7 +139,7 @@ export class Field extends Component {
             extractedPropsForStandaloneComponent = this.FieldComponent.extractProps(
                 this.props.name,
                 record,
-                fieldInfo.attrs
+                fieldInfo.attrs || { options: {} }
             );
         }
 
@@ -281,3 +281,4 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
 Field.forbiddenAttributeNames = {
     decorations: `You cannot use the "decorations" attribute name as it is used as generated prop name for the composite decoration-<something> attributes.`,
 };
+Field.defaultProps = { fieldInfo: {} };
