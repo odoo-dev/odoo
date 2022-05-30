@@ -382,7 +382,7 @@ export class ViewAdapter extends ActionAdapter {
                 // }
                 await this.actionService.switchView(payload.view_type, props);
             } catch (e) {
-                if (e instanceof ViewNotFoundError) {
+                if (typeof e === "object" && e instanceof ViewNotFoundError) {
                     return;
                 }
                 throw e;
