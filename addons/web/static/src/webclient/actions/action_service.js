@@ -440,6 +440,10 @@ function makeActionManager(env) {
             },
         });
 
+        if (view.type === "form" && action.target === "new") {
+            viewProps.mode = "edit";
+        }
+
         if (target === "inline") {
             viewProps.searchMenuTypes = [];
         }
@@ -717,7 +721,7 @@ function makeActionManager(env) {
                 actionDialogProps.title = action.name;
             }
 
-            let onClose = _removeDialog();
+            const onClose = _removeDialog();
             const removeDialog = env.services.dialog.add(ActionDialog, actionDialogProps, {
                 onClose: () => {
                     const onClose = _removeDialog();
@@ -1193,7 +1197,7 @@ function makeActionManager(env) {
             case "ir.actions.server":
                 return _executeServerAction(action, options);
             default: {
-                let handler = actionHandlersRegistry.get(action.type, null);
+                const handler = actionHandlersRegistry.get(action.type, null);
                 if (handler !== null) {
                     return handler({ env, action, options });
                 }
@@ -1260,7 +1264,7 @@ function makeActionManager(env) {
         // filter out context keys that are specific to the current action, because:
         //  - wrong default_* and search_default_* values won't give the expected result
         //  - wrong group_by values will fail and forbid rendering of the destination view
-        let currentCtx = {};
+        const currentCtx = {};
         for (const key in params.context) {
             if (key.match(CTX_KEY_REGEX) === null) {
                 currentCtx[key] = params.context[key];
@@ -1447,7 +1451,7 @@ function makeActionManager(env) {
         restore,
         loadState,
         async loadAction(actionRequest, context) {
-            let action = await _loadAction(actionRequest, context);
+            const action = await _loadAction(actionRequest, context);
             return _preprocessAction(action, context);
         },
         get currentController() {
