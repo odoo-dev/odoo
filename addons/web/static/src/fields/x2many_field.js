@@ -81,6 +81,25 @@ export class X2ManyField extends Component {
                 }
                 return true;
             });
+            // filter out oe_read_only/oe_edit_only columns
+            // note: remove this oe_read/edit_only logic when form view
+            // will always be in edit mode
+            const mode = this.props.record.mode;
+            columns = columns.filter((col) => {
+                if (col.type === "field") {
+                    if (mode === "readonly") {
+                        return !/\boe_edit_only\b/.test(col.className);
+                    } else {
+                        return !/\boe_read_only\b/.test(col.className);
+                    }
+                } else if (col.type === "button_group") {
+                    if (mode === "readonly") {
+                        return col.buttons.some((btn) => !/\boe_edit_only\b/.test(btn.className));
+                    } else {
+                        return col.buttons.some((btn) => !/\boe_read_only\b/.test(btn.className));
+                    }
+                }
+            });
         }
         const props = {
             activeActions: this.activeActions,
