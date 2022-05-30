@@ -3241,53 +3241,6 @@ QUnit.module("Fields", (hooks) => {
         assert.strictEqual(nbWrite, 1, "should have write the changes in DB");
     });
 
-    // WOWL won't do quick edit
-    QUnit.skipWOWL("one2many list (editable): edition", async function (assert) {
-        assert.expect(7);
-
-        serverData.models.partner.records[0].p = [2, 4];
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
-                <form>
-                    <field name="p">
-                        <tree editable="top">
-                            <field name="display_name"/>
-                            <field name="qux"/>
-                        </tree>
-                        <form>
-                            <field name="display_name"/>
-                        </form>
-                    </field>
-                </form>`,
-            resId: 1,
-        });
-
-        assert.containsOnce(target, ".o_field_x2many_list_row_add");
-
-        await click(target.querySelector(".o_list_renderer tbody td"));
-
-        assert.containsOnce(target, ".o_form_view .o_form_editable"); // not sure about this
-        assert.containsOnce(target, ".o_field_x2many_list_row_add");
-        assert.containsNone(target, ".modal");
-        // WOWL do we want this or another click?
-        assert.hasClass(target.querySelector(".o_list_renderer tbody tr"), "o_selected_row");
-        await editInput(target, '.o_list_renderer div[name="display_name"] input', "new name");
-
-        const secondRow = target.querySelectorAll(".o_list_renderer tbody tr")[1];
-        await click(secondRow.querySelector("td"));
-        assert.doesNotHaveClass(target, ".o_list_renderer tbody tr", "o_selected_row");
-        assert.strictEqual(
-            target.querySelector(".o_list_renderer tbody td").textContent,
-            "new name"
-        );
-
-        // create new subrecords
-        // TODO when 'Add an item' will be implemented
-    });
-
     QUnit.test("one2many list (editable): edition, part 2", async function (assert) {
         assert.expect(11);
 
@@ -6442,8 +6395,6 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test("one2many field with virtual ids", async function (assert) {
-        assert.expect(11);
-
         serverData.views = {
             "partner,false,form": '<form><field name="foo"/></form>',
         };
@@ -6668,18 +6619,10 @@ QUnit.module("Fields", (hooks) => {
             "should have 1 button type object disabled"
         );
 
+        assert.ok(target.querySelector(btn2Disabled).disabled);
+        assert.notOk(target.querySelector(btn2Warn).disabled);
         assert.strictEqual(
-            target.querySelector(btn2Disabled).attr("disabled"),
-            "disabled",
-            "Should have a button type object disabled in area 2"
-        );
-        assert.strictEqual(
-            target.querySelector(btn2Warn).attr("disabled"),
-            undefined,
-            "Should have a button type object not disabled in area 2"
-        );
-        assert.strictEqual(
-            target.querySelector(btn2Warn).attr("warn"),
+            target.querySelector(btn2Warn).getAttribute("warn"),
             "warn",
             "Should have a button type object with warn attr in area 2"
         );
@@ -7793,19 +7736,16 @@ QUnit.module("Fields", (hooks) => {
         ]);
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "one2many field: change value before pending onchange returns",
         async function (assert) {
-            assert.expect(2);
-
-            var M2O_DELAY = relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY;
-            relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = 0;
+            patchSetTimeout();
 
             serverData.models.partner.onchanges = {
                 int_field: function () {},
             };
-            var prom;
-            const form = await makeView({
+            let def;
+            await makeView({
                 type: "form",
                 resModel: "partner",
                 serverData,
@@ -7818,42 +7758,31 @@ QUnit.module("Fields", (hooks) => {
                             </tree>
                         </field>
                     </form>`,
-                mockRPC(route, args) {
-                    var result = this._super.apply(this, arguments);
+                async mockRPC(route, args) {
                     if (args.method === "onchange") {
                         // delay the onchange RPC
-                        return Promise.resolve(prom).then(_.constant(result));
+                        await Promise.resolve(def);
                     }
-                    return result;
                 },
             });
 
             await addRow(target);
-            prom = testUtils.makeTestPromise();
-            await testUtils.fields.editInput(form.$(".o_field_widget[name=int_field]"), "44");
+            def = makeDeferred();
+            await editInput(target, ".o_field_widget[name=int_field] input", "44");
 
-            var $dropdown = form.$(".o_field_many2one input").autocomplete("widget");
             // set trululu before onchange
-            await testUtils.fields.editAndTrigger(form.$(".o_field_many2one input"), "first", [
-                "keydown",
-                "keyup",
-            ]);
-            // complete the onchange
-            prom.resolve();
-            assert.strictEqual(
-                form.$(".o_field_many2one input").val(),
-                "first",
-                "should have kept the new value"
-            );
-            await testUtils.nextTick();
-            // check name_search result
-            assert.strictEqual(
-                $dropdown.find("li:not(.o_m2o_dropdown_option)").length,
-                1,
-                "autocomplete should contains 1 suggestion"
-            );
+            await editInput(target, ".o_field_widget[name=trululu] input", "first");
 
-            relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = M2O_DELAY;
+            // complete the onchange
+            def.resolve();
+            assert.strictEqual(target.querySelector(".o_field_many2one input").value, "first");
+            await nextTick();
+            // check name_search result
+            assert.strictEqual(target.querySelector(".o_field_many2one input").value, "first");
+            assert.containsOnce(
+                target,
+                ".o_field_many2one .dropdown-menu li:not(.o_m2o_dropdown_option)"
+            );
         }
     );
 
@@ -7893,16 +7822,13 @@ QUnit.module("Fields", (hooks) => {
         editInput(target, "[name=int_field] input", "44");
 
         click(target, ".o_field_widget[name=qux]");
-
         assert.strictEqual(
             document.activeElement,
             target.querySelector(".o_field_widget[name=qux] input")
         );
 
         def.resolve();
-
         await nextTick();
-
         assert.strictEqual(
             document.activeElement,
             target.querySelector(".o_field_widget[name=qux] input")
@@ -11631,8 +11557,6 @@ QUnit.module("Fields", (hooks) => {
             );
         }
     );
-
-    QUnit.module("TabNavigation");
 
     QUnit.skipWOWL(
         "when Navigating to a many2one with tabs, it receives the focus and adds a new line",
