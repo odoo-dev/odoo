@@ -772,7 +772,7 @@ QUnit.module("Fields", (hooks) => {
         );
 
         // press TAB to go to next line
-        await triggerEvent(target.querySelectorAll(".o_data_row input")[1], "keydown", {
+        await triggerEvent(target.querySelectorAll(".o_data_row input")[1], null, "keydown", {
             key: "Tab",
         });
         assert.strictEqual(
