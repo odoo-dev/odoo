@@ -3755,7 +3755,7 @@ QUnit.module("Fields", (hooks) => {
         await addRow(target);
         await triggerEvent(target, '[name="turtle_foo"] input', "keydown", { key: "Enter" });
         assert.hasClass(
-            target.querySelector('[name="turtle_foo"]'),
+            target.querySelector('div[name="turtle_foo"]'),
             "o_field_invalid",
             "input should be marked invalid"
         );

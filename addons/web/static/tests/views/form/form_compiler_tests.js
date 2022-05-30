@@ -112,7 +112,7 @@ QUnit.module("Form Compiler", () => {
             </form>`;
 
         const expected = /*xml*/ `
-            <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']" archs="'views' in record.fields.display_name and record.fields.display_name.views" placeholder="'e.g. Contact\\'s Name or //someinfo...'"/>
+            <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']" archs="'views' in record.fields.display_name and record.fields.display_name.views" placeholder="&quot;e.g. Contact's Name or //someinfo...&quot;"/>
         `;
 
         assert.areContentEquivalent(compileTemplate(arch), expected);

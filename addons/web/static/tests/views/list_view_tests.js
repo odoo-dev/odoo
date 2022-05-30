@@ -8252,7 +8252,7 @@ QUnit.module("Views", (hooks) => {
             "new fourth record should have amount 300"
         );
 
-        await click(target, "tbody tr:nth-child(2) [name='amount']");
+        await click(target, "tbody tr:nth-child(2) div[name='amount']");
 
         assert.strictEqual(
             $(target).find("tbody tr:eq(1) td:last input").val(),
@@ -8284,7 +8284,7 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.strictEqual(
-            $(target).find('tbody [name="amount"]').text(),
+            $(target).find('tbody div[name="amount"]').text(),
             "1200.00500.00300.000.00",
             "default should be sorted by int_field"
         );
@@ -8294,7 +8294,7 @@ QUnit.module("Views", (hooks) => {
 
         // Handle should be unlocked at this point
         assert.strictEqual(
-            $(target).find('tbody [name="amount"]').text(),
+            $(target).find('tbody div[name="amount"]').text(),
             "1200.000.00500.00300.00",
             "drag and drop should have succeeded, as the handle is unlocked"
         );
@@ -8302,7 +8302,7 @@ QUnit.module("Views", (hooks) => {
         // Sorting by a field different for int_field should lock the handle
         await click(target.querySelectorAll(".o_column_sortable")[1]);
         assert.strictEqual(
-            $(target).find('tbody [name="amount"]').text(),
+            $(target).find('tbody div[name="amount"]').text(),
             "0.00300.00500.001200.00",
             "should have been sorted by amount"
         );
@@ -8310,7 +8310,7 @@ QUnit.module("Views", (hooks) => {
         // Drag and drop the fourth line in second position (not)
         await dragAndDrop("tbody tr:nth-child(4) .o_row_handle", "tbody tr:nth-child(2)");
         assert.strictEqual(
-            $(target).find('tbody [name="amount"]').text(),
+            $(target).find('tbody div[name="amount"]').text(),
             "0.00300.00500.001200.00",
             "drag and drop should have failed as the handle is locked"
         );
@@ -8318,7 +8318,7 @@ QUnit.module("Views", (hooks) => {
         // Sorting by int_field should unlock the handle
         await click(target.querySelectorAll(".o_column_sortable")[0]);
         assert.strictEqual(
-            $(target).find('tbody [name="amount"]').text(),
+            $(target).find('tbody div[name="amount"]').text(),
             "1200.000.00500.00300.00",
             "records should be ordered as per the previous resequence"
         );
@@ -8326,7 +8326,7 @@ QUnit.module("Views", (hooks) => {
         // Drag and drop the fourth line in second position
         await dragAndDrop("tbody tr:nth-child(4) .o_row_handle", "tbody tr:nth-child(2)");
         assert.strictEqual(
-            $(target).find('tbody [name="amount"]').text(),
+            $(target).find('tbody div[name="amount"]').text(),
             "1200.00300.000.00500.00",
             "drag and drop should have worked as the handle is unlocked"
         );
@@ -10865,7 +10865,7 @@ QUnit.module("Views", (hooks) => {
             target.querySelector(".o_selected_row [name=foo].o_field_widget"),
             "o_readonly_modifier"
         );
-        assert.containsOnce(target, ".o_selected_row [name=int_field]");
+        assert.containsOnce(target, ".o_selected_row div[name=int_field]");
 
         // set a value and save
         await editInput(target, ".o_selected_row [name=foo] input", "some value");
@@ -10881,7 +10881,7 @@ QUnit.module("Views", (hooks) => {
             target.querySelector(".o_selected_row .o_field_widget[name=foo]"),
             "o_readonly_modifier"
         );
-        assert.containsNone(target, ".o_selected_row [name=int_field]");
+        assert.containsNone(target, ".o_selected_row div[name=int_field]");
     });
 
     QUnit.test("readonly boolean in editable list is readonly", async function (assert) {
@@ -10910,9 +10910,9 @@ QUnit.module("Views", (hooks) => {
 
         // clicking on enabled checkbox with active row toggles check mark
         await click(rows[0].querySelector(".o_data_cell"));
-        const enabledCell = rows[0].querySelector("[name=bar]");
+        const enabledCell = rows[0].querySelector("div[name=bar]");
         assert.containsOnce(enabledCell, ":checked:not(:disabled)");
-        await click(rows[0].querySelector("[name=bar] div"));
+        await click(rows[0].querySelector("div[name=bar] div"));
         assert.containsNone(
             enabledCell,
             ":checked",

@@ -373,7 +373,7 @@ QUnit.module("DebugMenu", (hooks) => {
         await click(target.querySelector(".o_debug_manager .dropdown-item"));
         assert.containsOnce(target, ".modal .o_form_view");
         assert.strictEqual(
-            target.querySelector(".modal .o_form_view .o_field_widget span").innerText.trim(),
+            target.querySelector(".modal .o_form_view .o_field_widget[name=id] input").value,
             "18"
         );
     });
@@ -409,7 +409,7 @@ QUnit.module("DebugMenu", (hooks) => {
         await legacyExtraNextTick();
         assert.containsOnce(target, ".modal .o_form_view");
         assert.strictEqual(
-            target.querySelector(".modal .o_form_view .o_field_widget span").innerText.trim(),
+            target.querySelector(".modal .o_form_view .o_field_widget[name=id] input").value,
             "293"
         );
     });
@@ -472,7 +472,7 @@ QUnit.module("DebugMenu", (hooks) => {
         await legacyExtraNextTick();
         assert.containsOnce(target, ".modal .o_form_view");
         assert.strictEqual(
-            target.querySelector(".modal .o_form_view .o_field_widget span").innerText.trim(),
+            target.querySelector(".modal .o_form_view .o_field_widget[name=id] input").value,
             "293"
         );
     });
