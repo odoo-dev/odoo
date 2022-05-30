@@ -9071,15 +9071,16 @@ QUnit.module("Views", (hooks) => {
         );
 
         await makeView({
-            arch: `<kanban>
-    <templates>
-        <t t-name="kanban-box">
-            <div>
-                <widget name="widget_test_option" title="Widget with Option"/>
-            </div>
-        </t>
-    </templates>
-</kanban>`,
+            arch: `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <widget name="widget_test_option" title="Widget with Option"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
             serverData,
             resModel: "partner",
             type: "kanban",
@@ -9092,71 +9093,61 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("action/type attributes on kanban arch, type='object'", async function (assert) {
-        // assert.expect(6)
-        // var kanban = await createView({
-        //     View: KanbanView,
-        //     model: "partner",
-        //     data: this.data,
-        //     arch:
-        //         '<kanban action="a1" type="object">' +
-        //             '<templates><div t-name="kanban-box">' +
-        //                 '<p>some value</p><field name="foo"/>' +
-        //             '</div></templates>' +
-        //         '</kanban>',
-        //     mockRPC: function (route) {
-        //         assert.step(route);
-        //         return this._super.apply(this, arguments);
-        //     },
-        // });
-        // var count = 0;
-        // testUtils.mock.intercept(kanban, 'execute_action', function (event) {
-        //     count++;
-        //     assert.strictEqual(event.data.action_data.type, "object");
-        //     assert.strictEqual(event.data.action_data.name, "a1");
-        //     event.data.on_closed();
-        // });
-        // testUtils.dom.click(kanban.$('p').first());
-        // await new Promise(r => setTimeout(r));
-        // assert.strictEqual(count, 1, "should have triggered a execute action");
-        // assert.verifySteps([
-        //     '/web/dataset/search_read',
-        //     '/web/dataset/call_kw/partner/read'
-        // ], 'a read should be done after the call button to reload the record');
-        // kanban.destroy();
+    QUnit.test("action/type attributes on kanban arch, type='object'", async function (assert) {
+        const kanban = await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban action="a1" type="object">
+                    <templates><t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <p>some value</p><field name="foo"/>
+                        </div>
+                    </t></templates>
+                </kanban>`,
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+        patchWithCleanup(kanban.env.services.action, {
+            doActionButton(params) {
+                assert.step(`doActionButton type ${params.type} name ${params.name}`);
+                params.onClose();
+            },
+        });
+
+        assert.verifySteps(["get_views", "web_search_read"]);
+        await click(target.querySelector(".o_kanban_record p"));
+        assert.verifySteps(["doActionButton type object name a1", "web_search_read"]);
     });
 
-    QUnit.skipWOWL("action/type attributes on kanban arch, type='action'", async function (assert) {
-        // assert.expect(6);
-        // var kanban = await createView({
-        //     View: KanbanView,
-        //     model: "partner",
-        //     data: this.data,
-        //     arch:
-        //         '<kanban action="a1" type="action">' +
-        //             '<templates><div t-name="kanban-box">' +
-        //                 '<p>some value</p><field name="foo"/>' +
-        //             '</div></templates>' +
-        //         '</kanban>',
-        //     mockRPC: function (route) {
-        //         assert.step(route);
-        //         return this._super.apply(this, arguments);
-        //     },
-        // });
-        // var count = 0;
-        // testUtils.mock.intercept(kanban, 'execute_action', function (event) {
-        //     count++;
-        //     assert.strictEqual(event.data.action_data.type, "action");
-        //     assert.strictEqual(event.data.action_data.name, "a1");
-        //     event.data.on_closed();
-        // });
-        // testUtils.dom.click(kanban.$('p').first());
-        // await new Promise(r => setTimeout(r));
-        // assert.strictEqual(count, 1, "should have triggered a execute action");
-        // assert.verifySteps([
-        //     '/web/dataset/search_read',
-        //     '/web/dataset/call_kw/partner/read'
-        // ], 'a read should be done after the call button to reload the record');
-        // kanban.destroy();
+    QUnit.test("action/type attributes on kanban arch, type='action'", async function (assert) {
+        const kanban = await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban action="a1" type="action">
+                    <templates><t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <p>some value</p><field name="foo"/>
+                        </div>
+                    </t></templates>
+                </kanban>`,
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+        patchWithCleanup(kanban.env.services.action, {
+            doActionButton(params) {
+                assert.step(`doActionButton type ${params.type} name ${params.name}`);
+                params.onClose();
+            },
+        });
+
+        assert.verifySteps(["get_views", "web_search_read"]);
+        await click(target.querySelector(".o_kanban_record p"));
+        assert.verifySteps(["doActionButton type action name a1", "web_search_read"]);
     });
 });

@@ -103,6 +103,9 @@ export class KanbanArchParser extends XMLParser {
         let handleField = null;
         const fieldNodes = {};
         const jsClass = xmlDoc.getAttribute("js_class");
+        const action = xmlDoc.getAttribute("action");
+        const type = xmlDoc.getAttribute("type");
+        const openAction = action && type ? { action, type } : null;
 
         // Root level of the template
         this.visitXML(xmlDoc, (node) => {
@@ -286,6 +289,7 @@ export class KanbanArchParser extends XMLParser {
             colorField,
             defaultOrder,
             onCreate,
+            openAction,
             quickCreateView,
             recordsDraggable,
             limit: limit && parseInt(limit, 10),

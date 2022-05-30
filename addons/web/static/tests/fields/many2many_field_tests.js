@@ -10,6 +10,7 @@ import {
     getFixture,
     getNodesTextContent,
     nextTick,
+    patchWithCleanup,
 } from "../helpers/utils";
 import { editSearch, validateSearch } from "../search/helpers";
 
@@ -1817,34 +1818,35 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("many2many kanban: action/type attribute", async function (assert) {
-        // assert.expect(2);
-        // this.data.partner.records[0].timmy = [12];
-        // var form = await createView({
-        //     View: FormView,
-        //     model: 'partner',
-        //     data: this.data,
-        //     arch: '<form string="Partners">' +
-        //         '<field name="timmy" add-label="Add timmy" mode="kanban">' +
-        //         '<kanban action="a1" type="object">' +
-        //         '<templates>' +
-        //         '<t t-name="kanban-box">' +
-        //         '<div class="oe_kanban_details">' +
-        //         '<field name="display_name"/>' +
-        //         '</div>' +
-        //         '</t>' +
-        //         '</templates>' +
-        //         '</kanban>' +
-        //         '</field>' +
-        //         '</form>',
-        //     res_id: 1,
-        // });
-        // testUtils.mock.intercept(form, 'execute_action', function (event) {
-        //     assert.strictEqual(event.data.action_data.type, "object");
-        //     assert.strictEqual(event.data.action_data.name, "a1");
-        //     event.data.on_closed();
-        // });
-        // testUtils.dom.click(form.$('.oe_kanban_details').first());
-        // form.destroy();
+    QUnit.test("many2many kanban: action/type attribute", async function (assert) {
+        serverData.models.partner.records[0].timmy = [12];
+        const form = await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="timmy">
+                        <kanban action="a1" type="object">
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div class="oe_kanban_global_click">
+                                        <field name="display_name"/>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </form>`,
+            resId: 1,
+        });
+        patchWithCleanup(form.env.services.action, {
+            doActionButton(params) {
+                assert.step(`doActionButton type ${params.type} name ${params.name}`);
+                params.onClose();
+            },
+        });
+        await click(target.querySelector(".oe_kanban_global_click"));
+        assert.verifySteps(["doActionButton type object name a1"]);
     });
 });

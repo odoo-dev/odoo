@@ -614,7 +614,22 @@ export class KanbanRenderer extends Component {
         if (ev.target.closest(GLOBAL_CLICK_CANCEL_SELECTORS.join(","))) {
             return;
         }
-        this.props.openRecord(record);
+        if (this.props.archInfo.openAction) {
+            this.action.doActionButton({
+                name: this.props.archInfo.openAction.action,
+                type: this.props.archInfo.openAction.type,
+                resModel: record.resModel,
+                resId: record.resId,
+                resIds: record.resIds,
+                context: record.context,
+                onClose: async () => {
+                    await record.model.root.load();
+                    record.model.notify();
+                },
+            });
+        } else {
+            this.props.openRecord(record);
+        }
     }
 
     /**
