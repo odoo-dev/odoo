@@ -2,8 +2,8 @@
 
 import { useService } from "@web/core/utils/hooks";
 import { debounce } from "@web/core/utils/timing";
+import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { usePosition } from "@web/core/position_hook";
-import { useHotkey } from "../hotkeys/hotkey_hook";
 
 const { Component, onWillUnmount, useExternalListener, useRef, useState, useEffect } = owl;
 
@@ -67,6 +67,21 @@ export class AutoComplete extends Component {
             allowRepeat: true,
             bypassEditableProtection: true,
         });
+        useHotkey("Enter", this.onEnterPress.bind(this), {
+            area: () => this.inputRef.el,
+            bypassEditableProtection: true,
+            validate: () => this.isOpened,
+        });
+        useHotkey("Escape", this.onEscapePress.bind(this), {
+            area: () => this.inputRef.el,
+            bypassEditableProtection: true,
+            validate: () => this.isOpened,
+        });
+        useHotkey("Tab", this.onTabPress.bind(this), {
+            area: () => this.inputRef.el,
+            bypassEditableProtection: true,
+            validate: () => this.isOpened,
+        });
     }
 
     get isOpened() {
@@ -76,13 +91,11 @@ export class AutoComplete extends Component {
     open(useInput = false) {
         this.state.open = true;
         this.loadSources(useInput);
-        this.registerOtherHotkeys();
     }
 
     close() {
         this.state.open = false;
         this.state.activeSourceOption = null;
-        this.unregisterOtherHotkeys();
     }
 
     loadSources(useInput) {
@@ -206,29 +219,6 @@ export class AutoComplete extends Component {
                 this.state.activeSourceOption = [sourceIndex, optionIndex];
             }
         }
-    }
-
-    registerOtherHotkeys() {
-        // These other hotkeys should only get registered when the autocomplete is opened.
-        const hotkeys = {
-            escape: this.onEscapePress.bind(this),
-            enter: this.onEnterPress.bind(this),
-            tab: this.onTabPress.bind(this),
-        };
-        for (const [hotkey, callback] of Object.entries(hotkeys)) {
-            const remove = this.hotkey.add(hotkey, callback, {
-                area: () => this.inputRef.el,
-                bypassEditableProtection: true,
-            });
-            this.hotkeysToRemove.push(remove);
-        }
-    }
-
-    unregisterOtherHotkeys() {
-        for (const removeHotkey of this.hotkeysToRemove) {
-            removeHotkey();
-        }
-        this.hotkeysToRemove = [];
     }
 
     onInputBlur() {

@@ -157,7 +157,8 @@ export const hotkeyService = {
                     (reg.allowRepeat || !isRepeated) &&
                     (reg.bypassEditableProtection || !shouldProtectEditable) &&
                     (reg.global || reg.activeElement === activeElement) &&
-                    (!reg.area || reg.area().contains(target))
+                    (!reg.validate || reg.validate(target)) &&
+                    (!reg.area || (reg.area() && reg.area().contains(target)))
             );
 
             // Search the closest from target
@@ -370,6 +371,7 @@ export const hotkeyService = {
                 bypassEditableProtection: options && options.bypassEditableProtection,
                 global: options && options.global,
                 area: options && options.area,
+                validate: options && options.validate,
             };
 
             // Due to the way elements are mounted in the DOM by Owl (bottom-to-top),
