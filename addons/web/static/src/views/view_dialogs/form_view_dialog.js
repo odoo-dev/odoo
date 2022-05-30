@@ -58,7 +58,9 @@ export class FormViewDialog extends Component {
                 const defaultButton = this.modalRef.el.querySelector(
                     ".modal-footer button.o-default-button"
                 );
-                defaultButton.classList.add("d-none");
+                if (defaultButton) {
+                    defaultButton.classList.add("d-none");
+                }
             }
         });
     }

@@ -3212,7 +3212,7 @@ QUnit.module("Fields", (hooks) => {
             "there should be a readonly form view opened"
         );
 
-        await click(target, ".modal .o_form_button_cancel");
+        await click(target, ".modal .modal-footer .btn-primary");
 
         await editInput(target, ".o_field_many2one input", "new product");
         await triggerEvent(target, ".o_field_many2one input", "blur");
