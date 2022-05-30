@@ -3,6 +3,7 @@
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "./standard_field_props";
 import { Many2OneField } from "./many2one_field";
+import { Domain } from "@web/core/domain";
 
 const { Component } = owl;
 
@@ -16,6 +17,12 @@ Many2OneAvatarField.props = {
     ...standardFieldProps,
     placeholder: { type: String, optional: true },
     relation: String,
+    getContext: { type: Function, optional: true },
+    getDomain: { type: Function, optional: true },
+};
+Many2OneAvatarField.defaultProps = {
+    getContext: () => ({}),
+    getDomain: () => new Domain(),
 };
 
 Many2OneAvatarField.supportedTypes = ["many2one"];
@@ -23,6 +30,8 @@ Many2OneAvatarField.supportedTypes = ["many2one"];
 Many2OneAvatarField.extractProps = (fieldName, record) => {
     return {
         relation: record.fields[fieldName].relation,
+        getContext: () => record.getFieldContext(fieldName),
+        getDomain: () => record.getFieldDomain(fieldName),
     };
 };
 

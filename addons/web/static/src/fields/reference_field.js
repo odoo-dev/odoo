@@ -2,6 +2,7 @@
 
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { Domain } from "@web/core/domain";
 import { Many2OneField } from "./many2one_field";
 import { standardFieldProps } from "./standard_field_props";
 
@@ -84,6 +85,12 @@ ReferenceField.props = {
             displayName: String,
         },
     },
+    getContext: { type: Function, optional: true },
+    getDomain: { type: Function, optional: true },
+};
+ReferenceField.defaultProps = {
+    getContext: () => ({}),
+    getDomain: () => new Domain(),
 };
 
 ReferenceField.displayName = _lt("Reference");
@@ -109,6 +116,8 @@ ReferenceField.extractProps = (fieldName, record, attrs) => {
 
     return {
         ...props,
+        getContext: () => record.getFieldContext(fieldName),
+        getDomain: () => record.getFieldDomain(fieldName),
     };
 };
 
