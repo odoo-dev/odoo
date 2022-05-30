@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { click, getFixture } from "../helpers/utils";
+import { click, clickEdit, getFixture } from "../helpers/utils";
 import { makeView, setupViewRegistries } from "../views/helpers";
 
 let serverData;
@@ -123,59 +123,88 @@ QUnit.module("Fields", (hooks) => {
         assert.ok(target.querySelector(".o_boolean_toggle input").checked);
     });
 
-    QUnit.skipWOWL(
-        "boolean toggle widget is not disabled in readonly mode",
-        async function (assert) {
-            // assert.expect(3);
-            // const form = await createView({
-            //     View: FormView,
-            //     model: 'partner',
-            //     data: this.data,
-            //     arch: '<form><field name="bar" widget="boolean_toggle"/></form>',
-            //     res_id: 5,
-            // });
-            // assert.containsOnce(form, ".custom-checkbox.o_boolean_toggle", "Boolean toggle widget applied to boolean field");
-            // assert.notOk(form.$('.o_boolean_toggle input')[0].checked);
-            // await testUtils.dom.click(form.$('.o_boolean_toggle'));
-            // assert.ok(form.$('.o_boolean_toggle input')[0].checked);
-            // form.destroy();
-        }
-    );
+    QUnit.test("boolean toggle widget is not disabled in readonly mode", async function (assert) {
+        assert.expect(3);
 
-    QUnit.skipWOWL(
+        await makeView({
+            type: "form",
+            serverData,
+            resModel: "partner",
+            resId: 1,
+            arch: `
+                    <form>
+                        <field name="bar" widget="boolean_toggle" />
+                    </form>
+                `,
+        });
+
+        assert.containsOnce(
+            target,
+            ".custom-checkbox.o_boolean_toggle",
+            "Boolean toggle widget applied to boolean field"
+        );
+        assert.containsNone(target, ".o_boolean_toggle input:checked");
+
+        await click(target, ".o_boolean_toggle");
+        assert.containsOnce(target, ".o_boolean_toggle input:checked");
+    });
+
+    QUnit.test(
         "boolean toggle widget is disabled with a readonly attribute",
         async function (assert) {
-            // assert.expect(3);
-            // const form = await createView({
-            //     View: FormView,
-            //     model: 'partner',
-            //     data: this.data,
-            //     arch: '<form><field name="bar" widget="boolean_toggle" readonly="1"/></form>',
-            //     res_id: 5,
-            // });
-            // assert.containsOnce(form, ".custom-checkbox.o_boolean_toggle", "Boolean toggle widget applied to boolean field");
-            // await testUtils.dom.click(form.$buttons.find('.o_form_button_edit'));
-            // assert.notOk(form.$('.o_boolean_toggle input')[0].checked);
-            // await testUtils.dom.click(form.$('.o_boolean_toggle'));
-            // assert.notOk(form.$('.o_boolean_toggle input')[0].checked);
-            // form.destroy();
+            assert.expect(3);
+
+            await makeView({
+                type: "form",
+                serverData,
+                resModel: "partner",
+                resId: 1,
+                arch: `
+                    <form>
+                        <field name="bar" widget="boolean_toggle" readonly="1" />
+                    </form>
+                `,
+            });
+
+            assert.containsOnce(
+                target,
+                ".custom-checkbox.o_boolean_toggle",
+                "Boolean toggle widget applied to boolean field"
+            );
+
+            await clickEdit(target);
+            assert.containsNone(target, ".o_boolean_toggle input:checked");
+
+            await click(target, ".o_boolean_toggle");
+            assert.containsNone(target, ".o_boolean_toggle input:checked");
         }
     );
 
-    QUnit.skipWOWL("boolean toggle widget is enabled in edit mode", async function (assert) {
-        // assert.expect(3);
-        // const form = await createView({
-        //     View: FormView,
-        //     model: 'partner',
-        //     data: this.data,
-        //     arch: '<form><field name="bar" widget="boolean_toggle"/></form>',
-        //     res_id: 5,
-        // });
-        // assert.containsOnce(form, ".custom-checkbox.o_boolean_toggle", "Boolean toggle widget applied to boolean field");
-        // await testUtils.dom.click(form.$buttons.find('.o_form_button_edit'));
-        // assert.notOk(form.$('.o_boolean_toggle input')[0].checked);
-        // await testUtils.dom.click(form.$('.o_boolean_toggle'));
-        // assert.ok(form.$('.o_boolean_toggle input')[0].checked);
-        // form.destroy();
+    QUnit.test("boolean toggle widget is enabled in edit mode", async function (assert) {
+        assert.expect(3);
+
+        await makeView({
+            type: "form",
+            serverData,
+            resModel: "partner",
+            resId: 1,
+            arch: `
+                <form>
+                    <field name="bar" widget="boolean_toggle" />
+                </form>
+            `,
+        });
+
+        assert.containsOnce(
+            target,
+            ".custom-checkbox.o_boolean_toggle",
+            "Boolean toggle widget applied to boolean field"
+        );
+
+        await clickEdit(target);
+        assert.containsNone(target, ".o_boolean_toggle input:checked");
+
+        await click(target, ".o_boolean_toggle");
+        assert.containsOnce(target, ".o_boolean_toggle input:checked");
     });
 });
