@@ -184,8 +184,8 @@ import { canDefaultBehaviorHappen } from "./helpers/utils";
     function isNotVisible(el, msg) {
         return _checkVisible(el, false, msg);
     }
-    function defaultBehavior(el, eventType, eventAttrs, msg) {
-        const answer = canDefaultBehaviorHappen(el, null, eventType, eventAttrs);
+    function defaultBehavior(el, selector, eventType, eventAttrs, msg) {
+        const answer = canDefaultBehaviorHappen(el, selector, eventType, eventAttrs);
         QUnit.assert.ok(answer, msg);
     }
 
