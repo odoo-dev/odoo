@@ -5048,7 +5048,7 @@ QUnit.module("Views", (hooks) => {
         assert.notOk(isNaN(cells[2].innerText.trim()), "Intger value is a number");
         assert.ok(cells[3].innerText.trim(), "Many2one field is a string");
 
-        const firstM2MTag = cells[4].querySelector(":scope span.o_tag_badge_text").innerText.trim();
+        const firstM2MTag = cells[4].querySelector(":scope div.o_tag_badge_text").innerText.trim();
         assert.ok(firstM2MTag.length > 0, "Many2many contains at least one string tag");
 
         assert.ok(

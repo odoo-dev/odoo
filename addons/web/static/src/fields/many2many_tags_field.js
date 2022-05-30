@@ -6,7 +6,7 @@ import { standardFieldProps } from "./standard_field_props";
 
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ColorList } from "@web/core/colorlist/colorlist";
-import { TagItem } from "@web/core/tags/tag_item";
+import { TagsList } from "@web/core/tags/tags_list";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { Domain } from "@web/core/domain";
 import { useService } from "@web/core/utils/hooks";
@@ -113,9 +113,10 @@ export class Many2ManyTagsField extends Component {
     get tags() {
         return this.props.value.records.map((record) => ({
             id: record.id, // datapoint_X
-            resId: record.resId, // X
-            name: record.data.display_name,
+            text: record.data.display_name,
             colorIndex: record.data[this.props.colorField],
+            onClick: (ev) => this.onBadgeClick(ev, record),
+            onDelete: !this.props.readonly ? () => this.onDelete(record.id) : undefined,
         }));
     }
     get canOpenColorDropdown() {
@@ -272,12 +273,13 @@ export class Many2ManyTagsField extends Component {
         this.props.value.replaceWith(ids);
     }
 
-    onDelete(tag) {
-        const ids = this.props.value.currentIds.filter((id) => id !== tag.resId);
+    onDelete(id) {
+        const tagRecord = this.props.value.records.find((record) => record.id === id);
+        const ids = this.props.value.currentIds.filter((id) => id !== tagRecord.resId);
         this.props.value.replaceWith(ids);
     }
 
-    onBadgeClick(ev, tag) {
+    onBadgeClick(ev, record) {
         if (!this.canOpenColorDropdown) return;
         const isClosed = !document.querySelector(".o_tag_popover");
         if (isClosed) {
@@ -293,7 +295,10 @@ export class Many2ManyTagsField extends Component {
                 this.constructor.components.Popover,
                 {
                     colors: this.constructor.RECORD_COLORS,
-                    tag: tag,
+                    tag: {
+                        id: record.id,
+                        colorIndex: record.data[this.props.colorField],
+                    },
                     switchTagColor: this.switchTagColor.bind(this),
                     onTagVisibilityChange: this.onTagVisibilityChange.bind(this),
                 }
@@ -343,7 +348,7 @@ Many2ManyTagsField.template = "web.Many2ManyTagsField";
 Many2ManyTagsField.components = {
     AutoComplete,
     Popover: Many2ManyTagsFieldColorListPopover,
-    TagItem,
+    TagsList,
 };
 
 Many2ManyTagsField.props = {

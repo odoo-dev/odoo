@@ -37,7 +37,6 @@
                 & {
                     background-color: $o-view-background-color;
                     color: nth($o-colors, $size);
-                    box-shadow: inset 0 0 0 1px;
                 }
                 &::after {
                     background-color: nth($o-colors, $size);

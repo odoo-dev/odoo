@@ -3058,7 +3058,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsN(
             getCard(0),
-            ".o_field_many2manytags .o_tag",
+            ".o_field_many2many_tags .o_tag",
             2,
             "first record should contain 2 tags"
         );
@@ -3092,7 +3092,7 @@ QUnit.module("Views", (hooks) => {
         );
         assert.containsN(
             target,
-            ".o_kanban_record:first-child .o_field_many2manytags .o_tag",
+            ".o_kanban_record:first-child .o_field_many2many_tags .o_tag",
             2,
             "first record should still contain only 2 tags"
         );
@@ -5772,7 +5772,7 @@ QUnit.module("Views", (hooks) => {
             "there should be sample records"
         );
         assert.ok(
-            target.querySelectorAll(".o_field_many2manytags .o_tag").length >= 1,
+            target.querySelectorAll(".o_field_many2many_tags .o_tag").length >= 1,
             "there should be tags"
         );
 
