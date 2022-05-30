@@ -13,6 +13,7 @@ import { standardViewProps } from "@web/views/helpers/standard_view_props";
 import { useSetupView } from "@web/views/helpers/view_hook";
 import { isX2Many } from "@web/views/helpers/view_utils";
 import { useViewButtons } from "@web/views/view_button/hook";
+import { localization } from "@web/core/l10n/localization";
 
 const { Component, onWillStart, useEffect, useRef, onRendered } = owl;
 
@@ -315,6 +316,18 @@ export class FormController extends Component {
 
     async save(params = {}) {
         const disabledButtons = this.disableButtons();
+
+        // This piece of code handles the notification displayed
+        // when a translatable field is edited.
+        // The banner doesn't go away unless close button is clicked.
+        if (this.shouldShowTranslatableFieldReminderNotification) {
+            this.showingTranslatableFieldReminderNotification = true;
+            this.translatableFieldsInNotification = new Set([
+                ...(this.translatableFieldsInNotification || []),
+                ...this.model.root.dirtyTranslatableFields,
+            ]);
+        }
+
         if (this.props.saveRecord) {
             await this.props.saveRecord(this.model.root, params);
         } else {
@@ -332,6 +345,10 @@ export class FormController extends Component {
         if (this.model.root.isVirtual) {
             this.env.config.historyBack();
         }
+    }
+
+    get shouldShowTranslatableFieldReminderNotification() {
+        return localization.multiLang && this.model.root.dirtyTranslatableFields.length;
     }
 }
 

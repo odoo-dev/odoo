@@ -4,6 +4,7 @@
     <t t-name="web.FormView" owl="1">
         <div t-att-class="props.className" t-ref="root">
             <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''">
+                <t t-if="showingTranslatableFieldReminderNotification" t-call="web.MissingTranslationNotificationBanner" />
                 <t t-set-slot="layout-buttons">
                     <t t-if="footerArchInfo and env.inDialog">
                         <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="footerArchInfo"/>
@@ -53,6 +54,18 @@
                     </button>
                 </t>
             </div>
+        </div>
+    </t>
+
+    <t t-name="web.MissingTranslationNotificationBanner" owl="1">
+        <div class="alert alert-info alert-dismissible" role="alertdialog">
+            Please update translations of :
+            <t t-foreach="[...translatableFieldsInNotification]" t-as="field" t-key="field">
+                <strong><a class="o_field_translate" t-att-name="field.name" href="#"><t t-esc="field.string"/><t t-if="!field_last">, </t></a></strong>
+            </t>
+            <button t-on-click="() => this.showingTranslatableFieldReminderNotification = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span class="fa fa-times"></span>
+            </button>
         </div>
     </t>
 

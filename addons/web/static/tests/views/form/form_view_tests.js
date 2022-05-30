@@ -29,6 +29,7 @@ import { session } from "@web/session";
 import legacySession from "web.session";
 import { scrollerService } from "@web/core/scroller_service";
 import BasicModel from "web.BasicModel";
+import { localization } from "@web/core/l10n/localization";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
@@ -7523,54 +7524,42 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("display translation alert", async function (assert) {
+    QUnit.test("display translation alert", async function (assert) {
         assert.expect(2);
 
         serverData.models.partner.fields.foo.translate = true;
         serverData.models.partner.fields.display_name.translate = true;
 
-        var multi_lang = _t.database.multi_lang;
-        _t.database.multi_lang = true;
+        patchWithCleanup(localization, {
+            multiLang: true,
+        });
 
         await makeView({
             type: "form",
             resModel: "partner",
             serverData,
-            arch:
-                "<form>" +
-                "<sheet>" +
-                "<group>" +
-                '<field name="foo"/>' +
-                '<field name="display_name"/>' +
-                "</group>" +
-                "</sheet>" +
-                "</form>",
+            arch: `<form><sheet><group><field name="foo"/><field name="display_name"/></group></sheet></form>`,
             resId: 1,
         });
 
-        await click(target.querySelector(".o_form_button_edit"));
-        await editInput(target, '.o_field_widget[name="foo"] input', "test");
-        await click(target.querySelector(".o_form_button_save"));
+        await clickEdit(target);
+        await editInput(target, '[name="foo"] input', "test");
+        await clickSave(target);
         assert.containsOnce(
             target,
-            ".o_form_view .alert > div .oe_field_translate",
+            ".alert .o_field_translate",
             "should have single translation alert"
         );
 
-        await click(target.querySelector(".o_form_button_edit"));
-        await editInput(
-            target.querySelector('.o_field_widget[name="display_name"] input'),
-            "test2"
-        );
-        await click(target.querySelector(".o_form_button_save"));
+        await clickEdit(target);
+        await editInput(target, '[name="display_name"] input', "test2");
+        await clickSave(target);
         assert.containsN(
             target,
-            ".o_form_view .alert > div .oe_field_translate",
+            ".alert .o_field_translate",
             2,
             "should have two translate fields in translation alert"
         );
-
-        _t.database.multi_lang = multi_lang;
     });
 
     QUnit.skipWOWL("translation alerts are preserved on pager change", async function (assert) {

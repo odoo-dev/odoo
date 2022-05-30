@@ -287,6 +287,22 @@ export class Record extends DataPoint {
         return this.model.__bm__.isDirty(this.__bm_handle__);
     }
 
+    get dirtyFields() {
+        return Object.keys(this.model.__bm__.localData[this.__bm_handle__]._changes).map(
+            (change) => this.activeFields[change]
+        );
+    }
+
+    get translatableFields() {
+        return Object.values(this.fields)
+            .filter((f) => f.translate)
+            .map((f) => this.activeFields[f.name]);
+    }
+
+    get dirtyTranslatableFields() {
+        return this.translatableFields.filter((f) => this.dirtyFields.includes(f));
+    }
+
     get isInEdition() {
         return this.mode === "edit";
     }

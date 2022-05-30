@@ -442,6 +442,11 @@ export class Record extends DataPoint {
         return this._changes ? Object.keys(this._changes).length > 0 : true;
     }
 
+    get dirtyFields() {
+        if (!this.isDirty) return [];
+        return this._changes.map((change) => this.activeFields[change]);
+    }
+
     get isInEdition() {
         return this.mode === "edit";
     }
