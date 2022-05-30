@@ -7,7 +7,13 @@ import { makeContext } from "@web/core/context";
 import { Pager } from "@web/core/pager/pager";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/fields/standard_field_props";
-import { useX2ManyInteractions, useX2ManyCrud, useActiveActions } from "@web/fields/x2many_utils";
+import {
+    useSelectCreate,
+    useX2ManyCrud,
+    useAddInlineRecord,
+    useOpenX2ManyRecord,
+    useActiveActions,
+} from "@web/fields/relational_utils";
 
 const { Component } = owl;
 
@@ -29,18 +35,16 @@ export class X2ManyField extends Component {
         this.viewMode = this.activeField.viewMode;
         this.Renderer = X2M_RENDERERS[this.viewMode];
 
-        this.x2ManyCrud = useX2ManyCrud(() => this.list, this.isMany2Many);
+        const { saveRecord, updateRecord, removeRecord } = useX2ManyCrud(
+            () => this.list,
+            this.isMany2Many
+        );
 
-        this.X2Many = useX2ManyInteractions({
-            activeField: this.activeField,
-            x2ManyCrud: this.x2ManyCrud,
-            editable: this.activeField.views[this.viewMode].editable,
-        });
-
-        const subViewActiveActions = this.activeField.views[this.viewMode].activeActions;
+        const subView = this.activeField.views[this.viewMode];
+        const subViewActiveActions = subView.activeActions;
         this.activeActions = useActiveActions({
             crudOptions: Object.assign({}, this.activeField.options, {
-                onDelete: this.x2ManyCrud.remove,
+                onDelete: removeRecord,
             }),
             isMany2Many: this.isMany2Many,
             subViewActiveActions,
@@ -51,6 +55,35 @@ export class X2ManyField extends Component {
                 };
             },
         });
+
+        if (subView.editable) {
+            this.addInLine = useAddInlineRecord({
+                position: subView.editable,
+                addNew: (...args) => this.list.addNew(...args),
+            });
+        }
+
+        const openRecord = useOpenX2ManyRecord({
+            resModel: this.list.resModel,
+            activeField: this.activeField,
+            activeActions: this.activeActions,
+            getList: () => this.list,
+            saveRecord,
+            updateRecord,
+        });
+        this._openRecord = openRecord;
+        const selectCreate = useSelectCreate({
+            resModel: this.props.value.resModel,
+            activeActions: this.activeActions,
+            onSelected: (resIds) => saveRecord(resIds),
+            onCreateEdit: ({ context }) => openRecord({ context }),
+        });
+
+        this.selectCreate = (params) => {
+            const p = Object.assign({}, params);
+            p.domain = [...(p.domain || []), "!", ["id", "in", this.props.value.currentIds]];
+            return selectCreate(p);
+        };
     }
 
     get list() {
@@ -160,11 +193,7 @@ export class X2ManyField extends Component {
     }
 
     async openRecord(record) {
-        return this.X2Many.openRecord(
-            record,
-            this.props.readonly ? "readonly" : "edit",
-            this.activeActions
-        );
+        return this._openRecord({ record, mode: this.props.readonly ? "readonly" : "edit" });
     }
 
     async onAdd(context) {
@@ -174,9 +203,12 @@ export class X2ManyField extends Component {
             context = makeContext([record.getFieldContext(this.props.name), context]);
         }
         if (this.isMany2Many) {
-            return this.X2Many.selectCreate({ domain, context, activeActions: this.activeActions });
+            return this.selectCreate({ domain, context });
         }
-        return this.X2Many.addRecord({ context });
+        if (this.addInLine) {
+            return this.addInLine({ context });
+        }
+        return this._openRecord({ context });
     }
 }
 

@@ -13,8 +13,12 @@ import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { usePopover } from "@web/core/popover/popover_hook";
 
-import { useX2ManyCrud, useActiveActions } from "@web/fields/x2many_utils";
-import { useSelectCreate, useOpenMany2XRecord } from "./relational_utils";
+import {
+    useX2ManyCrud,
+    useActiveActions,
+    useSelectCreate,
+    useOpenMany2XRecord,
+} from "./relational_utils";
 import { makeContext } from "@web/core/context";
 
 const { Component, useState, useEffect } = owl;
@@ -51,7 +55,7 @@ export class Many2ManyTagsField extends Component {
         this.dialog = useService("dialog");
         this.dialogClose = [];
 
-        this.x2ManyCrud = useX2ManyCrud(() => this.props.value, true);
+        const { saveRecord, removeRecord } = useX2ManyCrud(() => this.props.value, true);
 
         const activeField = this.props.record.activeFields[this.props.name];
 
@@ -59,7 +63,7 @@ export class Many2ManyTagsField extends Component {
             isMany2Many: true,
             crudOptions: {
                 create: this.props.canQuickCreate && activeField.options.create,
-                onDelete: this.x2ManyCrud.remove,
+                onDelete: removeRecord,
             },
             getEvalParams: () => {
                 return {
@@ -70,41 +74,23 @@ export class Many2ManyTagsField extends Component {
         });
 
         const resModel = this.props.relation;
-
-        const onRecordSaved = async (record) => {
-            const list = this.props.value;
-            const currentIds = list.currentIds;
-            return list.replaceWith([...currentIds, record.resId]);
-        };
-
         this.openMany2X = useOpenMany2XRecord({
             resModel,
-            onRecordSaved,
+            onRecordSaved: saveRecord,
             activeField,
             activeActions: this.activeActions,
             isToMany: true,
         });
-        const onCreateEdit = () => {
-            const context = this.props.record.getFieldContext(this.props.name);
-            return this.openMany2X({ context });
-        };
-
-        const onSelected = (resIds) => {
-            return this.x2ManyCrud.saveToList(resIds);
-        };
 
         this.selectCreate = useSelectCreate({
             resModel,
             activeActions: this.activeActions,
-            onCreateEdit,
-            onSelected,
+            onCreateEdit: () => {
+                const context = this.props.record.getFieldContext(this.props.name);
+                return this.openMany2X({ context });
+            },
+            onSelected: (resIds) => saveRecord(resIds),
         });
-
-        // this.x2Many = useX2ManyInteractions({
-        //     activeField,
-        //     editable: false,
-        //     x2ManyCrud: this.x2ManyCrud,
-        // });
 
         this.forceCloseAutocomplete = useForceCloseAutocomplete(() => {
             this.state.autocompleteValue = "";
