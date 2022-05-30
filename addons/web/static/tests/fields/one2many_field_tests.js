@@ -9396,7 +9396,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.skip(
         "one2many shortcut tab should not crash when there is no input widget",
         async function (assert) {
             // create a one2many view which has no input (only 1 textarea in this case)
@@ -9407,9 +9407,12 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <tree>
                                 <field name="turtle_foo" widget="text"/>
                             </tree>
+                            <form>
+                                <field name="display_name"/>
+                            </form>
                         </field>
                     </form>`,
                 resId: 1,
@@ -11740,12 +11743,9 @@ QUnit.module("Fields", (hooks) => {
 
             serverData.models.partner.records[0].turtles = [];
 
-            const form = await makeView({
+            await makeView({
                 type: "form",
                 resModel: "partner",
-                viewOptions: {
-                    mode: "edit",
-                },
                 serverData,
                 arch: `
                     <form>
@@ -11771,24 +11771,53 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
             });
 
-            assert.strictEqual(
-                form.$el.find('input[name="qux"]')[0],
-                document.activeElement,
-                "initially, the focus should be on the 'qux' field because it is the first input"
-            );
-            await testUtils.fields.triggerKeydown(form.$el.find('input[name="qux"]'), "tab");
+            await clickEdit(target);
 
-            // skips the first field of the one2many
-            await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-            // skips the second (and last) field of the one2many
-            await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
+            assert.strictEqual(target.querySelector("[name=qux] input"), document.activeElement);
+
+            const tabHeader = target.querySelector("a.nav-link");
+            assert.strictEqual(getNextTabableElement(target), tabHeader);
+            assert.defaultBehavior(tabHeader, null, "keydown", { key: "Tab" });
+            tabHeader.focus();
+
+            let addButton = target.querySelector(".o_field_x2many_list_row_add a");
+            assert.strictEqual(getNextTabableElement(target), addButton);
+            assert.defaultBehavior(addButton, null, "keydown", { key: "Tab" });
+            addButton.focus();
+
             assert.strictEqual(
-                assert.strictEqual(
-                    form.$el.find('input[name="foo"]')[0],
-                    document.activeElement,
-                    "after tab, the focus should be on the many2one"
-                )
+                target.querySelector("[name=turtle_foo] input"),
+                document.activeElement
             );
+
+            const textarea = target.querySelector("[name=turtle_description] textarea");
+            assert.strictEqual(getNextTabableElement(target), textarea);
+            assert.defaultBehavior(textarea, null, "keydown", { key: "Tab" });
+            textarea.focus();
+
+            const deleteButton = target.querySelector(
+                ".o_selected_row .o_list_record_remove button"
+            );
+            assert.strictEqual(getNextTabableElement(target), deleteButton);
+            assert.defaultBehavior(deleteButton, null, "keydown", { key: "Tab" });
+            deleteButton.focus();
+
+            addButton = target.querySelector(".o_field_x2many_list_row_add a");
+            assert.strictEqual(getNextTabableElement(target), addButton);
+            assert.defaultBehavior(addButton, null, "keydown", { key: "Tab" });
+            addButton.focus();
+
+            // // skips the first field of the one2many
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
+            // // skips the second (and last) field of the one2many
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
+            // assert.strictEqual(
+            //     assert.strictEqual(
+            //         form.$el.find('input[name="foo"]')[0],
+            //         document.activeElement,
+            //         "after tab, the focus should be on the many2one"
+            //     )
+            // );
         }
     );
 

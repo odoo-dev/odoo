@@ -40,7 +40,6 @@
                                     role="button"
                                     t-att-class="create_index !== 0 ? 'ml16' : ''"
                                     t-on-click.stop.prevent="() => props.onAdd(create.context)"
-                                    t-on-focus="() => props.onAdd(create.context)"
                                 >
                                     <t t-esc="create.description"/>
                                 </a>
@@ -114,7 +113,10 @@
     </t>
 
     <t t-name="web.ListRenderer.GroupRow" owl="1">
-        <tr t-attf-class="{{group.count > 0 ? 'o_group_has_content' : ''}} o_group_header {{!group.isFolded ? 'o_group_open' : ''}}" t-on-click="() => this.toggleGroup(group)">
+        <tr t-attf-class="{{group.count > 0 ? 'o_group_has_content' : ''}} o_group_header {{!group.isFolded ? 'o_group_open' : ''}}"
+            t-on-click="() => this.toggleGroup(group)"
+            t-att-data-id="group.id"
+        >
             <th class="o_group_name" t-att-colspan="getGroupNameCellColSpan(group)">
                 <span t-attf-class="fa {{group.isFolded ? 'fa-caret-right' : 'fa-caret-down' }}"
                     t-attf-style="padding-left: {{2 + getGroupLevel(group) * 20}}px; padding-right: 5px"/>
@@ -153,7 +155,10 @@
     </t>
 
     <t t-name="web.ListRenderer.RecordRow" owl="1">
-        <tr class="o_data_row" t-att-class="getRowClass(record)" t-att-data-id="record.id">
+        <tr class="o_data_row"
+            t-att-class="getRowClass(record)"
+            t-att-data-id="record.id"
+        >
             <td t-if="props.hasSelectors" class="o_list_record_selector" t-on-click.stop="() => this.toggleRecordSelection(record)">
                 <CheckBox disabled="!!props.list.editedRecord" value="record.selected" onChange.bind="() => this.toggleRecordSelection(record)" />
             </td>
@@ -191,7 +196,10 @@
                 <td t-if="'canUnlink' in activeActions ? canUnlink : canDelete" class="o_list_record_remove" t-on-click.stop="() => this.onDeleteRecord(record)">
                     <button class="fa"
                         t-att-class="{ 'fa-trash-o': 'canUnlink' in activeActions ? false : canDelete, 'fa-times': 'canUnlink' in activeActions ? canUnlink : false }"
-                        name="delete" aria-label="Delete row"/>
+                        name="delete"
+                        aria-label="Delete row"
+                        tabindex="-1"
+                    />
                 </td>
             </t>
         </tr>

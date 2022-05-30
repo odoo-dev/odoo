@@ -152,24 +152,88 @@ export class ListRenderer extends Component {
             area: () => this.rootRef.el,
         });
         useHotkey(
+            "Tab",
+            ({ target }) => {
+                const closestRecordRow = target.closest("tr.o_data_row");
+                if (closestRecordRow && this.tableRef.el.contains(closestRecordRow)) {
+                    // second condition seems useless
+                    // const recordId = closestRecordRow.dataset.id;
+                    // const record = this.props.list.records.find((record) => record.id === recordId);
+                    // seems to work also in grouped list thanks to the getter for records
+                }
+            },
+            {
+                area: () => this.tableRef.el,
+                validate: () => this.props.list.editedRecord,
+            }
+        );
+        useHotkey(
             "Enter",
             async ({ target }) => {
-                if (target.tagName === "TEXTAREA") {
+                // Enter within a record row
+                const closestRecordRow = target.closest("tr.o_data_row");
+                if (closestRecordRow && this.tableRef.el.contains(closestRecordRow)) {
+                    // second condition seems useless
+                    const recordId = closestRecordRow.dataset.id;
+                    const record = this.props.list.records.find((record) => record.id === recordId);
+                    // seems to work also in grouped list thanks to the getter for records
+
+                    const removeTd = target.closest("td.o_list_record_remove");
+                    if (removeTd) {
+                        this.onDeleteRecord(record);
+                        return;
+                    }
+
+                    const selectTd = target.closest("td.o_list_record_selector");
+                    if (selectTd) {
+                        this.toggleRecordSelection(record);
+                        return;
+                    }
+
+                    if (this.props.editable) {
+                        // TODO: we need to refactor switchMode and unselectRecord!!!
+                        if (
+                            this.props.list.editedRecord &&
+                            this.props.list.editedRecord.checkValidity()
+                        ) {
+                            await this.props.list.unselectRecord();
+                            if (this.props.list.records.length === 1) {
+                                // TODO put more logic here see _moveToSideLine in list_editable_renderer
+                                // we are sure there is no other records --> add a line
+                                this.props.onAdd();
+                            }
+                        }
+                    } else if (!this.props.archInfo.noOpen) {
+                        this.props.openRecord(record);
+                    }
+
                     return;
                 }
-                // TODO: we need to refactor switchMode and unselectRecord!!!
-                if (this.props.list.editedRecord && this.props.list.editedRecord.checkValidity()) {
-                    await this.props.list.unselectRecord();
-                    if (this.props.list.records.length === 1) {
-                        // TODO put more logic here see _moveToSideLine in list_editable_renderer
-                        // we are sure there is no other records --> add a line
-                        this.props.onAdd();
-                    }
+
+                // Enter within a group row
+                // we assume that
+                const closestGroupRow = target.closest("tr.o_group_header");
+                if (closestGroupRow && this.tableRef.el.contains(closestGroupRow)) {
+                    // second condition seems useless
+                    const groupId = closestGroupRow.dataset.id;
+                    const getGroups = (list) => {
+                        const groups = [];
+                        for (const group of list.groups || []) {
+                            groups.push(group, ...getGroups(group.list));
+                        }
+                        return groups;
+                    };
+                    const allGroups = getGroups(this.props.list);
+                    const group = allGroups.find((group) => group.id === groupId); // improve group search
+                    this.toggleGroup(group);
+
+                    return;
                 }
             },
             {
                 bypassEditableProtection: true,
-                area: () => this.rootRef.el,
+                area: () => this.tableRef.el,
+                validate: (target) => target.tagName !== "TEXTAREA",
             }
         );
     }
