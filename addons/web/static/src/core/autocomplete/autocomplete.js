@@ -215,7 +215,6 @@ export class AutoComplete extends Component {
 
     onInputBlur() {
         const value = this.inputRef.el.value;
-
         if (this.props.autoSelect && this.state.activeSourceOption && value.length > 0) {
             this.selectOption(this.state.activeSourceOption, { triggeredOnBlur: true });
         } else {
@@ -264,7 +263,6 @@ export class AutoComplete extends Component {
     }
     onTabPress() {
         const value = this.inputRef.el.value;
-
         if (
             this.props.autoSelect &&
             this.state.activeSourceOption &&

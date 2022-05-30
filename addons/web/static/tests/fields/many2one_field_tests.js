@@ -3318,7 +3318,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.skipWOWL("pressing enter in a m2o in an editable list", async function (assert) {
         assert.expect(8);
 
-        const list = await makeView({
+        await makeView({
             type: "list",
             resModel: "partner",
             serverData,
@@ -3329,41 +3329,45 @@ QUnit.module("Fields", (hooks) => {
             `,
         });
 
-        await click(list.$("td.o_data_cell:first"));
-        assert.containsOnce(list, ".o_selected_row", "should have a row in edit mode");
+        await click(target.querySelector("td.o_data_cell"));
+        assert.containsOnce(target, ".o_selected_row", "should have a row in edit mode");
 
         // we now write 'a' and press enter to check that the selection is
         // working, and prevent the navigation
-        await testUtils.fields.editInput(list.$("td.o_data_cell input:first"), "a");
-        var $input = list.$("td.o_data_cell input:first");
-        var $dropdown = $input.autocomplete("widget");
-        assert.ok($dropdown.is(":visible"), "autocomplete dropdown should be visible");
+        const input = target.querySelector("td.o_data_cell input");
+        await editInput(input, null, "a");
+        assert.containsOnce(
+            target.querySelector(".o_field_many2one"),
+            ".o-autocomplete.dropdown",
+            "autocomplete dropdown should be visible"
+        );
 
         // we now trigger ENTER to select first choice
-        await testUtils.fields.triggerKeydown($input, "enter");
-        assert.strictEqual($input[0], document.activeElement, "input should still be focused");
+        await triggerEvent(input, null, "keydown", { key: "Enter" });
+        assert.strictEqual(input, document.activeElement, "input should still be focused");
 
         // we now trigger again ENTER to make sure we can move to next line
-        await testUtils.fields.triggerKeydown($input, "enter");
-
-        assert.notOk(document.contains($input[0]), "input should no longer be in dom");
+        await triggerEvent(input, null, "keydown", { key: "Enter" });
+        assert.notOk(document.contains(input), "input should no longer be in dom");
         assert.hasClass(
-            list.$("tr.o_data_row:eq(1)"),
+            target.querySelector("tr.o_data_row:nth-child(2)"),
             "o_selected_row",
             "second row should now be selected"
         );
 
         // we now write again 'a' in the cell to select xpad. We will now
         // test with the tab key
-        await testUtils.fields.editInput(list.$("td.o_data_cell input:first"), "a");
-        $input = list.$("td.o_data_cell input:first");
-        $dropdown = $input.autocomplete("widget");
-        assert.ok($dropdown.is(":visible"), "autocomplete dropdown should be visible");
-        await testUtils.fields.triggerKeydown($input, "tab");
+        await editInput(input, "a");
+        assert.containsOnce(
+            target.querySelector(".o_field_many2one"),
+            ".o-autocomplete.dropdown",
+            "autocomplete dropdown should be visible"
+        );
 
-        assert.notOk(document.contains($input[0]), "input should no longer be in dom");
+        await triggerEvent(input, null, "keydown", { key: "tab" });
+        assert.notOk(document.contains(input), "input should no longer be in dom");
         assert.hasClass(
-            list.$("tr.o_data_row:eq(2)"),
+            target.querySelector("tr.o_data_row:nth-child(3)"),
             "o_selected_row",
             "third row should now be selected"
         );
@@ -3535,10 +3539,10 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "many2one in editable list + onchange, with enter [REQUIRE FOCUS]",
         async function (assert) {
-            assert.expect(6);
+            assert.expect(8);
 
             serverData.models.partner.onchanges.product_id = (obj) => {
                 obj.int_field = obj.product_id || 0;
@@ -3546,7 +3550,7 @@ QUnit.module("Fields", (hooks) => {
 
             const def = makeDeferred();
 
-            const list = await makeView({
+            await makeView({
                 type: "list",
                 resModel: "partner",
                 serverData,
@@ -3566,29 +3570,32 @@ QUnit.module("Fields", (hooks) => {
                 },
             });
 
-            await click(list.$("td.o_data_cell:first"));
-            await testUtils.fields.editInput(list.$("td.o_data_cell input:first"), "a");
-            var $input = list.$("td.o_data_cell input:first");
-            await testUtils.fields.triggerKeydown($input, "enter");
-            await testUtils.fields.triggerKey("up", $input, "enter");
+            await click(target.querySelector("td.o_data_cell"));
+            const input = target.querySelector("td.o_data_cell input");
+            await editInput(input, null, "a");
+            await triggerEvent(input, null, "keydown", { key: "enter" });
+            await triggerEvent(input, null, "keyup", { key: "enter" });
             def.resolve();
             await nextTick();
-            await testUtils.fields.triggerKeydown($input, "enter");
-            assert.strictEqual(
-                target.querySelector(".modal").length,
-                0,
-                "should not have any modal in DOM"
-            );
-            assert.verifySteps(["name_search", "onchange", "write", "read"]);
+            await triggerEvent(input, null, "keydown", { key: "enter" });
+            assert.containsNone(target, ".modal", "should not have any modal in DOM");
+            assert.verifySteps([
+                "get_views",
+                "web_search_read", // to display results in the dialog
+                "name_search",
+                "onchange",
+                "write",
+                "read",
+            ]);
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "many2one in editable list + onchange, with enter, part 2 [REQUIRE FOCUS]",
         async function (assert) {
             // this is the same test as the previous one, but the onchange is just
             // resolved slightly later
-            assert.expect(6);
+            assert.expect(8);
 
             serverData.models.partner.onchanges.product_id = (obj) => {
                 obj.int_field = obj.product_id || 0;
@@ -3596,7 +3603,7 @@ QUnit.module("Fields", (hooks) => {
 
             const def = makeDeferred();
 
-            const list = await makeView({
+            await makeView({
                 type: "list",
                 resModel: "partner",
                 serverData,
@@ -3616,20 +3623,23 @@ QUnit.module("Fields", (hooks) => {
                 },
             });
 
-            await click(list.$("td.o_data_cell:first"));
-            await testUtils.fields.editInput(list.$("td.o_data_cell input:first"), "a");
-            var $input = list.$("td.o_data_cell input:first");
-            await testUtils.fields.triggerKeydown($input, "enter");
-            await testUtils.fields.triggerKey("up", $input, "enter");
-            await testUtils.fields.triggerKeydown($input, "enter");
+            await click(target.querySelector("td.o_data_cell"));
+            const input = target.querySelector("td.o_data_cell input");
+            await editInput(input, null, "a");
+            await triggerEvent(input, null, "keydown", { key: "enter" });
+            await triggerEvent(input, null, "keyup", { key: "enter" });
+            await triggerEvent(input, null, "keydown", { key: "enter" });
             def.resolve();
             await nextTick();
-            assert.strictEqual(
-                target.querySelector(".modal").length,
-                0,
-                "should not have any modal in DOM"
-            );
-            assert.verifySteps(["name_search", "onchange", "write", "read"]);
+            assert.containsNone(target, ".modal", "should not have any modal in DOM");
+            assert.verifySteps([
+                "get_views",
+                "web_search_read", // to display results in the dialog
+                "name_search",
+                "onchange",
+                "write",
+                "read",
+            ]);
         }
     );
 
