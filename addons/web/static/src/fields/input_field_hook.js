@@ -1,7 +1,7 @@
 /** @odoo-module **/
 import { useBus } from "@web/core/utils/hooks";
 
-const { useEffect, useRef, useEnv } = owl;
+const { useComponent, useEffect, useRef, useEnv } = owl;
 
 /**
  * This hook is meant to be used by field components that use an input or
@@ -16,6 +16,7 @@ const { useEffect, useRef, useEnv } = owl;
 export function useInputField(params) {
     const env = useEnv();
     const inputRef = useRef(params.refName || "input");
+    const component = useComponent();
     let isDirty = false;
     let lastSetValue = null;
     function onInput(ev) {
@@ -25,7 +26,8 @@ export function useInputField(params) {
         lastSetValue = ev.target.value;
         isDirty = false;
     }
-    useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", commitChanges);
+    useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", () => commitChanges(true));
+    useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE", () => commitChanges(false));
     useEffect(
         (inputEl) => {
             if (inputEl) {
@@ -46,10 +48,20 @@ export function useInputField(params) {
         }
     });
 
-    async function commitChanges() {
-        if (inputRef.el && inputRef.el.value !== this.props.value) {
-            const val = params.parse ? params.parse(inputRef.el.value) : inputRef.el.value;
-            await this.props.update(val);
+    async function commitChanges(urgent) {
+        if (isDirty || urgent) {
+            try {
+                const val = params.parse ? params.parse(inputRef.el.value) : inputRef.el.value;
+                if (val !== component.props.value) {
+                    await component.props.update(val);
+                }
+            } catch (_e) {
+                if (urgent) {
+                    return;
+                } else {
+                    component.props.invalidate();
+                }
+            }
         }
     }
 }

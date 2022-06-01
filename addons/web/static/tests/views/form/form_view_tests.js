@@ -35,7 +35,7 @@ const serviceRegistry = registry.category("services");
 const widgetRegistry = registry.category("view_widgets");
 
 // WOWL remove after adapting tests
-let createView, testUtils, Widget, RamStorage, AbstractStorageService, clickLast;
+let createView, testUtils, Widget, RamStorage, AbstractStorageService;
 
 let target, serverData;
 QUnit.module("Views", (hooks) => {
@@ -6172,7 +6172,7 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
     });
 
-    QUnit.skipWOWL("modifiers are considered on multiple <footer/> tags", async function (assert) {
+    QUnit.test("modifiers are considered on multiple <footer/> tags", async function (assert) {
         serverData.views = {
             "partner,false,form": `
                 <form>
@@ -8819,7 +8819,6 @@ QUnit.module("Views", (hooks) => {
             1: {
                 id: 1,
                 name: "test",
-                res_id: 1,
                 res_model: "partner",
                 type: "ir.actions.act_window",
                 views: [
@@ -9032,41 +9031,51 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL("keep editing after call_button fail", async function (assert) {
+    QUnit.test("keep editing after call_button fail", async function (assert) {
         assert.expect(4);
 
-        var values;
+        let values;
+
+        // FIXME: there should be no depencency from views to actionService
+        const mockedActionService = {
+            start() {
+                return {
+                    doActionButton(params) {
+                        assert.deepEqual(
+                            [params.name, params.type],
+                            ["post", "object"],
+                            "the action should be correctly executed"
+                        );
+                        return Promise.reject();
+                    },
+                };
+            },
+        };
+        serviceRegistry.add("action", mockedActionService, { force: true });
         await makeView({
             type: "form",
             resModel: "partner",
             serverData,
-            arch:
-                "<form>" +
-                '<button name="post" class="p" string="Raise Error" type="object"/>' +
-                '<field name="p">' +
-                '<tree editable="top">' +
-                '<field name="display_name"/>' +
-                '<field name="product_id"/>' +
-                "</tree>" +
-                "</field>" +
-                "</form>",
+            arch: `
+                <form>
+                    <button name="post" class="p" string="Raise Error" type="object"/>
+                    <field name="p">
+                        <tree editable="top">
+                            <field name="display_name"/>
+                            <field name="product_id"/>
+                        </tree>
+                    </field>
+                </form>`,
             resId: 1,
-            intercepts: {
-                execute_action: function (ev) {
-                    assert.ok(true, "the action is correctly executed");
-                    ev.data.on_fail();
-                },
-            },
             mockRPC(route, args) {
                 if (args.method === "write") {
                     assert.deepEqual(args.args[1].p[0][2], values);
                 }
-                return this._super.apply(this, arguments);
-            },
-            viewOptions: {
-                mode: "edit",
             },
         });
+
+        // switch to edit mode
+        await click(target.querySelector(".o_form_button_edit"));
 
         // add a row and partially fill it
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
@@ -9079,12 +9088,11 @@ QUnit.module("Views", (hooks) => {
         };
         await click(target.querySelector("button.p"));
         // edit the new row again and set a many2one value
-        await clickLast(
-            target.querySelector(".o_form_view .o_field_one2many .o_data_row .o_data_cell")
+        await click(
+            target.querySelectorAll(".o_form_view .o_field_one2many .o_data_row .o_data_cell")[1]
         );
-        await testUtils.nextTick();
-        await testUtils.fields.many2one.clickOpenDropdown("product_id");
-        await testUtils.fields.many2one.clickHighlightedItem("product_id");
+        await nextTick();
+        await selectDropdownItem(target, "product_id", "xphone");
 
         assert.strictEqual(
             target.querySelector(".o_field_many2one input").value,
@@ -9125,7 +9133,7 @@ QUnit.module("Views", (hooks) => {
         await testUtils.nextTick();
     });
 
-    QUnit.skipWOWL("no deadlock when saving with uncommitted changes", async function (assert) {
+    QUnit.test("no deadlock when saving with uncommitted changes", async function (assert) {
         // Before saving a record, all field widgets are asked to commit their changes (new values
         // that they wouldn't have sent to the model yet). This test is added alongside a bug fix
         // ensuring that we don't end up in a deadlock when a widget actually has some changes to
@@ -9136,7 +9144,7 @@ QUnit.module("Views", (hooks) => {
         // In this test, we try to reproduce the deadlock situation by forcing the field widget to
         // commit changes before the save. We thus manually call 'saveRecord', instead of clicking
         // on 'Save'.
-        assert.expect(6);
+        assert.expect(7);
 
         await makeView({
             type: "form",
@@ -9145,30 +9153,56 @@ QUnit.module("Views", (hooks) => {
             arch: '<form><field name="foo"/></form>',
             mockRPC(route, args) {
                 assert.step(args.method);
-                return this._super.apply(this, arguments);
             },
-            // we set a fieldDebounce to precisely mock the behavior of the webclient: changes are
-            // not sent to the model at keystrokes, but when the input is left
-            fieldDebounce: 5000,
         });
 
-        await editInput(target.querySelector(".o_field_widget[name=foo] input"), "some foo value");
-        // manually save the record, to prevent the field widget to notify the model of its new
-        // value before being requested to
-        // form.saveRecord();
+        const input = target.querySelector(".o_field_widget[name=foo] input");
+        input.value = "some foo value";
+        await triggerEvent(input, null, "input");
 
-        await testUtils.nextTick();
+        await click(target.querySelector(".o_form_button_save"));
 
         assert.containsOnce(target, ".o_form_readonly", "form view should be in readonly");
         assert.strictEqual(
-            target.querySelector(".o_form_view").textContent.trim(),
+            target.querySelector(".o_form_view .o_form_readonly").textContent.trim(),
             "some foo value",
             "foo field should have correct value"
         );
-        assert.verifySteps(["onchange", "create", "read"]);
+        assert.verifySteps(["get_views", "onchange", "create", "read"]);
     });
 
-    QUnit.skipWOWL(
+    QUnit.test("saving with invalid uncommitted changes", async function (assert) {
+        assert.expect(7);
+
+        patchWithCleanup(browser, { setTimeout: () => 1 });
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="qux"/></form>',
+            mockRPC(route, args) {
+                assert.step(args.method);
+            },
+        });
+
+        const input = target.querySelector(".o_field_widget[name=qux] input");
+        input.value = "some qux value";
+        await triggerEvent(input, null, "input");
+
+        await click(target.querySelector(".o_form_button_save"));
+
+        assert.containsOnce(target, ".o_form_editable", "form view should stay in edit mode");
+        assert.strictEqual(
+            target.querySelector(".o_form_view .o_form_editable input").value,
+            "some qux value",
+            "qux field should have the invalid value"
+        );
+        assert.containsOnce(target, ".o_notification .text-danger");
+        assert.containsOnce(target, ".o_form_editable .o_field_invalid[name=qux]");
+        assert.verifySteps(["get_views", "onchange"]);
+    });
+
+    QUnit.test(
         "save record with onchange on one2many with required field",
         async function (assert) {
             // in this test, we have a one2many with a required field, whose value is
@@ -9184,7 +9218,7 @@ QUnit.module("Views", (hooks) => {
                 },
             };
 
-            var onchangeDef;
+            let onchangeDef;
             await makeView({
                 type: "form",
                 resModel: "partner",
@@ -9198,10 +9232,9 @@ QUnit.module("Views", (hooks) => {
                     "</tree>" +
                     "</field>" +
                     "</form>",
-                mockRPC(route, args) {
-                    var result = this._super.apply(this, arguments);
+                async mockRPC(route, args) {
                     if (args.method === "onchange") {
-                        return Promise.resolve(onchangeDef).then(_.constant(result));
+                        await onchangeDef;
                     }
                     if (args.method === "create") {
                         assert.step("create");
@@ -9211,41 +9244,37 @@ QUnit.module("Views", (hooks) => {
                             "should have wait for the onchange to return before saving"
                         );
                     }
-                    return result;
                 },
             });
 
             await click(target.querySelector(".o_field_x2many_list_row_add a"));
 
             assert.strictEqual(
-                target.querySelector(".o_field_widget[name=display_name]").value,
+                target.querySelector(".o_field_widget[name=display_name] input").value,
                 "",
                 "display_name should be the empty string by default"
             );
             assert.strictEqual(
-                target.querySelector(".o_field_widget[name=foo]").value,
+                target.querySelector(".o_field_widget[name=foo] input").value,
                 "",
                 "foo should be the empty string by default"
             );
 
             onchangeDef = makeDeferred(); // delay the onchange
 
-            await editInput(
-                target.querySelector(".o_field_widget[name=display_name]"),
-                "some value"
-            );
+            await editInput(target, ".o_field_widget[name=display_name] input", "some value");
 
             await click(target.querySelector(".o_form_button_save"));
 
             assert.step("resolve");
             onchangeDef.resolve();
-            await testUtils.nextTick();
+            await nextTick();
 
             assert.verifySteps(["resolve", "create"]);
         }
     );
 
-    QUnit.skipWOWL("call canBeRemoved while saving", async function (assert) {
+    QUnit.test("leave the form view while saving", async function (assert) {
         assert.expect(10);
 
         serverData.models.partner.onchanges = {
@@ -9254,69 +9283,92 @@ QUnit.module("Views", (hooks) => {
             },
         };
 
-        var onchangeDef;
-        var createDef = makeDeferred();
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: '<form><field name="display_name"/><field name="foo"/></form>',
-            mockRPC(route, args) {
-                var result = this._super.apply(this, arguments);
-                if (args.method === "onchange") {
-                    return Promise.resolve(onchangeDef).then(_.constant(result));
-                }
-                if (args.method === "create") {
-                    return Promise.resolve(createDef).then(_.constant(result));
-                }
-                return result;
+        serverData.actions = {
+            1: {
+                id: 1,
+                name: "test",
+                res_model: "partner",
+                type: "ir.actions.act_window",
+                views: [
+                    [false, "list"],
+                    [false, "form"],
+                ],
             },
-        });
+        };
+        serverData.views = {
+            "partner,false,list": `
+                <tree>
+                    <field name="display_name"/>
+                </tree>`,
+            "partner,false,form": `
+                <form>
+                    <field name="display_name"/>
+                    <field name="foo"/>
+                </form>`,
+            "partner,false,search": "<search></search>",
+        };
+
+        let onchangeDef;
+        const createDef = makeDeferred();
+
+        const mockRPC = async (route, args) => {
+            if (args.method === "onchange") {
+                await onchangeDef;
+            }
+            if (args.method === "create") {
+                await createDef;
+            }
+        };
+
+        const webClient = await createWebClient({ serverData, mockRPC });
+        await doAction(webClient, 1);
+
+        await click(target, ".o_list_button_add");
 
         // edit foo to trigger a delayed onchange
         onchangeDef = makeDeferred();
-        await editInput(target, ".o_field_widget[name=foo]", "trigger onchange");
+        await editInput(target, ".o_field_widget[name=foo] input", "trigger onchange");
 
         assert.strictEqual(
-            target.querySelector(".o_field_widget[name=display_name]").value,
+            target.querySelector(".o_field_widget[name=display_name] input").value,
             "default"
         );
 
         // save (will wait for the onchange to return), and will be delayed as well
         await click(target.querySelector(".o_form_button_save"));
 
-        assert.hasClass(target.querySelector(".o_form_view"), "o_form_editable");
+        assert.containsOnce(target, ".o_form_editable");
         assert.strictEqual(
-            target.querySelector(".o_field_widget[name=display_name]").value,
+            target.querySelector(".o_field_widget[name=display_name] input").value,
             "default"
         );
 
-        // simulate a click on the breadcrumbs to leave the form view
-        // form.canBeRemoved();
-        await testUtils.nextTick();
+        // click on the breadcrumbs to leave the form view
+        await click(target, ".breadcrumb-item.o_back_button a");
+        await nextTick();
 
-        assert.hasClass(target.querySelector(".o_form_view"), "o_form_editable");
+        assert.containsOnce(target, ".o_form_editable");
         assert.strictEqual(
-            target.querySelector(".o_field_widget[name=display_name]").value,
+            target.querySelector(".o_field_widget[name=display_name] input").value,
             "default"
         );
 
         // unlock the onchange
         onchangeDef.resolve();
-        await testUtils.nextTick();
-        assert.hasClass(target.querySelector(".o_form_view"), "o_form_editable");
+        await nextTick();
+        assert.containsOnce(target, ".o_form_editable");
         assert.strictEqual(
-            target.querySelector(".o_field_widget[name=display_name]").value,
+            target.querySelector(".o_field_widget[name=display_name] input").value,
             "changed"
         );
 
         // unlock the create
         createDef.resolve();
-        await testUtils.nextTick();
+        await nextTick();
 
-        assert.hasClass(target.querySelector(".o_form_view"), "o_form_readonly");
+        assert.containsOnce(target, ".o_list_view");
         assert.strictEqual(
-            target.querySelector(".o_field_widget[name=display_name]").textContent,
+            target.querySelector(".o_list_table .o_data_row:last-child td.o_data_cell").textContent,
             "changed"
         );
         assert.containsNone(
@@ -9326,38 +9378,68 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("call canBeRemoved twice", async function (assert) {
-        assert.expect(4);
+    QUnit.test(
+        "leave the form twice (clicking on the breadcrumb) should save only once",
+        async function (assert) {
+            assert.expect(4);
 
-        let writeCalls = 0;
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: '<form><field name="display_name"/><field name="foo"/></form>',
-            resId: 1,
-            viewOptions: {
-                mode: "edit",
-            },
-            mockRPC(route) {
-                if (route === "/web/dataset/call_kw/partner/write") {
+            let writeCalls = 0;
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "test",
+                    res_model: "partner",
+                    type: "ir.actions.act_window",
+                    views: [
+                        [false, "list"],
+                        [false, "form"],
+                    ],
+                },
+            };
+            serverData.views = {
+                "partner,false,list": `<tree><field name="foo"/></tree>`,
+                "partner,false,search": `<search></search>`,
+                "partner,false,form": `
+                    <form>
+                        <field name="display_name"/>
+                        <field name="foo"/>
+                    </form>`,
+            };
+
+            const writeDef = makeDeferred();
+
+            const mockRPC = async (route, args) => {
+                if (args.method === "write") {
                     writeCalls += 1;
+                    await writeDef;
                 }
-                return this._super(...arguments);
-            },
-        });
+            };
 
-        assert.containsOnce(target, ".o_form_editable");
-        await editInput(target, ".o_field_widget[name=foo]", "some value");
+            const webClient = await createWebClient({ serverData, mockRPC });
+            await doAction(webClient, 1);
 
-        // await form.canBeRemoved();
-        assert.containsNone(document.body, ".modal");
+            // switch to form view
+            await click(target.querySelector(".o_list_table .o_data_row .o_data_cell"));
 
-        // await form.canBeRemoved();
-        assert.containsNone(document.body, ".modal");
+            // switch to edit mode
+            await click(target.querySelector(".o_form_button_edit"));
 
-        assert.strictEqual(writeCalls, 1, "should save once");
-    });
+            assert.containsOnce(target, ".o_form_editable");
+            await editInput(target, ".o_field_widget[name=foo] input", "some value");
+
+            await click(target, ".breadcrumb-item.o_back_button a");
+            assert.containsNone(document.body, ".modal");
+
+            await click(target, ".breadcrumb-item.o_back_button a");
+            assert.containsNone(document.body, ".modal");
+
+            // unlock the create
+            writeDef.resolve();
+            await nextTick();
+
+            assert.strictEqual(writeCalls, 1, "should save once");
+        }
+    );
 
     QUnit.test("domain returned by onchange is cleared on discard", async function (assert) {
         assert.expect(5);
@@ -10530,8 +10612,9 @@ QUnit.module("Views", (hooks) => {
 
         // edit 'foo' but do not focusout -> the model isn't aware of the change
         // until the 'beforeunload' event is triggered
-        await editInput(target, ".o_field_widget[name='foo'] input", "test");
-        await triggerEvent(target, ".o_field_widget[name='foo'] input", "input");
+        const input = target.querySelector(".o_field_widget[name='foo'] input");
+        input.value = "test";
+        await triggerEvent(input, null, "input");
 
         window.dispatchEvent(new Event("beforeunload"));
         await nextTick();
@@ -10578,25 +10661,56 @@ QUnit.module("Views", (hooks) => {
 
             await click(target.querySelector(".o_form_button_edit"));
             // edit 'display_name' and simulate a focusout (trigger the 'change' event)
-            // -> notifies the model of the change and performs the onchange
             await editInput(target, '.o_field_widget[name="display_name"] input', "test");
-            await triggerEvent(target, '.o_field_widget[name="display_name"] input', "change");
 
             // edit 'name' and simulate a focusout (trigger the 'change' event)
-            // -> waits for the mutex (i.e. the onchange) to notify the model
             await editInput(target, '.o_field_widget[name="name"] input', "test");
-            await triggerEvent(target, '.o_field_widget[name="name"] input', "change");
 
             // edit 'foo' but do not focusout -> the model isn't aware of the change
             // until the 'beforeunload' event is triggered
-            await editInput(target, '.o_field_widget[name="foo"] input', "test");
-            await triggerEvent(target, '.o_field_widget[name="foo"] input', "input");
+            const input = target.querySelector('.o_field_widget[name="foo"] input');
+            input.value = "test";
+            await triggerEvent(input, null, "input");
 
             // trigger the 'beforeunload' event -> notifies the model directly and saves
             window.dispatchEvent(new Event("beforeunload"));
             await nextTick();
 
             assert.verifySteps(["get_views", "read", "onchange", "write"]);
+        }
+    );
+
+    QUnit.test(
+        "Auto save: save on closing tab/browser (invalid pending change)",
+        async function (assert) {
+            assert.expect(3);
+
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `<form><field name="qux"/></form>`,
+                resId: 1,
+                mockRPC(route, { method }) {
+                    assert.step(method);
+                    if (method === "write") {
+                        assert.notOk(true, "should not call the /write route");
+                    }
+                },
+            });
+
+            await click(target.querySelector(".o_form_button_edit"));
+
+            // edit 'foo' but do not focusout -> the model isn't aware of the change
+            // until the 'beforeunload' event is triggered
+            const input = target.querySelector(".o_field_widget[name='qux'] input");
+            input.value = "test";
+            await triggerEvent(input, null, "input");
+
+            window.dispatchEvent(new Event("beforeunload"));
+            await nextTick();
+
+            assert.verifySteps(["get_views", "read"]);
         }
     );
 
