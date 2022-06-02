@@ -12,6 +12,7 @@ import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/ui";
 import { Field } from "@web/fields/field";
+import { Group } from "@web/views/relational_model";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useBounceButton } from "../helpers/view_hook";
 import { getTooltipInfo } from "../../fields/field_tooltip";
@@ -170,94 +171,6 @@ export class ListRenderer extends Component {
             this.columnWidths = null;
             this.freezeColumnWidths();
         });
-        useHotkey("Escape", () => this.props.list.unselectRecord(true), {
-            area: () => this.rootRef.el,
-        });
-        useHotkey(
-            "Tab",
-            ({ target }) => {
-                const closestRecordRow = target.closest("tr.o_data_row");
-                if (closestRecordRow && this.tableRef.el.contains(closestRecordRow)) {
-                    // second condition seems useless
-                    // const recordId = closestRecordRow.dataset.id;
-                    // const record = this.props.list.records.find((record) => record.id === recordId);
-                    // seems to work also in grouped list thanks to the getter for records
-                }
-            },
-            {
-                area: () => this.tableRef.el,
-                validate: () => this.props.list.editedRecord,
-            }
-        );
-        useHotkey(
-            "Enter",
-            async ({ target }) => {
-                // Enter within a record row
-                const closestRecordRow = target.closest("tr.o_data_row");
-                if (closestRecordRow && this.tableRef.el.contains(closestRecordRow)) {
-                    // second condition seems useless
-                    const recordId = closestRecordRow.dataset.id;
-                    const record = this.props.list.records.find((record) => record.id === recordId);
-                    // seems to work also in grouped list thanks to the getter for records
-
-                    const removeTd = target.closest("td.o_list_record_remove");
-                    if (removeTd) {
-                        this.onDeleteRecord(record);
-                        return;
-                    }
-
-                    const selectTd = target.closest("td.o_list_record_selector");
-                    if (selectTd) {
-                        this.toggleRecordSelection(record);
-                        return;
-                    }
-
-                    if (this.props.editable) {
-                        // TODO: we need to refactor switchMode and unselectRecord!!!
-                        if (
-                            this.props.list.editedRecord &&
-                            this.props.list.editedRecord.checkValidity()
-                        ) {
-                            await this.props.list.unselectRecord();
-                            if (this.props.list.records.length === 1) {
-                                // TODO put more logic here see _moveToSideLine in list_editable_renderer
-                                // we are sure there is no other records --> add a line
-                                this.props.onAdd();
-                            }
-                        }
-                    } else if (!this.props.archInfo.noOpen) {
-                        this.props.openRecord(record);
-                    }
-
-                    return;
-                }
-
-                // Enter within a group row
-                // we assume that
-                const closestGroupRow = target.closest("tr.o_group_header");
-                if (closestGroupRow && this.tableRef.el.contains(closestGroupRow)) {
-                    // second condition seems useless
-                    const groupId = closestGroupRow.dataset.id;
-                    const getGroups = (list) => {
-                        const groups = [];
-                        for (const group of list.groups || []) {
-                            groups.push(group, ...getGroups(group.list));
-                        }
-                        return groups;
-                    };
-                    const allGroups = getGroups(this.props.list);
-                    const group = allGroups.find((group) => group.id === groupId); // improve group search
-                    this.toggleGroup(group);
-
-                    return;
-                }
-            },
-            {
-                bypassEditableProtection: true,
-                area: () => this.tableRef.el,
-                validate: (target) => target.tagName !== "TEXTAREA",
-            }
-        );
     }
 
     // The following code manipulates the DOM directly to avoid having to wait for a
@@ -843,13 +756,63 @@ export class ListRenderer extends Component {
     }
 
     /**
+     * @param {HTMLTableCellElement} cell
+     * @param {boolean} isInGroupRow
+     * @param {"up"|"down"|"left"|"right"} direction
+     */
+    findFutureCell(cell, isInGroupRow, direction) {
+        const row = cell.parentElement;
+        const children = [...row.children];
+        const index = children.indexOf(cell);
+        let futureCell;
+        switch (direction) {
+            case "up": {
+                let futureRow = row.previousElementSibling;
+                futureRow =
+                    futureRow ||
+                    (row.parentElement.previousElementSibling &&
+                        row.parentElement.previousElementSibling.lastElementChild);
+
+                if (futureRow) {
+                    const nextIsGroup = futureRow.classList.contains("o_group_header");
+                    const rowTypeSwitched = isInGroupRow !== nextIsGroup;
+                    futureCell = futureRow && futureRow.children[rowTypeSwitched ? 0 : index];
+                }
+                break;
+            }
+            case "down": {
+                let futureRow = row.nextElementSibling;
+                futureRow =
+                    futureRow ||
+                    (row.parentElement.nextElementSibling &&
+                        row.parentElement.nextElementSibling.firstElementChild);
+                if (futureRow) {
+                    const nextIsGroup = futureRow.classList.contains("o_group_header");
+                    const rowTypeSwitched = isInGroupRow !== nextIsGroup;
+                    futureCell = futureRow && futureRow.children[rowTypeSwitched ? 0 : index];
+                }
+                break;
+            }
+            case "left": {
+                futureCell = children[index - 1];
+                break;
+            }
+            case "right": {
+                futureCell = children[index + 1];
+                break;
+            }
+        }
+        return futureCell;
+    }
+
+    /**
      * @param {KeyboardEvent} ev
-     * @param {Record | Group} dataPoint
+     * @param { import('@web/views/relational_model').Group
+     *  | import('@web/views/relational_model').Record
+     *  | import('@web/views/basic_relational_model').Record
+     * } dataPoint
      */
     async onCellKeydown(ev, dataPoint) {
-        if (this.props.list.editedRecord) {
-            return;
-        }
         if (this.props.list.model.useSampleModel) {
             return;
         }
@@ -857,116 +820,125 @@ export class ListRenderer extends Component {
         const hotkey = getActiveHotkey(ev);
         // const isInBody = this.tableRef.el.querySelector("tbody").contains(ev.target);
         const closestCell = ev.target.closest("td, th");
-        const closestRow = closestCell.parentElement;
-        const isGroup = closestRow.classList.contains("o_group_header");
 
+        const handled = this.props.list.editedRecord
+            ? this.onCellKeydownEditMode(hotkey, closestCell, dataPoint)
+            : this.onCellKeydownReadOnlyMode(hotkey, closestCell, dataPoint);
+
+        if (handled) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
+    }
+
+    /**
+     * @param {string} hotkey
+     * @param {HTMLTableCellElement} cell
+     * @param { import('@web/views/relational_model').Group
+     *  | import('@web/views/relational_model').Record
+     *  | import('@web/views/basic_relational_model').Record
+     * } dataPoint
+     * @returns {boolean} true if some behavior has been taken
+     */
+    async onCellKeydownEditMode(hotkey, cell, dataPoint) {
+        let futureCell;
+        switch (hotkey) {
+            case "tab":
+                break;
+            case "shift+tab":
+                break;
+            case "enter":
+                // TODO: we need to refactor switchMode and unselectRecord!!!
+                if (this.props.list.editedRecord.checkValidity()) {
+                    await this.props.list.unselectRecord();
+                    if (this.props.list.records.length === 1) {
+                        // TODO put more logic here see _moveToSideLine in list_editable_renderer
+                        // we are sure there is no other records --> add a line
+                        this.props.onAdd();
+                    }
+                }
+                break;
+            case "escape":
+                this.props.list.unselectRecord(true);
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param {string} hotkey
+     * @param {HTMLTableCellElement} cell
+     * @param { import('@web/views/relational_model').Group
+     *  | import('@web/views/relational_model').Record
+     *  | import('@web/views/basic_relational_model').Record
+     * } dataPoint
+     * @returns {boolean} true if some behavior has been taken
+     */
+    onCellKeydownReadOnlyMode(hotkey, cell, dataPoint) {
+        const isInGroupRow = dataPoint instanceof Group;
         let futureCell;
         switch (hotkey) {
             case "arrowup": {
-                let nextRow = closestRow.previousElementSibling;
-                nextRow =
-                    nextRow ||
-                    (closestRow.parentElement.previousElementSibling &&
-                        closestRow.parentElement.previousElementSibling.lastElementChild);
+                futureCell = this.findFutureCell(cell, isInGroupRow, "up");
 
-                if (nextRow) {
-                    const nextIsGroup = nextRow.classList.contains("o_group_header");
-                    const index =
-                        isGroup !== nextIsGroup ? 0 : [...closestRow.children].indexOf(closestCell);
-                    futureCell = nextRow && nextRow.children[index];
-                } else {
+                if (!futureCell) {
                     // todo? maybe cycle through row instead of focusing the search
                     this.env.searchModel.trigger("focus-search");
                     this.tableRef.el
                         .querySelector("tbody")
                         .classList.remove("o_keyboard_navigation");
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    return;
                 }
                 break;
             }
-            case "arrowdown": {
-                let nextRow = closestRow.nextElementSibling;
-                nextRow =
-                    nextRow ||
-                    (closestRow.parentElement.nextElementSibling &&
-                        closestRow.parentElement.nextElementSibling.firstElementChild);
-                if (nextRow) {
-                    const nextIsGroup = nextRow.classList.contains("o_group_header");
-                    const index =
-                        isGroup !== nextIsGroup ? 0 : [...closestRow.children].indexOf(closestCell);
-                    futureCell = nextRow && nextRow.children[index];
-                }
+            case "arrowdown":
+                futureCell = this.findFutureCell(cell, isInGroupRow, "down");
                 break;
-            }
-            case "shift+tab":
-            case "arrowleft": {
-                if (isGroup && !dataPoint.isFolded) {
+            case "arrowleft":
+                if (isInGroupRow && !dataPoint.isFolded) {
                     this.toggleGroup(dataPoint);
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    return;
+                } else {
+                    futureCell = this.findFutureCell(cell, isInGroupRow, "left");
                 }
-                const children = [...closestRow.children];
-                const index = children.indexOf(closestCell);
-                futureCell = children[index - 1];
                 break;
-            }
-            case "tab":
             case "arrowright": {
-                if (isGroup && dataPoint.isFolded) {
+                if (isInGroupRow && dataPoint.isFolded) {
                     this.toggleGroup(dataPoint);
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    return;
+                } else {
+                    futureCell = this.findFutureCell(cell, isInGroupRow, "right");
                 }
-                const children = [...closestRow.children];
-                const index = children.indexOf(closestCell);
-                futureCell = children[index + 1];
                 break;
             }
             case "enter": {
-                const isRemoveTd = closestCell.classList.contains("o_list_record_remove");
+                const isRemoveTd = cell.classList.contains("o_list_record_remove");
                 if (isRemoveTd) {
                     this.onDeleteRecord(dataPoint);
+                    break;
                 }
 
-                if (isGroup) {
+                if (isInGroupRow) {
                     this.toggleGroup(dataPoint);
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    return;
+                    break;
                 }
 
-                if (this.props.editable) {
-                    // TODO: we need to refactor switchMode and unselectRecord!!!
-                    if (
-                        this.props.list.editedRecord &&
-                        this.props.list.editedRecord.checkValidity()
-                    ) {
-                        await this.props.list.unselectRecord();
-                        if (this.props.list.records.length === 1) {
-                            // TODO put more logic here see _moveToSideLine in list_editable_renderer
-                            // we are sure there is no other records --> add a line
-                            this.props.onAdd();
-                        }
-                    }
-                } else if (!this.props.archInfo.noOpen && dataPoint) {
+                if (!this.props.archInfo.noOpen && dataPoint) {
                     this.props.openRecord(dataPoint);
                 }
-                ev.preventDefault();
-                ev.stopPropagation();
-                return;
+                break;
             }
+            default:
+                // Return with no effect (no stop or prevent default...)
+                return false;
         }
+
         if (futureCell) {
             const toFocus = getElementToFocus(futureCell);
             toFocus.focus();
             this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
-            ev.preventDefault();
-            ev.stopPropagation();
         }
+
+        return true;
     }
 
     saveOptionalActiveFields() {

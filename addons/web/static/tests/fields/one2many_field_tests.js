@@ -9322,7 +9322,7 @@ QUnit.module("Fields", (hooks) => {
         }
     );
 
-    QUnit.skip(
+    QUnit.skipWOWL(
         "one2many shortcut tab should not crash when there is no input widget",
         async function (assert) {
             // create a one2many view which has no input (only 1 textarea in this case)
@@ -9333,12 +9333,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree>
+                            <tree editable="bottom">
                                 <field name="turtle_foo" widget="text"/>
                             </tree>
-                            <form>
-                                <field name="display_name"/>
-                            </form>
                         </field>
                     </form>`,
                 resId: 1,
@@ -9349,20 +9346,10 @@ QUnit.module("Fields", (hooks) => {
             // add a row, fill it, then trigger the tab shortcut
             await addRow(target);
             await editInput(target, "[name=turtle_foo] textarea", "ninja");
-
-            // simulates two Tabs with an automatic "Add a line"
-            const deleteButton = target.querySelector(
-                ".o_selected_row .o_list_record_remove button"
-            );
-            assert.strictEqual(getNextTabableElement(target), deleteButton);
-            assert.defaultBehavior(deleteButton, null, "keydown", { key: "Tab" });
-            deleteButton.focus();
-
-            const addButton = target.querySelector(".o_field_x2many_list_row_add a");
+            let addButton = target.querySelector(".o_field_x2many_list_row_add a");
             assert.strictEqual(getNextTabableElement(target), addButton);
             assert.defaultBehavior(addButton, null, "keydown", { key: "Tab" });
-            addButton.focus();
-            await nextTick();
+            await triggerEvent(addButton, null, "focusin");
 
             assert.deepEqual(
                 [...target.querySelectorAll(".o_field_text")].map((el) => el.textContent),
