@@ -72,4 +72,15 @@ export class Notebook extends Component {
 }
 
 Notebook.template = "web.Notebook";
-Notebook.props = ["slots?", "class?", "className?", "anchors?", "defaultPage?"];
+Notebook.defaultProps = {
+    className: "",
+    orientation: "horizontal",
+};
+Notebook.props = {
+    slots: { type: Object, optional: true },
+    class: { optional: true },
+    className: { type: String, optional: true },
+    anchors: { type: Object, optional: true },
+    defaultPage: { type: String, optional: true },
+    orientation: { type: String, optional: true },
+};
