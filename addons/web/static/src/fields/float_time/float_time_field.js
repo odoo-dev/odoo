@@ -20,15 +20,6 @@ export class FloatTimeField extends Component {
         useNumpadDecimal();
     }
 
-    onChange(ev) {
-        try {
-            const value = parseFloatTime(ev.target.value);
-            this.props.update(value);
-        } catch {
-            this.props.invalidate();
-        }
-    }
-
     get formattedValue() {
         return formatFloatTime(this.props.value);
     }

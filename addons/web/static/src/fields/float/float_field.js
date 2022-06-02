@@ -35,14 +35,7 @@ export class FloatField extends Component {
     }
 
     onChange(ev) {
-        try {
-            const value = this.parse(ev.target.value);
-            this.props.update(value);
-            this.defaultInputValue = ev.target.value;
-        } catch (_e) {
-            // WOWL TODO: rethrow error when not the expected type
-            this.props.invalidate();
-        }
+        this.defaultInputValue = ev.target.value;
     }
 
     getFormattedValue(props = this.props) {

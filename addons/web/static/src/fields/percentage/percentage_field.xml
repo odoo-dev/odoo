@@ -12,7 +12,6 @@
                     t-attf-class="o_input"
                     type="text"
                     inputmode="numeric"
-                    t-on-change="onChange"
                 />
                 <span>%</span>
             </div>

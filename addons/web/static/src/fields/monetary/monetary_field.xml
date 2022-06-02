@@ -5,7 +5,7 @@
         <span t-if="props.readonly" t-esc="formattedValue" />
         <div t-else="">
             <span t-if="currencyPosition === 'before'" t-out="currencySymbol" />
-            <input t-ref="numpadDecimal" t-att-id="props.id" t-att-type="props.inputType" t-att-placeholder="props.placeholder" class="o_input" t-on-change="onChange" />
+            <input t-ref="numpadDecimal" t-att-id="props.id" t-att-type="props.inputType" t-att-placeholder="props.placeholder" class="o_input"/>
             <span t-if="currencyPosition === 'after'" t-out="currencySymbol" />
         </div>
     </t>

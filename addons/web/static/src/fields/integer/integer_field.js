@@ -26,16 +26,6 @@ export class IntegerField extends Component {
         }
         return formatInteger(this.props.value);
     }
-
-    onChange(ev) {
-        try {
-            const value = parseInteger(ev.target.value);
-            this.props.update(value);
-        } catch (_e) {
-            // WOWL TODO: rethrow error when not the expected type
-            this.props.invalidate();
-        }
-    }
 }
 
 IntegerField.template = "web.IntegerField";

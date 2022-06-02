@@ -25,13 +25,6 @@ export class CharField extends Component {
         }
         return value;
     }
-    /**
-     * @param {Event} ev
-     */
-    onChange(ev) {
-        let value = this.parse(ev.target.value);
-        this.props.update(value || false);
-    }
 }
 
 CharField.template = "web.CharField";

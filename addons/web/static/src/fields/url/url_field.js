@@ -24,12 +24,6 @@ export class UrlField extends Component {
         }
         return value;
     }
-    /**
-     * @param {Event} ev
-     */
-    onChange(ev) {
-        this.props.update(ev.target.value);
-    }
 }
 
 UrlField.template = "web.UrlField";

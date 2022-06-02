@@ -13,7 +13,6 @@
                 t-att-autocomplete="props.autocomplete or (props.isPassword ? 'new-password' : 'off')"
                 t-att-maxlength="props.maxLength > 0 and props.maxLength"
                 t-att-placeholder="props.placeholder"
-                t-on-change="onChange"
                 t-ref="input"
             />
             <t t-if="props.isTranslatable">

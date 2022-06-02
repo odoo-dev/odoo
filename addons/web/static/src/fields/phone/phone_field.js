@@ -11,13 +11,6 @@ export class PhoneField extends Component {
     setup() {
         useInputField({ getValue: () => this.props.value || "" });
     }
-
-    /**
-     * @param {Event} ev
-     */
-    onChange(ev) {
-        this.props.update(ev.target.value);
-    }
 }
 
 PhoneField.template = "web.PhoneField";

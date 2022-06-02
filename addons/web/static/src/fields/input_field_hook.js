@@ -25,6 +25,12 @@ export function useInputField(params) {
     function onChange(ev) {
         lastSetValue = ev.target.value;
         isDirty = false;
+        try {
+            const val = params.parse ? params.parse(ev.target.value) : ev.target.value;
+            component.props.update(val);
+        } catch (_e) {
+            component.props.invalidate();
+        }
     }
     useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", () => commitChanges(true));
     useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE", () => commitChanges(false));

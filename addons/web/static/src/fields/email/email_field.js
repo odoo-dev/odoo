@@ -11,13 +11,6 @@ export class EmailField extends Component {
     setup() {
         useInputField({ getValue: () => this.props.value || "" });
     }
-
-    /**
-     * @param {Event} ev
-     */
-    onChange(ev) {
-        this.props.update(ev.target.value);
-    }
 }
 
 EmailField.template = "web.EmailField";

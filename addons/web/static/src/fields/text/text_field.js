@@ -37,9 +37,6 @@ export class TextField extends Component {
     onInput() {
         this.resize();
     }
-    onChange(ev) {
-        this.props.update(ev.target.value);
-    }
 }
 
 TextField.template = "web.TextField";

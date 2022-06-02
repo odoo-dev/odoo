@@ -19,18 +19,6 @@ export class PercentageField extends Component {
         });
         useNumpadDecimal();
     }
-    /**
-     * @param {Event} ev
-     */
-    onChange(ev) {
-        try {
-            const parsedValue = parsePercentage(ev.target.value);
-            this.props.update(parsedValue);
-        } catch (_e) {
-            // WOWL TODO: rethrow error when not the expected type
-            this.props.invalidate();
-        }
-    }
 
     get formattedValue() {
         return formatPercentage(this.props.value, {

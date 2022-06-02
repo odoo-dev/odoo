@@ -20,14 +20,6 @@ export class MonetaryField extends Component {
         });
         useNumpadDecimal();
     }
-    onChange(ev) {
-        try {
-            const value = parseMonetary(ev.target.value, { currencyId: this.props.currencyId });
-            this.props.update(value);
-        } catch {
-            this.props.invalidate();
-        }
-    }
 
     get currency() {
         if (!isNaN(this.props.currencyId) && this.props.currencyId in session.currencies) {
