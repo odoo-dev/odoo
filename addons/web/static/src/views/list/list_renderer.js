@@ -8,7 +8,6 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { Pager } from "@web/core/pager/pager";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
-import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/ui";
 import { Field } from "@web/fields/field";
@@ -812,7 +811,7 @@ export class ListRenderer extends Component {
      *  | import('@web/views/basic_relational_model').Record
      * } dataPoint
      */
-    async onCellKeydown(ev, dataPoint) {
+    onCellKeydown(ev, dataPoint) {
         if (this.props.list.model.useSampleModel) {
             return;
         }
@@ -834,32 +833,44 @@ export class ListRenderer extends Component {
     /**
      * @param {string} hotkey
      * @param {HTMLTableCellElement} cell
-     * @param { import('@web/views/relational_model').Group
-     *  | import('@web/views/relational_model').Record
+     * @param { import('@web/views/relational_model').Record
      *  | import('@web/views/basic_relational_model').Record
-     * } dataPoint
+     * } record
      * @returns {boolean} true if some behavior has been taken
      */
-    async onCellKeydownEditMode(hotkey, cell, dataPoint) {
-        let futureCell;
+    onCellKeydownEditMode(hotkey, cell, record) {
+        const { editable, list } = this.props;
         switch (hotkey) {
             case "tab":
                 break;
             case "shift+tab":
                 break;
             case "enter":
-                // TODO: we need to refactor switchMode and unselectRecord!!!
-                if (this.props.list.editedRecord.checkValidity()) {
-                    await this.props.list.unselectRecord();
-                    if (this.props.list.records.length === 1) {
-                        // TODO put more logic here see _moveToSideLine in list_editable_renderer
-                        // we are sure there is no other records --> add a line
+                if (!editable && list.selection.length === 1) {
+                    list.unselectRecord();
+                    break;
+                }
+
+                if (editable) {
+                    const index = list.records.indexOf(record);
+                    const futureRecord = list.records[index + 1];
+                    if (futureRecord) {
+                        futureRecord.switchMode("edit");
+                    } else {
                         this.props.onAdd();
                     }
                 }
+
+                if (list.selection.length > 1) {
+                    // Multiple edition
+                    const index = list.selection.indexOf(record);
+                    const futureRecord = list.selection[index + 1] || list.selection[0];
+                    futureRecord.switchMode("edit");
+                }
                 break;
             case "escape":
-                this.props.list.unselectRecord(true);
+                record.discard();
+                list.unselectRecord(true);
                 break;
             default:
                 return false;

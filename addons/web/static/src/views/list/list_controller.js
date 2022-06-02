@@ -129,12 +129,7 @@ export class ListController extends Component {
         );
     }
 
-    async openRecord(record) {
-        const activeIds = this.model.root.records.map((datapoint) => datapoint.resId);
-        this.props.selectRecord(record.resId, { activeIds });
-    }
-
-    async onClickCreate() {
+    async createRecord() {
         if (this.editable) {
             // add a new row
             if (this.model.root.editedRecord) {
@@ -145,6 +140,15 @@ export class ListController extends Component {
         } else {
             await this.props.createRecord();
         }
+    }
+
+    async openRecord(record) {
+        const activeIds = this.model.root.records.map((datapoint) => datapoint.resId);
+        this.props.selectRecord(record.resId, { activeIds });
+    }
+
+    onClickCreate() {
+        this.createRecord();
     }
 
     onClickDiscard() {

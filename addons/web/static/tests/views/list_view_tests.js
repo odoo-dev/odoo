@@ -6638,49 +6638,43 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([`switch to form - resId: 2-20170808020000`]);
     });
 
-    QUnit.skipWOWL("pressing enter on last line of editable list view", async function (assert) {
-        assert.expect(7);
-
+    QUnit.test("pressing enter on last line of editable list view", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
             serverData,
-            arch: '<tree editable="bottom"><field name="foo"/></tree>',
-            mockRPC: function (route) {
-                assert.step(route);
+            arch: `<tree editable="bottom"><field name="foo"/></tree>`,
+            mockRPC: function (route, args) {
+                assert.step(args.method);
             },
         });
 
+        assert.verifySteps(["get_views", "web_search_read"]);
+
         // click on 3rd line
-        await click($(target).find("td:contains(gnap)")[0]);
-        assert.hasClass(
-            $(target).find("tr.o_data_row:eq(2)"),
-            "o_selected_row",
-            "3rd row should be selected"
+        await click(target.querySelector("tr.o_data_row:nth-child(3) .o_field_cell[name=foo]"));
+        assert.hasClass(target.querySelector("tr.o_data_row:nth-child(3)"), "o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_selected_row [name=foo] input")
         );
 
         // press enter in input
-        await triggerEvent(target, '.o_selected_row [name="foo"] input', "keydown", {
-            key: "enter",
-        });
-        assert.hasClass(
-            $(target).find("tr.o_data_row:eq(3)"),
-            "o_selected_row",
-            "4rd row should be selected"
-        );
-        assert.doesNotHaveClass(
-            $(target).find("tr.o_data_row:eq(2)"),
-            "o_selected_row",
-            "3rd row should no longer be selected"
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.hasClass(target.querySelector("tr.o_data_row:nth-child(4)"), "o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_selected_row [name=foo] input")
         );
 
         // press enter on last row
-        await triggerEvent(target, '.o_selected_row [name="foo"] input', "keydown", {
-            key: "enter",
-        });
-        assert.containsN(target, "tr.o_data_row", 5, "should have created a 5th row");
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, "tr.o_data_row", 5);
+        assert.hasClass(target.querySelector("tr.o_data_row:nth-child(5)"), "o_selected_row");
 
-        assert.verifySteps(["/web/dataset/search_read", "/web/dataset/call_kw/foo/onchange"]);
+        assert.verifySteps(["onchange"]);
     });
 
     QUnit.skipWOWL("pressing tab on last cell of editable list view", async function (assert) {
@@ -11233,8 +11227,6 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "pressing ESC in editable grouped list should discard the current line changes",
         async function (assert) {
-            assert.expect(6);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
@@ -11243,18 +11235,21 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["bar"],
             });
 
-            await click(target.querySelectorAll(".o_group_header")[1]); // open first group
+            await click(target.querySelectorAll(".o_group_header")[1]); // open second group
             assert.containsN(target, "tr.o_data_row", 3);
 
             await click(target.querySelector(".o_data_cell"));
 
-            // update name by "foo"
-            const input = target.querySelector('.o_data_cell [name="foo"] input');
-            input.value = "new_value";
-            await triggerEvent(input, null, "input");
+            // update foo field of edited row
+            await editInput(target, ".o_data_cell [name=foo] input", "new_value");
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_data_cell [name=foo] input")
+            );
             // discard by pressing ESC
-            await triggerEvent(target, '[name="foo"] input', "keydown", { key: "escape" });
-            assert.containsNone(target, ".modal", "should not open modal");
+            triggerHotkey("Escape");
+            await nextTick();
+            assert.containsNone(target, ".modal");
 
             assert.containsOnce(target, "tbody tr td:contains(yop)");
             assert.containsN(target, "tr.o_data_row", 3);

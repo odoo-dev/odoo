@@ -1147,6 +1147,7 @@ export class Record extends DataPoint {
      * @returns {Promise<boolean>}
      */
     async _save(options = { stayInEdition: false, noReload: false }) {
+        this.model.env.bus.trigger("RELATIONAL_MODEL:WILL_SAVE");
         if (!this.checkValidity()) {
             const invalidFields = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
