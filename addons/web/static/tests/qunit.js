@@ -318,12 +318,27 @@ import { canDefaultBehaviorHappen } from "./helpers/utils";
         errorMessages.push(info);
     });
 
-    QUnit.debug = (name, cb) => {
-        owl.whenReady(() => document.body.classList.add("debug"));
-        QUnit.config.debug = true;
+    function setQUnitDebugMode() {
+        owl.whenReady(() => document.body.classList.add("debug")); // make the test visible to the naked eye
+        QUnit.config.debug = true; // allows for helper functions to behave differently (logging, the HTML element in which the test occurs etc...)
         QUnit.config.testTimeout = 60 * 60 * 1000;
+        // Allows for interacting with the test when it is over
+        // In fact, this will pause QUnit.
+        // Also, logs usefull info in the console.
+        QUnit.testDone(async (...args) => {
+            console.log(...args);
+            await new Promise(() => {});
+        });
+    }
+
+    QUnit.debug = (name, cb) => {
+        setQUnitDebugMode();
         QUnit.only(name, cb);
     };
+
+    if (QUnit.config.testId.length === 1) {
+         setQUnitDebugMode();
+    }
 
     const skip = QUnit.skip;
     QUnit.skipWOWL = (name, cb) => {
