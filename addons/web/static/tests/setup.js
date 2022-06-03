@@ -144,6 +144,9 @@ function patchBrowserWithCleanup() {
             // in tests, we never want to interact with the real local/session storages.
             localStorage: makeRAMLocalStorage(),
             sessionStorage: makeRAMLocalStorage(),
+            // Don't want original animation frames in tests
+            requestAnimationFrame: (fn) => fn(),
+            cancelAnimationFrame: () => {},
         },
         { pure: true }
     );

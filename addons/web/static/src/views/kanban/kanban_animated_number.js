@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
 import { formatInteger } from "@web/fields/formatters";
 
 const { Component, onWillUpdateProps, onWillUnmount, useState } = owl;
@@ -23,13 +24,13 @@ export class KanbanAnimatedNumber extends Component {
                     this.state.value = to;
                 } else {
                     this.state.value = from + (to - from) * progress;
-                    this.handle = requestAnimationFrame(animate);
+                    this.handle = browser.requestAnimationFrame(animate);
                 }
             };
-            cancelAnimationFrame(this.handle);
+            browser.cancelAnimationFrame(this.handle);
             animate();
         });
-        onWillUnmount(() => cancelAnimationFrame(this.handle));
+        onWillUnmount(() => browser.cancelAnimationFrame(this.handle));
     }
 
     format(value) {

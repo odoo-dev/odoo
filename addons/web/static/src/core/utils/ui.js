@@ -75,9 +75,7 @@ export function getVisibleElements(activeElement, selector) {
 
 const { useEffect, useEnv, useExternalListener, onWillUnmount } = owl;
 
-const DRAG_START_THRESHOLD = 5 ** 2;
 const LEFT_CLICK = 0;
-const MOUSEMOVE_DEBOUNCE = 6;
 const MANDATORY_SORTABLE_PARAMS = ["ref", "elements"];
 const SORTABLE_PARAMS = {
     enable: ["boolean", "function"],
@@ -132,18 +130,6 @@ function cssValueToNumber(val) {
  */
 function sortableError(reason) {
     return new Error(`Unable to use sortable feature: ${reason}.`);
-}
-
-/**
- * Returns the square distance between 2 points (defined by x1,y1 and x2,y2).
- * @param {number} x1
- * @param {number} y1
- * @param {number} x2
- * @param {number} y2
- * @returns {number}
- */
-function squareDistance(x1, y1, x2, y2) {
-    return (x2 - x1) ** 2 + (y2 - y1) ** 2;
 }
 
 /**
@@ -265,12 +251,10 @@ export function useSortable(params) {
      * @param {string} event
      * @param {(...args: any[]) => any} callback
      * @param {boolean | Record<string, boolean>} [options]
-     * @param {boolean} [timeout]
      */
-    const addListener = (el, event, callback, options, timeout) => {
+    const addListener = (el, event, callback, options) => {
         el.addEventListener(event, callback, options);
-        const cleanup = () => el.removeEventListener(event, callback, options);
-        cleanups.push(timeout ? () => setTimeout(cleanup) : cleanup);
+        cleanups.push(() => el.removeEventListener(event, callback, options));
     };
 
     /**
@@ -407,12 +391,7 @@ export function useSortable(params) {
                 currentContainerRect.y,
                 currentContainerRect.y + currentContainerRect.height - currentElementRect.height
             )}px`;
-        } else if (
-            // The drag sequence starts as soon as the mouse has travelled a
-            // certain amount of pixels from the initial mousedown position
-            // (`DRAG_START_THRESHOLD` = squared distance required to travel).
-            squareDistance(offsetX, offsetY, ev.clientX, ev.clientY) >= DRAG_START_THRESHOLD
-        ) {
+        } else {
             dragStart();
         }
     };
@@ -453,11 +432,6 @@ export function useSortable(params) {
         ghost = currentElement.cloneNode(true);
         ghost.style.visibility = "hidden";
         cleanups.push(() => ghost.remove());
-
-        // Cancels all click events targetting the current element
-        // A timeout is added so that all handlers can be executed without
-        // original click events getting in the way.
-        addListener(currentElement, "click", cancelEvent, true, true);
 
         // Binds handlers on eligible groups, if the elements are not confined to
         // their parents and a 'groupSelector' has been provided.
@@ -592,8 +566,9 @@ export function useSortable(params) {
         () => [ref.el]
     );
     // Other global mouse event listeners.
-    useExternalListener(window, "mousemove", debounce(onMousemove, MOUSEMOVE_DEBOUNCE, true));
-    useExternalListener(window, "mouseup", onMouseup, true);
+    const debouncedMousemove = debounce(onMousemove, "animationFrame", true);
+    useExternalListener(window, "mousemove", debouncedMousemove);
+    useExternalListener(window, "mouseup", onMouseup);
     useExternalListener(window, "keydown", onKeydown, true);
     onWillUnmount(() => dragStop(true));
 }

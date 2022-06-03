@@ -1,12 +1,13 @@
 /** @odoo-module **/
 
-import { standardViewProps } from "@web/views/helpers/standard_view_props";
-import { useService } from "@web/core/utils/hooks";
+import { browser } from "@web/core/browser/browser";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { useService } from "@web/core/utils/hooks";
 import { renderToString } from "@web/core/utils/render";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useSortable } from "@web/core/utils/ui";
+import { standardViewProps } from "@web/views/helpers/standard_view_props";
 import { BoardAction } from "./board_action";
 
 const { Component, useState, useRef } = owl;
@@ -79,7 +80,7 @@ export class BoardController extends Component {
         if (document.querySelector("canvas")) {
             // horrible hack to force charts to be recreated so they pick up the
             // proper size. also, no idea why raf is needed :(
-            requestAnimationFrame(() => this.render(true));
+            browser.requestAnimationFrame(() => this.render(true));
         }
     }
 

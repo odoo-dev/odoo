@@ -720,14 +720,13 @@ export async function dragAndDrop(from, to, position) {
     from = from instanceof Element ? from : fixture.querySelector(from);
     to = to instanceof Element ? to : fixture.querySelector(to);
 
-    // Mouse down on main target then move to a far away position to initiate the drag
+    // Mouse down on main target
     const fromRect = from.getBoundingClientRect();
     const toRect = to.getBoundingClientRect();
     triggerEvent(from, null, "mousedown", {
         clientX: fromRect.x + fromRect.width / 2,
         clientY: fromRect.y + fromRect.height / 2,
     });
-    triggerEvent(window, null, "mousemove", { clientX: -999, clientY: -999 });
 
     // Find target position
     const toPos = {
@@ -760,9 +759,7 @@ export async function dragAndDrop(from, to, position) {
     for (const target of getDifferentParents(from, to)) {
         triggerEvent(target, null, "mouseenter", toPos);
     }
-    triggerEvent(from, null, "mouseup", toPos);
-    await triggerEvent(from, null, "click", toPos, true);
-    await nextTick();
+    await triggerEvent(from, null, "mouseup", toPos);
 }
 
 export async function clickDropdown(target, fieldName) {

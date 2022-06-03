@@ -74,7 +74,7 @@ QUnit.module("utils", () => {
             assert.step("myFunc");
             return 42;
         };
-        const myDebouncedFunc = debounce(myFunc, 3000, true);
+        const myDebouncedFunc = debounce(myFunc, 3000, { immediate: true });
         myDebouncedFunc().then((x) => {
             assert.step("resolved " + x);
         });
