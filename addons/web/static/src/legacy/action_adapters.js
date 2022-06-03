@@ -7,7 +7,6 @@ import { objectToQuery } from "../core/browser/router_service";
 import { useDebugCategory } from "../core/debug/debug_context";
 import { Dialog } from "../core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
-import { setScrollPosition } from "@web/core/utils/scrolling";
 import { ViewNotFoundError } from "../webclient/actions/action_service";
 import { cleanDomFromBootstrap, wrapSuccessOrFail, useLegacyRefs } from "./utils";
 import { mapDoActionOptionAPI } from "./backend_utils";
@@ -96,7 +95,8 @@ class ActionAdapter extends ComponentAdapter {
         this.onScrollTo = (payload) => {
             const contentEl = this.el.querySelector(".o_content");
             if (contentEl) {
-                setScrollPosition(contentEl, { left: payload.left, top: payload.top });
+                contentEl.scrollLeft = payload.left || 0;
+                contentEl.scrollTop = payload.top || 0;
             }
         };
     }

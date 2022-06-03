@@ -3,7 +3,6 @@
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { download } from "@web/core/network/download";
 import { useService } from "@web/core/utils/hooks";
-import { setScrollPosition } from "@web/core/utils/scrolling";
 import { sprintf } from "@web/core/utils/strings";
 import { ActionMenus } from "@web/search/action_menus/action_menus";
 import { Layout } from "@web/search/layout";
@@ -178,7 +177,7 @@ export class ListController extends Component {
 
     onPageChangeScroll() {
         if (this.rootRef && this.rootRef.el) {
-            setScrollPosition(this.rootRef.el.querySelector(".o_content"), { top: 0 });
+            this.rootRef.el.querySelector(".o_content").scrollTop = 0;
         }
     }
 

@@ -1,7 +1,5 @@
 /** @odoo-module **/
 
-import { getScrollPosition, setScrollPosition } from "@web/core/utils/scrolling";
-
 const { onMounted, useComponent, useEffect, useExternalListener } = owl;
 
 const scrollSymbol = Symbol("scroll");
@@ -80,7 +78,12 @@ export function useSetupAction(params = {}) {
             if (rootRef) {
                 const searchPanelEl = rootRef.el.querySelector(".o_content .o_search_panel");
                 if (searchPanelEl) {
-                    state[scrollSymbol] = { searchPanel: getScrollPosition(searchPanelEl) };
+                    state[scrollSymbol] = {
+                        searchPanel: {
+                            left: searchPanelEl.scrollLeft,
+                            top: searchPanelEl.scrollTop,
+                        },
+                    };
                 }
             }
             return state;
@@ -93,7 +96,8 @@ export function useSetupAction(params = {}) {
                 if (scrolling) {
                     const searchPanelEl = rootRef.el.querySelector(".o_content .o_search_panel");
                     if (searchPanelEl) {
-                        setScrollPosition(searchPanelEl, scrolling.searchPanel);
+                        searchPanelEl.scrollLeft = scrolling.searchPanel.left || 0;
+                        searchPanelEl.scrollTop = scrolling.searchPanel.top || 0;
                     }
                 }
             });
@@ -108,7 +112,9 @@ export function useSetupAction(params = {}) {
             if (rootRef) {
                 const contentEl = rootRef.el.querySelector(".o_content");
                 if (contentEl) {
-                    state[scrollSymbol] = { content: getScrollPosition(contentEl) };
+                    state[scrollSymbol] = {
+                        content: { left: contentEl.scrollLeft, top: contentEl.scrollTop },
+                    };
                 }
             }
             return state;
@@ -121,7 +127,8 @@ export function useSetupAction(params = {}) {
                 if (scrolling) {
                     const contentEl = rootRef.el.querySelector(".o_content");
                     if (contentEl) {
-                        setScrollPosition(contentEl, scrolling.content);
+                        contentEl.scrollTop = scrolling.content.top || 0;
+                        contentEl.scrollLeft = scrolling.content.left || 0;
                     }
                 }
             });
