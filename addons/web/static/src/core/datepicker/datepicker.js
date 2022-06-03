@@ -7,8 +7,9 @@ import {
     parseDate,
     parseDateTime,
 } from "@web/core/l10n/dates";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { localization } from "@web/core/l10n/localization";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus } from "@web/core/utils/hooks";
 
 const {
     Component,
@@ -78,11 +79,9 @@ function wrapError(fn) {
  */
 export class DatePicker extends Component {
     setup() {
-        this.root = useRef("root");
+        this.rootRef = useRef("root");
         this.inputRef = useRef("input");
         this.state = useState({ warning: false });
-        this.hotkey = useService("hotkey");
-        this.unregisterHotkey = undefined;
 
         this.datePickerId = `o_datepicker_${datePickerId++}`;
         // Manually keep track of the "open" state to write the date in the
@@ -104,19 +103,15 @@ export class DatePicker extends Component {
         this.bootstrapDateTimePicker(this.props);
         this.updateInput();
 
-        window.$(this.root.el).on("show.datetimepicker", () => {
+        window.$(this.rootRef.el).on("show.datetimepicker", () => {
             this.datePickerShown = true;
             this.inputRef.el.select();
-            this.unregisterHotkey = this.hotkey.add("escape", this.onEscapeKey.bind(this), {
-                area: () => this.inputRef.el,
-            });
         });
-        window.$(this.root.el).on("hide.datetimepicker", () => {
+        window.$(this.rootRef.el).on("hide.datetimepicker", () => {
             this.datePickerShown = false;
-            this.unregisterHotkey();
             this.onDateChange({ useStatic: true });
         });
-        window.$(this.root.el).on("error.datetimepicker", () => false);
+        window.$(this.rootRef.el).on("error.datetimepicker", () => false);
     }
 
     onWillUpdateProps(nextProps) {
@@ -134,7 +129,7 @@ export class DatePicker extends Component {
     }
 
     onWillUnmount() {
-        window.$(this.root.el).off(); // Removes all jQuery events
+        window.$(this.rootRef.el).off(); // Removes all jQuery events
         this.bootstrapDateTimePicker("destroy");
     }
 
@@ -212,7 +207,7 @@ export class DatePicker extends Component {
             }
             commandOrParams = params;
         }
-        return window.$(this.root.el).datetimepicker(commandOrParams);
+        return window.$(this.rootRef.el).datetimepicker(commandOrParams);
     }
 
     //---------------------------------------------------------------------
@@ -247,9 +242,14 @@ export class DatePicker extends Component {
         }
     }
 
-    onEscapeKey() {
-        this.bootstrapDateTimePicker("hide");
-        this.inputRef.el.select();
+    onInputKeydown(ev) {
+        const hotkey = getActiveHotkey(ev);
+        if (this.datePickerShown && hotkey === "escape") {
+            this.bootstrapDateTimePicker("hide");
+            this.inputRef.el.select();
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
     }
 
     /**
