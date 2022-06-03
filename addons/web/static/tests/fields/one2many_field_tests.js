@@ -26,6 +26,7 @@ import {
     selectDropdownItem,
     triggerEvent,
     triggerEvents,
+    triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { registry } from "@web/core/registry";
@@ -435,7 +436,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("one2many list editable with cell readonly modifier", async function (assert) {
-        assert.expect(5);
+        assert.expect(3);
 
         serverData.models.partner.records[0].p = [2];
         serverData.models.partner.records[1].turtles = [1, 2];
@@ -485,11 +486,9 @@ QUnit.module("Fields", (hooks) => {
         );
 
         // Simulating a TAB key
+        triggerHotkey("Tab");
+        await nextTick();
         const secondTarget = target.querySelector(".o_selected_row [name=qux] input");
-        assert.strictEqual(getNextTabableElement(target), secondTarget);
-        assert.defaultBehavior(targetInput, null, "keydown", { key: "Tab" });
-        secondTarget.focus();
-
         await editInput(secondTarget, null, 9);
         await editInput(secondTarget, null, secondTarget.value + 9);
 
@@ -3689,13 +3688,11 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <group>
-                        <field name="turtles">
-                            <tree editable="top">
-                                <field name="turtle_foo"/>
-                            </tree>
-                        </field>
-                    </group>
+                    <field name="turtles">
+                        <tree editable="top">
+                            <field name="turtle_foo"/>
+                        </tree>
+                    </field>
                 </form>`,
             resId: 2,
             mockRPC(route, args) {
@@ -3707,11 +3704,7 @@ QUnit.module("Fields", (hooks) => {
         await clickEdit(target);
         await addRow(target);
         await triggerEvent(target, '[name="turtle_foo"] input', "keydown", { key: "Enter" });
-        assert.hasClass(
-            target.querySelector('div[name="turtle_foo"]'),
-            "o_field_invalid",
-            "input should be marked invalid"
-        );
+        assert.hasClass(target.querySelector('div[name="turtle_foo"]'), "o_field_invalid");
         assert.verifySteps(["get_views", "read", "onchange"]);
     });
 
@@ -6692,11 +6685,12 @@ QUnit.module("Fields", (hooks) => {
 
         await click(target.querySelector(".o_data_row td"));
         const turtleFooInput = target.querySelector('[name="turtle_foo"] input');
-        const turtleIntInput = target.querySelector('[name="turtle_int"] input');
         assert.strictEqual(turtleFooInput, document.activeElement);
 
-        assert.strictEqual(getNextTabableElement(target), turtleIntInput);
-        assert.defaultBehavior(turtleFooInput, null, "keydown", { key: "Tab" });
+        triggerHotkey("Tab");
+        await nextTick();
+        const turtleIntInput = target.querySelector('[name="turtle_int"] input');
+        assert.strictEqual(turtleIntInput, document.activeElement);
     });
 
     QUnit.test("one2many list editable = top", async function (assert) {
@@ -8927,12 +8921,15 @@ QUnit.module("Fields", (hooks) => {
         // check it's pizza
         await click(target.querySelectorAll(".o_field_x2many_list_row_add a")[1]);
         const input = target.querySelector(
-            '.o_field_widget[name="p"] .o_selected_row .o_field_widget[name="display_name"]'
+            '.o_field_widget[name="p"] .o_selected_row .o_field_widget[name="display_name"] input'
         );
+
+        assert.strictEqual(document.activeElement, input);
+
         await triggerEvent(input, null, "keydown", { key: "Enter" });
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
-            ["", "pizza"]
+            ["", "pizza", ""]
         );
 
         // click add pasta
@@ -8940,7 +8937,7 @@ QUnit.module("Fields", (hooks) => {
         await clickSave(target);
         assert.deepEqual(
             [...target.querySelectorAll(".o_data_cell")].map((el) => el.textContent),
-            ["", "pizza", "pasta"]
+            ["", "pizza", "", "pasta"]
         );
     });
 

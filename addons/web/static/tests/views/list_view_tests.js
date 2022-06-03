@@ -1068,31 +1068,30 @@ QUnit.module("Views", (hooks) => {
             type: "list",
             resModel: "foo",
             serverData,
-            arch: `<tree editable="top"><field name="date"/></tree>`,
+            arch: `
+                <tree editable="top">
+                    <field name="date"/>
+                </tree>
+            `,
         });
+
+        assert.containsN(target, ".o_data_row", 4);
 
         await click(target.querySelector(".o_data_cell"));
         assert.containsOnce(target, ".o_selected_row");
 
         await click(target, ".o_datepicker input");
-        assert.containsOnce(
-            document.body,
-            ".bootstrap-datetimepicker-widget",
-            "datepicker should be opened"
-        );
-        triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
-
+        assert.containsOnce(document.body, ".bootstrap-datetimepicker-widget");
+        triggerHotkey("Escape");
         await nextTick();
-        assert.containsOnce(target, ".o_selected_row", "the row is still in edition");
-        assert.containsNone(
-            document.body,
-            ".bootstrap-datetimepicker-widget",
-            "the datepicker is no longer visible"
-        );
-        triggerEvent(document.activeElement, null, "keydown", { key: "Escape" });
 
+        assert.containsOnce(target, ".o_selected_row");
+        assert.containsNone(document.body, ".bootstrap-datetimepicker-widget");
+
+        triggerHotkey("Escape");
         await nextTick();
-        assert.containsNone(target, ".o_selected_row", "the row is no longer in edition");
+
+        assert.containsNone(target, ".o_selected_row");
         assert.containsN(target, ".o_data_row", 4);
     });
 

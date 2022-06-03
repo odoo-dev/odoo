@@ -817,7 +817,11 @@ export class ListRenderer extends Component {
         }
 
         const hotkey = getActiveHotkey(ev);
-        // const isInBody = this.tableRef.el.querySelector("tbody").contains(ev.target);
+
+        if (ev.target.tagName === "TEXTAREA" && hotkey === "enter") {
+            return;
+        }
+
         const closestCell = ev.target.closest("td, th");
 
         const handled = this.props.list.editedRecord
@@ -840,13 +844,35 @@ export class ListRenderer extends Component {
      */
     onCellKeydownEditMode(hotkey, cell, record) {
         const { editable, list } = this.props;
+        const row = cell.parentElement;
+        const children = [...row.children];
+        const index = children.indexOf(cell);
+        const nextCells = children.slice(index + 1);
+        let toFocus = null;
         switch (hotkey) {
             case "tab":
+                for (const c of nextCells) {
+                    if (!c.classList.contains("o_data_cell")) {
+                        break;
+                    }
+                    toFocus = getElementToFocus(c);
+                    if (toFocus !== c) {
+                        break;
+                    } else {
+                        toFocus = null;
+                    }
+                }
+                if (toFocus) {
+                    toFocus.focus();
+                    this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
+                } else {
+                    throw new Error("To implement");
+                }
                 break;
             case "shift+tab":
                 break;
             case "enter":
-                if (!editable && list.selection.length === 1) {
+                if (!editable && list.selection && list.selection.length === 1) {
                     list.unselectRecord();
                     break;
                 }
@@ -856,12 +882,12 @@ export class ListRenderer extends Component {
                     const futureRecord = list.records[index + 1];
                     if (futureRecord) {
                         futureRecord.switchMode("edit");
-                    } else {
+                    } else if (record.checkValidity()) {
                         this.props.onAdd();
                     }
                 }
 
-                if (list.selection.length > 1) {
+                if (list.selection && list.selection.length > 1) {
                     // Multiple edition
                     const index = list.selection.indexOf(record);
                     const futureRecord = list.selection[index + 1] || list.selection[0];
