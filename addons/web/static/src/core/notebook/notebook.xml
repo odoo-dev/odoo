@@ -5,14 +5,15 @@
         <div t-attf-class="o_notebook d-flex {{ props.orientation }} {{ props.className }}" t-if="state.currentPage">
             <div class="o_notebook_headers">
                 <ul t-attf-class="nav {{ props.orientation === 'horizontal' ? 'nav-tabs' : 'nav-pills flex-column' }}">
-                    <li t-foreach="props.slots" t-as="page" t-key="page" class="nav-item" t-if="page_value.isVisible">
-                        <a class="nav-link" t-on-click.prevent="() => state.currentPage = page" href="#" role="tab" t-att-class="{ active: page === state.currentPage}" t-esc="page_value.title"/>
+                    <li t-foreach="navItems" t-as="navItem" t-key="navItem[0]" class="nav-item" t-if="navItem[1].isVisible">
+                        <a class="nav-link" t-on-click.prevent="() => state.currentPage = navItem[0]" href="#" role="tab" t-att-class="{ active: navItem[0] === state.currentPage}" t-esc="navItem[1].title"/>
                     </li>
                 </ul>
             </div>
             <div class="o_notebook_content tab-content">
                 <div class="tab-pane active" t-ref="activePane">
-                    <t t-slot="{{ state.currentPage }}"/>
+                    <t t-if="page" t-component="page.Component" t-props="page.props" />
+                    <t t-else="" t-slot="{{ state.currentPage }}" />
                 </div>
             </div>
         </div>

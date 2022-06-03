@@ -5,7 +5,7 @@
     background: theme-color('light');
 
     // sidebar
-    .o_kanban_examples_dialog_nav {
+    .o_notebook_headers {
         flex: 0 0 auto;
         border-right: 1px solid gray('300');
         background: white;
@@ -33,7 +33,7 @@
     }
 
     // content
-    .o_kanban_examples_dialog_content {
+    .o_notebook_content {
         flex: 1 1 100%;
         min-height: 300px;
 

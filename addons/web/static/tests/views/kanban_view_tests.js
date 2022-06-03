@@ -4861,58 +4861,61 @@ QUnit.module("Views", (hooks) => {
         // click to see the examples
         await click(target, ".o_column_quick_create .o_kanban_examples");
 
-        assert.strictEqual(
-            $(".modal .o_kanban_examples_dialog").length,
-            1,
+        assert.containsOnce(
+            target,
+            ".modal .o_kanban_examples_dialog",
             "should have open the examples dialog"
         );
-        assert.strictEqual(
-            $(".modal .o_kanban_examples_dialog_nav li").length,
+        assert.containsN(
+            target,
+            ".modal .o_notebook_headers li",
             2,
             "should have two examples (in the menu)"
         );
         assert.strictEqual(
-            target.querySelector(".modal .o_kanban_examples_dialog_nav").innerText,
+            target.querySelector(".modal .o_notebook_headers").innerText,
             "A first example\nA second example",
             "example names should be correct"
         );
-        assert.strictEqual(
-            $(".modal .o_kanban_examples_dialog_content .tab-pane").length,
-            2,
-            "should have two examples"
+        assert.containsOnce(
+            target,
+            ".modal .o_notebook_content .tab-pane",
+            "should have only rendered one page"
         );
 
-        const $panes = $(".modal .o_kanban_examples_dialog_content .tab-pane");
-        const $firstPane = $panes.eq(0);
-        assert.strictEqual(
-            $firstPane.find(".o_kanban_examples_group").length,
+        const firstPane = target.querySelector(".modal .o_notebook_content .tab-pane");
+        assert.containsN(
+            firstPane,
+            ".o_kanban_examples_group",
             3,
             "there should be 3 stages in the first example"
         );
         assert.strictEqual(
-            $firstPane.find("h6").text(),
+            [...firstPane.querySelectorAll("h6")].map((e) => e.textContent).join(""),
             "Column 1Column 2Column 3",
             "column titles should be correct"
         );
         assert.strictEqual(
-            $firstPane.find(".o_kanban_examples_description").html().trim(),
+            firstPane.querySelector(".o_kanban_examples_description").innerHTML,
             "A weak description.",
             "An escaped description should be displayed"
         );
 
-        const $secondPane = $panes.eq(1);
-        assert.strictEqual(
-            $secondPane.find(".o_kanban_examples_group").length,
+        await click(target.querySelector(".nav-item:nth-child(2) .nav-link"));
+        const secondPane = target.querySelector(".o_notebook_content");
+        assert.containsN(
+            secondPane,
+            ".o_kanban_examples_group",
             2,
             "there should be 2 stages in the second example"
         );
         assert.strictEqual(
-            $secondPane.find("h6").text(),
+            [...secondPane.querySelectorAll("h6")].map((e) => e.textContent).join(""),
             "Col 1Col 2",
             "column titles should be correct"
         );
         assert.strictEqual(
-            $secondPane.find(".o_kanban_examples_description").html().trim(),
+            secondPane.querySelector(".o_kanban_examples_description").innerHTML,
             "A <b>fantastic</b> description.",
             "A formatted description should be displayed."
         );

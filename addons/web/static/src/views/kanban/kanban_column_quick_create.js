@@ -1,5 +1,6 @@
 /** @odoo-module */
 import { Dialog } from "@web/core/dialog/dialog";
+import { Notebook } from "@web/core/notebook/notebook";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _lt } from "@web/core/l10n/translation";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
@@ -71,10 +72,31 @@ export class KanbanColumnQuickCreate extends Component {
 }
 KanbanColumnQuickCreate.template = "web.KanbanColumnQuickCreate";
 
+class KanbanExamplesNotebookTemplate extends Component {}
+KanbanExamplesNotebookTemplate.template = "web.KanbanExamplesNotebookTemplate";
+
 class KanbanColumnExamplesDialog extends Component {
     setup() {
         super.setup(...arguments);
         this.navList = useRef("navList");
+        this.pages = [];
+        this.activePage = null;
+        this.props.examples.forEach((eg) => {
+            eg.randomNumber = this.random(1, 4);
+            this.pages.push({
+                Component: KanbanExamplesNotebookTemplate,
+                props: {
+                    ...eg,
+                    isVisible: true,
+                    title: eg.name,
+                },
+                name: eg.name,
+            });
+        });
+    }
+
+    onPageUpdate(page) {
+        this.activePage = page;
     }
 
     random(min, max) {
@@ -82,14 +104,11 @@ class KanbanColumnExamplesDialog extends Component {
     }
 
     applyExamples() {
-        const ul = this.navList.el;
-        // FIXME WOWL: make an owl nav/tabs component so we don't have to do this
-        const activeNavItem = ul.querySelector(".nav-link.active").parentElement;
-        const index = [...ul.children].indexOf(activeNavItem);
+        const index = this.props.examples.findIndex((e) => e.name === this.activePage);
         this.props.applyExamples(index);
         this.props.close();
     }
 }
 KanbanColumnExamplesDialog.template = "web.KanbanColumnExamplesDialog";
-KanbanColumnExamplesDialog.components = { Dialog };
+KanbanColumnExamplesDialog.components = { Dialog, Notebook };
 KanbanColumnExamplesDialog.title = _lt("Kanban Examples");

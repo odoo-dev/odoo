@@ -188,4 +188,66 @@ QUnit.module("Components", (hooks) => {
             "navigation container uses the right class to display as vertical buttons"
         );
     });
+
+    QUnit.test("notebook pages rendered by a template component", async (assert) => {
+        const env = await makeTestEnv();
+
+        class NotebookPageRenderer extends Component {}
+        NotebookPageRenderer.template = xml`
+                    <h3 t-esc="props.title"></h3>
+                    <p t-esc="props.text" />
+                `;
+
+        class Parent extends Component {
+            setup() {
+                this.pages = [
+                    {
+                        Component: NotebookPageRenderer,
+                        props: {
+                            index: 1,
+                            isVisible: true,
+                            title: "Page 2",
+                            text: "Second page rendered by a template component",
+                        },
+                    },
+                    {
+                        Component: NotebookPageRenderer,
+                        props: {
+                            index: 2,
+                            isVisible: true,
+                            title: "Page 3",
+                            text: "Third page rendered by a template component",
+                        },
+                        name: "page_three", // required to be set as default page
+                    },
+                ];
+            }
+        }
+        Parent.template = xml`<Notebook defaultPage="'page_three'" pages="pages">
+                <t t-set-slot="page_one" title="'Page 1'" isVisible="true">
+                    <h3>Page 1</h3>
+                    <p>First page set directly as a slot</p>
+                </t>
+                <t t-set-slot="page_four" title="'Page 4'" isVisible="true">
+                    <h3>Page 4</h3>
+                </t>
+            </Notebook>`;
+        Parent.components = { Notebook };
+
+        await mount(Parent, target, { env });
+
+        assert.containsOnce(target, "div.o_notebook");
+        assert.hasClass(
+            target.querySelector(".o_notebook_headers .nav-item:nth-child(3) a"),
+            "active",
+            "third page is selected by default"
+        );
+
+        await click(target.querySelector(".o_notebook_headers .nav-item:nth-child(2) a"));
+        assert.strictEqual(
+            target.querySelector(".o_notebook_content p").textContent,
+            "Second page rendered by a template component",
+            "displayed content corresponds to the current page"
+        );
+    });
 });
