@@ -2,7 +2,7 @@
 
 import { useService } from "@web/core/utils/hooks";
 import { debounce } from "@web/core/utils/timing";
-import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { usePosition } from "@web/core/position_hook";
 
 const { Component, onWillUnmount, useExternalListener, useRef, useState, useEffect } = owl;
@@ -54,31 +54,6 @@ export class AutoComplete extends Component {
         );
         usePosition(() => this.inputRef.el, {
             popper: "sourcesList",
-        });
-        useHotkey("ArrowUp", this.onArrowUpPress.bind(this), {
-            area: () => this.inputRef.el,
-            allowRepeat: true,
-            bypassEditableProtection: true,
-        });
-        useHotkey("ArrowDown", this.onArrowDownPress.bind(this), {
-            area: () => this.inputRef.el,
-            allowRepeat: true,
-            bypassEditableProtection: true,
-        });
-        useHotkey("Enter", this.onEnterPress.bind(this), {
-            area: () => this.inputRef.el,
-            bypassEditableProtection: true,
-            validate: () => this.isOpened,
-        });
-        useHotkey("Escape", this.onEscapePress.bind(this), {
-            area: () => this.inputRef.el,
-            bypassEditableProtection: true,
-            validate: () => this.isOpened,
-        });
-        useHotkey("Tab", this.onTabPress.bind(this), {
-            area: () => this.inputRef.el,
-            bypassEditableProtection: true,
-            validate: () => this.isOpened,
         });
     }
 
@@ -249,6 +224,54 @@ export class AutoComplete extends Component {
         this.open(true);
     }
 
+    onInputKeydown(ev) {
+        const hotkey = getActiveHotkey(ev);
+        switch (hotkey) {
+            case "enter":
+                if (!this.isOpened || !this.state.activeSourceOption) {
+                    return;
+                }
+                this.selectOption(this.state.activeSourceOption);
+                break;
+            case "escape":
+                if (!this.isOpened) {
+                    return;
+                }
+                this.close();
+                break;
+            case "tab":
+                if (!this.isOpened) {
+                    return;
+                }
+                if (
+                    this.props.autoSelect &&
+                    this.state.activeSourceOption &&
+                    (this.state.navigationRev > 0 || this.inputRef.el.value.length > 0)
+                ) {
+                    this.selectOption(this.state.activeSourceOption);
+                }
+                this.close();
+                break;
+            case "arrowup":
+                this.navigate(-1);
+                if (!this.isOpened) {
+                    this.open(true);
+                }
+                break;
+            case "arrowdown":
+                this.navigate(+1);
+                if (!this.isOpened) {
+                    this.open(true);
+                }
+                break;
+            default:
+                break;
+        }
+
+        ev.stopPropagation();
+        ev.preventDefault();
+    }
+
     onOptionMouseEnter(indices) {
         this.state.activeSourceOption = indices;
     }
@@ -257,38 +280,6 @@ export class AutoComplete extends Component {
     }
     onOptionClick(indices) {
         this.selectOption(indices);
-    }
-
-    onEscapePress() {
-        this.close();
-    }
-    onEnterPress() {
-        if (this.isOpened && this.state.activeSourceOption) {
-            this.selectOption(this.state.activeSourceOption);
-        }
-    }
-    onTabPress() {
-        const value = this.inputRef.el.value;
-        if (
-            this.props.autoSelect &&
-            this.state.activeSourceOption &&
-            (this.state.navigationRev > 0 || value.length > 0)
-        ) {
-            this.selectOption(this.state.activeSourceOption);
-        }
-        this.close();
-    }
-    onArrowUpPress() {
-        this.navigate(-1);
-        if (!this.isOpened) {
-            this.open(true);
-        }
-    }
-    onArrowDownPress() {
-        this.navigate(+1);
-        if (!this.isOpened) {
-            this.open(true);
-        }
     }
 
     onWindowScroll(ev) {

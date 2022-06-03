@@ -13,6 +13,7 @@
                 t-on-click="onInputClick"
                 t-on-change="onInputChange"
                 t-on-input="debouncedOnInput"
+                t-on-keydown="onInputKeydown"
                 t-ref="input"
             />
             <t t-if="isOpened">
