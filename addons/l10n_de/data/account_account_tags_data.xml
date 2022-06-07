@@ -21,25 +21,25 @@
                     <record id="tax_report_de_tag_01_formula" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17.balance</field>
+                        <field name="formula">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_GRUNDLAGE.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
                     <record id="tax_report_de_tag_17" model="account.report.line">
                         <field name="name">I. Anmeldung der Umsatzsteuer-Vorauszahlung (zeile 17)</field>
-                        <field name="code">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17</field>
+                        <field name="code">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_GRUNDLAGE</field>
                         <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_de_tag_17_formula" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18.balance + INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31.balance + ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46.balance</field>
+                                <field name="formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_GRUNDLAGE.balance + INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_GRUNDLAGE.balance + ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_GRUNDLAGE.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46_GRUNDLAGE.balance</field>
                             </record>
                         </field>
                         <field name="children_ids">
                             <record id="tax_report_de_tag_18" model="account.report.line">
                                 <field name="name">Lieferungen und sonstige Leistungen (zeile 18)</field>
-                                <field name="code">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18</field>
+                                <field name="code">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_GRUNDLAGE</field>
                                 <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_de_tag_18_formula" model="account.report.expression">
@@ -201,7 +201,7 @@
                             </record>
                             <record id="tax_report_de_tag_31" model="account.report.line">
                                 <field name="name">Innergemeinschaftliche Erwerbe (zeile 31)</field>
-                                <field name="code">INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31</field>
+                                <field name="code">INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_GRUNDLAGE</field>
                                 <field name="sequence" eval="16"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_de_tag_31_formula" model="account.report.expression">
@@ -275,7 +275,7 @@
                             </record>
                             <record id="tax_report_de_tag_37" model="account.report.line">
                                 <field name="name">Ergänzende Angaben zu Umsätzen (zeile 37)</field>
-                                <field name="code">ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37</field>
+                                <field name="code">ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_GRUNDLAGE</field>
                                 <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_de_tag_37_formula" model="account.report.expression">
@@ -349,7 +349,7 @@
                             </record>
                             <record id="tax_report_de_tag_46" model="account.report.line">
                                 <field name="name">Leistungsempfänger als Steuerschuldner (zeile 46)</field>
-                                <field name="code">LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46</field>
+                                <field name="code">LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46_GRUNDLAGE</field>
                                 <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_de_tag_46_formula" model="account.report.expression">
@@ -432,25 +432,25 @@
                     <record id="tax_report_de_tag_02_formula" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17.balance</field>
+                        <field name="formula">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_STEUER.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
                     <record id="tax_report_de_tax_tag_17" model="account.report.line">
                         <field name="name">I. Anmeldung der Umsatzsteuer-Vorauszahlung (zeile 17)</field>
-                        <field name="code">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17</field>
+                        <field name="code">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_STEUER</field>
                         <field name="sequence" eval="35"/>
                         <field name="expression_ids">
                             <record id="tax_report_de_tax_tag_17_formula" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18.balance + INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31.balance + ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46.balance + ABZIEHBARE_VORSTEUERBETRAGE_ZEILE_55.balance + ANDERE_STEUERBETRAGE_ZEILE_64.balance + UMSATZSTEUERVORAUSZAHLUNGUBERSCHUSS_ZEILE_66.balance</field>
+                                <field name="formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_STEUER.balance + INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_STEUER.balance + ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_STEUER.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46.balance + ABZIEHBARE_VORSTEUERBETRAGE_ZEILE_55.balance + ANDERE_STEUERBETRAGE_ZEILE_64.balance + UMSATZSTEUERVORAUSZAHLUNGUBERSCHUSS_ZEILE_66.balance</field>
                             </record>
                         </field>
                         <field name="children_ids">
                             <record id="tax_report_de_tax_tag_18" model="account.report.line">
                                 <field name="name">Lieferungen und sonstige Leistungen (zeile 18)</field>
-                                <field name="code">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18</field>
+                                <field name="code">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_STEUER</field>
                                 <field name="sequence" eval="36"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_de_tax_tag_18_formula" model="account.report.expression">
@@ -512,7 +512,7 @@
                             </record>
                             <record id="tax_report_de_tax_tag_31" model="account.report.line">
                                 <field name="name">Innergemeinschaftliche Erwerbe (zeile 31)</field>
-                                <field name="code">INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31</field>
+                                <field name="code">INNERGEMEINSCHAFTLICHE_ERWERBE_ZEILE_31_STEUER</field>
                                 <field name="sequence" eval="41"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_de_tax_tag_31_formula" model="account.report.expression">
@@ -574,7 +574,7 @@
                             </record>
                             <record id="tax_report_de_tax_tag_37" model="account.report.line">
                                 <field name="name">Erganzende Angaben zu Umsatzen (zeile 37)</field>
-                                <field name="code">ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37</field>
+                                <field name="code">ERGANZENDE_ANGABEN_ZU_UMSATZEN_ZEILE_37_STEUER</field>
                                 <field name="sequence" eval="46"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_de_tax_tag_37_formula" model="account.report.expression">

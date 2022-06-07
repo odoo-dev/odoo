@@ -169,7 +169,7 @@ class AccountReport(models.Model):
         '''Copy the whole financial report hierarchy by duplicating each line recursively.
 
         :param default: Default values.
-        :return: The copied account.financial.html.report record.
+        :return: The copied account.report record.
         '''
         self.ensure_one()
         if default is None:
@@ -182,10 +182,10 @@ class AccountReport(models.Model):
         return copied_report
 
     def _get_copied_name(self):
-        '''Return a copied name of the account.financial.html.report record by adding the suffix (copy) at the end
+        '''Return a copied name of the account.report record by adding the suffix (copy) at the end
         until the name is unique.
 
-        :return: an unique name for the copied account.financial.html.report
+        :return: an unique name for the copied account.report
         '''
         self.ensure_one()
         name = self.name + ' ' + _('(copy)')
@@ -340,7 +340,7 @@ class AccountReportLine(models.Model):
     def _get_copied_code(self):
         '''Look for an unique copied code.
 
-        :return: an unique code for the copied account.financial.html.report.line
+        :return: an unique code for the copied account.report.line
         '''
         self.ensure_one()
         code = self.code + '_COPY'
