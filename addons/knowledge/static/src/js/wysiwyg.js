@@ -1,11 +1,28 @@
 /** @odoo-module **/
 
+import pyUtils from 'web.py_utils';
 import { qweb as QWeb } from 'web.core';
+import { SelectCreateDialog } from 'web.view_dialogs';
+import { ComponentWrapper } from 'web.OwlCompatibility';
+import { View } from './legacy_view_adapter.js';
+
 import Wysiwyg from 'web_editor.wysiwyg';
 import { KnowledgeArticleLinkModal } from './wysiwyg/knowledge_article_link.js';
 import { preserveCursor, setCursorStart } from '@web_editor/../lib/odoo-editor/src/OdooEditor';
 
 Wysiwyg.include({
+    custom_events: _.extend({}, Wysiwyg.prototype.custom_events, {
+        open_record: '_onOpenRecord',
+    }),
+    /**
+     * When the user clicks on a record, the `SelectCreateDialog` will propagate
+     * a `open_record` event to its parent to open the selected record. To prevent
+     * that, we will catch the event and stop its propagation.
+     * @param {OdooEvent} event
+     */
+    _onOpenRecord: function (event) {
+        event.stopPropagation();
+    },
     /**
      * @override
      */
@@ -80,6 +97,22 @@ Wysiwyg.include({
                 callback: () => {
                     this._insertTemplate();
                 },
+            }, {
+                groupName: 'Knowledge',
+                title: 'Kanban view',
+                description: 'Insert Kanban View',
+                fontawesome: 'fa-th-large',
+                callback: () => {
+                    this._insertView('kanban');
+                }
+            }, {
+                groupName: 'Knowledge',
+                title: 'List view',
+                description: 'Insert List View',
+                fontawesome: 'fa-th-list',
+                callback: () => {
+                    this._insertView('tree');
+                }
             });
         }
         return commands;
@@ -160,6 +193,42 @@ Wysiwyg.include({
         dialog.open();
     },
     /**
+     * Inserts a view in the editor
+     * @param {String} type - View type
+     */
+    _insertView: async function (type) {
+        const restoreSelection = preserveCursor(this.odooEditor.document);
+        const data = await openActionSelector.call(this, type);
+        restoreSelection();
+        const viewId = data.view ? data.view_id.res_id : false;
+        const viewType = type === 'tree' ? 'list' : type;
+        const embededViewFragment = new DocumentFragment();
+        const embededViewBlock = $(QWeb.render('knowledge.embeded_view', {
+            'res_model': data.res_model,
+            'name': data.name,
+            'view_id': viewId,
+            'view_type': viewType
+        }))[0];
+        embededViewFragment.append(embededViewBlock);
+        const [container] = this.odooEditor.execCommand('insertFragment', embededViewFragment);
+        console.log('data', data);
+        console.log('context', data.context);
+        console.log('container', container);
+        const context = pyUtils.py_eval(data.context); // TODO: Is it safe ?
+        const widget = new ComponentWrapper(this, View, {
+            resModel: data.res_model,
+            type: viewType,
+            views: [[viewId, viewType]],
+            withControlPanel: true,
+            context: context,
+            onPushState: () => {
+                console.log('onPushState');
+            },
+        });
+        widget.mount(container.querySelector('.o_knowledge_embeded_view_container'));
+        this._notifyNewToolbars(container);
+    },
+    /**
      * Notify the @see FieldHtmlInjector when a /file block is inserted from a
      * @see MediaDialog
      *
@@ -180,3 +249,29 @@ Wysiwyg.include({
         return result;
     },
 });
+
+/**
+ * Opens a new modal to let the user select an action
+ * @param {Object} options (i.e: 'kanban', 'tree', 'graph', 'pivot', etc)
+ * @returns {Promise}
+ */
+function openActionSelector (type) {
+    return new Promise((resolve, reject) => {
+        const dialog = new SelectCreateDialog(this, {
+            title: 'Select an action',
+            res_model: 'ir.actions.act_window',
+            domain: [
+                ['view_id', '!=', 'False'],
+                ['view_mode', '=ilike', `%${type}%`],
+            ],
+            no_create: true,
+            readonly: true,
+            disable_multiple_selection: true,
+        });
+        dialog.on('select_record', this, ({ data }) => {
+            dialog.close();
+            resolve(data);
+        });
+        dialog.open();
+    });
+}

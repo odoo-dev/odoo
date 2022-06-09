@@ -24,11 +24,8 @@ var SelectCreateKanbanController = KanbanController.extend({
      * @private
      */
     _onOpenRecord: function (ev) {
-        var selectedRecord = this.model.get(ev.data.id);
-        this.trigger_up('select_record', {
-            id: selectedRecord.res_id,
-            display_name: selectedRecord.data.display_name,
-        });
+        const { data } = this.model.get(ev.data.id);
+        this.trigger_up('select_record', data);
     },
 });
 
@@ -44,11 +41,8 @@ var SelectCreateListController = ListController.extend({
      * @private
      */
     _onOpenRecord: function (ev) {
-        var selectedRecord = this.model.get(ev.data.id);
-        this.trigger_up('select_record', {
-            id: selectedRecord.res_id,
-            display_name: selectedRecord.data.display_name,
-        });
+        const { data } = this.model.get(ev.data.id);
+        this.trigger_up('select_record', data);
     },
 });
 

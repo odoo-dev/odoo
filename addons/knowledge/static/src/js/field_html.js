@@ -6,6 +6,14 @@ import {KnowledgePlugin} from './knowledge_plugin';
 
 FieldHtml.include({
     /**
+     * When the field is mounted to the dom, we will ask the manager to load
+     * the embeded views. Note that the component has to be mounted for owl
+     * to insert the view.
+     */
+    on_attach_callback: function () {
+        this.injector.manageEmbededViews();
+    },
+    /**
      * @override
      */
     _renderReadonly: function () {
@@ -30,8 +38,8 @@ FieldHtml.include({
     _addFieldHtmlInjector: function () {
         if (this.$content && this.$content.length) {
             const editor = (this.mode === 'edit' && this.wysiwyg) ? this.wysiwyg.odooEditor : null;
-            const fieldHtmlInjector = new FieldHtmlInjector(this, this.mode, this.$content[0], editor);
-            return fieldHtmlInjector.appendTo(this.el);
+            this.injector = new FieldHtmlInjector(this, this.mode, this.$content[0], editor);
+            return this.injector.appendTo(this.el);
         }
     },
     /**

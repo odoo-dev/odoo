@@ -4,6 +4,7 @@ import { ComponentWrapper, WidgetAdapterMixin } from 'web.OwlCompatibility';
 import { useService } from "@web/core/utils/hooks";
 import { TemplateToolbar, FileToolbar } from './knowledge_toolbars';
 import { ArticleBehavior, ContentsContainerBehavior } from './knowledge_behaviors';
+import { KnowledgeEmbededView } from './knowledge_embeded_view';
 const { Component } = owl;
 
 /**
@@ -54,6 +55,13 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
             Behavior: ArticleBehavior,
         },
     },
+
+    embeded_view_types: {
+        o_knowledge_embeded_view_type_kanban: {
+            EmbededView: KnowledgeEmbededView
+        },
+    },
+
     /**
      * @override
      * @param {Widget} parent
@@ -67,6 +75,8 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
         this.toolbar_anchors = new Set();
         // store every behavior anchor elements
         this.behavior_anchors = new Set();
+        // store every embeded view
+        this.embeded_view_anchors = new Set();
         this.mode = mode;
         this.field = field;
         this.editor = editor;
@@ -112,6 +122,14 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
         $(this.field).on('refresh_toolbars', this._onRefreshToolbars.bind(this));
         return this.updateToolbars();
     },
+
+    /**
+     * Setup the behavior of the embeded view.
+     */
+    manageEmbededViews: function () {
+        return this.updateEmbededViews();
+    },
+
     /**
      * Scan this.field for every Toolbar container and anchor. Remove and
      * destroy currently registered obsolete toolbars.
@@ -210,6 +228,19 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
             }
         });
     },
+
+    /**
+     * @param {Object} embededViewsData
+     */
+    _scanFieldForEmbededView: function (embededViewsData) {
+        this.field.querySelectorAll('.o_knowledge_embeded_view').forEach(anchor => {
+            const type = Array.from(anchor.classList).find(className => {
+                return this.embeded_view_types.hasOwnProperty(className);
+            });
+            embededViewsData.push({ anchor, type });
+        });
+    },
+
     /**
      * If behaviorsData is set, update only those behaviors, if not, recompute
      * every behavior of this.field
@@ -220,7 +251,7 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
      *                        (i.e.: @see o_knowledge_behavior_type_... )
      */
     updateBehaviors: function (behaviorsData = []) {
-        if (!behaviorsData.lenth) {
+        if (!behaviorsData.length) {
             // no behaviorsData, recreate the array from the field value.
             this._scanFieldForBehaviors(behaviorsData);
         }
@@ -238,6 +269,30 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
             this.behavior_anchors.add(anchor);
         });
     },
+
+    /**
+     * @param {Array[Object]} behaviorData
+     */
+    updateEmbededViews: async function (embededViewsData = []) {
+        if (!embededViewsData.length) {
+            this._scanFieldForEmbededView(embededViewsData);
+        }
+        for (const embededViewData of embededViewsData) {
+            const { anchor, type } = embededViewData;
+            const { EmbededView } = this.embeded_view_types[type] || {};
+            if (!EmbededView) {
+                return;
+            }
+            if (!anchor.oKnowledgeEmbededView) {
+                // NOTE: the action service will only keep the last action (see: `keeplast`)
+                // So, we have to load each items one by one.
+                anchor.oKnowledgeEmbededView = new EmbededView();
+                await anchor.oKnowledgeEmbededView.mount(this, anchor);
+            }
+            this.embeded_view_anchors.add(anchor);
+        }
+    },
+
     /**
      * @param {Object}
      * @param {Element} [container] element which has a toolbar anchor
@@ -298,6 +353,17 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
             this.updateBehaviors("behaviorsData" in data ? data.behaviorsData : []);
         }
     },
+
+    /**
+     * @param {Event} event
+     * @param {Object} data
+     */
+    _onRefreshEmbededView: function (event, data = {}) {
+        if (this.field) {
+            this.updateBehaviors("embededViewsData" in data ? data.embededViewsData : []);
+        }
+    },
+
     /**
      * @param {Event} e
      * @param {Object} data
@@ -308,6 +374,7 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
         if (this.field) {
             this._onRefreshBehaviors(e, data);
             this._onRefreshToolbars(e, data);
+            this._onRefreshEmbededView(e, data);
         }
     }
 });

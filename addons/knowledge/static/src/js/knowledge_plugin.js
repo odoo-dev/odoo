@@ -22,5 +22,10 @@ export class KnowledgePlugin {
                 node.oKnowledgeBehavior.removeBehavior();
             }
         }
+        for (const node of editable.querySelectorAll('.o_knowledge_embeded_view_container')) {
+            while (node.firstChild) {
+                node.removeChild(node.lastChild);
+            }
+        }
     }
 }

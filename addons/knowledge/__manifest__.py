@@ -56,11 +56,13 @@
             'knowledge/static/src/js/form_renderer.js',
             'knowledge/static/src/js/knowledge_macros.js',
             'knowledge/static/src/js/knowledge_behaviors.js',
+            'knowledge/static/src/js/knowledge_embeded_view.js',
             'knowledge/static/src/js/knowledge_toolbars.js',
             'knowledge/static/src/js/knowledge_field_html_injector.js',
             'knowledge/static/src/js/knowledge_plugin.js',
             'knowledge/static/src/js/field_html.js',
             'knowledge/static/src/js/knowledge_service.js',
+            'knowledge/static/src/js/legacy_view_adapter.js',
         ],
         'web.assets_frontend': [
             'knowledge/static/src/scss/knowledge_frontend.scss',
