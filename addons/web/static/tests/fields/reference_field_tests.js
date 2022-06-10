@@ -12,6 +12,8 @@ import {
     editSelect,
     clickSave,
     clickEdit,
+    triggerHotkey,
+    nextTick,
 } from "../helpers/utils";
 import { makeView, setupViewRegistries } from "../views/helpers";
 
@@ -749,9 +751,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("reference and list navigation", async function (assert) {
-        assert.expect(2);
-
+    QUnit.test("reference and list navigation", async function (assert) {
         await makeView({
             type: "list",
             resModel: "partner",
@@ -766,21 +766,16 @@ QUnit.module("Fields", (hooks) => {
         // edit first row
         await click(target.querySelector(".o_data_row .o_data_cell"));
         assert.strictEqual(
-            target.querySelector(".o_data_row .o_field_widget[name='reference'] input"),
             document.activeElement,
-            "input of first data row should be selected"
+            target.querySelector(".o_data_row [name='reference'] input")
         );
 
-        // press TAB to go to next line
-        await triggerEvent(target.querySelectorAll(".o_data_row input")[1], null, "keydown", {
-            key: "Tab",
-        });
+        triggerHotkey("Tab");
+        await nextTick();
+
         assert.strictEqual(
-            target
-                .querySelectorAll(".o_data_row")[1]
-                .querySelector(".o_field_widget[name='reference'] select"),
             document.activeElement,
-            "select of second data row should be selected"
+            target.querySelector(".o_data_row:nth-child(2) [name='reference'] select")
         );
     });
 

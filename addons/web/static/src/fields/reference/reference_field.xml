@@ -4,7 +4,10 @@
     <t t-name="web.ReferenceField" owl="1">
         <div class="o_row">
             <t t-if="!props.readonly and !props.hideModelSelector">
-                <select class="o_input" t-on-change="(ev) => this.updateModel(ev.target.value || false)">
+                <select class="o_input"
+                    t-att-tabindex="relation ? '-1': 0"
+                    t-on-change="(ev) => this.updateModel(ev.target.value || false)"
+                >
                     <option />
                     <t t-foreach="props.record.fields[props.name].selection" t-as="option" t-key="option[0]">
                         <option t-att-value="option[0]" t-att-selected="option[0] === relation" t-esc="option[1]" />

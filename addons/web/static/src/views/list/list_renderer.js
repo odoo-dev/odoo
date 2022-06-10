@@ -333,14 +333,13 @@ export class ListRenderer extends Component {
             }
             const fieldName = column.name;
             if (!editedRecord.isReadonly(fieldName)) {
-                const fieldEl = this.tableRef.el.querySelector(
-                    `.o_selected_row .o_field_widget[name=${fieldName}]`
+                const cell = this.tableRef.el.querySelector(
+                    `.o_selected_row td[name=${fieldName}]`
                 );
-                if (fieldEl) {
-                    const focusableEl = fieldEl.querySelector("input, textarea"); // .o_focusable?
-                    if (focusableEl) {
-                        focusableEl.focus();
-                        focusableEl.select();
+                if (cell) {
+                    const toFocus = getElementToFocus(cell);
+                    if (toFocus) {
+                        toFocus.focus();
                         break;
                     }
                 }
