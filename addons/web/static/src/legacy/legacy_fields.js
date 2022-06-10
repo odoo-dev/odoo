@@ -187,6 +187,7 @@ export function mapRecordDatapoint(record) {
                 data[fieldName] = data[fieldName] ? moment(data[fieldName].toISO()) : false;
         }
     }
+    data.id = record.resId;
     const basicModelRecord = {
         ...mapDatapoint(record),
         res_id: record.resId,
