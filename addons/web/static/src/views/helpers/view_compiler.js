@@ -152,9 +152,11 @@ export function copyAttributes(el, compiled) {
     const isComponent = isComponentNode(compiled);
     const classes = el.className;
     if (classes) {
-        compiled.classList.add(...classes.split(/\s+/).filter(Boolean));
         if (isComponent) {
-            compiled.setAttribute("class", `'${compiled.className}'`);
+            const cls = compiled.className;
+            compiled.setAttribute("class", cls ? `'${classes} ' + ${cls}` : `'${classes}'`);
+        } else {
+            compiled.classList.add(...classes.split(/\s+/).filter(Boolean));
         }
     }
 
@@ -402,12 +404,6 @@ export class ViewCompiler {
         field.setAttribute("name", `'${fieldName}'`);
         field.setAttribute("record", "record");
         field.setAttribute("fieldInfo", `fieldNodes['${fieldId}']`);
-
-        // FIXME WOWL: only for x2many fields
-        field.setAttribute(
-            "archs",
-            `'views' in record.fields.${fieldName} and record.fields.${fieldName}.views`
-        );
 
         if (el.hasAttribute("widget")) {
             field.setAttribute("type", `'${el.getAttribute("widget")}'`);

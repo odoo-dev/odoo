@@ -9,19 +9,19 @@ export class KanbanCompiler extends ViewCompiler {
      */
     compileField(el, params) {
         const compiled = super.compileField(el, params);
-        const classAttr = compiled.getAttribute("class") || "";
-        const classSet = new Set();
         const { bold, display } = extractAttributes(el, ["bold", "display"]);
+        const classNames = [];
         if (display === "right") {
-            classSet.add("float-right");
+            classNames.push("float-right");
         } else if (display === "full") {
-            classSet.add("o_text_block");
+            classNames.push("o_text_block");
         }
         if (bold) {
-            classSet.add("o_text_bold");
+            classNames.push("o_text_bold");
         }
-        const classAttrs = [classAttr, `'${[...classSet].join(" ")}'`].filter(Boolean);
-        compiled.setAttribute("class", classAttrs.join("+"));
+        if (classNames.length > 0) {
+            compiled.setAttribute("class", `'${classNames.join(" ")}'`);
+        }
         return compiled;
     }
 

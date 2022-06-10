@@ -6482,6 +6482,26 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelectorAll(".o_kanban_record")[1].innerText, "blip");
     });
 
+    QUnit.test("field tag with widget and class attributes", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="foo" widget="char" class="hi"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        });
+
+        assert.containsN(target, ".o_field_widget.hi", 4);
+    });
+
     QUnit.test("rendering date and datetime (value)", async (assert) => {
         assert.expect(2);
 

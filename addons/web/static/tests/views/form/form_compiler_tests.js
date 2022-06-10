@@ -46,7 +46,7 @@ QUnit.module("Form Compiler", () => {
                 <div t-attf-class="{{props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}}" class="o_form_nosheet" t-ref="compiled_view_root">
                     <div class="someClass">
                         lol
-                        <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']" archs="'views' in record.fields.display_name and record.fields.display_name.views"/>
+                        <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']"/>
                     </div>
                 </div>
             </t>`;
@@ -67,14 +67,14 @@ QUnit.module("Form Compiler", () => {
                <t t-set-slot="item_0" type="'item'" sequence="0" t-slot-scope="scope" itemSpan="1">
                   <InnerGroup class="scope &amp;&amp; scope.className">
                      <t t-set-slot="item_0" type="'item'" sequence="0" t-slot-scope="scope" props="{id:'display_name',fieldName:'display_name',record:record,string:record.fields.display_name.string,fieldInfo:fieldNodes['display_name']}" Component="constructor.components.FormLabel" subType="'item_component'" itemSpan="2">
-                        <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']" archs="'views' in record.fields.display_name and record.fields.display_name.views" class="scope &amp;&amp; scope.className" />
+                        <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']" class="scope &amp;&amp; scope.className" />
                      </t>
                   </InnerGroup>
                </t>
                <t t-set-slot="item_1" type="'item'" sequence="1" t-slot-scope="scope" itemSpan="1">
                   <InnerGroup class="scope &amp;&amp; scope.className">
                      <t t-set-slot="item_0" type="'item'" sequence="0" t-slot-scope="scope" props="{id:'charfield',fieldName:'charfield',record:record,string:record.fields.charfield.string,fieldInfo:fieldNodes['charfield']}" Component="constructor.components.FormLabel" subType="'item_component'" itemSpan="2">
-                        <Field id="'charfield'" name="'charfield'" record="record" fieldInfo="fieldNodes['charfield']" archs="'views' in record.fields.charfield and record.fields.charfield.views" class="scope &amp;&amp; scope.className" />
+                        <Field id="'charfield'" name="'charfield'" record="record" fieldInfo="fieldNodes['charfield']" class="scope &amp;&amp; scope.className" />
                      </t>
                   </InnerGroup>
                </t>
@@ -95,10 +95,10 @@ QUnit.module("Form Compiler", () => {
         const expected = /*xml*/ `
             <Notebook>
                 <t t-set-slot="page_1" title="&quot;Page1&quot;" isVisible="true">
-                    <Field id="'charfield'" name="'charfield'" record="record" fieldInfo="fieldNodes['charfield']" archs="'views' in record.fields.charfield and record.fields.charfield.views"/>
+                    <Field id="'charfield'" name="'charfield'" record="record" fieldInfo="fieldNodes['charfield']"/>
                 </t>
                 <t t-set-slot="page_2" title="&quot;Page2&quot;" isVisible="true">
-                    <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']" archs="'views' in record.fields.display_name and record.fields.display_name.views"/>
+                    <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']"/>
                </t>
            </Notebook>`;
 
@@ -112,7 +112,7 @@ QUnit.module("Form Compiler", () => {
             </form>`;
 
         const expected = /*xml*/ `
-            <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']" archs="'views' in record.fields.display_name and record.fields.display_name.views" placeholder="&quot;e.g. Contact's Name or //someinfo...&quot;"/>
+            <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']" placeholder="&quot;e.g. Contact's Name or //someinfo...&quot;"/>
         `;
 
         assert.areContentEquivalent(compileTemplate(arch), expected);
