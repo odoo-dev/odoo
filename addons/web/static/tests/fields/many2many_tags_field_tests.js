@@ -16,6 +16,7 @@ import {
     patchWithCleanup,
     selectDropdownItem,
     triggerEvent,
+    triggerHotkey,
 } from "../helpers/utils";
 import { makeView, setupViewRegistries } from "../views/helpers";
 
@@ -1568,5 +1569,97 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelector(".modal footer .o_form_buttons_edit button"));
 
         assert.containsOnce(target, ".o_field_many2many_tags .badge");
+    });
+
+    QUnit.test("navigation in tags (mode 'readonly')", async function (assert) {
+        // keep a single line with 2 badges
+        serverData.models.partner.records = serverData.models.partner.records.slice(0, 1);
+        serverData.models.partner.records[0].timmy = [12, 14];
+
+        await makeView({
+            type: "list",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <tree editable="bottom">
+                    <field name="timmy" widget="many2many_tags"/>
+                </tree>
+            `,
+        });
+
+        target.querySelector("tr.o_data_row input[type=checkbox]").focus();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector("tr.o_data_row input[type=checkbox]")
+        );
+
+        triggerHotkey("ArrowRight");
+        await nextTick();
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector("tr.o_data_row td[name=timmy]")
+        );
+    });
+
+    QUnit.test("navigation in tags (mode 'edit')", async function (assert) {
+        // keep a single line with 2 badges
+        serverData.models.partner.records = serverData.models.partner.records.slice(0, 1);
+        serverData.models.partner.records[0].timmy = [12, 14];
+
+        await makeView({
+            type: "list",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <tree editable="bottom">
+                    <field name="timmy" widget="many2many_tags"/>
+                </tree>
+            `,
+        });
+
+        const row = target.querySelector("tr.o_data_row");
+        const m2mTagsCell = row.querySelector(".o_many2many_tags_cell");
+
+        await click(m2mTagsCell);
+
+        assert.containsN(row, ".o_field_many2many_tags .badge", 2);
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector("[name=timmy] .o-autocomplete--input")
+        );
+
+        // press left to focus the rightmost facet
+        triggerHotkey("ArrowLeft");
+        await nextTick;
+
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector("[name=timmy] .badge:nth-child(2) a")
+        );
+
+        // press left to focus the leftmost facet
+        triggerHotkey("ArrowLeft");
+        await nextTick;
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector("[name=timmy] .badge:nth-child(1) a")
+        );
+
+        // press left to focus the input
+        triggerHotkey("ArrowLeft");
+        await nextTick;
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector("[name=timmy] .o-autocomplete--input")
+        );
+        // press left to focus the leftmost facet
+        triggerHotkey("ArrowRight");
+        await nextTick;
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector("[name=timmy] .badge:nth-child(1) a")
+        );
     });
 });

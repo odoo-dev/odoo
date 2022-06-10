@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.TagsList" owl="1">
-        <span t-attf-class="o_tags_list {{props.className}} d-inline-flex flex-wrap" t-att-name="props.name">
+        <span t-attf-class="o_tags_list {{props.className}} d-inline-flex flex-wrap" t-att-name="props.name" tabIndex="-1">
             <t t-if="props.tags" t-foreach="visibleTags" t-as="tag" t-key="tag.id or tag_index">
                 <span t-attf-class="{{`o_tag_color_${ tag.colorIndex or 0 } ${props.displayBadge ? 'badge badge-pill' : ''}`}} o_tag d-inline-flex align-items-center h-100" t-att-data-color="tag.colorIndex" t-att-title="tag.text" t-on-click="(ev) => tag.onClick and tag.onClick(ev)">
                     <img t-if="tag.img" t-att-src="tag.img" class="o_m2m_avatar rounded-circle"/>
