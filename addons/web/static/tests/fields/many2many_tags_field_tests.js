@@ -702,9 +702,11 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             context: { take: "five" },
-            arch: `<tree editable="bottom">
-                    <field name="timmy" widget="many2many_tags" />
-                </tree>`,
+            arch: `
+                <tree editable="bottom">
+                    <field name="timmy" widget="many2many_tags"/>
+                </tree>
+            `,
             mockRPC: (route, { kwargs, method, model }) => {
                 if (method === "read" && model === "partner_type") {
                     assert.strictEqual(
@@ -716,42 +718,24 @@ QUnit.module("Fields", (hooks) => {
             },
         });
 
-        const firstRow = target.querySelectorAll(".o_data_row")[0];
+        const firstRow = target.querySelector(".o_data_row:nth-child(1)");
         const m2mTagsCell = firstRow.querySelector(".o_many2many_tags_cell");
 
-        assert.containsOnce(
-            firstRow,
-            ".o_field_many2many_tags .badge",
-            "m2m field should contain one tag"
-        );
+        assert.containsOnce(firstRow, ".o_field_many2many_tags .badge");
 
         // edit first row
         await click(m2mTagsCell);
 
-        assert.containsOnce(
-            m2mTagsCell,
-            ".o_field_many2many_selection",
-            "a many2one widget should have been instantiated"
-        );
+        assert.containsOnce(m2mTagsCell, ".o_field_many2many_selection");
 
         // add a tag
         await selectDropdownItem(firstRow, "timmy", "silver");
 
-        assert.containsN(
-            firstRow,
-            ".o_field_many2many_tags .badge",
-            2,
-            "m2m field should contain 2 tags"
-        );
+        assert.containsN(firstRow, ".o_field_many2many_tags .badge", 2);
 
         await clickSave(target);
 
-        assert.containsN(
-            firstRow,
-            ".o_field_many2many_tags .badge",
-            2,
-            "m2m field should contain 2 tags"
-        );
+        assert.containsN(firstRow, ".o_field_many2many_tags .badge", 2);
     });
 
     QUnit.test("many2many_tags can load more than 40 records", async function (assert) {
