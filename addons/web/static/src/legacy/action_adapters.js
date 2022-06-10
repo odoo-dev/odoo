@@ -379,21 +379,21 @@ export class ViewAdapter extends ActionAdapter {
     async _trigger_up(ev) {
         const payload = ev.data;
         if (ev.name === "switch_view") {
-            try {
-                const props = {};
-                if (payload.mode) {
-                    props.mode = payload.mode;
+            if (payload.view_type === "form") {
+                if (payload.res_id) {
+                    return this.props.selectRecord(payload.res_id, { mode: payload.mode });
+                } else {
+                    return this.props.createRecord();
                 }
-                // if (payload.res_id) {
-                // if make 'open a record, come back, and create a new record' crash
-                props.resId = payload.res_id;
-                // }
-                await this.actionService.switchView(payload.view_type, props);
-            } catch (e) {
-                if (typeof e === "object" && e instanceof ViewNotFoundError) {
-                    return;
+            } else {
+                try {
+                    await this.actionService.switchView(payload.view_type);
+                } catch (e) {
+                    if (typeof e === "object" && e instanceof ViewNotFoundError) {
+                        return;
+                    }
+                    throw e;
                 }
-                throw e;
             }
         } else if (ev.name === "execute_action") {
             const buttonContext = new Context(payload.action_data.context).eval();

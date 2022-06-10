@@ -27,7 +27,7 @@ function getJsClassWidget(fieldsInfo) {
 
 const legacyViewTemplate = xml`
     <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"
-                 widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" />`;
+                 widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" selectRecord="props.selectRecord" createRecord="props.createRecord"/>`;
 
 // registers a view from the legacy view registry to the wowl one, but wrapped
 // into an Owl Component
