@@ -7743,23 +7743,28 @@ QUnit.module("Views", (hooks) => {
                 type: "list",
                 resModel: "foo",
                 serverData,
-                arch:
-                    '<tree editable="bottom">' +
-                    '<field name="foo"/>' +
-                    '<field name="bar"/>' +
-                    "</tree>",
+                arch: `
+                    <tree editable="bottom">
+                        <field name="foo"/>
+                        <field name="bar"/>
+                    </tree>
+                `,
             });
 
             await click(target.querySelector(".o_field_cell[name=foo]"));
+
             const textarea = target.querySelector(".o_field_widget[name=foo] textarea");
             assert.strictEqual(document.activeElement, textarea);
             assert.strictEqual(textarea.selectionStart, 0);
             assert.strictEqual(textarea.selectionEnd, 3);
             textarea.selectionStart = 3; // Simulate browser keyboard right behavior (unselect)
+
             assert.strictEqual(document.activeElement, textarea);
             assert.ok(textarea.selectionStart === 3 && textarea.selectionEnd === 3);
+
             triggerHotkey("arrowright");
             await nextTick();
+
             assert.strictEqual(document.activeElement, textarea);
         }
     );

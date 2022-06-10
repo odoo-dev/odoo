@@ -340,6 +340,9 @@ export class ListRenderer extends Component {
                     const toFocus = getElementToFocus(cell);
                     if (toFocus) {
                         toFocus.focus();
+                        if (["INPUT", "TEXTAREA"].includes(toFocus.tagName)) {
+                            toFocus.select();
+                        }
                         break;
                     }
                 }
