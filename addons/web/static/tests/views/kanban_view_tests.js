@@ -7120,7 +7120,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(
             getCard(2).querySelector(".o_legacy_widget").innerText,
-            '{"foo":"gnap"}'
+            '{"foo":"gnap","id":3}'
         );
     });
 
