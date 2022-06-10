@@ -12,7 +12,7 @@
                 fieldString="fieldString"
                 activeActions="activeActions"
                 update="update"
-                createRecord="createRecord"
+                quickCreate="activeActions.canCreate ? quickCreate : null"
                 context="context"
                 getDomain.bind="getDomain"
                 isToMany="true"

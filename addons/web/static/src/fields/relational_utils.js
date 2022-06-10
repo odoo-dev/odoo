@@ -349,6 +349,7 @@ Many2XAutocomplete.defaultProps = {
     nameCreateField: "name",
     value: "",
     setInputFloats: () => {},
+    quickCreate: null,
 };
 
 export function useOpenMany2XRecord({
