@@ -1485,6 +1485,7 @@ class DynamicList extends DataPoint {
                         });
                         await Promise.all(validSelection.map((record) => record.load()));
                         record.switchMode("readonly");
+                        this.model.notify();
                     } catch (_) {
                         record.discard();
                     }

@@ -14,9 +14,9 @@ export class ListConfirmationDialog extends Component {
         this.props.close();
     }
 
-    _confirm() {
+    async _confirm() {
         if (this.props.confirm) {
-            this.props.confirm();
+            await this.props.confirm();
         }
         this.props.close();
     }

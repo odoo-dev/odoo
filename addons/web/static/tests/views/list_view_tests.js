@@ -10044,7 +10044,7 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("editable list: edit many2one from external link", async function (assert) {
+    QUnit.test("editable list: edit many2one from external link", async function (assert) {
         // need to implement save,... in FormViewDialog
         assert.expect(7);
 

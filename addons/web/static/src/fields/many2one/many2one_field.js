@@ -24,6 +24,18 @@ class CreateConfirmationDialog extends Component {
 CreateConfirmationDialog.components = { Dialog };
 CreateConfirmationDialog.template = "web.Many2OneField.CreateConfirmationDialog";
 
+function m2oTupleFromData(data) {
+    const id = data.id;
+    let name;
+    if ("display_name" in data) {
+        name = data.display_name;
+    } else {
+        let _name = data.name;
+        name = Array.isArray(_name) ? _name[1] : _name;
+    }
+    return [id, name];
+}
+
 export class Many2OneField extends Component {
     setup() {
         this.orm = useService("orm");
@@ -53,9 +65,9 @@ export class Many2OneField extends Component {
             resModel: this.props.relation,
             activeActions: this.state.activeActions,
             isToMany: false,
-            onRecordSaved: async () => {
+            onRecordSaved: async (record) => {
                 await this.props.record.load();
-                await this.props.update(this.props.value);
+                await this.props.update(m2oTupleFromData(record.data));
                 if (this.props.record.model.root.id !== this.props.record.id) {
                     this.props.record.switchMode("readonly");
                 }
@@ -66,16 +78,7 @@ export class Many2OneField extends Component {
 
         this.update = (value, params = {}) => {
             if (value) {
-                const data = value[0];
-                const id = data.id;
-                let name;
-                if ("display_name" in data) {
-                    name = data.display_name;
-                } else {
-                    let _name = data.name;
-                    name = Array.isArray(_name) ? _name[1] : _name;
-                }
-                value = [id, name];
+                value = m2oTupleFromData(value[0]);
             }
             if (!value && !this.updateOnEmpty) {
                 return;
