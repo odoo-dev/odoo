@@ -7243,9 +7243,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL('navigation with tab on a list with create="0"', async function (assert) {
-        assert.expect(4);
-
+    QUnit.test('navigation with tab on a list with create="0"', async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -7256,7 +7254,8 @@ QUnit.module("Views", (hooks) => {
 
         assert.containsN(target, ".o_data_row", 4, "the list should contain 4 rows");
 
-        await click($(target).find(".o_data_row:nth(2) .o_data_cell:first"));
+        const rows = target.querySelectorAll(".o_data_row");
+        await click(rows[2].querySelector(".o_data_cell"));
         assert.hasClass(
             $(target).find(".o_data_row:nth(2)"),
             "o_selected_row",
@@ -7265,11 +7264,9 @@ QUnit.module("Views", (hooks) => {
 
         // Press 'Tab' -> should go to next line
         // add a value in the cell because the Tab on an empty first cell would activate the next widget in the view
-        await editInput($(target).find(".o_selected_row input").eq(1), 11);
-        await testUtils.fields.triggerKeydown(
-            $(target).find('.o_selected_row input[name="display_name"]'),
-            "tab"
-        );
+        await editInput(target, ".o_selected_row .o_data_cell input", 11);
+        triggerHotkey("Tab");
+        await nextTick();
         assert.hasClass(
             $(target).find(".o_data_row:nth(3)"),
             "o_selected_row",
@@ -7277,11 +7274,9 @@ QUnit.module("Views", (hooks) => {
         );
 
         // Press 'Tab' -> should go back to first line as the create action isn't available
-        await editInput($(target).find(".o_selected_row input").eq(1), 11);
-        await testUtils.fields.triggerKeydown(
-            $(target).find('.o_selected_row input[name="display_name"]'),
-            "tab"
-        );
+        await editInput(target, ".o_selected_row .o_data_cell input", 11);
+        triggerHotkey("Tab");
+        await nextTick();
         assert.hasClass(
             $(target).find(".o_data_row:first"),
             "o_selected_row",
@@ -7357,14 +7352,13 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "edition, then navigation with tab (with a readonly field)",
         async function (assert) {
             // This test makes sure that if we have 2 cells in a row, the first in
             // edit mode, and the second one readonly, then if we edit and press TAB,
             // (before debounce), the save operation is properly done (before
             // selecting the next row)
-            assert.expect(4);
 
             await makeView({
                 type: "list",
@@ -7373,31 +7367,22 @@ QUnit.module("Views", (hooks) => {
                 arch:
                     '<tree editable="bottom"><field name="foo"/><field name="int_field" readonly="1"/></tree>',
                 mockRPC: function (route, args) {
-                    if (args.method) {
-                        assert.step(args.method);
-                    }
-                    return this._super.apply(this, arguments);
+                    assert.step(args.method);
                 },
-                fieldDebounce: 1,
             });
 
-            // click on first td and press TAB
-            await click($(target).find("td:contains(yop)"));
-            await testUtils.fields.editSelect(
-                $(target).find('tr.o_selected_row input[name="foo"]'),
-                "new value"
-            );
-            await testUtils.fields.triggerKeydown(
-                $(target).find('tr.o_selected_row input[name="foo"]'),
-                "tab"
-            );
+            // click on first dataRow and press TAB
+            await click(target.querySelector(".o_data_row .o_data_cell"));
+            await editInput(target, ".o_selected_row [name='foo'] input", "new value");
+            triggerHotkey("Tab");
+            await nextTick();
 
             assert.strictEqual(
                 $(target).find("tbody tr:first td:contains(new value)").length,
                 1,
                 "should have the new value visible in dom"
             );
-            assert.verifySteps(["write", "read"]);
+            assert.verifySteps(["get_views", "web_search_read", "write", "read"]);
         }
     );
 

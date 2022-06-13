@@ -927,7 +927,7 @@ export class ListRenderer extends Component {
                                     const { context } = this.creates[0];
                                     this.props.onAdd(context);
                                 }
-                            } else if (record.isDirty) {
+                            } else if (activeActions.create && record.isDirty) {
                                 if (record.checkValidity()) {
                                     this.props.onAdd();
                                 }
