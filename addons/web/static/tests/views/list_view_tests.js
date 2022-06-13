@@ -9709,82 +9709,63 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
-        "editable readonly list view: navigation in grouped list",
-        async function (assert) {
-            assert.expect(6);
+    QUnit.test("editable readonly list view: navigation in grouped list", async function (assert) {
+        await makeView({
+            type: "list",
+            serverData,
+            resModel: "foo",
+            arch: `<tree multi_edit="1"> <field name="foo"/> </tree>`,
+            groupBy: ["bar"],
+            selectRecord: (resId) => {
+                assert.step(`resId: ${resId}`);
+            },
+        });
 
-            await makeView({
-                arch: `
-                <tree multi_edit="1">
-                    <field name="foo"/>
-                </tree>`,
-                serverData,
-                groupBy: ["bar"],
-                intercepts: {
-                    switch_view: function (event) {
-                        assert.strictEqual(
-                            event.data.res_id,
-                            3,
-                            "'switch_view' event has been triggered"
-                        );
-                    },
-                },
-                resModel: "foo",
-            });
+        // Open both groups
+        const groupHeaders = [...target.querySelectorAll(".o_group_header")];
+        assert.containsN(target, ".o_group_header", 2);
+        await click(groupHeaders.shift());
+        await click(groupHeaders.shift());
 
-            // Open both groups
-            const groupHeaders = target.querySelectorAll(".o_group_header");
-            await click(groupHeaders[0]);
-            await click(groupHeaders.pop());
+        // select 2 records
+        const rows = [...target.querySelectorAll(".o_data_row")];
+        assert.containsN(target, ".o_data_row", 4);
+        await click(rows[0], ".o_list_record_selector input");
+        await click(rows[2], ".o_list_record_selector input");
 
-            // select 2 records
-            const rows = target.querySelectorAll(".o_data_row");
-            await click(rows[1], ".o_list_record_selector input");
-            await click(rows[3], ".o_list_record_selector input");
+        // toggle a row mode
+        await click(rows[0].querySelector("[name=foo]"));
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(rows[0], "o_selected_row");
+        assert.strictEqual(document.activeElement, rows[0].querySelector("[name=foo] input"));
 
-            // toggle a row mode
-            await click(rows[1].querySelector(".o_data_cell"));
-            assert.hasClass(
-                $(target).find(".o_data_row:eq(1)"),
-                "o_selected_row",
-                "the second row should be selected"
-            );
+        // Keyboard navigation only interracts with selected elements
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(rows[2], "o_selected_row");
+        assert.strictEqual(document.activeElement, rows[2].querySelector("[name=foo] input"));
 
-            // Keyboard navigation only interracts with selected elements
-            await testUtils.fields.triggerKeydown(
-                $(target).find("tr.o_selected_row input.o_field_widget"),
-                "enter"
-            );
-            assert.hasClass(
-                $(target).find(".o_data_row:eq(3)"),
-                "o_selected_row",
-                "the fourth row should be selected"
-            );
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(rows[0], "o_selected_row");
+        assert.strictEqual(document.activeElement, rows[0].querySelector("[name=foo] input"));
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-            assert.hasClass(
-                $(target).find(".o_data_row:eq(1)"),
-                "o_selected_row",
-                "the second row should be selected again"
-            );
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(rows[2], "o_selected_row");
+        assert.strictEqual(document.activeElement, rows[2].querySelector("[name=foo] input"));
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-            assert.hasClass(
-                $(target).find(".o_data_row:eq(3)"),
-                "o_selected_row",
-                "the fourth row should be selected again"
-            );
+        // Click on a non selected row
+        await click(rows[3].querySelector("[name=foo]"));
+        assert.containsNone(target, ".o_selected_row");
 
-            await click($(target).find(".o_data_row:eq(2) .o_data_cell:eq(0)"));
-            assert.containsNone(
-                target,
-                ".o_data_cell input.o_field_widget",
-                "no row should be editable anymore"
-            );
-            await click($(target).find(".o_data_row:eq(2) .o_data_cell:eq(0)"));
-        }
-    );
+        // Click again should select the clicked record
+        await click(rows[3].querySelector("[name=foo]"));
+        assert.verifySteps(["resId: 3"]);
+    });
 
     QUnit.test(
         "editable readonly list view: single edition does not behave like a multi-edition",
