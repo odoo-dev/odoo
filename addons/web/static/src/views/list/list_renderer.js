@@ -943,6 +943,8 @@ export class ListRenderer extends Component {
                                 } else {
                                     futureRecord.switchMode("edit");
                                 }
+                            } else {
+                                return false;
                             }
                         } else {
                             const futureRecord = list.records[index + 1];

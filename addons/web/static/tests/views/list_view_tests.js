@@ -52,6 +52,7 @@ import {
 } from "../search/helpers";
 import { createWebClient, doAction, loadState } from "../webclient/helpers";
 import { makeView, setupViewRegistries } from "./helpers";
+import { getNextTabableElement } from "@web/core/utils/ui";
 
 const { markup, onWillStart } = owl;
 
@@ -7291,73 +7292,64 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL(
-        'navigation with tab on a one2many list with create="0"',
-        async function (assert) {
-            assert.expect(4);
+    QUnit.test('navigation with tab on a one2many list with create="0"', async function (assert) {
+        serverData.models.foo.records[0].o2m = [1, 2];
+        var form = await makeView({
+            type: "form",
+            resModel: "foo",
+            serverData,
+            arch: `
+                    <form>
+                        <sheet>
+                            <field name="o2m">
+                            <tree editable="bottom" create="0">
+                                <field name="display_name"/>
+                            </tree>
+                            </field>
+                            <field name="foo"/>
+                        </sheet>
+                    </form>
+                `,
+            resId: 1,
+            mode: "edit",
+        });
 
-            serverData.models.foo.records[0].o2m = [1, 2];
-            var form = await makeView({
-                type: "form",
-                resModel: "foo",
-                serverData,
-                arch:
-                    "<form><sheet>" +
-                    '<field name="o2m">' +
-                    '<tree editable="bottom" create="0">' +
-                    '<field name="display_name"/>' +
-                    "</tree>" +
-                    "</field>" +
-                    '<field name="foo"/>' +
-                    "</sheet></form>",
-                resId: 1,
-                viewOptions: {
-                    mode: "edit",
-                },
-            });
+        assert.containsN(target, ".o_field_widget[name=o2m] .o_data_row", 2);
 
-            assert.containsN(
-                form,
-                ".o_field_widget[name=o2m] .o_data_row",
-                2,
-                "there should be two records in the many2many"
-            );
+        await click(
+            target,
+            ".o_field_widget[name=o2m] .o_data_row:nth-child(1) .o_data_cell[name=display_name]"
+        );
+        assert.hasClass(
+            target.querySelector(".o_field_widget[name=o2m] .o_data_row:nth-child(1)"),
+            "o_selected_row"
+        );
+        assert.containsOnce(target, ".o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_selected_row [name=display_name] input")
+        );
 
-            await click(form.$(".o_field_widget[name=o2m] .o_data_cell:first"));
-            assert.hasClass(
-                form.$(".o_field_widget[name=o2m] .o_data_row:first"),
-                "o_selected_row",
-                "first row should be in edition"
-            );
+        // Press 'Tab' -> should go to next line
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.hasClass(
+            target.querySelector(".o_field_widget[name=o2m] .o_data_row:nth-child(2)"),
+            "o_selected_row"
+        );
+        assert.containsOnce(target, ".o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_selected_row [name=display_name] input")
+        );
 
-            // Press 'Tab' -> should go to next line
-            await testUtils.fields.triggerKeydown(
-                form.$(".o_field_widget[name=o2m] .o_selected_row input"),
-                "tab"
-            );
-            await testUtils.nextTick(); // wait for discard
-            assert.hasClass(
-                form.$(".o_field_widget[name=o2m] .o_data_row:nth(1)"),
-                "o_selected_row",
-                "second row should be in edition"
-            );
-
-            // Press 'Tab' -> should get out of the one to many and go to the next field of the form
-            await testUtils.fields.triggerKeydown(
-                form.$(".o_field_widget[name=o2m] .o_selected_row input"),
-                "tab"
-            );
-            // use of owlCompatibilityExtraNextTick because the x2many control panel is updated twice
-            await testUtils.owlCompatibilityExtraNextTick();
-            assert.strictEqual(
-                document.activeElement,
-                form.$('input[name="foo"]')[0],
-                "the next field should be selected"
-            );
-
-            form.destroy();
-        }
-    );
+        // Pressing 'Tab' -> should use default behavior and thus get out of
+        // the one to many and go to the next field of the form
+        assert.strictEqual(getNextTabableElement(target), target.querySelector("[name=foo] input"));
+        assert.defaultBehavior(target, ".o_selected_row [name=display_name] input", "keydown", {
+            key: "Tab",
+        });
+    });
 
     QUnit.test(
         "edition, then navigation with tab (with a readonly field)",
