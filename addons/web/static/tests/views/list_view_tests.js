@@ -7587,74 +7587,61 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL(
-        "skip buttons when navigating list view with TAB (end)",
-        async function (assert) {
-            assert.expect(2);
+    QUnit.test("skip buttons when navigating list view with TAB (end)", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                    <tree editable="bottom">
+                        <field name="foo"/>
+                        <button name="kikou" string="Kikou" type="object"/>
+                    </tree>
+                `,
+            resId: 1,
+        });
 
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch:
-                    '<tree editable="bottom">' +
-                    '<field name="foo"/>' +
-                    '<button name="kikou" string="Kikou" type="object"/>' +
-                    "</tree>",
-                resId: 1,
-            });
+        await click(target, ".o_data_row:nth-child(3) [name=foo]");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(3) [name=foo] input")
+        );
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(4) [name=foo] input")
+        );
+    });
 
-            await click($(target).find("tbody tr:eq(2) td:eq(1)"));
-            assert.strictEqual(
-                $(target).find('tbody tr:eq(2) input[name="foo"]')[0],
-                document.activeElement,
-                "foo should be focused"
-            );
-            triggerHotkey("tab");
-            await nextTick();
-            assert.strictEqual(
-                $(target).find('tbody tr:eq(3) input[name="foo"]')[0],
-                document.activeElement,
-                "next line should be selected"
-            );
-        }
-    );
+    QUnit.test("skip buttons when navigating list view with TAB (middle)", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                    <tree editable="bottom">
+                        <button name="kikou" string="Kikou" type="object"/>
+                        <field name="foo"/>
+                        <button name="kikou" string="Kikou" type="object"/>
+                        <field name="int_field"/>
+                    </tree>
+                `,
+            resId: 1,
+        });
 
-    QUnit.skipWOWL(
-        "skip buttons when navigating list view with TAB (middle)",
-        async function (assert) {
-            assert.expect(2);
-
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch:
-                    '<tree editable="bottom">' +
-                    // Adding a button column makes conversions between column and field position trickier
-                    '<button name="kikou" string="Kikou" type="object"/>' +
-                    '<field name="foo"/>' +
-                    '<button name="kikou" string="Kikou" type="object"/>' +
-                    '<field name="int_field"/>' +
-                    "</tree>",
-                resId: 1,
-            });
-
-            await click($(target).find("tbody tr:eq(2) td:eq(2)"));
-            assert.strictEqual(
-                $(target).find('tbody tr:eq(2) input[name="foo"]')[0],
-                document.activeElement,
-                "foo should be focused"
-            );
-            triggerHotkey("tab");
-            await nextTick();
-            assert.strictEqual(
-                $(target).find('tbody tr:eq(2) input[name="int_field"]')[0],
-                document.activeElement,
-                "int_field should be focused"
-            );
-        }
-    );
+        await click(target, ".o_data_row:nth-child(3) [name=foo]");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(3) [name=foo] input")
+        );
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(3) [name=int_field] input")
+        );
+    });
 
     QUnit.test("navigation: not moving down with keydown", async function (assert) {
         await makeView({

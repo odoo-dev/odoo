@@ -122,6 +122,7 @@ ViewButton.props = [
     "defaultRank?",
     "disabled?",
     "size?",
+    "tabindex?",
     "title?",
     "string?",
     "slots?",

@@ -13,6 +13,7 @@
             'data-tooltip-template': hasBigTooltip ? 'views.ViewButtonTooltip' : false,
             'data-tooltip-info': hasBigTooltip ? tooltip : false,
             'data-tooltip': hasSmallToolTip ? props.title : false,
+            tabindex: props.tabindex,
         }"
         t-on-click.stop="onClick"
     >

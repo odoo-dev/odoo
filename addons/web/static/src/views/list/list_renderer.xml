@@ -194,6 +194,7 @@
                                 record="record"
                                 string="button.string"
                                 title="button.title"
+                                tabindex="props.list.editedRecord ? '-1' : '0'"
                             />
                         </t>
                     </td>
