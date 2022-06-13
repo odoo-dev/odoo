@@ -1310,6 +1310,62 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test("quick create record with onchange of field marked readonly", async (assert) => {
+        assert.expect(15);
+
+        serverData.models.partner.onchanges = {
+            foo(obj) {
+                obj.int_field = 8;
+            },
+        };
+        serverData.views["partner,some_view_ref,form"] = `<form>
+            <field name="foo"/>
+            <field name="int_field" readonly="true"/>
+        </form>`;
+
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch: `<kanban on_create="quick_create" quick_create_view="some_view_ref">
+                <field name="bar"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div>
+                            <field name="foo"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>`,
+            groupBy: ["bar"],
+            async mockRPC(route, { method, args }) {
+                if (method === "create") {
+                    assert.notOk(
+                        "int_field" in args[0],
+                        "readonly field shouldn't be sent in create"
+                    );
+                }
+                assert.step(method || route);
+            },
+        });
+        assert.verifySteps([
+            "get_views",
+            "web_read_group", // initial read_group
+            "web_search_read", // initial search_read (first column)
+            "web_search_read", // initial search_read (second column)
+        ]);
+
+        // click on 'Create' -> should open the quick create in the first column
+        await quickCreateRecord();
+        assert.verifySteps(["get_views", "onchange"]);
+
+        // fill the 'foo' field -> should trigger the onchange
+        await editQuickCreateInput("foo", "new partner");
+        assert.verifySteps(["onchange"]);
+        await validateRecord();
+        assert.verifySteps(["create", "read", "onchange"]);
+    });
+
     QUnit.test("quick create record and change state in grouped mode", async (assert) => {
         assert.expect(1);
 

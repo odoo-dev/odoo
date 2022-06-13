@@ -602,6 +602,10 @@ export class Record extends DataPoint {
     getChanges(allFields = false, parentChanges = false) {
         const changes = { ...(allFields ? this.data : this._changes) };
         for (const fieldName in changes) {
+            if (!allFields && fieldName in this.activeFields && this.isReadonly(fieldName)) {
+                delete changes[fieldName];
+                continue;
+            }
             const fieldType = this.fields[fieldName].type;
             if (["one2many", "many2many"].includes(fieldType)) {
                 const staticList = this._cache[fieldName];
