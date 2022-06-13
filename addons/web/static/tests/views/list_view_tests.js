@@ -7294,7 +7294,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test('navigation with tab on a one2many list with create="0"', async function (assert) {
         serverData.models.foo.records[0].o2m = [1, 2];
-        var form = await makeView({
+        await makeView({
             type: "form",
             resModel: "foo",
             serverData,
@@ -7593,39 +7593,33 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
-        "skip invisible fields when navigating list view with TAB",
-        async function (assert) {
-            assert.expect(2);
+    QUnit.test("skip invisible fields when navigating list view with TAB", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                    <tree editable="bottom">
+                        <field name="foo"/>
+                        <field name="bar" invisible="1"/>
+                        <field name="int_field"/>
+                    </tree>
+                `,
+            resId: 1,
+        });
 
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch:
-                    '<tree editable="bottom">' +
-                    '<field name="foo"/>' +
-                    '<field name="bar" invisible="1"/>' +
-                    '<field name="int_field"/>' +
-                    "</tree>",
-                resId: 1,
-            });
-
-            await click(target.querySelector(".o_field_cell[name=foo]"));
-            assert.strictEqual(
-                target.querySelector(".o_field_cell[name=foo] input"),
-                document.activeElement,
-                "foo should be focused"
-            );
-            triggerHotkey("tab");
-            await nextTick();
-            assert.strictEqual(
-                target.querySelector(".o_field_cell[name=int_field] input"),
-                document.activeElement,
-                "int_field should be focused"
-            );
-        }
-    );
+        await click(target, ".o_data_row:nth-child(1) .o_field_cell[name=foo]");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(1) .o_field_cell[name=foo] input")
+        );
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(1) .o_field_cell[name=int_field] input")
+        );
+    });
 
     QUnit.skipWOWL(
         "skip buttons when navigating list view with TAB (end)",
