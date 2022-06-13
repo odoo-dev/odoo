@@ -836,24 +836,23 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ":scope .o_notebook .nav");
     });
 
-    QUnit.skipWOWL("notebook name transferred to DOM", async function (assert) {
-        // var form = await createView({
-        //     View: FormView,
-        //     model: 'partner',
-        //     data: this.data,
-        //     arch: '<form string="Partners">' +
-        //             '<sheet>' +
-        //                 '<notebook>' +
-        //                     '<page name="choucroute" string="Choucroute">' +
-        //                         '<field name="foo"/>' +
-        //                     '</page>' +
-        //                 '</notebook>' +
-        //             '</sheet>' +
-        //         '</form>',
-        //     res_id: 1,
-        // });
-        // assert.hasClass(form.$(".o_notebook .nav .nav-link[name='choucroute']"), 'active');
-        // form.destroy();
+    QUnit.test("notebook name transferred to DOM", async function (assert) {
+        await makeView({
+            type: 'form',
+            serverData,
+            resModel: 'partner',
+            resId: 1,
+            arch: `<form>
+                        <sheet>
+                            <notebook>
+                                <page name="choucroute" string="Choucroute">
+                                    <field name="foo"/>
+                                </page>
+                            </notebook>
+                        </sheet>
+                    </form>`,
+        });
+        assert.hasClass(target.querySelector(".o_notebook .nav .nav-link[name='choucroute']"), 'active');
     });
 
     QUnit.test("no visible page", async function (assert) {

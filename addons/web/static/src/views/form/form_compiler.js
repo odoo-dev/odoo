@@ -414,12 +414,20 @@ export class FormCompiler extends ViewCompiler {
             const pageSlot = createElement("t");
             append(noteBook, pageSlot);
 
+            if (el.hasAttribute("name")) {
+                noteBook.setAttribute("name", `"${el.getAttribute("name")}"`);
+                el.removeAttribute("name");
+            }
+            
             const pageId = `page_${this.id++}`;
             const pageTitle = toStringExpression(
                 child.getAttribute("string") || child.getAttribute("name") || ""
             );
+            const pageNodeName = toStringExpression(child.getAttribute("name") || "");
+
             pageSlot.setAttribute("t-set-slot", pageId);
             pageSlot.setAttribute("title", pageTitle);
+            pageSlot.setAttribute("name", pageNodeName);
 
             if (child.getAttribute("autofocus") === "autofocus") {
                 noteBook.setAttribute("defaultPage", `"${pageId}"`);

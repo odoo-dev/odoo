@@ -94,10 +94,10 @@ QUnit.module("Form Compiler", () => {
 
         const expected = /*xml*/ `
             <Notebook>
-                <t t-set-slot="page_1" title="&quot;Page1&quot;" isVisible="true">
+                <t t-set-slot="page_1" title="&quot;Page1&quot;" name="&quot;p1&quot;" isVisible="true">
                     <Field id="'charfield'" name="'charfield'" record="record" fieldInfo="fieldNodes['charfield']"/>
                 </t>
-                <t t-set-slot="page_2" title="&quot;Page2&quot;" isVisible="true">
+                <t t-set-slot="page_2" title="&quot;Page2&quot;" name="&quot;p2&quot;" isVisible="true">
                     <Field id="'display_name'" name="'display_name'" record="record" fieldInfo="fieldNodes['display_name']"/>
                </t>
            </Notebook>`;
