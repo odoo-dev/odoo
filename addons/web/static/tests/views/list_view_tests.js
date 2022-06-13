@@ -7197,50 +7197,55 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "navigation with tab and readonly field (with modification)",
         async function (assert) {
             // This test makes sure that if we have 2 cells in a row, the first in
             // edit mode, and the second one readonly, then if we press TAB when the
             // focus is on the first, then the focus skips the readonly cells and
             // directly goes to the next line instead.
-            assert.expect(2);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
                 serverData,
-                arch:
-                    '<tree editable="bottom"><field name="foo"/><field name="int_field" readonly="1"/></tree>',
+                arch: `
+                    <tree editable="bottom">
+                        <field name="foo"/>
+                        <field name="int_field" readonly="1"/>
+                    </tree>
+                `,
             });
 
-            // click on first td and press TAB
-            await click($(target).find("td:contains(yop)"));
-
-            //modity the cell content
-            testUtils.fields.editAndTrigger($(document.activeElement), "blip-changed", ["change"]);
-
-            await testUtils.fields.triggerKeydown(
-                $(target).find('tr.o_selected_row input[name="foo"]'),
-                "tab"
+            // Pass the first row in edition.
+            await click(target, ".o_data_row:nth-child(1) [name=foo]");
+            assert.containsOnce(target, ".o_selected_row");
+            assert.hasClass(target.querySelector(".o_data_row:nth-child(1)"), "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_data_row:nth-child(1) [name=foo] input")
             );
 
-            assert.hasClass(
-                $(target).find("tr.o_data_row:eq(1)"),
-                "o_selected_row",
-                "2nd row should be selected"
+            // Modity the cell content
+            await editInput(document.activeElement, null, "blip-changed");
+
+            // Pressing Tab should skip the readonly field and directly go to the next row.
+            triggerHotkey("Tab");
+            await nextTick();
+            assert.containsOnce(target, ".o_selected_row");
+            assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
             );
 
-            // we do it again. This was broken because the this.currentRow variable
-            // was not properly set, and the second TAB could cause a crash.
-            await testUtils.fields.triggerKeydown(
-                $(target).find('tr.o_selected_row input[name="foo"]'),
-                "tab"
-            );
-            assert.hasClass(
-                $(target).find("tr.o_data_row:eq(2)"),
-                "o_selected_row",
-                "3rd row should be selected"
+            // We do it again.
+            triggerHotkey("Tab");
+            await nextTick();
+            assert.containsOnce(target, ".o_selected_row");
+            assert.hasClass(target.querySelector(".o_data_row:nth-child(3)"), "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_data_row:nth-child(3) [name=foo] input")
             );
         }
     );
