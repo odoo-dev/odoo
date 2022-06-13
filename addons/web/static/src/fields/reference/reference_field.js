@@ -36,6 +36,7 @@ export class ReferenceField extends Component {
             update: this.updateM2O.bind(this),
         };
         delete p.hideModelSelector;
+        delete p.modelSelection;
         delete p.modelFieldValue;
         return p;
     }
@@ -90,6 +91,7 @@ ReferenceField.props = {
     ],
     getContext: { type: Function, optional: true },
     getDomain: { type: Function, optional: true },
+    modelSelection: { type: Array, optional: true },
     string: { type: String, optional: true },
 };
 ReferenceField.defaultProps = {
@@ -115,6 +117,10 @@ ReferenceField.extractProps = (fieldName, record, attrs) => {
         props = {
             hideModelSelector: true,
             modelFieldValue: preloadedData && preloadedData.modelName,
+        };
+    } else {
+        props = {
+            modelSelection: record.fields[fieldName].selection,
         };
     }
 
