@@ -96,10 +96,12 @@ export class ListRenderer extends Component {
             const editedRecord = this.props.list.editedRecord;
             if (editedRecord && this.activeRowId !== editedRecord.id) {
                 let column = this.state.columns[0];
+                let forward;
                 if (this.cellToFocus && this.cellToFocus.record === editedRecord) {
                     column = this.cellToFocus.column;
+                    forward = this.cellToFocus.forward;
                 }
-                this.focusCell(column);
+                this.focusCell(column, forward);
             }
             this.cellToFocus = null;
         });
@@ -317,7 +319,7 @@ export class ListRenderer extends Component {
         );
     }
 
-    focusCell(column) {
+    focusCell(column, forward = true) {
         let index = this.state.columns.indexOf(column);
         if (index === -1) {
             index = 0;
@@ -326,12 +328,17 @@ export class ListRenderer extends Component {
             ...this.state.columns.slice(index, this.state.columns.length),
             ...this.state.columns.slice(0, index),
         ];
+        if (!forward) {
+            columns.reverse();
+        }
         const editedRecord = this.props.list.editedRecord;
         for (const column of columns) {
             if (column.type !== "field") {
                 continue;
             }
             const fieldName = column.name;
+            // in findNextFocusableOnRow test is done by using classList
+            // refactor
             if (!editedRecord.isReadonly(fieldName)) {
                 const cell = this.tableRef.el.querySelector(
                     `.o_selected_row td[name=${fieldName}]`
@@ -1009,7 +1016,7 @@ export class ListRenderer extends Component {
                         } else {
                             const futureRecord = list.records[index - 1];
                             const column = this.state.columns[this.state.columns.length - 1];
-                            this.cellToFocus = { column, record: futureRecord };
+                            this.cellToFocus = { column, forward: false, record: futureRecord };
                             futureRecord.switchMode("edit");
                         }
                     }

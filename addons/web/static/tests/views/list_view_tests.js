@@ -7519,42 +7519,37 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "pressing SHIFT-TAB in editable list with a readonly field in last column [REQUIRE FOCUS]",
         async function (assert) {
-            assert.expect(4);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
                 serverData,
-                arch:
-                    '<tree editable="bottom">' +
-                    '<field name="int_field"/>' +
-                    '<field name="foo"/>' +
-                    '<field name="qux" readonly="1"/>' +
-                    "</tree>",
+                arch: `
+                    <tree editable="bottom">
+                        <field name="int_field"/>
+                        <field name="foo"/>
+                        <field name="qux" readonly="1"/>
+                    </tree>
+                `,
             });
 
-            // start on 'int_field', line 3
-            await click($(target).find(".o_data_row:nth(2) .o_data_cell:first"));
-            assert.hasClass($(target).find(".o_data_row:nth(2)"), "o_selected_row");
+            await click(target.querySelector(".o_data_row:nth-child(2) .o_data_cell"));
+
+            assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
             assert.strictEqual(
                 document.activeElement,
-                $(target).find(".o_data_row:nth(2) .o_data_cell input[name=int_field]")[0]
+                target.querySelector(".o_data_row:nth-child(2) [name=int_field] input")
             );
 
-            // Press 'shift-Tab' -> should go to previous line ('foo' field)
-            $(document.activeElement).trigger({
-                type: "keydown",
-                which: $.ui.keyCode.TAB,
-                shiftKey: true,
-            });
-            await testUtils.nextTick();
-            assert.hasClass($(target).find(".o_data_row:nth(1)"), "o_selected_row");
+            triggerHotkey("shift+tab");
+            await nextTick();
+
+            assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
             assert.strictEqual(
                 document.activeElement,
-                $(target).find(".o_data_row:nth(1) .o_data_cell input[name=foo]")[0]
+                target.querySelector(".o_data_row [name=foo] input")
             );
         }
     );
