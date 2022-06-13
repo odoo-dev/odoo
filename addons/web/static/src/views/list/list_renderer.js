@@ -946,13 +946,7 @@ export class ListRenderer extends Component {
                             }
                         } else {
                             const futureRecord = list.records[index + 1];
-                            if (record === futureRecord) {
-                                // Refocus first cell of same record
-                                toFocus = this.findNextFocusableOnRow(row);
-                                toFocus.focus();
-                            } else {
-                                futureRecord.switchMode("edit");
-                            }
+                            futureRecord.switchMode("edit");
                         }
                     }
 
@@ -985,13 +979,29 @@ export class ListRenderer extends Component {
                     // }
                 }
                 break;
-            case "shift+tab":
+            case "shift+tab": {
                 toFocus = this.findPreviousFocusableOnRow(row, cell);
                 if (toFocus) {
                     toFocus.focus();
                     this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
+                } else {
+                    const applyMultiEditBehavior = record.selected && list.model.multiEdit;
+                    if (applyMultiEditBehavior) {
+                        throw new Error("To implement");
+                    } else {
+                        const index = list.records.indexOf(record);
+                        if (index === 0) {
+                            throw new Error("To implement");
+                        } else {
+                            const futureRecord = list.records[index - 1];
+                            const column = this.state.columns[this.state.columns.length - 1];
+                            this.cellToFocus = { column, record: futureRecord };
+                            futureRecord.switchMode("edit");
+                        }
+                    }
                 }
                 break;
+            }
             case "enter":
                 // use this.props.list.model.multiEdit somewhere?
 

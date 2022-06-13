@@ -7067,8 +7067,6 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "pressing TAB in editable list with several fields [REQUIRE FOCUS]",
         async function (assert) {
-            assert.expect(6);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
@@ -7103,7 +7101,6 @@ QUnit.module("Views", (hooks) => {
             await nextTick();
 
             assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
-
             assert.strictEqual(
                 document.activeElement,
                 target.querySelector(".o_data_row:nth-child(2) .o_data_cell input")
@@ -7111,49 +7108,44 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "pressing SHIFT-TAB in editable list with several fields [REQUIRE FOCUS]",
         async function (assert) {
-            assert.expect(6);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
                 serverData,
-                arch:
-                    '<tree editable="bottom">' +
-                    '<field name="foo"/>' +
-                    '<field name="int_field"/>' +
-                    "</tree>",
+                arch: `
+                    <tree editable="bottom">
+                        <field name="foo"/>
+                        <field name="int_field"/>
+                    </tree>
+                `,
             });
 
-            await click($(target).find(".o_data_row:nth(2) .o_data_cell:nth(1)"));
-            assert.hasClass($(target).find(".o_data_row:nth(2)"), "o_selected_row");
+            await click(target.querySelector(".o_data_row:nth-child(2) .o_data_cell"));
+            assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
             assert.strictEqual(
                 document.activeElement,
-                $(target).find(".o_data_row:nth(2) .o_data_cell:last input")[0]
+                target.querySelector(".o_data_row:nth-child(2) .o_data_cell input")
             );
 
-            // Press 'shift-Tab' -> should go to previous line (last cell)
-            $(target)
-                .find("tr.o_selected_row input")
-                .trigger($.Event("keydown", { which: $.ui.keyCode.TAB, shiftKey: true }));
-            await testUtils.nextTick();
-            assert.hasClass($(target).find(".o_data_row:nth(2)"), "o_selected_row");
+            triggerHotkey("shift+tab");
+            await nextTick();
+
+            assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
             assert.strictEqual(
                 document.activeElement,
-                $(target).find(".o_data_row:nth(2) .o_data_cell:first input")[0]
+                target.querySelector(".o_data_row .o_data_cell:nth-child(3) input")
             );
 
-            // Press 'shift-Tab' -> should go to previous cell
-            $(target)
-                .find("tr.o_selected_row input")
-                .trigger($.Event("keydown", { which: $.ui.keyCode.TAB, shiftKey: true }));
-            await testUtils.nextTick();
-            assert.hasClass($(target).find(".o_data_row:nth(1)"), "o_selected_row");
+            triggerHotkey("shift+tab");
+            await nextTick();
+
+            assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
             assert.strictEqual(
                 document.activeElement,
-                $(target).find(".o_data_row:nth(1) .o_data_cell:last input")[0]
+                target.querySelector(".o_data_row .o_data_cell input")
             );
         }
     );
