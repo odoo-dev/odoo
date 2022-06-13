@@ -11504,49 +11504,40 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.debug('pressing ENTER in editable="top" grouped list view', async function (assert) {
-        assert.expect(10);
-
+        serverData.models.foo.records[2].bar = false;
         await makeView({
             type: "list",
             resModel: "foo",
             serverData,
-            arch: '<tree editable="top"><field name="foo"/></tree>',
+            arch: `
+                <tree editable="top">
+                    <field name="foo"/>
+                </tree>
+            `,
             mockRPC: function (route, args) {
-                assert.step(args.method || route);
-                return this._super.apply(this, arguments);
+                assert.step(args.method);
             },
             groupBy: ["bar"],
         });
 
-        await click($(target).find(".o_group_header:first")); // open first group
-        await click($(target).find(".o_group_header:nth(1)")); // open second group
+        await click(target.querySelector(".o_group_header"));
+        await click(target.querySelector(".o_group_header:last-child"));
         assert.containsN(target, "tr.o_data_row", 4);
-        await click($(target).find(".o_data_row:nth(1) .o_data_cell")); // click on second line
-        assert.hasClass($(target).find("tr.o_data_row:eq(1)"), "o_selected_row");
 
-        // press enter in input should move to next record
-        await testUtils.fields.triggerKeydown(
-            $(target).find("tr.o_selected_row .o_input"),
-            "enter"
-        );
+        await click(target.querySelector(".o_data_row .o_data_cell"));
+        assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
 
-        assert.hasClass($(target).find("tr.o_data_row:eq(2)"), "o_selected_row");
-        assert.doesNotHaveClass($(target).find("tr.o_data_row:eq(1)"), "o_selected_row");
+        triggerHotkey("Enter");
+        await nextTick();
 
-        // press enter on last row should move to first record of next group
-        await testUtils.fields.triggerKeydown(
-            $(target).find("tr.o_selected_row .o_input"),
-            "enter"
-        );
+        assert.hasClass(target.querySelectorAll(".o_data_row")[1], "o_selected_row");
 
-        assert.hasClass($(target).find("tr.o_data_row:eq(3)"), "o_selected_row");
-        assert.doesNotHaveClass($(target).find("tr.o_data_row:eq(2)"), "o_selected_row");
+        triggerHotkey("Enter");
+        await nextTick();
 
-        assert.verifySteps([
-            "web_read_group",
-            "/web/dataset/search_read",
-            "/web/dataset/search_read",
-        ]);
+        assert.hasClass(target.querySelectorAll(".o_data_row")[2], "o_selected_row");
+
+        assert.verifySteps(["get_views", "web_read_group", "web_search_read", "web_search_read"]);
     });
 
     QUnit.skipWOWL(
