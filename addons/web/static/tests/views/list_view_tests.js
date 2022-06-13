@@ -11082,34 +11082,6 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
-        "inputs are disabled when unselecting rows in grouped editable",
-        async function (assert) {
-            assert.expect(1);
-
-            var input;
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: '<tree editable="bottom"><field name="foo"/></tree>',
-                mockRPC: function (route, args) {
-                    if (args.method === "write") {
-                        assert.strictEqual(input.disabled, true, "input should be disabled");
-                    }
-                },
-                groupBy: ["bar"],
-            });
-
-            await click(target.querySelectorAll(".o_group_header")[1]);
-            await click(target.querySelector(".o_data_row .o_data_cell"));
-            input = target.querySelector(".o_selected_row [name='foo'] input");
-            await editInput(input, null, "lemon");
-            triggerHotkey("Tab");
-            await nextTick();
-        }
-    );
-
     QUnit.test(
         "pressing ESC in editable grouped list should discard the current line changes",
         async function (assert) {
