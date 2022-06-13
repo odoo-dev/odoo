@@ -939,12 +939,12 @@ export class ListRenderer extends Component {
                                     const { context } = this.creates[0];
                                     this.props.onAdd(context);
                                 }
-                            } else if (activeActions.create && record.isDirty) {
+                            } else if (activeActions.create && !record.canBeAbandoned) {
                                 if (record.checkValidity()) {
                                     this.props.onAdd();
                                 }
                             } else if (cycleOnTab) {
-                                if (record.isNew && !record.isDirty) {
+                                if (record.canBeAbandoned) {
                                     list.unselectRecord(true);
                                 }
                                 const futureRecord = list.records[0];
