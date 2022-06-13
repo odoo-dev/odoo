@@ -151,9 +151,7 @@ function sortableError(reason) {
  * @param {SortableParams} params
  */
 export function useSortable(params) {
-    if (useEnv().isSmall) {
-        return;
-    }
+    const env = useEnv();
     const { ref } = params;
     /** @type {(() => any)[]} */
     const cleanups = [];
@@ -529,7 +527,7 @@ export function useSortable(params) {
     useEffect(
         (...deps) => {
             const actualParams = Object.fromEntries(deps);
-            enabled = Boolean(ref.el && actualParams.enable);
+            enabled = Boolean(ref.el && !env.isSmall && actualParams.enable);
             if (!enabled) {
                 return;
             }

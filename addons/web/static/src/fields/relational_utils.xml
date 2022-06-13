@@ -33,7 +33,15 @@
 
 <t t-name="web.Many2XAutocomplete" owl="1" >
     <div class="o_input_dropdown" t-ref="autocomplete_container">
-        <AutoComplete
+        <input t-if="env.isSmall"
+            type="text"
+            t-att-id="props.id"
+            class="o_input"
+            readonly=""
+            t-att-value="state.autocompleteValue"
+            t-on-click="onSearchMore"
+        />
+        <AutoComplete t-else=""
             value="state.autocompleteValue"
             id="props.id"
             placeholder="props.placeholder"

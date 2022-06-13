@@ -8,6 +8,7 @@ import { deepCopy } from "@web/core/utils/objects";
 import { extractLayoutComponents } from "@web/search/layout";
 import { WithSearch } from "@web/search/with_search/with_search";
 import { useActionLinks } from "@web/views/helpers/view_hook";
+import { pluck } from "../core/utils/objects";
 
 const { Component, markRaw, onWillUpdateProps, onWillStart, toRaw, useSubEnv } = owl;
 const viewRegistry = registry.category("views");
@@ -159,19 +160,19 @@ export class View extends Component {
 
         this.handleActionLinks = useActionLinks({ resModel });
 
-        onWillUpdateProps(this.onWillUpdateProps);
-        onWillStart(this.onWillStart);
+        onWillStart(() => this.loadView(this.props));
+        onWillUpdateProps((nextProps) => this.onWillUpdateProps(nextProps));
     }
 
-    async onWillStart() {
+    async loadView(props) {
         // determine view type
-        let descr = viewRegistry.get(this.props.type);
+        let descr = viewRegistry.get(props.type);
         const type = descr.type;
 
         // determine views for which descriptions should be obtained
-        let { viewId, searchViewId } = this.props;
+        let { viewId, searchViewId } = props;
 
-        const views = deepCopy(this.props.views || this.env.config.views);
+        const views = deepCopy(props.views || this.env.config.views);
         const view = views.find((v) => v[1] === type) || [];
         if (view.length) {
             view[0] = viewId !== undefined ? viewId : view[0];
@@ -191,7 +192,7 @@ export class View extends Component {
         // searchViewId will remains undefined if loadSearchView=false
 
         // prepare view description
-        const { context, resModel, loadActionMenus, loadIrFilters } = this.props;
+        const { context, resModel, loadActionMenus, loadIrFilters } = props;
         let {
             arch,
             fields,
@@ -200,7 +201,7 @@ export class View extends Component {
             searchViewFields,
             irFilters,
             actionMenus,
-        } = this.props;
+        } = props;
 
         let loadView = !arch || (!actionMenus && loadActionMenus);
         let loadSearchView =
@@ -215,7 +216,7 @@ export class View extends Component {
                 { context, resModel, views },
                 { actionId: this.env.config.actionId, loadActionMenus, loadIrFilters }
             );
-            // Note: if this.props.views is different from views, the cached descriptions
+            // Note: if props.views is different from views, the cached descriptions
             // will certainly not be reused! (but for the standard flow this will work as
             // before)
             viewDescription = result.views[type];
@@ -260,12 +261,12 @@ export class View extends Component {
             viewType: type,
             viewSubType: subType,
             bannerRoute,
-            noBreadcrumbs: this.props.noBreadcrumbs,
+            noBreadcrumbs: props.noBreadcrumbs,
             ...extractLayoutComponents(descr),
         });
         const info = {
             actionMenus,
-            mode: this.props.display.mode,
+            mode: props.display.mode,
             irFilters,
             searchViewArch,
             searchViewFields,
@@ -280,35 +281,35 @@ export class View extends Component {
             relatedModels,
             resModel,
             useSampleModel: false,
-            className: `${this.props.className} o_view_controller o_${this.env.config.viewType}_view`,
+            className: `${props.className} o_view_controller o_${this.env.config.viewType}_view`,
         };
         if (viewDescription.custom_view_id) {
             // for dashboard
             viewProps.info.customViewId = viewDescription.custom_view_id;
         }
-        if (this.props.globalState) {
-            viewProps.globalState = this.props.globalState;
+        if (props.globalState) {
+            viewProps.globalState = props.globalState;
         }
 
-        if ("useSampleModel" in this.props) {
-            viewProps.useSampleModel = this.props.useSampleModel;
+        if ("useSampleModel" in props) {
+            viewProps.useSampleModel = props.useSampleModel;
         } else if (sample) {
             viewProps.useSampleModel = Boolean(evaluateExpr(sample));
         }
 
-        for (const key in this.props) {
+        for (const key in props) {
             if (!STANDARD_PROPS.includes(key)) {
-                viewProps[key] = this.props[key];
+                viewProps[key] = props[key];
             }
         }
 
-        let { noContentHelp } = this.props;
+        let { noContentHelp } = props;
         if (noContentHelp) {
             viewProps.info.noContentHelp = noContentHelp;
         }
 
         const searchMenuTypes =
-            this.props.searchMenuTypes || descr.searchMenuTypes || this.constructor.searchMenuTypes;
+            props.searchMenuTypes || descr.searchMenuTypes || this.constructor.searchMenuTypes;
         viewProps.searchMenuTypes = searchMenuTypes;
 
         const finalProps = descr.props ? descr.props(viewProps, descr, this.env.config) : viewProps;
@@ -316,7 +317,7 @@ export class View extends Component {
         this.Controller = descr.Controller;
         this.componentProps = finalProps;
         this.withSearchProps = {
-            ...toRaw(this.props),
+            ...toRaw(props),
             searchMenuTypes,
             SearchModel: descr.SearchModel,
         };
@@ -356,6 +357,11 @@ export class View extends Component {
     }
 
     onWillUpdateProps(nextProps) {
+        const oldProps = pluck(this.props, "arch", "type", "resModel");
+        const newProps = pluck(nextProps, "arch", "type", "resModel");
+        if (JSON.stringify(oldProps) !== JSON.stringify(newProps)) {
+            return this.loadView(nextProps);
+        }
         // we assume that nextProps can only vary in the search keys:
         // comparison, context, domain, groupBy, orderBy
         const { comparison, context, domain, groupBy, orderBy } = nextProps;

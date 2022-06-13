@@ -3,10 +3,18 @@
 
     <t t-name="web.SelectCreateDialog" owl="1">
         <Dialog title="props.title">
-            <View t-props="viewProps"/>
+            <t t-set="__PROPS__" t-value="viewProps" />
+            <t t-log="__PROPS__" />
+            <View t-props="__PROPS__" />
             <t t-set-slot="footer">
                 <t t-if="props.multiSelect">
-                    <button class="btn btn-primary o_select_button" t-att-disabled="state.resIds.length === 0" data-hotkey="v" t-on-click="select">Select</button>
+                    <button class="btn btn-primary o_select_button"
+                        t-att-disabled="state.resIds.length === 0"
+                        data-hotkey="v"
+                        t-on-click="() => this.select(state.resIds)"
+                    >
+                        Select
+                    </button>
                 </t>
                 <t t-if="!props.noCreate">
                     <button class="btn btn-primary" data-hotkey="c" t-on-click="createEditRecord">Create</button>

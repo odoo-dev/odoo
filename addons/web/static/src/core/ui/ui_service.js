@@ -55,7 +55,7 @@ export const MEDIAS_BREAKPOINTS = [
  *
  * @returns {MediaQueryList[]}
  */
- export function getMediaQueryLists() {
+export function getMediaQueryLists() {
     return MEDIAS_BREAKPOINTS.map(({ minWidth, maxWidth }) => {
         if (!maxWidth) {
             return window.matchMedia(`(min-width: ${minWidth}px)`);
@@ -69,8 +69,6 @@ export const MEDIAS_BREAKPOINTS = [
 
 export const uiService = {
     start(env) {
-        let ui = {};
-
         // block/unblock code
         const bus = new EventBus();
         registry.category("main_components").add("BlockUI", { Component: BlockUI, props: { bus } });
@@ -95,18 +93,6 @@ export const uiService = {
             }
         }
 
-        Object.assign(ui, {
-            bus,
-            block,
-            unblock,
-        });
-
-        Object.defineProperty(ui, "isBlocked", {
-            get() {
-                return blockCount > 0;
-            },
-        });
-
         // UI active element code
         let activeElems = [document];
 
@@ -126,17 +112,6 @@ export const uiService = {
             }
         }
 
-        Object.assign(ui, {
-            activateElement,
-            deactivateElement,
-            getActiveElementOf,
-        });
-        Object.defineProperty(ui, "activeElement", {
-            get() {
-                return activeElems[activeElems.length - 1];
-            },
-        });
-
         // window size handling
         const MEDIAS = getMediaQueryLists();
         function getSize() {
@@ -147,21 +122,33 @@ export const uiService = {
         function updateSize() {
             ui.size = getSize();
         }
+
         browser.addEventListener("resize", debounce(updateSize, 100));
 
-        Object.assign(ui, {
-            size: getSize(),
-        });
-        Object.defineProperty(ui, "isSmall", {
-            get() {
-                return ui.size <= SIZES.SM;
-            },
-        });
         Object.defineProperty(env, "isSmall", {
             get() {
-                return ui.size <= SIZES.SM;
+                return ui.isSmall;
             },
         });
+
+        const ui = {
+            bus,
+            size: getSize(),
+            get activeElement() {
+                return activeElems[activeElems.length - 1];
+            },
+            get isBlocked() {
+                return blockCount > 0;
+            },
+            get isSmall() {
+                return ui.size <= SIZES.SM;
+            },
+            block,
+            unblock,
+            activateElement,
+            deactivateElement,
+            getActiveElementOf,
+        };
 
         return ui;
     },

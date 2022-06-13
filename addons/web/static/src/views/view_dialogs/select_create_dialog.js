@@ -10,43 +10,48 @@ export class SelectCreateDialog extends Component {
     setup() {
         this.viewService = useService("view");
         this.state = useState({ resIds: [] });
-        const type = this.props.type;
-        const contextKey = type === "list" ? "tree_view_ref" : "kanban_view_ref";
-        this.viewProps = {
-            viewId: (this.props.context && this.props.context[contextKey]) || false,
-            resModel: this.props.resModel,
-            domain: this.props.domain,
-            context: this.props.context,
-            type, // "list" or "kanban"
+        this.baseViewProps = {
+            display: { searchPanel: false },
             editable: false, // readonly
+            noBreadcrumbs: true,
+            noContentHelp: markup(`<p>${this.env._t("No records found!")}</p>`),
             showButtons: false,
-            hasSelectors: this.props.multiSelect,
-            selectRecord: async (resId) => {
-                if (this.props.onSelected) {
-                    await this.props.onSelected([resId]);
-                    this.props.close();
-                }
-            },
+            selectRecord: (resId) => this.select([resId]),
             onSelectionChanged: (resIds) => {
                 this.state.resIds = resIds;
             },
-            noBreadcrumbs: true,
-            searchViewId: this.props.searchViewId || false,
-            display: { searchPanel: false },
-            noContentHelp: markup(`<p>${this.env._t("No records found!")}</p>`),
-            dynamicFilters: this.props.dynamicFilters || [],
         };
-        if (this.props.type === "kanban") {
-            this.viewProps.forceGlobalClick = true;
-        }
     }
 
-    async select() {
+    get viewProps() {
+        let id;
+        const viewProps = {
+            ...this.baseViewProps,
+            context: this.props.context,
+            domain: this.props.domain,
+            dynamicFilters: this.props.dynamicFilters,
+            hasSelectors: this.props.multiSelect,
+            resModel: this.props.resModel,
+            searchViewId: this.props.searchViewId,
+            type: this.env.isSmall ? "kanban" : "list",
+        };
+        const context = this.props.context || {};
+        if (viewProps.type === "kanban") {
+            viewProps.forceGlobalClick = true;
+            id = context["kanban_view_ref"];
+        } else {
+            id = context["list_view_ref"] || context["tree_view_ref"];
+        }
+        return { ...viewProps, viewId: id || false };
+    }
+
+    async select(resIds) {
         if (this.props.onSelected) {
-            await this.props.onSelected(this.state.resIds);
+            await this.props.onSelected(resIds);
             this.props.close();
         }
     }
+
     async createEditRecord() {
         if (this.props.onCreateEdit) {
             await this.props.onCreateEdit();
@@ -58,7 +63,9 @@ SelectCreateDialog.components = { Dialog, View };
 SelectCreateDialog.template = "web.SelectCreateDialog";
 
 SelectCreateDialog.defaultProps = {
+    dynamicFilters: [],
     multiSelect: true,
+    searchViewId: false,
     type: "list",
 };
 

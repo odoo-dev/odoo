@@ -390,10 +390,10 @@ ListController.template = `web.ListView`;
 ListController.components = { ActionMenus, ListViewHeaderButton, Layout, ViewButton };
 ListController.props = {
     ...standardViewProps,
-    hasSelectors: { type: Boolean, optional: 1 },
-    editable: { type: Boolean, optional: 1 },
-    showButtons: { type: Boolean, optional: 1 },
-    onSelectionChanged: { type: Function, optional: 1 },
+    editable: { type: Boolean, optional: true },
+    hasSelectors: { type: Boolean, optional: true },
+    onSelectionChanged: { type: Function, optional: true },
+    showButtons: { type: Boolean, optional: true },
     Model: Function,
     Renderer: Function,
     buttonTemplate: String,
@@ -401,8 +401,8 @@ ListController.props = {
 };
 ListController.defaultProps = {
     createRecord: () => {},
-    hasSelectors: true,
     editable: true,
+    hasSelectors: true,
     selectRecord: () => {},
     showButtons: true,
 };

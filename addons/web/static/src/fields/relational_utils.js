@@ -174,7 +174,8 @@ export class Many2XAutocomplete extends owl.Component {
         this.selectCreate = useSelectCreate({
             resModel,
             activeActions,
-            onSelected: (resIds) => {
+            onSelected: (resId) => {
+                const resIds = Array.isArray(resId) ? resId : [resId];
                 const values = resIds.map((id) => ({ id }));
                 return update(values);
             },

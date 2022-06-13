@@ -81,16 +81,21 @@ KanbanController.template = `web.KanbanView`;
 KanbanController.components = { Layout, KanbanRenderer };
 KanbanController.props = {
     ...standardViewProps,
+    defaultGroupBy: { validate: (dgb) => !dgb || typeof dgb === "string", optional: true },
+    editable: { type: Boolean, optional: true },
+    forceGlobalClick: { type: Boolean, optional: true },
+    hasSelectors: { type: Boolean, optional: true },
+    onSelectionChanged: { type: Function, optional: true },
+    showButtons: { type: Boolean, optional: true },
     Model: Function,
     Renderer: Function,
     buttonTemplate: String,
     archInfo: Object,
-    forceGlobalClick: { type: Boolean, optional: true },
-    defaultGroupBy: { validate: (dgb) => !dgb || typeof dgb === "string", optional: true },
 };
 
 KanbanController.defaultProps = {
     createRecord: () => {},
-    selectRecord: () => {},
     forceGlobalClick: false,
+    selectRecord: () => {},
+    showButtons: true,
 };
