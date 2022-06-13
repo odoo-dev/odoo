@@ -853,7 +853,13 @@ export class ListRenderer extends Component {
         const nextCells = children.slice(index + 1);
         for (const c of nextCells) {
             if (!c.classList.contains("o_data_cell")) {
-                break;
+                continue;
+            }
+            if (
+                c.firstElementChild &&
+                c.firstElementChild.classList.contains("o_readonly_modifier")
+            ) {
+                continue;
             }
             const toFocus = getElementToFocus(c);
             if (toFocus !== c) {
@@ -869,7 +875,13 @@ export class ListRenderer extends Component {
         const previousCells = children.slice(0, index);
         for (const c of previousCells.reverse()) {
             if (!c.classList.contains("o_data_cell")) {
-                break;
+                continue;
+            }
+            if (
+                c.firstElementChild &&
+                c.firstElementChild.classList.contains("o_readonly_modifier")
+            ) {
+                continue;
             }
             const toFocus = getElementToFocus(c);
             if (toFocus !== c) {

@@ -7385,15 +7385,13 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "edition, then navigation with tab (with a readonly field and onchange)",
         async function (assert) {
             // This test makes sure that if we have a read-only cell in a row, in
             // case the keyboard navigation move over it and there a unsaved changes
             // (which will trigger an onchange), the focus of the next activable
             // field will not crash
-            assert.expect(4);
-
             serverData.models.bar.onchanges = {
                 o2m: function () {},
             };
@@ -7404,72 +7402,50 @@ QUnit.module("Views", (hooks) => {
             };
             serverData.models.bar.records[0].o2m = [1, 4];
 
-            var form = await makeView({
+            await makeView({
                 type: "form",
-                model: "bar",
+                resModel: "bar",
                 resId: 1,
                 serverData,
-                arch:
-                    "<form>" +
-                    "<group>" +
-                    '<field name="display_name"/>' +
-                    '<field name="o2m">' +
-                    '<tree editable="bottom">' +
-                    '<field name="foo"/>' +
-                    '<field name="date" readonly="1"/>' +
-                    '<field name="int_field"/>' +
-                    "</tree>" +
-                    "</field>" +
-                    "</group>" +
-                    "</form>",
+                arch: `
+                    <form>
+                        <group>
+                            <field name="display_name"/>
+                            <field name="o2m">
+                                <tree editable="bottom">
+                                    <field name="foo"/>
+                                    <field name="date" readonly="1"/>
+                                    <field name="int_field"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </form>
+                `,
                 mockRPC: function (route, args) {
                     if (args.method === "onchange") {
-                        assert.step(args.method + ":" + args.model);
+                        assert.step(`onchange:${args.model}`);
                     }
-                    return this._super.apply(this, arguments);
-                },
-                fieldDebounce: 1,
-                viewOptions: {
-                    mode: "edit",
                 },
             });
 
-            var jq_evspecial_focus_trigger = $.event.special.focus.trigger;
-            // As KeyboardEvent will be triggered by JS and not from the
-            // User-Agent itself, the focus event will not trigger default
-            // action (event not being trusted), we need to manually trigger
-            // 'change' event on the currently focused element
-            $.event.special.focus.trigger = function () {
-                if (this !== document.activeElement && this.focus) {
-                    var activeElement = document.activeElement;
-                    this.focus();
-                    $(activeElement).trigger("change");
-                }
-            };
+            await clickEdit(target);
 
-            // editable target, click on first td and press TAB
-            await click(form.$(".o_data_cell:contains(yop)"));
+            await click(target.querySelector(".o_data_cell"));
             assert.strictEqual(
                 document.activeElement,
-                form.$('tr.o_selected_row input[name="foo"]')[0],
-                "focus should be on an input with name = foo"
+                target.querySelector(".o_data_cell[name=foo] input")
             );
-            await editInput(form.$('tr.o_selected_row input[name="foo"]'), "new value");
-            var tabEvent = $.Event("keydown", { which: $.ui.keyCode.TAB });
-            await testUtils.dom.triggerEvents(form.$('tr.o_selected_row input[name="foo"]'), [
-                tabEvent,
-            ]);
+            await editInput(target, ".o_data_cell[name=foo] input", "new value");
+
+            triggerHotkey("Tab");
+            await nextTick();
+
             assert.strictEqual(
                 document.activeElement,
-                form.$('tr.o_selected_row input[name="int_field"]')[0],
-                "focus should be on an input with name = int_field"
+                target.querySelector(".o_data_cell[name=int_field] input")
             );
 
-            // Restore origin jQuery special trigger for 'focus'
-            $.event.special.focus.trigger = jq_evspecial_focus_trigger;
-
-            assert.verifySteps(["onchange:bar"], "onchange method should have been called");
-            form.destroy();
+            assert.verifySteps(["onchange:bar"]);
         }
     );
 
