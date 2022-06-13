@@ -168,7 +168,7 @@ QUnit.test('list activity widget: open dropdown', async function (assert) {
     const views = {
         'res.users,false,list': '<list><field name="activity_ids" widget="list_activity"/></list>',
     };
-    const { env, openView } = await start({
+    const { openView } = await start({
         mockRPC: function (route, args) {
             if (
                 args.method !== 'get_views' &&
