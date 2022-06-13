@@ -89,7 +89,7 @@ class FieldAdapter extends ComponentAdapter {
                             if (typeof valueIds[0] === "number") {
                                 newIds = valueIds; // not sure if it is a real case: a list of ids
                             } else if (valueIds.length && "id" in valueIds[0]) {
-                                newIds = valueIds.map(r => r.id);
+                                newIds = valueIds.map((r) => r.id);
                             }
                         } else if ("id" in valueIds) {
                             newIds = [valueIds.id];
@@ -122,6 +122,8 @@ class FieldAdapter extends ComponentAdapter {
             if (payload.onSuccess) {
                 payload.onSuccess();
             }
+        } else if (evType === "history_back") {
+            return this.wowlEnv.config.historyBack();
         }
         super._trigger_up(...arguments);
     }
