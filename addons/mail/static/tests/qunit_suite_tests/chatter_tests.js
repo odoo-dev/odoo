@@ -5,6 +5,7 @@ import { WEBCLIENT_LOAD_ROUTES } from '@mail/../tests/helpers/webclient_setup';
 
 import testUtils from 'web.test_utils';
 import { patchWithCleanup } from '@web/../tests/helpers/utils';
+import { ViewAdapter } from "@web/legacy/action_adapters";
 
 QUnit.module('mail', {}, function () {
 QUnit.module('Chatter');
@@ -188,11 +189,18 @@ QUnit.test('list activity widget: open dropdown', async function (assert) {
         },
         serverData: { views },
     });
-    patchWithCleanup(env.services.action, {
-        switchView() {
-            assert.step('switch_view');
-        },
+
+    patchWithCleanup(ViewAdapter.prototype, {
+        setup() {
+            this._super();
+            const selectRecord = this.props.selectRecord;
+            this.props.selectRecord = (...args) => {
+                assert.step(`select_record ${JSON.stringify(args)}`);
+                return selectRecord(...args);
+            }
+        }
     });
+
     await openView({
         res_model: 'res.users',
         views: [[false, 'list']],
@@ -216,7 +224,7 @@ QUnit.test('list activity widget: open dropdown', async function (assert) {
 
     assert.verifySteps([
         '/web/dataset/search_read',
-        'switch_view',
+        'select_record [2,{\"mode\":\"readonly\"}]',
         'open dropdown',
         'activity_format',
         'action_feedback',
