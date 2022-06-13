@@ -11543,49 +11543,86 @@ QUnit.module("Views", (hooks) => {
     QUnit.skipWOWL(
         "pressing ENTER in editable grouped list view with create=0",
         async function (assert) {
-            assert.expect(10);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
                 serverData,
                 arch: '<tree editable="bottom" create="0"><field name="foo"/></tree>',
-                mockRPC: function (route, args) {
-                    assert.step(args.method || route);
-                    return this._super.apply(this, arguments);
+                mockRPC: function (route, { method }) {
+                    assert.step(method);
                 },
                 groupBy: ["bar"],
             });
+            assert.containsN(target, ".o_group_header", 2);
+            assert.containsNone(target, ".o_data_row");
+            assert.verifySteps(["get_views", "web_read_group"]);
 
-            await click($(target).find(".o_group_header:first")); // open first group
-            await click($(target).find(".o_group_header:nth(1)")); // open second group
-            assert.containsN(target, "tr.o_data_row", 4);
-            await click($(target).find(".o_data_row:nth(1) .o_data_cell")); // click on second line
-            assert.hasClass($(target).find("tr.o_data_row:eq(1)"), "o_selected_row");
+            // Open group headers
+            const [firstGroupHeader, secondGroupHeader] = [
+                ...target.querySelectorAll(".o_group_header"),
+            ];
+            await click(firstGroupHeader);
+            await click(secondGroupHeader);
+            assert.containsN(target, ".o_data_row", 4);
+            assert.containsNone(target, ".o_selected_row");
+            assert.verifySteps(["web_search_read", "web_search_read"]);
 
-            // press enter in input should move to next record
-            await testUtils.fields.triggerKeydown(
-                $(target).find("tr.o_selected_row .o_input"),
-                "enter"
+            // Click on first data row
+            const dataRows = [...target.querySelectorAll(".o_data_row")];
+            await click(dataRows[0].querySelector("[name=foo]"));
+            assert.containsOnce(target, ".o_selected_row");
+            assert.hasClass(dataRows[0], "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                dataRows[0].querySelector("[name=foo] input")
             );
+            assert.strictEqual(dataRows[0], target.querySelector("tbody tr:nth-child(2)"));
 
-            assert.hasClass($(target).find("tr.o_data_row:eq(2)"), "o_selected_row");
-            assert.doesNotHaveClass($(target).find("tr.o_data_row:eq(1)"), "o_selected_row");
-
-            // press enter on last row should move to first record of next group
-            await testUtils.fields.triggerKeydown(
-                $(target).find("tr.o_selected_row .o_input"),
-                "enter"
+            // Press enter in input should move to next record, even if record is in another group
+            triggerHotkey("Enter");
+            await nextTick();
+            assert.containsOnce(target, ".o_selected_row");
+            assert.hasClass(dataRows[1], "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                dataRows[1].querySelector("[name=foo] input")
             );
+            assert.strictEqual(dataRows[1], target.querySelector("tbody tr:nth-child(4)"));
 
-            assert.hasClass($(target).find("tr.o_data_row:eq(3)"), "o_selected_row");
-            assert.doesNotHaveClass($(target).find("tr.o_data_row:eq(2)"), "o_selected_row");
+            // Press enter in input should move to next record
+            triggerHotkey("Enter");
+            await nextTick();
+            assert.containsOnce(target, ".o_selected_row");
+            assert.hasClass(dataRows[2], "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                dataRows[2].querySelector("[name=foo] input")
+            );
+            assert.strictEqual(dataRows[2], target.querySelector("tbody tr:nth-child(5)"));
 
-            assert.verifySteps([
-                "web_read_group",
-                "/web/dataset/search_read",
-                "/web/dataset/search_read",
-            ]);
+            // Once again
+            triggerHotkey("Enter");
+            await nextTick();
+            assert.containsOnce(target, ".o_selected_row");
+            assert.hasClass(dataRows[3], "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                dataRows[3].querySelector("[name=foo] input")
+            );
+            assert.strictEqual(dataRows[3], target.querySelector("tbody tr:nth-child(6)"));
+
+            // Once again on the last data row should cycle to the first data row
+            triggerHotkey("Enter");
+            await nextTick();
+            assert.containsOnce(target, ".o_selected_row");
+            assert.hasClass(dataRows[0], "o_selected_row");
+            assert.strictEqual(
+                document.activeElement,
+                dataRows[0].querySelector("[name=foo] input")
+            );
+            assert.strictEqual(dataRows[0], target.querySelector("tbody tr:nth-child(2)"));
+
+            assert.verifySteps([]);
         }
     );
 
