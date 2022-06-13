@@ -14,9 +14,7 @@ import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { MockServer } from "@web/../tests/helpers/mock_server";
 import { getFixture, makeDeferred, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { doAction, getActionManagerServerData } from "@web/../tests/webclient/helpers";
-import legacyViewRegistry from "web.view_registry";
-import FormView from "web.FormView";
-import ListView from "web.ListView";
+import { useLegacyViews } from "@web/../tests/legacy/legacy_setup";
 
 import core from 'web.core';
 
@@ -564,10 +562,7 @@ function getOpenDiscuss(webClient, { context, params, ...props } = {}) {
  * @returns {Object}
  */
 async function start(param0 = {}) {
-    registry.category("views").remove("form"); // remove new form from registry
-    registry.category("views").remove("list"); // remove new list from registry
-    legacyViewRegistry.add("form", FormView); // add legacy form -> will be wrapped and added to new registry
-    legacyViewRegistry.add("list", ListView); // add legacy list -> will be wrapped and added to new registry
+    useLegacyViews();
     // patch _.debounce and _.throttle to be fast and synchronous.
     patchWithCleanup(_, {
         debounce: func => func,
