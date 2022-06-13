@@ -11423,36 +11423,32 @@ QUnit.module("Views", (hooks) => {
     QUnit.skipWOWL(
         "editing then pressing TAB (with a readonly field) in grouped list",
         async function (assert) {
-            assert.expect(6);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
                 serverData,
-                arch:
-                    '<tree editable="bottom"><field name="foo"/><field name="int_field" readonly="1"/></tree>',
+                arch: `
+                    <tree editable="bottom">
+                        <field name="foo"/>
+                        <field name="int_field" readonly="1"/>
+                    </tree>
+                `,
                 mockRPC: function (route, args) {
                     assert.step(args.method || route);
-                    return this._super.apply(this, arguments);
                 },
                 groupBy: ["bar"],
-                fieldDebounce: 1,
             });
 
-            await click($(target).find(".o_group_header:first")); // open first group
-            // click on first td and press TAB
-            await click($(target).find("td:contains(yop)"));
-            await testUtils.fields.editAndTrigger(
-                $(target).find('tr.o_selected_row input[name="foo"]'),
-                "new value",
-                "input"
-            );
-            await testUtils.fields.triggerKeydown(
-                $(target).find('tr.o_selected_row input[name="foo"]'),
-                "tab"
-            );
+            await click(target.querySelector(".o_group_header"));
+            await click(target.querySelector(".o_data_row [name=foo]"));
+            await editInput(target, ".o_selected_row [name=foo] input", "new value");
+            triggerHotkey("Tab");
+            await nextTick();
 
-            assert.containsOnce(target, "tbody tr td:contains(new value)");
+            assert.strictEqual(
+                target.querySelector(".o_data_row [name=foo]").innerText,
+                "new value"
+            );
             assert.verifySteps(["web_read_group", "/web/dataset/search_read", "write", "read"]);
         }
     );
@@ -11507,7 +11503,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL('pressing ENTER in editable="top" grouped list view', async function (assert) {
+    QUnit.debug('pressing ENTER in editable="top" grouped list view', async function (assert) {
         assert.expect(10);
 
         await makeView({
