@@ -10962,6 +10962,7 @@ QUnit.module('LegacyViews', {
             View: ListView,
             model: 'foo',
             data: this.data,
+            debug: 1,
             arch: '<tree editable="bottom"><field name="foo" required="1"/></tree>',
             groupBy: ['bar'],
         });

@@ -1044,7 +1044,6 @@ export class ListRenderer extends Component {
             }
             case "enter":
                 // use this.props.list.model.multiEdit somewhere?
-
                 if (!editable && list.selection && list.selection.length === 1) {
                     list.unselectRecord();
                     break;
@@ -1068,6 +1067,7 @@ export class ListRenderer extends Component {
                 }
                 break;
             case "escape": {
+                // TODO this seems bad: refactor this
                 record.discard();
                 list.unselectRecord(true);
                 const firstAddButton = this.tableRef.el.querySelector(
@@ -1075,6 +1075,8 @@ export class ListRenderer extends Component {
                 );
                 if (firstAddButton) {
                     firstAddButton.focus();
+                } else {
+                    cell.focus();
                 }
                 break;
             }
@@ -1153,7 +1155,14 @@ export class ListRenderer extends Component {
                     break;
                 }
 
-                if (!this.props.archInfo.noOpen && dataPoint) {
+                if (this.props.editable) {
+                    // problem with several fields with same name!
+                    const column = this.state.columns.find(
+                        (c) => c.name === cell.getAttribute("name")
+                    );
+                    this.cellToFocus = { column, record: dataPoint };
+                    dataPoint.switchMode("edit");
+                } else if (!this.props.archInfo.noOpen && dataPoint) {
                     this.props.openRecord(dataPoint);
                     break;
                 }

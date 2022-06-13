@@ -114,6 +114,7 @@
                             <a href="#"
                                 role="button"
                                 t-on-click.stop.prevent="() => group.createRecord({}, props.editable === 'top')"
+                                t-on-keydown.synthetic="(ev) => this.onCellKeydown(ev, null)"
                             >
                                 Add a line
                             </a>

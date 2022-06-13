@@ -11788,345 +11788,293 @@ QUnit.module("Views", (hooks) => {
     QUnit.skipWOWL(
         "cell-level keyboard navigation in editable grouped list",
         async function (assert) {
-            assert.expect(56);
+            serverData.models.foo.records[0].bar = false;
+            serverData.models.foo.records[1].bar = false;
+            serverData.models.foo.records[2].bar = false;
+            serverData.models.foo.records[3].bar = true;
 
             await makeView({
                 type: "list",
                 resModel: "foo",
                 serverData,
-                arch: '<tree editable="bottom"><field name="foo" required="1"/></tree>',
+                arch: `
+                    <tree editable="bottom">
+                        <field name="foo" required="1"/>
+                    </tree>
+                `,
                 groupBy: ["bar"],
             });
 
-            await click($(target).find(".o_group_header:first")); // open first group
-            await click($(target).find("td:contains(blip)")); // select row of first group
-            assert.hasClass(
-                $(target).find("tr.o_data_row:eq(1)"),
-                "o_selected_row",
-                "second row should be opened"
-            );
+            await click(target.querySelector(".o_group_header"));
+            const secondDataRow = target.querySelectorAll(".o_data_row")[1];
+            await click(secondDataRow, "[name=foo]");
+            assert.hasClass(secondDataRow, "o_selected_row");
 
-            var $secondRowInput = $(target).find("tr.o_data_row:eq(1) td:eq(1) input");
-            assert.strictEqual(
-                $secondRowInput.val(),
-                "blip",
-                "second record should be in edit mode"
-            );
+            await editInput(secondDataRow, "[name=foo] input", "blipbloup");
 
-            await testUtils.fields.editAndTrigger($secondRowInput, "blipbloup", "input");
-            assert.strictEqual(
-                $secondRowInput.val(),
-                "blipbloup",
-                "second record should be changed but not saved yet"
-            );
+            triggerHotkey("Escape");
+            await nextTick();
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "escape");
+            assert.containsNone(document.body, ".modal");
 
-            assert.containsNone(
-                document.body,
-                ".modal",
-                "record has been modified but modal should not be opened"
-            );
+            assert.doesNotHaveClass(secondDataRow, "o_selected_row");
 
-            assert.doesNotHaveClass(
-                $(target).find("tr.o_data_row:eq(1)"),
-                "o_selected_row",
-                "second row should be closed"
-            );
-            assert.strictEqual(document.activeElement.tagName, "TD", "focus is in field td");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "blip",
-                "second field of second record should be focused"
-            );
-            assert.strictEqual(
-                $(target).find("tr.o_data_row:eq(1) td:eq(1)").text(),
-                "blip",
-                "change should not have been saved"
-            );
+            assert.strictEqual(document.activeElement, secondDataRow.querySelector("[name=foo]"));
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "left");
-            assert.strictEqual(
-                document.activeElement.tagName,
-                "INPUT",
-                "record selector should be focused"
-            );
+            assert.strictEqual(document.activeElement.textContent, "blip");
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "right");
-            assert.strictEqual(document.activeElement.tagName, "TD", "focus is in first record td");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-            var $firstRowInput = $(target).find("tr.o_data_row:eq(0) td:eq(1) input");
-            assert.hasClass(
-                $(target).find("tr.o_data_row:eq(0)"),
-                "o_selected_row",
-                "first row should be selected"
-            );
-            assert.strictEqual($firstRowInput.val(), "yop", "first record should be in edit mode");
-
-            await testUtils.fields.editAndTrigger($firstRowInput, "Zipadeedoodah", "input");
-            assert.strictEqual(
-                $firstRowInput.val(),
-                "Zipadeedoodah",
-                "first record should be changed but not saved yet"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-            assert.strictEqual(
-                $(target).find("tr.o_data_row:eq(0) td:eq(1)").text(),
-                "Zipadeedoodah",
-                "first record should be saved"
-            );
-            assert.doesNotHaveClass(
-                $(target).find("tr.o_data_row:eq(0)"),
-                "o_selected_row",
-                "first row should be closed"
-            );
-            assert.hasClass(
-                $(target).find("tr.o_data_row:eq(1)"),
-                "o_selected_row",
-                "second row should be opened"
-            );
-            assert.strictEqual(
-                $(target).find("tr.o_data_row:eq(1) td:eq(1) input").val(),
-                "blip",
-                "second record should be in edit mode"
-            );
+            triggerHotkey("ArrowLeft");
 
             assert.strictEqual(
-                document.activeElement.value,
-                "blip",
-                "second record input should be focused"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "right");
-            assert.strictEqual(
-                document.activeElement.value,
-                "blip",
-                "second record input should still be focused (arrows movements are disabled in edit)"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "left");
-            assert.strictEqual(
-                document.activeElement.value,
-                "blip",
-                "second record input should still be focused (arrows movements are still disabled in edit)"
+                document.activeElement,
+                secondDataRow.querySelector("input[type=checkbox]")
             );
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "escape");
-            assert.doesNotHaveClass(
-                $(target).find("tr.o_data_row:eq(1)"),
-                "o_selected_row",
-                "second row should be closed"
-            );
-            assert.strictEqual(document.activeElement.tagName, "TD", "focus is in field td");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "blip",
-                "second field of second record should be focused"
-            );
+            triggerHotkey("ArrowUp");
+            triggerHotkey("ArrowRight");
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            const firstDataRow = target.querySelector(".o_data_row");
+            assert.strictEqual(document.activeElement, firstDataRow.querySelector("[name=foo]"));
 
-            assert.strictEqual(
-                document.activeElement.tagName,
-                "A",
-                'should focus the "Add a line" button'
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            triggerHotkey("Enter");
+            await nextTick();
 
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "No (1)",
-                "focus should be on second group header"
-            );
-            assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                3,
-                "should have 3 rows displayed"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-            assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                4,
-                "should have 4 rows displayed"
-            );
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "No (1)",
-                "focus should still be on second group header"
-            );
+            assert.hasClass(firstDataRow, "o_selected_row");
+            await editInput(firstDataRow, "[name=foo] input", "Zipadeedoodah");
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "blip",
-                "second field of last record should be focused"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            assert.strictEqual(
-                document.activeElement.tagName,
-                "A",
-                'should focus the "Add a line" button'
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            assert.strictEqual(
-                document.activeElement.tagName,
-                "A",
-                "arrow navigation should not cycle (focus still on last row)"
-            );
+            triggerHotkey("Enter");
+            await nextTick();
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-            await testUtils.fields.editAndTrigger(
-                $("tr.o_data_row:eq(4) td:eq(1) input"),
-                "cheateur arrete de cheater",
-                "input"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
+            assert.strictEqual(firstDataRow.querySelector("[name=foo]").innerText, "Zipadeedoodah");
+            assert.doesNotHaveClass(firstDataRow, "o_selected_row");
+            assert.hasClass(secondDataRow, "o_selected_row");
             assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                6,
-                "should have 6 rows displayed (new record + new edit line)"
+                document.activeElement,
+                secondDataRow.querySelector("[name=foo] input")
             );
+            assert.strictEqual(document.activeElement.value, "blip");
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "escape");
-            assert.strictEqual(
-                document.activeElement.tagName,
-                "A",
-                'should focus the "Add a line" button'
-            );
-
-            // come back to the top
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-
-            assert.strictEqual(document.activeElement.tagName, "TH", "focus is in table header");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "left");
-            assert.strictEqual(document.activeElement.tagName, "INPUT", "focus is in header input");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            await testUtils.fields.triggerKeydown($(document.activeElement), "right");
-            assert.strictEqual(document.activeElement.tagName, "TD", "focus is in field td");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "Zipadeedoodah",
-                "second field of first record should be focused"
-            );
-
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "Yes (3)",
-                "focus should be on first group header"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
-            assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                2,
-                "should have 2 rows displayed (first group should be closed)"
-            );
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "Yes (3)",
-                "focus should still be on first group header"
-            );
+            triggerHotkey("ArrowUp");
+            triggerHotkey("ArrowRight");
+            await nextTick();
 
             assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                2,
-                "should have 2 rows displayed"
+                document.activeElement,
+                secondDataRow.querySelector("[name=foo] input")
             );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "right");
+            assert.strictEqual(document.activeElement.value, "blip");
+
+            triggerHotkey("ArrowDown");
+            triggerHotkey("ArrowLeft");
+            await nextTick();
+
             assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                5,
-                "should have 5 rows displayed"
+                document.activeElement,
+                secondDataRow.querySelector("td[name=foo] input")
             );
+            assert.strictEqual(document.activeElement.value, "blip");
+
+            triggerHotkey("Escape");
+            await nextTick();
+
+            assert.doesNotHaveClass(secondDataRow, "o_selected_row");
+
+            assert.strictEqual(document.activeElement, secondDataRow.querySelector("td[name=foo]"));
+
+            triggerHotkey("ArrowDown");
+            triggerHotkey("ArrowDown");
+
             assert.strictEqual(
-                document.activeElement.textContent,
-                "Yes (3)",
-                "focus is still in header"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "right");
-            assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                5,
-                "should have 5 rows displayed"
-            );
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "Yes (3)",
-                "focus is still in header"
+                document.activeElement,
+                target.querySelector(".o_group_field_row_add a")
             );
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "left");
-            assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                2,
-                "should have 2 rows displayed"
-            );
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "Yes (3)",
-                "focus is still in header"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "left");
-            assert.strictEqual(
-                $(target).find("tr.o_data_row").length,
-                2,
-                "should have 2 rows displayed"
-            );
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "Yes (3)",
-                "focus is still in header"
-            );
+            triggerHotkey("ArrowDown");
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "No (2)",
-                "focus should now be on second group header"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            assert.strictEqual(document.activeElement.tagName, "TD", "record td should be focused");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "blip",
-                "second field of first record of second group should be focused"
-            );
+            const secondGroupHeader = target.querySelectorAll(".o_group_name")[1];
+            assert.strictEqual(document.activeElement, secondGroupHeader);
 
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "cheateur arrete de cheater",
-                "second field of last record of second group should be focused"
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "down");
-            assert.strictEqual(
-                document.activeElement.tagName,
-                "A",
-                'should focus the "Add a line" button'
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "cheateur arrete de cheater",
-                'second field of last record of second group should be focused (special case: the first td of the "Add a line" line was skipped'
-            );
-            await testUtils.fields.triggerKeydown($(document.activeElement), "up");
-            assert.strictEqual(
-                document.activeElement.textContent,
-                "blip",
-                "second field of first record of second group should be focused"
-            );
+            assert.containsN(target, ".o_data_row", 3);
+
+            triggerHotkey("Enter");
+            await nextTick();
+
+            assert.containsN(target, ".o_data_row", 4);
+
+            assert.strictEqual(document.activeElement, secondGroupHeader);
+
+            triggerHotkey("ArrowDown");
+            await nextTick();
+
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "blip",
+            //     "second field of last record should be focused"
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            // assert.strictEqual(
+            //     document.activeElement.tagName,
+            //     "A",
+            //     'should focus the "Add a line" button'
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            // assert.strictEqual(
+            //     document.activeElement.tagName,
+            //     "A",
+            //     "arrow navigation should not cycle (focus still on last row)"
+            // );
+
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
+            // await testUtils.fields.editAndTrigger(
+            //     $("tr.o_data_row:eq(4) td:eq(1) input"),
+            //     "cheateur arrete de cheater",
+            //     "input"
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
+            // assert.strictEqual(
+            //     $(target).find("tr.o_data_row").length,
+            //     6,
+            //     "should have 6 rows displayed (new record + new edit line)"
+            // );
+
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "escape");
+            // assert.strictEqual(
+            //     document.activeElement.tagName,
+            //     "A",
+            //     'should focus the "Add a line" button'
+            // );
+
+            // // come back to the top
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+
+            // assert.strictEqual(document.activeElement.tagName, "TH", "focus is in table header");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "left");
+            // assert.strictEqual(document.activeElement.tagName, "INPUT", "focus is in header input");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "right");
+            // assert.strictEqual(document.activeElement.tagName, "TD", "focus is in field td");
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "Zipadeedoodah",
+            //     "second field of first record should be focused"
+            // );
+
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "No (3)",
+            //     "focus should be on first group header"
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "enter");
+            // assert.strictEqual(
+            //     $(target).find("tr.o_data_row").length,
+            //     2,
+            //     "should have 2 rows displayed (first group should be closed)"
+            // );
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "No (3)",
+            //     "focus should still be on first group header"
+            // );
+
+            // assert.strictEqual(
+            //     $(target).find("tr.o_data_row").length,
+            //     2,
+            //     "should have 2 rows displayed"
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "right");
+            // assert.strictEqual(
+            //     $(target).find("tr.o_data_row").length,
+            //     5,
+            //     "should have 5 rows displayed"
+            // );
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "No (3)",
+            //     "focus is still in header"
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "right");
+            // assert.strictEqual(
+            //     $(target).find("tr.o_data_row").length,
+            //     5,
+            //     "should have 5 rows displayed"
+            // );
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "No (3)",
+            //     "focus is still in header"
+            // );
+
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "left");
+            // assert.strictEqual(
+            //     $(target).find("tr.o_data_row").length,
+            //     2,
+            //     "should have 2 rows displayed"
+            // );
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "No (3)",
+            //     "focus is still in header"
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "left");
+            // assert.strictEqual(
+            //     $(target).find("tr.o_data_row").length,
+            //     2,
+            //     "should have 2 rows displayed"
+            // );
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "No (3)",
+            //     "focus is still in header"
+            // );
+
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "Yes (2)",
+            //     "focus should now be on second group header"
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            // assert.strictEqual(document.activeElement.tagName, "TD", "record td should be focused");
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "blip",
+            //     "second field of first record of second group should be focused"
+            // );
+
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "cheateur arrete de cheater",
+            //     "second field of last record of second group should be focused"
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "down");
+            // assert.strictEqual(
+            //     document.activeElement.tagName,
+            //     "A",
+            //     'should focus the "Add a line" button'
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "cheateur arrete de cheater",
+            //     'second field of last record of second group should be focused (special case: the first td of the "Add a line" line was skipped'
+            // );
+            // await testUtils.fields.triggerKeydown($(document.activeElement), "up");
+            // assert.strictEqual(
+            //     document.activeElement.textContent,
+            //     "blip",
+            //     "second field of first record of second group should be focused"
+            // );
         }
     );
 
