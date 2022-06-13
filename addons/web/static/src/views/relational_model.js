@@ -1512,7 +1512,12 @@ class DynamicList extends DataPoint {
                 record,
                 fieldNodes: this.model.fieldNodes,
             };
-            await this.model.dialogService.add(ListConfirmationDialog, dialogProps);
+            this.model.trigger("list-confirmation-dialog-will-open");
+            await this.model.dialogService.add(ListConfirmationDialog, dialogProps, {
+                onClose: () => {
+                    this.model.trigger("list-confirmation-dialog-closed");
+                },
+            });
         } else {
             await record._save();
             record.selected = false;

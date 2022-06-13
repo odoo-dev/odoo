@@ -8893,9 +8893,8 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    // Neer focus datacell
-    QUnit.skipWOWL("editable list view: multi edition", async function (assert) {
-        assert.expect(26);
+    QUnit.test("editable list view: multi edition", async function (assert) {
+        assert.expect(27);
 
         await makeView({
             type: "list",
@@ -8938,49 +8937,35 @@ QUnit.module("Views", (hooks) => {
 
         // edit a line without modifying a field
         await click(rows[0].querySelector(".o_data_cell"));
-        assert.hasClass(
-            $(target).find(".o_data_row:eq(0)"),
-            "o_selected_row",
-            "the first row should be selected"
-        );
+        assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
+
         await click(target, ".o_list_view");
-        assert.containsNone(target, ".o_selected_row", "no row should be selected");
+        assert.containsNone(target, ".o_selected_row");
 
         // create a record and edit its value
         await click(target, ".o_list_button_add");
         assert.verifySteps(["onchange"]);
 
         await editInput(target, ".o_selected_row [name=int_field] input", 123);
-        assert.containsNone(
-            document.body,
-            ".modal",
-            "the multi edition should not be triggered during creation"
-        );
+        assert.containsNone(document.body, ".modal");
 
         await clickSave(target);
         assert.verifySteps(["create", "read"]);
 
         // edit a field
-        await click(rows[0].querySelector(".o_data_cell"));
+        await click(rows[0].querySelector("[name=int_field]"));
         await editInput(rows[0], "[name=int_field] input", 666);
-        assert.containsOnce(target, ".modal", "modal appears when switching cells");
+        assert.containsOnce(target, ".modal");
 
         await click(target, ".modal .btn.btn-secondary");
-        assert.containsN(
-            target,
-            ".o_list_record_selector input:checked",
-            2,
-            "Selection should remain unchanged"
-        );
+        assert.containsN(target, ".o_list_record_selector input:checked", 2);
         assert.deepEqual(
             [...rows[0].querySelectorAll(".o_data_cell")].map((el) => el.innerText),
-            ["yop", "10"],
-            "changes have been discarded and row is back to readonly"
+            ["yop", "10"]
         );
         assert.strictEqual(
             document.activeElement,
-            rows[0].querySelectorAll(".o_data_cell")[1],
-            "focus should be given to the most recently edited cell after discard"
+            rows[0].querySelector(".o_data_cell[name=int_field]")
         );
 
         await click(rows[0].querySelectorAll(".o_data_cell")[1]);

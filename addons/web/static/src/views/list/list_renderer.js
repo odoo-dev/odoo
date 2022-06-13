@@ -149,6 +149,21 @@ export class ListRenderer extends Component {
                 this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
             });
         }
+
+        // not very beautiful but works: refactor at some point
+        this.lastCellFocused;
+        useBus(this.props.list.model, "list-confirmation-dialog-will-open", () => {
+            if (this.tableRef.el.contains(document.activeElement)) {
+                this.lastCellFocused = document.activeElement.closest("td");
+            }
+        });
+
+        useBus(this.props.list.model, "list-confirmation-dialog-closed", () => {
+            if (this.lastCellFocused) {
+                this.lastCellFocused.focus();
+            }
+        });
+
         useBounceButton(this.rootRef, () => {
             return this.showNoContentHelper;
         });
