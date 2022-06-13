@@ -6713,9 +6713,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["onchange"]);
     });
 
-    QUnit.skipWOWL("pressing tab on last cell of editable list view", async function (assert) {
-        assert.expect(9);
-
+    QUnit.test("pressing tab on last cell of editable list view", async function (assert) {
         await makeView({
             type: "list",
             resModel: "foo",
@@ -6728,7 +6726,7 @@ QUnit.module("Views", (hooks) => {
         const rows = target.querySelectorAll(".o_data_row");
         await click(rows[3].querySelector(".o_data_cell"));
         assert.strictEqual(
-            document.activeElement.name,
+            document.activeElement.parentNode.getAttribute("name"),
             "foo",
             "focus should be on an input with name = foo"
         );
@@ -6738,103 +6736,92 @@ QUnit.module("Views", (hooks) => {
         await triggerEvent(document.activeElement, null, "change");
         triggerHotkey("Tab");
         await nextTick();
-
         assert.strictEqual(
-            document.activeElement.name,
+            document.activeElement.parentNode.getAttribute("name"),
             "int_field",
             "focus should be on an input with name = int_field"
         );
 
         triggerHotkey("Tab");
         await nextTick();
-
         assert.hasClass(
             $(target).find("tr.o_data_row:eq(4)"),
             "o_selected_row",
             "5th row should be selected"
         );
         assert.strictEqual(
-            document.activeElement.name,
+            document.activeElement.parentNode.getAttribute("name"),
             "foo",
             "focus should be on an input with name = foo"
         );
 
         assert.verifySteps([
-            "/web/dataset/search_read",
+            "/web/dataset/call_kw/foo/get_views",
+            "/web/dataset/call_kw/foo/web_search_read",
             "/web/dataset/call_kw/foo/write",
             "/web/dataset/call_kw/foo/read",
             "/web/dataset/call_kw/foo/onchange",
         ]);
     });
 
-    QUnit.skipWOWL(
-        "navigation with tab and read completes after default_get",
-        async function (assert) {
-            assert.expect(8);
+    QUnit.test("navigation with tab and read completes after default_get", async function (assert) {
+        const onchangeGetPromise = makeDeferred();
+        const readPromise = makeDeferred();
 
-            var onchangeGetPromise = testUtils.makeTestPromise();
-            var readPromise = testUtils.makeTestPromise();
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree editable="bottom"><field name="foo"/><field name="int_field"/></tree>',
+            mockRPC: function (route, args, performRPC) {
+                assert.step(args.method);
+                const result = performRPC(route, args);
+                if (args.method === "read") {
+                    return readPromise.then(function () {
+                        return result;
+                    });
+                }
+                if (args.method === "onchange") {
+                    return onchangeGetPromise.then(function () {
+                        return result;
+                    });
+                }
+                return result;
+            },
+        });
 
-            await makeView({
-                type: "list",
-                resModel: "foo",
-                serverData,
-                arch: '<tree editable="bottom"><field name="foo"/><field name="int_field"/></tree>',
-                mockRPC: function (route, args) {
-                    if (args.method) {
-                        assert.step(args.method);
-                    }
-                    var result = this._super.apply(this, arguments);
-                    if (args.method === "read") {
-                        return readPromise.then(function () {
-                            return result;
-                        });
-                    }
-                    if (args.method === "onchange") {
-                        return onchangeGetPromise.then(function () {
-                            return result;
-                        });
-                    }
-                    return result;
-                },
-            });
+        const rows = target.querySelectorAll(".o_data_row");
+        await click(rows[3].querySelectorAll(".o_data_cell")[1]);
 
-            await click($(target).find("td:contains(-4)").last());
+        await editInput(target, ".o_selected_row [name='int_field'] input", "1234");
+        triggerHotkey("Tab");
+        await nextTick();
 
-            await editInput($(target).find('tr.o_selected_row input[name="int_field"]'), "1234");
-            await testUtils.fields.triggerKeydown(
-                $(target).find('tr.o_selected_row input[name="int_field"]'),
-                "tab"
-            );
+        onchangeGetPromise.resolve();
+        assert.containsN(target, "tbody tr.o_data_row", 4, "should have 4 data rows");
 
-            onchangeGetPromise.resolve();
-            assert.containsN(target, "tbody tr.o_data_row", 4, "should have 4 data rows");
+        readPromise.resolve();
+        await nextTick();
+        assert.containsN(target, "tbody tr.o_data_row", 5, "should have 5 data rows");
+        assert.strictEqual(
+            $(target).find("td:contains(1234)").length,
+            1,
+            "should have a cell with new value"
+        );
 
-            readPromise.resolve();
-            await testUtils.nextTick();
-            assert.containsN(target, "tbody tr.o_data_row", 5, "should have 5 data rows");
-            assert.strictEqual(
-                $(target).find("td:contains(1234)").length,
-                1,
-                "should have a cell with new value"
-            );
+        // we trigger a tab to move to the second cell in the current row. this
+        // operation requires that this.currentRow is properly set in the
+        // list editable renderer.
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.hasClass(
+            $(target).find("tr.o_data_row:eq(4)"),
+            "o_selected_row",
+            "5th row should be selected"
+        );
 
-            // we trigger a tab to move to the second cell in the current row. this
-            // operation requires that this.currentRow is properly set in the
-            // list editable renderer.
-            await testUtils.fields.triggerKeydown(
-                $(target).find('tr.o_selected_row input[name="foo"]'),
-                "tab"
-            );
-            assert.hasClass(
-                $(target).find("tr.o_data_row:eq(4)"),
-                "o_selected_row",
-                "5th row should be selected"
-            );
-
-            assert.verifySteps(["write", "read", "onchange"]);
-        }
-    );
+        assert.verifySteps(["get_views", "web_search_read", "write", "read", "onchange"]);
+    });
 
     QUnit.test("display toolbar", async function (assert) {
         await makeView({
