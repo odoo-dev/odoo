@@ -11186,42 +11186,38 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
     });
 
-    QUnit.skipWOWL('pressing TAB in editable="top" grouped list', async function (assert) {
+    QUnit.test('pressing TAB in editable="top" grouped list', async function (assert) {
         assert.expect(7);
 
         await makeView({
             type: "list",
             resModel: "foo",
             serverData,
-            arch: '<tree editable="top"><field name="foo"/></tree>',
+            arch: `
+                <tree editable="top">
+                    <field name="foo"/>
+                </tree>
+            `,
             groupBy: ["bar"],
         });
 
         // open two groups
-        await click($(target).find(".o_group_header:first"));
-        assert.containsN(target, ".o_data_row", 3, "first group contains 3 rows");
-        await click($(target).find(".o_group_header:nth(1)"));
-        assert.containsN(target, ".o_data_row", 4, "first group contains 1 row");
+        await click(target.querySelector(".o_group_header"));
+        assert.containsN(target, ".o_data_row", 1);
 
-        await click($(target).find(".o_data_cell:first"));
+        await click(target.querySelector(".o_group_header:last-child"));
+        assert.containsN(target, ".o_data_row", 4);
 
-        assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
+        await click(target.querySelector(".o_data_cell"));
+        assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
 
-        // Press 'Tab' -> should go to next line (still in first group)
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
-        assert.hasClass($(target).find(".o_data_row:nth(1)"), "o_selected_row");
-
-        // Press 'Tab' -> should go to next line (still in first group)
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
-        assert.hasClass($(target).find(".o_data_row:nth(2)"), "o_selected_row");
-
-        // Press 'Tab' -> should go to first line of next group
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
-        assert.hasClass($(target).find(".o_data_row:nth(3)"), "o_selected_row");
-
-        // Press 'Tab' -> should go back to first line of first group
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
-        assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
+        const dataRows = [...target.querySelectorAll(".o_data_row")];
+        dataRows.push(dataRows.shift());
+        for (const row of dataRows) {
+            triggerHotkey("Tab");
+            await nextTick();
+            assert.hasClass(row, "o_selected_row");
+        }
     });
 
     QUnit.skipWOWL("pressing TAB in editable grouped list with create=0", async function (assert) {
