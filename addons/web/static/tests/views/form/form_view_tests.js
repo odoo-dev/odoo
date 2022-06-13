@@ -5918,7 +5918,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL("oe_read_only className is handled in list views", async function (assert) {
+    QUnit.test("oe_read_only className is handled in list views", async function (assert) {
         await makeView({
             type: "form",
             resModel: "partner",
@@ -5955,22 +5955,31 @@ QUnit.module("Views", (hooks) => {
             "100%",
             'As the only visible char field, "foo" should take 100% of the remaining space'
         );
-        assert.strictEqual(
-            target.querySelector("th.oe_read_only").style.width,
-            "0px",
-            '"oe_read_only" in edit mode should have a 0px width'
+       
+        assert.containsNone(
+            target, 
+            "th.oe_read_only",
+            'the column with "oe_read_only" should not be visible in edit mode'
         );
-
         assert.containsOnce(target, ".o_form_view .o_form_editable", "form should be in edit mode");
         assert.isNotVisible(
-            target.querySelector('.o_field_one2many thead th[data-name="display_name"]'),
+            target.querySelector('th[data-name="display_name"]'),
             "display_name cell should not be visible in edit mode"
         );
 
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
+
+        assert.containsNone(
+            target, 
+            "th.oe_read_only",
+            'the column with "oe_read_only" should not be visible in edit mode'
+        );
+
+        await clickSave(target);
+
         assert.hasClass(
             target.querySelector(
-                '.o_form_view tbody tr:first .o_field_widget[name="display_name"]'
+                '[name="display_name"]'
             ),
             "oe_read_only",
             "display_name input should have oe_read_only class"
