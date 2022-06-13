@@ -10155,14 +10155,11 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "editable form with many2one: click out does not discard the row",
         async function (assert) {
             // WOWL Should be moved to form view tests!
-
-            // In this test, we simulate a long click by manually triggering a mousedown and later on
-            // mouseup and click events
-            assert.expect(5);
+            assert.expect(4);
 
             serverData.models.bar.fields.m2o = {
                 string: "M2O field",
@@ -10193,23 +10190,12 @@ QUnit.module("Views", (hooks) => {
 
             // focus and write something in the m2o
             await editInput(target, ".o_field_many2one input", "abcdef");
-
             await nextTick();
 
-            // then simulate a mousedown outside
-            target.querySelector('.o_field_widget[name="display_name"]').focus();
-            await triggerEvent(target, '.o_field_widget[name="display_name"]', "mousedown");
-            await nextTick();
+            // simulate focus out
+            await triggerEvent(target, ".o_field_many2one input", "blur");
+
             assert.containsOnce(target, ".modal", "should ask confirmation to create a record");
-
-            // trigger the mouseup and the click
-            await triggerEvents(target, '.o_field_widget[name="display_name"]', [
-                "mouseup",
-                "click",
-            ]);
-            await nextTick();
-
-            assert.containsOnce(target, ".modal", "modal should still be displayed");
             assert.containsOnce(target, ".o_data_row", "the row should still be there");
         }
     );
