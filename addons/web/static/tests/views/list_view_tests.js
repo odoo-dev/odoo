@@ -7118,7 +7118,7 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector(".o_data_row:nth-child(2) .o_data_cell input")
             );
 
-            triggerHotkey("shift+tab");
+            triggerHotkey("shift+Tab");
             await nextTick();
 
             assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
@@ -7127,7 +7127,7 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector(".o_data_row .o_data_cell:nth-child(3) input")
             );
 
-            triggerHotkey("shift+tab");
+            triggerHotkey("shift+Tab");
             await nextTick();
 
             assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
@@ -7460,7 +7460,7 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector(".o_data_row:nth-child(2) [name=qux] input")
             );
 
-            await triggerHotkey("shift+tab");
+            await triggerHotkey("shift+Tab");
             await nextTick();
 
             assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
@@ -7495,7 +7495,7 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
             );
 
-            triggerHotkey("shift+tab");
+            triggerHotkey("shift+Tab");
             await nextTick();
 
             assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
@@ -7530,7 +7530,7 @@ QUnit.module("Views", (hooks) => {
                 target.querySelector(".o_data_row:nth-child(2) [name=int_field] input")
             );
 
-            triggerHotkey("shift+tab");
+            triggerHotkey("shift+Tab");
             await nextTick();
 
             assert.hasClass(target.querySelector(".o_data_row"), "o_selected_row");
@@ -11259,43 +11259,47 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
     });
 
-    QUnit.skipWOWL('pressing SHIFT-TAB in editable="bottom" grouped list', async function (assert) {
-        assert.expect(6);
-
+    QUnit.test('pressing SHIFT-TAB in editable="bottom" grouped list', async function (assert) {
+        serverData.models.foo.records[2].bar = false;
         await makeView({
             type: "list",
             resModel: "foo",
             serverData,
-            arch: '<tree editable="bottom"><field name="foo" required="1"/></tree>',
+            arch: `
+                <tree editable="bottom">
+                    <field name="foo" required="1"/>
+                </tree>
+            `,
             groupBy: ["bar"],
         });
 
-        await click($(target).find(".o_group_header:first")); // open first group
-        assert.containsN(target, ".o_data_row", 3, "first group contains 3 rows");
-        await click($(target).find(".o_group_header:eq(1)")); // open second group
-        assert.containsN(target, ".o_data_row", 4, "first group contains 1 row");
+        await click(target.querySelector(".o_group_header"));
+        assert.containsN(target, ".o_data_row", 2);
+        await click(target.querySelector(".o_group_header:last-child"));
+        assert.containsN(target, ".o_data_row", 4);
 
         // navigate inside a group
-        await click($(target).find(".o_data_row:eq(1) .o_data_cell")); // select second row of first group
-        assert.hasClass($(target).find("tr.o_data_row:eq(1)"), "o_selected_row");
+        const secondRow = target.querySelectorAll(".o_data_row")[1];
+        await click(secondRow, ".o_data_cell");
+        assert.hasClass(secondRow, "o_selected_row");
 
-        // press Shft+tab
-        $(target)
-            .find("tr.o_selected_row input")
-            .trigger($.Event("keydown", { which: $.ui.keyCode.TAB, shiftKey: true }));
-        await testUtils.nextTick();
-        assert.hasClass($(target).find("tr.o_data_row:first"), "o_selected_row");
-        assert.doesNotHaveClass($(target).find("tr.o_data_row:eq(1)"), "o_selected_row");
+        triggerHotkey("shift+Tab");
+        await nextTick();
+
+        const firstRow = target.querySelector(".o_data_row");
+        assert.hasClass(firstRow, "o_selected_row");
+        assert.doesNotHaveClass(secondRow, "o_selected_row");
 
         // navigate between groups
-        await click($(target).find(".o_data_cell:eq(3)")); // select row of second group
+        const thirdRow = target.querySelectorAll(".o_data_row")[2];
+        await click(thirdRow, ".o_data_cell");
 
-        // press Shft+tab
-        $(target)
-            .find("tr.o_selected_row input")
-            .trigger($.Event("keydown", { which: $.ui.keyCode.TAB, shiftKey: true }));
-        await testUtils.nextTick();
-        assert.hasClass($(target).find("tr.o_data_row:eq(2)"), "o_selected_row");
+        assert.hasClass(thirdRow, "o_selected_row");
+
+        triggerHotkey("shift+Tab");
+        await nextTick();
+
+        assert.hasClass(secondRow, "o_selected_row");
     });
 
     QUnit.skipWOWL('pressing SHIFT-TAB in editable="top" grouped list', async function (assert) {
