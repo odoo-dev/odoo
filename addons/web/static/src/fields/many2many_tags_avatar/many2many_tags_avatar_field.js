@@ -30,7 +30,10 @@ Many2ManyTagsAvatarField.extractProps = (fieldName, record, attrs) => {
         relation: record.activeFields[fieldName].relation,
         domain: record.getFieldDomain(fieldName),
         context: record.getFieldContext(fieldName),
+        evalContext: record.evalContext,
         canQuickCreate: !attrs.options.no_quick_create,
+        createDomain: attrs.options.create,
+        string: record.activeFields[fieldName].string,
     };
 };
 
@@ -52,7 +55,10 @@ ListKanbanMany2ManyTagsAvatarField.extractProps = (fieldName, record, attrs) => 
         relation: record.activeFields[fieldName].relation,
         domain: record.getFieldDomain(fieldName),
         context: record.getFieldContext(fieldName),
+        evalContext: record.evalContext,
         canQuickCreate: !attrs.options.no_quick_create,
+        createDomain: attrs.options.create,
+        string: record.activeFields[fieldName].string,
     };
 };
 

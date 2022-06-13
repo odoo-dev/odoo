@@ -33,23 +33,19 @@ export class Many2ManyTagsField extends Component {
 
         const { saveRecord, removeRecord } = useX2ManyCrud(() => this.props.value, true);
 
-        const activeField = this.props.record.activeFields[this.props.name];
-
         this.activeActions = useActiveActions({
             fieldType: "many2many",
             crudOptions: {
-                create: this.props.canQuickCreate && activeField.options.create,
+                create: this.props.canQuickCreate && this.props.createDomain,
                 onDelete: removeRecord,
             },
             getEvalParams: (props) => {
                 return {
-                    evalContext: props.record.evalContext,
+                    evalContext: props.evalContext,
                     readonly: props.readonly,
                 };
             },
         });
-
-        this.fieldString = activeField.string;
 
         this.update = (recordlist) => {
             if (Array.isArray(recordlist)) {
@@ -67,10 +63,6 @@ export class Many2ManyTagsField extends Component {
                 return saveRecord([created[0]]);
             };
         }
-    }
-
-    get context() {
-        return this.props.record.getFieldContext(this.props.name);
     }
 
     get tags() {
@@ -274,12 +266,15 @@ Many2ManyTagsField.props = {
     canEditColor: { type: Boolean, optional: true },
     canQuickCreate: { type: Boolean, optional: true },
     colorField: { type: String, optional: true },
+    createDomain: { type: Array, optional: true },
     placeholder: { type: String, optional: true },
     relation: { type: String },
     domain: { type: Domain },
     context: { type: Object },
+    evalContext: { type: Object },
     nameCreateField: { type: String, optional: true },
     itemsVisible: { type: Number, optional: true },
+    string: { type: String },
 };
 Many2ManyTagsField.defaultProps = {
     canEditColor: true,
@@ -294,15 +289,18 @@ Many2ManyTagsField.fieldsToFetch = {
 };
 
 Many2ManyTagsField.extractProps = (fieldName, record, attrs) => {
+    const activeField = record.activeFields[fieldName];
     return {
         colorField: attrs.options.color_field,
         nameCreateField: attrs.options.create_name_field,
-        canEditColor:
-            !attrs.options.no_edit_color && record.activeFields[fieldName].viewType !== "list",
-        relation: record.activeFields[fieldName].relation,
+        canEditColor: !attrs.options.no_edit_color && activeField.viewType !== "list",
+        relation: activeField.relation,
         domain: record.getFieldDomain(fieldName),
         context: record.getFieldContext(fieldName),
         canQuickCreate: !attrs.options.no_quick_create,
+        createDomain: attrs.options.create,
+        evalContext: record.evalContext,
+        string: activeField.string,
     };
 };
 
