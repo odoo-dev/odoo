@@ -9672,52 +9672,40 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([`resId: 3`]);
     });
 
-    // Need Key Nav
-    QUnit.skipWOWL(
+    QUnit.test(
         "editable list view: multi edition: edit and validate last row",
         async function (assert) {
-            assert.expect(3);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
                 serverData,
                 arch: `
                     <tree multi_edit="1">
-                    <field name="foo"/>
-                    <field name="int_field"/>
-                    </tree>`,
-                // in this test, we want to accurately mock what really happens, that is, input
-                // fields only trigger their changes on 'change' event, not on 'input'
-                // fieldDebounce: 100000,
+                        <field name="foo"/>
+                        <field name="int_field"/>
+                    </tree>
+                `,
             });
 
             assert.containsN(target, ".o_data_row", 4);
 
-            // select all records
             await click(target.querySelector(".o_list_view .o_list_record_selector input"));
 
-            // edit last cell of last line
-            await click([...target.querySelectorAll(".o_data_row .o_data_cell")].pop());
-            const input = target.querySelector(".o_data_row [name=int_field] input");
-            input.value = "666";
-            await triggerEvent(input, null, "input");
-            await triggerEvent(
-                [...target.querySelectorAll(".o_data_row .o_data_cell")].pop(),
-                null,
-                "keydown",
-                { key: "enter" }
+            await click(target, ".o_data_row:last-child [name=int_field]");
+            await editInput(target, ".o_data_row:last-child [name=int_field] input", 7);
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_data_row:last-child [name=int_field] input")
             );
+
+            triggerHotkey("Enter");
+            await nextTick();
 
             assert.containsOnce(target, ".modal");
 
             await click(target, ".modal .btn-primary");
-            assert.containsN(
-                target,
-                ".o_data_row",
-                4,
-                "should not create a new row as we were in multi edition"
-            );
+
+            assert.containsN(target, ".o_data_row", 4);
         }
     );
 
