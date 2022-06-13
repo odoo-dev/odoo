@@ -1155,6 +1155,9 @@ export class ListRenderer extends Component {
                     break;
                 }
 
+                if (!dataPoint) {
+                    return false;
+                }
                 if (this.props.editable) {
                     // problem with several fields with same name!
                     const column = this.state.columns.find(
@@ -1162,11 +1165,10 @@ export class ListRenderer extends Component {
                     );
                     this.cellToFocus = { column, record: dataPoint };
                     dataPoint.switchMode("edit");
-                } else if (!this.props.archInfo.noOpen && dataPoint) {
+                } else if (!this.props.archInfo.noOpen) {
                     this.props.openRecord(dataPoint);
-                    break;
                 }
-                return false;
+                break;
             }
             default:
                 // Return with no effect (no stop or prevent default...)
