@@ -105,7 +105,7 @@
                     <t t-call="web.ListRenderer.Rows">
                         <t t-set="list" t-value="group.list"/>
                     </t>
-                    <t t-if="!group.list.isGrouped and props.editable and props.activeActions['create']">
+                    <tr t-if="!group.list.isGrouped and props.editable and props.activeActions['create']">
                         <td t-if="props.hasSelectors"/>
                         <td
                             t-att-colspan="state.columns.length + 1"
@@ -118,7 +118,7 @@
                                 Add a line
                             </a>
                         </td>
-                    </t>
+                    </tr>
                 </t>
             </t>
         </t>

@@ -12256,11 +12256,9 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_data_row", 5);
     });
 
-    QUnit.skipWOWL(
+    QUnit.test(
         "add and discard a line through keyboard navigation without crashing",
         async function (assert) {
-            assert.expect(2);
-
             await makeView({
                 type: "list",
                 resModel: "foo",
@@ -12269,26 +12267,25 @@ QUnit.module("Views", (hooks) => {
                 groupBy: ["bar"],
             });
 
-            await click($(target).find(".o_group_header:first")); // open group
-            // Triggers ENTER on "Add a line" wrapper cell
-            await testUtils.fields.triggerKeydown(
-                $(target).find(".o_group_field_row_add"),
-                "enter"
+            // open the last group
+            await click(target, ".o_group_header:last-child");
+            assert.containsN(target, ".o_data_row", 3);
+
+            // Can trigger ENTER on "Add a line" link ?
+            assert.containsOnce(target, ".o_group_field_row_add a");
+            target.querySelector(".o_group_field_row_add a").focus();
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o_group_field_row_add a")
             );
-            assert.containsN(
-                target,
-                "tbody:nth(1) .o_data_row",
-                4,
-                "new data row should be created"
-            );
-            await click(target.querySelector(".o_list_button_discard"));
+            assert.defaultBehavior(document.activeElement, null, "keydown", { key: "Enter" });
+            // Simulate "enter" keydown
+            await click(target, ".o_group_field_row_add a");
+
+            assert.containsN(target, ".o_data_row", 4);
+            await click(target, ".o_list_button_discard");
             // At this point, a crash manager should appear if no proper link targetting
-            assert.containsN(
-                target,
-                "tbody:nth(1) .o_data_row",
-                3,
-                "new data row should be discarded."
-            );
+            assert.containsN(target, ".o_data_row", 3);
         }
     );
 
