@@ -9619,78 +9619,72 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
-    QUnit.skipWOWL("editable readonly list view: navigation", async function (assert) {
-        assert.expect(6);
-
+    QUnit.test("editable readonly list view: navigation", async function (assert) {
         await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
             arch: `
                 <tree multi_edit="1">
                     <field name="foo"/>
                     <field name="int_field"/>
-                </tree>`,
-            serverData,
-            intercepts: {
-                switch_view: function (event) {
-                    assert.strictEqual(
-                        event.data.res_id,
-                        3,
-                        "'switch_view' event has been triggered"
-                    );
-                },
+                </tree>
+            `,
+            selectRecord: (resId) => {
+                assert.step(`resId: ${resId}`);
             },
-            resModel: "foo",
         });
 
         // select 2 records
-        await click($(target).find(".o_data_row:eq(1) .o_list_record_selector input"));
-        await click($(target).find(".o_data_row:eq(3) .o_list_record_selector input"));
+        await click(target, ".o_data_row:nth-child(2) .o_list_record_selector input");
+        await click(target, ".o_data_row:nth-child(4) .o_list_record_selector input");
 
         // toggle a row mode
-        await click($(target).find(".o_data_row:eq(1) .o_data_cell:eq(1)"));
-        assert.hasClass(
-            $(target).find(".o_data_row:eq(1)"),
-            "o_selected_row",
-            "the second row should be selected"
+        await click(target, ".o_data_row:nth-child(2) [name=foo]");
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
         );
 
         // Keyboard navigation only interracts with selected elements
-        await testUtils.fields.triggerKeydown(
-            $(target).find('tr.o_selected_row input.o_field_widget[name="int_field"]'),
-            "enter"
-        );
-        assert.hasClass(
-            $(target).find(".o_data_row:eq(3)"),
-            "o_selected_row",
-            "the fourth row should be selected"
-        );
-
-        await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-        await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-        assert.hasClass(
-            $(target).find(".o_data_row:eq(1)"),
-            "o_selected_row",
-            "the second row should be selected again"
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(target.querySelector(".o_data_row:nth-child(4)"), "o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(4) [name=foo] input")
         );
 
-        await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-        await testUtils.fields.triggerKeydown($(document.activeElement), "tab");
-        assert.hasClass(
-            $(target).find(".o_data_row:eq(3)"),
-            "o_selected_row",
-            "the fourth row should be selected again"
+        triggerHotkey("Tab"); // go to 4th row int_field
+        triggerHotkey("Tab"); // go to 2nd row foo field
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(2) [name=foo] input")
         );
 
-        await click($(target).find(".o_data_row:eq(2) .o_data_cell:eq(0)"));
-        assert.containsNone(
-            target,
-            ".o_data_cell input.o_field_widget",
-            "no row should be editable anymore"
+        triggerHotkey("Tab"); // go to 2nd row int_field
+        triggerHotkey("Tab"); // go to 4th row foo field
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(target.querySelector(".o_data_row:nth-child(4)"), "o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(4) [name=foo] input")
         );
-        // Clicking on an unselected record while no row is being edited will open the record (switch_view)
-        await click($(target).find(".o_data_row:eq(2) .o_data_cell:eq(0)"));
 
-        await click($(target).find(".o_data_row:eq(1) .o_list_record_selector input"));
-        await click($(target).find(".o_data_row:eq(3) .o_list_record_selector input"));
+        // Clicking on an unselected row while a row is being edited will leave the edition
+        await click(target, ".o_data_row:nth-child(3) [name=foo]");
+        assert.containsNone(target, ".o_selected_row");
+
+        // Clicking on an unselected record while no row is being edited will open the record
+        await click(target, ".o_data_row:nth-child(3) [name=foo]");
+        assert.verifySteps([`resId: 3`]);
     });
 
     // Need Key Nav

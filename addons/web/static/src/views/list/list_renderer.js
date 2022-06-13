@@ -756,6 +756,8 @@ export class ListRenderer extends Component {
                 await record.switchMode("edit");
                 this.cellToFocus = { column, record };
             }
+        } else if (this.props.list.editedRecord && this.props.list.editedRecord !== record) {
+            this.props.list.unselectRecord(true);
         } else if (!this.props.archInfo.noOpen) {
             this.props.openRecord(record);
         }
