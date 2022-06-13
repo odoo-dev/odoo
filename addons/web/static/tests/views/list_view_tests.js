@@ -11087,7 +11087,7 @@ QUnit.module("Views", (hooks) => {
         async function (assert) {
             assert.expect(1);
 
-            var $input;
+            var input;
             await makeView({
                 type: "list",
                 resModel: "foo",
@@ -11095,22 +11095,18 @@ QUnit.module("Views", (hooks) => {
                 arch: '<tree editable="bottom"><field name="foo"/></tree>',
                 mockRPC: function (route, args) {
                     if (args.method === "write") {
-                        assert.strictEqual(
-                            $input.prop("disabled"),
-                            true,
-                            "input should be disabled"
-                        );
+                        assert.strictEqual(input.disabled, true, "input should be disabled");
                     }
-                    return this._super.apply(this, arguments);
                 },
                 groupBy: ["bar"],
             });
 
-            await click($(target).find(".o_group_header:first"));
-            await click($(target).find("td:contains(yop)"));
-            $input = $(target).find('tr.o_selected_row input[name="foo"]');
-            await testUtils.fields.editAndTrigger($input, "lemon", "input");
-            await testUtils.fields.triggerKeydown($input, "tab");
+            await click(target.querySelectorAll(".o_group_header")[1]);
+            await click(target.querySelector(".o_data_row .o_data_cell"));
+            input = target.querySelector(".o_selected_row [name='foo'] input");
+            await editInput(input, null, "lemon");
+            triggerHotkey("Tab");
+            await nextTick();
         }
     );
 
@@ -11148,7 +11144,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipWOWL('pressing TAB in editable="bottom" grouped list', async function (assert) {
+    QUnit.test('pressing TAB in editable="bottom" grouped list', async function (assert) {
         assert.expect(7);
 
         await makeView({
@@ -11160,28 +11156,33 @@ QUnit.module("Views", (hooks) => {
         });
 
         // open two groups
-        await click($(target).find(".o_group_header:first"));
-        assert.containsN(target, ".o_data_row", 3, "first group contains 3 rows");
-        await click($(target).find(".o_group_header:nth(1)"));
-        assert.containsN(target, ".o_data_row", 4, "first group contains 1 row");
+        await click(getGroup(target, 0));
+        assert.containsN(target, ".o_data_row", 1, "first group contains 1 row");
 
-        await click($(target).find(".o_data_cell:first"));
+        await click(getGroup(target, 1));
+        assert.containsN(target, ".o_data_row", 4, "second group contains 3 rows");
+
+        await click(target.querySelector(".o_data_cell"));
         assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
 
-        // Press 'Tab' -> should go to next line (still in first group)
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
+        // Press 'Tab' -> should go to first line of second group
+        triggerHotkey("Tab");
+        await nextTick();
         assert.hasClass($(target).find(".o_data_row:nth(1)"), "o_selected_row");
 
-        // Press 'Tab' -> should go to next line (still in first group)
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
+        // Press 'Tab' -> should go to next line (still in second group)
+        triggerHotkey("Tab");
+        await nextTick();
         assert.hasClass($(target).find(".o_data_row:nth(2)"), "o_selected_row");
 
-        // Press 'Tab' -> should go to first line of next group
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
+        // Press 'Tab' -> should go to next line (still in second group)
+        triggerHotkey("Tab");
+        await nextTick();
         assert.hasClass($(target).find(".o_data_row:nth(3)"), "o_selected_row");
 
         // Press 'Tab' -> should go back to first line of first group
-        await testUtils.fields.triggerKeydown($(target).find(".o_selected_row .o_input"), "tab");
+        triggerHotkey("Tab");
+        await nextTick();
         assert.hasClass($(target).find(".o_data_row:first"), "o_selected_row");
     });
 
