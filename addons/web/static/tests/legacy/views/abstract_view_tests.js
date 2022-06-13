@@ -11,7 +11,7 @@ var ListView = require('web.ListView');
 const { createWebClient, doAction } = require('@web/../tests/webclient/helpers');
 var createView = testUtils.createView;
 
-QUnit.module('Views', {
+QUnit.module('LegacyViews', {
     beforeEach: function () {
         this.data = {
             fake_model: {

@@ -38,7 +38,7 @@ const { markup, onMounted, onWillUnmount, xml } = owl;
 
 let serverData;
 let target;
-QUnit.module('Views', {
+QUnit.module('LegacyViews', {
     beforeEach: function () {
         registry.category("views").remove("list"); // remove new list from registry
         registry.category("views").remove("kanban"); // remove new kanban from registry
@@ -152,7 +152,7 @@ QUnit.module('Views', {
     }
 }, function () {
 
-    QUnit.module('Legacy ListView');
+    QUnit.module('ListView (legacy)');
 
     QUnit.test('simple readonly list', async function (assert) {
         assert.expect(10);

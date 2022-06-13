@@ -39,7 +39,7 @@ const { onMounted, onWillUnmount, xml } = owl;
 
 let serverData;
 let target;
-QUnit.module('Views', {
+QUnit.module('LegacyViews', {
     beforeEach: function () {
         target = getFixture();
 
@@ -190,7 +190,7 @@ QUnit.module('Views', {
     },
 }, function () {
 
-    QUnit.module('Legacy FormView');
+    QUnit.module('FormView (legacy)');
 
     QUnit.test('simple form rendering', async function (assert) {
         assert.expect(12);
@@ -1067,7 +1067,7 @@ QUnit.module('Views', {
                             <notebook>
                                 <page string="Non scrollable page">
                                     <div id="anchor1">No scrollbar!</div>
-                                    <a href="#anchor2" class="link2">TO ANCHOR 2</a> 
+                                    <a href="#anchor2" class="link2">TO ANCHOR 2</a>
                                 </page>
                                 <page string="Other scrollable page">
                                     <p style="font-size: large">
@@ -1092,7 +1092,7 @@ QUnit.module('Views', {
                                         at sapien. Vivamus leo. Aliquam euismod libero eu enim. Nulla nec felis sed leo
                                         placerat imperdiet. Aenean suscipit nulla in justo. Suspendisse cursus rutrum
                                         augue.
-                                    </p>   
+                                    </p>
                                 </page>
                             </notebook>
                         </sheet>
@@ -1387,7 +1387,7 @@ QUnit.module('Views', {
         assert.containsN(form, 'button.oe_stat_button[disabled]', 1);
         await testUtils.dom.click('button[name=action_to_perform]');
         assert.containsN(form, 'button.oe_stat_button[disabled]', 1, "After performing the action, only one button should be disabled.");
-        
+
         form.destroy();
     });
 

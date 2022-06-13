@@ -25,7 +25,7 @@ var createView = testUtils.createView;
 const { Markup } = require("web.utils");
 const { markup, xml } = owl;
 
-QUnit.module('Views', {
+QUnit.module('LegacyViews', {
     before: function () {
         this._initialKanbanProgressBarAnimate = KanbanColumnProgressBar.prototype.ANIMATE;
         KanbanColumnProgressBar.prototype.ANIMATE = false;
@@ -111,7 +111,7 @@ QUnit.module('Views', {
     },
 }, function () {
 
-    QUnit.module('Legacy KanbanView');
+    QUnit.module('KanbanView (legacy)');
 
     QUnit.test('basic ungrouped rendering', async function (assert) {
         assert.expect(6);
