@@ -43,7 +43,7 @@ export class ProgressBarField extends Component {
                 parsedValue = Math.floor(parsedValue);
             }
             this.state[part] = parsedValue;
-            this.props.record.update({ [this.props[part].fieldName]: parsedValue });
+            this.props.updatePart(part, parsedValue);
         } catch {
             this.props.invalidate();
             return;
@@ -69,9 +69,11 @@ ProgressBarField.props = {
     isCurrentValueEditable: { type: Boolean, optional: true },
     isMaxValueEditable: { type: Boolean, optional: true },
     invalidate: { type: Function, optional: true },
+    updatePart: { type: Function, optional: true },
 };
 ProgressBarField.defaultProps = {
     invalidate: () => {},
+    updatePart: () => {},
 };
 
 ProgressBarField.displayName = _lt("Progress Bar");
@@ -102,15 +104,19 @@ ProgressBarField.extractProps = (fieldName, record, attrs) => {
             type: value % 1 === 0 ? "integer" : "float",
         };
     };
-    return {
+    const parts = {
         currentValue: getPart("current_value"),
         maxValue: getPart("max_value"),
+    };
+    return {
+        ...parts,
         isPercentage: !attrs.options.max_value,
         isCurrentValueEditable:
             (attrs.options.editable && !attrs.options.edit_max_value) ||
             attrs.options.edit_current_value,
         isMaxValueEditable: attrs.options.edit_max_value,
         invalidate: () => record.setInvalidField(fieldName),
+        updatePart: (part, value) => record.update({ [parts[part].fieldName]: value }),
     };
 };
 
