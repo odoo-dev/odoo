@@ -320,16 +320,15 @@ export class ListRenderer extends Component {
     }
 
     focusCell(column, forward = true) {
-        let index = this.state.columns.indexOf(column);
-        if (index === -1) {
-            index = 0;
-        }
-        const columns = [
-            ...this.state.columns.slice(index, this.state.columns.length),
-            ...this.state.columns.slice(0, index),
-        ];
-        if (!forward) {
-            columns.reverse();
+        const index = this.state.columns.indexOf(column);
+        let columns;
+        if (index === -1 && !forward) {
+            columns = this.state.columns.slice(0).reverse();
+        } else {
+            columns = [
+                ...this.state.columns.slice(index, this.state.columns.length),
+                ...this.state.columns.slice(0, index),
+            ];
         }
         const editedRecord = this.props.list.editedRecord;
         for (const column of columns) {
@@ -1015,8 +1014,7 @@ export class ListRenderer extends Component {
                             throw new Error("To implement");
                         } else {
                             const futureRecord = list.records[index - 1];
-                            const column = this.state.columns[this.state.columns.length - 1];
-                            this.cellToFocus = { column, forward: false, record: futureRecord };
+                            this.cellToFocus = { forward: false, record: futureRecord };
                             futureRecord.switchMode("edit");
                         }
                     }
