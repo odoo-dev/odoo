@@ -11503,7 +11503,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.debug('pressing ENTER in editable="top" grouped list view', async function (assert) {
+    QUnit.test('pressing ENTER in editable="top" grouped list view', async function (assert) {
         serverData.models.foo.records[2].bar = false;
         await makeView({
             type: "list",
