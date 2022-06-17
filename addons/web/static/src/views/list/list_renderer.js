@@ -812,7 +812,7 @@ export class ListRenderer extends Component {
      * @param {boolean} cellIsInGroupRow
      * @param {"up"|"down"|"left"|"right"} direction
      */
-    findFutureCell(cell, cellIsInGroupRow, direction) {
+    findFocusFutureCell(cell, cellIsInGroupRow, direction) {
         const row = cell.parentElement;
         const children = [...row.children];
         const index = children.indexOf(cell);
@@ -872,7 +872,7 @@ export class ListRenderer extends Component {
                 break;
             }
         }
-        return futureCell;
+        return futureCell && getElementToFocus(futureCell);
     }
 
     /**
@@ -903,6 +903,8 @@ export class ListRenderer extends Component {
             : this.onCellKeydownReadOnlyMode(hotkey, closestCell, group, record); // record is supposed to be not null here
 
         if (handled) {
+            this.lastCreatingAction = false;
+            this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
             ev.preventDefault();
             ev.stopPropagation();
         }
@@ -952,6 +954,150 @@ export class ListRenderer extends Component {
         return null;
     }
 
+    applyCellKeydownMultiEditMode(hotkey, cell, group, record) {
+        const { list } = this.props;
+        const row = cell.parentElement;
+        let toFocus, futureRecord;
+        const index = list.selection.indexOf(record);
+        if (this.lastIsDirty && ["tab", "shift+tab", "enter"].includes(hotkey)) {
+            record.switchMode("readonly");
+            return true;
+        }
+
+        if (this.applyCellKeydownEditModeStayOnRow(hotkey, cell, group, record)) {
+            return true;
+        }
+
+        switch (hotkey) {
+            case "tab":
+                futureRecord = list.selection[index + 1] || list.selection[0];
+                if (record === futureRecord) {
+                    // Refocus first cell of same record
+                    toFocus = this.findNextFocusableOnRow(row);
+                    this.focus(toFocus);
+                    return true;
+                }
+                break;
+
+            case "shift+tab":
+                futureRecord =
+                    list.selection[index - 1] || list.selection[list.selection.length - 1];
+                if (record === futureRecord) {
+                    // Refocus last cell of same record
+                    toFocus = this.findPreviousFocusableOnRow(row);
+                    this.focus(toFocus);
+                    return true;
+                }
+                this.cellToFocus = { forward: false, record: futureRecord };
+                break;
+
+            case "enter":
+                if (list.selection.length === 1) {
+                    record.switchMode("readonly");
+                    return true;
+                }
+                futureRecord = list.selection[index + 1] || list.selection[0];
+                break;
+        }
+
+        if (futureRecord) {
+            futureRecord.switchMode("edit");
+            return true;
+        }
+        return false;
+    }
+
+    applyCellKeydownEditModeGroup(hotkey, cell, group, record) {
+        const { activeActions, editable } = this.props;
+        const groupIndex = group.list.records.indexOf(record);
+        const isLastOfGroup = groupIndex === group.list.records.length - 1;
+        const isDirty = record.isDirty || this.lastIsDirty;
+        const isEnterBehavior = hotkey === "enter" && (!record.canBeAbandoned || isDirty);
+        const isTabBehavior = hotkey === "tab" && !record.canBeAbandoned && isDirty;
+        if (isEnterBehavior && !record.checkValidity()) {
+            return true;
+        }
+        if (
+            isLastOfGroup &&
+            activeActions.create &&
+            editable === "bottom" &&
+            record.checkValidity() &&
+            (isEnterBehavior || isTabBehavior)
+        ) {
+            record.save().then((saved) => {
+                if (saved) {
+                    group.createRecord({}, editable === "top");
+                }
+            });
+            return true;
+        }
+        return false;
+    }
+
+    applyCellKeydownEditModeStayOnRow(hotkey, cell, group, record) {
+        let toFocus;
+        const row = cell.parentElement;
+
+        switch (hotkey) {
+            case "tab":
+                toFocus = this.findNextFocusableOnRow(row, cell);
+                break;
+            case "shift+tab":
+                toFocus = this.findPreviousFocusableOnRow(row, cell);
+                break;
+        }
+
+        if (toFocus) {
+            this.focus(toFocus);
+            return true;
+        }
+        return false;
+    }
+
+    applyCellKeydownEditModeLastRow(hotkey, cell, group, record) {
+        const { activeActions, cycleOnTab, list } = this.props;
+        const row = cell.parentElement;
+        switch (hotkey) {
+            case "tab":
+                // X2many add a line
+                if (activeActions && (activeActions.canLink || activeActions.canCreate)) {
+                    if (record.isNew && !record.isDirty) {
+                        list.unselectRecord(true);
+                        return false;
+                    }
+                    // add a line
+                    if (record.checkValidity()) {
+                        const { context } = this.creates[0];
+                        this.props.onAdd(context);
+                    }
+                } else if (
+                    activeActions.create &&
+                    !record.canBeAbandoned &&
+                    (record.isDirty || this.lastIsDirty)
+                ) {
+                    record.save().then((saved) => {
+                        if (saved) {
+                            this.props.onAdd();
+                        }
+                    });
+                } else if (cycleOnTab) {
+                    if (record.canBeAbandoned) {
+                        list.unselectRecord(true);
+                    }
+                    const futureRecord = list.records[0];
+                    if (record === futureRecord) {
+                        // Refocus first cell of same record
+                        const toFocus = this.findNextFocusableOnRow(row);
+                        this.focus(toFocus);
+                    } else {
+                        futureRecord.switchMode("edit");
+                    }
+                } else {
+                    return false;
+                }
+        }
+    }
+
     /**
      * @param {string} hotkey
      * @param {HTMLTableCellElement} cell
@@ -964,159 +1110,44 @@ export class ListRenderer extends Component {
      * @returns {boolean} true if some behavior has been taken
      */
     onCellKeydownEditMode(hotkey, cell, group, record) {
-        const { activeActions, cycleOnTab, editable, list } = this.props;
+        const { activeActions, cycleOnTab, list } = this.props;
         const row = cell.parentElement;
-        let toFocus = null;
+        const applyMultiEditBehavior = record.selected && list.model.multiEdit;
+
+        if (
+            applyMultiEditBehavior &&
+            this.applyCellKeydownMultiEditMode(hotkey, cell, group, record)
+        ) {
+            return true;
+        }
+
+        if (this.applyCellKeydownEditModeStayOnRow(hotkey, cell, group, record)) {
+            return true;
+        }
+
+        if (group && this.applyCellKeydownEditModeGroup(hotkey, cell, group, record)) {
+            return true;
+        }
+
         switch (hotkey) {
-            case "tab":
-                toFocus = this.findNextFocusableOnRow(row, cell);
-                if (toFocus) {
-                    this.focus(toFocus);
-                    this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
-                } else {
-                    const applyMultiEditBehavior = record.selected && list.model.multiEdit;
-                    if (applyMultiEditBehavior) {
-                        if (!record.isDirty) {
-                            const index = list.selection.indexOf(record);
-                            const futureRecord = list.selection[index + 1] || list.selection[0];
-                            if (record === futureRecord) {
-                                // Refocus first cell of same record
-                                toFocus = this.findNextFocusableOnRow(row);
-                                this.focus(toFocus);
-                            } else {
-                                futureRecord.switchMode("edit");
-                            }
+            case "tab": {
+                const index = list.records.indexOf(record);
+                if (index === list.records.length - 1) {
+                    if (activeActions && (activeActions.canLink || activeActions.canCreate)) {
+                        if (record.isNew && !record.isDirty) {
+                            list.unselectRecord(true);
+                            return false;
                         }
-                    } else {
-                        const index = list.records.indexOf(record);
-                        if (group) {
-                            const groupIndex = group.list.records.indexOf(record);
-                            if (
-                                groupIndex === group.list.records.length - 1 &&
-                                activeActions.create &&
-                                !record.canBeAbandoned &&
-                                record.isDirty &&
-                                record.checkValidity()
-                            ) {
-                                // it would maybe be better to rework onAdd API
-                                record.save().then((saved) => {
-                                    if (saved) {
-                                        group.createRecord({}, this.props.editable === "top");
-                                    }
-                                });
-
-                                return true;
-                            }
+                        // add a line
+                        if (record.checkValidity()) {
+                            const { context } = this.creates[0];
+                            this.props.onAdd(context);
                         }
-                        if (index === list.records.length - 1) {
-                            if (
-                                activeActions &&
-                                (activeActions.canLink || activeActions.canCreate)
-                            ) {
-                                if (record.isNew && !record.isDirty) {
-                                    list.unselectRecord(true);
-                                    return false;
-                                }
-                                // add a line
-                                if (record.checkValidity()) {
-                                    const { context } = this.creates[0];
-                                    this.props.onAdd(context);
-                                }
-                            } else if (
-                                activeActions.create &&
-                                !record.canBeAbandoned &&
-                                record.isDirty
-                            ) {
-                                record.save().then((saved) => {
-                                    if (saved) {
-                                        if (group) {
-                                            // it would maybe be better to rework onAdd API
-                                            group.createRecord({}, this.props.editable === "top");
-                                        } else {
-                                            this.props.onAdd();
-                                        }
-                                    }
-                                });
-                            } else if (cycleOnTab) {
-                                if (record.canBeAbandoned) {
-                                    list.unselectRecord(true);
-                                }
-                                const futureRecord = list.records[0];
-                                if (record === futureRecord) {
-                                    // Refocus first cell of same record
-                                    toFocus = this.findNextFocusableOnRow(row);
-                                    this.focus(toFocus);
-                                } else {
-                                    futureRecord.switchMode("edit");
-                                }
-                            } else {
-                                return false;
-                            }
-                        } else {
-                            const futureRecord = list.records[index + 1];
-                            futureRecord.switchMode("edit");
-                        }
-                    }
-                }
-                break;
-            case "shift+tab": {
-                toFocus = this.findPreviousFocusableOnRow(row, cell);
-                if (toFocus) {
-                    this.focus(toFocus);
-                    this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
-                } else {
-                    const applyMultiEditBehavior = record.selected && list.model.multiEdit;
-                    if (applyMultiEditBehavior) {
-                        throw new Error("To implement");
-                    } else {
-                        const index = list.records.indexOf(record);
-                        if (index === 0) {
-                            throw new Error("To implement");
-                        } else {
-                            const futureRecord = list.records[index - 1];
-                            this.cellToFocus = { forward: false, record: futureRecord };
-                            futureRecord.switchMode("edit");
-                        }
-                    }
-                }
-                break;
-            }
-            case "enter":
-                // use this.props.list.model.multiEdit somewhere?
-                if (!editable && list.selection && list.selection.length === 1) {
-                    list.unselectRecord();
-                    break;
-                }
-
-                if (editable) {
-                    if (group) {
-                        const focusIndex = group.list.records.indexOf(record);
-                        if (
-                            focusIndex === group.list.records.length - 1 &&
-                            activeActions.create &&
-                            editable === "bottom"
-                        ) {
-                            // it would maybe be better to rework onAdd API
-                            record.save().then((saved) => {
-                                if (saved) {
-                                    group.createRecord({}, editable === "top");
-                                }
-                            });
-                            return true;
-                        }
-                    }
-                    const index = list.records.indexOf(record);
-                    let futureRecord = list.records[index + 1];
-
-                    if (!futureRecord) {
-                        if (activeActions && activeActions.create === false) {
-                            futureRecord = list.records[0];
-                        }
-                    }
-
-                    if (futureRecord) {
-                        futureRecord.switchMode("edit");
-                    } else {
+                    } else if (
+                        activeActions.create &&
+                        !record.canBeAbandoned &&
+                        (record.isDirty || this.lastIsDirty)
+                    ) {
                         record.save().then((saved) => {
                             if (saved) {
                                 if (group) {
@@ -1127,16 +1158,83 @@ export class ListRenderer extends Component {
                                 }
                             }
                         });
+                    } else if (cycleOnTab) {
+                        if (record.canBeAbandoned) {
+                            list.unselectRecord(true);
+                        }
+                        const futureRecord = list.records[0];
+                        if (record === futureRecord) {
+                            // Refocus first cell of same record
+                            const toFocus = this.findNextFocusableOnRow(row);
+                            this.focus(toFocus);
+                        } else {
+                            futureRecord.switchMode("edit");
+                        }
+                    } else {
+                        return false;
                     }
-                }
-
-                if (list.selection && list.selection.length > 1) {
-                    // Multiple edition
-                    const index = list.selection.indexOf(record);
-                    const futureRecord = list.selection[index + 1] || list.selection[0];
+                } else {
+                    const futureRecord = list.records[index + 1];
                     futureRecord.switchMode("edit");
                 }
                 break;
+            }
+            case "shift+tab": {
+                const index = list.records.indexOf(record);
+                if (index === 0) {
+                    if (cycleOnTab) {
+                        if (record.canBeAbandoned) {
+                            list.unselectRecord(true);
+                        }
+                        const futureRecord = list.records[list.records.length - 1];
+                        if (record === futureRecord) {
+                            // Refocus first cell of same record
+                            const toFocus = this.findPreviousFocusableOnRow(row);
+                            this.focus(toFocus);
+                        } else {
+                            this.cellToFocus = { forward: false, record: futureRecord };
+                            futureRecord.switchMode("edit");
+                        }
+                    } else {
+                        return false;
+                    }
+                } else {
+                    const futureRecord = list.records[index - 1];
+                    this.cellToFocus = { forward: false, record: futureRecord };
+                    futureRecord.switchMode("edit");
+                }
+                break;
+            }
+            case "enter": {
+                const index = list.records.indexOf(record);
+                let futureRecord = list.records[index + 1];
+
+                if (!futureRecord) {
+                    if (activeActions && activeActions.create === false) {
+                        futureRecord = list.records[0];
+                    }
+                }
+
+                if (futureRecord) {
+                    futureRecord.switchMode("edit");
+                } else if (this.lastIsDirty || !record.canBeAbandoned || this.lastCreatingAction) {
+                    record.save().then((saved) => {
+                        if (saved) {
+                            if (group) {
+                                // it would maybe be better to rework onAdd API
+                                group.createRecord({}, this.props.editable === "top");
+                            } else {
+                                this.props.onAdd();
+                            }
+                        }
+                    });
+                } else if (record.checkValidity()) {
+                    const index = list.records.indexOf(record);
+                    futureRecord = list.records[index + 1] || list.records.at(0);
+                    futureRecord.switchMode("edit");
+                }
+                break;
+            }
             case "escape": {
                 // TODO this seems bad: refactor this
                 record.discard();
@@ -1189,56 +1287,72 @@ export class ListRenderer extends Component {
      * @returns {boolean} true if some behavior has been taken
      */
     onCellKeydownReadOnlyMode(hotkey, cell, group, record) {
-        const cellIsInGroupRow = !!(group && !record);
-        let futureCell;
+        const cellIsInGroupRow = Boolean(group && !record);
+        const applyMultiEditBehavior = record && record.selected && this.props.list.model.multiEdit;
+        let toFocus;
         switch (hotkey) {
-            case "arrowup": {
-                futureCell = this.findFutureCell(cell, cellIsInGroupRow, "up");
-                if (!futureCell) {
+            case "arrowup":
+                toFocus = this.findFocusFutureCell(cell, cellIsInGroupRow, "up");
+                if (!toFocus) {
                     this.env.searchModel.trigger("focus-search");
-                    this.tableRef.el
-                        .querySelector("tbody")
-                        .classList.remove("o_keyboard_navigation");
+                    return true;
                 }
                 break;
-            }
             case "arrowdown":
-                futureCell = this.findFutureCell(cell, cellIsInGroupRow, "down");
+                toFocus = this.findFocusFutureCell(cell, cellIsInGroupRow, "down");
                 break;
             case "arrowleft":
                 if (cellIsInGroupRow && !group.isFolded) {
                     this.toggleGroup(group);
-                } else if (cell.classList.contains("o_field_x2many_list_row_add")) {
+                    return true;
+                }
+
+                if (cell.classList.contains("o_field_x2many_list_row_add")) {
                     // to refactor
                     const a = document.activeElement;
-                    const futureA = a.previousElementSibling;
-                    if (futureA) {
-                        this.focus(futureA);
-                    }
+                    toFocus = a.previousElementSibling;
                 } else {
-                    futureCell = this.findFutureCell(cell, cellIsInGroupRow, "left");
+                    toFocus = this.findFocusFutureCell(cell, cellIsInGroupRow, "left");
                 }
                 break;
-            case "arrowright": {
+            case "arrowright":
                 if (cellIsInGroupRow && group.isFolded) {
                     this.toggleGroup(group);
-                } else if (cell.classList.contains("o_field_x2many_list_row_add")) {
-                    // to refactor
+                    return true;
+                }
+
+                if (cell.classList.contains("o_field_x2many_list_row_add")) {
+                    // This cell contains only <a/> elements, see template.
                     const a = document.activeElement;
-                    const futureA = a.nextElementSibling;
-                    if (futureA) {
-                        this.focus(futureA);
-                    }
+                    toFocus = a.nextElementSibling;
                 } else {
-                    futureCell = this.findFutureCell(cell, cellIsInGroupRow, "right");
+                    toFocus = this.findFocusFutureCell(cell, cellIsInGroupRow, "right");
                 }
                 break;
-            }
-            case "enter": {
-                const isRemoveTd = cell.classList.contains("o_list_record_remove");
-                if (isRemoveTd) {
+            case "tab":
+                if (cellIsInGroupRow) {
+                    const buttons = Array.from(cell.querySelectorAll(".o_group_buttons button"));
+                    const currentButton = document.activeElement.closest("button");
+                    const index = buttons.indexOf(currentButton);
+                    toFocus = buttons[index + 1] || currentButton;
+                }
+                break;
+            case "shift+tab":
+                if (cellIsInGroupRow) {
+                    const buttons = Array.from(cell.querySelectorAll(".o_group_buttons button"));
+                    const currentButton = document.activeElement.closest("button");
+                    const index = buttons.indexOf(currentButton);
+                    toFocus = buttons[index - 1] || currentButton;
+                }
+                break;
+            case "enter":
+                if (!group && !record) {
+                    return false;
+                }
+
+                if (cell.classList.contains("o_list_record_remove")) {
                     this.onDeleteRecord(record);
-                    break;
+                    return true;
                 }
 
                 if (cellIsInGroupRow) {
@@ -1248,67 +1362,34 @@ export class ListRenderer extends Component {
                     } else {
                         this.toggleGroup(group);
                     }
-                    break;
+                    return true;
                 }
 
-                if (!group && !record) {
-                    return false;
-                }
-
-                if (this.props.editable) {
-                    // problem with several fields with same name!
+                if (this.props.editable || applyMultiEditBehavior) {
                     const column = this.state.columns.find(
                         (c) => c.name === cell.getAttribute("name")
                     );
                     this.cellToFocus = { column, record };
                     record.switchMode("edit");
-                } else if (!this.props.archInfo.noOpen) {
+                    return true;
+                }
+
+                if (!this.props.archInfo.noOpen) {
                     this.props.openRecord(record);
+                    return true;
                 }
                 break;
-            }
-            case "tab":
-                if (cellIsInGroupRow) {
-                    const buttons = Array.from(cell.querySelectorAll(".o_group_buttons button"));
-                    const currentButton = document.activeElement.closest("button");
-                    const index = buttons.indexOf(currentButton);
-                    const futureButton = buttons[index + 1] || currentButton;
-                    if (futureButton) {
-                        this.focus(futureButton);
-                        this.tableRef.el
-                            .querySelector("tbody")
-                            .classList.add("o_keyboard_navigation");
-                        return true;
-                    }
-                }
-                return false;
-            case "shift+tab":
-                if (cellIsInGroupRow) {
-                    const buttons = Array.from(cell.querySelectorAll(".o_group_buttons button"));
-                    const currentButton = document.activeElement.closest("button");
-                    const index = buttons.indexOf(currentButton);
-                    const futureButton = buttons[index - 1] || currentButton;
-                    if (futureButton) {
-                        this.focus(futureButton);
-                        this.tableRef.el
-                            .querySelector("tbody")
-                            .classList.add("o_keyboard_navigation");
-                        return true;
-                    }
-                }
-                return false;
             default:
                 // Return with no effect (no stop or prevent default...)
                 return false;
         }
 
-        if (futureCell) {
-            const toFocus = getElementToFocus(futureCell);
+        if (toFocus) {
             this.focus(toFocus);
-            this.tableRef.el.querySelector("tbody").classList.add("o_keyboard_navigation");
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     async onCreateAction(context) {
@@ -1318,6 +1399,9 @@ export class ListRenderer extends Component {
         }
         this.props.onAdd(context);
         this.createProm = Promise.resolve();
+        this.createProm.then(() => {
+            this.lastCreatingAction = true;
+        });
         await this.createProm;
         this.createProm = null;
     }
@@ -1344,6 +1428,10 @@ export class ListRenderer extends Component {
             const { context } = this.creates[0];
             this.onCreateAction(context);
         }
+    }
+
+    setDirty(isDirty) {
+        this.lastIsDirty = isDirty;
     }
 
     saveOptionalActiveFields() {
@@ -1408,9 +1496,7 @@ export class ListRenderer extends Component {
             return; // there's no row in edition
         }
 
-        // WOWL: see if a test exists?
-        const tbody = this.tableRef.el.querySelector("tbody");
-        tbody.classList.remove("o_keyboard_navigation");
+        this.tableRef.el.querySelector("tbody").classList.remove("o_keyboard_navigation");
 
         if (this.tableRef.el.contains(ev.target)) {
             return; // ignore clicks inside the table, they are handled directly by the renderer

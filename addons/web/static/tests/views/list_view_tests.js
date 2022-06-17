@@ -67,8 +67,12 @@ async function reloadListView(target) {
     await validateSearch(target);
 }
 
-function getGroup(target, index) {
-    return target.querySelectorAll(".o_group_header")[index];
+function getDataRow(position) {
+    return target.querySelectorAll(".o_data_row")[position - 1];
+}
+
+function getGroup(position) {
+    return target.querySelectorAll(".o_group_header")[position - 1];
 }
 
 QUnit.module("Views", (hooks) => {
@@ -5994,7 +5998,7 @@ QUnit.module("Views", (hooks) => {
 
         // basic rendering tests
         assert.containsN(target, ".o_group_header", 2, "should contain 2 groups at first level");
-        const value1Group = getGroup(target, 0);
+        const value1Group = getGroup(1);
         assert.strictEqual(
             value1Group.querySelector(".o_group_name").textContent.trim(),
             "Value 1 (4)",
@@ -6028,7 +6032,7 @@ QUnit.module("Views", (hooks) => {
         );
 
         assert.strictEqual(
-            getGroup(target, 0).querySelector(".o_group_name").textContent.trim(),
+            getGroup(1).querySelector(".o_group_name").textContent.trim(),
             "Value 1 (4)",
             "group should have correct name and count (of records, not inner subgroups)"
         );
@@ -6042,7 +6046,7 @@ QUnit.module("Views", (hooks) => {
             5,
             "open group should contain 5 groups (2 groups and 3 subGroup)"
         );
-        const blipGroup = getGroup(target, 1);
+        const blipGroup = getGroup(2);
         assert.strictEqual(
             blipGroup.querySelector(".o_group_name").textContent.trim(),
             "blip (2)",
@@ -6120,7 +6124,7 @@ QUnit.module("Views", (hooks) => {
         // close first level group
         nbRPCs = { readGroup: 0, webSearchRead: 0 };
         envIDs = []; // the group being closed, there is no more record in the environment
-        await click(getGroup(target, 1));
+        await click(getGroup(2));
         assert.strictEqual(nbRPCs.readGroup, 0, "should have done no read_group");
         assert.strictEqual(nbRPCs.webSearchRead, 0, "should have done no web_search_read");
         assert.deepEqual(
@@ -9398,12 +9402,53 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        // select 2 records
-        await click(target, ".o_data_row:nth-child(2) .o_list_record_selector input");
-        await click(target, ".o_data_row:nth-child(4) .o_list_record_selector input");
+        assert.strictEqual(document.activeElement, target.querySelector(".o_searchview_input"));
+
+        // ArrowDown two times must get to the checkbox selector of first data row
+        triggerHotkey("ArrowDown");
+        triggerHotkey("ArrowDown");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:first-child .o_list_record_selector input")
+        );
+
+        // select the second record
+        triggerHotkey("ArrowDown");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(2) .o_list_record_selector input")
+        );
+        assert.defaultBehavior(document.activeElement, null, "keydown", { key: "Space" });
+        document.activeElement.checked = true;
+        await triggerEvent(document.activeElement, null, "input");
+        await triggerEvent(document.activeElement, null, "change");
+
+        // select the fourth record
+        triggerHotkey("ArrowDown");
+        triggerHotkey("ArrowDown");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(4) .o_list_record_selector input")
+        );
+        assert.defaultBehavior(document.activeElement, null, "keydown", { key: "Space" });
+        document.activeElement.checked = true;
+        await triggerEvent(document.activeElement, null, "input");
+        await triggerEvent(document.activeElement, null, "change");
 
         // toggle a row mode
-        await click(target, ".o_data_row:nth-child(2) [name=foo]");
+        triggerHotkey("ArrowUp");
+        triggerHotkey("ArrowUp");
+        triggerHotkey("ArrowRight");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(2) [name=foo]")
+        );
+        triggerHotkey("Enter");
+        await nextTick();
         assert.containsOnce(target, ".o_selected_row");
         assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
         assert.strictEqual(
@@ -9441,11 +9486,31 @@ QUnit.module("Views", (hooks) => {
             target.querySelector(".o_data_row:nth-child(4) [name=foo] input")
         );
 
+        triggerHotkey("Shift+Tab"); // go to 2nd row int_field
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(target.querySelector(".o_data_row:nth-child(2)"), "o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(2) [name=int_field] input")
+        );
+
+        triggerHotkey("Shift+Tab"); // go to 2nd row foo field
+        triggerHotkey("Shift+Tab"); // go to 4th row int_field field
+        await nextTick();
+        assert.containsOnce(target, ".o_selected_row");
+        assert.hasClass(target.querySelector(".o_data_row:nth-child(4)"), "o_selected_row");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:nth-child(4) [name=int_field] input")
+        );
+
         // Clicking on an unselected row while a row is being edited will leave the edition
         await click(target, ".o_data_row:nth-child(3) [name=foo]");
         assert.containsNone(target, ".o_selected_row");
 
         // Clicking on an unselected record while no row is being edited will open the record
+        assert.verifySteps([]);
         await click(target, ".o_data_row:nth-child(3) [name=foo]");
         assert.verifySteps([`resId: 3`]);
     });
@@ -9463,25 +9528,21 @@ QUnit.module("Views", (hooks) => {
                         <field name="int_field"/>
                     </tree>`,
             });
-
             assert.containsN(target, ".o_data_row", 4);
-
             await click(target.querySelector(".o_list_view .o_list_record_selector input"));
 
             await click(target, ".o_data_row:last-child [name=int_field]");
-            await editInput(target, ".o_data_row:last-child [name=int_field] input", 7);
+            const input = target.querySelector(".o_data_row:last-child [name=int_field] input");
+            input.value = 7;
+            await triggerEvent(input, null, "input");
             assert.strictEqual(
                 document.activeElement,
                 target.querySelector(".o_data_row:last-child [name=int_field] input")
             );
-
             triggerHotkey("Enter");
             await nextTick();
-
             assert.containsOnce(target, ".modal");
-
             await click(target, ".modal .btn-primary");
-
             assert.containsN(target, ".o_data_row", 4);
         }
     );
@@ -10898,10 +10959,10 @@ QUnit.module("Views", (hooks) => {
         });
 
         // open two groups
-        await click(getGroup(target, 0));
+        await click(getGroup(1));
         assert.containsN(target, ".o_data_row", 1, "first group contains 1 row");
 
-        await click(getGroup(target, 1));
+        await click(getGroup(2));
         assert.containsN(target, ".o_data_row", 4, "second group contains 3 rows");
 
         await click(target.querySelector(".o_data_cell"));
@@ -10969,9 +11030,9 @@ QUnit.module("Views", (hooks) => {
         });
 
         // open two groups
-        await click(getGroup(target, 0));
+        await click(getGroup(1));
         assert.containsN(target, ".o_data_row", 1, "first group contains 1 rows");
-        await click(getGroup(target, 1));
+        await click(getGroup(2));
         assert.containsN(target, ".o_data_row", 4, "first group contains 3 row");
 
         await click(target.querySelector(".o_data_cell"));
@@ -11140,9 +11201,9 @@ QUnit.module("Views", (hooks) => {
         });
 
         // open two groups
-        await click(getGroup(target, 0));
+        await click(getGroup(1));
         assert.containsN(target, ".o_data_row", 1, "first group contains 1 rows");
-        await click(getGroup(target, 1));
+        await click(getGroup(2));
         assert.containsN(target, ".o_data_row", 4, "first group contains 3 row");
 
         // select and edit last row of first group
@@ -11239,8 +11300,8 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["bar"],
         });
 
-        await click(getGroup(target, 0)); // open first group
-        await click(getGroup(target, 1)); // open second group
+        await click(getGroup(1)); // open first group
+        await click(getGroup(2)); // open second group
         assert.containsN(target, "tr.o_data_row", 4);
 
         const rows = target.querySelectorAll(".o_data_row");
@@ -11506,6 +11567,393 @@ QUnit.module("Views", (hooks) => {
         await nextTick();
         assert.verifySteps(["resId: 3"]);
     });
+
+    QUnit.test("keyboard navigation from last cell in editable list", async (assert) => {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree editable="bottom">
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                </tree>
+            `,
+        });
+
+        // Click on last cell
+        await click(target, ".o_data_row:last-child [name=int_field]");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:last-child [name=int_field] input")
+        );
+
+        // Tab should focus the first field of first row
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:first-child [name=foo] input")
+        );
+
+        // Shift+Tab should focus back the last field of last row
+        triggerHotkey("Shift+Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:last-child [name=int_field] input")
+        );
+
+        // Enter should add a new row at the bottom
+        assert.containsN(target, ".o_data_row", 4);
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:last-child [name=foo] input")
+        );
+
+        // Enter should discard the edited row as it is pristine + get to first row
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 4);
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:first-child [name=foo] input")
+        );
+
+        // Click on last cell
+        await click(target, ".o_data_row:last-child [name=int_field]");
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:last-child [name=int_field] input")
+        );
+
+        // Enter should add a new row at the bottom
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+
+        // Edit the row and press enter: should add a new row
+        const input = target.querySelector(".o_data_row:last-child [name=foo] input");
+        assert.strictEqual(document.activeElement, input);
+        input.value = "blork";
+        await triggerEvent(input, null, "input");
+        triggerHotkey("Enter");
+        await triggerEvent(input, null, "change");
+        assert.containsN(target, ".o_data_row", 6);
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".o_data_row:last-child [name=foo] input")
+        );
+
+        // Escape should discard the added row as it is pristine + view should go into readonly mode
+        triggerHotkey("Escape");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+        assert.containsNone(target, ".o_selected_row");
+    });
+
+    QUnit.test("keyboard navigation from last cell in editable grouped list", async (assert) => {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            groupBy: ["bar"],
+            arch: `
+                <tree editable="bottom">
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                </tree>
+            `,
+        });
+
+        assert.containsNone(target, ".o_data_row");
+        assert.containsN(target, ".o_group_header", 2);
+
+        // Open first and second groups
+        await click(getGroup(1));
+        await click(getGroup(2));
+        assert.containsN(target, ".o_data_row", 4);
+
+        // Click on last cell
+        await click(getDataRow(4).querySelector("[name=int_field]"));
+        assert.strictEqual(
+            document.activeElement,
+            getDataRow(4).querySelector("[name=int_field] input")
+        );
+
+        // Tab should focus the first field of first data row
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.strictEqual(document.activeElement, getDataRow(1).querySelector("[name=foo] input"));
+
+        // Shift+Tab should focus back the last field of last row
+        triggerHotkey("Shift+Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            getDataRow(4).querySelector("[name=int_field] input")
+        );
+
+        // Enter should add a new row at the bottom
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+        assert.strictEqual(document.activeElement, getDataRow(5).querySelector("[name=foo] input"));
+
+        // Enter should discard the edited row as it is pristine + get to first row
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 4);
+        assert.strictEqual(document.activeElement, getDataRow(1).querySelector("[name=foo] input"));
+
+        // Click on last cell
+        await click(getDataRow(4).querySelector("[name=int_field]"));
+        assert.strictEqual(
+            document.activeElement,
+            getDataRow(4).querySelector("[name=int_field] input")
+        );
+
+        // Enter should add a new row at the bottom
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+
+        // Edit the row and press enter: should add a new row
+        let input = getDataRow(5).querySelector("[name=foo] input");
+        assert.strictEqual(document.activeElement, input);
+        input.value = "blork";
+        await triggerEvent(input, null, "input");
+        triggerHotkey("Enter");
+        await triggerEvent(input, null, "change");
+        assert.containsN(target, ".o_data_row", 6);
+        assert.strictEqual(document.activeElement, getDataRow(6).querySelector("[name=foo] input"));
+
+        // Escape should discard the added row as it is pristine + view should go into readonly mode
+        triggerHotkey("Escape");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+        assert.containsNone(target, ".o_selected_row");
+
+        // Click on last data row of first group
+        assert.equal(getGroup(1).innerText, "No (1)	-4");
+        await click(getDataRow(1).querySelector("[name=foo]"));
+        assert.strictEqual(document.activeElement, getDataRow(1).querySelector("[name=foo] input"));
+
+        // Enter should add a new row in the first group
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 6);
+        assert.equal(getGroup(1).innerText, "No (2)	-4");
+
+        // Enter should discard the edited row as it is pristine + get to next data row
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+        assert.equal(getGroup(1).innerText, "No (1)	-4");
+        assert.strictEqual(document.activeElement, getDataRow(2).querySelector("[name=foo] input"));
+
+        // Shift+Tab should focus back the last field of first row
+        triggerHotkey("Shift+Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            getDataRow(1).querySelector("[name=int_field] input")
+        );
+
+        // Enter should add a new row in the first group
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 6);
+        assert.equal(getGroup(1).innerText, "No (2)	-4");
+
+        // Edit the row and press enter: should add a new row
+        input = getDataRow(2).querySelector("[name=foo] input");
+        assert.strictEqual(document.activeElement, input);
+        input.value = "zzapp";
+        await triggerEvent(input, null, "input");
+        triggerHotkey("Enter");
+        await triggerEvent(input, null, "change");
+        assert.containsN(target, ".o_data_row", 7);
+        assert.equal(getGroup(1).innerText, "No (3)	-4");
+        assert.strictEqual(document.activeElement, getDataRow(3).querySelector("[name=foo] input"));
+    });
+
+    QUnit.test("keyboard navigation from last cell in multi-edit list", async (assert) => {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            groupBy: ["bar"],
+            arch: `
+                <tree editable="bottom">
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                </tree>
+            `,
+        });
+
+        assert.containsNone(target, ".o_data_row");
+        assert.containsN(target, ".o_group_header", 2);
+
+        // Open first and second groups
+        await click(getGroup(1));
+        await click(getGroup(2));
+        assert.containsN(target, ".o_data_row", 4);
+
+        // Click on last cell
+        await click(getDataRow(4).querySelector("[name=int_field]"));
+        assert.strictEqual(
+            document.activeElement,
+            getDataRow(4).querySelector("[name=int_field] input")
+        );
+
+        // Tab should focus the first field of first data row
+        triggerHotkey("Tab");
+        await nextTick();
+        assert.strictEqual(document.activeElement, getDataRow(1).querySelector("[name=foo] input"));
+
+        // Shift+Tab should focus back the last field of last row
+        triggerHotkey("Shift+Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            getDataRow(4).querySelector("[name=int_field] input")
+        );
+
+        // Enter should add a new row at the bottom
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+        assert.strictEqual(document.activeElement, getDataRow(5).querySelector("[name=foo] input"));
+
+        // Enter should discard the edited row as it is pristine + get to first row
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 4);
+        assert.strictEqual(document.activeElement, getDataRow(1).querySelector("[name=foo] input"));
+
+        // Click on last cell
+        await click(getDataRow(4).querySelector("[name=int_field]"));
+        assert.strictEqual(
+            document.activeElement,
+            getDataRow(4).querySelector("[name=int_field] input")
+        );
+
+        // Enter should add a new row at the bottom
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+
+        // Edit the row and press enter: should add a new row
+        let input = getDataRow(5).querySelector("[name=foo] input");
+        assert.strictEqual(document.activeElement, input);
+        input.value = "blork";
+        await triggerEvent(input, null, "input");
+        triggerHotkey("Enter");
+        await triggerEvent(input, null, "change");
+        assert.containsN(target, ".o_data_row", 6);
+        assert.strictEqual(document.activeElement, getDataRow(6).querySelector("[name=foo] input"));
+
+        // Escape should discard the added row as it is pristine + view should go into readonly mode
+        triggerHotkey("Escape");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+        assert.containsNone(target, ".o_selected_row");
+
+        // Click on last data row of first group
+        assert.equal(getGroup(1).innerText, "No (1)	-4");
+        await click(getDataRow(1).querySelector("[name=foo]"));
+        assert.strictEqual(document.activeElement, getDataRow(1).querySelector("[name=foo] input"));
+
+        // Enter should add a new row in the first group
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 6);
+        assert.equal(getGroup(1).innerText, "No (2)	-4");
+
+        // Enter should discard the edited row as it is pristine + get to next data row
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 5);
+        assert.equal(getGroup(1).innerText, "No (1)	-4");
+        assert.strictEqual(document.activeElement, getDataRow(2).querySelector("[name=foo] input"));
+
+        // Shift+Tab should focus back the last field of first row
+        triggerHotkey("Shift+Tab");
+        await nextTick();
+        assert.strictEqual(
+            document.activeElement,
+            getDataRow(1).querySelector("[name=int_field] input")
+        );
+
+        // Enter should add a new row in the first group
+        triggerHotkey("Enter");
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 6);
+        assert.equal(getGroup(1).innerText, "No (2)	-4");
+
+        // Edit the row and press enter: should add a new row
+        input = getDataRow(2).querySelector("[name=foo] input");
+        assert.strictEqual(document.activeElement, input);
+        input.value = "zzapp";
+        await triggerEvent(input, null, "input");
+        triggerHotkey("Enter");
+        await triggerEvent(input, null, "change");
+        assert.containsN(target, ".o_data_row", 7);
+        assert.equal(getGroup(1).innerText, "No (3)	-4");
+        assert.strictEqual(document.activeElement, getDataRow(3).querySelector("[name=foo] input"));
+    });
+
+    QUnit.test(
+        "editable grouped list: adding a second record pass the first in readonly",
+        async (assert) => {
+            await makeView({
+                type: "list",
+                resModel: "foo",
+                serverData,
+                groupBy: ["bar"],
+                arch: `
+                <tree editable="bottom">
+                    <field name="foo"/>
+                </tree>
+            `,
+            });
+
+            assert.containsNone(target, ".o_data_row");
+            assert.containsN(target, ".o_group_header", 2);
+
+            // Open first and second groups
+            await click(getGroup(1));
+            await click(getGroup(2));
+            assert.containsN(target, ".o_data_row", 4);
+            assert.equal(getGroup(1).innerText, "No (1)");
+            assert.equal(getGroup(2).innerText, "Yes (3)");
+
+            // add a row in first group
+            await click(target.querySelectorAll(".o_group_field_row_add a")[0]);
+            assert.containsOnce(target, ".o_selected_row");
+            assert.containsN(target, ".o_data_row", 5);
+            assert.equal(getGroup(1).innerText, "No (2)");
+            assert.strictEqual(
+                document.activeElement,
+                getDataRow(2).querySelector("[name=foo] input")
+            );
+
+            // add a row in second group
+            await click(target.querySelectorAll(".o_group_field_row_add a")[1]);
+            assert.containsOnce(target, ".o_selected_row");
+            assert.containsN(target, ".o_data_row", 5);
+            assert.equal(getGroup(2).innerText, "Yes (4)");
+            assert.equal(getGroup(1).innerText, "No (1)");
+            assert.strictEqual(
+                document.activeElement,
+                getDataRow(5).querySelector("[name=foo] input")
+            );
+        }
+    );
 
     QUnit.test("removing a groupby while adding a line from list", async function (assert) {
         await makeView({

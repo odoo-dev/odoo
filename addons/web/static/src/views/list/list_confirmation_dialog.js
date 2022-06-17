@@ -3,10 +3,15 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { _lt } from "@web/core/l10n/translation";
 import { Field } from "@web/views/fields/field";
+import { useAutofocus } from "@web/core/utils/hooks";
 
 const { Component } = owl;
 
 export class ListConfirmationDialog extends Component {
+    setup() {
+        useAutofocus();
+    }
+
     _cancel() {
         if (this.props.cancel) {
             this.props.cancel();

@@ -3720,7 +3720,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="top">
+                        <tree editable="bottom">
                             <field name="turtle_foo"/>
                         </tree>
                     </field>
@@ -3734,7 +3734,8 @@ QUnit.module("Fields", (hooks) => {
         // edit mode, then click on Add an item, then press enter
         await clickEdit(target);
         await addRow(target);
-        await triggerEvent(target, '[name="turtle_foo"] input', "keydown", { key: "Enter" });
+        triggerHotkey("Enter");
+        await nextTick();
         assert.hasClass(target.querySelector('div[name="turtle_foo"]'), "o_field_invalid");
         assert.verifySteps(["get_views", "read", "onchange"]);
     });
