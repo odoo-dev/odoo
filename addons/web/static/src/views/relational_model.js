@@ -1900,7 +1900,15 @@ export class DynamicGroupList extends DynamicList {
             (this.expand ? this.constructor.DEFAULT_LOAD_LIMIT : this.constructor.DEFAULT_LIMIT);
         this.onCreateRecord =
             params.onCreateRecord ||
-            ((record) => {
+            (async (record) => {
+                const editedRecord = this.editedRecord;
+                if (editedRecord && !record.isInQuickCreation) {
+                    if (editedRecord.canBeAbandoned) {
+                        this.abandonRecord(editedRecord.id);
+                    } else {
+                        await editedRecord.save();
+                    }
+                }
                 this.editedRecord = record;
             });
     }
@@ -2101,6 +2109,7 @@ export class DynamicGroupList extends DynamicList {
         for (const group of this.groups) {
             const removedRecord = group.list.removeRecord(record);
             if (removedRecord) {
+                group.count--;
                 if (removedRecord === this.editedRecord) {
                     this.editedRecord = null;
                 }

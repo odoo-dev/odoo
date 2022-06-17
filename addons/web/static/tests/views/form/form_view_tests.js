@@ -9203,9 +9203,7 @@ QUnit.module("Views", (hooks) => {
             },
         });
 
-        const input = target.querySelector(".o_field_widget[name=qux] input");
-        input.value = "some qux value";
-        await triggerEvent(input, null, "input");
+        await editInput(target, ".o_field_widget[name=qux] input", "some qux value");
 
         await click(target.querySelector(".o_form_button_save"));
 

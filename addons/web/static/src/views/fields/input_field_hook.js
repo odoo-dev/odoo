@@ -22,6 +22,9 @@ export function useInputField(params) {
     let lastSetValue = null;
     function onInput(ev) {
         isDirty = ev.target.value !== lastSetValue;
+        if (component.props.setDirty) {
+            component.props.setDirty(isDirty);
+        }
     }
     function onChange(ev) {
         lastSetValue = ev.target.value;
@@ -31,6 +34,9 @@ export function useInputField(params) {
             component.props.update(val);
         } catch (_e) {
             component.props.invalidate();
+        }
+        if (component.props.setDirty) {
+            component.props.setDirty(isDirty);
         }
     }
     useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", () => commitChanges(true));
@@ -57,6 +63,7 @@ export function useInputField(params) {
 
     async function commitChanges(urgent) {
         if (isDirty || urgent) {
+            isDirty = false;
             try {
                 const val = params.parse ? params.parse(inputRef.el.value) : inputRef.el.value;
                 if (val !== component.props.value) {
@@ -68,6 +75,9 @@ export function useInputField(params) {
                 } else {
                     component.props.invalidate();
                 }
+            }
+            if (component.props.setDirty) {
+                component.props.setDirty(false);
             }
         }
     }

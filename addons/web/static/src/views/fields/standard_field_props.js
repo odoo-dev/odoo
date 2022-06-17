@@ -9,4 +9,5 @@ export const standardFieldProps = {
     update: { type: Function, optional: true },
     value: true,
     decorations: { type: Object, optional: true },
+    setDirty: { type: Function, optional: true },
 };
