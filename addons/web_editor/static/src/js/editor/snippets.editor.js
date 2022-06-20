@@ -687,7 +687,8 @@ var SnippetEditor = Widget.extend({
         const proms = Object.values(this.styles).map(opt => {
             return opt.updateUIVisibility();
         });
-        return Promise.all(proms);
+        const visibilities = await Promise.all(proms);
+        this.$optionsSection.toggleClass('d-none', !visibilities.some(v => v !== false));
     },
     /**
      * Clones the current snippet.
