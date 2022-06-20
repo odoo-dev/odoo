@@ -443,6 +443,10 @@ function makeActionManager(env) {
             viewProps.mode = "edit";
         }
 
+        if (action.flags && "mode" in action.flags && view.type === "form") {
+            viewProps.mode = action.flags.mode;
+        }
+
         if (target === "inline") {
             viewProps.searchMenuTypes = [];
         }
