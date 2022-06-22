@@ -557,10 +557,25 @@ export class Record extends DataPoint {
     }
 
     async update(changes) {
+        if (this.batchingUpdateProm) {
+            // Assign changes in the current batch
+            Object.assign(this.batchChanges, changes);
+            return this._updatePromise;
+        }
+
+        this.batchingUpdateProm = Promise.resolve();
+        this.batchChanges = Object.assign({}, changes);
+
         let resolveUpdatePromise;
         this._updatePromise = new Promise((r) => {
             resolveUpdatePromise = r;
         });
+
+        await this.batchingUpdateProm;
+        changes = this.batchChanges;
+        this.batchingUpdateProm = null;
+        this.batchChanges = null;
+
         const data = {};
         for (const [fieldName, value] of Object.entries(changes)) {
             const fieldType = this.fields[fieldName].type;
@@ -572,6 +587,7 @@ export class Record extends DataPoint {
                 notifyChange: false,
             });
         }
+
         const parentID = this.model.__bm__.localData[this.__bm_handle__].parentID;
         if (parentID && this.__viewType === "list") {
             // inside an x2many (parentID is the id of the static list datapoint)
@@ -614,9 +630,8 @@ export class Record extends DataPoint {
             resolveSavePromise = r;
         });
         const proms = [];
-        this.model.env.bus.trigger("RELATIONAL_MODEL:WILL_SAVE", { proms });
-        await Promise.all(proms);
-        await this._updatePromise;
+        this.model.env.bus.trigger("RELATIONAL_MODEL:NEED_LOCAL_CHANGES", { proms });
+        await Promise.all([...proms, this._updatePromise]);
         this._closeInvalidFieldsNotification();
         if (!this.checkValidity()) {
             const invalidFields = [...this._invalidFields].map((fieldName) => {
@@ -680,14 +695,15 @@ export class Record extends DataPoint {
      * @private
      */
     async urgentSave() {
-        this.model.__bm__.executeDirectly(async () => {
-            this._urgentSave = true;
-            this.model.env.bus.trigger("RELATIONAL_MODEL:WILL_SAVE_URGENTLY");
-            this.__syncData();
-            if (this.isDirty && this.checkValidity()) {
-                await this.model.__bm__.save(this.__bm_handle__, { reload: false });
-            }
-        });
+        this.model.__bm__.bypassMutex = true;
+        this._urgentSave = true;
+        this.model.env.bus.trigger("RELATIONAL_MODEL:WILL_SAVE_URGENTLY");
+        await Promise.resolve();
+        this.__syncData();
+        if (this.isDirty && this.checkValidity()) {
+            this.model.__bm__.save(this.__bm_handle__, { reload: false });
+        }
+        this.model.__bm__.bypassMutex = false;
     }
 
     async archive() {
@@ -763,9 +779,12 @@ export class StaticList extends DataPoint {
             }
 
             const editedRecord = this.editedRecord;
-            this.editedRecord = null;
             if (editedRecord && editedRecord.id === record.id && mode === "readonly") {
-                return record.checkValidity();
+                const valid = record.checkValidity();
+                if (valid) {
+                    this.editedRecord = null;
+                }
+                return valid;
             }
             if (editedRecord) {
                 const isValid = editedRecord.checkValidity();

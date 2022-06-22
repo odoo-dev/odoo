@@ -40,7 +40,7 @@ export function useInputField(params) {
         }
     }
     useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", () => commitChanges(true));
-    useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE", () => commitChanges(false));
+    useBus(env.bus, "RELATIONAL_MODEL:NEED_LOCAL_CHANGES", () => commitChanges(false));
     useEffect(
         (inputEl) => {
             if (inputEl) {

@@ -9350,16 +9350,21 @@ QUnit.module("Fields", (hooks) => {
                         </field>
                     </form>`,
             async mockRPC(route, args) {
+                assert.step(args.method);
                 if (args.method === "onchange") {
                     await Promise.resolve(def);
                 }
             },
         });
 
+        assert.verifySteps(["get_views", "onchange"]);
+
         const value = "hello";
 
         // add a new line
         await addRow(target);
+
+        assert.verifySteps(["onchange"]);
 
         // we want to add a delay to simulate an onchange
         def = makeDeferred();
@@ -9368,13 +9373,14 @@ QUnit.module("Fields", (hooks) => {
         const input = target.querySelector("[name=turtle_foo] input");
         input.value = value;
         await triggerEvent(input, null, "input");
-
         triggerHotkey("Enter");
         await triggerEvent(input, null, "change");
 
         // check that nothing changed before the onchange finished
         assert.strictEqual(target.querySelector("[name=turtle_foo] input").value, value);
         assert.containsOnce(target, ".o_data_row");
+
+        assert.verifySteps(["onchange"]);
 
         // unlock onchange
         def.resolve();
@@ -9390,6 +9396,8 @@ QUnit.module("Fields", (hooks) => {
             target.querySelector(".o_data_row:nth-child(2) [name=turtle_foo] input").value,
             ""
         );
+
+        assert.verifySteps(["onchange"]);
     });
 
     QUnit.test(
