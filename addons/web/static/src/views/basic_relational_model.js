@@ -397,6 +397,7 @@ export class Record extends DataPoint {
                     }
                 }
             }
+            this.model.__bm__.localData[this.__bm_handle__]._noAbandon = true;
         }
         this.mode = mode;
         this.model.notify();

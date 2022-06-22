@@ -1032,7 +1032,7 @@ export class ListRenderer extends Component {
             record.checkValidity() &&
             (isEnterBehavior || isTabBehavior)
         ) {
-            this.props.onAdd({ group });
+            this.onCreateAction({ group });
             return true;
         }
         return false;
@@ -1072,14 +1072,14 @@ export class ListRenderer extends Component {
                     // add a line
                     if (record.checkValidity()) {
                         const { context } = this.creates[0];
-                        this.props.onAdd({ context });
+                        this.onCreateAction({ context });
                     }
                 } else if (
                     activeActions.create &&
                     !record.canBeAbandoned &&
                     (record.isDirty || this.lastIsDirty)
                 ) {
-                    this.props.onAdd({ group });
+                    this.onCreateAction({ group });
                 } else if (cycleOnTab) {
                     if (record.canBeAbandoned) {
                         list.unselectRecord(true);
@@ -1132,7 +1132,16 @@ export class ListRenderer extends Component {
         switch (hotkey) {
             case "tab": {
                 const index = list.records.indexOf(record);
-                if (index === list.records.length - 1) {
+                const isLast = index === list.records.length - 1;
+                let futureRecord = list.records[index + 1];
+                if (
+                    this.lastCreatingAction &&
+                    record.canBeAbandoned &&
+                    !(record.isDirty || this.lastIsDirty)
+                ) {
+                    list.unselectRecord(true);
+                }
+                if (isLast) {
                     if (activeActions && (activeActions.canLink || activeActions.canCreate)) {
                         if (record.isNew && !record.isDirty) {
                             list.unselectRecord(true);
@@ -1141,19 +1150,19 @@ export class ListRenderer extends Component {
                         // add a line
                         if (record.checkValidity()) {
                             const { context } = this.creates[0];
-                            this.props.onAdd({ context });
+                            this.onCreateAction({ context });
                         }
                     } else if (
                         activeActions.create &&
                         !record.canBeAbandoned &&
                         (record.isDirty || this.lastIsDirty)
                     ) {
-                        this.props.onAdd({ group });
+                        this.onCreateAction({ group });
                     } else if (cycleOnTab) {
                         if (record.canBeAbandoned) {
                             list.unselectRecord(true);
                         }
-                        const futureRecord = list.records[0];
+                        futureRecord = list.records[0];
                         if (record === futureRecord) {
                             // Refocus first cell of same record
                             const toFocus = this.findNextFocusableOnRow(row);
@@ -1162,22 +1171,31 @@ export class ListRenderer extends Component {
                             futureRecord.switchMode("edit");
                         }
                     } else {
+                        list.unselectRecord(this.lastCreatingAction);
                         return false;
                     }
                 } else {
-                    const futureRecord = list.records[index + 1];
                     futureRecord.switchMode("edit");
                 }
                 break;
             }
             case "shift+tab": {
                 const index = list.records.indexOf(record);
-                if (index === 0) {
+                const isFirst = index === 0;
+                let futureRecord = list.records[index - 1];
+                if (
+                    this.lastCreatingAction &&
+                    record.canBeAbandoned &&
+                    !(record.isDirty || this.lastIsDirty)
+                ) {
+                    list.unselectRecord(true);
+                }
+                if (isFirst) {
                     if (cycleOnTab) {
                         if (record.canBeAbandoned) {
                             list.unselectRecord(true);
                         }
-                        const futureRecord = list.records[list.records.length - 1];
+                        futureRecord = list.records[list.records.length - 1];
                         if (record === futureRecord) {
                             // Refocus first cell of same record
                             const toFocus = this.findPreviousFocusableOnRow(row);
@@ -1187,10 +1205,10 @@ export class ListRenderer extends Component {
                             futureRecord.switchMode("edit");
                         }
                     } else {
+                        list.unselectRecord(this.lastCreatingAction);
                         return false;
                     }
                 } else {
-                    const futureRecord = list.records[index - 1];
                     this.cellToFocus = { forward: false, record: futureRecord };
                     futureRecord.switchMode("edit");
                 }
@@ -1198,28 +1216,44 @@ export class ListRenderer extends Component {
             }
             case "enter": {
                 const index = list.records.indexOf(record);
-                let futureRecord = list.records[index + 1];
+                const isLast = index === list.records.length - 1;
+                const canCreate = activeActions && activeActions.create === true;
+                const futureRecord = list.records[index + 1] || list.records[0];
 
-                if (!futureRecord) {
-                    if (activeActions && activeActions.create === false) {
-                        futureRecord = list.records[0];
+                // if (canCreate && (isLast || this.lastCreatingAction)) {
+                //     this.onCreateAction({ group });
+                // } else {
+                //     futureRecord.switchMode("edit");
+                // }
+
+                if (this.lastCreatingAction) {
+                    const shouldBeKept =
+                        this.lastIsDirty || !record.canBeAbandoned || record.checkValidity();
+                    if (shouldBeKept) {
+                        if (canCreate) {
+                            this.onCreateAction({ group });
+                        } else {
+                            futureRecord.switchMode("edit");
+                        }
+                    } else {
+                        list.unselectRecord(true);
+                        futureRecord.switchMode("edit");
+                    }
+                } else {
+                    if (isLast && canCreate) {
+                        this.onCreateAction({ group });
+                    } else {
+                        futureRecord.switchMode("edit");
                     }
                 }
 
-                if (futureRecord) {
-                    futureRecord.switchMode("edit");
-                } else if (
-                    this.lastIsDirty ||
-                    record.isDirty ||
-                    !record.canBeAbandoned ||
-                    this.lastCreatingAction
-                ) {
-                    this.props.onAdd({ group });
-                } else if (record.checkValidity()) {
-                    const index = list.records.indexOf(record);
-                    futureRecord = list.records[index + 1] || list.records.at(0);
-                    futureRecord.switchMode("edit");
-                }
+                //  else if (this.lastIsDirty || !record.canBeAbandoned || this.lastCreatingAction) {
+                //     this.onCreateAction({ group });
+                // } else if (record.checkValidity()) {
+                //     const index = list.records.indexOf(record);
+                //     futureRecord = list.records[index + 1] || list.records.at(0);
+                //     futureRecord.switchMode("edit");
+                // }
                 break;
             }
             case "escape": {
@@ -1379,17 +1413,15 @@ export class ListRenderer extends Component {
         return false;
     }
 
-    async onCreateAction(context) {
+    async onCreateAction(params) {
         // TO DISCUSS: is it a use case for owl `batched()` ?
         if (this.createProm) {
             return;
         }
-        this.props.onAdd({ context });
+        this.props.onAdd(params);
         this.createProm = Promise.resolve();
-        this.createProm.then(() => {
-            this.lastCreatingAction = true;
-        });
         await this.createProm;
+        this.lastCreatingAction = true;
         this.createProm = null;
     }
 
@@ -1413,7 +1445,7 @@ export class ListRenderer extends Component {
             this.uiService.getActiveElementOf(relatedTarget) === this.activeElement;
         if (withinSameUIActiveElement && isX2MRowAdder) {
             const { context } = this.creates[0];
-            this.onCreateAction(context);
+            this.onCreateAction({ context });
         }
     }
 
