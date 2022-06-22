@@ -1189,7 +1189,7 @@ export class Record extends DataPoint {
      * @returns {Promise<boolean>}
      */
     async _save(options = { stayInEdition: false, noReload: false }) {
-        this.model.env.bus.trigger("RELATIONAL_MODEL:WILL_SAVE");
+        this.model.env.bus.trigger("RELATIONAL_MODEL:NEED_LOCAL_CHANGES");
         if (!this.checkValidity()) {
             const invalidFields = [...this._invalidFields].map((fieldName) => {
                 return `<li>${escape(this.fields[fieldName].string || fieldName)}</li>`;
@@ -2519,9 +2519,12 @@ export class StaticList extends DataPoint {
         this.editedRecord = null;
         this.onRecordWillSwitchMode = async (record, mode) => {
             const editedRecord = this.editedRecord;
-            this.editedRecord = null;
-            if (editedRecord === record && mode === "readonly") {
-                return record.checkValidity();
+            if (editedRecord && editedRecord.id === record.id && mode === "readonly") {
+                const valid = record.checkValidity();
+                if (valid) {
+                    this.editedRecord = null;
+                }
+                return valid;
             }
             if (editedRecord) {
                 await editedRecord.switchMode("readonly");

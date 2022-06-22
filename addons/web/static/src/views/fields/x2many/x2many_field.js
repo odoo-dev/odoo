@@ -217,7 +217,7 @@ export class X2ManyField extends Component {
         return false;
     }
 
-    async onAdd(context) {
+    async onAdd({ context } = {}) {
         const record = this.props.record;
         const domain = record.getFieldDomain(this.props.name).toList();
         if (context) {
@@ -227,7 +227,16 @@ export class X2ManyField extends Component {
             return this.selectCreate({ domain, context });
         }
         if (this.addInLine) {
-            return this.addInLine({ context });
+            if (this.list.editedRecord) {
+                const proms = [];
+                this.list.model.env.bus.trigger("RELATIONAL_MODEL:NEED_LOCAL_CHANGES", { proms });
+                await Promise.all([...proms, this.list.editedRecord._updatePromise]);
+                await this.list.editedRecord.switchMode("readonly");
+            }
+            if (!this.list.editedRecord) {
+                return this.addInLine({ context });
+            }
+            return;
         }
         return this._openRecord({ context });
     }

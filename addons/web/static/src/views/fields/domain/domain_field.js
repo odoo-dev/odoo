@@ -34,7 +34,7 @@ export class DomainField extends Component {
             }
         });
 
-        useBus(this.env.bus, "RELATIONAL_MODEL:WILL_SAVE", async (ev) => {
+        useBus(this.env.bus, "RELATIONAL_MODEL:NEED_LOCAL_CHANGES", async (ev) => {
             if (this.isDebugEdited) {
                 const prom = this.loadCount(this.props);
                 ev.detail.proms.push(prom);

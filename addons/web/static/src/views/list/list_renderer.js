@@ -1024,11 +1024,7 @@ export class ListRenderer extends Component {
             record.checkValidity() &&
             (isEnterBehavior || isTabBehavior)
         ) {
-            record.save().then((saved) => {
-                if (saved) {
-                    group.createRecord({}, editable === "top");
-                }
-            });
+            this.props.onAdd({ group });
             return true;
         }
         return false;
@@ -1068,18 +1064,14 @@ export class ListRenderer extends Component {
                     // add a line
                     if (record.checkValidity()) {
                         const { context } = this.creates[0];
-                        this.props.onAdd(context);
+                        this.props.onAdd({ context });
                     }
                 } else if (
                     activeActions.create &&
                     !record.canBeAbandoned &&
                     (record.isDirty || this.lastIsDirty)
                 ) {
-                    record.save().then((saved) => {
-                        if (saved) {
-                            this.props.onAdd();
-                        }
-                    });
+                    this.props.onAdd({ group });
                 } else if (cycleOnTab) {
                     if (record.canBeAbandoned) {
                         list.unselectRecord(true);
@@ -1148,16 +1140,7 @@ export class ListRenderer extends Component {
                         !record.canBeAbandoned &&
                         (record.isDirty || this.lastIsDirty)
                     ) {
-                        record.save().then((saved) => {
-                            if (saved) {
-                                if (group) {
-                                    // it would maybe be better to rework onAdd API
-                                    group.createRecord({}, this.props.editable === "top");
-                                } else {
-                                    this.props.onAdd();
-                                }
-                            }
-                        });
+                        this.props.onAdd({ group });
                     } else if (cycleOnTab) {
                         if (record.canBeAbandoned) {
                             list.unselectRecord(true);
@@ -1218,16 +1201,7 @@ export class ListRenderer extends Component {
                 if (futureRecord) {
                     futureRecord.switchMode("edit");
                 } else if (this.lastIsDirty || !record.canBeAbandoned || this.lastCreatingAction) {
-                    record.save().then((saved) => {
-                        if (saved) {
-                            if (group) {
-                                // it would maybe be better to rework onAdd API
-                                group.createRecord({}, this.props.editable === "top");
-                            } else {
-                                this.props.onAdd();
-                            }
-                        }
-                    });
+                    this.props.onAdd({ group });
                 } else if (record.checkValidity()) {
                     const index = list.records.indexOf(record);
                     futureRecord = list.records[index + 1] || list.records.at(0);
@@ -1397,7 +1371,7 @@ export class ListRenderer extends Component {
         if (this.createProm) {
             return;
         }
-        this.props.onAdd(context);
+        this.props.onAdd({ context });
         this.createProm = Promise.resolve();
         this.createProm.then(() => {
             this.lastCreatingAction = true;

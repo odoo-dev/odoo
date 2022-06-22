@@ -8497,8 +8497,6 @@ QUnit.module('Legacy fields', {}, function () {
         });
 
         QUnit.test('one2many with onchange, required field, shortcut enter', async function (assert) {
-            assert.expect(5);
-
             this.data.turtle.onchanges = {
                 turtle_foo: function () { },
             };
@@ -8517,6 +8515,7 @@ QUnit.module('Legacy fields', {}, function () {
                     '</form>',
                 mockRPC: function (route, args) {
                     var result = this._super.apply(this, arguments);
+                    assert.step(args.method);
                     if (args.method === 'onchange') {
                         return Promise.resolve(prom).then(_.constant(result));
                     }
@@ -8537,13 +8536,17 @@ QUnit.module('Legacy fields', {}, function () {
 
             // write something in the field
             var $input = form.$('input[name="turtle_foo"]');
-            await testUtils.fields.editInput($input, value);
-            await testUtils.fields.triggerKeydown($input, 'enter');
+            $input[0].value = value;
+            await testUtils.dom.triggerEvent($input, "input");
+            testUtils.fields.triggerKeydown($input, 'enter');
+            await testUtils.dom.triggerEvent($input, "change");
 
             // check that nothing changed before the onchange finished
             assert.strictEqual($input.val(), value, "input content shouldn't change");
             assert.containsOnce(form, '.o_data_row',
                 "should still contain only one row");
+
+            assert.verifySteps(["onchange", "onchange", "onchange"]);
 
             // unlock onchange
             prom.resolve();
@@ -8554,6 +8557,8 @@ QUnit.module('Legacy fields', {}, function () {
             assert.strictEqual(form.$('input[name="turtle_foo"]').val(), '');
             assert.containsN(form, '.o_data_row', 2,
                 "should now contain two rows");
+
+            assert.verifySteps(["onchange"]);
 
             form.destroy();
         });

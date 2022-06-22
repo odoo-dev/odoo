@@ -2,6 +2,7 @@
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { download } from "@web/core/network/download";
+import { DynamicRecordList } from "@web/views/relational_model";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { ActionMenus } from "@web/search/action_menus/action_menus";
@@ -135,14 +136,18 @@ export class ListController extends Component {
         );
     }
 
-    async createRecord() {
+    async createRecord({ group } = {}) {
+        const list = (group && group.list) || this.model.root;
         if (this.editable) {
-            // TODO WOWL: cover grouped case?
-            // add a new row
-            if (this.model.root.editedRecord) {
-                await this.model.root.editedRecord.save();
+            if (!(list instanceof DynamicRecordList)) {
+                throw new Error("List should be a DynamicRecordList");
             }
-            await this.model.root.createRecord({}, this.editable === "top");
+            if (list.editedRecord) {
+                await list.editedRecord.save();
+            }
+            if (!list.editedRecord) {
+                await (group || list).createRecord({}, this.editable === "top");
+            }
             this.render();
         } else {
             await this.props.createRecord();
