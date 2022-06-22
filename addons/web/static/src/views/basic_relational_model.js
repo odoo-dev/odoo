@@ -1118,8 +1118,6 @@ export class RelationalModel extends Model {
         };
 
         this.initialMode = params.mode;
-
-        window.basicmodel = this;
     }
 
     async duplicateDatapoint(record, params) {

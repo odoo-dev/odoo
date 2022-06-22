@@ -490,11 +490,6 @@ export function useViewCompiler(ViewCompiler, templateKey, xmlDoc, params) {
     if (!templateIds[templateKey]) {
         const compiledDoc = new ViewCompiler().compile(xmlDoc, params);
         templateIds[templateKey] = xml`${compiledDoc.outerHTML}`;
-        // DEBUG -- start
-        console.group(`Compiled template (${templateIds[templateKey]}):`);
-        console.dirxml(compiledDoc);
-        console.groupEnd();
-        // DEBUG -- end
     }
     return templateIds[templateKey];
 }

@@ -3162,12 +3162,6 @@ export class RelationalModel extends Model {
 
         // list of models for which the DataManager's cache should be cleared on create, update and delete operations
         this.noCacheModels = ["ir.actions.act_window", "ir.filters", "ir.ui.view", "res.currency"];
-
-        // debug
-        window.basicmodel = this;
-        // console.group("Current model");
-        // console.log(this);
-        // console.groupEnd();
     }
 
     /**
