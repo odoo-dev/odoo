@@ -115,7 +115,7 @@ tour.register('tour_knowledge_main_flow', {
             run: 'click',
         }, {
             trigger: '.o_AttachmentBox .o_AttachmentList_attachment:contains(knowledgeFile)',
-            content: 'check and remove the atttachment',
+            content: 'check and remove the attachment',
             run: function (helper) {
                 helper.click(this.$anchor.find('button[title="Remove"]'));
             }
@@ -152,6 +152,38 @@ tour.register('tour_knowledge_main_flow', {
         }, {
             trigger: '.o_knowledge_file:contains(knowledgeFile)',
             content: 'success',
-        }
+        },
+        {
+            trigger: '[name="body"] > .odoo-editor-editable > p',
+            content: 'create an article link',
+            run: function () {
+                applyCommand(this.$anchor[0], '/tableofcontent');
+            }
+        },
+        {
+            trigger: '.o_knowledge_toc_content:contains(No heading found)',
+            content: 'check that no heading was found',
+        },
+        {
+            trigger: '[name="body"] > .odoo-editor-editable > p',
+            content: 'insert a heading',
+            run: function () {
+                this.$anchor[0].insertBefore(document.createElement('h1'), this.$anchor[0].firstChild);
+            }
+        }, {
+            trigger: '.o_knowledge_toc_content:contains(No heading found)',
+            content: 'check that no heading was found',
+        },
+        {
+            // write in h1
+            trigger: '[name="body"] > .odoo-editor-editable > h1',
+            content: 'write in h1',
+            run: function () {
+                this.$anchor[0].innerText = 'test';
+            }
+        }, {
+            trigger: '.o_knowledge_toc_content:contains(test)',
+            content: 'check that the heading was found',
+        },
     ]
 );
