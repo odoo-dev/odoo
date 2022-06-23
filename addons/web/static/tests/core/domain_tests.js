@@ -331,6 +331,27 @@ QUnit.module("domain", {}, () => {
         assert.throws(() => new Domain(["!"]), /invalid domain .* \(missing 1 segment/);
     });
 
+    QUnit.test("follow relations", function (assert) {
+        assert.ok(
+            new Domain([["partner.city", "ilike", "Bru"]]).contains({
+                name: "Lucas",
+                partner: {
+                    city: "Bruxelles",
+                },
+            })
+        );
+        assert.ok(
+            new Domain([["partner.city.name", "ilike", "Bru"]]).contains({
+                name: "Lucas",
+                partner: {
+                    city: {
+                        name: "Bruxelles",
+                    },
+                },
+            })
+        );
+    });
+
     // ---------------------------------------------------------------------------
     // Normalization
     // ---------------------------------------------------------------------------
