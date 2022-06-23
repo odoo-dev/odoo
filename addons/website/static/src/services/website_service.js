@@ -5,6 +5,8 @@ import core from 'web.core';
 import ajax from 'web.ajax';
 import { getWysiwygClass } from 'web_editor.loader';
 
+import { FullscreenIndication } from '../components/fullscreen_indication/fullscreen_indication';
+
 const { reactive, EventBus } = owl;
 
 const websiteSystrayRegistry = registry.category('website_systray');
@@ -21,8 +23,8 @@ export const unslugHtmlDataObject = (repr) => {
 };
 
 export const websiteService = {
-    dependencies: ['orm', 'action', 'user', 'dialog'],
-    async start(env, { orm, action, user, dialog }) {
+    dependencies: ['orm', 'action', 'user', 'dialog', 'hotkey'],
+    async start(env, { orm, action, user, dialog, hotkey }) {
         let websites = [];
         let currentWebsiteId;
         let currentMetadata = {};
@@ -34,6 +36,7 @@ export const websiteService = {
         let isPublisher;
         let isDesigner;
         let hasMultiWebsites;
+        let fullscreen;
         const context = reactive({
             showNewContentModal: false,
             showAceEditor: false,
@@ -48,6 +51,18 @@ export const websiteService = {
             currentWebsiteId = id;
             websiteSystrayRegistry.trigger('EDIT-WEBSITE');
         };
+        hotkey.add("escape", () => {
+            // Toggle fullscreen mode when pressing escape.
+            if (currentWebsiteId) {
+                fullscreen = !fullscreen;
+                document.body.classList.toggle('o_website_fullscreen', fullscreen);
+                bus.trigger((fullscreen ? 'FULLSCREEN-INDICATION-SHOW' : 'FULLSCREEN-INDICATION-HIDE'));
+            }
+        });
+        registry.category('main_components').add('FullscreenIndication', {
+            Component: FullscreenIndication,
+            props: { bus },
+        });
         return {
             set currentWebsiteId(id) {
                 setCurrentWebsiteId(id);

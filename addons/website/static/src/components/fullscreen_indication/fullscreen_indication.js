@@ -1,18 +1,24 @@
 /** @odoo-module **/
 
-const { Component, xml, useEffect, useState } = owl;
+const { Component, xml, useState } = owl;
 
 export class FullscreenIndication extends Component {
     setup() {
         this.state = useState({ isVisible: false });
+        this.props.bus.on('FULLSCREEN-INDICATION-SHOW', this, this.show);
+        this.props.bus.on('FULLSCREEN-INDICATION-HIDE', this, this.hide);
+    }
 
-        useEffect(() => {
-            setTimeout(() => this.state.isVisible = true);
+    show() {
+        setTimeout(() => this.state.isVisible = true);
+        this.autofade = setTimeout(() => this.state.isVisible = false, 2000);
+    }
 
-            this.autofade = setTimeout(() => this.state.isVisible = false, 2000);
-
-            return () => clearTimeout(this.autofade);
-        }, () => []);
+    hide() {
+        if (this.state.isVisible) {
+            this.state.isVisible = false;
+            clearTimeout(this.autofade);
+        }
     }
 }
 FullscreenIndication.template = xml`
