@@ -462,8 +462,9 @@ QUnit.module("Fields", (hooks) => {
             assert.strictEqual(
                 target
                     .querySelector(".o_field_many2many[name=timmy] .o-kanban-button-new")
-                    .innerText.trim(),
-                "Add timmy",
+                    .innerText.trim()
+                    .toUpperCase(), // for community/enterprise compatibility
+                "ADD TIMMY",
                 "In M2M Kanban, Add button should have 'Add timmy' label"
             );
         }
