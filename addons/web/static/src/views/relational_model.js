@@ -464,6 +464,11 @@ export class Record extends DataPoint {
     }
 
     get isDirty() {
+        if (this.canBeAbandoned) {
+            // for a new record, have changes does not necessarily mean to be dirty!
+            return false;
+        }
+
         const changes = { ...this._changes };
         for (const fieldName in changes) {
             const fieldType = this.fields[fieldName].type;
