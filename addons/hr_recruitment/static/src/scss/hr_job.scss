@@ -1,4 +1,4 @@
-.o_kanban_view.o_kanban_dashboard {
+.o_kanban_renderer.o_kanban_dashboard {
     &.o_hr_recruitment_kanban {
         &.o_kanban_ungrouped .o_kanban_record {
             width: 450px;
@@ -54,6 +54,10 @@
 
         .o_kanban_card_header_title {
             min-height: 3rem;
+
+            .o_field_boolean_favorite {
+                display: inline;
+            }
         }
 
         .o_recruitment_job_container {
