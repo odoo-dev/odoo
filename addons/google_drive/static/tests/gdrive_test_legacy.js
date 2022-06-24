@@ -4,7 +4,7 @@ odoo.define('google_drive.gdrive_integration', function (require) {
     const FormView = require('web.FormView');
     const testUtils = require('web.test_utils');
 
-    QUnit.module('Google Drive Integration', {
+    QUnit.module('Google Drive Integration (Legacy)', {
         beforeEach() {
             this.data = {
                 partner: {
@@ -20,7 +20,7 @@ odoo.define('google_drive.gdrive_integration', function (require) {
         },
     }, function () {
 
-        QUnit.module('Google Drive ActionMenus');
+        QUnit.module('Google Drive ActionMenus (Legacy)');
 
         QUnit.test('rendering of the google drive attachments in action menus', async function (assert) {
             assert.expect(3);
@@ -67,7 +67,7 @@ odoo.define('google_drive.gdrive_integration', function (require) {
 
             await testUtils.controlPanel.toggleMenuItem(form, "Cyberdyne Systems");
 
-            form.destroy();
+           form.destroy();
         });
 
         QUnit.test("no google drive data", async function (assert) {
