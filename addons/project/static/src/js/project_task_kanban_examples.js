@@ -3,12 +3,14 @@
 import { _lt } from 'web.core';
 import {Markup} from 'web.utils';
 import kanbanExamplesRegistry from 'web.kanban_examples_registry';
+import { registry } from "@web/core/registry";
 
 const greenBullet = Markup`<span class="o_status d-inline-block o_status_green"></span>`;
 const redBullet = Markup`<span class="o_status d-inline-block o_status_red"></span>`;
-const star = Markup`<a style="color: gold;" class="fa fa-star"/>`;
-const clock = Markup`<a class="fa fa-clock-o" />`;
+const star = Markup`<a style="color: gold;" class="fa fa-star"></a>`;
+const clock = Markup`<a class="fa fa-clock-o"></a>`;
 
+const _Markup = owl.markup('').constructor.prototype;
 const descriptionActivities = escFormat(_lt('%s Use the %s icon to organize your daily activities.'), '<br/>', clock);
 const description = escFormat(_lt('Prioritize Tasks by using the %s icon.' +
             '%s Use the %s button to signalize to your colleagues that a task is ready for the next stage.' +
@@ -27,17 +29,21 @@ const description = escFormat(_lt('Prioritize Tasks by using the %s icon.' +
  * @returns {Object} a stringifiable object returning the escaped then formatted string
  */
 function escFormat(fmt, ...args) {
-    return {
-        [_.escapeMethod]() {
-            return this;
-        },
-        toString() {
-            return _.str.sprintf(_.escape(fmt), ...args);
-        },
-    };
+    // Returned object needs to be instanceof owl Markup so that owl will insert it correctly
+    return Object.create(
+        _Markup,
+        Object.getOwnPropertyDescriptors({
+            [_.escapeMethod]() {
+                return this;
+            },
+            toString() {
+                return _.str.sprintf(_.escape(fmt), ...args);
+            },
+        })
+    );
 }
 
-kanbanExamplesRegistry.add('project', {
+const exampleData = {
     ghostColumns: [_lt('New'), _lt('Assigned'), _lt('In Progress'), _lt('Done')],
     applyExamplesText: _lt("Use This For My Project"),
     examples:[{
@@ -108,4 +114,7 @@ kanbanExamplesRegistry.add('project', {
         description: description,
         bullets: [greenBullet, redBullet, star, clock],
     }],
-});
+};
+
+kanbanExamplesRegistry.add('project', exampleData);
+registry.category("kanban_examples").add('project', exampleData);
