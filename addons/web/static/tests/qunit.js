@@ -1,3 +1,5 @@
+/** @odoo-module */
+
 (function () {
     "use strict";
 
@@ -310,16 +312,20 @@
 
     // Append a "Rerun in debug" link.
     // Only works if the test is not hidden.
-    QUnit.testDone(async ({ testId}) => {
+    QUnit.testDone(async ({ testId }) => {
         const testElement = document.getElementById(`qunit-test-output-${testId}`);
-        if (!testElement) { // Is probably hidden because it passed
+        if (!testElement) {
+            // Is probably hidden because it passed
             return;
         }
         const reRun = testElement.querySelector("li a");
         const reRunDebug = document.createElement("a");
         reRunDebug.textContent = "Rerun in debug";
         const location = window.location;
-        reRunDebug.setAttribute("href", `${location.origin}${location.pathname}${location.search}&debugTestId=${testId}`);
+        reRunDebug.setAttribute(
+            "href",
+            `${location.origin}${location.pathname}${location.search}&debugTestId=${testId}`
+        );
 
         reRun.parentElement.insertBefore(reRunDebug, reRun.nextSibling);
     });
@@ -349,6 +355,11 @@
         QUnit.config.testId = [debugTestId];
         setQUnitDebugMode();
     }
+
+    const skip = QUnit.skip;
+    QUnit.skipWOWL = (name, cb) => {
+        skip(name, cb);
+    };
 
     // Override global UnhandledRejection that is assigned wayyy before this file
     // Do not really crash on non-errors rejections
