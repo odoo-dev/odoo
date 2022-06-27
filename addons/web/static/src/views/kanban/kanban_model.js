@@ -23,27 +23,27 @@ const FALSE = Symbol("false");
 
 function makeTransactionManager() {
     const bus = new EventBus();
-    let started = false;
+    const transactions = {};
     return {
-        start: () => {
-            if (started) {
+        start: (id) => {
+            if (transactions[id]) {
                 throw new Error(`Transaction in progress: commit or abort to start a new one.`);
             }
-            started = true;
+            transactions[id] = true;
             bus.trigger("START");
         },
-        commit: () => {
-            if (!started) {
+        commit: (id) => {
+            if (!transactions[id]) {
                 throw new Error(`No transaction in progress.`);
             }
-            started = false;
+            delete transactions[id];
             bus.trigger("COMMIT");
         },
-        abort: () => {
-            if (!started) {
+        abort: (id) => {
+            if (!transactions[id]) {
                 throw new Error(`No transaction in progress.`);
             }
-            started = false;
+            delete transactions[id];
             bus.trigger("ABORT");
         },
         register: ({ onStart, onCommit, onAbort }) => {
@@ -422,7 +422,7 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
 
         const record = sourceGroup.list.records.find((r) => r.id === dataRecordId);
 
-        this.model.transaction.start();
+        this.model.transaction.start(dataRecordId);
 
         // Move from one group to another
         try {
@@ -443,9 +443,9 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
                 ]);
             }
             await targetGroup.list.resequence(dataRecordId, refId);
-            this.model.transaction.commit();
+            this.model.transaction.commit(dataRecordId);
         } catch (err) {
-            this.model.transaction.abort();
+            this.model.transaction.abort(dataRecordId);
             this.model.notify();
             throw err;
         }
@@ -495,17 +495,17 @@ export class KanbanDynamicGroupList extends DynamicGroupList {
 
 export class KanbanDynamicRecordList extends DynamicRecordList {
     async moveRecord(dataRecordId, _dataGroupId, refId) {
-        this.model.transaction.start();
+        this.model.transaction.start(dataRecordId);
 
         try {
             await this.resequence(dataRecordId, refId);
         } catch (err) {
-            this.model.transaction.abort();
+            this.model.transaction.abort(dataRecordId);
             this.model.notify();
             throw err;
         }
 
-        this.model.transaction.commit();
+        this.model.transaction.commit(dataRecordId);
     }
 }
 
