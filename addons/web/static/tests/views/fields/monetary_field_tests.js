@@ -742,12 +742,12 @@ QUnit.module("Fields", (hooks) => {
         ).filter((li) => li.textContent === "€")[0];
         await click(euroM2OListItem);
 
-        // TODO Qunit.skipWOWL => don't we have some kind of blur / event on m2o click ?
-        // assert.strictEqual(
-        //     form.el.querySelector(".o_field_monetary input").value,
-        //     "4.20\u00a0€",
-        //     "The value should be formatted with new currency on blur."
-        // );
+        assert.strictEqual(
+            target.querySelector(".o_field_monetary div :first-child").value +
+                target.querySelector(".o_field_monetary div :last-child").textContent,
+            "4.20€",
+            "The value should be formatted with new currency on blur."
+        );
 
         await clickSave(target);
 
@@ -795,12 +795,12 @@ QUnit.module("Fields", (hooks) => {
         ).filter((li) => li.textContent === "€")[0];
         await click(euroM2OListItem);
 
-        // TODO Qunit.skipWOWL => don't we have some kind of blur / event on m2o click ?
-        // assert.strictEqual(
-        //     form.el.querySelector(".o_field_monetary input").value,
-        //     "4.20\u00a0€",
-        //     "The value should be formatted with new currency on blur."
-        // );
+        assert.strictEqual(
+            target.querySelector(".o_field_monetary div :first-child").value +
+                target.querySelector(".o_field_monetary div :last-child").textContent,
+            "4.20€",
+            "The value should be formatted with new currency on blur."
+        );
 
         await clickSave(target);
 
