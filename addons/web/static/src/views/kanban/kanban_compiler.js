@@ -138,6 +138,7 @@ export class KanbanCompiler extends ViewCompiler {
             card.setAttribute("role", `article`);
             card.setAttribute("t-att-data-id", `props.canResequence and props.record.id`);
             card.setAttribute("t-on-click", `onGlobalClick`);
+            card.setAttribute("t-ref", "root");
 
             combineAttributes(card, "t-att-class", "getRecordClasses()", "+' '+");
         }
