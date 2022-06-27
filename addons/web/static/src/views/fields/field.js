@@ -163,6 +163,7 @@ export class Field extends Component {
             value: this.props.record.data[this.props.name],
             decorations: decorationMap,
             readonly: readonlyFromViewMode || readonlyFromModifiers || false,
+            ...fieldInfo.propsFromAttrs,
             ...propsFromAttrs,
             ...props,
             type: field.type,
@@ -222,6 +223,12 @@ Field.parseFieldNode = function (node, models, modelName, viewType, jsClass) {
 
         fieldInfo.rawAttrs[attribute.name] = attribute.value;
     }
+
+    const parseArchAttrs = fieldInfo.FieldComponent.parseArchAttrs || (() => ({}));
+    fieldInfo.propsFromAttrs = parseArchAttrs({
+        ...fieldInfo.rawAttrs,
+        options: fieldInfo.options,
+    });
 
     if (fieldInfo.modifiers.invisible !== true && X2M_TYPES.includes(field.type)) {
         const views = {};

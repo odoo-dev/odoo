@@ -10,9 +10,36 @@ import { TranslationButton } from "../translation_button";
 
 const { Component } = owl;
 
+/**
+ * @template T
+ * @param {(props: T) => void} callback
+ * @param {(props: T, nextProps: T) => boolean} [shouldUpdate]
+ */
+function usePropsUpdate(callback, shouldUpdate = () => true) {
+    const component = owl.useComponent();
+    owl.onWillStart(() => {
+        callback.call(component, component.props);
+    });
+    owl.onWillUpdateProps(async (np) => {
+        if (shouldUpdate(component.props, np)) {
+            await callback.call(component, np);
+        }
+    });
+}
+
 export class CharField extends Component {
     setup() {
         useInputField({ getValue: () => this.props.value || "", parse: (v) => this.parse(v) });
+
+        usePropsUpdate((p) => {
+            const fieldName = p.name;
+            const field = p.record.fields[fieldName];
+            this.shouldTrim = field.trim;
+            this.maxLength = field.size;
+            this.isTranslatable = field.translate;
+            this.resId = p.record.resId;
+            this.resModel = p.record.resModel;
+        });
     }
 
     get formattedValue() {
@@ -53,6 +80,14 @@ CharField.extractProps = (fieldName, record, attrs) => {
         isTranslatable: record.fields[fieldName].translate,
         resId: record.resId,
         resModel: record.resModel,
+        autocomplete: attrs.autocomplete,
+        isPassword: archParseBoolean(attrs.password),
+        placeholder: attrs.placeholder,
+    };
+};
+
+CharField.parseArchAttrs = (attrs) => {
+    return {
         autocomplete: attrs.autocomplete,
         isPassword: archParseBoolean(attrs.password),
         placeholder: attrs.placeholder,
