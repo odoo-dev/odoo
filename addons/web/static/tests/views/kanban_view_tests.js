@@ -36,7 +36,7 @@ import legacyFieldRegistry from "web.field_registry";
 import Widget from "web.Widget";
 import widgetRegistry from "web.widget_registry";
 
-const { Component, markup, xml } = owl;
+const { Component, xml } = owl;
 
 const serviceRegistry = registry.category("services");
 const viewWidgetRegistry = registry.category("view_widgets");
@@ -4996,12 +4996,12 @@ QUnit.module("Views", (hooks) => {
                 {
                     name: "A first example",
                     columns: ["Column 1", "Column 2", "Column 3"],
-                    description: markup("A weak description."),
+                    description: "A weak description.",
                 },
                 {
                     name: "A second example",
                     columns: ["Col 1", "Col 2"],
-                    description: markup(`A <b>fantastic</b> description.`),
+                    description: `A fantastic description.`,
                 },
             ],
         });
@@ -5089,7 +5089,7 @@ QUnit.module("Views", (hooks) => {
         );
         assert.strictEqual(
             secondPane.querySelector(".o_kanban_examples_description").innerHTML,
-            "A <b>fantastic</b> description.",
+            "A fantastic description.",
             "A formatted description should be displayed."
         );
     });
@@ -5384,14 +5384,14 @@ QUnit.module("Views", (hooks) => {
                 '<field name="foo"/>' +
                 "</div>" +
                 "</t></templates></kanban>",
-            noContentHelp: markup('<p class="hello">click to add a partner</p>'),
+            noContentHelp: '<p class="hello">click to add a partner</p>',
         });
 
         assert.containsOnce(target, ".o_view_nocontent", "should display the no content helper");
 
         assert.strictEqual(
-            target.querySelector(".o_view_nocontent p.hello").innerText,
-            "click to add a partner",
+            target.querySelector(".o_view_nocontent").innerText,
+            '<p class="hello">click to add a partner</p>',
             "should have rendered no content helper from action"
         );
 
