@@ -50,7 +50,7 @@ export class Pager extends Component {
         return parts.join("-");
     }
     /**
-     * @returns {boolean} true iff there is only one page
+     * @returns {boolean} true if there is only one page
      */
     get isSinglePage() {
         return this.minimum === 1 && this.maximum === this.props.total;
@@ -68,9 +68,7 @@ export class Pager extends Component {
         } else if (minimum < 0 && this.props.limit > 1) {
             minimum = this.props.total - (this.props.total % this.props.limit || this.props.limit);
         }
-
-        this.update(minimum, this.props.limit);
-        this.props.onPageChangeScroll();
+        this.update(minimum, this.props.limit, true);
     }
     /**
      * @param {string} value
@@ -97,10 +95,11 @@ export class Pager extends Component {
     /**
      * @param {number} offset
      * @param {number} limit
+     * @param {Boolean} hasNavigated
      */
-    async update(offset, limit) {
+    async update(offset, limit, hasNavigated) {
         this.state.isDisabled = true;
-        await this.props.onUpdate({ offset, limit });
+        await this.props.onUpdate({ offset, limit }, hasNavigated);
         this.state.isDisabled = false;
         this.state.isEditing = false;
     }
@@ -156,7 +155,6 @@ Pager.template = "web.Pager";
 Pager.defaultProps = {
     isEditable: true,
     withAccessKey: true,
-    onPageChangeScroll: () => {},
 };
 Pager.props = {
     offset: Number,
@@ -164,6 +162,5 @@ Pager.props = {
     total: Number,
     onUpdate: Function,
     isEditable: { type: Boolean, optional: true },
-    onPageChangeScroll: { type: Function, optional: true },
     withAccessKey: { type: Boolean, optional: true },
 };

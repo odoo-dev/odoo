@@ -112,7 +112,7 @@ export class ListController extends Component {
                 offset: list.offset,
                 limit: list.limit,
                 total: list.count,
-                onUpdate: async ({ offset, limit }) => {
+                onUpdate: async ({ offset, limit }, hasNavigated) => {
                     if (this.model.root.editedRecord) {
                         if (!(await this.model.root.editedRecord.save())) {
                             return;
@@ -120,8 +120,10 @@ export class ListController extends Component {
                     }
                     await list.load({ limit, offset });
                     this.render(true); // FIXME WOWL reactivity
+                    if (hasNavigated) {
+                        this.onPageChangeScroll();
+                    }
                 },
-                onPageChangeScroll: this.onPageChangeScroll,
             };
         });
 
