@@ -7,8 +7,6 @@ import { registry } from "@web/core/registry";
 import { escape, intersperse, nbsp, sprintf } from "@web/core/utils/strings";
 import { session } from "@web/session";
 
-const { markup } = owl;
-
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
@@ -212,10 +210,6 @@ export function formatFloatTime(value, options = {}) {
     return `${isNegative ? "-" : ""}${hour}:${min}`;
 }
 
-export function formatHtml(value) {
-    return markup(value);
-}
-
 /**
  * Returns a string representing an integer.  If the value is false, then we
  * return an empty string.
@@ -403,7 +397,7 @@ registry
     .add("float", formatFloat)
     .add("float_factor", formatFloatFactor)
     .add("float_time", formatFloatTime)
-    .add("html", formatHtml)
+    .add("html", (value) => value)
     .add("integer", formatInteger)
     .add("many2one", formatMany2one)
     .add("one2many", formatX2many)

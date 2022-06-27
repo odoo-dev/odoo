@@ -532,6 +532,11 @@ export class Record extends DataPoint {
                 }
                 case "char": {
                     data[fieldName] = data[fieldName] || "";
+                    break;
+                }
+                case "html": {
+                    data[fieldName] = markup(data[fieldName] || "");
+                    break;
                 }
             }
             if (legDP.specialData[fieldName]) {

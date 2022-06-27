@@ -83,7 +83,6 @@ TextField.extractProps = (fieldName, record, attrs) => {
 };
 
 registry.category("fields").add("text", TextField);
-registry.category("fields").add("html", TextField);
 
 class ListTextField extends TextField {
     get minimumHeight() {

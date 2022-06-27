@@ -17,7 +17,7 @@ import { KANBAN_BOX_ATTRIBUTE } from "./kanban_arch_parser";
 import { KanbanCompiler } from "./kanban_compiler";
 import { KanbanCoverImageDialog } from "./kanban_cover_image_dialog";
 
-const { Component, markup, onWillUpdateProps, xml } = owl;
+const { Component, onWillUpdateProps, xml } = owl;
 const { COLORS } = ColorList;
 
 const formatters = registry.category("formatters");
@@ -109,9 +109,6 @@ function getRawValue(record, fieldName) {
         case "date":
         case "datetime": {
             return value && value.toJSDate();
-        }
-        case "html": {
-            return markup(value);
         }
         default: {
             return value;

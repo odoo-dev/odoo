@@ -1,5 +1,9 @@
 /** @odoo-module **/
 
+import { defaultLocalization } from "@web/../tests/helpers/mock_services";
+import { patchWithCleanup } from "@web/../tests/helpers/utils";
+import { localization } from "@web/core/l10n/localization";
+import { session } from "@web/session";
 import {
     formatFloat,
     formatFloatFactor,
@@ -11,10 +15,6 @@ import {
     formatReference,
     formatX2many,
 } from "@web/views/fields/formatters";
-import { localization } from "@web/core/l10n/localization";
-import { defaultLocalization } from "@web/../tests/helpers/mock_services";
-import { patchWithCleanup } from "@web/../tests/helpers/utils";
-import { session } from "@web/session";
 
 QUnit.module("Fields", (hooks) => {
     hooks.beforeEach(() => {
