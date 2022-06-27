@@ -225,30 +225,21 @@ export const hotkeyService = {
                         (target instanceof Node && reg.area() && reg.area().contains(target)))
             );
 
-            // Search the closest from target
-            let closest;
-            for (const candidate of candidates) {
-                // First candidate
-                if (!closest) {
-                    closest = candidate;
-                    continue;
-                }
-
-                // Ignore all other candidates not having an area
-                // (= prioritize candidates having an area)
-                if (candidate.area) {
-                    if (!closest.area || closest.area().contains(candidate.area())) {
-                        closest = candidate;
-                        continue;
+            // First candidate
+            let winner = candidates.shift();
+            if (winner && winner.area) {
+                // If there is an area, find the closest one
+                for (const candidate of candidates) {
+                    if (candidate.area() && winner.area().contains(candidate.area())) {
+                        winner = candidate;
                     }
                 }
             }
 
             // Dispatch actual hotkey to the matching registration
-            const match = closest;
-            if (match) {
-                match.callback({
-                    area: match.area && match.area(),
+            if (winner) {
+                winner.callback({
+                    area: winner.area && winner.area(),
                     target,
                 });
                 return true;
