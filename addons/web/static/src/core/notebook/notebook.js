@@ -2,7 +2,7 @@
 
 import { scrollTo } from "@web/core/utils/scrolling";
 
-const { Component, onWillUpdateProps, useEffect, useRef, useState } = owl;
+const { Component, onWillDestroy, onWillUpdateProps, useEffect, useRef, useState } = owl;
 
 /**
  * A notebook component that will render only the current page and allow
@@ -58,9 +58,8 @@ export class Notebook extends Component {
         this.pages = this.computePages(this.props);
         this.state = useState({ currentPage: null });
         this.state.currentPage = this.props.defaultPage || this.computeActivePage();
-        this.env.bus.addEventListener("SCROLLER:ANCHOR_LINK_CLICKED", (ev) =>
-            this.onAnchorClicked(ev)
-        );
+        const onAnchorClicked = this.onAnchorClicked.bind(this);
+        this.env.bus.addEventListener("SCROLLER:ANCHOR_LINK_CLICKED", onAnchorClicked);
         useEffect(
             () => {
                 this.props.onPageUpdate(this.state.currentPage);
@@ -76,6 +75,9 @@ export class Notebook extends Component {
             this.pages = this.computePages(nextProps);
             this.state.currentPage = this.computeActivePage();
         });
+        onWillDestroy(() => {
+            this.env.bus.removeEventListener("SCROLLER:ANCHOR_LINK_CLICKED", onAnchorClicked);
+        });
     }
 
     get navItems() {
@@ -88,7 +90,9 @@ export class Notebook extends Component {
     }
 
     onAnchorClicked(ev) {
-        if (!this.props.anchors) return;
+        if (!this.props.anchors) {
+            return;
+        }
         const id = ev.detail.detail.id.substring(1);
         if (this.props.anchors[id]) {
             if (this.state.currentPage !== this.props.anchors[id].target) {
