@@ -56,7 +56,7 @@ import { getNextTabableElement } from "@web/core/utils/ui";
 import { TextField } from "@web/views/fields/text/text_field";
 import { registerCleanup } from "../helpers/cleanup";
 
-const { markup, onWillStart } = owl;
+const { onWillStart } = owl;
 
 const serviceRegistry = registry.category("services");
 
@@ -3061,7 +3061,7 @@ QUnit.module("Views", (hooks) => {
                         <field name="int_field" widget="handle" />
                         <field name="foo" />
                     </tree>`,
-                noContentHelp: markup('<p class="hello">click to add a foo</p>'),
+                noContentHelp: '<p class="hello">click to add a foo</p>',
             });
 
             // as help is being provided in the action, table won't be rendered until a record exists
@@ -4847,12 +4847,12 @@ QUnit.module("Views", (hooks) => {
             resModel: "foo",
             serverData,
             arch: '<tree><field name="foo"/></tree>',
-            noContentHelp: markup('<p class="hello">click to add a partner</p>'),
+            noContentHelp: "click to add a partner",
         });
         assert.containsOnce(target, ".o_view_nocontent", "should display the no content helper");
         assert.containsNone(target, ".o_list_view table", "should not have a table in the dom");
         assert.deepEqual(
-            [...target.querySelectorAll(".o_view_nocontent p.hello")].map((el) => el.textContent),
+            [...target.querySelectorAll(".o_view_nocontent")].map((el) => el.textContent),
             ["click to add a partner"]
         );
 
@@ -4902,7 +4902,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="datetime"/>
                 </tree>`,
             context: { search_default_empty: true },
-            noContentHelp: markup('<p class="hello">click to add a partner</p>'),
+            noContentHelp: "click to add a partner",
             searchViewArch: `
                 <search>
                     <filter name="empty" domain="[('id', '&lt;', 0)]"/>
@@ -4914,7 +4914,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(target.querySelector(".o_list_view .o_content"), "o_view_sample_data");
         assert.containsOnce(target, ".o_list_table");
         assert.containsN(target, ".o_data_row", 10);
-        assert.containsOnce(target, ".o_nocontent_help .hello");
+        assert.containsOnce(target, ".o_nocontent_help");
 
         // Check list sample data
         const firstRow = target.querySelector(".o_data_row");
@@ -4948,7 +4948,7 @@ QUnit.module("Views", (hooks) => {
             "o_view_sample_data"
         );
         assert.containsNone(target, ".o_list_table");
-        assert.containsOnce(target, ".o_nocontent_help .hello");
+        assert.containsOnce(target, ".o_nocontent_help");
 
         await toggleMenuItem(target, "False Domain");
         await toggleMenuItem(target, "True Domain");
@@ -4958,7 +4958,7 @@ QUnit.module("Views", (hooks) => {
         );
         assert.containsOnce(target, ".o_list_table");
         assert.containsN(target, ".o_data_row", 4);
-        assert.containsNone(target, ".o_nocontent_help .hello");
+        assert.containsNone(target, ".o_nocontent_help");
     });
 
     QUnit.test("refresh empty list with sample data", async function (assert) {
@@ -4990,19 +4990,19 @@ QUnit.module("Views", (hooks) => {
                 [false, "kanban"],
             ],
             context: { search_default_empty: true },
-            help: markup('<p class="hello">click to add a partner</p>'),
+            help: '<p class="hello">click to add a partner</p>',
         });
         assert.hasClass(target.querySelector(".o_list_view .o_content"), "o_view_sample_data");
         assert.containsOnce(target, ".o_list_table");
         assert.containsN(target, ".o_data_row", 10);
-        assert.containsOnce(target, ".o_nocontent_help .hello");
+        assert.containsOnce(target, ".o_nocontent_help");
 
         const textContent = target.querySelector(".o_list_view").textContent;
         await click(target, ".o_cp_switch_buttons .o_list");
         assert.hasClass(target.querySelector(".o_list_view .o_content"), "o_view_sample_data");
         assert.containsOnce(target, ".o_list_table");
         assert.containsN(target, ".o_data_row", 10);
-        assert.containsOnce(target, ".o_nocontent_help .hello");
+        assert.containsOnce(target, ".o_nocontent_help");
         assert.strictEqual(target.querySelector(".o_list_view").textContent, textContent);
     });
 
