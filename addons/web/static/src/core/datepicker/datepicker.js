@@ -283,7 +283,7 @@ DatePicker.defaultProps = {
 DatePicker.props = {
     // Components props
     onDateTimeChanged: Function,
-    date: { validate: (dt) => dt instanceof DateTime || !dt, optional: true },
+    date: { type: [DateTime, { value: false }], optional: true },
     warn_future: { type: Boolean, optional: true },
     // Bootstrap datepicker options
     buttons: {
