@@ -38,33 +38,4 @@
         </div>
     </t>
 
-    <t t-name="web.KanbanExamplesNotebookTemplate" owl="1">
-        <div t-if="props.description" class="o_kanban_examples_description" t-out="props.description"/>
-        <div class="o_kanban_examples">
-            <t t-foreach="props.columns" t-as="column" t-key="column">
-                <div class="o_kanban_examples_group">
-                    <h6><b t-esc="column"/></h6>
-                    <div t-foreach="props.randomNumber" t-as="num" t-key="num_index" class="o_kanban_examples_ghost">
-                        <div class="o_ghost_content"/>
-                        <div class="o_ghost_content o_ghost_tag"/>
-                        <!-- FIXME WOWL random(0, 5 and _.sample) -->
-                        <t t-if="props.bullets and random(0, 5) > 3" t-out="_.sample(props.bullets)"/>
-                        <img class="float-right o_ghost_avatar" src="/base/static/img/avatar.png" alt="Avatar"/>
-                    </div>
-                </div>
-            </t>
-        </div>
-    </t>
-
-    <!-- Note: this dialog isn't responsive, but it is not accessible on mobile -->
-    <t t-name="web.KanbanColumnExamplesDialog" owl="1">
-        <Dialog contentClass="'o_kanban_examples_dialog'" title="this.constructor.title">
-            <Notebook orientation="'vertical'" pages="pages" onPageUpdate.bind="onPageUpdate" />
-            <t t-set-slot="footer">
-                <button class="btn btn-primary" t-on-click="applyExamples" t-esc="props.applyExamplesText"/>
-                <button class="btn btn-secondary" t-on-click="props.close">Close</button>
-            </t>
-        </Dialog>
-    </t>
-
 </templates>
