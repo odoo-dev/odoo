@@ -23,6 +23,19 @@ class FieldAdapter extends ComponentAdapter {
         this.wowlEnv = this.env;
         this.env = Component.env;
         useEffect(() => {
+            // if classNames are given to the field, we only want
+            // to add those classes to the legacy field without
+            // the parent element affecting the style of the field
+            const fieldClassnames =
+                this.props.fieldParams.options &&
+                this.props.fieldParams.options.attrs &&
+                this.props.fieldParams.options.attrs.class;
+            if (fieldClassnames) {
+                for (const className of fieldClassnames.split(" ")) {
+                    this.widgetEl.parentElement.classList.remove(className);
+                }
+                this.widgetEl.parentElement.style.display = "contents";
+            }
             this.widgetEl.parentElement.classList.remove("o_text_overflow");
             this.widgetEl.classList.add("o_legacy_field_widget");
         });
