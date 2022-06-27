@@ -841,10 +841,9 @@ function makeActionManager(env) {
             if (type !== "search") {
                 const arch = viewDescriptions[type].arch;
                 const archDoc = domParser.parseFromString(arch, "text/xml").documentElement;
-                const key = archDoc.getAttribute("js_class") || type;
-                if (viewRegistry.contains(key)) {
-                    views.push(viewRegistry.get(key));
-                }
+                const jsClass = archDoc.getAttribute("js_class");
+                const key = viewRegistry.contains(jsClass) ? jsClass : type;
+                views.push(viewRegistry.get(key));
             }
         }
         // END LEGACY CODE COMPATIBILITY

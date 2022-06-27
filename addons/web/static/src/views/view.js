@@ -246,13 +246,17 @@ export class View extends Component {
         const xml = parser.parseFromString(arch, "text/xml");
         const rootNode = xml.documentElement;
 
-        const subType = rootNode.getAttribute("js_class");
+        let subType = rootNode.getAttribute("js_class");
         const bannerRoute = rootNode.getAttribute("banner_route");
         const sample = rootNode.getAttribute("sample");
 
         // determine ViewClass to instantiate (if not already done)
         if (subType) {
-            descr = viewRegistry.get(subType);
+            if (viewRegistry.contains(subType)) {
+                descr = viewRegistry.get(subType);
+            } else {
+                subType = null;
+            }
         }
 
         Object.assign(this.env.config, {
