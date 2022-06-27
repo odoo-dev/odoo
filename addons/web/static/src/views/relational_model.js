@@ -1128,7 +1128,7 @@ export class Record extends DataPoint {
             this.resModel,
             "onchange",
             [
-                [],
+                this.resId ? [this.resId] : [],
                 this.getChanges(true, true),
                 fieldNames && fieldNames.length ? fieldNames : [],
                 this._getOnchangeSpec(),
