@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { SimpleDialog } from "@web/core/dialog/dialog";
+import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 
 const { Component, useState, useRef, onWillStart, onMounted } = owl;
@@ -56,5 +56,5 @@ export class KanbanCoverImageDialog extends Component {
     }
 }
 
+KanbanCoverImageDialog.components = { Dialog };
 KanbanCoverImageDialog.template = "web.KanbanCoverImageDialog";
-KanbanCoverImageDialog.components = { SimpleDialog };
