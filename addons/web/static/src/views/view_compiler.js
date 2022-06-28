@@ -405,6 +405,7 @@ export class ViewCompiler {
         field.setAttribute("name", `'${fieldName}'`);
         field.setAttribute("record", "record");
         field.setAttribute("fieldInfo", `fieldNodes['${fieldId}']`);
+        field.setAttribute("t-props", `fieldNodes['${fieldId}'].propsFromAttrs`);
 
         if (el.hasAttribute("widget")) {
             field.setAttribute("type", `'${el.getAttribute("widget")}'`);

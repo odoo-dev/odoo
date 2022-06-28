@@ -163,7 +163,6 @@ export class Field extends Component {
             value: this.props.record.data[this.props.name],
             decorations: decorationMap,
             readonly: readonlyFromViewMode || readonlyFromModifiers || false,
-            ...fieldInfo.propsFromAttrs,
             ...propsFromAttrs,
             ...props,
             type: field.type,
