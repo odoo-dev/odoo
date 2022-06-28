@@ -264,7 +264,7 @@
         }
 
         // Kanban Record - Inner elements
-        .o_field_many2manytags, .o_kanban_tags {
+        .o_field_many2many_tags, .o_kanban_tags {
             display: block;
             margin-bottom: $o-kanban-inner-hmargin;
             line-height: 1.2;
