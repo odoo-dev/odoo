@@ -304,7 +304,6 @@ export class KanbanRecord extends Component {
             }
             case "delete": {
                 const listOrGroup = group || list;
-                // WOWL TODO refactor this but how?
                 if (listOrGroup.deleteRecords) {
                     this.dialog.add(ConfirmationDialog, {
                         body: env._t("Are you sure you want to delete this record?"),
