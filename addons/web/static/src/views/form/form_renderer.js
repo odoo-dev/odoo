@@ -16,12 +16,12 @@ import { FormCompiler } from "./form_compiler";
 import { FormLabel } from "./form_label";
 import { StatusBarButtons } from "./status_bar_buttons/status_bar_buttons";
 
-const { Component, onMounted, onWillUnmount, useSubEnv, useRef, useState, xml } = owl;
+const { Component, onMounted, onWillUnmount, useEffect, useSubEnv, useRef, useState, xml } = owl;
 
 export class FormRenderer extends Component {
     setup() {
         const { archInfo, Compiler, record } = this.props;
-        const { arch, xmlDoc } = archInfo;
+        const { arch, autofocusFieldId, disableAutofocus, xmlDoc } = archInfo;
         const templates = { FormRenderer: xmlDoc };
         this.state = useState({}); // Used by Form Compiler
         this.templates = useViewCompiler(
@@ -31,13 +31,29 @@ export class FormRenderer extends Component {
             this.compileParams
         );
         useSubEnv({ model: record.model });
-        useBounceButton(useRef("compiled_view_root"), () => {
+        const compiledViewRef = useRef("compiled_view_root");
+        useBounceButton(compiledViewRef, () => {
             return !record.isInEdition;
         });
-        this.uiService = useService('ui');
+        if (!disableAutofocus) {
+            useEffect(
+                (isInEdition, refEl) => {
+                    if (isInEdition && refEl) {
+                        const elementToFocus =
+                            (autofocusFieldId && refEl.querySelector(`#${autofocusFieldId}`)) ||
+                            refEl.querySelector(".o_content .o_field_widget input");
+                        if (elementToFocus) {
+                            elementToFocus.focus();
+                        }
+                    }
+                },
+                () => [record.isInEdition, compiledViewRef.el]
+            );
+        }
+        this.uiService = useService("ui");
         this.onResize = useDebounced(this.render, 200);
-        onMounted(() => browser.addEventListener('resize', this.onResize));
-        onWillUnmount(() => browser.removeEventListener('resize', this.onResize));
+        onMounted(() => browser.addEventListener("resize", this.onResize));
+        onWillUnmount(() => browser.removeEventListener("resize", this.onResize));
     }
 
     evalDomainFromRecord(record, expr) {

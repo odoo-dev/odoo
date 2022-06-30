@@ -429,7 +429,7 @@ class X2ManyFieldDialog extends owl.Component {
 
         const { autofocusFieldId, disableAutofocus } = this.archInfo;
         if (!disableAutofocus) {
-            // to simplify
+            // to simplify!!
             useEffect(
                 (isInEdition) => {
                     let elementToFocus;
