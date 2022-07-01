@@ -52,6 +52,17 @@ export const KnowledgeEmbeddedViewBehavior = KnowledgeBehavior.extend({
             views: actWindow.views,
             withControlPanel: true,
             context: context,
+            /**
+             * @param {integer} recordId
+             */
+            selectRecord: recordId => {
+                this.handler.do_action({
+                    type: 'ir.actions.act_window',
+                    res_model: actWindow.res_model,
+                    views: [[false, 'form']],
+                    res_id: recordId,
+                });
+            },
         });
         return Promise.all([
             promise,

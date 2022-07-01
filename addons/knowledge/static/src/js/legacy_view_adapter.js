@@ -177,6 +177,7 @@ View.template = xml/* xml */ `
         viewInfo="viewInfo"
         viewParams="getViewParams()"
         onPushState="props.onPushState"
+        selectRecord="props.selectRecord"
     />
 `;
 
