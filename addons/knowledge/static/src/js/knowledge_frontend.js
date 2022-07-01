@@ -1,12 +1,14 @@
 /** @odoo-module */
 'use strict';
 
+import { qweb as QWeb } from 'web.core';
 import publicWidget from 'web.public.widget';
 import KnowledgeTreePanelMixin from './tools/tree_panel_mixin.js'
 
 
 publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend(KnowledgeTreePanelMixin, {
     selector: '.o_knowledge_form_view',
+    xmlDependencies: ['/knowledge/static/src/xml/knowledge_frontend.xml'],
     events: {
         'keyup .knowledge_search_bar': '_searchArticles',
         'click .o_article_caret': '_onFold',
@@ -21,6 +23,10 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend(KnowledgeTree
         return this._super.apply(this, arguments).then(() => {
             const id = this.$el.data('article-id');
             this._renderTree(id, '/knowledge/tree_panel/portal');
+            const $placeholder = $(QWeb.render('knowledge.embeded_view_placeholder', {
+                url: '/knowledge/article/' + id
+            }));
+            $placeholder.appendTo($('.o_knowledge_embeded_view_container'));
         });
     },
 
