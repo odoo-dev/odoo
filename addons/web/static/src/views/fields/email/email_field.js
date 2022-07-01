@@ -17,6 +17,11 @@ EmailField.template = "web.EmailField";
 EmailField.props = {
     ...standardFieldProps,
 };
+EmailField.extractProps = (fieldName, record, attrs) => {
+    return {
+        placeholder: attrs.placeholder,
+    };
+};
 
 EmailField.displayName = _lt("Email");
 EmailField.supportedTypes = ["char"];

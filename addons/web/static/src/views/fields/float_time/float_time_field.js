@@ -38,9 +38,10 @@ FloatTimeField.displayName = _lt("Time");
 FloatTimeField.supportedTypes = ["float"];
 
 FloatTimeField.isEmpty = () => false;
-FloatTimeField.extractProps = (fieldName, record) => {
+FloatTimeField.extractProps = (fieldName, record, attrs) => {
     return {
         invalidate: () => record.setInvalidField(fieldName),
+        placeholder: attrs.placeholder,
     };
 };
 

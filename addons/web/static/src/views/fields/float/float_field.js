@@ -73,6 +73,7 @@ FloatField.extractProps = (fieldName, record, attrs) => {
         digits:
             (attrs.digits ? JSON.parse(attrs.digits) : attrs.options.digits) ||
             record.fields[fieldName].digits,
+        placeholder: attrs.placeholder,
     };
 };
 
