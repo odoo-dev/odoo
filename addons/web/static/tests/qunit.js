@@ -507,4 +507,20 @@
         el.innerText = "details:not([open]) > :not(summary) { display: none; }";
         document.head.appendChild(el);
     });
+
+    // Prevent browser from logging errors as that will cause the python test to immediately fail.
+    // QUnit already has listeners for these events and will mark the test as failed accordingly
+    window.addEventListener("error", (ev) => {
+        ev.preventDefault();
+    });
+    window.addEventListener("unhandledrejection", (ev) => {
+        ev.preventDefault();
+    });
+    const consoleError = console.error;
+    QUnit.begin(() => {
+        console.error = console.log;
+    });
+    QUnit.done(() => {
+        console.error = consoleError;
+    });
 })();
