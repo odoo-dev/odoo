@@ -13,18 +13,10 @@ export class KnowledgePlugin {
             if (node.oKnowledgeToolbar) {
                 node.oKnowledgeToolbar.removeToolbar();
             }
-            while (node.firstChild) {
-                node.removeChild(node.lastChild);
-            }
         }
         for (const node of editable.querySelectorAll('.o_knowledge_behavior_anchor')) {
             if (node.oKnowledgeBehavior) {
                 node.oKnowledgeBehavior.removeBehavior();
-            }
-        }
-        for (const node of editable.querySelectorAll('.o_knowledge_embeded_view_container')) {
-            while (node.firstChild) {
-                node.removeChild(node.lastChild);
             }
         }
     }

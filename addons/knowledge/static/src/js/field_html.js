@@ -11,7 +11,8 @@ FieldHtml.include({
      * to insert the view.
      */
     on_attach_callback: function () {
-        this.injector.manageEmbededViews();
+        this.injector.canMount = true;
+        this.injector.updateBehaviors();
     },
     /**
      * @override

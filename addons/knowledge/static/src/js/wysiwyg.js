@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import pyUtils from 'web.py_utils';
 import { qweb as QWeb } from 'web.core';
 import { SelectCreateDialog } from 'web.view_dialogs';
 import { ComponentWrapper } from 'web.OwlCompatibility';
@@ -198,35 +197,16 @@ Wysiwyg.include({
      */
     _insertView: async function (type) {
         const restoreSelection = preserveCursor(this.odooEditor.document);
-        const data = await openActionSelector.call(this, type);
+        const embeddedViewParams = await openActionSelector.call(this, type);
         restoreSelection();
-        const viewId = data.view ? data.view_id.res_id : false;
-        const viewType = type === 'tree' ? 'list' : type;
-        const embededViewFragment = new DocumentFragment();
-        const embededViewBlock = $(QWeb.render('knowledge.embeded_view', {
-            'res_model': data.res_model,
-            'name': data.name,
-            'view_id': viewId,
-            'view_type': viewType
+        const embeddedViewFragment = new DocumentFragment();
+        const embeddedViewBlock = $(QWeb.render('knowledge.embedded_view', {
+            'act_window_id': embeddedViewParams.id,
         }))[0];
-        embededViewFragment.append(embededViewBlock);
-        const [container] = this.odooEditor.execCommand('insertFragment', embededViewFragment);
-        console.log('data', data);
-        console.log('context', data.context);
-        console.log('container', container);
-        const context = pyUtils.py_eval(data.context); // TODO: Is it safe ?
-        const widget = new ComponentWrapper(this, View, {
-            resModel: data.res_model,
-            type: viewType,
-            views: [[viewId, viewType]],
-            withControlPanel: true,
-            context: context,
-            onPushState: () => {
-                console.log('onPushState');
-            },
-        });
-        widget.mount(container.querySelector('.o_knowledge_embeded_view_container'));
+        embeddedViewFragment.append(embeddedViewBlock);
+        const [container] = this.odooEditor.execCommand('insertFragment', embeddedViewFragment);
         this._notifyNewToolbars(container);
+        this._notifyNewBehaviors(container);
     },
     /**
      * Notify the @see FieldHtmlInjector when a /file block is inserted from a

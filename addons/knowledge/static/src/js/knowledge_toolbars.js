@@ -60,6 +60,7 @@ const KnowledgeToolbar = Widget.extend({
         this.trigger_up('toolbar_removed', {
             anchor: this.anchor,
         });
+        this.anchor.replaceChildren();
         delete this.anchor.oKnowledgeToolbar;
         this.destroy();
     },

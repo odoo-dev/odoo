@@ -32,6 +32,7 @@ const KnowledgeBehavior = Class.extend({
         this.handler = handler;
         this.anchor = anchor;
         this.mode = mode;
+        this.willMount = false;
         if (this.handler.editor) {
             this.handler.editor.observerUnactive('knowledge_attributes');
         }
@@ -53,6 +54,14 @@ const KnowledgeBehavior = Class.extend({
      * Disable the listeners added in @see applyListeners
      */
     disableListeners: function () {},
+    /**
+     * Mount components related to this behavior
+     * @returns {Promise}
+     */
+    mountComponents: function () {
+        this.willMount = true;
+        return Promise.resolve();
+    },
     /**
      * Used by @see KnowledgePlugin to remove behaviors when the field_html is
      * saved. Also used by @see FieldHtmlInjector to manage injected behaviors

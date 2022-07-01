@@ -19,14 +19,11 @@
             </div>
         </div>
     </t>
-    <t t-name="knowledge.embeded_view">
-        <div class="o_knowledge_embeded_view o_knowledge_embeded_view_type_kanban o_knowledge_toolbars_container"
-            t-att-data-res-model="res_model"
-            t-att-data-name="name"
-            t-att-data-view-id="view_id"
-            t-att-data-view-type="view_type">
+    <t t-name="knowledge.embedded_view">
+        <div class="o_knowledge_embedded_view_type_kanban o_knowledge_toolbars_container o_knowledge_behavior_anchor o_knowledge_behavior_type_embedded_view"
+            t-att-data-res_id="act_window_id">
             <div class="o_knowledge_toolbar_anchor o_knowledge_toolbar_type_template" />
-            <div class="o_knowledge_embeded_view_container" />
+            <div class="o_knowledge_embedded_view_container" />
         </div>
     </t>
     <t t-name="knowledge.wysiwyg_article_link">

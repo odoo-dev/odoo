@@ -56,7 +56,7 @@
             'knowledge/static/src/js/form_renderer.js',
             'knowledge/static/src/js/knowledge_macros.js',
             'knowledge/static/src/js/knowledge_behaviors.js',
-            'knowledge/static/src/js/knowledge_embeded_view.js',
+            'knowledge/static/src/js/knowledge_embedded_view_behavior.js',
             'knowledge/static/src/js/knowledge_toolbars.js',
             'knowledge/static/src/js/knowledge_field_html_injector.js',
             'knowledge/static/src/js/knowledge_plugin.js',
