@@ -8,6 +8,28 @@ import { KnowledgeEmbeddedViewBehavior } from './knowledge_embedded_view_behavio
 const { Component } = owl;
 
 /**
+ * Set an intersection observer on the given element, when the element is displayed
+ * on screen, the function will evaluate the callback function. If the callback
+ * function returns True, the observer will stop observing the element.
+ * @param {HTMLElement} element
+ * @param {Function} callback
+ */
+function setIntersectionObserver (element, callback) {
+    const options = {
+        root: null,
+        rootMargin: '0px'
+    };
+    const observer = new window.IntersectionObserver(entries => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+            observer.unobserve(entry.target);
+            callback();
+        }
+    }, options);
+    observer.observe(element);
+}
+
+/**
  * Component used to access the @see uiService
  */
 class FieldHtmlInjectorComponent extends Component {
@@ -244,7 +266,9 @@ const FieldHtmlInjector = Widget.extend(WidgetAdapterMixin, {
                 anchor.oKnowledgeBehavior = new Behavior(this, anchor, this.mode);
             }
             if (this.canMount && !anchor.oKnowledgeBehavior.willMount) {
-                await anchor.oKnowledgeBehavior.mountComponents();
+                setIntersectionObserver(anchor, () => {
+                    anchor.oKnowledgeBehavior.mountComponents();
+                });
             }
             this.behavior_anchors.add(anchor);
         }
