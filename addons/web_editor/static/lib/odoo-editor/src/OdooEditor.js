@@ -2589,11 +2589,21 @@ export class OdooEditor extends EventTarget {
      * @private
      */
     _onSelectionChange() {
+        // TODO:
+        // - Either: Create a new OdooEditor object for Knowledge and overwrite this function
+        // - Either: Create a function `createOdooEditor` in `wysiwyg` that will instantiate the OdooEditor and overwrite it in our wysiwyg file
+        const selection = this.document.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const node = range.commonAncestorContainer;
+            const container = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+            if (container.closest('.o_knowledge_embeded_view')) {
+                return;
+            }
+        }
         // Compute the current selection on selectionchange but do not record it. Leave
         // that to the command execution or the 'input' event handler.
         this._computeHistorySelection();
-
-        const selection = this.document.getSelection();
         this._updateToolbar(!selection.isCollapsed && this.isSelectionInEditable(selection));
 
         if (this._currentMouseState === 'mouseup') {
