@@ -3,12 +3,17 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ViewAdapter } from "@web/legacy/action_adapters";
-import { LegacyComponent } from "@web/legacy/legacy_component";
 import { getDefaultConfig } from "@web/views/view";
 import legacyViewRegistry from "web.view_registry";
 import Widget from "web.Widget";
 
-const { onWillStart, useSubEnv, xml } = owl;
+const {
+    Component,
+    onWillStart,
+    useSubEnv,
+    useState,
+    xml
+} = owl;
 
 const viewRegistry = registry.category("views");
 const viewKeysMapping = {
@@ -27,7 +32,7 @@ const viewKeysMapping = {
     withSearchPanel: "withSearchPanel",
 };
 
-export class View extends LegacyComponent {
+export class View extends Component {
     setup() {
         const { arch, fields, resModel, searchViewArch, searchViewFields, type } = this.props;
 
@@ -57,6 +62,9 @@ export class View extends LegacyComponent {
 
         this.viewService = useService("view");
         this.Widget = Widget; // fool the ComponentAdapter with a simple Widget
+        this.state = useState({
+            error: false
+        });
 
         onWillStart(this.onWillStart);
     }
@@ -101,14 +109,22 @@ export class View extends LegacyComponent {
             searchViewId && (!searchViewArch || !searchViewFields || (!irFilters && loadIrFilters));
 
         if (loadView || loadSearchView) {
-            const viewDescriptions = await this.viewService.loadViews(
-                {
+            let viewDescriptions = null;
+            try {
+                viewDescriptions = await this.viewService.loadViews({
                     resModel,
                     views: this.views,
                     context,
-                },
-                { actionId, loadActionMenus, loadIrFilters }
-            );
+                }, { actionId, loadActionMenus, loadIrFilters });
+            } catch (error) {
+                console.log(error);
+                if (error.name === 'odoo.exceptions.AccessError') {
+                    this.state.error = 'access';
+                } else {
+                    this.state.error = 'other';
+                }
+                return;
+            }
             const result = viewDescriptions.__legacy__;
             this.viewParams = result.fields_views[type];
             if (result.fields_views.search) {
@@ -171,7 +187,16 @@ export class View extends LegacyComponent {
 
 View.components = { ViewAdapter };
 View.template = xml/* xml */ `
+    <t t-if="this.state.error">
+        <t t-if="this.state.error === 'access'">
+            <i class="fa fa-warning"/>You don't have access to the <span t-out="this.props.resModel" class="font-italic"/> model.
+        </t>
+        <t t-else="">
+            <i class="fa fa-warning"/>Error while loading the view.
+        </t>
+    </t>
     <ViewAdapter
+        t-else=""
         Component="Widget"
         View="View"
         viewInfo="viewInfo"
