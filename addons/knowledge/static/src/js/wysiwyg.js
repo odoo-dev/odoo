@@ -2,8 +2,6 @@
 
 import { qweb as QWeb } from 'web.core';
 import { SelectCreateDialog } from 'web.view_dialogs';
-import { ComponentWrapper } from 'web.OwlCompatibility';
-import { View } from './legacy_view_adapter.js';
 
 import Wysiwyg from 'web_editor.wysiwyg';
 import { KnowledgeArticleLinkModal } from './wysiwyg/knowledge_article_link.js';

@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
 import { ComponentWrapper } from 'web.OwlCompatibility';
-import { View } from './legacy_view_adapter.js';
+import { EmbeddedView } from './embedded_view.js';
 import { KnowledgeBehavior } from './knowledge_behaviors';
-import pyUtils from 'web.py_utils';
 
 export const KnowledgeEmbeddedViewBehavior = KnowledgeBehavior.extend({
     init: function (handler, anchor, mode) {
@@ -30,39 +29,9 @@ export const KnowledgeEmbeddedViewBehavior = KnowledgeBehavior.extend({
         if (this.handler.editor) {
             this.handler.editor.observerUnactive('knowledge_embedded_view');
         }
-        const actWindows = await this.handler._rpc({
-            model: 'ir.actions.act_window',
-            domain: [
-                ['id', '=', this.actWindowId],
-                ['view_mode', '=ilike', `%${this.viewType}%`],
-            ],
-            method: 'search_read',
-            fields: ['context', 'res_model', 'views'],
-        });
-        const actWindow = actWindows[0];
-        const context = pyUtils.py_eval(actWindow.context); // TODO: Is it safe ?
-        actWindow.views.forEach((item) => {
-            if (item[1] === 'tree') {
-                item[1] = 'list';
-            }
-        });
-        this.viewWrapper = new ComponentWrapper(this, View, {
-            resModel: actWindow.res_model,
-            type: this.viewType,
-            views: actWindow.views,
-            withControlPanel: true,
-            context: context,
-            /**
-             * @param {integer} recordId
-             */
-            selectRecord: recordId => {
-                this.handler.do_action({
-                    type: 'ir.actions.act_window',
-                    res_model: actWindow.res_model,
-                    views: [[false, 'form']],
-                    res_id: recordId,
-                });
-            },
+        this.viewWrapper = new ComponentWrapper(this, EmbeddedView, {
+            actionId: this.actWindowId,
+            viewType: this.viewType,
         });
         return Promise.all([
             promise,

@@ -43,6 +43,7 @@
             'knowledge/static/src/scss/knowledge_editor.scss',
             'knowledge/static/src/scss/knowledge_blocks.scss',
             'knowledge/static/src/components/*/*.js',
+            'knowledge/static/src/js/embedded_view.js',
             'knowledge/static/src/js/knowledge_controller.js',
             'knowledge/static/src/js/knowledge_renderers.js',
             'knowledge/static/src/js/knowledge_views.js',
@@ -62,7 +63,6 @@
             'knowledge/static/src/js/knowledge_plugin.js',
             'knowledge/static/src/js/field_html.js',
             'knowledge/static/src/js/knowledge_service.js',
-            'knowledge/static/src/js/legacy_view_adapter.js',
         ],
         'web.assets_frontend': [
             'knowledge/static/src/scss/knowledge_frontend.scss',
