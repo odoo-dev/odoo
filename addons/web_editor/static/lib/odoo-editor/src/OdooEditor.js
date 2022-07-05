@@ -2597,7 +2597,7 @@ export class OdooEditor extends EventTarget {
             const range = selection.getRangeAt(0);
             const node = range.commonAncestorContainer;
             const container = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
-            if (container.closest('.o_knowledge_embeded_view')) {
+            if (container.closest('.o_knowledge_embedded_view_type_kanban')) {
                 return;
             }
         }

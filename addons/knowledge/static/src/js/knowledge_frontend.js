@@ -26,7 +26,7 @@ publicWidget.registry.KnowledgeWidget = publicWidget.Widget.extend(KnowledgeTree
             const $placeholder = $(QWeb.render('knowledge.embeded_view_placeholder', {
                 url: '/knowledge/article/' + id
             }));
-            $placeholder.appendTo($('.o_knowledge_embeded_view_container'));
+            $placeholder.appendTo($('.o_knowledge_embedded_view_container'));
         });
     },
 
