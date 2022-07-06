@@ -35,6 +35,7 @@ export const KnowledgeEmbeddedViewBehavior = KnowledgeBehavior.extend({
             actionId: this.actWindowId,
             viewType: this.viewType,
         });
+        this.container.replaceChildren();
         return Promise.all([
             promise,
             this.viewWrapper.mount(this.container).finally(() => {
