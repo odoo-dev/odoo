@@ -13,12 +13,14 @@ export const KnowledgeEmbeddedViewBehavior = KnowledgeBehavior.extend({
                              .find(className => className.startsWith('o_knowledge_embedded_view_type_'))
                              .split('o_knowledge_embedded_view_type_')[1];
     },
-    removeBehavior: function () {
-        if (this.viewWrapper && this.viewWrapper.el) {
-            this.viewWrapper.unmount();
-        }
-        this.container.replaceChildren();
+    /**
+     * @override
+     */
+    applyAttributes: function () {
         this._super.apply(this, arguments);
+        if (this.mode === 'edit') {
+            this.anchor.setAttribute('contenteditable', 'false');
+        }
     },
     /**
      * @override
@@ -41,5 +43,12 @@ export const KnowledgeEmbeddedViewBehavior = KnowledgeBehavior.extend({
                 }
             })
         ]);
+    },
+    removeBehavior: function () {
+        if (this.viewWrapper && this.viewWrapper.el) {
+            this.viewWrapper.unmount();
+        }
+        this.container.replaceChildren();
+        this._super.apply(this, arguments);
     },
 });
