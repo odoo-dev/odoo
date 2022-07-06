@@ -35,7 +35,7 @@ const BUTTON_CLICK_PARAMS = [
     // just override compileButton in kanban compiler to add the debounce?
     "debounce",
 ];
-const BUTTON_STRING_PROPS = ["string", "size", "title", "icon"];
+const BUTTON_STRING_PROPS = ["string", "size", "title", "icon", "id"];
 
 /**
  * @param {Element} el
