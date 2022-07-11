@@ -1028,4 +1028,76 @@ QUnit.module("SettingsFormView", (hooks) => {
 
         assert.verifySteps(["cancel"]);
     });
+
+    QUnit.test("Settings Radio widget: show and search", async function (assert) {
+        serverData.models["res.config.settings"].fields.product_id = {
+            string: "Product",
+            type: "many2one",
+            relation: "product",
+        };
+        serverData.models.product = {
+            fields: {
+                name: { string: "Product Name", type: "char" },
+            },
+            records: [
+                {
+                    id: 37,
+                    display_name: "xphone",
+                },
+                {
+                    id: 41,
+                    display_name: "xpad",
+                },
+            ],
+        };
+        await makeView({
+            type: "form",
+            resModel: "res.config.settings",
+            serverData,
+            arch: `
+                <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
+                    <div class="o_setting_container">
+                        <div class="settings">
+                            <div class="app_settings_block" string="CRM" data-key="crm">
+                                <div class="row mt16 o_settings_container">
+                                    <div class="col-12 col-lg-6 o_setting_box">
+                                        <div class="o_setting_right_pane">
+                                            <label for="product_id"/>
+                                            <div class="content-group">
+                                                <div class="mt16">
+                                                    <field name="product_id" class="o_light_label" widget="radio"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>`,
+        });
+
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_radio_item label")].map(
+                (x) => x.parentElement.textContent
+            ),
+            ["xphone", "xpad"]
+        );
+
+        await editSearch(target, "xp");
+        await execTimeouts();
+        assert.containsN(target, ".highlighter", 2, "should have 2 options highlighted");
+        assert.deepEqual(
+            [...target.querySelectorAll(".highlighter")].map((x) => x.parentElement.textContent),
+            ["xphone", "xpad"]
+        );
+
+        await editSearch(target, "xph");
+        await execTimeouts();
+        assert.containsN(target, ".highlighter", 1, "should have only one highlighted");
+        assert.deepEqual(
+            [...target.querySelectorAll(".highlighter")].map((x) => x.parentElement.textContent),
+            ["xphone"]
+        );
+    });
 });

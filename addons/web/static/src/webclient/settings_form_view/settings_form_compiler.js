@@ -163,8 +163,6 @@ function compileField(el, params) {
         let widgetName;
         if (el.hasAttribute("widget")) {
             widgetName = el.getAttribute("widget");
-        }
-        if (params.getFieldExpr) {
             const label = params.getFieldExpr(el.getAttribute("name"), widgetName);
             if (label) {
                 params.labels.push({
@@ -219,57 +217,21 @@ export class SettingsFormCompiler extends FormCompiler {
     setup() {
         super.setup();
         this.compilers.unshift(
-            {
-                selector: "form",
-                fn: compileForm,
-            },
-            {
-                selector: "div.settings",
-                fn: compileSettingsPage,
-            },
-            {
-                selector: "div.app_settings_block",
-                fn: compileSettingsApp,
-            },
-            {
-                selector: "div.app_settings_header",
-                fn: compileSettingsHeader,
-            },
+            { selector: "form", fn: compileForm },
+            { selector: "div.settings", fn: compileSettingsPage },
+            { selector: "div.app_settings_block", fn: compileSettingsApp },
+            { selector: "div.app_settings_header", fn: compileSettingsHeader },
             // objects to show/hide in the search
-            {
-                selector: "div.o_setting_box",
-                fn: compileSettingBox,
-            },
-            {
-                selector: "div.o_settings_container",
-                fn: compileSettingsContainer,
-            },
+            { selector: "div.o_setting_box", fn: compileSettingBox },
+            { selector: "div.o_settings_container", fn: compileSettingsContainer },
             // h2
-            {
-                selector: "h2",
-                fn: compileSettingsGroupTitle,
-            },
-            {
-                selector: "h3.o_setting_tip",
-                fn: compileSettingsGroupTip,
-            },
+            { selector: "h2", fn: compileSettingsGroupTitle },
+            { selector: "h3.o_setting_tip", fn: compileSettingsGroupTip },
             // search terms and highlight :
-            {
-                selector: "label",
-                fn: compileLabel,
-            },
-            {
-                selector: "span.o_form_label",
-                fn: compileGenericLabel,
-            },
-            {
-                selector: "div.text-muted",
-                fn: compileGenericLabel,
-            },
-            {
-                selector: "field",
-                fn: compileField,
-            }
+            { selector: "label", fn: compileLabel },
+            { selector: "span.o_form_label", fn: compileGenericLabel },
+            { selector: "div.text-muted", fn: compileGenericLabel },
+            { selector: "field", fn: compileField }
         );
     }
     createLabelFromField(fieldId, fieldName, fieldString, label, params) {
