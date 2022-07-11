@@ -465,7 +465,7 @@ QUnit.test('fieldmany2many tags email (edition)', async function (assert) {
     assert.verifySteps([`[${resPartnerId2}]`, `[${resPartnerId2}]`, `[${resPartnerId2}]`]);
 });
 
-QUnit.skipWOWL('many2many_tags_email widget can load more than 40 records', async function (assert) {
+QUnit.test('many2many_tags_email widget can load more than 40 records', async function (assert) {
     assert.expect(3);
 
     const pyEnv = await startServer();
@@ -492,7 +492,7 @@ QUnit.skipWOWL('many2many_tags_email widget can load more than 40 records', asyn
 
     await click('.o_form_button_edit');
 
-    assert.hasClass(document.querySelector('.o_form_view'), 'o_form_editable');
+    assert.hasClass(document.querySelector('.o_legacy_form_view'), 'o_form_editable');
 
     // add a record to the relation
     await testUtils.fields.many2one.clickOpenDropdown('partner_ids');
