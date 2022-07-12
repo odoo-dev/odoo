@@ -94,7 +94,6 @@ class TestTOTP(HttpCase):
         user.
         """
 
-        import unittest; raise unittest.SkipTest("skipWOWL")
         self.start_tour('/web', 'totp_tour_setup', login='demo')
         self.url_open('/web/session/logout')
 
