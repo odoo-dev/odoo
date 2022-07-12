@@ -59,7 +59,7 @@ tour.register('totp_tour_setup', {
     content: "Get secret from collapsed div",
     trigger: 'a:contains("Cannot scan it?")',
     run(helpers) {
-        const $secret = this.$anchor.closest('div').find('[name=secret] span');
+        const $secret = this.$anchor.closest('div').find('[name=secret] > span');
         const $copyBtn = $secret.find('button');
         $copyBtn.remove();
         const secret = $secret.text();
@@ -194,7 +194,7 @@ tour.register('totp_login_device', {
     run: () => {},
 }, {
     content: "Input password",
-    trigger: '[name=password]',
+    trigger: '[name=password] input',
     run: 'text demo', // FIXME: better way to do this?
 }, {
     content: "Confirm",

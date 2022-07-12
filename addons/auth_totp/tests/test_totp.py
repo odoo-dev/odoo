@@ -44,7 +44,6 @@ class TestTOTP(HttpCase):
             self.env['ir.http']._clear_routing_map()
 
     def test_totp(self):
-        import unittest; raise unittest.SkipTest("skipWOWL")
         # 1. Enable 2FA
         self.start_tour('/web', 'totp_tour_setup', login='demo')
 
