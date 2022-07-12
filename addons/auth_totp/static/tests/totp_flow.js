@@ -283,14 +283,14 @@ tour.register('totp_admin_disables', {
     trigger: 'button.dropdown-toggle:contains("Action")'
 }, {
     content: "Select totp remover",
-    trigger: 'a.dropdown-item:contains(Disable two-factor authentication)'
+    trigger: 'span.dropdown-item:contains(Disable two-factor authentication)'
 }, { // enhanced security yo
     content: "Check that we have to enter enhanced security mode",
 trigger: 'div:contains("enter your password")',
     run: () => {},
 }, {
     content: "Input password",
-    trigger: '[name=password]',
+    trigger: '[name=password] input',
     run: 'text admin', // FIXME: better way to do this?
 }, {
     content: "Confirm",

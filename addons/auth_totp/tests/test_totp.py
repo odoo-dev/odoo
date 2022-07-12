@@ -83,7 +83,6 @@ class TestTOTP(HttpCase):
 
 
     def test_totp_administration(self):
-        import unittest; raise unittest.SkipTest("skipWOWL")
         self.start_tour('/web', 'totp_tour_setup', login='demo')
         self.start_tour('/web', 'totp_admin_disables', login='admin')
         self.start_tour('/', 'totp_login_disabled', login=None)
