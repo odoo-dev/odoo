@@ -72,8 +72,7 @@ export class Field extends Component {
     setup() {
         this.FieldComponent = this.props.fieldInfo.FieldComponent;
         if (!this.FieldComponent) {
-            const fieldType = this.props.record.fields[this.props.name].type;
-            this.FieldComponent = getFieldClassFromRegistry(fieldType, this.props.type);
+            this.FieldComponent = getFieldClassFromRegistry(this.fieldType, this.props.type);
         }
     }
 
@@ -91,9 +90,13 @@ export class Field extends Component {
             o_required_modifier: required,
             o_field_invalid: invalid,
             o_field_empty: empty,
-            [`o_field_${this.type}`]: true,
+            [`o_field_${this.fieldType}`]: true,
             [_class]: Boolean(_class),
         };
+
+        if (this.props.type) {
+            classNames[`o_field_${this.props.type}`] = true;
+        }
 
         // generate field decorations classNames (only if field-specific decorations
         // have been defined in an attribute, e.g. decoration-danger="other_field = 5")
@@ -106,6 +109,10 @@ export class Field extends Component {
         }
 
         return classNames;
+    }
+
+    get fieldType() {
+        return this.props.record.fields[this.props.name].type;
     }
 
     get type() {
