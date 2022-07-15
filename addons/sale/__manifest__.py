@@ -83,6 +83,9 @@ This module contains all the common features of Sales Management and eCommerce.
         'web.report_assets_common': [
             'sale/static/src/scss/sale_report.scss',
         ],
+        'web.assets_qweb': [
+            'sale/static/src/xml/product_discount_widget_templates.xml',
+        ],
     },
     'post_init_hook': '_synchronize_cron',
     'license': 'LGPL-3',

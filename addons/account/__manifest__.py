@@ -123,6 +123,7 @@ You could use this simplified accounting in case you work with an (external) acc
         ],
         'web.assets_qweb': [
             'account/static/src/xml/**/*',
+            'account/static/src/js/**/*.xml',
         ],
     },
     'license': 'LGPL-3',

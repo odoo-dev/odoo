@@ -1,18 +1,12 @@
-odoo.define('sale.SaleOrderView', function (require) {
-    "use strict";
+/** @odoo-module **/
 
-    const SaleOrderFormController = require('sale.SaleOrderFormController');
-    const FormView = require('web.FormView');
-    const viewRegistry = require('web.view_registry');
+import { registry } from "@web/core/registry";
+import { formView } from "@web/views/form/form_view";
 
-    const SaleOrderView = FormView.extend({
-        config: _.extend({}, FormView.prototype.config, {
-            Controller: SaleOrderFormController,
-        }),
-    });
+import { SaleOrderFormController } from "./sale_order_controller";
 
-    viewRegistry.add('sale_discount_form', SaleOrderView);
-
-    return SaleOrderView;
-
+export const SaleOrderFormView = Object.assign({}, formView, {
+    Controller: SaleOrderFormController,
 });
+
+registry.category("views").add("sale_order_form_view", SaleOrderFormView);
