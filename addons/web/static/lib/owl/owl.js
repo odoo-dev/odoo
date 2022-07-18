@@ -2469,35 +2469,36 @@
         const timeoutError = new Error(`${hookName}'s promise hasn't resolved after 3 seconds`);
         const node = getCurrent();
         return (...args) => {
+            const _onError = (cause) => {
+                if (cause instanceof Error) {
+                    cause.message = `${error.message}"${cause.message}"`;
+                    cause.stack = `${error.stack} \nCaused by ${cause.stack}`;
+                    throw cause;
+                }
+                error.cause = cause;
+                throw error;
+            };
             try {
                 const result = fn(...args);
                 if (result instanceof Promise) {
                     if (hookName === "onWillStart" || hookName === "onWillUpdateProps") {
                         const fiber = node.fiber;
-                        Promise.race([
-                            result,
-                            new Promise((resolve) => setTimeout(() => resolve(TIMEOUT), 3000)),
-                        ]).then((res) => {
+                        Promise.race([result, new Promise((resolve) => setTimeout(() => resolve(TIMEOUT), 3000))])
+                            .then((res) => {
                             if (res === TIMEOUT && node.fiber === fiber) {
                                 console.warn(timeoutError);
                             }
-                        });
+                        })
+                            .catch(() => { });
                     }
                     return result.catch((cause) => {
-                        error.cause = cause;
-                        if (cause instanceof Error) {
-                            error.message += `"${cause.message}"`;
-                        }
-                        throw error;
+                        _onError(cause);
                     });
                 }
                 return result;
             }
             catch (cause) {
-                if (cause instanceof Error) {
-                    error.message += `"${cause.message}"`;
-                }
-                throw error;
+                _onError(cause);
             }
         };
     }
