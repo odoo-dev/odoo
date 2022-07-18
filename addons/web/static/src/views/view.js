@@ -90,6 +90,7 @@ export function getDefaultConfig() {
  */
 
 export class ViewNotFoundError extends Error {}
+export class LegacyFormViewInDialogError extends Error {}
 
 const STANDARD_PROPS = [
     "resModel",
@@ -257,6 +258,10 @@ export class View extends Component {
             } else {
                 subType = null;
             }
+        }
+
+        if (descr.type === "form" && descr.isLegacy && this.env.inDialog) {
+            throw new LegacyFormViewInDialogError();
         }
 
         Object.assign(this.env.config, {
