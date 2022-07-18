@@ -5,6 +5,8 @@ import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
 import { BlockUI } from "./block_ui";
 import { browser } from "@web/core/browser/browser";
+import { getTabableElements } from "@web/core/utils/ui";
+import { getActiveHotkey } from "../hotkeys/hotkey_service";
 
 const { EventBus, useEffect, useRef } = owl;
 
@@ -31,11 +33,44 @@ export function useActiveElement(refName) {
         (el) => {
             if (el) {
                 uiService.activateElement(el);
+                trapFocus(el);
                 return () => uiService.deactivateElement(el);
             }
         },
         () => [owner.el]
     );
+}
+
+function trapFocus(element) {
+    const tabableEls = getTabableElements(element);
+    if (tabableEls.length > 0 && element.tabIndex < 0) {
+        element.tabIndex = -1;
+    }
+    const firstTabableEl = tabableEls[0] || element;
+    const lastTabableEl = tabableEls[tabableEls.length - 1] || element;
+
+    element.addEventListener("keydown", function (e) {
+        switch (getActiveHotkey(e)) {
+            case "tab":
+                if (document.activeElement === lastTabableEl) {
+                    firstTabableEl.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                break;
+            case "shift+tab":
+                if (document.activeElement === firstTabableEl) {
+                    lastTabableEl.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                break;
+        }
+    });
+
+    if (!element.contains(document.activeElement)) {
+        firstTabableEl.focus();
+    }
 }
 
 // window size handling

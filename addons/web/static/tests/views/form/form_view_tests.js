@@ -16,6 +16,7 @@ import {
     patchWithCleanup,
     selectDropdownItem,
     triggerEvent,
+    triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { toggleActionMenu, toggleGroupByMenu, toggleMenuItem } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
@@ -30,6 +31,8 @@ import legacySession from "web.session";
 import { scrollerService } from "@web/core/scroller_service";
 import BasicModel from "web.BasicModel";
 import { localization } from "@web/core/l10n/localization";
+import { Dialog } from "@web/core/dialog/dialog";
+import { useAutofocus } from "@web/core/utils/hooks";
 
 const fieldRegistry = registry.category("fields");
 const serviceRegistry = registry.category("services");
@@ -6537,6 +6540,92 @@ QUnit.module("Views", (hooks) => {
             "cursor should be at the end"
         );
     });
+
+    QUnit.test(
+        "when a dialog is open, the focus is trapped in the dialog",
+        async function (assert) {
+            const form = await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: '<form><field name="foo"/><field name="bar"/></form>',
+                resId: 1,
+            });
+            await click(target.querySelector(".o_form_button_edit"));
+
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector('.o_field_widget[name="foo"] input')
+            );
+            assert.strictEqual(
+                target.querySelector('.o_field_widget[name="foo"] input').selectionStart,
+                3,
+                "cursor should be at the end"
+            );
+            class CustomDialog extends owl.Component {}
+            CustomDialog.components = { Dialog };
+            CustomDialog.template = owl.xml`<Dialog title="'Welcome'">content</Dialog>`;
+            form.env.services.dialog.add(CustomDialog);
+            await nextTick();
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o-default-button"),
+                "The focus is on the first 'focusable' element of the dialog"
+            );
+            triggerHotkey("Tab");
+            await nextTick();
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".o-default-button"),
+                "The focus is trapped on the dialog"
+            );
+
+            await click(target.querySelector(".o-default-button"));
+            target.querySelector('.o_field_widget[name="foo"] input').focus();
+            await nextTick();
+
+            class CustomDialog2 extends owl.Component {
+                setup() {
+                    useAutofocus();
+                }
+            }
+            CustomDialog2.components = { Dialog };
+            CustomDialog2.template = owl.xml`
+                                        <Dialog title="'Welcome'">
+                                            <input type="text" placeholder="withouFocus"/>
+                                            <input type="text" t-ref="autofocus" placeholder="withFocus"/>
+                                        </Dialog>`;
+            form.env.services.dialog.add(CustomDialog2);
+            await nextTick();
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector("input[placeholder=withFocus]"),
+                "The focus is on the autofocus element of the dialog"
+            );
+
+            await click(target.querySelector(".o-default-button"));
+            target.querySelector('.o_field_widget[name="foo"] input').focus();
+            await nextTick();
+
+            class CustomDialog3 extends owl.Component {}
+            CustomDialog3.components = { Dialog };
+            CustomDialog3.template = owl.xml`<Dialog title="'Welcome'" footer="false">content</Dialog>`;
+            form.env.services.dialog.add(CustomDialog3);
+            await nextTick();
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".modal.d-block.o_technical_modal"),
+                "when there is not other element, the focus is on the dialog itself"
+            );
+            triggerHotkey("Tab");
+            await nextTick();
+            assert.strictEqual(
+                document.activeElement,
+                target.querySelector(".modal.d-block.o_technical_modal"),
+                "The focus stays in the dialog"
+            );
+        }
+    );
 
     QUnit.test("autofocus fields are focused", async function (assert) {
         await makeView({
