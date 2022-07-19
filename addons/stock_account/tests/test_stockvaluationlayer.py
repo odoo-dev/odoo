@@ -1024,7 +1024,6 @@ class TestAngloSaxonAccounting(TestStockValuationCommon):
             invoice_line_form.quantity = 2
             invoice_line_form.price_unit = 25
             invoice_line_form.account_id = self.default_journal_purchase.default_account_id
-            invoice_line_form.tax_ids.clear()
         invoice = invoice_form.save()
         invoice.action_post()
 

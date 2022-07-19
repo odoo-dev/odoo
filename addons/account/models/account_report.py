@@ -160,8 +160,11 @@ class AccountReport(models.Model):
                     tax_tags.write({'country_id': vals['country_id']})
                 else:
                     # Another report uses these tags as well; let's keep them and create new tags in the target country
-                    tag_vals = self.env['account.report.expression']._get_tags_create_vals(expression.formula, vals['country_id'])
-                    self.env['account.account.tag'].create(tag_vals)
+                    # if they don't exist yet.
+                    existing_tax_tags = self.env['account.account.tag']._get_tax_tags(expression.formula, vals['country_id'])
+                    if not existing_tax_tags:
+                        tag_vals = self.env['account.report.expression']._get_tags_create_vals(expression.formula, vals['country_id'])
+                        self.env['account.account.tag'].create(tag_vals)
 
         return super().write(vals)
 
@@ -303,9 +306,7 @@ class AccountReportLine(models.Model):
 
         # Update aggregation expressions, so that they use the copied lines
         for expression in self.expression_ids:
-            copy_defaults = {
-                'report_line_id': copied_line.id,
-            }
+            copy_defaults = {'report_line_id': copied_line.id}
 
             if expression.engine == 'aggregation':
                 copied_formula = f" {expression.formula} " # Add spaces so that the lookahead/lookbehind of the regex can work (we can't do a | in those)
@@ -572,6 +573,7 @@ class AccountReportExternalValue(models.Model):
     _name = "account.report.external.value"
     _description = 'Accounting Report External Value'
     _check_company_auto = True
+    _order = 'date, id'
 
     name = fields.Char(required=True)
     value = fields.Float(required=True)
@@ -595,7 +597,6 @@ class AccountReportExternalValue(models.Model):
     # Carryover fields
     carryover_origin_expression_label = fields.Char(string="Origin Expression Label")
     carryover_origin_report_line_id = fields.Many2one(string="Origin Line", comodel_name='account.report.line')
-
 
     @api.constrains('foreign_vat_fiscal_position_id', 'target_report_expression_id')
     def _check_fiscal_position(self):

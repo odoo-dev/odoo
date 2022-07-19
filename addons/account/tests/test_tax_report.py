@@ -165,7 +165,7 @@ class TaxReportTest(AccountTestInvoicingCommon):
             self.assertEqual(set(original_tags.mapped('name')), set(copy_tags.mapped('name')), "Tags matched by original and copied expression should have the same names.")
             self.assertNotEqual(original_tags.country_id, copy_tags.country_id, "Tags matched by original and copied expression should have different countries.")
 
-        # Direclty change the country of a report without copying it first (some of its tags are shared, but not all)
+        # Directly change the country of a report without copying it first (some of its tags are shared, but not all)
         original_report_2_tags = {line: line.expression_ids._get_matching_tags() for line in self.tax_report_2.line_ids}
         self.tax_report_2.country_id = self.test_country_2
         for line in self.tax_report_2.line_ids:
@@ -173,6 +173,8 @@ class TaxReportTest(AccountTestInvoicingCommon):
 
             if line == self.tax_report_line_2_42:
                 # This line is the only one of the report not sharing its tags
-                self.assertEqual(line_tags, original_report_2_tags[line], "The tax_tags expressions not sharing their tags with any other report should keep the same tags when the country of their report is changed")
+                self.assertEqual(line_tags, original_report_2_tags[line], "The tax_tags expressions not sharing their tags with any other report should keep the same tags when the country of their report is changed.")
             else:
-                self.assertNotEqual(line_tags, original_report_2_tags[line], "The tax_tags expressions sharing their tags with other report should receive new tags when the country of their report is changed")
+                # Tags already exist since 'copied_report_1' belongs to 'test_country_2'
+                for tag in line_tags:
+                    self.assertIn(tag, country_2_tags_after_change, "The tax_tags expressions sharing their tags with other report should not receive new tags since they already exist.")
