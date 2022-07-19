@@ -219,11 +219,19 @@ class AccountReportLine(models.Model):
         precompute=True,
         ondelete='cascade'
     )
+    hierarchy_level = fields.Integer(
+        string="Level",
+        compute='_compute_hierarchy_level',
+        store=True,
+        readonly=False,
+        recursive=True,
+        required=True,
+        precompute=True,
+    )
     parent_id = fields.Many2one(string="Parent Line", comodel_name='account.report.line', ondelete='set null')
     children_ids = fields.One2many(string="Child Lines", comodel_name='account.report.line', inverse_name='parent_id')
     groupby = fields.Char(string="Group By")
     sequence = fields.Integer(string="Sequence")
-    hierarchy_level = fields.Integer(string="Level", compute='_compute_hierarchy_level', store=True, readonly=False, recursive=True)
     code = fields.Char(string="Code")
     foldable = fields.Boolean(string="Foldable", help="By default, we always unfold the lines that can be. If this is checked; the line won't be unfolded by default, and a folding button will be displayed")
     print_on_new_page = fields.Boolean('Print On New Page', help='When checked this line and everything after it will be printed on a new page.')
