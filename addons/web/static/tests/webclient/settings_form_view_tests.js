@@ -647,6 +647,76 @@ QUnit.module("SettingsFormView", (hooks) => {
         }
     );
 
+    QUnit.test(
+        "clicking on a button with noSaveDialog will not show discard warning",
+        async function (assert) {
+            assert.expect(4);
+
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "Settings view",
+                    res_model: "res.config.settings",
+                    type: "ir.actions.act_window",
+                    views: [[1, "form"]],
+                },
+                4: {
+                    id: 4,
+                    name: "Other action",
+                    res_model: "task",
+                    type: "ir.actions.act_window",
+                    views: [[2, "list"]],
+                },
+            };
+
+            serverData.views = {
+                "res.config.settings,1,form": `
+                    <form string="Settings" js_class="base_settings">
+                        <div class="settings">
+                            <div class="app_settings_block" string="CRM" data-key="crm">
+                                <div class="row mt16 o_settings_container">
+                                    <div class="col-12 col-lg-6 o_setting_box">
+                                        <div class="o_setting_left_pane">
+                                            <field name="foo"/>
+                                        </div>
+                                        <div class="o_setting_right_pane">
+                                            <span class="o_form_label">Foo</span>
+                                            <div class="text-muted">this is foo</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button name="4" string="Execute action" type="action" noSaveDialog="true"/>
+                            </div>
+                        </div>
+                    </form>`,
+                "task,2,list": '<tree><field name="display_name"/></tree>',
+                "res.config.settings,false,search": "<search></search>",
+                "task,false,search": "<search></search>",
+            };
+
+            const webClient = await createWebClient({ serverData });
+
+            await doAction(webClient, 1);
+            assert.containsNone(
+                target,
+                ".o_field_boolean input:checked",
+                "checkbox should not be checked"
+            );
+
+            await click(target.querySelector(".custom-control input"));
+            assert.containsOnce(
+                target,
+                ".o_field_boolean input:checked",
+                "checkbox should be checked"
+            );
+
+            await click(target.querySelector("button[name='4']"));
+            assert.containsNone(document.body, ".modal", "should not open a warning dialog");
+
+            assert.containsOnce(target, ".o_list_view", "should be open list view");
+        }
+    );
+
     QUnit.test("settings view does not display o_not_app settings", async function (assert) {
         await makeView({
             type: "form",

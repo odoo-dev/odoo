@@ -13,7 +13,11 @@ export class SettingsFormController extends formView.Controller {
         super.setup();
         const beforeExecuteAction = async (clickParams) => {
             let _continue = true;
-            if (this.model.root.isDirty && !["cancel", "execute"].includes(clickParams.name)) {
+            if (
+                this.model.root.isDirty &&
+                !["cancel", "execute"].includes(clickParams.name) &&
+                !clickParams.noSaveDialog
+            ) {
                 const message = this.env._t("Would you like to save your changes?");
                 await new Promise((resolve) => {
                     this.dialogService.add(
