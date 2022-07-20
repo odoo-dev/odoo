@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 import re
 from collections import defaultdict
 
@@ -375,6 +374,55 @@ class AccountReportExpression(models.Model):
              "(on a _carryover_*-labeled expression), in case it is different from the parent line. 'custom' is also allowed as value"
              " in case the carryover destination requires more complex logic."
     )
+
+    @api.constrains('engine', 'formula', 'subformula')
+    def _check_formula(self):
+        """
+        Check the formula (and subformula if any) is valid. Doesn't check for custom engines.
+        """
+        agg_pattern = re.compile(r'^([+\(\-]*|[+\-]|)[\w\d]+([.*<>+\)\(-/]+[\w\d]+)*\)*$')
+        dom_pattern = re.compile(r'^(\[[\"\'A-z\d_%\|&!=,\(\).><]+\])|False$')
+        tax_pattern = re.compile(r'^[\d\w\W\(\)]+$')
+        account_pattern = re.compile(r'^[+-]?[A-z\d.]*([CD](?=\\)|[^CD])(\\\(([A-z\d]+,?)*\))?[DC]?'
+                                           r'([+-][A-z\d.]*([CD](?=\\)|[^CD])(\\\(([A-z\d]+,?)*\))?[DC]?)*$')
+        ext_pattern = re.compile(r'^(sum|most_recent)$')
+
+        agg_sub_pattern = re.compile(r'^(if_(above|below|between)\([A-Z]{3}\(-?[\d.]+\)(,[A-Z]{3}\(-?[\d.]+\))?\))|cross_report$')
+        dom_sub_pattern = re.compile(r'-?((sum(_if_(neg|pos))?)|count_rows)')
+        ext_sub_pattern = re.compile(r'(editable|rounding=\d+)(;editable|rounding=\d+)*')
+
+
+        bad_pattern_msg = _("Syntax not recognized by the engine") + ': "{}"'
+        for record in self:
+            formula = record.formula.translate(str.maketrans({' ': '', '\n': ''}))
+            subformula = record.subformula.translate(str.maketrans({' ': '', '\n': ''})) if record.subformula else ''
+            if record.engine == 'aggregation':
+                if not agg_pattern.match(formula):
+                    raise ValidationError(bad_pattern_msg.format(record.formula))
+                if subformula and not agg_sub_pattern.match(subformula):
+                    raise ValidationError(bad_pattern_msg.format(record.subformula))
+            elif record.engine == 'domain':
+                if not dom_pattern.match(formula):
+                    raise ValidationError(bad_pattern_msg.format(record.formula))
+                if subformula and not dom_sub_pattern.match(subformula):
+                    raise ValidationError(bad_pattern_msg.format(record.subformula))
+            elif record.engine == 'tax_tags':
+                if not tax_pattern.match(formula):
+                    raise ValidationError(bad_pattern_msg.format(record.formula))
+                if subformula:
+                    raise UserWarning(_("Subformula is not supported for account_codes"))
+            elif record.engine == 'account_codes':
+                if not account_pattern.match(formula):
+                    raise ValidationError(bad_pattern_msg.format(record.formula))
+                if subformula:
+                    raise UserWarning(_("Subformula is not supported for account_codes"))
+            elif record.engine == 'external':
+                if not ext_pattern.match(formula):
+                    raise ValidationError(bad_pattern_msg.format(record.formula))
+                if subformula and not ext_sub_pattern.match(subformula):
+                    raise ValidationError(bad_pattern_msg.format(record.subformula))
+            # Else Custom => Pass
+
 
     @api.depends('engine')
     def _compute_auditable(self):
