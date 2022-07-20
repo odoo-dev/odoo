@@ -5,7 +5,7 @@ import { WEBCLIENT_LOAD_ROUTES } from '@mail/../tests/helpers/webclient_setup';
 
 import testUtils from 'web.test_utils';
 import { clickEdit, patchWithCleanup, selectDropdownItem } from '@web/../tests/helpers/utils';
-import { ViewAdapter } from "@web/legacy/action_adapters";
+import { ListController } from "@web/views/list/list_controller";
 
 QUnit.module('mail', {}, function () {
 QUnit.module('Chatter');
@@ -40,7 +40,7 @@ QUnit.test('list activity widget with no activity', async function (assert) {
     assert.verifySteps(['/web/dataset/call_kw/res.users/web_search_read']);
 });
 
-QUnit.skipWOWL('list activity widget with activities', async function (assert) {
+QUnit.test('list activity widget with activities', async function (assert) {
     assert.expect(6);
 
     const pyEnv = await startServer();
@@ -93,7 +93,7 @@ QUnit.skipWOWL('list activity widget with activities', async function (assert) {
     assert.verifySteps(['/web/dataset/call_kw/res.users/web_search_read']);
 });
 
-QUnit.skipWOWL('list activity widget with exception', async function (assert) {
+QUnit.test('list activity widget with exception', async function (assert) {
     assert.expect(4);
 
     const pyEnv = await startServer();
@@ -133,7 +133,7 @@ QUnit.skipWOWL('list activity widget with exception', async function (assert) {
     assert.verifySteps(['/web/dataset/call_kw/res.users/web_search_read']);
 });
 
-QUnit.skipWOWL('list activity widget: open dropdown', async function (assert) {
+QUnit.test('list activity widget: open dropdown', async function (assert) {
     assert.expect(9);
 
     const pyEnv = await startServer();
@@ -190,7 +190,7 @@ QUnit.skipWOWL('list activity widget: open dropdown', async function (assert) {
         serverData: { views },
     });
 
-    patchWithCleanup(ViewAdapter.prototype, {
+    patchWithCleanup(ListController.prototype, {
         setup() {
             this._super();
             const selectRecord = this.props.selectRecord;
@@ -223,8 +223,8 @@ QUnit.skipWOWL('list activity widget: open dropdown', async function (assert) {
     assert.strictEqual(document.querySelector('.o_activity_summary').innerText, 'Meet FP');
 
     assert.verifySteps([
-        '/web/dataset/call_kw/res.users/web_search_read',
-        'select_record [2,{\"mode\":\"readonly\"}]',
+        'web_search_read',
+        'select_record [2,{"activeIds":[2]}]',
         'open dropdown',
         'activity_format',
         'action_feedback',
@@ -232,7 +232,7 @@ QUnit.skipWOWL('list activity widget: open dropdown', async function (assert) {
     ]);
 });
 
-QUnit.skipWOWL('list activity exception widget with activity', async function (assert) {
+QUnit.test('list activity exception widget with activity', async function (assert) {
     assert.expect(3);
 
     const pyEnv = await startServer();
@@ -283,9 +283,9 @@ QUnit.skipWOWL('list activity exception widget with activity', async function (a
     });
 
     assert.containsN(document.body, '.o_data_row', 2, "should have two records");
-    assert.doesNotHaveClass(document.querySelector('.o_data_row .o_activity_exception_cell div'), 'fa-warning',
+    assert.doesNotHaveClass(document.querySelector('.o_data_row .o_activity_exception_cell div div'), 'fa-warning',
         "there is no any exception activity on record");
-    assert.hasClass(document.querySelectorAll('.o_data_row .o_activity_exception_cell div')[1], 'fa-warning',
+    assert.hasClass(document.querySelectorAll('.o_data_row .o_activity_exception_cell div div')[1], 'fa-warning',
         "there is an exception on a record");
 });
 
