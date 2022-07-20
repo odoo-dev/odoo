@@ -23,7 +23,7 @@
                 <t t-set="formated_amount" t-value="'{:,.2f}'.format(o.amount_residual).replace(',','\xa0')"/>
 
                 <div class="swissqr_page_title">
-                    <h1>QR-bill for invoice <t t-esc="o.name"/></h1>
+                    <h1>QR-bill for invoice <t t-out="o.name"/></h1>
                 </div>
 
                 <div class="swissqr_content_v2">
@@ -45,7 +45,7 @@
                                 <span t-field="o.partner_bank_id.acc_number" t-if="not o.partner_bank_id.l10n_ch_qr_iban"/>
                                 <span t-field="o.partner_bank_id.l10n_ch_qr_iban" t-if="o.partner_bank_id.l10n_ch_qr_iban"/>
                                 <br/>
-                                <span t-esc="o.partner_bank_id.acc_holder_name or o.company_id.name"/><br/>
+                                <span t-out="o.partner_bank_id.acc_holder_name or o.company_id.name"/><br/>
                                 <span t-field="o.company_id.street"/><br/>
                                 <span t-field="o.company_id.country_id.code"/>
                                 <span t-field="o.company_id.zip"/>
@@ -58,7 +58,7 @@
                                     <span>Reference</span>
                                 </div>
                                 <div class="swissqr_text content">
-                                    <span t-esc="o.space_qrr_reference(o.payment_reference)"/><br/>
+                                    <span t-out="o.space_qrr_reference(o.payment_reference)"/><br/>
                                     <br/>
                                 </div>
                             </t>
@@ -92,7 +92,7 @@
                                         <span>Amount</span>
                                     </div>
                                     <div class="content">
-                                        <span t-esc="formated_amount"/>
+                                        <span t-out="formated_amount"/>
                                     </div>
                                 </div>
                             </div>
@@ -133,7 +133,7 @@
                                             <span>Amount</span><br/>
                                         </div>
                                         <div class="content">
-                                            <span t-esc="formated_amount"/>
+                                            <span t-out="formated_amount"/>
                                         </div>
                                     </div>
                                 </div>
@@ -149,7 +149,7 @@
                                 <span t-field="o.partner_bank_id.acc_number" t-if="not o.partner_bank_id.l10n_ch_qr_iban"/>
                                 <span t-field="o.partner_bank_id.l10n_ch_qr_iban" t-if="o.partner_bank_id.l10n_ch_qr_iban"/>
                                 <br/>
-                                <span t-esc="o.partner_bank_id.acc_holder_name or o.company_id.name"/><br/>
+                                <span t-out="o.partner_bank_id.acc_holder_name or o.company_id.name"/><br/>
                                 <span t-field="o.company_id.street"/><br/>
                                 <span t-field="o.company_id.country_id.code"/>
                                 <span t-field="o.company_id.zip"/>
@@ -162,7 +162,7 @@
                                     <span class="title">Reference</span>
                                 </div>
                                 <div class="swissqr_text content">
-                                    <span t-esc="o.space_qrr_reference(o.payment_reference)"/><br/>
+                                    <span t-out="o.space_qrr_reference(o.payment_reference)"/><br/>
                                     <br/>
                                 </div>
                             </t>
@@ -173,7 +173,7 @@
                                     <span>Additional information</span>
                                 </div>
                                 <div class="swissqr_text content">
-                                    <span t-esc="additional_info"/><br/>
+                                    <span t-out="additional_info"/><br/>
                                     <br/>
                                 </div>
                             </t>
