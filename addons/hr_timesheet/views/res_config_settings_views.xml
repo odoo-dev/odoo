@@ -61,7 +61,6 @@
                                             <widget name="hr_timesheet.app_store_widget" type="apple"/>
                                         </div>
                                         <div class="col-lg-3 pe-0">
-                                            <!-- WOWL FIXME: div.o_widget changes the layout. Do we really need a div.o_widget? -->
                                             <widget name="hr_timesheet.app_store_widget" type="google"/>
                                         </div>
                                     </div>

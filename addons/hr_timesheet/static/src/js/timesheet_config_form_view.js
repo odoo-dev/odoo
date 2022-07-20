@@ -1,4 +1,3 @@
-// WOWL TODO: remove this file
 odoo.define('hr_timesheet.res.config.form', function (require) {
     "use strict";
 

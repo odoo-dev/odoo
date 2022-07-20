@@ -4,8 +4,9 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
+import { isAndroid, isIOS } from "@web/core/browser/feature_detection";
 
-const { Component, xml } = owl;
+const { Component } = owl;
 
 const configs = {
     apple: {
@@ -25,19 +26,24 @@ const configs = {
 class AppStoreWidget extends Component {
     setup() {
         this.dialog = useService("dialog");
-        // WOWL TODO: check view widgets' api (props.node.attrs? Seems verbose and not particularly useful)
         this.config = configs[this.props.node.attrs.type];
     }
 
     openQRDialog() {
-        // WOWL FIXME: if isMobile doAction url
-        this.dialog.add(AppStoreQRDialog, { url: this.config.storeUrl });
+        if (
+            (this.props.node.attrs.type === "apple" && isIOS()) ||
+            (this.props.node.attrs.type === "google" && isAndroid())
+        ) {
+            this.env.services.action.doAction({
+                type: "ir.actions.act_url",
+                url: this.config.storeUrl,
+            });
+        } else {
+            this.dialog.add(AppStoreQRDialog, { url: this.config.storeUrl });
+        }
     }
 }
-// WOWL TODO: move templates in own file
-AppStoreWidget.template = xml`
-<img t-att-alt="config.alt" class="img img-fluid mt-1" t-att-class="config.className" style="height: 85% !important; cursor: pointer;" t-att-src="config.src" t-on-click="openQRDialog"/>
-`;
+AppStoreWidget.template = "hr_timesheet.AppStoreWidget";
 
 class AppStoreQRDialog extends Component {
     setup() {
@@ -50,15 +56,6 @@ class AppStoreQRDialog extends Component {
     }
 }
 AppStoreQRDialog.components = { Dialog };
-AppStoreQRDialog.template = xml`<Dialog title="title">
-    <div style="text-align:center;">
-        <h3>Scan this QR code to get the Awesome Timesheet app:</h3><br/><br/>
-        <img class="border border-dark rounded" t-att-src="qrCodeUrl"/>
-    </div>
-    <t t-set-slot="footer">
-        <button class="btn btn-primary" t-on-click="viewApp">View App</button>
-        <button class="btn" t-on-click="props.close">Discard</button>
-    </t>
-</Dialog>`;
+AppStoreQRDialog.template = "hr_timesheet.AppStoreQRDialog";
 
 registry.category("view_widgets").add("hr_timesheet.app_store_widget", AppStoreWidget);
