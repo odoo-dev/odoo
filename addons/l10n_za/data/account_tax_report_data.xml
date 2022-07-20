@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="total_vat_payable" model="account.report.line">
                 <field name="name">[20] VAT PAYABLE/REFUNDABLE (Total A - Total B)</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="total_vat_payable_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -27,7 +25,6 @@
                 <field name="children_ids">
                     <record id="total_output_tax" model="account.report.line">
                         <field name="name">[13] Total A: TOTAL OUTPUT TAX (4 + 4A + 9 + 11 + 12)</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="total_output_tax_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -39,7 +36,6 @@
                             <record id="standard_rate_exclude_capital_goods_service" model="account.report.line">
                                 <field name="name">[1] Standard Rate (Excluding Capital goods and/or services and accomodation)</field>
                                 <field name="code">VAT1</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="standard_rate_exclude_capital_goods_service_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -51,7 +47,6 @@
                             <record id="vat_on_standard_rate_exclude_capital_goods_service" model="account.report.line">
                                 <field name="name">[4] x 15/ (100 + 15)</field>
                                 <field name="code">VAT4</field>
-                                <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="vat_on_standard_rate_exclude_capital_goods_service_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -63,7 +58,6 @@
                             <record id="standard_rate_only_capital_goods_service" model="account.report.line">
                                 <field name="name">[1A] Standard Rate (Only Capital goods and/or services)</field>
                                 <field name="code">VAT1A</field>
-                                <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="standard_rate_only_capital_goods_service_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -75,7 +69,6 @@
                             <record id="vat_on_standard_rate_only_capital_goods_service" model="account.report.line">
                                 <field name="name">[4A] x 15/ (100 + 15)</field>
                                 <field name="code">VAT4A</field>
-                                <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="vat_on_standard_rate_only_capital_goods_service_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -87,7 +80,6 @@
                             <record id="zero_rate_exclude_goods_exported" model="account.report.line">
                                 <field name="name">[2] Zero Rate (excluding goods exported)</field>
                                 <field name="code">VAT2</field>
-                                <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="zero_rate_exclude_goods_exported_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -99,7 +91,6 @@
                             <record id="zero_rate_only_goods_exported" model="account.report.line">
                                 <field name="name">[2A] Zero Rate (Only goods exported)</field>
                                 <field name="code">VAT2A</field>
-                                <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="zero_rate_only_goods_exported_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -111,7 +102,6 @@
                             <record id="exempt_and_non_supplies" model="account.report.line">
                                 <field name="name">[3] Exempt and Non supplies</field>
                                 <field name="code">VAT3</field>
-                                <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="exempt_and_non_supplies_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -123,7 +113,6 @@
                             <record id="accomodation_exceeding_28_days" model="account.report.line">
                                 <field name="name">[5] Accomodation exceeding 28 days</field>
                                 <field name="code">VAT5</field>
-                                <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="accomodation_exceeding_28_days_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -134,7 +123,6 @@
                             </record>
                             <record id="accomodation_exceeding_28_days_60_percent" model="account.report.line">
                                 <field name="name">[6] x 60%</field>
-                                <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="accomodation_exceeding_28_days_60_percent_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -146,7 +134,6 @@
                             <record id="accomodation_under_28_days" model="account.report.line">
                                 <field name="name">[7] Accomodation under 28 days</field>
                                 <field name="code">VAT7</field>
-                                <field name="sequence" eval="12"/>
                                 <field name="expression_ids">
                                     <record id="accomodation_under_28_days_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -157,7 +144,6 @@
                             </record>
                             <record id="accomodation_28_days" model="account.report.line">
                                 <field name="name">[8] Total (6 + 7)</field>
-                                <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="accomodation_28_days_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -168,7 +154,6 @@
                             </record>
                             <record id="vat_on_accomodation_28_days" model="account.report.line">
                                 <field name="name">[9] x 15 / (100 ??) </field>
-                                <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="vat_on_accomodation_28_days_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -180,7 +165,6 @@
                                     <record id="vat_on_accomodation_exceeding_28_days" model="account.report.line">
                                         <field name="name">VAT on Accomodation exceeding 28 days</field>
                                         <field name="code">SEC6</field>
-                                        <field name="sequence" eval="15"/>
                                         <field name="expression_ids">
                                             <record id="vat_on_accomodation_exceeding_28_days_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -192,7 +176,6 @@
                                     <record id="vat_on_accomodation_under_28_days" model="account.report.line">
                                         <field name="name">VAT on Accomodation under 28 days</field>
                                         <field name="code">SEC7</field>
-                                        <field name="sequence" eval="16"/>
                                         <field name="expression_ids">
                                             <record id="vat_on_accomodation_under_28_days_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -205,7 +188,6 @@
                             </record>
                             <record id="vat_plus_base_of_second_hand_goods_export" model="account.report.line">
                                 <field name="name">[10] Change in use and export of second-hand goods</field>
-                                <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="vat_plus_base_of_second_hand_goods_export_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -217,7 +199,6 @@
                                     <record id="second_hand_goods_export" model="account.report.line">
                                         <field name="name">[10] Base Amount: Change in use and export of second-hand goods</field>
                                         <field name="code">VAT10a</field>
-                                        <field name="sequence" eval="18"/>
                                         <field name="expression_ids">
                                             <record id="second_hand_goods_export_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -231,7 +212,6 @@
                             <record id="vat_on_second_hand_goods_export" model="account.report.line">
                                 <field name="name">[11] x 15 / (100 + 15)</field>
                                 <field name="code">VAT11</field>
-                                <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="vat_on_second_hand_goods_export_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -243,7 +223,6 @@
                             <record id="other_imported_services" model="account.report.line">
                                 <field name="name">[12] Other and imported services</field>
                                 <field name="code">VAT12</field>
-                                <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="other_imported_services_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -256,7 +235,6 @@
                     </record>
                     <record id="total_input_tax" model="account.report.line">
                         <field name="name">[19] Total B: TOTAL INPUT TAX (14 + 14A + 15 + 15A + 16 + 17 + 18)</field>
-                        <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="total_input_tax_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -268,7 +246,6 @@
                             <record id="capital_goods_services_supplied" model="account.report.line">
                                 <field name="name">[14] Capital Goods and/or services supplied to you</field>
                                 <field name="code">VAT14</field>
-                                <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="capital_goods_services_supplied_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -280,7 +257,6 @@
                             <record id="capital_goods_imported" model="account.report.line">
                                 <field name="name">[14A] Capital Goods imported by you</field>
                                 <field name="code">VAT14A</field>
-                                <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="capital_goods_imported_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -292,7 +268,6 @@
                             <record id="other_goods_services_supplied" model="account.report.line">
                                 <field name="name">[15] Other goods and/or services supplied to you (not Capital Goods)</field>
                                 <field name="code">VAT15</field>
-                                <field name="sequence" eval="24"/>
                                 <field name="expression_ids">
                                     <record id="other_goods_services_supplied_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -304,7 +279,6 @@
                             <record id="other_goods_imported" model="account.report.line">
                                 <field name="name">[15A] Other goods imported by you (not Capital Goods)</field>
                                 <field name="code">VAT15A</field>
-                                <field name="sequence" eval="25"/>
                                 <field name="expression_ids">
                                     <record id="other_goods_imported_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -316,7 +290,6 @@
                             <record id="change_in_use" model="account.report.line">
                                 <field name="name">[16] Change in Use</field>
                                 <field name="code">VAT16</field>
-                                <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="change_in_use_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -328,7 +301,6 @@
                             <record id="bad_debts" model="account.report.line">
                                 <field name="name">[17] Bad Debts</field>
                                 <field name="code">VAT17</field>
-                                <field name="sequence" eval="27"/>
                                 <field name="expression_ids">
                                     <record id="bad_debts_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -340,7 +312,6 @@
                             <record id="others" model="account.report.line">
                                 <field name="name">[18] Other</field>
                                 <field name="code">VAT18</field>
-                                <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="others_tag" model="account.report.expression">
                                         <field name="label">balance</field>

@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_rub_1" model="account.report.line">
                 <field name="name">Rubriek 1: Prestaties binnenland</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_1_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="tax_report_rub_1a" model="account.report.line">
                         <field name="name">1a. Leveringen/diensten belast met hoog tarief (omzet)</field>
                         <field name="code">1A_OMZET</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1a_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                     <record id="tax_report_rub_1b" model="account.report.line">
                         <field name="name">1b. Leveringen/diensten belast met laag tarief (omzet)</field>
                         <field name="code">1B_OMZET</field>
-                        <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1b_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -52,7 +48,6 @@
                     <record id="tax_report_rub_1c" model="account.report.line">
                         <field name="name">1c. Leveringen/diensten belast met overige tarieven behalve 0% (omzet)</field>
                         <field name="code">1C_OMZET</field>
-                        <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1c_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -64,7 +59,6 @@
                     <record id="tax_report_rub_1d" model="account.report.line">
                         <field name="name">1d. Privégebruik (omzet)</field>
                         <field name="code">1D_OMZET</field>
-                        <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1d_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -76,7 +70,6 @@
                     <record id="tax_report_rub_1e" model="account.report.line">
                         <field name="name">1e. Leveringen/diensten belast met 0% of niet bij u belast (omzet)</field>
                         <field name="code">1E_OMZET</field>
-                        <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_1e_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -89,7 +82,6 @@
             </record>
             <record id="tax_report_rub_2" model="account.report.line">
                 <field name="name">Rubriek 2: Verleggingsregelingen binnenland (omzet)</field>
-                <field name="sequence" eval="7"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_2_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -101,7 +93,6 @@
                     <record id="tax_report_rub_2a" model="account.report.line">
                         <field name="name">2a. Leveringen/diensten waarbij de heffing van omzetbelasting naar u is verlegd (omzet)</field>
                         <field name="code">2A_OMZET</field>
-                        <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_2a_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -114,7 +105,6 @@
             </record>
             <record id="tax_report_rub_3" model="account.report.line">
                 <field name="name">Rubriek 3: Prestaties naar of in het buitenland (omzet)</field>
-                <field name="sequence" eval="9"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_3_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -126,7 +116,6 @@
                     <record id="tax_report_rub_3a" model="account.report.line">
                         <field name="name">3a. Leveringen naar landen buiten de EU (uitvoer) (omzet)</field>
                         <field name="code">3A_OMZET</field>
-                        <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_3a_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -138,7 +127,6 @@
                     <record id="tax_report_rub_3b" model="account.report.line">
                         <field name="name">3b. Leveringen naar/diensten in landen binnen de EU (omzet)</field>
                         <field name="code">3B_OMZET</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_3b_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -150,7 +138,6 @@
                     <record id="tax_report_rub_3c" model="account.report.line">
                         <field name="name">3c. Installatie/afstandsverkopen binnen de EU (omzet)</field>
                         <field name="code">3C_OMZET</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_3c_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -163,7 +150,6 @@
             </record>
             <record id="tax_report_rub_4" model="account.report.line">
                 <field name="name">Rubriek 4: Prestaties vanuit het buitenland aan u verricht (omzet)</field>
-                <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_4_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -175,7 +161,6 @@
                     <record id="tax_report_rub_4a" model="account.report.line">
                         <field name="name">4a. Leveringen/diensten uit landen buiten de EU (invoer) (omzet)</field>
                         <field name="code">4A_OMZET</field>
-                        <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_4a_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -187,7 +172,6 @@
                     <record id="tax_report_rub_4b" model="account.report.line">
                         <field name="name">4b. Leveringen/diensten uit landen binnen de EU (omzet)</field>
                         <field name="code">4B_OMZET</field>
-                        <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_4b_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -201,7 +185,6 @@
             <record id="tax_report_rub_btw_1" model="account.report.line">
                 <field name="name">Rubriek 1: Prestaties binnenland (BTW)</field>
                 <field name="code">NLTAX_B1</field>
-                <field name="sequence" eval="16"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_btw_1_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -213,7 +196,6 @@
                     <record id="tax_report_rub_btw_1a" model="account.report.line">
                         <field name="name">1a. Leveringen/diensten belast met 21% (BTW)</field>
                         <field name="code">1A_BTW</field>
-                        <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1a_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -225,7 +207,6 @@
                     <record id="tax_report_rub_btw_1b" model="account.report.line">
                         <field name="name">1b. Leveringen/diensten belast met laag tarief (BTW)</field>
                         <field name="code">1B_BTW</field>
-                        <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1b_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -237,7 +218,6 @@
                     <record id="tax_report_rub_btw_1c" model="account.report.line">
                         <field name="name">1c. Leveringen/diensten belast met overige tarieven behalve 0% (BTW)</field>
                         <field name="code">1C_BTW</field>
-                        <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1c_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -249,7 +229,6 @@
                     <record id="tax_report_rub_btw_1d" model="account.report.line">
                         <field name="name">1d. Privégebruik (BTW)</field>
                         <field name="code">1D_BTW</field>
-                        <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1d_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -261,7 +240,6 @@
                     <record id="tax_report_rub_btw_1e" model="account.report.line">
                         <field name="name">1e. Leveringen/diensten belast met 0% of niet bij u belast (BTW)</field>
                         <field name="code">1E_BTW</field>
-                        <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_1e_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -274,7 +252,6 @@
             </record>
             <record id="tax_report_rub_btw_2" model="account.report.line">
                 <field name="name">Rubriek 2: Verleggingsregelingen binnenland (BTW)</field>
-                <field name="sequence" eval="22"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_btw_2_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -286,7 +263,6 @@
                     <record id="tax_report_rub_btw_2a" model="account.report.line">
                         <field name="name">2a. Leveringen/diensten waarbij de heffing van Heffing van omzetbelasting naar u is verlegd (BTW)</field>
                         <field name="code">NLTAX_B2</field>
-                        <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_2a_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -299,7 +275,6 @@
             </record>
             <record id="tax_report_rub_btw_4" model="account.report.line">
                 <field name="name">Rubriek 4: Prestaties vanuit het buitenland aan u verricht (BTW)</field>
-                <field name="sequence" eval="24"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_btw_4_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -311,7 +286,6 @@
                     <record id="tax_report_rub_btw_4a" model="account.report.line">
                         <field name="name">4a. Leveringen/diensten uit landen buiten de EU (BTW)</field>
                         <field name="code">NLTAX_B4a</field>
-                        <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_4a_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -323,7 +297,6 @@
                     <record id="tax_report_rub_btw_4b" model="account.report.line">
                         <field name="name">4b. Leveringen/diensten uit landen binnen de EU (BTW)</field>
                         <field name="code">NLTAX_B4b</field>
-                        <field name="sequence" eval="26"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_4b_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -336,7 +309,6 @@
             </record>
             <record id="tax_report_rub_btw_5" model="account.report.line">
                 <field name="name">Rubriek 5: Voorbelasting, kleineondernemersregeling en totaal (BTW)</field>
-                <field name="sequence" eval="27"/>
                 <field name="expression_ids">
                     <record id="tax_report_rub_btw_5_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -347,7 +319,6 @@
                 <field name="children_ids">
                     <record id="tax_report_rub_btw_5a" model="account.report.line">
                         <field name="name">5a. Verschuldigde omzetbelasting (rubrieken 1a t/m 4b) (BTW)</field>
-                        <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5a_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -359,7 +330,6 @@
                     <record id="tax_report_rub_btw_5b" model="account.report.line">
                         <field name="name">5b. Voorbelasting (BTW)</field>
                         <field name="code">NLTAX_B5b</field>
-                        <field name="sequence" eval="29"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5b_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -371,7 +341,6 @@
                     <record id="tax_report_rub_btw_5c" model="account.report.line">
                         <field name="name">5c. Subtotaal (rubriek 5a min 5b) (BTW)</field>
                         <field name="code"/>
-                        <field name="sequence" eval="30"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5c_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -383,7 +352,6 @@
                     <record id="tax_report_rub_btw_5d" model="account.report.line">
                         <field name="name">5d. Vermindering volgens de kleineondernemersregeling (BTW)</field>
                         <field name="code">NLTAX_B5d</field>
-                        <field name="sequence" eval="31"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5d_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -395,7 +363,6 @@
                     <record id="tax_report_rub_btw_5e" model="account.report.line">
                         <field name="name">5e. Schatting vorige aangifte(n) (BTW)</field>
                         <field name="code">NLTAX_B5e</field>
-                        <field name="sequence" eval="32"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5e_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -407,7 +374,6 @@
                     <record id="tax_report_rub_btw_5f" model="account.report.line">
                         <field name="name">5f. Schatting deze aangifte (BTW)</field>
                         <field name="code">NLTAX_B5f</field>
-                        <field name="sequence" eval="33"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5f_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -419,7 +385,6 @@
                     <record id="tax_report_rub_btw_5g" model="account.report.line">
                         <field name="name">5g. Totaal te betalen/terug te vragen (BTW)</field>
                         <field name="code">NLTAX_B5g</field>
-                        <field name="sequence" eval="34"/>
                         <field name="expression_ids">
                             <record id="tax_report_rub_btw_5g_formula" model="account.report.expression">
                                 <field name="label">balance</field>

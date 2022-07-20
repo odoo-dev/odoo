@@ -10,18 +10,15 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_gstrpt_sale_total" model="account.report.line">
                 <field name="name">GST amounts you owe the Tax Office from sales</field>
-                <field name="sequence" eval="1"/>
                 <field name="children_ids">
                     <record id="account_tax_report_gstrpt_g1" model="account.report.line">
                         <field name="name">G1: Total Sales (including any GST)</field>
                         <field name="code">G1</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -33,7 +30,6 @@
                             <record id="account_tax_report_gstrpt_g2" model="account.report.line">
                                 <field name="name">G2: Export sales</field>
                                 <field name="code">G2</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_gstrpt_g2_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -45,7 +41,6 @@
                             <record id="account_tax_report_gstrpt_g3" model="account.report.line">
                                 <field name="name">G3: Other GST-free sales</field>
                                 <field name="code">G3</field>
-                                <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_gstrpt_g3_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -57,7 +52,6 @@
                             <record id="account_tax_report_gstrpt_g4" model="account.report.line">
                                 <field name="name">G4: Input taxed sales</field>
                                 <field name="code">G4</field>
-                                <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_gstrpt_g4_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -71,7 +65,6 @@
                     <record id="account_tax_report_gstrpt_g5" model="account.report.line">
                         <field name="name">G5: G2 + G3 + G4</field>
                         <field name="code">G5</field>
-                        <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g5_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -83,7 +76,6 @@
                     <record id="account_tax_report_gstrpt_g6" model="account.report.line">
                         <field name="name">G6: Total sales subject to GST (G1 minus G5)</field>
                         <field name="code">G6</field>
-                        <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g6_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -95,7 +87,6 @@
                             <record id="account_tax_report_gstrpt_g7" model="account.report.line">
                                 <field name="name">G7: Adjustments (if applicable)</field>
                                 <field name="code">G7</field>
-                                <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_gstrpt_g7_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -109,7 +100,6 @@
                     <record id="account_tax_report_gstrpt_g8" model="account.report.line">
                         <field name="name">G8: Total sales subject to GST after adjustments (G6 + G7)</field>
                         <field name="code">G8</field>
-                        <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g8_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -121,7 +111,6 @@
                     <record id="account_tax_report_gstrpt_g9" model="account.report.line">
                         <field name="name">G9: GST on sales (G8 divided by eleven)</field>
                         <field name="code">G9</field>
-                        <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g9_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -134,12 +123,10 @@
             </record>
             <record id="account_tax_report_gstrpt_purchase_total" model="account.report.line">
                 <field name="name">GST amounts the Tax Office owes you from purchases</field>
-                <field name="sequence" eval="11"/>
                 <field name="children_ids">
                     <record id="account_tax_report_gstrpt_g10" model="account.report.line">
                         <field name="name">G10: Capital purchases (including any GST)</field>
                         <field name="code">G10</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g10_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -151,7 +138,6 @@
                     <record id="account_tax_report_gstrpt_g11" model="account.report.line">
                         <field name="name">G11: Non-capital purchases (including GST)</field>
                         <field name="code">G11</field>
-                        <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g11_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -163,7 +149,6 @@
                     <record id="account_tax_report_gstrpt_g12" model="account.report.line">
                         <field name="name">G12: G10 + G11</field>
                         <field name="code">G12</field>
-                        <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g12_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -175,7 +160,6 @@
                             <record id="account_tax_report_gstrpt_g13" model="account.report.line">
                                 <field name="name">G13: Purchases for making input taxed sales</field>
                                 <field name="code">G13</field>
-                                <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_gstrpt_g13_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -187,7 +171,6 @@
                             <record id="account_tax_report_gstrpt_g14" model="account.report.line">
                                 <field name="name">G14: Purchases without GST in the price</field>
                                 <field name="code">G14</field>
-                                <field name="sequence" eval="16"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_gstrpt_g14_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -199,7 +182,6 @@
                             <record id="account_tax_report_gstrpt_g15" model="account.report.line">
                                 <field name="name">G15: Estimated purchases for private use or not income tax deductible</field>
                                 <field name="code">G15</field>
-                                <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_gstrpt_g15_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -213,7 +195,6 @@
                     <record id="account_tax_report_gstrpt_g16" model="account.report.line">
                         <field name="name">G16: G13 + G14 + G15</field>
                         <field name="code">G16</field>
-                        <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g16_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -225,7 +206,6 @@
                     <record id="account_tax_report_gstrpt_g17" model="account.report.line">
                         <field name="name">G17: Total purchases subject to GST (G12 minus G16) </field>
                         <field name="code">G17</field>
-                        <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g17_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -237,7 +217,6 @@
                             <record id="account_tax_report_gstrpt_g18" model="account.report.line">
                                 <field name="name">G18: Adjustments (if applicable)</field>
                                 <field name="code">G18</field>
-                                <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_gstrpt_g18_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -251,7 +230,6 @@
                     <record id="account_tax_report_gstrpt_g19" model="account.report.line">
                         <field name="name">G19: Total purchases subject to GST after adjustments (G17 + G18) </field>
                         <field name="code">G19</field>
-                        <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g19_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -263,7 +241,6 @@
                     <record id="account_tax_report_gstrpt_g20a" model="account.report.line">
                         <field name="name">GST on purchases (G19 divided by eleven)</field>
                         <field name="code">GP</field>
-                        <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g20a_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -275,7 +252,6 @@
                     <record id="account_tax_report_gstrpt_gstonly" model="account.report.line">
                         <field name="name">GST only purchases</field>
                         <field name="code">ONLY</field>
-                        <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_gstonly_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -287,7 +263,6 @@
                     <record id="account_tax_report_gstrpt_g20b" model="account.report.line">
                         <field name="name">G20: GST on purchases</field>
                         <field name="code">G20</field>
-                        <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_g20b_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -300,12 +275,10 @@
             </record>
             <record id="account_tax_report_gstrpt_summary" model="account.report.line">
                 <field name="name">Summary</field>
-                <field name="sequence" eval="25"/>
                 <field name="children_ids">
                     <record id="account_tax_report_gstrpt_summary_1a" model="account.report.line">
                         <field name="name">1A: GST on sales</field>
                         <field name="code">1A</field>
-                        <field name="sequence" eval="26"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_summary_1a_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -317,7 +290,6 @@
                     <record id="account_tax_report_gstrpt_summary_1b" model="account.report.line">
                         <field name="name">1B: GST on purchases</field>
                         <field name="code">1B</field>
-                        <field name="sequence" eval="27"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_summary_1b_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -328,7 +300,6 @@
                     </record>
                     <record id="account_tax_report_gstrpt_summary_9" model="account.report.line">
                         <field name="name">9: Your payment</field>
-                        <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_summary_9_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -341,11 +312,9 @@
             </record>
             <record id="account_tax_report_gstrpt_comparison" model="account.report.line">
                 <field name="name">Comparison</field>
-                <field name="sequence" eval="29"/>
                 <field name="children_ids">
                     <record id="account_tax_report_gstrpt_comparison_worksheet" model="account.report.line">
                         <field name="name">GST from worksheet (G20-G9)</field>
-                        <field name="sequence" eval="30"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_comparison_worksheet_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -356,7 +325,6 @@
                     </record>
                     <record id="account_tax_report_gstrpt_comparison_gl" model="account.report.line">
                         <field name="name">GST from General Ledger</field>
-                        <field name="sequence" eval="31"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_gstrpt_comparison_gl_tag" model="account.report.expression">
                                 <field name="label">balance</field>

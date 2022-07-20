@@ -10,14 +10,12 @@
             <record id="account_tax_report_skat_dk_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_line_sales_group" model="account.report.line">
                 <field name="name">Skyldig moms</field>
                 <field name="code">DUE_VAT</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_sales_group_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -29,7 +27,6 @@
                     <record id="account_tax_report_line_sales_tax" model="account.report.line">
                         <field name="name">Salgsmoms (udgående moms)</field>
                         <field name="code">DK_SALES_VAT</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_sales_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -41,7 +38,6 @@
                     <record id="account_tax_report_line_international_purchase_products" model="account.report.line">
                         <field name="name">Moms af varekøb i udlandet (både EU og lande uden for EU)</field>
                         <field name="code">REVERSE_CHARGE_MERCHANDISES_PURCHASED_OUT_DK</field>
-                        <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_international_purchase_products_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -53,7 +49,6 @@
                     <record id="account_tax_report_line_international_purchase_services" model="account.report.line">
                         <field name="name">Moms af ydelseskøb i udlandet med omvendt betalingspligt</field>
                         <field name="code">REVERSE_CHARGE_SERVICES_PURCHASED_OUT_DK</field>
-                        <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_international_purchase_services_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -67,7 +62,6 @@
             <record id="account_tax_report_line_deduction_group" model="account.report.line">
                 <field name="name">Fradrag</field>
                 <field name="code">VAT_TO_DEDUCED</field>
-                <field name="sequence" eval="5"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_deduction_group_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -79,7 +73,6 @@
                     <record id="account_tax_report_line_deduction_purchase_tax" model="account.report.line">
                         <field name="name">Købsmoms (indgående moms)</field>
                         <field name="code">PURCHASE_VAT</field>
-                        <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_purchase_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -91,7 +84,6 @@
                     <record id="account_tax_report_line_deduction_oil_bottle_tax" model="account.report.line">
                         <field name="name">Olie- og flaskegasafgift</field>
                         <field name="code">OIL_AND_BOTTLED_GAS_TAX</field>
-                        <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_oil_bottle_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -103,7 +95,6 @@
                     <record id="account_tax_report_line_deduction_electrical_tax" model="account.report.line">
                         <field name="name">Elafgift</field>
                         <field name="code">ELECTRICITY_TAX</field>
-                        <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_electrical_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -115,7 +106,6 @@
                     <record id="account_tax_report_line_deduction_gas_tax" model="account.report.line">
                         <field name="name">Naturgas- og bygasafgift</field>
                         <field name="code">NATURAL_AND_CITY_GAS_TAX</field>
-                        <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_gas_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -127,7 +117,6 @@
                     <record id="account_tax_report_line_deduction_coal_tax" model="account.report.line">
                         <field name="name">Kulafgift</field>
                         <field name="code">COAL_TAX</field>
-                        <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_coal_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -139,7 +128,6 @@
                     <record id="account_tax_report_line_deduction_co2_tax" model="account.report.line">
                         <field name="name">CO2-afgift</field>
                         <field name="code">CO2_TAX</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_co2_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -151,7 +139,6 @@
                     <record id="account_tax_report_line_deduction_water_tax" model="account.report.line">
                         <field name="name">Vandafgift</field>
                         <field name="code">WATER_TAX</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_deduction_water_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -164,7 +151,6 @@
             </record>
             <record id="account_tax_report_line_vat_statement" model="account.report.line">
                 <field name="name">Momsangivelse (positivt beløb = betale, negativt beløb = penge tilgode)</field>
-                <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_vat_statement_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -175,11 +161,9 @@
             </record>
             <record id="account_tax_report_line_additional_info" model="account.report.line">
                 <field name="name">Supplerende oplysninger</field>
-                <field name="sequence" eval="14"/>
                 <field name="children_ids">
                     <record id="account_tax_report_line_section_a_products" model="account.report.line">
                         <field name="name">Rubrik A: varer (EU)</field>
-                        <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_a_products_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -190,7 +174,6 @@
                     </record>
                     <record id="account_tax_report_line_section_a_services" model="account.report.line">
                         <field name="name">Rubrik A = ydelser (EU)</field>
-                        <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_a_services_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -201,7 +184,6 @@
                     </record>
                     <record id="account_tax_report_line_section_b_product_eu" model="account.report.line">
                         <field name="name">Rubrik B = varer (Indberettes til EU-salg uden moms)</field>
-                        <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_b_product_eu_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -212,7 +194,6 @@
                     </record>
                     <record id="account_tax_report_line_section_b_products_non_eu" model="account.report.line">
                         <field name="name">Rubrik B = varer (Indberettes ikke til EU-salg uden moms)</field>
-                        <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_b_products_non_eu_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -223,7 +204,6 @@
                     </record>
                     <record id="account_tax_report_line_section_b_services" model="account.report.line">
                         <field name="name">Rubrik B = ydelser - (EU-salg uden moms)</field>
-                        <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_b_services_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -234,7 +214,6 @@
                     </record>
                     <record id="account_tax_report_line_section_c" model="account.report.line">
                         <field name="name">Rubrik C - Værdien af andre varer og ydelser (uanset landet)</field>
-                        <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_section_c_tag" model="account.report.expression">
                                 <field name="label">balance</field>

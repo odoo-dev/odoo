@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_line_ostali_porezi" model="account.report.line">
                 <field name="name">Ostali porezi, carine, trošarine i sl.</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_ostali_porezi_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="account_tax_report_line_porez" model="account.report.line">
                         <field name="name">Porez na potrošnju</field>
                         <field name="code">POREZ_NA_POTROSNJU</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_porez_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -42,7 +39,6 @@
             </record>
             <record id="account_tax_report_line_pdv" model="account.report.line">
                 <field name="name">PDV</field>
-                <field name="sequence" eval="3"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_pdv_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -53,7 +49,6 @@
                 <field name="children_ids">
                     <record id="account_tax_report_line_obrazac_pdv" model="account.report.line">
                         <field name="name">OBRAZAC PDV</field>
-                        <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_obrazac_pdv_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -64,7 +59,6 @@
                         <field name="children_ids">
                             <record id="account_tax_report_line_osnovica" model="account.report.line">
                                 <field name="name">O S N O V I C A</field>
-                                <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_osnovica_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -75,7 +69,6 @@
                                 <field name="children_ids">
                                     <record id="account_tax_report_line_obracun" model="account.report.line">
                                         <field name="name">Obračun isporuka (I+II)</field>
-                                        <field name="sequence" eval="6"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_obracun_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -87,7 +80,6 @@
                                             <record id="account_tax_report_line_obracun_isporuke" model="account.report.line">
                                                 <field name="name">I. Isporuke ne podliježu / oslobođene</field>
                                                 <field name="code">OBRACUN_I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE</field>
-                                                <field name="sequence" eval="7"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_obracun_isporuke_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -99,7 +91,6 @@
                                                     <record id="account_tax_report_line_koje" model="account.report.line">
                                                         <field name="name">I.1. Koje ne podliježu oporezivanju</field>
                                                         <field name="code">koje</field>
-                                                        <field name="sequence" eval="8"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_koje_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -111,7 +102,6 @@
                                                     <record id="account_tax_report_line_oslobodene" model="account.report.line">
                                                         <field name="name">I.2. Oslobođene ukupno</field>
                                                         <field name="code">I2_OSLOBODENE_UKUPNO</field>
-                                                        <field name="sequence" eval="9"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_oslobodene_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -123,7 +113,6 @@
                                                             <record id="account_tax_report_line_izvozne" model="account.report.line">
                                                                 <field name="name">I.2.1. Izvozne</field>
                                                                 <field name="code">izvozne</field>
-                                                                <field name="sequence" eval="10"/>
                                                                 <field name="expression_ids">
                                                                     <record id="account_tax_report_line_izvozne_tag" model="account.report.expression">
                                                                         <field name="label">balance</field>
@@ -135,7 +124,6 @@
                                                             <record id="account_tax_report_line_isporuke" model="account.report.line">
                                                                 <field name="name">I.2.2. Isporuke dobara</field>
                                                                 <field name="code">isporuke</field>
-                                                                <field name="sequence" eval="11"/>
                                                                 <field name="expression_ids">
                                                                     <record id="account_tax_report_line_isporuke_tag" model="account.report.expression">
                                                                         <field name="label">balance</field>
@@ -147,7 +135,6 @@
                                                             <record id="account_tax_report_line_tuzemne" model="account.report.line">
                                                                 <field name="name">I.2.3. Tuzemne - bez prava odbitka</field>
                                                                 <field name="code">tuzemne</field>
-                                                                <field name="sequence" eval="12"/>
                                                                 <field name="expression_ids">
                                                                     <record id="account_tax_report_line_tuzemne_tag" model="account.report.expression">
                                                                         <field name="label">balance</field>
@@ -159,7 +146,6 @@
                                                             <record id="account_tax_report_line_ostale" model="account.report.line">
                                                                 <field name="name">I.2.4. Ostale – s pravom odbitka</field>
                                                                 <field name="code">ostale</field>
-                                                                <field name="sequence" eval="13"/>
                                                                 <field name="expression_ids">
                                                                     <record id="account_tax_report_line_ostale_tag" model="account.report.expression">
                                                                         <field name="label">balance</field>
@@ -173,7 +159,6 @@
                                                     <record id="account_tax_report_line_isporuke_po" model="account.report.line">
                                                         <field name="name">I.3. Isporuke po stopi od 0%</field>
                                                         <field name="code">isporuke_po</field>
-                                                        <field name="sequence" eval="14"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_isporuke_po_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -187,7 +172,6 @@
                                             <record id="account_tax_report_line_oporezive" model="account.report.line">
                                                 <field name="name">II. Oporezive isporuke</field>
                                                 <field name="code">OBRACUN_II_OPOREZIVE_ISPORUKE</field>
-                                                <field name="sequence" eval="15"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_oporezive_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -199,7 +183,6 @@
                                                     <record id="account_tax_report_line_izdani_10" model="account.report.line">
                                                         <field name="name">II.1 Izdani računi po stopi 10%</field>
                                                         <field name="code">izdani_10</field>
-                                                        <field name="sequence" eval="16"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_izdani_10_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -211,7 +194,6 @@
                                                     <record id="account_tax_report_line_izdani_22_i_23" model="account.report.line">
                                                         <field name="name">II.2 Izdani računi po stopi 22% i 23%</field>
                                                         <field name="code">OBRACUN_II2_IZDANI_RACUNI_PO_STOPI_22_I_23</field>
-                                                        <field name="sequence" eval="17"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_izdani_22_i_23_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -224,7 +206,6 @@
                                                     <record id="account_tax_report_line_izdani_25" model="account.report.line">
                                                         <field name="name">II.3 Izdani računi po stopi 25%</field>
                                                         <field name="code">izdani_25</field>
-                                                        <field name="sequence" eval="18"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_izdani_25_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -236,7 +217,6 @@
                                                     <record id="account_tax_report_line_nenaplaceni" model="account.report.line">
                                                         <field name="name">II.4 Nenaplaćeni izvoz</field>
                                                         <field name="code">II4_NENAPLACENI_IZVOZ</field>
-                                                        <field name="sequence" eval="19"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_nenaplaceni_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -249,7 +229,6 @@
                                                     <record id="account_tax_report_line_oslobodenje" model="account.report.line">
                                                         <field name="name">II.5 Oslobođenje izvoza – putnički promet</field>
                                                         <field name="code">II5_OSLOBODENJE_IZVOZA__PUTNICKI_PROMET</field>
-                                                        <field name="sequence" eval="20"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_oslobodenje_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -265,7 +244,6 @@
                                     </record>
                                     <record id="account_tax_report_line_obracunani" model="account.report.line">
                                         <field name="name">III. OBRAČUNANI PRETPOREZ</field>
-                                        <field name="sequence" eval="21"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_obracunani_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -277,7 +255,6 @@
                                             <record id="account_tax_report_line_pretporez_10" model="account.report.line">
                                                 <field name="name">III.1. Pretporez 10%</field>
                                                 <field name="code">pretporez_10</field>
-                                                <field name="sequence" eval="22"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pretporez_10_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -288,7 +265,6 @@
                                             </record>
                                             <record id="account_tax_report_line_pretporez_22_i_23" model="account.report.line">
                                                 <field name="name">III.2. Pretporez 22% i23%</field>
-                                                <field name="sequence" eval="23"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pretporez_22_i_23_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -299,7 +275,6 @@
                                             </record>
                                             <record id="account_tax_report_line_pretporez_25" model="account.report.line">
                                                 <field name="name">III.3. Pretporez 25%</field>
-                                                <field name="sequence" eval="24"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pretporez_25_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -311,7 +286,6 @@
                                                     <record id="account_tax_report_line_pretporez_25_30" model="account.report.line">
                                                         <field name="name">III.3. Pretporez 25% (30%)</field>
                                                         <field name="code">pretporez_25_30</field>
-                                                        <field name="sequence" eval="25"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_pretporez_25_30_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -323,7 +297,6 @@
                                                     <record id="account_tax_report_line_pretporez_25_70" model="account.report.line">
                                                         <field name="name">III.3. Pretporez 25% (70%)</field>
                                                         <field name="code">pretporez_25_70</field>
-                                                        <field name="sequence" eval="26"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_pretporez_25_70_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -337,7 +310,6 @@
                                             <record id="account_tax_report_line_placeni_uvozu" model="account.report.line">
                                                 <field name="name">III.4. Plaćeni PP pri uvozu</field>
                                                 <field name="code">placeni_uvozu</field>
-                                                <field name="sequence" eval="27"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_placeni_uvozu_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -349,7 +321,6 @@
                                             <record id="account_tax_report_line_placeni_usluge_10" model="account.report.line">
                                                 <field name="name">III.5. Plaćeni PP na ino usluge 10%</field>
                                                 <field name="code">placeni_usluge_10</field>
-                                                <field name="sequence" eval="28"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_placeni_usluge_10_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -360,7 +331,6 @@
                                             </record>
                                             <record id="account_tax_report_line_placeni_usluge_22_i_23" model="account.report.line">
                                                 <field name="name">III.6. Plaćeni PP na ino usluge 22% i 23%</field>
-                                                <field name="sequence" eval="29"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_placeni_usluge_22_i_23_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -372,7 +342,6 @@
                                             <record id="account_tax_report_line_placeni_usluge_25" model="account.report.line">
                                                 <field name="name">III.7. Plaćeni PP na ino usluge 25%</field>
                                                 <field name="code">placeni_usluge_25</field>
-                                                <field name="sequence" eval="30"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_placeni_usluge_25_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -384,7 +353,6 @@
                                             <record id="account_tax_report_line_pretporez_0" model="account.report.line">
                                                 <field name="name">III.0. Pretporez 0%</field>
                                                 <field name="code">pretporez_0</field>
-                                                <field name="sequence" eval="31"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pretporez_0_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -399,7 +367,6 @@
                             </record>
                             <record id="account_tax_report_line_pdv_porez" model="account.report.line">
                                 <field name="name">PDV – POREZ – razlika za uplatu/preplata</field>
-                                <field name="sequence" eval="32"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_pdv_porez_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -411,7 +378,6 @@
                                     <record id="account_tax_report_line_porezna" model="account.report.line">
                                         <field name="name">VI. POREZNA OBVEZA U RAZDOBLJU</field>
                                         <field name="code">VI_POREZNA_OBVEZA_U_RAZDOBLJU</field>
-                                        <field name="sequence" eval="33"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_porezna_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -423,7 +389,6 @@
                                             <record id="account_tax_report_line_isporuke_ne" model="account.report.line">
                                                 <field name="name">I. Isporuke ne podliježu / oslobođene</field>
                                                 <field name="code">POREZNA_I_ISPORUKE_NE_PODLIJEZU__OSLOBODENE</field>
-                                                <field name="sequence" eval="34"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_isporuke_ne_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -436,7 +401,6 @@
                                             <record id="account_tax_report_line_oporezive_isporuke" model="account.report.line">
                                                 <field name="name">II. Oporezive isporuke</field>
                                                 <field name="code">POREZNA_II_OPOREZIVE_ISPORUKE</field>
-                                                <field name="sequence" eval="35"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_oporezive_isporuke_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -448,7 +412,6 @@
                                                     <record id="account_tax_report_line_izdani_racuni" model="account.report.line">
                                                         <field name="name">II.1 Izdani računi po stopi 10%</field>
                                                         <field name="code">izdani_racuni</field>
-                                                        <field name="sequence" eval="36"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_izdani_racuni_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -460,7 +423,6 @@
                                                     <record id="account_tax_report_line_izdani_racuni_22_i_23" model="account.report.line">
                                                         <field name="name">II.2 Izdani računi po stopi 22% i 23%</field>
                                                         <field name="code">POREZNA_II2_IZDANI_RACUNI_PO_STOPI_22_I_23</field>
-                                                        <field name="sequence" eval="37"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_izdani_racuni_22_i_23_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -473,7 +435,6 @@
                                                     <record id="account_tax_report_line_izdani_racuni_25" model="account.report.line">
                                                         <field name="name">II.3 Izdani računi po stopi 25%</field>
                                                         <field name="code">izdani_racuni_25</field>
-                                                        <field name="sequence" eval="38"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_izdani_racuni_25_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -485,7 +446,6 @@
                                                     <record id="account_tax_report_line_oslobodenje_izvoza" model="account.report.line">
                                                         <field name="name">II.4 Oslobođenje izvoza – putnički promet</field>
                                                         <field name="code">II4_OSLOBODENJE_IZVOZA__PUTNICKI_PROMET</field>
-                                                        <field name="sequence" eval="39"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_oslobodenje_izvoza_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -500,7 +460,6 @@
                                             <record id="account_tax_report_line_obracunani_pretporez" model="account.report.line">
                                                 <field name="name">III. OBRAČUNANI PRETPOREZ</field>
                                                 <field name="code">III_OBRACUNANI_PRETPOREZ</field>
-                                                <field name="sequence" eval="40"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_obracunani_pretporez_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -512,7 +471,6 @@
                                                     <record id="account_tax_report_line_pretporez_10_tax" model="account.report.line">
                                                         <field name="name">III.1. Pretporez 10%</field>
                                                         <field name="code">pretporez_10_tax</field>
-                                                        <field name="sequence" eval="41"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_pretporez_10_tax_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -524,7 +482,6 @@
                                                     <record id="account_tax_report_line_pretporez_22_i_23_tax" model="account.report.line">
                                                         <field name="name">III.2. Pretporez 22% i 23%</field>
                                                         <field name="code">III2_PRETPOREZ_22_I_23</field>
-                                                        <field name="sequence" eval="42"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_pretporez_22_i_23_tax_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -537,7 +494,6 @@
                                                     <record id="account_tax_report_line_pretporez_25_tax" model="account.report.line">
                                                         <field name="name">III.3. Pretporez 25%</field>
                                                         <field name="code">pretporez_25_tax</field>
-                                                        <field name="sequence" eval="43"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_pretporez_25_tax_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -549,7 +505,6 @@
                                                     <record id="account_tax_report_line_placeni_uvozu_tax" model="account.report.line">
                                                         <field name="name">III.4. Plaćeni PP pri uvozu</field>
                                                         <field name="code">placeni_uvozu_tax</field>
-                                                        <field name="sequence" eval="44"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_placeni_uvozu_tax_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -561,7 +516,6 @@
                                                     <record id="account_tax_report_line_placeni_usluge_10_tax" model="account.report.line">
                                                         <field name="name">III.5. Plaćeni PP na ino usluge 10%</field>
                                                         <field name="code">placeni_usluge_10_tax</field>
-                                                        <field name="sequence" eval="45"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_placeni_usluge_10_tax_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -573,7 +527,6 @@
                                                     <record id="account_tax_report_line_placeni_usluge_22_i_23_tax" model="account.report.line">
                                                         <field name="name">III.6. Plaćeni PP na ino usluge 22% i 23%</field>
                                                         <field name="code">III6_PLACENI_PP_NA_INO_USLUGE_22_I_23</field>
-                                                        <field name="sequence" eval="46"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_placeni_usluge_22_i_23_tax_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -586,7 +539,6 @@
                                                     <record id="account_tax_report_line_placeni_usluge_25_tax" model="account.report.line">
                                                         <field name="name">III.7. Plaćeni PP na ino usluge 25%</field>
                                                         <field name="code">placeni_usluge_25_ta</field>
-                                                        <field name="sequence" eval="47"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_placeni_usluge_25_tax_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -598,7 +550,6 @@
                                                     <record id="account_tax_report_line_ispravci" model="account.report.line">
                                                         <field name="name">III.8. Ispravci pretporeza</field>
                                                         <field name="code">III8_ISPRAVCI_PRETPOREZA</field>
-                                                        <field name="sequence" eval="48"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_ispravci_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -615,7 +566,6 @@
                                     <record id="account_tax_report_line_uplaceno" model="account.report.line">
                                         <field name="name">Uplaćeno u razdoblju</field>
                                         <field name="code">UPLACENO_U_RAZDOBLJU</field>
-                                        <field name="sequence" eval="49"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_uplaceno_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -631,7 +581,6 @@
                     </record>
                     <record id="account_tax_report_line_pdv_ostalo" model="account.report.line">
                         <field name="name">PDV - OSTALO</field>
-                        <field name="sequence" eval="50"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_pdv_ostalo_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -642,7 +591,6 @@
                         <field name="children_ids">
                             <record id="account_tax_report_line_ostali_podaci" model="account.report.line">
                                 <field name="name">Ostali podaci</field>
-                                <field name="sequence" eval="51"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_ostali_podaci_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -654,7 +602,6 @@
                                     <record id="account_tax_report_line_ispravak" model="account.report.line">
                                         <field name="name">1. ZA ISPRAVAK PRETPOREZA</field>
                                         <field name="code">1_ZA_ISPRAVAK_PRETPOREZA</field>
-                                        <field name="sequence" eval="52"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_ispravak_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -666,7 +613,6 @@
                                             <record id="account_tax_report_line_nabava" model="account.report.line">
                                                 <field name="name">1.1. NABAVA NEKRETNINA</field>
                                                 <field name="code">11_NABAVA_NEKRETNINA</field>
-                                                <field name="sequence" eval="53"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_nabava_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -679,7 +625,6 @@
                                             <record id="account_tax_report_line_prodaja" model="account.report.line">
                                                 <field name="name">1.2. PRODAJA NEKRETNINA</field>
                                                 <field name="code">12_PRODAJA_NEKRETNINA</field>
-                                                <field name="sequence" eval="54"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_prodaja_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -692,7 +637,6 @@
                                             <record id="account_tax_report_line_nabava_osobnih" model="account.report.line">
                                                 <field name="name">1.3. NABAVA OSOBNIH VOZILA</field>
                                                 <field name="code">13_NABAVA_OSOBNIH_VOZILA</field>
-                                                <field name="sequence" eval="55"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_nabava_osobnih_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -705,7 +649,6 @@
                                             <record id="account_tax_report_line_prodaja_osobnih" model="account.report.line">
                                                 <field name="name">1.4. PRODAJA OSOBNIH VOZILA</field>
                                                 <field name="code">14_PRODAJA_OSOBNIH_VOZILA</field>
-                                                <field name="sequence" eval="56"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_prodaja_osobnih_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -718,7 +661,6 @@
                                             <record id="account_tax_report_line_nabava_dugotrajne" model="account.report.line">
                                                 <field name="name">1.5. NABAVA DUGOTRAJNE IMOVINE</field>
                                                 <field name="code">15_NABAVA_DUGOTRAJNE_IMOVINE</field>
-                                                <field name="sequence" eval="57"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_nabava_dugotrajne_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -731,7 +673,6 @@
                                             <record id="account_tax_report_line_prodaja_dugotrajne" model="account.report.line">
                                                 <field name="name">1.6. PRODAJA DUGOTRAJNE IMOVINE</field>
                                                 <field name="code">16_PRODAJA_DUGOTRAJNE_IMOVINE</field>
-                                                <field name="sequence" eval="58"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_prodaja_dugotrajne_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -746,7 +687,6 @@
                                     <record id="account_tax_report_line_otudenje" model="account.report.line">
                                         <field name="name">2. OTUĐENJE/STJECANJE GOSPODARSKE CJELINE ILI POGONA</field>
                                         <field name="code">2_OTUDENJESTJECANJE_GOSPODARSKE_CJELINE_ILI_POGONA</field>
-                                        <field name="sequence" eval="59"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_otudenje_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -759,7 +699,6 @@
                                     <record id="account_tax_report_line_nabava_dobara" model="account.report.line">
                                         <field name="name">3. NABAVA DOBARA I USLUGA ZA REPREZENTACIJU</field>
                                         <field name="code">3_NABAVA_DOBARA_I_USLUGA_ZA_REPREZENTACIJU</field>
-                                        <field name="sequence" eval="60"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_nabava_dobara_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -772,7 +711,6 @@
                                     <record id="account_tax_report_line_nabava_osobnih_vozila" model="account.report.line">
                                         <field name="name">4. NABAVA OSOBNIH VOZILA I DRUGIH SREDSTAVA ZA OSOBNI PRIJEVOZ</field>
                                         <field name="code">4_NABAVA_OSOBNIH_VOZILA_I_DRUGIH_SREDSTAVA_ZA_OSOBNI_PRIJEVOZ</field>
-                                        <field name="sequence" eval="61"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_nabava_osobnih_vozila_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -785,7 +723,6 @@
                                     <record id="account_tax_report_line_osnovica_za_obracun" model="account.report.line">
                                         <field name="name">5. OSNOVICA ZA OBRAČUN VLASTITE POTROŠNJE ZA OSOBNA VOZILA NABAV</field>
                                         <field name="code">5_OSNOVICA_ZA_OBRACUN_VLASTITE_POTROSNJE_ZA_OSOBNA_VOZILA_NABAV</field>
-                                        <field name="sequence" eval="62"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_osnovica_za_obracun_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -799,7 +736,6 @@
                             </record>
                             <record id="account_tax_report_line_nepriznati_pretporez" model="account.report.line">
                                 <field name="name">NEPRIZNATI PRETPOREZ</field>
-                                <field name="sequence" eval="63"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_nepriznati_pretporez_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -810,7 +746,6 @@
                                 <field name="children_ids">
                                     <record id="account_tax_report_line_nepriznati_pretporez_osnovica_3070" model="account.report.line">
                                         <field name="name">NEPRIZNATI PRETPOREZ (osnovica 30 ili 70%)</field>
-                                        <field name="sequence" eval="64"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_nepriznati_pretporez_osnovica_3070_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -821,7 +756,6 @@
                                         <field name="children_ids">
                                             <record id="account_tax_report_line_nepriznati_pretporez_10" model="account.report.line">
                                                 <field name="name">Nepriznati pretporez 10% (o)</field>
-                                                <field name="sequence" eval="65"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_nepriznati_pretporez_10_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -833,7 +767,6 @@
                                             </record>
                                             <record id="account_tax_report_line_nepriznati_pretporez_22_i_23" model="account.report.line">
                                                 <field name="name">Nepriznati pretporez 22% i 23% (o)</field>
-                                                <field name="sequence" eval="66"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_nepriznati_pretporez_22_i_23_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -845,7 +778,6 @@
                                             </record>
                                             <record id="account_tax_report_line_nepriznati_pretporez_25" model="account.report.line">
                                                 <field name="name">Nepriznati pretporez 25% (o)</field>
-                                                <field name="sequence" eval="67"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_nepriznati_pretporez_25_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -857,7 +789,6 @@
                                                     <record id="account_tax_report_line_nepriznati_pretporez_25_30" model="account.report.line">
                                                         <field name="name">Nepriznati pretporez 25% (o) (30%)</field>
                                                         <field name="code">nepriznati_pretporez_25_30</field>
-                                                        <field name="sequence" eval="68"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_nepriznati_pretporez_25_30_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -869,7 +800,6 @@
                                                     <record id="account_tax_report_line_nepriznati_pretporez_25_70" model="account.report.line">
                                                         <field name="name">Nepriznati pretporez 25% (o) (70%)</field>
                                                         <field name="code">nepriznati_pretporez_25_70</field>
-                                                        <field name="sequence" eval="69"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_nepriznati_pretporez_25_70_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -881,7 +811,6 @@
                                                     <record id="account_tax_report_line_nepriznati_pretporez_25_other" model="account.report.line">
                                                         <field name="name">Nepriznati pretporez 25% (o)</field>
                                                         <field name="code">nepriznati_pretporez_25_other</field>
-                                                        <field name="sequence" eval="70"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_nepriznati_pretporez_25_other_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -897,7 +826,6 @@
                                     <record id="account_tax_report_line_pretporez_koji" model="account.report.line">
                                         <field name="name">Pretporez koji još nije priznan (uključivo i neplaćeni R-2)</field>
                                         <field name="code">pretporez_koji</field>
-                                        <field name="sequence" eval="71"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_pretporez_koji_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -908,7 +836,6 @@
                                     </record>
                                     <record id="account_tax_report_line_nepriznati_pretporez_porez" model="account.report.line">
                                         <field name="name">NEPRIZNATI PRETPOREZ (porez)</field>
-                                        <field name="sequence" eval="72"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_nepriznati_pretporez_porez_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -920,7 +847,6 @@
                                             <record id="account_tax_report_line_nepriznati_pretporez_3070" model="account.report.line">
                                                 <field name="name">NEPRIZNATI PRETPOREZ (30 ili 70%)</field>
                                                 <field name="code">NEPRIZNATI_PRETPOREZ_30_ILI_70</field>
-                                                <field name="sequence" eval="73"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_nepriznati_pretporez_3070_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -932,7 +858,6 @@
                                                     <record id="account_tax_report_line_nepriznati_pretporez_10_tax" model="account.report.line">
                                                         <field name="name">Nepriznati pretporez 10% (p)</field>
                                                         <field name="code">NEPRIZNATI_PRETPOREZ_10_P</field>
-                                                        <field name="sequence" eval="74"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_nepriznati_pretporez_10_tax_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -945,7 +870,6 @@
                                                     <record id="account_tax_report_line_nepriznati_pretporez_22_i_23_tax" model="account.report.line">
                                                         <field name="name">Nepriznati pretporez 22% i 23% (p)</field>
                                                         <field name="code">NEPRIZNATI_PRETPOREZ_22_I_23_P</field>
-                                                        <field name="sequence" eval="75"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_nepriznati_pretporez_22_i_23_tax_formula" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -958,7 +882,6 @@
                                                     <record id="account_tax_report_line_nepriznati_pretporez_25_tax" model="account.report.line">
                                                         <field name="name">Nepriznati pretporez 25% (p)</field>
                                                         <field name="code">nepriznati_pretporez_25_tax</field>
-                                                        <field name="sequence" eval="76"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_nepriznati_pretporez_25_tax_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -973,7 +896,6 @@
                                     </record>
                                     <record id="account_tax_report_line_pretporez_koji_ukupno" model="account.report.line">
                                         <field name="name">Pretporez koji još nije priznan (ukupno)</field>
-                                        <field name="sequence" eval="77"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_pretporez_koji_ukupno_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -985,7 +907,6 @@
                                             <record id="account_tax_report_line_pretporez_koji_neplaceni" model="account.report.line">
                                                 <field name="name">Pretporez koji još nije priznan (neplaćeni R2)</field>
                                                 <field name="code">pretporez_koji_neplaceni</field>
-                                                <field name="sequence" eval="78"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pretporez_koji_neplaceni_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -997,7 +918,6 @@
                                             <record id="account_tax_report_line_pretporez_koji_neplaceni_25" model="account.report.line">
                                                 <field name="name">Pretporez koji još nije priznan (neplaćeni UVOZ dobara 25%)</field>
                                                 <field name="code">pretporez_koji_neplaceni_25</field>
-                                                <field name="sequence" eval="79"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pretporez_koji_neplaceni_25_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -1009,7 +929,6 @@
                                             <record id="account_tax_report_line_pretporez_koji_neplaceni_usluge_25" model="account.report.line">
                                                 <field name="name">Pretporez koji još nije priznan (neplaćene INO usluge 25%)</field>
                                                 <field name="code">pretporez_koji_neplaceni_usluge_25</field>
-                                                <field name="sequence" eval="80"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pretporez_koji_neplaceni_usluge_25_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -1021,7 +940,6 @@
                                             <record id="account_tax_report_line_pretporez_koji_neplaceni_usluge_10" model="account.report.line">
                                                 <field name="name">Pretporez koji još nije priznan (neplaćene INO usluge 10%)</field>
                                                 <field name="code">PRETPOREZ_KOJI_JOS_NIJE_PRIZNAN_NEPLACENE_INO_USLUGE_10</field>
-                                                <field name="sequence" eval="81"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pretporez_koji_neplaceni_usluge_10_formula" model="account.report.expression">
                                                         <field name="label">balance</field>

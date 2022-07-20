@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_out_tax_title" model="account.report.line">
                 <field name="name">Output Tax</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_out_tax_title_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="tax_report_out_tax_sale" model="account.report.line">
                         <field name="name">1. Sales amount</field>
                         <field name="code">OUTPUTTAX_SALEAMOUNT</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_out_tax_sale_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                     <record id="tax_report_out_tax_less_sales_0_rate" model="account.report.line">
                         <field name="name">2. Less sales subject to 0% tax rate </field>
                         <field name="code">OUTPUTTAX_SALE_ZERO</field>
-                        <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_out_tax_less_sales_0_rate_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -52,7 +48,6 @@
                     <record id="tax_report_out_tax_less_exempted_sales" model="account.report.line">
                         <field name="name">3. Less exempted sales</field>
                         <field name="code">OUTPUTTAX_EXEMPTED</field>
-                        <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_out_tax_less_exempted_sales_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -63,7 +58,6 @@
                     </record>
                     <record id="tax_report_out_tax_taxable_sales_amount" model="account.report.line">
                         <field name="name">4. Taxable sales amount(1. -2. -3.)</field>
-                        <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_out_tax_taxable_sales_amount_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -75,7 +69,6 @@
                     <record id="tax_report_out_tax" model="account.report.line">
                         <field name="name">5. Output tax</field>
                         <field name="code">OUTPUTTAX_TAX</field>
-                        <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_out_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -89,7 +82,6 @@
             <record id="tax_report_input_tax_title" model="account.report.line">
                 <field name="name">Input Tax</field>
                 <field name="code">INPUTTAX</field>
-                <field name="sequence" eval="7"/>
                 <field name="expression_ids">
                     <record id="tax_report_input_tax_title_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -101,7 +93,6 @@
                     <record id="tax_report_input_tax_purchase_from_out_tax" model="account.report.line">
                         <field name="name">6. Purchase amount that is entitled to deduction of input tax from output tax in tax computation</field>
                         <field name="code">6_PURCHASE_AMOUNT_THAT_IS_ENTITLED_TO_DEDUCTION_OF_INPUT_TAX_FROM_OUTPUT_TAX_IN_TAX_COMPUTATION</field>
-                        <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="tax_report_input_tax_purchase_from_out_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -113,7 +104,6 @@
                     <record id="tax_report_input_tax" model="account.report.line">
                         <field name="name">7. Input tax (according to invoice of purchase amount in 6.)</field>
                         <field name="code">INPUTTAX_TAX</field>
-                        <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="tax_report_input_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -126,7 +116,6 @@
             </record>
             <record id="tax_report_vat" model="account.report.line">
                 <field name="name">Value Added Tax</field>
-                <field name="sequence" eval="10"/>
                 <field name="expression_ids">
                     <record id="tax_report_vat_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -137,7 +126,6 @@
                 <field name="children_ids">
                     <record id="tax_report_vat_payable" model="account.report.line">
                         <field name="name">8. Tax payable (5. minus 7. (if 5. is greater than 7.))</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_vat_payable_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -148,7 +136,6 @@
                     </record>
                     <record id="tax_report_vat_excess" model="account.report.line">
                         <field name="name">9. Excess tax payable (7. minus 5. (if 5. is less than 7.))</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_vat_excess_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -160,7 +147,6 @@
                     <record id="tax_report_vat_payment_last_period" model="account.report.line">
                         <field name="name">10. Excess tax payment carried forward from last period</field>
                         <field name="code">10_EXCESS_TAX_PAYMENT_CARRIED_FORWARD_FROM_LAST_PERIOD</field>
-                        <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="tax_report_vat_payment_last_period_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -174,7 +160,6 @@
             </record>
             <record id="tax_report_net_vat" model="account.report.line">
                 <field name="name">Net Tax</field>
-                <field name="sequence" eval="14"/>
                 <field name="expression_ids">
                     <record id="tax_report_net_vat_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -186,7 +171,6 @@
                     <record id="tax_report_net_vat_payable" model="account.report.line">
                         <field name="name">11. Net tax payable (if 8. is greater than 10.)</field>
                         <field name="code">11_NET_TAX_PAYABLE_IF_8_IS_GREATER_THAN_10</field>
-                        <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="tax_report_net_vat_payable_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -198,7 +182,6 @@
                     <record id="tax_report_net_vat_excess" model="account.report.line">
                         <field name="name">12. Net excess tax payable ((if 10. is greater than 8.) or (9. plus 10.))</field>
                         <field name="code">12_NET_EXCESS_TAX_PAYABLE_IF_10_IS_GREATER_THAN_8_OR_9_PLUS_10</field>
-                        <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_net_vat_excess_tag" model="account.report.expression">
                                 <field name="label">balance</field>

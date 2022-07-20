@@ -10,21 +10,17 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_pt_base" model="account.report.line">
                 <field name="name">Base</field>
-                <field name="sequence" eval="1"/>
                 <field name="children_ids">
                     <record id="tax_report_pt_base_vendas" model="account.report.line">
                         <field name="name">Vendas</field>
-                        <field name="sequence" eval="2"/>
                         <field name="children_ids">
                             <record id="tax_report_pt_base_vendas_faturas" model="account.report.line">
                                 <field name="name">Faturas/Notas de débito</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pt_base_vendas_faturas_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -36,7 +32,6 @@
                                     <record id="tax_report_pt_base_vendas_faturas_normal" model="account.report.line">
                                         <field name="name">Normal</field>
                                         <field name="code">TAX_REPORT_PT_BASE_VENDAS_FATURAS_NORMAL</field>
-                                        <field name="sequence" eval="4"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_vendas_faturas_normal_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -48,7 +43,6 @@
                                     <record id="tax_report_pt_base_vendas_faturas_intermedia" model="account.report.line">
                                         <field name="name">Intermédia</field>
                                         <field name="code">TAX_REPORT_PT_BASE_VENDAS_FATURAS_INTERMEDIA</field>
-                                        <field name="sequence" eval="5"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_vendas_faturas_intermedia_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -60,7 +54,6 @@
                                     <record id="tax_report_pt_base_vendas_faturas_reduzida" model="account.report.line">
                                         <field name="name">Reduzida</field>
                                         <field name="code">TAX_REPORT_PT_BASE_VENDAS_FATURAS_REDUZIDA</field>
-                                        <field name="sequence" eval="6"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_vendas_faturas_reduzida_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -72,7 +65,6 @@
                                     <record id="tax_report_pt_base_vendas_faturas_isento" model="account.report.line">
                                         <field name="name">Isento</field>
                                         <field name="code">TAX_REPORT_PT_BASE_VENDAS_FATURAS_ISENTO</field>
-                                        <field name="sequence" eval="7"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_vendas_faturas_isento_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -85,7 +77,6 @@
                             </record>
                             <record id="tax_report_pt_base_vendas_notas_credito" model="account.report.line">
                                 <field name="name">Notas de crédito</field>
-                                <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pt_base_vendas_notas_credito_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -97,7 +88,6 @@
                                     <record id="tax_report_pt_base_vendas_notas_credito_normal" model="account.report.line">
                                         <field name="name">Normal</field>
                                         <field name="code">TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_NORMAL</field>
-                                        <field name="sequence" eval="9"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_vendas_notas_credito_normal_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -109,7 +99,6 @@
                                     <record id="tax_report_pt_base_vendas_notas_credito_intermedia" model="account.report.line">
                                         <field name="name">Intermédia</field>
                                         <field name="code">TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_INTERMEDIA</field>
-                                        <field name="sequence" eval="10"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_vendas_notas_credito_intermedia_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -121,7 +110,6 @@
                                     <record id="tax_report_pt_base_vendas_notas_credito_reduzida" model="account.report.line">
                                         <field name="name">Reduzida</field>
                                         <field name="code">TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_REDUZIDA</field>
-                                        <field name="sequence" eval="11"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_vendas_notas_credito_reduzida_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -133,7 +121,6 @@
                                     <record id="tax_report_pt_base_vendas_notas_credito_isento" model="account.report.line">
                                         <field name="name">Isento</field>
                                         <field name="code">TAX_REPORT_PT_BASE_VENDAS_NOTAS_CREDITO_ISENTO</field>
-                                        <field name="sequence" eval="12"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_vendas_notas_credito_isento_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -148,11 +135,9 @@
                     </record>
                     <record id="tax_report_pt_base_despesas" model="account.report.line">
                         <field name="name">Despesas</field>
-                        <field name="sequence" eval="13"/>
                         <field name="children_ids">
                             <record id="tax_report_pt_base_despesas_faturas" model="account.report.line">
                                 <field name="name">Faturas</field>
-                                <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pt_base_despesas_faturas_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -164,7 +149,6 @@
                                     <record id="tax_report_pt_base_despesas_faturas_normal" model="account.report.line">
                                         <field name="name">Normal</field>
                                         <field name="code">TAX_REPORT_PT_BASE_DESPESAS_FATURAS_NORMAL</field>
-                                        <field name="sequence" eval="15"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_despesas_faturas_normal_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -176,7 +160,6 @@
                                     <record id="tax_report_pt_base_despesas_faturas_intermedia" model="account.report.line">
                                         <field name="name">Intermédia</field>
                                         <field name="code">TAX_REPORT_PT_BASE_DESPESAS_FATURAS_INTERMEDIA</field>
-                                        <field name="sequence" eval="16"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_despesas_faturas_intermedia_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -188,7 +171,6 @@
                                     <record id="tax_report_pt_base_despesas_faturas_reduzida" model="account.report.line">
                                         <field name="name">Reduzida</field>
                                         <field name="code">TAX_REPORT_PT_BASE_DESPESAS_FATURAS_REDUZIDA</field>
-                                        <field name="sequence" eval="17"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_despesas_faturas_reduzida_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -200,7 +182,6 @@
                                     <record id="tax_report_pt_base_despesas_faturas_isento" model="account.report.line">
                                         <field name="name">Isento</field>
                                         <field name="code">TAX_REPORT_PT_BASE_DESPESAS_FATURAS_ISENTO</field>
-                                        <field name="sequence" eval="18"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_despesas_faturas_isento_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -213,7 +194,6 @@
                             </record>
                             <record id="tax_report_pt_base_despesas_notas_credito" model="account.report.line">
                                 <field name="name">Notas de crédito</field>
-                                <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pt_base_despesas_notas_credito_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -225,7 +205,6 @@
                                     <record id="tax_report_pt_base_despesas_notas_credito_normal" model="account.report.line">
                                         <field name="name">Normal</field>
                                         <field name="code">TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_NORMAL</field>
-                                        <field name="sequence" eval="20"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_despesas_notas_credito_normal_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -237,7 +216,6 @@
                                     <record id="tax_report_pt_base_despesas_notas_credito_intermedia" model="account.report.line">
                                         <field name="name">Intermédia</field>
                                         <field name="code">TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_INTERMEDIA</field>
-                                        <field name="sequence" eval="21"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_despesas_notas_credito_intermedia_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -249,7 +227,6 @@
                                     <record id="tax_report_pt_base_despesas_notas_credito_reduzida" model="account.report.line">
                                         <field name="name">Reduzida</field>
                                         <field name="code">TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_REDUZIDA</field>
-                                        <field name="sequence" eval="22"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_despesas_notas_credito_reduzida_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -261,7 +238,6 @@
                                     <record id="tax_report_pt_base_despesas_notas_credito_isento" model="account.report.line">
                                         <field name="name">Isento</field>
                                         <field name="code">TAX_REPORT_PT_BASE_DESPESAS_NOTAS_CREDITO_ISENTO</field>
-                                        <field name="sequence" eval="23"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_base_despesas_notas_credito_isento_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -278,16 +254,13 @@
             </record>
             <record id="tax_report_pt_iva" model="account.report.line">
                 <field name="name">IVA</field>
-                <field name="sequence" eval="24"/>
                 <field name="children_ids">
                     <record id="tax_report_pt_tax_vendas" model="account.report.line">
                         <field name="name">Vendas</field>
-                        <field name="sequence" eval="25"/>
                         <field name="children_ids">
                             <record id="tax_report_pt_tax_vendas_faturas" model="account.report.line">
                                 <field name="name">Faturas/Notas de débito (Total IVA liquidado)</field>
                                 <field name="code">tax_report_pt_tax_vendas_faturas</field>
-                                <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pt_tax_vendas_faturas_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -299,7 +272,6 @@
                                     <record id="tax_report_pt_tax_vendas_faturas_normal" model="account.report.line">
                                         <field name="name">Normal</field>
                                         <field name="code">TAX_REPORT_PT_TAX_VENDAS_FATURAS_NORMAL</field>
-                                        <field name="sequence" eval="27"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_vendas_faturas_normal_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -311,7 +283,6 @@
                                     <record id="tax_report_pt_tax_vendas_faturas_intermedia" model="account.report.line">
                                         <field name="name">Intermédia</field>
                                         <field name="code">TAX_REPORT_PT_TAX_VENDAS_FATURAS_INTERMEDIA</field>
-                                        <field name="sequence" eval="28"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_vendas_faturas_intermedia_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -323,7 +294,6 @@
                                     <record id="tax_report_pt_tax_vendas_faturas_reduzida" model="account.report.line">
                                         <field name="name">Reduzida</field>
                                         <field name="code">TAX_REPORT_PT_TAX_VENDAS_FATURAS_REDUZIDA</field>
-                                        <field name="sequence" eval="29"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_vendas_faturas_reduzida_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -335,7 +305,6 @@
                                     <record id="tax_report_pt_tax_vendas_faturas_isento" model="account.report.line">
                                         <field name="name">Isento</field>
                                         <field name="code">TAX_REPORT_PT_TAX_VENDAS_FATURAS_ISENTO</field>
-                                        <field name="sequence" eval="30"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_vendas_faturas_isento_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -349,7 +318,6 @@
                             <record id="tax_report_pt_tax_vendas_notas_credito" model="account.report.line">
                                 <field name="name">Notas de crédito (Total IVA regularizado a favor da empresa)</field>
                                 <field name="code">tax_report_pt_tax_vendas_notas_credito</field>
-                                <field name="sequence" eval="31"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pt_tax_vendas_notas_credito_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -361,7 +329,6 @@
                                     <record id="tax_report_pt_tax_vendas_notas_credito_normal" model="account.report.line">
                                         <field name="name">Normal</field>
                                         <field name="code">TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_NORMAL</field>
-                                        <field name="sequence" eval="32"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_vendas_notas_credito_normal_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -373,7 +340,6 @@
                                     <record id="tax_report_pt_tax_vendas_notas_credito_intermedia" model="account.report.line">
                                         <field name="name">Intermédia</field>
                                         <field name="code">TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_INTERMEDIA</field>
-                                        <field name="sequence" eval="33"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_vendas_notas_credito_intermedia_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -385,7 +351,6 @@
                                     <record id="tax_report_pt_tax_vendas_notas_credito_reduzida" model="account.report.line">
                                         <field name="name">Reduzida</field>
                                         <field name="code">TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_REDUZIDA</field>
-                                        <field name="sequence" eval="34"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_vendas_notas_credito_reduzida_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -397,7 +362,6 @@
                                     <record id="tax_report_pt_tax_vendas_notas_credito_isento" model="account.report.line">
                                         <field name="name">Isento</field>
                                         <field name="code">TAX_REPORT_PT_TAX_VENDAS_NOTAS_CREDITO_ISENTO</field>
-                                        <field name="sequence" eval="35"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_vendas_notas_credito_isento_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -412,12 +376,10 @@
                     </record>
                     <record id="tax_report_pt_tax_despesas" model="account.report.line">
                         <field name="name">Despesas</field>
-                        <field name="sequence" eval="36"/>
                         <field name="children_ids">
                             <record id="tax_report_pt_tax_despesas_faturas" model="account.report.line">
                                 <field name="name">Faturas (Total IVA dedutível)</field>
                                 <field name="code">tax_report_pt_tax_despesas_faturas</field>
-                                <field name="sequence" eval="37"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pt_tax_despesas_faturas_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -429,7 +391,6 @@
                                     <record id="tax_report_pt_tax_despesas_faturas_normal" model="account.report.line">
                                         <field name="name">Normal</field>
                                         <field name="code">TAX_REPORT_PT_TAX_DESPESAS_FATURAS_NORMAL</field>
-                                        <field name="sequence" eval="38"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_despesas_faturas_normal_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -441,7 +402,6 @@
                                     <record id="tax_report_pt_tax_despesas_faturas_intermedia" model="account.report.line">
                                         <field name="name">Intermédia</field>
                                         <field name="code">TAX_REPORT_PT_TAX_DESPESAS_FATURAS_INTERMEDIA</field>
-                                        <field name="sequence" eval="39"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_despesas_faturas_intermedia_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -453,7 +413,6 @@
                                     <record id="tax_report_pt_tax_despesas_faturas_reduzida" model="account.report.line">
                                         <field name="name">Reduzida</field>
                                         <field name="code">TAX_REPORT_PT_TAX_DESPESAS_FATURAS_REDUZIDA</field>
-                                        <field name="sequence" eval="40"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_despesas_faturas_reduzida_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -465,7 +424,6 @@
                                     <record id="tax_report_pt_tax_despesas_faturas_isento" model="account.report.line">
                                         <field name="name">Isento</field>
                                         <field name="code">TAX_REPORT_PT_TAX_DESPESAS_FATURAS_ISENTO</field>
-                                        <field name="sequence" eval="41"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_despesas_faturas_isento_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -479,7 +437,6 @@
                             <record id="tax_report_pt_tax_despesas_notas_credito" model="account.report.line">
                                 <field name="name">Notas de crédito (Total IVA regularizado a favor do Estado)</field>
                                 <field name="code">tax_report_pt_tax_despesas_notas_credito</field>
-                                <field name="sequence" eval="42"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pt_tax_despesas_notas_credito_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -491,7 +448,6 @@
                                     <record id="tax_report_pt_tax_despesas_notas_credito_normal" model="account.report.line">
                                         <field name="name">Normal</field>
                                         <field name="code">TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_NORMAL</field>
-                                        <field name="sequence" eval="43"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_despesas_notas_credito_normal_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -503,7 +459,6 @@
                                     <record id="tax_report_pt_tax_despesas_notas_credito_intermedia" model="account.report.line">
                                         <field name="name">Intermédia</field>
                                         <field name="code">TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_INTERMEDIA</field>
-                                        <field name="sequence" eval="44"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_despesas_notas_credito_intermedia_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -515,7 +470,6 @@
                                     <record id="tax_report_pt_tax_despesas_notas_credito_reduzida" model="account.report.line">
                                         <field name="name">Reduzida</field>
                                         <field name="code">TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_REDUZIDA</field>
-                                        <field name="sequence" eval="45"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_despesas_notas_credito_reduzida_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -527,7 +481,6 @@
                                     <record id="tax_report_pt_tax_despesas_notas_credito_isento" model="account.report.line">
                                         <field name="name">Isento</field>
                                         <field name="code">TAX_REPORT_PT_TAX_DESPESAS_NOTAS_CREDITO_ISENTO</field>
-                                        <field name="sequence" eval="46"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_pt_tax_despesas_notas_credito_isento_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -545,7 +498,6 @@
             <record id="tax_report_pt_tax_total_pagar" model="account.report.line">
                 <field name="name">TOTAL IVA A PAGAR</field>
                 <field name="code">tax_report_pt_tax_total_pagar</field>
-                <field name="sequence" eval="47"/>
                 <field name="expression_ids">
                     <record id="tax_report_pt_tax_total_pagar_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -557,7 +509,6 @@
             </record>
             <record id="tax_report_pt_tax_total_receber" model="account.report.line">
                 <field name="name">TOTAL IVA A RECEBER</field>
-                <field name="sequence" eval="48"/>
                 <field name="expression_ids">
                     <record id="tax_report_pt_tax_total_receber_formula" model="account.report.expression">
                         <field name="label">balance</field>

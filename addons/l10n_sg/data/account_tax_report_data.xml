@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_line_supplies" model="account.report.line">
                 <field name="name">Supplies</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_supplies_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="account_tax_report_line_std_rated_supplies" model="account.report.line">
                         <field name="name">Box 1 - Total value of standard-rated supplies</field>
                         <field name="code">BOX1</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_std_rated_supplies_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                     <record id="account_tax_report_line_zero_rated_supplies" model="account.report.line">
                         <field name="name">Box 2 - Total value of zero-rated supplies</field>
                         <field name="code">BOX2</field>
-                        <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_zero_rated_supplies_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -52,7 +48,6 @@
                     <record id="account_tax_report_line_exempt_supplies" model="account.report.line">
                         <field name="name">Box 3 - Total value of exempt supplies</field>
                         <field name="code">BOX3</field>
-                        <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_exempt_supplies_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -63,7 +58,6 @@
                     </record>
                     <record id="account_tax_report_line_total_supplies" model="account.report.line">
                         <field name="name">Box 4 - Total value of (1) + (2) + (3)</field>
-                        <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_total_supplies_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -76,7 +70,6 @@
             </record>
             <record id="account_tax_report_line_purchases" model="account.report.line">
                 <field name="name">Purchases</field>
-                <field name="sequence" eval="6"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_purchases_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -88,7 +81,6 @@
                     <record id="account_tax_report_line_total_taxable_purchases" model="account.report.line">
                         <field name="name">Box 5 - Total value of taxable purchases</field>
                         <field name="code">BOX_5</field>
-                        <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_total_taxable_purchases_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -101,7 +93,6 @@
             </record>
             <record id="account_tax_report_line_taxes" model="account.report.line">
                 <field name="name">Taxes</field>
-                <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_taxes_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -113,7 +104,6 @@
                     <record id="account_tax_report_line_output_tax_due" model="account.report.line">
                         <field name="name">Box 6 - Output tax due</field>
                         <field name="code">BOX6</field>
-                        <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_output_tax_due_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -125,7 +115,6 @@
                     <record id="account_tax_report_line_inp_tax_refund_claim" model="account.report.line">
                         <field name="name">Box 7 - Less : Input tax and refunds claimed</field>
                         <field name="code">BOX7</field>
-                        <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_inp_tax_refund_claim_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -136,7 +125,6 @@
                     </record>
                     <record id="account_tax_report_line_total_gst_paid_iras" model="account.report.line">
                         <field name="name">Box 8 - Equals : Net GST to be paid to IRAS</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_total_gst_paid_iras_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -149,7 +137,6 @@
             </record>
             <record id="account_tax_report_line_applicable" model="account.report.line">
                 <field name="name">Applicable to Taxable Persons under Major Exported Scheme / Approved 3rd Party Logistics Company / Other Approved Schemes Only</field>
-                <field name="sequence" eval="12"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_applicable_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -161,7 +148,6 @@
                     <record id="account_tax_report_line_applicable_goods_imported_value" model="account.report.line">
                         <field name="name">Box 9 - Total value of goods imported under this scheme</field>
                         <field name="code">BOX_9</field>
-                        <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_applicable_goods_imported_value_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -174,7 +160,6 @@
             </record>
             <record id="account_tax_report_line_revenues" model="account.report.line">
                 <field name="name">Revenue</field>
-                <field name="sequence" eval="14"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_revenues_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -185,7 +170,6 @@
                 <field name="children_ids">
                     <record id="account_tax_report_line_revenues_accounting_period" model="account.report.line">
                         <field name="name">Box 13 - Revenue for the accounting period</field>
-                        <field name="sequence" eval="15"/>
                         <field name="code">BOX_13</field>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_revenues_accounting_period_formula" model="account.report.expression">

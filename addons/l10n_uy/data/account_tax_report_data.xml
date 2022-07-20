@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_base_impb" model="account.report.line">
                 <field name="name">Base Imponible</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_base_impb_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="account_tax_report_base_impb_cmprs" model="account.report.line">
                         <field name="name">Base Imponible Compras</field>
                         <field name="code">BASE_IMPONIBLE_COMPRAS</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_base_impb_cmprs_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                             <record id="account_tax_report_base_impb_cmprs_22" model="account.report.line">
                                 <field name="name">Base Compras 22%</field>
                                 <field name="code">UYTAX_010101</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_base_impb_cmprs_22_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -52,7 +48,6 @@
                             <record id="account_tax_report_base_impb_cmprs_10" model="account.report.line">
                                 <field name="name">Base Compras 10%</field>
                                 <field name="code">UYTAX_020101</field>
-                                <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_base_impb_cmprs_10_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -64,7 +59,6 @@
                             <record id="account_tax_report_base_impb_cmprs_0" model="account.report.line">
                                 <field name="name">Base Compras 0%</field>
                                 <field name="code">UYTAX_030101</field>
-                                <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_base_impb_cmprs_0_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -76,7 +70,6 @@
                             <record id="account_tax_report_impb_cmprs" model="account.report.line">
                                 <field name="name">Base Imponible Compras</field>
                                 <field name="code">UYTAX_040101</field>
-                                <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_impb_cmprs_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -90,7 +83,6 @@
                     <record id="account_tax_report_base_impb_vnts" model="account.report.line">
                         <field name="name">Base Imponible Ventas</field>
                         <field name="code">BASE_IMPONIBLE_VENTAS</field>
-                        <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_base_impb_vnts_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -102,7 +94,6 @@
                             <record id="account_tax_report_base_impb_vnts_22" model="account.report.line">
                                 <field name="name">Base Ventas 22%</field>
                                 <field name="code">UYTAX_010201</field>
-                                <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_base_impb_vnts_22_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -114,7 +105,6 @@
                             <record id="account_tax_report_base_impb_vnts_10" model="account.report.line">
                                 <field name="name">Base Ventas 10%</field>
                                 <field name="code">UYTAX_020201</field>
-                                <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_base_impb_vnts_10_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -126,7 +116,6 @@
                             <record id="account_tax_report_base_impb_vnts_0" model="account.report.line">
                                 <field name="name">Base Ventas 0%</field>
                                 <field name="code">UYTAX_030201</field>
-                                <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_base_impb_vnts_0_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -138,7 +127,6 @@
                             <record id="account_tax_report_impb_vnts" model="account.report.line">
                                 <field name="name">Base Imponible Ventas</field>
                                 <field name="code">UYTAX_040201</field>
-                                <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_impb_vnts_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -153,7 +141,6 @@
             </record>
             <record id="account_tax_report_sldo_iva" model="account.report.line">
                 <field name="name">Saldo de IVA</field>
-                <field name="sequence" eval="12"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_sldo_iva_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -165,7 +152,6 @@
                     <record id="account_tax_report_iva_cmprs_pagdo" model="account.report.line">
                         <field name="name">IVA Compras - pagado</field>
                         <field name="code">IVA_COMPRAS__PAGADO</field>
-                        <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_iva_cmprs_pagdo_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -177,7 +163,6 @@
                             <record id="account_tax_report_iva_cmprs_22" model="account.report.line">
                                 <field name="name">IVA Compras 22%</field>
                                 <field name="code">UYTAX_010102</field>
-                                <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_iva_cmprs_22_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -189,7 +174,6 @@
                             <record id="account_tax_report_iva_cmprs_10" model="account.report.line">
                                 <field name="name">IVA Compras 10%</field>
                                 <field name="code">UYTAX_020102</field>
-                                <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_iva_cmprs_10_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -201,7 +185,6 @@
                             <record id="account_tax_report_cmprs_exnto_iva" model="account.report.line">
                                 <field name="name">Compras Exento IVA</field>
                                 <field name="code">COMPRAS_EXENTO_IVA</field>
-                                <field name="sequence" eval="16"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_cmprs_exnto_iva_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -216,7 +199,6 @@
                     <record id="account_tax_report_cmprs_pagdo" model="account.report.line">
                         <field name="name">IVA Compras - pagado</field>
                         <field name="code">UYTAX_040102</field>
-                        <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_cmprs_pagdo_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -228,7 +210,6 @@
                     <record id="account_tax_report_iva_vnts_prcbdo" model="account.report.line">
                         <field name="name">IVA Ventas - percibido</field>
                         <field name="code">IVA_VENTAS__PERCIBIDO</field>
-                        <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_iva_vnts_prcbdo_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -240,7 +221,6 @@
                             <record id="account_tax_report_iva_vnts_22" model="account.report.line">
                                 <field name="name">IVA Ventas 22%</field>
                                 <field name="code">UYTAX_010202</field>
-                                <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_iva_vnts_22_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -252,7 +232,6 @@
                             <record id="account_tax_report_iva_vnts_10" model="account.report.line">
                                 <field name="name">IVA Ventas 10%</field>
                                 <field name="code">UYTAX_020202</field>
-                                <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_iva_vnts_10_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -264,7 +243,6 @@
                             <record id="account_tax_report_vnts_iva" model="account.report.line">
                                 <field name="name">Ventas Exento IVA</field>
                                 <field name="code">VENTAS_EXENTO_IVA</field>
-                                <field name="sequence" eval="21"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_vnts_iva_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -277,7 +255,6 @@
                             <record id="account_tax_report_vnts_prcbdo" model="account.report.line">
                                 <field name="name">IVA Ventas - percibido</field>
                                 <field name="code">UYTAX_040202</field>
-                                <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_vnts_prcbdo_tag" model="account.report.expression">
                                         <field name="label">balance</field>

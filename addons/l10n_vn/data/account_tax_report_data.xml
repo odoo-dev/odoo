@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_line_01_vn" model="account.report.line">
                 <field name="name">Purchase of Goods and Services</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_01_vn_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="account_tax_report_line_01_01_vn" model="account.report.line">
                         <field name="name">VAT on purchase of goods and services</field>
                         <field name="code">VAT_ON_PURCHASE_OF_GOODS_AND_SERVICES</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_01_01_vn_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                             <record id="account_tax_report_line_01_01_01_vn" model="account.report.line">
                                 <field name="name">VAT on purchase of goods and services 0%</field>
                                 <field name="code">VAT_ON_PURCHASE_OF_GOODS_AND_SERVICES_0</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_01_01_01_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -52,7 +48,6 @@
                             <record id="account_tax_report_line_02_01_01_vn" model="account.report.line">
                                 <field name="name">VAT on purchase of goods and services 5%</field>
                                 <field name="code">VAT_ON_PURCHASE_OF_GOODS_AND_SERVICES_5</field>
-                                <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_02_01_01_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -64,7 +59,6 @@
                             <record id="account_tax_report_line_03_01_01_vn" model="account.report.line">
                                 <field name="name">VAT on purchase of goods and services 10%</field>
                                 <field name="code">VAT_ON_PURCHASE_OF_GOODS_AND_SERVICES_10</field>
-                                <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_03_01_01_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -78,7 +72,6 @@
                     <record id="account_tax_report_line_02_01_vn" model="account.report.line">
                         <field name="name">Untaxed Purchase of Goods and Services</field>
                         <field name="code">UNTAXED_PURCHASE_OF_GOODS_AND_SERVICES</field>
-                        <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_02_01_vn_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -90,7 +83,6 @@
                             <record id="account_tax_report_line_01_02_01_vn" model="account.report.line">
                                 <field name="name">Untaxed Purchase of Goods and Services taxed 0%</field>
                                 <field name="code">UNTAXED_PURCHASE_OF_GOODS_AND_SERVICES_TAXED_0</field>
-                                <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_01_02_01_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -102,7 +94,6 @@
                             <record id="account_tax_report_line_02_02_01_vn" model="account.report.line">
                                 <field name="name">Untaxed Purchase of Goods and Services taxed 5%</field>
                                 <field name="code">UNTAXED_PURCHASE_OF_GOODS_AND_SERVICES_TAXED_5</field>
-                                <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_02_02_01_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -114,7 +105,6 @@
                             <record id="account_tax_report_line_03_02_01_vn" model="account.report.line">
                                 <field name="name">Untaxed Purchase of Goods and Services taxed 10%</field>
                                 <field name="code">UNTAXED_PURCHASE_OF_GOODS_AND_SERVICES_TAXED_10</field>
-                                <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_03_02_01_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -129,7 +119,6 @@
             </record>
             <record id="account_tax_report_line_02_vn" model="account.report.line">
                 <field name="name">Sales of Goods and Services</field>
-                <field name="sequence" eval="10"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_02_vn_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -141,7 +130,6 @@
                     <record id="account_tax_report_line_01_02_vn" model="account.report.line">
                         <field name="name">VAT on sales of goods and services</field>
                         <field name="code">VAT_ON_SALES_OF_GOODS_AND_SERVICES</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_01_02_vn_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -153,7 +141,6 @@
                             <record id="account_tax_report_line_01_01_02_vn" model="account.report.line">
                                 <field name="name">VAT on sales of goods and services 0%</field>
                                 <field name="code">VAT_ON_SALES_OF_GOODS_AND_SERVICES_0</field>
-                                <field name="sequence" eval="12"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_01_01_02_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -165,7 +152,6 @@
                             <record id="account_tax_report_line_02_01_02_vn" model="account.report.line">
                                 <field name="name">VAT on sales of goods and services 5%</field>
                                 <field name="code">VAT_ON_SALES_OF_GOODS_AND_SERVICES_5</field>
-                                <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_02_01_02_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -177,7 +163,6 @@
                             <record id="account_tax_report_line_03_01_02_vn" model="account.report.line">
                                 <field name="name">VAT on sales of goods and services 10%</field>
                                 <field name="code">VAT_ON_SALES_OF_GOODS_AND_SERVICES_10</field>
-                                <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_03_01_02_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -191,7 +176,6 @@
                     <record id="account_tax_report_line_02_02_vn" model="account.report.line">
                         <field name="name">Untaxed Sales of Goods and Services</field>
                         <field name="code">UNTAXED_SALES_OF_GOODS_AND_SERVICES</field>
-                        <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_02_02_vn_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -203,7 +187,6 @@
                             <record id="account_tax_report_line_01_02_02_vn" model="account.report.line">
                                 <field name="name">Untaxed sales of goods and services taxed 0%</field>
                                 <field name="code">UNTAXED_SALES_OF_GOODS_AND_SERVICES_TAXED_0</field>
-                                <field name="sequence" eval="16"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_01_02_02_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -215,7 +198,6 @@
                             <record id="account_tax_report_line_02_02_02_vn" model="account.report.line">
                                 <field name="name">Untaxed sales of goods and services taxed 5%</field>
                                 <field name="code">UNTAXED_SALES_OF_GOODS_AND_SERVICES_TAXED_5</field>
-                                <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_02_02_02_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -227,7 +209,6 @@
                             <record id="account_tax_report_line_03_02_02_vn" model="account.report.line">
                                 <field name="name">Untaxed sales of goods and services taxed 10%</field>
                                 <field name="code">UNTAXED_SALES_OF_GOODS_AND_SERVICES_TAXED_10</field>
-                                <field name="sequence" eval="18"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_03_02_02_vn_tag" model="account.report.expression">
                                         <field name="label">balance</field>

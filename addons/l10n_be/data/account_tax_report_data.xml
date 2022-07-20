@@ -10,22 +10,18 @@
             <record id="tax_report_vat_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_title_operations" model="account.report.line">
                 <field name="name">Opérations</field>
-                <field name="sequence" eval="1"/>
                 <field name="children_ids">
                     <record id="tax_report_title_operations_sortie" model="account.report.line">
                         <field name="name">II A la sortie</field>
-                        <field name="sequence" eval="2"/>
                         <field name="children_ids">
                             <record id="tax_report_line_00" model="account.report.line">
                                 <field name="name">00 - Opérations soumises à un régime particulier</field>
                                 <field name="code">c00</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_00_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -37,7 +33,6 @@
                             <record id="tax_report_line_01" model="account.report.line">
                                 <field name="name">01 - Opérations avec TVA à 6%</field>
                                 <field name="code">c01</field>
-                                <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_01_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -49,7 +44,6 @@
                             <record id="tax_report_line_02" model="account.report.line">
                                 <field name="name">02 - Opérations avec TVA à 12%</field>
                                 <field name="code">c02</field>
-                                <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_02_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -61,7 +55,6 @@
                             <record id="tax_report_line_03" model="account.report.line">
                                 <field name="name">03 - Opérations avec TVA à 21%</field>
                                 <field name="code">c03</field>
-                                <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_03_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -73,7 +66,6 @@
                             <record id="tax_report_line_44" model="account.report.line">
                                 <field name="name">44 - Services intra-communautaires</field>
                                 <field name="code">c44</field>
-                                <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_44_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -85,7 +77,6 @@
                             <record id="tax_report_line_45" model="account.report.line">
                                 <field name="name">45 - Opérations avec TVA due par le cocontractant</field>
                                 <field name="code">c45</field>
-                                <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_45_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -97,7 +88,6 @@
                             <record id="tax_report_title_operations_sortie_46" model="account.report.line">
                                 <field name="name">46 - Livraisons intra-communautaires exemptées</field>
                                 <field name="code">c46</field>
-                                <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_title_operations_sortie_46_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -109,7 +99,6 @@
                                     <record id="tax_report_line_46L" model="account.report.line">
                                         <field name="name">46L - Livraisons biens intra-communautaires exemptées</field>
                                         <field name="code">c46L</field>
-                                        <field name="sequence" eval="10"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_46L_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -121,7 +110,6 @@
                                     <record id="tax_report_line_46T" model="account.report.line">
                                         <field name="name">46T - Livraisons biens intra-communautaire exemptées</field>
                                         <field name="code">c46T</field>
-                                        <field name="sequence" eval="11"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_46T_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -135,7 +123,6 @@
                             <record id="tax_report_line_47" model="account.report.line">
                                 <field name="name">47 - Autres opérations exemptées</field>
                                 <field name="code">c47</field>
-                                <field name="sequence" eval="12"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_47_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -147,7 +134,6 @@
                             <record id="tax_report_title_operations_sortie_48" model="account.report.line">
                                 <field name="name">48 - Notes de crédit aux opérations grilles [44] et [46]</field>
                                 <field name="code">c48</field>
-                                <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_title_operations_sortie_48_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -159,7 +145,6 @@
                                     <record id="tax_report_line_48s44" model="account.report.line">
                                         <field name="name">48s44 - Notes de crédit aux opérations grilles [44]</field>
                                         <field name="code">c48s44</field>
-                                        <field name="sequence" eval="14"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_48s44_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -171,7 +156,6 @@
                                     <record id="tax_report_line_48s46L" model="account.report.line">
                                         <field name="name">48s46L - Notes de crédit aux opérations grilles [46L]</field>
                                         <field name="code">c48s46L</field>
-                                        <field name="sequence" eval="15"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_48s46L_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -183,7 +167,6 @@
                                     <record id="tax_report_line_48s46T" model="account.report.line">
                                         <field name="name">48s46T - Notes de crédit aux opérations grilles [46T]</field>
                                         <field name="code">c48s46T</field>
-                                        <field name="sequence" eval="16"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_line_48s46T_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -197,7 +180,6 @@
                             <record id="tax_report_line_49" model="account.report.line">
                                 <field name="name">49 - Notes de crédit aux opérations du point II</field>
                                 <field name="code">c49</field>
-                                <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_49_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -210,12 +192,10 @@
                     </record>
                     <record id="tax_report_title_operations_entree" model="account.report.line">
                         <field name="name">III A l'entrée</field>
-                        <field name="sequence" eval="18"/>
                         <field name="children_ids">
                             <record id="tax_report_line_81" model="account.report.line">
                                 <field name="name">81 - Marchandises, matières premières et auxiliaires</field>
                                 <field name="code">c81</field>
-                                <field name="sequence" eval="19"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_81_tag" model="account.report.expression">
                                         <field name="label">tag</field>
@@ -250,7 +230,6 @@
                             <record id="tax_report_line_82" model="account.report.line">
                                 <field name="name">82 - Services et biens divers</field>
                                 <field name="code">c82</field>
-                                <field name="sequence" eval="20"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_82_tag" model="account.report.expression">
                                         <field name="label">tag</field>
@@ -285,7 +264,6 @@
                             <record id="tax_report_line_83" model="account.report.line">
                                 <field name="name">83 - Biens d'investissement</field>
                                 <field name="code">c83</field>
-                                <field name="sequence" eval="21"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_83_tag" model="account.report.expression">
                                         <field name="label">tag</field>
@@ -320,7 +298,6 @@
                             <record id="tax_report_line_84" model="account.report.line">
                                 <field name="name">84 - Notes de crédits sur opérations case [86] et [88]</field>
                                 <field name="code">c84</field>
-                                <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_84_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -332,7 +309,6 @@
                             <record id="tax_report_line_85" model="account.report.line">
                                 <field name="name">85 - Notes de crédits autres opérations</field>
                                 <field name="code">c85</field>
-                                <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_85_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -344,7 +320,6 @@
                             <record id="tax_report_line_86" model="account.report.line">
                                 <field name="name">86 - Acquisition intra-communautaires et ventes ABC</field>
                                 <field name="code">c86</field>
-                                <field name="sequence" eval="24"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_86_tag" model="account.report.expression">
                                         <field name="label">tag</field>
@@ -379,7 +354,6 @@
                             <record id="tax_report_line_87" model="account.report.line">
                                 <field name="name">87 - Autres opérations</field>
                                 <field name="code">c87</field>
-                                <field name="sequence" eval="25"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_87_tag" model="account.report.expression">
                                         <field name="label">tag</field>
@@ -414,7 +388,6 @@
                             <record id="tax_report_line_88" model="account.report.line">
                                 <field name="name">88 - Acquisition services intra-communautaires</field>
                                 <field name="code">c88</field>
-                                <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_88_tag" model="account.report.expression">
                                         <field name="label">tag</field>
@@ -452,16 +425,13 @@
             </record>
             <record id="tax_report_title_taxes" model="account.report.line">
                 <field name="name">Taxes</field>
-                <field name="sequence" eval="27"/>
                 <field name="children_ids">
                     <record id="tax_report_title_taxes_dues" model="account.report.line">
                         <field name="name">IV Dues</field>
-                        <field name="sequence" eval="28"/>
                         <field name="children_ids">
                             <record id="tax_report_line_54" model="account.report.line">
                                 <field name="name">54 - TVA sur opérations des grilles [01], [02], [03]</field>
                                 <field name="code">c54</field>
-                                <field name="sequence" eval="29"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_54_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -473,7 +443,6 @@
                             <record id="tax_report_line_55" model="account.report.line">
                                 <field name="name">55 - TVA sur opérations des grilles [86] et [88]</field>
                                 <field name="code">c55</field>
-                                <field name="sequence" eval="30"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_55_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -485,7 +454,6 @@
                             <record id="tax_report_line_56" model="account.report.line">
                                 <field name="name">56 - TVA sur opérations de la grille [87]</field>
                                 <field name="code">c56</field>
-                                <field name="sequence" eval="31"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_56_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -497,7 +465,6 @@
                             <record id="tax_report_line_57" model="account.report.line">
                                 <field name="name">57 - TVA relatives aux importations</field>
                                 <field name="code">c57</field>
-                                <field name="sequence" eval="32"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_57_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -509,7 +476,6 @@
                             <record id="tax_report_line_61" model="account.report.line">
                                 <field name="name">61 - Diverses régularisations en faveur de l'Etat</field>
                                 <field name="code">c61</field>
-                                <field name="sequence" eval="33"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_61_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -521,7 +487,6 @@
                             <record id="tax_report_line_63" model="account.report.line">
                                 <field name="name">63 - TVA à reverser sur notes de crédit recues</field>
                                 <field name="code">c63</field>
-                                <field name="sequence" eval="34"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_63_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -534,12 +499,10 @@
                     </record>
                     <record id="tax_report_title_taxes_deductibles" model="account.report.line">
                         <field name="name">V Déductibles</field>
-                        <field name="sequence" eval="35"/>
                         <field name="children_ids">
                             <record id="tax_report_line_59" model="account.report.line">
                                 <field name="name">59 - TVA déductible</field>
                                 <field name="code">c59</field>
-                                <field name="sequence" eval="36"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_59_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -551,7 +514,6 @@
                             <record id="tax_report_line_62" model="account.report.line">
                                 <field name="name">62 - Diverses régularisations en faveur du déclarant</field>
                                 <field name="code">c62</field>
-                                <field name="sequence" eval="37"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_62_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -563,7 +525,6 @@
                             <record id="tax_report_line_64" model="account.report.line">
                                 <field name="name">64 - TVA à récupérer sur notes de crédit delivrées</field>
                                 <field name="code">c64</field>
-                                <field name="sequence" eval="38"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_64_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -576,11 +537,9 @@
                     </record>
                     <record id="tax_report_title_taxes_soldes" model="account.report.line">
                         <field name="name">VI Soldes</field>
-                        <field name="sequence" eval="39"/>
                         <field name="children_ids">
                             <record id="tax_report_line_71" model="account.report.line">
                                 <field name="name">71 - Taxes dues à l'état</field>
-                                <field name="sequence" eval="40"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_71_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -592,7 +551,6 @@
                             </record>
                             <record id="tax_report_line_72" model="account.report.line">
                                 <field name="name">72 - Somme due par l'état</field>
-                                <field name="sequence" eval="41"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_72_formula" model="account.report.expression">
                                         <field name="label">balance</field>

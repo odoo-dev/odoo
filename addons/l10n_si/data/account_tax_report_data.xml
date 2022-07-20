@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_zo_dvd" model="account.report.line">
                 <field name="name">Znesek osnov za DDV</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_zo_dvd_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="tax_report_zo_dvd_neo" model="account.report.line">
                         <field name="name">Neodbitni DDV</field>
                         <field name="code">ZO_NEODBITNI_DDV</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_zo_dvd_neo_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                             <record id="tax_report_zo_dvd_neo_sdtopni" model="account.report.line">
                                 <field name="name">Vstopni DDV</field>
                                 <field name="code">ZO_NEODBITNI_VSTOPNI_DDV</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_zo_dvd_neo_sdtopni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -52,7 +48,6 @@
                                     <record id="tax_report_zo_dvd_neo_sdtopni_osno" model="account.report.line">
                                         <field name="name">Nabave po osnovni stopnji DDV</field>
                                         <field name="code">NABAVE_PO_OSNOVNI_STOPNJI_DDV_NEODBITNI</field>
-                                        <field name="sequence" eval="4"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zo_dvd_neo_sdtopni_osno_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -64,7 +59,6 @@
                                     <record id="tax_report_zo_dvd_neo_sdtopni_zni" model="account.report.line">
                                         <field name="name">Nabave po znižani stopnji DDV</field>
                                         <field name="code">NABAVE_PO_ZNIZANI_STOPNJI_DDV_NEODBITNI</field>
-                                        <field name="sequence" eval="5"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zo_dvd_neo_sdtopni_zni_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -80,7 +74,6 @@
                     <record id="tax_report_zo_dvd_odb" model="account.report.line">
                         <field name="name">Odbitni DDV</field>
                         <field name="code">ZO_ODBITNI_DDV</field>
-                        <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_zo_dvd_odb_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -92,7 +85,6 @@
                             <record id="tax_report_zo_dvd_odb_izstopni" model="account.report.line">
                                 <field name="name">Izstopni DDV</field>
                                 <field name="code">ZO_IZSTOPNI_DDV</field>
-                                <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_zo_dvd_odb_izstopni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -104,7 +96,6 @@
                                     <record id="tax_report_zo_dvd_odb_izstopni_opr" model="account.report.line">
                                         <field name="name">Prodaja oproščena DDV</field>
                                         <field name="code">PRODAJA_OPROSCENA_DDV</field>
-                                        <field name="sequence" eval="8"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zo_dvd_odb_izstopni_opr_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -116,7 +107,6 @@
                                     <record id="tax_report_zo_dvd_odb_izstopni_osn" model="account.report.line">
                                         <field name="name">Prodaja po osnovni stopnji DDV</field>
                                         <field name="code">PRODAJA_PO_OSNOVNI_STOPNJI_DDV</field>
-                                        <field name="sequence" eval="9"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zo_dvd_odb_izstopni_osn_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -128,7 +118,6 @@
                                     <record id="tax_report_zo_dvd_odb_izstopni_zni" model="account.report.line">
                                         <field name="name">Prodaja po znižani stopnji DDV</field>
                                         <field name="code">PRODAJA_PO_ZNIZANI_STOPNJI_DDV</field>
-                                        <field name="sequence" eval="10"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zo_dvd_odb_izstopni_zni_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -142,7 +131,6 @@
                             <record id="tax_report_zo_dvd_odb_vstopni" model="account.report.line">
                                 <field name="name">Vstopni DDV</field>
                                 <field name="code">ODBITNI_VSTOPNI_DDV</field>
-                                <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_zo_dvd_odb_vstopni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -154,7 +142,6 @@
                                     <record id="tax_report_zo_dvd_odb_vstopni_opr" model="account.report.line">
                                         <field name="name">Nabave oproščene DDV</field>
                                         <field name="code">NABAVE_OPROSCENE_DDV</field>
-                                        <field name="sequence" eval="12"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zo_dvd_odb_vstopni_opr_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -166,7 +153,6 @@
                                     <record id="tax_report_zo_dvd_odb_vstopni_osn" model="account.report.line">
                                         <field name="name">Nabave po osnovni stopnji DDV</field>
                                         <field name="code">NABAVE_PO_OSNOVNI_STOPNJI_DDV_VSTOPNI</field>
-                                        <field name="sequence" eval="13"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zo_dvd_odb_vstopni_osn_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -178,7 +164,6 @@
                                     <record id="tax_report_zo_dvd_odb_vstopni_zni" model="account.report.line">
                                         <field name="name">Nabave po znižani stopnji DDV</field>
                                         <field name="code">NABAVE_PO_ZNIZANI_STOPNJI_DDV_VSTOPNI</field>
-                                        <field name="sequence" eval="14"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zo_dvd_odb_vstopni_zni_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -195,7 +180,6 @@
             </record>
             <record id="tax_report_zn_dvd" model="account.report.line">
                 <field name="name">Znesek DDV</field>
-                <field name="sequence" eval="15"/>
                 <field name="expression_ids">
                     <record id="tax_report_zn_dvd_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -207,7 +191,6 @@
                     <record id="tax_report_zn_dvd_neo" model="account.report.line">
                         <field name="name">Neodbitni DDV</field>
                         <field name="code">ZN_NEODBITNI_DDV</field>
-                        <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_zn_dvd_neo_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -219,7 +202,6 @@
                             <record id="tax_report_zn_dvd_neo_vstopni" model="account.report.line">
                                 <field name="name">Vstopni DDV</field>
                                 <field name="code">ZN_NEODBITNI_VSTOPNI_DDV</field>
-                                <field name="sequence" eval="17"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_zn_dvd_neo_vstopni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -231,7 +213,6 @@
                                     <record id="tax_report_zn_dvd_neo_vstopni_osnnovna" model="account.report.line">
                                         <field name="name">Neodbitni DDV – osnovna stopnja</field>
                                         <field name="code">NEODBITNI_DDV__OSNOVNA_STOPNJA</field>
-                                        <field name="sequence" eval="18"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zn_dvd_neo_vstopni_osnnovna_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -243,7 +224,6 @@
                                     <record id="tax_report_zn_dvd_neo_vstopni_zni" model="account.report.line">
                                         <field name="name">Neodbitni DDV – znižana stopnja</field>
                                         <field name="code">NEODBITNI_DDV__ZNIZANA_STOPNJA</field>
-                                        <field name="sequence" eval="19"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zn_dvd_neo_vstopni_zni_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -259,7 +239,6 @@
                     <record id="tax_report_zn_dvd_odb" model="account.report.line">
                         <field name="name">Odbitni DDV</field>
                         <field name="code">ZN_ODBITNI_DDV</field>
-                        <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="tax_report_zn_dvd_odb_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -271,7 +250,6 @@
                             <record id="tax_report_zn_dvd_odb_izstopni" model="account.report.line">
                                 <field name="name">Izstopni DDV</field>
                                 <field name="code">ZN_IZSTOPNI_DDV</field>
-                                <field name="sequence" eval="21"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_zn_dvd_odb_izstopni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -283,7 +261,6 @@
                                     <record id="tax_report_zn_dvd_odb_izstopni_osn" model="account.report.line">
                                         <field name="name">Izstopni DDV - osnovna stopnja</field>
                                         <field name="code">IZSTOPNI_DDV__OSNOVNA_STOPNJA</field>
-                                        <field name="sequence" eval="22"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zn_dvd_odb_izstopni_osn_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -295,7 +272,6 @@
                                     <record id="tax_report_zn_dvd_odb_izstopni_zni" model="account.report.line">
                                         <field name="name">Izstopni DDV - znižana stopnja</field>
                                         <field name="code">IZSTOPNI_DDV__ZNIZANA_STOPNJA</field>
-                                        <field name="sequence" eval="23"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zn_dvd_odb_izstopni_zni_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -309,7 +285,6 @@
                             <record id="tax_report_zn_dvd_odb_vstopni" model="account.report.line">
                                 <field name="name">Vstopni DDV</field>
                                 <field name="code">VSTOPNI_DDV</field>
-                                <field name="sequence" eval="24"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_zn_dvd_odb_vstopni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -321,7 +296,6 @@
                                     <record id="tax_report_zn_dvd_odb_vstopni_osn" model="account.report.line">
                                         <field name="name">Vstopni DDV - osnovna stopnja</field>
                                         <field name="code">VSTOPNI_DDV__OSNOVNA_STOPNJA</field>
-                                        <field name="sequence" eval="25"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zn_dvd_odb_vstopni_osn_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -333,7 +307,6 @@
                                     <record id="tax_report_zn_dvd_odb_vstopni_zni" model="account.report.line">
                                         <field name="name">Vstopni DDV - znižana stopnja</field>
                                         <field name="code">VSTOPNI_DDV__ZNIZANA_STOPNJA</field>
-                                        <field name="sequence" eval="26"/>
                                         <field name="expression_ids">
                                             <record id="tax_report_zn_dvd_odb_vstopni_zni_tag" model="account.report.expression">
                                                 <field name="label">balance</field>

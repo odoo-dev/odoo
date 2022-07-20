@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_line_base_all_sales" model="account.report.line">
                 <field name="name">VAT on Sales and all other Outputs (Base)</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_base_all_sales_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="tax_report_line_standard_rated_supplies_base" model="account.report.line">
                         <field name="name">1. Standard Rated supplies (Base)</field>
                         <field name="code">1_STANDARD_RATED_SUPPLIES_BASE</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_supplies_base_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                             <record id="tax_report_line_standard_rated_supplies_base_abu_dhabi" model="account.report.line">
                                 <field name="name">a. Abu Dhabi</field>
                                 <field name="code">STD_RATE_SUPP_BASE_AB</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_abu_dhabi_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -52,7 +48,6 @@
                             <record id="tax_report_line_standard_rated_supplies_base_dubai" model="account.report.line">
                                 <field name="name">b. Dubai</field>
                                 <field name="code">STD_RATE_SUPP_BASE_DB</field>
-                                <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_dubai_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -64,7 +59,6 @@
                             <record id="tax_report_line_standard_rated_supplies_base_sharjah" model="account.report.line">
                                 <field name="name">c. Sharjah</field>
                                 <field name="code">STD_RATE_SUPP_BASE_SJ</field>
-                                <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_sharjah_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -76,7 +70,6 @@
                             <record id="tax_report_line_standard_rated_supplies_base_ajman" model="account.report.line">
                                 <field name="name">d. Ajman</field>
                                 <field name="code">STD_RATE_SUPP_BASE_AJ</field>
-                                <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_ajman_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -88,7 +81,6 @@
                             <record id="tax_report_line_standard_rated_supplies_base_umm_al_quwain" model="account.report.line">
                                 <field name="name">e. Umm Al Quwain</field>
                                 <field name="code">STD_RATE_SUPP_BASE_UM</field>
-                                <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_umm_al_quwain_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -100,7 +92,6 @@
                             <record id="tax_report_line_standard_rated_supplies_base_ras_al_khaima" model="account.report.line">
                                 <field name="name">f. Ras Al-Khaima</field>
                                 <field name="code">STD_RATE_SUPP_BASE_RA</field>
-                                <field name="sequence" eval="8"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_ras_al_khaima_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -112,7 +103,6 @@
                             <record id="tax_report_line_standard_rated_supplies_base_fujairah" model="account.report.line">
                                 <field name="name">g. Fujairah</field>
                                 <field name="code">STD_RATE_SUPP_BASE_FU</field>
-                                <field name="sequence" eval="9"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_fujairah_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -123,7 +113,6 @@
                             </record>
                             <record id="tax_report_line_standard_rated_supplies_base_subtotal" model="account.report.line">
                                 <field name="name">Sub Total</field>
-                                <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_base_subtotal_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -137,7 +126,6 @@
                     <record id="tax_report_line_tax_refund_tourist_base" model="account.report.line">
                         <field name="name">2. Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme</field>
                         <field name="code">TAX_REF_TOUR_SCHEME_BASE</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_tax_refund_tourist_base_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -149,7 +137,6 @@
                     <record id="tax_report_line_supplies_reverse_charge_base" model="account.report.line">
                         <field name="name">3. Supplies subject to reverse charge provisions</field>
                         <field name="code">REVERSE_CHARGE_PRO_BASE</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_reverse_charge_base_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -161,7 +148,6 @@
                     <record id="tax_report_line_zero_rated_supplies_base" model="account.report.line">
                         <field name="name">4. Zero rated supplies</field>
                         <field name="code">ZERO_RATE_SUPP_BASE</field>
-                        <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_zero_rated_supplies_base_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -173,7 +159,6 @@
                     <record id="tax_report_line_exempt_supplies_base" model="account.report.line">
                         <field name="name">5. Exempt supplies</field>
                         <field name="code">EXAMPT_SUPP_BASE</field>
-                        <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_supplies_base_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -185,7 +170,6 @@
                     <record id="tax_report_line_supplies_out_of_scope_base" model="account.report.line">
                         <field name="name">6. Out of scope</field>
                         <field name="code">OUT_OF_SCOPE_BASE_0</field>
-                        <field name="sequence" eval="15"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_out_of_scope_base_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -198,7 +182,6 @@
                     <record id="tax_report_line_import_uae_base" model="account.report.line">
                         <field name="name">7. Goods imported into the UAE</field>
                         <field name="code">GOODS_IMPORT_IN_UAE_BASE</field>
-                        <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_import_uae_base_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -210,7 +193,6 @@
                     <record id="tax_report_line_adjustment_import_uae_base" model="account.report.line">
                         <field name="name">8. Adjustments to goods imported into the UAE</field>
                         <field name="code">ADJUST_GOODS_IMPORT_IN_UAE_BASE</field>
-                        <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_adjustment_import_uae_base_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -222,7 +204,6 @@
                     </record>
                     <record id="tax_report_line_base_all_sales_total" model="account.report.line">
                         <field name="name">9. Total</field>
-                        <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_base_all_sales_total_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -235,7 +216,6 @@
             </record>
             <record id="tax_report_line_base_all_expense" model="account.report.line">
                 <field name="name">VAT on Expenses and all other Inputs (Base)</field>
-                <field name="sequence" eval="19"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_base_all_expense_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -247,7 +227,6 @@
                     <record id="tax_report_line_standard_rated_expense_base" model="account.report.line">
                         <field name="name">10. Standard rated expenses</field>
                         <field name="code">STD_RATE_EXPENSES_BASE</field>
-                        <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_expense_base_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -259,7 +238,6 @@
                     <record id="tax_report_line_expense_supplies_reverse_base" model="account.report.line">
                         <field name="name">11. Supplies subject to the reverse charge provisions</field>
                         <field name="code">SUPP_REV_CHARGE_PRO_BASE</field>
-                        <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_supplies_reverse_base_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -271,7 +249,6 @@
                     <record id="tax_report_line_expense_out_of_scope" model="account.report.line">
                         <field name="name">12. Out of scope</field>
                         <field name="code">OUT_OF_SCOPE_1_BASE</field>
-                        <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_out_of_scope_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -283,7 +260,6 @@
                     </record>
                     <record id="tax_report_line_base_all_expense_total" model="account.report.line">
                         <field name="name">13. Totals</field>
-                        <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_base_all_expense_total_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -296,7 +272,6 @@
             </record>
             <record id="tax_report_line_vat_all_sales" model="account.report.line">
                 <field name="name">VAT on Sales and all other Outputs (Tax)</field>
-                <field name="sequence" eval="24"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_vat_all_sales_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -308,7 +283,6 @@
                     <record id="tax_report_line_standard_rated_supplies_vat" model="account.report.line">
                         <field name="name">1. Standard Rated supplies (Tax)</field>
                         <field name="code">1_STANDARD_RATED_SUPPLIES_TAX</field>
-                        <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_supplies_vat_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -320,7 +294,6 @@
                             <record id="tax_report_line_standard_rated_supplies_vat_abu_dhabi" model="account.report.line">
                                 <field name="name">a. Abu Dhabi</field>
                                 <field name="code">STD_RATE_SUPP_TAX_AB</field>
-                                <field name="sequence" eval="26"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_abu_dhabi_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -332,7 +305,6 @@
                             <record id="tax_report_line_standard_rated_supplies_vat_dubai" model="account.report.line">
                                 <field name="name">b. Dubai</field>
                                 <field name="code">STD_RATE_SUPP_TAX_DB</field>
-                                <field name="sequence" eval="27"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_dubai_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -344,7 +316,6 @@
                             <record id="tax_report_line_standard_rated_supplies_vat_sharjah" model="account.report.line">
                                 <field name="name">c. Sharjah</field>
                                 <field name="code">STD_RATE_SUPP_TAX_SJ</field>
-                                <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_sharjah_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -356,7 +327,6 @@
                             <record id="tax_report_line_standard_rated_supplies_vat_ajman" model="account.report.line">
                                 <field name="name">d. Ajman</field>
                                 <field name="code">STD_RATE_SUPP_TAX_AJ</field>
-                                <field name="sequence" eval="29"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_ajman_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -368,7 +338,6 @@
                             <record id="tax_report_line_standard_rated_supplies_vat_umm_al_quwain" model="account.report.line">
                                 <field name="name">e. Umm Al Quwain</field>
                                 <field name="code">STD_RATE_SUPP_TAX_UM</field>
-                                <field name="sequence" eval="30"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_umm_al_quwain_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -380,7 +349,6 @@
                             <record id="tax_report_line_standard_rated_supplies_vat_ras_al_khaima" model="account.report.line">
                                 <field name="name">f. Ras Al-Khaima</field>
                                 <field name="code">STD_RATE_SUPP_TAX_RA</field>
-                                <field name="sequence" eval="31"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_ras_al_khaima_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -392,7 +360,6 @@
                             <record id="tax_report_line_standard_rated_supplies_vat_fujairah" model="account.report.line">
                                 <field name="name">g. Fujairah</field>
                                 <field name="code">STD_RATE_SUPP_TAX_FU</field>
-                                <field name="sequence" eval="32"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_fujairah_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -403,7 +370,6 @@
                             </record>
                             <record id="tax_report_line_standard_rated_supplies_vat_subtotal" model="account.report.line">
                                 <field name="name">Sub Total</field>
-                                <field name="sequence" eval="33"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_line_standard_rated_supplies_vat_subtotal_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -417,7 +383,6 @@
                     <record id="tax_report_line_tax_refund_tourist_vat" model="account.report.line">
                         <field name="name">2. Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme</field>
                         <field name="code">TAX_REF_TOUR_SCHEME_TAX</field>
-                        <field name="sequence" eval="34"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_tax_refund_tourist_vat_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -429,7 +394,6 @@
                     <record id="tax_report_line_supplies_reverse_charge_vat" model="account.report.line">
                         <field name="name">3. Supplies subject to reverse charge provisions</field>
                         <field name="code">REVERSE_CHARGE_PRO_TAX</field>
-                        <field name="sequence" eval="35"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_reverse_charge_vat_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -441,7 +405,6 @@
                     <record id="tax_report_line_zero_rated_supplies_vat" model="account.report.line">
                         <field name="name">4. Zero rated supplies</field>
                         <field name="code">ZERO_RATE_SUPP_TAX</field>
-                        <field name="sequence" eval="36"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_zero_rated_supplies_vat_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -453,7 +416,6 @@
                     <record id="tax_report_line_exempt_supplies_vat" model="account.report.line">
                         <field name="name">5. Exempt supplies</field>
                         <field name="code">EXAMPT_SUPP_TAX</field>
-                        <field name="sequence" eval="37"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_exempt_supplies_vat_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -465,7 +427,6 @@
                     <record id="tax_report_line_supplies_out_of_scope_vat" model="account.report.line">
                         <field name="name">6. Out of scope</field>
                         <field name="code">OUT_OF_SCOPE_TAX_0</field>
-                        <field name="sequence" eval="38"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_supplies_out_of_scope_vat_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -478,7 +439,6 @@
                     <record id="tax_report_line_import_uae_vat" model="account.report.line">
                         <field name="name">7. Goods imported into the UAE</field>
                         <field name="code">GOODS_IMPORT_IN_UAE_TAX</field>
-                        <field name="sequence" eval="39"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_import_uae_vat_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -490,7 +450,6 @@
                     <record id="tax_report_line_adjustment_import_uae_vat" model="account.report.line">
                         <field name="name">8. Adjustments to goods imported into the UAE</field>
                         <field name="code">ADJUST_GOODS_IMPORT_IN_UAE_TAX</field>
-                        <field name="sequence" eval="40"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_adjustment_import_uae_vat_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -502,7 +461,6 @@
                     </record>
                     <record id="tax_report_line_vat_all_sales_total" model="account.report.line">
                         <field name="name">9. Total</field>
-                        <field name="sequence" eval="41"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vat_all_sales_total_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -515,7 +473,6 @@
             </record>
             <record id="tax_report_line_vat_all_expense" model="account.report.line">
                 <field name="name">VAT on Expenses and all other Inputs (Tax)</field>
-                <field name="sequence" eval="42"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_vat_all_expense_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -527,7 +484,6 @@
                     <record id="tax_report_line_standard_rated_expense_vat" model="account.report.line">
                         <field name="name">10. Standard rated expenses</field>
                         <field name="code">STD_RATE_EXPENSES_TAX</field>
-                        <field name="sequence" eval="43"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_standard_rated_expense_vat_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -539,7 +495,6 @@
                     <record id="tax_report_line_expense_supplies_reverse_vat" model="account.report.line">
                         <field name="name">11. Supplies subject to the reverse charge provisions</field>
                         <field name="code">SUPP_REV_CHARGE_PRO_TAX</field>
-                        <field name="sequence" eval="44"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_supplies_reverse_vat_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -551,7 +506,6 @@
                     <record id="tax_report_line_expense_out_of_scope_vat" model="account.report.line">
                         <field name="name">12. Out of scope</field>
                         <field name="code">OUT_OF_SCOPE_1_TAX</field>
-                        <field name="sequence" eval="45"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_expense_out_of_scope_vat_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -563,7 +517,6 @@
                     </record>
                     <record id="tax_report_line_vat_all_expense_total" model="account.report.line">
                         <field name="name">13. Totals</field>
-                        <field name="sequence" eval="46"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_vat_all_expense_total_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -576,7 +529,6 @@
             </record>
             <record id="tax_report_line_net_vat_due" model="account.report.line">
                 <field name="name">Net VAT Due</field>
-                <field name="sequence" eval="47"/>
                 <field name="expression_ids">
                     <record id="tax_report_line_net_vat_due_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -587,7 +539,6 @@
                 <field name="children_ids">
                     <record id="tax_report_line_total_value_due_tax_period" model="account.report.line">
                         <field name="name">14. Total value of due tax for the period</field>
-                        <field name="sequence" eval="48"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_total_value_due_tax_period_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -598,7 +549,6 @@
                     </record>
                     <record id="tax_report_line_total_value_recoverable_tax_period" model="account.report.line">
                         <field name="name">15. Total value of recoverable tax for the period</field>
-                        <field name="sequence" eval="49"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_total_value_recoverable_tax_period_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -609,7 +559,6 @@
                     </record>
                     <record id="tax_report_line_net_vat_due_period" model="account.report.line">
                         <field name="name">16. Net VAT due (or reclaimed) for the period</field>
-                        <field name="sequence" eval="50"/>
                         <field name="expression_ids">
                             <record id="tax_report_line_net_vat_due_period_formula" model="account.report.expression">
                                 <field name="label">balance</field>

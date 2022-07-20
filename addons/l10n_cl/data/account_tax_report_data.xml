@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_base_imponible_ventas" model="account.report.line">
                 <field name="name">Base Imponible Ventas</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_imponible_ventas_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -27,7 +25,6 @@
                 <field name="children_ids">
                     <record id="tax_report_ventas_exentas" model="account.report.line">
                         <field name="name">Ventas Exentas</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_ventas_exentas_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -38,7 +35,6 @@
                     </record>
                     <record id="tax_report_impuestos_renta" model="account.report.line">
                         <field name="name">Impuesto a la Renta Primera Categoría a Pagar</field>
-                        <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_impuestos_renta_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -51,7 +47,6 @@
             </record>
             <record id="tax_report_retencion_total_compras" model="account.report.line">
                 <field name="name">Retención Total (compras)</field>
-                <field name="sequence" eval="4"/>
                 <field name="expression_ids">
                     <record id="tax_report_retencion_total_compras_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -62,7 +57,6 @@
             </record>
             <record id="tax_report_ventas_netas_gravadas_c_iva" model="account.report.line">
                 <field name="name">Ventas Netas Gravadas con IVA</field>
-                <field name="sequence" eval="5"/>
                 <field name="expression_ids">
                     <record id="tax_report_ventas_netas_gravadas_c_iva_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -73,7 +67,6 @@
             </record>
             <record id="tax_report_impuestos_originados_venta" model="account.report.line">
                 <field name="name">Impuesto Originado por la Venta</field>
-                <field name="sequence" eval="6"/>
                 <field name="expression_ids">
                     <record id="tax_report_impuestos_originados_venta_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -84,7 +77,6 @@
             </record>
             <record id="tax_report_iva_debito_fiscal" model="account.report.line">
                 <field name="name">IVA Debito Fiscal</field>
-                <field name="sequence" eval="7"/>
                 <field name="expression_ids">
                     <record id="tax_report_iva_debito_fiscal_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -95,7 +87,6 @@
             </record>
             <record id="tax_report_ppm" model="account.report.line">
                 <field name="name">PPM</field>
-                <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="tax_report_ppm_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -106,7 +97,6 @@
             </record>
             <record id="tax_report_compras_netas_gr_iva_recup" model="account.report.line">
                 <field name="name">Compras Netas Gravadas Con IVA (recuperable)</field>
-                <field name="sequence" eval="9"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_netas_gr_iva_recup_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -117,7 +107,6 @@
             </record>
             <record id="tax_report_compras_netas_gr_iva_uso_comun" model="account.report.line">
                 <field name="name">Compra Netas Gravadas Con IVA Uso Comun</field>
-                <field name="sequence" eval="10"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_netas_gr_iva_uso_comun_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -128,7 +117,6 @@
             </record>
             <record id="tax_report_compras_netas_gr_iva_no_recuperable" model="account.report.line">
                 <field name="name">Compras IVA No Recuperable</field>
-                <field name="sequence" eval="11"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_netas_gr_iva_no_recuperable_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -139,7 +127,6 @@
             </record>
             <record id="tax_report_compras_supermercado" model="account.report.line">
                 <field name="name">Compras De Supermercado</field>
-                <field name="sequence" eval="12"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_supermercado_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -150,7 +137,6 @@
             </record>
             <record id="tax_report_compras_activo_fijo" model="account.report.line">
                 <field name="name">Compras de Activo Fijo</field>
-                <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_activo_fijo_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -161,7 +147,6 @@
             </record>
             <record id="tax_report_compras_activo_fijo_uso_comun" model="account.report.line">
                 <field name="name">Compras de Activo Fijo Uso Común</field>
-                <field name="sequence" eval="14"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_activo_fijo_uso_comun_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -172,7 +157,6 @@
             </record>
             <record id="tax_report_compras_activo_fijo_no_recup" model="account.report.line">
                 <field name="name">Compras de Activo Fijo No Recuperable</field>
-                <field name="sequence" eval="15"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_activo_fijo_no_recup_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -183,7 +167,6 @@
             </record>
             <record id="tax_report_compras_no_gravadas_iva" model="account.report.line">
                 <field name="name">Compras No Gravadas Con IVA</field>
-                <field name="sequence" eval="16"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_no_gravadas_iva_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -194,7 +177,6 @@
             </record>
             <record id="tax_report_impuestos_pagados_compra" model="account.report.line">
                 <field name="name">Impuestos Pagados en la Compra</field>
-                <field name="sequence" eval="17"/>
                 <field name="expression_ids">
                     <record id="tax_report_impuestos_pagados_compra_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -205,7 +187,6 @@
             </record>
             <record id="tax_report_compras_iva_recup" model="account.report.line">
                 <field name="name">IVA Pagado Compras Recuperables</field>
-                <field name="sequence" eval="18"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_iva_recup_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -216,7 +197,6 @@
             </record>
             <record id="tax_report_compras_iva_uso_comun" model="account.report.line">
                 <field name="name">IVA Pagado Compras Uso Común</field>
-                <field name="sequence" eval="19"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_iva_uso_comun_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -227,7 +207,6 @@
             </record>
             <record id="tax_report_compras_iva_no_recup" model="account.report.line">
                 <field name="name">IVA Pagado No Recuperable</field>
-                <field name="sequence" eval="20"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_iva_no_recup_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -238,7 +217,6 @@
             </record>
             <record id="tax_report_compras_iva_supermercado" model="account.report.line">
                 <field name="name">IVA Pagado Compras Supermercado</field>
-                <field name="sequence" eval="21"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_iva_supermercado_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -249,7 +227,6 @@
             </record>
             <record id="tax_report_compras_iva_activo_fijo" model="account.report.line">
                 <field name="name">Compras Activo Fijo</field>
-                <field name="sequence" eval="22"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_iva_activo_fijo_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -260,7 +237,6 @@
             </record>
             <record id="tax_report_compras_iva_activo_fijo_uso_comun" model="account.report.line">
                 <field name="name">Compras Activo Fijo Uso Común</field>
-                <field name="sequence" eval="23"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_iva_activo_fijo_uso_comun_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -271,7 +247,6 @@
             </record>
             <record id="tax_report_compras_iva_activo_fijo_no_recup" model="account.report.line">
                 <field name="name">Compras Activo Fijo No Recuperables</field>
-                <field name="sequence" eval="24"/>
                 <field name="expression_ids">
                     <record id="tax_report_compras_iva_activo_fijo_no_recup_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -282,7 +257,6 @@
             </record>
             <record id="tax_report_retencion_segunda_categ" model="account.report.line">
                 <field name="name">Retención Segunda Categoría</field>
-                <field name="sequence" eval="25"/>
                 <field name="expression_ids">
                     <record id="tax_report_retencion_segunda_categ_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -293,7 +267,6 @@
             </record>
             <record id="tax_report_base_retencion_segunda_categ" model="account.report.line">
                 <field name="name">Base Retención Segunda Categoría</field>
-                <field name="sequence" eval="26"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_retencion_segunda_categ_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -304,7 +277,6 @@
             </record>
             <record id="tax_report_base_ila_compras" model="account.report.line">
                 <field name="name">Base Retenciones ILA (compras)</field>
-                <field name="sequence" eval="27"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_ila_compras_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -315,7 +287,6 @@
             </record>
             <record id="tax_report_tax_ila_compras" model="account.report.line">
                 <field name="name">Impuesto Ret Sufrida ILA (compras)</field>
-                <field name="sequence" eval="28"/>
                 <field name="expression_ids">
                     <record id="tax_report_tax_ila_compras_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -326,7 +297,6 @@
             </record>
             <record id="tax_report_base_ila_ventas" model="account.report.line">
                 <field name="name">Base Retenciones ILA (ventas)</field>
-                <field name="sequence" eval="29"/>
                 <field name="expression_ids">
                     <record id="tax_report_base_ila_ventas_tag" model="account.report.expression">
                         <field name="label">balance</field>
@@ -337,7 +307,6 @@
             </record>
             <record id="tax_report_tax_ila_ventas" model="account.report.line">
                 <field name="name">Impuesto Ret Practicadas ILA (ventas)</field>
-                <field name="sequence" eval="30"/>
                 <field name="expression_ids">
                     <record id="tax_report_tax_ila_ventas_tag" model="account.report.expression">
                         <field name="label">balance</field>

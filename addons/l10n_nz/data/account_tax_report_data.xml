@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_sale_and_income" model="account.report.line">
                 <field name="name">Sales and Income</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_sale_and_income_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="tax_report_box5" model="account.report.line">
                         <field name="name">[BOX 5] Total sales and income for the period(including GST and zero-rated Supplies)</field>
                         <field name="code">NZBOX5</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_box5_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                     <record id="tax_report_box6" model="account.report.line">
                         <field name="name">[BOX 6] Zero-rated supplies in Box 5</field>
                         <field name="code">NZBOX6</field>
-                        <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="tax_report_box6_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -52,7 +48,6 @@
                     <record id="tax_report_box7" model="account.report.line">
                         <field name="name">[BOX 7] The amount in Box 6 is subracted from Box 5</field>
                         <field name="code">NZBOX7</field>
-                        <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_box7_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -64,7 +59,6 @@
                     <record id="tax_report_box8" model="account.report.line">
                         <field name="name">[BOX 8] Multiply the amount in Box 7 by 3 and then divide by 23</field>
                         <field name="code">NZBOX8</field>
-                        <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="tax_report_box8_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -76,7 +70,6 @@
                     <record id="tax_report_box9" model="account.report.line">
                         <field name="name">[BOX 9] Enter any adjustments from your calculation sheet</field>
                         <field name="code">NZBOX9</field>
-                        <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="tax_report_box9_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -88,7 +81,6 @@
                     <record id="tax_report_box10" model="account.report.line">
                         <field name="name">[BOX 10] Total GST collected on sales and income</field>
                         <field name="code">NZBOX10</field>
-                        <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="tax_report_box10_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -101,7 +93,6 @@
             </record>
             <record id="tax_report_purchases_and_expenses" model="account.report.line">
                 <field name="name">Purchases and Expenses</field>
-                <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="tax_report_purchases_and_expenses_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -113,7 +104,6 @@
                     <record id="tax_report_box11" model="account.report.line">
                         <field name="name">[BOX 11] Total purchases and expenses(including GST) for which tax invoicing requirements have been met</field>
                         <field name="code">NZBOX11</field>
-                        <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="tax_report_box11_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -125,7 +115,6 @@
                     <record id="tax_report_box12" model="account.report.line">
                         <field name="name">[BOX 12] Multiply BOX11 by 3 and then divide by 23</field>
                         <field name="code">NZBOX12</field>
-                        <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="tax_report_box12_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -137,7 +126,6 @@
                     <record id="tax_report_box13" model="account.report.line">
                         <field name="name">[BOX 13] Credit adjustments from your calculation sheet</field>
                         <field name="code">NZBOX13</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_box13_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -150,7 +138,6 @@
                     <record id="tax_report_box14" model="account.report.line">
                         <field name="name">[BOX 14] Total GST credit for purchases and expenses</field>
                         <field name="code">NZBOX14</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="tax_report_box14_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -163,7 +150,6 @@
             </record>
             <record id="tax_report_box15" model="account.report.line">
                 <field name="name">[BOX 15] Difference between BOX10 and BOX14</field>
-                <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="tax_report_box15_formula" model="account.report.expression">
                         <field name="label">balance</field>

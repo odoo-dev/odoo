@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="tax_report_icms" model="account.report.line">
                 <field name="name">ICMS</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="tax_report_icms_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="tax_report_icms_tributada" model="account.report.line">
                         <field name="name">Tributada integralmente</field>
                         <field name="code">TRIBUTADA_INTEGRALMENTE</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="tax_report_icms_tributada_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                             <record id="tax_report_icms_1" model="account.report.line">
                                 <field name="name">ICMS base</field>
                                 <field name="code">ICMS_1</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_icms_1_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -54,7 +50,6 @@
                     <record id="tax_report_icms_tributada_com" model="account.report.line">
                         <field name="name">Tributada e com cobrança do ICMS por substituição tributária</field>
                         <field name="code">TRIBUTADA_E_COM_COBRANCA_DO_ICMS_POR_SUBSTITUICAO_TRIBUTARIA</field>
-                        <field name="sequence" eval="4"/>
                         <field name="expression_ids">
                             <record id="tax_report_icms_tributada_com_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -66,7 +61,6 @@
                             <record id="tax_report_icms_2" model="account.report.line">
                                 <field name="name">ICMS tax</field>
                                 <field name="code">ICMS_2</field>
-                                <field name="sequence" eval="5"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_icms_2_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -81,7 +75,6 @@
             </record>
             <record id="tax_report_icmsst" model="account.report.line">
                 <field name="name">ICMS Subist</field>
-                <field name="sequence" eval="6"/>
                 <field name="expression_ids">
                     <record id="tax_report_icmsst_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -93,7 +86,6 @@
                     <record id="tax_report_icmsst_1" model="account.report.line">
                         <field name="name">ICMSST base</field>
                         <field name="code">ICMSST_1</field>
-                        <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="tax_report_icmsst_1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -105,7 +97,6 @@
                     <record id="tax_report_icmsst_2" model="account.report.line">
                         <field name="name">ICMSST tax</field>
                         <field name="code">ICMSST_2</field>
-                        <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="tax_report_icmsst_2_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -118,7 +109,6 @@
             </record>
             <record id="tax_report_irpj" model="account.report.line">
                 <field name="name">IRPJ</field>
-                <field name="sequence" eval="9"/>
                 <field name="expression_ids">
                     <record id="tax_report_irpj_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -130,7 +120,6 @@
                     <record id="tax_report_irpj_1" model="account.report.line">
                         <field name="name">IRPJ base</field>
                         <field name="code">IRPJ_1</field>
-                        <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="tax_report_irpj_1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -142,7 +131,6 @@
                     <record id="tax_report_irpj_2" model="account.report.line">
                         <field name="name">IRPJ tax</field>
                         <field name="code">IRPJ_2</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="tax_report_irpj_2_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -155,7 +143,6 @@
             </record>
             <record id="tax_report_ir" model="account.report.line">
                 <field name="name">IR</field>
-                <field name="sequence" eval="12"/>
                 <field name="expression_ids">
                     <record id="tax_report_ir_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -167,7 +154,6 @@
                     <record id="tax_report_ir_1" model="account.report.line">
                         <field name="name">IR base</field>
                         <field name="code">IR_1</field>
-                        <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="tax_report_ir_1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -179,7 +165,6 @@
                     <record id="tax_report_ir_2" model="account.report.line">
                         <field name="name">IR tax</field>
                         <field name="code">IR_2</field>
-                        <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="tax_report_ir_2_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -192,7 +177,6 @@
             </record>
             <record id="tax_report_issqn" model="account.report.line">
                 <field name="name">ISSQN</field>
-                <field name="sequence" eval="15"/>
                 <field name="expression_ids">
                     <record id="tax_report_issqn_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -204,7 +188,6 @@
                     <record id="tax_report_issqn_1" model="account.report.line">
                         <field name="name">ISSQN base</field>
                         <field name="code">ISSQN_1</field>
-                        <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="tax_report_issqn_1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -216,7 +199,6 @@
                     <record id="tax_report_issqn_2" model="account.report.line">
                         <field name="name">ISSQN tax</field>
                         <field name="code">ISSQN_2</field>
-                        <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="tax_report_issqn_2_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -229,7 +211,6 @@
             </record>
             <record id="tax_report_csll" model="account.report.line">
                 <field name="name">CSLL</field>
-                <field name="sequence" eval="18"/>
                 <field name="expression_ids">
                     <record id="tax_report_csll_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -241,7 +222,6 @@
                     <record id="tax_report_csll_1" model="account.report.line">
                         <field name="name">CSLL base</field>
                         <field name="code">CSLL_1</field>
-                        <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="tax_report_csll_1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -253,7 +233,6 @@
                     <record id="tax_report_csll_2" model="account.report.line">
                         <field name="name">CSLL tax</field>
                         <field name="code">CSLL_2</field>
-                        <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="tax_report_csll_2_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -266,7 +245,6 @@
             </record>
             <record id="tax_report_cofins" model="account.report.line">
                 <field name="name">COFINS</field>
-                <field name="sequence" eval="21"/>
                 <field name="expression_ids">
                     <record id="tax_report_cofins_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -278,7 +256,6 @@
                     <record id="tax_report_cofins_oper_bas" model="account.report.line">
                         <field name="name">Operação Tributável com Alíquota Básica</field>
                         <field name="code">COFINS_OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA</field>
-                        <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="tax_report_cofins_oper_bas_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -290,7 +267,6 @@
                             <record id="tax_report_cofins_1" model="account.report.line">
                                 <field name="name">COFINS base</field>
                                 <field name="code">COFINS_1</field>
-                                <field name="sequence" eval="23"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_cofins_1_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -302,7 +278,6 @@
                             <record id="tax_report_cofins_2" model="account.report.line">
                                 <field name="name">COFINS tax</field>
                                 <field name="code">COFINS_2</field>
-                                <field name="sequence" eval="24"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_cofins_2_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -317,7 +292,6 @@
             </record>
             <record id="tax_report_pis" model="account.report.line">
                 <field name="name">PIS</field>
-                <field name="sequence" eval="25"/>
                 <field name="expression_ids">
                     <record id="tax_report_pis_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -329,7 +303,6 @@
                     <record id="tax_report_pis_oper_tri_basica" model="account.report.line">
                         <field name="name">Operação Tributável com Alíquota Básica</field>
                         <field name="code">PIS_OPERACAO_TRIBUTAVEL_COM_ALIQUOTA_BASICA</field>
-                        <field name="sequence" eval="26"/>
                         <field name="expression_ids">
                             <record id="tax_report_pis_oper_tri_basica_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -341,7 +314,6 @@
                             <record id="tax_report_pis_1" model="account.report.line">
                                 <field name="name">PIS base</field>
                                 <field name="code">PIS_1</field>
-                                <field name="sequence" eval="27"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pis_1_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -353,7 +325,6 @@
                             <record id="tax_report_pis_2" model="account.report.line">
                                 <field name="name">PIS tax</field>
                                 <field name="code">PIS_2</field>
-                                <field name="sequence" eval="28"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_pis_2_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -369,7 +340,6 @@
             <record id="tax_report_ipi" model="account.report.line">
                 <field name="name">IPI</field>
                 <field name="code">BRTAX07</field>
-                <field name="sequence" eval="29"/>
                 <field name="expression_ids">
                     <record id="tax_report_ipi_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -381,7 +351,6 @@
                     <record id="tax_report_ipi_extrada_com" model="account.report.line">
                         <field name="name">Entrada com recuperação de crédito</field>
                         <field name="code">ENTRADA_COM_RECUPERACAO_DE_CREDITO</field>
-                        <field name="sequence" eval="30"/>
                         <field name="expression_ids">
                             <record id="tax_report_ipi_extrada_com_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -393,7 +362,6 @@
                             <record id="tax_report_ipi_1" model="account.report.line">
                                 <field name="name">IPI base</field>
                                 <field name="code">BRTAX07_1</field>
-                                <field name="sequence" eval="31"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_ipi_1_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -407,7 +375,6 @@
                     <record id="tax_report_ipi_extrada_tributada" model="account.report.line">
                         <field name="name">Entrada tributada com alíquota zero</field>
                         <field name="code">ENTRADA_TRIBUTADA_COM_ALIQUOTA_ZERO</field>
-                        <field name="sequence" eval="32"/>
                         <field name="expression_ids">
                             <record id="tax_report_ipi_extrada_tributada_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -419,7 +386,6 @@
                             <record id="tax_report_ipi_2" model="account.report.line">
                                 <field name="name">IPI tax</field>
                                 <field name="code">IPI_2</field>
-                                <field name="sequence" eval="33"/>
                                 <field name="expression_ids">
                                     <record id="tax_report_ipi_2_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -434,7 +400,6 @@
             </record>
             <record id="tax_report_ii" model="account.report.line">
                 <field name="name">II</field>
-                <field name="sequence" eval="34"/>
                 <field name="expression_ids">
                     <record id="tax_report_ii_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -446,7 +411,6 @@
                     <record id="tax_report_ii_1" model="account.report.line">
                         <field name="name">II base</field>
                         <field name="code">II_1</field>
-                        <field name="sequence" eval="35"/>
                         <field name="expression_ids">
                             <record id="tax_report_ii_1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -458,7 +422,6 @@
                     <record id="tax_report_ii_2" model="account.report.line">
                         <field name="name">II tax</field>
                         <field name="code">II_2</field>
-                        <field name="sequence" eval="36"/>
                         <field name="expression_ids">
                             <record id="tax_report_ii_2_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -471,7 +434,6 @@
             </record>
             <record id="tax_report_inss" model="account.report.line">
                 <field name="name">INSS</field>
-                <field name="sequence" eval="37"/>
                 <field name="expression_ids">
                     <record id="tax_report_inss_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -483,7 +445,6 @@
                     <record id="tax_report_inss_1" model="account.report.line">
                         <field name="name">INSS base</field>
                         <field name="code">INSS_1</field>
-                        <field name="sequence" eval="38"/>
                         <field name="expression_ids">
                             <record id="tax_report_inss_1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -495,7 +456,6 @@
                     <record id="tax_report_inss_2" model="account.report.line">
                         <field name="name">INSS tax</field>
                         <field name="code">INSS_2</field>
-                        <field name="sequence" eval="39"/>
                         <field name="expression_ids">
                             <record id="tax_report_inss_2_tag" model="account.report.expression">
                                 <field name="label">balance</field>

@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_line_razem_c" model="account.report.line">
                 <field name="name">Podstawa - Razem C</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_razem_c_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="account_tax_report_line_kraj_zwolnione" model="account.report.line">
                         <field name="name">Podstawa - Dostawa towarów/usług, kraj, zwolnione</field>
                         <field name="code">PLTAXC_01_10</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_kraj_zwolnione_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                     <record id="account_tax_report_line_poza_kraj" model="account.report.line">
                         <field name="name">Podstawa - Dostawa towarów/usług, poza kraj</field>
                         <field name="code">PLTAXC_02_11</field>
-                        <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_poza_kraj_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -52,7 +48,6 @@
                             <record id="account_tax_report_line_uslugi_art_100_1_4" model="account.report.line">
                                 <field name="name">Podstawa - W tym usługi art 100.1.4</field>
                                 <field name="code">PLTAXC_02a_12</field>
-                                <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_uslugi_art_100_1_4_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -66,7 +61,6 @@
                     <record id="account_tax_report_line_uslugi_kraj_0" model="account.report.line">
                         <field name="name">Podstawa - Dostawa towarów/usług, kraj, 0%</field>
                         <field name="code">PLTAXC_03_13</field>
-                        <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_uslugi_kraj_0_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -77,7 +71,6 @@
                         <field name="children_ids">
                             <record id="account_tax_report_line_towary_art_129" model="account.report.line">
                                 <field name="name">Podstawa - W tym towary art 129</field>
-                                <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_towary_art_129_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -92,7 +85,6 @@
                     <record id="account_tax_report_line_kraj_3_lub_5" model="account.report.line">
                         <field name="name">Podstawa - Dostawa towarów/usług, kraj, 3% lub 5%</field>
                         <field name="code">PLTAXC_04_15</field>
-                        <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_kraj_3_lub_5_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -104,7 +96,6 @@
                     <record id="account_tax_report_line_kraj_7_lub_8" model="account.report.line">
                         <field name="name">Podstawa - Dostawa towarów/usług, kraj, 7% lub 8%</field>
                         <field name="code">PLTAXC_05_17</field>
-                        <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_kraj_7_lub_8_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -116,7 +107,6 @@
                     <record id="account_tax_report_line_kraj_22_lub_23" model="account.report.line">
                         <field name="name">Podstawa - Dostawa towarów/usług, kraj, 22% lub 23%</field>
                         <field name="code">PLTAXC_06_19</field>
-                        <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_kraj_22_lub_23_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -128,7 +118,6 @@
                     <record id="account_tax_report_line_dostawa_towarow" model="account.report.line">
                         <field name="name">Podstawa - Wew-wspól dostawa towarów</field>
                         <field name="code">PLTAXC_07_21</field>
-                        <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_dostawa_towarow_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -140,7 +129,6 @@
                     <record id="account_tax_report_line_eksport_towarow" model="account.report.line">
                         <field name="name">Podstawa - Eksport towarów</field>
                         <field name="code">PLTAXC_08_22</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_eksport_towarow_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -152,7 +140,6 @@
                     <record id="account_tax_report_line_nabycie_towarow" model="account.report.line">
                         <field name="name">Podstawa - Wewn-wspól. nabycie towarów</field>
                         <field name="code">PLTAXC_09_23</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_nabycie_towarow_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -164,7 +151,6 @@
                     <record id="account_tax_report_line_art_33a" model="account.report.line">
                         <field name="name">Podstawa - Import towarów art. 33a</field>
                         <field name="code">PLTAXC_10_25</field>
-                        <field name="sequence" eval="13"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_art_33a_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -176,7 +162,6 @@
                     <record id="account_tax_report_line_import_uslug" model="account.report.line">
                         <field name="name">Podstawa - Import usług</field>
                         <field name="code">PLTAXC_11_27</field>
-                        <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_import_uslug_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -188,7 +173,6 @@
                             <record id="account_tax_report_line_art_28b" model="account.report.line">
                                 <field name="name">Podstawa - W tym nabycie wg art 28b</field>
                                 <field name="code">PLTAXC_11a_29</field>
-                                <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_art_28b_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -202,7 +186,6 @@
                     <record id="account_tax_report_line_podatnik_nabywca" model="account.report.line">
                         <field name="name">Podstawa - Dostawa towarów, podatnik nabywca</field>
                         <field name="code">PLTAXC_12_31</field>
-                        <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_podatnik_nabywca_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -215,7 +198,6 @@
             </record>
             <record id="account_tax_report_line_razem_d" model="account.report.line">
                 <field name="name">Podstawa - Razem D</field>
-                <field name="sequence" eval="17"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_razem_d_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -227,7 +209,6 @@
                     <record id="account_tax_report_line_uslug_s_trwale" model="account.report.line">
                         <field name="name">Podstawa - Nabycie towarów i usług ś.trwałe</field>
                         <field name="code">PODSTAWA__NABYCIE_TOWAROW_I_USLUG_STRWALE</field>
-                        <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_uslug_s_trwale_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -240,7 +221,6 @@
                     <record id="account_tax_report_line_uslug_pozostalych" model="account.report.line">
                         <field name="name">Podstawa - Nabycie towarów i usług pozostałych</field>
                         <field name="code">PLTAXD_02_41a</field>
-                        <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_uslug_pozostalych_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -253,7 +233,6 @@
             </record>
             <record id="account_tax_report_line_do_przeniesienia" model="account.report.line">
                 <field name="name">Podatek - Do przeniesienia</field>
-                <field name="sequence" eval="20"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_do_przeniesienia_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -264,7 +243,6 @@
                 <field name="children_ids">
                     <record id="account_tax_report_line_nad_naleznym" model="account.report.line">
                         <field name="name">Podatek - Nadwyżka naliczonego nad należnym</field>
-                        <field name="sequence" eval="21"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_nad_naleznym_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -275,7 +253,6 @@
                         <field name="children_ids">
                             <record id="account_tax_report_line_do_US" model="account.report.line">
                                 <field name="name">Podatek - Do wpłaty do US</field>
-                                <field name="sequence" eval="22"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_do_US_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -286,7 +263,6 @@
                                 <field name="children_ids">
                                     <record id="account_tax_report_line_kasy_rejestrujace" model="account.report.line">
                                         <field name="name">Podatek - Wydatek na kasy rejestrujące</field>
-                                        <field name="sequence" eval="23"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_kasy_rejestrujace_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -298,7 +274,6 @@
                                     </record>
                                     <record id="account_tax_report_line_zaniechaniem_poboru" model="account.report.line">
                                         <field name="name">Podatek - Objęty zaniechaniem poboru</field>
-                                        <field name="sequence" eval="24"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_zaniechaniem_poboru_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -311,7 +286,6 @@
                                     <record id="account_tax_report_line_podatek_razem_c" model="account.report.line">
                                         <field name="name">Podatek - Razem C</field>
                                         <field name="code">PLTAXC</field>
-                                        <field name="sequence" eval="25"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_podatek_razem_c_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -323,7 +297,6 @@
                                             <record id="account_tax_report_line_podatek_kraj_3_lub_5" model="account.report.line">
                                                 <field name="name">Podatek - Dostawa towarów/usług, kraj, 3% lub 5%</field>
                                                 <field name="code">PLTAXC_04_16</field>
-                                                <field name="sequence" eval="26"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_kraj_3_lub_5_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -335,7 +308,6 @@
                                             <record id="account_tax_report_line_podatek_kraj_7_lub_8" model="account.report.line">
                                                 <field name="name">Podatek - Dostawa towarów/usług, kraj, 7% lub 8%</field>
                                                 <field name="code">PLTAXC_05_18</field>
-                                                <field name="sequence" eval="27"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_kraj_7_lub_8_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -347,7 +319,6 @@
                                             <record id="account_tax_report_line_podatek_kraj_22_lub_23" model="account.report.line">
                                                 <field name="name">Podatek - Dostawa towarów/usług, kraj, 22% lub 23%</field>
                                                 <field name="code">PLTAXC_06_20</field>
-                                                <field name="sequence" eval="28"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_kraj_22_lub_23_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -359,7 +330,6 @@
                                             <record id="account_tax_report_line_podatek_nabycie_towarow" model="account.report.line">
                                                 <field name="name">Podatek - Wewn-wspól. nabycie towarów</field>
                                                 <field name="code">PLTAXC_09_24</field>
-                                                <field name="sequence" eval="29"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_nabycie_towarow_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -371,7 +341,6 @@
                                             <record id="account_tax_report_line_podatek_art_33a" model="account.report.line">
                                                 <field name="name">Podatek - Import towarów art. 33a</field>
                                                 <field name="code">PLTAXC_10_26</field>
-                                                <field name="sequence" eval="30"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_art_33a_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -383,7 +352,6 @@
                                             <record id="account_tax_report_line_podatek_import_uslug" model="account.report.line">
                                                 <field name="name">Podatek - Import usług</field>
                                                 <field name="code">PLTAXC_11_28</field>
-                                                <field name="sequence" eval="31"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_import_uslug_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -395,7 +363,6 @@
                                                     <record id="account_tax_report_line_podatek_art_28b" model="account.report.line">
                                                         <field name="name">Podatek - W tym nabycie wg art 28b</field>
                                                         <field name="code">PLTAXC_11a_30</field>
-                                                        <field name="sequence" eval="32"/>
                                                         <field name="expression_ids">
                                                             <record id="account_tax_report_line_podatek_art_28b_tag" model="account.report.expression">
                                                                 <field name="label">balance</field>
@@ -409,7 +376,6 @@
                                             <record id="account_tax_report_line_podatek_podatnik_nabywca" model="account.report.line">
                                                 <field name="name">Podatek - Dostawa towarów, podatnik nabywca</field>
                                                 <field name="code">PLTAXC_12_32</field>
-                                                <field name="sequence" eval="33"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_podatnik_nabywca_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -420,7 +386,6 @@
                                             </record>
                                             <record id="account_tax_report_line_podatek_art_14_5" model="account.report.line">
                                                 <field name="name">Podatek - Ze spisu z natury art 14.5</field>
-                                                <field name="sequence" eval="34"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_art_14_5_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -432,7 +397,6 @@
                                             </record>
                                             <record id="account_tax_report_line_podatek_transp_termin" model="account.report.line">
                                                 <field name="name">Podatek - Wew.wspól. nabycie środk. transp. termin</field>
-                                                <field name="sequence" eval="35"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_transp_termin_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -447,7 +411,6 @@
                                     <record id="account_tax_report_line_podatek_razem_d" model="account.report.line">
                                         <field name="name">Podatek - Razem D</field>
                                         <field name="code">PLTAXD</field>
-                                        <field name="sequence" eval="36"/>
                                         <field name="expression_ids">
                                             <record id="account_tax_report_line_podatek_razem_d_formula" model="account.report.expression">
                                                 <field name="label">balance</field>
@@ -459,7 +422,6 @@
                                             <record id="account_tax_report_line_podatek_deklaracji" model="account.report.line">
                                                 <field name="name">Podatek - Nadwyżka z poprzedniej deklaracji</field>
                                                 <field name="code">PODATEK__NADWYZKA_Z_POPRZEDNIEJ_DEKLARACJI</field>
-                                                <field name="sequence" eval="37"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_deklaracji_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -472,7 +434,6 @@
                                             <record id="account_tax_report_line_pl_03_01_01_04_02" model="account.report.line">
                                                 <field name="name">Podatek - Naliczony ze spisu z natury, art.113</field>
                                                 <field name="code">PODATEK__NALICZONY_ZE_SPISU_Z_NATURY_ART113</field>
-                                                <field name="sequence" eval="38"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_pl_03_01_01_04_02_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -485,7 +446,6 @@
                                             <record id="account_tax_report_line_podatek_s_trwale" model="account.report.line">
                                                 <field name="name">Podatek - Nabycie towarów i usług ś.trwałe</field>
                                                 <field name="code">PODATEK__NABYCIE_TOWAROW_I_USLUG_STRWALE</field>
-                                                <field name="sequence" eval="39"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_s_trwale_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -498,7 +458,6 @@
                                             <record id="account_tax_report_line_podatek_uslug_pozostalych" model="account.report.line">
                                                 <field name="name">Podatek - Nabycie towarów i usług pozostałych</field>
                                                 <field name="code">PLTAXD_02_42</field>
-                                                <field name="sequence" eval="40"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_uslug_pozostalych_tag" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -510,7 +469,6 @@
                                             <record id="account_tax_report_line_podatek_s_trwalych" model="account.report.line">
                                                 <field name="name">Podatek - Korekta naliczonego od nabycia ś.trwałych</field>
                                                 <field name="code">PODATEK__KOREKTA_NALICZONEGO_OD_NABYCIA_STRWALYCH</field>
-                                                <field name="sequence" eval="41"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_s_trwalych_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -523,7 +481,6 @@
                                             <record id="account_tax_report_line_podatek_pozostalych_nabyc" model="account.report.line">
                                                 <field name="name">Podatek - Korekta naliczonego od pozostałych nabyć</field>
                                                 <field name="code">PODATEK__KOREKTA_NALICZONEGO_OD_POZOSTALYCH_NABYC</field>
-                                                <field name="sequence" eval="42"/>
                                                 <field name="expression_ids">
                                                     <record id="account_tax_report_line_podatek_pozostalych_nabyc_formula" model="account.report.expression">
                                                         <field name="label">balance</field>
@@ -539,7 +496,6 @@
                             </record>
                             <record id="account_tax_report_line_podatek_okresie" model="account.report.line">
                                 <field name="name">Podatek - Wydatek na kasy do zwrotu w tym okresie</field>
-                                <field name="sequence" eval="43"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_podatek_okresie_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -553,7 +509,6 @@
                     </record>
                     <record id="account_tax_report_line_podatek_do_zwrotu" model="account.report.line">
                         <field name="name">Podatek - Do zwrotu</field>
-                        <field name="sequence" eval="44"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_podatek_do_zwrotu_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -565,7 +520,6 @@
                             <record id="account_tax_report_line_do_zwrotu_25_dni" model="account.report.line">
                                 <field name="name">Podatek - Do zwrotu 25 dni</field>
                                 <field name="code">PODATEK__DO_ZWROTU_25_DNI</field>
-                                <field name="sequence" eval="45"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_do_zwrotu_25_dni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -578,7 +532,6 @@
                             <record id="account_tax_report_line_do_zwrotu_60_dni" model="account.report.line">
                                 <field name="name">Podatek - Do zwrotu 60 dni</field>
                                 <field name="code">PODATEK__DO_ZWROTU_60_DNI</field>
-                                <field name="sequence" eval="46"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_do_zwrotu_60_dni_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -591,7 +544,6 @@
                             <record id="account_tax_report_line_do_zwrotu_180_dni" model="account.report.line">
                                 <field name="name">Podatek - Do zwrotu 180 dni</field>
                                 <field name="code">PODATEK__DO_ZWROTU_180_DNI</field>
-                                <field name="sequence" eval="47"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_do_zwrotu_180_dni_formula" model="account.report.expression">
                                         <field name="label">balance</field>

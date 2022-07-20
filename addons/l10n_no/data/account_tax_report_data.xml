@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_line_samlet_omsetning" model="account.report.line">
                 <field name="name">A. Samlet omsetning, uttak og innførsel</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_samlet_omsetning_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="account_tax_report_line_post_1" model="account.report.line">
                         <field name="name">Post 1 Samlet omsetning og uttak utenfor merverdiavgiftsloven</field>
                         <field name="code">NOTAX_01</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_1_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                     <record id="account_tax_report_line_post_2" model="account.report.line">
                         <field name="name">Post 2 Samlet omsetning og uttak innenfor merverdiavgiftloven og innførsel</field>
                         <field name="code">NOTAX_02</field>
-                        <field name="sequence" eval="3"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_2_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -53,7 +49,6 @@
             </record>
             <record id="account_tax_report_line_innenlands_omsetning" model="account.report.line">
                 <field name="name">B. Innenlands omsetning og uttak</field>
-                <field name="sequence" eval="4"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_innenlands_omsetning_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -65,7 +60,6 @@
                     <record id="account_tax_report_line_post_3" model="account.report.line">
                         <field name="name">Post 3 Innenlands omsetning og uttak, og beregnet avgift 25 %</field>
                         <field name="code">NOTAX_03</field>
-                        <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_3_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -77,7 +71,6 @@
                     <record id="account_tax_report_line_post_3_tax" model="account.report.line">
                         <field name="name">Post 3 Innenlands omsetning og uttak, og beregnet avgift 25 % Tax</field>
                         <field name="code">NOTAX_03_1</field>
-                        <field name="sequence" eval="6"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_3_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -89,7 +82,6 @@
                     <record id="account_tax_report_line_post_4" model="account.report.line">
                         <field name="name">Post 4 Innenlands omsetning og uttak, og beregnet avgift 15 %</field>
                         <field name="code">NOTAX_04</field>
-                        <field name="sequence" eval="7"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_4_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -101,7 +93,6 @@
                     <record id="account_tax_report_line_post_4_tax" model="account.report.line">
                         <field name="name">Post 4 Innenlands omsetning og uttak, og beregnet avgift 15 % Tax</field>
                         <field name="code">NOTAX_04_1</field>
-                        <field name="sequence" eval="8"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_4_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -113,7 +104,6 @@
                     <record id="account_tax_report_line_post_5" model="account.report.line">
                         <field name="name">Post 5 Innenlands omsetning og uttak, og beregnet avgift 12 %</field>
                         <field name="code">NOTAX_05</field>
-                        <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_5_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -125,7 +115,6 @@
                     <record id="account_tax_report_line_post_5_tax" model="account.report.line">
                         <field name="name">Post 5 Innenlands omsetning og uttak, og beregnet avgift 12 % Tax</field>
                         <field name="code">NOTAX_05_1</field>
-                        <field name="sequence" eval="10"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_5_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -137,7 +126,6 @@
                     <record id="account_tax_report_line_post_6" model="account.report.line">
                         <field name="name">Post 6 Innenlands omsetning og uttak fritatt for merverdiavgift</field>
                         <field name="code">NOTAX_06</field>
-                        <field name="sequence" eval="11"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_6_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -149,7 +137,6 @@
                     <record id="account_tax_report_line_post_7" model="account.report.line">
                         <field name="name">Post 7 Innenlands omsetning med omvendt avgiftsplikt</field>
                         <field name="code">NOTAX_07</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_7_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -162,7 +149,6 @@
             </record>
             <record id="account_tax_report_line_utforsel" model="account.report.line">
                 <field name="name">C. Utførsel</field>
-                <field name="sequence" eval="13"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_utforsel_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -174,7 +160,6 @@
                     <record id="account_tax_report_line_post_8" model="account.report.line">
                         <field name="name">Post 8 Utførsel av varer og tjenester fritatt for merverdiavgift</field>
                         <field name="code">NOTAX_08</field>
-                        <field name="sequence" eval="14"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_8_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -187,7 +172,6 @@
             </record>
             <record id="account_tax_report_line_innforsel_av_varer" model="account.report.line">
                 <field name="name">D. Innførsel av varer</field>
-                <field name="sequence" eval="15"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_innforsel_av_varer_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -199,7 +183,6 @@
                     <record id="account_tax_report_line_post_9" model="account.report.line">
                         <field name="name">Post 9 Innførsel av varer, og beregnet avgift 25 %</field>
                         <field name="code">NOTAX_09</field>
-                        <field name="sequence" eval="16"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_9_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -211,7 +194,6 @@
                     <record id="account_tax_report_line_post_9_tax" model="account.report.line">
                         <field name="name">Post 9 Innførsel av varer, og beregnet avgift 25 % Tax</field>
                         <field name="code">NOTAX_09_1</field>
-                        <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_9_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -223,7 +205,6 @@
                     <record id="account_tax_report_line_post_10" model="account.report.line">
                         <field name="name">Post 10 Innførsel av varer, og beregnet avgift 15 %</field>
                         <field name="code">NOTAX_10</field>
-                        <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_10_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -235,7 +216,6 @@
                     <record id="account_tax_report_line_post_10_tax" model="account.report.line">
                         <field name="name">Post 10 Innførsel av varer, og beregnet avgift 15 % Tax</field>
                         <field name="code">NOTAX_10_1</field>
-                        <field name="sequence" eval="19"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_10_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -247,7 +227,6 @@
                     <record id="account_tax_report_line_post_11" model="account.report.line">
                         <field name="name">Post 11 Innførsel av varer som det ikke skal beregnes merverdiavgift av</field>
                         <field name="code">NOTAX_11</field>
-                        <field name="sequence" eval="20"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_11_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -260,7 +239,6 @@
             </record>
             <record id="account_tax_report_line_kjop_med_omvendt_avgiftsplikt" model="account.report.line">
                 <field name="name">E. Kjøp med omvendt avgiftsplikt</field>
-                <field name="sequence" eval="21"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_kjop_med_omvendt_avgiftsplikt_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -272,7 +250,6 @@
                     <record id="account_tax_report_line_post_12" model="account.report.line">
                         <field name="name">Post 12 Tjenester kjøpt fra utlandet, og beregnet avgift 25 %</field>
                         <field name="code">NOTAX_12</field>
-                        <field name="sequence" eval="22"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_12_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -284,7 +261,6 @@
                     <record id="account_tax_report_line_post_12_tax" model="account.report.line">
                         <field name="name">Post 12 Tjenester kjøpt fra utlandet, og beregnet avgift 25 % Tax</field>
                         <field name="code">NOTAX_12_1</field>
-                        <field name="sequence" eval="23"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_12_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -296,7 +272,6 @@
                     <record id="account_tax_report_line_post_13" model="account.report.line">
                         <field name="name">Post 13 Innenlands kjøp av varer og tjenester, og beregnet avgift 25 %</field>
                         <field name="code">NOTAX_13</field>
-                        <field name="sequence" eval="24"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_13_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -308,7 +283,6 @@
                     <record id="account_tax_report_line_post_13_tax" model="account.report.line">
                         <field name="name">Post 13 Innenlands kjøp av varer og tjenester, og beregnet avgift 25 % Tax</field>
                         <field name="code">NOTAX_13_1</field>
-                        <field name="sequence" eval="25"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_13_tax_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -321,7 +295,6 @@
             </record>
             <record id="account_tax_report_line_fradragsberettigen_innenlands" model="account.report.line">
                 <field name="name">F. Fradragsberettiget innenlands inngående avgift</field>
-                <field name="sequence" eval="26"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_fradragsberettigen_innenlands_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -333,7 +306,6 @@
                     <record id="account_tax_report_line_post_14" model="account.report.line">
                         <field name="name">Post 14 Fradragsberettiget innenlands inngående avgift 25 %</field>
                         <field name="code">NOTAX_14</field>
-                        <field name="sequence" eval="27"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_14_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -345,7 +317,6 @@
                     <record id="account_tax_report_line_post_15" model="account.report.line">
                         <field name="name">Post 15 Fradragsberettiget innenlands inngående avgift 15 %</field>
                         <field name="code">NOTAX_15</field>
-                        <field name="sequence" eval="28"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_15_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -357,7 +328,6 @@
                     <record id="account_tax_report_line_post_16" model="account.report.line">
                         <field name="name">Post 16 Fradragsberettiget innenlands inngående avgift 12 %</field>
                         <field name="code">NOTAX_16</field>
-                        <field name="sequence" eval="29"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_16_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -370,7 +340,6 @@
             </record>
             <record id="account_tax_report_line_fradragsberettiget_innforselsmerverdiavgift" model="account.report.line">
                 <field name="name">G. Fradragsberettiget innførselsmerverdiavgift</field>
-                <field name="sequence" eval="30"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_fradragsberettiget_innforselsmerverdiavgift_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -382,7 +351,6 @@
                     <record id="account_tax_report_line_post_17" model="account.report.line">
                         <field name="name">Post 17 Fradragsberettiget innførselsmerverdiavgift 25 %</field>
                         <field name="code">NOTAX_17</field>
-                        <field name="sequence" eval="31"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_17_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -394,7 +362,6 @@
                     <record id="account_tax_report_line_post_18" model="account.report.line">
                         <field name="name">Post 18 Fradragsberettiget innførselsmerverdiavgift 15 %</field>
                         <field name="code">NOTAX_18</field>
-                        <field name="sequence" eval="32"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_18_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -407,7 +374,6 @@
             </record>
             <record id="account_tax_report_line_sum" model="account.report.line">
                 <field name="name">H. Sum</field>
-                <field name="sequence" eval="33"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_line_sum_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -420,7 +386,6 @@
                     <record id="account_tax_report_line_post_19" model="account.report.line">
                         <field name="name">Post 19 Avgift å betale</field>
                         <field name="code">NOTAX_19</field>
-                        <field name="sequence" eval="34"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_line_post_19_formula" model="account.report.expression">
                                 <field name="label">balance</field>

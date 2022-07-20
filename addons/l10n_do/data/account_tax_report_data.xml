@@ -10,13 +10,11 @@
             <record id="tax_report_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
-                <field name="sequence" eval="1"/>
             </record>
         </field>
         <field name="line_ids">
             <record id="account_tax_report_total_operaciones" model="account.report.line">
                 <field name="name">II-1 Total de Operaciones</field>
-                <field name="sequence" eval="1"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_total_operaciones_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -28,7 +26,6 @@
                     <record id="account_tax_report_2A_ingrs_exprt" model="account.report.line">
                         <field name="name">II.A INGRESOS POR EXPORTACIONES DE BIENES O SERVICIOS EXENTOS</field>
                         <field name="code">IIA_INGRESOS_POR_EXPORTACIONES_DE_BIENES_O_SERVICIOS_EXENTOS</field>
-                        <field name="sequence" eval="2"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_2A_ingrs_exprt_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -40,7 +37,6 @@
                             <record id="account_tax_report_2A2_ingrs_exprt" model="account.report.line">
                                 <field name="name">II.A.2 INGRESOS POR EXPORTACIONES DE BIENES O SERVICIOS EXENTOS</field>
                                 <field name="code">IIA2_INGRESOS_POR_EXPORTACIONES_DE_BIENES_O_SERVICIOS_EXENTOS</field>
-                                <field name="sequence" eval="3"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2A2_ingrs_exprt_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -53,7 +49,6 @@
                             <record id="account_tax_report_2A3_ingrs_local_vnts" model="account.report.line">
                                 <field name="name">II.A.3 INGRESOS POR VENTAS LOCALES DE BIENES O SERVICIOS EXENTOS</field>
                                 <field name="code">DOTAX010102</field>
-                                <field name="sequence" eval="4"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2A3_ingrs_local_vnts_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -67,7 +62,6 @@
                     <record id="account_tax_report_2b_grvd" model="account.report.line">
                         <field name="name">II.B GRAVADAS</field>
                         <field name="code">IIB_GRAVADAS</field>
-                        <field name="sequence" eval="5"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_2b_grvd_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -79,7 +73,6 @@
                             <record id="account_tax_report_2b6_grvd" model="account.report.line">
                                 <field name="name">II.B.6 OPERACIONES GRAVADAS AL 18%</field>
                                 <field name="code">DOTAX010201</field>
-                                <field name="sequence" eval="6"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2b6_grvd_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -91,7 +84,6 @@
                             <record id="account_tax_report_2b7_grvd" model="account.report.line">
                                 <field name="name">II.B.7 OPERACIONES GRAVADAS AL 11%</field>
                                 <field name="code">IIB7_OPERACIONES_GRAVADAS_AL_11</field>
-                                <field name="sequence" eval="7"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_2b7_grvd_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -107,7 +99,6 @@
             </record>
             <record id="account_tax_report_3_liquidacion" model="account.report.line">
                 <field name="name">III LIQUIDACION</field>
-                <field name="sequence" eval="8"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_3_liquidacion_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -119,7 +110,6 @@
                     <record id="account_financial_report_line_02_01_do_account_tax_report_total_itbs" model="account.report.line">
                         <field name="name">III.10 TOTAL ITBIS COBRADO (Sumar casillas 8+9)</field>
                         <field name="code">III10_TOTAL_ITBIS_COBRADO_SUMAR_CASILLAS_89</field>
-                        <field name="sequence" eval="9"/>
                         <field name="expression_ids">
                             <record id="account_financial_report_line_02_01_do_account_tax_report_total_itbs_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -131,7 +121,6 @@
                             <record id="account_tax_report_itbs_18_casilla" model="account.report.line">
                                 <field name="name">III.8 ITBIS COBRADO (18% de la casilla 6)</field>
                                 <field name="code">DOTAX020101</field>
-                                <field name="sequence" eval="10"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_itbs_18_casilla_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -143,7 +132,6 @@
                             <record id="account_tax_report_tbs_11_casilla" model="account.report.line">
                                 <field name="name">III.9 TBIS COBRADO (11% de la casilla 7)</field>
                                 <field name="code">III9_TBIS_COBRADO_11_DE_LA_CASILLA_7</field>
-                                <field name="sequence" eval="11"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_tbs_11_casilla_formula" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -158,7 +146,6 @@
                     <record id="account_tax_report_total_itbs_pgdo" model="account.report.line">
                         <field name="name">III.14 TOTAL ITBIS PAGADO (Sumar casillas 11+12+13)</field>
                         <field name="code">III14_TOTAL_ITBIS_PAGADO_SUMAR_CASILLAS_111213</field>
-                        <field name="sequence" eval="12"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_total_itbs_pgdo_formula" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -170,7 +157,6 @@
                             <record id="account_tax_report_itbs_pgdo_locales" model="account.report.line">
                                 <field name="name">III.11 ITBIS PAGADO EN COMPRAS LOCALES</field>
                                 <field name="code">DOTAX020201</field>
-                                <field name="sequence" eval="13"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_itbs_pgdo_locales_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -182,7 +168,6 @@
                             <record id="account_tax_report_itbs_pgdo_dedubl" model="account.report.line">
                                 <field name="name">III.12 ITBIS PAGADO POR SERVICIOS DEDUCIBLES</field>
                                 <field name="code">DOTAX020202</field>
-                                <field name="sequence" eval="14"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_itbs_pgdo_dedubl_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -194,7 +179,6 @@
                             <record id="account_tax_report_itbs_pgdo_imptcn" model="account.report.line">
                                 <field name="name">III.13 ITBIS PAGADO EN IMPORTACIONES</field>
                                 <field name="code">DOTAX020203</field>
-                                <field name="sequence" eval="15"/>
                                 <field name="expression_ids">
                                     <record id="account_tax_report_itbs_pgdo_imptcn_tag" model="account.report.expression">
                                         <field name="label">balance</field>
@@ -209,7 +193,6 @@
             </record>
             <record id="account_tax_report_itbs_rntnd" model="account.report.line">
                 <field name="name">A,1 ITBIS RETENIDO</field>
-                <field name="sequence" eval="16"/>
                 <field name="expression_ids">
                     <record id="account_tax_report_itbs_rntnd_formula" model="account.report.expression">
                         <field name="label">balance</field>
@@ -221,7 +204,6 @@
                     <record id="account_tax_report_retcn_prsn" model="account.report.line">
                         <field name="name">A.25 Servicios Sujetos a Retención Personas = Físicas y Entidad</field>
                         <field name="code">DOTAX0301</field>
-                        <field name="sequence" eval="17"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_retcn_prsn_tag" model="account.report.expression">
                                 <field name="label">balance</field>
@@ -233,7 +215,6 @@
                     <record id="account_tax_report_itbs_retcn_prsn" model="account.report.line">
                         <field name="name">A.30 Itbis Por Servicios Sujetos A Retencion Personas Físicas</field>
                         <field name="code">DOTAX0302</field>
-                        <field name="sequence" eval="18"/>
                         <field name="expression_ids">
                             <record id="account_tax_report_itbs_retcn_prsn_tag" model="account.report.expression">
                                 <field name="label">balance</field>
