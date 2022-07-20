@@ -59,7 +59,7 @@ import { getNextTabableElement } from "@web/core/utils/ui";
 import { TextField } from "@web/views/fields/text/text_field";
 import { DynamicRecordList } from "@web/views/relational_model";
 
-const { onWillStart } = owl;
+const { Component, onWillStart, xml } = owl;
 
 const serviceRegistry = registry.category("services");
 
@@ -14138,4 +14138,57 @@ QUnit.module("Views", (hooks) => {
 
         assert.hasClass(target.querySelector(".o_list_renderer"), "myClass");
     });
+
+    QUnit.test("fieldDependencies support for fields", async (assert) => {
+        serverData.models.foo.records = [{ id: 1, int_field: 2 }];
+
+        class CustomField extends Component {}
+        CustomField.fieldDependencies = {
+            int_field: { type: "integer" },
+        };
+        CustomField.template = xml`<span t-esc="props.record.data.int_field"/>`;
+        registry.category("fields").add("custom_field", CustomField);
+
+        await makeView({
+            resModel: "foo",
+            type: "list",
+            arch: `
+                <list>
+                    <field name="foo" widget="custom_field"/>
+                </list>
+            `,
+            serverData,
+        });
+
+        assert.strictEqual(target.querySelector("[name=foo] span").innerText, "2");
+    });
+
+    QUnit.test(
+        "fieldDependencies support for fields: dependence on a relational field",
+        async (assert) => {
+            class CustomField extends Component {}
+            CustomField.fieldDependencies = {
+                m2o: { type: "many2one", relation: "bar" },
+            };
+            CustomField.template = xml`<span t-esc="props.record.data.m2o[0]"/>`;
+            registry.category("fields").add("custom_field", CustomField);
+
+            await makeView({
+                resModel: "foo",
+                type: "list",
+                arch: `
+                    <list>
+                        <field name="foo" widget="custom_field"/>
+                    </list>
+                `,
+                serverData,
+                mockRPC: (route, args) => {
+                    assert.step(args.method);
+                },
+            });
+
+            assert.strictEqual(target.querySelector("[name=foo] span").innerText, "1");
+            assert.verifySteps(["get_views", "web_search_read"]);
+        }
+    );
 });
