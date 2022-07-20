@@ -39,6 +39,11 @@ registerModel({
          * @private
          */
         _onChangeThreadAttachmentsInWebClientView() {
+            if (this.thread.model === 'account.move.line') {
+                // account.move.line is not actually a thread in python
+                this.setMainAttachmentFromIndex(0);
+                return;
+            }
             if (
                 this.thread.areAttachmentsLoaded &&
                 !this.thread.isLoadingAttachments &&
