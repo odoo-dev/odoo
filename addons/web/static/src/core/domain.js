@@ -206,6 +206,9 @@ function matchCondition(record, condition) {
             return fieldValue === value;
         case "!=":
         case "<>":
+            if (Array.isArray(fieldValue) && Array.isArray(value)) {
+                return !shallowEqual(fieldValue, value);
+            }
             return JSON.stringify(fieldValue) !== JSON.stringify(value);
         case "<":
             return fieldValue < value;
