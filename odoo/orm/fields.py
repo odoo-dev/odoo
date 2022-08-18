@@ -1982,41 +1982,38 @@ class Field[T]:
 
     def __set__(self, records: BaseModel, value) -> None:
         """ set the value of field ``self`` on ``records`` """
-        protected_ids = []
-        new_ids = []
-        other_ids = []
-        for record_id in records._ids:
-            if record_id in records.env._protected.get(self, ()):
-                protected_ids.append(record_id)
-            elif not record_id:
-                new_ids.append(record_id)
-            else:
-                other_ids.append(record_id)
+        protected_ids = records.env._protected.get(self, ())
+        prot_ids, real_ids, new_ids = [], [], []
+        for id_ in records._ids:
+            (prot_ids if id_ in protected_ids else real_ids if id_ else new_ids).append(id_)
 
-        if protected_ids:
+        if prot_ids:
             # records being computed: no business logic, no recomputation
-            protected_records = records.__class__(records.env, tuple(protected_ids), records._prefetch_ids)
-            self.write(protected_records, value)
+            recs = records.__class__(records.env, tuple(prot_ids), records._prefetch_ids)
+            self.write(recs, value)
+
+        if real_ids:
+            # real records: full business logic
+            recs = records.__class__(records.env, tuple(real_ids), records._prefetch_ids)
+            write_value = self.convert_to_write(value, recs)
+            recs.write({self.name: write_value})
 
         if new_ids:
             # new records: no business logic
-            new_records = records.__class__(records.env, tuple(new_ids), records._prefetch_ids)
-            with records.env.protecting(records.pool.field_computed.get(self, [self]), new_records):
-                if self.relational:
-                    new_records.modified([self.name], before=True)
-                self.write(new_records, value)
-                new_records.modified([self.name])
+            recs = records.__class__(records.env, tuple(new_ids), records._prefetch_ids)
+
+            # important: protect all assigned records, not just the ones that are modified
+            with records.env.protecting(records.pool.field_computed.get(self) or [self], records):
+                if records.pool.is_modifying_relations(self):
+                    recs.modified([self.name], before=True)
+                self.write(recs, value)
+                recs.modified([self.name])
 
             if self.inherited:
                 # special case: also assign parent records if they are new
-                parents = new_records[self.related.split('.')[0]]
-                parents.filtered(lambda r: not r.id)[self.name] = value
-
-        if other_ids:
-            # base case: full business logic
-            records = records.__class__(records.env, tuple(other_ids), records._prefetch_ids)
-            write_value = self.convert_to_write(value, records)
-            records.write({self.name: write_value})
+                parents = recs[self.related.split('.')[0]]
+                new_parents = parents.browse(id_ for id_ in parents._ids if not id_)
+                new_parents[self.name] = value
 
     ############################################################################
     #
