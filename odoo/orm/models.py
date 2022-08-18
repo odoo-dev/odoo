@@ -3878,68 +3878,96 @@ class BaseModel(metaclass=MetaModel):
 
     @api.private
     def update(self, values: ValuesType) -> None:
-        """ Update the records in ``self`` with ``values``. """
+        """ Update the records in ``self`` with ``values``. This method is more
+        general than method :meth:`write`, since it may be used in compute
+        methods and deals with new records, too. For real records, it simply
+        delegates to :meth:`write`.
+        """
         if not self._ids or not values:
             return
 
         env = self.env
-        fields = self._fields
 
-        # group updates by ids {ids: [(field, value)]} for new and real records
-        new_updates = defaultdict(list)
-        real_updates = defaultdict(list)
+        # determine field values {field: value} in update order
+        field_values = dict(sorted(
+            [(self._fields[key], val) for key, val in values.items()],
+            key=lambda item: self._fields_update_order__[item[0]],
+        ))
 
-        for fname, value in values.items():
-            field = fields[fname]
+        # group updates by ids {ids: {field: value}} for new and real records
+        new_updates = defaultdict(dict)
+        real_updates = defaultdict(dict)
+
+        for field, value in field_values.items():
             ids = self._ids
 
             if ((protected_ids := env._protected.get(field, ())) and
-                (protected_ids := tuple(id_ for id_ in ids if id_ in protected_ids))
+                (prot_ids := tuple(id_ for id_ in ids if id_ in protected_ids))
             ):
                 # records being computed: no business logic, no recomputation
-                protected_records = self.__class__(env, protected_ids, self._prefetch_ids)
-                field.write(protected_records, value)
-                if len(protected_ids) == len(ids):
+                records = self.__class__(env, prot_ids, self._prefetch_ids)
+                field.write(records, value)
+                if len(prot_ids) == len(ids):
                     continue
                 ids = tuple(id_ for id_ in ids if id_ not in protected_ids)
 
-            new_ids = tuple(id_ for id_ in ids if not id_)
-            if new_ids:
-                new_updates[new_ids].append((field, value))
+            if new_ids := tuple(id_ for id_ in ids if not id_):
+                new_updates[new_ids][field] = value
                 if len(new_ids) == len(ids):
                     continue
                 ids = tuple(id_ for id_ in ids if id_)
 
-            real_updates[ids].append((field, value))
+            real_updates[ids][field] = value
 
-        # new records: no business logic
-        for ids, field_vals in new_updates.items():
-            new_records = self.__class__(env, ids, self._prefetch_ids)
+        if len(new_updates) > 1 or len(real_updates) > 1:
+            # happens for instance when updating fields F, G where F is
+            # protected on id 1 only, and G is protected on id 2 only; we chose
+            # to not support such use-cases because of their complexity
+            raise ValueError("update() with fields protected on different records")
+
+        if new_updates:
+            # new records: no business logic
+            ids, field_vals = new_updates.popitem()
+            records = self.__class__(env, ids, self._prefetch_ids)
+
+            # since new records are only in memory, protect all fields being
+            # written in order to avoid losing field values from cache
             fields_to_protect = OrderedSet(
                 f
-                for field, _ in field_vals
-                for f in env.registry.field_computed.get(field, (field,))
+                for field in field_vals
+                for f in env.registry.field_computed.get(field) or (field,)
             )
-            with env.protecting(fields_to_protect, new_records):
-                new_records.modified(
-                    [field.name for field, _ in field_vals if field.relational], before=True,
+
+            # force the computation of fields that are computed with some
+            # assigned fields, but are not assigned themselves
+            records._recompute_recordset([
+                field.name
+                for field in fields_to_protect
+                if field.compute and field not in field_vals
+            ])
+
+            with env.protecting(fields_to_protect, records):
+                records.modified(
+                    [f.name for f in field_vals if env.registry.is_modifying_relations(f)],
+                    before=True,
                 )
-                for field, value in field_vals:
-                    field.write(new_records, value)
-                new_records.modified([field.name for field, _ in field_vals])
+                for field, value in field_vals.items():
+                    field.write(records, value)
+                records.modified([field.name for field in field_vals])
 
-            # special case: also assign parent records if they are new
-            for field, value in field_vals:
-                if field.inherited:
-                    parents = new_records[field.related.split('.')[0]]
-                    parents.filtered(lambda r: not r.id)[field.name] = value
+                # special case: also assign parent records if they are new
+                for field, value in field_vals.items():
+                    if field.inherited:
+                        parents = records[field.related.split('.')[0]]
+                        parents.filtered(lambda r: not r.id)[field.name] = value
 
-        # base case: full business logic
-        for ids, field_vals in real_updates.items():
+        if real_updates:
+            # real records: full business logic
+            ids, field_vals = real_updates.popitem()
             records = self.__class__(env, ids, self._prefetch_ids)
             records.write({
                 field.name: field.convert_to_write(value, records)
-                for field, value in field_vals
+                for field, value in field_vals.items()
             })
 
     def write(self, vals: ValuesType) -> typing.Literal[True]:
@@ -3997,23 +4025,32 @@ class BaseModel(metaclass=MetaModel):
         bad_names = {'id', 'parent_path'}
         if self._log_access:
             # the superuser can set log_access fields while loading registry
-            if not (self.env.uid == SUPERUSER_ID and not self.pool.ready):
+            if not (env.uid == SUPERUSER_ID and not env.registry.ready):
                 bad_names.update(LOG_ACCESS_COLUMNS)
 
         # set magic fields
         vals = {key: val for key, val in vals.items() if key not in bad_names}
         if self._log_access:
-            vals.setdefault('write_uid', self.env.uid)
-            vals.setdefault('write_date', self.env.cr.now())
+            vals.setdefault('write_uid', env.uid)
+            vals.setdefault('write_date', env.cr.now())
 
-        field_values = sorted(
+        # determine field values {field: value}
+        # The mapping _fields_update_order__ determines a priority for writing
+        # on fields. Monetary fields need their corresponding currency field in
+        # cache for rounding values. X2many fields must be written last,
+        # because they flush other fields when deleting lines.
+        field_values = dict(sorted(
             [(self._fields[key], val) for key, val in vals.items()],
-            key=lambda item: self._fields_update_order__[item[0]]
-        )                                           # [(field, value)]
-        determine_inverses = defaultdict(list)      # {inverse: fields}
+            key=lambda item: self._fields_update_order__[item[0]],
+        ))
+
+        # determine what to protect, what to update
+        field_updates = {}
+        field_inverses = {}
         fnames_modifying_relations = []
-        protected = set()
-        for field, value in field_values:
+        fields_to_protect = OrderedSet()
+        for field, value in field_values.items():
+            field_updates[field] = value
             if field.inverse:
                 if field.type in ('one2many', 'many2many'):
                     # The written value is a list of commands that must applied
@@ -4023,8 +4060,8 @@ class BaseModel(metaclass=MetaModel):
                     # make sure the field's value is in cache before writing, in
                     # order to avoid an inconsistent update.
                     self[field.name]
-                determine_inverses[field.inverse].append(field)
-            if self.pool.is_modifying_relations(field):
+                field_inverses[field] = value
+            if env.registry.is_modifying_relations(field):
                 fnames_modifying_relations.append(field.name)
             if field.inverse or (field.compute and not field.readonly):
                 if field.store or field.type not in ('one2many', 'many2many'):
@@ -4037,18 +4074,18 @@ class BaseModel(metaclass=MetaModel):
                     # will automatically invalidate the field from the cache,
                     # forcing its value to be recomputed once dependencies are
                     # up-to-date.
-                    protected.update(self.pool.field_computed.get(field, [field]))
+                    fields_to_protect.update(env.registry.field_computed.get(field, [field]))
 
         # force the computation of fields that are computed with some assigned
         # fields, but are not assigned themselves
         to_compute = [field.name
-                      for field in protected
-                      if field.compute and field.name not in vals]
+                      for field in fields_to_protect
+                      if field.compute and field not in field_values]
         if to_compute:
             self._recompute_recordset(to_compute)
 
         # protect fields being written against recomputation
-        with env.protecting(protected, self):
+        with env.protecting(fields_to_protect, self):
             # Determine records depending on values. When modifying a relational
             # field, you have to recompute what depends on the field's values
             # before and after modification.  This is because the modification
@@ -4069,9 +4106,7 @@ class BaseModel(metaclass=MetaModel):
             # line's order after the modification.
             self.modified(fnames_modifying_relations, before=True)
 
-            real_recs = self.filtered('id')
-
-            for field, value in field_values:
+            for field, value in field_updates.items():
                 field.write(self, value)
 
             # determine records depending on new values
@@ -4093,21 +4128,27 @@ class BaseModel(metaclass=MetaModel):
                 self.flush_model([self._parent_name])
 
             # validate non-inversed fields first
-            inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
-            real_recs._validate_fields(vals, inverse_fields)
+            real_recs = self.filtered('id')
+            inverse_fnames = [field.name for field in field_inverses]
+            real_recs._validate_fields(vals, inverse_fnames)
 
-            for fields in determine_inverses.values():
+            # group inverse fields by inverse method
+            for _method, fields_ in groupby(field_inverses, lambda field: field.inverse):
                 # write again on non-stored fields that have been invalidated from cache
-                for field in fields:
-                    if not field.store and (not field.inherited or field.type not in ('one2many', 'many2many')) and any(field._cache_missing_ids(real_recs)):
-                        field.write(real_recs, vals[field.name])
+                for field in fields_:
+                    if (
+                        not field.store
+                        and not (field.inherited and field.type in ('one2many', 'many2many'))
+                        and any(field._cache_missing_ids(real_recs))
+                    ):
+                        field.write(real_recs, field_inverses[field])
 
                 # inverse records that are not being computed
                 try:
-                    fields[0].determine_inverse(real_recs)
+                    fields_[0].determine_inverse(real_recs)
                 except AccessError as e:
-                    if fields[0].inherited:
-                        description = self.env['ir.model']._get(self._name).name
+                    if fields_[0].inherited:
+                        description = env['ir.model']._get(self._name).name
                         raise AccessError(_(
                             "%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).",
                             previous_message=e.args[0],
@@ -4121,10 +4162,10 @@ class BaseModel(metaclass=MetaModel):
                 self._clear_cache_on_fields is None
                 or not vals.keys().isdisjoint(self._clear_cache_on_fields)
             ):
-                self.env.transaction.invalidate_ormcache(cache_name)
+                env.transaction.invalidate_ormcache(cache_name)
 
             # validate inversed fields
-            real_recs._validate_fields(inverse_fields)
+            real_recs._validate_fields(inverse_fnames)
 
         if self._check_company_auto:
             self._check_company(list(vals))
