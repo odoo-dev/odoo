@@ -3840,14 +3840,23 @@ class BaseModel(metaclass=MetaModel):
             vals.setdefault('write_uid', self.env.uid)
             vals.setdefault('write_date', self.env.cr.now())
 
-        field_values = sorted(
+        # determine field values {field: value}
+        # The mapping _fields_update_order__ determines a priority for writing
+        # on fields. Monetary fields need their corresponding currency field in
+        # cache for rounding values. X2many fields must be written last,
+        # because they flush other fields when deleting lines.
+        field_values = dict(sorted(
             [(self._fields[key], val) for key, val in vals.items()],
             key=lambda item: self._fields_update_order__[item[0]]
-        )                                           # [(field, value)]
-        determine_inverses = defaultdict(list)      # {inverse: fields}
+        ))
+
+        # determine what to protect, what to update
+        field_updates = {}
+        field_inverses = {}
         fnames_modifying_relations = []
-        protected = set()
-        for field, value in field_values:
+        fields_to_protect = OrderedSet()
+        for field, value in field_values.items():
+            field_updates[field] = value
             if field.inverse:
                 if field.type in ('one2many', 'many2many'):
                     # The written value is a list of commands that must applied
@@ -3857,7 +3866,7 @@ class BaseModel(metaclass=MetaModel):
                     # make sure the field's value is in cache before writing, in
                     # order to avoid an inconsistent update.
                     self[field.name]
-                determine_inverses[field.inverse].append(field)
+                field_inverses[field] = value
             if self.pool.is_modifying_relations(field):
                 fnames_modifying_relations.append(field.name)
             if field.inverse or (field.compute and not field.readonly):
@@ -3871,18 +3880,18 @@ class BaseModel(metaclass=MetaModel):
                     # will automatically invalidate the field from the cache,
                     # forcing its value to be recomputed once dependencies are
                     # up-to-date.
-                    protected.update(self.pool.field_computed.get(field, [field]))
+                    fields_to_protect.update(self.pool.field_computed.get(field, [field]))
 
         # force the computation of fields that are computed with some assigned
         # fields, but are not assigned themselves
         to_compute = [field.name
-                      for field in protected
-                      if field.compute and field.name not in vals]
+                      for field in fields_to_protect
+                      if field.compute and field not in field_values]
         if to_compute:
             self._recompute_recordset(to_compute)
 
         # protect fields being written against recomputation
-        with env.protecting(protected, self):
+        with env.protecting(fields_to_protect, self):
             # Determine records depending on values. When modifying a relational
             # field, you have to recompute what depends on the field's values
             # before and after modification.  This is because the modification
@@ -3903,9 +3912,7 @@ class BaseModel(metaclass=MetaModel):
             # line's order after the modification.
             self.modified(fnames_modifying_relations, before=True)
 
-            real_recs = self.filtered('id')
-
-            for field, value in field_values:
+            for field, value in field_updates.items():
                 field.write(self, value)
 
             # determine records depending on new values
@@ -3927,20 +3934,26 @@ class BaseModel(metaclass=MetaModel):
                 self.flush_model([self._parent_name])
 
             # validate non-inversed fields first
-            inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
-            real_recs._validate_fields(vals, inverse_fields)
+            real_recs = self.filtered('id')
+            inverse_fnames = [field.name for field in field_inverses]
+            real_recs._validate_fields(vals, inverse_fnames)
 
-            for fields in determine_inverses.values():
+            # group inverse fields by inverse method
+            for _method, fields_ in groupby(field_inverses, lambda field: field.inverse):
                 # write again on non-stored fields that have been invalidated from cache
-                for field in fields:
-                    if not field.store and (not field.inherited or field.type not in ('one2many', 'many2many')) and any(field._cache_missing_ids(real_recs)):
-                        field.write(real_recs, vals[field.name])
+                for field in fields_:
+                    if (
+                        not field.store
+                        and not (field.inherited and field.type in ('one2many', 'many2many'))
+                        and any(field._cache_missing_ids(real_recs))
+                    ):
+                        field.write(real_recs, field_inverses[field])
 
                 # inverse records that are not being computed
                 try:
-                    fields[0].determine_inverse(real_recs)
+                    fields_[0].determine_inverse(real_recs)
                 except AccessError as e:
-                    if fields[0].inherited:
+                    if fields_[0].inherited:
                         description = self.env['ir.model']._get(self._name).name
                         raise AccessError(_(
                             "%(previous_message)s\n\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).",
@@ -3958,7 +3971,7 @@ class BaseModel(metaclass=MetaModel):
                 self.env.transaction.invalidate_ormcache(cache_name)
 
             # validate inversed fields
-            real_recs._validate_fields(inverse_fields)
+            real_recs._validate_fields(inverse_fnames)
 
         if self._check_company_auto:
             self._check_company(list(vals))
