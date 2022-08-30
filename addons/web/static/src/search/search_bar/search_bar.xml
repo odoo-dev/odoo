@@ -35,7 +35,7 @@
 
     <t t-name="web.SearchBar.Input" owl="1">
         <input type="text"
-            class="o_searchview_input"
+            class="o_searchview_input form-control p-0"
             accesskey="Q"
             placeholder="Search..."
             role="searchbox"

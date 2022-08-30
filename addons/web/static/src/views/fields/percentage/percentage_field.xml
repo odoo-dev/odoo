@@ -9,7 +9,7 @@
             <div class="d-flex">
                 <input
                     t-ref="numpadDecimal"
-                    t-attf-class="o_input"
+                    t-attf-class="o_input form-control"
                     t-att-placeholder="props.placeholder"
                     type="text"
                     inputmode="numeric"

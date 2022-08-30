@@ -7,7 +7,7 @@
         </t>
         <t t-else="">
             <input
-                class="o_input"
+                class="o_input form-control"
                 t-att-id="props.id"
                 type="email"
                 t-att-placeholder="props.placeholder"

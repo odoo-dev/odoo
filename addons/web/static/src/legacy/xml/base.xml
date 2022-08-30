@@ -357,7 +357,7 @@
             />
         </div>
         <input type="text"
-            class="o_searchview_input"
+            class="o_searchview_input form-control p-0"
             t-att-autofocus="!env.device.isMobileDevice"
             accesskey="Q"
             placeholder="Search..."

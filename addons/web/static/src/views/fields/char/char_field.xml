@@ -7,7 +7,7 @@
         </t>
         <t t-else="">
             <input
-                class="o_input"
+                class="o_input form-control"
                 t-att-class="{'o_field_translate': props.isTranslatable}"
                 t-att-id="props.id"
                 t-att-type="props.isPassword ? 'password' : 'text'"

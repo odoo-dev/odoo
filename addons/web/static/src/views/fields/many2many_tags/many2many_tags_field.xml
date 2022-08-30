@@ -4,7 +4,7 @@
     <t t-name="web.Many2ManyTagsField" owl="1">
         <div
             class="o_field_tags d-inline-flex flex-wrap mw-100"
-            t-att-class="{'o_tags_input o_input': !props.readonly}"
+            t-att-class="{'o_tags_input o_input form-control': !props.readonly}"
         >
             <TagsList tags="tags"/>
             <div t-if="showM2OSelectionField" class="o_field_many2many_selection d-inline-flex w-100" t-on-keydown="onAutoCompleteKeydown" t-ref="autoComplete">
