@@ -19,6 +19,10 @@
 // Style
 // ------------------------------------------------------------------
 
+.o_ChatterTopbar_actions {
+    border-bottom: $border-width solid transparent;
+}
+
 .o_ChatterTopbar_button {
     &:hover, &:focus {
         background-color: $gray-200;

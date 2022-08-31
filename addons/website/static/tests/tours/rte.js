@@ -153,7 +153,7 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     trigger: 'iframe .js_language_selector a[data-url_code="en"]',
 }, {
     content: "edit english version",
-    trigger: '.o_edit_website_container > a',
+    trigger: '.o_edit_website_container',
     extra_trigger: 'iframe body:not(:has(#wrap p font:first:containsExact(paragraphs <b>describing</b>)))',
 }, {
     content: "select text",

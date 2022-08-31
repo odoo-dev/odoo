@@ -75,7 +75,7 @@ odoo.define('website_hr_recruitment.tour', function(require) {
         trigger: 'iframe form'
     }, {
         content: 'Enter in edit mode',
-        trigger: '.o_edit_website_container > a',
+        trigger: '.o_edit_website_container',
     }, {
         content: 'Add a fake default value for the job_id field',
         trigger: '#oe_snippets.o_loaded',
@@ -118,7 +118,7 @@ odoo.define('website_hr_recruitment.tour', function(require) {
         }
     }, {
         content: 'Enter in edit mode',
-        trigger: '.o_edit_website_container > a',
+        trigger: '.o_edit_website_container',
     }, {
         content: 'Verify that the job_id field has kept its default value',
         trigger: '#oe_snippets.o_loaded',

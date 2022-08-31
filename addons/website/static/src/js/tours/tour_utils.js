@@ -132,7 +132,7 @@ function changePaddingSize(direction) {
  */
 function clickOnEdit(position = "bottom") {
     return {
-        trigger: ".o_menu_systray .o_edit_website_container a",
+        trigger: ".o_menu_systray .o_edit_website_container",
         content: Markup(_t("<b>Click Edit</b> to start designing your homepage.")),
         extra_trigger: "body:not(.editor_has_snippets)",
         position: position,

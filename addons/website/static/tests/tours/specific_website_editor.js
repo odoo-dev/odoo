@@ -7,7 +7,7 @@ tour.register('generic_website_editor', {
     test: true,
 }, [{
     content: 'Click edit button',
-    trigger: '.o_edit_website_container > a',
+    trigger: '.o_edit_website_container',
 },
 {
     trigger: 'iframe body:not([data-hello="world"])',
@@ -20,7 +20,7 @@ tour.register('specific_website_editor', {
     test: true,
 }, [{
     content: 'Click edit button',
-    trigger: '.o_edit_website_container > a',
+    trigger: '.o_edit_website_container',
 },
 {
     trigger: 'iframe body[data-hello="world"]',
