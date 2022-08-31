@@ -44,7 +44,7 @@ wTourUtils.registerWebsitePreviewTour('course_publisher', {
     trigger: 'button:contains("Save")',
 }, {
     content: 'eLearning: launch course edition',
-    trigger: '.o_edit_website_container a',
+    trigger: '.o_edit_website_container',
 }, {
     content: 'eLearning: double click image to edit it',
     extra_trigger: 'iframe body.editor_enable',

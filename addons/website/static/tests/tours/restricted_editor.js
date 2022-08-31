@@ -7,7 +7,7 @@ wTourUtils.registerWebsitePreviewTour("restricted_editor", {
     test: true,
     url: "/",
 }, [{
-    trigger: '.o_edit_website_container a',
+    trigger: '.o_edit_website_container',
     content: "Click \"EDIT\" button of website as Restricted Editor",
 }, {
     trigger: '#oe_snippets.o_loaded',

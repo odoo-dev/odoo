@@ -71,11 +71,11 @@
             display: flex;
             flex: 0 0 auto;
             flex-flow: column nowrap;
-            background: map-get($grays, '900');
+            background: var(--settings__tab-bg, map-get($grays, '900'));
             overflow: auto;
 
             .selected {
-                background-color: map-get($grays, '800');
+                background-color: var(--settings__tab-bg--active, map-get($grays, '800'));
                 box-shadow: inset 2px 0 0 $o-brand-primary;
             }
 
@@ -111,7 +111,7 @@
                 h2 {
                     margin: 0 0 !important;
                     @include o-base-settings-horizontal-padding(.4rem);
-                    background-color: map-get($grays, '200');
+                    background-color: var(--settings__title-bg, map-get($grays, '200'));
                     font-size: 15px;
 
                     &.o_invisible_modifier + .o_settings_container {

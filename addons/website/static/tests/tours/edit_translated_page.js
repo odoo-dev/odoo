@@ -13,7 +13,7 @@ tour.register('edit_translated_page_redirect', {
     {
         content: "Enter edit mode",
         extra_trigger: 'iframe main:has([data-for="contactus_form"])',
-        trigger: '.o_edit_website_container > a',
+        trigger: '.o_edit_website_container',
     },
     {
         content: 'check editor dashboard',
@@ -32,7 +32,7 @@ tour.register('edit_translated_page_redirect', {
     {
         content: "Enter edit mode",
         extra_trigger: 'iframe #wrapwrap',
-        trigger: '.o_edit_website_container > a',
+        trigger: '.o_edit_website_container',
     },
     {
         content: 'check editor dashboard',

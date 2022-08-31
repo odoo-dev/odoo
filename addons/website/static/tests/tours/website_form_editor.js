@@ -325,7 +325,7 @@ odoo.define('website.tour.form_editor', function (require) {
         // Check that if we edit again and save again the default value is not deleted.
         {
             content: 'Enter in edit mode again',
-            trigger: '.o_edit_website_container > a',
+            trigger: '.o_edit_website_container',
             run: 'click',
         },
         {

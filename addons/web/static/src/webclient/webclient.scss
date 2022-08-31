@@ -22,6 +22,7 @@ tfoot {
   direction: ltr;
   position: relative; // normally useless but required by bootstrap-datepicker
   background-color: $o-webclient-background-color;
+  color-scheme: $o-webclient-color-scheme;
 }
 
 // ------------------------------------------------------------------
@@ -249,7 +250,7 @@ select {
   @include o-hover-text-color($link-color, $link-hover-color);
 
   &.disabled, &:disabled {
-    @include o-hover-text-color($link-color, $link-color);
+    @include o-hover-text-color($o-gray-500, $o-gray-500);
   }
 }
 
@@ -272,12 +273,12 @@ select {
   // Achieve "clickable text" elements that act like buttons once the
   // the user interacts with (eg. control-panel dropdowns);
   @include button-variant(
-    $background: #fff,
-    $border: #fff,
-    $hover-background: $o-gray-100,
-    $hover-border: $o-gray-200,
-    $active-background: $o-gray-100,
-    $active-border: $o-gray-300
+    $background: $o-btn-light-bg,
+    $border: $o-btn-light-border,
+    $hover-background: $o-btn-light-background-hover,
+    $hover-border: $o-btn-light-background-hover,
+    $active-background: $o-btn-light-background-hover,
+    $active-border: $o-btn-light-background-hover
   );
 }
 

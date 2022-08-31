@@ -19,7 +19,7 @@ EventAdditionalTourSteps.include({
                 content: Markup(_t("Use this <b>shortcut</b> to easily access your event web page.")),
                 position: 'bottom',
             }, {
-                trigger: '.o_edit_website_container a',
+                trigger: '.o_edit_website_container',
                 extra_trigger: 'iframe .o_wevent_event',
                 content: Markup(_t("With the Edit button, you can <b>customize</b> the web page visitors will see when registering.")),
                 position: 'bottom',

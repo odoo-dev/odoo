@@ -33,7 +33,7 @@ wTourUtils.registerWebsitePreviewTour('shop_customize', {
         },
         {
             content: "enter edit mode",
-            trigger: '.o_edit_website_container > a',
+            trigger: '.o_edit_website_container',
         },
         {
             content: "open customize tab",
@@ -72,7 +72,7 @@ wTourUtils.registerWebsitePreviewTour('shop_customize', {
         },
         {
             content: "enter edit mode",
-            trigger: '.o_edit_website_container > a',
+            trigger: '.o_edit_website_container',
         },
         {
             content: "open customize tab",
@@ -135,7 +135,7 @@ wTourUtils.registerWebsitePreviewTour('shop_customize', {
         },
         {
             content: "enter edit mode",
-            trigger: '.o_edit_website_container > a',
+            trigger: '.o_edit_website_container',
         },
         {
             content: "open customize tab",

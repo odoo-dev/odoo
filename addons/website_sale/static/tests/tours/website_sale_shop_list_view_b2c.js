@@ -25,7 +25,7 @@ wTourUtils.registerWebsitePreviewTour('shop_list_view_b2c', {
         },
         {
             content: "go to edit mode",
-            trigger: '.o_edit_website_container > a',
+            trigger: '.o_edit_website_container',
         },
         {
             content: "open customize tab",

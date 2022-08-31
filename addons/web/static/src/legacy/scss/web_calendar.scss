@@ -19,7 +19,7 @@ $o-cw-filter-avatar-size: 20px;
     min-width: 0;
     height: 100%;
     background-color: map-get($grays, '100');
-    background: linear-gradient(-45deg, map-get($grays, '100'), white);
+    background: linear-gradient(-45deg, map-get($grays, '100'), $o-view-background-color);
 
     .fc-event {
         margin: 0 1px;
@@ -41,7 +41,7 @@ $o-cw-filter-avatar-size: 20px;
         }
 
         .fc-bg {
-            background-color: mix(map-get($theme-colors, 'primary'), white); // Used for placeholder events only (on creation)
+            background-color: mix(map-get($theme-colors, 'primary'), $o-view-background-color); // Used for placeholder events only (on creation)
             width: 101%;
             height: 101%; // Compensate border
             opacity: 0.7;
@@ -583,6 +583,7 @@ $o-cw-filter-avatar-size: 20px;
         margin: 0;
         width: 100%;
         padding: 0;
+        background-color: $o-view-background-color;
 
         &, td, .ui-datepicker-header, td a, td span {
             border: 0;
