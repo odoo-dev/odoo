@@ -13,6 +13,7 @@
             padding-left: $o-statusbar-arrow-width*2;
             border-width: 0;
             font-size: $font-size-sm;
+            line-height: $o-statusbar-height;
 
             &:first-child {
                 padding-right: $o-horizontal-padding; // Compensate container padding
