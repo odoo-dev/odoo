@@ -74,7 +74,7 @@
                                     </div>
                                     <div class="row mt8">
                                         <label class="col-lg-3" string="Favicon" for="favicon"/>
-                                        <field name="favicon" widget="image" class="float-start oe_avatar"/>
+                                        <field name="favicon" widget="image" class="float-start oe_avatar bg-view"/>
                                     </div>
                                 </div>
                             </div>
