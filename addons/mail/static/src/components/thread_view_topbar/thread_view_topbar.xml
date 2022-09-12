@@ -15,7 +15,7 @@
                             </div>
                         </t>
                         <t t-if="threadViewTopbar.isEditingThreadName">
-                            <input class="o_ThreadViewTopbar_threadNameInput lead fw-bold" type="text" t-att-value="threadViewTopbar.pendingThreadName" t-on-input="threadViewTopbar.onInputThreadNameInput" t-on-keydown="threadViewTopbar.onKeyDownThreadNameInput" t-ref="threadNameInput"/>
+                            <input class="o_ThreadViewTopbar_threadNameInput form-control lead fw-bold" type="text" t-att-value="threadViewTopbar.pendingThreadName" t-on-input="threadViewTopbar.onInputThreadNameInput" t-on-keydown="threadViewTopbar.onKeyDownThreadNameInput" t-ref="threadNameInput"/>
                         </t>
                     </t>
                     <t t-if="!threadViewTopbar.thread">
@@ -38,7 +38,7 @@
                             </t>
                         </t>
                         <t t-if="threadViewTopbar.isEditingThreadDescription">
-                            <input class="o_ThreadViewTopbar_threadDescriptionInput" type="text" t-att-value="threadViewTopbar.pendingThreadDescription" t-on-input="threadViewTopbar.onInputThreadDescriptionInput" t-on-keydown="threadViewTopbar.onKeyDownThreadDescriptionInput" t-ref="threadDescriptionInput"/>
+                            <input class="o_ThreadViewTopbar_threadDescriptionInput form-control" type="text" t-att-value="threadViewTopbar.pendingThreadDescription" t-on-input="threadViewTopbar.onInputThreadDescriptionInput" t-on-keydown="threadViewTopbar.onKeyDownThreadDescriptionInput" t-ref="threadDescriptionInput"/>
                         </t>
                     </t>
                 </div>
@@ -94,7 +94,7 @@
                             </span>
                         </t>
                         <t t-if="threadViewTopbar.isEditingGuestName">
-                            <input class="o_ThreadViewTopbar_guestNameInput" type="text" t-att-value="messaging.currentGuest.name" t-on-input="threadViewTopbar.onInputGuestNameInput" t-on-keydown="threadViewTopbar.onKeyDownGuestNameInput" t-ref="guestNameInput"/>
+                            <input class="o_ThreadViewTopbar_guestNameInput form-control" type="text" t-att-value="messaging.currentGuest.name" t-on-input="threadViewTopbar.onInputGuestNameInput" t-on-keydown="threadViewTopbar.onKeyDownGuestNameInput" t-ref="guestNameInput"/>
                         </t>
                     </div>
                 </t>
