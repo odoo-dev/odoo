@@ -306,8 +306,8 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         }
 
         &.active {
-            &, &:hover, &:focus {
-                color: $o-we-bg-darker;
+            & > * , &:hover, &:focus {
+                color: $o-we-toolbar-color-clickable-active
 
                 &:before {
                     top: 0;
@@ -563,8 +563,6 @@ img::selection {
 .note-editable {
     border: $o-we-border-width solid $o-we-fg-light;
     overflow: auto;
-    background: white;
-    color: black;
     height: 100%;
     padding: 4px;
     min-height: 10px;
