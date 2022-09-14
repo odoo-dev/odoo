@@ -105,8 +105,8 @@ div.dropdown-menu.bootstrap-datetimepicker-widget {
             margin: 0;
             border-radius: 0;
             color: $o-main-text-color;
-            border-top: 1px solid $border-color;
-            box-shadow: 0 1px 0 $border-color; // overlaps with main box border
+            border-top: 1px solid var(--datepicker-border-color, #{$border-color});
+            box-shadow: 0 1px 0 var(--datepicker-border-color, #{$border-color}); // overlaps with main box border
 
             &.primary {
                 color: $o-brand-primary;
