@@ -1,5 +1,6 @@
 .o_website_loader_container {
     --website-loader-color: #{$white};
+
     font-family: "Montserrat", $font-family-sans-serif;
     background-color: rgba($o-shadow-color, .9);
     pointer-events: all;
@@ -22,6 +23,7 @@
     .o_website_loader_tip {
         font-size: 0.5em;
         color: var(--website-loader-color);
+        
         @include media-breakpoint-down(md) {
             width: 50% !important;
         }
