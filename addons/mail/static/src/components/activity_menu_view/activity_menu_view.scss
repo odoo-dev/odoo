@@ -23,9 +23,6 @@
             color: $headings-color;
         }
     }
-    &:not(:last-child) {
-        border-bottom: 1px solid map-get($grays, '400');
-    }
     @include media-breakpoint-down(md) {
         padding: $o-mail-chatter-mobile-gap;
     }
@@ -99,7 +96,6 @@
 .o_ActivityMenuView_activityGroupNoCount {
     cursor: initial;
     align-items: center;
-    color: grey;
     opacity: 0.5;
     padding: 3px;
     min-height: inherit;
