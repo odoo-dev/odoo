@@ -3,6 +3,7 @@ odoo.define('web.calendar_tests', function (require) {
 
 const AbstractField = require('web.AbstractField');
 const BasicModel = require('web.BasicModel');
+var FormView = require('web.FormView');
 var CalendarView = require('web.CalendarView');
 var CalendarRenderer = require('web.CalendarRenderer');
 var Dialog = require('web.Dialog');
@@ -13,6 +14,8 @@ var mixins = require('web.mixins');
 var testUtils = require('web.test_utils');
 var session = require('web.session');
 const Widget = require('web.Widget');
+const { registry } = require('@web/core/registry');
+const legacyViewRegistry = require('web.view_registry');
 
 const { getFixture, patchWithCleanup } = require("@web/../tests/helpers/utils");
 
@@ -46,6 +49,10 @@ QUnit.module('LegacyViews', {
         patchWithCleanup(session, {
             uid: -1
         });
+        registry.category("views").remove("calendar"); // remove new calendar from registry
+        registry.category("views").remove("form"); // remove new form from registry
+        legacyViewRegistry.add("calendar", CalendarView); // add legacy calendar -> will be wrapped and added to new registry
+        legacyViewRegistry.add("form", FormView); // add legacy form -> will be wrapped and added to new registry
         this.data = {
             event: {
                 fields: {
@@ -303,8 +310,7 @@ QUnit.module('LegacyViews', {
         calendar.destroy();
     });
 
-    QUnit.skipWOWL('breadcrumbs are updated with the displayed period', async function (assert) {
-        // SKIPPED WOWL: it seems the initial date is not taken into account anymore ?
+    QUnit.test('breadcrumbs are updated with the displayed period', async function (assert) {
         assert.expect(4);
 
         serverData.views = {
@@ -3413,8 +3419,7 @@ QUnit.module('LegacyViews', {
         calendar.destroy();
     });
 
-    QUnit.skipWOWL('initial_date given in the context', async function (assert) {
-        // SKIPPED WOWL: it seems the initial date is not taken into account anymore ?
+    QUnit.test('initial_date given in the context', async function (assert) {
         assert.expect(1);
 
         serverData.views = {
