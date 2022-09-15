@@ -27,6 +27,14 @@
     box-shadow: var(--daterangepicker-box-shadow);
     font-family: inherit;
 
+    &:before {
+        border-bottom-color: var(--daterangerpicker__arrow-border-color, #{$dropdown-border-color});
+    }
+    
+    &:after {
+        border-bottom-color: var(--daterangerpicker__arrow-background-color, #{$dropdown-bg});
+    }
+
     .calendar-table {
         border: 0;
         background-color: var(--daterangepicker__table-bg);
