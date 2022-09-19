@@ -49,3 +49,7 @@ export function hasTouch() {
 export function maxTouchPoints() {
     return browser.navigator.maxTouchPoints || 1;
 }
+
+export function isDark() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--o-webclient-color-scheme') === "dark";
+}

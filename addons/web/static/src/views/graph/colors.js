@@ -1,6 +1,8 @@
 /** @odoo-module **/
 
-export const COLORS = [
+import { isDark } from "@web/core/browser/feature_detection";
+
+const COLORS_BRIGHT = [
     "#1f77b4",
     "#ff7f0e",
     "#aec7e8",
@@ -23,6 +25,31 @@ export const COLORS = [
     "#9edae5",
 ];
 
+const COLORS_DARK = [
+    "#00ffff",
+    "#ff6347",
+    "#00ced1",
+    "#ffd700",
+    "#29ef29",
+    "#c5fabb",
+    "#fe4b4c",
+    "#ffb6c1",
+    "#ba87e9",
+    "#eadbf6",
+    "#d36650",
+    "#ecc1b8",
+    "#fda9e3",
+    "#ff69b4",
+    "#808080",
+    "#f2e8e8",
+    "#fcfe2d",
+    "#f8f8bc",
+    "#33ecff",
+    "#d3f6fc",
+];
+
+export const COLORS = isDark() ? COLORS_DARK : COLORS_BRIGHT;
+
 /**
  * @param {number} index
  * @returns {string}
@@ -33,7 +60,7 @@ export function getColor(index) {
 
 export const DEFAULT_BG = "#d3d3d3";
 
-export const BORDER_WHITE = "rgba(255,255,255,0.6)";
+export const BORDER_WHITE = isDark() ? "rgba(0, 0, 0, 0.6)" : "rgba(255,255,255,0.6)";
 
 const RGB_REGEX = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
 
