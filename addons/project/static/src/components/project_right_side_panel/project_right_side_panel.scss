@@ -33,7 +33,7 @@ $o-rightpanel-filter-default-color: #D59244;
     height: 100%;
     padding: $o-rightpanel-p-small $o-rightpanel-p $o-rightpanel-p*2 $o-rightpanel-p;
     border-left: 1px solid $gray-300;
-    background-color: white;
+    background-color: $o-view-background-color;
     min-width: 400px;
     max-width: 1140px;
 
@@ -59,7 +59,7 @@ $o-rightpanel-filter-default-color: #D59244;
             color: $o-brand-primary;
 
             &:hover {
-                color: #001d1f;
+                color: $link-hover-color;
                 text-decoration: none;
             }
         }
@@ -85,12 +85,12 @@ $o-rightpanel-filter-default-color: #D59244;
             font-size: small;
             .table-striped{
                 tbody tr:nth-of-type(odd) {
-                    background-color: $gray-100;
+                    background-color: var(--RightpanelData__tr-background-color, #{$gray-100});
                 }
             }
             .o_rightpanel_data_row, table > tbody > tr {
                 &:not(.o_rightpanel_nohover):hover {
-                    background-color: $gray-200;
+                    background-color: var(--RightpanelData__tr-background-color--hover, #{$gray-200});
                     border-radius: 5px;
                 }
             }
