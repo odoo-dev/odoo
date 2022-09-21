@@ -13,5 +13,16 @@
     .o_microsoft_sync_button_configured {
         color: white;
         height: 2em;
+
+        &:hover {
+            #microsoft_check {
+                display: none;
+            }
+        }
+        &:not(:hover) {
+            #microsoft_stop {
+                display: none;
+            }
+        }
     }
 }

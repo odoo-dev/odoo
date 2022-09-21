@@ -172,20 +172,8 @@ export class FormController extends Component {
             this.archInfo.arch = this.archInfo.xmlDoc.outerHTML;
         }
 
-        const beforeExecuteAction = (clickParams) => {
-            if (clickParams.special !== "cancel") {
-                return this.model.root.save({ stayInEdition: true }).then((saved) => {
-                    if (saved && this.props.onSave) {
-                        this.props.onSave(this.model.root);
-                    }
-                    return saved;
-                });
-            } else if (this.props.onDiscard) {
-                this.props.onDiscard(this.model.root);
-            }
-        };
         const rootRef = useRef("root");
-        useViewButtons(this.model, rootRef, { beforeExecuteAction });
+        useViewButtons(this.model, rootRef, { beforeExecuteAction: this.beforeExecuteActionButton.bind(this) });
         useSetupView({
             rootRef,
             beforeLeave: () => {
@@ -352,6 +340,19 @@ export class FormController extends Component {
 
     enableButtons() {
         this.state.isDisabled = false;
+    }
+
+    beforeExecuteActionButton(clickParams) {
+        if (clickParams.special !== "cancel") {
+            return this.model.root.save({ stayInEdition: true }).then((saved) => {
+                if (saved && this.props.onSave) {
+                    this.props.onSave(this.model.root);
+                }
+                return saved;
+            });
+        } else if (this.props.onDiscard) {
+            this.props.onDiscard(this.model.root);
+        }
     }
 
     async edit() {
