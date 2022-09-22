@@ -447,7 +447,7 @@
         }
 
         .oe_kanban_text_red {
-            color: #a61300;
+            color: o-text-color('danger');
             font-weight: $font-weight-bold;
         }
 
