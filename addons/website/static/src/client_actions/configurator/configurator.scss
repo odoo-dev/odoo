@@ -1,6 +1,6 @@
 .o_configurator_container {
     @include o-position-absolute(0, 0, 0, 0);
-    background-color: $white;
+    background-color: $o-view-background-color;
 
     .o_configurator_screen {
 
@@ -131,6 +131,10 @@
                     overflow: hidden;
                     opacity: 0;
                 }
+            }
+
+            .o_configurator_industry_dropdown {
+                background: $dropdown-bg;
             }
 
             .dropdown {

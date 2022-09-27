@@ -37,7 +37,7 @@
                                 <i class="text-primary" t-if="state.selectedType">
                                     <t t-esc="state.getSelectedType(state.selectedType).label"/>
                                 </i>
-                                <i class="fa fa-angle-down text-black-50 ms-auto ps-2" role="img"/>
+                                <i class="fa fa-angle-down ms-auto ps-2" role="img"/>
                             </a>
                         </div>
                         <div t-attf-class="dropdown-menu border-0 shadow-lg {{state.selectedType ? 'o_step_completed' : 'o_step_todo show'}}" role="menu">
@@ -65,7 +65,7 @@
                                 <t t-if="state.selectedPurpose">
                                     <t t-esc="state.getSelectedPurpose(state.selectedPurpose).label"/>
                                 </t>
-                                <i class="fa fa-angle-down text-black-50 ms-auto ps-2" role="img"/>
+                                <i class="fa fa-angle-down ms-auto ps-2" role="img"/>
                             </a>
                         </div>
                         <div class="dropdown-menu border-0 shadow-lg" role="menu">
@@ -118,7 +118,7 @@
                 </div>
                 <div class="o_palettes_separator position-relative d-flex justify-content-center order-lg-2 w-0 py-3 py-lg-0 px-lg-5 mb-4 mb-lg-0">
                     <div class="border-top w-100"></div>
-                    <b class="palette_selection_or bg-white text-muted w-lg-100 text-center px-3 py-lg-3">OR</b>
+                    <b class="palette_selection_or bg-view text-muted w-lg-100 text-center px-3 py-lg-3">OR</b>
                     <div class="border-start d-none d-lg-inline h-100 mx-auto w-0"></div>
                 </div>
                 <div class="o_palettes_container w-auto flex-grow-1 o_configurator_show_fast">
