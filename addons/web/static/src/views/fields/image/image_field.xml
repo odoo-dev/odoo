@@ -30,7 +30,7 @@
                 </t>
             </div>
             <img
-                class="img img-fluid"
+                class="img img-fluid w-100"
                 alt="Binary file"
                 t-att-src="getUrl(props.previewImage or props.name)"
                 t-att-name="props.name"
