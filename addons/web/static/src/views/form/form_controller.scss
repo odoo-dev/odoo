@@ -549,38 +549,6 @@
             > .nav.nav-tabs {
                 @include o-form-sheet-inner-left-padding;
                 border-bottom-color: $border-color;
-
-                > .nav-item {
-                    white-space: nowrap;
-
-                    > .nav-link {
-                        color: $body-color;
-                        border-color: $border-color;
-                        background-color: white;
-
-                        &:hover, &:focus, &:active {
-                            outline: none;
-                            color: $link-color;
-                        }
-
-                        &.active {
-                            border-bottom-color: white;
-
-                            &, &:hover, &:focus, &:active {
-                                color: $headings-color;
-                                border-top-color: $o-brand-odoo;
-                            }
-                        }
-
-                        &.disabled {
-                            color: $text-muted;
-                        }
-                    }
-
-                    + .nav-item {
-                        margin-left: -1px;
-                    }
-                }
             }
         }
 
