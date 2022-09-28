@@ -681,7 +681,7 @@ $o-filter_colors: lighten(#000, 46.7%), #f06050, #f4a460, #f7cd1f, #6cc1ed, #814
     }
 
     .o_cw_popover.o_calendar_color_#{$i - 1} {
-        $color-subdle: mix(white, $color, 90%);
+        $color-subdle: mix($o-white, $color, 85%);
 
         .card-header,
         .card-header .popover-header {
@@ -691,7 +691,7 @@ $o-filter_colors: lighten(#000, 46.7%), #f06050, #f4a460, #f7cd1f, #6cc1ed, #814
 
         .card-header {
             padding-left: 2px;
-            border-color: mix($card-border-color, mix(white, $color));
+            border-color: mix($card-border-color, mix($o-white, $color));
         }
     }
 }
