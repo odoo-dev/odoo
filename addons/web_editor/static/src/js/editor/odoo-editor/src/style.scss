@@ -282,7 +282,8 @@
     position: absolute;
     z-index: $zindex-modal;
     border: black;
-    background-color: white;
+    background: var(--oePowerbox__wrapper-bg, $o-white);
+    color: $o-main-text-color;
     max-height: 40vh;
     box-sizing: border-box;
     max-width: 100%;
@@ -314,7 +315,7 @@
 
 .oe-powerbox-category, .oe-powerbox-noResult {
     margin: 10px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--oePowerbox__category-color, $o-gray-600);
     font-size: 11px;
 }
 .oe-powerbox-category {
@@ -330,7 +331,7 @@
     cursor: pointer;
 
     &.active {
-        background: #EFEFEE;
+        background: var(--oePowerbox__commandName-bg, $o-gray-100); 
     }
 }
 i.oe-powerbox-commandImg {
@@ -339,17 +340,18 @@ i.oe-powerbox-commandImg {
     width: 30px;
     align-items: center;
     justify-content: center;
-    background: white;
-    color: rgba(0, 0, 0, 0.6);
+    background: var(--oePowerbox__commandImg-bg, $o-gray-100);
+    color: var(--oePowerbox__commandImg-color, $o-gray-800);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 7px;
     font-size: 15px;
 }
 .oe-powerbox-commandName {
     font-size: 13px;
+    color: var(--oePowerbox__commandName-color, $o-main-text-color);
 }
 .oe-powerbox-commandDescription {
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--oePowerbox__commandDescription-color, $o-main-color-muted);
     font-size: 12px;
 }
 .oe-powerbox-commandRightCol {
