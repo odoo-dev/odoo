@@ -48,27 +48,27 @@
     }
     .o_table_ui_menu_toggler {
         cursor: pointer;
-        background-color: white;
-        color: #6e727a;
-        border: 1px solid #C9CCD2;
+        background-color: var(--o-table-ui-bg, #{$o-white});
+        color: var(--o-table-ui-color, #{$o-main-text-color});
+        border: $border-width solid var(--o-table-ui-border, #{$border-color});
         border-radius: 5px;
         padding: 2px 3px;
     }
     .o_table_ui_menu {
         display: none;
         cursor: pointer;
-        background-color: white;
+        background-color: var(--o-table-ui-bg, #{$o-white});
         width: fit-content;
-        border: 1px solid #C9CCD2;
+        border: $border-width solid var(--o-table-ui-border, #{$border-color});
         padding: 5px 0;
         white-space: nowrap;
 
         > div:hover {
-            background-color: #ebebeb;
+            background-color: var(--o-table-ui-hover, #{$o-gray-200});
         }
         span {
             margin-right: 8px;
-            color: #6e727a;
+            color: var(--o-table-ui-color, #{$o-main-text-color});
         }
         div {
             padding: 0 8px;
@@ -229,7 +229,7 @@
 .oe-tablepicker-wrapper.oe-floating {
     padding: 3px;
     z-index: 1051;
-    background: white;
+    background-color: var(--oeTablepicker__wrapper-bg, $o-white);
 }
 .oe-tablepicker-row {
     line-height: 0;
@@ -240,7 +240,7 @@
 
     .oe-tablepicker-row .oe-tablepicker-cell {
         display: inline-block;
-        background:  #EFEFEE;
+        background-color: var(--oeTablepicker__cell-bg, $o-gray-200);
         width: 19px;
         height: 19px;
         padding: 0;
@@ -251,7 +251,7 @@
             margin-right: 0;
         }
         &.active {
-            background: #d3d1cb;
+            background-color: var(--oeTablepicker-color-accent, $o-brand-primary);
         }
     }
 }

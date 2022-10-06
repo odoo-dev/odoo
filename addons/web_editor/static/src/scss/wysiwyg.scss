@@ -478,7 +478,7 @@ body .modal {
         }
 
         .o_link_dialog_preview {
-            border-left: 1px solid map-get($grays, '200');
+            border-left: var(--o-link-dialog-preview-border, #{$border-width} solid #{$border-color});
         }
     }
 }
