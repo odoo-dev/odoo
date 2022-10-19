@@ -483,7 +483,7 @@ class Lead(models.Model):
             value = re.sub(r'[^\d+]+', '', value)
             if len(value) <= 2:
                 raise UserError(_('Please enter at least 3 digits when searching on phone / mobile.'))
-
+            #pylint: disable=W1401
             query = f"""
                     SELECT model.id
                     FROM {self._table} model
