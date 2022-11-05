@@ -7,7 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMenu extends Component {
     setup() {
-        this.activity = useState(useService("mail.activity"));
+        this.activity = useState(useService("mail.activity").state);
         this.action = useService("action");
         this.userId = useService("user").userId;
     }
