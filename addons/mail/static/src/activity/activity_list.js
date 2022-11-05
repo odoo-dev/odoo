@@ -17,6 +17,6 @@ export class ActivityList extends Component {
 
 Object.assign(ActivityList, {
     components: { Activity },
-    props: ["activities"],
+    props: ["activities", "reload"],
     template: "mail.activity_list",
 });
