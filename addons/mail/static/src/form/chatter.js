@@ -16,7 +16,10 @@ export class Chatter extends Component {
         this.state = useState({
             mode: "message", // message or note
             hasComposer: false,
-            metadata: null,
+            activities: [],
+            attachments: [],
+            followers: [],
+            isFollower: false,
         });
 
         this.load();
@@ -36,7 +39,11 @@ export class Chatter extends Component {
             thread_model: this.props.resModel,
         }).then((result) => {
             if (this.thread.id === thread.id) {
-                this.state.metadata = result;
+                this.state.activities = result.activities;
+                this.state.attachments = result.attachments;
+                this.state.followers = result.followers;
+                const partnerId = this.messaging.user.partnerId;
+                this.state.isFollower = !!result.followers.find(f => f.partner_id === partnerId)
             }
         });
         this.thread = thread;
