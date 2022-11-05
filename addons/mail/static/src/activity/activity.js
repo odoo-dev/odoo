@@ -1,9 +1,15 @@
 /** @odoo-module */
 
-import { Component, useState } from "@odoo/owl";
+import { Component, useState, onWillUpdateProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 const { DateTime } = luxon;
+
+function computeDelay(dateStr) {
+    const today = DateTime.now().startOf("day");
+    const date = DateTime.fromISO(dateStr);
+    return date.diff(today, "days").days;
+}
 
 export class Activity extends Component {
     setup() {
@@ -12,9 +18,10 @@ export class Activity extends Component {
         this.state = useState({
             showDetails: false,
         });
-        const today = DateTime.now().startOf("day");
-        const date = DateTime.fromISO(this.props.data.date_deadline);
-        this.delay = date.diff(today, "days").days;
+        this.delay = computeDelay(this.props.data.date_deadline);
+        onWillUpdateProps(nextProps => {
+            this.delay = computeDelay(nextProps.data.date_deadline);
+        });
     }
 
     toggleDetails() {
