@@ -3,7 +3,7 @@
 import { Sidebar } from "@mail/discuss/sidebar";
 import { click, getFixture, mount, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
-import { makeMessagingEnv, MessagingServer } from "../helpers";
+import { makeMessagingEnv, MessagingServer } from "../helpers/helpers";
 
 let target;
 
