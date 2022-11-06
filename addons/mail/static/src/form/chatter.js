@@ -14,8 +14,7 @@ export class Chatter extends Component {
         this.rpc = useService("rpc");
         this.action = useService("action");
         this.state = useState({
-            mode: "message", // message or note
-            hasComposer: false,
+            composing: false, // false, 'message' or 'note
             activities: [],
             attachments: [],
             followers: [],
@@ -29,7 +28,7 @@ export class Chatter extends Component {
             if (nextProps.resId !== this.props.resId) {
                 this.load(nextProps.resId);
                 if (nextProps.resId === false) {
-                    this.state.hasComposer = false;
+                    this.state.composing = false;
                 }
             }
         });
@@ -56,8 +55,12 @@ export class Chatter extends Component {
         });
     }
 
-    toggleComposer() {
-        this.state.hasComposer = !this.state.hasComposer;
+    toggleComposer(mode = false) {
+        if (this.state.composing === mode) {
+            this.state.composing = false;
+        } else {
+            this.state.composing = mode;
+        }
     }
 
     async scheduleActivity() {
