@@ -71,6 +71,6 @@ export class Chatter extends Component {
 
 Object.assign(Chatter, {
     components: { Thread, Composer, ActivityList },
-    props: ["resId", "resModel"],
+    props: ["resId", "resModel", "displayName"],
     template: "mail.chatter",
 });
