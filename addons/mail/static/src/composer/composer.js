@@ -48,6 +48,6 @@ export class Composer extends Component {
 }
 
 Object.assign(Composer, {
-    props: ["threadId", "autofocus?", "onPostCallback?", "mode?"],
+    props: ["threadId", "autofocus?", "onPostCallback?", "mode?", "placeholder?"],
     template: "mail.composer",
 });
