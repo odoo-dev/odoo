@@ -31,7 +31,11 @@ export class Composer extends Component {
     async sendMessage() {
         const el = this.ref.el;
         if (el.value.trim()) {
-            const prom = this.messaging.postMessage(this.props.threadId, el.value);
+            const prom = this.messaging.postMessage(
+                this.props.threadId,
+                el.value,
+                this.props.type === "note"
+            );
             await prom;
             if (this.props.onPostCallback) {
                 this.props.onPostCallback();
@@ -48,6 +52,7 @@ export class Composer extends Component {
 }
 
 Object.assign(Composer, {
-    props: ["threadId", "autofocus?", "onPostCallback?", "mode?", "placeholder?"],
+    defaultProps: { type: "message" },
+    props: ["threadId", "autofocus?", "onPostCallback?", "mode?", "placeholder?", "type?"],
     template: "mail.composer",
 });
