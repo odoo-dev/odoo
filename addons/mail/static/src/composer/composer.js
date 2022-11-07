@@ -52,7 +52,7 @@ export class Composer extends Component {
 }
 
 Object.assign(Composer, {
-    defaultProps: { type: "message" },
+    defaultProps: { type: "message", mode: "normal" }, // mode = compact, normal, extended
     props: ["threadId", "autofocus?", "onPostCallback?", "mode?", "placeholder?", "type?"],
     template: "mail.composer",
 });
