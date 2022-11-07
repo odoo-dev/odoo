@@ -4,6 +4,7 @@ import { Discuss } from "@mail/discuss/discuss";
 import { click, editInput, getFixture, mount, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { makeMessagingEnv, MessagingServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
+import { Deferred } from "@web/core/utils/concurrency";
 
 let target;
 
@@ -157,4 +158,31 @@ QUnit.module("mail", (hooks) => {
             target.querySelector(".o-mail-composer-textarea")
         );
     });
+
+    QUnit.test("posting a message right after another one is squashed", async (assert) => {
+        const def = new Deferred();
+        let flag = false;
+        const server = new MessagingServer();
+        server.addChannel(1, "general", "General announcements...");
+        const env = makeMessagingEnv(async (route, params) => {
+            if (flag && route === "/mail/message/post") {
+                await def;
+            }
+            return server.rpc(route, params);
+        });
+        env.services["mail.messaging"].setDiscussThread(1);
+
+        await mount(Discuss, target, { env });
+        // write 1 message
+        await editInput(target, ".o-mail-composer-textarea", "abc");
+        await click($(target).find(".o-mail-composer button:contains('Send')")[0]);
+
+        // write another message, but /mail/message/post is delayed by deferred
+        flag = true;
+        await editInput(target, ".o-mail-composer-textarea", "def");
+        await click($(target).find(".o-mail-composer button:contains('Send')")[0]);
+        assert.containsN(target, ".o-mail-message", 2);
+        assert.containsN(target, ".o-mail-message-header", 1); // just 1, because 2nd message is squashed
+    });
+
 });
