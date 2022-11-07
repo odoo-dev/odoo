@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 export class MessagingServer {
+    activities = [];
     channels = [];
     chats = [];
     messages = [];
@@ -35,8 +36,8 @@ export class MessagingServer {
                 channel_type: "channel",
                 message_needaction_counter: 0,
                 group_based_subscription: true,
-                create_uid: 1,
-            },
+                create_uid: 1
+            }
         };
         this.channels.push(channel);
         return channel;
@@ -52,8 +53,8 @@ export class MessagingServer {
             channel: {
                 avatarCacheKey: false,
                 channel_type: "chat",
-                channelMembers: [["insert", [{ persona: { partner: { id: partnerId, name } } }]]],
-            },
+                channelMembers: [["insert", [{ persona: { partner: { id: partnerId, name } } }]]]
+            }
         };
         this.chats.push(chatChannel);
         return chatChannel;
@@ -73,7 +74,7 @@ export class MessagingServer {
             body,
             author,
             date,
-            message_type: type,
+            message_type: type
         };
         this.messages[id] = message;
         return message;
@@ -103,9 +104,9 @@ export class MessagingServer {
             channels: this.channels,
             current_user_settings: {
                 is_discuss_sidebar_category_channel_open: true,
-                is_discuss_sidebar_category_chat_open: true,
+                is_discuss_sidebar_category_chat_open: true
             },
-            internalUserGroupId: 1,
+            internalUserGroupId: 1
         };
     }
 
@@ -120,7 +121,7 @@ export class MessagingServer {
         return {
             activities: [],
             attachments: [],
-            followers: [],
+            followers: []
         };
     }
 
@@ -149,5 +150,9 @@ export class MessagingServer {
     _web_dataset_call_kw_res_partner_im_search(params) {
         const searchStr = params.args[0];
         return this.partners.filter((p) => p.name.includes(searchStr));
+    }
+
+    _web_dataset_call_kw_res_users_systray_get_activities(params) {
+        return [];
     }
 }

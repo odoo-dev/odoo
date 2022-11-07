@@ -44,7 +44,7 @@ export const activityService = {
         }
 
         bus.addEventListener("notification", (notifEvent) => {
-            for (let notif of notifEvent.detail) {
+            for (const notif of notifEvent.detail) {
                 if (notif.type === "mail.activity/updated") {
                     if (notif.payload.activity_created) {
                         state.counter++;
