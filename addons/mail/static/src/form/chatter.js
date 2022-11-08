@@ -40,8 +40,12 @@ export class Chatter extends Component {
             // todo: reset activities/attachments/followers
             return;
         }
+        const requestList = ["followers", "attachments", "messages"];
+        if (this.props.hasActivity) {
+            requestList.push("activities");
+        }
         this.rpc("/mail/thread/data", {
-            request_list: ["activities", "followers", "attachments", "messages"],
+            request_list: requestList,
             thread_id: resId,
             thread_model: this.props.resModel,
         }).then((result) => {
@@ -71,6 +75,6 @@ export class Chatter extends Component {
 
 Object.assign(Chatter, {
     components: { Thread, Composer, ActivityList },
-    props: ["resId", "resModel", "displayName"],
+    props: ["hasActivity", "resId", "resModel", "displayName"],
     template: "mail.chatter",
 });
