@@ -22,7 +22,12 @@ export class Chatter extends Component {
         });
 
         this.load();
-        useChildSubEnv({ inChatter: true });
+        useChildSubEnv({
+            inChatter: true,
+            chatter: {
+                reload: this.load.bind(this),
+            },
+        });
 
         onWillUpdateProps((nextProps) => {
             if (nextProps.resId !== this.props.resId) {
@@ -33,25 +38,26 @@ export class Chatter extends Component {
             }
         });
     }
-    load(resId = this.props.resId) {
-        const thread = this.messaging.getChatterThread(this.props.resModel, resId);
+
+    load(resId = this.props.resId, requestList = ["followers", "attachments", "messages"]) {
+        const { resModel } = this.props;
+        const thread = this.messaging.getChatterThread(resModel, resId);
         this.thread = thread;
         if (!resId) {
             // todo: reset activities/attachments/followers
             return;
         }
-        const requestList = ["followers", "attachments", "messages"];
-        if (this.props.hasActivity) {
+        if (this.props.hasActivity && !requestList.includes("activities")) {
             requestList.push("activities");
         }
-        this.rpc("/mail/thread/data", {
-            request_list: requestList,
-            thread_id: resId,
-            thread_model: this.props.resModel,
-        }).then((result) => {
-            if (this.thread.id === thread.id) {
+        this.messaging.fetchChatterData(resId, resModel, requestList).then((result) => {
+            if ("activities" in result) {
                 this.state.activities = result.activities;
+            }
+            if ("attachments" in result) {
                 this.state.attachments = result.attachments;
+            }
+            if ("followers" in result) {
                 this.state.followers = result.followers;
                 const partnerId = this.messaging.user.partnerId;
                 this.state.isFollower = !!result.followers.find((f) => f.partner_id === partnerId);
@@ -69,7 +75,7 @@ export class Chatter extends Component {
 
     async scheduleActivity() {
         await this.activity.scheduleActivity(this.props.resModel, this.props.resId);
-        this.load();
+        this.load(this.props.resId, ["activities"]);
     }
 }
 

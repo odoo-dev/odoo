@@ -43,7 +43,7 @@
         </t>
         <div class="overflow-auto">
             <t t-if="props.hasActivity and state.activities.length">
-                <ActivityList activities="state.activities" reload.bind="load" />
+                <ActivityList activities="state.activities"/>
             </t>
             <Thread id="thread.id" t-key="thread.id"/>
         </div>

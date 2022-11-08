@@ -27,6 +27,40 @@ export class TestServer {
         return JSON.parse(JSON.stringify(result));
     }
 
+    addActivity(id) {
+        const activity = {
+            id,
+            activity_category: "default",
+            activity_decoration: false,
+            activity_type_id: [4, "To Do"],
+            automated: false,
+            can_write: true,
+            chaining_type: "suggest",
+            create_date: "2022-11-09 12:10:54",
+            create_uid: [2, "Mitchell Admin"],
+            date_deadline: "2022-11-14",
+            display_name: "To Do",
+            has_recommended_activities: false,
+            icon: "fa-tasks",
+            mail_template_ids: [],
+            note: false,
+            previous_activity_type_id: false,
+            recommended_activity_type_id: false,
+            request_partner_id: false,
+            res_id: 7,
+            res_model: "project.task",
+            res_model_id: [391, "Task"],
+            res_name: "Room 2: Decoration",
+            state: "planned",
+            summary: false,
+            user_id: [2, "Mitchell Admin"],
+            write_date: "2022-11-09 12:10:54",
+            write_uid: [2, "Mitchell Admin"],
+        };
+        this.activities.push(activity);
+        return activity;
+    }
+
     addChannel(id, name, description) {
         const channel = {
             id,
@@ -189,6 +223,14 @@ export class TestServer {
     }
 
     _web_dataset_call_kw_res_users_systray_get_activities(params) {
+        return [];
+    }
+
+    _web_dataset_call_kw_mail_activity_unlink(params) {
+        return [];
+    }
+
+    _web_dataset_call_kw_mail_activity_action_feedback(params) {
         return [];
     }
 }

@@ -3,11 +3,12 @@
 import { reactive } from "@odoo/owl";
 
 export const activityService = {
-    dependencies: ["orm", "action", "bus_service"],
-    async: ["scheduleActivity"],
-    start(env, { orm, action, bus_service: bus }) {
+    dependencies: ["orm", "action", "bus_service", "mail.messaging"],
+    async: ["scheduleActivity", "markAsDoneAndScheduleNext"],
+    start(env, { orm, action, bus_service: bus, "mail.messaging": messaging }) {
         const state = reactive({
             counter: 0,
+            feedback: {},
             activities: [],
         });
 
@@ -51,6 +52,18 @@ export const activityService = {
             });
         }
 
+        async function markAsDone(id) {
+            await orm.call("mail.activity", "action_feedback", [[id]], {
+                feedback: state.feedback[id],
+            });
+        }
+
+        async function markAsDoneAndScheduleNext(activity, thread) {
+            await markAsDone(activity.id);
+            await messaging.fetchThreadMessages(thread.id);
+            await scheduleActivity(thread.resModel, thread.resId);
+        }
+
         bus.addEventListener("notification", (notifEvent) => {
             for (const notif of notifEvent.detail) {
                 if (notif.type === "mail.activity/updated") {
@@ -67,6 +80,8 @@ export const activityService = {
         return {
             state,
             scheduleActivity,
+            markAsDone,
+            markAsDoneAndScheduleNext,
         };
     },
 };

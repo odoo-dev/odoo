@@ -359,6 +359,18 @@ export class Messaging {
         return thread;
     }
 
+    fetchChatterData(
+        resId,
+        resModel,
+        requestList = ["activities", "followers", "attachments", "messages"]
+    ) {
+        return this.rpc("/mail/thread/data", {
+            request_list: requestList,
+            thread_id: resId,
+            thread_model: resModel,
+        });
+    }
+
     async fetchThreadMessages(threadId) {
         const thread = this.threads[threadId];
         if (thread.status !== "new") {

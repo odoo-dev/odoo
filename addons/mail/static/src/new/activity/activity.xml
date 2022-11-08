@@ -14,12 +14,12 @@
                 <span class="fw-bolder text-danger" t-elif="delay === -1">Yesterday:</span>
                 <span class="fw-bolder text-danger" t-elif="delay lt 0"><t t-esc="-delay"/> days overdue:</span>
                 <span class="fw-bolder text-warning" t-else="">Today:</span>
-                <span class="fw-bolder px-2"><t t-esc="activity.display_name"/></span>
-                <span class="px-1">for <t t-esc="activity.user_id[1]"/></span>
-                <i class="fa fa-info-circle btn-link btn-primary cursor-pointer ms-1" role="img" title="Info" aria-label="Info" t-on-click="toggleDetails"></i>
+                <span class="o-mail-activity-name fw-bolder px-2"><t t-esc="activity.display_name"/></span>
+                <span class="o-mail-activity-user px-1">for <t t-esc="activity.user_id[1]"/></span>
+                <i class="o-mail-activity-toggle fa fa-info-circle btn-link btn-primary cursor-pointer ms-1" role="img" title="Info" aria-label="Info" t-on-click="toggleDetails"></i>
             </div>
             <div t-if="state.showDetails">
-                <table class="table table-sm">
+                <table class="o-mail-activity-details table table-sm">
                     <tbody>
                         <tr><td class="text-end fw-bolder">Activity type</td><td><t t-esc="activity.activity_type_id[1]"/></td></tr>
                         <tr><td class="text-end fw-bolder">Created</td><td><t t-esc="activity.create_date"/> by <t t-esc="activity.create_uid[1]"/></td></tr>
@@ -29,9 +29,9 @@
                 </table>
             </div>
             <div>
-                <span class="btn btn-link btn-primary p-0 me-3"><i class="fa fa-check"/> Mark Done</span>
+                <span class="btn btn-link btn-primary p-0 me-3" t-on-click="markAsDone"><i class="fa fa-check"/> Mark Done</span>
                 <span class="btn btn-link btn-primary p-0 me-3" t-on-click="edit"><i class="fa fa-pencil"/> Edit</span>
-                <span class="btn btn-link btn-primary p-0" t-on-click="unlink"><i class="fa fa-times"/> Cancel</span>
+                <span class="o-mail-activity-unlink-button btn btn-link btn-primary p-0" t-on-click="unlink"><i class="fa fa-times"/> Cancel</span>
             </div>
         </div>
     </div>

@@ -8,6 +8,9 @@ export class ActivityList extends Component {
         this.state = useState({
             isOpen: true,
         });
+        if (this.env.chatter) {
+            this.env.chatter.reload();
+        }
     }
 
     toggleList() {
@@ -17,6 +20,6 @@ export class ActivityList extends Component {
 
 Object.assign(ActivityList, {
     components: { Activity },
-    props: ["activities", "reload"],
+    props: ["activities"],
     template: "mail.activity_list",
 });
