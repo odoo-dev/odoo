@@ -42,13 +42,18 @@ export function makeTestEnv(rpc) {
     env.services.hotkey = hotkey;
     const orm = ormService.start(env, { rpc, user });
     env.services.orm = orm;
-    const activity = activityService.start(env, { action, bus_service, orm });
+    const messaging = messagingService.start(env, { rpc, orm, user, router, bus_service });
+    env.services["mail.messaging"] = messaging;
+    const activity = activityService.start(env, {
+        action,
+        bus_service,
+        orm,
+        "mail.messaging": messaging,
+    });
     env.services["mail.activity"] = activity;
     const popover = popoverService.start();
     env.services.popover = popover;
 
-    const messaging = messagingService.start(env, { rpc, orm, user, router, bus_service });
-    env.services["mail.messaging"] = messaging;
     return env;
 }
 
