@@ -178,7 +178,7 @@ export class Messaging {
      * TODO: remove thread argument and add a method addToThread or something
      * caller should do it, not this method
      */
-    createMessage(body, data, thread, confirmed = true) {
+    createMessage(body, data, thread) {
         const { author, id, date, message_type: type } = data;
         if (id in this.messages) {
             return this.messages[id];
@@ -201,7 +201,6 @@ export class Messaging {
             body,
             authorId: author.id,
             isAuthor: author.id === this.user.partnerId,
-            confirmed,
             dateDay,
             dateTimeStr: dateTime.toLocaleString(DateTime.DATETIME_SHORT),
             dateTime,
@@ -305,7 +304,7 @@ export class Messaging {
                 trackingValues: [],
             };
             const body = this.env._t("Creating a new record...");
-            this.createMessage(body, tmpData, thread, false);
+            this.createMessage(body, tmpData, thread);
         }
         return thread;
     }
@@ -411,7 +410,7 @@ export class Messaging {
         } else {
             const tmpId = `pending${this.nextId++}`;
             const tmpData = { id: tmpId, author: { id: this.user.partnerId } };
-            tmpMsg = this.createMessage(markup(body), tmpData, thread, false);
+            tmpMsg = this.createMessage(markup(body), tmpData, thread);
         }
         const data = await this.rpc(`/mail/message/post`, params);
         if (thread.type !== "chatter") {
