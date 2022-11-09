@@ -12,7 +12,7 @@ QUnit.module("mail", (hooks) => {
         target = getFixture();
         // for autocomplete stuff
         patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
+            setTimeout: (fn) => fn()
         });
     });
 
@@ -80,7 +80,7 @@ QUnit.module("mail", (hooks) => {
         assert.verifySteps([
             "/mail/init_messaging",
             "/mail/channel/messages",
-            "/mail/message/post",
+            "/mail/message/post"
         ]);
     });
 
@@ -91,7 +91,7 @@ QUnit.module("mail", (hooks) => {
                 route.startsWith("/mail") ||
                 [
                     "/web/dataset/call_kw/mail.channel/search_read",
-                    "/web/dataset/call_kw/mail.channel/channel_create",
+                    "/web/dataset/call_kw/mail.channel/channel_create"
                 ].includes(route)
             ) {
                 assert.step(route);
@@ -110,7 +110,7 @@ QUnit.module("mail", (hooks) => {
             "/mail/inbox/messages",
             "/web/dataset/call_kw/mail.channel/search_read",
             "/web/dataset/call_kw/mail.channel/channel_create",
-            "/mail/channel/messages",
+            "/mail/channel/messages"
         ]);
     });
 
@@ -122,7 +122,7 @@ QUnit.module("mail", (hooks) => {
                 route.startsWith("/mail") ||
                 [
                     "/web/dataset/call_kw/res.partner/im_search",
-                    "/web/dataset/call_kw/mail.channel/channel_get",
+                    "/web/dataset/call_kw/mail.channel/channel_get"
                 ].includes(route)
             ) {
                 assert.step(route);
@@ -145,7 +145,7 @@ QUnit.module("mail", (hooks) => {
             "/mail/inbox/messages",
             "/web/dataset/call_kw/res.partner/im_search",
             "/web/dataset/call_kw/mail.channel/channel_get",
-            "/mail/channel/messages",
+            "/mail/channel/messages"
         ]);
     });
 
@@ -177,4 +177,33 @@ QUnit.module("mail", (hooks) => {
             target.querySelector(".o-mail-composer-textarea")
         );
     });
+
+    QUnit.test(
+        "posting a message immediately after another one is displayed in 'simple' mode (squashed)",
+        async (assert) => {
+            const prom = new Promise(() => {});
+            let flag = false;
+            const server = new TestServer();
+            server.addChannel(1, "general", "General announcements...");
+            const env = makeTestEnv(async (route, params) => {
+                if (flag && route === "/mail/message/post") {
+                    await prom;
+                }
+                return server.rpc(route, params);
+            });
+            env.services["mail.messaging"].setDiscussThread(1);
+
+            await mount(Discuss, target, { env });
+            // write 1 message
+            await editInput(target, ".o-mail-composer-textarea", "abc");
+            await click(target, ".o-mail-composer button[data-action='send']");
+
+            // write another message, but /mail/message/post is delayed by promise
+            flag = true;
+            await editInput(target, ".o-mail-composer-textarea", "def");
+            await click(target, ".o-mail-composer button[data-action='send']");
+            assert.containsN(target, ".o-mail-message", 2);
+            assert.containsN(target, ".o-mail-msg-header", 1); // just 1, because 2nd message is squashed
+        }
+    );
 });

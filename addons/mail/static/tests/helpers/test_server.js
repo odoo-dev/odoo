@@ -36,8 +36,8 @@ export class TestServer {
                 channel_type: "channel",
                 message_needaction_counter: 0,
                 group_based_subscription: true,
-                create_uid: 1,
-            },
+                create_uid: 1
+            }
         };
         this.channels.push(channel);
         return channel;
@@ -53,8 +53,8 @@ export class TestServer {
             channel: {
                 avatarCacheKey: false,
                 channel_type: "chat",
-                channelMembers: [["insert", [{ persona: { partner: { id: partnerId, name } } }]]],
-            },
+                channelMembers: [["insert", [{ persona: { partner: { id: partnerId, name } } }]]]
+            }
         };
         this.chats.push(chatChannel);
         return chatChannel;
@@ -74,7 +74,7 @@ export class TestServer {
             body,
             author,
             date,
-            message_type: type,
+            message_type: type
         };
         this.messages[id] = message;
         return message;
@@ -104,14 +104,17 @@ export class TestServer {
             channels: this.channels,
             current_user_settings: {
                 is_discuss_sidebar_category_channel_open: true,
-                is_discuss_sidebar_category_chat_open: true,
+                is_discuss_sidebar_category_chat_open: true
             },
-            internalUserGroupId: 1,
+            internalUserGroupId: 1
         };
     }
 
     _mail_message_post(params) {
-        return this.addMessage("comment", this.nextMessageId++, 3, params.post_data.body);
+        const message = this.addMessage("comment", this.nextMessageId++, 3, params.post_data.body);
+        message.model = params.thread_model;
+        message.res_id = params.thread_id;
+        return message;
     }
 
     _mail_thread_data(params) {
@@ -121,7 +124,7 @@ export class TestServer {
         return {
             activities: [],
             attachments: [],
-            followers: [],
+            followers: []
         };
     }
 

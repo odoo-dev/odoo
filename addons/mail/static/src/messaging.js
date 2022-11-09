@@ -408,7 +408,12 @@ export class Messaging {
             params.post_data.partner_ids = [];
         } else {
             const tmpId = `pending${this.nextId++}`;
-            const tmpData = { id: tmpId, author: { id: this.user.partnerId } };
+            const tmpData = {
+                id: tmpId,
+                author: { id: this.user.partnerId },
+                res_id: thread.id,
+                model: "mail.channel",
+            };
             tmpMsg = this.createMessage(markup(body), tmpData, thread);
         }
         const data = await this.rpc(`/mail/message/post`, params);
