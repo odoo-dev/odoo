@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { registry } from "@web/core/registry";
-import { _lt } from "@web/core/l10n/translation";
 import { Messaging } from "./messaging";
 import { reactive } from "@odoo/owl";
 
