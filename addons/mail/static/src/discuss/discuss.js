@@ -2,6 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { Sidebar } from "./sidebar";
+import { useObserve }  from "../utils"
 import { Thread } from "../thread/thread";
 import { ThreadIcon } from "./thread_icon";
 import { useMessaging } from "../messaging_hook";
@@ -19,6 +20,10 @@ export class Discuss extends Component {
         onWillStart(() => this.messaging.isReady);
         onMounted(() => (this.messaging.discuss.isActive = true));
         onWillUnmount(() => (this.messaging.discuss.isActive = false));
+        useObserve(this.messaging.discuss, 'threadId', (val) => {
+            // reset here the pendingName
+            console.log('hey', val);
+        });
     }
 
     currentThread() {

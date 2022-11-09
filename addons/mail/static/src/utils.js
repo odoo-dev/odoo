@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { onMounted, onPatched, onWillPatch, onWillUnmount, useRef } from "@odoo/owl";
+import { onMounted, onPatched, onWillPatch, onWillUnmount, reactive, useEffect, useRef } from "@odoo/owl";
 
 export function removeFromArray(array, elem) {
     const index = array.indexOf(elem);
@@ -55,4 +55,24 @@ export function useAutoScroll(refName) {
             ref.el.scrollTop = ref.el.scrollHeight;
         }
     });
+}
+
+export function useObserve(obj, key, callback) {
+    useEffect(
+        () => observe(obj, key, callback),
+        () => []
+    );
+}
+
+export function observe(obj, key, callback) {
+    let isActive = true;
+    const reactiveObj = reactive(obj, () => {
+        if (isActive) {
+            callback(reactiveObj[key]);
+        }
+    });
+    reactiveObj[key]; // initial subscription
+    return () => {
+        isActive = false;
+    };
 }
