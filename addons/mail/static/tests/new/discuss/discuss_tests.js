@@ -237,4 +237,32 @@ QUnit.module("mail", (hooks) => {
         await nextTick(); // wait for following rendering
         assert.equal(target.querySelector(".o-mail-message-body").textContent, "test 😛 😆");
     });
+
+    QUnit.test(
+        "posting a message immediately after another one is displayed in 'simple' mode (squashed)",
+        async (assert) => {
+            let flag = false;
+            const server = new TestServer();
+            server.addChannel(1, "general", "General announcements...");
+            const env = makeTestEnv(async (route, params) => {
+                if (flag && route === "/mail/message/post") {
+                    await new Promise(() => {});
+                }
+                return server.rpc(route, params);
+            });
+            env.services["mail.messaging"].setDiscussThread(1);
+
+            await mount(Discuss, target, { env });
+            // write 1 message
+            await editInput(target, ".o-mail-composer-textarea", "abc");
+            await click(target, ".o-mail-composer button[data-action='send']");
+
+            // write another message, but /mail/message/post is delayed by promise
+            flag = true;
+            await editInput(target, ".o-mail-composer-textarea", "def");
+            await click(target, ".o-mail-composer button[data-action='send']");
+            assert.containsN(target, ".o-mail-message", 2);
+            assert.containsN(target, ".o-mail-msg-header", 1); // just 1, because 2nd message is squashed
+        }
+    );
 });
