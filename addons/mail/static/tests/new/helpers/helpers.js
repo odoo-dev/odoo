@@ -4,6 +4,7 @@ import { messagingService } from "@mail/new/messaging_service";
 import { activityService } from "@mail/new/activity/activity_service";
 import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
+import { dropzoneService } from "@mail/new/dropzone/dropzone_service";
 import { App, EventBus } from "@odoo/owl";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 
@@ -53,6 +54,8 @@ export function makeTestEnv(rpc) {
     env.services["mail.activity"] = activity;
     const popover = popoverService.start();
     env.services.popover = popover;
+    const dropzone = dropzoneService.start();
+    env.services.dropzone = dropzone;
 
     return env;
 }

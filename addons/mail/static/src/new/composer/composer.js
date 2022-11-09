@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { Component, onMounted, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
+import { useDropzone } from "../dropzone/dropzone_hook";
 import { useMessaging } from "../messaging_hook";
 import { useEmojiPicker } from "./emoji_picker";
 import { convertBrToLineBreak, isEventHandled, onExternalClick } from "@mail/new/utils";
@@ -13,6 +14,9 @@ export class Composer extends Component {
             autofocus: 0,
             value: this.props.message ? convertBrToLineBreak(this.props.message.body) : "",
         });
+        if (this.props.dropzoneRef) {
+            useDropzone(this.props.dropzoneRef);
+        }
         useEmojiPicker("emoji-picker", {
             onSelect: (str) => this.addEmoji(str),
         });
@@ -138,6 +142,7 @@ Object.assign(Composer, {
         "mode?",
         "placeholder?",
         "type?",
+        "dropzoneRef?",
     ],
     template: "mail.composer",
 });

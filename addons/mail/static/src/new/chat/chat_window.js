@@ -3,7 +3,7 @@
 import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
 import { useMessageHighlight, useMessaging } from "../messaging_hook";
-import { Component, useChildSubEnv } from "@odoo/owl";
+import { Component, useChildSubEnv, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { CallUI } from "../rtc/call_ui";
 
@@ -12,6 +12,7 @@ export class ChatWindow extends Component {
         this.messaging = useMessaging();
         this.messageHighlight = useMessageHighlight();
         this.action = useService("action");
+        this.contentRef = useRef("content");
         useChildSubEnv({ inChatWindow: true });
     }
 

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.chatter" owl="1">
-    <div class="o-mail-chatter h-100 d-flex flex-column" t-att-class="props.resId === false ? 'o-chatter-disabled' : ''">
+    <div class="o-mail-chatter h-100 d-flex flex-column" t-att-class="props.resId === false ? 'o-chatter-disabled' : ''" t-ref="root">
         <div class="o-mail-chatter-topbar d-flex flex-shrink-0 flex-grow-0 pe-2 mb-2">
             <button class="o-mail-chatter-topbar-send-message-button btn btn-odoo p-2 my-2 mx-3" t-att-class="{'btn-odoo': state.composing !== 'note'}" t-att-disabled="!props.resId" t-on-click="() => this.toggleComposer('message')">
                 Send message
