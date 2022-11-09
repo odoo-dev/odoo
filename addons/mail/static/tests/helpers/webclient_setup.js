@@ -13,6 +13,7 @@ import { PopoverManagerContainer } from "@mail/components/popover_manager_contai
 import { ActivityMenu } from "@mail/new/activity/activity_menu";
 import { activityService } from "@mail/new/activity/activity_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
+import { dropzoneService } from "@mail/new/dropzone/dropzone_service";
 import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
 import { messagingService as newMessagingService } from "@mail/new/messaging_service";
 import { messagingService } from "@mail/services/messaging_service";
@@ -100,6 +101,7 @@ function setupMessagingServiceRegistries({
 
     services = {
         bus_service: busService,
+        dropzone: dropzoneService,
         im_status: imStatusService,
         "mail.activity": activityService,
         "mail.messaging": newMessagingService,

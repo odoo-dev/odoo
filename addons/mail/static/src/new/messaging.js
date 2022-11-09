@@ -789,4 +789,5 @@ export class Messaging {
     stopCall(threadId) {
         this.threads[threadId].inCall = false;
     }
+
 }

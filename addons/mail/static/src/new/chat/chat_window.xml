@@ -22,11 +22,13 @@
             </div>
         </div>
         <t t-if="!props.folded">
-            <t t-if="thread.inCall">
-                <CallUI thread="thread" compact="true"/>
-            </t>
-            <Thread id="props.threadId" t-key="props.threadId" messageHighlight="messageHighlight"/>
-            <Composer threadId="thread.id" autofocus="props.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage"/>
+            <div class="o-mail-chat-window-content d-flex flex-column h-100 overflow-auto" t-ref="content">
+                <t t-if="thread.inCall">
+                    <CallUI thread="thread" compact="true"/>
+                </t>
+                <Thread id="props.threadId" t-key="props.threadId" messageHighlight="messageHighlight"/>
+                <Composer threadId="thread.id" autofocus="props.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage" dropzoneRef="contentRef"/>
+            </div>
         </t>
     </div>
 </t>

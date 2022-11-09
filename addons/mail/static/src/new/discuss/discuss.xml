@@ -4,7 +4,7 @@
 <t t-name="mail.discuss" owl="1">
     <div class="d-flex h-100 flex-grow-1">
         <Sidebar />
-        <div t-if="thread" class="o-mail-discuss-content d-flex flex-column h-100 w-100 bg-view" t-att-class="{'o-mail-with-composer': thread.type !== 'mailbox'}">
+        <div t-if="thread" class="o-mail-discuss-content d-flex flex-column h-100 w-100 bg-view" t-att-class="{'o-mail-with-composer': thread.type !== 'mailbox'}" t-ref="content">
             <!-- top bar -->
             <div class="px-3 bg-100 border-bottom d-flex flex-shrink-0" style="height:42px;">
                 <ThreadIcon className="'me-2 align-self-center'" thread="thread"/>
@@ -42,7 +42,7 @@
             </t>
             <Thread id="thread.id" t-key="thread.id" messageHighlight="messageHighlight"/>
             <t t-if="thread.type !== 'mailbox' or messaging.discuss.messageToReplyTo">
-                <Composer t-key="thread.id" threadId="thread.id" autofocus="true" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()"/>
+                <Composer t-key="thread.id" threadId="thread.id" autofocus="true" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()" dropzoneRef="contentRef"/>
             </t>
         </div>
         <div t-if="!thread" class="o-mail-discuss-no-thread d-flex flex-grow-1 align-items-center justify-content-center w-100 bg-view">

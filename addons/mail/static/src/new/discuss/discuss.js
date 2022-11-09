@@ -7,12 +7,13 @@ import { ThreadIcon } from "./thread_icon";
 import { useMessageHighlight, useMessaging } from "../messaging_hook";
 import { Composer } from "../composer/composer";
 import { CallUI } from "../rtc/call_ui";
-import { Component, onWillStart, onMounted, onWillUnmount } from "@odoo/owl";
+import { Component, onWillStart, onMounted, onWillUnmount, useRef } from "@odoo/owl";
 
 export class Discuss extends Component {
     setup() {
         this.messaging = useMessaging();
         this.messageHighlight = useMessageHighlight();
+        this.contentRef = useRef("content");
         onWillStart(() => this.messaging.isReady);
         onMounted(() => (this.messaging.discuss.isActive = true));
         onWillUnmount(() => (this.messaging.discuss.isActive = false));
