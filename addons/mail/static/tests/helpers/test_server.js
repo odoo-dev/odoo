@@ -1,5 +1,12 @@
 /** @odoo-module **/
 
+import { markRaw } from "@odoo/owl";
+
+import { deserializeDateTime } from "@web/core/l10n/dates";
+import { url } from "@web/core/utils/urls";
+
+const { DateTime } = luxon;
+
 export class TestServer {
     constructor() {
         this.activities = [];
@@ -66,7 +73,7 @@ export class TestServer {
      *
      * @param {'commnent'} type
      */
-    addMessage(type, id, authorId, body, date) {
+    addMessage(type, id, threadId, threadModel, authorId, body, date) {
         const author = this.partners.find((p) => p.id === authorId);
         if (!author) {
             throw new Error("missing author");
@@ -77,6 +84,8 @@ export class TestServer {
             author,
             date,
             message_type: type,
+            res_id: threadId,
+            model: threadModel,
         };
         this.messages[id] = message;
         return message;
@@ -91,8 +100,15 @@ export class TestServer {
     // -------------------------------------------------------------------------
     // Handlers
     // -------------------------------------------------------------------------
-    _mail_channel_messages() {
-        return [];
+
+    _mail_channel_messages({ channel_id, limit }) {
+        return Object.values(this.messages)
+            .filter((msg) => msg.res_id === channel_id && msg.model === "mail.channel")
+            .slice(0, limit);
+    }
+
+    _mail_channel_set_last_seen_message({ channel_id, last_message_id }) {
+        return { id: channel_id, result: last_message_id };
     }
 
     _mail_inbox_messages() {
@@ -112,8 +128,28 @@ export class TestServer {
         };
     }
 
-    _mail_message_post(params) {
-        return this.addMessage("comment", this.nextMessageId++, 3, params.post_data.body);
+    _mail_message_post({ post_data, thread_id, thread_model }) {
+        return this.addMessage(
+            "comment",
+            this.nextMessageId++,
+            thread_id,
+            thread_model,
+            3,
+            post_data.body
+        );
+    }
+
+    _mail_message_update_content({ attachment_ids, body, id }) {
+        const result = {
+            id,
+            attachment_ids,
+            body: `<p>${body}</p>`,
+        };
+        this.messages[id] = {
+            ...this.messages[id],
+            ...result,
+        };
+        return result;
     }
 
     _mail_thread_data(params) {
