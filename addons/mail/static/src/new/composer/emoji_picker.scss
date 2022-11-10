@@ -9,18 +9,11 @@
         width: 30px;
         font-size: 1.5rem;
         &:hover {
-            background-color: #e9ecef;
+            background-color: $gray-300;
         }
     }
 
-    .o-mail-emoji-picker-top {
-        border-bottom: 1px solid gray;
-        .o-emoji:hover {
-            background-color: white;
-        }
-    }
-
-    .o-mail-emoji-picker-search {
-        border-bottom: 1px solid gray;
+    .o-mail-emoji-picker-top .o-emoji:not(:hover):not(.o-isActive) {
+        filter: grayscale(1);
     }
 }
