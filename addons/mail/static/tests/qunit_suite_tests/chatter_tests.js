@@ -40,7 +40,7 @@ QUnit.module("mail", {}, function () {
             views: [[false, "list"]],
         });
 
-        assert.containsOnce(document.body, ".o_ActivityButtonView_icon.text-muted");
+        assert.containsOnce(document.body, ".o-activity-button-icon.text-muted");
         assert.strictEqual(
             document.querySelector(".o_ListFieldActivityView_summary").innerText,
             ""
@@ -99,14 +99,14 @@ QUnit.module("mail", {}, function () {
         });
 
         const firstRow = document.querySelector(".o_data_row");
-        assert.containsOnce(firstRow, ".o_ActivityButtonView_icon.text-warning.fa-phone");
+        assert.containsOnce(firstRow, ".o-activity-button-icon.text-warning.fa-phone");
         assert.strictEqual(
             firstRow.querySelector(".o_ListFieldActivityView_summary").innerText,
             "Call with Al"
         );
 
         const secondRow = document.querySelectorAll(".o_data_row")[1];
-        assert.containsOnce(secondRow, ".o_ActivityButtonView_icon.text-success.fa-clock-o");
+        assert.containsOnce(secondRow, ".o-activity-button-icon.text-success.fa-clock-o");
         assert.strictEqual(
             secondRow.querySelector(".o_ListFieldActivityView_summary").innerText,
             "Type 2"
@@ -155,7 +155,7 @@ QUnit.module("mail", {}, function () {
             views: [[false, "list"]],
         });
 
-        assert.containsOnce(document.body, ".o_ActivityButtonView_icon.text-warning.fa-warning");
+        assert.containsOnce(document.body, ".o-activity-button-icon.text-warning.fa-warning");
         assert.strictEqual(
             document.querySelector(".o_ListFieldActivityView_summary").innerText,
             "Warning"
@@ -251,7 +251,7 @@ QUnit.module("mail", {}, function () {
             "Call with Al"
         );
 
-        await click(".o_ActivityButtonView"); // open the popover
+        await click(".o-activity-button"); // open the popover
         await click(".o_ActivityListViewItem_markAsDone"); // mark the first activity as done
         await click(".o_ActivityMarkDonePopoverContentView_doneButton"); // confirm
 
