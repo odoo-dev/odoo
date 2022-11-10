@@ -3,6 +3,7 @@
 import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
 import { useMessaging } from "../messaging_hook";
+import { useRtc } from "../rtc/rtc_hook";
 import { useMessageHighlight } from "@mail/new/utils/hooks";
 import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
@@ -28,6 +29,7 @@ export class ChatWindow extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.state = useState({
             /**
@@ -94,6 +96,6 @@ export class ChatWindow extends Component {
     }
 
     startCall() {
-        this.messaging.startCall(this.props.chatWindow.threadLocalId);
+        this.rtc.toggleCall(this.props.chatWindow.thread.id);
     }
 }

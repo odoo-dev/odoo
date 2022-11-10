@@ -6,7 +6,7 @@ import { PartnerImStatus } from "./partner_im_status";
 import { Partner } from "../core/partner_model";
 
 import { _t } from "@web/core/l10n/translation";
-import { Thread } from "../core/thread_model";
+import { createLocalId } from "../core/thread_model.create_local_id";
 
 export class ChannelInvitationForm extends Component {
     static components = { PartnerImStatus };
@@ -102,9 +102,7 @@ export class ChannelInvitationForm extends Component {
     }
 
     get thread() {
-        return this.messaging.state.threads[
-            Thread.createLocalId({ model: "mail.channel", id: this.props.threadId })
-        ];
+        return this.messaging.state.threads[createLocalId("mail.channel", this.props.threadId)];
     }
 
     get invitationButtonText() {

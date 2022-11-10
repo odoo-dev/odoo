@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { Discuss } from "@mail/new/discuss/discuss";
-import { Thread } from "@mail/new/core/thread_model";
 import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 import {
     click,
@@ -17,6 +16,7 @@ import { browser } from "@web/core/browser/browser";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
+import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 
 let target;
 
@@ -270,9 +270,7 @@ QUnit.test("Message following a notification should not be squashed", async (ass
     server.addMessage("comment", 2, 1, "mail.channel", 3, "Hello world !");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
 
     assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container");

@@ -1,7 +1,7 @@
 /* @odoo-module */
 
 import { Messaging, asyncMethods } from "./core/messaging";
-import { Thread } from "./core/thread_model";
+import { createLocalId } from "./core/thread_model.create_local_id";
 
 export const messagingService = {
     dependencies: [
@@ -14,6 +14,8 @@ export const messagingService = {
         "notification",
         "multi_tab",
         "presence",
+        "mail.soundEffects",
+        "mail.userSettings",
     ],
     async: asyncMethods,
     start(
@@ -28,19 +30,18 @@ export const messagingService = {
             notification,
             multi_tab: multiTab,
             presence,
+            "mail.soundEffects": soundEffects,
+            "mail.userSettings": userSettings,
         }
     ) {
         // compute initial discuss thread
-        let threadLocalId = Thread.createLocalId({ model: "mail.box", id: "inbox" });
+        let threadLocalId = createLocalId("mail.box", "inbox");
         const activeId = router.current.hash.active_id;
         if (typeof activeId === "string" && activeId.startsWith("mail.box_")) {
-            threadLocalId = Thread.createLocalId({ model: "mail.box", id: activeId.slice(9) });
+            threadLocalId = createLocalId("mail.box", activeId.slice(9));
         }
         if (typeof activeId === "string" && activeId.startsWith("mail.channel_")) {
-            threadLocalId = Thread.createLocalId({
-                model: "mail.channel",
-                id: parseInt(activeId.slice(13), 10),
-            });
+            threadLocalId = createLocalId("mail.channel", parseInt(activeId.slice(13), 10));
         }
 
         const messaging = new Messaging(
@@ -54,7 +55,9 @@ export const messagingService = {
             im_status,
             notification,
             multiTab,
-            presence
+            presence,
+            soundEffects,
+            userSettings
         );
         messaging.initialize();
         bus.addEventListener("notification", (notifEvent) => {

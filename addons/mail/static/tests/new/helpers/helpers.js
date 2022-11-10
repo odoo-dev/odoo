@@ -10,6 +10,9 @@ import { notificationService } from "@web/core/notifications/notification_servic
 import { fileUploadService } from "@web/core/file_upload/file_upload_service";
 import { effectService } from "@web/core/effects/effect_service";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
+import { soundEffects } from "@mail/new/sound_effects_service";
+import { userSettingsService } from "@mail/new/user_settings_service";
+import { rtcService } from "@mail/new/rtc/rtc_service";
 
 const { afterNextRender } = App;
 
@@ -50,6 +53,10 @@ export function makeTestEnv(rpc) {
     env.services.orm = orm;
     const im_status = { registerToImStatus() {} };
     env.services.im_status = im_status;
+    const soundEffect = soundEffects.start(env);
+    env.services["mail.soundEffects"] = soundEffect;
+    const userSettings = userSettingsService.start(env, { rpc, user });
+    env.services["mail.userSettings"] = userSettings;
     const messaging = messagingService.start(env, {
         rpc,
         orm,
@@ -57,6 +64,8 @@ export function makeTestEnv(rpc) {
         router,
         bus_service,
         im_status,
+        "mail.soundEffects": soundEffects,
+        "mail.userSettings": userSettings,
     });
     const effect = effectService.start(env);
     env.services.effect = effect;
@@ -74,6 +83,15 @@ export function makeTestEnv(rpc) {
     env.services.notification = notification;
     const fileUpload = fileUploadService.start(env, { notification });
     env.services.file_upload = fileUpload;
+    const rtc = rtcService.start(env, {
+        "mail.messaging": messaging,
+        notification,
+        rpc,
+        bus_service,
+        "mail.soundEffects": soundEffects,
+        "mail.userSettings": userSettings,
+    });
+    env.services["mail.rtc"] = rtc;
     return env;
 }
 

@@ -16,7 +16,7 @@ import { doAction, getActionManagerServerData } from "@web/../tests/webclient/he
 
 import { App, EventBus } from "@odoo/owl";
 import { registryNamesToCloneWithCleanup } from "@web/../tests/helpers/mock_env";
-import { Thread } from "@mail/new/core/thread_model";
+import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 const { afterNextRender } = App;
 
 // load emoji data once, when the test suite starts.
@@ -151,7 +151,7 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
         }
         // TODO-DISCUSS-REFACTORING: remove when activeId will be handled.
         webClient.env.services["mail.messaging"].setDiscussThread(
-            Thread.createLocalId({ model: threadModel, id: threadId })
+            createLocalId(threadModel, threadId)
         );
         if (waitUntilMessagesLoaded) {
             const messagesLoadedPromise = makeDeferred();

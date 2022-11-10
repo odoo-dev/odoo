@@ -67,4 +67,11 @@ export class ChatWindow {
             thread.state = this.folded ? "folded" : "open";
         }
     }
+
+    /**
+     * @returns {import("@mail/new/core/thread_model").Thread}
+     */
+    get thread() {
+        return this._state.threads[this.threadLocalId];
+    }
 }
