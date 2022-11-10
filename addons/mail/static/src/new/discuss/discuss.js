@@ -5,9 +5,10 @@ import { Sidebar } from "./sidebar";
 import { Thread } from "../thread/thread";
 import { ThreadIcon } from "./thread_icon";
 import { useMessaging } from "../messaging_hook";
+import { useRtc } from "../rtc/rtc_hook";
 import { useMessageHighlight } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";
-import { CallUI } from "../rtc/call_ui";
+import { CallView } from "../rtc/call_view";
 import { ChannelMemberList } from "./channel_member_list";
 import {
     Component,
@@ -32,7 +33,7 @@ export class Discuss extends Component {
         Thread,
         ThreadIcon,
         Composer,
-        CallUI,
+        CallView,
         CallSettings,
         ChannelMemberList,
     };
@@ -41,6 +42,7 @@ export class Discuss extends Component {
 
     setup() {
         this.messaging = useMessaging();
+        this.rtc = useRtc();
         this.messageHighlight = useMessageHighlight();
         this.contentRef = useRef("content");
         this.popover = usePopover();
@@ -95,7 +97,7 @@ export class Discuss extends Component {
     }
 
     startCall() {
-        this.messaging.startCall(this.messaging.state.discuss.threadLocalId);
+        this.rtc.toggleCall(this.thread.id);
     }
 
     toggleInviteForm() {

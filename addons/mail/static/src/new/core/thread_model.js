@@ -7,6 +7,10 @@ import { sprintf } from "@web/core/utils/strings";
 import { removeFromArray } from "../utils/arrays";
 import { cleanTerm } from "@mail/new/utils/format";
 
+// discuss refactoring: minimizing conflicts
+//import { Guest } from "@mail/new/core/guest_model";
+import { RtcSession } from "@mail/new/rtc/rtc_session_model";
+
 export class Thread {
     /** @type {number} */
     id;
@@ -15,6 +19,11 @@ export class Thread {
     canLeave = false;
     /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
     channelMembers = [];
+    /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession} */
+    rtcSessions = new Map();
+    /** @type {import("@mail/new/core/partner_model").partner[]} */
+    invitedPartners = [];
+    invitedGuests = [];
     /** @type {integer} */
     chatPartnerId;
     /** @type {Composer} */
@@ -136,6 +145,33 @@ export class Thread {
                 serverData.channel.channelMembers[0][1].forEach((elem) => {
                     Partner.insert(this._state, elem.persona.partner);
                 });
+            }
+            if ("rtcSessions" in serverData) {
+                const sessionsData = serverData.rtcSessions[0][1];
+                const command = serverData.rtcSessions[0][0];
+                switch (command) {
+                    case "insert-and-unlink":
+                        for (const rtcSessionData of sessionsData) {
+                            RtcSession.delete(this.state, rtcSessionData.id);
+                        }
+                        break;
+                    case "insert":
+                        for (const rtcSessionData of sessionsData) {
+                            const rtcSession = RtcSession.insert(this._state, rtcSessionData);
+                            this.rtcSessions.set(rtcSession.id, rtcSession);
+                        }
+                        break;
+                }
+            }
+            if ("invitedGuests" in serverData) {
+                //this.invitedGuests = serverData.invitedGuests && serverData.invitedGuests.map((guest) => Guest.insert(this._state, guest));
+            }
+            if ("invitedPartners" in serverData) {
+                this.invitedPartners =
+                    serverData.invitedPartners &&
+                    serverData.invitedPartners.map((partner) =>
+                        Partner.insert(this._state, partner)
+                    );
             }
         }
         Composer.insert(this._state, { thread: this });
@@ -265,7 +301,7 @@ export class Thread {
     }
 
     get imgUrl() {
-        const avatarCacheKey = this.serverData.channel.avatarCacheKey;
+        const avatarCacheKey = this.serverData?.channel?.avatarCacheKey;
         if (this.type === "channel" || this.type === "group") {
             return `/web/image/mail.channel/${this.id}/avatar_128?unique=${avatarCacheKey}`;
         }

@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { Thread } from "./thread_model";
+// import { Thread } from "./thread_model"; //FIXME commented to avoid cyclic dependency
 
 /**
  * @class ChannelMember
@@ -19,10 +19,10 @@ export class ChannelMember {
         }
         Object.assign(channelMember, {
             id: data.id,
-            partnerId: data.partnerId,
-            threadId: data.threadId ?? channelMember.threadId,
+            partnerId: data.partnerId ?? data.persona?.partner?.id,
+            threadId: data.threadId ?? channelMember.threadId ?? data?.channel.id,
         });
-        if (!channelMember.thread.channelMembers.includes(channelMember)) {
+        if (channelMember.thread && !channelMember.thread.channelMembers.includes(channelMember)) {
             channelMember.thread.channelMembers.push(channelMember);
         }
         return channelMember;
@@ -50,7 +50,8 @@ export class ChannelMember {
 
     get thread() {
         return this._state.threads[
-            Thread.createLocalId({ model: "mail.channel", id: this.threadId })
+            `mail.channel,${this.threadId}`
+            // Thread.createLocalId({ model: "mail.channel", id: this.threadId }) //FIXME commented to avoid cyclic dependency
         ];
     }
 }

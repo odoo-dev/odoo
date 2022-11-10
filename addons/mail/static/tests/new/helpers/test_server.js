@@ -151,6 +151,7 @@ export class TestServer {
             current_user_settings: {
                 is_discuss_sidebar_category_channel_open: true,
                 is_discuss_sidebar_category_chat_open: true,
+                volume_settings_ids: [["insert-and-replace", []]],
             },
             internalUserGroupId: 1,
         };

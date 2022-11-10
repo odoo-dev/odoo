@@ -55,8 +55,8 @@
             </div>
             <div class="overflow-auto d-flex flex-grow-1">
                 <div class="d-flex flex-column flex-grow-1">
-                    <t t-if="thread.inCall">
-                        <CallUI thread="thread"/>
+                    <t t-if="thread.rtcSessions.size > 0">
+                        <CallView thread="thread"/>
                     </t>
                     <Thread id="thread.localId" t-key="thread.localId" messageHighlight="messageHighlight"/>
                     <t t-if="thread.type !== 'mailbox' or messaging.state.discuss.messageToReplyTo">
