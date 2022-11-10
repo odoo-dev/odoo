@@ -15,6 +15,7 @@ import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
 import { Partner } from "./partner_model";
 import { ChannelMember } from "../core/channel_member_model";
+import { RtcSession } from "@mail/new/rtc/rtc_session_model";
 import { LinkPreview } from "./link_preview_model";
 import { Message } from "./message_model";
 import { CannedResponse } from "./canned_response_model";
@@ -22,6 +23,7 @@ import { browser } from "@web/core/browser/browser";
 import { sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
+import { createLocalId } from "./thread_model.create_local_id";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 const FETCH_MSG_LIMIT = 30;
@@ -64,12 +66,16 @@ export class Messaging {
         im_status,
         notification,
         multiTab,
-        presence
+        presence,
+        soundEffects,
+        userSettings
     ) {
         this.env = env;
         this.rpc = rpc;
         this.orm = orm;
         this.notification = notification;
+        this.soundEffects = soundEffects;
+        this.userSettings = userSettings;
         this.nextId = 1;
         this.router = router;
         this.bus = bus;
@@ -105,6 +111,7 @@ export class Messaging {
             /** @type {Object.<number, Partner>} */
             partners: {},
             partnerRoot: {},
+            rtcSessions: new Map(),
             /** @type {Object.<number, import("@mail/new/core/message_model").Message>} */
             messages: {},
             /** @type {{[key: string|number]: Thread}} */
@@ -200,6 +207,7 @@ export class Messaging {
             }
             this.sortChannels();
             const settings = data.current_user_settings;
+            this.userSettings.updateFromCommands(settings);
             this.state.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
             this.state.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
             this.state.discuss.inbox.counter = data.needaction_inbox_counter;
@@ -272,10 +280,7 @@ export class Messaging {
         });
         this.createChannelThread(channel);
         this.sortChannels();
-        this.state.discuss.threadLocalId = Thread.createLocalId({
-            model: "mail.channel",
-            id: channel.id,
-        });
+        this.state.discuss.threadLocalId = createLocalId("mail.channel", channel.id);
     }
 
     async fetchChannelMembers(threadLocalId) {
@@ -347,7 +352,7 @@ export class Messaging {
                 is_note: true,
                 is_transient: true,
             },
-            this.state.threads[Thread.createLocalId({ model: "mail.channel", id: threadId })]
+            this.state.threads[createLocalId("mail.channel", threadId)]
         );
     }
 
@@ -484,8 +489,7 @@ export class Messaging {
                 case "mail.channel/new_message":
                     {
                         const { id, message } = notif.payload;
-                        const channel =
-                            this.state.threads[Thread.createLocalId({ id, model: "mail.channel" })];
+                        const channel = this.state.threads[createLocalId("mail.channel", id)];
                         if (channel) {
                             this.createNotificationMessage(message, channel);
                         } else {
@@ -511,6 +515,14 @@ export class Messaging {
                         );
                     }
                     break;
+                case "mail.channel/rtc_sessions_update":
+                    {
+                        const { id, rtcSessions } = notif.payload;
+                        const sessionsData = rtcSessions[0][1];
+                        const command = rtcSessions[0][0];
+                        this._updateRtcSessions(id, sessionsData, command);
+                    }
+                    break;
                 case "mail.record/insert":
                     {
                         if (notif.payload.Partner) {
@@ -534,6 +546,10 @@ export class Messaging {
                         const { Message: messageData } = notif.payload;
                         if (messageData) {
                             Message.insert(this.state, messageData);
+                        }
+                        const { "res.users.settings": userSettingsData } = notif.payload;
+                        if (userSettingsData) {
+                            this.userSettings.updateFromCommands(userSettingsData);
                         }
                     }
                     break;
@@ -653,9 +669,7 @@ export class Messaging {
                 }
                 case "mail.channel/unpin": {
                     const thread =
-                        this.state.threads[
-                            Thread.createLocalId({ model: "mail.channel", id: notif.payload.id })
-                        ];
+                        this.state.threads[createLocalId("mail.channel", notif.payload.id)];
                     if (!thread) {
                         return;
                     }
@@ -667,6 +681,33 @@ export class Messaging {
                     break;
                 }
             }
+        }
+    }
+
+    _updateRtcSessions(channelId, rtcSessions, command) {
+        const channel = this.state.threads[channelId];
+        if (!channel) {
+            return;
+        }
+        const oldCount = channel.rtcSessions.size;
+        switch (command) {
+            case "insert-and-unlink":
+                for (const rtcSessionData of rtcSessions) {
+                    RtcSession.delete(this.state, rtcSessionData.id);
+                }
+                break;
+            case "insert":
+                for (const rtcSessionData of rtcSessions) {
+                    const rtcSession = RtcSession.insert(this.state, rtcSessionData);
+                    channel.rtcSessions.set(rtcSession.id, rtcSession);
+                }
+                break;
+        }
+        if (rtcSessions.length > oldCount) {
+            this.soundEffects.play("channelJoin");
+        }
+        if (rtcSessions.length < oldCount) {
+            this.soundEffects.play("memberLeave");
         }
     }
 
@@ -683,7 +724,7 @@ export class Messaging {
     }
 
     getChatterThread(resModel, resId) {
-        const localId = Thread.createLocalId({ model: resModel, id: resId });
+        const localId = createLocalId(resModel, resId);
         if (localId in this.state.threads) {
             if (resId === false) {
                 return this.state.threads[localId];
@@ -909,8 +950,7 @@ export class Messaging {
             partners.push(partner);
         }
         for (const threadId of rawMentionedThreadIds) {
-            const thread =
-                this.state.threads[Thread.createLocalId({ model: "mail.channel", id: threadId })];
+            const thread = this.state.threads[createLocalId("mail.channel", threadId)];
             const index = body.indexOf(`#${thread.displayName}`);
             if (index === -1) {
                 continue;
@@ -1019,10 +1059,7 @@ export class Messaging {
         ]);
         this.createChannelThread(channel);
         this.sortChannels();
-        this.state.discuss.threadLocalId = Thread.createLocalId({
-            model: "mail.channel",
-            id: channel.id,
-        });
+        this.state.discuss.threadLocalId = createLocalId("mail.channel", channel.id);
     }
 
     async getChat({ userId, partnerId }) {
@@ -1187,7 +1224,7 @@ export class Messaging {
 
     async leaveChannel(id) {
         await this.orm.call("mail.channel", "action_unfollow", [id]);
-        this.state.threads[Thread.createLocalId({ model: "mail.channel", id })].remove();
+        this.state.threads[createLocalId("mail.channel", id)].remove();
         this.setDiscussThread(this.state.discuss.channels.threads[0]);
     }
 

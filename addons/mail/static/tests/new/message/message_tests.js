@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
-import { Thread } from "@mail/new/core/thread_model";
 import { Discuss } from "@mail/new/discuss/discuss";
 import { startServer, start } from "@mail/../tests/helpers/test_utils";
 
@@ -22,6 +21,7 @@ import {
 import { makeTestEnv, TestServer } from "../helpers/helpers";
 
 import { registry } from "@web/core/registry";
+import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 
 let target;
 
@@ -37,9 +37,7 @@ QUnit.test("Start edition on click edit", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");
@@ -84,9 +82,7 @@ QUnit.test("Stop edition on click cancel", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");
@@ -101,9 +97,7 @@ QUnit.test("Stop edition on press escape", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");
@@ -119,9 +113,7 @@ QUnit.test("Stop edition on click save", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");
@@ -136,9 +128,7 @@ QUnit.test("Stop edition on press enter", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");
@@ -154,9 +144,7 @@ QUnit.test("Stop edition on click away", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");
@@ -172,9 +160,7 @@ QUnit.test("Do not stop edition on click away when clicking on emoji", async (as
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     const { Component: PopoverContainer, props } = registry
         .category("main_components")
         .get("PopoverContainer");
@@ -196,9 +182,7 @@ QUnit.test("Save on click", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");
@@ -219,9 +203,7 @@ QUnit.test("Do not call server on save if no changes", async (assert) => {
         return server.rpc(route, params);
     });
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");
@@ -237,9 +219,7 @@ QUnit.test("Scroll bar to the top when edit starts", async (assert) => {
     server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world ! ".repeat(1000));
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(
-        Thread.createLocalId({ model: "mail.channel", id: 1 })
-    );
+    env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
     await click(target, "i[aria-label='Edit']");

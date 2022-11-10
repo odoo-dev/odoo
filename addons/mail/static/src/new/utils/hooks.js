@@ -17,6 +17,7 @@ import { Deferred } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { removeFromArrayWithPredicate } from "./arrays";
 import { Thread } from "../core/thread_model";
+import { createLocalId } from "../core/thread_model.create_local_id";
 
 function useExternalListener(target, eventName, handler, eventParams) {
     const boundHandler = handler.bind(useComponent());
@@ -319,8 +320,7 @@ export function useAttachmentUploader({ threadLocalId, messageId }) {
         }
         const threadId = upload.data.get("thread_id");
         const threadModel = upload.data.get("thread_model");
-        const originThread =
-            messaging.state.threads[Thread.createLocalId({ model: threadModel, id: threadId })];
+        const originThread = messaging.state.threads[createLocalId(threadModel, threadId)];
         const attachment = {
             ...response,
             extension: upload.title.split(".").pop(),

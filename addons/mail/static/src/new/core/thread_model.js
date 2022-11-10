@@ -7,6 +7,9 @@ import { sprintf } from "@web/core/utils/strings";
 import { removeFromArray } from "../utils/arrays";
 import { cleanTerm } from "@mail/new/utils/format";
 
+import { RtcSession } from "@mail/new/rtc/rtc_session_model";
+import { createLocalId } from "./thread_model.create_local_id";
+
 export class Thread {
     /** @type {number} */
     id;
@@ -15,6 +18,10 @@ export class Thread {
     canLeave = false;
     /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
     channelMembers = [];
+    /** @type {import("@mail/new/rtc/rtc_session_model").rtcSession} */
+    rtcSessions = new Map();
+    /** @type {import("@mail/new/core/partner_model").partner[]} */
+    invitedPartners = [];
     /** @type {integer} */
     chatPartnerId;
     /** @type {Composer} */
@@ -45,15 +52,6 @@ export class Thread {
     _state;
 
     /**
-     * @param {Object} param0
-     * @param {string} param0.model
-     * @param {number} param0.id
-     */
-    static createLocalId({ model, id }) {
-        return `${model},${id}`;
-    }
-
-    /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
      * @returns {Thread}
@@ -65,7 +63,7 @@ export class Thread {
         if (!("model" in data)) {
             throw new Error("Cannot insert thread: model is missing in data");
         }
-        const localId = Thread.createLocalId({ model: data.model, id: data.id });
+        const localId = createLocalId(data.model, data.id);
         if (localId in state.threads) {
             const thread = state.threads[localId];
             thread.update(data);
@@ -136,6 +134,30 @@ export class Thread {
                 serverData.channel.channelMembers[0][1].forEach((elem) => {
                     Partner.insert(this._state, elem.persona.partner);
                 });
+            }
+            if ("rtcSessions" in serverData) {
+                const sessionsData = serverData.rtcSessions[0][1];
+                const command = serverData.rtcSessions[0][0];
+                switch (command) {
+                    case "insert-and-unlink":
+                        for (const rtcSessionData of sessionsData) {
+                            RtcSession.delete(this.state, rtcSessionData.id);
+                        }
+                        break;
+                    case "insert":
+                        for (const rtcSessionData of sessionsData) {
+                            const rtcSession = RtcSession.insert(this._state, rtcSessionData);
+                            this.rtcSessions.set(rtcSession.id, rtcSession);
+                        }
+                        break;
+                }
+            }
+            if ("invitedPartners" in serverData) {
+                this.invitedPartners =
+                    serverData.invitedPartners &&
+                    serverData.invitedPartners.map((partner) =>
+                        Partner.insert(this._state, partner)
+                    );
             }
         }
         Composer.insert(this._state, { thread: this });
@@ -265,7 +287,7 @@ export class Thread {
     }
 
     get imgUrl() {
-        const avatarCacheKey = this.serverData.channel.avatarCacheKey;
+        const avatarCacheKey = this.serverData?.channel?.avatarCacheKey;
         if (this.type === "channel" || this.type === "group") {
             return `/web/image/mail.channel/${this.id}/avatar_128?unique=${avatarCacheKey}`;
         }
@@ -288,7 +310,7 @@ export class Thread {
     }
 
     get localId() {
-        return Thread.createLocalId({ model: this.model, id: this.id });
+        return createLocalId(this.model, this.id);
     }
 
     /** @returns {import("@mail/new/core/message_model").Message | undefined} */

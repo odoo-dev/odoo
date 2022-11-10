@@ -55,8 +55,6 @@ QUnit.test(
 QUnit.test(
     'chat window: post message on channel with "CTRL-Enter" keyboard shortcut for small screen size',
     async function (assert) {
-        assert.expect(1);
-
         const pyEnv = await startServer();
         pyEnv["mail.channel"].create({
             channel_member_ids: [

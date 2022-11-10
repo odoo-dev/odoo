@@ -25,6 +25,9 @@ import { registry } from "@web/core/registry";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient } from "@web/../tests/webclient/helpers";
 import { effectService } from "@web/core/effects/effect_service";
+import { soundEffects } from "@mail/new/sound_effects_service";
+import { userSettingsService } from "@mail/new/user_settings_service";
+import { rtcService } from "@mail/new/rtc/rtc_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -107,6 +110,9 @@ function setupMessagingServiceRegistries({
         effect: effectService,
         "mail.activity": activityService,
         "mail.messaging": newMessagingService,
+        "mail.rtc": rtcService,
+        "mail.soundEffects": soundEffects,
+        "mail.userSettings": userSettingsService,
         messaging: messagingService,
         attachmentViewer: attachmentViewerService,
         messagingValues,

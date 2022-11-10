@@ -10,7 +10,7 @@ import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { markEventHandled } from "../utils/misc";
 import { ChatWindowIcon } from "../chat/chat_window_icon";
-import { Thread } from "../core/thread_model";
+import { createLocalId } from "../core/thread_model.create_local_id";
 
 import { _t } from "@web/core/l10n/translation";
 
@@ -82,9 +82,7 @@ export class Sidebar extends Component {
      */
     unpinChannel(channelId) {
         this.orm.silent.call("mail.channel", "channel_pin", [channelId], { pinned: false });
-        this.messaging.state.threads[
-            Thread.createLocalId({ model: "mail.channel", id: channelId })
-        ].remove();
+        this.messaging.state.threads[createLocalId("mail.channel", channelId)].remove();
     }
 
     stopEditing() {

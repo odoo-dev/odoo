@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="mail.call" owl="1">
+        <div class="o-mail-call d-flex" t-att-class="{'o-fullScreen fixed-top vw-100 vh-100': isFullScreen, 'o-isMinimized': isMinimized, 'position-relative': !isFullScreen }">
+            <!-- Used to make the component depend on the window size and trigger an update when the window size changes. -->
+            <CallMain thread="props.thread"/>
+            <!-- <CallSidebarView t-if="hasSidebar"/> -->
+        </div>
+</t>
+
+</templates>

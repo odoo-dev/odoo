@@ -1,6 +1,10 @@
 .o-mail-call-ui {
     background: $dark;
     color: white;
+
+    &.o-compact .o-mail-call-command {
+        padding: 0.5rem !important;
+    }
 }
 
 .o-mail-call-command:not(.btn-danger) {
@@ -10,8 +14,4 @@
 
 .o-mail-call-command {
     padding: 1rem !important;
-}
-
-.o-compact .o-mail-call-command {
-    padding: 0.5rem !important;
 }
