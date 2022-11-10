@@ -45,20 +45,14 @@ export class ActivityListPopoverItem extends Component {
     }
 
     onClickEditActivityButton() {
-        if (this.props.onClickEditActivityButton) {
-            this.props.onClickEditActivityButton();
-        }
+        this.props.onClickEditActivityButton();
         this.activityService
             .scheduleActivity(
                 this.props.activity.res_model,
                 this.props.activity.res_id,
                 this.props.activity.id
             )
-            .then(() => {
-                if (this.props.onActivityEdited) {
-                    this.props.onActivityEdited();
-                }
-            });
+            .then(() => this.props.onActivityChanged());
     }
 
     onClickMarkAsDone() {
@@ -71,6 +65,6 @@ export class ActivityListPopoverItem extends Component {
 }
 
 Object.assign(ActivityListPopoverItem, {
-    props: ["activity", "onActivityEdited", "onClickEditActivityButton"],
+    props: ["activity", "onActivityChanged", "onClickEditActivityButton"],
     template: "mail.ActivityListPopoverItem",
 });
