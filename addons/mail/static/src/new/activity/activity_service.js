@@ -21,11 +21,19 @@ export const activityService = {
             state.activities = activities;
         });
 
-        async function scheduleActivity(resModel, resId, activityId = false) {
+        async function scheduleActivity(
+            resModel,
+            resId,
+            activityId = false,
+            defaultActivityTypeId = undefined
+        ) {
             const context = {
                 default_res_model: resModel,
                 default_res_id: resId,
             };
+            if (defaultActivityTypeId !== undefined) {
+                context.default_activity_type_id = defaultActivityTypeId;
+            }
             return new Promise((resolve) => {
                 action.doAction(
                     {

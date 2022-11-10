@@ -18,8 +18,13 @@ export class ActivityListPopover extends Component {
 
     onClickAddActivityButton() {
         this.activity
-            .scheduleActivity(this.props.record.resModel, this.props.record.resId)
-            .then(() => this.reload());
+            .scheduleActivity(
+                this.props.resModel,
+                this.props.resId,
+                undefined,
+                this.props.defaultActivityTypeId
+            )
+            .then(() => this.props.onActivityChanged());
         this.props.close();
     }
 
@@ -31,22 +36,15 @@ export class ActivityListPopover extends Component {
         return this.state.activities.filter((activity) => activity.state === "planned");
     }
 
-    reload() {
-        this.props.record.model.load({ resId: this.props.record.resId });
-    }
-
     get todayActivities() {
         return this.state.activities.filter((activity) => activity.state === "today");
     }
 
     async updateFromProps(props) {
         this.state.activities = (
-            await this.orm.silent.call(
-                "mail.activity",
-                "activity_format",
-                [props.record.data.activity_ids.currentIds],
-                { context: this.user.user_context }
-            )
+            await this.orm.silent.call("mail.activity", "activity_format", [props.activityIds], {
+                context: this.user.user_context,
+            })
         ).sort(function (a, b) {
             if (a.date_deadline === b.date_deadline) {
                 return a.id - b.id;
@@ -58,6 +56,13 @@ export class ActivityListPopover extends Component {
 
 Object.assign(ActivityListPopover, {
     components: { ActivityListPopoverItem },
-    props: ["close", "record"],
+    props: [
+        "activityIds",
+        "close",
+        "defaultActivityTypeId?",
+        "onActivityChanged",
+        "resId",
+        "resModel",
+    ],
     template: "mail.ActivityListPopover",
 });

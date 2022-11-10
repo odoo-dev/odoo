@@ -57,7 +57,14 @@ export class ActivityButton extends Component {
             this.closePopover = this.popover.add(
                 this.buttonRef.el,
                 ActivityListPopover,
-                { record: this.props.record },
+                {
+                    activityIds: this.props.record.data.activity_ids.currentIds,
+                    onActivityChanged: () => {
+                        this.props.record.model.load({ resId: this.props.record.resId });
+                    },
+                    resId: this.props.record.resId,
+                    resModel: this.props.record.resModel,
+                },
                 {
                     onClose: () => (this.closePopover = undefined),
                     position: "bottom", // should be "bottom-start" but not supported for some reason
