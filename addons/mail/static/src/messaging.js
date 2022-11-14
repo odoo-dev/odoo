@@ -32,6 +32,7 @@ export class Messaging {
             avatarUrl: `/web/image?field=avatar_128&id=${user.userId}&model=res.users`,
         };
         this.partners = {};
+        this.partnerRoot = {};
         this.messages = {};
         this.threads = {};
         this.users = {};
@@ -79,6 +80,8 @@ export class Messaging {
         };
 
         this.chatWindows = [];
+
+        this.commands = [];
     }
 
     /**
@@ -87,7 +90,7 @@ export class Messaging {
     initialize() {
         this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
             this.createPartner(data.current_partner.id, data.current_partner.name);
-            this.createPartner(data.partner_root.id, data.partner_root.name);
+            this.partnerRoot = this.createPartner(data.partner_root.id, data.partner_root.name);
             for (const channelData of data.channels) {
                 this.createChannelThread(channelData);
             }
@@ -98,6 +101,7 @@ export class Messaging {
             this.internalUserGroupId = data.internalUserGroupId;
             this.discuss.starred.counter = data.starred_counter;
             this.isReady.resolve();
+            this.initCommands();
         });
     }
 
@@ -215,6 +219,7 @@ export class Messaging {
             dateTime,
             isStarred,
             isNote: data.is_note,
+            isTransient: data.is_transient,
         };
         message.recordName = data.record_name;
         message.resId = data.res_id;
@@ -239,6 +244,31 @@ export class Messaging {
         return message;
     }
 
+    /**
+     * Create a transient message, i.e. a message which does not come
+     * from a member of the channel. Usually a log message, such as one
+     * generated from a command with ('/').
+     *
+     * @param {Object} data
+     */
+    createTransientMessage(data) {
+        const { body, res_id: threadId } = data;
+        const lastMessageId = Object.values(this.messages).reduce(
+            (lastMessageId, message) => Math.max(lastMessageId, message.id),
+            0
+        );
+        this.createMessage(
+            markup(body),
+            {
+                author: this.partnerRoot,
+                id: lastMessageId + 0.01,
+                is_note: true,
+                is_transient: true
+            },
+            this.threads[threadId]
+        );
+    }
+
     createPartner(id, name) {
         if (id in this.partners) {
             return this.partners[id];
@@ -246,6 +276,30 @@ export class Messaging {
         const partner = { id, name };
         this.partners[id] = partner;
         return partner;
+    }
+
+    initCommands() {
+        const commands = [
+            {
+                help: this.env._t("Show a helper message"),
+                methodName: "execute_command_help",
+                name: "help",
+            },
+            {
+                help: this.env._t("Leave this channel"),
+                methodName: "execute_command_leave",
+                name: "leave",
+            },
+            {
+                channel_types: ["channel", "chat"],
+                help: this.env._t("List users in the current channel"),
+                methodName: "execute_command_who",
+                name: "who",
+            },
+        ];
+        for (let c of commands) {
+            this.commands.push(c);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -263,6 +317,10 @@ export class Messaging {
                         this.createMessage(body, message, thread);
                     }
                     break;
+                case "mail.channel/transient_message":
+                    return this.createTransientMessage(
+                        notif.payload
+                    );
             }
         }
     }
@@ -398,6 +456,11 @@ export class Messaging {
     }
     async postMessage(threadId, body, isNote = false) {
         let tmpMsg;
+        const command = this.getCommandFromText(threadId, body);
+        if (command) {
+            await this.excuteCommand(threadId, command, body);
+            return;
+        }
         const thread = this.threads[threadId];
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const params = {
@@ -427,6 +490,31 @@ export class Messaging {
             delete this.messages[tmpMsg.id];
         }
         this.createMessage(markup(data.body), data, thread);
+    }
+
+    async excuteCommand(threadId, command, body = "") {
+        return this.orm.call("mail.channel", command.methodName, [[threadId]], {
+            body,
+        });
+    }
+
+    getCommandFromText(threadId, content) {
+        const thread = this.threads[threadId];
+        if (["channel", "chat", "group"].includes(thread.type)) {
+            if (content.startsWith("/")) {
+                const firstWord = content.substring(1).split(/\s/)[0];
+                return this.commands.find((command) => {
+                    if (command.name !== firstWord) {
+                        return false;
+                    }
+                    if (command.channel_types) {
+                        return command.channel_types.includes(thread.type);
+                    }
+                    return true;
+                });
+            }
+        }
+        return undefined;
     }
 
     openDiscussion(threadId) {

@@ -2,6 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.message" owl="1">
+    <t t-set="hasActionList" t-value="!message.isTransient"/>
     <div class="o-mail-message py-1 mt-1 px-3 d-flex" t-att-class="{'o-mail-is-author': message.isAuthor}">
         <div class="o-mail-message-sidebar d-flex flex-shrink-0 justify-content-center">
             <div t-if="!props.squashed" class="o-mail-avatar-container position-relative">
@@ -47,16 +48,18 @@
                         <t t-out="message.body"/>
                     </div>
                 </t>
-                <div t-if="props.hasActions" class="o-mail-message-actions invisible">
-                    <div class="rounded-1 shadow-sm">
-                        <i class="cursor-pointer px-1 py-2 fa fa-lg"
-                            t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
-                            t-on-click="toggleStar"
-                            role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"/>
-                        <i class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-if="canBeDeleted" t-on-click="onClickDelete"
-                            role="button" tabindex="0" title="Delete" aria-label="Delete"/>
+                <t t-if="hasActionList">
+                    <div t-if="props.hasActions" class="o-mail-message-actions invisible">
+                        <div class="rounded-1 shadow-sm">
+                            <i class="cursor-pointer px-1 py-2 fa fa-lg"
+                                t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
+                                t-on-click="toggleStar"
+                                role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"/>
+                            <i class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-if="canBeDeleted" t-on-click="onClickDelete"
+                                role="button" tabindex="0" title="Delete" aria-label="Delete"/>
+                        </div>
                     </div>
-                </div>
+                </t>
             </div>
         </div>
     </div>
