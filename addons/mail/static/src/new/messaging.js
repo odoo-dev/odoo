@@ -5,6 +5,7 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Deferred } from "@web/core/utils/concurrency";
 import { url } from "@web/core/utils/urls";
 import { htmlToTextContentInline, removeFromArray } from "./utils";
+import { prettifyMessageContent } from "./message_prettify_utils";
 
 const { DateTime } = luxon;
 
@@ -415,7 +416,7 @@ export class Messaging {
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const params = {
             post_data: {
-                body,
+                body: await prettifyMessageContent(body),
                 attachment_ids: [],
                 message_type: "comment",
                 partner_ids: [],
@@ -432,7 +433,11 @@ export class Messaging {
         } else {
             const tmpId = `pending${this.nextId++}`;
             const tmpData = { id: tmpId, author: { id: this.user.partnerId } };
-            tmpMsg = this.createMessage(markup(body), tmpData, thread);
+            tmpMsg = this.createMessage(
+                markup(await prettifyMessageContent(body)),
+                tmpData,
+                thread
+            );
         }
         const data = await this.rpc(`/mail/message/post`, params);
         if (thread.type !== "chatter") {

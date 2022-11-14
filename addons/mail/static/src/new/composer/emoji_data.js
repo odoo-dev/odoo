@@ -54,7 +54,7 @@
 
 // Since JSON grammar is way simpler than JavaScript's grammar, it is actually
 // faster to parse the data as a JSON object than as a JavaScript object.
-export const emojiCategoriesData = JSON.parse(`[
+export const categories = JSON.parse(`[
     {
         "name": "Smileys & Emotion",
         "title": "🙂",
@@ -97,7 +97,7 @@ export const emojiCategoriesData = JSON.parse(`[
     }
 ]`);
 
-export const emojisData = JSON.parse(`[
+export const emojis = JSON.parse(`[
     {
         "category": "Smileys & Emotion",
         "codepoints": "😀",

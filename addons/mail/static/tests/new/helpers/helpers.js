@@ -4,8 +4,10 @@ import { messagingService } from "@mail/new/messaging_service";
 import { activityService } from "@mail/new/activity/activity_service";
 import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
-import { EventBus } from "@odoo/owl";
+import { App, EventBus } from "@odoo/owl";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
+
+const { afterNextRender } = App;
 
 export { TestServer } from "./test_server";
 
@@ -48,4 +50,23 @@ export function makeTestEnv(rpc) {
     const messaging = messagingService.start(env, { rpc, orm, user, router, bus_service });
     env.services["mail.messaging"] = messaging;
     return env;
+}
+
+/**
+ * @param {string} selector
+ * @param {string} content
+ */
+export async function insertText(selector, content) {
+    await afterNextRender(() => {
+        document.querySelector(selector).focus();
+        for (const char of content) {
+            document.execCommand("insertText", false, char);
+            document
+                .querySelector(selector)
+                .dispatchEvent(new window.KeyboardEvent("keydown", { key: char }));
+            document
+                .querySelector(selector)
+                .dispatchEvent(new window.KeyboardEvent("keyup", { key: char }));
+        }
+    });
 }

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { loadEmojiData } from "@mail/new/composer/emoji_picker";
+import { useEmoji } from "@mail/new/composer/emoji_picker";
 import { Discuss } from "@mail/new/discuss/discuss";
 
 import {
@@ -137,7 +137,7 @@ QUnit.module("mail", (hooks) => {
         await click(target, "i[aria-label='Edit']");
 
         await click(target.querySelector("i[aria-label='Emojis']").closest("button"));
-        await loadEmojiData(); // wait for emoji being loaded (required for rendering)
+        await useEmoji(); // wait for emoji being loaded (required for rendering)
         await nextTick(); // wait for following rendering
         await click(target.querySelector(".o-mail-emoji-picker-content .o-emoji"));
         assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
