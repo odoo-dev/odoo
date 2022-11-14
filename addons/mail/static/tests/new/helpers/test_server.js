@@ -156,6 +156,10 @@ export class TestServer {
         };
     }
 
+    _mail_link_preview(params) {
+        return [];
+    }
+
     _mail_message_post({ post_data, thread_id, thread_model }) {
         return this.addMessage(
             "comment",

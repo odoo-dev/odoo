@@ -3,10 +3,11 @@
 import { isEventHandled, markEventHandled, onExternalClick } from "@mail/new/utils";
 import { useMessaging } from "../messaging_hook";
 import { RelativeTime } from "./relative_time";
-import { Component, onPatched, useRef, useState } from "@odoo/owl";
+import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { Composer } from "@mail/new/composer/composer";
-import { MessageDeleteDialog } from "@mail/new/thread/message_delete_dialog";
+import { Composer } from "../composer/composer";
+import { MessageDeleteDialog } from "../thread/message_delete_dialog";
+import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
 
 export class Message extends Component {
@@ -19,6 +20,10 @@ export class Message extends Component {
         this.action = useService("action");
         this.user = useService("user");
         this.message = this.props.message;
+        useChildSubEnv({
+            LinkPreviewListComponent: LinkPreviewList,
+            alignedRight: this.isAlignedRight,
+        });
         onExternalClick("ref", async (ev) => {
             // Let event be handled by bubbling handlers first.
             await new Promise(setTimeout);
@@ -102,7 +107,7 @@ export class Message extends Component {
 }
 
 Object.assign(Message, {
-    components: { Composer, MessageInReplyTo, RelativeTime },
+    components: { Composer, MessageInReplyTo, RelativeTime, LinkPreviewList },
     defaultProps: { hasActions: true, onParentMessageClick: () => {} },
     props: [
         "hasActions?",

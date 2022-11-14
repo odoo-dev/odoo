@@ -226,6 +226,7 @@ export class Messaging {
             parentMessage,
             subtype_description: subtypeDescription,
             trackingValues,
+            linkPreviews,
         } = data;
         if (id in this.messages) {
             return this.messages[id];
@@ -258,6 +259,7 @@ export class Messaging {
             parentMessage,
             subtypeDescription,
             trackingValues,
+            linkPreviews,
         };
         if (parentMessage) {
             const { body, ...data } = parentMessage;
@@ -363,6 +365,27 @@ export class Messaging {
                     break;
                 case "mail.channel/transient_message":
                     return this.createTransientMessage(notif.payload);
+                case "mail.record/insert":
+                    {
+                        const { LinkPreview: linkPreviews } = notif.payload;
+                        if (linkPreviews) {
+                            for (const linkPreview of linkPreviews) {
+                                this.messages[linkPreview.message.id].linkPreviews.push(
+                                    linkPreview
+                                );
+                            }
+                        }
+                    }
+                    break;
+                case "mail.link.preview/delete":
+                    {
+                        const { id, message_id } = notif.payload;
+                        const index = this.messages[message_id].linkPreviews.findIndex(
+                            (linkPreview) => linkPreview.id === id
+                        );
+                        delete this.messages[message_id].linkPreviews[index];
+                    }
+                    break;
             }
         }
     }
@@ -566,6 +589,9 @@ export class Messaging {
             );
         }
         const data = await this.rpc(`/mail/message/post`, params);
+        if (!this.isMessageEmpty(data)) {
+            this.rpc(`/mail/link_preview`, { message_id: data.id }, { silent: true });
+        }
         if (thread.type !== "chatter") {
             removeFromArray(thread.messages, tmpMsg.id);
             delete this.messages[tmpMsg.id];
