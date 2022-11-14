@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Composer } from "@mail/new/composer/composer";
-import { loadEmojiData } from "@mail/new/composer/emoji_picker";
+import { useEmoji } from "@mail/new/composer/emoji_picker";
 import { click, getFixture, mount, nextTick } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
 import { registry } from "@web/core/registry";
@@ -37,7 +37,7 @@ QUnit.module("mail", (hooks) => {
             await mount(PopoverContainer, target, { env, props });
             await mount(Composer, target, { env, props: { threadId: 1, placeholder: "owl" } });
             await click(target.querySelector("i[aria-label='Emojis']").closest("button"));
-            await loadEmojiData(); // wait for emoji being loaded (required for rendering)
+            await useEmoji(); // wait for emoji being loaded (required for rendering)
             await nextTick(); // wait for following rendering
             await click(target.querySelector(".o-mail-emoji-picker-content .o-emoji"));
             await click(target.querySelector("i[aria-label='Emojis']").closest("button"));

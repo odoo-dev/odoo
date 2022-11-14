@@ -1,9 +1,17 @@
 /** @odoo-module **/
 
 import { Discuss } from "@mail/new/discuss/discuss";
-import { click, editInput, getFixture, mount, patchWithCleanup } from "@web/../tests/helpers/utils";
-import { makeTestEnv, TestServer } from "../helpers/helpers";
+import {
+    click,
+    editInput,
+    getFixture,
+    mount,
+    nextTick,
+    patchWithCleanup,
+} from "@web/../tests/helpers/utils";
+import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
+import { useEmoji } from "@mail/new/composer/emoji_picker";
 
 let target;
 
@@ -74,8 +82,10 @@ QUnit.module("mail", (hooks) => {
 
         await mount(Discuss, target, { env });
         assert.containsNone(target, ".o-mail-message");
-        await editInput(target, ".o-mail-composer-textarea", "abc");
-        await click($(target).find(".o-mail-composer button:contains('Send')")[0]); // click on send
+        await insertText(".o-mail-composer-textarea", "abc");
+        await click(target, ".o-mail-composer-send-button");
+        await useEmoji(); // wait for emoji being loaded (required for rendering)
+        await nextTick(); // wait for following rendering
         assert.containsOnce(target, ".o-mail-message");
         assert.verifySteps([
             "/mail/init_messaging",
@@ -196,5 +206,35 @@ QUnit.module("mail", (hooks) => {
         await mount(Discuss, target, { env });
 
         assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container");
+    });
+
+    QUnit.test("Posting message should transform links.", async (assert) => {
+        const server = new TestServer();
+        server.addChannel(1, "general", "General announcements...");
+        const env = makeTestEnv((route, params) => server.rpc(route, params));
+        env.services["mail.messaging"].setDiscussThread(1);
+        await mount(Discuss, target, { env });
+        await insertText(".o-mail-composer-textarea", "test https://www.odoo.com/");
+        await click(target, ".o-mail-composer-send-button");
+        await useEmoji(); // wait for emoji being loaded (required for rendering)
+        await nextTick(); // wait for following rendering
+        assert.containsOnce(
+            target,
+            "a[href='https://www.odoo.com/']",
+            "Message should have a link"
+        );
+    });
+
+    QUnit.test("Posting message should transform relevant data to emoji.", async (assert) => {
+        const server = new TestServer();
+        server.addChannel(1, "general", "General announcements...");
+        const env = makeTestEnv((route, params) => server.rpc(route, params));
+        env.services["mail.messaging"].setDiscussThread(1);
+        await mount(Discuss, target, { env });
+        await insertText(".o-mail-composer-textarea", "test :P :laughing:");
+        await click(target, ".o-mail-composer-send-button");
+        await useEmoji(); // wait for emoji being loaded (required for rendering)
+        await nextTick(); // wait for following rendering
+        assert.equal(target.querySelector(".o-mail-message-body").textContent, "test 😛 😆");
     });
 });

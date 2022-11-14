@@ -2,7 +2,7 @@
 
 import { Component, onMounted, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
-import { useEmojiPicker, loadEmojiData } from "./emoji_picker";
+import { useEmojiPicker } from "./emoji_picker";
 
 export class Composer extends Component {
     setup() {
@@ -45,7 +45,6 @@ export class Composer extends Component {
     }
 
     onKeydown(ev) {
-        loadEmojiData();
         if (ev.key === "Enter") {
             ev.preventDefault(); // to prevent useless return
             if (this.props.message) {
