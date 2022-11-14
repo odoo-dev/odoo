@@ -78,6 +78,7 @@
                 }">
                     <Composer autofocus="true" message="message" onDiscardCallback="() => state.isEditing = false" onPostCallback="() => state.isEditing = false" mode="'compact'" />
                 </div>
+                <LinkPreviewList t-if="message.linkPreviews" linkPreviews="message.linkPreviews" canBeDeleted="canBeDeleted" />
             </div>
         </div>
     </div>

@@ -178,7 +178,7 @@ QUnit.module("mail", (hooks) => {
     });
 
     QUnit.test("can post a message on a record thread", async (assert) => {
-        assert.expect(10);
+        assert.expect(11);
         const server = new TestServer();
         const env = makeTestEnv((route, params) => {
             if (route.startsWith("/mail")) {
@@ -220,11 +220,12 @@ QUnit.module("mail", (hooks) => {
             "/mail/thread/data",
             "/mail/thread/messages",
             "/mail/message/post",
+            "/mail/link_preview",
         ]);
     });
 
     QUnit.test("can post a note on a record thread", async (assert) => {
-        assert.expect(10);
+        assert.expect(11);
         const server = new TestServer();
         const env = makeTestEnv((route, params) => {
             if (route.startsWith("/mail")) {
@@ -266,6 +267,7 @@ QUnit.module("mail", (hooks) => {
             "/mail/thread/data",
             "/mail/thread/messages",
             "/mail/message/post",
+            "/mail/link_preview",
         ]);
     });
 });

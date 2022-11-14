@@ -114,6 +114,7 @@ QUnit.module("mail", (hooks) => {
             "/mail/init_messaging",
             "/mail/channel/messages",
             "/mail/message/post",
+            "/mail/link_preview",
         ]);
     });
 
