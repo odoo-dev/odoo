@@ -43,8 +43,8 @@
                 <CallUI thread="thread"/>
             </t>
             <Thread id="thread.id" t-key="thread.id"/>
-            <t t-if="thread.type !== 'mailbox'">
-                <Composer t-key="thread.id" threadId="thread.id" autofocus="true"/>
+            <t t-if="thread.type !== 'mailbox' or messaging.discuss.messageToReplyTo">
+                <Composer t-key="thread.id" threadId="thread.id" autofocus="true" onDiscardCallback="() => messaging.cancelReplyTo()"/>
             </t>
         </div>
     </div>

@@ -3,6 +3,7 @@
 import { markRaw, markup, reactive } from "@odoo/owl";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Deferred } from "@web/core/utils/concurrency";
+import { sprintf } from "@web/core/utils/strings";
 import { url } from "@web/core/utils/urls";
 import { htmlToTextContentInline, removeFromArray } from "./utils";
 import { prettifyMessageContent } from "./message_prettify_utils";
@@ -63,6 +64,7 @@ export class Messaging {
         // discuss app
         this.discuss = {
             isActive: false,
+            messageToReplyTo: null,
             threadId: initialThreadId,
             channels: {
                 extraClass: "o-mail-category-channel",
@@ -215,13 +217,14 @@ export class Messaging {
             id,
             date,
             message_type: type,
+            needaction,
+            parentMessage,
             subtype_description: subtypeDescription,
             trackingValues,
         } = data;
         if (id in this.messages) {
             return this.messages[id];
         }
-        this.createPartner(author.id, author.name);
         const now = DateTime.now();
         const dateTime = markRaw(date ? deserializeDateTime(date) : now);
         let dateDay = dateTime.toLocaleString(DateTime.DATE_FULL);
@@ -238,16 +241,22 @@ export class Messaging {
             id,
             type,
             body,
-            authorId: author.id,
+            author: this.createPartner(author.id, author.name),
             isAuthor: author.id === this.user.partnerId,
             dateDay,
             dateTimeStr: dateTime.toLocaleString(DateTime.DATETIME_SHORT),
             dateTime,
             isStarred,
             isNote: data.is_note,
+            needaction,
+            parentMessage,
             subtypeDescription,
             trackingValues,
         };
+        if (parentMessage) {
+            const { body, ...data } = parentMessage;
+            message["parentMessage"] = this.createMessage(body, data, thread);
+        }
         message.recordName = data.record_name;
         message.resId = data.res_id;
         message.resModel = data.model;
@@ -428,7 +437,18 @@ export class Messaging {
         }
         return this.previewsProm;
     }
-    async postMessage(threadId, body, isNote = false) {
+
+    async postInboxReply(threadId, threadModel, body, postData) {
+        const thread = this.getChatterThread(threadModel, threadId);
+        const message = await this.postMessage(thread.id, body, postData);
+        this.env.services.notification.add(
+            sprintf(this.env._t('Message posted on "%s"'), message.recordName),
+            { type: "info" }
+        );
+        return message;
+    }
+
+    async postMessage(threadId, body, { isNote = false, parentId }) {
         let tmpMsg;
         const thread = this.threads[threadId];
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
@@ -443,6 +463,9 @@ export class Messaging {
             thread_id: threadId,
             thread_model: "mail.channel",
         };
+        if (parentId) {
+            params.post_data.parent_id = parentId;
+        }
         if (thread.type === "chatter") {
             params.thread_id = thread.resId;
             params.thread_model = thread.resModel;
@@ -456,6 +479,9 @@ export class Messaging {
                 res_id: thread.id,
                 model: "mail.channel",
             };
+            if (parentId) {
+                tmpData.parentMessage = this.messages[parentId];
+            }
             tmpMsg = this.createMessage(
                 markup(await prettifyMessageContent(body)),
                 tmpData,
@@ -467,7 +493,7 @@ export class Messaging {
             removeFromArray(thread.messages, tmpMsg.id);
             delete this.messages[tmpMsg.id];
         }
-        this.createMessage(markup(data.body), data, thread);
+        return this.createMessage(markup(data.body), data, thread);
     }
 
     async updateMessage(messageId, body) {
@@ -489,6 +515,18 @@ export class Messaging {
         } else {
             this.openChatWindow(threadId);
         }
+    }
+
+    toggleReplyTo(message) {
+        if (this.discuss.messageToReplyTo === message) {
+            this.discuss.messageToReplyTo = null;
+        } else {
+            this.discuss.messageToReplyTo = message;
+        }
+    }
+
+    cancelReplyTo() {
+        this.discuss.messageToReplyTo = null;
     }
 
     async createChannel(name) {

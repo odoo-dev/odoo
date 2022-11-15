@@ -1,3 +1,6 @@
 $o-mail-thread-avatar-size: 36px !default;
 $o-mail-thread-window-bg: #FAFAFA !default;
 $o-mail-thread-window-width: 340px !default;
+// Needed because $border-radius variations are all set to 0 in enterprise.
+$o-mail-rounded-rectangle-border-radius-sm: .2rem !default;
+$o-mail-rounded-rectangle-border-radius-lg: 3 * $o-mail-rounded-rectangle-border-radius-sm !default;

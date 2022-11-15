@@ -3055,10 +3055,10 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "reply to message from inbox (message linked to document)",
             async function (assert) {
-                assert.expect(19);
+                assert.expect(17);
 
                 const pyEnv = await startServer();
                 const resPartnerId1 = pyEnv["res.partner"].create({ name: "Refactoring" });
@@ -3119,28 +3119,18 @@ QUnit.module("mail", {}, function () {
                     "should display a single message"
                 );
                 assert.strictEqual(
-                    parseInt(document.querySelector(".o-mail-message").dataset.messageId),
-                    mailMessageId1,
-                    "should display message with ID 100"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_MessageView_originThread").textContent,
+                    document.querySelector(".o-mail-message-recod-name").textContent,
                     " on Refactoring",
                     "should display message originates from record 'Refactoring'"
                 );
 
-                await click(".o-mail-message");
-                await click(".o_MessageActionView_actionReplyTo");
+                await click("i[aria-label='Reply']");
                 assert.ok(
-                    document.querySelector(".o-mail-message").classList.contains("o-selected"),
-                    "message should be selected after clicking on reply icon"
-                );
-                assert.ok(
-                    document.querySelector(".o_ComposerView"),
+                    document.querySelector(".o-mail-composer"),
                     "should have composer after clicking on reply to message"
                 );
                 assert.strictEqual(
-                    document.querySelector(`.o_ComposerView_threadName`).textContent,
+                    document.querySelector(`.o-mail-composer-origin-thread`).textContent,
                     " on: Refactoring",
                     "composer should display origin thread name of message"
                 );
@@ -3154,7 +3144,7 @@ QUnit.module("mail", {}, function () {
                 await click(".o-mail-composer-send-button");
                 assert.verifySteps(["message_post"]);
                 assert.notOk(
-                    document.querySelector(".o_ComposerView"),
+                    document.querySelector(".o-mail-composer"),
                     "should no longer have composer after posting reply to message"
                 );
                 assert.strictEqual(

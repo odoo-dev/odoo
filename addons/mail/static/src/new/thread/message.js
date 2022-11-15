@@ -1,11 +1,13 @@
 /** @odoo-module */
 
+import { isEventHandled, markEventHandled, onExternalClick } from "@mail/new/utils";
 import { useMessaging } from "../messaging_hook";
 import { RelativeTime } from "./relative_time";
-import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "@mail/new/composer/composer";
 import { MessageDeleteDialog } from "@mail/new/thread/message_delete_dialog";
+import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
 
 export class Message extends Component {
     setup() {
@@ -17,10 +19,14 @@ export class Message extends Component {
         this.action = useService("action");
         this.user = useService("user");
         this.message = this.props.message;
-        this.author = this.messaging.partners[this.message.authorId];
-        useExternalListener(document, "click", ({ target }) => {
+        onExternalClick("ref", async (ev) => {
+            // Let event be handled by bubbling handlers first.
+            await new Promise(setTimeout);
+            if (isEventHandled(ev, "emoji.selectEmoji")) {
+                return;
+            }
             // Stop editing the message on click away.
-            if (target === this.ref.el || this.ref.el.contains(target)) {
+            if (!this.ref.el || ev.target === this.ref.el || this.ref.el.contains(ev.target)) {
                 return;
             }
             this.state.isEditing = false;
@@ -31,7 +37,7 @@ export class Message extends Component {
         if (!this.props.hasActions) {
             return false;
         }
-        if (!this.user.isAdmin && this.message.authorId !== this.user.partnerId) {
+        if (!this.user.isAdmin && this.message.author.id !== this.user.partnerId) {
             return false;
         }
         if (this.message.type !== "comment") {
@@ -42,6 +48,16 @@ export class Message extends Component {
 
     get canBeEdited() {
         return this.canBeDeleted;
+    }
+
+    get canReplyTo() {
+        return this.message.needaction || this.message.resModel === "mail.channel";
+    }
+
+    get isAlignedRight() {
+        return Boolean(
+            this.env.inChatWindow && this.user.partnerId === this.props.message.author.id
+        );
     }
 
     toggleStar() {
@@ -55,6 +71,11 @@ export class Message extends Component {
         });
     }
 
+    onClickReplyTo(ev) {
+        markEventHandled(ev, "message.replyTo");
+        this.messaging.toggleReplyTo(this.message);
+    }
+
     openRecord() {
         this.action.doAction({
             type: "ir.actions.act_window",
@@ -66,8 +87,8 @@ export class Message extends Component {
 }
 
 Object.assign(Message, {
-    components: { Composer, RelativeTime },
+    components: { Composer, MessageInReplyTo, RelativeTime },
     defaultProps: { hasActions: true },
-    props: ["hasActions?", "message", "squashed?"],
+    props: ["hasActions?", "grayedOut?", "message", "squashed?"],
     template: "mail.message",
 });

@@ -1,3 +1,7 @@
+.o-mail-message {
+    transition: background-color .2s ease-out, opacity .5s ease-out, box-shadow .5s ease-out, transform .2s ease-out;
+}
+
 .o-mail-message-sidebar {
     flex-basis: 48px;
     max-width: 48px;
@@ -22,7 +26,7 @@
 .o-mail-chat-window .o-mail-message.o-mail-is-author {
     flex-direction: row-reverse;
 
-    .o-mail-message-content {
+    .o-mail-message-core, .o-mail-message-content {
         flex-direction: row-reverse;
     }
     .o-mail-msg-header {

@@ -133,46 +133,35 @@ QUnit.module("mail", {}, function () {
                 notification_type: "inbox",
                 res_partner_id: pyEnv.currentPartnerId,
             });
-            const { afterEvent, click, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
-                },
-            });
+            const { click, openDiscuss } = await start();
+            await openDiscuss();
             assert.containsOnce(
                 document.body,
                 ".o-mail-message",
                 "should display a single message"
             );
-            await click(".o-mail-message");
 
-            await click(".o_MessageActionView_actionReplyTo");
+            await click("i[aria-label='Reply']");
             assert.containsOnce(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "should have composer after clicking on reply to message"
             );
             assert.containsOnce(
                 document.body,
-                ".o_ComposerView_buttonDiscard",
+                "i[title='Stop replying']",
                 "composer should have a discard button"
             );
 
-            await click(`.o_ComposerView_buttonDiscard`);
+            await click("i[title='Stop replying']");
             assert.containsNone(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "reply composer should be closed after clicking on discard"
             );
         });
 
-        QUnit.skipRefactoring("reply: discard on reply button toggle", async function (assert) {
+        QUnit.test("reply: discard on reply button toggle", async function (assert) {
             assert.expect(3);
 
             const pyEnv = await startServer();
@@ -190,40 +179,29 @@ QUnit.module("mail", {}, function () {
                 notification_type: "inbox",
                 res_partner_id: pyEnv.currentPartnerId,
             });
-            const { afterEvent, click, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
-                },
-            });
+            const { click, openDiscuss } = await start();
+            await openDiscuss();
             assert.containsOnce(
                 document.body,
                 ".o-mail-message",
                 "should display a single message"
             );
 
-            await click(".o-mail-message");
-            await click(".o_MessageActionView_actionReplyTo");
+            await click("i[aria-label='Reply']");
             assert.containsOnce(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "should have composer after clicking on reply to message"
             );
-            await click(`.o_MessageActionView_actionReplyTo`);
+            await click("i[aria-label='Reply']");
             assert.containsNone(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "reply composer should be closed after clicking on reply button again"
             );
         });
 
-        QUnit.skipRefactoring("reply: discard on click away", async function (assert) {
+        QUnit.test("reply: discard on click away", async function (assert) {
             assert.expect(7);
 
             const pyEnv = await startServer();
@@ -241,29 +219,18 @@ QUnit.module("mail", {}, function () {
                 notification_type: "inbox",
                 res_partner_id: pyEnv.currentPartnerId,
             });
-            const { afterEvent, click, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
-                },
-            });
+            const { click, openDiscuss } = await start();
+            await openDiscuss();
             assert.containsOnce(
                 document.body,
                 ".o-mail-message",
                 "should display a single message"
             );
 
-            await click(".o-mail-message");
-            await click(".o_MessageActionView_actionReplyTo");
+            await click("i[aria-label='Reply']");
             assert.containsOnce(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "should have composer after clicking on reply to message"
             );
 
@@ -271,47 +238,47 @@ QUnit.module("mail", {}, function () {
             await nextAnimationFrame(); // wait just in case, but nothing is supposed to happen
             assert.containsOnce(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "reply composer should still be there after clicking inside itself"
             );
 
-            await click(`.o_ComposerView_buttonEmojis`);
+            await click("i[aria-label='Emojis']");
             assert.containsOnce(
                 document.body,
-                ".o_EmojiPickerView",
+                ".o-mail-emoji-picker",
                 "emoji list should be opened after clicking on emojis button"
             );
 
-            await click(`.o_EmojiView`);
+            await click(".o-mail-emoji-picker-content .o-emoji");
             assert.containsNone(
                 document.body,
-                ".o_EmojiPickerView",
+                ".o-mail-emoji-picker",
                 "emoji list should be closed after selecting an emoji"
             );
             assert.containsOnce(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "reply composer should still be there after selecting an emoji (even though it is technically a click away, it should be considered inside)"
             );
 
             await click(`.o-mail-message`);
             assert.containsNone(
                 document.body,
-                ".o_ComposerView",
+                ".o-mail-composer",
                 "reply composer should be closed after clicking away"
             );
         });
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             '"reply to" composer should log note if message replied to is a note',
             async function (assert) {
-                assert.expect(6);
+                assert.expect(5);
 
                 const pyEnv = await startServer();
                 const resPartnerId1 = pyEnv["res.partner"].create({});
                 const mailMessageId1 = pyEnv["mail.message"].create({
                     body: "not empty",
-                    is_discussion: false,
+                    is_note: true,
                     model: "res.partner",
                     needaction: true,
                     needaction_partner_ids: [pyEnv.currentPartnerId],
@@ -323,7 +290,7 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, click, insertText, messaging, openDiscuss } = await start({
+                const { click, insertText, openDiscuss } = await start({
                     async mockRPC(route, args) {
                         if (route === "/mail/message/post") {
                             assert.step("/mail/message/post");
@@ -340,30 +307,14 @@ QUnit.module("mail", {}, function () {
                         }
                     },
                 });
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
+                await openDiscuss();
                 assert.containsOnce(
                     document.body,
                     ".o-mail-message",
                     "should display a single message"
                 );
 
-                await click(".o-mail-message");
-                await click(".o_MessageActionView_actionReplyTo");
-                assert.strictEqual(
-                    document.querySelector(".o-mail-composer-send-button").textContent.trim(),
-                    "Log",
-                    "Send button text should be 'Log'"
-                );
+                await click("i[aria-label='Reply']");
 
                 await insertText(".o-mail-composer-textarea", "Test");
                 await click(".o-mail-composer-send-button");
@@ -371,7 +322,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             '"reply to" composer should send message if message replied to is not a note',
             async function (assert) {
                 assert.expect(6);
@@ -392,7 +343,7 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, click, insertText, messaging, openDiscuss } = await start({
+                const { click, insertText, openDiscuss } = await start({
                     async mockRPC(route, args) {
                         if (route === "/mail/message/post") {
                             assert.step("/mail/message/post");
@@ -409,25 +360,14 @@ QUnit.module("mail", {}, function () {
                         }
                     },
                 });
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
-                    },
-                });
+                await openDiscuss();
                 assert.containsOnce(
                     document.body,
                     ".o-mail-message",
                     "should display a single message"
                 );
 
-                await click(".o-mail-message");
-                await click(".o_MessageActionView_actionReplyTo");
+                await click("i[aria-label='Reply']");
                 assert.strictEqual(
                     document.querySelector(".o-mail-composer-send-button").textContent.trim(),
                     "Send",
