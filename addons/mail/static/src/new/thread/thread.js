@@ -21,6 +21,15 @@ export class Thread extends Component {
         this.messaging.fetchThreadMessages(threadId);
     }
 
+    isGrayedOut(msg) {
+        const { messageToReplyTo } = this.messaging.discuss;
+        return (
+            messageToReplyTo &&
+            messageToReplyTo.id !== msg.id &&
+            messageToReplyTo.resId === msg.resId
+        );
+    }
+
     isSquashed(msg, prevMsg) {
         if (
             !prevMsg ||
@@ -31,10 +40,13 @@ export class Thread extends Component {
             return false;
         }
 
-        if (msg.authorId !== prevMsg.authorId) {
+        if (msg.author.id !== prevMsg.author.id) {
             return false;
         }
         if (msg.resModel !== prevMsg.resModel || msg.resId !== prevMsg.resId) {
+            return false;
+        }
+        if (msg.parentMessage) {
             return false;
         }
         return msg.dateTime.ts - prevMsg.dateTime.ts < 60 * 1000;

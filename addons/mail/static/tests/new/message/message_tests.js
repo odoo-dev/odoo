@@ -2,6 +2,7 @@
 
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { Discuss } from "@mail/new/discuss/discuss";
+import { startServer, start } from "@mail/../tests/helpers/test_utils";
 
 import {
     click,
@@ -118,6 +119,7 @@ QUnit.module("mail", (hooks) => {
         await click(target, "i[aria-label='Edit']");
 
         await triggerEvent(target, ".o-mail-discuss-sidebar", "click");
+        await nextTick();
         assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
     });
 
@@ -207,4 +209,144 @@ QUnit.module("mail", (hooks) => {
             "Composer text area is scrolled to the top when edit starts"
         );
     });
+
+    QUnit.test(
+        "Other messages are grayed out when replying to another one",
+        async function (assert) {
+            const pyEnv = await startServer();
+            const channelId = pyEnv["mail.channel"].create({
+                channel_type: "channel",
+                name: "channel1",
+            });
+            const [firstMessageId, secondMessageId] = pyEnv["mail.message"].create([
+                { body: "Hello world", res_id: channelId, model: "mail.channel" },
+                { body: "Goodbye world", res_id: channelId, model: "mail.channel" },
+            ]);
+            const { click, openDiscuss } = await start({
+                discuss: { active_id: `mail.channel_${channelId}` },
+            });
+            await openDiscuss();
+            // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
+            await click(".o-mail-category-item");
+
+            assert.containsN(document.body, ".o-mail-message", 2, "Should display two messages");
+            await click(
+                `.o-mail-message[data-message-id='${firstMessageId}'] i[aria-label='Reply']`
+            );
+            assert.notOk(
+                document
+                    .querySelector(`.o-mail-message[data-message-id='${firstMessageId}']`)
+                    .classList.contains("opacity-50"),
+                "First message should not be grayed out"
+            );
+            assert.ok(
+                document
+                    .querySelector(`.o-mail-message[data-message-id='${secondMessageId}']`)
+                    .classList.contains("opacity-50"),
+                "Second message should be grayed out"
+            );
+        }
+    );
+
+    QUnit.test("Parent message body is displayed on replies", async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "channel1",
+        });
+        pyEnv["mail.message"].create({
+            body: "Hello world",
+            res_id: channelId,
+            model: "mail.channel",
+        });
+        const { click, openDiscuss } = await start({
+            discuss: { active_id: `mail.channel_${channelId}` },
+        });
+        await openDiscuss();
+        // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
+        await click(".o-mail-category-item");
+
+        await click(`.o-mail-message i[aria-label='Reply']`);
+        await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
+        await click(".o-mail-composer-send-button");
+        assert.containsOnce(
+            document.body,
+            ".o-mail-message-in-reply-body",
+            "Origin message should be displayed on reply"
+        );
+        assert.ok(
+            document.querySelector(".o-mail-message-in-reply-body").innerText,
+            "Hello world",
+            "Origin message should be correct"
+        );
+    });
+
+    QUnit.test(
+        "Updating the parent message of a reply also updates the visual of the reply",
+        async function (assert) {
+            const pyEnv = await startServer();
+            const channelId = pyEnv["mail.channel"].create({
+                channel_type: "channel",
+                name: "channel1",
+            });
+            pyEnv["mail.message"].create({
+                body: "Hello world",
+                res_id: channelId,
+                message_type: "comment",
+                model: "mail.channel",
+            });
+            const { click, openDiscuss } = await start({
+                discuss: { active_id: `mail.channel_${channelId}` },
+            });
+            await openDiscuss();
+            // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
+            await click(".o-mail-category-item");
+
+            await click("i[aria-label='Reply']");
+            await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
+            await triggerHotkey("Enter", false);
+            await click("i[aria-label='Edit']");
+            await editInput(target, ".o-mail-message textarea", "Goodbye World");
+            await triggerHotkey("Enter", false);
+            await nextTick();
+            assert.strictEqual(
+                document.querySelector(".o-mail-message-in-reply-body").innerText,
+                "Goodbye World"
+            );
+        }
+    );
+
+    QUnit.test(
+        "Deleting parent message of a reply should adapt reply visual",
+        async function (assert) {
+            const pyEnv = await startServer();
+            const channelId = pyEnv["mail.channel"].create({
+                channel_type: "channel",
+                name: "channel1",
+            });
+            pyEnv["mail.message"].create({
+                body: "Hello world",
+                res_id: channelId,
+                message_type: "comment",
+                model: "mail.channel",
+            });
+            const { click, openDiscuss } = await start({
+                discuss: { active_id: `mail.channel_${channelId}` },
+            });
+            await openDiscuss();
+            // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
+            await click(".o-mail-category-item");
+
+            await click("i[aria-label='Reply']");
+            await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
+            await triggerHotkey("Enter", false);
+            await click("i[aria-label='Delete']");
+            $('button:contains("Delete")').click();
+            await nextTick();
+            assert.strictEqual(
+                document.querySelector(".o-mail-message-in-reply-deleted-message").innerText,
+                "Original message was deleted"
+            );
+        }
+    );
 });

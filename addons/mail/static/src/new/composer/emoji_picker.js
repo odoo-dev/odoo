@@ -1,5 +1,7 @@
 /** @odoo-module */
 
+import { markEventHandled } from "@mail/new/utils";
+
 import { Component, onMounted, onWillStart, useRef, useState, onPatched } from "@odoo/owl";
 import { getBundle, loadBundle } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -10,7 +12,6 @@ import { memoize } from "@web/core/utils/functions";
  * @param {string} refName
  * @param {object} props
  * @param {function} [props.onSelect]
- * @param {boolean} [props.preventClickPropagation]
  */
 export function useEmojiPicker(refName, props) {
     const ref = useRef(refName);
@@ -70,9 +71,7 @@ export class EmojiPicker extends Component {
     }
 
     onClick(ev) {
-        if (this.props.preventClickPropagation) {
-            ev.stopPropagation();
-        }
+        markEventHandled(ev, "emoji.selectEmoji");
     }
 
     getEmojis() {
@@ -112,6 +111,6 @@ export class EmojiPicker extends Component {
 }
 
 Object.assign(EmojiPicker, {
-    props: ["onSelect", "close", "preventClickPropagation?"],
+    props: ["onSelect", "close"],
     template: "mail.emoji_picker",
 });

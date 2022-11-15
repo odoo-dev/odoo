@@ -23,7 +23,7 @@
                         <t t-call="mail.notification_message"/>
                     </t>
                     <t t-elif="!messaging.isMessageEmpty(msg)">
-                        <Message message="msg" squashed="isSquashed(msg, prevMsg)"/>
+                        <Message message="msg" squashed="isSquashed(msg, prevMsg)" grayedOut="isGrayedOut(msg)"/>
                     </t>
                     <t t-set="prevMsg" t-value="msg"/>
                 </t>
@@ -46,7 +46,7 @@
 
 <t t-name="mail.notification_message" owl="1">
     <div class="d-flex justify-content-center text-500 small px-3">
-        <span class="d-inline mx-1" t-esc="messaging.partners[msg.authorId].name"/> <t t-out="msg.body"/>
+        <span class="d-inline mx-1" t-esc="msg.author.name"/> <t t-out="msg.body"/>
     </div>
 </t>
 

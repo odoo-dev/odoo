@@ -3,6 +3,7 @@
 import { Component, onMounted, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
 import { useEmojiPicker } from "./emoji_picker";
+import { isEventHandled, onExternalClick } from "@mail/new/utils";
 
 export class Composer extends Component {
     setup() {
@@ -14,7 +15,6 @@ export class Composer extends Component {
         });
         useEmojiPicker("emoji-picker", {
             onSelect: (str) => this.addEmoji(str),
-            preventClickPropagation: true,
         });
         useEffect(
             (focus) => {
@@ -23,6 +23,14 @@ export class Composer extends Component {
                 }
             },
             () => [this.props.autofocus + this.state.autofocus, this.props.placeholder]
+        );
+        useEffect(
+            (messageToReplyTo) => {
+                if (messageToReplyTo && messageToReplyTo.resId === this.props.threadId) {
+                    this.state.autofocus++;
+                }
+            },
+            () => [this.messaging.discuss.messageToReplyTo]
         );
         onWillUpdateProps(({ message }) => {
             this.state.value = message ? this.convertBrToLineBreak(message.body) : "";
@@ -35,6 +43,25 @@ export class Composer extends Component {
             () => [this.state.value, this.ref.el]
         );
         onMounted(() => this.ref.el.scrollTo({ top: 0, behavior: "instant" }));
+        onExternalClick("composer", async (ev) => {
+            // Let event be handled by bubbling handlers first.
+            await new Promise(setTimeout);
+            if (isEventHandled(ev, "message.replyTo") || isEventHandled(ev, "emoji.selectEmoji")) {
+                return;
+            }
+            this.messaging.cancelReplyTo();
+        });
+    }
+
+    get hasReplyToHeader() {
+        const { messageToReplyTo } = this.messaging.discuss;
+        if (!messageToReplyTo) {
+            return false;
+        }
+        return (
+            messageToReplyTo.resId === this.props.threadId ||
+            (this.props.threadId === "inbox" && messageToReplyTo.needaction)
+        );
     }
 
     convertBrToLineBreak(str) {
@@ -60,11 +87,18 @@ export class Composer extends Component {
     async sendMessage() {
         const el = this.ref.el;
         if (el.value.trim()) {
-            await this.messaging.postMessage(
-                this.props.threadId,
-                el.value,
-                this.props.type === "note"
-            );
+            const { messageToReplyTo } = this.messaging.discuss;
+            const { id: parentId, isNote, resId, resModel } = messageToReplyTo || {};
+            const postData = {
+                isNote: this.props.type === "note" || isNote,
+                parentId,
+            };
+            if (messageToReplyTo && this.props.threadId === this.messaging.discuss.inbox.id) {
+                await this.messaging.postInboxReply(resId, resModel, el.value, postData);
+            } else {
+                await this.messaging.postMessage(this.props.threadId, el.value, postData);
+            }
+            this.messaging.cancelReplyTo();
             if (this.props.onPostCallback) {
                 this.props.onPostCallback();
             }
