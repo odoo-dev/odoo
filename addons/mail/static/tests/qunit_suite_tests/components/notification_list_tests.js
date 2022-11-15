@@ -52,7 +52,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "thread notifications are re-ordered on receiving a new message",
             async function (assert) {
                 assert.expect(4);

@@ -9,7 +9,7 @@ QUnit.module('components', {}, function () {
 QUnit.module('notification_list', {}, function () {
 QUnit.module('notification_list_notification_group_tests.js');
 
-QUnit.test('mark as read', async function (assert) {
+QUnit.skipRefactoring('mark as read', async function (assert) {
     assert.expect(2);
 
     const pyEnv = await startServer();

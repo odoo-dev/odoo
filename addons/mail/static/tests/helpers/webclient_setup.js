@@ -9,8 +9,10 @@ import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 
 import { ChatWindowManagerContainer } from "@mail/components/chat_window_manager_container/chat_window_manager_container";
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
-import { DiscussContainer } from "@mail/components/discuss_container/discuss_container";
+import { Discuss } from "@mail/new/discuss/discuss";
 import { PopoverManagerContainer } from "@mail/components/popover_manager_container/popover_manager_container";
+import { messagingService as newMessagingService } from "@mail/new/messaging_service";
+import { activityService } from "@mail/new/activity/activity_service";
 import { messagingService } from "@mail/services/messaging_service";
 import { systrayService } from "@mail/services/systray_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
@@ -48,7 +50,7 @@ function setupMainComponentRegistry() {
         Component: ChatWindowManagerContainer,
     });
     mainComponentRegistry.add("DialogManagerContainer", { Component: DialogManagerContainer });
-    registry.category("actions").add("mail.action_discuss", DiscussContainer);
+    registry.category("actions").add("mail.action_discuss", Discuss);
     mainComponentRegistry.add("PopoverManagerContainer", { Component: PopoverManagerContainer });
 }
 
@@ -97,6 +99,8 @@ function setupMessagingServiceRegistries({
     services = {
         bus_service: busService,
         im_status: imStatusService,
+        "mail.activity": activityService,
+        "mail.messaging": newMessagingService,
         messaging: messagingService,
         messagingValues,
         presence: makeFakePresenceService({

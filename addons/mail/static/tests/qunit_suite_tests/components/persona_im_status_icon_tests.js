@@ -8,7 +8,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("persona_im_status_icon_tests.js");
 
-        QUnit.test("initially online", async function (assert) {
+        QUnit.skipRefactoring("initially online", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -37,7 +37,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("initially offline", async function (assert) {
+        QUnit.skipRefactoring("initially offline", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -66,7 +66,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("initially away", async function (assert) {
+        QUnit.skipRefactoring("initially away", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -95,7 +95,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("change icon on change partner im_status", async function (assert) {
+        QUnit.skipRefactoring("change icon on change partner im_status", async function (assert) {
             assert.expect(4);
 
             const pyEnv = await startServer();
@@ -148,7 +148,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("change icon on change guest im_status", async function (assert) {
+        QUnit.skipRefactoring("change icon on change guest im_status", async function (assert) {
             assert.expect(4);
 
             const pyEnv = await startServer();

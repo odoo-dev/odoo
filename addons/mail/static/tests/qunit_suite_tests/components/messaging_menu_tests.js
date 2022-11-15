@@ -436,7 +436,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("new message", async function (assert) {
+        QUnit.skipRefactoring("new message", async function (assert) {
             assert.expect(3);
 
             const { click } = await start();
@@ -458,7 +458,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("no new message when discuss is open", async function (assert) {
+        QUnit.skipRefactoring("no new message when discuss is open", async function (assert) {
             assert.expect(3);
 
             const { click, openDiscuss, openView } = await start();

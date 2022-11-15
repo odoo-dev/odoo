@@ -8,9 +8,7 @@ import { Component } from "@odoo/owl";
 class ActivityException extends Component {
     get textClass() {
         if (this.props.value) {
-            return (
-                "text-" + this.props.value + " fa " + this.props.record.data.activity_exception_icon
-            );
+            return `text-${this.props.value} fa ${this.props.record.data.activity_exception_icon}`;
         }
         return undefined;
     }
