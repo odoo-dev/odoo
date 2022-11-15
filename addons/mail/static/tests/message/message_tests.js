@@ -182,4 +182,29 @@ QUnit.module("mail", (hooks) => {
         await nextTick();
         assert.verifySteps([]);
     });
+
+    QUnit.test("Scroll bar to the top when edit starts", async (assert) => {
+        const server = new TestServer();
+        server.addChannel(1, "general", "General announcements...");
+        server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world ! ".repeat(1000));
+        const env = makeTestEnv((route, params) => server.rpc(route, params));
+        await env.services["mail.messaging"].isReady;
+        env.services["mail.messaging"].setDiscussThread(1);
+        await mount(Discuss, target, { env });
+        target.querySelector(".o-mail-message-actions").classList.remove("invisible");
+        await click(target, "i[aria-label='Edit']");
+
+        const messageTextarea = document.querySelector(
+            ".o-mail-message-editable-content .o-mail-composer-textarea"
+        );
+        assert.ok(
+            messageTextarea.scrollHeight > messageTextarea.clientHeight,
+            "Composer textarea has a vertical scroll bar"
+        );
+        assert.strictEqual(
+            messageTextarea.scrollTop,
+            0,
+            "Composer text area is scrolled to the top when edit starts"
+        );
+    });
 });

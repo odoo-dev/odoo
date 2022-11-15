@@ -8,7 +8,10 @@
     <t t-set="extended" t-value="props.mode === 'extended'"/>
     <div class="o-mail-composer-container">
         <div class="o-mail-composer d-flex flex-shrink-0"
-                t-att-class="{'px-3 py-2': extended, 'p-3': normal}">
+                t-att-class="{
+                    'px-3 py-2 o-mail-extended-composer': extended,
+                    'p-3': normal,
+                }">
             <div class="o-mail-composer-sidebar flex-shrink-0" t-if="!compact">
                 <img class="o-mail-composer-avatar mt-1 rounded-circle" t-att-src="messaging.user.avatarUrl" alt="Avatar of user"/>
             </div>
