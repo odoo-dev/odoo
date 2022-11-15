@@ -24,7 +24,7 @@
                         <t t-esc="current"/>
                     </div>
                 </t>
-                <span class="o-emoji p-1 cursor-pointer" t-att-title="emoji.name" t-att-data-index="emoji_index">
+                <span class="o-emoji p-1 cursor-pointer" t-att-title="emoji.name" t-att-data-index="emoji_index" t-att-data-codepoints="emoji.codepoints">
                     <t t-esc="emoji.codepoints"/>
                 </span>
             </t>
@@ -33,4 +33,3 @@
 </t>
 
 </templates>
-
