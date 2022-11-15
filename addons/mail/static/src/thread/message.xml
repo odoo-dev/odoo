@@ -46,7 +46,7 @@
                         <t t-out="message.body"/>
                     </div>
                 </t>
-                <div t-if="props.hasActions" class="o-mail-message-actions invisible">
+                <div class="o-mail-message-actions invisible">
                     <div class="rounded-1 shadow-sm">
                         <i class="cursor-pointer px-1 py-2 fa fa-lg"
                             t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"

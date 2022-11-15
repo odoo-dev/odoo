@@ -2,10 +2,10 @@
 
 import { useMessaging } from "../messaging_hook";
 import { RelativeTime } from "./relative_time";
-import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, useExternalListener, useRef, useState, markup } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "@mail/composer/composer";
-import { MessageDeleteDialog } from "@mail/thread/message_delete_dialog";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 export class Message extends Component {
     setup() {
@@ -16,6 +16,7 @@ export class Message extends Component {
         this.messaging = useMessaging();
         this.action = useService("action");
         this.user = useService("user");
+        this.dialogService = useService("dialog");
         this.message = this.props.message;
         this.author = this.messaging.partners[this.message.authorId];
         useExternalListener(document, "click", ({ target }) => {
@@ -28,9 +29,6 @@ export class Message extends Component {
     }
 
     get canBeDeleted() {
-        if (!this.props.hasActions) {
-            return false;
-        }
         if (!this.user.isAdmin && this.message.authorId !== this.user.partnerId) {
             return false;
         }
@@ -49,9 +47,20 @@ export class Message extends Component {
     }
 
     onClickDelete() {
-        this.env.services.dialog.add(MessageDeleteDialog, {
-            message: this.message,
-            messageComponent: Message,
+        const msg = this.env._t("Are you sure you want to delete this message?");
+        const body = markup(`
+            <blockquote>
+                <div class="alert alert-primary" role="alert">
+                    ${this.message.body}
+                </div>
+            </blockquote>`);
+        this.dialogService.add(ConfirmationDialog, {
+            title: msg,
+            body: body,
+            confirm: () => {
+                this.messaging.deleteMessage(this.props.message);
+            },
+            cancel: () => {},
         });
     }
 
@@ -67,7 +76,6 @@ export class Message extends Component {
 
 Object.assign(Message, {
     components: { Composer, RelativeTime },
-    defaultProps: { hasActions: true },
-    props: ["hasActions?", "message", "squashed?"],
+    props: ["message", "squashed?"],
     template: "mail.message",
 });
