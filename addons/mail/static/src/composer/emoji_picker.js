@@ -98,10 +98,9 @@ export class EmojiPicker extends Component {
     }
 
     selectEmoji(ev) {
-        const index = ev.target.dataset.index;
-        if (index) {
-            const emoji = this.emojis[index];
-            this.props.onSelect(emoji.codepoints);
+        const codepoints = ev.target.dataset.codepoints;
+        if (codepoints) {
+            this.props.onSelect(codepoints);
             this.props.close();
         }
     }
