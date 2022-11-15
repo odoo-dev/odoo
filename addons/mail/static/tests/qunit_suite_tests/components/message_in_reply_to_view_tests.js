@@ -6,7 +6,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("message_in_reply_to_view_tests");
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "click on message in reply to highlights the parent message",
             async function (assert) {
                 assert.expect(1);
@@ -35,7 +35,7 @@ QUnit.module("mail", {}, function () {
                 });
                 await openDiscuss();
                 await click(
-                    `.o_MessageView[data-id="${mailMessageId2}"] .o_MessageInReplyToView_body`
+                    `.o-mail-message[data-id="${mailMessageId2}"] .o_MessageInReplyToView_body`
                 );
                 assert.containsOnce(
                     document.body,

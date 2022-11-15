@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="mail.autogrow_input" owl="1">
+    <div
+        class="o-mail-autogrow-input-container h-100 position-relative"
+        t-attf-class="
+            {{ props.class.general }}
+            {{ props.disabled || (!rootHover.isHover and !inputFocus.isFocus) ? props.class.blur : '' }}
+            {{ !props.disabled and inputFocus.isFocus ? props.class.focus : '' }}
+            {{ !props.disabled and rootHover.isHover ? props.class.hover : '' }}
+        "
+        t-ref="root"
+    >
+        <span class="h-100 invisible ps-1 pe-2" t-out="state.value"/>
+        <input
+            class="o-mail-autogrow-input bg-transparent d-inline-block h-100 w-100 position-absolute start-0 border-0 px-1 m-0"
+            t-att-disabled="props.disabled"
+            t-att-title="props.title"
+            t-model="state.value"
+            t-on-keydown="onKeydownInput"
+            t-ref="input"
+            type="text"
+        />
+    </div>
+</t>
+
+</templates>

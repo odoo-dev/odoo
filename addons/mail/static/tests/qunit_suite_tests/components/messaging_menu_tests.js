@@ -12,7 +12,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("messaging_menu_tests.js");
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "[technical] messaging not created then becomes created",
             async function (assert) {
                 /**
@@ -46,7 +46,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test("messaging not initialized", async function (assert) {
+        QUnit.skipRefactoring("messaging not initialized", async function (assert) {
             assert.expect(2);
 
             const messaginginitializedDeferred = makeTestPromise();
@@ -73,7 +73,7 @@ QUnit.module("mail", {}, function () {
             messaginginitializedDeferred.resolve(); // ensure proper teardown
         });
 
-        QUnit.test("messaging becomes initialized", async function (assert) {
+        QUnit.skipRefactoring("messaging becomes initialized", async function (assert) {
             assert.expect(2);
 
             const messagingInitializedProm = makeTestPromise();
@@ -103,7 +103,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("basic rendering", async function (assert) {
+        QUnit.skipRefactoring("basic rendering", async function (assert) {
             assert.expect(21);
 
             patchWithCleanup(browser, {
@@ -245,49 +245,52 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("counter is taking into account failure notification", async function (assert) {
-            assert.expect(2);
+        QUnit.skipRefactoring(
+            "counter is taking into account failure notification",
+            async function (assert) {
+                assert.expect(2);
 
-            patchWithCleanup(browser, {
-                Notification: {
-                    ...browser.Notification,
-                    permission: "denied",
-                },
-            });
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                model: "mail.channel",
-                res_id: mailChannelId1,
-            });
-            const [mailChannelMemberId] = pyEnv["mail.channel.member"].search([
-                ["channel_id", "=", mailChannelId1],
-                ["partner_id", "=", pyEnv.currentPartnerId],
-            ]);
-            pyEnv["mail.channel.member"].write([mailChannelMemberId], {
-                seen_message_id: mailMessageId1,
-            });
-            // failure that is expected to be used in the test
-            pyEnv["mail.notification"].create({
-                mail_message_id: mailMessageId1, // id of the related message
-                notification_status: "exception", // necessary value to have a failure
-                notification_type: "email",
-            });
-            await start();
+                patchWithCleanup(browser, {
+                    Notification: {
+                        ...browser.Notification,
+                        permission: "denied",
+                    },
+                });
+                const pyEnv = await startServer();
+                const mailChannelId1 = pyEnv["mail.channel"].create({});
+                const mailMessageId1 = pyEnv["mail.message"].create({
+                    model: "mail.channel",
+                    res_id: mailChannelId1,
+                });
+                const [mailChannelMemberId] = pyEnv["mail.channel.member"].search([
+                    ["channel_id", "=", mailChannelId1],
+                    ["partner_id", "=", pyEnv.currentPartnerId],
+                ]);
+                pyEnv["mail.channel.member"].write([mailChannelMemberId], {
+                    seen_message_id: mailMessageId1,
+                });
+                // failure that is expected to be used in the test
+                pyEnv["mail.notification"].create({
+                    mail_message_id: mailMessageId1, // id of the related message
+                    notification_status: "exception", // necessary value to have a failure
+                    notification_type: "email",
+                });
+                await start();
 
-            assert.containsOnce(
-                document.body,
-                ".o_MessagingMenu_counter",
-                "should display a notification counter next to the messaging menu for one notification"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_MessagingMenu_counter").textContent,
-                "1",
-                "should display a counter of '1' next to the messaging menu"
-            );
-        });
+                assert.containsOnce(
+                    document.body,
+                    ".o_MessagingMenu_counter",
+                    "should display a notification counter next to the messaging menu for one notification"
+                );
+                assert.strictEqual(
+                    document.querySelector(".o_MessagingMenu_counter").textContent,
+                    "1",
+                    "should display a counter of '1' next to the messaging menu"
+                );
+            }
+        );
 
-        QUnit.test("switch tab", async function (assert) {
+        QUnit.skipRefactoring("switch tab", async function (assert) {
             assert.expect(15);
 
             const { click } = await start();
@@ -436,7 +439,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("new message", async function (assert) {
+        QUnit.skipRefactoring("new message", async function (assert) {
             assert.expect(3);
 
             const { click } = await start();
@@ -458,7 +461,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("no new message when discuss is open", async function (assert) {
+        QUnit.skipRefactoring("no new message when discuss is open", async function (assert) {
             assert.expect(3);
 
             const { click, openDiscuss, openView } = await start();
@@ -490,7 +493,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("channel preview: basic rendering", async function (assert) {
+        QUnit.skipRefactoring("channel preview: basic rendering", async function (assert) {
             assert.expect(9);
 
             const pyEnv = await startServer();
@@ -586,7 +589,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("filtered previews", async function (assert) {
+        QUnit.skipRefactoring("filtered previews", async function (assert) {
             assert.expect(12);
 
             const pyEnv = await startServer();
@@ -705,7 +708,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("open chat window from preview", async function (assert) {
+        QUnit.skipRefactoring("open chat window from preview", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -721,7 +724,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("no code injection in message body preview", async function (assert) {
+        QUnit.skipRefactoring("no code injection in message body preview", async function (assert) {
             assert.expect(5);
 
             const pyEnv = await startServer();
@@ -764,7 +767,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "no code injection in message body preview from sanitized message",
             async function (assert) {
                 assert.expect(5);
@@ -810,7 +813,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "<br/> tags in message body preview are transformed in spaces",
             async function (assert) {
                 assert.expect(4);
@@ -848,89 +851,98 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test("rendering with OdooBot has a request (default)", async function (assert) {
-            assert.expect(4);
+        QUnit.skipRefactoring(
+            "rendering with OdooBot has a request (default)",
+            async function (assert) {
+                assert.expect(4);
 
-            patchWithCleanup(browser, {
-                Notification: {
-                    ...browser.Notification,
-                    permission: "default",
-                },
-            });
-            const { click } = await start();
+                patchWithCleanup(browser, {
+                    Notification: {
+                        ...browser.Notification,
+                        permission: "default",
+                    },
+                });
+                const { click } = await start();
 
-            assert.ok(
-                document.querySelector(".o_MessagingMenu_counter"),
-                "should display a notification counter next to the messaging menu for OdooBot request"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_MessagingMenu_counter").textContent,
-                "1",
-                "should display a counter of '1' next to the messaging menu"
-            );
+                assert.ok(
+                    document.querySelector(".o_MessagingMenu_counter"),
+                    "should display a notification counter next to the messaging menu for OdooBot request"
+                );
+                assert.strictEqual(
+                    document.querySelector(".o_MessagingMenu_counter").textContent,
+                    "1",
+                    "should display a counter of '1' next to the messaging menu"
+                );
 
-            await click(".o_MessagingMenu_toggler");
-            assert.containsOnce(
-                document.body,
-                ".o_NotificationRequestView",
-                "should display a notification in the messaging menu"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_NotificationRequestView_name").textContent.trim(),
-                "OdooBot has a request",
-                "notification should display that OdooBot has a request"
-            );
-        });
+                await click(".o_MessagingMenu_toggler");
+                assert.containsOnce(
+                    document.body,
+                    ".o_NotificationRequestView",
+                    "should display a notification in the messaging menu"
+                );
+                assert.strictEqual(
+                    document.querySelector(".o_NotificationRequestView_name").textContent.trim(),
+                    "OdooBot has a request",
+                    "notification should display that OdooBot has a request"
+                );
+            }
+        );
 
-        QUnit.test("rendering without OdooBot has a request (denied)", async function (assert) {
-            assert.expect(2);
+        QUnit.skipRefactoring(
+            "rendering without OdooBot has a request (denied)",
+            async function (assert) {
+                assert.expect(2);
 
-            patchWithCleanup(browser, {
-                Notification: {
-                    permission: "denied",
-                },
-            });
-            const { click } = await start();
+                patchWithCleanup(browser, {
+                    Notification: {
+                        permission: "denied",
+                    },
+                });
+                const { click } = await start();
 
-            assert.containsNone(
-                document.body,
-                ".o_MessagingMenu_counter",
-                "should not display a notification counter next to the messaging menu"
-            );
+                assert.containsNone(
+                    document.body,
+                    ".o_MessagingMenu_counter",
+                    "should not display a notification counter next to the messaging menu"
+                );
 
-            await click(".o_MessagingMenu_toggler");
-            assert.containsNone(
-                document.body,
-                ".o_NotificationRequestView",
-                "should display no notification in the messaging menu"
-            );
-        });
+                await click(".o_MessagingMenu_toggler");
+                assert.containsNone(
+                    document.body,
+                    ".o_NotificationRequestView",
+                    "should display no notification in the messaging menu"
+                );
+            }
+        );
 
-        QUnit.test("rendering without OdooBot has a request (accepted)", async function (assert) {
-            assert.expect(2);
+        QUnit.skipRefactoring(
+            "rendering without OdooBot has a request (accepted)",
+            async function (assert) {
+                assert.expect(2);
 
-            patchWithCleanup(browser, {
-                Notification: {
-                    permission: "granted",
-                },
-            });
-            const { click } = await start();
+                patchWithCleanup(browser, {
+                    Notification: {
+                        permission: "granted",
+                    },
+                });
+                const { click } = await start();
 
-            assert.containsNone(
-                document.body,
-                ".o_MessagingMenu_counter",
-                "should not display a notification counter next to the messaging menu"
-            );
+                assert.containsNone(
+                    document.body,
+                    ".o_MessagingMenu_counter",
+                    "should not display a notification counter next to the messaging menu"
+                );
 
-            await click(".o_MessagingMenu_toggler");
-            assert.containsNone(
-                document.body,
-                ".o_NotificationRequestView",
-                "should display no notification in the messaging menu"
-            );
-        });
+                await click(".o_MessagingMenu_toggler");
+                assert.containsNone(
+                    document.body,
+                    ".o_NotificationRequestView",
+                    "should display no notification in the messaging menu"
+                );
+            }
+        );
 
-        QUnit.test("respond to notification prompt (denied)", async function (assert) {
+        QUnit.skipRefactoring("respond to notification prompt (denied)", async function (assert) {
             assert.expect(4);
 
             patchWithCleanup(browser, {
@@ -970,7 +982,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "Group chat should be displayed inside the chat section of the messaging menu",
             async function (assert) {
                 assert.expect(1);
