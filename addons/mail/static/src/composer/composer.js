@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
 import { useEmojiPicker, loadEmojiData } from "./emoji_picker";
 
@@ -27,6 +27,14 @@ export class Composer extends Component {
         onWillUpdateProps(({ message }) => {
             this.state.value = message ? this.convertBrToLineBreak(message.body) : "";
         });
+        useEffect(
+            () => {
+                this.ref.el.style.height = "1px";
+                this.ref.el.style.height = this.ref.el.scrollHeight + "px";
+            },
+            () => [this.state.value, this.ref.el]
+        );
+        onMounted(() => this.ref.el.scrollTo({ top: 0, behavior: "instant" }));
     }
 
     convertBrToLineBreak(str) {

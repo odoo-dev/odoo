@@ -10,7 +10,12 @@ $o-mail-message-sidebar-width: 48px !default;
 .o-mail-composer-textarea {
     padding-top: 10px; // carefully crafted to have the text in the middle in chat window
     padding-bottom: 10px;
+    max-height: 100px;
     resize: none;
+
+    .o-mail-extended-composer & {
+        max-height: 400px;
+    }
 
     &::placeholder {
         @include text-truncate();
