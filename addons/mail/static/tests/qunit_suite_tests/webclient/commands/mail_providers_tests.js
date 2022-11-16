@@ -19,7 +19,7 @@ QUnit.module("mail", {}, function () {
                 },
             });
 
-            QUnit.test(
+            QUnit.skipRefactoring(
                 "open the chatWindow of a user from the command palette",
                 async function (assert) {
                     assert.expect(1);

@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { ChatWindowManagerContainer } from "@mail/components/chat_window_manager_container/chat_window_manager_container";
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
 import { activityService } from "@mail/new/activity/activity_service";
 import { Discuss } from "@mail/new/discuss/discuss";
@@ -35,9 +34,6 @@ registry
 registry
     .category("main_components")
     .add("DialogManagerContainer", { Component: DialogManagerContainer });
-registry
-    .category("main_components")
-    .add("ChatWindowManagerContainer", { Component: ChatWindowManagerContainer });
 registry
     .category("main_components")
     .add("PopoverManagerContainer", { Component: PopoverManagerContainer });
