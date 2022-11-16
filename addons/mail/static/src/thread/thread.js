@@ -22,7 +22,7 @@ export class Thread extends Component {
     }
 
     isSquashed(msg, prevMsg) {
-        if (!prevMsg || this.env.inChatter) {
+        if (!prevMsg || this.messaging.isMessageEmpty(prevMsg) || this.env.inChatter) {
             return false;
         }
 
