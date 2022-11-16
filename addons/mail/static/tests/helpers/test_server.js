@@ -97,7 +97,8 @@ export class TestServer {
     _mail_channel_messages({ channel_id, limit }) {
         return Object.values(this.messages)
             .filter((msg) => msg.res_id === channel_id && msg.model === "mail.channel")
-            .slice(0, limit);
+            .slice(0, limit)
+            .sort((firstMsg, secMsg) => secMsg.id - firstMsg.id);
     }
 
     _mail_channel_set_last_seen_message({ channel_id, last_message_id }) {

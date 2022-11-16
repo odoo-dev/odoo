@@ -177,4 +177,24 @@ QUnit.module("mail", (hooks) => {
             target.querySelector(".o-mail-composer-textarea")
         );
     });
+
+    QUnit.test("Message following a notification should not be squashed", async (assert) => {
+        const server = new TestServer();
+        server.addChannel(1, "general", "General announcements...");
+        server.addMessage(
+            "notification",
+            1,
+            1,
+            "mail.channel",
+            3,
+            '<div class="o_mail_notification">created <a href="#" class="o_channel_redirect">#general</a></div>'
+        );
+        server.addMessage("comment", 2, 1, "mail.channel", 3, "Hello world !");
+        const env = makeTestEnv((route, params) => server.rpc(route, params));
+        await env.services["mail.messaging"].isReady;
+        env.services["mail.messaging"].setDiscussThread(1);
+        await mount(Discuss, target, { env });
+
+        assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container");
+    });
 });
