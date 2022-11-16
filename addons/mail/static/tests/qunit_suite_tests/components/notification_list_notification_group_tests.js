@@ -85,7 +85,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("mark as read", async function (assert) {
+        QUnit.skipRefactoring("mark as read", async function (assert) {
             assert.expect(2);
 
             const pyEnv = await startServer();
@@ -120,7 +120,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("grouped notifications by document", async function (assert) {
+        QUnit.skipRefactoring("grouped notifications by document", async function (assert) {
             // If some failures linked to a document refers to a same document, a single
             // notification should group all those failures.
             assert.expect(5);
@@ -293,7 +293,7 @@ QUnit.module("mail", {}, function () {
             assert.verifySteps(["do_action"], "should do an action to display the related records");
         });
 
-        QUnit.test("different mail.channel are not grouped", async function (assert) {
+        QUnit.skipRefactoring("different mail.channel are not grouped", async function (assert) {
             // `mail.channel` is a special case where notifications are not grouped when
             // they are linked to different channels, even though the model is the same.
             assert.expect(6);

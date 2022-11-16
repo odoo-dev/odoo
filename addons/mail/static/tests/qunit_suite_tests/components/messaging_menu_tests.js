@@ -705,7 +705,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("open chat window from preview", async function (assert) {
+        QUnit.skipRefactoring("open chat window from preview", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();

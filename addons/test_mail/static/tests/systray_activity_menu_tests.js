@@ -44,7 +44,7 @@ QUnit.test('activity menu widget: menu with no records', async function (assert)
     assert.containsOnce(document.body, '.o_ActivityMenuView_noActivity');
 });
 
-QUnit.test('activity menu widget: activity menu with 2 models', async function (assert) {
+QUnit.skipRefactoring('activity menu widget: activity menu with 2 models', async function (assert) {
     assert.expect(10);
 
     const { click, env } = await start();

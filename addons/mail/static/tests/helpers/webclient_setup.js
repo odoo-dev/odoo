@@ -7,12 +7,12 @@ import { makeMultiTabToLegacyEnv } from "@bus/services/legacy/make_multi_tab_to_
 import { makeBusServiceToLegacyEnv } from "@bus/services/legacy/make_bus_service_to_legacy_env";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 
-import { ChatWindowManagerContainer } from "@mail/components/chat_window_manager_container/chat_window_manager_container";
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
 import { Discuss } from "@mail/new/discuss/discuss";
 import { PopoverManagerContainer } from "@mail/components/popover_manager_container/popover_manager_container";
 import { messagingService as newMessagingService } from "@mail/new/messaging_service";
 import { activityService } from "@mail/new/activity/activity_service";
+import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
 import { messagingService } from "@mail/services/messaging_service";
 import { systrayService } from "@mail/services/systray_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
@@ -46,8 +46,8 @@ const SERVICES_PARAMETER_NAMES = new Set([
  */
 function setupMainComponentRegistry() {
     const mainComponentRegistry = registry.category("main_components");
-    mainComponentRegistry.add("ChatWindowManagerContainer", {
-        Component: ChatWindowManagerContainer,
+    mainComponentRegistry.add("mail.ChatWindowContainer", {
+        Component: ChatWindowContainer,
     });
     mainComponentRegistry.add("DialogManagerContainer", { Component: DialogManagerContainer });
     registry.category("actions").add("mail.action_discuss", Discuss);
