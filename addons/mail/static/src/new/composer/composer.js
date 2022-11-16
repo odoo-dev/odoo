@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onMounted, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, useEffect, useRef, useState } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
 import { useEmojiPicker, loadEmojiData } from "./emoji_picker";
 
@@ -24,9 +24,6 @@ export class Composer extends Component {
             },
             () => [this.props.autofocus + this.state.autofocus, this.props.placeholder]
         );
-        onWillUpdateProps(({ message }) => {
-            this.state.value = message ? this.convertBrToLineBreak(message.body) : "";
-        });
         useEffect(
             () => {
                 this.ref.el.style.height = "1px";
