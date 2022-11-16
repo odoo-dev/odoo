@@ -24,8 +24,12 @@ export class Composer extends Component {
             },
             () => [this.props.autofocus + this.state.autofocus, this.props.placeholder]
         );
-        onWillUpdateProps(({ message }) => {
-            this.state.value = message ? this.convertBrToLineBreak(message.body) : "";
+        onWillUpdateProps((nextProps) => {
+            if (nextProps.message !== this.props.message) {
+                this.state.value = nextProps.message
+                    ? this.convertBrToLineBreak(nextProps.message.body)
+                    : "";
+            }
         });
         useEffect(
             () => {
