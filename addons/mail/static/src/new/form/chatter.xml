@@ -11,7 +11,7 @@
                 Log note
             </button>
             <div class="border-bottom border-start flex-grow-1 d-flex">
-                <button t-if="props.hasActivity" class="o-mail-chatter-topbar-schedule-activity-button p-2 m-2" t-att-disabled="!props.resId" t-on-click="scheduleActivity">
+                <button t-if="props.hasActivity" class="o-mail-chatter-topbar-schedule-activity-button btn p-2 m-2" t-att-disabled="!props.resId" t-on-click="scheduleActivity">
                     <i class="fa fa-clock-o me-1"/>
                     Activities
                 </button>
