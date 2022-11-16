@@ -5,6 +5,7 @@ import { activityService } from "@mail/new/activity/activity_service";
 import { Discuss } from "@mail/new/discuss/discuss";
 import { messagingService as newMessagingService } from "@mail/new/messaging_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
+import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
 import { PopoverManagerContainer } from "@mail/components/popover_manager_container/popover_manager_container";
 import { messagingService } from "@mail/services/messaging_service";
 import { systrayService } from "@mail/services/systray_service";
@@ -37,3 +38,11 @@ registry
 registry
     .category("main_components")
     .add("PopoverManagerContainer", { Component: PopoverManagerContainer });
+
+registry.category("systray").add(
+    "mail.messaging_menu",
+    {
+        Component: MessagingMenu,
+    },
+    { sequence: 25 }
+);
