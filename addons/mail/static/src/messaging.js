@@ -188,7 +188,15 @@ export class Messaging {
      * caller should do it, not this method
      */
     createMessage(body, data, thread) {
-        const { author, id, date, message_type: type } = data;
+        const {
+            attachment_ids: attachments,
+            author,
+            id,
+            date,
+            message_type: type,
+            subtype_description: subtypeDescription,
+            trackingValues,
+        } = data;
         if (id in this.messages) {
             return this.messages[id];
         }
@@ -205,6 +213,7 @@ export class Messaging {
         }
 
         const message = {
+            attachments,
             id,
             type,
             body,
@@ -215,6 +224,8 @@ export class Messaging {
             dateTime,
             isStarred,
             isNote: data.is_note,
+            subtypeDescription,
+            trackingValues,
         };
         message.recordName = data.record_name;
         message.resId = data.res_id;
@@ -546,12 +557,29 @@ export class Messaging {
             this.discuss.starred.counter--;
             removeFromArray(this.discuss.starred.messages, message.id);
         }
-        removeFromArray(this.threads[message.resId].messages, message.id);
+        message.body = markup("");
+        message.attachments = [];
         return this.rpc("/mail/message/update_content", {
             attachment_ids: [],
             body: "",
             message_id: message.id,
         });
+    }
+
+    isMessageBodyEmpty(message) {
+        return (
+            !message.body ||
+            ["", "<p></p>", "<p><br></p>", "<p><br/></p>"].includes(message.body.replace(/\s/g, ""))
+        );
+    }
+
+    isMessageEmpty(message) {
+        return (
+            this.isMessageBodyEmpty(message) &&
+            message.attachments.length === 0 &&
+            message.trackingValues.length === 0 &&
+            !message.subtypeDescription
+        );
     }
 
     async unstarAll() {
