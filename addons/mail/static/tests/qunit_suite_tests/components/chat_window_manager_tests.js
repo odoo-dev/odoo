@@ -2209,7 +2209,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "should not have chat window hidden menu in mobile (transition from 3 chat windows in desktop to mobile)",
             async function (assert) {
                 /**

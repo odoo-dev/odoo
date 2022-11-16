@@ -2,7 +2,6 @@
 
 import { Component, useState } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
-import { registry } from "@web/core/registry";
 import { useMessaging } from "../messaging_hook";
 import { RelativeTime } from "../thread/relative_time";
 
@@ -58,9 +57,3 @@ Object.assign(MessagingMenu, {
     props: [],
     template: "mail.messaging_menu",
 });
-
-const systrayItem = {
-    Component: MessagingMenu,
-};
-
-registry.category("systray").add("mail.messaging_menu", systrayItem, { sequence: 25 });

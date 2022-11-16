@@ -8,7 +8,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("thread_needaction_preview_tests.js");
 
-        QUnit.test("mark as read", async function (assert) {
+        QUnit.skipRefactoring("mark as read", async function (assert) {
             assert.expect(5);
 
             const pyEnv = await startServer();
@@ -259,7 +259,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "preview should display last needaction message preview even if there is a more recent message that is not needaction in the thread",
             async function (assert) {
                 assert.expect(2);

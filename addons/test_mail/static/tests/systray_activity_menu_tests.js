@@ -144,7 +144,7 @@ QUnit.test('activity menu widget: activity view icon', async function (assert) {
     ]);
 });
 
-QUnit.test('activity menu widget: close on messaging menu click', async function (assert) {
+QUnit.skipRefactoring('activity menu widget: close on messaging menu click', async function (assert) {
     assert.expect(2);
 
     const { click } = await start();

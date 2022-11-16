@@ -10,9 +10,10 @@ import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
 import { Discuss } from "@mail/new/discuss/discuss";
 import { PopoverManagerContainer } from "@mail/components/popover_manager_container/popover_manager_container";
-import { messagingService as newMessagingService } from "@mail/new/messaging_service";
 import { activityService } from "@mail/new/activity/activity_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
+import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
+import { messagingService as newMessagingService } from "@mail/new/messaging_service";
 import { messagingService } from "@mail/services/messaging_service";
 import { systrayService } from "@mail/services/systray_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
@@ -124,6 +125,14 @@ function setupMessagingServiceRegistries({
     registry
         .category("wowlToLegacyServiceMappers")
         .add("messaging_service_to_legacy_env", makeMessagingToLegacyEnv);
+
+    registry.category("systray").add(
+        "mail.messaging_menu",
+        {
+            Component: MessagingMenu,
+        },
+        { sequence: 25 }
+    );
 }
 
 /**

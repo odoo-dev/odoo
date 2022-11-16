@@ -8,7 +8,7 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("notification_list_notification_group_tests.js");
 
-        QUnit.test("notification group basic layout", async function (assert) {
+        QUnit.skipRefactoring("notification group basic layout", async function (assert) {
             assert.expect(10);
 
             const pyEnv = await startServer();
@@ -188,7 +188,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test("grouped notifications by document model", async function (assert) {
+        QUnit.skipRefactoring("grouped notifications by document model", async function (assert) {
             // If all failures linked to a document model refers to different documents,
             // a single notification should group all failures that are linked to this
             // document model.
@@ -379,7 +379,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.test(
+        QUnit.skipRefactoring(
             "multiple grouped notifications by document model, sorted by the most recent message of each group",
             async function (assert) {
                 assert.expect(9);
@@ -475,7 +475,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.test("non-failure notifications are ignored", async function (assert) {
+        QUnit.skipRefactoring("non-failure notifications are ignored", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
