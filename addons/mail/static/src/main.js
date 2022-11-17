@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { DialogManagerContainer } from "@mail/components/dialog_manager_container/dialog_manager_container";
+import { ActivityMenu } from "@mail/new/activity/activity_menu";
 import { activityService } from "@mail/new/activity/activity_service";
 import { Discuss } from "@mail/new/discuss/discuss";
 import { messagingService as newMessagingService } from "@mail/new/messaging_service";
@@ -39,6 +40,13 @@ registry
     .category("main_components")
     .add("PopoverManagerContainer", { Component: PopoverManagerContainer });
 
+registry.category("systray").add(
+    "mail.activity_menu",
+    {
+        Component: ActivityMenu,
+    },
+    { sequence: 20 }
+);
 registry.category("systray").add(
     "mail.messaging_menu",
     {

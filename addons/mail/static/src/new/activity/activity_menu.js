@@ -2,7 +2,6 @@
 
 import { Component, useState } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
-import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMenu extends Component {
@@ -53,9 +52,3 @@ Object.assign(ActivityMenu, {
     props: [],
     template: "mail.activity_menu",
 });
-
-const systrayItem = {
-    Component: ActivityMenu,
-};
-
-registry.category("systray").add("mail.activity_menu", systrayItem, { sequence: 20 });
