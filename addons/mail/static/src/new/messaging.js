@@ -153,6 +153,7 @@ export class Messaging {
             chatPartnerId: false,
             isAdmin: false,
             canLeave: data.canLeave || false,
+            isRenameable: ["chat", "channel", "group"].includes(type),
         };
         for (const key in data) {
             thread[key] = data[key];
@@ -599,6 +600,17 @@ export class Messaging {
         this.discuss.starred.counter = 0;
         this.discuss.starred.messages = [];
         await this.orm.call("mail.message", "unstar_all");
+    }
+
+    async notifyThreadNameToServer(threadId, name) {
+        const thread = this.threads[threadId];
+        if (thread.type === "channel" || thread.type === "group") {
+            thread.name = name;
+            await this.orm.call("mail.channel", "channel_rename", [[thread.id]], { name });
+        } else if (thread.type === "chat") {
+            thread.name = name;
+            await this.orm.call("mail.channel", "channel_set_custom_name", [[thread.id]], { name });
+        }
     }
 
     // -------------------------------------------------------------------------

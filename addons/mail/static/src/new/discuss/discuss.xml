@@ -9,10 +9,14 @@
             <!-- top bar -->
             <div class="px-3 bg-100 border-bottom d-flex flex-shrink-0" style="height:42px;">
                 <ThreadIcon className="'me-2 align-self-center'" thread="thread"/>
-                <div class="d-flex flex-grow-1 align-self-center align-items-center">
-                    <div class="lead flex-shrink-0 px-1 border text-truncate fw-bold border-light" t-att-title="thread.name" >
-                        <t t-esc="thread.name"/>
-                    </div>
+                <div class="d-flex flex-grow-1 align-self-center align-items-center h-100 py-2">
+                    <AutogrowInput
+                        class="{ general: 'o-mail-discuss-thread-name fw-bold lead border', blur: 'bg-transparent border-light', hover: 'bg-white', focus: 'bg-white border-dark' }"
+                        disabled="!thread.isRenameable"
+                        onValidate.bind="renameThread"
+                        title="thread.name"
+                        value="thread.name"
+                    />
                     <t t-if="thread.description">
                         <div class="flex-shrink-0 mx-2 py-2 border-start"/>
                         <div class="px-1 border text-truncate border-light" t-att-title="thread.description">

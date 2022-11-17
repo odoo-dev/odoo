@@ -1,6 +1,20 @@
 /** @odoo-module */
 
-import { onMounted, onPatched, onWillPatch, onWillUnmount, useRef } from "@odoo/owl";
+import {
+    onMounted,
+    onPatched,
+    onWillPatch,
+    onWillUnmount,
+    useComponent,
+    useRef,
+    useState,
+} from "@odoo/owl";
+
+function useExternalListener(target, eventName, handler, eventParams) {
+    const boundHandler = handler.bind(useComponent());
+    onMounted(() => target().addEventListener(eventName, boundHandler, eventParams));
+    onWillUnmount(() => target().removeEventListener(eventName, boundHandler, eventParams));
+}
 
 export function removeFromArray(array, elem) {
     const index = array.indexOf(elem);
@@ -55,4 +69,48 @@ export function useAutoScroll(refName) {
             ref.el.scrollTop = ref.el.scrollHeight;
         }
     });
+}
+
+export function useHover(refName, callback = () => {}) {
+    const ref = useRef(refName);
+    const state = useState({ isHover: false });
+    function onHover(hovered) {
+        state.isHover = hovered;
+        callback(hovered);
+    }
+    useExternalListener(
+        () => ref.el,
+        "mouseenter",
+        () => onHover(true),
+        true
+    );
+    useExternalListener(
+        () => ref.el,
+        "mouseleave",
+        () => onHover(false),
+        true
+    );
+    return state;
+}
+
+export function useFocus(refName, callback = () => {}) {
+    const ref = useRef(refName);
+    const state = useState({ isFocus: false });
+    function onFocus(focused) {
+        state.isFocus = focused;
+        callback(focused);
+    }
+    useExternalListener(
+        () => ref.el,
+        "focusin",
+        () => onFocus(true),
+        true
+    );
+    useExternalListener(
+        () => ref.el,
+        "focusout",
+        () => onFocus(false),
+        true
+    );
+    return state;
 }
