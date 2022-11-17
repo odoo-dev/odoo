@@ -1,0 +1,15 @@
+.o-mail-autogrow-input-container {
+    min-width: 3em;
+
+    span {
+        white-space: pre;
+    }
+
+    input {
+        font-weight: inherit;
+
+        &:disabled {
+            color: $black;
+        }
+    }
+}

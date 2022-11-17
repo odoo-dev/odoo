@@ -8,6 +8,7 @@ import {
     mount,
     nextTick,
     patchWithCleanup,
+    triggerEvent,
 } from "@web/../tests/helpers/utils";
 import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
@@ -67,6 +68,39 @@ QUnit.module("mail", (hooks) => {
             target.querySelector(".o-mail-composer-textarea"),
             document.activeElement
         );
+    });
+
+    QUnit.test("can change the thread name of #general", async (assert) => {
+        const server = new TestServer();
+        server.addChannel(1, "general", "General announcements...");
+        const env = makeTestEnv((route, params) => {
+            if (route === "/web/dataset/call_kw/mail.channel/channel_rename") {
+                assert.step(route);
+            }
+            return server.rpc(route, params);
+        });
+        await mount(Discuss, target, { env });
+        env.services["mail.messaging"].setDiscussThread(1);
+
+        assert.containsOnce(target, ".o-mail-discuss-thread-name");
+        const threadNameElement = target.querySelector(
+            ".o-mail-discuss-thread-name .o-mail-autogrow-input"
+        );
+
+        await click(threadNameElement);
+        assert.strictEqual(threadNameElement.value, "general");
+        await editInput(target, ".o-mail-discuss-thread-name .o-mail-autogrow-input", "special");
+        await triggerEvent(
+            target,
+            ".o-mail-discuss-thread-name .o-mail-autogrow-input",
+            "keydown",
+            {
+                key: "Enter",
+            }
+        );
+        assert.strictEqual(threadNameElement.value, "special");
+
+        assert.verifySteps(["/web/dataset/call_kw/mail.channel/channel_rename"]);
     });
 
     QUnit.test("can post a message", async (assert) => {

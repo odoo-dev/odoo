@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { AutogrowInput } from "./autogrow_input";
 import { Sidebar } from "./sidebar";
 import { Thread } from "../thread/thread";
 import { ThreadIcon } from "./thread_icon";
@@ -26,10 +27,23 @@ export class Discuss extends Component {
     startCall() {
         this.messaging.startCall(this.messaging.discuss.threadId);
     }
+
+    async renameThread({ value: name }) {
+        const newName = name.trim();
+        const thread = this.currentThread();
+        if (
+            newName !== thread.name &&
+            ((newName && thread.type === "channel") ||
+                thread.type === "chat" ||
+                thread.type === "group")
+        ) {
+            await this.messaging.notifyThreadNameToServer(thread.id, newName);
+        }
+    }
 }
 
 Object.assign(Discuss, {
-    components: { Sidebar, Thread, ThreadIcon, Composer, CallUI },
+    components: { AutogrowInput, Sidebar, Thread, ThreadIcon, Composer, CallUI },
     props: ["*"],
     template: "mail.discuss",
 });
