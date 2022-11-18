@@ -9,7 +9,12 @@ export class Thread extends Component {
     setup() {
         this.messaging = useMessaging();
         if (!this.env.inChatter) {
-            useAutoScroll("messages");
+            useAutoScroll(
+                "messages",
+                () =>
+                    !this.props.messageHighlight ||
+                    !this.props.messageHighlight.highlightedMessageId
+            );
         }
         onWillStart(() => this.requestMessages(this.props.id));
         onWillUpdateProps((nextProps) => this.requestMessages(nextProps.id));
@@ -55,6 +60,6 @@ export class Thread extends Component {
 
 Object.assign(Thread, {
     components: { Message },
-    props: ["id"],
+    props: ["id", "messageHighlight?"],
     template: "mail.thread",
 });

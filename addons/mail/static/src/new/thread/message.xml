@@ -4,12 +4,13 @@
 <t t-name="mail.message" owl="1">
     <div class="o-mail-message position-relative py-1 mt-1 px-3" t-att-class="{
             'o-mail-is-author': message.isAuthor,
+            'o-highlighted bg-view shadow-lg': props.highlighted,
             'opacity-50': props.grayedOut,
         }"
         t-att-data-message-id="message.id"
         t-ref="ref"
     >
-        <MessageInReplyTo t-if="message.parentMessage" message="message" alignedRight="isAlignedRight"/>
+        <MessageInReplyTo t-if="message.parentMessage" alignedRight="isAlignedRight" message="message" onClick="props.onParentMessageClick"/>
         <div class="o-mail-message-core position-relative d-flex flex-shrink-0">
             <div class="o-mail-message-sidebar d-flex flex-shrink-0 justify-content-center">
                 <div t-if="!props.squashed" class="o-mail-avatar-container position-relative">

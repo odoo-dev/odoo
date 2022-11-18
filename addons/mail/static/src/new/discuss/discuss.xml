@@ -40,9 +40,9 @@
             <t t-if="thread.inCall">
                 <CallUI thread="thread"/>
             </t>
-            <Thread id="thread.id" t-key="thread.id"/>
+            <Thread id="thread.id" t-key="thread.id" messageHighlight="messageHighlight"/>
             <t t-if="thread.type !== 'mailbox' or messaging.discuss.messageToReplyTo">
-                <Composer t-key="thread.id" threadId="thread.id" autofocus="true" onDiscardCallback="() => messaging.cancelReplyTo()"/>
+                <Composer t-key="thread.id" threadId="thread.id" autofocus="true" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()"/>
             </t>
         </div>
         <div t-if="!thread" class="o-mail-discuss-no-thread d-flex flex-grow-1 align-items-center justify-content-center w-100 bg-view">
