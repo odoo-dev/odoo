@@ -31,6 +31,6 @@ export class MessageInReplyTo extends Component {
 }
 
 Object.assign(MessageInReplyTo, {
-    props: ["message", "alignedRight"],
+    props: ["message", "alignedRight", "onClick"],
     template: "mail.message_in_reply_to",
 });

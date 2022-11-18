@@ -92,7 +92,7 @@ export function onExternalClick(refName, cb) {
     });
 }
 
-export function useAutoScroll(refName) {
+export function useAutoScroll(refName, shouldScrollPredicate = () => true) {
     const ref = useRef(refName);
     let isScrolled = false;
     onMounted(() => {
@@ -103,7 +103,7 @@ export function useAutoScroll(refName) {
         isScrolled = Math.abs(el.scrollTop + el.clientHeight - el.scrollHeight) < 1;
     });
     onPatched(() => {
-        if (isScrolled) {
+        if (isScrolled && shouldScrollPredicate()) {
             ref.el.scrollTop = ref.el.scrollHeight;
         }
     });

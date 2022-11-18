@@ -3,7 +3,7 @@
 import { isEventHandled, markEventHandled, onExternalClick } from "@mail/new/utils";
 import { useMessaging } from "../messaging_hook";
 import { RelativeTime } from "./relative_time";
-import { Component, useRef, useState } from "@odoo/owl";
+import { Component, onPatched, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "@mail/new/composer/composer";
 import { MessageDeleteDialog } from "@mail/new/thread/message_delete_dialog";
@@ -30,6 +30,11 @@ export class Message extends Component {
                 return;
             }
             this.state.isEditing = false;
+        });
+        onPatched(() => {
+            if (this.props.highlighted && this.ref.el) {
+                this.ref.el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
         });
     }
 
@@ -98,7 +103,14 @@ export class Message extends Component {
 
 Object.assign(Message, {
     components: { Composer, MessageInReplyTo, RelativeTime },
-    defaultProps: { hasActions: true },
-    props: ["hasActions?", "grayedOut?", "message", "squashed?"],
+    defaultProps: { hasActions: true, onParentMessageClick: () => {} },
+    props: [
+        "hasActions?",
+        "grayedOut?",
+        "highlighted?",
+        "onParentMessageClick?",
+        "message",
+        "squashed?",
+    ],
     template: "mail.message",
 });

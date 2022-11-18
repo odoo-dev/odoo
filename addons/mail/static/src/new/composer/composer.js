@@ -123,11 +123,16 @@ export class Composer extends Component {
 }
 
 Object.assign(Composer, {
-    defaultProps: { type: "message", mode: "normal", onDiscardCallback: () => {} }, // mode = compact, normal, extended
+    defaultProps: {
+        mode: "normal",
+        onDiscardCallback: () => {},
+        type: "message",
+    }, // mode = compact, normal, extended
     props: [
         "threadId?",
         "message?",
         "autofocus?",
+        "highlightReplyTo?",
         "onDiscardCallback?",
         "onPostCallback?",
         "mode?",
