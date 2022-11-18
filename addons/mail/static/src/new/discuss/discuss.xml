@@ -19,9 +19,12 @@
                     />
                     <t t-if="thread.description">
                         <div class="flex-shrink-0 mx-2 py-2 border-start"/>
-                        <div class="px-1 border text-truncate border-light" t-att-title="thread.description">
-                            <t t-esc="thread.description"/>
-                        </div>
+                        <AutogrowInput
+                            class="{ general: 'o-mail-discuss-thread-description border', blur: 'bg-transparent border-light', hover: 'bg-white', focus: 'bg-white border-dark' }"
+                            onValidate.bind="updateThreadDescription"
+                            title="thread.description"
+                            value="thread.description"
+                        />
                     </t>
                 </div>
                 <div class="o-mail-discuss-actions d-flex align-items-center ms-1">
