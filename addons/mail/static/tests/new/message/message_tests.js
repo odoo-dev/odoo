@@ -167,7 +167,7 @@ QUnit.module("mail", (hooks) => {
     QUnit.test("Do not call server on save if no changes", async (assert) => {
         const server = new TestServer();
         server.addChannel(1, "general", "General announcements...");
-        server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world");
+        server.addMessage("comment", 1, 1, "mail.channel", 3, "Hello world\nGoodbye world");
         const env = makeTestEnv((route, params) => {
             if (route === "/mail/message/update_content") {
                 assert.step("update_content");

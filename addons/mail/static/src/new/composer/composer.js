@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { Component, onMounted, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
+import { convertBrToLineBreak } from "@mail/new/utils";
 import { useMessaging } from "../messaging_hook";
 import { useEmojiPicker } from "./emoji_picker";
 import { isEventHandled, onExternalClick } from "@mail/new/utils";
@@ -11,7 +12,7 @@ export class Composer extends Component {
         this.ref = useRef("textarea");
         this.state = useState({
             autofocus: 0,
-            value: this.props.message ? this.convertBrToLineBreak(this.props.message.body) : "",
+            value: this.props.message ? convertBrToLineBreak(this.props.message.body) : "",
         });
         useEmojiPicker("emoji-picker", {
             onSelect: (str) => this.addEmoji(str),
@@ -33,7 +34,7 @@ export class Composer extends Component {
             () => [this.messaging.discuss.messageToReplyTo]
         );
         onWillUpdateProps(({ message }) => {
-            this.state.value = message ? this.convertBrToLineBreak(message.body) : "";
+            this.state.value = message ? convertBrToLineBreak(message.body) : "";
         });
         useEffect(
             () => {
@@ -62,13 +63,6 @@ export class Composer extends Component {
             messageToReplyTo.resId === this.props.threadId ||
             (this.props.threadId === "inbox" && messageToReplyTo.needaction)
         );
-    }
-
-    convertBrToLineBreak(str) {
-        return new DOMParser().parseFromString(
-            str.replaceAll("<br>", "\n").replaceAll("</br>", "\n"),
-            "text/html"
-        ).body.textContent;
     }
 
     onKeydown(ev) {
