@@ -4,7 +4,7 @@ import { markRaw, markup, reactive } from "@odoo/owl";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Deferred } from "@web/core/utils/concurrency";
 import { url } from "@web/core/utils/urls";
-import { htmlToTextContentInline, removeFromArray } from "./utils";
+import { htmlToTextContentInline, convertBrToLineBreak, removeFromArray } from "./utils";
 import { prettifyMessageContent } from "./message_prettify_utils";
 
 const { DateTime } = luxon;
@@ -472,7 +472,7 @@ export class Messaging {
 
     async updateMessage(messageId, body) {
         const message = this.messages[messageId];
-        if (htmlToTextContentInline(message.body) === body) {
+        if (convertBrToLineBreak(message.body) === body) {
             return;
         }
         const data = await this.rpc("/mail/message/update_content", {

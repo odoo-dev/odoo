@@ -39,6 +39,13 @@ export function htmlToTextContentInline(htmlString) {
         .replace(/\s\s+/g, " ");
 }
 
+export function convertBrToLineBreak(str) {
+    return new DOMParser().parseFromString(
+        str.replaceAll("<br>", "\n").replaceAll("</br>", "\n"),
+        "text/html"
+    ).body.textContent;
+}
+
 export function onExternalClick(refName, cb) {
     const ref = useRef(refName);
     function onClick(ev) {
