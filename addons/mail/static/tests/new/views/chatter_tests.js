@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Chatter } from "@mail/new/form/chatter";
+import { Chatter } from "@mail/new/views/chatter";
 import { click, editInput, nextTick, getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
 import { Component, useState, xml } from "@odoo/owl";
