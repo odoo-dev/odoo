@@ -1,14 +1,6 @@
 /** @odoo-module */
 
-import {
-    onMounted,
-    onPatched,
-    onWillPatch,
-    onWillUnmount,
-    useComponent,
-    useRef,
-    useState,
-} from "@odoo/owl";
+import { onMounted, onPatched, onWillUnmount, useComponent, useRef, useState } from "@odoo/owl";
 
 function useExternalListener(target, eventName, handler, eventParams) {
     const boundHandler = handler.bind(useComponent());
@@ -94,19 +86,29 @@ export function onExternalClick(refName, cb) {
 
 export function useAutoScroll(refName, shouldScrollPredicate = () => true) {
     const ref = useRef(refName);
-    let isScrolled = false;
-    onMounted(() => {
-        ref.el.scrollTop = ref.el.scrollHeight;
-    });
-    onWillPatch(() => {
-        const el = ref.el;
+    let el = null;
+    let isScrolled = true;
+    const observer = new ResizeObserver(applyScroll);
+
+    function onScroll() {
         isScrolled = Math.abs(el.scrollTop + el.clientHeight - el.scrollHeight) < 1;
-    });
-    onPatched(() => {
+    }
+    function applyScroll() {
         if (isScrolled && shouldScrollPredicate()) {
             ref.el.scrollTop = ref.el.scrollHeight;
         }
+    }
+    onMounted(() => {
+        el = ref.el;
+        el.scrollTop = el.scrollHeight;
+        observer.observe(el);
+        el.addEventListener("scroll", onScroll);
     });
+    onWillUnmount(() => {
+        observer.unobserve(el);
+        el.removeEventListener("scroll", onScroll);
+    });
+    onPatched(applyScroll);
 }
 
 export function useHover(refName, callback = () => {}) {
