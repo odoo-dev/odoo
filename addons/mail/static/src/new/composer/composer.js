@@ -46,6 +46,10 @@ export class Composer extends Component {
 
     onKeydown(ev) {
         if (ev.key === "Enter") {
+            const shouldPost = this.props.mode === "extended" ? ev.ctrlKey : !ev.shiftKey;
+            if (!shouldPost) {
+                return;
+            }
             ev.preventDefault(); // to prevent useless return
             if (this.props.message) {
                 this.editMessage();
