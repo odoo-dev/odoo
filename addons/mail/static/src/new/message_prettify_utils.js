@@ -1,8 +1,9 @@
 /** @odoo-module */
 import { escape } from "@web/core/utils/strings";
-import { useEmoji } from "./composer/emoji_picker";
+import { loadEmoji } from "./composer/emoji_picker";
 
-const urlRegexp = /\b(?:https?:\/\/\d{1,3}(?:\.\d{1,3}){3}|(?:https?:\/\/|(?:www\.))[-a-z0-9@:%._+~#=\u00C0-\u024F\u1E00-\u1EFF]{2,256}\.[a-z]{2,13})\b(?:[-a-z0-9@:%_+.~#?&'$//=;\u00C0-\u024F\u1E00-\u1EFF]*)/gi;
+const urlRegexp =
+    /\b(?:https?:\/\/\d{1,3}(?:\.\d{1,3}){3}|(?:https?:\/\/|(?:www\.))[-a-z0-9@:%._+~#=\u00C0-\u024F\u1E00-\u1EFF]{2,256}\.[a-z]{2,13})\b(?:[-a-z0-9@:%_+.~#?&'$//=;\u00C0-\u024F\u1E00-\u1EFF]*)/gi;
 
 /**
  * @param rawBody {string}
@@ -141,7 +142,7 @@ function escapeAndCompactTextContent(content) {
  * @returns {string}
  */
 async function _generateEmojisOnHtml(htmlString) {
-    const { emojis } = await useEmoji();
+    const { emojis } = await loadEmoji();
     for (const emoji of emojis) {
         for (const source of [...emoji.shortcodes, ...emoji.emoticons]) {
             const escapedSource = String(source).replace(/([.*+?=^!:${}()|[\]/\\])/g, "\\$1");

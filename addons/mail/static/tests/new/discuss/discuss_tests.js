@@ -12,7 +12,7 @@ import {
 } from "@web/../tests/helpers/utils";
 import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
-import { useEmoji } from "@mail/new/composer/emoji_picker";
+import { loadEmoji } from "@mail/new/composer/emoji_picker";
 
 let target;
 
@@ -118,7 +118,7 @@ QUnit.module("mail", (hooks) => {
         assert.containsNone(target, ".o-mail-message");
         await insertText(".o-mail-composer-textarea", "abc");
         await click(target, ".o-mail-composer-send-button");
-        await useEmoji(); // wait for emoji being loaded (required for rendering)
+        await loadEmoji(); // wait for emoji being loaded (required for rendering)
         await nextTick(); // wait for following rendering
         assert.containsOnce(target, ".o-mail-message");
         assert.verifySteps([
@@ -250,7 +250,7 @@ QUnit.module("mail", (hooks) => {
         await mount(Discuss, target, { env });
         await insertText(".o-mail-composer-textarea", "test https://www.odoo.com/");
         await click(target, ".o-mail-composer-send-button");
-        await useEmoji(); // wait for emoji being loaded (required for rendering)
+        await loadEmoji(); // wait for emoji being loaded (required for rendering)
         await nextTick(); // wait for following rendering
         assert.containsOnce(
             target,
@@ -267,7 +267,7 @@ QUnit.module("mail", (hooks) => {
         await mount(Discuss, target, { env });
         await insertText(".o-mail-composer-textarea", "test :P :laughing:");
         await click(target, ".o-mail-composer-send-button");
-        await useEmoji(); // wait for emoji being loaded (required for rendering)
+        await loadEmoji(); // wait for emoji being loaded (required for rendering)
         await nextTick(); // wait for following rendering
         assert.equal(target.querySelector(".o-mail-message-body").textContent, "test 😛 😆");
     });

@@ -29,17 +29,17 @@ export function useEmojiPicker(refName, props) {
     };
     onMounted(() => {
         ref.el.addEventListener("click", toggle);
-        ref.el.addEventListener("mouseenter", useEmoji);
+        ref.el.addEventListener("mouseenter", loadEmoji);
     });
 }
 
-const loadEmojiData = memoize(() => getBundle("mail.assets_model_data").then(loadBundle));
+const _loadEmoji = memoize(() => getBundle("mail.assets_model_data").then(loadBundle));
 
 /**
  * @returns {import("@mail/composer/emoji_data")}
  */
-export async function useEmoji() {
-    await loadEmojiData();
+export async function loadEmoji() {
+    await _loadEmoji();
     return odoo.runtimeImport("@mail/new/composer/emoji_data");
 }
 
@@ -55,7 +55,7 @@ export class EmojiPicker extends Component {
             searchStr: "",
         });
         onWillStart(async () => {
-            const { categories, emojis } = await useEmoji();
+            const { categories, emojis } = await loadEmoji();
             this.categories = categories;
             this.emojis = emojis;
             this.state.categoryId = this.categories[0].sortId;
