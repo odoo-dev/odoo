@@ -76,25 +76,17 @@ QUnit.module("mail", (hooks) => {
             }
             return server.rpc(route, params);
         });
-        await mount(Discuss, target, { env });
         env.services["mail.messaging"].setDiscussThread(1);
-
-        assert.containsOnce(target, ".o-mail-discuss-thread-name");
-        const threadNameElement = target.querySelector(
-            ".o-mail-discuss-thread-name .o-mail-autogrow-input"
-        );
+        await mount(Discuss, target, { env });
+        assert.containsOnce(target, "input.o-mail-discuss-thread-name");
+        const threadNameElement = target.querySelector("input.o-mail-discuss-thread-name");
 
         await click(threadNameElement);
         assert.strictEqual(threadNameElement.value, "general");
-        await editInput(target, ".o-mail-discuss-thread-name .o-mail-autogrow-input", "special");
-        await triggerEvent(
-            target,
-            ".o-mail-discuss-thread-name .o-mail-autogrow-input",
-            "keydown",
-            {
-                key: "Enter",
-            }
-        );
+        await editInput(target, "input.o-mail-discuss-thread-name", "special");
+        await triggerEvent(target, "input.o-mail-discuss-thread-name", "keydown", {
+            key: "Enter",
+        });
         assert.strictEqual(threadNameElement.value, "special");
 
         assert.verifySteps(["/web/dataset/call_kw/mail.channel/channel_rename"]);

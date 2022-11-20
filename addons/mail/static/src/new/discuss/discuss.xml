@@ -10,10 +10,9 @@
                 <ThreadIcon className="'me-2 align-self-center'" thread="thread"/>
                 <div class="d-flex flex-grow-1 align-self-center align-items-center h-100 py-2">
                     <AutogrowInput
-                        class="{ general: 'o-mail-discuss-thread-name fw-bold lead border', blur: 'bg-transparent border-light', hover: 'bg-white', focus: 'bg-white border-dark' }"
+                        className="'o-mail-discuss-thread-name'"
                         disabled="!thread.isRenameable"
                         onValidate.bind="renameThread"
-                        title="thread.name"
                         value="thread.name"
                     />
                     <t t-if="thread.description">
