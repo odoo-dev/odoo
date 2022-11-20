@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { onExternalClick, useFocus, useHover } from "../utils";
-import { Component, useRef, useState, onWillUpdateProps } from "@odoo/owl";
+import { Component, useRef, useState, onWillUpdateProps, useEffect } from "@odoo/owl";
 
 export class AutogrowInput extends Component {
     setup() {
@@ -10,13 +10,20 @@ export class AutogrowInput extends Component {
         });
         this.inputFocus = useFocus("input");
         this.inputRef = useRef("input");
-        this.rootHover = useHover("root");
+        this.inputHover = useHover("input");
         onWillUpdateProps((nextProps) => {
             if (this.props.value !== nextProps.value) {
                 this.state.value = nextProps.value;
             }
         });
         onExternalClick("input", () => this.onValidate());
+        useEffect(
+            () => {
+                this.inputRef.el.style.width = "1px";
+                this.inputRef.el.style.width = this.inputRef.el.scrollWidth + 5 + "px";
+            },
+            () => [this.state.value]
+        );
     }
 
     /**
@@ -43,9 +50,6 @@ export class AutogrowInput extends Component {
     }
 
     onDiscard() {
-        this.props.onDiscard({
-            value: this.state.value,
-        });
         this.state.value = this.props.value;
     }
 }
@@ -53,30 +57,13 @@ export class AutogrowInput extends Component {
 Object.assign(AutogrowInput, {
     template: "mail.autogrow_input",
     props: {
-        class: {
-            type: Object,
-            blur: { type: String, optional: true },
-            focus: { type: String, optional: true },
-            general: { type: String, optional: true },
-            hover: { type: String, optional: true },
-            optional: true,
-        },
+        className: { type: String, optional: true },
         disabled: { type: Boolean, optional: true },
-        onDiscard: { type: Function, optional: true },
         onValidate: { type: Function, optional: true },
-        placeholder: { type: String, optional: true },
-        title: { type: String, optional: true },
         value: { type: String },
     },
     defaultProps: {
+        className: "",
         onValidate: () => {},
-        onDiscard: () => {},
-        class: {
-            blur: "",
-            focus: "",
-            general: "bg-white border",
-            hover: "",
-        },
-        placeholder: "",
     },
 });
