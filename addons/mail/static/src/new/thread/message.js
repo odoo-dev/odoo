@@ -70,6 +70,15 @@ export class Message extends Component {
         );
     }
 
+    get isOriginThread() {
+        if (!this.props.threadId) {
+            return false;
+        }
+        const thread = this.messaging.threads[this.props.threadId];
+        // channel has no resId, it's indistinguishable from threadId in that case
+        return this.message.resId === (thread.resId || this.props.threadId);
+    }
+
     toggleStar() {
         this.messaging.toggleStar(this.props.message.id);
     }
@@ -87,12 +96,16 @@ export class Message extends Component {
     }
 
     openRecord() {
-        this.action.doAction({
-            type: "ir.actions.act_window",
-            res_id: this.message.resId,
-            res_model: this.message.resModel,
-            views: [[false, "form"]],
-        });
+        if (this.message.resModel === "mail.channel") {
+            this.messaging.openDiscussion(this.message.resId);
+        } else {
+            this.action.doAction({
+                type: "ir.actions.act_window",
+                res_id: this.message.resId,
+                res_model: this.message.resModel,
+                views: [[false, "form"]],
+            });
+        }
     }
 
     get hasOpenChatFromAvatarClick() {
@@ -116,6 +129,7 @@ Object.assign(Message, {
         "onParentMessageClick?",
         "message",
         "squashed?",
+        "threadId?",
     ],
     template: "mail.message",
 });

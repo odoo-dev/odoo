@@ -29,6 +29,7 @@
                             highlighted="props.messageHighlight and props.messageHighlight.highlightedMessageId === msg.id"
                             onParentMessageClick="() => props.messageHighlight and msg.parentMessage and props.messageHighlight.highlightMessage(msg.parentMessage.id)"
                             grayedOut="isGrayedOut(msg)"
+                            threadId="props.id"
                         />
                     </t>
                     <t t-set="prevMsg" t-value="msg"/>
