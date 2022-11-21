@@ -613,6 +613,14 @@ export class Messaging {
         }
     }
 
+    async notifyThreadDescriptionToServer(threadId, description) {
+        const thread = this.threads[threadId];
+        thread.description = description;
+        return this.orm.call("mail.channel", "channel_change_description", [[thread.id]], {
+            description,
+        });
+    }
+
     // -------------------------------------------------------------------------
     // rtc (audio and video calls)
     // -------------------------------------------------------------------------

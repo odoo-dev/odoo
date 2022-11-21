@@ -103,6 +103,43 @@ QUnit.module("mail", (hooks) => {
         assert.verifySteps(["/web/dataset/call_kw/mail.channel/channel_rename"]);
     });
 
+    QUnit.test("can change the thread description of #general", async (assert) => {
+        const server = new TestServer();
+        server.addChannel(1, "general", "General announcements...");
+        const env = makeTestEnv((route, params) => {
+            if (route === "/web/dataset/call_kw/mail.channel/channel_change_description") {
+                assert.step(route);
+            }
+            return server.rpc(route, params);
+        });
+        env.services["mail.messaging"].setDiscussThread(1);
+        await mount(Discuss, target, { env });
+
+        assert.containsOnce(target, ".o-mail-discuss-thread-description");
+        const threadDescriptionElement = target.querySelector(
+            ".o-mail-discuss-thread-description .o-mail-autogrow-input"
+        );
+
+        await click(threadDescriptionElement);
+        assert.strictEqual(threadDescriptionElement.value, "General announcements...");
+        await editInput(
+            target,
+            ".o-mail-discuss-thread-description .o-mail-autogrow-input",
+            "I want a burger today!"
+        );
+        await triggerEvent(
+            target,
+            ".o-mail-discuss-thread-description .o-mail-autogrow-input",
+            "keydown",
+            {
+                key: "Enter",
+            }
+        );
+        assert.strictEqual(threadDescriptionElement.value, "I want a burger today!");
+
+        assert.verifySteps(["/web/dataset/call_kw/mail.channel/channel_change_description"]);
+    });
+
     QUnit.test("can post a message", async (assert) => {
         const server = new TestServer();
         server.addChannel(1, "general", "General announcements...");
