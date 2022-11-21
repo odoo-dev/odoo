@@ -6,4 +6,8 @@
     .o-mail-discuss-actions button:not(.btn-secondary):hover {
         background-color: $gray-400;
     }
+
+    .o-mail-discuss-thread-name {
+        max-width: 30em;
+    }
 }
