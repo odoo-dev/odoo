@@ -9,6 +9,23 @@ import { prettifyMessageContent } from "./message_prettify_utils";
 
 const { DateTime } = luxon;
 
+export const asyncMethods = [
+    "fetchThreadMessages",
+    "fetchPreviews",
+    "postMessage",
+    "updateMessage",
+    "createChannel",
+    "getChat",
+    "joinChannel",
+    "joinChat",
+    "leaveChannel",
+    "openChat",
+    "toggleStar",
+    "deleteMessage",
+    "unstarAll",
+    "notifyThreadNameToServer",
+];
+
 export class Messaging {
     constructor(...args) {
         const self = reactive(this);

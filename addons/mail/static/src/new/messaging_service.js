@@ -1,9 +1,10 @@
 /** @odoo-module */
 
-import { Messaging } from "./messaging";
+import { Messaging, asyncMethods } from "./messaging";
 
 export const messagingService = {
     dependencies: ["rpc", "orm", "user", "router", "bus_service", "notification"],
+    async: asyncMethods,
     start(env, { rpc, orm, user, router, bus_service: bus, notification }) {
         // compute initial discuss thread
         let threadId = "inbox";

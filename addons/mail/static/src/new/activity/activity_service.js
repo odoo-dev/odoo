@@ -4,6 +4,7 @@ import { reactive } from "@odoo/owl";
 
 export const activityService = {
     dependencies: ["orm", "action", "bus_service"],
+    async: ["scheduleActivity"],
     start(env, { orm, action, bus_service: bus }) {
         const state = reactive({
             counter: 0,
