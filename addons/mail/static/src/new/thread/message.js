@@ -4,6 +4,7 @@ import { isEventHandled, markEventHandled, onExternalClick } from "@mail/new/uti
 import { useMessaging } from "../messaging_hook";
 import { RelativeTime } from "./relative_time";
 import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
+import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
@@ -120,7 +121,7 @@ export class Message extends Component {
 }
 
 Object.assign(Message, {
-    components: { Composer, MessageInReplyTo, RelativeTime, LinkPreviewList },
+    components: { Composer, MessageInReplyTo, RelativeTime, LinkPreviewList, PartnerImStatus },
     defaultProps: { hasActions: true, onParentMessageClick: () => {} },
     props: [
         "hasActions?",

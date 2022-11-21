@@ -43,7 +43,16 @@ export function makeTestEnv(rpc) {
     env.services.hotkey = hotkey;
     const orm = ormService.start(env, { rpc, user });
     env.services.orm = orm;
-    const messaging = messagingService.start(env, { rpc, orm, user, router, bus_service });
+    const im_status = { registerToImStatus() {} };
+    env.services.im_status = im_status;
+    const messaging = messagingService.start(env, {
+        rpc,
+        orm,
+        user,
+        router,
+        bus_service,
+        im_status,
+    });
     env.services["mail.messaging"] = messaging;
     const activity = activityService.start(env, {
         action,

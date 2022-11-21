@@ -107,6 +107,7 @@
     >
         <div class="position-relative d-flex ms-4" style="width:30px;height:30px">
             <img class="w-100 h-100 rounded-circle" t-att-src="thread.imgUrl" alt="Thread Image"/>
+            <PartnerImStatus t-if="thread.type === 'chat'" className="'o-mail-category-im-status position-absolute bottom-0 end-0'" partner="messaging.partners[thread.chatPartnerId]"/>
         </div>
         <span class="ms-3 me-2 text-truncate" t-att-class="{ 'o-item-unread fw-bolder': thread.isUnread }">
             <t t-esc="thread.chatPartnerId ? messaging.partners[thread.chatPartnerId].name : thread.name"/>
