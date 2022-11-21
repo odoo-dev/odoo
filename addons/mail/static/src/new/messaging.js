@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { markRaw, markup, reactive } from "@odoo/owl";
+import { markRaw, markup, toRaw, reactive } from "@odoo/owl";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
@@ -34,7 +34,7 @@ export class Messaging {
         return self;
     }
 
-    setup(env, rpc, orm, user, router, initialThreadId, notification) {
+    setup(env, rpc, orm, user, router, initialThreadId, im_status, notification) {
         this.env = env;
         this.rpc = rpc;
         this.orm = orm;
@@ -43,6 +43,7 @@ export class Messaging {
         this.router = router;
         this.isReady = new Deferred();
         this.previewsProm = null;
+        this.imStatusService = im_status;
 
         // base data
         this.user = {
@@ -56,6 +57,7 @@ export class Messaging {
         this.threads = {};
         this.users = {};
         this.internalUserGroupId = null;
+        this.registeredImStatusPartners = [];
 
         // messaging menu
         this.menu = {
@@ -156,6 +158,16 @@ export class Messaging {
             const thread2 = this.threads[id2];
             return String.prototype.localeCompare.call(thread1.name, thread2.name);
         });
+    }
+
+    updateImStatusRegistration(partner) {
+        if (partner.im_status !== "im_partner" && !partner.is_public) {
+            this.registeredImStatusPartners.push(partner.id);
+        }
+        this.imStatusService.registerToImStatus(
+            "res.partner",
+            toRaw(this.registeredImStatusPartners)
+        );
     }
 
     createThread(id, name, type, data = {}) {
@@ -319,8 +331,9 @@ export class Messaging {
         if (id in this.partners) {
             return this.partners[id];
         }
-        const partner = { id, name };
+        const partner = { id, name, im_status: null };
         this.partners[id] = partner;
+        this.updateImStatusRegistration(partner);
         // return reactive version
         return this.partners[id];
     }
@@ -362,6 +375,28 @@ export class Messaging {
                         const thread = this.threads[id];
                         const body = markup(message.body);
                         this.createMessage(body, message, thread);
+                    }
+                    break;
+                case "mail.record/insert":
+                    {
+                        const receivedPartner = notif.payload.Partner;
+                        if (receivedPartner) {
+                            // If Partner in the payload is a single object
+                            if (receivedPartner.im_status) {
+                                const im_status = receivedPartner.im_status;
+                                const id = receivedPartner.id;
+                                this.partners[id].im_status = im_status;
+                            } else {
+                                // If Partner in the payload is an array of partners
+                                for (const partner of receivedPartner) {
+                                    if (partner.im_status) {
+                                        const im_status = partner.im_status;
+                                        const id = partner.id;
+                                        this.partners[id].im_status = im_status;
+                                    }
+                                }
+                            }
+                        }
                     }
                     break;
                 case "mail.channel/transient_message":

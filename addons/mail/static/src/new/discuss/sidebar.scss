@@ -9,4 +9,8 @@
     .o-mail-category-item:hover .o-mail-commands {
         display: flex !important;
     }
+
+    .o-mail-category-im-status {
+        transform: scale(0.75);
+    }
 }

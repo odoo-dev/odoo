@@ -838,7 +838,6 @@ QUnit.module("mail", {}, function () {
             "activity mark as done popover should focus feedback input on open [REQUIRE FOCUS]",
             async function (assert) {
                 assert.expect(3);
-
                 const pyEnv = await startServer();
                 const resPartnerId1 = pyEnv["res.partner"].create({});
                 const emailActivityTypeId = pyEnv["mail.activity.type"].search([

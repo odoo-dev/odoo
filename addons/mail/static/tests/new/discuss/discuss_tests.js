@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Discuss } from "@mail/new/discuss/discuss";
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { start, startServer, afterNextRender } from "@mail/../tests/helpers/test_utils";
 import {
     click,
     editInput,
@@ -14,6 +14,7 @@ import {
 import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
+import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
 
 let target;
 
@@ -386,6 +387,76 @@ QUnit.module("mail", (hooks) => {
             document.querySelector(`.o_mail_notification`).textContent,
             "You are alone in this channel.",
             "should display '/who' result"
+        );
+    });
+
+    QUnit.test("sidebar: chat im_status rendering", async function (assert) {
+        assert.expect(8);
+
+        const pyEnv = await startServer();
+        const [resPartnerId1, resPartnerId2, resPartnerId3] = pyEnv["res.partner"].create([
+            { im_status: "offline", name: "Partner1" },
+            { im_status: "online", name: "Partner2" },
+            { im_status: "away", name: "Partner3" },
+        ]);
+        pyEnv["mail.channel"].create([
+            {
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId1 }],
+                ],
+                channel_type: "chat",
+            },
+            {
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId2 }],
+                ],
+                channel_type: "chat",
+            },
+            {
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId3 }],
+                ],
+                channel_type: "chat",
+            },
+        ]);
+        const { advanceTime, openDiscuss } = await start({ hasTimeControl: true });
+        await openDiscuss();
+        await afterNextRender(() => advanceTime(UPDATE_BUS_PRESENCE_DELAY));
+        assert.strictEqual(
+            target.querySelectorAll(".o-mail-category-item").length,
+            3,
+            "should have 3 category items"
+        );
+        assert.strictEqual(
+            target.querySelectorAll(
+                ".o-mail-category-item .o-mail-category-im-status .o-mail-partner-im-status"
+            ).length,
+            3,
+            "should have 3 partner im-status"
+        );
+        const chat1 = target.querySelectorAll(".o-mail-category-item")[0];
+        const chat2 = target.querySelectorAll(".o-mail-category-item")[1];
+        const chat3 = target.querySelectorAll(".o-mail-category-item")[2];
+        assert.strictEqual(chat1.textContent, "Partner1", "First chat should have Partner1");
+        assert.strictEqual(chat2.textContent, "Partner2", "First chat should have Partner2");
+        assert.strictEqual(chat3.textContent, "Partner3", "First chat should have Partner3");
+        assert.strictEqual(
+            chat1.querySelectorAll(".o-offline").length,
+            1,
+            "chat1 should have offline icon"
+        );
+        assert.strictEqual(
+            chat2.querySelectorAll(".o-online").length,
+            1,
+            "chat2 should have online icon"
+        );
+        assert.strictEqual(
+            chat3.querySelectorAll(".o-away").length,
+            1,
+            "chat3 should have away icon"
         );
     });
 });
