@@ -10,6 +10,7 @@ import {
     getFixture,
     mount,
     nextTick,
+    patchWithCleanup,
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
@@ -356,4 +357,195 @@ QUnit.module("mail", (hooks) => {
             );
         }
     );
+
+    QUnit.test("Can open emoji picker after edit mode", async (assert) => {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "channel1",
+        });
+        pyEnv["mail.message"].create({
+            body: "Hello world",
+            res_id: channelId,
+            message_type: "comment",
+            model: "mail.channel",
+        });
+        const { click, openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${channelId}`,
+                },
+            },
+        });
+        await openDiscuss();
+        await click("i[aria-label='Edit']");
+        await triggerEvent(target, ".o-mail-discuss-sidebar", "click");
+        await click("i[aria-label='Add a Reaction']");
+        assert.containsOnce(target, ".o-mail-emoji-picker");
+    });
+
+    QUnit.test("Can add a reaction", async (assert) => {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "channel1",
+        });
+        pyEnv["mail.message"].create({
+            body: "Hello world",
+            res_id: channelId,
+            message_type: "comment",
+            model: "mail.channel",
+        });
+        const { click, openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${channelId}`,
+                },
+            },
+        });
+        await openDiscuss();
+        await click("i[aria-label='Add a Reaction']");
+        await click(".o-emoji[data-codepoints='😅']");
+        assert.containsOnce(target, ".o-mail-message-reaction:contains('😅')");
+    });
+
+    QUnit.test("Can remove a reaction", async (assert) => {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "channel1",
+        });
+        pyEnv["mail.message"].create({
+            body: "Hello world",
+            res_id: channelId,
+            message_type: "comment",
+            model: "mail.channel",
+        });
+        const { click, openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${channelId}`,
+                },
+            },
+        });
+        await openDiscuss();
+        await click("i[aria-label='Add a Reaction']");
+        await click(".o-emoji[data-codepoints='😅']");
+        await click(".o-mail-message-reaction");
+        assert.containsNone(target, ".o-mail-message-reaction:contains('😅')");
+    });
+
+    QUnit.test("Two users reacting with the same emoji", async (assert) => {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "channel1",
+        });
+        pyEnv["mail.message"].create({
+            body: "Hello world",
+            res_id: channelId,
+            message_type: "comment",
+            model: "mail.channel",
+        });
+        const { click, env, openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${channelId}`,
+                },
+            },
+        });
+        await openDiscuss();
+        await click("i[aria-label='Add a Reaction']");
+        await click(".o-emoji[data-codepoints='😅']");
+
+        pyEnv.currentPartnerId = pyEnv["res.partner"].create({ name: "Jean Pierre" });
+        patchWithCleanup(env.services.user, {
+            partnerId: pyEnv.currentPartnerId,
+        });
+        await click("i[aria-label='Add a Reaction']");
+        await click(".o-emoji[data-codepoints='😅']");
+        assert.containsOnce(
+            target,
+            ".o-mail-message-reaction:contains(2)",
+            "Reaction count should be 2"
+        );
+
+        await click(".o-mail-message-reaction");
+        assert.containsOnce(
+            target,
+            ".o-mail-message-reaction:contains('😅')",
+            "Reaction should still be visible after one of the partners deleted its reaction"
+        );
+        assert.containsOnce(
+            target,
+            ".o-mail-message-reaction:contains(1)",
+            "Reaction count should be updated"
+        );
+    });
+
+    QUnit.test("Reaction summary", async (assert) => {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "channel1",
+        });
+        pyEnv["mail.message"].create({
+            body: "Hello world",
+            res_id: channelId,
+            message_type: "comment",
+            model: "mail.channel",
+        });
+        const { click, openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${channelId}`,
+                },
+            },
+        });
+        await openDiscuss();
+        const partnerNames = ["Foo", "Bar", "FooBar", "Bob"];
+        const expectedSummaries = [
+            "Foo has reacted with 😅",
+            "Foo and Bar have reacted with 😅",
+            "Foo, Bar, FooBar have reacted with 😅",
+            "Foo, Bar, FooBar and 1 other person have reacted with 😅",
+        ];
+        for (const [idx, name] of partnerNames.entries()) {
+            const partnerId = pyEnv["res.partner"].create({ name });
+            pyEnv.currentPartnerId = partnerId;
+            await click("i[aria-label='Add a Reaction']");
+            await click(".o-emoji[data-codepoints='😅']");
+            assert.strictEqual(
+                target.querySelector(".o-mail-message-reaction").getAttribute("title"),
+                expectedSummaries[idx]
+            );
+        }
+    });
+
+    QUnit.test("Toggle reaction from the emoji picker", async (assert) => {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "channel1",
+        });
+        pyEnv["mail.message"].create({
+            body: "Hello world",
+            res_id: channelId,
+            message_type: "comment",
+            model: "mail.channel",
+        });
+        const { click, openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${channelId}`,
+                },
+            },
+        });
+        await openDiscuss();
+        await click("i[aria-label='Add a Reaction']");
+        await click(".o-emoji[data-codepoints='😅']");
+        await click("i[aria-label='Add a Reaction']");
+        await click(".o-emoji[data-codepoints='😅']");
+        assert.containsNone(target, ".o-mail-message-reaction:contains('😅')");
+    });
 });

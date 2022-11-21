@@ -22,6 +22,7 @@ addModelNamesToFetch([
     "mail.guest",
     "mail.link.preview",
     "mail.message",
+    "mail.message.reaction",
     "mail.message.subtype",
     "mail.notification",
     "mail.shortcode",

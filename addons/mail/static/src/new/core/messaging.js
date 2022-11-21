@@ -290,6 +290,10 @@ export class Messaging {
                                 );
                             }
                         }
+                        const { Message: messageData } = notif.payload;
+                        if (messageData) {
+                            Message.insert(this.state, messageData);
+                        }
                     }
                     break;
                 case "mail.channel/transient_message":
@@ -648,6 +652,24 @@ export class Messaging {
         });
         message.body = markup(data.body);
         message.attachments.push(...attachments);
+    }
+
+    async addReaction(messageId, content) {
+        const messageData = await this.rpc("/mail/message/add_reaction", {
+            content,
+            message_id: messageId,
+        });
+        const message = this.state.messages[messageId];
+        Message.insert(this.state, messageData, message.originThread);
+    }
+
+    async removeReaction(reaction) {
+        const messageData = await this.rpc("/mail/message/remove_reaction", {
+            content: reaction.content,
+            message_id: reaction.messageId,
+        });
+        const message = this.state.messages[reaction.messageId];
+        Message.insert(this.state, messageData, message.originThread);
     }
 
     openDiscussion(threadId) {

@@ -10,6 +10,7 @@ import {
     useRef,
     useState,
     onPatched,
+    onWillPatch,
 } from "@odoo/owl";
 import { getBundle, loadBundle } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -37,6 +38,14 @@ export function useEmojiPicker(refName, props) {
         }
     };
     onMounted(() => {
+        ref.el.addEventListener("click", toggle);
+        ref.el.addEventListener("mouseenter", loadEmoji);
+    });
+    onWillPatch(() => {
+        ref.el.removeEventListener("click", toggle);
+        ref.el.removeEventListener("mouseenter", loadEmoji);
+    });
+    onPatched(() => {
         ref.el.addEventListener("click", toggle);
         ref.el.addEventListener("mouseenter", loadEmoji);
     });

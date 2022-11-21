@@ -15,6 +15,8 @@ import { useMessaging } from "../messaging_hook";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";
+import { MessageReactions } from "@mail/new/thread/message_reactions";
+import { useEmojiPicker } from "../composer/emoji_picker";
 
 /**
  * @typedef {Object} Props
@@ -33,6 +35,7 @@ export class Message extends Component {
         Composer,
         LinkPreviewList,
         MessageInReplyTo,
+        MessageReactions,
         PartnerImStatus,
         RelativeTime,
     };
@@ -80,6 +83,22 @@ export class Message extends Component {
                 this.ref.el.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
+        if (this.props.hasActions && !this.message.isTransient) {
+            useEmojiPicker("emoji-picker", {
+                onSelect: (emoji) => {
+                    const reaction = this.message.reactions.find(
+                        ({ content, partners }) =>
+                            content === emoji &&
+                            partners.find(({ id }) => id === this.user.partnerId)
+                    );
+                    if (reaction) {
+                        this.messaging.removeReaction(reaction);
+                    } else {
+                        this.messaging.addReaction(this.message.id, emoji);
+                    }
+                },
+            });
+        }
     }
 
     get message() {

@@ -339,7 +339,7 @@ class DiscussController(http.Controller):
                 'content': content,
                 'count': len(reactions),
                 'guests': guests,
-                'message': {'id', message_sudo.id},
+                'message': {'id': message_sudo.id},
                 'partners': partners,
             })],
         }

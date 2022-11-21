@@ -45,7 +45,7 @@
                     </small>
                 </div>
                 <div t-if="!state.isEditing" class="o-mail-message-content d-flex">
-                    <t t-if="message.type === 'notification' or message.isTransient">
+                    <t t-if="(message.type === 'notification' or message.isTransient) and !messaging.isMessageBodyEmpty(message)">
                         <t t-if="message.subtype_description">
                             <p class="mb-0"><t t-esc="message.subtype_description"/></p>
                         </t>
@@ -74,6 +74,8 @@
                     </t>
                     <div t-if="props.hasActions and !message.isTransient" class="o-mail-message-actions invisible">
                         <div class="rounded-1 shadow-sm">
+                            <i class="cursor-pointer px-1 py-2 fa fa-lg fa-smile-o"
+                                role="button" tabindex="1" title="Add a Reaction" aria-label="Add a Reaction" t-ref="emoji-picker"/>
                             <i class="cursor-pointer px-1 py-2 fa fa-lg"
                                 t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
                                 t-on-click="toggleStar"
@@ -98,7 +100,8 @@
                     attachments="message.attachments"
                     unlinkAttachment.bind="onClickAttachmentUnlink"
                     imagesHeight="300" />
-                <LinkPreviewList t-if="message.linkPreviews" linkPreviews="message.linkPreviews" canBeDeleted="canBeDeleted" />
+                <LinkPreviewList t-if="message.linkPreviews.length > 0" linkPreviews="message.linkPreviews" canBeDeleted="canBeDeleted" />
+                <MessageReactions message="message"/>
             </div>
         </div>
     </div>

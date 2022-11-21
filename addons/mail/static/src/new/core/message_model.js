@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { LinkPreview } from "./link_preview_model";
+import { MessageReactions } from "./message_reactions_model";
 import { Partner } from "./partner_model";
 import { Thread } from "./thread_model";
 
@@ -14,7 +15,7 @@ const { DateTime } = luxon;
 
 export class Message {
     /** @type {Object[]} */
-    attachments;
+    attachments = [];
     /** @type {Partner} */
     author;
     /** @type {string} */
@@ -34,17 +35,19 @@ export class Message {
     /** @type {boolean} */
     isTransient;
     /** @type {LinkPreview[]} */
-    linkPreviews;
+    linkPreviews = [];
     /** @type {Message|undefined} */
     parentMessage;
-    /** @type {Object[]} */
-    reactions;
+    /** @type {MessageReactions[]} */
+    reactions = [];
     /** @type {string} */
     recordName;
     /** @type {number|string} */
     resId;
     /** @type {string|undefined} */
     resModel;
+    /** @type {Number[]} */
+    starred_partner_ids = [];
     /** @type {string} */
     subject;
     /** @type {string} */
@@ -77,20 +80,19 @@ export class Message {
 
     update(data, thread) {
         const {
-            attachment_ids: attachments = [],
-            body,
-            is_discussion: isDiscussion,
-            is_note: isNote,
-            is_transient: isTransient,
-            linkPreviews = [],
-            message_type: type,
-            messageReactionGroups: reactions = [],
-            model: resModel,
-            record_name: recordName,
-            res_id: resId,
-            subject,
-            subtype_description: subtypeDescription,
-            starred_partner_ids = [],
+            attachment_ids: attachments = this.attachments,
+            body = this.body,
+            is_discussion: isDiscussion = this.isDiscussion,
+            is_note: isNote = this.isNote,
+            is_transient: isTransient = this.isTransient,
+            linkPreviews = this.linkPreviews,
+            message_type: type = this.type,
+            model: resModel = this.resModel,
+            record_name: recordName = this.recordName,
+            res_id: resId = this.resId,
+            subject = this.subject,
+            subtype_description: subtypeDescription = this.subtypeDescription,
+            starred_partner_ids = this.starred_partner_ids,
             ...remainingData
         } = data;
         for (const key in remainingData) {
@@ -102,7 +104,7 @@ export class Message {
                 extension: attachment.name.split(".").pop(),
                 originThread: Thread.insert(this._state, attachment.originThread[0][1]),
             })),
-            author: Partner.insert(this._state, data.author),
+            author: data.author ? Partner.insert(this._state, data.author) : this.author,
             body,
             isDiscussion,
             isNote,
@@ -113,7 +115,6 @@ export class Message {
             parentMessage: this.parentMessage
                 ? Message.insert(this._state, this.parentMessage, thread)
                 : undefined,
-            reactions,
             recordName,
             resId,
             resModel,
@@ -122,13 +123,43 @@ export class Message {
             trackingValues: data.trackingValues || [],
             type,
         });
-        this.isAuthor = this.author.id === this._state.user.partnerId;
+        this._updateReactions(data.messageReactionGroups);
+        if (this.author) {
+            this.isAuthor = this.author.id === this._state.user.partnerId;
+        }
         if (thread) {
             if (!thread.messages.includes(this.id)) {
                 thread.messages.push(this.id);
                 thread.sortMessages();
             }
         }
+    }
+
+    _updateReactions(reactionGroups = []) {
+        const reactionContentToUnlink = new Set();
+        const reactionsToInsert = [];
+        for (const rawReaction of reactionGroups) {
+            const [command, reactionData] = Array.isArray(rawReaction)
+                ? rawReaction
+                : ["insert", rawReaction];
+            const reaction = MessageReactions.insert(this._state, reactionData);
+            if (command === "insert") {
+                reactionsToInsert.push(reaction);
+            } else {
+                reactionContentToUnlink.add(reaction.content);
+            }
+        }
+        this.reactions = this.reactions.filter(
+            ({ content }) => !reactionContentToUnlink.has(content)
+        );
+        reactionsToInsert.forEach((reaction) => {
+            const idx = this.reactions.findIndex(({ content }) => reaction.content === content);
+            if (idx !== -1) {
+                this.reactions[idx] = reaction;
+            } else {
+                this.reactions.push(reaction);
+            }
+        });
     }
 
     get dateDay() {
