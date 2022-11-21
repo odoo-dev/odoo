@@ -84,6 +84,16 @@ export class Message extends Component {
             views: [[false, "form"]],
         });
     }
+
+    get hasOpenChatFromAvatarClick() {
+        return this.message.author.id !== this.messaging.user.partnerId;
+    }
+
+    openChatAvatar() {
+        if (this.hasOpenChatFromAvatarClick) {
+            this.messaging.openChat({ partnerId: this.message.author.id });
+        }
+    }
 }
 
 Object.assign(Message, {

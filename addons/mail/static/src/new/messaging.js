@@ -551,31 +551,39 @@ export class Messaging {
         this.discuss.threadId = channel.id;
     }
 
-    async getChat({ userId }) {
-        let user = this.users[userId];
-        if (!user) {
-            this.users[userId] = { id: userId };
-            user = this.users[userId];
-        }
-        if (!user.partner_id) {
-            const [userData] = await this.orm.silent.read("res.users", [user.id], ["partner_id"], {
-                context: { active_test: false },
-            });
-            if (userData) {
-                user.partner_id = userData.partner_id[0];
+    async getChat({ userId, partnerId }) {
+        if (!partnerId) {
+            let user = this.users[userId];
+            if (!user) {
+                this.users[userId] = { id: userId };
+                user = this.users[userId];
             }
-        }
-        if (!user.partner_id) {
-            this.notification.add(this.env._t("You can only chat with existing users."), {
-                type: "warning",
-            });
-            return;
+            if (!user.partner_id) {
+                const [userData] = await this.orm.silent.read(
+                    "res.users",
+                    [user.id],
+                    ["partner_id"],
+                    {
+                        context: { active_test: false },
+                    }
+                );
+                if (userData) {
+                    user.partner_id = userData.partner_id[0];
+                }
+            }
+            if (!user.partner_id) {
+                this.notification.add(this.env._t("You can only chat with existing users."), {
+                    type: "warning",
+                });
+                return;
+            }
+            partnerId = user.partner_id;
         }
         let chat = Object.values(this.threads).find(
-            (thread) => thread.type === "chat" && thread.chatPartnerId === user.partner_id
+            (thread) => thread.type === "chat" && thread.chatPartnerId === partnerId
         );
         if (!chat || !chat.is_pinned) {
-            chat = await this.joinChat(user.partner_id);
+            chat = await this.joinChat(partnerId);
         }
         if (!chat) {
             this.notification.add(

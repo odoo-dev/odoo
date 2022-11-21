@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Discuss } from "@mail/new/discuss/discuss";
+import { start, startServer } from "@mail/../tests/helpers/test_utils";
 import {
     click,
     editInput,
@@ -19,10 +20,6 @@ let target;
 QUnit.module("mail", (hooks) => {
     hooks.beforeEach(async () => {
         target = getFixture();
-        // for autocomplete stuff
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-        });
     });
 
     QUnit.module("discuss");
@@ -129,6 +126,10 @@ QUnit.module("mail", (hooks) => {
     });
 
     QUnit.test("can create a new channel", async (assert) => {
+        // for autocomplete stuff
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
         const server = new TestServer();
         const env = makeTestEnv((route, params) => {
             if (
@@ -159,6 +160,10 @@ QUnit.module("mail", (hooks) => {
     });
 
     QUnit.test("can join a chat conversation", async (assert) => {
+        // for autocomplete stuff
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+        });
         const server = new TestServer();
         server.addPartner(43, "abc");
         const env = makeTestEnv((route, params) => {
@@ -299,4 +304,37 @@ QUnit.module("mail", (hooks) => {
             assert.containsN(target, ".o-mail-msg-header", 1); // just 1, because 2nd message is squashed
         }
     );
+
+    QUnit.test("Click on avatar opens its partner chat window", async (assert) => {
+        assert.expect(3);
+        const pyEnv = await startServer();
+        const testPartnerId = pyEnv["res.partner"].create({
+            name: "testPartner",
+        });
+        pyEnv["mail.message"].create({
+            author_id: testPartnerId,
+            body: "Test",
+            attachment_ids: [],
+            model: "res.partner",
+            res_id: testPartnerId,
+        });
+        const { openFormView } = await start();
+        await openFormView({
+            res_id: testPartnerId,
+            res_model: "res.partner",
+        });
+        assert.containsOnce(
+            target,
+            ".o-mail-message-sidebar .o-mail-avatar-container .cursor-pointer"
+        );
+        await click(
+            target.querySelector(".o-mail-message-sidebar .o-mail-avatar-container .cursor-pointer")
+        );
+        assert.containsOnce(target, ".o-mail-chat-window-header-name");
+        assert.ok(
+            target
+                .querySelector(".o-mail-chat-window-header-name")
+                .textContent.includes("testPartner")
+        );
+    });
 });

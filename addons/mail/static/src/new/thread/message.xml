@@ -13,14 +13,16 @@
         <div class="o-mail-message-core position-relative d-flex flex-shrink-0">
             <div class="o-mail-message-sidebar d-flex flex-shrink-0 justify-content-center">
                 <div t-if="!props.squashed" class="o-mail-avatar-container position-relative">
-                    <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect" t-att-class="{ 'cursor-pointer': props.hasActions }"
-                        t-attf-src="/mail/channel/1/partner/{{message.author.id}}/avatar_128"/>
+                    <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
+                        t-attf-src="/mail/channel/1/partner/{{message.author.id}}/avatar_128"
+                        t-att-class="{ 'cursor-pointer': props.hasActions and hasOpenChatFromAvatarClick }"
+                        t-on-click="openChatAvatar" />
                 </div>
             </div>
             <div t-att-class="{ 'flex-grow-1': state.isEditing }">
                 <div t-if="!props.squashed" class="o-mail-msg-header d-flex flex-wrap align-items-baseline">
                     <span class="o-mail-own-name">
-                        <strong class="o_redirect me-1 text-truncate" t-att-class="{ 'cursor-pointer': props.hasActions}">
+                        <strong class="o_redirect me-1 text-truncate" t-att-class="{ 'cursor-pointer': props.hasActions and props.hasOpenChatFromAvatarClick }" t-on-click="openChatAvatar">
                         <t t-esc="message.author.name"/>
                         </strong> -
                     </span>
