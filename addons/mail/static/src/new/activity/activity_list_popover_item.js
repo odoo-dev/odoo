@@ -9,7 +9,6 @@ import { Component, useState } from "@odoo/owl";
 export class ActivityListPopoverItem extends Component {
     setup() {
         this.user = useService("user");
-        this.activityService = useService("mail.activity");
         this.state = useState({ hasMarkDoneView: false });
     }
 
@@ -46,7 +45,7 @@ export class ActivityListPopoverItem extends Component {
 
     onClickEditActivityButton() {
         this.props.onClickEditActivityButton();
-        this.activityService
+        this.env.services["mail.activity"]
             .scheduleActivity(
                 this.props.activity.res_model,
                 this.props.activity.res_id,

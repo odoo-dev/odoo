@@ -9,7 +9,6 @@ import { Component, onWillUpdateProps, useState } from "@odoo/owl";
 export class ActivityListPopover extends Component {
     setup() {
         this.orm = useService("orm");
-        this.activity = useService("mail.activity");
         this.user = useService("user");
         this.state = useState({ activities: [] });
         this.updateFromProps(this.props);
@@ -17,7 +16,7 @@ export class ActivityListPopover extends Component {
     }
 
     onClickAddActivityButton() {
-        this.activity
+        this.env.services["mail.activity"]
             .scheduleActivity(
                 this.props.resModel,
                 this.props.resId,
