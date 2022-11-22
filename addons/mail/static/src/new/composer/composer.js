@@ -18,6 +18,9 @@ import { useEmojiPicker } from "./emoji_picker";
 
 import { sprintf } from "@web/core/utils/strings";
 import { FileUploader } from "@web/views/fields/file_handler";
+import { Typing } from "./typing";
+import { useDebounced } from "@web/core/utils/timing";
+import { browser } from "@web/core/browser/browser";
 
 export class Composer extends Component {
     setup() {
@@ -27,10 +30,15 @@ export class Composer extends Component {
         });
         this.messaging = useMessaging();
         this.ref = useRef("textarea");
+        this.typingNotified = false;
         this.state = useState({
             autofocus: 0,
             active: true,
         });
+        this.stopTyping = useDebounced(() => {
+            this.notifyIsTyping(false);
+            this.typingNotified = false;
+        }, 1000);
         if (this.props.dropzoneRef) {
             useDropzone(this.props.dropzoneRef, {
                 onDrop: (ev) => {
@@ -79,6 +87,17 @@ export class Composer extends Component {
             this.messaging.cancelReplyTo();
         });
         onWillDestroy(() => this.attachmentUploader.unlinkAll());
+    }
+
+    typing(ev) {
+        if (!this.typingNotified && !ev.target.value.startsWith("/")) {
+            this.notifyIsTyping();
+            this.typingNotified = true;
+            browser.setTimeout(() => {
+                this.typingNotified = false;
+            }, 50000);
+        }
+        this.stopTyping();
     }
 
     get hasReplyToHeader() {
@@ -186,6 +205,24 @@ export class Composer extends Component {
         });
     }
 
+    /**
+     * Notify the server of the current typing status
+     *
+     * @param {boolean} [is_typing=true]
+     */
+    notifyIsTyping(is_typing = true) {
+        if (this.thread?.type === "channel") {
+            this.messaging.rpc(
+                "/mail/channel/notify_typing",
+                {
+                    channel_id: this.thread.id,
+                    is_typing,
+                },
+                { silent: true }
+            );
+        }
+    }
+
     async editMessage() {
         return this.processMessage(async (value) =>
             this.messaging.updateMessage(
@@ -207,7 +244,7 @@ export class Composer extends Component {
 }
 
 Object.assign(Composer, {
-    components: { AttachmentList, FileUploader },
+    components: { AttachmentList, FileUploader, Typing },
     defaultProps: {
         mode: "normal",
         onDiscardCallback: () => {},

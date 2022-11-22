@@ -192,15 +192,18 @@ QUnit.module("mail", (hooks) => {
                 assert.expect(2);
 
                 const pyEnv = await startServer();
-                const mailChanelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
+                const mailChanelId1 = pyEnv["mail.channel"].create({
+                    name: "pétanque-tournament-14",
+                });
                 const { click, insertText, openDiscuss } = await start({
                     discuss: {
                         context: { active_id: mailChanelId1 },
                     },
                 });
                 await openDiscuss();
-                const composerTextInputTextArea =
-                    document.querySelector(".o-mail-composer-textarea");
+                const composerTextInputTextArea = document.querySelector(
+                    ".o-mail-composer-textarea"
+                );
                 await insertText(".o-mail-composer-textarea", "Blabla");
                 assert.strictEqual(
                     composerTextInputTextArea.value,
@@ -599,13 +602,13 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             'do not send typing notification on typing "/" command',
             async function (assert) {
                 assert.expect(1);
 
                 const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
+                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "channel" });
                 const { insertText, openDiscuss } = await start({
                     discuss: {
                         params: {
@@ -631,7 +634,7 @@ QUnit.module("mail", (hooks) => {
                 assert.expect(1);
 
                 const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
+                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "channel" });
                 const { click, insertText, openDiscuss } = await start({
                     discuss: {
                         params: {
@@ -1081,42 +1084,39 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
-        QUnit.test(
-            "composer text input cleared on message post",
-            async function (assert) {
-                assert.expect(4);
+        QUnit.test("composer text input cleared on message post", async function (assert) {
+            assert.expect(4);
 
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "au-secours-aidez-moi" });
-                const { click, insertText, openDiscuss } = await start({
-                    discuss: {
-                        context: { active_id: mailChannelId1 },
-                    },
-                    async mockRPC(route, args) {
-                        if (route === "/mail/message/post") {
-                            assert.step("message_post");
-                        }
-                    },
-                });
-                await openDiscuss();
-                // Type message
-                await insertText(".o-mail-composer-textarea", "test message");
-                assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).value,
-                    "test message",
-                    "should have inserted text content in editable"
-                );
+            const pyEnv = await startServer();
+            const mailChannelId1 = pyEnv["mail.channel"].create({ name: "au-secours-aidez-moi" });
+            const { click, insertText, openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: mailChannelId1 },
+                },
+                async mockRPC(route, args) {
+                    if (route === "/mail/message/post") {
+                        assert.step("message_post");
+                    }
+                },
+            });
+            await openDiscuss();
+            // Type message
+            await insertText(".o-mail-composer-textarea", "test message");
+            assert.strictEqual(
+                document.querySelector(`.o-mail-composer-textarea`).value,
+                "test message",
+                "should have inserted text content in editable"
+            );
 
-                // Send message
-                await click(".o-mail-composer-send-button");
-                assert.verifySteps(["message_post"]);
-                assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).value,
-                    "",
-                    "should have no content in composer input after posting message"
-                );
-            }
-        );
+            // Send message
+            await click(".o-mail-composer-send-button");
+            assert.verifySteps(["message_post"]);
+            assert.strictEqual(
+                document.querySelector(`.o-mail-composer-textarea`).value,
+                "",
+                "should have no content in composer input after posting message"
+            );
+        });
 
         QUnit.skipRefactoring(
             "composer with thread typing notification status",
@@ -1718,13 +1718,16 @@ QUnit.module("mail", (hooks) => {
                     },
                 });
                 await openDiscuss();
-                await insertText(".o-mail-composer-textarea", "According to all known laws of aviation,");
+                await insertText(
+                    ".o-mail-composer-textarea",
+                    "According to all known laws of aviation,"
+                );
 
                 await click($(target).find("span:contains('epic-shrek-lovers')")[0]);
                 await click($(target).find("span:contains('minigolf-galaxy-iv')")[0]);
                 assert.strictEqual(
                     target.querySelector(".o-mail-composer-textarea").value,
-                    "According to all known laws of aviation,",
+                    "According to all known laws of aviation,"
                 );
             }
         );

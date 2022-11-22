@@ -146,6 +146,7 @@ QUnit.module("mail", (hooks) => {
         assert.verifySteps([
             "/mail/init_messaging",
             "/mail/channel/messages",
+            "/mail/channel/notify_typing",
             "/mail/message/post",
             "/mail/link_preview",
         ]);

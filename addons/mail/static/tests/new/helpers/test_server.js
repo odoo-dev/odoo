@@ -245,4 +245,7 @@ export class TestServer {
     _web_dataset_call_kw_mail_channel_member_search_read(params) {
         return [];
     }
+    _mail_channel_notify_typing() {
+        return [];
+    }
 }

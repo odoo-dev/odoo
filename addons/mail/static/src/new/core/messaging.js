@@ -11,6 +11,7 @@ import { Thread } from "./thread_model";
 import { Partner } from "./partner_model";
 import { LinkPreview } from "./link_preview_model";
 import { Message } from "./message_model";
+import { browser } from "@web/core/browser/browser";
 
 const FETCH_MSG_LIMIT = 30;
 
@@ -50,6 +51,9 @@ export class Messaging {
         this.imStatusService = im_status;
 
         this.state = reactive({
+            /** @type Object<number, []> */
+            areTyping: {},
+            areTypingTimer: {},
             // base data
             user: {
                 partnerId: user.partnerId,
@@ -321,6 +325,42 @@ export class Messaging {
                     }
                     if (this.state.user.partnerId === partner_id) {
                         channel.serverLastSeenMsgByCurrentUser = last_message_id;
+                    }
+                    break;
+                }
+                case "mail.channel.member/typing_status": {
+                    const isTyping = notif.payload.isTyping;
+                    const channel_id = notif.payload.channel.id;
+                    const name = notif.payload.persona.partner.name;
+                    if (notif.payload.persona.partner.id === this.state.user.partnerId) {
+                        return;
+                    }
+                    if (!this.state.areTyping[channel_id]) {
+                        this.state.areTyping[channel_id] = [];
+                        this.state.areTypingTimer[channel_id] = {};
+                    }
+                    const remove = () => {
+                        if (this.state.areTyping[channel_id]) {
+                            removeFromArray(this.state.areTyping[channel_id], name);
+                            if (this.state.areTyping[channel_id].length === 0) {
+                                delete this.state.areTyping[channel_id];
+                            }
+                        }
+                    };
+                    if (isTyping) {
+                        if (!this.state.areTyping[channel_id].includes(name)) {
+                            this.state.areTyping[channel_id].push(name);
+                        }
+                        if (this.state.areTypingTimer[channel_id][name]) {
+                            browser.clearTimeout(this.state.areTypingTimer[channel_id][name]);
+                        }
+                        this.state.areTypingTimer[channel_id] = {
+                            [name]: browser.setTimeout(() => {
+                                remove();
+                            }, 60000),
+                        };
+                    } else {
+                        remove();
                     }
                     break;
                 }

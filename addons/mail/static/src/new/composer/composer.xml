@@ -11,6 +11,7 @@
                 t-att-class="{
                     'px-3 py-2 o-mail-extended-composer': extended,
                     'p-3': normal,
+                    'o-has-current-partner-avatar pe-3 ps-1': !this.env.inChatWindow,
                 }">
             <div class="o-mail-composer-sidebar-main flex-shrink-0" t-if="!compact">
                 <img class="o-mail-composer-avatar mt-1 rounded-circle" t-att-src="messaging.state.user.avatarUrl" alt="Avatar of user"/>
@@ -36,6 +37,7 @@
                         t-ref="textarea"
                         style="height:40px;"
                         t-on-keydown="onKeydown"
+                        t-on-input="typing"
                         t-model="props.composer.textInputContent"
                         t-att-placeholder="placeholder"/>
                 </div>
@@ -60,6 +62,11 @@
                     attachments="attachmentUploader.attachments"
                     unlinkAttachment="attachmentUploader.unlink"
                     imagesHeight="50" />
+            </div>
+            <div t-if="thread" class="o-mail-composer-core-footer overflow-auto" t-att-class="{ 'o-composer-is-compact': compact, 'ms-0': !compact }">
+                <div class="o-mail-composer-is-typing">
+                    <Typing channel_id="thread.id" />
+                </div>
             </div>
         </div>
         <t t-if="props.composer.messageId">
