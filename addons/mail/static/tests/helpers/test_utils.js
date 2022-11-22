@@ -123,7 +123,7 @@ function getMouseenter({ afterNextRender }) {
     };
 }
 
-function getOpenDiscuss(webClient, { context = {}, params, ...props } = {}) {
+function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {}) {
     return async function openDiscuss({ waitUntilMessagesLoaded = true } = {}) {
         const actionOpenDiscuss = {
             // hardcoded actionId, required for discuss_container props validation.
