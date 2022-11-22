@@ -337,4 +337,32 @@ QUnit.module("mail", (hooks) => {
                 .textContent.includes("testPartner")
         );
     });
+
+    QUnit.test("Can use channel command /who", async (assert) => {
+        assert.expect(1);
+
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "my-channel",
+        });
+        const { click, env, insertText, openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: mailChannelId1,
+                },
+            },
+        });
+        // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
+        env.services["mail.messaging"].setDiscussThread(mailChannelId1);
+        await openDiscuss();
+        await insertText(".o-mail-composer-textarea", "/who");
+        await click(".o-mail-composer button[data-action='send']");
+
+        assert.strictEqual(
+            document.querySelector(`.o_mail_notification`).textContent,
+            "You are alone in this channel.",
+            "should display '/who' result"
+        );
+    });
 });
