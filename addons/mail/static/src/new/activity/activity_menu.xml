@@ -19,7 +19,7 @@
                             <div class="flex-grow-1">
                                 <div class="d-flex px-2">
                                     <span class="flex-grow-1"><t t-esc="group.name"/></span>
-                                    <t t-foreach="group.actions" t-as="action" t-key="action_index">
+                                    <t t-foreach="group.actions or []" t-as="action" t-key="action_index">
                                         <button class="btn fa p-0" type="button" t-att-title="action.name" t-att-class="action.icon"/>
                                     </t>
                                 </div>
