@@ -36,7 +36,7 @@ export function useEmojiPicker(refName, props) {
 const _loadEmoji = memoize(() => getBundle("mail.assets_model_data").then(loadBundle));
 
 /**
- * @returns {import("@mail/composer/emoji_data")}
+ * @returns {import("@mail/new/composer/emoji_data")}
  */
 export async function loadEmoji() {
     await _loadEmoji();
