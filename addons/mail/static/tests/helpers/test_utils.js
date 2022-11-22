@@ -135,7 +135,7 @@ function getOpenDiscuss(webClient, { context = {}, params, ...props } = {}) {
         };
         if (waitUntilMessagesLoaded) {
             const messagesLoadedPromise = makeDeferred();
-            let threadId = context.active_id || context.default_active_id || "inbox";
+            let threadId = context.active_id || params.default_active_id || "inbox";
             if (typeof threadId === "string" && threadId.includes("_")) {
                 threadId = parseInt(threadId.split("_")[1]);
             }
