@@ -3,9 +3,8 @@
 
 <t t-name="mail.discuss" owl="1">
     <div class="d-flex h-100 flex-grow-1">
-        <t t-set="thread" t-value="currentThread()"/>
         <Sidebar />
-        <div class="o-mail-discuss-content d-flex flex-column h-100 w-100 bg-view" t-att-class="{'o-mail-with-composer':thread.type !== 'mailbox'}">
+        <div t-if="thread" class="o-mail-discuss-content d-flex flex-column h-100 w-100 bg-view" t-att-class="{'o-mail-with-composer': thread.type !== 'mailbox'}">
             <!-- top bar -->
             <div class="px-3 bg-100 border-bottom d-flex flex-shrink-0" style="height:42px;">
                 <ThreadIcon className="'me-2 align-self-center'" thread="thread"/>
@@ -46,6 +45,9 @@
             <t t-if="thread.type !== 'mailbox'">
                 <Composer t-key="thread.id" threadId="thread.id" autofocus="true"/>
             </t>
+        </div>
+        <div t-if="!thread" class="o-mail-discuss-no-thread d-flex flex-grow-1 align-items-center justify-content-center w-100 bg-view">
+            <h4 class="text-muted"><b><i>No conversation selected.</i></b></h4>
         </div>
     </div>
 </t>

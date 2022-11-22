@@ -17,7 +17,7 @@ export class Discuss extends Component {
         onWillUnmount(() => (this.messaging.discuss.isActive = false));
     }
 
-    currentThread() {
+    get thread() {
         return this.messaging.threads[this.messaging.discuss.threadId];
     }
 
@@ -30,14 +30,13 @@ export class Discuss extends Component {
 
     async renameThread({ value: name }) {
         const newName = name.trim();
-        const thread = this.currentThread();
         if (
-            newName !== thread.name &&
-            ((newName && thread.type === "channel") ||
-                thread.type === "chat" ||
-                thread.type === "group")
+            newName !== this.thread.name &&
+            ((newName && this.thread.type === "channel") ||
+                this.thread.type === "chat" ||
+                this.thread.type === "group")
         ) {
-            await this.messaging.notifyThreadNameToServer(thread.id, newName);
+            await this.messaging.notifyThreadNameToServer(this.thread.id, newName);
         }
     }
 }
