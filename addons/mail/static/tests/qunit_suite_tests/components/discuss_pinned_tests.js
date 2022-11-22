@@ -95,7 +95,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o_DiscussView_noThread",
+                    ".o-mail-discuss-no-thread",
                     "should have no thread opened in discuss"
                 );
             }
@@ -136,7 +136,7 @@ QUnit.module("mail", {}, function () {
             });
             assert.containsOnce(
                 document.body,
-                ".o_DiscussView_noThread",
+                ".o-mail-discuss-no-thread",
                 "should have no thread opened in discuss"
             );
             assert.containsNone(
