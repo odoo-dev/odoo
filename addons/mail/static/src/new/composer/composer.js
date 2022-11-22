@@ -1,10 +1,9 @@
 /** @odoo-module */
 
 import { Component, onMounted, onWillUpdateProps, useEffect, useRef, useState } from "@odoo/owl";
-import { convertBrToLineBreak } from "@mail/new/utils";
 import { useMessaging } from "../messaging_hook";
 import { useEmojiPicker } from "./emoji_picker";
-import { isEventHandled, onExternalClick } from "@mail/new/utils";
+import { convertBrToLineBreak, isEventHandled, onExternalClick } from "@mail/new/utils";
 
 export class Composer extends Component {
     setup() {
