@@ -8,12 +8,17 @@ import { useMessageHighlight, useMessaging } from "../messaging_hook";
 import { Composer } from "../composer/composer";
 import { CallUI } from "../rtc/call_ui";
 import { Component, onWillStart, onMounted, onWillUnmount, useRef } from "@odoo/owl";
+import { CallSettings } from "../rtc/call_settings";
+import { usePopover } from "@web/core/popover/popover_hook";
 
 export class Discuss extends Component {
     setup() {
         this.messaging = useMessaging();
         this.messageHighlight = useMessageHighlight();
         this.contentRef = useRef("content");
+        this.popover = usePopover();
+        this.closePopover = null;
+        this.settingsRef = useRef("settings");
         onWillStart(() => this.messaging.isReady);
         onMounted(() => (this.messaging.discuss.isActive = true));
         onWillUnmount(() => (this.messaging.discuss.isActive = false));
@@ -28,6 +33,16 @@ export class Discuss extends Component {
     }
     startCall() {
         this.messaging.startCall(this.messaging.discuss.threadId);
+    }
+
+    toggleSettings() {
+        if (this.closePopover) {
+            this.closePopover();
+            this.closePopover = null;
+        } else {
+            const el = this.settingsRef.el;
+            this.closePopover = this.popover.add(el, CallSettings);
+        }
     }
 
     async renameThread({ value: name }) {
@@ -51,7 +66,7 @@ export class Discuss extends Component {
 }
 
 Object.assign(Discuss, {
-    components: { AutogrowInput, Sidebar, Thread, ThreadIcon, Composer, CallUI },
+    components: { AutogrowInput, Sidebar, Thread, ThreadIcon, Composer, CallUI, CallSettings },
     props: ["*"],
     template: "mail.discuss",
 });
