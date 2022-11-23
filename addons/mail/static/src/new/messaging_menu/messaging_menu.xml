@@ -15,7 +15,7 @@
                     <button class="btn btn-link" t-att-class="state.filter === 'channels' ? 'fw-bolder' : 'text-500'" type="button" role="tab" data-tab-id="channels">Channels</button>
                 </div>
                 <div class="d-flex flex-column overflow-auto">
-                    <div class="d-flex justify-content-center py-4 px-2 text-muted" t-if="state.previews.length === 0">
+                    <div class="d-flex justify-content-center py-4 px-2 text-muted" t-if="displayedPreviews.length === 0">
                         No conversation yet...
                     </div>
                     <t t-else="" t-foreach="displayedPreviews" t-as="preview" t-key="preview.id">
