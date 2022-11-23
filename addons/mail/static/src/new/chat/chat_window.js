@@ -17,17 +17,15 @@ export class ChatWindow extends Component {
     }
 
     close() {
-        this.messaging.closeChatWindow(this.props.threadId);
+        this.messaging.closeChatWindow(this.props.chatWindow.threadId);
     }
 
     toggleFold() {
-        this.messaging.chatWindows.find((cw) => cw.threadId === this.props.threadId).folded =
-            !this.props.folded;
+        this.props.chatWindow.folded = !this.props.chatWindow.folded;
     }
 
     expand() {
-        // todo
-        this.messaging.setDiscussThread(this.props.threadId);
+        this.messaging.setDiscussThread(this.props.chatWindow.threadId);
         this.action.doAction(
             {
                 type: "ir.actions.client",
@@ -38,13 +36,12 @@ export class ChatWindow extends Component {
     }
 
     startCall() {
-        this.messaging.startCall(this.props.threadId);
+        this.messaging.startCall(this.props.chatWindow.threadId);
     }
 }
 
 Object.assign(ChatWindow, {
     components: { Thread, Composer, CallUI },
-    props: ["threadId", "right?", "autofocus?", "folded?"],
-    defaultProps: { folded: false },
+    props: ["chatWindow", "right?"],
     template: "mail.chat_window",
 });
