@@ -207,7 +207,8 @@ export class Messaging {
         }
 
         this.threads[id] = thread;
-        return thread;
+        // return reactive version
+        return this.threads[id];
     }
 
     /**
@@ -282,7 +283,8 @@ export class Messaging {
         } else {
             thread.messages.push(id);
         }
-        return message;
+        // return reactive version
+        return this.messages[id];
     }
 
     /**
@@ -316,7 +318,8 @@ export class Messaging {
         }
         const partner = { id, name };
         this.partners[id] = partner;
-        return partner;
+        // return reactive version
+        return this.partners[id];
     }
 
     initCommands() {
