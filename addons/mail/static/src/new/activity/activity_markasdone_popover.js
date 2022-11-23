@@ -28,7 +28,7 @@ export class ActivityMarkAsDone extends Component {
     async onClickDone() {
         const { res_id: resId, res_model: resModel } = this.props.activity;
         const thread = this.messaging.getChatterThread(resModel, resId);
-        await this.activityService.markAsDone(this.props.activity.id);
+        await this.env.services["mail.activity"].markAsDone(this.props.activity.id);
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }
@@ -38,10 +38,16 @@ export class ActivityMarkAsDone extends Component {
     async onClickDoneAndScheduleNext() {
         const { res_id: resId, res_model: resModel } = this.props.activity;
         const thread = this.messaging.getChatterThread(resModel, resId);
+        if (this.props.onClickDoneAndScheduleNext) {
+            this.props.onClickDoneAndScheduleNext();
+        }
         if (this.props.close) {
             this.props.close();
         }
-        await this.activityService.markAsDoneAndScheduleNext(this.props.activity, thread);
+        await this.env.services["mail.activity"].markAsDoneAndScheduleNext(
+            this.props.activity,
+            thread
+        );
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }
@@ -50,7 +56,7 @@ export class ActivityMarkAsDone extends Component {
 
 Object.assign(ActivityMarkAsDone, {
     template: "mail.activity_mark_as_done",
-    props: ["activity", "close?", "reload?"],
+    props: ["activity", "close?", "onClickDoneAndScheduleNext?", "reload?"],
     defaultProps: {
         hasHeader: false,
     },

@@ -51,7 +51,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o_ActivityMarkDonePopoverContentView_doneButton",
+                    ".o-mail-activity-mark-as-done-button-done",
                     "Popover component should contain the done button"
                 );
                 assert.containsOnce(
@@ -106,7 +106,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_ActivityMarkDonePopoverContentView_doneButton",
+                    ".o-mail-activity-mark-as-done-button-done",
                     "Popover component should NOT contain the done button"
                 );
                 assert.containsOnce(
@@ -156,7 +156,7 @@ QUnit.module("mail", {}, function () {
                     views: [[false, "form"]],
                 });
                 await click(".o_ActivityView_markDoneButton");
-                await click(".o_ActivityMarkDonePopoverContentView_doneButton");
+                await click(".o-mail-activity-mark-as-done-button-done");
                 assert.verifySteps(
                     ["action_feedback"],
                     "Mark done and schedule next button should call the right rpc"
@@ -209,7 +209,7 @@ QUnit.module("mail", {}, function () {
                 );
                 feedbackTextarea.focus();
                 document.execCommand("insertText", false, "This task is done");
-                document.querySelector(".o_ActivityMarkDonePopoverContentView_doneButton").click();
+                document.querySelector(".o-mail-activity-mark-as-done-button-done").click();
                 assert.verifySteps(
                     ["action_feedback"],
                     "Mark done and schedule next button should call the right rpc"
