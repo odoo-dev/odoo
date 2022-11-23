@@ -133,12 +133,14 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
             tag: "mail.action_discuss",
             type: "ir.actions.client",
         };
+        let threadId = context.active_id || params.default_active_id || "inbox";
+        if (typeof threadId === "string" && threadId.includes("_")) {
+            threadId = parseInt(threadId.split("_")[1]);
+        }
+        // TODO-DISCUSS-REFACTORING: remove when activeId will be handled.
+        webClient.env.services["mail.messaging"].setDiscussThread(threadId);
         if (waitUntilMessagesLoaded) {
             const messagesLoadedPromise = makeDeferred();
-            let threadId = context.active_id || params.default_active_id || "inbox";
-            if (typeof threadId === "string" && threadId.includes("_")) {
-                threadId = parseInt(threadId.split("_")[1]);
-            }
             let loadMessageRoute = `/mail/${threadId}/messages`;
             if (Number.isInteger(threadId)) {
                 loadMessageRoute = "/mail/channel/messages";

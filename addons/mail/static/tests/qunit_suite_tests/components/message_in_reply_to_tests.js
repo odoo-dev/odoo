@@ -28,15 +28,13 @@ QUnit.module("mail", {}, function () {
                     parent_id: mailMessageId1,
                     res_id: mailChannelId1,
                 });
-                const { click, env, openDiscuss } = await start({
+                const { click, openDiscuss } = await start({
                     discuss: {
                         params: {
                             default_active_id: `mail.channel_${mailChannelId1}`,
                         },
                     },
                 });
-                // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
-                env.services["mail.messaging"].setDiscussThread(mailChannelId1);
                 await openDiscuss();
                 await click(
                     `.o-mail-message[data-message-id="${mailMessageId2}"] .o-mail-message-in-reply-body`
@@ -80,15 +78,13 @@ QUnit.module("mail", {}, function () {
                     parent_id: oldestMessageId,
                     res_id: mailChannelId1,
                 });
-                const { click, env, openDiscuss } = await start({
+                const { click, openDiscuss } = await start({
                     discuss: {
                         params: {
                             default_active_id: `mail.channel_${mailChannelId1}`,
                         },
                     },
                 });
-                // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
-                env.services["mail.messaging"].setDiscussThread(mailChannelId1);
                 await openDiscuss();
                 await click(
                     `.o-mail-message[data-message-id="${latestMessageId}"] .o-mail-message-in-reply-body`

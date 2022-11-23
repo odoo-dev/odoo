@@ -223,12 +223,13 @@ QUnit.module("mail", (hooks) => {
                 { body: "Goodbye world", res_id: channelId, model: "mail.channel" },
             ]);
             const { click, openDiscuss } = await start({
-                discuss: { active_id: `mail.channel_${channelId}` },
+                discuss: {
+                    context: {
+                        active_id: `mail.channel_${channelId}`,
+                    },
+                },
             });
             await openDiscuss();
-            // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
-            await click(".o-mail-category-item");
-
             assert.containsN(document.body, ".o-mail-message", 2, "Should display two messages");
             await click(
                 `.o-mail-message[data-message-id='${firstMessageId}'] i[aria-label='Reply']`
@@ -260,11 +261,13 @@ QUnit.module("mail", (hooks) => {
             model: "mail.channel",
         });
         const { click, openDiscuss } = await start({
-            discuss: { active_id: `mail.channel_${channelId}` },
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${channelId}`,
+                },
+            },
         });
         await openDiscuss();
-        // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
-        await click(".o-mail-category-item");
 
         await click(`.o-mail-message i[aria-label='Reply']`);
         await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
@@ -296,11 +299,13 @@ QUnit.module("mail", (hooks) => {
                 model: "mail.channel",
             });
             const { click, openDiscuss } = await start({
-                discuss: { active_id: `mail.channel_${channelId}` },
+                discuss: {
+                    context: {
+                        active_id: `mail.channel_${channelId}`,
+                    },
+                },
             });
             await openDiscuss();
-            // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
-            await click(".o-mail-category-item");
 
             await click("i[aria-label='Reply']");
             await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
@@ -331,11 +336,13 @@ QUnit.module("mail", (hooks) => {
                 model: "mail.channel",
             });
             const { click, openDiscuss } = await start({
-                discuss: { active_id: `mail.channel_${channelId}` },
+                discuss: {
+                    context: {
+                        active_id: `mail.channel_${channelId}`,
+                    },
+                },
             });
             await openDiscuss();
-            // TODO-DISCUSS-REFACTORING: remove when active id will be handle.
-            await click(".o-mail-category-item");
 
             await click("i[aria-label='Reply']");
             await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
