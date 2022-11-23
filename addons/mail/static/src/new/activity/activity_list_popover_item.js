@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { ActivityMarkAsDone } from "@mail/new/activity/activity_markasdone_popover";
+
 import { auto_str_to_date } from "web.time";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
@@ -10,6 +12,11 @@ export class ActivityListPopoverItem extends Component {
     setup() {
         this.user = useService("user");
         this.state = useState({ hasMarkDoneView: false });
+        this.closeMarkAsDone = this.closeMarkAsDone.bind(this);
+    }
+
+    closeMarkAsDone() {
+        this.state.hasMarkDoneView = false;
     }
 
     get delayLabel() {
@@ -64,6 +71,12 @@ export class ActivityListPopoverItem extends Component {
 }
 
 Object.assign(ActivityListPopoverItem, {
-    props: ["activity", "onActivityChanged", "onClickEditActivityButton"],
+    components: { ActivityMarkAsDone },
+    props: [
+        "activity",
+        "onActivityChanged",
+        "onClickDoneAndScheduleNext?",
+        "onClickEditActivityButton",
+    ],
     template: "mail.ActivityListPopoverItem",
 });

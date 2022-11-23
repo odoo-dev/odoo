@@ -10,7 +10,7 @@
                         <span class="flex-grow-1"/>
                         <span class="badge rounded-pill text-bg-danger mx-3 align-self-center" t-esc="overdueActivities.length"/>
                     </div>
-                    <ActivityListPopoverItem t-foreach="overdueActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="props.onActivityChanged" onClickEditActivityButton="props.close"/>
+                    <ActivityListPopoverItem t-foreach="overdueActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="props.onActivityChanged" onClickEditActivityButton="props.close" onClickDoneAndScheduleNext="props.close"/>
                 </t>
                 <t t-if="todayActivities.length > 0">
                     <div class="d-flex bg-100 py-2 border-bottom">
@@ -18,7 +18,7 @@
                         <span class="flex-grow-1"/>
                         <span class="badge rounded-pill text-bg-warning mx-3 align-self-center" t-esc="todayActivities.length"/>
                     </div>
-                    <ActivityListPopoverItem t-foreach="todayActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="props.onActivityChanged" onClickEditActivityButton="props.close"/>
+                    <ActivityListPopoverItem t-foreach="todayActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="props.onActivityChanged" onClickEditActivityButton="props.close" onClickDoneAndScheduleNext="props.close"/>
                 </t>
                 <t t-if="plannedActivities.length > 0">
                     <div class="d-flex bg-100 py-2 border-bottom">
@@ -26,7 +26,7 @@
                         <span class="flex-grow-1"/>
                         <span class="badge rounded-pill text-bg-success mx-3 align-self-center" t-esc="plannedActivities.length"/>
                     </div>
-                    <ActivityListPopoverItem t-foreach="plannedActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="props.onActivityChanged" onClickEditActivityButton="props.close"/>
+                    <ActivityListPopoverItem t-foreach="plannedActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="props.onActivityChanged" onClickEditActivityButton="props.close" onClickDoneAndScheduleNext="props.close"/>
                 </t>
             </div>
             <button class="o-activity-list-popover-add-activity-button btn btn-secondary p-3 text-center" t-on-click="onClickAddActivityButton">

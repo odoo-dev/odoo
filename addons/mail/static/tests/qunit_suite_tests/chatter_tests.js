@@ -155,8 +155,8 @@ QUnit.module("mail", {}, function () {
         assert.verifySteps(["/web/dataset/call_kw/res.users/web_search_read"]);
     });
 
-    QUnit.skipRefactoring("list activity widget: open dropdown", async function (assert) {
-        assert.expect(9);
+    QUnit.test("list activity widget: open dropdown", async function (assert) {
+        assert.expect(7);
 
         const pyEnv = await startServer();
         const [mailActivityTypeId1, mailActivityTypeId2] = pyEnv["mail.activity.type"].create([
@@ -243,8 +243,8 @@ QUnit.module("mail", {}, function () {
         );
 
         await click(".o-activity-button"); // open the popover
-        await click(".o_ActivityListViewItem_markAsDone"); // mark the first activity as done
-        await click(".o_ActivityMarkDonePopoverContentView_doneButton"); // confirm
+        await click(".o-activity-list-popover-item-mark-as-done"); // mark the first activity as done
+        await click(".o-mail-activity-mark-as-done-button-done"); // confirm
 
         assert.strictEqual(document.querySelector(".o-list-activity-summary").innerText, "Meet FP");
 
@@ -252,8 +252,6 @@ QUnit.module("mail", {}, function () {
             "web_search_read",
             "activity_format",
             "action_feedback",
-            "/mail/thread/messages",
-            "/mail/thread/data",
             "web_search_read",
         ]);
     });

@@ -280,7 +280,7 @@ QUnit.skipRefactoring('activity view: activity widget', async function (assert) 
 
     await testUtils.dom.click(document.querySelector('.o-activity-list-popover-add-activity-button'));
     await testUtils.dom.click(document.querySelector('.overdue .o-activity-cell-closest-deadline'));
-    await testUtils.dom.click(document.querySelector('.o_ActivityListViewItem_markAsDone'));
+    await testUtils.dom.click(document.querySelector('.o-activity-list-popover-item-mark-as-done'));
     document.querySelector('.o_ActivityMarkDonePopoverContentView_feedback').value = "feedback2";
 
     await testUtils.dom.click(document.querySelector('.o_ActivityMarkDonePopoverContentView_doneScheduleNextButton'));
