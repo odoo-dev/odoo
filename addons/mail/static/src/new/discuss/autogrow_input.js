@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { onExternalClick, useFocus, useHover } from "../utils";
-import { Component, useRef, useState, onMounted, onWillUpdateProps, useEffect } from "@odoo/owl";
+import { Component, useRef, useState, onWillUpdateProps, useEffect } from "@odoo/owl";
 
 export class AutogrowInput extends Component {
     setup() {
@@ -17,16 +17,18 @@ export class AutogrowInput extends Component {
                 this.state.value = nextProps.value;
             }
         });
-        onMounted(() => {
-            // This mesures the maximum width of the input which can get from the flex layout.
-            this.inputRef.el.style.width = "100%";
-            this.maxWidth = this.inputRef.el.clientWidth;
-            this.inputRef.el.style.width = this.inputRef.el.scrollWidth + 5 + "px";
-        });
         onExternalClick("input", () => this.onValidate());
         useEffect(
             () => {
-                this.inputRef.el.style.width = "20px";
+                // This mesures the maximum width of the input which can get from the flex layout.
+                this.inputRef.el.style.width = "100%";
+                this.maxWidth = this.inputRef.el.clientWidth;
+                // Minimum width of the input
+                this.inputRef.el.style.width = "10px";
+                if (this.state.value === "" && this.props.placeholder !== "") {
+                    this.inputRef.el.style.width = "auto";
+                    return;
+                }
                 if (this.inputRef.el.scrollWidth + 5 > this.maxWidth) {
                     this.inputRef.el.style.width = "100%";
                     return;
@@ -71,10 +73,12 @@ Object.assign(AutogrowInput, {
         className: { type: String, optional: true },
         disabled: { type: Boolean, optional: true },
         onValidate: { type: Function, optional: true },
+        placeholder: { type: String, optional: true },
         value: { type: String },
     },
     defaultProps: {
         className: "",
         onValidate: () => {},
+        placeholder: "",
     },
 });

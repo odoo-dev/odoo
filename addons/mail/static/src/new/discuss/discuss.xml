@@ -10,16 +10,20 @@
                 <ThreadIcon className="'me-2 align-self-center'" thread="thread"/>
                 <div class="d-flex flex-grow-1 align-self-center align-items-center h-100 py-2">
                     <AutogrowInput
-                        className="'o-mail-discuss-thread-name flex-shrink-1'"
+                        className="'o-mail-discuss-thread-name lead fw-bold flex-shrink-1'"
                         disabled="!thread.isRenameable"
                         onValidate.bind="renameThread"
                         value="thread.name"
                     />
-                    <t t-if="thread.description">
+                    <t t-if="thread.isDescriptionChangeable">
                         <div class="flex-shrink-0 mx-2 py-2 border-start"/>
-                        <div class="flex-shrink-0 px-1 border text-truncate border-light" t-att-title="thread.description">
-                            <t t-esc="thread.description"/>
-                        </div>
+                        <t t-set="autogrowDescriptionPlaceholder">Add a description</t>
+                        <AutogrowInput
+                            className="'o-mail-discuss-thread-description flex-shrink-1'"
+                            onValidate.bind="updateThreadDescription"
+                            placeholder="autogrowDescriptionPlaceholder"
+                            value="thread.description or ''"
+                        />
                     </t>
                 </div>
                 <div class="o-mail-discuss-actions flex-shrink-0 d-flex align-items-center ms-1">

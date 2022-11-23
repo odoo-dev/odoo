@@ -3,9 +3,10 @@
 
 <t t-name="mail.autogrow_input" owl="1">
     <input
-        class="o-mail-autogrow-input p-1 lead fw-bold border"
-        t-att-class="{'bg-transparent border-transparent': !inputFocus.isFocus and !inputHover.isHover}"
+        class="o-mail-autogrow-input text-truncate border px-2 py-1"
+        t-att-class="{'bg-transparent border-transparent': !inputFocus.isFocus and !inputHover.isHover, 'border-dark': inputFocus.isFocus}"
         t-attf-class="{{ props.className }}"
+        t-attf-placeholder="{{ props.placeholder }}"
         t-att-disabled="props.disabled"
         t-att-title="state.value"
         t-model="state.value"

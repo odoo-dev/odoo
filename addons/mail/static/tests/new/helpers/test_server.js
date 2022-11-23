@@ -216,6 +216,10 @@ export class TestServer {
         return [];
     }
 
+    _web_dataset_call_kw_mail_channel_channel_change_description() {
+        return [];
+    }
+
     _web_dataset_call_kw_mail_channel_search_read(params) {
         const nameSearch = params.kwargs.domain[1][2];
         return this.channels.filter((channel) => channel.name.includes(nameSearch));

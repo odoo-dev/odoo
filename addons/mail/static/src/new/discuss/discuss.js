@@ -41,6 +41,13 @@ export class Discuss extends Component {
             await this.messaging.notifyThreadNameToServer(this.thread.id, newName);
         }
     }
+
+    async updateThreadDescription({ value: description }) {
+        const newDescription = description.trim();
+        if (newDescription !== this.thread.description) {
+            await this.messaging.notifyThreadDescriptionToServer(this.thread.id, newDescription);
+        }
+    }
 }
 
 Object.assign(Discuss, {

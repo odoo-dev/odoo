@@ -176,6 +176,7 @@ export class Messaging {
             chatPartnerId: false,
             isAdmin: false,
             canLeave: data.canLeave || false,
+            isDescriptionChangeable: ["channel", "group"].includes(type),
             isRenameable: ["chat", "channel", "group"].includes(type),
         };
         for (const key in data) {
@@ -814,6 +815,14 @@ export class Messaging {
             thread.name = name;
             await this.orm.call("mail.channel", "channel_set_custom_name", [[thread.id]], { name });
         }
+    }
+
+    async notifyThreadDescriptionToServer(threadId, description) {
+        const thread = this.threads[threadId];
+        thread.description = description;
+        return this.orm.call("mail.channel", "channel_change_description", [[thread.id]], {
+            description,
+        });
     }
 
     // -------------------------------------------------------------------------
