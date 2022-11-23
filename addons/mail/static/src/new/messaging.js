@@ -381,8 +381,9 @@ export class Messaging {
     openChatWindow(threadId) {
         const chatWindow = this.chatWindows.find((c) => c.threadId === threadId);
         if (!chatWindow) {
-            this.chatWindows.push({ threadId, autofocus: 1 });
+            this.chatWindows.push({ threadId, autofocus: 1, folded: false });
         } else {
+            chatWindow.folded = false;
             chatWindow.autofocus++;
         }
     }
