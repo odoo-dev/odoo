@@ -2,17 +2,18 @@
 
 import { Messaging } from "@mail/new/messaging";
 
-import { patch } from 'web.utils';
+import { patch } from "web.utils";
 
 patch(Messaging.prototype, "hr", {
     setup(...args) {
         this._super(...args);
         this.employees = {};
     },
-    async getChat({ employeeId, userId }) {
+    async getChat(person) {
+        const { employeeId } = person;
         const _super = this._super.bind(this);
         if (!employeeId) {
-            return _super({ userId });
+            return _super(person);
         }
         let employee = this.employees[employeeId];
         if (!employee) {
@@ -21,9 +22,14 @@ patch(Messaging.prototype, "hr", {
         }
         if (!employee.user_id && !employee.hasCheckedUser) {
             employee.hasCheckedUser = true;
-            const [employeeData] = await this.orm.silent.read("hr.employee.public", [employee.id], ["user_id", "user_partner_id"], {
-                context: { active_test: false },
-            });
+            const [employeeData] = await this.orm.silent.read(
+                "hr.employee.public",
+                [employee.id],
+                ["user_id", "user_partner_id"],
+                {
+                    context: { active_test: false },
+                }
+            );
             if (employeeData) {
                 employee.user_id = employeeData.user_id[0];
                 let user = this.users[employee.user_id];
@@ -37,7 +43,7 @@ patch(Messaging.prototype, "hr", {
         if (!employee.user_id) {
             this.notification.add(
                 this.env._t("You can only chat with employees that have a dedicated user."),
-                { type: 'info' }
+                { type: "info" }
             );
             return;
         }
