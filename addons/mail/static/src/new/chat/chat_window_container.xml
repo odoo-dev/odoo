@@ -2,8 +2,8 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.chat_window_container" owl="1">
-    <t t-foreach="chatWindows" t-as="chat" t-key="chat.threadId">
-        <ChatWindow threadId="chat.threadId" autofocus="chat.autofocus" folded="chat.folded" right="10 + chat_index*350"/>
+    <t t-foreach="chatWindows" t-as="chatWindow" t-key="chatWindow.threadId">
+        <ChatWindow chatWindow="chatWindow" right="10 + chatWindow_index * 350"/>
     </t>
 </t>
 
