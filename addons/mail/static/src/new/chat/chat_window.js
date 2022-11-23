@@ -3,7 +3,7 @@
 import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
 import { useMessageHighlight, useMessaging } from "../messaging_hook";
-import { Component, useChildSubEnv, useState } from "@odoo/owl";
+import { Component, useChildSubEnv } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { CallUI } from "../rtc/call_ui";
 
@@ -11,7 +11,6 @@ export class ChatWindow extends Component {
     setup() {
         this.messaging = useMessaging();
         this.messageHighlight = useMessageHighlight();
-        this.state = useState({ folded: false });
         this.action = useService("action");
         useChildSubEnv({ inChatWindow: true });
     }
@@ -21,7 +20,8 @@ export class ChatWindow extends Component {
     }
 
     toggleFold() {
-        this.state.folded = !this.state.folded;
+        this.messaging.chatWindows.find((cw) => cw.threadId === this.props.threadId).folded =
+            !this.props.folded;
     }
 
     expand() {
@@ -43,6 +43,7 @@ export class ChatWindow extends Component {
 
 Object.assign(ChatWindow, {
     components: { Thread, Composer, CallUI },
-    props: ["threadId", "right?", "autofocus?"],
+    props: ["threadId", "right?", "autofocus?", "folded?"],
+    defaultProps: { folded: false },
     template: "mail.chat_window",
 });

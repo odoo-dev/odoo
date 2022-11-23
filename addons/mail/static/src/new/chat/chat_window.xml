@@ -4,7 +4,7 @@
 <t t-name="mail.chat_window" owl="1">
     <div class="o-mail-chat-window position-absolute bottom-0 rounded-top-3 bg-view overflow-hidden d-flex flex-column"
         t-attf-style="right:{{props.right}}px;"
-        t-att-class="{'o-folded': state.folded}"
+        t-att-class="{'o-folded': props.folded}"
     >
         <div class="o-mail-chat-window-header d-flex align-items-center cursor-pointer flex-shrink-0" t-on-click="toggleFold">
             <t t-set="thread" t-value="messaging.threads[props.threadId]"/>
@@ -21,7 +21,7 @@
                 <i class="fa fa-close"></i>
             </div>
         </div>
-        <t t-if="!state.folded">
+        <t t-if="!props.folded">
             <t t-if="thread.inCall">
                 <CallUI thread="thread" compact="true"/>
             </t>
