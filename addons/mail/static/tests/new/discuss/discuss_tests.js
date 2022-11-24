@@ -104,26 +104,21 @@ QUnit.module("mail", (hooks) => {
         env.services["mail.messaging"].setDiscussThread(1);
         await mount(Discuss, target, { env });
 
-        assert.containsOnce(target, ".o-mail-discuss-thread-description");
+        assert.containsOnce(target, "input.o-mail-discuss-thread-description");
         const threadDescriptionElement = target.querySelector(
-            ".o-mail-discuss-thread-description .o-mail-autogrow-input"
+            "input.o-mail-discuss-thread-description"
         );
 
         await click(threadDescriptionElement);
         assert.strictEqual(threadDescriptionElement.value, "General announcements...");
         await editInput(
             target,
-            ".o-mail-discuss-thread-description .o-mail-autogrow-input",
+            "input.o-mail-discuss-thread-description",
             "I want a burger today!"
         );
-        await triggerEvent(
-            target,
-            ".o-mail-discuss-thread-description .o-mail-autogrow-input",
-            "keydown",
-            {
-                key: "Enter",
-            }
-        );
+        await triggerEvent(target, "input.o-mail-discuss-thread-description", "keydown", {
+            key: "Enter",
+        });
         assert.strictEqual(threadDescriptionElement.value, "I want a burger today!");
 
         assert.verifySteps(["/web/dataset/call_kw/mail.channel/channel_change_description"]);
