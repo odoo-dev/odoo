@@ -9,7 +9,7 @@
         </t>
         <t t-set-slot="default">
             <div class="o-mail-messaging-menu">
-                <div class="border-bottom d-flex flex-shrink-0" t-on-click="activateTab">
+                <div class="o-mail-messaging-menu-topbar border-bottom d-flex flex-shrink-0" t-on-click="activateTab">
                     <button class="btn btn-link" t-att-class="state.filter === 'all' ? 'fw-bolder' : 'text-500'" type="button" role="tab" data-tab-id="all">All</button>
                     <button class="btn btn-link" t-att-class="state.filter === 'chats' ? 'fw-bolder' : 'text-500'" type="button" role="tab" data-tab-id="chats">Chats</button>
                     <button class="btn btn-link" t-att-class="state.filter === 'channels' ? 'fw-bolder' : 'text-500'" type="button" role="tab" data-tab-id="channels">Channels</button>
