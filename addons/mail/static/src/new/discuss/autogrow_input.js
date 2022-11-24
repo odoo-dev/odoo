@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { onExternalClick, useFocus, useHover } from "../utils";
-import { Component, useRef, useState, onWillUpdateProps, useEffect } from "@odoo/owl";
+import { Component, useRef, useState, onMounted, onWillUpdateProps, useEffect } from "@odoo/owl";
 
 export class AutogrowInput extends Component {
     setup() {
@@ -11,15 +11,26 @@ export class AutogrowInput extends Component {
         this.inputFocus = useFocus("input");
         this.inputRef = useRef("input");
         this.inputHover = useHover("input");
+        this.maxWidth = undefined;
         onWillUpdateProps((nextProps) => {
             if (this.props.value !== nextProps.value) {
                 this.state.value = nextProps.value;
             }
         });
+        onMounted(() => {
+            // This mesures the maximum width of the input which can get from the flex layout.
+            this.inputRef.el.style.width = "100%";
+            this.maxWidth = this.inputRef.el.clientWidth;
+            this.inputRef.el.style.width = this.inputRef.el.scrollWidth + 5 + "px";
+        });
         onExternalClick("input", () => this.onValidate());
         useEffect(
             () => {
-                this.inputRef.el.style.width = "1px";
+                this.inputRef.el.style.width = "20px";
+                if (this.inputRef.el.scrollWidth + 5 > this.maxWidth) {
+                    this.inputRef.el.style.width = "100%";
+                    return;
+                }
                 this.inputRef.el.style.width = this.inputRef.el.scrollWidth + 5 + "px";
             },
             () => [this.state.value]
