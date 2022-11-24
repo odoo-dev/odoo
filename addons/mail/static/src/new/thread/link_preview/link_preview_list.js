@@ -7,28 +7,15 @@ import { LinkPreviewVideo } from "./link_preview_video";
 
 export class LinkPreviewList extends Component {
     get linkPreviewsImage() {
-        return this.props.linkPreviews.filter((linkPreview) =>
-            Boolean(linkPreview.image_mimetype || linkPreview.og_mimetype === "image/gif")
-        );
+        return this.props.linkPreviews.filter((linkPreview) => linkPreview.isImage);
     }
 
     get linkPreviewsVideo() {
-        return this.props.linkPreviews.filter((linkPreview) =>
-            Boolean(
-                linkPreview.og_type &&
-                    linkPreview.og_type.startsWith("video") &&
-                    !this.linkPreviewsImage.includes(linkPreview)
-            )
-        );
+        return this.props.linkPreviews.filter((linkPreview) => linkPreview.isVideo);
     }
 
     get linkPreviewsCard() {
-        return this.props.linkPreviews.filter((linkPreview) =>
-            Boolean(
-                !this.linkPreviewsVideo.includes(linkPreview) &&
-                    !this.linkPreviewsImage.includes(linkPreview)
-            )
-        );
+        return this.props.linkPreviews.filter((linkPreview) => linkPreview.isCard);
     }
 }
 
