@@ -2494,42 +2494,6 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("composer state: text save and restore", async function (assert) {
-            assert.expect(2);
-
-            const pyEnv = await startServer();
-            const [mailChannelId1] = pyEnv["mail.channel"].create([
-                { name: "General" },
-                { name: "Special" },
-            ]);
-            const { click, insertText, openDiscuss } = await start({
-                discuss: {
-                    params: {
-                        default_active_id: `mail.channel_${mailChannelId1}`,
-                    },
-                },
-            });
-            await openDiscuss();
-            // Write text in composer for #general
-            await insertText(".o-mail-composer-textarea", "A message");
-            await click(`.o_DiscussSidebarCategoryItem[data-channel-name="Special"]`);
-            await insertText(".o-mail-composer-textarea", "An other message");
-            // Switch back to #general
-            await click(`.o_DiscussSidebarCategoryItem[data-channel-name="General"]`);
-            assert.strictEqual(
-                document.querySelector(`.o-mail-composer-textarea`).value,
-                "A message",
-                "should restore the input text"
-            );
-
-            await click(`.o_DiscussSidebarCategoryItem[data-channel-name="Special"]`);
-            assert.strictEqual(
-                document.querySelector(`.o-mail-composer-textarea`).value,
-                "An other message",
-                "should restore the input text"
-            );
-        });
-
         QUnit.skipRefactoring(
             "composer state: attachments save and restore",
             async function (assert) {

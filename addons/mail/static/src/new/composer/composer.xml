@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.composer" owl="1">
-    <t t-set="thread" t-value="props.message ? undefined : messaging.threads[props.threadId]" />
+    <t t-set="thread" t-value="props.composer.messageId ? undefined : messaging.threads[props.composer.threadId]" />
     <t t-set="compact" t-value="props.mode === 'compact'"/>
     <t t-set="normal" t-value="props.mode === 'normal'"/>
     <t t-set="extended" t-value="props.mode === 'extended'"/>
@@ -37,7 +37,7 @@
                         t-ref="textarea"
                         style="height:40px;"
                         t-on-keydown="onKeydown"
-                        t-model="state.value"
+                        t-model="props.composer.textInputContent"
                         t-att-placeholder="props.placeholder or (thread ? `Message #${thread.name}` : '')" />
                 </div>
                 <div class="d-flex py-1 border-top bg-view" t-att-class="{'border-bottom': normal, 'border': extended }">
@@ -53,7 +53,7 @@
                 </t>
             </div>
         </div>
-        <t t-if="props.message">
+        <t t-if="props.composer.messageId">
             <span class="text-muted">escape to <a href="#" t-on-click="props.onDiscardCallback">cancel</a>, enter to <a href="#" t-on-click="editMessage">save</a></span>
         </t>
     </div>
@@ -66,7 +66,7 @@
                 t-on-click="sendMessage"
                 type="button"
                 data-action="send"
-                t-att-disabled="!state.value"
+                t-att-disabled="!props.composer.textInputContent"
             >
                 Send
             </button>
