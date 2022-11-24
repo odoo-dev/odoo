@@ -10,19 +10,19 @@
                 <ThreadIcon className="'me-2 align-self-center'" thread="thread"/>
                 <div class="d-flex flex-grow-1 align-self-center align-items-center h-100 py-2">
                     <AutogrowInput
-                        className="'o-mail-discuss-thread-name'"
+                        className="'o-mail-discuss-thread-name flex-shrink-1'"
                         disabled="!thread.isRenameable"
                         onValidate.bind="renameThread"
                         value="thread.name"
                     />
                     <t t-if="thread.description">
                         <div class="flex-shrink-0 mx-2 py-2 border-start"/>
-                        <div class="px-1 border text-truncate border-light" t-att-title="thread.description">
+                        <div class="flex-shrink-0 px-1 border text-truncate border-light" t-att-title="thread.description">
                             <t t-esc="thread.description"/>
                         </div>
                     </t>
                 </div>
-                <div class="o-mail-discuss-actions d-flex align-items-center ms-1">
+                <div class="o-mail-discuss-actions flex-shrink-0 d-flex align-items-center ms-1">
                     <t t-set="isEmpty" t-value="thread.messages.length === 0"/>
                     <t t-if="thread.id === 'inbox'">
                         <button class="btn btn-secondary" t-att-disabled="isEmpty" t-on-click="markAllAsRead">Mark all read</button>
