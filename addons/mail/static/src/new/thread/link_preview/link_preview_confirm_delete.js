@@ -4,6 +4,13 @@ import { useService } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 
+/**
+ * @typedef {Object} Props
+ * @property {import("@mail/new/core/link_preview_model").LinkPreview} linkPreview
+ * @property {function} close
+ * @property {Component} LinkPreviewListComponent
+ * @extends {Component<Props, Env>}
+ */
 export class LinkPreviewConfirmDelete extends Component {
     setup() {
         this.rpc = useService("rpc");

@@ -9,6 +9,7 @@ import { htmlToTextContentInline, convertBrToLineBreak, removeFromArray } from "
 import { prettifyMessageContent } from "./message_prettify_utils";
 import { Thread } from "./core/thread_model";
 import { Partner } from "./core/partner_model";
+import { LinkPreview } from "./core/link_preview_model";
 
 const { DateTime } = luxon;
 
@@ -225,6 +226,13 @@ export class Messaging {
             isStarred = true;
         }
 
+        const linkPreviewsClass = [];
+        if (linkPreviews) {
+            for (const linkPreview of linkPreviews) {
+                linkPreviewsClass.push(new LinkPreview(linkPreview));
+            }
+        }
+
         const message = {
             attachments,
             id,
@@ -242,7 +250,7 @@ export class Messaging {
             parentMessage,
             subtypeDescription,
             trackingValues,
-            linkPreviews,
+            linkPreviews: linkPreviewsClass,
         };
         if (parentMessage) {
             const { body, ...data } = parentMessage;
@@ -365,7 +373,7 @@ export class Messaging {
                         if (linkPreviews) {
                             for (const linkPreview of linkPreviews) {
                                 this.state.messages[linkPreview.message.id].linkPreviews.push(
-                                    linkPreview
+                                    new LinkPreview(linkPreview)
                                 );
                             }
                         }
