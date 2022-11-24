@@ -386,6 +386,17 @@ export class Messaging {
                         delete this.messages[message_id].linkPreviews[index];
                     }
                     break;
+                case "mail.message/toggle_star": {
+                    const { message_ids: messageIds, starred } = notif.payload;
+                    for (const messageId of messageIds) {
+                        const message = this.messages[messageId];
+                        if (!message) {
+                            continue;
+                        }
+                        this.updateMessageStarredState(message, starred);
+                    }
+                    this.discuss.starred.messages.sort();
+                }
             }
         }
     }
@@ -743,17 +754,18 @@ export class Messaging {
     }
 
     async toggleStar(messageId) {
-        const message = this.messages[messageId];
-        message.isStarred = !message.isStarred;
-        if (message.isStarred) {
+        await this.orm.call("mail.message", "toggle_message_starred", [[messageId]]);
+    }
+
+    updateMessageStarredState(message, isStarred) {
+        message.isStarred = isStarred;
+        if (isStarred) {
             this.discuss.starred.counter++;
-            this.discuss.starred.messages.push(messageId);
+            this.discuss.starred.messages.push(message.id);
         } else {
             this.discuss.starred.counter--;
-            removeFromArray(this.discuss.starred.messages, messageId);
+            removeFromArray(this.discuss.starred.messages, message.id);
         }
-        this.discuss.starred.messages.sort();
-        await this.orm.call("mail.message", "toggle_message_starred", [[messageId]]);
     }
 
     async deleteMessage(message) {
