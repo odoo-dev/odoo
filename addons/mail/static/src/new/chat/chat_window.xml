@@ -27,7 +27,7 @@
                     <CallUI thread="thread" compact="true"/>
                 </t>
                 <Thread id="thread.id" t-key="thread.id" messageHighlight="messageHighlight"/>
-                <Composer threadId="thread.id" autofocus="props.chatWindow.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage" dropzoneRef="contentRef"/>
+                <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage" dropzoneRef="contentRef"/>
             </div>
         </t>
     </div>

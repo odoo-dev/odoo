@@ -170,6 +170,14 @@ export class Messaging {
         );
     }
 
+    createComposer({ threadId, messageId }) {
+        return {
+            messageId,
+            threadId,
+            textInputContent: messageId ? convertBrToLineBreak(this.messages[messageId].body) : "",
+        };
+    }
+
     createThread(id, name, type, data = {}) {
         if (id in this.threads) {
             return this.threads[id];
@@ -190,6 +198,7 @@ export class Messaging {
             canLeave: data.canLeave || false,
             isDescriptionChangeable: ["channel", "group"].includes(type),
             isRenameable: ["chat", "channel", "group"].includes(type),
+            composer: this.createComposer({ threadId: id }),
         };
         for (const key in data) {
             thread[key] = data[key];

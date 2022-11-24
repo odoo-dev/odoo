@@ -35,7 +35,7 @@ export class Message extends Component {
             if (!this.ref.el || ev.target === this.ref.el || this.ref.el.contains(ev.target)) {
                 return;
             }
-            this.state.isEditing = false;
+            this.exitEditMode();
         });
         onPatched(() => {
             if (this.props.highlighted && this.ref.el) {
@@ -117,6 +117,19 @@ export class Message extends Component {
         if (this.hasOpenChatFromAvatarClick) {
             this.messaging.openChat({ partnerId: this.message.author.id });
         }
+    }
+
+    /**
+     * @param {MouseEvent} ev
+     */
+    onClickEdit(ev) {
+        this.message.composer = this.messaging.createComposer({ messageId: this.props.message.id });
+        this.state.isEditing = true;
+    }
+
+    exitEditMode() {
+        this.message.composer = null;
+        this.state.isEditing = false;
     }
 }
 

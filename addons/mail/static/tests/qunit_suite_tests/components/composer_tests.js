@@ -11,17 +11,22 @@ import {
 } from "@mail/../tests/helpers/test_utils";
 
 import { file, makeTestPromise } from "web.test_utils";
+import { click, getFixture } from "@web/../tests/helpers/utils";
 
 const { createFile, inputFiles } = file;
+let target;
 
-QUnit.module("mail", {}, function () {
+QUnit.module("mail", (hooks) => {
+    hooks.beforeEach(async () => {
+        target = getFixture();
+    });
     QUnit.module("components", {}, function () {
         QUnit.module("composer_tests.js");
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "composer text input: basic rendering when posting a message",
             async function (assert) {
-                assert.expect(5);
+                assert.expect(4);
 
                 const pyEnv = await startServer();
                 const { click, openFormView } = await start();
@@ -32,20 +37,14 @@ QUnit.module("mail", {}, function () {
                 await click(".o-mail-chatter-topbar-send-message-button");
 
                 assert.strictEqual(
-                    document.querySelectorAll(".o_ComposerView").length,
+                    document.querySelectorAll(".o-mail-composer").length,
                     1,
                     "should have composer in discuss thread"
                 );
                 assert.strictEqual(
-                    document.querySelectorAll(".o_ComposerView_textInput").length,
+                    document.querySelectorAll(".o-mail-composer-textarea").length,
                     1,
                     "should have text input inside discuss thread composer"
-                );
-                assert.ok(
-                    document
-                        .querySelector(".o_ComposerView_textInput")
-                        .classList.contains("o_ComposerTextInputView"),
-                    "composer text input of composer should be a ComposerTextIput component"
                 );
                 assert.strictEqual(
                     document.querySelectorAll(`.o-mail-composer-textarea`).length,
@@ -251,9 +250,8 @@ QUnit.module("mail", {}, function () {
                     },
                 });
                 await openDiscuss();
-                const composerTextInputTextArea = document.querySelector(
-                    `.o-mail-composer-textarea`
-                );
+                const composerTextInputTextArea =
+                    document.querySelector(`.o-mail-composer-textarea`);
                 await insertText(".o-mail-composer-textarea", "Blabla");
                 assert.strictEqual(
                     composerTextInputTextArea.value,
@@ -273,6 +271,27 @@ QUnit.module("mail", {}, function () {
                     "😊",
                     "whole text selection should have been replaced by emoji"
                 );
+            }
+        );
+
+        QUnit.test(
+            "click on emoji button, select emoji, then re-click on button should show emoji picker",
+            async function (assert) {
+                assert.expect(1);
+                const pyEnv = await startServer();
+                const mailChanelId1 = pyEnv["mail.channel"].create({
+                    name: "roblox-skateboarding",
+                });
+                const { click, openDiscuss } = await start({
+                    discuss: {
+                        context: { active_id: mailChanelId1 },
+                    },
+                });
+                await openDiscuss();
+                await click("i[aria-label='Emojis']");
+                await click(".o-emoji[data-codepoints='👺']");
+                await click("i[aria-label='Emojis']");
+                assert.containsOnce(document.body, ".o-mail-emoji-picker");
             }
         );
 
@@ -1730,6 +1749,33 @@ QUnit.module("mail", {}, function () {
                     document.querySelector(".o-mail-composer-send-button").textContent,
                     "Send",
                     "Send button of mail.channel composer should have 'Send' as label"
+                );
+            }
+        );
+
+        QUnit.test(
+            "composer textarea content is retained when changing channel then going back",
+            async function (assert) {
+                assert.expect(1);
+
+                const pyEnv = await startServer();
+                const [mailChannelId1] = pyEnv["mail.channel"].create([
+                    { name: "minigolf-galaxy-iv" },
+                    { name: "epic-shrek-lovers" },
+                ]);
+                const { insertText, openDiscuss } = await start({
+                    discuss: {
+                        context: { active_id: mailChannelId1 },
+                    },
+                });
+                await openDiscuss();
+                await insertText(".o-mail-composer-textarea", "According to all known laws of aviation,");
+
+                await click($(target).find("span:contains('epic-shrek-lovers')")[0]);
+                await click($(target).find("span:contains('minigolf-galaxy-iv')")[0]);
+                assert.strictEqual(
+                    target.querySelector(".o-mail-composer-textarea").value,
+                    "According to all known laws of aviation,",
                 );
             }
         );
