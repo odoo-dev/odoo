@@ -2,7 +2,6 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.composer" owl="1">
-    <t t-set="thread" t-value="props.composer.messageId ? undefined : messaging.threads[props.composer.threadId]" />
     <t t-set="compact" t-value="props.mode === 'compact'"/>
     <t t-set="normal" t-value="props.mode === 'normal'"/>
     <t t-set="extended" t-value="props.mode === 'extended'"/>
@@ -38,7 +37,7 @@
                         style="height:40px;"
                         t-on-keydown="onKeydown"
                         t-model="props.composer.textInputContent"
-                        t-att-placeholder="props.placeholder or (thread ? `Message #${thread.name}` : '')" />
+                        t-att-placeholder="placeholder"/>
                 </div>
                 <div class="d-flex py-1 border-top bg-view" t-att-class="{'border-bottom': normal, 'border': extended }">
                     <div class="d-flex align-items-center px-2" >
