@@ -6,7 +6,7 @@ import { RelativeTime } from "./relative_time";
 import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { useService } from "@web/core/utils/hooks";
-import { Composer } from "../composer/composer";
+import { Composer } from "../composer/composer_view";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
