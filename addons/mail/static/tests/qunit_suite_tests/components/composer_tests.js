@@ -1647,13 +1647,13 @@ QUnit.module("mail", (hooks) => {
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "send message only once when button send is clicked twice quickly",
             async function (assert) {
                 assert.expect(2);
 
                 const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
+                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
                 const { insertText, openDiscuss } = await start({
                     discuss: {
                         context: { active_id: mailChannelId1 },
