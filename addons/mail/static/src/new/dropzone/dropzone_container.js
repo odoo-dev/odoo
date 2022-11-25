@@ -17,7 +17,7 @@ export class DropzoneContainer extends Component {
     }
 
     onDragEnter(ev) {
-        if (this.dragCount === 0 && ev.dataTransfer?.types.includes("Files")) {
+        if (this.dragCount === 0 && ev.dataTransfer && ev.dataTransfer.types.includes("Files")) {
             this.state.isDraggingFile = true;
         }
         this.dragCount++;

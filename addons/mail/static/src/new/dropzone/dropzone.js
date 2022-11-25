@@ -3,9 +3,6 @@
 import { Component, onMounted, useExternalListener, useRef, useState } from "@odoo/owl";
 
 export class Dropzone extends Component {
-    static template = "mail.dropzone";
-    static props = { ref: Object };
-
     setup() {
         // Prevents to browser to open or download the file when it is dropped
         // outside of the dropzone.
@@ -45,3 +42,8 @@ export class Dropzone extends Component {
         this.state.isDraggingInside = false;
     }
 }
+
+Object.assign(Dropzone, {
+    template: "mail.dropzone",
+    props: { ref: Object },
+});
