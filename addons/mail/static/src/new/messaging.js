@@ -10,6 +10,8 @@ import { prettifyMessageContent } from "./message_prettify_utils";
 
 const { DateTime } = luxon;
 
+const FETCH_MSG_LIMIT = 30;
+
 export const asyncMethods = [
     "fetchThreadMessages",
     "fetchPreviews",
@@ -189,6 +191,7 @@ export class Messaging {
             counter: 0,
             isUnread: false,
             icon: false,
+            loadMore: false,
             description: false,
             status: "new", // 'new', 'loading', 'ready'
             imgUrl: false,
@@ -307,8 +310,13 @@ export class Messaging {
         } else {
             thread.messages.push(id);
         }
+        this.sortThreadMessages(thread);
         // return reactive version
         return this.messages[id];
+    }
+
+    sortThreadMessages(thread) {
+        thread.messages.sort((msgId1, msgId2) => msgId1 - msgId2);
     }
 
     /**
@@ -506,51 +514,90 @@ export class Messaging {
         });
     }
 
-    async fetchThreadMessages(threadId) {
-        const thread = this.threads[threadId];
-        if (thread.status !== "new") {
-            return;
-        }
+    async fetchThreadMessages(thread, { min, max }) {
         thread.status = "loading";
         let rawMessages;
         switch (thread.type) {
             case "mailbox":
-                rawMessages = await this.rpc(`/mail/${threadId}/messages`, { limit: 30 });
+                rawMessages = await this.rpc(`/mail/${thread.id}/messages`, {
+                    limit: FETCH_MSG_LIMIT,
+                    max_id: max,
+                    min_id: min,
+                });
                 break;
             case "chatter":
                 if (thread.resId === false) {
-                    return;
+                    return [];
                 }
                 rawMessages = await this.rpc("/mail/thread/messages", {
                     thread_id: thread.resId,
                     thread_model: thread.resModel,
-                    limit: 30,
+                    limit: FETCH_MSG_LIMIT,
+                    max_id: max,
+                    min_id: min,
                 });
                 break;
             case "channel":
             case "chat":
                 rawMessages = await this.rpc("/mail/channel/messages", {
-                    channel_id: threadId,
-                    limit: 30,
+                    channel_id: thread.id,
+                    limit: FETCH_MSG_LIMIT,
+                    max_id: max,
+                    min_id: min,
                 });
                 break;
             default:
                 throw new Error("Unknown thread type");
         }
-        const lastMessage = rawMessages[0];
-        for (const data of rawMessages.reverse()) {
-            this.createMessage(markup(data.body), data, thread);
-        }
         thread.status = "ready";
+        const messages = rawMessages
+            .reverse()
+            .map((data) => this.createMessage(markup(data.body), data, thread));
+        return messages;
+    }
+
+    async fetchThreadMessagesNew(threadId) {
+        const thread = this.threads[threadId];
+        const fetchedMsgs = await this.fetchThreadMessages(thread, {
+            min: this.getThreadMostRecentMsg(thread),
+        });
+        const mostRecentMsg = fetchedMsgs[0];
+        Object.assign(thread, {
+            isUnread: false,
+            loadMore: fetchedMsgs.length === FETCH_MSG_LIMIT,
+        });
         if (thread.isUnread && ["chat", "channel"].includes(thread.type)) {
-            if (lastMessage) {
+            if (mostRecentMsg) {
                 this.rpc("/mail/channel/set_last_seen_message", {
                     channel_id: thread.id,
-                    last_message_id: lastMessage.id,
+                    last_message_id: mostRecentMsg.id,
                 });
             }
         }
-        thread.isUnread = false;
+    }
+
+    async fetchThreadMessagesMore(threadId) {
+        const thread = this.threads[threadId];
+        const fetchedMsgs = await this.fetchThreadMessages(thread, {
+            max: this.getThreadOldestMsg(thread),
+        });
+        if (fetchedMsgs.length < FETCH_MSG_LIMIT) {
+            thread.loadMore = false;
+        }
+    }
+
+    getThreadMostRecentMsg(thread) {
+        if (thread.messages.length === 0) {
+            return undefined;
+        }
+        return Math.max(...thread.messages);
+    }
+
+    getThreadOldestMsg(thread) {
+        if (thread.messages.length === 0) {
+            return undefined;
+        }
+        return Math.min(...thread.messages);
     }
 
     async fetchPreviews() {
@@ -876,5 +923,4 @@ export class Messaging {
     stopCall(threadId) {
         this.threads[threadId].inCall = false;
     }
-
 }
