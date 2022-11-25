@@ -406,12 +406,6 @@ export class Messaging {
                                 }
                             }
                         }
-                    }
-                    break;
-                case "mail.channel/transient_message":
-                    return this.createTransientMessage(notif.payload);
-                case "mail.record/insert":
-                    {
                         const { LinkPreview: linkPreviews } = notif.payload;
                         if (linkPreviews) {
                             for (const linkPreview of linkPreviews) {
@@ -422,6 +416,8 @@ export class Messaging {
                         }
                     }
                     break;
+                case "mail.channel/transient_message":
+                    return this.createTransientMessage(notif.payload);
                 case "mail.link.preview/delete":
                     {
                         const { id, message_id } = notif.payload;
