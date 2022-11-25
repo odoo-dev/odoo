@@ -45,7 +45,7 @@
             <t t-if="props.hasActivity and state.activities.length">
                 <ActivityList activities="state.activities"/>
             </t>
-            <Thread id="thread.id" t-key="thread.id"/>
+            <Thread id="thread.id" t-key="thread.id" order="'desc'"/>
         </div>
     </div>
 

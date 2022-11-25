@@ -23,7 +23,7 @@ export class Thread extends Component {
     requestMessages(threadId) {
         // does not return the promise, so the thread is immediately rendered
         // then updated whenever messages get here
-        this.messaging.fetchThreadMessages(threadId);
+        this.messaging.fetchThreadMessagesNew(threadId);
     }
 
     isGrayedOut(msg) {
@@ -60,6 +60,9 @@ export class Thread extends Component {
 
 Object.assign(Thread, {
     components: { Message },
-    props: ["id", "messageHighlight?"],
+    props: ["id", "messageHighlight?", "order?"],
+    defaultProps: {
+        order: "asc", // 'asc' or 'desc'
+    },
     template: "mail.thread",
 });

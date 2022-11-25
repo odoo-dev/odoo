@@ -32,7 +32,7 @@ export class ActivityMarkAsDone extends Component {
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }
-        await this.messaging.fetchThreadMessages(thread.id);
+        await this.messaging.fetchThreadMessagesNew(thread.id);
     }
 
     async onClickDoneAndScheduleNext() {
