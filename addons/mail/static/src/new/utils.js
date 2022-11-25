@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { onMounted, onPatched, onWillUnmount, useComponent, useRef, useState } from "@odoo/owl";
+import { onMounted, onPatched, onWillPatch, onWillUnmount, useComponent, useRef, useState } from "@odoo/owl";
 
 function useExternalListener(target, eventName, handler, eventParams) {
     const boundHandler = handler.bind(useComponent());
@@ -84,31 +84,44 @@ export function onExternalClick(refName, cb) {
     });
 }
 
-export function useAutoScroll(refName, shouldScrollPredicate = () => true) {
+export function useAutoScroll(refName, { onApply, onObserve }) {
     const ref = useRef(refName);
+    const state = useState({ count: 0 });
     let el = null;
-    let isScrolled = true;
-    const observer = new ResizeObserver(applyScroll);
-
-    function onScroll() {
-        isScrolled = Math.abs(el.scrollTop + el.clientHeight - el.scrollHeight) < 1;
-    }
-    function applyScroll() {
-        if (isScrolled && shouldScrollPredicate()) {
-            ref.el.scrollTop = ref.el.scrollHeight;
+    const observer = new ResizeObserver(() => state.count++);
+    const snapshot = {
+        scrollHeight: null,
+        scrollTop: null,
+    };
+    function apply() {
+        if (!el) {
+            return;
         }
+        onApply(el);
+    }
+    function observe() {
+        el = ref.el;
+        if (!el) {
+            return;
+        }
+        Object.assign(snapshot, {
+            scrollHeight: el.scrollHeight,
+            scrollTop: el.scrollTop,
+        });
+        onObserve(el);
     }
     onMounted(() => {
         el = ref.el;
         el.scrollTop = el.scrollHeight;
         observer.observe(el);
-        el.addEventListener("scroll", onScroll);
+        el.addEventListener("scroll", observe);
     });
     onWillUnmount(() => {
         observer.unobserve(el);
-        el.removeEventListener("scroll", onScroll);
+        el.removeEventListener("scroll", observe);
     });
-    onPatched(applyScroll);
+    onWillPatch(observe);
+    onPatched(apply);
 }
 
 export function useHover(refName, callback = () => {}) {

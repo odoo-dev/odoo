@@ -9,12 +9,20 @@ export class Thread extends Component {
     setup() {
         this.messaging = useMessaging();
         if (!this.env.inChatter) {
-            useAutoScroll(
-                "messages",
-                () =>
-                    !this.props.messageHighlight ||
-                    !this.props.messageHighlight.highlightedMessageId
-            );
+            let isScrolled = true;
+            useAutoScroll("messages", {
+                onApply: (el) => {
+                    if (
+                        isScrolled &&
+                        (!this.props.messageHighlight ||
+                            !this.props.messageHighlight.highlightedMessageId)
+                    ) {
+                        el.scrollTop = el.scrollHeight;
+                    }
+                },
+                onObserve: (el) =>
+                    (isScrolled = Math.abs(el.scrollTop + el.clientHeight - el.scrollHeight) < 1),
+            });
         }
         onWillStart(() => this.requestMessages(this.props.id));
         onWillUpdateProps((nextProps) => this.requestMessages(nextProps.id));
