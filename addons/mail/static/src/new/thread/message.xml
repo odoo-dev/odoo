@@ -15,7 +15,7 @@
             <div class="o-mail-message-sidebar d-flex flex-shrink-0 justify-content-center">
                 <div t-if="!props.squashed" class="o-mail-avatar-container position-relative bg-view">
                     <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
-                        t-attf-src="/mail/channel/1/partner/{{message.author.id}}/avatar_128"
+                        t-att-src="message.author.avatarUrl"
                         t-att-class="{ 'cursor-pointer': props.hasActions and hasOpenChatFromAvatarClick }"
                         t-on-click="openChatAvatar" />
                     <PartnerImStatus partner="message.author" className="'position-absolute bottom-0 end-0'"/>

@@ -8,6 +8,7 @@ import { url } from "@web/core/utils/urls";
 import { htmlToTextContentInline, convertBrToLineBreak, removeFromArray } from "./utils";
 import { prettifyMessageContent } from "./message_prettify_utils";
 import { LinkPreview } from "./thread/link_preview/link_preview.class";
+import { Partner } from "./partner.class";
 
 const { DateTime } = luxon;
 
@@ -116,8 +117,14 @@ export class Messaging {
      */
     initialize() {
         this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
-            this.createPartner(data.current_partner.id, data.current_partner.name);
-            this.partnerRoot = this.createPartner(data.partner_root.id, data.partner_root.name);
+            new Partner(this.env, {
+                id: data.current_partner.id,
+                name: data.current_partner.name,
+            });
+            this.partnerRoot = new Partner(this.env, {
+                id: data.partner_root.id,
+                name: data.partner_root.name,
+            });
             for (const channelData of data.channels) {
                 this.createChannelThread(channelData);
             }
@@ -218,14 +225,17 @@ export class Messaging {
             if (data.serverData) {
                 const avatarCacheKey = data.serverData.channel.avatarCacheKey;
                 for (const elem of data.serverData.channel.channelMembers[0][1]) {
-                    this.createPartner(elem.persona.partner.id, elem.persona.partner.name);
+                    const partner = new Partner(this.env).create({
+                        id: elem.persona.partner.id,
+                        name: elem.persona.partner.name,
+                    });
                     if (
-                        elem.persona.partner.id !== this.user.partnerId ||
+                        partner.id !== this.user.partnerId ||
                         (data.serverData.channel.channelMembers[0][1].length === 1 &&
-                            elem.persona.partner.id === this.user.partnerId)
+                            partner.id === this.user.partnerId)
                     ) {
-                        thread.chatPartnerId = elem.persona.partner.id;
-                        thread.name = this.partners[elem.persona.partner.id].name;
+                        thread.chatPartnerId = partner.id;
+                        thread.name = this.partners[partner.id].name;
                     }
                 }
                 thread.imgUrl = `/web/image/res.partner/${thread.chatPartnerId}/avatar_128?unique=${avatarCacheKey}`;
@@ -280,7 +290,7 @@ export class Messaging {
             id,
             type,
             body,
-            author: this.createPartner(author.id, author.name),
+            author: new Partner(this.env, { id: author.id, name: author.name }),
             isAuthor: author.id === this.user.partnerId,
             dateDay,
             dateTimeStr: dateTime.toLocaleString(DateTime.DATETIME_SHORT),
@@ -350,17 +360,6 @@ export class Messaging {
             },
             this.threads[threadId]
         );
-    }
-
-    createPartner(id, name) {
-        if (id in this.partners) {
-            return this.partners[id];
-        }
-        const partner = { id, name, im_status: null };
-        this.partners[id] = partner;
-        this.updateImStatusRegistration(partner);
-        // return reactive version
-        return this.partners[id];
     }
 
     initCommands() {
@@ -631,8 +630,7 @@ export class Messaging {
                         preview.last_message.body = htmlToTextContentInline(
                             preview.last_message.body
                         );
-                        const { id, name } = preview.last_message.author;
-                        this.createPartner(id, name);
+                        new Partner(this.env, preview.last_message.author);
                     }
                     return previews;
                 });
