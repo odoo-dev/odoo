@@ -9,6 +9,7 @@ import { htmlToTextContentInline, convertBrToLineBreak, removeFromArray } from "
 import { prettifyMessageContent } from "./message_prettify_utils";
 import { LinkPreview } from "./thread/link_preview/link_preview.class";
 import { Partner } from "./partner.class";
+import { Message } from "./thread/message.class";
 
 const { DateTime } = luxon;
 
@@ -252,85 +253,18 @@ export class Messaging {
      * caller should do it, not this method
      */
     createMessage(body, data, thread) {
-        const {
-            attachment_ids: attachments,
-            author,
-            id,
-            date,
-            message_type: type,
-            needaction,
-            parentMessage,
-            subtype_description: subtypeDescription,
-            trackingValues,
-            linkPreviews,
-        } = data;
-        if (id in this.messages) {
-            return this.messages[id];
-        }
-        const now = DateTime.now();
-        const dateTime = markRaw(date ? deserializeDateTime(date) : now);
-        let dateDay = dateTime.toLocaleString(DateTime.DATE_FULL);
-        if (dateDay === now.toLocaleString(DateTime.DATE_FULL)) {
-            dateDay = this.env._t("Today");
-        }
-        let isStarred = false;
-        if (data.starred_partner_ids && data.starred_partner_ids.includes(this.user.partnerId)) {
-            isStarred = true;
-        }
-
-        const linkPreviewsClass = [];
-        if (linkPreviews) {
-            for (const linkPreview of linkPreviews) {
-                linkPreviewsClass.push(new LinkPreview(linkPreview));
-            }
-        }
-
-        const message = {
-            attachments,
-            id,
-            type,
+        const message = new Message(this.env, {
             body,
-            author: new Partner(this.env, { id: author.id, name: author.name }),
-            isAuthor: author.id === this.user.partnerId,
-            dateDay,
-            dateTimeStr: dateTime.toLocaleString(DateTime.DATETIME_SHORT),
-            dateTime,
-            isStarred,
-            isNote: data.is_note,
-            isTransient: data.is_transient,
-            needaction,
-            parentMessage,
-            subtypeDescription,
-            trackingValues,
-            linkPreviews: linkPreviewsClass,
-        };
-        if (parentMessage) {
-            const { body, ...data } = parentMessage;
-            message["parentMessage"] = this.createMessage(body, data, thread);
-        }
-        message.recordName = data.record_name;
-        message.resId = data.res_id;
-        message.resModel = data.model;
-        message.url = `${url("/web")}#model=${data.model}&id=${data.res_id}`;
-        if (type === "notification") {
-            message.trackingValues = data.trackingValues;
-            if (data.model === "mail.channel") {
-                // is that correct?
-                message.isNotification = true;
-            }
-            if (data.subtype_description) {
-                message.subtype_description = data.subtype_description;
-            }
-        }
-        this.messages[id] = message;
+            ...data,
+        });
         if (thread.type === "chatter") {
-            thread.messages.unshift(id);
+            thread.messages.unshift(message.id);
         } else {
-            thread.messages.push(id);
+            thread.messages.push(message.id);
         }
         this.sortThreadMessages(thread);
         // return reactive version
-        return this.messages[id];
+        return this.messages[message.id];
     }
 
     sortThreadMessages(thread) {
