@@ -12,6 +12,7 @@ export class Composer extends Component {
         this.ref = useRef("textarea");
         this.state = useState({
             autofocus: 0,
+            active: true,
         });
         if (this.props.dropzoneRef) {
             useDropzone(this.props.dropzoneRef);
@@ -81,9 +82,25 @@ export class Composer extends Component {
         }
     }
 
-    async sendMessage() {
+    async processMessage(cb) {
         const el = this.ref.el;
         if (el.value.trim()) {
+            if (!this.state.active) {
+                return;
+            }
+            this.state.active = false;
+            await cb(el.value);
+            if (this.props.onPostCallback) {
+                this.props.onPostCallback();
+            }
+            this.state.active = true;
+        }
+        this.props.composer.textInputContent = "";
+        el.focus();
+    }
+
+    async sendMessage() {
+        return this.processMessage(async (value) => {
             const { messageToReplyTo } = this.messaging.discuss;
             const { id: parentId, isNote, resId, resModel } = messageToReplyTo || {};
             const postData = {
@@ -94,29 +111,18 @@ export class Composer extends Component {
                 messageToReplyTo &&
                 this.props.composer.threadId === this.messaging.discuss.inbox.id
             ) {
-                await this.messaging.postInboxReply(resId, resModel, el.value, postData);
+                await this.messaging.postInboxReply(resId, resModel, value, postData);
             } else {
-                await this.messaging.postMessage(this.props.composer.threadId, el.value, postData);
+                await this.messaging.postMessage(this.props.composer.threadId, value, postData);
             }
             this.messaging.cancelReplyTo();
-            if (this.props.onPostCallback) {
-                this.props.onPostCallback();
-            }
-        }
-        this.props.composer.textInputContent = "";
-        el.focus();
+        });
     }
 
     async editMessage() {
-        const el = this.ref.el;
-        if (el.value.trim()) {
-            await this.messaging.updateMessage(this.props.composer.messageId, this.ref.el.value);
-            if (this.props.onPostCallback) {
-                this.props.onPostCallback();
-            }
-        }
-        this.props.composer.textInputContent = "";
-        el.focus();
+        return this.processMessage((value) =>
+            this.messaging.updateMessage(this.props.composer.messageId, value)
+        );
     }
 
     addEmoji(str) {
