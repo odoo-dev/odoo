@@ -6,6 +6,8 @@ import { useMessaging } from "../messaging_hook";
 import { useEmojiPicker } from "./emoji_picker";
 import { isEventHandled, onExternalClick } from "@mail/new/utils";
 
+import { sprintf } from "@web/core/utils/strings";
+
 export class Composer extends Component {
     setup() {
         this.messaging = useMessaging();
@@ -63,6 +65,26 @@ export class Composer extends Component {
             messageToReplyTo.resId === this.props.composer.threadId ||
             (this.props.composer.threadId === "inbox" && messageToReplyTo.needaction)
         );
+    }
+
+    get placeholder() {
+        if (this.props.placeholder) {
+            return this.props.placeholder;
+        }
+        if (this.thread) {
+            return sprintf(
+                this.env._t("Message #%(thread name)s…"),
+                { "thread name": this.thread.name },
+            );
+        }
+        return "";
+    }
+
+    get thread() {
+        if (this.props.composer.threadId) {
+            return this.messaging.threads[this.props.composer.threadId];
+        }
+        return null;
     }
 
     onKeydown(ev) {

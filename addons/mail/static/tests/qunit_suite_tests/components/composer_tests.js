@@ -26,7 +26,7 @@ QUnit.module("mail", (hooks) => {
         QUnit.test(
             "composer text input: basic rendering when posting a message",
             async function (assert) {
-                assert.expect(4);
+                assert.expect(3);
 
                 const pyEnv = await startServer();
                 const { click, openFormView } = await start();
@@ -36,33 +36,20 @@ QUnit.module("mail", (hooks) => {
                 });
                 await click(".o-mail-chatter-topbar-send-message-button");
 
-                assert.strictEqual(
-                    document.querySelectorAll(".o-mail-composer").length,
-                    1,
-                    "should have composer in discuss thread"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(".o-mail-composer-textarea").length,
-                    1,
-                    "should have text input inside discuss thread composer"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(`.o-mail-composer-textarea`).length,
-                    1,
-                    "should have editable part inside composer text input"
-                );
-                assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).placeholder,
-                    "Send a message to followers...",
-                    "should have 'Send a message to followers...' as placeholder composer text input"
+                assert.containsOnce(target, ".o-mail-composer");
+                assert.containsOnce(target, "textarea.o-mail-composer-textarea");
+                assert.hasAttrValue(
+                    target.querySelector(".o-mail-composer-textarea"),
+                    "placeholder",
+                    "Send a message to followers..."
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "composer text input: basic rendering when logging note",
             async function (assert) {
-                assert.expect(5);
+                assert.expect(3);
 
                 const pyEnv = await startServer();
                 const { click, openFormView } = await start();
@@ -72,73 +59,35 @@ QUnit.module("mail", (hooks) => {
                 });
                 await click(".o-mail-chatter-topbar-log-note-button");
 
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ComposerView").length,
-                    1,
-                    "should have composer in discuss thread"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ComposerView_textInput").length,
-                    1,
-                    "should have text input inside discuss thread composer"
-                );
-                assert.ok(
-                    document
-                        .querySelector(".o_ComposerView_textInput")
-                        .classList.contains("o_ComposerTextInputView"),
-                    "composer text input of composer should be a ComposerTextIput component"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(`.o-mail-composer-textarea`).length,
-                    1,
-                    "should have editable part inside composer text input"
-                );
-                assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).placeholder,
-                    "Log an internal note...",
-                    "should have 'Log an internal note...' as placeholder in composer text input if composer is log"
+                assert.containsOnce(target, ".o-mail-composer");
+                assert.containsOnce(target, "textarea.o-mail-composer-textarea");
+                assert.hasAttrValue(
+                    target.querySelector(".o-mail-composer-textarea"),
+                    "placeholder",
+                    "Log an internal note..."
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "composer text input: basic rendering when linked thread is a mail.channel",
             async function (assert) {
-                assert.expect(4);
+                assert.expect(2);
 
                 const pyEnv = await startServer();
-                const mailChanelId1 = pyEnv["mail.channel"].create({});
+                const mailChanelId1 = pyEnv["mail.channel"].create({ name: "dofus-disco" });
                 const { openDiscuss } = await start({
                     discuss: {
                         context: { active_id: mailChanelId1 },
                     },
                 });
                 await openDiscuss();
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ComposerView").length,
-                    1,
-                    "should have composer in discuss thread"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ComposerView_textInput").length,
-                    1,
-                    "should have text input inside discuss thread composer"
-                );
-                assert.ok(
-                    document
-                        .querySelector(".o_ComposerView_textInput")
-                        .classList.contains("o_ComposerTextInputView"),
-                    "composer text input of composer should be a ComposerTextIput component"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(`.o-mail-composer-textarea`).length,
-                    1,
-                    "should have editable part inside composer text input"
-                );
+                assert.containsOnce(target, ".o-mail-composer");
+                assert.containsOnce(target, "textarea.o-mail-composer-textarea");
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "composer text input placeholder should contain channel name when thread does not have specific correspondent",
             async function (assert) {
                 assert.expect(1);
@@ -154,10 +103,10 @@ QUnit.module("mail", (hooks) => {
                     },
                 });
                 await openDiscuss();
-                assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).placeholder,
-                    "Message #General...",
-                    "should have 'Message #General...' as placeholder for composer text input when thread does not have specific correspondent"
+                assert.hasAttrValue(
+                    target.querySelector(".o-mail-composer-textarea"),
+                    "placeholder",
+                    "Message #General…"
                 );
             }
         );
@@ -182,39 +131,39 @@ QUnit.module("mail", (hooks) => {
                     },
                 });
                 await openDiscuss();
-                assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).placeholder,
-                    "Message Marc Demo...",
-                    "should have 'Message Marc Demo...' as placeholder for composer text input when thread has exactly one correspondent"
+                assert.hasAttrValue(
+                    target.querySelector(".o-mail-composer-textarea"),
+                    "placeholder",
+                    "Message Marc Demo…"
                 );
             }
         );
 
-        QUnit.skipRefactoring("add an emoji", async function (assert) {
+        QUnit.test("add an emoji", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
-            const mailChanelId1 = pyEnv["mail.channel"].create({});
+            const mailChanelId1 = pyEnv["mail.channel"].create({ name: "swamp-safari" });
             const { click, openDiscuss } = await start({
                 discuss: {
                     context: { active_id: mailChanelId1 },
                 },
             });
             await openDiscuss();
-            await click(".o_ComposerView_buttonEmojis");
-            await click('.o_EmojiView[data-codepoints="😊"]');
+            await click("i[aria-label='Emojis']");
+            await click(".o-emoji[data-codepoints='😤']");
             assert.strictEqual(
-                document.querySelector(`.o-mail-composer-textarea`).value,
-                "😊",
+                target.querySelector(".o-mail-composer-textarea").value,
+                "😤",
                 "emoji should be inserted in the composer text input"
             );
         });
 
-        QUnit.skipRefactoring("add an emoji after some text", async function (assert) {
+        QUnit.test("add an emoji after some text", async function (assert) {
             assert.expect(2);
 
             const pyEnv = await startServer();
-            const mailChanelId1 = pyEnv["mail.channel"].create({});
+            const mailChanelId1 = pyEnv["mail.channel"].create({ name: "beyblade-room" });
             const { click, insertText, openDiscuss } = await start({
                 discuss: {
                     context: { active_id: mailChanelId1 },
@@ -223,16 +172,16 @@ QUnit.module("mail", (hooks) => {
             await openDiscuss();
             await insertText(".o-mail-composer-textarea", "Blabla");
             assert.strictEqual(
-                document.querySelector(`.o-mail-composer-textarea`).value,
+                target.querySelector(".o-mail-composer-textarea").value,
                 "Blabla",
                 "composer text input should have text only initially"
             );
 
-            await click(".o_ComposerView_buttonEmojis");
-            await click('.o_EmojiView[data-codepoints="😊"]');
+            await click("i[aria-label='Emojis']");
+            await click(".o-emoji[data-codepoints='🤑']");
             assert.strictEqual(
-                document.querySelector(`.o-mail-composer-textarea`).value,
-                "Blabla😊",
+                target.querySelector(".o-mail-composer-textarea").value,
+                "Blabla🤑",
                 "emoji should be inserted after the text"
             );
         });
@@ -243,7 +192,7 @@ QUnit.module("mail", (hooks) => {
                 assert.expect(2);
 
                 const pyEnv = await startServer();
-                const mailChanelId1 = pyEnv["mail.channel"].create({});
+                const mailChanelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
                 const { click, insertText, openDiscuss } = await start({
                     discuss: {
                         context: { active_id: mailChanelId1 },
@@ -251,7 +200,7 @@ QUnit.module("mail", (hooks) => {
                 });
                 await openDiscuss();
                 const composerTextInputTextArea =
-                    document.querySelector(`.o-mail-composer-textarea`);
+                    document.querySelector(".o-mail-composer-textarea");
                 await insertText(".o-mail-composer-textarea", "Blabla");
                 assert.strictEqual(
                     composerTextInputTextArea.value,
@@ -264,11 +213,11 @@ QUnit.module("mail", (hooks) => {
                     0,
                     composerTextInputTextArea.value.length
                 );
-                await click(".o_ComposerView_buttonEmojis");
-                await click('.o_EmojiView[data-codepoints="😊"]');
+                await click("i[aria-label='Emojis']");
+                await click('.o-emoji[data-codepoints="🤠"]');
                 assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).value,
-                    "😊",
+                    document.querySelector(".o-mail-composer-textarea").value,
+                    "🤠",
                     "whole text selection should have been replaced by emoji"
                 );
             }
@@ -291,7 +240,7 @@ QUnit.module("mail", (hooks) => {
                 await click("i[aria-label='Emojis']");
                 await click(".o-emoji[data-codepoints='👺']");
                 await click("i[aria-label='Emojis']");
-                assert.containsOnce(document.body, ".o-mail-emoji-picker");
+                assert.containsOnce(target, ".o-mail-emoji-picker");
             }
         );
 
@@ -1132,13 +1081,13 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "composer text input cleared on message post",
             async function (assert) {
                 assert.expect(4);
 
                 const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
+                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "au-secours-aidez-moi" });
                 const { click, insertText, openDiscuss } = await start({
                     discuss: {
                         context: { active_id: mailChannelId1 },
@@ -1653,7 +1602,7 @@ QUnit.module("mail", (hooks) => {
                 assert.expect(2);
 
                 const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "nether-picnic" });
                 const { insertText, openDiscuss } = await start({
                     discuss: {
                         context: { active_id: mailChannelId1 },
@@ -1669,8 +1618,8 @@ QUnit.module("mail", (hooks) => {
                 await insertText(".o-mail-composer-textarea", "test message");
 
                 await afterNextRender(() => {
-                    document.querySelector(`.o-mail-composer-send-button`).click();
-                    document.querySelector(`.o-mail-composer-send-button`).click();
+                    target.querySelector(".o-mail-composer-send-button").click();
+                    target.querySelector(".o-mail-composer-send-button").click();
                 });
                 assert.verifySteps(["message_post"], "The message has been posted only once");
             }
@@ -1732,13 +1681,13 @@ QUnit.module("mail", (hooks) => {
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             'send button on mail.channel should have "Send" as label',
             async function (assert) {
                 assert.expect(1);
 
                 const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
+                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "minecraft-wii-u" });
                 const { openDiscuss } = await start({
                     discuss: {
                         context: { active_id: mailChannelId1 },
@@ -1746,7 +1695,7 @@ QUnit.module("mail", (hooks) => {
                 });
                 await openDiscuss();
                 assert.strictEqual(
-                    document.querySelector(".o-mail-composer-send-button").textContent,
+                    target.querySelector(".o-mail-composer-send-button").textContent.trim(),
                     "Send",
                     "Send button of mail.channel composer should have 'Send' as label"
                 );
