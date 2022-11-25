@@ -30,7 +30,7 @@ export class Composer extends Component {
         );
         useEffect(
             (messageToReplyTo) => {
-                if (messageToReplyTo && messageToReplyTo.resId === this.props.composer.threadId) {
+                if (messageToReplyTo && messageToReplyTo.resId === this.props.composer.thread.id) {
                     this.state.autofocus++;
                 }
             },
@@ -56,12 +56,13 @@ export class Composer extends Component {
 
     get hasReplyToHeader() {
         const { messageToReplyTo } = this.messaging.discuss;
-        if (!messageToReplyTo) {
+        const { thread } = this.props.composer;
+        if (!messageToReplyTo || !thread) {
             return false;
         }
         return (
-            messageToReplyTo.resId === this.props.composer.threadId ||
-            (this.props.composer.threadId === "inbox" && messageToReplyTo.needaction)
+            messageToReplyTo.resId === thread.id ||
+            (thread === this.messaging.discuss.inbox && Boolean(messageToReplyTo.needaction))
         );
     }
 
@@ -72,7 +73,7 @@ export class Composer extends Component {
                 return;
             }
             ev.preventDefault(); // to prevent useless return
-            if (this.props.composer.messageId) {
+            if (this.props.composer.message) {
                 this.editMessage();
             } else {
                 this.sendMessage();
@@ -109,11 +110,11 @@ export class Composer extends Component {
             };
             if (
                 messageToReplyTo &&
-                this.props.composer.threadId === this.messaging.discuss.inbox.id
+                this.props.composer.thread === this.messaging.discuss.inbox
             ) {
                 await this.messaging.postInboxReply(resId, resModel, value, postData);
             } else {
-                await this.messaging.postMessage(this.props.composer.threadId, value, postData);
+                await this.messaging.postMessage(this.props.composer.thread.id, value, postData);
             }
             this.messaging.cancelReplyTo();
         });
@@ -121,7 +122,7 @@ export class Composer extends Component {
 
     async editMessage() {
         return this.processMessage((value) =>
-            this.messaging.updateMessage(this.props.composer.messageId, value)
+            this.messaging.updateMessage(this.props.composer.message.id, value)
         );
     }
 

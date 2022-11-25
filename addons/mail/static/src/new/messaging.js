@@ -5,6 +5,7 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
 import { url } from "@web/core/utils/urls";
+import { Composer } from "./composer/composer";
 import { htmlToTextContentInline, convertBrToLineBreak, removeFromArray } from "./utils";
 import { prettifyMessageContent } from "./message_prettify_utils";
 
@@ -170,14 +171,6 @@ export class Messaging {
         );
     }
 
-    createComposer({ threadId, messageId }) {
-        return {
-            messageId,
-            threadId,
-            textInputContent: messageId ? convertBrToLineBreak(this.messages[messageId].body) : "",
-        };
-    }
-
     createThread(id, name, type, data = {}) {
         if (id in this.threads) {
             return this.threads[id];
@@ -198,8 +191,8 @@ export class Messaging {
             canLeave: data.canLeave || false,
             isDescriptionChangeable: ["channel", "group"].includes(type),
             isRenameable: ["chat", "channel", "group"].includes(type),
-            composer: this.createComposer({ threadId: id }),
         };
+        thread.composer = new Composer({ thread });
         for (const key in data) {
             thread[key] = data[key];
         }

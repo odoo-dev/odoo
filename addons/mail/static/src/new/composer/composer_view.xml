@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.composer" owl="1">
-    <t t-set="thread" t-value="props.composer.messageId ? undefined : messaging.threads[props.composer.threadId]" />
+    <t t-set="thread" t-value="props.composer.message ? undefined : messaging.threads[props.composer.thread.id]" />
     <t t-set="compact" t-value="props.mode === 'compact'"/>
     <t t-set="normal" t-value="props.mode === 'normal'"/>
     <t t-set="extended" t-value="props.mode === 'extended'"/>
@@ -53,7 +53,7 @@
                 </t>
             </div>
         </div>
-        <t t-if="props.composer.messageId">
+        <t t-if="props.composer.message">
             <span class="text-muted">escape to <a href="#" t-on-click="props.onDiscardCallback">cancel</a>, enter to <a href="#" t-on-click="editMessage">save</a></span>
         </t>
     </div>
