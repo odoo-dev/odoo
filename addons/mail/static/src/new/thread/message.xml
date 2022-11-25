@@ -13,7 +13,7 @@
         <MessageInReplyTo t-if="message.parentMessage" alignedRight="isAlignedRight" message="message" onClick="props.onParentMessageClick"/>
         <div class="o-mail-message-core position-relative d-flex flex-shrink-0">
             <div class="o-mail-message-sidebar d-flex flex-shrink-0 justify-content-center">
-                <div t-if="!props.squashed" class="o-mail-avatar-container position-relative">
+                <div t-if="!props.squashed" class="o-mail-avatar-container position-relative bg-view">
                     <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
                         t-attf-src="/mail/channel/1/partner/{{message.author.id}}/avatar_128"
                         t-att-class="{ 'cursor-pointer': props.hasActions and hasOpenChatFromAvatarClick }"
