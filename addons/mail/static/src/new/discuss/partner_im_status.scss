@@ -6,3 +6,7 @@ $o-mail-partner-status-icon-size: 1.2em !default;
     height: $o-mail-partner-status-icon-size;
     line-height: 1.3em;
 }
+
+.o-mail-background-inherit {
+    background-color: inherit;
+}
