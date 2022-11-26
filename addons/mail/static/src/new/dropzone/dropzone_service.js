@@ -4,10 +4,9 @@ import { registry } from "@web/core/registry";
 
 import { DropzoneContainer } from "@mail/new/dropzone/dropzone_container";
 
-const dropzones = new Set();
-
 export const dropzoneService = {
     start() {
+        const dropzones = new Set();
         registry.category("main_components").add("mail.DropzoneContainer", {
             Component: DropzoneContainer,
             props: { dropzones },
