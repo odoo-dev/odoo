@@ -3,7 +3,7 @@
 import { onExternalClick, useFocus, useHover } from "../utils";
 import { Component, useRef, useState, onWillUpdateProps, useEffect } from "@odoo/owl";
 
-export class AutogrowInput extends Component {
+export class AutoresizeInput extends Component {
     setup() {
         this.state = useState({
             value: this.props.value,
@@ -67,8 +67,8 @@ export class AutogrowInput extends Component {
     }
 }
 
-Object.assign(AutogrowInput, {
-    template: "mail.autogrow_input",
+Object.assign(AutoresizeInput, {
+    template: "mail.autoresize_input",
     props: {
         className: { type: String, optional: true },
         disabled: { type: Boolean, optional: true },

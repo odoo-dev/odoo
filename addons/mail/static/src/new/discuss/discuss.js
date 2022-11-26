@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { AutogrowInput } from "./autogrow_input";
+import { AutoresizeInput } from "./autoresize_input";
 import { Sidebar } from "./sidebar";
 import { Thread } from "../thread/thread";
 import { ThreadIcon } from "./thread_icon";
@@ -66,7 +66,7 @@ export class Discuss extends Component {
 }
 
 Object.assign(Discuss, {
-    components: { AutogrowInput, Sidebar, Thread, ThreadIcon, Composer, CallUI, CallSettings },
+    components: { AutoresizeInput, Sidebar, Thread, ThreadIcon, Composer, CallUI, CallSettings },
     props: ["*"],
     template: "mail.discuss",
 });
