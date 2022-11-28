@@ -1,16 +1,22 @@
 /** @odoo-module */
 
-import { isEventHandled, markEventHandled, onExternalClick } from "@mail/new/utils";
+import {
+    isEventHandled,
+    markEventHandled,
+    onExternalClick,
+    removeFromArrayWithPredicate,
+} from "@mail/new/utils";
 import { useMessaging } from "../messaging_hook";
 import { RelativeTime } from "./relative_time";
-import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
+import { AttachmentList } from "@mail/new/thread/attachment_list";
+import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
+import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Composer as ComposerModel } from "../core/composer_model";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
-import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
 
 export class Message extends Component {
     setup() {
@@ -97,6 +103,11 @@ export class Message extends Component {
         this.messaging.toggleReplyTo(this.message);
     }
 
+    async onClickAttachmentUnlink(attachment) {
+        await this.messaging.unlinkAttachment(attachment);
+        removeFromArrayWithPredicate(this.message.attachments, ({ id }) => id === attachment.id);
+    }
+
     openRecord() {
         if (this.message.resModel === "mail.channel") {
             this.messaging.openDiscussion(this.message.resId);
@@ -137,7 +148,14 @@ export class Message extends Component {
 }
 
 Object.assign(Message, {
-    components: { Composer, MessageInReplyTo, RelativeTime, LinkPreviewList, PartnerImStatus },
+    components: {
+        AttachmentList,
+        Composer,
+        MessageInReplyTo,
+        RelativeTime,
+        LinkPreviewList,
+        PartnerImStatus,
+    },
     defaultProps: { hasActions: true, onParentMessageClick: () => {} },
     props: [
         "hasActions?",

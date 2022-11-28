@@ -47,6 +47,13 @@ export function removeFromArray(array, elem) {
     }
 }
 
+export function removeFromArrayWithPredicate(array, predicate) {
+    const index = array.findIndex(predicate);
+    if (index >= 0) {
+        array.splice(index, 1);
+    }
+}
+
 const eventHandledWeakMap = new WeakMap();
 
 /**

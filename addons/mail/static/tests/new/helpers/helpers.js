@@ -7,6 +7,8 @@ import { popoverService } from "@web/core/popover/popover_service";
 import { dropzoneService } from "@mail/new/dropzone/dropzone_service";
 import { App, EventBus } from "@odoo/owl";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
+import { notificationService } from "@web/core/notifications/notification_service";
+import { fileUploadService } from "@web/core/file_upload/file_upload_service";
 
 const { afterNextRender } = App;
 
@@ -65,7 +67,10 @@ export function makeTestEnv(rpc) {
     env.services.popover = popover;
     const dropzone = dropzoneService.start();
     env.services.dropzone = dropzone;
-
+    const notification = notificationService.start(env);
+    env.services.notification = notification;
+    const fileUpload = fileUploadService.start(env, { notification });
+    env.services.file_upload = fileUpload;
     return env;
 }
 

@@ -16,7 +16,7 @@
                             <t t-if="!messaging.isMessageBodyEmpty(message.parentMessage)">
                                 <t t-out="message.parentMessage.body"/>
                             </t>
-                            <t t-if="message.parentMessage.attachments.length > 0">
+                            <t t-elif="message.parentMessage.attachments.length > 0">
                                 <span class="me-2 fst-italic">Click to see the attachments</span>
                                 <i class="fa fa-image"/>
                             </t>

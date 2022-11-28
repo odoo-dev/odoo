@@ -198,7 +198,7 @@ export class Messaging {
      */
     createMessage(body, data, thread) {
         const {
-            attachment_ids: attachments,
+            attachment_ids: attachments = [],
             author,
             id,
             date,
@@ -206,7 +206,7 @@ export class Messaging {
             needaction,
             parentMessage,
             subtype_description: subtypeDescription,
-            trackingValues,
+            trackingValues = [],
             linkPreviews,
         } = data;
         if (id in this.state.messages) {
@@ -232,9 +232,13 @@ export class Messaging {
                 linkPreviewsClass.push(new LinkPreview(linkPreview));
             }
         }
-
         const message = {
-            attachments,
+            attachments: attachments.map((attachment) => {
+                return {
+                    ...attachment,
+                    originThread: Thread.insert(this.state, attachment.originThread[0][1]),
+                };
+            }),
             id,
             type,
             body,
@@ -617,7 +621,7 @@ export class Messaging {
         return message;
     }
 
-    async postMessage(threadId, body, { isNote = false, parentId }) {
+    async postMessage(threadId, body, { attachments = [], isNote = false, parentId }) {
         const command = this.getCommandFromText(threadId, body);
         if (command) {
             await this.excuteCommand(threadId, command, body);
@@ -629,7 +633,7 @@ export class Messaging {
         const params = {
             post_data: {
                 body: await prettifyMessageContent(body),
-                attachment_ids: [],
+                attachment_ids: attachments.map(({ id }) => id),
                 message_type: "comment",
                 partner_ids: [],
                 subtype_xmlid: subtype,
@@ -650,6 +654,7 @@ export class Messaging {
             const tmpData = {
                 id: tmpId,
                 author: { id: this.state.user.partnerId },
+                attachments: attachments,
                 res_id: thread.id,
                 model: "mail.channel",
             };
@@ -663,14 +668,15 @@ export class Messaging {
             );
         }
         const data = await this.rpc(`/mail/message/post`, params);
-        if (!this.isMessageEmpty(data)) {
+        const message = this.createMessage(markup(data.body), data, thread);
+        if (!this.isMessageEmpty(message)) {
             this.rpc(`/mail/link_preview`, { message_id: data.id }, { silent: true });
         }
         if (thread.type !== "chatter") {
             removeFromArray(thread.messages, tmpMsg.id);
             delete this.state.messages[tmpMsg.id];
         }
-        return this.createMessage(markup(data.body), data, thread);
+        return message;
     }
 
     async excuteCommand(threadId, command, body = "") {
@@ -698,17 +704,20 @@ export class Messaging {
         return undefined;
     }
 
-    async updateMessage(messageId, body) {
+    async updateMessage(messageId, body, attachments = []) {
         const message = this.state.messages[messageId];
-        if (convertBrToLineBreak(message.body) === body) {
+        if (convertBrToLineBreak(message.body) === body && attachments.length === 0) {
             return;
         }
         const data = await this.rpc("/mail/message/update_content", {
-            attachment_ids: [],
+            attachment_ids: attachments
+                .map(({ id }) => id)
+                .concat(message.attachments.map(({ id }) => id)),
             body: markup(body),
             message_id: message.id,
         });
         message.body = markup(data.body);
+        message.attachments.push(...attachments);
     }
 
     openDiscussion(threadId) {
@@ -850,6 +859,12 @@ export class Messaging {
             attachment_ids: [],
             body: "",
             message_id: message.id,
+        });
+    }
+
+    async unlinkAttachment(attachment) {
+        return this.rpc("/mail/attachment/delete", {
+            attachment_id: attachment.id,
         });
     }
 

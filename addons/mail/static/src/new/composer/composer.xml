@@ -44,12 +44,22 @@
                         <button class="btn border-0 rounded-pill" t-ref="emoji-picker">
                             <i class="fa fa-smile-o" role="img" aria-label="Emojis"/>
                         </button>
-                        <button class="btn fa fa-paperclip border-0 rounded-pill" title="Add attachment" aria-label="Add attachment" type="button"/>
+                        <FileUploader multiUpload="true" onUploaded.bind="attachmentUploader.upload">
+                            <t t-set-slot="toggler">
+                                <button t-att-disabled="!state.active" class="btn fa fa-paperclip border-0 rounded-pill" title="Add attachment" aria-label="Add attachment" type="button" />
+                            </t>
+                        </FileUploader>
                     </div>
                 </div>
                 <t t-if="!compact">
                     <t t-call="mail.Composer.actionButtons"/>
                 </t>
+            </div>
+            <div class="o-mail-composer-footer overflow-auto">
+                <AttachmentList
+                    attachments="attachmentUploader.attachments"
+                    unlinkAttachment="attachmentUploader.unlink"
+                    imagesHeight="50" />
             </div>
         </div>
         <t t-if="props.composer.messageId">
@@ -65,7 +75,7 @@
                 t-on-click="sendMessage"
                 type="button"
                 data-action="send"
-                t-att-disabled="!props.composer.textInputContent"
+                t-att-disabled="isSendButtonDisabled"
             >
                 Send
             </button>

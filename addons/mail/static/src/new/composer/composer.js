@@ -1,15 +1,29 @@
 /** @odoo-module */
 
-import { Component, onMounted, useEffect, useRef, useState } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillDestroy,
+    useChildSubEnv,
+    useEffect,
+    useRef,
+    useState,
+} from "@odoo/owl";
 import { useDropzone } from "../dropzone/dropzone_hook";
-import { useMessaging } from "../messaging_hook";
+import { useMessaging, useAttachmentUploader } from "../messaging_hook";
+import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { useEmojiPicker } from "./emoji_picker";
 import { isEventHandled, onExternalClick } from "@mail/new/utils";
 
 import { sprintf } from "@web/core/utils/strings";
+import { FileUploader } from "@web/views/fields/file_handler";
 
 export class Composer extends Component {
     setup() {
+        this.attachmentUploader = useAttachmentUploader({
+            threadId: this.props.composer.threadId,
+            messageId: this.props.composer.messageId,
+        });
         this.messaging = useMessaging();
         this.ref = useRef("textarea");
         this.state = useState({
@@ -19,6 +33,9 @@ export class Composer extends Component {
         if (this.props.dropzoneRef) {
             useDropzone(this.props.dropzoneRef);
         }
+        useChildSubEnv({
+            inComposer: true,
+        });
         useEmojiPicker("emoji-picker", {
             onSelect: (str) => this.addEmoji(str),
         });
@@ -54,6 +71,7 @@ export class Composer extends Component {
             }
             this.messaging.cancelReplyTo();
         });
+        onWillDestroy(() => this.attachmentUploader.unlinkAll());
     }
 
     get hasReplyToHeader() {
@@ -86,6 +104,20 @@ export class Composer extends Component {
         return null;
     }
 
+    get message() {
+        return this.props.composer.messageId
+            ? this.messaging.state.messages[this.props.composer.messageId]
+            : null;
+    }
+
+    get isSendButtonDisabled() {
+        return (
+            (!this.props.composer.textInputContent &&
+                this.attachmentUploader.attachments.length === 0) ||
+            this.attachmentUploader.attachments.some(({ uploading }) => Boolean(uploading))
+        );
+    }
+
     onKeydown(ev) {
         if (ev.key === "Enter") {
             const shouldPost = this.props.mode === "extended" ? ev.ctrlKey : !ev.shiftKey;
@@ -105,7 +137,12 @@ export class Composer extends Component {
 
     async processMessage(cb) {
         const el = this.ref.el;
-        if (el.value.trim()) {
+        const attachments = this.attachmentUploader.attachments;
+        if (
+            el.value.trim() ||
+            (attachments.length > 0 && attachments.every(({ uploading }) => !uploading)) ||
+            (this.message && this.message.attachments.length > 0)
+        ) {
             if (!this.state.active) {
                 return;
             }
@@ -116,6 +153,7 @@ export class Composer extends Component {
             }
             this.state.active = true;
         }
+        this.attachmentUploader.reset();
         this.props.composer.textInputContent = "";
         el.focus();
     }
@@ -125,6 +163,7 @@ export class Composer extends Component {
             const { messageToReplyTo } = this.messaging.state.discuss;
             const { id: parentId, isNote, resId, resModel } = messageToReplyTo || {};
             const postData = {
+                attachments: this.attachmentUploader.attachments,
                 isNote: this.props.type === "note" || isNote,
                 parentId,
             };
@@ -141,8 +180,12 @@ export class Composer extends Component {
     }
 
     async editMessage() {
-        return this.processMessage((value) =>
-            this.messaging.updateMessage(this.props.composer.messageId, value)
+        return this.processMessage(async (value) =>
+            this.messaging.updateMessage(
+                this.props.composer.messageId,
+                value,
+                this.attachmentUploader.attachments
+            )
         );
     }
 
@@ -153,6 +196,7 @@ export class Composer extends Component {
 }
 
 Object.assign(Composer, {
+    components: { AttachmentList, FileUploader },
     defaultProps: {
         mode: "normal",
         onDiscardCallback: () => {},

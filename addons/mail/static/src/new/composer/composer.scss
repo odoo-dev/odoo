@@ -22,6 +22,10 @@
     .o-mail-composer-sidebar-main {
         grid-area: sidebar-main;
     }
+
+    .o-mail-composer-footer {
+        grid-area: core-footer;
+    }
 }
 
 .o-mail-composer-textarea {

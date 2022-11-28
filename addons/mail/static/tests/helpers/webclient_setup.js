@@ -20,6 +20,7 @@ import { messagingService } from "@mail/services/messaging_service";
 import { systrayService } from "@mail/services/systray_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
 
+import { fileUploadService } from "@web/core/file_upload/file_upload_service";
 import { registry } from "@web/core/registry";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient } from "@web/../tests/webclient/helpers";
@@ -114,6 +115,9 @@ function setupMessagingServiceRegistries({
         multi_tab: multiTabService,
         ...services,
     };
+    if (!serviceRegistry.contains("file_upload")) {
+        serviceRegistry.add("file_upload", fileUploadService);
+    }
 
     Object.entries(services).forEach(([serviceName, service]) => {
         serviceRegistry.add(serviceName, service);
