@@ -7,9 +7,8 @@ import { sprintf } from "@web/core/utils/strings";
 import { url } from "@web/core/utils/urls";
 import { htmlToTextContentInline, convertBrToLineBreak, removeFromArray } from "./utils";
 import { prettifyMessageContent } from "./message_prettify_utils";
-import { Thread } from "./core/thread_model";
-import { Partner } from "./core/partner_model";
-import { LinkPreview } from "./core/link_preview_model";
+
+import { Thread, Partner, LinkPreview } from "./core/models";
 
 const { DateTime } = luxon;
 

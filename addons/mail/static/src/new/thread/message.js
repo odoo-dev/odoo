@@ -7,10 +7,11 @@ import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/ow
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
-import { Composer as ComposerModel } from "../core/composer_model";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
+
+import { Composer as ComposerModel } from "../core/models";
 
 export class Message extends Component {
     setup() {

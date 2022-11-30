@@ -7,7 +7,7 @@ import { LinkPreviewVideo } from "./link_preview_video";
 
 /**
  * @typedef {Object} Props
- * @property {import("@mail/new/core/link_preview_model").LinkPreview[]} linkPreviews
+ * @property {import("@mail/new/core/models").LinkPreview[]} linkPreviews
  * @property {boolean} [canBeDeleted]
  * @extends {Component<Props, Env>}
  */
