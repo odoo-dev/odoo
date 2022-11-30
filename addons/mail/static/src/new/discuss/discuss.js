@@ -1,14 +1,16 @@
-/** @odoo-module */
+/** @odoo-module **/
 
-import { AutoresizeInput } from "./autoresize_input";
-import { Sidebar } from "./sidebar";
-import { Thread } from "../thread/thread";
-import { ThreadIcon } from "./thread_icon";
-import { useMessageHighlight, useMessaging } from "../messaging_hook";
-import { Composer } from "../composer/composer";
-import { CallUI } from "../rtc/call_ui";
+import { AutoresizeInput } from "@mail/new/discuss/autoresize_input";
+import { Sidebar } from "@mail/new/discuss/sidebar";
+import { Thread } from "@mail/new/thread/thread";
+import { ThreadIcon } from "@mail/new/discuss/thread_icon";
+import { useMessageHighlight, useMessaging } from "@mail/new/messaging_hook";
+import { Composer } from "@mail/new/composer/composer";
+import { CallUI } from "@mail/new/rtc/call_ui";
+import { CallSettings } from "@mail/new/rtc/call_settings";
+
 import { Component, onWillStart, onMounted, onWillUnmount, useRef } from "@odoo/owl";
-import { CallSettings } from "../rtc/call_settings";
+
 import { usePopover } from "@web/core/popover/popover_hook";
 
 export class Discuss extends Component {

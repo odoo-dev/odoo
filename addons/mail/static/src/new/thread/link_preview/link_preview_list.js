@@ -1,9 +1,9 @@
-/** @odoo-module */
+/** @odoo-module **/
 
 import { Component } from "@odoo/owl";
-import { LinkPreviewCard } from "./link_preview_card";
-import { LinkPreviewImage } from "./link_preview_image";
-import { LinkPreviewVideo } from "./link_preview_video";
+import { LinkPreviewCard } from "@mail/new/thread/link_preview/link_preview_card";
+import { LinkPreviewImage } from "@mail/new/thread/link_preview/link_preview_image";
+import { LinkPreviewVideo } from "@mail/new/thread/link_preview/link_preview_video";
 
 /**
  * @typedef {Object} Props

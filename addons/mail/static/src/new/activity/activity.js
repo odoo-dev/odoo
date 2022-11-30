@@ -1,9 +1,11 @@
-/** @odoo-module */
+/** @odoo-module **/
+
+import { ActivityMarkAsDone } from "@mail/new/activity/activity_markasdone_popover";
 
 import { Component, useState, onWillUpdateProps } from "@odoo/owl";
+
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { ActivityMarkAsDone } from "./activity_markasdone_popover";
 
 const { DateTime } = luxon;
 

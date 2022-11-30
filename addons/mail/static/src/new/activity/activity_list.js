@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
-import { Activity } from "./activity";
+import { Activity } from "@mail/new/activity/activity";
 
 export class ActivityList extends Component {
     setup() {

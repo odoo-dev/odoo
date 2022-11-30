@@ -2,9 +2,9 @@
 
 import { ActivityListPopoverItem } from "@mail/new/activity/activity_list_popover_item";
 
-import { useService } from "@web/core/utils/hooks";
-
 import { Component, onWillUpdateProps, useState } from "@odoo/owl";
+
+import { useService } from "@web/core/utils/hooks";
 
 export class ActivityListPopover extends Component {
     setup() {

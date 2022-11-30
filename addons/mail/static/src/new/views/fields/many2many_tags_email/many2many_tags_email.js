@@ -1,13 +1,12 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
-import { useOpenMany2XRecord } from "@web/views/fields/relational_utils";
-import { sprintf } from "@web/core/utils/strings";
+import { onMounted, onWillUpdateProps } from "@odoo/owl";
 
+import { registry } from "@web/core/registry";
+import { sprintf } from "@web/core/utils/strings";
 import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
-
-import { onMounted, onWillUpdateProps } from "@odoo/owl";
+import { useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 
 export class FieldMany2ManyTagsEmailTagsList extends TagsList {}
 FieldMany2ManyTagsEmailTagsList.template = "FieldMany2ManyTagsEmailTagsList";

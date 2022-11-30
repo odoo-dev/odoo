@@ -1,4 +1,10 @@
-/** @odoo-module */
+/** @odoo-module **/
+
+import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
+import { useMessaging, useAttachmentUploader } from "@mail/new/messaging_hook";
+import { AttachmentList } from "@mail/new/thread/attachment_list";
+import { useEmojiPicker } from "@mail/new/composer/emoji_picker";
+import { isEventHandled, onExternalClick } from "@mail/new/utils";
 
 import {
     Component,
@@ -9,11 +15,6 @@ import {
     useRef,
     useState,
 } from "@odoo/owl";
-import { useDropzone } from "../dropzone/dropzone_hook";
-import { useMessaging, useAttachmentUploader } from "../messaging_hook";
-import { AttachmentList } from "@mail/new/thread/attachment_list";
-import { useEmojiPicker } from "./emoji_picker";
-import { isEventHandled, onExternalClick } from "@mail/new/utils";
 
 import { sprintf } from "@web/core/utils/strings";
 import { FileUploader } from "@web/views/fields/file_handler";

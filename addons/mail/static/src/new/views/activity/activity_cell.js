@@ -2,10 +2,10 @@
 
 import { ActivityListPopover } from "@mail/new/activity/activity_list_popover";
 
+import { Component, useRef, useSubEnv } from "@odoo/owl";
+
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useWowlService } from "@web/legacy/utils";
-
-import { Component, useRef, useSubEnv } from "@odoo/owl";
 
 export class ActivityCell extends Component {
     setup() {

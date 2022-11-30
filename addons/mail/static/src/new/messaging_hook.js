@@ -1,8 +1,10 @@
-/** @odoo-module */
+/** @odoo-module **/
+
+import { removeFromArrayWithPredicate } from "@mail/new/utils";
 
 import { reactive, useState } from "@odoo/owl";
+
 import { useBus, useService } from "@web/core/utils/hooks";
-import { removeFromArrayWithPredicate } from "./utils";
 
 /**
  * @typedef {import("@mail/new/messaging").Messaging} Messaging

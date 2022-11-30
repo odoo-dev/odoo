@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { Component } from "@odoo/owl";
+
 import core from "web.core";
 import fieldRegistry from "web.field_registry";
 import {
@@ -9,8 +11,6 @@ import {
     Many2OneAvatar,
 } from "web.relational_fields";
 import session from "web.session";
-
-import { Component } from "@odoo/owl";
 
 // This module defines extensions of the Many2OneAvatar and Many2ManyAvatar
 // widgets, which are integrated with the messaging system. They are designed

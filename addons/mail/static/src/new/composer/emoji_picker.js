@@ -1,4 +1,4 @@
-/** @odoo-module */
+/** @odoo-module **/
 
 import { markEventHandled } from "@mail/new/utils";
 
@@ -11,6 +11,7 @@ import {
     useState,
     onPatched,
 } from "@odoo/owl";
+
 import { getBundle, loadBundle } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { memoize } from "@web/core/utils/functions";

@@ -1,4 +1,4 @@
-/** @odoo-module */
+/** @odoo-module **/
 
 import {
     isEventHandled,
@@ -6,17 +6,19 @@ import {
     onExternalClick,
     removeFromArrayWithPredicate,
 } from "@mail/new/utils";
-import { useMessaging } from "../messaging_hook";
-import { RelativeTime } from "./relative_time";
+import { useMessaging } from "@mail/new/messaging_hook";
+import { RelativeTime } from "@mail/new/thread/relative_time";
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
+import { Composer } from "@mail/new/composer/composer";
+import { Composer as ComposerModel } from "@mail/new/core/composer_model";
+import { MessageDeleteDialog } from "@mail/new/thread/message_delete_dialog";
+import { LinkPreviewList } from "@mail/new/thread/link_preview/link_preview_list";
+
 import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
+
 import { useService } from "@web/core/utils/hooks";
-import { Composer } from "../composer/composer";
-import { Composer as ComposerModel } from "../core/composer_model";
-import { MessageDeleteDialog } from "../thread/message_delete_dialog";
-import { LinkPreviewList } from "./link_preview/link_preview_list";
 
 export class Message extends Component {
     setup() {

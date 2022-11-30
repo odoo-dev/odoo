@@ -1,6 +1,6 @@
-/** @odoo-module */
+/** @odoo-module **/
 
-import { Messaging, asyncMethods } from "./messaging";
+import { Messaging, asyncMethods } from "@mail/new/messaging";
 
 export const messagingService = {
     dependencies: ["rpc", "orm", "user", "router", "bus_service", "im_status", "notification"],

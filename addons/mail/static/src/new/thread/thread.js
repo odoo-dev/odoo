@@ -1,9 +1,10 @@
-/** @odoo-module */
+/** @odoo-module **/
+
+import { useMessaging } from "@mail/new/messaging_hook";
+import { useAutoScroll, useScrollSnapshot, useVisible } from "@mail/new/utils";
+import { Message } from "@mail/new/thread/message";
 
 import { Component, onMounted, onWillStart, onWillUpdateProps, useRef } from "@odoo/owl";
-import { useMessaging } from "../messaging_hook";
-import { useAutoScroll, useScrollSnapshot, useVisible } from "../utils";
-import { Message } from "./message";
 
 import { Transition } from "@web/core/transition";
 

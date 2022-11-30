@@ -2,10 +2,10 @@
 
 import { ActivityButton } from "@mail/new/activity/activity_button";
 
+import { Component } from "@odoo/owl";
+
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-
-import { Component } from "@odoo/owl";
 
 export class KanbanActivity extends Component {}
 

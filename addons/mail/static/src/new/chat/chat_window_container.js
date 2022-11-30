@@ -1,8 +1,9 @@
-/** @odoo-module */
+/** @odoo-module **/
+
+import { useMessaging } from "@mail/new/messaging_hook";
+import { ChatWindow } from "@mail/new/chat/chat_window";
 
 import { Component } from "@odoo/owl";
-import { useMessaging } from "../messaging_hook";
-import { ChatWindow } from "./chat_window";
 
 export class ChatWindowContainer extends Component {
     setup() {

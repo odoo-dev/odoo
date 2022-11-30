@@ -1,10 +1,10 @@
-/** @odoo-module */
+/** @odoo-module **/
+
+import { useMessaging } from "@mail/new/messaging_hook";
 
 import { Component } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
-
-import { useMessaging } from "@mail/new/messaging_hook";
 
 export class MessageInReplyTo extends Component {
     setup() {
