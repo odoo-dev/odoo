@@ -12,6 +12,7 @@ export class Composer extends Component {
     setup() {
         this.messaging = useMessaging();
         this.ref = useRef("textarea");
+        this.caretLocationBeforeAddingEmoji = null;
         this.state = useState({
             autofocus: 0,
             active: true,
@@ -26,6 +27,13 @@ export class Composer extends Component {
             (focus) => {
                 if (focus && this.ref.el) {
                     this.ref.el.focus();
+                    if (this.caretLocationBeforeAddingEmoji) {
+                        this.ref.el.setSelectionRange(
+                            this.caretLocationBeforeAddingEmoji,
+                            this.caretLocationBeforeAddingEmoji
+                        );
+                        this.caretLocationBeforeAddingEmoji = null;
+                    }
                 }
             },
             () => [this.props.autofocus + this.state.autofocus, this.props.placeholder]
@@ -146,8 +154,16 @@ export class Composer extends Component {
         );
     }
 
-    addEmoji(str) {
-        this.props.composer.textInputContent += str;
+    addEmoji(emoji) {
+        const element = this.ref.el;
+        this.props.composer.textInputContent =
+            this.props.composer.textInputContent.substring(0, element.selectionStart) +
+            emoji +
+            this.props.composer.textInputContent.substring(
+                element.selectionEnd,
+                this.props.composer.textInputContent.length
+            );
+        this.caretLocationBeforeAddingEmoji = this.ref.el.selectionStart + emoji.length;
         this.state.autofocus++;
     }
 }

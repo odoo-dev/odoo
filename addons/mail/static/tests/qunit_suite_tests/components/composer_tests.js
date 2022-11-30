@@ -186,21 +186,58 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
+        QUnit.only("add an emoji in the middle of some text", async function (assert) {
+            assert.expect(3);
+
+            const pyEnv = await startServer();
+            const mailChanelId1 = pyEnv["mail.channel"].create({ name: "beyblade-room" });
+            const { click, insertText, openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: mailChanelId1 },
+                },
+            });
+            await openDiscuss();
+            await insertText(".o-mail-composer-textarea", "An emoji should be inserted here  <-");
+            assert.strictEqual(
+                target.querySelector(".o-mail-composer-textarea").value,
+                "An emoji should be inserted here  <-",
+                "composer text input should have text only initially"
+            );
+
+            target.querySelector(".o-mail-composer-textarea").setSelectionRange(33, 33);
+
+            await click("i[aria-label='Emojis']");
+            await click(".o-emoji[data-codepoints='🤑']");
+            assert.strictEqual(
+                target.querySelector(".o-mail-composer-textarea").value,
+                "An emoji should be inserted here 🤑 <-",
+                "emoji should be inserted in the text"
+            );
+
+            assert.strictEqual(
+                target.querySelector(".o-mail-composer-textarea").selectionStart,
+                35
+            );
+        });
+
         QUnit.skipRefactoring(
             "add emoji replaces (keyboard) text selection",
             async function (assert) {
                 assert.expect(2);
 
                 const pyEnv = await startServer();
-                const mailChanelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
+                const mailChanelId1 = pyEnv["mail.channel"].create({
+                    name: "pétanque-tournament-14",
+                });
                 const { click, insertText, openDiscuss } = await start({
                     discuss: {
                         context: { active_id: mailChanelId1 },
                     },
                 });
                 await openDiscuss();
-                const composerTextInputTextArea =
-                    document.querySelector(".o-mail-composer-textarea");
+                const composerTextInputTextArea = document.querySelector(
+                    ".o-mail-composer-textarea"
+                );
                 await insertText(".o-mail-composer-textarea", "Blabla");
                 assert.strictEqual(
                     composerTextInputTextArea.value,
@@ -1081,42 +1118,39 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
-        QUnit.test(
-            "composer text input cleared on message post",
-            async function (assert) {
-                assert.expect(4);
+        QUnit.test("composer text input cleared on message post", async function (assert) {
+            assert.expect(4);
 
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({ name: "au-secours-aidez-moi" });
-                const { click, insertText, openDiscuss } = await start({
-                    discuss: {
-                        context: { active_id: mailChannelId1 },
-                    },
-                    async mockRPC(route, args) {
-                        if (route === "/mail/message/post") {
-                            assert.step("message_post");
-                        }
-                    },
-                });
-                await openDiscuss();
-                // Type message
-                await insertText(".o-mail-composer-textarea", "test message");
-                assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).value,
-                    "test message",
-                    "should have inserted text content in editable"
-                );
+            const pyEnv = await startServer();
+            const mailChannelId1 = pyEnv["mail.channel"].create({ name: "au-secours-aidez-moi" });
+            const { click, insertText, openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: mailChannelId1 },
+                },
+                async mockRPC(route, args) {
+                    if (route === "/mail/message/post") {
+                        assert.step("message_post");
+                    }
+                },
+            });
+            await openDiscuss();
+            // Type message
+            await insertText(".o-mail-composer-textarea", "test message");
+            assert.strictEqual(
+                document.querySelector(`.o-mail-composer-textarea`).value,
+                "test message",
+                "should have inserted text content in editable"
+            );
 
-                // Send message
-                await click(".o-mail-composer-send-button");
-                assert.verifySteps(["message_post"]);
-                assert.strictEqual(
-                    document.querySelector(`.o-mail-composer-textarea`).value,
-                    "",
-                    "should have no content in composer input after posting message"
-                );
-            }
-        );
+            // Send message
+            await click(".o-mail-composer-send-button");
+            assert.verifySteps(["message_post"]);
+            assert.strictEqual(
+                document.querySelector(`.o-mail-composer-textarea`).value,
+                "",
+                "should have no content in composer input after posting message"
+            );
+        });
 
         QUnit.skipRefactoring(
             "composer with thread typing notification status",
@@ -1718,13 +1752,16 @@ QUnit.module("mail", (hooks) => {
                     },
                 });
                 await openDiscuss();
-                await insertText(".o-mail-composer-textarea", "According to all known laws of aviation,");
+                await insertText(
+                    ".o-mail-composer-textarea",
+                    "According to all known laws of aviation,"
+                );
 
                 await click($(target).find("span:contains('epic-shrek-lovers')")[0]);
                 await click($(target).find("span:contains('minigolf-galaxy-iv')")[0]);
                 assert.strictEqual(
                     target.querySelector(".o-mail-composer-textarea").value,
-                    "According to all known laws of aviation,",
+                    "According to all known laws of aviation,"
                 );
             }
         );
