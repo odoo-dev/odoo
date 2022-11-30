@@ -13,7 +13,7 @@ import { useDropzone } from "../dropzone/dropzone_hook";
 import { useMessaging, useAttachmentUploader } from "../messaging_hook";
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { useEmojiPicker } from "./emoji_picker";
-import { isEventHandled, onExternalClick } from "@mail/new/utils";
+import { dataUrlToBlob, isEventHandled, onExternalClick } from "@mail/new/utils";
 
 import { sprintf } from "@web/core/utils/strings";
 import { FileUploader } from "@web/views/fields/file_handler";
@@ -187,6 +187,10 @@ export class Composer extends Component {
                 this.attachmentUploader.attachments
             )
         );
+    }
+
+    async onFileUpload({ data, name, type }) {
+        this.attachmentUploader.upload(new File([dataUrlToBlob(data, type)], name, { type }));
     }
 
     addEmoji(str) {

@@ -14,9 +14,10 @@ export const dropzoneService = {
 
         let lastId = 0;
 
-        function add(target) {
+        function add(target, onDrop) {
             const dropzone = {
                 id: lastId++,
+                onDrop,
                 ref: target,
             };
             dropzones.add(dropzone);

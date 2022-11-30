@@ -16,8 +16,10 @@
                     Activities
                 </button>
                 <span class="flex-grow-1"/>
-                <button class="o-mail-chatter-topbar-add-attachments btn px-2" t-att-disabled="!props.resId">
-                    <i class="fa fa-paperclip fa-lg"/>
+                <button class="o-mail-chatter-topbar-add-attachments btn px-2" t-att-disabled="!props.resId" t-on-click="() => state.isAttachmentBoxOpened = !state.isAttachmentBoxOpened">
+                    <i class="fa fa-paperclip fa-lg me-1"/>
+                    <span t-if="!state.isLoadingAttachments" t-esc="state.attachments.length + attachmentUploader.attachments.length"/>
+                    <i t-else="" class="fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>
                 </button>
                 <Dropdown position="'bottom-end'" isDisabled="isDisabled" class="'o-mail-chatter-topbar-follower-list d-flex'" menuClass="'o-mail-chatter-topbar-follower-list-dropdown flex-column p-0'" menuDisplay="'d-flex'" title="followerButtonLabel" togglerClass="'o-mail-chatter-topbar-follower-list-button btn btn-light px-2'">
                     <t t-set-slot="toggler">
@@ -74,6 +76,30 @@
             <t t-if="props.hasActivity and state.activities.length">
                 <ActivityList activities="state.activities"/>
             </t>
+            <div t-if="state.isAttachmentBoxOpened" class="o-mail-attachment-box position-relative">
+                <div class="d-flex align-items-center">
+                    <hr class="flex-grow-1"/>
+                    <span class="p-3 fw-bold">
+                        Files
+                    </span>
+                    <hr class="flex-grow-1"/>
+                </div>
+                <div class="d-flex flex-column">
+                    <AttachmentList
+                        attachments="attachmentUploader.attachments.concat(state.attachments)"
+                        unlinkAttachment.bind="unlinkAttachment"
+                        imagesHeight="160"
+                    />
+                    <FileUploader multiUpload="true" onUploaded.bind="onFileUpload">
+                        <t t-set-slot="toggler">
+                            <button class="btn btn-link" type="button" t-att-disabled="!thread.hasWriteAccess">
+                                <i class="fa fa-plus-square"/>
+                                Attach files
+                            </button>
+                        </t>
+                    </FileUploader>
+                </div>
+            </div>
             <Thread id="thread.id" t-key="thread.id" order="'desc'"/>
         </div>
     </div>

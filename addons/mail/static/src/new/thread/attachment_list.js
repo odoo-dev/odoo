@@ -34,6 +34,7 @@ export class AttachmentList extends Component {
         const { imagesHeight } = this.props;
         if (
             !this.env.inComposer &&
+            !this.env.inChatter &&
             !attachment.accessToken &&
             attachment.originThread &&
             !attachment.originThread.model

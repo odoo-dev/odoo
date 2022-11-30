@@ -480,16 +480,23 @@ export class Messaging {
         return thread;
     }
 
-    fetchChatterData(
+    async fetchChatterData(
         resId,
         resModel,
         requestList = ["activities", "followers", "attachments", "messages"]
     ) {
-        return this.rpc("/mail/thread/data", {
+        const result = await this.rpc("/mail/thread/data", {
             request_list: requestList,
             thread_id: resId,
             thread_model: resModel,
         });
+        if ("attachments" in result) {
+            result["attachments"] = result["attachments"].map((attachment) => ({
+                ...attachment,
+                originThread: Thread.insert(this.state, attachment.originThread[0][1]),
+            }));
+        }
+        return result;
     }
 
     async fetchThreadMessages(thread, { min, max }) {

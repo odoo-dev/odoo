@@ -235,12 +235,12 @@ QUnit.module("mail", {}, function () {
                 );
             });
 
-            QUnit.skipRefactoring("chatter: drop attachments", async function (assert) {
+            QUnit.test("chatter: drop attachments", async function (assert) {
                 assert.expect(4);
 
                 const pyEnv = await startServer();
                 const resPartnerId1 = pyEnv["res.partner"].create({});
-                const { afterEvent, openView } = await start();
+                const { openView } = await start();
                 await openView({
                     res_id: resPartnerId1,
                     res_model: "res.partner",
@@ -261,23 +261,19 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     dragenterFiles(document.querySelector(".o-mail-chatter"))
                 );
-                assert.ok(document.querySelector(".o_Chatter_dropZone"), "should have a drop zone");
-                assert.strictEqual(
-                    document.querySelectorAll(`.o_AttachmentBoxView`).length,
-                    0,
+                assert.ok(document.querySelector(".o-dropzone"), "should have a drop zone");
+                assert.containsNone(
+                    document.body,
+                    ".o-mail-attachment-image",
                     "should have no attachment before files are dropped"
                 );
 
                 await afterNextRender(() =>
-                    afterEvent({
-                        eventName: "o-file-uploader-upload",
-                        func: () => dropFiles(document.querySelector(".o_Chatter_dropZone"), files),
-                        message: "should wait until files are uploaded",
-                        predicate: ({ files: uploadedFiles }) => uploadedFiles === files,
-                    })
+                    dropFiles(document.querySelector(".o-dropzone"), files)
                 );
-                assert.strictEqual(
-                    document.querySelectorAll(`.o_AttachmentBoxView .o_AttachmentCard`).length,
+                assert.containsN(
+                    document.body,
+                    ".o-mail-attachment-image",
                     2,
                     "should have 2 attachments in the attachment box after files dropped"
                 );
@@ -293,15 +289,11 @@ QUnit.module("mail", {}, function () {
                     }),
                 ];
                 await afterNextRender(() =>
-                    afterEvent({
-                        eventName: "o-file-uploader-upload",
-                        func: () => dropFiles(document.querySelector(".o_Chatter_dropZone"), files),
-                        message: "should wait until files are uploaded",
-                        predicate: ({ files: uploadedFiles }) => uploadedFiles === files,
-                    })
+                    dropFiles(document.querySelector(".o-dropzone"), files)
                 );
-                assert.strictEqual(
-                    document.querySelectorAll(`.o_AttachmentBoxView .o_AttachmentCard`).length,
+                assert.containsN(
+                    document.body,
+                    ".o-mail-attachment-image",
                     3,
                     "should have 3 attachments in the attachment box after files dropped"
                 );

@@ -42,7 +42,7 @@ Object.assign(DropzoneContainer, {
     template: xml`
         <t t-if="state.isDraggingFile">
             <t t-foreach="[...props.dropzones]" t-as="dropzone" t-key="dropzone.id">
-                <Dropzone ref="dropzone.ref"/>
+                <Dropzone ref="dropzone.ref" onDrop="dropzone.onDrop"/>
             </t>
         </t>
     `,

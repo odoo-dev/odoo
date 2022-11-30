@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { reactive, useState } from "@odoo/owl";
+import { reactive, useEnv, useState } from "@odoo/owl";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { removeFromArrayWithPredicate } from "./utils";
 
@@ -38,14 +38,8 @@ export function useMessageHighlight(duration = 2000) {
     return state;
 }
 
-function dataUrlToBlob(data, type) {
-    const binData = window.atob(data);
-    const uiArr = new Uint8Array(binData.length);
-    uiArr.forEach((_, index) => (uiArr[index] = binData.charCodeAt(index)));
-    return new Blob([uiArr], { type });
-}
-
 export function useAttachmentUploader({ threadId, messageId }) {
+    const env = useEnv();
     const { bus, upload } = useService("file_upload");
     const notification = useService("notification");
     const messaging = useService("mail.messaging");
@@ -53,18 +47,16 @@ export function useAttachmentUploader({ threadId, messageId }) {
     const uploadingAttachmentIds = new Set();
     const state = useState({
         attachments: [],
-        async upload(fileData) {
-            const { name, data, type } = fileData;
+        async upload(file) {
             const thread =
                 messaging.state.threads[threadId || messaging.state.messages[messageId].resId];
-            const file = new File([dataUrlToBlob(data, type)], name, { type });
             const tmpId = messaging.nextId++;
             uploadingAttachmentIds.add(tmpId);
             upload("/mail/attachment/upload", [file], {
                 buildFormData(formData) {
                     formData.append("thread_id", thread.resId || thread.id);
                     formData.append("thread_model", thread.resModel || "mail.channel");
-                    formData.append("is_pending", true);
+                    formData.append("is_pending", Boolean(env.inComposer));
                     formData.append("temporary_id", tmpId);
                 },
             }).catch((e) => {

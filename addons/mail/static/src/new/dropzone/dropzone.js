@@ -40,10 +40,13 @@ export class Dropzone extends Component {
 
     onDrop(ev) {
         this.state.isDraggingInside = false;
+        if (this.props.onDrop) {
+            this.props.onDrop(ev);
+        }
     }
 }
 
 Object.assign(Dropzone, {
     template: "mail.dropzone",
-    props: { ref: Object },
+    props: { ref: Object, onDrop: { type: Function, optional: true } },
 });

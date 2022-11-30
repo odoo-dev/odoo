@@ -1,14 +1,28 @@
 /** @odoo-module **/
 
 import { Thread } from "../thread/thread";
-import { useMessaging } from "../messaging_hook";
+import { useAttachmentUploader, useMessaging } from "../messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
+import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { Composer } from "../composer/composer";
 import { ActivityList } from "../activity/activity_list";
-import { Component, useState, onWillUpdateProps, useChildSubEnv, useRef } from "@odoo/owl";
+import {
+    Component,
+    useState,
+    onWillUpdateProps,
+    useChildSubEnv,
+    useRef,
+    onWillStart,
+} from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";
-import { useHover } from "../utils";
+import { FileUploader } from "@web/views/fields/file_handler";
+import {
+    dataUrlToBlob,
+    isDragSourceExternalFile,
+    removeFromArrayWithPredicate,
+    useHover,
+} from "../utils";
 
 export class Chatter extends Component {
     setup() {
@@ -22,18 +36,29 @@ export class Chatter extends Component {
             attachments: [],
             composing: false, // false, 'message' or 'note'
             followers: [],
+            isAttachmentBoxOpened: false,
+            isLoadingAttachments: false,
         });
         this.unfollowHover = useHover("unfollow");
-
-        this.load();
+        this.attachmentUploader = useAttachmentUploader({
+            threadId: `${this.props.resModel},${this.props.resId}`,
+        });
         useChildSubEnv({
             inChatter: true,
             chatter: {
                 reload: this.load.bind(this),
             },
         });
-        useDropzone(useRef("root"));
+        useDropzone(useRef("root"), {
+            onDrop: (ev) => {
+                if (isDragSourceExternalFile(ev.dataTransfer)) {
+                    [...ev.dataTransfer.files].forEach(this.attachmentUploader.upload);
+                    this.state.isAttachmentBoxOpened = true;
+                }
+            },
+        });
 
+        onWillStart(() => this.load());
         onWillUpdateProps((nextProps) => {
             if (nextProps.resId !== this.props.resId) {
                 this.load(nextProps.resId);
@@ -64,6 +89,7 @@ export class Chatter extends Component {
     }
 
     load(resId = this.props.resId, requestList = ["followers", "attachments", "messages"]) {
+        this.state.isLoadingAttachments = requestList.includes("attachments");
         const { resModel } = this.props;
         const thread = this.messaging.getChatterThread(resModel, resId);
         this.thread = thread;
@@ -81,6 +107,7 @@ export class Chatter extends Component {
             }
             if ("attachments" in result) {
                 this.state.attachments = result.attachments;
+                this.state.isLoadingAttachments = false;
             }
             if ("followers" in result) {
                 this.state.followers = result.followers;
@@ -140,10 +167,21 @@ export class Chatter extends Component {
     get unfollowText() {
         return this.env._t("Unfollow");
     }
+
+    async unlinkAttachment(attachment) {
+        await this.attachmentUploader.unlink(attachment);
+        removeFromArrayWithPredicate(this.state.attachments, ({ id }) => attachment.id === id);
+    }
+
+    async onFileUpload({ data, name, type }) {
+        return this.attachmentUploader.upload(
+            new File([dataUrlToBlob(data, type)], name, { type })
+        );
+    }
 }
 
 Object.assign(Chatter, {
-    components: { Dropdown, Thread, Composer, ActivityList },
+    components: { AttachmentList, Dropdown, Thread, Composer, ActivityList, FileUploader },
     props: ["hasActivity", "resId", "resModel", "displayName?"],
     template: "mail.chatter",
 });
