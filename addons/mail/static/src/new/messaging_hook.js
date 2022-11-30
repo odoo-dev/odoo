@@ -4,11 +4,7 @@ import { reactive, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 /**
- * @typedef {import("@mail/new/messaging").Messaging} Messaging
- */
-
-/**
- *  @returns {Messaging} messaging
+ *  @returns {import("@mail/new/messaging").Messaging}
  */
 export function useMessaging() {
     return useState(useService("mail.messaging"));

@@ -4,6 +4,11 @@ import { Composer } from "./composer_model";
 import { Partner } from "./partner_model";
 
 export class Thread {
+    /**
+     * @param {import("@mail/new/messaging").Messaging['state']} state
+     * @param {Object} data
+     * @returns {Thread}
+     */
     static insert(state, data) {
         if (data.id in state.threads) {
             return state.threads[data.id];

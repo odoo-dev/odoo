@@ -32,6 +32,9 @@ export const asyncMethods = [
     "notifyThreadNameToServer",
 ];
 
+/**
+ * @typedef {Messaging} Messaging
+ */
 export class Messaging {
     constructor(...args) {
         this.setup(...args);

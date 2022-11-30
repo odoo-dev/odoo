@@ -1,6 +1,11 @@
 /** @odoo-module */
 
 export class Partner {
+    /**
+     * @param {import("@mail/new/messaging").Messaging['state']} state
+     * @param {Object} data
+     * @returns {Partner}
+     */
     static insert(state, data) {
         if (data.id in state.partners) {
             return state.partners[data.id];
