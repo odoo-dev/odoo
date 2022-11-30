@@ -8,13 +8,20 @@ import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { CallUI } from "../rtc/call_ui";
 import { CallSettings } from "../rtc/call_settings";
+import { ChannelMemberList } from "../discuss/channel_member_list";
 
 export class ChatWindow extends Component {
     setup() {
         this.messaging = useMessaging();
         this.messageHighlight = useMessageHighlight();
         this.state = useState({
-            inSettings: false,
+            /**
+             * activeMode:
+             *   "member-list": channel member list is displayed
+             *   "in-settings": settings is displayed
+             *   "": no action pannel
+             */
+            activeMode: "",
         });
         this.action = useService("action");
         this.contentRef = useRef("content");
@@ -26,7 +33,11 @@ export class ChatWindow extends Component {
     }
 
     toggleSettings() {
-        this.state.inSettings = !this.state.inSettings;
+        this.state.activeMode = this.state.activeMode === "in-settings" ? "" : "in-settings";
+    }
+
+    toggleMemberList() {
+        this.state.activeMode = this.state.activeMode === "member-list" ? "" : "member-list";
     }
 
     expand() {
@@ -46,7 +57,7 @@ export class ChatWindow extends Component {
 }
 
 Object.assign(ChatWindow, {
-    components: { Thread, Composer, CallUI, CallSettings },
+    components: { Thread, Composer, CallUI, CallSettings, ChannelMemberList },
     props: ["chatWindow", "right?"],
     template: "mail.chat_window",
 });

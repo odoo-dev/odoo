@@ -12,7 +12,7 @@ export class TestServer {
     }
 
     async rpc(route, params) {
-        const snakeCaseRoute = route.replaceAll("/", "_").replace(".", "_");
+        const snakeCaseRoute = route.replaceAll("/", "_").replaceAll(".", "_");
         if (!(snakeCaseRoute in this)) {
             throw new Error("Unhandled route: " + route);
         }
@@ -239,6 +239,10 @@ export class TestServer {
     }
 
     _web_dataset_call_kw_mail_activity_action_feedback(params) {
+        return [];
+    }
+
+    _web_dataset_call_kw_mail_channel_member_search_read(params) {
         return [];
     }
 }

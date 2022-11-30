@@ -14,6 +14,7 @@ export class Thread {
             return state.threads[data.id];
         }
         const thread = new Thread(data);
+        thread._state = state;
         thread.composer = Composer.insert(state, { threadId: thread.id });
         if (thread.type === "channel") {
             state.discuss.channels.threads.push(thread.id);
@@ -65,6 +66,7 @@ export class Thread {
             serverLastSeenMsgByCurrentUser: data.serverData
                 ? data.serverData.seen_message_id
                 : null,
+            channelMembers: [],
         });
         for (const key in data) {
             this[key] = data[key];
@@ -110,5 +112,35 @@ export class Thread {
 
     sortMessages() {
         this.messages.sort((msgId1, msgId2) => msgId1 - msgId2);
+    }
+
+    get onlineMembers() {
+        const orderedOnlineMembers = [];
+        for (const member of this.channelMembers) {
+            const memberImStatus = this._state.partners[member.partnerId].im_status;
+            member.im_status = memberImStatus;
+            if (member.partnerId !== this._state.user.partnerId) {
+                member.hasOpenChatFromAvatarClick = true;
+            }
+            if (memberImStatus === "online") {
+                orderedOnlineMembers.push(member);
+            }
+        }
+        return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
+    }
+
+    get offlineMembers() {
+        const orderedOnlineMembers = [];
+        for (const member of this.channelMembers) {
+            const memberImStatus = this._state.partners[member.partnerId].im_status;
+            member.im_status = memberImStatus;
+            if (member.partnerId !== this._state.user.partnerId) {
+                member.hasOpenChatFromAvatarClick = true;
+            }
+            if (memberImStatus !== "online") {
+                orderedOnlineMembers.push(member);
+            }
+        }
+        return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
     }
 }

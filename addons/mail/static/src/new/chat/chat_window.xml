@@ -13,6 +13,9 @@
             <div t-if="!thread.inCall" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Start a Call" t-on-click.stop="startCall">
                 <i class="fa fa-phone"/>
             </div>
+            <div t-if="thread and thread.type === 'channel'" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" t-attf-title="{{state.activeMode === 'member-list' and 'Hide' or 'Show'}} Member List" t-on-click.stop="toggleMemberList">
+                <i class="fa fa-users"/>
+            </div>
             <div class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Show Call Settings" t-on-click.stop="toggleSettings">
                 <i class="fa fa-gear"/>
             </div>
@@ -25,8 +28,11 @@
         </div>
         <t t-if="!props.chatWindow.folded">
             <div class="o-mail-chat-window-content d-flex flex-column h-100 overflow-auto" t-ref="content">
-                <t t-if="state.inSettings">
+                <t t-if="state.activeMode === 'in-settings'">
                     <CallSettings />
+                </t>
+                <t t-elif="state.activeMode === 'member-list'">
+                    <ChannelMemberList thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start w-100 h-100'"/>
                 </t>
                 <t t-else="">
                     <t t-if="thread.inCall">

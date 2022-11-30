@@ -37,19 +37,31 @@
                         <button t-if="!thread.inCall" class="btn" title="Start a Call" t-on-click="startCall">
                             <i class="fa fa-lg fa-phone text-700"/>
                         </button>
+                    </t>
+                    <t t-if="thread.type === 'channel'">
+                        <button class="btn" t-att-title="state.activeMode === 'member-list' ? 'Hide Member List' : 'Show Member List'" t-on-click.stop="toggleMemberList">
+                            <i class="fa fa-lg fa-users text-700"/>
+                        </button>
+                    </t>
+                    <t t-if="thread.type !== 'mailbox'">
                         <button class="btn" t-ref="settings" title="Show Call Settings" t-on-click="toggleSettings">
                             <i class="fa fa-lg fa-gear text-700"/>
                         </button>
                     </t>
                 </div>
             </div>
-            <t t-if="thread.inCall">
-                <CallUI thread="thread"/>
-            </t>
-            <Thread id="thread.id" t-key="thread.id" messageHighlight="messageHighlight"/>
-            <t t-if="thread.type !== 'mailbox' or messaging.state.discuss.messageToReplyTo">
-                <Composer t-key="thread.id" composer="thread.composer" autofocus="true" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()" dropzoneRef="contentRef"/>
-            </t>
+            <div class="overflow-auto d-flex flex-grow-1">
+                <div class="d-flex flex-column flex-grow-1">
+                    <t t-if="thread.inCall">
+                        <CallUI thread="thread"/>
+                    </t>
+                    <Thread id="thread.id" t-key="thread.id" messageHighlight="messageHighlight"/>
+                    <t t-if="thread.type !== 'mailbox' or messaging.state.discuss.messageToReplyTo">
+                        <Composer t-key="thread.id" composer="thread.composer" autofocus="true" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()" dropzoneRef="contentRef"/>
+                    </t>
+                </div>
+                <ChannelMemberList t-if="thread.type === 'channel' and state.activeMode === 'member-list'" thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start'"/>
+            </div>
         </div>
         <div t-if="!thread" class="o-mail-discuss-no-thread d-flex flex-grow-1 align-items-center justify-content-center w-100 bg-view">
             <h4 class="text-muted"><b><i>No conversation selected.</i></b></h4>

@@ -8,7 +8,8 @@ import { useMessaging } from "../messaging_hook";
 import { useMessageHighlight } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";
 import { CallUI } from "../rtc/call_ui";
-import { Component, onWillStart, onMounted, onWillUnmount, useRef } from "@odoo/owl";
+import { ChannelMemberList } from "./channel_member_list";
+import { Component, onWillStart, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { CallSettings } from "../rtc/call_settings";
 import { usePopover } from "@web/core/popover/popover_hook";
 
@@ -20,6 +21,14 @@ export class Discuss extends Component {
         this.popover = usePopover();
         this.closePopover = null;
         this.settingsRef = useRef("settings");
+        this.state = useState({
+            /**
+             * activeMode:
+             *   "member-list": channel member list is displayed
+             *   "": no action pannel
+             */
+            activeMode: "",
+        });
         onWillStart(() => this.messaging.isReady);
         onMounted(() => (this.messaging.state.discuss.isActive = true));
         onWillUnmount(() => (this.messaging.state.discuss.isActive = false));
@@ -46,6 +55,10 @@ export class Discuss extends Component {
         }
     }
 
+    toggleMemberList() {
+        this.state.activeMode = this.state.activeMode === "member-list" ? "" : "member-list";
+    }
+
     async renameThread({ value: name }) {
         const newName = name.trim();
         if (
@@ -67,7 +80,16 @@ export class Discuss extends Component {
 }
 
 Object.assign(Discuss, {
-    components: { AutoresizeInput, Sidebar, Thread, ThreadIcon, Composer, CallUI, CallSettings },
+    components: {
+        AutoresizeInput,
+        Sidebar,
+        Thread,
+        ThreadIcon,
+        Composer,
+        CallUI,
+        CallSettings,
+        ChannelMemberList,
+    },
     props: ["*"],
     template: "mail.discuss",
 });

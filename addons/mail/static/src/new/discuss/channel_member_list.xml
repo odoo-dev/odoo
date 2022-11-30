@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.channel_member_list" owl="1">
+        <div class="o-mail-channel-member-list d-flex flex-column overflow-auto bg-light" t-att-class="props.className">
+            <t t-if="props.thread.onlineMembers.length > 0">
+                <h6 class="m-2">
+                    Online -
+                    <t t-esc="props.thread.onlineMembers.length"/>
+                </h6>
+                <t t-foreach="props.thread.onlineMembers" t-as="member" t-key="member.partnerId" t-call="mail.channel_member"/>
+            </t>
+            <t t-if="props.thread.offlineMembers.length > 0">
+                <h6 class="m-2">
+                    Offline -
+                    <t t-esc="props.thread.offlineMembers.length"/>
+                </h6>
+                <t t-foreach="props.thread.offlineMembers" t-as="member" t-key="member.partnerId" t-call="mail.channel_member"/>
+            </t>
+        </div>
+    </t>
+    <t t-name="mail.channel_member" owl="1">
+        <div class="o-mail-channel-member d-flex align-items-center mx-2 p-2 bg-light" t-att-class="{'cursor-pointer': member.hasOpenChatFromAvatarClick}" t-on-click.stop="() => this.openChatAvatar(member)">
+            <div class="o-mail-background-inherit o-mail-channel-member-avatar-container position-relative d-flex ms-4 flex-shrink-0">
+                <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
+                    t-attf-src="/mail/channel/1/partner/{{member.partnerId}}/avatar_128"/>
+                <PartnerImStatus className="'position-absolute bottom-0 end-0'" partner="member"/>
+            </div>
+            <span class="o-mail-channel-member-name ms-2 text-truncate" t-esc="member.name"/>
+        </div>
+    </t>
+
+</templates>
