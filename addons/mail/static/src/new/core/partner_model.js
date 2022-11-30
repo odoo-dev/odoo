@@ -23,4 +23,8 @@ export class Partner {
     constructor({ id, name }) {
         Object.assign(this, { id, name, im_status: null });
     }
+
+    get avatarUrl() {
+        return `/mail/channel/1/partner/${this.id}/avatar_128`;
+    }
 }
