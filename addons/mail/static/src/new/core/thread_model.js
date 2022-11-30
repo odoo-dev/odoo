@@ -72,4 +72,18 @@ export class Thread {
             this[key] = data[key];
         }
     }
+
+    get mostRecentMsgId() {
+        if (this.messages.length === 0) {
+            return undefined;
+        }
+        return Math.max(...this.messages);
+    }
+
+    get oldestMsgId() {
+        if (this.messages.length === 0) {
+            return undefined;
+        }
+        return Math.min(...this.messages);
+    }
 }

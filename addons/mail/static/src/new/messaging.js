@@ -536,9 +536,9 @@ export class Messaging {
 
     async fetchThreadMessagesNew(threadId) {
         const thread = this.state.threads[threadId];
-        const min = this.getThreadMostRecentMsg(thread);
+        const min = thread.mostRecentMsgId;
         const fetchedMsgs = await this.fetchThreadMessages(thread, { min });
-        const mostRecentMsgId = this.getThreadMostRecentMsg(thread);
+        const mostRecentMsgId = thread.mostRecentMsgId;
         if (thread.isUnread && ["chat", "channel"].includes(thread.type)) {
             if (fetchedMsgs.length > 0) {
                 this.rpc("/mail/channel/set_last_seen_message", {
@@ -559,25 +559,11 @@ export class Messaging {
     async fetchThreadMessagesMore(threadId) {
         const thread = this.state.threads[threadId];
         const fetchedMsgs = await this.fetchThreadMessages(thread, {
-            max: this.getThreadOldestMsg(thread),
+            max: thread.oldestMsgId,
         });
         if (fetchedMsgs.length < FETCH_MSG_LIMIT) {
             thread.loadMore = false;
         }
-    }
-
-    getThreadMostRecentMsg(thread) {
-        if (thread.messages.length === 0) {
-            return undefined;
-        }
-        return Math.max(...thread.messages);
-    }
-
-    getThreadOldestMsg(thread) {
-        if (thread.messages.length === 0) {
-            return undefined;
-        }
-        return Math.min(...thread.messages);
     }
 
     async fetchPreviews() {

@@ -26,7 +26,7 @@ export class Thread extends Component {
             onWillPatch: () => {
                 return {
                     hasMoreMsgsAbove:
-                        this.messaging.getThreadOldestMsg(this.thread) !== this.oldestMessageId &&
+                        this.thread.oldestMsgId !== this.oldestMessageId &&
                         this.props.order === "asc",
                 };
             },
@@ -37,14 +37,14 @@ export class Thread extends Component {
                     el.scrollTop = scrollTop + el.scrollHeight - scrollHeight;
                     this.pendingLoadMore = false;
                 }
-                this.oldestMessageId = this.messaging.getThreadOldestMsg(this.thread);
+                this.oldestMessageId = this.thread.oldestMsgId;
                 if (!wasPendingLoadMore) {
                     this.loadMore();
                 }
             },
         });
         onMounted(() => {
-            this.oldestMessageId = this.messaging.getThreadOldestMsg(this.thread);
+            this.oldestMessageId = this.thread.oldestMsgId;
             this.loadMore();
         });
         onWillStart(() => this.requestMessages(this.props.id));
