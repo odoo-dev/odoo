@@ -29,16 +29,19 @@ export class LoyaltyActionHelper extends Component {
             "loyalty.program",
             "create_from_template",
             [templateId],
+            {context: this.env.model.root.context},
         );
         if (!action) {
             return;
         }
         this.action.doAction(action);
     }
-};
+}
+
 LoyaltyActionHelper.template = "loyalty.LoyaltyActionHelper";
 
-export class LoyaltyListRenderer extends ListRenderer {};
+export class LoyaltyListRenderer extends ListRenderer {}
+
 LoyaltyListRenderer.template = "loyalty.LoyaltyListRenderer";
 LoyaltyListRenderer.components = {
     ...LoyaltyListRenderer.components,
