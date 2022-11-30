@@ -4,14 +4,12 @@ import { markRaw, markup, toRaw, reactive } from "@odoo/owl";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
-import { url } from "@web/core/utils/urls";
 import { htmlToTextContentInline, convertBrToLineBreak, removeFromArray } from "./utils";
 import { prettifyMessageContent } from "./message_prettify_utils";
 import { Thread } from "./core/thread_model";
 import { Partner } from "./core/partner_model";
 import { LinkPreview } from "./core/link_preview_model";
-
-const { DateTime } = luxon;
+import { Message } from "./core/message_model";
 
 const FETCH_MSG_LIMIT = 30;
 
@@ -195,93 +193,18 @@ export class Messaging {
      * TODO: remove thread argument and add a method addToThread or something
      * caller should do it, not this method
      */
-    createMessage(body, data, thread) {
-        const {
-            attachment_ids: attachments = [],
-            author,
-            id,
-            date,
-            message_type: type,
-            needaction,
-            parentMessage,
-            subtype_description: subtypeDescription,
-            trackingValues = [],
-            linkPreviews,
-        } = data;
-        if (id in this.state.messages) {
-            return this.state.messages[id];
-        }
-        const now = DateTime.now();
-        const dateTime = markRaw(date ? deserializeDateTime(date) : now);
-        let dateDay = dateTime.toLocaleString(DateTime.DATE_FULL);
-        if (dateDay === now.toLocaleString(DateTime.DATE_FULL)) {
-            dateDay = this.env._t("Today");
-        }
-        let isStarred = false;
-        if (
-            data.starred_partner_ids &&
-            data.starred_partner_ids.includes(this.state.user.partnerId)
-        ) {
-            isStarred = true;
-        }
-
-        const linkPreviewsClass = [];
-        if (linkPreviews) {
-            for (const linkPreview of linkPreviews) {
-                linkPreviewsClass.push(new LinkPreview(linkPreview));
+    createMessage(data, thread) {
+        const message = Message.insert(this.state, data);
+        if (!thread.messages.includes(message.id)) {
+            if (thread.type === "chatter") {
+                thread.messages.unshift(message.id);
+            } else {
+                thread.messages.push(message.id);
             }
+            this.sortThreadMessages(thread);
         }
-        const message = {
-            attachments: attachments.map((attachment) => {
-                return {
-                    ...attachment,
-                    originThread: Thread.insert(this.state, attachment.originThread[0][1]),
-                };
-            }),
-            id,
-            type,
-            body,
-            author: Partner.insert(this.state, { id: author.id, name: author.name }),
-            isAuthor: author.id === this.state.user.partnerId,
-            dateDay,
-            dateTimeStr: dateTime.toLocaleString(DateTime.DATETIME_SHORT),
-            dateTime,
-            isStarred,
-            isNote: data.is_note,
-            isTransient: data.is_transient,
-            needaction,
-            parentMessage,
-            subtypeDescription,
-            trackingValues,
-            linkPreviews: linkPreviewsClass,
-        };
-        if (parentMessage) {
-            const { body, ...data } = parentMessage;
-            message["parentMessage"] = this.createMessage(body, data, thread);
-        }
-        message.recordName = data.record_name;
-        message.resId = data.res_id;
-        message.resModel = data.model;
-        message.url = `${url("/web")}#model=${data.model}&id=${data.res_id}`;
-        if (type === "notification") {
-            message.trackingValues = data.trackingValues;
-            if (data.model === "mail.channel") {
-                // is that correct?
-                message.isNotification = true;
-            }
-            if (data.subtype_description) {
-                message.subtype_description = data.subtype_description;
-            }
-        }
-        this.state.messages[id] = message;
-        if (thread.type === "chatter") {
-            thread.messages.unshift(id);
-        } else {
-            thread.messages.push(id);
-        }
-        this.sortThreadMessages(thread);
         // return reactive version
-        return this.state.messages[id];
+        return message;
     }
 
     sortThreadMessages(thread) {
@@ -296,13 +219,12 @@ export class Messaging {
      * @param {Object} data
      */
     createTransientMessage(data) {
-        const { body, res_id: threadId } = data;
+        const { res_id: threadId } = data;
         const lastMessageId = Object.values(this.state.messages).reduce(
             (lastMessageId, message) => Math.max(lastMessageId, message.id),
             0
         );
         this.createMessage(
-            markup(body),
             {
                 author: this.state.partnerRoot,
                 id: lastMessageId + 0.01,
@@ -348,8 +270,7 @@ export class Messaging {
                     {
                         const { id, message } = notif.payload;
                         const thread = this.state.threads[id];
-                        const body = markup(message.body);
-                        this.createMessage(body, message, thread);
+                        this.createMessage(message, thread);
                     }
                     break;
                 case "mail.record/insert":
@@ -473,9 +394,9 @@ export class Messaging {
                 author: { id: this.state.user.partnerId },
                 message_type: "notification",
                 trackingValues: [],
+                body: this.env._t("Creating a new record..."),
             };
-            const body = this.env._t("Creating a new record...");
-            this.createMessage(body, tmpData, thread);
+            this.createMessage(tmpData, thread);
         }
         return thread;
     }
@@ -535,9 +456,7 @@ export class Messaging {
                 throw new Error("Unknown thread type");
         }
         thread.status = "ready";
-        const messages = rawMessages
-            .reverse()
-            .map((data) => this.createMessage(markup(data.body), data, thread));
+        const messages = rawMessages.reverse().map((data) => this.createMessage(data, thread));
         return messages;
     }
 
@@ -651,20 +570,17 @@ export class Messaging {
                 attachments: attachments,
                 res_id: thread.id,
                 model: "mail.channel",
+                body: await prettifyMessageContent(body),
             };
             if (parentId) {
                 tmpData.parentMessage = this.state.messages[parentId];
             }
-            tmpMsg = this.createMessage(
-                markup(await prettifyMessageContent(body)),
-                tmpData,
-                thread
-            );
+            tmpMsg = this.createMessage(tmpData, thread);
         }
         const data = await this.rpc(`/mail/message/post`, params);
-        const message = this.createMessage(markup(data.body), data, thread);
+        const message = this.createMessage(data, thread);
         if (!this.isMessageEmpty(message)) {
-            this.rpc(`/mail/link_preview`, { message_id: data.id }, { silent: true });
+            this.rpc(`/mail/link_preview`, { message_id: message.id }, { silent: true });
         }
         if (thread.type !== "chatter") {
             removeFromArray(thread.messages, tmpMsg.id);
