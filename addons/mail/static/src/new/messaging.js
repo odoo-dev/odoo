@@ -1,15 +1,21 @@
 /** @odoo-module **/
 
+import { Partner } from "@mail/new/common/models/partner_model";
+import { Thread } from "@mail/new/common/models/thread_model";
+import { LinkPreview } from "@mail/new/discuss/models/link_preview_model";
+import { prettifyMessageContent } from "@mail/new/utils/message_prettify_utils";
+import {
+    htmlToTextContentInline,
+    convertBrToLineBreak,
+    removeFromArray,
+} from "@mail/new/utils/utils";
+
 import { markRaw, markup, toRaw, reactive } from "@odoo/owl";
+
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
 import { url } from "@web/core/utils/urls";
-import { htmlToTextContentInline, convertBrToLineBreak, removeFromArray } from "./utils";
-import { prettifyMessageContent } from "./message_prettify_utils";
-import { LinkPreview } from "@mail/new/discuss/models/link_preview_model";
-import { Thread } from "@mail/new/common/models/thread_model";
-import { Partner } from "@mail/new/common/models/partner_model";
 
 const { DateTime } = luxon;
 
