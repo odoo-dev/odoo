@@ -16,7 +16,6 @@ const { DateTime } = luxon;
 const FETCH_MSG_LIMIT = 30;
 
 export const asyncMethods = [
-    "fetchThreadMessages",
     "fetchPreviews",
     "postMessage",
     "updateMessage",
@@ -537,9 +536,8 @@ export class Messaging {
 
     async fetchThreadMessagesNew(threadId) {
         const thread = this.state.threads[threadId];
-        const fetchedMsgs = await this.fetchThreadMessages(thread, {
-            min: this.getThreadMostRecentMsg(thread),
-        });
+        const min = this.getThreadMostRecentMsg(thread);
+        const fetchedMsgs = await this.fetchThreadMessages(thread, { min });
         const mostRecentMsgId = this.getThreadMostRecentMsg(thread);
         if (thread.isUnread && ["chat", "channel"].includes(thread.type)) {
             if (fetchedMsgs.length > 0) {
@@ -551,7 +549,10 @@ export class Messaging {
         }
         Object.assign(thread, {
             isUnread: false,
-            loadMore: fetchedMsgs.length === FETCH_MSG_LIMIT,
+            loadMore:
+                min === undefined && fetchedMsgs.length === FETCH_MSG_LIMIT
+                    ? true
+                    : thread.loadMore,
         });
     }
 

@@ -7,8 +7,15 @@ import {
     start,
     startServer,
 } from "@mail/../tests/helpers/test_utils";
+import { getFixture } from "@web/../tests/helpers/utils";
 
-QUnit.module("mail", {}, function () {
+let target;
+
+QUnit.module("mail", (hooks) => {
+    hooks.beforeEach(async () => {
+        target = getFixture();
+    });
+
     QUnit.module("components", {}, function () {
         QUnit.module("thread_view_tests.js");
 
@@ -34,9 +41,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("message list asc order", async function (assert) {
-            assert.expect(5);
-
+        QUnit.test("message list asc order", async function (assert) {
             const pyEnv = await startServer();
             const mailChannelId1 = pyEnv["mail.channel"].create({
                 channel_type: "channel",
@@ -50,69 +55,25 @@ QUnit.module("mail", {}, function () {
                     res_id: mailChannelId1,
                 });
             }
-            const { afterEvent, openDiscuss } = await start({
+            const { openDiscuss } = await start({
                 discuss: {
                     context: { active_id: mailChannelId1 },
                 },
             });
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until channel 1 loaded initial messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread.model === "mail.channel" &&
-                        threadViewer.thread.id === mailChannelId1
-                    );
-                },
-            });
-            const messageItems = document.querySelectorAll(`.o_MessageListView_item`);
-            assert.notOk(
-                messageItems[messageItems.length - 1].classList.contains(
-                    "o_MessageListView_loadMore"
-                ),
-                "load more link should be before messages"
-            );
-            assert.ok(
-                messageItems[0].classList.contains("o_MessageListView_loadMore"),
-                "load more link should NOT be after messages"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`.o-mail-message`).length,
+            await openDiscuss();
+            assert.containsN(
+                target,
+                ".o-mail-thread button:contains(Load More) ~ .o-mail-message",
                 30,
-                "should have 30 messages at the beginning"
+                "load more should be before all 30 fetched messages"
             );
 
-            // scroll to top
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: () => (document.querySelector(`.o_ThreadView_messageList`).scrollTop = 0),
-                message: "should wait until channel 1 loaded more messages after scrolling to top",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "more-messages-loaded" &&
-                        threadViewer.thread.model === "mail.channel" &&
-                        threadViewer.thread.id === mailChannelId1
-                    );
-                },
-            });
-            assert.strictEqual(
-                document.querySelectorAll(`.o-mail-message`).length,
+            await afterNextRender(() => (target.querySelector(".o-mail-thread").scrollTop = 0));
+            assert.containsN(
+                target,
+                ".o-mail-thread .o-mail-message",
                 60,
-                "should have 60 messages after scrolled to top"
-            );
-
-            // scroll to bottom
-            await afterNextRender(() => {
-                document.querySelector(
-                    `.o_ThreadView_messageList`
-                ).scrollTop = document.querySelector(`.o_ThreadView_messageList`).scrollHeight;
-            });
-            assert.strictEqual(
-                document.querySelectorAll(`.o-mail-message`).length,
-                60,
-                "scrolling to bottom should not trigger any message fetching"
+                "should have fetched 30 more messages from scroll top (auto-load more)"
             );
         });
 

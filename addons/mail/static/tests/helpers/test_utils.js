@@ -260,6 +260,20 @@ async function start(param0 = {}) {
     const { discuss = {}, hasTimeControl, waitUntilMessagingCondition = "initialized" } = param0;
     const advanceTime = hasTimeControl ? getAdvanceTime() : undefined;
     const target = param0["target"] || getFixture();
+    // make qunit fixture in visible range,
+    // so that features like IntersectionObserver work as expected
+    target.style.position = "absolute";
+    target.style.top = "0";
+    target.style.left = "0";
+    target.style.height = "100%";
+    target.style.opacity = QUnit.config.debug ? "" : "0";
+    registerCleanup(async () => {
+        target.style.position = "";
+        target.style.top = "";
+        target.style.left = "";
+        target.style.height = "";
+        target.style.opacity = "";
+    });
     param0["target"] = target;
     if (!["none", "created", "initialized"].includes(waitUntilMessagingCondition)) {
         throw Error(
