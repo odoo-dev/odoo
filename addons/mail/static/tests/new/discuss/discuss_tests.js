@@ -459,4 +459,64 @@ QUnit.module("mail", (hooks) => {
             "chat3 should have away icon"
         );
     });
+
+    QUnit.test("No load more when fetch below fetch limit of 30", async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+        const resPartnerId1 = pyEnv["res.partner"].create({});
+        pyEnv["res.partner"].create({});
+        for (let i = 28; i >= 0; i--) {
+            pyEnv["mail.message"].create({
+                author_id: resPartnerId1,
+                body: "not empty",
+                date: "2019-04-20 10:00:00",
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            });
+        }
+        const { openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: `mail.channel_${mailChannelId1}`,
+                },
+            },
+            async mockRPC(route, args) {
+                if (route === "/mail/channel/messages") {
+                    assert.strictEqual(args.limit, 30, "should fetch up to 30 messages");
+                }
+            },
+        });
+        await openDiscuss();
+        assert.containsN(target, ".o-mail-message", 29);
+        assert.containsNone(target, "button:contains(Load more)");
+    });
+
+    QUnit.test("show date separator above mesages of similar date", async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+        const resPartnerId1 = pyEnv["res.partner"].create({});
+        pyEnv["res.partner"].create({});
+        for (let i = 28; i >= 0; i--) {
+            pyEnv["mail.message"].create({
+                author_id: resPartnerId1,
+                body: "not empty",
+                date: "2019-04-20 10:00:00",
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            });
+        }
+        const { openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: `mail.channel_${mailChannelId1}`,
+                },
+            },
+        });
+        await openDiscuss();
+        assert.ok(
+            $(target).find("hr + span:contains(April 20, 2019) + hr").offset().top <
+                $(target).find(".o-mail-message").offset().top,
+            "should have a single date separator above all the messages" // to check: may be client timezone dependent
+        );
+    });
 });

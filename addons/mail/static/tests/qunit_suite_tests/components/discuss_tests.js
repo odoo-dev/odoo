@@ -1450,69 +1450,6 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring(
-            "load all messages from channel initially, less than fetch limit (29 < 30)",
-            async function (assert) {
-                // AKU TODO: thread specific test
-                assert.expect(5);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                pyEnv["res.partner"].create({});
-                for (let i = 28; i >= 0; i--) {
-                    pyEnv["mail.message"].create({
-                        author_id: resPartnerId1,
-                        body: "not empty",
-                        date: "2019-04-20 10:00:00",
-                        model: "mail.channel",
-                        res_id: mailChannelId1,
-                    });
-                }
-                const { openDiscuss } = await start({
-                    discuss: {
-                        params: {
-                            default_active_id: `mail.channel_${mailChannelId1}`,
-                        },
-                    },
-                    async mockRPC(route, args) {
-                        if (route === "/mail/channel/messages") {
-                            assert.strictEqual(args.limit, 30, "should fetch up to 30 messages");
-                        }
-                    },
-                });
-                await openDiscuss();
-                assert.strictEqual(
-                    document.querySelectorAll(`
-            .o_DiscussView_thread .o_ThreadView_messageList .o_MessageListView_separatorDate
-        `).length,
-                    1,
-                    "should have a single date separator" // to check: may be client timezone dependent
-                );
-                assert.strictEqual(
-                    document.querySelector(`
-            .o_DiscussView_thread .o_ThreadView_messageList .o_MessageListView_separatorLabelDate
-        `).textContent,
-                    "April 20, 2019",
-                    "should display date day of messages"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(`
-            .o_DiscussView_thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
-                    29,
-                    "should have 29 messages"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(`
-            .o_DiscussView_thread .o_ThreadView_messageList .o_MessageListView_loadMore
-        `).length,
-                    0,
-                    "should not have load more link"
-                );
-            }
-        );
-
         QUnit.skipRefactoring("load more messages from channel", async function (assert) {
             // AKU: thread specific test
             assert.expect(6);
