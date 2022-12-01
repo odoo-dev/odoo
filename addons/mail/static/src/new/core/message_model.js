@@ -14,6 +14,51 @@ const { DateTime } = luxon;
 
 export class Message {
     constructor(data) {
+        /** @type {Object[]} **/
+        void this.attachments;
+        /** @type {Partner} **/
+        void this.author;
+        /** @type {String} **/
+        void this.body;
+        /** @type {String} **/
+        void this.dateDay;
+        /** @type {DateTime} **/
+        void this.dateTime;
+        /** @type {Number|String} **/
+        void this.id;
+        /** @type {Boolean} **/
+        void this.isAuthor;
+        /** @type {Boolean} **/
+        void this.isDiscussion;
+        /** @type {Boolean} **/
+        void this.isNote;
+        /** @type {Boolean} **/
+        void this.isNotification;
+        /** @type {Boolean} **/
+        void this.isStarred;
+        /** @type {Boolean} **/
+        void this.isTransient;
+        /** @type {LinkPreview[]} **/
+        void this.linkPreviews;
+        /** @type {Message|undefined} **/
+        void this.parentMessage;
+        /** @type {Object[]} **/
+        void this.reactions;
+        /** @type {String} **/
+        void this.recordName;
+        /** @type {Number|String} */
+        void this.resId;
+        /** @type {String|undefined} **/
+        void this.resModel;
+        /** @type {String} **/
+        void this.subtypeDescription;
+        /** @type {Object[]} **/
+        void this.trackingValues;
+        /** @type {String} **/
+        void this.type;
+        /** @type {String} **/
+        void this.url;
+
         const {
             date,
             is_discussion: isDiscussion,
@@ -55,6 +100,12 @@ export class Message {
         }
     }
 
+    /**
+     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {Object} data
+     * @param {Thread} thread
+     * @returns {Message}
+     */
     static insert(state, data, thread) {
         if (data.id in state.messages) {
             return state.messages[data.id];
