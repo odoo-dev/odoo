@@ -12,13 +12,6 @@ export function isDragSourceExternalFile(dataTransfer) {
     return false;
 }
 
-export function dataUrlToBlob(data, type) {
-    const binData = window.atob(data);
-    const uiArr = new Uint8Array(binData.length);
-    uiArr.forEach((_, index) => (uiArr[index] = binData.charCodeAt(index)));
-    return new Blob([uiArr], { type });
-}
-
 const eventHandledWeakMap = new WeakMap();
 
 /**

@@ -19,7 +19,7 @@ import {
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
-import { dataUrlToBlob, isDragSourceExternalFile } from "@mail/new/utils/misc";
+import { isDragSourceExternalFile } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
@@ -60,7 +60,7 @@ export class Chatter extends Component {
                     return;
                 }
                 if (isDragSourceExternalFile(ev.dataTransfer)) {
-                    [...ev.dataTransfer.files].forEach(this.attachmentUploader.upload);
+                    [...ev.dataTransfer.files].forEach(this.attachmentUploader.uploadFile);
                     this.state.isAttachmentBoxOpened = true;
                 }
             },
@@ -213,12 +213,6 @@ export class Chatter extends Component {
     async unlinkAttachment(attachment) {
         await this.attachmentUploader.unlink(attachment);
         removeFromArrayWithPredicate(this.state.attachments, ({ id }) => attachment.id === id);
-    }
-
-    async onFileUpload({ data, name, type }) {
-        return this.attachmentUploader.upload(
-            new File([dataUrlToBlob(data, type)], name, { type })
-        );
     }
 }
 

@@ -215,6 +215,13 @@ export function useMessageHighlight(duration = 2000) {
     return state;
 }
 
+function dataUrlToBlob(data, type) {
+    const binData = window.atob(data);
+    const uiArr = new Uint8Array(binData.length);
+    uiArr.forEach((_, index) => (uiArr[index] = binData.charCodeAt(index)));
+    return new Blob([uiArr], { type });
+}
+
 export function useAttachmentUploader({ threadId, messageId }) {
     const component = useComponent();
     const env = useEnv();
@@ -226,7 +233,11 @@ export function useAttachmentUploader({ threadId, messageId }) {
     const uploadingAttachmentIds = new Set();
     const state = useState({
         attachments: [],
-        async upload(file) {
+        uploadData({ data, name, type }) {
+            const file = new File([dataUrlToBlob(data, type)], name, { type });
+            return this.uploadFile(file);
+        },
+        async uploadFile(file) {
             const thread =
                 messaging.state.threads[threadId || messaging.state.messages[messageId].resId];
             const tmpId = messaging.nextId++;

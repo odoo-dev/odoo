@@ -98,7 +98,7 @@
                         unlinkAttachment.bind="unlinkAttachment"
                         imagesHeight="160"
                     />
-                    <FileUploader multiUpload="true" onUploaded.bind="onFileUpload">
+                    <FileUploader multiUpload="true" onUploaded="(data) => attachmentUploader.uploadData(data)">
                         <t t-set-slot="toggler">
                             <button class="btn btn-link" type="button" t-att-disabled="!thread.hasWriteAccess">
                                 <i class="fa fa-plus-square"/>

@@ -8,7 +8,6 @@ import { FileUploader } from "@web/views/fields/file_handler";
 import { ActivityMarkAsDone } from "./activity_markasdone_popover";
 import { computeDelay } from "@mail/new/utils/dates";
 import { useAttachmentUploader } from "@mail/new/utils/hooks";
-import { dataUrlToBlob } from "@mail/new/utils/misc";
 
 export class Activity extends Component {
     static components = { FileUploader };
@@ -26,9 +25,9 @@ export class Activity extends Component {
             this.delay = computeDelay(nextProps.data.date_deadline);
         });
         if (this.props.data.activity_category === "upload_file") {
-            this.uploadDocument = useAttachmentUploader({
+            this.attachmentUploader = useAttachmentUploader({
                 threadId: this.thread.id,
-            }).upload;
+            });
         }
     }
 
@@ -48,10 +47,8 @@ export class Activity extends Component {
         );
     }
 
-    async onFileUploaded({ data, name, type }) {
-        const attachmentId = (
-            await this.uploadDocument(new File([dataUrlToBlob(data, type)], name, { type }))
-        ).id;
+    async onFileUploaded(data) {
+        const { id: attachmentId } = await this.attachmentUploader.uploadData(data);
         await this.activity.markAsDone(this.props.data.id, [attachmentId]);
         this.props.onUpdate();
         await this.messaging.fetchThreadMessagesNew(this.thread.id);

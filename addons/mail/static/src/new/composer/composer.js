@@ -3,7 +3,6 @@
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { onExternalClick, useAttachmentUploader, useSelection } from "@mail/new/utils/hooks";
 import {
-    dataUrlToBlob,
     isDragSourceExternalFile,
     isEventHandled,
     markEventHandled,
@@ -67,7 +66,9 @@ export class Composer extends Component {
             useDropzone(this.props.dropzoneRef, {
                 onDrop: (ev) => {
                     if (isDragSourceExternalFile(ev.dataTransfer)) {
-                        [...ev.dataTransfer.files].forEach(this.attachmentUploader.upload);
+                        for (const file of ev.dataTransfer.files) {
+                            this.attachmentUploader.uploadFile(file);
+                        }
                     }
                 },
             });
@@ -325,10 +326,6 @@ export class Composer extends Component {
             )
         );
         this.suggestion.clearRawMentions();
-    }
-
-    async onFileUpload({ data, name, type }) {
-        this.attachmentUploader.upload(new File([dataUrlToBlob(data, type)], name, { type }));
     }
 
     addEmoji(str) {
