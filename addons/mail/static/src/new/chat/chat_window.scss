@@ -16,7 +16,7 @@
 }
 
 .o-mail-chat-window-header {
+    background-color: var(--ChatWindowHeaderView-background-color, #{$o-brand-odoo});
     height: 36px;
-    background-color: $o-brand-odoo;
     color: #ffffff;
 }

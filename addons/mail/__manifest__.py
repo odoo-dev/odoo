@@ -210,10 +210,12 @@ For more specific needs, you may also assign custom-defined actions
             ('remove', 'mail/static/src/components/*/*.dark.scss'),
 
             'mail/static/src/new/**/*',
+            ('remove', 'mail/static/src/new/**/*.dark.scss'),
             ('remove', 'mail/static/src/new/composer/emoji_data.js'),
         ],
         "web.dark_mode_assets_backend": [
             'mail/static/src/components/*/*.dark.scss',
+            'mail/static/src/new/**/*.dark.scss',
         ],
         'web.assets_backend_prod_only': [
             'mail/static/src/main.js',
