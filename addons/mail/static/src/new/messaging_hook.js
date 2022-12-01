@@ -5,7 +5,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { removeFromArrayWithPredicate } from "./utils";
 
 /**
- *  @returns {import("@mail/new/messaging").Messaging}
+ *  @returns {import("@mail/new/core/messaging").Messaging}
  */
 export function useMessaging() {
     return useState(useService("mail.messaging"));

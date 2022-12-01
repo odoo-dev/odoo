@@ -2,7 +2,7 @@
 
 export class Partner {
     /**
-     * @param {import("@mail/new/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
      * @returns {Partner}
      */

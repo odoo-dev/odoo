@@ -5,7 +5,7 @@ import { Partner } from "./partner_model";
 
 export class Thread {
     /**
-     * @param {import("@mail/new/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
      * @returns {Thread}
      */

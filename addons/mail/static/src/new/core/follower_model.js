@@ -4,7 +4,7 @@ import { Partner } from "@mail/new/core/partner_model";
 
 export class Follower {
     /**
-     * @param {import("@mail/new/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
      * @returns {Follower}
      */
