@@ -61,7 +61,6 @@ export class Thread {
             chatPartnerId: false,
             isAdmin: false,
             canLeave: data.canLeave || false,
-            isRenameable: ["chat", "channel", "group"].includes(type),
             composer: null,
             serverLastSeenMsgByCurrentUser: data.serverData
                 ? data.serverData.seen_message_id
@@ -85,6 +84,10 @@ export class Thread {
 
     get isDescriptionChangeable() {
         return ["channel", "group"].includes(this.type);
+    }
+
+    get isRenameable() {
+        return ["chat", "channel", "group"].includes(this.type);
     }
 
     get mostRecentMsgId() {
