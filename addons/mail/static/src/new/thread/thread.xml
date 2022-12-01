@@ -2,9 +2,8 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.thread" owl="1">
-    <t t-set="isEmpty" t-value="thread.messages.length === 0"/>
     <div class="o-mail-thread overflow-auto pb-4 flex-grow-1 bg-view" t-ref="messages">
-        <t t-if="!isEmpty">
+        <t t-if="!thread.isEmpty">
             <div class="d-flex flex-column" t-att-class="{'justify-content-end': !env.inChatter and thread.type !== 'mailbox'}" style="min-height:100%">
                 <t t-set="currentDay" t-value="0"/>
                 <t t-set="prevMsg" t-value="0"/>
@@ -45,7 +44,7 @@
         <t t-else="">
             <div class="d-flex flex-column align-items-center justify-content-center p-4 text-muted fst-italic h-100">
                 <t t-if="thread.status !== 'loading'">
-                    <t t-if="isEmpty and thread.type === 'mailbox'">
+                    <t t-if="thread.isEmpty and thread.type === 'mailbox'">
                         <t t-call="mail.empty.mailbox"/>
                     </t>
                     <t t-else="">

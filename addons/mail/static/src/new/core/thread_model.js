@@ -97,6 +97,10 @@ export class Thread {
         return Math.max(...this.messages);
     }
 
+    get isEmpty() {
+        return this.messages.length === 0;
+    }
+
     get oldestMsgId() {
         if (this.messages.length === 0) {
             return undefined;

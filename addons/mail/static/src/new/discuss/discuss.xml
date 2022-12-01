@@ -27,12 +27,11 @@
                     </t>
                 </div>
                 <div class="o-mail-discuss-actions flex-shrink-0 d-flex align-items-center ms-1">
-                    <t t-set="isEmpty" t-value="thread.messages.length === 0"/>
                     <t t-if="thread.id === 'inbox'">
-                        <button class="btn btn-secondary" t-att-disabled="isEmpty" t-on-click="markAllAsRead">Mark all read</button>
+                        <button class="btn btn-secondary" t-att-disabled="thread.isEmpty" t-on-click="markAllAsRead">Mark all read</button>
                     </t>
                     <t t-if="thread.id === 'starred'">
-                        <button class="btn btn-secondary" t-att-disabled="isEmpty" t-on-click="unstarAll">Unstar all</button>
+                        <button class="btn btn-secondary" t-att-disabled="thread.isEmpty" t-on-click="unstarAll">Unstar all</button>
                     </t>
                     <t t-if="thread.type !== 'mailbox'">
                         <button t-if="!thread.inCall" class="btn" title="Start a Call" t-on-click="startCall">
