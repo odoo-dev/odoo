@@ -61,7 +61,6 @@ export class Thread {
             chatPartnerId: false,
             isAdmin: false,
             canLeave: data.canLeave || false,
-            isDescriptionChangeable: ["channel", "group"].includes(type),
             isRenameable: ["chat", "channel", "group"].includes(type),
             composer: null,
             serverLastSeenMsgByCurrentUser: data.serverData
@@ -82,6 +81,10 @@ export class Thread {
             return `/web/image/res.partner/${this.chatPartnerId}/avatar_128?unique=${avatarCacheKey}`;
         }
         return false;
+    }
+
+    get isDescriptionChangeable() {
+        return ["channel", "group"].includes(this.type);
     }
 
     get mostRecentMsgId() {
