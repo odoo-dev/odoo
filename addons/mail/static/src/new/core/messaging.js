@@ -1,15 +1,11 @@
 /** @odoo-module */
 
-import { markRaw, markup, toRaw, reactive } from "@odoo/owl";
-import { deserializeDateTime } from "@web/core/l10n/dates";
+import { markup, toRaw, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
-import {
-    prettifyMessageContent,
-    htmlToTextContentInline,
-    convertBrToLineBreak,
-} from "@mail/new/utils/format";
+import { prettifyMessageContent, convertBrToLineBreak } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
+import { MessagingMenu } from "./messaging_menu_model";
 import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
 import { Partner } from "./partner_model";
@@ -70,9 +66,7 @@ export class Messaging {
             internalUserGroupId: null,
             registeredImStatusPartners: reactive([], () => this.updateImStatusRegistration()),
             // messaging menu
-            menu: {
-                counter: 5, // sounds about right.
-            },
+            menu: null,
             // discuss app
             discuss: {
                 isActive: false,
@@ -108,6 +102,7 @@ export class Messaging {
             chatWindows: [],
             commands: [],
         });
+        this.state.menu = MessagingMenu.insert(this.state);
         this.state.discuss.inbox = Thread.insert(this.state, {
             id: "inbox",
             name: env._t("Inbox"),
@@ -488,16 +483,9 @@ export class Messaging {
                 .call("mail.channel", "channel_fetch_preview", [ids])
                 .then((previews) => {
                     for (const preview of previews) {
-                        preview.last_message.date = markRaw(
-                            deserializeDateTime(preview.last_message.date)
-                        );
-                        preview.last_message.body = htmlToTextContentInline(
-                            preview.last_message.body
-                        );
-                        const { id, name } = preview.last_message.author;
-                        Partner.insert(this.state, { id, name });
+                        const thread = Thread.insert(this.state, preview.id);
+                        Message.insert(this.state, preview.last_message, thread);
                     }
-                    return previews;
                 });
         }
         return this.previewsProm;

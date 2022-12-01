@@ -10,50 +10,29 @@ export class Thread {
      * @returns {Thread}
      */
     static insert(state, data) {
+        let thread;
         if (data.id in state.threads) {
-            return state.threads[data.id];
+            thread = state.threads[data.id];
+        } else {
+            thread = new Thread();
+            thread._state = state;
         }
-        const thread = new Thread(data);
-        thread._state = state;
-        thread.composer = Composer.insert(state, { threadId: thread.id });
-        if (thread.type === "channel") {
-            state.discuss.channels.threads.push(thread.id);
-        }
-        if (thread.type === "chat") {
-            thread.is_pinned = data.serverData.is_pinned;
-            state.discuss.chats.threads.push(thread.id);
-            if (data.serverData) {
-                for (const elem of data.serverData.channel.channelMembers[0][1]) {
-                    Partner.insert(state, {
-                        id: elem.persona.partner.id,
-                        name: elem.persona.partner.name,
-                    });
-                    if (
-                        elem.persona.partner.id !== state.user.partnerId ||
-                        (data.serverData.channel.channelMembers[0][1].length === 1 &&
-                            elem.persona.partner.id === state.user.partnerId)
-                    ) {
-                        thread.chatPartnerId = elem.persona.partner.id;
-                        thread.name = state.partners[elem.persona.partner.id].name;
-                    }
-                }
-            }
-        }
-
+        thread.update(data);
         state.threads[thread.id] = thread;
         // return reactive version
         return state.threads[thread.id];
     }
 
-    constructor(data) {
-        const { id, name, type } = data;
+    update(data) {
+        const { canLeave, id, name, serverData, type } = data;
         Object.assign(this, {
-            hasWriteAccess: data.serverData && data.serverData.hasWriteAccess,
+            hasWriteAccess: serverData && serverData.hasWriteAccess,
             id,
             name,
             type,
             counter: 0,
             isUnread: false,
+            is_pinned: serverData && serverData.is_pinned,
             icon: false,
             loadMore: false,
             description: false,
@@ -61,15 +40,38 @@ export class Thread {
             messages: [], // list of ids
             chatPartnerId: false,
             isAdmin: false,
-            canLeave: data.canLeave || false,
+            canLeave: canLeave || false,
             composer: null,
-            serverLastSeenMsgByCurrentUser: data.serverData
-                ? data.serverData.seen_message_id
-                : null,
+            serverLastSeenMsgByCurrentUser: serverData ? serverData.seen_message_id : null,
             channelMembers: [],
         });
         for (const key in data) {
             this[key] = data[key];
+        }
+        if (!this.composer) {
+            this.composer = Composer.insert(this._state, { threadId: this.id });
+        }
+        if (this.type === "channel") {
+            this._state.discuss.channels.threads.push(this.id);
+        }
+        if (this.type === "chat") {
+            this._state.discuss.chats.threads.push(this.id);
+            if (serverData) {
+                for (const elem of serverData.channel.channelMembers[0][1]) {
+                    Partner.insert(this._state, {
+                        id: elem.persona.partner.id,
+                        name: elem.persona.partner.name,
+                    });
+                    if (
+                        elem.persona.partner.id !== this._state.user.partnerId ||
+                        (serverData.channel.channelMembers[0][1].length === 1 &&
+                            elem.persona.partner.id === this._state.user.partnerId)
+                    ) {
+                        this.chatPartnerId = elem.persona.partner.id;
+                        this.name = this._state.partners[elem.persona.partner.id].name;
+                    }
+                }
+            }
         }
     }
 
@@ -90,6 +92,14 @@ export class Thread {
 
     get isRenameable() {
         return ["chat", "channel", "group"].includes(this.type);
+    }
+
+    /** @returns {import("@mail/new/core/message_model").Message | undefined} **/
+    get mostRecentMsg() {
+        if (!this.mostRecentMsgId) {
+            return undefined;
+        }
+        return this._state.messages[this.mostRecentMsgId];
     }
 
     get mostRecentMsgId() {

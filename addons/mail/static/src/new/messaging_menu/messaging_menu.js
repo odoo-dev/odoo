@@ -10,14 +10,10 @@ export class MessagingMenu extends Component {
     setup() {
         this.messaging = useMessaging();
         this.state = useState({
-            previews: false,
             filter: "all", // can be 'all', 'channels' or 'chats'
         });
     }
 
-    async loadPreviews() {
-        this.state.previews = await this.messaging.fetchPreviews();
-    }
     activateTab(ev) {
         const target = ev.target.dataset.tabId;
         if (target) {
@@ -27,13 +23,10 @@ export class MessagingMenu extends Component {
     get displayedPreviews() {
         const filter = this.state.filter;
         if (filter === "all") {
-            return this.state.previews;
+            return this.messaging.state.menu.previews;
         }
-        const threads = this.messaging.state.threads;
         const target = filter === "chats" ? "chat" : "channel";
-        return this.state.previews.filter((preview) => {
-            return threads[preview.id].type === target;
-        });
+        return this.messaging.state.menu.previews.filter((preview) => preview.type === target);
     }
 
     openDiscussion(threadId) {
@@ -45,7 +38,7 @@ export class MessagingMenu extends Component {
     }
 
     isAuthor(preview) {
-        return preview.last_message.author.id === this.messaging.state.user.partnerId;
+        return preview.mostRecentMsg.author.id === this.messaging.state.user.partnerId;
     }
 
     getPreviewAuthor(id) {

@@ -13,6 +13,46 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 const { DateTime } = luxon;
 
 export class Message {
+    /** @type {Object[]} **/
+    attachments;
+    /** @type {Partner} **/
+    author;
+    /** @type {String} **/
+    body;
+    /** @type {Number|String} **/
+    id;
+    /** @type {Boolean} **/
+    isAuthor;
+    /** @type {Boolean} **/
+    isDiscussion;
+    /** @type {Boolean} **/
+    isNote;
+    /** @type {Boolean} **/
+    isNotification;
+    /** @type {Boolean} **/
+    isStarred;
+    /** @type {Boolean} **/
+    isTransient;
+    /** @type {LinkPreview[]} **/
+    linkPreviews;
+    /** @type {Message|undefined} **/
+    parentMessage;
+    /** @type {Object[]} **/
+    reactions;
+    /** @type {String} **/
+    recordName;
+    /** @type {Number|String} */
+    resId;
+    /** @type {String|undefined} **/
+    resModel;
+    /** @type {String} **/
+    subtypeDescription;
+    /** @type {Object[]} **/
+    trackingValues;
+    /** @type {String} **/
+    type;
+    now = DateTime.now();
+
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
@@ -20,99 +60,56 @@ export class Message {
      * @returns {Message}
      */
     static insert(state, data, thread) {
+        let message;
         if (data.id in state.messages) {
-            return state.messages[data.id];
+            message = state.messages[data.id];
+        } else {
+            message = new Message();
+            message._state = state;
         }
-        const {
-            attachment_ids: attachments = [],
-            body,
-            linkPreviews = [],
-            starred_partner_ids: starredPartnerIds = [],
-            ...remainingData
-        } = data;
-        const message = new Message({
-            ...remainingData,
-            body: markup(body),
-            isStarred: starredPartnerIds.includes(state.user.partnerId),
-        });
-        Object.assign(message, {
-            author: Partner.insert(state, data.author),
-            attachments: attachments.map((attachment) => ({
-                ...attachment,
-                extension: attachment.name.split('.').pop(),
-                originThread: Thread.insert(state, attachment.originThread[0][1]),
-            })),
-            linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
-            parentMessage: message.parentMessage
-                ? Message.insert(state, message.parentMessage, thread)
-                : undefined,
-        });
-        message.isAuthor = message.author.id === state.user.partnerId;
+        message.update(data, thread);
         state.messages[message.id] = message;
-        thread.messages.push(message.id);
-        thread.sortMessages();
         // return reactive version
         return state.messages[message.id];
     }
 
-    constructor(data) {
-        /** @type {Object[]} **/
-        void this.attachments;
-        /** @type {Partner} **/
-        void this.author;
-        /** @type {String} **/
-        void this.body;
-        /** @type {Number|String} **/
-        void this.id;
-        /** @type {Boolean} **/
-        void this.isAuthor;
-        /** @type {Boolean} **/
-        void this.isDiscussion;
-        /** @type {Boolean} **/
-        void this.isNote;
-        /** @type {Boolean} **/
-        void this.isNotification;
-        /** @type {Boolean} **/
-        void this.isStarred;
-        /** @type {Boolean} **/
-        void this.isTransient;
-        /** @type {LinkPreview[]} **/
-        void this.linkPreviews;
-        /** @type {Message|undefined} **/
-        void this.parentMessage;
-        /** @type {Object[]} **/
-        void this.reactions;
-        /** @type {String} **/
-        void this.recordName;
-        /** @type {Number|String} */
-        void this.resId;
-        /** @type {String|undefined} **/
-        void this.resModel;
-        /** @type {String} **/
-        void this.subtypeDescription;
-        /** @type {Object[]} **/
-        void this.trackingValues;
-        /** @type {String} **/
-        void this.type;
-        this.now = DateTime.now();
-
+    update(data, thread) {
         const {
+            attachment_ids: attachments = [],
+            body,
             is_discussion: isDiscussion,
             is_note: isNote,
             is_transient: isTransient,
+            linkPreviews = [],
             message_type: type,
             messageReactionGroups: reactions = [],
             model: resModel,
             record_name: recordName,
             res_id: resId,
             subtype_description: subtypeDescription,
+            starred_partner_ids = [],
             ...remainingData
         } = data;
+        for (const key in remainingData) {
+            this[key] = remainingData[key];
+        }
         Object.assign(this, {
+            attachments: attachments.map((attachment) => ({
+                ...attachment,
+                extension: attachment.name.split(".").pop(),
+                originThread: Thread.insert(this._state, attachment.originThread[0][1]),
+            })),
+            author: Partner.insert(this._state, data.author),
+            body: markup(body),
             isDiscussion,
             isNote,
             isNotification: type === "notification" && resModel === "mail.channel",
+            isStarred: starred_partner_ids.includes(this._state.user.partnerId),
             isTransient,
+            linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
+            parentMessage: this.parentMessage
+                ? Message.insert(this._state, this.parentMessage, thread)
+                : undefined,
             reactions,
             recordName,
             resId,
@@ -121,8 +118,12 @@ export class Message {
             trackingValues: data.trackingValues || [],
             type,
         });
-        for (const key in remainingData) {
-            this[key] = remainingData[key];
+        this.isAuthor = this.author.id === this._state.user.partnerId;
+        if (thread) {
+            if (!thread.messages.includes(this.id)) {
+                thread.messages.push(this.id);
+                thread.sortMessages();
+            }
         }
     }
 
