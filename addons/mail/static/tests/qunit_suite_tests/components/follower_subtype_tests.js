@@ -41,7 +41,7 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             await click(".o-mail-chatter-topbar-follower-list-button");
-            await click(".o_FollowerView_editButton");
+            await click(".o-mail-chatter-topbar-follower-list-follower-edit-button");
             assert.containsOnce(
                 document.body,
                 ".o_FollowerSubtypeView:contains(TestSubtype)",
@@ -104,7 +104,7 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             await click(".o-mail-chatter-topbar-follower-list-button");
-            await click(".o_FollowerView_editButton");
+            await click(".o-mail-chatter-topbar-follower-list-follower-edit-button");
             assert.notOk(
                 $(".o_FollowerSubtypeView:contains(TestSubtype) .o_FollowerSubtypeView_checkbox")[0]
                     .checked,
@@ -146,7 +146,7 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             await click(".o-mail-chatter-topbar-follower-list-button");
-            await click(".o_FollowerView_editButton");
+            await click(".o-mail-chatter-topbar-follower-list-follower-edit-button");
             assert.notOk(
                 document.querySelector(
                     `.o_FollowerSubtypeView[data-follower-subtype-id="${followerSubtypeId}"] .o_FollowerSubtypeView_checkbox`

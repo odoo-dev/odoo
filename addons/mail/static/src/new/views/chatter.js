@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { Follower } from "@mail/new/core/follower_model";
 import { Thread } from "../thread/thread";
 import { useAttachmentUploader, useMessaging } from "../messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
@@ -84,7 +85,7 @@ export class Chatter extends Component {
 
     get isFollower() {
         return Boolean(
-            this.state.followers.find((f) => f.partner_id === this.messaging.state.user.partnerId)
+            this.state.followers.find((f) => f.partner.id === this.messaging.state.user.partnerId)
         );
     }
 
@@ -101,6 +102,7 @@ export class Chatter extends Component {
             requestList.push("activities");
         }
         this.messaging.fetchChatterData(resId, resModel, requestList).then((result) => {
+            this.thread.hasReadAccess = result.hasReadAccess;
             this.thread.hasWriteAccess = result.hasWriteAccess;
             if ("activities" in result) {
                 this.state.activities = result.activities;
@@ -110,7 +112,12 @@ export class Chatter extends Component {
                 this.state.isLoadingAttachments = false;
             }
             if ("followers" in result) {
-                this.state.followers = result.followers;
+                this.state.followers = result.followers.map((followerData) =>
+                    Follower.insert(this.messaging.state, {
+                        followedThread: this.thread,
+                        ...followerData,
+                    })
+                );
             }
         });
     }
@@ -137,11 +144,27 @@ export class Chatter extends Component {
         });
     }
 
+    onClickDetails(ev, follower) {
+        this.messaging.openDocument({ id: follower.partner.id, model: "res.partner" });
+        document.body.click(); // hack to close dropdown
+    }
+
+    onClickEdit(ev, follower) {
+        // follower.showSubtypes(); // TODO
+        document.body.click(); // hack to close dropdown
+    }
+
     async onClickFollow() {
         await this.orm.call(this.props.resModel, "message_subscribe", [[this.props.resId]], {
             partner_ids: [this.messaging.state.user.partnerId],
         });
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
+    }
+
+    onClickRemove(ev, follower) {
+        // follower.remove(); // TODO
+        // TODO reload parent view (message_follower_ids)
+        document.body.click(); // hack to close dropdown
     }
 
     async onClickUnfollow() {

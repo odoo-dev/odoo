@@ -412,7 +412,12 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
             ]);
             // search read returns many2one relations as an array [id, display_name].
             // But the original route does not. Thus, we need to change it now.
-            followers.forEach((follower) => (follower.partner_id = follower.partner_id[0]));
+            followers.forEach((follower) => {
+                follower.partner_id = follower.partner_id[0];
+                follower.partner = this._mockResPartnerMailPartnerFormat([follower.partner_id]).get(
+                    follower.partner_id
+                );
+            });
             res["followers"] = followers;
         }
         if (request_list.includes("suggestedRecipients")) {

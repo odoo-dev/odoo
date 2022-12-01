@@ -105,14 +105,13 @@ QUnit.module("mail", {}, function () {
             const pyEnv = await startServer();
             const [resPartnerId1, resPartnerId2, resPartnerId3] = pyEnv["res.partner"].create([
                 { name: "resPartner1" },
-                { name: "resPartner2" },
+                { name: "François Perusse" },
                 { name: "resPartner3" },
             ]);
             pyEnv["mail.followers"].create({
                 partner_id: resPartnerId2,
                 email: "bla@bla.bla",
                 is_active: true,
-                name: "François Perusse",
                 res_id: resPartnerId1,
                 res_model: "res.partner",
             });
@@ -263,26 +262,30 @@ QUnit.module("mail", {}, function () {
             });
 
             await click(".o-mail-chatter-topbar-follower-list-button");
-            assert.containsOnce(document.body, ".o_FollowerView", "should have follower component");
             assert.containsOnce(
                 document.body,
-                ".o_FollowerView_removeButton",
+                ".o-mail-chatter-topbar-follower-list-follower",
+                "should have follower component"
+            );
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter-topbar-follower-list-follower-remove-button",
                 "should display a remove button"
             );
 
-            await click(".o_FollowerView_removeButton");
+            await click(".o-mail-chatter-topbar-follower-list-follower-remove-button");
             assert.verifySteps(
                 ["message_unsubscribe"],
                 "clicking on remove button should call 'message_unsubscribe' route"
             );
             assert.containsNone(
                 document.body,
-                ".o_FollowerView",
+                ".o-mail-chatter-topbar-follower-list-follower",
                 "should no longer have follower component"
             );
         });
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             'Hide "Add follower" and subtypes edition/removal buttons except own user on read only record',
             async function (assert) {
                 assert.expect(5);
@@ -294,14 +297,12 @@ QUnit.module("mail", {}, function () {
                 ]);
                 pyEnv["mail.followers"].create([
                     {
-                        name: "Jean Michang",
                         is_active: true,
                         partner_id: pyEnv.currentPartnerId,
                         res_id: resPartnerId1,
                         res_model: "res.partner",
                     },
                     {
-                        name: "Eden Hazard",
                         is_active: true,
                         partner_id: resPartnerId2,
                         res_id: resPartnerId1,
@@ -330,31 +331,33 @@ QUnit.module("mail", {}, function () {
                     ".o-mail-chatter-topbar-follower-list-add-follower",
                     "'Add followers' button should not be displayed for a readonly record"
                 );
-                const followersList = document.querySelectorAll(".o_FollowerView");
+                const followersList = document.querySelectorAll(
+                    ".o-mail-chatter-topbar-follower-list-follower"
+                );
                 assert.containsOnce(
                     followersList[0],
-                    ".o_FollowerView_editButton",
+                    ".o-mail-chatter-topbar-follower-list-follower-edit-button",
                     "should display edit button for a follower related to current user"
                 );
                 assert.containsOnce(
                     followersList[0],
-                    ".o_FollowerView_removeButton",
+                    ".o-mail-chatter-topbar-follower-list-follower-remove-button",
                     "should display remove button for a follower related to current user"
                 );
                 assert.containsNone(
                     followersList[1],
-                    ".o_FollowerView_editButton",
+                    ".o-mail-chatter-topbar-follower-list-follower-edit-button",
                     "should not display edit button for other followers on a readonly record"
                 );
                 assert.containsNone(
                     followersList[1],
-                    ".o_FollowerView_removeButton",
+                    ".o-mail-chatter-topbar-follower-list-follower-remove-button",
                     "should not display remove button for others on a readonly record"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             'Show "Add follower" and subtypes edition/removal buttons on all followers if user has write access',
             async function (assert) {
                 assert.expect(5);
@@ -366,14 +369,12 @@ QUnit.module("mail", {}, function () {
                 ]);
                 pyEnv["mail.followers"].create([
                     {
-                        name: "Jean Michang",
                         is_active: true,
                         partner_id: pyEnv.currentPartnerId,
                         res_id: resPartnerId1,
                         res_model: "res.partner",
                     },
                     {
-                        name: "Eden Hazard",
                         is_active: true,
                         partner_id: resPartnerId2,
                         res_id: resPartnerId1,
@@ -402,25 +403,27 @@ QUnit.module("mail", {}, function () {
                     ".o-mail-chatter-topbar-follower-list-add-follower",
                     "'Add followers' button should be displayed for the writable record"
                 );
-                const followersList = document.querySelectorAll(".o_FollowerView");
+                const followersList = document.querySelectorAll(
+                    ".o-mail-chatter-topbar-follower-list-follower"
+                );
                 assert.containsOnce(
                     followersList[0],
-                    ".o_FollowerView_editButton",
+                    ".o-mail-chatter-topbar-follower-list-follower-edit-button",
                     "should display edit button for a follower related to current user"
                 );
                 assert.containsOnce(
                     followersList[0],
-                    ".o_FollowerView_removeButton",
+                    ".o-mail-chatter-topbar-follower-list-follower-remove-button",
                     "should display remove button for a follower related to current user"
                 );
                 assert.containsOnce(
                     followersList[1],
-                    ".o_FollowerView_editButton",
+                    ".o-mail-chatter-topbar-follower-list-follower-edit-button",
                     "should display edit button for other followers also on the writable record"
                 );
                 assert.containsOnce(
                     followersList[1],
-                    ".o_FollowerView_removeButton",
+                    ".o-mail-chatter-topbar-follower-list-follower-remove-button",
                     "should display remove button for other followers also on the writable record"
                 );
             }

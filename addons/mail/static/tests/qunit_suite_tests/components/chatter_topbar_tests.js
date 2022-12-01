@@ -378,24 +378,22 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.skipRefactoring("rendering with multiple partner followers", async function (assert) {
+        QUnit.test("rendering with multiple partner followers", async function (assert) {
             assert.expect(7);
 
             const pyEnv = await startServer();
             const [resPartnerId1, resPartnerId2, resPartnerId3] = pyEnv["res.partner"].create([
-                { name: "resPartner1" },
-                { name: "resPartner2" },
+                { name: "Eden Hazard" },
+                { name: "Jean Michang" },
                 { message_follower_ids: [1, 2] },
             ]);
             pyEnv["mail.followers"].create([
                 {
-                    name: "Jean Michang",
                     partner_id: resPartnerId2,
                     res_id: resPartnerId3,
                     res_model: "res.partner",
                 },
                 {
-                    name: "Eden Hazard",
                     partner_id: resPartnerId1,
                     res_id: resPartnerId3,
                     res_model: "res.partner",
@@ -427,7 +425,7 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsN(
                 document.body,
-                ".o_FollowerView",
+                ".o-mail-chatter-topbar-follower-list-follower",
                 2,
                 "exactly two followers should be listed"
             );

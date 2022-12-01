@@ -57,6 +57,7 @@ export class Messaging {
                 uid: user.context.uid,
                 avatarUrl: `/web/image?field=avatar_128&id=${user.userId}&model=res.users`,
             },
+            followers: {},
             partners: {},
             partnerRoot: {},
             messages: {},
@@ -821,6 +822,15 @@ export class Messaging {
         await this.orm.call("mail.channel", "action_unfollow", [id]);
         removeFromArray(this.state.discuss.channels.threads, id);
         this.setDiscussThread(this.state.discuss.channels.threads[0]);
+    }
+
+    openDocument({ id, model }) {
+        this.env.services.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: model,
+            views: [[false, "form"]],
+            res_id: id,
+        });
     }
 
     async openChat(person) {

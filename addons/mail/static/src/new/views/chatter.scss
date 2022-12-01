@@ -18,3 +18,22 @@
      */
     max-width: Min(400px, 95vw);
 }
+
+.o-mail-chatter-topbar-follower-list-follower-avatar {
+    width: $o-mail-partner-avatar-size;
+    height: $o-mail-partner-avatar-size;
+}
+
+.o-mail-chatter-topbar-follower-list-follower-details {
+    min-width: 0;
+
+    &:hover {
+        background: $gray-400;
+        color: $black;
+    }
+}
+
+.o-mail-chatter-topbar-follower-list-follower-button:hover {
+    background: $gray-400;
+    color: $black;
+}

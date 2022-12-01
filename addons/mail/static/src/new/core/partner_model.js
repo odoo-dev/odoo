@@ -32,4 +32,8 @@ export class Partner {
     get avatarUrl() {
         return `/mail/channel/1/partner/${this.id}/avatar_128`;
     }
+
+    get nameOrDisplayName() {
+        return this.name || this.display_name;
+    }
 }
