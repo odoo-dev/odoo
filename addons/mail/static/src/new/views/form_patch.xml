@@ -5,8 +5,8 @@
         <xpath expr="//div[hasclass('o_form_view_container')]" position="after">
             <t t-if="hasSideChatter()">
                 <div class='o-mail-chatter-aside'>
-                    <Chatter resId="model.root.resId" resModel="model.root.resModel" hasActivity="hasActivity" displayName="displayName()"/>
-                <div>
+                    <Chatter resId="model.root.resId" resModel="model.root.resModel" hasActivity="hasActivity" displayName="displayName()" isAttachmentBoxOpenedInitially="isAttachmentBoxOpenedInitially"/>
+                </div>
             </t>
         </xpath>
     </t>

@@ -18,13 +18,12 @@ QUnit.module("mail", {}, function () {
                 </div>
             </form>`,
             };
-            const { click, openView } = await start({ serverData: { views } });
+            const { openView } = await start({ serverData: { views } });
             await openView({
                 res_id: resPartnerId1,
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            await click(".o-mail-chatter-topbar-add-attachments");
             assert.containsOnce(
                 document.body,
                 ".o-mail-attachment-box",
@@ -73,13 +72,12 @@ QUnit.module("mail", {}, function () {
                 </div>
             </form>`,
             };
-            const { click, openView } = await start({ serverData: { views } });
+            const { openView } = await start({ serverData: { views } });
             await openView({
                 res_id: resPartnerId1,
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            await click(".o-mail-chatter-topbar-add-attachments");
             assert.containsOnce(
                 document.body,
                 ".o-mail-attachment-box",
@@ -207,7 +205,6 @@ QUnit.module("mail", {}, function () {
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            await click(".o-mail-chatter-topbar-add-attachments");
 
             assert.containsOnce(
                 document.body,

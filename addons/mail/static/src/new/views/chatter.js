@@ -36,7 +36,7 @@ export class Chatter extends Component {
             attachments: [],
             composing: false, // false, 'message' or 'note'
             followers: [],
-            isAttachmentBoxOpened: false,
+            isAttachmentBoxOpened: this.props.isAttachmentBoxOpenedInitially,
             isLoadingAttachments: false,
         });
         this.unfollowHover = useHover("unfollow");
@@ -182,6 +182,6 @@ export class Chatter extends Component {
 
 Object.assign(Chatter, {
     components: { AttachmentList, Dropdown, Thread, Composer, ActivityList, FileUploader },
-    props: ["hasActivity", "resId", "resModel", "displayName?"],
+    props: ["hasActivity", "resId", "resModel", "displayName?", "isAttachmentBoxOpenedInitially?"],
     template: "mail.chatter",
 });

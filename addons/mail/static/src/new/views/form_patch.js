@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { evaluateExpr } from "@web/core/py_js/py";
 import { useService } from "@web/core/utils/hooks";
 import { SIZES } from "@web/core/ui/ui_service";
 import { patch } from "@web/core/utils/patch";
@@ -18,6 +19,8 @@ patch(FormController.prototype, "mail/new", {
         this.hasChatter = Boolean(xmlDocChatter);
         this.hasActivity =
             this.hasChatter && Boolean(xmlDocChatter.querySelector("field[name='activity_ids']"));
+        this.isAttachmentBoxOpenedInitially =
+            this.hasChatter && this._isAttachmentBoxOpenedInitially(xmlDocChatter);
         if (xmlDocChatter) {
             const doc = archXml.ownerDocument;
             const rootT = doc.createElement("t");
@@ -27,6 +30,10 @@ patch(FormController.prototype, "mail/new", {
             chatterTag.setAttribute("resModel", "props.record.resModel");
             chatterTag.setAttribute("displayName", "props.record.data.display_name");
             chatterTag.setAttribute("hasActivity", this.hasActivity);
+            chatterTag.setAttribute(
+                "isAttachmentBoxOpenedInitially",
+                this.isAttachmentBoxOpenedInitially
+            );
             rootT.appendChild(chatterTag);
             xmlDocChatter.replaceWith(rootT);
         }
@@ -38,5 +45,21 @@ patch(FormController.prototype, "mail/new", {
 
     hasSideChatter() {
         return this.hasChatter && this.uiService.size >= SIZES.XXL;
+    },
+
+    _isAttachmentBoxOpenedInitially(xmlDocChatter) {
+        const messageField = xmlDocChatter.querySelector("field[name='message_ids']");
+        const messageFollowerField = xmlDocChatter.querySelector(
+            "field[name='message_follower_ids']"
+        );
+        const messageOptions = evaluateExpr(
+            (messageField && messageField.getAttribute("options")) || "{}"
+        );
+        const messageFollowerOptions = evaluateExpr(
+            (messageFollowerField && messageFollowerField.getAttribute("options")) || "{}"
+        );
+        return Boolean(
+            messageOptions["open_attachments"] || messageFollowerOptions["open_attachments"]
+        );
     },
 });
