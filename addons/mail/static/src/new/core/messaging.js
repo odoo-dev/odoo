@@ -11,6 +11,7 @@ import {
     convertBrToLineBreak,
 } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
+import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
 import { Partner } from "./partner_model";
 import { LinkPreview } from "./link_preview_model";
@@ -441,23 +442,6 @@ export class Messaging {
         this.router.pushState({ active_id: activeId });
     }
 
-    openChatWindow(threadId) {
-        const chatWindow = this.state.chatWindows.find((c) => c.threadId === threadId);
-        if (!chatWindow) {
-            this.state.chatWindows.push({ threadId, autofocus: 1, folded: false });
-        } else {
-            chatWindow.folded = false;
-            chatWindow.autofocus++;
-        }
-    }
-
-    closeChatWindow(threadId) {
-        const index = this.state.chatWindows.findIndex((c) => c.threadId === threadId);
-        if (index > -1) {
-            this.state.chatWindows.splice(index, 1);
-        }
-    }
-
     getChatterThread(resModel, resId) {
         const localId = resModel + "," + resId;
         if (localId in this.state.threads) {
@@ -726,7 +710,7 @@ export class Messaging {
         if (this.state.discuss.isActive) {
             this.setDiscussThread(threadId);
         } else {
-            this.openChatWindow(threadId);
+            ChatWindow.insert(this.state, { threadId });
         }
     }
 

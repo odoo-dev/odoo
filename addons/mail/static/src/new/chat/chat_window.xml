@@ -19,7 +19,7 @@
             <div class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Open in Discuss" t-on-click.stop="expand">
                 <i class="fa fa-expand"/>
             </div>
-            <div class="o-mail-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Close chat window" t-on-click.stop="close">
+            <div class="o-mail-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Close chat window" t-on-click.stop="() => props.chatWindow.close()">
                 <i class="fa fa-close"></i>
             </div>
         </div>

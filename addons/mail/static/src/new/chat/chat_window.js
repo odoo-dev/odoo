@@ -21,10 +21,6 @@ export class ChatWindow extends Component {
         useChildSubEnv({ inChatWindow: true });
     }
 
-    close() {
-        this.messaging.closeChatWindow(this.props.chatWindow.threadId);
-    }
-
     toggleFold() {
         this.props.chatWindow.folded = !this.props.chatWindow.folded;
     }
