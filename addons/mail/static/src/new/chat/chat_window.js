@@ -2,7 +2,8 @@
 
 import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
-import { useMessageHighlight, useMessaging } from "../messaging_hook";
+import { useMessaging } from "../messaging_hook";
+import { useMessageHighlight } from "@mail/new/utils/hooks";
 import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { CallUI } from "../rtc/call_ui";

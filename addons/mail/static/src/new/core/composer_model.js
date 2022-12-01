@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { convertBrToLineBreak } from "./../utils";
+import { convertBrToLineBreak } from "@mail/new/utils/format";
 
 export class Composer {
     /**

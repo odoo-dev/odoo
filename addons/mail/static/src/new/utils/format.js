@@ -1,6 +1,7 @@
 /** @odoo-module */
+
 import { escape } from "@web/core/utils/strings";
-import { loadEmoji } from "./composer/emoji_picker";
+import { loadEmoji } from "@mail/new/composer/emoji_picker";
 
 const urlRegexp =
     /\b(?:https?:\/\/\d{1,3}(?:\.\d{1,3}){3}|(?:https?:\/\/|(?:www\.))[-a-z0-9@:%._+~#=\u00C0-\u024F\u1E00-\u1EFF]{2,256}\.[a-z]{2,13})\b(?:[-a-z0-9@:%_+.~#?&'$//=;\u00C0-\u024F\u1E00-\u1EFF]*)/gi;
@@ -151,4 +152,27 @@ async function _generateEmojisOnHtml(htmlString) {
         }
     }
     return htmlString;
+}
+
+export function htmlToTextContentInline(htmlString) {
+    const fragment = document.createDocumentFragment();
+    const div = document.createElement("div");
+    fragment.appendChild(div);
+    htmlString = htmlString.replace(/<br\s*\/?>/gi, " ");
+    try {
+        div.innerHTML = htmlString;
+    } catch {
+        div.innerHTML = `<pre>${htmlString}</pre>`;
+    }
+    return div.textContent
+        .trim()
+        .replace(/[\n\r]/g, "")
+        .replace(/\s\s+/g, " ");
+}
+
+export function convertBrToLineBreak(str) {
+    return new DOMParser().parseFromString(
+        str.replaceAll("<br>", "\n").replaceAll("</br>", "\n"),
+        "text/html"
+    ).body.textContent;
 }

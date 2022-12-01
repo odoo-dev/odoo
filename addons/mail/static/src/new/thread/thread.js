@@ -2,7 +2,7 @@
 
 import { Component, onMounted, onWillStart, onWillUpdateProps, useRef } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
-import { useAutoScroll, useScrollSnapshot, useVisible } from "../utils";
+import { useAutoScroll, useScrollSnapshot, useVisible } from "@mail/new/utils/hooks";
 import { Message } from "./message";
 
 import { Transition } from "@web/core/transition";

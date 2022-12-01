@@ -4,7 +4,7 @@ import { Component, useState, onWillUpdateProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { ActivityMarkAsDone } from "./activity_markasdone_popover";
-import { computeDelay } from "@mail/new/utils";
+import { computeDelay } from "@mail/new/utils/dates";
 
 export class Activity extends Component {
     setup() {

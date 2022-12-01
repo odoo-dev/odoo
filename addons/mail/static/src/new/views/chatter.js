@@ -2,7 +2,7 @@
 
 import { Follower } from "@mail/new/core/follower_model";
 import { Thread } from "../thread/thread";
-import { useAttachmentUploader, useMessaging } from "../messaging_hook";
+import { useMessaging } from "../messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { Composer } from "../composer/composer";
@@ -18,12 +18,9 @@ import {
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
-import {
-    dataUrlToBlob,
-    isDragSourceExternalFile,
-    removeFromArrayWithPredicate,
-    useHover,
-} from "../utils";
+import { dataUrlToBlob, isDragSourceExternalFile } from "@mail/new/utils/misc";
+import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
+import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
 
 export class Chatter extends Component {
     setup() {

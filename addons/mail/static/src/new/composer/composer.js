@@ -1,5 +1,8 @@
 /** @odoo-module */
 
+import { AttachmentList } from "@mail/new/thread/attachment_list";
+import { onExternalClick, useAttachmentUploader } from "@mail/new/utils/hooks";
+import { dataUrlToBlob, isDragSourceExternalFile, isEventHandled } from "@mail/new/utils/misc";
 import {
     Component,
     onMounted,
@@ -10,15 +13,8 @@ import {
     useState,
 } from "@odoo/owl";
 import { useDropzone } from "../dropzone/dropzone_hook";
-import { useMessaging, useAttachmentUploader } from "../messaging_hook";
-import { AttachmentList } from "@mail/new/thread/attachment_list";
+import { useMessaging } from "../messaging_hook";
 import { useEmojiPicker } from "./emoji_picker";
-import {
-    dataUrlToBlob,
-    isDragSourceExternalFile,
-    isEventHandled,
-    onExternalClick,
-} from "@mail/new/utils";
 
 import { sprintf } from "@web/core/utils/strings";
 import { FileUploader } from "@web/views/fields/file_handler";

@@ -1,22 +1,19 @@
 /** @odoo-module */
 
-import {
-    isEventHandled,
-    markEventHandled,
-    onExternalClick,
-    removeFromArrayWithPredicate,
-} from "@mail/new/utils";
-import { useMessaging } from "../messaging_hook";
-import { RelativeTime } from "./relative_time";
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
+import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
+import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
+import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Composer as ComposerModel } from "../core/composer_model";
+import { useMessaging } from "../messaging_hook";
 import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
+import { RelativeTime } from "./relative_time";
 
 export class Message extends Component {
     setup() {

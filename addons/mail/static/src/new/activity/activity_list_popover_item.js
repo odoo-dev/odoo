@@ -4,7 +4,7 @@ import { ActivityMarkAsDone } from "@mail/new/activity/activity_markasdone_popov
 
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
-import { computeDelay } from "@mail/new/utils";
+import { computeDelay } from "@mail/new/utils/dates";
 
 import { Component, useState } from "@odoo/owl";
 
