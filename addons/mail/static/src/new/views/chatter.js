@@ -43,14 +43,18 @@ export class Chatter extends Component {
         this.attachmentUploader = useAttachmentUploader({
             threadId: `${this.props.resModel},${this.props.resId}`,
         });
+        this.rootRef = useRef("root");
         useChildSubEnv({
             inChatter: true,
             chatter: {
                 reload: this.load.bind(this),
             },
         });
-        useDropzone(useRef("root"), {
+        useDropzone(this.rootRef, {
             onDrop: (ev) => {
+                if (this.state.composing) {
+                    return;
+                }
                 if (isDragSourceExternalFile(ev.dataTransfer)) {
                     [...ev.dataTransfer.files].forEach(this.attachmentUploader.upload);
                     this.state.isAttachmentBoxOpened = true;

@@ -69,7 +69,7 @@
             </t>
             <t t-set="placeholder" t-value="state.composing === 'message' ? 'Send a message to followers...' : 'Log an internal note...'"/>
             <t t-set="type" t-value="state.composing === 'message' ? 'message' : 'note'"/>
-            <Composer composer="thread.composer" autofocus="true" mode="'extended'" onPostCallback.bind="toggleComposer" placeholder="placeholder" type="type"/>
+            <Composer composer="thread.composer" autofocus="true" mode="'extended'" onPostCallback.bind="toggleComposer" placeholder="placeholder" type="type" dropzoneRef="rootRef"/>
             <hr/>
         </t>
         <div class="overflow-auto">

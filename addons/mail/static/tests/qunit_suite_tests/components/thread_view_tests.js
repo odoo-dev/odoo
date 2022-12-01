@@ -19,7 +19,7 @@ QUnit.module("mail", (hooks) => {
     QUnit.module("components", {}, function () {
         QUnit.module("thread_view_tests.js");
 
-        QUnit.skipRefactoring("dragover files on thread with composer", async function (assert) {
+        QUnit.test("dragover files on thread with composer", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -34,9 +34,9 @@ QUnit.module("mail", (hooks) => {
                 },
             });
             await openDiscuss();
-            await afterNextRender(() => dragenterFiles(document.querySelector(".o_ThreadView")));
+            await afterNextRender(() => dragenterFiles(document.querySelector(".o-mail-thread")));
             assert.ok(
-                document.querySelector(".o_ComposerView_dropZone"),
+                document.querySelector(".o-dropzone"),
                 "should have dropzone when dragging file over the thread"
             );
         });
