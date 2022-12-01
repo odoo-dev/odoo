@@ -190,28 +190,6 @@ export function useHover(refName, callback = () => {}) {
     return state;
 }
 
-export function useFocus(refName, callback = () => {}) {
-    const ref = useRef(refName);
-    const state = useState({ isFocus: false });
-    function onFocus(focused) {
-        state.isFocus = focused;
-        callback(focused);
-    }
-    useExternalListener(
-        () => ref.el,
-        "focusin",
-        () => onFocus(true),
-        true
-    );
-    useExternalListener(
-        () => ref.el,
-        "focusout",
-        () => onFocus(false),
-        true
-    );
-    return state;
-}
-
 export function useVisible(refName, cb) {
     const ref = useRef(refName);
     const state = { isVisible: false };

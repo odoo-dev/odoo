@@ -3,8 +3,7 @@
 
 <t t-name="mail.autoresize_input" owl="1">
     <input
-        class="o-mail-autoresize-input text-truncate border px-2 py-1"
-        t-att-class="{'bg-transparent border-transparent': !inputFocus.isFocus and !inputHover.isHover, 'border-dark': inputFocus.isFocus}"
+        class="o-mail-autoresize-input text-truncate px-2 py-1 border-1 bg-transparent border-transparent"
         t-attf-class="{{ props.className }}"
         t-attf-placeholder="{{ props.placeholder }}"
         t-att-disabled="props.disabled"

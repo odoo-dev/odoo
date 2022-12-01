@@ -1,0 +1,9 @@
+.o-mail-autoresize-input:focus {
+    @extend .border-dark;
+    @extend .bg-white;
+}
+
+.o-mail-autoresize-input:hover {
+    @extend .bg-white;
+    @extend .border
+}

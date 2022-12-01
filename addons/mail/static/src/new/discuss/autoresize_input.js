@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { onExternalClick, useFocus, useHover } from "../utils";
+import { onExternalClick } from "../utils";
 import { Component, useRef, useState, onWillUpdateProps, useEffect } from "@odoo/owl";
 
 export class AutoresizeInput extends Component {
@@ -8,9 +8,7 @@ export class AutoresizeInput extends Component {
         this.state = useState({
             value: this.props.value,
         });
-        this.inputFocus = useFocus("input");
         this.inputRef = useRef("input");
-        this.inputHover = useHover("input");
         this.maxWidth = undefined;
         onWillUpdateProps((nextProps) => {
             if (this.props.value !== nextProps.value) {
