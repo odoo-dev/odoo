@@ -13,12 +13,7 @@ import { useDropzone } from "../dropzone/dropzone_hook";
 import { useMessaging, useAttachmentUploader } from "../messaging_hook";
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { useEmojiPicker } from "./emoji_picker";
-import {
-    dataUrlToBlob,
-    isDragSourceExternalFile,
-    isEventHandled,
-    onExternalClick,
-} from "@mail/new/utils";
+import { isDragSourceExternalFile, isEventHandled, onExternalClick } from "@mail/new/utils";
 
 import { sprintf } from "@web/core/utils/strings";
 import { FileUploader } from "@web/views/fields/file_handler";
@@ -39,7 +34,9 @@ export class Composer extends Component {
             useDropzone(this.props.dropzoneRef, {
                 onDrop: (ev) => {
                     if (isDragSourceExternalFile(ev.dataTransfer)) {
-                        [...ev.dataTransfer.files].forEach(this.attachmentUploader.upload);
+                        for (const file of ev.dataTransfer.files) {
+                            this.attachmentUploader.uploadFile(file);
+                        }
                     }
                 },
             });
@@ -201,7 +198,7 @@ export class Composer extends Component {
     }
 
     async onFileUpload({ data, name, type }) {
-        this.attachmentUploader.upload(new File([dataUrlToBlob(data, type)], name, { type }));
+        this.attachmentUploader.uploadData(data, name, type);
     }
 
     addEmoji(str) {

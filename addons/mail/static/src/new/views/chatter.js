@@ -18,12 +18,7 @@ import {
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
-import {
-    dataUrlToBlob,
-    isDragSourceExternalFile,
-    removeFromArrayWithPredicate,
-    useHover,
-} from "../utils";
+import { isDragSourceExternalFile, removeFromArrayWithPredicate, useHover } from "../utils";
 
 export class Chatter extends Component {
     setup() {
@@ -201,9 +196,7 @@ export class Chatter extends Component {
     }
 
     async onFileUpload({ data, name, type }) {
-        return this.attachmentUploader.upload(
-            new File([dataUrlToBlob(data, type)], name, { type })
-        );
+        return this.attachmentUploader.uploadData(data, name, type);
     }
 }
 
