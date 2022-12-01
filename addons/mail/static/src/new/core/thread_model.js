@@ -17,14 +17,11 @@ export class Thread {
         thread.composer = Composer.insert(state, { threadId: thread.id });
         if (thread.type === "channel") {
             state.discuss.channels.threads.push(thread.id);
-            const avatarCacheKey = data.serverData.channel.avatarCacheKey;
-            thread.imgUrl = `/web/image/mail.channel/${data.id}/avatar_128?unique=${avatarCacheKey}`;
         }
         if (thread.type === "chat") {
             thread.is_pinned = data.serverData.is_pinned;
             state.discuss.chats.threads.push(thread.id);
             if (data.serverData) {
-                const avatarCacheKey = data.serverData.channel.avatarCacheKey;
                 for (const elem of data.serverData.channel.channelMembers[0][1]) {
                     Partner.insert(state, {
                         id: elem.persona.partner.id,
@@ -39,7 +36,6 @@ export class Thread {
                         thread.name = state.partners[elem.persona.partner.id].name;
                     }
                 }
-                thread.imgUrl = `/web/image/res.partner/${thread.chatPartnerId}/avatar_128?unique=${avatarCacheKey}`;
             }
         }
 
@@ -61,7 +57,6 @@ export class Thread {
             loadMore: false,
             description: false,
             status: "new", // 'new', 'loading', 'ready'
-            imgUrl: false,
             messages: [], // list of ids
             chatPartnerId: false,
             isAdmin: false,
@@ -76,6 +71,17 @@ export class Thread {
         for (const key in data) {
             this[key] = data[key];
         }
+    }
+
+    get imgUrl() {
+        const avatarCacheKey = this.serverData.channel.avatarCacheKey;
+        if (this.type === "channel") {
+            return `/web/image/mail.channel/${this.id}/avatar_128?unique=${avatarCacheKey}`;
+        }
+        if (this.type === "chat") {
+            return `/web/image/res.partner/${this.chatPartnerId}/avatar_128?unique=${avatarCacheKey}`;
+        }
+        return false;
     }
 
     get mostRecentMsgId() {
