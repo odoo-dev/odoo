@@ -4,7 +4,6 @@ import { markRaw, markup, toRaw, reactive } from "@odoo/owl";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
-import { url } from "@web/core/utils/urls";
 import {
     prettifyMessageContent,
     htmlToTextContentInline,
@@ -14,8 +13,7 @@ import { removeFromArray } from "@mail/new/utils/arrays";
 import { Thread } from "./thread_model";
 import { Partner } from "./partner_model";
 import { LinkPreview } from "./link_preview_model";
-
-const { DateTime } = luxon;
+import { Message } from "./message_model";
 
 const FETCH_MSG_LIMIT = 30;
 
@@ -199,99 +197,6 @@ export class Messaging {
         );
     }
 
-    /**
-     * TODO: remove thread argument and add a method addToThread or something
-     * caller should do it, not this method
-     */
-    createMessage(body, data, thread) {
-        const {
-            attachment_ids: attachments = [],
-            author,
-            id,
-            date,
-            message_type: type,
-            needaction,
-            parentMessage,
-            subtype_description: subtypeDescription,
-            trackingValues = [],
-            linkPreviews,
-        } = data;
-        if (id in this.state.messages) {
-            return this.state.messages[id];
-        }
-        const now = DateTime.now();
-        const dateTime = markRaw(date ? deserializeDateTime(date) : now);
-        let dateDay = dateTime.toLocaleString(DateTime.DATE_FULL);
-        if (dateDay === now.toLocaleString(DateTime.DATE_FULL)) {
-            dateDay = this.env._t("Today");
-        }
-        let isStarred = false;
-        if (
-            data.starred_partner_ids &&
-            data.starred_partner_ids.includes(this.state.user.partnerId)
-        ) {
-            isStarred = true;
-        }
-
-        const linkPreviewsClass = [];
-        if (linkPreviews) {
-            for (const linkPreview of linkPreviews) {
-                linkPreviewsClass.push(new LinkPreview(linkPreview));
-            }
-        }
-        const message = {
-            attachments: attachments.map((attachment) => {
-                return {
-                    ...attachment,
-                    originThread: Thread.insert(this.state, attachment.originThread[0][1]),
-                };
-            }),
-            id,
-            type,
-            body,
-            author: Partner.insert(this.state, { id: author.id, name: author.name }),
-            isAuthor: author.id === this.state.user.partnerId,
-            dateDay,
-            dateTimeStr: dateTime.toLocaleString(DateTime.DATETIME_SHORT),
-            dateTime,
-            isStarred,
-            isNote: data.is_note,
-            isTransient: data.is_transient,
-            needaction,
-            parentMessage,
-            subtypeDescription,
-            trackingValues,
-            linkPreviews: linkPreviewsClass,
-        };
-        if (parentMessage) {
-            const { body, ...data } = parentMessage;
-            message["parentMessage"] = this.createMessage(body, data, thread);
-        }
-        message.recordName = data.record_name;
-        message.resId = data.res_id;
-        message.resModel = data.model;
-        message.url = `${url("/web")}#model=${data.model}&id=${data.res_id}`;
-        if (type === "notification") {
-            message.trackingValues = data.trackingValues;
-            if (data.model === "mail.channel") {
-                // is that correct?
-                message.isNotification = true;
-            }
-            if (data.subtype_description) {
-                message.subtype_description = data.subtype_description;
-            }
-        }
-        this.state.messages[id] = message;
-        if (thread.type === "chatter") {
-            thread.messages.unshift(id);
-        } else {
-            thread.messages.push(id);
-        }
-        this.sortThreadMessages(thread);
-        // return reactive version
-        return this.state.messages[id];
-    }
-
     sortThreadMessages(thread) {
         thread.messages.sort((msgId1, msgId2) => msgId1 - msgId2);
     }
@@ -309,10 +214,11 @@ export class Messaging {
             (lastMessageId, message) => Math.max(lastMessageId, message.id),
             0
         );
-        this.createMessage(
-            markup(body),
+        Message.insert(
+            this.state,
             {
                 author: this.state.partnerRoot,
+                body,
                 id: lastMessageId + 0.01,
                 is_note: true,
                 is_transient: true,
@@ -348,6 +254,7 @@ export class Messaging {
     // -------------------------------------------------------------------------
     // process notifications received by the bus
     // -------------------------------------------------------------------------
+
     handleNotification(notifications) {
         console.log("notifications received", notifications);
         for (const notif of notifications) {
@@ -355,9 +262,7 @@ export class Messaging {
                 case "mail.channel/new_message":
                     {
                         const { id, message } = notif.payload;
-                        const thread = this.state.threads[id];
-                        const body = markup(message.body);
-                        this.createMessage(body, message, thread);
+                        Message.insert(this.state, message, this.state.threads[id]);
                     }
                     break;
                 case "mail.record/insert":
@@ -479,11 +384,11 @@ export class Messaging {
             const tmpData = {
                 id: tmpId,
                 author: { id: this.state.user.partnerId },
+                body: this.env._t("Creating a new record..."),
                 message_type: "notification",
                 trackingValues: [],
             };
-            const body = this.env._t("Creating a new record...");
-            this.createMessage(body, tmpData, thread);
+            Message.insert(this.state, tmpData, thread);
         }
         return thread;
     }
@@ -545,7 +450,7 @@ export class Messaging {
         thread.status = "ready";
         const messages = rawMessages
             .reverse()
-            .map((data) => this.createMessage(markup(data.body), data, thread));
+            .map((data) => Message.insert(this.state, data, thread));
         return messages;
     }
 
@@ -663,14 +568,17 @@ export class Messaging {
             if (parentId) {
                 tmpData.parentMessage = this.state.messages[parentId];
             }
-            tmpMsg = this.createMessage(
-                markup(await prettifyMessageContent(body)),
-                tmpData,
+            tmpMsg = Message.insert(
+                this.state,
+                {
+                    ...tmpData,
+                    body: await prettifyMessageContent(body),
+                },
                 thread
             );
         }
         const data = await this.rpc(`/mail/message/post`, params);
-        const message = this.createMessage(markup(data.body), data, thread);
+        const message = Message.insert(this.state, data, thread);
         if (!this.isMessageEmpty(message)) {
             this.rpc(`/mail/link_preview`, { message_id: data.id }, { silent: true });
         }

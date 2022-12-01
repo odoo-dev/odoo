@@ -107,4 +107,8 @@ export class Thread {
         }
         return Math.min(...this.messages);
     }
+
+    sortMessages() {
+        this.messages.sort((msgId1, msgId2) => msgId1 - msgId2);
+    }
 }
