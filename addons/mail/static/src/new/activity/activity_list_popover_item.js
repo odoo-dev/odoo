@@ -2,9 +2,9 @@
 
 import { ActivityMarkAsDone } from "@mail/new/activity/activity_markasdone_popover";
 
-import { auto_str_to_date } from "web.time";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
+import { computeDelay } from "@mail/new/utils";
 
 import { Component, useState } from "@odoo/owl";
 
@@ -20,11 +20,7 @@ export class ActivityListPopoverItem extends Component {
     }
 
     get delayLabel() {
-        // TODO recompute every minute
-        const today = moment().startOf("day");
-        const momentDeadlineDate = moment(auto_str_to_date(this.props.activity.date_deadline));
-        // true means no rounding
-        const diff = momentDeadlineDate.diff(today, "days", true);
+        const diff = computeDelay(this.props.activity.date_deadline);
         if (diff === 0) {
             return this.env._t("Today");
         } else if (diff === -1) {

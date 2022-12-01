@@ -4,14 +4,7 @@ import { Component, useState, onWillUpdateProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { ActivityMarkAsDone } from "./activity_markasdone_popover";
-
-const { DateTime } = luxon;
-
-function computeDelay(dateStr) {
-    const today = DateTime.now().startOf("day");
-    const date = DateTime.fromISO(dateStr);
-    return date.diff(today, "days").days;
-}
+import { computeDelay } from "@mail/new/utils";
 
 export class Activity extends Component {
     setup() {
