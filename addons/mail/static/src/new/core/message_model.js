@@ -119,7 +119,7 @@ export class Message {
         } = data;
         const message = new Message({
             ...remainingData,
-            body: typeof body === "string" ? markup(body) : body,
+            body: markup(body),
             isStarred: starredPartnerIds.includes(state.user.partnerId),
         });
         Object.assign(message, {
