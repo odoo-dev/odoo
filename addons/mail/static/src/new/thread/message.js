@@ -15,6 +15,17 @@ import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";
 
+/**
+ * @typedef {Object} Props
+ * @property {boolean} [hasActions]
+ * @property {boolean} [grayedOut]
+ * @property {boolean} [highlighted]
+ * @property {function} [onParentMessageClick]
+ * @property {import("@mail/new/core/message_model").Message} message
+ * @property {boolean} [squashed]
+ * @property {number} [threadId]
+ * @extends {Component<Props, Env>}
+ */
 export class Message extends Component {
     setup() {
         this.state = useState({
@@ -55,7 +66,10 @@ export class Message extends Component {
         if (!this.props.hasActions) {
             return false;
         }
-        if (!this.user.isAdmin && this.message.author.id !== this.user.partnerId) {
+        if (!this.user.isAdmin && !this.message.isAuthor) {
+            return false;
+        }
+        if (this.message.trackingValues.length > 0) {
             return false;
         }
         if (this.message.type !== "comment") {

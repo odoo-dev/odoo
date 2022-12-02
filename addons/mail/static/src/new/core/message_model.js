@@ -13,6 +13,8 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 const { DateTime } = luxon;
 
 export class Message {
+    /** @type {import("@mail/new/core/messaging").Messaging['state']} state */
+    _state;
     /** @type {Object[]} */
     attachments;
     /** @type {Partner} */
@@ -28,13 +30,13 @@ export class Message {
     /** @type {boolean} */
     isNote;
     /** @type {boolean} */
-    isNotification;
-    /** @type {boolean} */
-    isStarred;
-    /** @type {boolean} */
     isTransient;
     /** @type {LinkPreview[]} */
     linkPreviews;
+    /** @type {boolean} */
+    needaction;
+    /** @type {DateTime} */
+    now = DateTime.now();
     /** @type {Message|undefined} */
     parentMessage;
     /** @type {Object[]} */
@@ -47,13 +49,14 @@ export class Message {
     resModel;
     /** @type {string} */
     subject;
+    /** @type {number[]} */
+    starredPartnerIds;
     /** @type {string} */
     subtypeDescription;
     /** @type {Object[]} */
     trackingValues;
-    /** @type {string} */
+    /** @type {'email'|'comment'|'notification'|'user_notification'} */
     type;
-    now = DateTime.now();
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
@@ -75,54 +78,42 @@ export class Message {
         return state.messages[message.id];
     }
 
+    /**
+     * @param {Object} data
+     * @param {Thread} thread
+     */
     update(data, thread) {
-        const {
-            attachment_ids: attachments = [],
-            body,
-            is_discussion: isDiscussion,
-            is_note: isNote,
-            is_transient: isTransient,
-            linkPreviews = [],
-            message_type: type,
-            messageReactionGroups: reactions = [],
-            model: resModel,
-            record_name: recordName,
-            res_id: resId,
-            subject,
-            subtype_description: subtypeDescription,
-            starred_partner_ids = [],
-            ...remainingData
-        } = data;
-        for (const key in remainingData) {
-            this[key] = remainingData[key];
-        }
         Object.assign(this, {
-            attachments: attachments.map((attachment) => ({
-                ...attachment,
-                extension: attachment.name.split(".").pop(),
-                originThread: Thread.insert(this._state, attachment.originThread[0][1]),
-            })),
+            attachments: data.attachment_ids
+                ? data.attachment_ids.map((attachment) => ({
+                      ...attachment,
+                      extension: attachment.name.split(".").pop(),
+                      originThread: Thread.insert(this._state, attachment.originThread[0][1]),
+                  }))
+                : [],
             author: Partner.insert(this._state, data.author),
-            body,
-            isDiscussion,
-            isNote,
-            isNotification: type === "notification" && resModel === "mail.channel",
-            isStarred: starred_partner_ids.includes(this._state.user.partnerId),
-            isTransient,
-            linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
-            parentMessage: this.parentMessage
-                ? Message.insert(this._state, this.parentMessage, thread)
+            body: data.body,
+            date: data.date,
+            id: data.id,
+            isDiscussion: data.is_discussion,
+            isNote: data.is_note,
+            isTransient: data.is_transient || false,
+            linkPreviews: data.linkPreviews
+                ? data.linkPreviews.map((data) => new LinkPreview(data))
+                : [],
+            needaction: data.needaction,
+            parentMessage: data.parentMessage
+                ? Message.insert(this._state, data.parentMessage, thread)
                 : undefined,
-            reactions,
-            recordName,
-            resId,
-            resModel,
-            subject,
-            subtypeDescription,
+            resModel: data.model,
+            reactions: data.messageReactionGroups || [],
+            recordName: data.record_name,
+            resId: data.res_id,
+            starredPartnerIds: data.starred_partner_ids || [],
+            subtypeDescription: data.subtype_description,
+            type: data.message_type,
             trackingValues: data.trackingValues || [],
-            type,
         });
-        this.isAuthor = this.author.id === this._state.user.partnerId;
         if (thread) {
             if (!thread.messages.includes(this.id)) {
                 thread.messages.push(this.id);
@@ -137,6 +128,18 @@ export class Message {
             dateDay = _t("Today");
         }
         return dateDay;
+    }
+
+    get isStarred() {
+        return this.starredPartnerIds.includes(this._state.user.partnerId);
+    }
+
+    get isNotification() {
+        return this.type === "notification" && this.resModel === "mail.channel";
+    }
+
+    get isAuthor() {
+        return this.author.id === this._state.user.partnerId;
     }
 
     get dateTime() {
