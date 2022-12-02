@@ -24,7 +24,6 @@ export class Message extends Component {
         this.messaging = useMessaging();
         this.action = useService("action");
         this.user = useService("user");
-        this.message = this.props.message;
         useChildSubEnv({
             LinkPreviewListComponent: LinkPreviewList,
             alignedRight: this.isAlignedRight,
@@ -52,13 +51,13 @@ export class Message extends Component {
         if (!this.props.hasActions) {
             return false;
         }
-        if (!this.user.isAdmin && this.message.author.id !== this.user.partnerId) {
+        if (!this.user.isAdmin && this.props.message.author.id !== this.user.partnerId) {
             return false;
         }
-        if (this.message.type !== "comment") {
+        if (this.props.message.type !== "comment") {
             return false;
         }
-        return this.message.isNote || this.message.resModel === "mail.channel";
+        return this.props.message.isNote || this.props.message.resModel === "mail.channel";
     }
 
     get canBeEdited() {
@@ -66,7 +65,7 @@ export class Message extends Component {
     }
 
     get canReplyTo() {
-        return this.message.needaction || this.message.resModel === "mail.channel";
+        return this.props.message.needaction || this.props.message.resModel === "mail.channel";
     }
 
     get isAlignedRight() {
@@ -81,7 +80,7 @@ export class Message extends Component {
         }
         const thread = this.messaging.state.threads[this.props.threadId];
         // channel has no resId, it's indistinguishable from threadId in that case
-        return this.message.resId === (thread.resId || this.props.threadId);
+        return this.props.message.resId === (thread.resId || this.props.threadId);
     }
 
     toggleStar() {
@@ -90,36 +89,39 @@ export class Message extends Component {
 
     onClickDelete() {
         this.env.services.dialog.add(MessageDeleteDialog, {
-            message: this.message,
+            message: this.props.message,
             messageComponent: Message,
         });
     }
 
     onClickReplyTo(ev) {
         markEventHandled(ev, "message.replyTo");
-        this.messaging.toggleReplyTo(this.message);
+        this.messaging.toggleReplyTo(this.props.message);
     }
 
     async onClickAttachmentUnlink(attachment) {
         await this.messaging.unlinkAttachment(attachment);
-        removeFromArrayWithPredicate(this.message.attachments, ({ id }) => id === attachment.id);
+        removeFromArrayWithPredicate(
+            this.props.message.attachments,
+            ({ id }) => id === attachment.id
+        );
     }
 
     openRecord() {
-        if (this.message.resModel === "mail.channel") {
-            this.messaging.openDiscussion(this.message.resId);
+        if (this.props.message.resModel === "mail.channel") {
+            this.messaging.openDiscussion(this.props.message.resId);
         } else {
             this.action.doAction({
                 type: "ir.actions.act_window",
-                res_id: this.message.resId,
-                res_model: this.message.resModel,
+                res_id: this.props.message.resId,
+                res_model: this.props.message.resModel,
                 views: [[false, "form"]],
             });
         }
     }
 
     openChatAvatar() {
-        if (this.message.author.isCurrentUser) {
+        if (this.props.message.author.isCurrentUser) {
             this.messaging.openChat({ partnerId: this.message.author.id });
         }
     }
@@ -128,14 +130,14 @@ export class Message extends Component {
      * @param {MouseEvent} ev
      */
     onClickEdit(ev) {
-        this.message.composer = ComposerModel.insert(this.messaging.state, {
+        this.props.message.composer = ComposerModel.insert(this.messaging.state, {
             messageId: this.props.message.id,
         });
         this.state.isEditing = true;
     }
 
     exitEditMode() {
-        this.message.composer = null;
+        this.props.message.composer = null;
         this.state.isEditing = false;
     }
 }
