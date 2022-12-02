@@ -80,9 +80,11 @@ export class Chatter extends Component {
         return this.env._t("Following");
     }
 
+    /**
+     * @returns {boolean}
+     */
     get isDisabled() {
-        return !this.props.resId;
-        // TODO should depend on access rights on document
+        return !this.props.resId || !this.thread.hasReadAccess;
     }
 
     get isFollower() {
