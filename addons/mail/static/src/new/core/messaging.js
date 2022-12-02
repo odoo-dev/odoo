@@ -623,7 +623,7 @@ export class Messaging {
             attachment_ids: attachments
                 .map(({ id }) => id)
                 .concat(message.attachments.map(({ id }) => id)),
-            body: markup(body),
+            body: await prettifyMessageContent(body),
             message_id: message.id,
         });
         message.body = markup(data.body);
