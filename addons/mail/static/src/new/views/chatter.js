@@ -165,8 +165,14 @@ export class Chatter extends Component {
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
     }
 
-    onClickRemove(ev, follower) {
-        // follower.remove(); // TODO
+    async onClickRemove(ev, follower) {
+        await this.orm.call(follower.followedThread.resModel, "message_unsubscribe", [
+            [follower.followedThread.resId],
+            [follower.partner.id],
+        ]);
+        Follower.delete(this.messaging.state, follower);
+        this.state.followers.splice(this.state.followers.indexOf(follower), 1);
+        this.load(this.props.resId, ["followers", "suggestedRecipients"]);
         // TODO reload parent view (message_follower_ids)
         document.body.click(); // hack to close dropdown
     }

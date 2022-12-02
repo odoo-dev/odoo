@@ -43,6 +43,14 @@ export class Follower {
     }
 
     /**
+     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {import("@mail/new/core/follower_model").Follower} follower
+     */
+    static delete(state, follower) {
+        delete state.followers[follower.id];
+    }
+
+    /**
      * @returns {boolean}
      */
     get isEditable() {

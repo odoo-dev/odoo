@@ -221,7 +221,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("click on remove follower", async function (assert) {
+        QUnit.test("click on remove follower", async function (assert) {
             assert.expect(6);
 
             const pyEnv = await startServer();
