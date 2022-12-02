@@ -118,12 +118,8 @@ export class Message extends Component {
         }
     }
 
-    get hasOpenChatFromAvatarClick() {
-        return this.message.author.id !== this.messaging.state.user.partnerId;
-    }
-
     openChatAvatar() {
-        if (this.hasOpenChatFromAvatarClick) {
+        if (this.message.author.isCurrentUser) {
             this.messaging.openChat({ partnerId: this.message.author.id });
         }
     }

@@ -127,12 +127,7 @@ export class Thread {
     get onlineMembers() {
         const orderedOnlineMembers = [];
         for (const member of this.channelMembers) {
-            const memberImStatus = this._state.partners[member.partnerId].im_status;
-            member.im_status = memberImStatus;
-            if (member.partnerId !== this._state.user.partnerId) {
-                member.hasOpenChatFromAvatarClick = true;
-            }
-            if (memberImStatus === "online") {
+            if (member.im_status === "online") {
                 orderedOnlineMembers.push(member);
             }
         }
@@ -142,12 +137,7 @@ export class Thread {
     get offlineMembers() {
         const orderedOnlineMembers = [];
         for (const member of this.channelMembers) {
-            const memberImStatus = this._state.partners[member.partnerId].im_status;
-            member.im_status = memberImStatus;
-            if (member.partnerId !== this._state.user.partnerId) {
-                member.hasOpenChatFromAvatarClick = true;
-            }
-            if (memberImStatus !== "online") {
+            if (member.im_status !== "online") {
                 orderedOnlineMembers.push(member);
             }
         }

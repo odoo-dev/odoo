@@ -4,6 +4,7 @@ import { Component, onWillUpdateProps, onWillStart } from "@odoo/owl";
 import { useMessaging } from "@mail/new/messaging_hook";
 import { PartnerImStatus } from "./partner_im_status";
 import { Partner } from "../core/partner_model";
+import { ChannelMember } from "../core/channel_member_model";
 
 export class ChannelMemberList extends Component {
     setup() {
@@ -29,14 +30,16 @@ export class ChannelMemberList extends Component {
                 id: partnerId,
                 name: name,
             });
-            members.push({ partnerId, name });
+            members.push(
+                new ChannelMember(this.messaging.state, { id: mailChannelMember.id, partnerId })
+            );
         }
         props.thread.channelMembers = members;
     }
 
     openChatAvatar(member) {
-        if (member.hasOpenChatFromAvatarClick) {
-            this.messaging.openChat({ partnerId: member.partnerId });
+        if (member.isCurrentUser) {
+            this.messaging.openChat({ partnerId: member.partner.id });
         }
     }
 }

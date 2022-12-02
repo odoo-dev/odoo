@@ -17,6 +17,7 @@ export class Partner {
             return state.partners[data.id];
         }
         let partner = new Partner(data);
+        partner._state = state;
         state.partners[data.id] = partner;
         // return reactive version
         partner = state.partners[data.id];
@@ -41,5 +42,9 @@ export class Partner {
 
     get nameOrDisplayName() {
         return this.name || this.display_name;
+    }
+
+    get isCurrentUser() {
+        return this.id !== this._state.user.partnerId;
     }
 }
