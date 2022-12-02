@@ -6,6 +6,7 @@ import {
     onWillPatch,
     onWillUnmount,
     reactive,
+    status,
     useComponent,
     useEnv,
     useRef,
@@ -212,6 +213,7 @@ export function useMessageHighlight(duration = 2000) {
 }
 
 export function useAttachmentUploader({ threadId, messageId }) {
+    const component = useComponent();
     const env = useEnv();
     const { bus, upload } = useService("file_upload");
     const notification = useService("notification");
@@ -256,7 +258,10 @@ export function useAttachmentUploader({ threadId, messageId }) {
         reset() {
             abortByUploadId = {};
             uploadingAttachmentIds.clear();
-            state.attachments = [];
+            // prevent queuing of a render that will never be resolved.
+            if (status(component) !== "destroyed") {
+                state.attachments = [];
+            }
         },
     });
     useBus(bus, "FILE_UPLOAD_ADDED", ({ detail: { upload } }) => {
