@@ -4,7 +4,7 @@ import { LinkPreview } from "./link_preview_model";
 import { Partner } from "./partner_model";
 import { Thread } from "./thread_model";
 
-import { markup, markRaw } from "@odoo/owl";
+import { markup, toRaw } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
@@ -13,93 +13,6 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 const { DateTime } = luxon;
 
 export class Message {
-    constructor(data) {
-        /** @type {Object[]} **/
-        void this.attachments;
-        /** @type {Partner} **/
-        void this.author;
-        /** @type {String} **/
-        void this.body;
-        /** @type {String} **/
-        void this.dateDay;
-        /** @type {DateTime} **/
-        void this.dateTime;
-        /** @type {Number|String} **/
-        void this.id;
-        /** @type {Boolean} **/
-        void this.isAuthor;
-        /** @type {Boolean} **/
-        void this.isDiscussion;
-        /** @type {Boolean} **/
-        void this.isNote;
-        /** @type {Boolean} **/
-        void this.isNotification;
-        /** @type {Boolean} **/
-        void this.isStarred;
-        /** @type {Boolean} **/
-        void this.isTransient;
-        /** @type {LinkPreview[]} **/
-        void this.linkPreviews;
-        /** @type {Message|undefined} **/
-        void this.parentMessage;
-        /** @type {Object[]} **/
-        void this.reactions;
-        /** @type {String} **/
-        void this.recordName;
-        /** @type {Number|String} */
-        void this.resId;
-        /** @type {String|undefined} **/
-        void this.resModel;
-        /** @type {String} **/
-        void this.subtypeDescription;
-        /** @type {Object[]} **/
-        void this.trackingValues;
-        /** @type {String} **/
-        void this.type;
-        /** @type {String} **/
-        void this.url;
-
-        const {
-            date,
-            is_discussion: isDiscussion,
-            is_note: isNote,
-            is_transient: isTransient,
-            message_type: type,
-            messageReactionGroups: reactions = [],
-            model: resModel,
-            record_name: recordName,
-            res_id: resId,
-            subtype_description: subtypeDescription,
-            ...remainingData
-        } = data;
-        const now = DateTime.now();
-        const dateTime = markRaw(date ? deserializeDateTime(date) : now);
-        let dateDay = dateTime.toLocaleString(DateTime.DATE_FULL);
-        if (dateDay === now.toLocaleString(DateTime.DATE_FULL)) {
-            dateDay = _t("Today");
-        }
-        Object.assign(this, {
-            dateDay,
-            dateTime,
-            dateTimeStr: dateTime.toLocaleString(DateTime.DATETIME_SHORT),
-            isDiscussion,
-            isNote,
-            isNotification: type === "notification" && resModel === "mail.channel",
-            isTransient,
-            reactions,
-            recordName,
-            resId,
-            resModel,
-            subtypeDescription,
-            trackingValues: data.trackingValues || [],
-            type,
-            url: `${url("/web")}#model=${resModel}&id=${resId}`,
-        });
-        for (const key in remainingData) {
-            this[key] = remainingData[key];
-        }
-    }
-
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
@@ -139,5 +52,96 @@ export class Message {
         thread.sortMessages();
         // return reactive version
         return state.messages[message.id];
+    }
+
+    constructor(data) {
+        /** @type {Object[]} **/
+        void this.attachments;
+        /** @type {Partner} **/
+        void this.author;
+        /** @type {String} **/
+        void this.body;
+        /** @type {Number|String} **/
+        void this.id;
+        /** @type {Boolean} **/
+        void this.isAuthor;
+        /** @type {Boolean} **/
+        void this.isDiscussion;
+        /** @type {Boolean} **/
+        void this.isNote;
+        /** @type {Boolean} **/
+        void this.isNotification;
+        /** @type {Boolean} **/
+        void this.isStarred;
+        /** @type {Boolean} **/
+        void this.isTransient;
+        /** @type {LinkPreview[]} **/
+        void this.linkPreviews;
+        /** @type {Message|undefined} **/
+        void this.parentMessage;
+        /** @type {Object[]} **/
+        void this.reactions;
+        /** @type {String} **/
+        void this.recordName;
+        /** @type {Number|String} */
+        void this.resId;
+        /** @type {String|undefined} **/
+        void this.resModel;
+        /** @type {String} **/
+        void this.subtypeDescription;
+        /** @type {Object[]} **/
+        void this.trackingValues;
+        /** @type {String} **/
+        void this.type;
+        this.now = DateTime.now();
+
+        const {
+            is_discussion: isDiscussion,
+            is_note: isNote,
+            is_transient: isTransient,
+            message_type: type,
+            messageReactionGroups: reactions = [],
+            model: resModel,
+            record_name: recordName,
+            res_id: resId,
+            subtype_description: subtypeDescription,
+            ...remainingData
+        } = data;
+        Object.assign(this, {
+            isDiscussion,
+            isNote,
+            isNotification: type === "notification" && resModel === "mail.channel",
+            isTransient,
+            reactions,
+            recordName,
+            resId,
+            resModel,
+            subtypeDescription,
+            trackingValues: data.trackingValues || [],
+            type,
+        });
+        for (const key in remainingData) {
+            this[key] = remainingData[key];
+        }
+    }
+
+    get url() {
+        return `${url("/web")}#model=${this.resModel}&id=${this.id}`;
+    }
+
+    get dateTime() {
+        return toRaw(this.date ? deserializeDateTime(this.date) : this.now);
+    }
+
+    get dateTimeStr() {
+        return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
+    }
+
+    get dateDay() {
+        let dateDay = this.dateTime.toLocaleString(DateTime.DATE_FULL);
+        if (dateDay === DateTime.now().toLocaleString(DateTime.DATE_FULL)) {
+            dateDay = _t("Today");
+        }
+        return dateDay;
     }
 }
