@@ -148,45 +148,31 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring(
-            "layout with card details and filename and extension",
-            async function (assert) {
-                assert.expect(2);
-
-                const pyEnv = await startServer();
-                const channelId = pyEnv["mail.channel"].create({
-                    channel_type: "channel",
-                    name: "channel1",
-                });
-                const messageAttachmentId = pyEnv["ir.attachment"].create({
-                    name: "test.txt",
-                    mimetype: "text/plain",
-                });
-                pyEnv["mail.message"].create({
-                    attachment_ids: [messageAttachmentId],
-                    body: "<p>Test</p>",
-                    model: "mail.channel",
-                    res_id: channelId,
-                });
-                const { openDiscuss } = await start({
-                    discuss: {
-                        context: { active_id: channelId },
-                    },
-                });
-                await openDiscuss();
-
-                assert.strictEqual(
-                    document.querySelectorAll(`.o_AttachmentCard_details`).length,
-                    1,
-                    "attachment should have a details part"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(`.o_AttachmentCard_extension`).length,
-                    1,
-                    "attachment should have its extension shown"
-                );
-            }
-        );
+        QUnit.test("layout with card details and filename and extension", async function (assert) {
+            const pyEnv = await startServer();
+            const channelId = pyEnv["mail.channel"].create({
+                channel_type: "channel",
+                name: "channel1",
+            });
+            const messageAttachmentId = pyEnv["ir.attachment"].create({
+                name: "test.txt",
+                mimetype: "text/plain",
+            });
+            pyEnv["mail.message"].create({
+                attachment_ids: [messageAttachmentId],
+                body: "<p>Test</p>",
+                model: "mail.channel",
+                res_id: channelId,
+            });
+            const { openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: channelId },
+                },
+            });
+            await openDiscuss();
+            assert.containsOnce(document.body, ".o-mail-attachment-card:contains('test.txt')");
+            assert.containsOnce(document.body, ".o-mail-attachment-card small:contains('txt')");
+        });
 
         QUnit.skipRefactoring("view attachment", async function (assert) {
             assert.expect(3);

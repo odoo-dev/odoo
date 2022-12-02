@@ -276,6 +276,7 @@ export function useAttachmentUploader({ threadId, messageId }) {
             ];
         abortByUploadId[upload.id] = upload.xhr.abort.bind(upload.xhr);
         state.attachments.push({
+            extension: upload.title.split('.').pop(),
             filename: upload.title,
             id: upload.id,
             mimetype: upload.type,
@@ -305,6 +306,7 @@ export function useAttachmentUploader({ threadId, messageId }) {
             ];
         const attachment = {
             ...response,
+            extension: upload.title.split('.').pop(),
             originThread,
         };
         const index = state.attachments.findIndex(({ id }) => id === upload.id);

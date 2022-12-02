@@ -39,6 +39,7 @@ export class Message {
             author: Partner.insert(state, data.author),
             attachments: attachments.map((attachment) => ({
                 ...attachment,
+                extension: attachment.name.split('.').pop(),
                 originThread: Thread.insert(state, attachment.originThread[0][1]),
             })),
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
