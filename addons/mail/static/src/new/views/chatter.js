@@ -33,6 +33,7 @@ export class Chatter extends Component {
             activities: [],
             attachments: [],
             composing: false, // false, 'message' or 'note'
+            /** @type {import("@mail/new/core/follower_model").Follower[]} **/
             followers: [],
             isAttachmentBoxOpened: this.props.isAttachmentBoxOpenedInitially,
             isLoadingAttachments: false,
