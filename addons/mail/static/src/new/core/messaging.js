@@ -259,7 +259,8 @@ export class Messaging {
                 case "mail.channel/new_message":
                     {
                         const { id, message } = notif.payload;
-                        Message.insert(this.state, message, this.state.threads[id]);
+                        const data = Object.assign(message, { body: markup(message.body) });
+                        Message.insert(this.state, data, this.state.threads[id]);
                     }
                     break;
                 case "mail.record/insert":
@@ -293,7 +294,9 @@ export class Messaging {
                     }
                     break;
                 case "mail.channel/transient_message":
-                    return this.createTransientMessage(notif.payload);
+                    return this.createTransientMessage(
+                        Object.assign(notif.payload, { body: markup(notif.payload.body) })
+                    );
                 case "mail.link.preview/delete":
                     {
                         const { id, message_id } = notif.payload;
@@ -430,7 +433,9 @@ export class Messaging {
         thread.status = "ready";
         const messages = rawMessages
             .reverse()
-            .map((data) => Message.insert(this.state, data, thread));
+            .map((data) =>
+                Message.insert(this.state, Object.assign(data, { body: markup(data.body) }), thread)
+            );
         return messages;
     }
 
@@ -484,7 +489,10 @@ export class Messaging {
                 .then((previews) => {
                     for (const preview of previews) {
                         const thread = Thread.insert(this.state, preview.id);
-                        Message.insert(this.state, preview.last_message, thread);
+                        const data = Object.assign(preview.last_message, {
+                            body: markup(preview.last_message.body),
+                        });
+                        Message.insert(this.state, data, thread);
                     }
                 });
         }
@@ -551,7 +559,11 @@ export class Messaging {
             );
         }
         const data = await this.rpc(`/mail/message/post`, params);
-        const message = Message.insert(this.state, data, thread);
+        const message = Message.insert(
+            this.state,
+            Object.assign(data, { body: markup(data.body) }),
+            thread
+        );
         if (!this.isMessageEmpty(message)) {
             this.rpc(`/mail/link_preview`, { message_id: data.id }, { silent: true });
         }
@@ -745,7 +757,7 @@ export class Messaging {
             this.state.discuss.starred.counter--;
             removeFromArray(this.state.discuss.starred.messages, message.id);
         }
-        message.body = markup("");
+        message.body = "";
         message.attachments = [];
         return this.rpc("/mail/message/update_content", {
             attachment_ids: [],

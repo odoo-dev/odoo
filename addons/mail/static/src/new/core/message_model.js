@@ -4,7 +4,7 @@ import { LinkPreview } from "./link_preview_model";
 import { Partner } from "./partner_model";
 import { Thread } from "./thread_model";
 
-import { markup, toRaw } from "@odoo/owl";
+import { toRaw } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
@@ -100,7 +100,7 @@ export class Message {
                 originThread: Thread.insert(this._state, attachment.originThread[0][1]),
             })),
             author: Partner.insert(this._state, data.author),
-            body: markup(body),
+            body,
             isDiscussion,
             isNote,
             isNotification: type === "notification" && resModel === "mail.channel",
