@@ -8,9 +8,6 @@ export class ActivityList extends Component {
         this.state = useState({
             isOpen: true,
         });
-        if (this.env.chatter) {
-            this.env.chatter.reload();
-        }
     }
 
     toggleList() {
