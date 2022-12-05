@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { Composer } from "./composer_model";
 import { Partner } from "./partner_model";
@@ -94,7 +94,7 @@ export class Thread {
         return ["chat", "channel", "group"].includes(this.type);
     }
 
-    /** @returns {import("@mail/new/core/message_model").Message | undefined} **/
+    /** @returns {import("@mail/new/core/message_model").Message | undefined} */
     get mostRecentMsg() {
         if (!this.mostRecentMsgId) {
             return undefined;

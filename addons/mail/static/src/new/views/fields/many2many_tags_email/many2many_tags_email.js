@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { registry } from "@web/core/registry";
 import { useOpenMany2XRecord } from "@web/views/fields/relational_utils";

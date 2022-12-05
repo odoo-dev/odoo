@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { Component, onWillUpdateProps, onWillStart } from "@odoo/owl";
 import { useMessaging } from "@mail/new/messaging_hook";

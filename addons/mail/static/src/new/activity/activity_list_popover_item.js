@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { ActivityMarkAsDone } from "@mail/new/activity/activity_markasdone_popover";
 

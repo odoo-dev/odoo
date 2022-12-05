@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { convertBrToLineBreak } from "@mail/new/utils/format";
 

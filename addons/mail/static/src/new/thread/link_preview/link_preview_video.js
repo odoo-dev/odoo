@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { Component } from "@odoo/owl";
 import { LinkPreviewAside } from "./link_preview_aside";

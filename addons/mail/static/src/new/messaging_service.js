@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { Messaging, asyncMethods } from "./core/messaging";
 

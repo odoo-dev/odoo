@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { markEventHandled } from "@mail/new/utils/misc";
 

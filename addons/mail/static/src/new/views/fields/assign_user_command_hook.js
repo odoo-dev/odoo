@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { useCommand } from "@web/core/commands/command_hook";
 import { useService } from "@web/core/utils/hooks";

@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";

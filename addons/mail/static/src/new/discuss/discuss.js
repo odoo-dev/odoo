@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { AutoresizeInput } from "./autoresize_input";
 import { Sidebar } from "./sidebar";

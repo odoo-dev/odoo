@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { Component, xml, onWillDestroy } from "@odoo/owl";
 

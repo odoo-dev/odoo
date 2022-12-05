@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import core from "web.core";
 import fieldRegistry from "web.field_registry";

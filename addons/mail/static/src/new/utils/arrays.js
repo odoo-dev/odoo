@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 export function removeFromArray(array, elem) {
     const index = array.indexOf(elem);

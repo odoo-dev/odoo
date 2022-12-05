@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { useMessaging } from "../messaging_hook";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";

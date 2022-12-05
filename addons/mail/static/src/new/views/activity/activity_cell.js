@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { ActivityListPopover } from "@mail/new/activity/activity_list_popover";
 

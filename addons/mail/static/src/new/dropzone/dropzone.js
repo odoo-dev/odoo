@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { Component, onMounted, useExternalListener, useRef, useState } from "@odoo/owl";
 

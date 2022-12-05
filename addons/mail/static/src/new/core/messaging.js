@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { markup, toRaw, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
@@ -56,7 +56,7 @@ export class Messaging {
                 uid: user.context.uid,
                 avatarUrl: `/web/image?field=avatar_128&id=${user.userId}&model=res.users`,
             },
-            /** @type {Object.<number, import("@mail/new/core/follower_model").Follower>} **/
+            /** @type {Object.<number, import("@mail/new/core/follower_model").Follower>} */
             followers: {},
             partners: {},
             partnerRoot: {},

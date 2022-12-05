@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { escape } from "@web/core/utils/strings";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";

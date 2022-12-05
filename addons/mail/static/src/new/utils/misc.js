@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 // todo: move this some other place in the future
 export function isDragSourceExternalFile(dataTransfer) {

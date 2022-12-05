@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { evaluateExpr } from "@web/core/py_js/py";
 import { useService } from "@web/core/utils/hooks";

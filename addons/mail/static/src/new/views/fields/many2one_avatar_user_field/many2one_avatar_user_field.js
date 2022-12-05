@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { registry } from "@web/core/registry";
 import { Many2OneAvatarField } from "@web/views/fields/many2one_avatar/many2one_avatar_field";

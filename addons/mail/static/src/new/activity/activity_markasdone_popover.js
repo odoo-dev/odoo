@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { useMessaging } from "../messaging_hook";
 import { Component, onMounted, useExternalListener, useRef } from "@odoo/owl";

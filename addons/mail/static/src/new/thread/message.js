@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { AttachmentList } from "@mail/new/thread/attachment_list";

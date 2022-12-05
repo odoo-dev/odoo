@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { Partner } from "@mail/new/core/partner_model";
 
@@ -11,15 +11,15 @@ import { Partner } from "@mail/new/core/partner_model";
  */
 
 export class Follower {
-    /** @type {import("@mail/new/core/thread_model").Thread} **/
+    /** @type {import("@mail/new/core/thread_model").Thread} */
     followedThread;
-    /** @type {number} **/
+    /** @type {number} */
     id;
-    /** @type {Boolean} **/
+    /** @type {boolean} */
     isActive;
-    /** @type {import("@mail/new/core/partner_model").Partner} **/
+    /** @type {import("@mail/new/core/partner_model").Partner} */
     partner;
-    /** @type {import("@mail/new/core/messaging").Messaging['state']} **/
+    /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state

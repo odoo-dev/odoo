@@ -1,9 +1,9 @@
-/** @odoo-module */
+/* @odoo-module */
 
 export class MessagingMenu {
-    /** @type {number} **/
+    /** @type {number} */
     counter;
-    /** @type {import("@mail/new/core/messaging").Messaging['state']} **/
+    /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
 
     /**
@@ -28,7 +28,7 @@ export class MessagingMenu {
         });
     }
 
-    /** @returns {import("@mail/new/core/thread_model").Thread[]} **/
+    /** @returns {import("@mail/new/core/thread_model").Thread[]} */
     get previews() {
         return Object.values(this._state.threads).filter((thread) => thread.is_pinned);
     }

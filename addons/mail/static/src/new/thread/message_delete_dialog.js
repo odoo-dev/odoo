@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { useMessaging } from "@mail/new/messaging_hook";
 import { Component } from "@odoo/owl";

@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { registry } from "@web/core/registry";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";

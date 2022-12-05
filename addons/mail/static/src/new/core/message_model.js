@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 import { LinkPreview } from "./link_preview_model";
 import { Partner } from "./partner_model";
@@ -13,43 +13,43 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 const { DateTime } = luxon;
 
 export class Message {
-    /** @type {Object[]} **/
+    /** @type {Object[]} */
     attachments;
-    /** @type {Partner} **/
+    /** @type {Partner} */
     author;
-    /** @type {String} **/
+    /** @type {string} */
     body;
-    /** @type {Number|String} **/
+    /** @type {number|string} */
     id;
-    /** @type {Boolean} **/
+    /** @type {boolean} */
     isAuthor;
-    /** @type {Boolean} **/
+    /** @type {boolean} */
     isDiscussion;
-    /** @type {Boolean} **/
+    /** @type {boolean} */
     isNote;
-    /** @type {Boolean} **/
+    /** @type {boolean} */
     isNotification;
-    /** @type {Boolean} **/
+    /** @type {boolean} */
     isStarred;
-    /** @type {Boolean} **/
+    /** @type {boolean} */
     isTransient;
-    /** @type {LinkPreview[]} **/
+    /** @type {LinkPreview[]} */
     linkPreviews;
-    /** @type {Message|undefined} **/
+    /** @type {Message|undefined} */
     parentMessage;
-    /** @type {Object[]} **/
+    /** @type {Object[]} */
     reactions;
-    /** @type {String} **/
+    /** @type {string} */
     recordName;
-    /** @type {Number|String} */
+    /** @type {number|string} */
     resId;
-    /** @type {String|undefined} **/
+    /** @type {string|undefined} */
     resModel;
-    /** @type {String} **/
+    /** @type {string} */
     subtypeDescription;
-    /** @type {Object[]} **/
+    /** @type {Object[]} */
     trackingValues;
-    /** @type {String} **/
+    /** @type {string} */
     type;
     now = DateTime.now();
 

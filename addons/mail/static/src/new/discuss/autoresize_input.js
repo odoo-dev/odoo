@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useRef, useState, onWillUpdateProps, useEffect } from "@odoo/owl";

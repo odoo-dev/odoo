@@ -1,7 +1,7 @@
-/** @odoo-module */
+/* @odoo-module */
 
 export class LinkPreview {
-    /** @type {Number} */
+    /** @type {number} */
     id;
     /** @type {Object} */
     message;

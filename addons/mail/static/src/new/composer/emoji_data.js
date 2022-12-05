@@ -1,4 +1,4 @@
-/** @odoo-module **/
+/* @odoo-module */
 
 // Emoji data are generated from Unicode CLDR, falling under the following
 // licence:

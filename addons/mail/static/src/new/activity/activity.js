@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { Component, useState, onWillUpdateProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";

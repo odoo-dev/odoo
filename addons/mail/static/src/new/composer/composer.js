@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { onExternalClick, useAttachmentUploader } from "@mail/new/utils/hooks";

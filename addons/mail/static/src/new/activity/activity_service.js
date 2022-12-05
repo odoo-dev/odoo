@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { reactive } from "@odoo/owl";
 

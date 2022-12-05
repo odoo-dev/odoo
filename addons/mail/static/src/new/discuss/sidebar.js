@@ -1,4 +1,4 @@
-/** @odoo-module */
+/* @odoo-module */
 
 import { useMessaging } from "../messaging_hook";
 import { ThreadIcon } from "./thread_icon";
