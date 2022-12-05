@@ -46,6 +46,8 @@ export class Message {
     /** @type {string|undefined} */
     resModel;
     /** @type {string} */
+    subject;
+    /** @type {string} */
     subtypeDescription;
     /** @type {Object[]} */
     trackingValues;
@@ -86,6 +88,7 @@ export class Message {
             model: resModel,
             record_name: recordName,
             res_id: resId,
+            subject,
             subtype_description: subtypeDescription,
             starred_partner_ids = [],
             ...remainingData
@@ -114,6 +117,7 @@ export class Message {
             recordName,
             resId,
             resModel,
+            subject,
             subtypeDescription,
             trackingValues: data.trackingValues || [],
             type,
@@ -145,5 +149,37 @@ export class Message {
             dateDay = _t("Today");
         }
         return dateDay;
+    }
+
+    get isSubjectSimilarToOriginThreadName() {
+        if (!this.subject || !this.originThread || !this.originThread.name) {
+            return false;
+        }
+        const cleanedThreadName = this.originThread.name.trim().toLowerCase();
+        const cleanedSubject = this.subject.trim().toLowerCase();
+        if (cleanedSubject === cleanedThreadName) {
+            return true;
+        }
+        if (!cleanedSubject.endsWith(cleanedThreadName)) {
+            return false;
+        }
+        const subjectWithoutThreadName = cleanedSubject.slice(
+            0,
+            cleanedSubject.indexOf(cleanedThreadName)
+        );
+        const prefixList = ["re", "fw", "fwd"];
+        // match any prefix as many times as possible
+        const isSequenceOfPrefixes = new RegExp(`^((${prefixList.join("|")}):\\s*)+$`);
+        return isSequenceOfPrefixes.test(subjectWithoutThreadName);
+    }
+
+    get originThread() {
+        const threadLocalId = (() => {
+            if (this.resModel === "mail.channel") {
+                return this.resId;
+            }
+            return this.resModel + "," + this.resId;
+        })();
+        return this._state.threads[threadLocalId];
     }
 }
