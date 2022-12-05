@@ -6,7 +6,7 @@ import { useMessaging } from "../messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { Composer } from "../composer/composer";
-import { ActivityList } from "../activity/activity_list";
+import { Activity } from "@mail/new/activity/activity";
 import {
     Component,
     useState,
@@ -32,6 +32,7 @@ export class Chatter extends Component {
         this.state = useState({
             activities: [],
             attachments: [],
+            showActivities: true,
             composing: false, // false, 'message' or 'note'
             /** @type {import("@mail/new/core/follower_model").Follower[]} */
             followers: [],
@@ -45,9 +46,6 @@ export class Chatter extends Component {
         this.rootRef = useRef("root");
         useChildSubEnv({
             inChatter: true,
-            chatter: {
-                reload: this.load.bind(this),
-            },
         });
         useDropzone(this.rootRef, {
             onDrop: (ev) => {
@@ -192,6 +190,10 @@ export class Chatter extends Component {
         }
     }
 
+    toggleActivities() {
+        this.state.showActivities = !this.state.showActivities;
+    }
+
     async scheduleActivity() {
         await this.activity.scheduleActivity(this.props.resModel, this.props.resId);
         this.load(this.props.resId, ["activities"]);
@@ -214,7 +216,7 @@ export class Chatter extends Component {
 }
 
 Object.assign(Chatter, {
-    components: { AttachmentList, Dropdown, Thread, Composer, ActivityList, FileUploader },
+    components: { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader },
     props: ["hasActivity", "resId", "resModel", "displayName?", "isAttachmentBoxOpenedInitially?"],
     template: "mail.chatter",
 });

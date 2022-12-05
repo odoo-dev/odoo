@@ -82,7 +82,7 @@
         </t>
         <div class="overflow-auto">
             <t t-if="props.hasActivity and state.activities.length">
-                <ActivityList activities="state.activities"/>
+                <t t-call="mail.activity_list"/>
             </t>
             <div t-if="state.isAttachmentBoxOpened" class="o-mail-attachment-box position-relative">
                 <div class="d-flex align-items-center">
@@ -111,8 +111,25 @@
             <Thread id="thread.id" t-key="thread.id" order="'desc'"/>
         </div>
     </div>
+</t>
 
-
+<t t-name="mail.activity_list" owl="1">
+    <div class="o-mail-activity-list">
+        <div class="d-flex pt-4 cursor-pointer fw-bolder" t-on-click="toggleActivities">
+            <hr class="flex-grow-1 border-top"/>
+            <div class="px-3">
+                <i class="fa fa-fw" t-att-class="state.showActivities ? 'fa-caret-down' : 'fa-caret-right'"/>
+                Planned Activities
+                <span t-if="!state.showActivities" class="badge text-bg-success"><t t-esc="props.activities.length"/></span>
+            </div>
+            <hr class="flex-grow-1 border-top"/>
+        </div>
+        <t t-if="state.showActivities">
+            <t t-foreach="state.activities" t-as="activity" t-key="activity.id">
+                <Activity data="activity" onUpdate.bind="load"/>
+            </t>
+        </t>
+    </div>
 </t>
 
 </templates>

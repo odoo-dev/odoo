@@ -30,7 +30,7 @@ export class Activity extends Component {
             ActivityMarkAsDone,
             {
                 activity: this.props.data,
-                reload: this.env.chatter ? this.env.chatter.reload : undefined,
+                reload: this.props.onUpdate,
             },
             { position: "right" }
         );
@@ -39,20 +39,17 @@ export class Activity extends Component {
     async edit() {
         const { id, res_model, res_id } = this.props.data;
         await this.activity.scheduleActivity(res_model, res_id, id);
-        if (this.env.chatter) {
-            this.env.chatter.reload();
-        }
+        this.props.onUpdate();
     }
 
     async unlink() {
         await this.orm.unlink("mail.activity", [this.props.data.id]);
-        if (this.env.chatter) {
-            this.env.chatter.reload();
-        }
+        this.props.onUpdate();
     }
 }
 
 Object.assign(Activity, {
-    props: ["data"],
+    props: ["data", "onUpdate?"],
+    defaultProps: { onUpdate: () => {} },
     template: "mail.activity",
 });
