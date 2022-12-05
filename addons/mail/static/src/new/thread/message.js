@@ -24,7 +24,6 @@ export class Message extends Component {
         this.messaging = useMessaging();
         this.action = useService("action");
         this.user = useService("user");
-        this.message = this.props.message;
         useChildSubEnv({
             LinkPreviewListComponent: LinkPreviewList,
             alignedRight: this.isAlignedRight,
@@ -46,6 +45,10 @@ export class Message extends Component {
                 this.ref.el.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
+    }
+
+    get message() {
+        return this.props.message;
     }
 
     get canBeDeleted() {
