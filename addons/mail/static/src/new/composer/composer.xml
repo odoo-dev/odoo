@@ -62,7 +62,7 @@
                     imagesHeight="50" />
             </div>
         </div>
-        <t t-if="props.composer.messageId">
+        <t t-if="props.composer.message">
             <span class="text-muted">escape to <a href="#" t-on-click="props.onDiscardCallback">cancel</a>, enter to <a href="#" t-on-click="editMessage">save</a></span>
         </t>
     </div>

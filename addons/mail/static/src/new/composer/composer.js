@@ -22,8 +22,8 @@ import { FileUploader } from "@web/views/fields/file_handler";
 export class Composer extends Component {
     setup() {
         this.attachmentUploader = useAttachmentUploader({
-            threadId: this.props.composer.threadId,
-            messageId: this.props.composer.messageId,
+            threadId: this.props.composer.thread?.id,
+            messageId: this.props.composer.message?.id,
         });
         this.messaging = useMessaging();
         this.ref = useRef("textarea");
@@ -56,7 +56,7 @@ export class Composer extends Component {
         );
         useEffect(
             (messageToReplyTo) => {
-                if (messageToReplyTo && messageToReplyTo.resId === this.props.composer.threadId) {
+                if (messageToReplyTo && messageToReplyTo.resId === this.props.composer.thread?.id) {
                     this.state.autofocus++;
                 }
             },
@@ -83,12 +83,12 @@ export class Composer extends Component {
 
     get hasReplyToHeader() {
         const { messageToReplyTo } = this.messaging.state.discuss;
-        if (!messageToReplyTo) {
+        if (!messageToReplyTo || !this.props.composer.thread) {
             return false;
         }
         return (
-            messageToReplyTo.resId === this.props.composer.threadId ||
-            (this.props.composer.threadId === "inbox" && messageToReplyTo.needaction)
+            messageToReplyTo.resId === this.props.composer.thread.id ||
+            (this.props.composer.thread.id === "inbox" && messageToReplyTo.needaction)
         );
     }
 
@@ -105,16 +105,11 @@ export class Composer extends Component {
     }
 
     get thread() {
-        if (this.props.composer.threadId) {
-            return this.messaging.state.threads[this.props.composer.threadId];
-        }
-        return null;
+        return this.props.composer.thread ?? null;
     }
 
     get message() {
-        return this.props.composer.messageId
-            ? this.messaging.state.messages[this.props.composer.messageId]
-            : null;
+        return this.props.composer.message ?? null;
     }
 
     get isSendButtonDisabled() {
@@ -132,7 +127,7 @@ export class Composer extends Component {
                 return;
             }
             ev.preventDefault(); // to prevent useless return
-            if (this.props.composer.messageId) {
+            if (this.props.composer.message) {
                 this.editMessage();
             } else {
                 this.sendMessage();
@@ -174,13 +169,10 @@ export class Composer extends Component {
                 isNote: this.props.type === "note" || isNote,
                 parentId,
             };
-            if (
-                messageToReplyTo &&
-                this.props.composer.threadId === this.messaging.state.discuss.inbox.id
-            ) {
+            if (messageToReplyTo && this.props.composer.thread.id === "inbox") {
                 await this.messaging.postInboxReply(resId, resModel, value, postData);
             } else {
-                await this.messaging.postMessage(this.props.composer.threadId, value, postData);
+                await this.messaging.postMessage(this.props.composer.thread.id, value, postData);
             }
             this.messaging.cancelReplyTo();
         });
@@ -189,7 +181,7 @@ export class Composer extends Component {
     async editMessage() {
         return this.processMessage(async (value) =>
             this.messaging.updateMessage(
-                this.props.composer.messageId,
+                this.props.composer.message.id,
                 value,
                 this.attachmentUploader.attachments
             )

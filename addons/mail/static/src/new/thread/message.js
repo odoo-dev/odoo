@@ -5,6 +5,7 @@ import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { MessageInReplyTo } from "@mail/new/thread/message_in_reply_to";
 import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
+import { convertBrToLineBreak } from "@mail/new/utils/format";
 import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
@@ -165,8 +166,9 @@ export class Message extends Component {
      * @param {MouseEvent} ev
      */
     onClickEdit(ev) {
-        this.message.composer = ComposerModel.insert(this.messaging.state, {
-            messageId: this.props.message.id,
+        ComposerModel.insert(this.messaging.state, {
+            message: this.props.message,
+            textInputContent: convertBrToLineBreak(this.props.message.body),
         });
         this.state.isEditing = true;
     }

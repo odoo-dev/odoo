@@ -21,13 +21,17 @@ export class Thread {
         if (data.id in state.threads) {
             thread = state.threads[data.id];
         } else {
-            thread = new Thread();
+            thread = new Thread(state);
             thread._state = state;
         }
         thread.update(data);
         state.threads[thread.id] = thread;
         // return reactive version
         return state.threads[thread.id];
+    }
+
+    constructor(state) {
+        Composer.insert(state, { thread: this });
     }
 
     update(data) {
@@ -48,14 +52,10 @@ export class Thread {
             chatPartnerId: false,
             isAdmin: false,
             canLeave: canLeave || false,
-            composer: null,
             serverLastSeenMsgByCurrentUser: serverData ? serverData.seen_message_id : null,
         });
         for (const key in data) {
             this[key] = data[key];
-        }
-        if (!this.composer) {
-            this.composer = Composer.insert(this._state, { threadId: this.id });
         }
         if (this.type === "channel") {
             this._state.discuss.channels.threads.push(this.id);

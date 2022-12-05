@@ -1,26 +1,50 @@
 /* @odoo-module */
 
-import { convertBrToLineBreak } from "@mail/new/utils/format";
-
 export class Composer {
+    /** @type {Message} */
+    message;
+    /** @type {string} */
+    textInputContent;
+    /** @type {Thread} */
+    thread;
+
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
      * @returns {Composer}
      */
     static insert(state, data) {
-        const composer = new Composer(data);
-        if (data.messageId) {
-            composer.textInputContent = convertBrToLineBreak(state.messages[data.messageId].body);
+        const { message, thread } = data;
+        if (Boolean(message) === Boolean(thread)) {
+            throw new Error("Composer shall have a thread xor a message.");
         }
-        return composer;
+        const composer = (thread ?? message)?.composer;
+        if (composer) {
+            return composer.update(data);
+        }
+        return new Composer(state, data);
     }
 
-    constructor({ threadId, messageId }) {
+    constructor(state, data) {
+        const { message, thread } = data;
+        if (thread) {
+            this.thread = thread;
+            thread.composer = this;
+        } else if (message) {
+            this.message = message;
+            message.composer = this;
+        }
         Object.assign(this, {
-            messageId,
-            threadId,
             textInputContent: "",
+            _state: state,
         });
+        return this.update(data);
+    }
+
+    update(data) {
+        if ("textInputContent" in data) {
+            this.textInputContent = data.textInputContent;
+        }
+        return this;
     }
 }
