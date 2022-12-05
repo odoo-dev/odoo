@@ -8,6 +8,7 @@ import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
+import { markEventHandled } from "../utils/misc";
 
 export class Sidebar extends Component {
     setup() {
@@ -22,7 +23,8 @@ export class Sidebar extends Component {
         });
     }
 
-    openThread(id) {
+    openThread(ev, id) {
+        markEventHandled(ev, "sidebar.openThread");
         this.messaging.setDiscussThread(id);
     }
 

@@ -37,7 +37,7 @@
             'o-active bg-200': mailbox.id === messaging.state.discuss.threadId,
             'o-starred-box': mailbox.id === 'starred',
         }"
-        t-on-click="() => this.openThread(mailbox.id)"
+        t-on-click="(ev) => this.openThread(ev, mailbox.id)"
     >
         <ThreadIcon className="'ms-4 me-2'" thread="mailbox"/>
         <div class="me-2 text-truncate">
@@ -103,7 +103,7 @@
             'o-active bg-200': threadId === messaging.state.discuss.threadId,
             'o-unread': thread.isUnread,
         }"
-        t-on-click="() => this.openThread(threadId)"
+        t-on-click="(ev) => this.openThread(ev, threadId)"
     >
         <div class="o-mail-background-inherit position-relative d-flex ms-4 flex-shrink-0" style="width:30px;height:30px">
             <img class="w-100 h-100 rounded-circle" t-att-src="thread.imgUrl" alt="Thread Image"/>
@@ -118,7 +118,7 @@
                 <i t-attf-class="fa fa-cog {{ hover_class }}" title="Channel settings" t-on-click.stop="() => this.openSettings(thread)" role="img"/>
             </t>
             <t t-if="thread.canLeave">
-                <div class="fa fa-times ms-1" t-attf-class="{{ hover_class }}" 
+                <div class="fa fa-times ms-1" t-attf-class="{{ hover_class }}"
                     t-on-click.stop="() => this.leaveChannel(thread)" title="Leave this channel" role="img"/>
             </t>
         </div>

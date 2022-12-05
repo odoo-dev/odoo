@@ -276,7 +276,7 @@ export function useAttachmentUploader({ threadId, messageId }) {
             ];
         abortByUploadId[upload.id] = upload.xhr.abort.bind(upload.xhr);
         state.attachments.push({
-            extension: upload.title.split('.').pop(),
+            extension: upload.title.split(".").pop(),
             filename: upload.title,
             id: upload.id,
             mimetype: upload.type,
@@ -306,7 +306,7 @@ export function useAttachmentUploader({ threadId, messageId }) {
             ];
         const attachment = {
             ...response,
-            extension: upload.title.split('.').pop(),
+            extension: upload.title.split(".").pop(),
             originThread,
         };
         const index = state.attachments.findIndex(({ id }) => id === upload.id);
@@ -322,4 +322,43 @@ export function useAttachmentUploader({ threadId, messageId }) {
     });
 
     return state;
+}
+
+export function useSelection({ refName, model, preserveOnClickAwayPredicate = () => false }) {
+    const ref = useRef(refName);
+    function onSelectionChange() {
+        if (document.activeElement && document.activeElement === ref.el) {
+            Object.assign(model, {
+                start: ref.el.selectionStart,
+                end: ref.el.selectionEnd,
+                direction: ref.el.selectionDirection,
+            });
+        }
+    }
+    function clear() {
+        ref.el.selectionStart = ref.el.selectionEnd = ref.el.value.length;
+    }
+    onExternalClick(refName, async (ev) => {
+        if (await preserveOnClickAwayPredicate(ev)) {
+            return;
+        }
+        clear();
+        Object.assign(model, {
+            start: ref.el.selectionStart,
+            end: ref.el.selectionEnd,
+            direction: ref.el.selectionDirection,
+        });
+    });
+    onMounted(() => {
+        document.addEventListener("selectionchange", onSelectionChange);
+    });
+    onWillUnmount(() => {
+        document.removeEventListener("selectionchange", onSelectionChange);
+    });
+    return {
+        clear,
+        restore() {
+            ref.el.setSelectionRange(model.start, model.end, model.direction);
+        },
+    };
 }

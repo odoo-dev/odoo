@@ -7,6 +7,12 @@ export class Composer {
     textInputContent;
     /** @type {Thread} */
     thread;
+    /** @type {{ start: number, end: number, direction: "forward" | "backward" | "none"}}*/
+    selection = {
+        start: 0,
+        end: 0,
+        direction: "none",
+    };
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state

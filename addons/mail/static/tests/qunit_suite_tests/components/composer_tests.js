@@ -11,7 +11,8 @@ import {
 } from "@mail/../tests/helpers/test_utils";
 
 import { file, makeTestPromise } from "web.test_utils";
-import { click, getFixture } from "@web/../tests/helpers/utils";
+import { click, getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { Composer } from "@mail/new/composer/composer";
 
 const { createFile, inputFiles } = file;
 let target;
@@ -19,6 +20,12 @@ let target;
 QUnit.module("mail", (hooks) => {
     hooks.beforeEach(async () => {
         target = getFixture();
+        // Simulate real user interactions
+        patchWithCleanup(Composer.prototype, {
+            isEventTrusted() {
+                return true;
+            },
+        });
     });
     QUnit.module("components", {}, function () {
         QUnit.module("composer_tests.js");
@@ -186,8 +193,38 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
-        QUnit.skipRefactoring(
-            "add emoji replaces (keyboard) text selection",
+        QUnit.test("add emoji replaces (keyboard) text selection", async function (assert) {
+            assert.expect(2);
+
+            const pyEnv = await startServer();
+            const mailChanelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
+            const { click, insertText, openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: mailChanelId1 },
+                },
+            });
+            await openDiscuss();
+            const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
+            await insertText(".o-mail-composer-textarea", "Blabla");
+            assert.strictEqual(
+                composerTextInputTextArea.value,
+                "Blabla",
+                "composer text input should have text only initially"
+            );
+
+            // simulate selection of all the content by keyboard
+            composerTextInputTextArea.setSelectionRange(0, composerTextInputTextArea.value.length);
+            await click("i[aria-label='Emojis']");
+            await click('.o-emoji[data-codepoints="🤠"]');
+            assert.strictEqual(
+                document.querySelector(".o-mail-composer-textarea").value,
+                "🤠",
+                "whole text selection should have been replaced by emoji"
+            );
+        });
+
+        QUnit.test(
+            "selected text is not replaced after cancelling the selection",
             async function (assert) {
                 assert.expect(2);
 
@@ -216,12 +253,49 @@ QUnit.module("mail", (hooks) => {
                     0,
                     composerTextInputTextArea.value.length
                 );
+                document.querySelector(".o-mail-discuss-content").click();
+                await nextTick();
                 await click("i[aria-label='Emojis']");
                 await click('.o-emoji[data-codepoints="🤠"]');
                 assert.strictEqual(
                     document.querySelector(".o-mail-composer-textarea").value,
-                    "🤠",
+                    "Blabla🤠",
                     "whole text selection should have been replaced by emoji"
+                );
+            }
+        );
+
+        QUnit.test(
+            "Selection is kept when changing channel and going back to original channel",
+            async (assert) => {
+                assert.expect(1);
+
+                const pyEnv = await startServer();
+                const firstChannelId = pyEnv["mail.channel"].create([
+                    { name: "firstChannel" },
+                    { name: "secondChannel" },
+                ]);
+                const { insertText, openDiscuss } = await start({
+                    discuss: {
+                        params: {
+                            default_active_id: `mail.channel_${firstChannelId}`,
+                        },
+                    },
+                });
+                await openDiscuss();
+                await insertText(".o-mail-composer-textarea", "Foo");
+                // simulate selection of all the content by keyboard
+                const composerTextArea = document.querySelector(".o-mail-composer-textarea");
+                composerTextArea.setSelectionRange(0, composerTextArea.value.length);
+                await nextTick();
+                const [firstChannelBtn, secondChannelBtn] =
+                    document.querySelectorAll(".o-mail-category-item");
+                await afterNextRender(() => secondChannelBtn.click());
+                await afterNextRender(() => firstChannelBtn.click());
+                assert.ok(
+                    composerTextArea.selectionStart === 0 &&
+                        composerTextArea.selectionEnd === composerTextArea.value.length,
+                    "Content of the text area should still be selected after switching channels"
                 );
             }
         );

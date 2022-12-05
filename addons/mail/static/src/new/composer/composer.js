@@ -1,8 +1,13 @@
 /* @odoo-module */
 
 import { AttachmentList } from "@mail/new/thread/attachment_list";
-import { onExternalClick, useAttachmentUploader } from "@mail/new/utils/hooks";
-import { dataUrlToBlob, isDragSourceExternalFile, isEventHandled } from "@mail/new/utils/misc";
+import { onExternalClick, useAttachmentUploader, useSelection } from "@mail/new/utils/hooks";
+import {
+    dataUrlToBlob,
+    isDragSourceExternalFile,
+    isEventHandled,
+    markEventHandled,
+} from "@mail/new/utils/misc";
 import {
     Component,
     onMounted,
@@ -39,6 +44,21 @@ export class Composer extends Component {
             this.notifyIsTyping(false);
             this.typingNotified = false;
         }, 1000);
+        this.selection = useSelection({
+            refName: "textarea",
+            model: this.props.composer.selection,
+            preserveOnClickAwayPredicate: async (ev) => {
+                // Let event be handled by bubbling handlers first.
+                await new Promise(setTimeout);
+                return (
+                    !this.isEventTrusted(ev) ||
+                    isEventHandled(ev, "sidebar.openThread") ||
+                    isEventHandled(ev, "emoji.selectEmoji") ||
+                    isEventHandled(ev, "composer.clickOnAddEmoji") ||
+                    isEventHandled(ev, "composer.clickOnAddAttachment")
+                );
+            },
+        });
         if (this.props.dropzoneRef) {
             useDropzone(this.props.dropzoneRef, {
                 onDrop: (ev) => {
@@ -77,7 +97,11 @@ export class Composer extends Component {
             },
             () => [this.props.composer.textInputContent, this.ref.el]
         );
-        onMounted(() => this.ref.el.scrollTo({ top: 0, behavior: "instant" }));
+        onMounted(() => {
+            this.selection.restore();
+            this.state.autofocus++;
+            this.ref.el.scrollTo({ top: 0, behavior: "instant" });
+        });
         onExternalClick("composer", async (ev) => {
             // Let event be handled by bubbling handlers first.
             await new Promise(setTimeout);
@@ -156,6 +180,21 @@ export class Composer extends Component {
         }
     }
 
+    onClickAddAttachment(ev) {
+        markEventHandled(ev, "composer.clickOnAddAttachment");
+        this.selection.restore();
+        this.state.autofocus++;
+    }
+
+    onClickAddEmoji(ev) {
+        markEventHandled(ev, "composer.clickOnAddEmoji");
+    }
+
+    isEventTrusted(ev) {
+        // Allow patching during tests
+        return ev.isTrusted;
+    }
+
     async processMessage(cb) {
         const el = this.ref.el;
         const attachments = this.attachmentUploader.attachments;
@@ -230,7 +269,10 @@ export class Composer extends Component {
     }
 
     addEmoji(str) {
-        this.props.composer.textInputContent += str;
+        const textContent = this.ref.el.value;
+        const firstPart = textContent.slice(0, this.props.composer.selection.start);
+        const secondPart = textContent.slice(this.props.composer.selection.end, textContent.length);
+        this.props.composer.textInputContent = firstPart + str + secondPart;
         this.state.autofocus++;
     }
 }

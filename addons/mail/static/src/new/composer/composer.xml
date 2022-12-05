@@ -43,12 +43,12 @@
                 </div>
                 <div class="d-flex py-1 border-top bg-view" t-att-class="{'border-bottom': normal, 'border': extended }">
                     <div class="d-flex align-items-center px-2" >
-                        <button class="btn border-0 rounded-pill" t-ref="emoji-picker">
+                        <button class="btn border-0 rounded-pill" t-on-click="onClickAddEmoji" t-ref="emoji-picker">
                             <i class="fa fa-smile-o" role="img" aria-label="Emojis"/>
                         </button>
                         <FileUploader multiUpload="true" onUploaded.bind="onFileUpload">
                             <t t-set-slot="toggler">
-                                <button t-att-disabled="!state.active" class="btn fa fa-paperclip border-0 rounded-pill" title="Add attachment" aria-label="Add attachment" type="button" />
+                                <button t-att-disabled="!state.active" class="btn fa fa-paperclip border-0 rounded-pill" title="Add attachment" aria-label="Add attachment" type="button" t-on-click="onClickAddAttachment"/>
                             </t>
                         </FileUploader>
                     </div>
