@@ -1,33 +1,30 @@
 /** @odoo-module */
 
-/**
- * @class LinkPreview
- */
 export class LinkPreview {
+    /** @type {Number} */
+    id;
+    /** @type {Object} */
+    message;
+    /** @type {string} */
+    image_mimetype;
+    /** @type {string} */
+    og_description;
+    /** @type {string} */
+    og_image;
+    /** @type {string} */
+    og_mimetype;
+    /** @type {string} */
+    og_title;
+    /** @type {string} */
+    og_type;
+    /** @type {string} */
+    og_source_url;
+
     /**
      * @param {Object} data
+     * @returns {LinkPreview}
      */
     constructor(data) {
-        /** @type {Number} */
-        void this.id;
-        /** @type {Object} */
-        void this.message;
-        /** @type {string} */
-        void this.image_mimetype;
-        /** @type {string} */
-        void this.og_description;
-        /** @type {string} */
-        void this.og_image;
-        /** @type {string} */
-        void this.og_mimetype;
-        /** @type {string} */
-        void this.og_title;
-        /** @type {string} */
-        void this.og_type;
-        /** @type {string} */
-        void this.og_source_url;
-
-        // Assign every field from the server RPC to the class
         Object.assign(this, data);
     }
 
