@@ -7,9 +7,15 @@ import {
     startServer,
 } from "@mail/../tests/helpers/test_utils";
 
-import { patchWithCleanup } from "@web/../tests/helpers/utils";
+import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 
-QUnit.module("mail", {}, function () {
+let target;
+
+QUnit.module("mail", (hooks) => {
+    hooks.beforeEach(async () => {
+        target = getFixture();
+    });
+
     QUnit.module("components", {}, function () {
         QUnit.module("discuss_inbox_tests.js");
 
@@ -420,7 +426,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.skipRefactoring("show subject of message in Inbox", async function (assert) {
+        QUnit.test("show subject of message in Inbox", async function (assert) {
             assert.expect(3);
 
             const pyEnv = await startServer();
@@ -437,36 +443,21 @@ QUnit.module("mail", {}, function () {
                 notification_type: "inbox",
                 res_partner_id: pyEnv.currentPartnerId,
             });
-            const { afterEvent, messaging, openDiscuss } = await start();
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until inbox displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.inbox.thread
-                    );
+            const { openDiscuss } = await start({
+                discuss: {
+                    default_active_id: "inbox",
                 },
             });
-            assert.containsOnce(
-                document.body,
-                ".o-mail-message",
-                "should display a single message"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_subject",
-                "should display subject of the message"
-            );
+            await openDiscuss();
+            assert.containsOnce(target, ".o-mail-message", "should display a single message");
+            assert.containsOnce(target, ".o-mail-message-subject");
             assert.strictEqual(
-                document.querySelector(".o_MessageView_subject").textContent,
-                "Subject: Salutations, voyageur",
-                "Subject of the message should be 'Salutations, voyageur'"
+                target.querySelector(".o-mail-message-subject").textContent,
+                "Subject: Salutations, voyageur"
             );
         });
 
-        QUnit.skipRefactoring("show subject of message in history", async function (assert) {
+        QUnit.test("show subject of message in history", async function (assert) {
             assert.expect(3);
 
             const pyEnv = await startServer();
@@ -483,38 +474,19 @@ QUnit.module("mail", {}, function () {
                 notification_type: "inbox",
                 res_partner_id: pyEnv.currentPartnerId,
             });
-            const { afterEvent, messaging, openDiscuss } = await start({
+            const { openDiscuss } = await start({
                 discuss: {
                     params: {
-                        default_active_id: "mail.box_history",
+                        default_active_id: "history",
                     },
                 },
             });
-            await afterEvent({
-                eventName: "o-thread-view-hint-processed",
-                func: openDiscuss,
-                message: "should wait until history displayed its messages",
-                predicate: ({ hint, threadViewer }) => {
-                    return (
-                        hint.type === "messages-loaded" &&
-                        threadViewer.thread === messaging.history.thread
-                    );
-                },
-            });
-            assert.containsOnce(
-                document.body,
-                ".o-mail-message",
-                "should display a single message"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageView_subject",
-                "should display subject of the message"
-            );
+            await openDiscuss();
+            assert.containsOnce(target, ".o-mail-message");
+            assert.containsOnce(target, ".o-mail-message-subject");
             assert.strictEqual(
-                document.querySelector(".o_MessageView_subject").textContent,
-                "Subject: Salutations, voyageur",
-                "Subject of the message should be 'Salutations, voyageur'"
+                target.querySelector(".o-mail-message-subject").textContent,
+                "Subject: Salutations, voyageur"
             );
         });
 
@@ -603,7 +575,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "subject should not be shown when subject is the same as the thread name",
             async function (assert) {
                 assert.expect(1);
@@ -625,27 +597,21 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
+                const { openDiscuss } = await start({
+                    discuss: {
+                        default_active_id: "inbox",
                     },
                 });
+                await openDiscuss();
                 assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
+                    target,
+                    ".o-mail-message-subject",
                     "subject should not be shown when subject is the same as the thread name"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "subject should not be shown when subject is the same as the thread name and both have the same prefix",
             async function (assert) {
                 assert.expect(1);
@@ -667,27 +633,21 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
+                const { openDiscuss } = await start({
+                    discuss: {
+                        default_active_id: "inbox",
                     },
                 });
+                await openDiscuss();
                 assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
+                    target,
+                    ".o-mail-message-subject",
                     "subject should not be shown when subject is the same as the thread name and both have the same prefix"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             'subject should not be shown when subject differs from thread name only by the "Re:" prefix',
             async function (assert) {
                 assert.expect(1);
@@ -709,27 +669,21 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
+                const { openDiscuss } = await start({
+                    discuss: {
+                        default_active_id: "inbox",
                     },
                 });
+                await openDiscuss();
                 assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
+                    target,
+                    ".o-mail-message-subject",
                     "should not display subject when subject differs from thread name only by the 'Re:' prefix"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             'subject should not be shown when subject differs from thread name only by the "Fw:" and "Re:" prefix',
             async function (assert) {
                 assert.expect(1);
@@ -751,27 +705,21 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
+                const { openDiscuss } = await start({
+                    discuss: {
+                        default_active_id: "inbox",
                     },
                 });
+                await openDiscuss();
                 assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
+                    target,
+                    ".o-mail-message-subject",
                     "should not display subject when subject differs from thread name only by the 'Fw:' and Re:' prefix"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "subject should be shown when the thread name has an extra prefix compared to subject",
             async function (assert) {
                 assert.expect(1);
@@ -793,27 +741,21 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
+                const { openDiscuss } = await start({
+                    discuss: {
+                        default_active_id: "inbox",
                     },
                 });
+                await openDiscuss();
                 assert.containsOnce(
-                    document.body,
-                    ".o_MessageView_subject",
+                    target,
+                    ".o-mail-message-subject",
                     "subject should be shown when the thread name has an extra prefix compared to subject"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             'subject should not be shown when subject differs from thread name only by the "fw:" prefix and both contain another common prefix',
             async function (assert) {
                 assert.expect(1);
@@ -835,27 +777,21 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
+                const { openDiscuss } = await start({
+                    discuss: {
+                        default_active_id: "inbox",
                     },
                 });
+                await openDiscuss();
                 assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
+                    target,
+                    ".o-mail-message-subject",
                     "subject should not be shown when subject differs from thread name only by the 'fw:' prefix and both contain another common prefix"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             'subject should not be shown when subject differs from thread name only by the "Re: Re:" prefix',
             async function (assert) {
                 assert.expect(1);
@@ -877,21 +813,15 @@ QUnit.module("mail", {}, function () {
                     notification_type: "inbox",
                     res_partner_id: pyEnv.currentPartnerId,
                 });
-                const { afterEvent, messaging, openDiscuss } = await start();
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: openDiscuss,
-                    message: "should wait until inbox displayed its messages",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "messages-loaded" &&
-                            threadViewer.thread === messaging.inbox.thread
-                        );
+                const { openDiscuss } = await start({
+                    discuss: {
+                        default_active_id: "inbox",
                     },
                 });
+                await openDiscuss();
                 assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
+                    target,
+                    ".o-mail-message-subject",
                     "should not display subject when subject differs from thread name only by the 'Re: Re:'' prefix"
                 );
             }

@@ -7,6 +7,7 @@ import {
     start,
     startServer,
 } from "@mail/../tests/helpers/test_utils";
+
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -223,7 +224,7 @@ QUnit.module("mail", (hooks) => {
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "show message subject when subject is not the same as the thread name",
             async function (assert) {
                 assert.expect(3);
@@ -246,25 +247,17 @@ QUnit.module("mail", (hooks) => {
                     },
                 });
                 await openDiscuss();
-                assert.containsOnce(
-                    document.body,
-                    ".o-mail-message",
-                    "should display a single message"
-                );
-                assert.containsOnce(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "should display subject of the message"
-                );
+                assert.containsOnce(target, ".o-mail-message");
+                assert.containsOnce(target, ".o-mail-message-subject");
                 assert.strictEqual(
-                    document.querySelector(".o_MessageView_subject").textContent,
+                    document.querySelector(".o-mail-message-subject").textContent,
                     "Subject: Salutations, voyageur",
                     "Subject of the message should be 'Salutations, voyageur'"
                 );
             }
         );
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "do not show message subject when subject is the same as the thread name",
             async function (assert) {
                 assert.expect(1);
@@ -288,11 +281,7 @@ QUnit.module("mail", (hooks) => {
                 });
                 await openDiscuss();
 
-                assert.containsNone(
-                    document.body,
-                    ".o_MessageView_subject",
-                    "should not display subject of the message"
-                );
+                assert.containsNone(target, ".o-mail-message-subject");
             }
         );
 

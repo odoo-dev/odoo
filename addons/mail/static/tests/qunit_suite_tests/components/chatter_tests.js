@@ -9,11 +9,17 @@ import {
     startServer,
 } from "@mail/../tests/helpers/test_utils";
 
+import { getFixture } from "@web/../tests/helpers/utils";
 import { file } from "web.test_utils";
 
 const { createFile } = file;
+let target;
 
-QUnit.module("mail", {}, function () {
+QUnit.module("mail", (hooks) => {
+    hooks.beforeEach(async () => {
+        target = getFixture();
+    });
+
     QUnit.module("components", {}, function () {
         QUnit.module("chatter", {}, function () {
             QUnit.module("chatter_tests.js");
@@ -376,7 +382,7 @@ QUnit.module("mail", {}, function () {
                 }
             );
 
-            QUnit.skipRefactoring(
+            QUnit.test(
                 "should display subject when subject is not the same as the thread name",
                 async function (assert) {
                     assert.expect(2);
@@ -396,20 +402,15 @@ QUnit.module("mail", {}, function () {
                         views: [[false, "form"]],
                     });
 
-                    assert.containsOnce(
-                        document.body,
-                        ".o_MessageView_subject",
-                        "should display subject of the message"
-                    );
+                    assert.containsOnce(target, ".o-mail-message-subject");
                     assert.strictEqual(
-                        document.querySelector(".o_MessageView_subject").textContent,
-                        "Subject: Salutations, voyageur",
-                        "Subject of the message should be 'Salutations, voyageur'"
+                        target.querySelector(".o-mail-message-subject").textContent,
+                        "Subject: Salutations, voyageur"
                     );
                 }
             );
 
-            QUnit.test(
+            QUnit.skipRefactoring(
                 "should not display subject when subject is the same as the thread name",
                 async function (assert) {
                     assert.expect(1);
@@ -431,11 +432,7 @@ QUnit.module("mail", {}, function () {
                         views: [[false, "form"]],
                     });
 
-                    assert.containsNone(
-                        document.body,
-                        ".o_MessageView_subject",
-                        "should not display subject of the message"
-                    );
+                    assert.containsNone(target, ".o-mail-message-subject");
                 }
             );
 
