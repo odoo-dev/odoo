@@ -56,6 +56,8 @@ export class Messaging {
                 uid: user.context.uid,
                 avatarUrl: `/web/image?field=avatar_128&id=${user.userId}&model=res.users`,
             },
+            /** @type {Object.<number, import("@mail/new/core/channel_member_model").ChannelMember>} */
+            channelMembers: {},
             /** @type {Object.<number, import("@mail/new/core/follower_model").Follower>} */
             followers: {},
             /** @type {Object.<number, Partner>} */

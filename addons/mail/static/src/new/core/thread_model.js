@@ -6,6 +6,8 @@ import { Partner } from "./partner_model";
 export class Thread {
     /** @type {import("@mail/new/core/follower_model").Follower[]} */
     followers = [];
+    /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
+    channelMembers = [];
     /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
 
@@ -48,7 +50,6 @@ export class Thread {
             canLeave: canLeave || false,
             composer: null,
             serverLastSeenMsgByCurrentUser: serverData ? serverData.seen_message_id : null,
-            channelMembers: [],
         });
         for (const key in data) {
             this[key] = data[key];

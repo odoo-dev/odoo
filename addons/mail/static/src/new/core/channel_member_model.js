@@ -5,10 +5,25 @@
  * @typedef Data
  * @property {number} id
  * @property {number} partnerId
+ * @property {number} threadId
  */
 export class ChannelMember {
-    constructor(_state, { id, partnerId }) {
-        Object.assign(this, { _state, id, partnerId });
+    static insert(state, data) {
+        let channelMember = state.channelMembers[data.id];
+        if (!channelMember) {
+            channelMember = new ChannelMember();
+            channelMember._state = state;
+            state.channelMembers[data.id] = channelMember;
+        }
+        Object.assign(channelMember, {
+            id: data.id,
+            partnerId: data.partnerId,
+            threadId: data.threadId || channelMember.threadId,
+        });
+        if (!channelMember.thread.channelMembers.includes(channelMember)) {
+            channelMember.thread.channelMembers.push(channelMember);
+        }
+        return channelMember;
     }
 
     get partner() {
@@ -29,5 +44,9 @@ export class ChannelMember {
 
     get isCurrentUser() {
         return this.partner.isCurrentUser;
+    }
+
+    get thread() {
+        return this._state.threads[this.threadId];
     }
 }

@@ -22,7 +22,6 @@ export class ChannelMemberList extends Component {
             fields,
             {}
         );
-        const members = [];
         for (const mailChannelMember of results) {
             const partnerId = mailChannelMember.partner_id[0];
             const name = mailChannelMember.partner_id[1];
@@ -30,11 +29,12 @@ export class ChannelMemberList extends Component {
                 id: partnerId,
                 name: name,
             });
-            members.push(
-                new ChannelMember(this.messaging.state, { id: mailChannelMember.id, partnerId })
-            );
+            ChannelMember.insert(this.messaging.state, {
+                id: mailChannelMember.id,
+                partnerId,
+                threadId: props.thread.id,
+            });
         }
-        props.thread.channelMembers = members;
     }
 
     openChatAvatar(member) {
