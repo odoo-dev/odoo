@@ -5,7 +5,6 @@ import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
 import { prettifyMessageContent, convertBrToLineBreak } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
-import { Follower } from "@mail/new/core/follower_model";
 import { MessagingMenu } from "./messaging_menu_model";
 import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
@@ -823,7 +822,7 @@ export class Messaging {
             [follower.followedThread.resId],
             [follower.partner.id],
         ]);
-        Follower.delete(this.state, follower);
+        follower.delete();
     }
 
     // -------------------------------------------------------------------------

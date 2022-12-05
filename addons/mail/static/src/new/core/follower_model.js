@@ -42,12 +42,8 @@ export class Follower {
         return follower;
     }
 
-    /**
-     * @param {import("@mail/new/core/messaging").Messaging['state']} state
-     * @param {import("@mail/new/core/follower_model").Follower} follower
-     */
-    static delete(state, follower) {
-        delete state.followers[follower.id];
+    delete() {
+        delete this._state.followers[this.id];
     }
 
     /**
