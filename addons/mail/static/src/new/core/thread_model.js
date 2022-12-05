@@ -49,7 +49,7 @@ export class Thread {
             this[key] = data[key];
         }
         if (!this.composer) {
-            this.composer = Composer.insert(this._state, { threadId: this.id });
+            this.composer = new Composer(this._state, { threadId: this.id });
         }
         if (this.type === "channel") {
             this._state.discuss.channels.threads.push(this.id);

@@ -16,8 +16,7 @@ export class Partner {
         if (data.id in state.partners) {
             return state.partners[data.id];
         }
-        let partner = new Partner(data);
-        partner._state = state;
+        let partner = new Partner(state, data);
         state.partners[data.id] = partner;
         // return reactive version
         partner = state.partners[data.id];
@@ -32,7 +31,8 @@ export class Partner {
         return partner;
     }
 
-    constructor({ id, name }) {
+    constructor(state, { id, name }) {
+        this._state = state;
         Object.assign(this, { id, name, im_status: null });
     }
 
