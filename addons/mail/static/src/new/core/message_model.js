@@ -131,8 +131,12 @@ export class Message {
         }
     }
 
-    get url() {
-        return `${url("/web")}#model=${this.resModel}&id=${this.id}`;
+    get dateDay() {
+        let dateDay = this.dateTime.toLocaleString(DateTime.DATE_FULL);
+        if (dateDay === DateTime.now().toLocaleString(DateTime.DATE_FULL)) {
+            dateDay = _t("Today");
+        }
+        return dateDay;
     }
 
     get dateTime() {
@@ -141,14 +145,6 @@ export class Message {
 
     get dateTimeStr() {
         return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
-    }
-
-    get dateDay() {
-        let dateDay = this.dateTime.toLocaleString(DateTime.DATE_FULL);
-        if (dateDay === DateTime.now().toLocaleString(DateTime.DATE_FULL)) {
-            dateDay = _t("Today");
-        }
-        return dateDay;
     }
 
     get isSubjectSimilarToOriginThreadName() {
@@ -181,5 +177,9 @@ export class Message {
             return this.resModel + "," + this.resId;
         })();
         return this._state.threads[threadLocalId];
+    }
+
+    get url() {
+        return `${url("/web")}#model=${this.resModel}&id=${this.id}`;
     }
 }
