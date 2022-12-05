@@ -5,6 +5,7 @@ import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
 import { prettifyMessageContent, convertBrToLineBreak } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
+import { Follower } from "@mail/new/core/follower_model";
 import { MessagingMenu } from "./messaging_menu_model";
 import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
@@ -812,6 +813,17 @@ export class Messaging {
         return this.orm.call("mail.channel", "channel_change_description", [[thread.id]], {
             description,
         });
+    }
+
+    /**
+     * @param {import("@mail/new/core/follower_model").Follower} follower
+     */
+    async removeFollower(follower) {
+        await this.orm.call(follower.followedThread.resModel, "message_unsubscribe", [
+            [follower.followedThread.resId],
+            [follower.partner.id],
+        ]);
+        Follower.delete(this.state, follower);
     }
 
     // -------------------------------------------------------------------------

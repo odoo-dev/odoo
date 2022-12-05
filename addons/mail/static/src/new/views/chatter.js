@@ -163,12 +163,12 @@ export class Chatter extends Component {
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
     }
 
+    /**
+     * @param {MouseEvent} ev
+     * @param {import("@mail/new/core/follower_model").Follower} follower
+     */
     async onClickRemove(ev, follower) {
-        await this.orm.call(follower.followedThread.resModel, "message_unsubscribe", [
-            [follower.followedThread.resId],
-            [follower.partner.id],
-        ]);
-        Follower.delete(this.messaging.state, follower);
+        await this.messaging.removeFollower(follower);
         this.state.followers.splice(this.state.followers.indexOf(follower), 1);
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
         // TODO reload parent view (message_follower_ids)
