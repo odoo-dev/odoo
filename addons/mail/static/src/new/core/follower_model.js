@@ -39,10 +39,17 @@ export class Follower {
             partner: Partner.insert(state, data.partner),
             _state: state,
         });
+        if (!follower.followedThread.followers.includes(follower)) {
+            follower.followedThread.followers.push(follower);
+        }
         return follower;
     }
 
     delete() {
+        const index = this.followedThread.followers.indexOf(this);
+        if (index !== -1) {
+            this.followedThread.followers.splice(index, 1);
+        }
         delete this._state.followers[this.id];
     }
 

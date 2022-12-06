@@ -4,6 +4,9 @@ import { Composer } from "./composer_model";
 import { Partner } from "./partner_model";
 
 export class Thread {
+    /** @type {import("@mail/new/core/follower_model").Follower[]} */
+    followers = [];
+
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data

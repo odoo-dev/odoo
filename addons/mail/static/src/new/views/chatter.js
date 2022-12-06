@@ -34,8 +34,6 @@ export class Chatter extends Component {
             attachments: [],
             showActivities: true,
             composing: false, // false, 'message' or 'note'
-            /** @type {import("@mail/new/core/follower_model").Follower[]} */
-            followers: [],
             isAttachmentBoxOpened: this.props.isAttachmentBoxOpenedInitially,
             isLoadingAttachments: false,
         });
@@ -87,7 +85,7 @@ export class Chatter extends Component {
 
     get isFollower() {
         return Boolean(
-            this.state.followers.find((f) => f.partner.id === this.messaging.state.user.partnerId)
+            this.thread.followers.find((f) => f.partner.id === this.messaging.state.user.partnerId)
         );
     }
 
@@ -114,12 +112,12 @@ export class Chatter extends Component {
                 this.state.isLoadingAttachments = false;
             }
             if ("followers" in result) {
-                this.state.followers = result.followers.map((followerData) =>
+                for (const followerData of result.followers) {
                     Follower.insert(this.messaging.state, {
                         followedThread: this.thread,
                         ...followerData,
-                    })
-                );
+                    });
+                }
             }
         });
     }
@@ -169,7 +167,6 @@ export class Chatter extends Component {
      */
     async onClickRemove(ev, follower) {
         await this.messaging.removeFollower(follower);
-        this.state.followers.splice(this.state.followers.indexOf(follower), 1);
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
         // TODO reload parent view (message_follower_ids)
         document.body.click(); // hack to close dropdown
