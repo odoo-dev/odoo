@@ -172,7 +172,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("click on edit follower", async function (assert) {
+        QUnit.test("click on edit follower", async function (assert) {
             assert.expect(5);
 
             const pyEnv = await startServer();
@@ -224,12 +224,12 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerSubtypeList",
+                ".o-mail-follower-subtype-dialog",
                 "A dialog allowing to edit follower subtypes should have been created"
             );
         });
 
-        QUnit.skipRefactoring("edit follower and close subtype dialog", async function (assert) {
+        QUnit.test("edit follower and close subtype dialog", async function (assert) {
             assert.expect(6);
 
             const pyEnv = await startServer();
@@ -244,16 +244,6 @@ QUnit.module("mail", {}, function () {
                 async mockRPC(route, args) {
                     if (route.includes("/mail/read_subscription_data")) {
                         assert.step("fetch_subtypes");
-                        return [
-                            {
-                                default: true,
-                                followed: true,
-                                internal: false,
-                                id: 1,
-                                name: "Dummy test",
-                                res_model: "res.partner",
-                            },
-                        ];
                     }
                 },
             });
@@ -281,11 +271,11 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsOnce(
                 document.body,
-                ".o_FollowerSubtypeList",
+                ".o-mail-follower-subtype-dialog",
                 "dialog allowing to edit follower subtypes should have been created"
             );
 
-            await click(".o_FollowerSubtypeList_closeButton");
+            await click(".o-mail-follower-subtype-dialog-close");
             assert.containsNone(
                 document.body,
                 ".o_DialogManager_dialog",

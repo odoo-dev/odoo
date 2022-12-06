@@ -21,6 +21,7 @@ import { FileUploader } from "@web/views/fields/file_handler";
 import { dataUrlToBlob, isDragSourceExternalFile } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
+import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 
 export class Chatter extends Component {
     /**
@@ -136,10 +137,7 @@ export class Chatter extends Component {
             },
         };
         this.env.services.action.doAction(action, {
-            onClose: () => {
-                this.load(this.props.resId, ["followers", "suggestedRecipients"]);
-                // TODO reload parent view if applicable (hasParentReloadOnFollowersUpdate)
-            },
+            onClose: () => this.onFollowerChanged(),
         });
     }
 
@@ -148,8 +146,15 @@ export class Chatter extends Component {
         document.body.click(); // hack to close dropdown
     }
 
-    onClickEdit(ev, follower) {
-        // follower.showSubtypes(); // TODO
+    /**
+     * @param {MouseEvent} ev
+     * @param {import("@mail/new/core/follower_model").Follower} follower
+     */
+    async onClickEdit(ev, follower) {
+        this.env.services.dialog.add(FollowerSubtypeDialog, {
+            follower,
+            onFollowerChanged: () => this.onFollowerChanged(),
+        });
         document.body.click(); // hack to close dropdown
     }
 
@@ -157,7 +162,7 @@ export class Chatter extends Component {
         await this.orm.call(this.props.resModel, "message_subscribe", [[this.props.resId]], {
             partner_ids: [this.messaging.state.user.partnerId],
         });
-        this.load(this.props.resId, ["followers", "suggestedRecipients"]);
+        this.onFollowerChanged();
     }
 
     /**
@@ -166,13 +171,17 @@ export class Chatter extends Component {
      */
     async onClickRemove(ev, follower) {
         await this.messaging.removeFollower(follower);
-        this.load(this.props.resId, ["followers", "suggestedRecipients"]);
-        // TODO reload parent view (message_follower_ids)
+        this.onFollowerChanged();
         document.body.click(); // hack to close dropdown
     }
 
     async onClickUnfollow() {
         await this.messaging.removeFollower(this.thread.followerOfCurrentUser);
+        this.onFollowerChanged();
+    }
+
+    onFollowerChanged() {
+        // TODO reload parent view (message_follower_ids / hasParentReloadOnFollowersUpdate)
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
     }
 

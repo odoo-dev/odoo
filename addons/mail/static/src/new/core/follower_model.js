@@ -21,6 +21,7 @@ export class Follower {
     partner;
     /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
+
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {import("@mail/new/core/follower_model").Data} data
