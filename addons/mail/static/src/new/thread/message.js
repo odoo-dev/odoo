@@ -55,7 +55,7 @@ export class Message extends Component {
         if (!this.props.hasActions) {
             return false;
         }
-        if (!this.user.isAdmin && this.message.author.id !== this.user.partnerId) {
+        if (!this.user.isAdmin && !this.message.isAuthor) {
             return false;
         }
         if (this.message.type !== "comment") {
