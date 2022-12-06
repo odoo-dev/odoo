@@ -23,6 +23,11 @@ import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
 
 export class Chatter extends Component {
+    /**
+     * @type {import("@mail/new/core/thread_model").Thread}
+     */
+    thread;
+
     setup() {
         this.action = useService("action");
         this.activity = useService("mail.activity");
@@ -81,12 +86,6 @@ export class Chatter extends Component {
      */
     get isDisabled() {
         return !this.props.resId || !this.thread.hasReadAccess;
-    }
-
-    get isFollower() {
-        return Boolean(
-            this.thread.followers.find((f) => f.partner.id === this.messaging.state.user.partnerId)
-        );
     }
 
     load(resId = this.props.resId, requestList = ["followers", "attachments", "messages"]) {
@@ -173,9 +172,7 @@ export class Chatter extends Component {
     }
 
     async onClickUnfollow() {
-        await this.orm.call(this.props.resModel, "message_unsubscribe", [[this.props.resId]], {
-            partner_ids: [this.messaging.state.user.partnerId],
-        });
+        await this.messaging.removeFollower(this.thread.followerOfCurrentUser);
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
     }
 

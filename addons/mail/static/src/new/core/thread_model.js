@@ -6,6 +6,8 @@ import { Partner } from "./partner_model";
 export class Thread {
     /** @type {import("@mail/new/core/follower_model").Follower[]} */
     followers = [];
+    /** @type {import("@mail/new/core/messaging").Messaging['state']} */
+    _state;
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
@@ -76,6 +78,13 @@ export class Thread {
                 }
             }
         }
+    }
+
+    /**
+     * @returns {import("@mail/new/core/follower_model").Follower}
+     */
+    get followerOfCurrentUser() {
+        return this.followers.find((f) => f.partner.id === this._state.user.partnerId);
     }
 
     get imgUrl() {
