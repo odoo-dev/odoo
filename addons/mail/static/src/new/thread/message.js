@@ -15,7 +15,41 @@ import { MessageDeleteDialog } from "../thread/message_delete_dialog";
 import { LinkPreviewList } from "./link_preview/link_preview_list";
 import { RelativeTime } from "./relative_time";
 
+/**
+ * @typedef {Object} Props
+ * @property {boolean} [hasActions]
+ * @property {boolean} [grayedOut]
+ * @property {boolean} [highlighted]
+ * @property {function} [onParentMessageClick]
+ * @property {import("@mail/new/core/message_model").Message} message
+ * @property {boolean} [squashed]
+ * @property {number} [threadId]
+ * @extends {Component<Props, Env>}
+ */
 export class Message extends Component {
+    static components = {
+        AttachmentList,
+        Composer,
+        LinkPreviewList,
+        MessageInReplyTo,
+        PartnerImStatus,
+        RelativeTime,
+    };
+    static defaultProps = {
+        hasActions: true,
+        onParentMessageClick: () => {},
+    };
+    static props = [
+        "hasActions?",
+        "grayedOut?",
+        "highlighted?",
+        "onParentMessageClick?",
+        "message",
+        "squashed?",
+        "threadId?",
+    ];
+    static template = "mail.message";
+
     setup() {
         this.state = useState({
             isEditing: false,
@@ -142,25 +176,3 @@ export class Message extends Component {
         this.state.isEditing = false;
     }
 }
-
-Object.assign(Message, {
-    components: {
-        AttachmentList,
-        Composer,
-        MessageInReplyTo,
-        RelativeTime,
-        LinkPreviewList,
-        PartnerImStatus,
-    },
-    defaultProps: { hasActions: true, onParentMessageClick: () => {} },
-    props: [
-        "hasActions?",
-        "grayedOut?",
-        "highlighted?",
-        "onParentMessageClick?",
-        "message",
-        "squashed?",
-        "threadId?",
-    ],
-    template: "mail.message",
-});
