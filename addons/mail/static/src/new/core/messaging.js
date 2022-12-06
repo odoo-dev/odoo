@@ -741,8 +741,16 @@ export class Messaging {
         await this.orm.call("mail.message", "toggle_message_starred", [[messageId]]);
     }
 
+    /**
+     * @param {Message} message
+     * @param {boolean} isStarred
+     */
     updateMessageStarredState(message, isStarred) {
-        message.isStarred = isStarred;
+        if (message.isStarred) {
+            removeFromArray(message.starredPartnerIds, this.state.user.partnerId);
+        } else {
+            message.starredPartnerIds.push(this.state.user.partnerId);
+        }
         if (isStarred) {
             this.state.discuss.starred.counter++;
             this.state.discuss.starred.messages.push(message.id);

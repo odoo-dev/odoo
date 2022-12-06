@@ -30,8 +30,6 @@ export class Message {
     /** @type {boolean} */
     isNotification;
     /** @type {boolean} */
-    isStarred;
-    /** @type {boolean} */
     isTransient;
     /** @type {LinkPreview[]} */
     linkPreviews;
@@ -47,6 +45,8 @@ export class Message {
     resModel;
     /** @type {string} */
     subject;
+    /** @type {number[]} */
+    starredPartnerIds;
     /** @type {string} */
     subtypeDescription;
     /** @type {Object[]} */
@@ -107,7 +107,6 @@ export class Message {
             isDiscussion,
             isNote,
             isNotification: type === "notification" && resModel === "mail.channel",
-            isStarred: starred_partner_ids.includes(this._state.user.partnerId),
             isTransient,
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
             parentMessage: this.parentMessage
@@ -119,6 +118,7 @@ export class Message {
             resModel,
             subject,
             subtypeDescription,
+            starredPartnerIds: starred_partner_ids,
             trackingValues: data.trackingValues || [],
             type,
         });
@@ -137,6 +137,10 @@ export class Message {
             dateDay = _t("Today");
         }
         return dateDay;
+    }
+
+    get isStarred() {
+        return this.starredPartnerIds.includes(this._state.user.partnerId);
     }
 
     get dateTime() {
