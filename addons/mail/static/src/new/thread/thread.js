@@ -21,13 +21,13 @@ export class Thread extends Component {
         this.messagesRef = useRef("messages");
         this.pendingLoadMore = false;
         this.loadMoreState = useVisible("load-more", () => this.loadMore());
-        this.oldestMessageId = null;
+        this.oldestNonTransientMessageId = null;
         useScrollSnapshot("messages", {
             onWillPatch: () => {
                 return {
                     hasMoreMsgsAbove:
-                        this.thread.oldestMsgId !== this.oldestMessageId &&
-                        this.props.order === "asc",
+                        this.thread.oldestNonTransientMessage?.id !==
+                            this.oldestNonTransientMessage && this.props.order === "asc",
                 };
             },
             onPatched: ({ hasMoreMsgsAbove, scrollTop, scrollHeight }) => {
@@ -37,14 +37,14 @@ export class Thread extends Component {
                     el.scrollTop = scrollTop + el.scrollHeight - scrollHeight;
                     this.pendingLoadMore = false;
                 }
-                this.oldestMessageId = this.thread.oldestMsgId;
+                this.oldestNonTransientMessage = this.thread.oldestNonTransientMessage?.id;
                 if (!wasPendingLoadMore) {
                     this.loadMore();
                 }
             },
         });
         onMounted(() => {
-            this.oldestMessageId = this.thread.oldestMsgId;
+            this.oldestNonTransientMessage = this.thread.oldestNonTransientMessage?.id;
             this.loadMore();
         });
         onWillStart(() => this.requestMessages(this.props.id));

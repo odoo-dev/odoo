@@ -122,15 +122,28 @@ export class Thread {
         return Math.max(...this.messages);
     }
 
+    get mostRecentNonTransientMessage() {
+        if (this.messages.length === 0) {
+            return undefined;
+        }
+        const oldestNonTransientMessageId = [...this.messages]
+            .reverse()
+            .find((messageId) => Number.isInteger(messageId));
+        return this._state.messages[oldestNonTransientMessageId];
+    }
+
     get isEmpty() {
         return this.messages.length === 0;
     }
 
-    get oldestMsgId() {
+    get oldestNonTransientMessage() {
         if (this.messages.length === 0) {
             return undefined;
         }
-        return Math.min(...this.messages);
+        const oldestNonTransientMessageId = this.messages.find((messageId) =>
+            Number.isInteger(messageId)
+        );
+        return this._state.messages[oldestNonTransientMessageId];
     }
 
     sortMessages() {
