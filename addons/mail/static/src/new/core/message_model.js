@@ -28,8 +28,6 @@ export class Message {
     /** @type {boolean} */
     isNote;
     /** @type {boolean} */
-    isNotification;
-    /** @type {boolean} */
     isStarred;
     /** @type {boolean} */
     isTransient;
@@ -106,7 +104,6 @@ export class Message {
             body,
             isDiscussion,
             isNote,
-            isNotification: type === "notification" && resModel === "mail.channel",
             isStarred: starred_partner_ids.includes(this._state.user.partnerId),
             isTransient,
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
@@ -129,6 +126,10 @@ export class Message {
                 thread.sortMessages();
             }
         }
+    }
+
+    get isNotification() {
+        return this.type === "notification" && this.resModel === "mail.channel";
     }
 
     get dateDay() {
