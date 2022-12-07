@@ -9,6 +9,7 @@ import { useService } from "@web/core/utils/hooks";
 import { CallUI } from "../rtc/call_ui";
 import { CallSettings } from "../rtc/call_settings";
 import { ChannelMemberList } from "../discuss/channel_member_list";
+import { ChatWindowIcon } from "./chat_window_icon";
 
 export class ChatWindow extends Component {
     setup() {
@@ -57,7 +58,7 @@ export class ChatWindow extends Component {
 }
 
 Object.assign(ChatWindow, {
-    components: { Thread, Composer, CallUI, CallSettings, ChannelMemberList },
+    components: { Thread, Composer, CallUI, CallSettings, ChannelMemberList, ChatWindowIcon },
     props: ["chatWindow", "right?"],
     template: "mail.chat_window",
 });

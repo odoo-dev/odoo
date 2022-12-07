@@ -34,14 +34,15 @@ export class Thread {
     update(data) {
         const { canLeave, id, name, serverData, type } = data;
         Object.assign(this, {
-            hasWriteAccess: serverData && serverData.hasWriteAccess,
+            authorizedGroupFullName: serverData?.authorizedGroupFullName,
+            hasWriteAccess: serverData?.hasWriteAccess,
             id,
             name,
             customName: false,
             type,
             counter: 0,
             isUnread: false,
-            is_pinned: serverData && serverData.is_pinned,
+            is_pinned: serverData?.is_pinned,
             icon: false,
             loadMore: false,
             description: false,

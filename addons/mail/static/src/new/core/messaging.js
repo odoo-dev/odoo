@@ -68,6 +68,7 @@ export class Messaging {
             partners: {},
             partnerRoot: {},
             messages: {},
+            /** @type {{[key: string|number]: Thread}} */
             threads: {},
             users: {},
             internalUserGroupId: null,
@@ -152,6 +153,13 @@ export class Messaging {
             this.isReady.resolve();
             this.initCommands();
         });
+    }
+
+    /**
+     * @param {number} channel_id
+     */
+    isTyping(channel_id) {
+        return Boolean(this.state.areTyping[channel_id]);
     }
 
     /**

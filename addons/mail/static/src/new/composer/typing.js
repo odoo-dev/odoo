@@ -4,20 +4,32 @@ import { Component } from "@odoo/owl";
 import { sprintf } from "@web/core/utils/strings";
 import { useMessaging } from "../messaging_hook";
 
+/**
+ * @typedef {Object} Props
+ * @property {number} channel_id
+ * @property {string} size
+ * @property {boolean} displayText
+ * @extends {Component<Props, Env>}
+ */
 export class Typing extends Component {
     static defaultProps = {
         size: "small",
+        displayText: true,
     };
-    static props = ["channel_id", "size?"];
+    static props = ["channel_id", "size?", "displayText?"];
     static template = "mail.typing";
 
     setup() {
         this.messaging = useMessaging();
     }
 
-    /** @type {boolean|string} */
+    get isTyping() {
+        return this.messaging.isTyping(this.props.channel_id);
+    }
+
+    /** @returns {boolean|string} */
     get text() {
-        if (this.messaging.state.areTyping[this.props.channel_id]) {
+        if (this.isTyping) {
             const channelAreTyping = this.messaging.state.areTyping[this.props.channel_id];
             if (channelAreTyping.length === 1) {
                 return sprintf(this.env._t("%s is typing..."), channelAreTyping[0]);

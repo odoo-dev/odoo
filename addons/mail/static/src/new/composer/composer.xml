@@ -63,9 +63,9 @@
                     unlinkAttachment="attachmentUploader.unlink"
                     imagesHeight="50" />
             </div>
-            <div t-if="thread" class="o-mail-composer-core-footer overflow-auto" t-att-class="{ 'o-composer-is-compact': compact, 'ms-0': !compact }">
+            <div t-if="thread and !env.inChatWindow" class="o-mail-composer-core-footer overflow-auto" t-att-class="{ 'o-composer-is-compact': compact, 'ms-0': !compact }">
                 <div class="o-mail-composer-is-typing">
-                    <Typing channel_id="thread.id" />
+                    <Typing channel_id="thread.id" size="'medium'" />
                 </div>
             </div>
         </div>

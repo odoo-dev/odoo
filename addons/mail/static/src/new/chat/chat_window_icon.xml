@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.chat_window_icon" owl="1">
+        <div class="o-mail-chatwindow-icon d-flex justify-content-center flex-shrink-0 ms-3 me-1 my-0">
+            <t t-if="thread.type === 'channel'">
+                <div t-if="thread.authorizedGroupFullName" class="o_ThreadIconView_groupRestrictedChannel fa fa-fw fa-hashtag" t-att-title="thread.accessRestrictedToGroupText"/>
+                <div t-if="!thread.authorizedGroupFullName" class="o_ThreadIconView_publicChannel fa fa-fw fa-globe" title="Public Channel"/>
+            </t>
+            <t t-elif="thread.type === 'chat' and chatPartner">
+                <Typing t-if="isTyping" channel_id="thread.id" size="'small'" displayText="false"/>
+                <div t-elif="chatPartner.im_status === 'online'" class="o-mail-chatwindow-icon-online fa fa-fw fa-circle" title="Online"/>
+                <div t-elif="chatPartner.im_status === 'offline'" class="o-mail-chatwindow-icon-offline fa fa-fw fa-circle-o" title="Offline"/>
+                <div t-elif="chatPartner.im_status === 'away'" class="o-mail-chatwindow-icon-away fa fa-fw fa-circle text-warning" title="Away"/>
+                <div t-elif="chatPartner === messaging.partnerRoot" class="o-mail-chatwindow-icon-online fa fa-fw fa-heart" title="Bot"/>
+                <t t-else="" name="noImStatusCondition">
+                    <div class="o-mail-chatwindow-icon-noImStatus fa fa-fw fa-question-circle" title="No IM status available"/>
+                </t>
+            </t>
+            <div t-elif="thread.type === 'group'" class="o-mail-chatwindow-icon fa fa-fw fa-users" title="Grouped Chat"/>
+            <t t-elif="thread.mailbox">
+                <div t-if="thread.mailbox === messaging.inbox" class="o-mail-chatwindow-icon-mailboxInbox fa fa-fw fa-inbox"/>
+                <div t-elif="thread.mailbox === messaging.starred" class="o-mail-chatwindow-icon-mailboxStarred fa fa-fw fa-star-o"/>
+                <div t-elif="thread.mailbox === messaging.history" class="o-mail-chatwindow-icon-mailboxHistory fa fa-fw fa-history"/>
+            </t>
+        </div>
+    </t>
+
+</templates>
