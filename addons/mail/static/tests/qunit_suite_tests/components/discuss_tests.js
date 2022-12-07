@@ -794,7 +794,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("sidebar: chat custom name", async function (assert) {
+        QUnit.test("sidebar: chat custom name", async function (assert) {
             assert.expect(1);
 
             const pyEnv = await startServer();
@@ -815,11 +815,9 @@ QUnit.module("mail", {}, function () {
             });
             const { openDiscuss } = await start();
             await openDiscuss();
-            const chat = document.querySelector(
-                `.o-mail-category-chat .o_DiscussSidebarCategory_item`
-            );
+            const chat = document.querySelector(`.o-mail-category-item`);
             assert.strictEqual(
-                chat.querySelector(`:scope .o_DiscussSidebarCategoryItem_name`).textContent,
+                chat.querySelector("span").textContent,
                 "Marc",
                 "chat should have custom name as name"
             );
