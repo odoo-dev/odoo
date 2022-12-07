@@ -336,10 +336,16 @@ export function useSelection({ refName, model, preserveOnClickAwayPredicate = ()
         }
     }
     function clear() {
+        if (!ref.el) {
+            return;
+        }
         ref.el.selectionStart = ref.el.selectionEnd = ref.el.value.length;
     }
     onExternalClick(refName, async (ev) => {
         if (await preserveOnClickAwayPredicate(ev)) {
+            return;
+        }
+        if (!ref.el) {
             return;
         }
         clear();
@@ -358,7 +364,7 @@ export function useSelection({ refName, model, preserveOnClickAwayPredicate = ()
     return {
         clear,
         restore() {
-            ref.el.setSelectionRange(model.start, model.end, model.direction);
+            ref.el?.setSelectionRange(model.start, model.end, model.direction);
         },
     };
 }
