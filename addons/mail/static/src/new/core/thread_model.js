@@ -2,6 +2,7 @@
 
 import { Composer } from "./composer_model";
 import { Partner } from "./partner_model";
+import { _t } from "@web/core/l10n/translation";
 
 export class Thread {
     /** @type {import("@mail/new/core/follower_model").Follower[]} */
@@ -40,6 +41,7 @@ export class Thread {
             hasWriteAccess: serverData && serverData.hasWriteAccess,
             id,
             name,
+            customName: false,
             type,
             counter: 0,
             isUnread: false,
@@ -78,6 +80,7 @@ export class Thread {
                         this.name = this._state.partners[elem.persona.partner.id].name;
                     }
                 }
+                this.customName = serverData.channel.custom_channel_name;
             }
         }
     }
@@ -177,5 +180,15 @@ export class Thread {
 
     get unknownMemberCount() {
         return this.memberCount - this.channelMembers.length;
+    }
+
+    get displayName() {
+        if (this.type === "chat" && this.chatPartnerId) {
+            return this.customName || this.name;
+        }
+        if (this.type === "group" && !this.name) {
+            return this.channelMembers.map((channelMember) => channelMember.name).join(_t(", "));
+        }
+        return this.name;
     }
 }

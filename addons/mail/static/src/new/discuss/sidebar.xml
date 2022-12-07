@@ -110,7 +110,7 @@
             <PartnerImStatus t-if="thread.type === 'chat'" className="'o-mail-category-im-status position-absolute bottom-0 end-0'" partner="messaging.state.partners[thread.chatPartnerId]"/>
         </div>
         <span class="ms-3 me-2 text-truncate" t-att-class="{ 'o-item-unread fw-bolder': thread.isUnread }">
-            <t t-esc="thread.chatPartnerId ? messaging.state.partners[thread.chatPartnerId].name : thread.name"/>
+            <t t-esc="thread.displayName"/>
         </span>
         <div class="flex-grow-1"/>
         <div class="o-mail-commands d-none ms-1 me-3">

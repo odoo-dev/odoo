@@ -13,7 +13,7 @@
                         className="'o-mail-discuss-thread-name lead fw-bold flex-shrink-1'"
                         disabled="!thread.isRenameable"
                         onValidate.bind="renameThread"
-                        value="thread.name"
+                        value="thread.displayName"
                     />
                     <t t-if="thread.isDescriptionChangeable">
                         <div class="flex-shrink-0 mx-2 py-2 border-start"/>

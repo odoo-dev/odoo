@@ -836,7 +836,7 @@ export class Messaging {
             thread.name = name;
             await this.orm.call("mail.channel", "channel_rename", [[thread.id]], { name });
         } else if (thread.type === "chat") {
-            thread.name = name;
+            thread.customName = name;
             await this.orm.call("mail.channel", "channel_set_custom_name", [[thread.id]], { name });
         }
     }

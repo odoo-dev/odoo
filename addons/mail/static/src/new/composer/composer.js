@@ -141,7 +141,7 @@ export class Composer extends Component {
         }
         if (this.thread) {
             return sprintf(this.env._t("Message #%(thread name)s…"), {
-                "thread name": this.thread.name,
+                "thread name": this.thread.displayName,
             });
         }
         return "";
