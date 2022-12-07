@@ -750,7 +750,7 @@ QUnit.module("mail", {}, function () {
             assert.verifySteps(["activity_send_mail"], "should have called activity_send_mail rpc");
         });
 
-        QUnit.skipRefactoring("activity upload document is available", async function (assert) {
+        QUnit.test("activity upload document is available", async function (assert) {
             assert.expect(3);
 
             const pyEnv = await startServer();
@@ -765,26 +765,19 @@ QUnit.module("mail", {}, function () {
                 res_id: resPartnerId1,
                 res_model: "res.partner",
             });
-            const { messaging, openView } = await start();
+            const { openView } = await start();
             await openView({
                 res_id: resPartnerId1,
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
-                1,
-                "should have activity component"
+            assert.containsOnce(
+                document.body,
+                ".o-mail-activity-name:contains('Upload Document')",
+                "Should have upload document activity"
             );
-            assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_uploadButton").length,
-                1,
-                "should have activity upload button"
-            );
-            assert.ok(
-                messaging.models["Chatter"].all()[0].activityViews[0].fileUploader,
-                "should have a file uploader"
-            );
+            assert.containsOnce(document.body, ".fa-upload", "Should have activity upload button");
+            assert.containsOnce(document.body, ".o_input_file", "Should have a file uploader");
         });
 
         QUnit.skipRefactoring("activity click on mark as done", async function (assert) {

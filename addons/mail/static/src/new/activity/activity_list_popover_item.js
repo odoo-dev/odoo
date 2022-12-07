@@ -4,7 +4,11 @@ import { ActivityMarkAsDone } from "@mail/new/activity/activity_markasdone_popov
 
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
+import { FileUploader } from "@web/views/fields/file_handler";
+
 import { computeDelay } from "@mail/new/utils/dates";
+import { useAttachmentUploader } from "@mail/new/utils/hooks";
+import { dataUrlToBlob } from "@mail/new/utils/misc";
 
 import { Component, useState } from "@odoo/owl";
 
@@ -12,6 +16,14 @@ export class ActivityListPopoverItem extends Component {
     setup() {
         this.user = useService("user");
         this.state = useState({ hasMarkDoneView: false });
+        if (this.props.activity.activity_category === "upload_file") {
+            this.uploadDocument = useAttachmentUploader({
+                threadId: this.env.services["mail.messaging"].getChatterThread(
+                    this.props.activity.res_model,
+                    this.props.activity.res_id
+                ).id,
+            }).upload;
+        }
         this.closeMarkAsDone = this.closeMarkAsDone.bind(this);
     }
 
@@ -61,13 +73,17 @@ export class ActivityListPopoverItem extends Component {
         this.state.hasMarkDoneView = !this.state.hasMarkDoneView;
     }
 
-    onClickUploadDocument() {
-        // todo open file uploader
+    async onFileUploaded({ data, name, type }) {
+        const attachmentId = (
+            await this.uploadDocument(new File([dataUrlToBlob(data, type)], name, { type }))
+        ).id;
+        await this.env.services["mail.activity"].markAsDone(this.props.activity.id, [attachmentId]);
+        this.props.onActivityChanged();
     }
 }
 
 Object.assign(ActivityListPopoverItem, {
-    components: { ActivityMarkAsDone },
+    components: { ActivityMarkAsDone, FileUploader },
     props: [
         "activity",
         "onActivityChanged",

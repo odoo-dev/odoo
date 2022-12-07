@@ -12,6 +12,8 @@ import {
     useRef,
     useState,
 } from "@odoo/owl";
+
+import { Deferred } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { removeFromArrayWithPredicate } from "./arrays";
 import { Thread } from "../core/thread_model";
@@ -220,6 +222,7 @@ export function useAttachmentUploader({ threadId, messageId }) {
     const notification = useService("notification");
     const messaging = useService("mail.messaging");
     let abortByUploadId = {};
+    let deferredByUploadId = {};
     const uploadingAttachmentIds = new Set();
     const state = useState({
         attachments: [],
@@ -228,7 +231,7 @@ export function useAttachmentUploader({ threadId, messageId }) {
                 messaging.state.threads[threadId || messaging.state.messages[messageId].resId];
             const tmpId = messaging.nextId++;
             uploadingAttachmentIds.add(tmpId);
-            upload("/mail/attachment/upload", [file], {
+            const { id } = await upload("/mail/attachment/upload", [file], {
                 buildFormData(formData) {
                     formData.append("thread_id", thread.resId || thread.id);
                     formData.append("thread_model", thread.resModel || "mail.channel");
@@ -240,9 +243,14 @@ export function useAttachmentUploader({ threadId, messageId }) {
                     throw e;
                 }
             });
+            const uploadDoneDeferred = new Deferred();
+            deferredByUploadId[id] = uploadDoneDeferred;
+            return uploadDoneDeferred;
         },
         async unlink(attachment) {
             const abort = abortByUploadId[attachment.id];
+            delete abortByUploadId[attachment.id];
+            delete deferredByUploadId[attachment.id];
             if (abort) {
                 abort();
                 return;
@@ -258,6 +266,7 @@ export function useAttachmentUploader({ threadId, messageId }) {
         },
         reset() {
             abortByUploadId = {};
+            deferredByUploadId = {};
             uploadingAttachmentIds.clear();
             // prevent queuing of a render that will never be resolved.
             if (status(component) !== "destroyed") {
@@ -320,9 +329,12 @@ export function useAttachmentUploader({ threadId, messageId }) {
         } else {
             state.attachments.push(attachment);
         }
+        deferredByUploadId[upload.id].resolve(attachment);
+        delete deferredByUploadId[upload.id];
     });
     useBus(bus, "FILE_UPLOAD_ERROR", ({ detail: { upload } }) => {
         delete abortByUploadId[upload.id];
+        delete deferredByUploadId[upload.id];
         uploadingAttachmentIds.delete(parseInt(upload.data.get("temporary_id")));
     });
 

@@ -52,8 +52,9 @@ export const activityService = {
             });
         }
 
-        async function markAsDone(id) {
+        async function markAsDone(id, attachmentIds = []) {
             await orm.call("mail.activity", "action_feedback", [[id]], {
+                attachment_ids: attachmentIds,
                 feedback: state.feedback[id],
             });
         }

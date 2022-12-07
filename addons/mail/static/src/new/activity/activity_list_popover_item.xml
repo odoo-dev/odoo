@@ -14,7 +14,11 @@
                     <i class="fa fa-pencil"/>
                 </button>
                 <t t-if="props.activity.can_write">
-                    <button t-if="hasFileUploader" class="o-activity-list-popover-item-action-link btn btn-link shadow-none fs-4 fa fa-upload" title="Upload file" aria-label="Upload File" t-on-click="onClickUploadDocument"/>
+                    <FileUploader t-if="hasFileUploader" onUploaded.bind="onFileUploaded">
+                        <t t-set-slot="toggler">
+                            <button class="o-activity-list-popover-item-action-link btn btn-link shadow-none fs-4 fa fa-upload" title="Upload file" aria-label="Upload File"/>
+                        </t>
+                    </FileUploader>
                     <button t-if="hasMarkDoneButton" class="o-activity-list-popover-item-action-link o-activity-list-popover-item-mark-as-done btn btn-link shadow-none fs-4 fa fa-check-circle" title="Mark as done" aria-label="Mark as done" t-on-click="onClickMarkAsDone" t-ref="markDoneButton"/>
                 </t>
             </div>
