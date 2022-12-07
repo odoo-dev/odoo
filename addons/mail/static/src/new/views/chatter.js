@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { Chatter as ChatterModel } from "../core/chatter_model";
 import { Follower } from "@mail/new/core/follower_model";
 import { Thread } from "../thread/thread";
 import { useMessaging } from "../messaging_hook";
@@ -52,8 +53,8 @@ export class Chatter extends Component {
         });
         useDropzone(this.rootRef, {
             onDrop: (ev) => {
-                if (this.thread.composer.type) {
-                    return;
+                if (this.isComposerOpen) {
+                    return; // avoid uploading files twice when both Composer and Chatter are open
                 }
                 if (isDragSourceExternalFile(ev.dataTransfer)) {
                     [...ev.dataTransfer.files].forEach(this.attachmentUploader.upload);
@@ -68,7 +69,7 @@ export class Chatter extends Component {
                 this.state.isLoadingAttachments = false;
                 this.load(nextProps.resId);
                 if (nextProps.resId === false) {
-                    this.thread.composer.type = false;
+                    this.chatter.composerAction = "none";
                 }
             }
         });
@@ -82,6 +83,10 @@ export class Chatter extends Component {
         return this.env._t("Following");
     }
 
+    get isComposerOpen() {
+        return this.chatter.composerAction !== "none";
+    }
+
     /**
      * @returns {boolean}
      */
@@ -93,6 +98,7 @@ export class Chatter extends Component {
         const { resModel } = this.props;
         const thread = this.messaging.getChatterThread(resModel, resId);
         this.thread = thread;
+        this.chatter = ChatterModel.insert(this.messaging.state, { thread });
         if (!resId) {
             // todo: reset activities/attachments/followers
             return;
@@ -185,11 +191,11 @@ export class Chatter extends Component {
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
     }
 
-    toggleComposer(mode = false) {
-        if (this.thread.composer.type === mode) {
-            this.thread.composer.type = false;
+    toggleComposer(composerAction = "none") {
+        if (this.chatter.composerAction === composerAction) {
+            this.chatter.composerAction = "none";
         } else {
-            this.thread.composer.type = mode;
+            this.chatter.composerAction = composerAction;
         }
     }
 

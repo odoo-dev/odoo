@@ -5,6 +5,8 @@ import { Partner } from "./partner_model";
 import { _t } from "@web/core/l10n/translation";
 
 export class Thread {
+    /** @type {import("@mail/new/core/chatter_model").Chatter} */
+    chatter;
     /** @type {import("@mail/new/core/follower_model").Follower[]} */
     followers = [];
     /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
@@ -29,6 +31,13 @@ export class Thread {
         state.threads[thread.id] = thread;
         // return reactive version
         return state.threads[thread.id];
+    }
+
+    constructor(state, data) {
+        Object.assign(this, {
+            chatter: null,
+            _state: state,
+        });
     }
 
     update(data) {
