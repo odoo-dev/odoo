@@ -10,7 +10,7 @@
                 <ThreadIcon className="'me-2 align-self-center'" thread="thread"/>
                 <div class="d-flex flex-grow-1 align-self-center align-items-center h-100 py-2">
                     <AutoresizeInput
-                        className="'o-mail-discuss-thread-name lead fw-bold flex-shrink-1'"
+                        className="'o-mail-discuss-thread-name lead fw-bold flex-shrink-1 text-dark'"
                         disabled="!thread.isRenameable"
                         onValidate.bind="renameThread"
                         value="thread.name"
