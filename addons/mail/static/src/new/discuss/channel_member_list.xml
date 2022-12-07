@@ -17,6 +17,11 @@
                 </h6>
                 <t t-foreach="props.thread.offlineMembers" t-as="member" t-key="member.id" t-call="mail.channel_member"/>
             </t>
+            <span t-if="props.thread.unknownMemberCount === 1" class="mx-2 mt-2">And 1 other member.</span>
+            <span t-if="props.thread.unknownMemberCount > 1" class="mx-2 mt-2">And <t t-esc="props.thread.unknownMemberCount"/> other members.</span>
+            <div t-if="!props.thread.areAllMembersLoaded" class="mx-2 my-1">
+                <button class="btn btn-secondary" title="Load more" t-on-click.stop="() => this.fetchChannelMembers(props)">Load more</button>
+            </div>
         </div>
     </t>
     <t t-name="mail.channel_member" owl="1">

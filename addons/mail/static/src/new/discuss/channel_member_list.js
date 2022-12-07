@@ -10,27 +10,35 @@ export class ChannelMemberList extends Component {
     setup() {
         this.messaging = useMessaging();
         onWillStart(() => this.fetchChannelMembers(this.props));
-        onWillUpdateProps((nextProps) => this.fetchChannelMembers(nextProps));
+        onWillUpdateProps((nextProps) => {
+            if (nextProps.thread.channelMembers.length === 0) {
+                this.fetchChannelMembers(nextProps);
+            }
+        });
     }
 
     async fetchChannelMembers(props) {
-        const domain = [["channel_id", "=", props.thread.id]];
-        const fields = ["partner_id"];
-        const results = await this.messaging.orm.searchRead(
-            "mail.channel.member",
-            domain,
-            fields,
-            {}
+        const results = await this.messaging.orm.call(
+            "mail.channel",
+            "load_more_members",
+            [[props.thread.id]],
+            {
+                known_member_ids: props.thread.channelMembers.map(
+                    (channelMember) => channelMember.id
+                ),
+            }
         );
-        for (const mailChannelMember of results) {
-            const partnerId = mailChannelMember.partner_id[0];
-            const name = mailChannelMember.partner_id[1];
+        const channelMembers = results["channelMembers"][0][1];
+        props.thread.memberCount = results["memberCount"];
+        for (const channelMember of channelMembers) {
+            const partnerId = channelMember["persona"]["partner"]["id"];
+            const name = channelMember["persona"]["partner"]["name"];
             Partner.insert(this.messaging.state, {
                 id: partnerId,
                 name: name,
             });
             ChannelMember.insert(this.messaging.state, {
-                id: mailChannelMember.id,
+                id: channelMember.id,
                 partnerId,
                 threadId: props.thread.id,
             });

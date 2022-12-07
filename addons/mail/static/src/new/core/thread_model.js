@@ -53,6 +53,7 @@ export class Thread {
             isAdmin: false,
             canLeave: canLeave || false,
             serverLastSeenMsgByCurrentUser: serverData ? serverData.seen_message_id : null,
+            memberCount: 0,
         });
         for (const key in data) {
             this[key] = data[key];
@@ -168,5 +169,13 @@ export class Thread {
             }
         }
         return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
+    }
+
+    get areAllMembersLoaded() {
+        return this.memberCount === this.channelMembers.length;
+    }
+
+    get unknownMemberCount() {
+        return this.memberCount - this.channelMembers.length;
     }
 }
