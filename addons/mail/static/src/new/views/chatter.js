@@ -39,7 +39,6 @@ export class Chatter extends Component {
             activities: [],
             attachments: [],
             showActivities: true,
-            composing: false, // false, 'message' or 'note'
             isAttachmentBoxOpened: this.props.isAttachmentBoxOpenedInitially,
             isLoadingAttachments: false,
         });
@@ -53,7 +52,7 @@ export class Chatter extends Component {
         });
         useDropzone(this.rootRef, {
             onDrop: (ev) => {
-                if (this.state.composing) {
+                if (this.thread.composer.type) {
                     return;
                 }
                 if (isDragSourceExternalFile(ev.dataTransfer)) {
@@ -69,7 +68,7 @@ export class Chatter extends Component {
                 this.state.isLoadingAttachments = false;
                 this.load(nextProps.resId);
                 if (nextProps.resId === false) {
-                    this.state.composing = false;
+                    this.thread.composer.type = false;
                 }
             }
         });
@@ -187,10 +186,10 @@ export class Chatter extends Component {
     }
 
     toggleComposer(mode = false) {
-        if (this.state.composing === mode) {
-            this.state.composing = false;
+        if (this.thread.composer.type === mode) {
+            this.thread.composer.type = false;
         } else {
-            this.state.composing = mode;
+            this.thread.composer.type = mode;
         }
     }
 

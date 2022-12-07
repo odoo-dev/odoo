@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
 import { Chatter } from "@mail/new/views/chatter";
-import { start } from "@mail/../tests/helpers/test_utils";
+import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
+import { start, waitFormViewLoaded } from "@mail/../tests/helpers/test_utils";
 
 import { click, editInput, nextTick, getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
@@ -322,6 +323,81 @@ QUnit.module("mail", (hooks) => {
                 target,
                 ".o-mail-chatter-topbar-add-attachments .fa-spin",
                 "Should not contain attachment spinner"
+            );
+        }
+    );
+
+    QUnit.test(
+        "Composer toggle state is kept when switching from aside to bottom",
+        async function (assert) {
+            patchUiSize({ size: SIZES.XXL });
+            const { click, openFormView, pyEnv } = await start();
+            const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
+            await openFormView({
+                res_model: "res.partner",
+                res_id: partnerId,
+            });
+            await click(".o-mail-chatter-topbar-send-message-button");
+            patchUiSize({ size: SIZES.LG });
+            await waitFormViewLoaded(() => window.dispatchEvent(new Event("resize")), {
+                resId: partnerId,
+                resModel: "res.partner",
+            });
+            assert.containsOnce(target, ".o-mail-composer-textarea");
+        }
+    );
+
+    QUnit.test(
+        "Textarea content is kept when switching from aside to bottom",
+        async function (assert) {
+            patchUiSize({ size: SIZES.XXL });
+            const { click, openFormView, pyEnv } = await start();
+            const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
+            await openFormView({
+                res_model: "res.partner",
+                res_id: partnerId,
+            });
+            await click(".o-mail-chatter-topbar-send-message-button");
+            await editInput(target, ".o-mail-composer-textarea", "Hello world !");
+            patchUiSize({ size: SIZES.LG });
+            await waitFormViewLoaded(() => window.dispatchEvent(new Event("resize")), {
+                resId: partnerId,
+                resModel: "res.partner",
+            });
+            assert.strictEqual(
+                target.querySelector(".o-mail-composer-textarea").value,
+                "Hello world !"
+            );
+        }
+    );
+
+    QUnit.test(
+        "Composer type is kept when switching from aside to bottom",
+        async function (assert) {
+            patchUiSize({ size: SIZES.XXL });
+            const { click, openFormView, pyEnv } = await start();
+            const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
+            await openFormView({
+                res_model: "res.partner",
+                res_id: partnerId,
+            });
+            await click(".o-mail-chatter-topbar-log-note-button");
+            patchUiSize({ size: SIZES.LG });
+            await waitFormViewLoaded(() => window.dispatchEvent(new Event("resize")), {
+                resId: partnerId,
+                resModel: "res.partner",
+            });
+            assert.ok(
+                target
+                    .querySelector(".o-mail-chatter-topbar-log-note-button")
+                    .classList.contains("btn-odoo"),
+                "Active button should be the log note button"
+            );
+            assert.ok(
+                !target
+                    .querySelector(".o-mail-chatter-topbar-send-message-button")
+                    .classList.contains("btn-odoo"),
+                "Send message button should not be active"
             );
         }
     );

@@ -21,17 +21,13 @@ export class Thread {
         if (data.id in state.threads) {
             thread = state.threads[data.id];
         } else {
-            thread = new Thread(state);
+            thread = new Thread();
             thread._state = state;
         }
         thread.update(data);
         state.threads[thread.id] = thread;
         // return reactive version
         return state.threads[thread.id];
-    }
-
-    constructor(state) {
-        Composer.insert(state, { thread: this });
     }
 
     update(data) {
@@ -80,6 +76,7 @@ export class Thread {
                 }
             }
         }
+        Composer.insert(this._state, { thread: this });
     }
 
     /**

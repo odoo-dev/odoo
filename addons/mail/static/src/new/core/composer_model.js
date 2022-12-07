@@ -13,6 +13,8 @@ export class Composer {
         end: 0,
         direction: "none",
     };
+    /** @typedef {'message' | 'note'| false} */
+    type;
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
@@ -42,6 +44,7 @@ export class Composer {
         }
         Object.assign(this, {
             textInputContent: "",
+            type: thread?.type === "chatter" ? false : "message",
             _state: state,
         });
         return this.update(data);

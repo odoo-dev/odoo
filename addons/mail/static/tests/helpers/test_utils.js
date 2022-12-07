@@ -164,6 +164,59 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
     };
 }
 
+/**
+ * Wait until the form view corresponding to the given resId/resModel has loaded.
+ *
+ * @param {Function} func Function expected to trigger form view load.
+ * @param {Object} param1
+ */
+export function waitFormViewLoaded(
+    func,
+    { resId = false, resModel, waitUntilMessagesLoaded = true, waitUntilDataLoaded = true } = {}
+) {
+    const waitData = (func) => {
+        const dataLoadedPromise = makeDeferred();
+        registry.category("mock_server_callbacks").add(
+            "/mail/thread/data",
+            ({ thread_id: threadId, thread_model: threadModel }) => {
+                if (threadId === resId && threadModel === resModel) {
+                    dataLoadedPromise.resolve();
+                }
+            },
+            { force: true }
+        );
+        return afterNextRender(async () => {
+            await func();
+            await dataLoadedPromise;
+        });
+    };
+    const waitMessages = (func) => {
+        const messagesLoadedPromise = makeDeferred();
+        registry.category("mock_server_callbacks").add(
+            "/mail/thread/messages",
+            ({ thread_id: threadid, thread_model: threadModel }) => {
+                if (threadid === resId && threadModel === resModel) {
+                    messagesLoadedPromise.resolve();
+                }
+            },
+            { force: true }
+        );
+        return afterNextRender(async () => {
+            await func();
+            await messagesLoadedPromise;
+        });
+    };
+    if (waitUntilDataLoaded && waitUntilMessagesLoaded) {
+        return waitData(() => waitMessages(func));
+    }
+    if (waitUntilDataLoaded) {
+        return waitData(func);
+    }
+    if (waitUntilMessagesLoaded) {
+        return waitMessages(func);
+    }
+}
+
 function getOpenFormView(openView) {
     return async function openFormView(
         action,
@@ -175,46 +228,13 @@ function getOpenFormView(openView) {
     ) {
         action["views"] = [[false, "form"]];
         const func = () => openView(action, props);
-        const waitData = (func) => {
-            const dataLoadedPromise = makeDeferred();
-            registry.category("mock_server_callbacks").add(
-                "/mail/thread/data",
-                ({ thread_id: threadId, thread_model: threadModel }) => {
-                    if (threadId === action.res_id && threadModel === action.res_model) {
-                        dataLoadedPromise.resolve();
-                    }
-                },
-                { force: true }
-            );
-            return afterNextRender(async () => {
-                await func();
-                await dataLoadedPromise;
+        if (waitUntilDataLoaded || waitUntilMessagesLoaded) {
+            return waitFormViewLoaded(func, {
+                resId: action.res_id,
+                resModel: action.res_model,
+                waitUntilDataLoaded,
+                waitUntilMessagesLoaded,
             });
-        };
-        const waitMessages = (func) => {
-            const messagesLoadedPromise = makeDeferred();
-            registry.category("mock_server_callbacks").add(
-                "/mail/thread/messages",
-                ({ thread_id: threadid, thread_model: threadModel }) => {
-                    if (threadid === action.res_id && threadModel === action.res_model) {
-                        messagesLoadedPromise.resolve();
-                    }
-                },
-                { force: true }
-            );
-            return afterNextRender(async () => {
-                await func();
-                await messagesLoadedPromise;
-            });
-        };
-        if (waitUntilDataLoaded && waitUntilMessagesLoaded) {
-            return waitData(() => waitMessages(func));
-        }
-        if (waitUntilDataLoaded) {
-            return waitData(func);
-        }
-        if (waitUntilMessagesLoaded) {
-            return waitMessages(func);
         }
         return func();
     };

@@ -224,7 +224,7 @@ export class Composer extends Component {
             const { id: parentId, isNote, resId, resModel } = messageToReplyTo || {};
             const postData = {
                 attachments: this.attachmentUploader.attachments,
-                isNote: this.props.type === "note" || isNote,
+                isNote: this.props.composer.type === "note" || isNote,
                 parentId,
             };
             if (messageToReplyTo && this.props.composer.thread.id === "inbox") {
@@ -282,7 +282,6 @@ Object.assign(Composer, {
     defaultProps: {
         mode: "normal",
         onDiscardCallback: () => {},
-        type: "message",
     }, // mode = compact, normal, extended
     props: [
         "composer",
@@ -292,7 +291,6 @@ Object.assign(Composer, {
         "onPostCallback?",
         "mode?",
         "placeholder?",
-        "type?",
         "dropzoneRef?",
     ],
     template: "mail.composer",
