@@ -4,8 +4,8 @@
     <t t-name="mail.chat_window_icon" owl="1">
         <div class="o-mail-chatwindow-icon d-flex justify-content-center flex-shrink-0 ms-3 me-1 my-0">
             <t t-if="thread.type === 'channel'">
-                <div t-if="thread.authorizedGroupFullName" class="o-mail-chatwindow-icon-groupRestrictedChannel fa fa-fw fa-hashtag" t-att-title="thread.accessRestrictedToGroupText"/>
-                <div t-if="!thread.authorizedGroupFullName" class="o-mail-chatwindow-icon-publicChannel fa fa-fw fa-globe" title="Public Channel"/>
+                <div t-if="thread.authorizedGroupFullName" class="fa fa-fw fa-hashtag" t-att-title="thread.accessRestrictedToGroupText"/>
+                <div t-if="!thread.authorizedGroupFullName" class="fa fa-fw fa-globe" title="Public Channel"/>
             </t>
             <t t-elif="thread.type === 'chat' and chatPartner">
                 <Typing t-if="isTyping" channel_id="thread.id" size="'small'" displayText="false"/>
