@@ -133,7 +133,7 @@ export class Composer extends Component {
                         return; // ignore obsolete call
                     }
                     await this.messaging.fetchSuggestions(this.suggestionSearchProps, {
-                        threadId: this.props.composer.threadId,
+                        threadId: this.props.composer.thread.id,
                     });
                     this.updateSuggestionList();
                 });
@@ -316,7 +316,7 @@ export class Composer extends Component {
         }
         const [mainSuggestions, extraSuggestions = {}] = this.messaging.searchSuggestions(
             this.suggestionSearchProps,
-            { threadId: this.props.composer.threadId },
+            { threadId: this.props.composer.thread.id },
             true
         );
         // arbitrary limit to avoid displaying too many elements at once

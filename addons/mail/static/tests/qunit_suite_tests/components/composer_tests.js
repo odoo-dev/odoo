@@ -839,50 +839,91 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
-        QUnit.skipRefactoring(
-            'display partner mention suggestions on typing "@"',
-            async function (assert) {
-                assert.expect(3);
+        QUnit.test('display partner mention suggestions on typing "@"', async function (assert) {
+            const pyEnv = await startServer();
 
-                const pyEnv = await startServer();
+            const resPartnerId1 = pyEnv["res.partner"].create({
+                email: "testpartner@odoo.com",
+                name: "TestPartner",
+            });
+            const resPartnerId2 = pyEnv["res.partner"].create({
+                email: "testpartner2@odoo.com",
+                name: "TestPartner2",
+            });
+            pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+            const mailChannelId1 = pyEnv["mail.channel"].create({
+                name: "general",
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId1 }],
+                    [0, 0, { partner_id: resPartnerId2 }],
+                ],
+            });
+            const { insertText, openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: mailChannelId1 },
+                },
+            });
+            await openDiscuss();
+            assert.containsNone(target, ".o-navigable-list--dropdown-item");
 
-                const resPartnerId1 = pyEnv["res.partner"].create({
-                    email: "testpartner@odoo.com",
-                    name: "TestPartner",
-                });
-                const resPartnerId2 = pyEnv["res.partner"].create({
-                    email: "testpartner2@odoo.com",
-                    name: "TestPartner2",
-                });
-                pyEnv["res.users"].create({ partner_id: resPartnerId1 });
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    channel_member_ids: [
-                        [0, 0, { partner_id: pyEnv.currentPartnerId }],
-                        [0, 0, { partner_id: resPartnerId1 }],
-                        [0, 0, { partner_id: resPartnerId2 }],
-                    ],
-                });
-                const { insertText, openDiscuss } = await start({
-                    discuss: {
-                        context: { active_id: mailChannelId1 },
-                    },
-                });
-                await openDiscuss();
+            await insertText(".o-mail-composer-textarea", "@");
+            assert.containsOnce(target, ".o-navigable-list--dropdown-item");
+        });
 
-                assert.containsNone(
-                    document.body,
-                    ".o_ComposerSuggestionListView_list",
-                    "mention suggestions list should not be present"
-                );
-                await insertText(".o-mail-composer-textarea", "@");
-                assert.hasClass(
-                    document.querySelector(".o_ComposerSuggestionListView_list"),
-                    "show",
-                    "should display mention suggestions on typing '@'"
-                );
-                assert.containsOnce(document.body, ".dropdown-divider", "should have a separator");
-            }
-        );
+        QUnit.test("show other channel member in @ mention", async function (assert) {
+            const pyEnv = await startServer();
+            const resPartnerId = pyEnv["res.partner"].create({
+                email: "testpartner@odoo.com",
+                name: "TestPartner",
+            });
+            const mailChannelId1 = pyEnv["mail.channel"].create({
+                name: "general",
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId }],
+                ],
+            });
+            const { click, insertText, openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: mailChannelId1 },
+                },
+            });
+            await openDiscuss();
+            await click(`.o-mail-discuss-actions button[title="Show Member List"]`); // FIXME: load channel members
+            await insertText(".o-mail-composer-textarea", "@");
+            assert.containsOnce(target, ".o-navigable-list--dropdown-item:contains(TestPartner)");
+        });
+
+        QUnit.test("select @ mention insert mention text in composer", async function (assert) {
+            const pyEnv = await startServer();
+            const resPartnerId = pyEnv["res.partner"].create({
+                email: "testpartner@odoo.com",
+                name: "TestPartner",
+            });
+            const mailChannelId1 = pyEnv["mail.channel"].create({
+                name: "general",
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId }],
+                ],
+            });
+            const { click, insertText, openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: mailChannelId1 },
+                },
+            });
+            await openDiscuss();
+            await click(`.o-mail-discuss-actions button[title="Show Member List"]`); // FIXME: load channel members
+            await insertText(".o-mail-composer-textarea", "@");
+            await afterNextRender(() =>
+                $(target).find(".o-navigable-list--dropdown-item:contains(TestPartner)").click()
+            );
+            assert.strictEqual(
+                $(target).find(".o-mail-composer-textarea").val().trim(),
+                "@TestPartner"
+            );
+        });
 
         QUnit.skipRefactoring("mention a partner", async function (assert) {
             assert.expect(4);
