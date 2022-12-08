@@ -15,6 +15,7 @@ import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
+import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 
 let target;
 
@@ -518,6 +519,141 @@ QUnit.module("mail", (hooks) => {
             $(target).find("hr + span:contains(April 20, 2019) + hr").offset().top <
                 $(target).find(".o-mail-message").offset().top,
             "should have a single date separator above all the messages" // to check: may be client timezone dependent
+        );
+    });
+
+    QUnit.test("sidebar: chat custom name", async function (assert) {
+        assert.expect(1);
+
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "Marc Demo" });
+        pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        custom_channel_name: "Marc",
+                        partner_id: pyEnv.currentPartnerId,
+                    },
+                ],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+            channel_type: "chat",
+        });
+        const { openDiscuss } = await start();
+        await openDiscuss();
+        const chat = document.querySelector(`.o-mail-category-item`);
+        assert.strictEqual(
+            chat.querySelector("span").textContent,
+            "Marc",
+            "chat should have custom name as name"
+        );
+    });
+
+    QUnit.test("reply to message from inbox (message linked to document)", async function (assert) {
+        assert.expect(17);
+
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "Refactoring" });
+        const mailMessageId1 = pyEnv["mail.message"].create({
+            body: "<p>Test</p>",
+            date: "2019-04-20 11:00:00",
+            message_type: "comment",
+            needaction: true,
+            model: "res.partner",
+            res_id: resPartnerId1,
+        });
+        pyEnv["mail.notification"].create({
+            mail_message_id: mailMessageId1, // id of related message
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId, // must be for current partner
+        });
+        const { click, insertText, openDiscuss } = await start({
+            async mockRPC(route, args) {
+                if (route === "/mail/message/post") {
+                    assert.step("message_post");
+                    assert.strictEqual(
+                        args.thread_model,
+                        "res.partner",
+                        "should post message to record with model 'res.partner'"
+                    );
+                    assert.strictEqual(
+                        args.thread_id,
+                        resPartnerId1,
+                        "should post message to record with Id 20"
+                    );
+                    assert.strictEqual(
+                        args.post_data.body,
+                        "Test",
+                        "should post with provided content in composer input"
+                    );
+                    assert.strictEqual(
+                        args.post_data.message_type,
+                        "comment",
+                        "should set message type as 'comment'"
+                    );
+                }
+            },
+            services: {
+                notification: makeFakeNotificationService((notification) => {
+                    assert.ok(true, "should display a notification after posting reply");
+                    assert.strictEqual(
+                        notification,
+                        'Message posted on "Refactoring"',
+                        "notification should tell that message has been posted to the record 'Refactoring'"
+                    );
+                }),
+            },
+        });
+        await openDiscuss();
+        assert.strictEqual(
+            document.querySelectorAll(".o-mail-message").length,
+            1,
+            "should display a single message"
+        );
+        assert.strictEqual(
+            document.querySelector(".o-mail-message-recod-name").textContent,
+            " on Refactoring",
+            "should display message originates from record 'Refactoring'"
+        );
+
+        await click("i[aria-label='Reply']");
+        assert.ok(
+            document.querySelector(".o-mail-composer"),
+            "should have composer after clicking on reply to message"
+        );
+        assert.strictEqual(
+            document.querySelector(`.o-mail-composer-origin-thread`).textContent,
+            " on: Refactoring",
+            "composer should display origin thread name of message"
+        );
+        assert.strictEqual(
+            document.activeElement,
+            document.querySelector(`.o-mail-composer-textarea`),
+            "composer text input should be auto-focus"
+        );
+
+        await insertText(".o-mail-composer-textarea", "Test");
+        await click(".o-mail-composer-send-button");
+        assert.verifySteps(["message_post"]);
+        assert.notOk(
+            document.querySelector(".o-mail-composer"),
+            "should no longer have composer after posting reply to message"
+        );
+        assert.strictEqual(
+            document.querySelectorAll(".o-mail-message").length,
+            1,
+            "should still display a single message after posting reply"
+        );
+        assert.strictEqual(
+            parseInt(document.querySelector(".o-mail-message").dataset.messageId),
+            mailMessageId1,
+            "should still display message with ID 100 after posting reply"
+        );
+        assert.notOk(
+            document.querySelector(".o-mail-message").classList.contains("o-selected"),
+            "message should not longer be selected after posting reply"
         );
     });
 });
