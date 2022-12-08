@@ -5,10 +5,33 @@ import { Partner } from "./partner_model";
 import { _t } from "@web/core/l10n/translation";
 
 export class Thread {
-    /** @type {import("@mail/new/core/follower_model").Follower[]} */
-    followers = [];
+    /** @type {string|number} */
+    id;
+    canLeave = false;
     /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
     channelMembers = [];
+    /** @type {integer} */
+    chatPartnerId;
+    /** @type {Composer} */
+    composer;
+    counter = 0;
+    /** @type {string} */
+    customName;
+    /** @type {string} */
+    description;
+    /** @type {import("@mail/new/core/follower_model").Follower[]} */
+    followers = [];
+    /** @type {string} */
+    icon;
+    isAdmin = false;
+    isUnread = false;
+    loadMore = false;
+    memberCount = 0;
+    /** @type {import("@mail/new/core/message_model").Message[]} */
+    messages = [];
+    /** @type {integer} */
+    serverLastSeenMsgByCurrentUser;
+    status = "new";
     /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
 
@@ -27,57 +50,51 @@ export class Thread {
      * @returns {Thread}
      */
     static insert(state, data) {
-        let thread;
         if (data.id in state.threads) {
-            thread = state.threads[data.id];
-        } else {
-            thread = new Thread();
-            thread._state = state;
+            const thread = state.threads[data.id];
+            thread.update(data);
+            return thread;
         }
-        thread.update(data);
-        state.threads[thread.id] = thread;
+        const thread = new Thread(state, data);
         // return reactive version
         return state.threads[thread.id];
     }
 
+    constructor(state, data) {
+        Object.assign(this, {
+            id: data.id,
+            type: data.type,
+            _state: state,
+        });
+        if (this.type === "channel") {
+            this._state.discuss.channels.threads.push(this.id);
+        } else if (this.type === "chat") {
+            this._state.discuss.chats.threads.push(this.id);
+        }
+        this.update(data);
+        state.threads[this.id] = this;
+    }
+
     update(data) {
-        this.canLeave ??= data.canLeave;
-        this.id ??= data.id;
-        this.name ??= data.name;
-        this.serverData ??= data.serverData;
-        this.type ??= data.type;
-        this.authorizedGroupFullName ??= this.serverData?.authorizedGroupFullName;
-        this.hasWriteAccess ??= this.serverData?.hasWriteAccess;
-        this.is_pinned ??= this.serverData?.is_pinned;
-        this.customName ??= false;
-        this.counter ??= 0;
-        this.isUnread ??= false;
-        this.icon ??= false;
-        this.loadMore ??= false;
-        this.description ??= false;
-        this.status ??= "new";
-        this.messages ??= [];
-        this.chatPartnerId ??= false;
-        this.isAdmin ??= false;
-        this.serverLastSeenMsgByCurrentUser ??= this.serverData
-            ? this.serverData.seen_message_id
-            : null;
-        this.memberCount ??= 0;
         for (const key in data) {
             this[key] = data[key];
         }
-
-        if (this.type === "channel") {
-            if (!this._state.discuss.channels.threads.includes(this.id)) {
-                this._state.discuss.channels.threads.push(this.id);
+        if (data.serverData) {
+            const { serverData } = data;
+            if ("authorizedGroupFullName" in serverData) {
+                this.authorizedGroupFullName = serverData.authorizedGroupFullName;
             }
-        }
-        if (this.type === "chat") {
-            if (!this._state.discuss.chats.threads.includes(this.id)) {
-                this._state.discuss.chats.threads.push(this.id);
+            if ("hasWriteAccess" in serverData) {
+                this.hasWriteAccess = serverData.hasWriteAccess;
             }
-            if (data.serverData) {
-                for (const elem of data.serverData.channel.channelMembers[0][1]) {
+            if ("is_pinned" in serverData) {
+                this.is_pinned = serverData.is_pinned;
+            }
+            if ("seen_message_id" in serverData) {
+                this.serverLastSeenMsgByCurrentUser = serverData.seen_message_id;
+            }
+            if (this.type === "chat") {
+                for (const elem of serverData.channel.channelMembers[0][1]) {
                     Partner.insert(this._state, {
                         id: elem.persona.partner.id,
                         name: elem.persona.partner.name,
@@ -85,14 +102,14 @@ export class Thread {
                     });
                     if (
                         elem.persona.partner.id !== this._state.user.partnerId ||
-                        (data.serverData.channel.channelMembers[0][1].length === 1 &&
+                        (serverData.channel.channelMembers[0][1].length === 1 &&
                             elem.persona.partner.id === this._state.user.partnerId)
                     ) {
                         this.chatPartnerId = elem.persona.partner.id;
                         this.name = this._state.partners[elem.persona.partner.id].name;
                     }
                 }
-                this.customName = data.serverData.channel.custom_channel_name;
+                this.customName = serverData.channel.custom_channel_name;
             }
         }
         Composer.insert(this._state, { thread: this });
