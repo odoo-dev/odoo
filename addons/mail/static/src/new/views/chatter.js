@@ -105,6 +105,10 @@ export class Chatter extends Component {
         return !this.props.resId || !this.thread.hasReadAccess;
     }
 
+    get unfollowText() {
+        return this.env._t("Unfollow");
+    }
+
     load(resId = this.props.resId, requestList = ["followers", "attachments", "messages"]) {
         const { resModel } = this.props;
         const thread = this.messaging.getChatterThread(resModel, resId);
@@ -197,9 +201,24 @@ export class Chatter extends Component {
         this.onFollowerChanged();
     }
 
+    async onFileUpload({ data, name, type }) {
+        return this.attachmentUploader.upload(
+            new File([dataUrlToBlob(data, type)], name, { type })
+        );
+    }
+
     onFollowerChanged() {
         // TODO reload parent view (message_follower_ids / hasParentReloadOnFollowersUpdate)
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
+    }
+
+    async scheduleActivity() {
+        await this.activity.scheduleActivity(this.props.resModel, this.props.resId);
+        this.load(this.props.resId, ["activities"]);
+    }
+
+    toggleActivities() {
+        this.state.showActivities = !this.state.showActivities;
     }
 
     toggleComposer(composerAction = "none") {
@@ -210,28 +229,9 @@ export class Chatter extends Component {
         }
     }
 
-    toggleActivities() {
-        this.state.showActivities = !this.state.showActivities;
-    }
-
-    async scheduleActivity() {
-        await this.activity.scheduleActivity(this.props.resModel, this.props.resId);
-        this.load(this.props.resId, ["activities"]);
-    }
-
-    get unfollowText() {
-        return this.env._t("Unfollow");
-    }
-
     async unlinkAttachment(attachment) {
         await this.attachmentUploader.unlink(attachment);
         removeFromArrayWithPredicate(this.state.attachments, ({ id }) => attachment.id === id);
-    }
-
-    async onFileUpload({ data, name, type }) {
-        return this.attachmentUploader.upload(
-            new File([dataUrlToBlob(data, type)], name, { type })
-        );
     }
 }
 
