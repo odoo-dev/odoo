@@ -41,7 +41,13 @@ export class Thread {
     }
 
     update(data) {
-        const { canLeave, id, name, serverData, type } = data;
+        const {
+            canLeave = this.canLeave,
+            id = this.id,
+            name = this.name,
+            serverData = this.serverData,
+            type = this.type,
+        } = data;
         Object.assign(this, {
             authorizedGroupFullName: serverData?.authorizedGroupFullName,
             hasWriteAccess: serverData?.hasWriteAccess,
@@ -67,10 +73,14 @@ export class Thread {
             this[key] = data[key];
         }
         if (this.type === "channel") {
-            this._state.discuss.channels.threads.push(this.id);
+            if (!this._state.discuss.channels.threads.includes(this.id)) {
+                this._state.discuss.channels.threads.push(this.id);
+            }
         }
         if (this.type === "chat") {
-            this._state.discuss.chats.threads.push(this.id);
+            if (!this._state.discuss.chats.threads.includes(this.id)) {
+                this._state.discuss.chats.threads.push(this.id);
+            }
             if (serverData) {
                 for (const elem of serverData.channel.channelMembers[0][1]) {
                     Partner.insert(this._state, {

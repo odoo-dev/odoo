@@ -20,13 +20,18 @@ export class MessagingMenu extends Component {
             this.state.filter = target;
         }
     }
+
     get displayedPreviews() {
+        /** @type {import("@mail/new/core/thread_model").Thread[]} **/
+        const threads = Object.values(this.messaging.state.threads);
+        const previews = threads.filter((thread) => thread.is_pinned);
+
         const filter = this.state.filter;
         if (filter === "all") {
-            return this.messaging.state.menu.previews;
+            return previews;
         }
         const target = filter === "chats" ? "chat" : "channel";
-        return this.messaging.state.menu.previews.filter((preview) => preview.type === target);
+        return previews.filter((preview) => preview.type === target);
     }
 
     openDiscussion(threadId) {
@@ -35,14 +40,6 @@ export class MessagingMenu extends Component {
         // hack: click on window to close dropdown, because we use a dropdown
         // without dropdownitem...
         document.body.click();
-    }
-
-    isAuthor(preview) {
-        return preview.mostRecentMsg.author.id === this.messaging.state.user.partnerId;
-    }
-
-    getPreviewAuthor(id) {
-        return this.messaging.state.partners[id].name;
     }
 }
 
