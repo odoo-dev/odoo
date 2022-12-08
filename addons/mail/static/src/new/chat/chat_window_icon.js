@@ -20,11 +20,17 @@ export class ChatWindowIcon extends Component {
 
     setup() {
         this.messaging = useMessaging();
-        this.thread = this.messaging.state.threads[this.props.chatWindow.threadId];
-        this.chatPartner = this.messaging.state.partners[this.thread.chatPartnerId];
     }
 
     get isTyping() {
         return this.messaging.isTyping(this.thread.id);
+    }
+
+    get thread() {
+        return this.messaging.state.threads[this.props.chatWindow.threadId];
+    }
+
+    get chatPartner() {
+        return this.messaging.state.partners[this.thread.chatPartnerId];
     }
 }
