@@ -4,6 +4,7 @@ import { LinkPreview } from "./link_preview_model";
 import { MessageReactions } from "./message_reactions_model";
 import { Partner } from "./partner_model";
 import { Thread } from "./thread_model";
+import { htmlToTextContentInline } from "@mail/new/utils/format";
 
 import { toRaw } from "@odoo/owl";
 
@@ -228,5 +229,9 @@ export class Message {
             this.trackingValues.length === 0 &&
             !this.subtypeDescription
         );
+    }
+
+    get inlineBody() {
+        return htmlToTextContentInline(this.body);
     }
 }

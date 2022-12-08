@@ -51,7 +51,7 @@
                 <t t-else="">
                     <t t-esc="preview.mostRecentMsg.author.name"/>: 
                 </t>:
-                <t t-esc="preview.mostRecentMsg.body"/>
+                <t t-esc="preview.mostRecentMsg.inlineBody"/>
             </div>
         </div>
     </div>
