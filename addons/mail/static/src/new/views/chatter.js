@@ -38,6 +38,7 @@ export class Chatter extends Component {
         this.state = useState({
             activities: [],
             attachments: [],
+            composerAction: "none",
             showActivities: true,
             isAttachmentBoxOpened: this.props.isAttachmentBoxOpenedInitially,
             isLoadingAttachments: false,
@@ -52,8 +53,8 @@ export class Chatter extends Component {
         });
         useDropzone(this.rootRef, {
             onDrop: (ev) => {
-                if (this.thread.composer.type) {
-                    return;
+                if (this.isComposerOpen) {
+                    return; // avoid uploading files twice when both Composer and Chatter are open
                 }
                 if (isDragSourceExternalFile(ev.dataTransfer)) {
                     [...ev.dataTransfer.files].forEach(this.attachmentUploader.upload);
@@ -68,10 +69,24 @@ export class Chatter extends Component {
                 this.state.isLoadingAttachments = false;
                 this.load(nextProps.resId);
                 if (nextProps.resId === false) {
-                    this.thread.composer.type = false;
+                    this.state.composerAction = "none";
                 }
             }
         });
+    }
+
+    /**
+     * @returns {string}
+     */
+    get composerPlaceholder() {
+        switch (this.state.composerAction) {
+            case "logNote":
+                return this.env._t("Log an internal note…");
+            case "sendMessage":
+                return this.env._t("Send a message to followers…");
+            default:
+                return "";
+        }
     }
 
     get followerButtonLabel() {
@@ -80,6 +95,13 @@ export class Chatter extends Component {
 
     get followingText() {
         return this.env._t("Following");
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    get isComposerOpen() {
+        return this.state.composerAction !== "none";
     }
 
     /**
@@ -185,11 +207,11 @@ export class Chatter extends Component {
         this.load(this.props.resId, ["followers", "suggestedRecipients"]);
     }
 
-    toggleComposer(mode = false) {
-        if (this.thread.composer.type === mode) {
-            this.thread.composer.type = false;
+    toggleComposer(composerAction = "none") {
+        if (this.state.composerAction === composerAction) {
+            this.state.composerAction = "none";
         } else {
-            this.thread.composer.type = mode;
+            this.state.composerAction = composerAction;
         }
     }
 
