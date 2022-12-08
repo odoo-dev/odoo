@@ -13,6 +13,8 @@ export class Composer {
         end: 0,
         direction: "none",
     };
+    /** @type {Boolean} */
+    forceCursorMove;
     /** @typedef {'message' | 'note'| false} */
     type;
 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mail.navigable_list" owl="1">
+        <div
+            class="o-navigable-list bg-white m-0 p-0"
+            t-ref="root"
+            t-att-class="props.class"
+        >
+            <t t-if="isOpened and hasOptions">
+                <div
+                    class="o-navigable-list-dropdown-menu border"
+                    t-on-mousedown.prevent=""
+                >
+                    <t t-foreach="sources" t-as="source" t-key="source.id">
+                        <t t-if="source.isLoading">
+                            <div class="o-navigable-list--dropdown-item">
+                                <a href="#" class="">
+                                    <i class="fa fa-spin fa-circle-o-notch" />
+                                    <t t-esc="source.placeholder" />
+                                </a>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <t
+                                t-foreach="source.options"
+                                t-as="option"
+                                t-key="option.id"
+                            >
+                                <div
+                                    class="o-navigable-list--dropdown-item"
+                                    t-att-class="option.classList"
+                                    t-on-mouseenter="() => this.onOptionMouseEnter([source_index, option_index])"
+                                    t-on-mouseleave="() => this.onOptionMouseLeave([source_index, option_index])"
+                                    t-on-click="(ev) => this.onOptionClick(ev, [source_index, option_index])"
+                                >
+                                    <a
+                                        href="#"
+                                        class="d-flex align-items-center w-100 py-2 px-4"
+                                        t-att-class="{ 'bg-300': isActiveSourceOption([source_index, option_index]) }"
+                                    >
+                                        <t t-if="source.optionTemplate">
+                                            <t
+                                                t-call="{{ source.optionTemplate }}"
+                                            />
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="option.label" />
+                                        </t>
+                                    </a>
+                                </div>
+                            </t>
+                        </t>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>
