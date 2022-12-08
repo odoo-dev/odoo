@@ -29,7 +29,12 @@ export class Partner {
             // Get reactive version.
             partner = state.partners[data.id];
         }
-        const { id = partner.id, name = partner.name, im_status = partner.im_status, email = partner.email } = data;
+        const {
+            id = partner.id,
+            name = partner.name,
+            im_status = partner.im_status,
+            email = partner.email,
+        } = data;
         Object.assign(partner, {
             id,
             name,
