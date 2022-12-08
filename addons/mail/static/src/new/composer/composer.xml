@@ -6,6 +6,7 @@
     <t t-set="normal" t-value="props.mode === 'normal'"/>
     <t t-set="extended" t-value="props.mode === 'extended'"/>
     <t t-set="messageToReplyTo" t-value="messaging.state.discuss.messageToReplyTo" />
+    <NavigableList t-props="getNavigableListProps()" />
     <div class="o-mail-composer-container" t-ref="composer">
         <div class="o-mail-composer d-grid flex-shrink-0"
                 t-att-class="{
@@ -73,6 +74,19 @@
         </t>
     </div>
 </t>
+
+    <t t-name="mail.Composer.suggestionPartner" owl="1">
+        <t t-set="partner" t-value="option.partner"/>
+        <t t-if="option.partner">
+            <PartnerImStatus partner="partner"/>
+        </t>
+        <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate">
+            <t t-esc="partner.name" />
+        </strong>
+        <t t-if="partner.email">
+            <em class="text-600 text-truncate align-self-center">(<t t-esc="partner.email" />)</em>
+        </t>
+    </t>
 
     <t t-name="mail.Composer.actionButtons" owl="1">
         <div class="d-flex">

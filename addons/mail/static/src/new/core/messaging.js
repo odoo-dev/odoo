@@ -550,7 +550,7 @@ export class Messaging {
         return message;
     }
 
-    async postMessage(threadId, body, { attachments = [], isNote = false, parentId }) {
+    async postMessage(threadId, body, { attachments = [], isNote = false, parentId, rawMentions }) {
         const command = this.getCommandFromText(threadId, body);
         if (command) {
             await this.excuteCommand(threadId, command, body);
@@ -559,9 +559,10 @@ export class Messaging {
         let tmpMsg;
         const thread = this.state.threads[threadId];
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
+        const validMentions = this.getMentionsFromText(rawMentions, body);
         const params = {
             post_data: {
-                body: await prettifyMessageContent(body),
+                body: await prettifyMessageContent(body, validMentions),
                 attachment_ids: attachments.map(({ id }) => id),
                 message_type: "comment",
                 partner_ids: [],
@@ -594,7 +595,7 @@ export class Messaging {
                 this.state,
                 {
                     ...tmpData,
-                    body: await prettifyMessageContent(body),
+                    body: markup(await prettifyMessageContent(body, validMentions)),
                 },
                 thread
             );
@@ -613,6 +614,22 @@ export class Messaging {
             delete this.state.messages[tmpMsg.id];
         }
         return message;
+    }
+
+    getMentionsFromText(rawMentions, body) {
+        const validMentions = {};
+        const partners = [];
+        const rawMentionedPartnerIds = rawMentions.partnerIds || [];
+        for (const partnerId of rawMentionedPartnerIds) {
+            const partner = this.state.partners[partnerId];
+            const index = body.indexOf(`@${partner.name}`);
+            if (index === -1) {
+                continue;
+            }
+            partners.push(partner);
+        }
+        validMentions.partners = partners;
+        return validMentions;
     }
 
     async excuteCommand(threadId, command, body = "") {
@@ -640,16 +657,17 @@ export class Messaging {
         return undefined;
     }
 
-    async updateMessage(messageId, body, attachments = []) {
+    async updateMessage(messageId, body, attachments = [], rawMentions) {
         const message = this.state.messages[messageId];
         if (convertBrToLineBreak(message.body) === body && attachments.length === 0) {
             return;
         }
+        const validMentions = this.getMentionsFromText(rawMentions, body);
         const data = await this.rpc("/mail/message/update_content", {
             attachment_ids: attachments
                 .map(({ id }) => id)
                 .concat(message.attachments.map(({ id }) => id)),
-            body: await prettifyMessageContent(body),
+            body: await prettifyMessageContent(body, validMentions),
             message_id: message.id,
         });
         message.body = markup(data.body);
@@ -871,6 +889,90 @@ export class Messaging {
             thread.customName = name;
             await this.orm.call("mail.channel", "channel_set_custom_name", [[thread.id]], { name });
         }
+    }
+
+    /*
+     * Returns suggestions that match the given search term from specified type.
+     *
+     * @param {Object} [suggestionSearchProps={}]
+     * @param {String} [suggestionSearchProps.suggestionDelimiter] can be one one of the following: ["@", ":", "#", "/"]
+     * @param {String} [suggestionSearchProps.suggestionSearchTerm]
+     * @param {Object} [options={}]
+     * @param {Integer} [options.thread] prioritize and/or restrict
+     *  result in the context of given thread
+     * @returns {[mainSuggestion[], extraSuggestion[]]}
+     */
+
+    searchSuggestions(
+        { suggestionDelimiter, suggestionSearchTerm },
+        { threadId } = {},
+        sort = false
+    ) {
+        const cleanedSearchTerm = cleanTerm(suggestionSearchTerm);
+        switch (suggestionDelimiter) {
+            case "@": {
+                return Partner.searchSuggestions(this.state, cleanedSearchTerm, threadId, sort);
+            }
+            case ":":
+                break;
+            case "#":
+                break;
+            case "/":
+                break;
+        }
+        return [
+            {
+                type: undefined,
+                suggestions: [],
+            },
+            {
+                type: undefined,
+                suggestions: [],
+            },
+        ];
+    }
+
+    async fetchSuggestions({ suggestionDelimiter, suggestionSearchTerm }, { threadId } = {}) {
+        const cleanedSearchTerm = cleanTerm(suggestionSearchTerm);
+        switch (suggestionDelimiter) {
+            case "@": {
+                this.fetchPartners(cleanedSearchTerm, threadId);
+                break;
+            }
+            case ":":
+                break;
+            case "#":
+                break;
+            case "/":
+                break;
+        }
+    }
+
+    async fetchPartners(suggestionSearchTerm, threadId) {
+        const kwargs = { search: suggestionSearchTerm };
+        const thread = this.state.threads[threadId];
+        const isNonPublicChannel =
+            thread &&
+            (thread.type === "group" ||
+                thread.type === "chat" ||
+                (thread.type === "channel" && thread.serverData.group_based_subscription));
+        if (isNonPublicChannel) {
+            kwargs.channel_id = thread.id;
+        }
+        const suggestedPartners = await this.orm.call(
+            "res.partner",
+            "get_mention_suggestions",
+            [],
+            kwargs
+        );
+        suggestedPartners.map((data) => {
+            Partner.insert(this.state, {
+                id: data.id,
+                name: data.name,
+                email: data.email,
+                im_status: data.im_status,
+            });
+        });
     }
 
     async notifyThreadDescriptionToServer(threadId, description) {

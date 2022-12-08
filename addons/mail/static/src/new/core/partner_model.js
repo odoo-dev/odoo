@@ -1,5 +1,7 @@
 /* @odoo-module */
 
+import { cleanTerm } from "@mail/new/utils/format";
+
 /**
  * @typedef Data
  * @property {number} id
@@ -12,6 +14,8 @@ export class Partner {
     id;
     /** @type {string} */
     name;
+    /** @type {string} */
+    email;
     /** @type {'offline' | 'bot' | 'online' | 'away' | 'im_partner' | undefined} im_status */
     im_status;
 
@@ -29,7 +33,12 @@ export class Partner {
             // Get reactive version.
             partner = state.partners[data.id];
         }
-        const { id = partner.id, name = partner.name, im_status = partner.im_status, email = partner.email } = data;
+        const {
+            id = partner.id,
+            name = partner.name,
+            im_status = partner.im_status,
+            email = partner.email,
+        } = data;
         Object.assign(partner, {
             id,
             name,
@@ -57,5 +66,119 @@ export class Partner {
 
     get isCurrentUser() {
         return this.id !== this._state.user.partnerId;
+    }
+
+    static searchSuggestions(state, cleanedSearchTerm, threadId, sort) {
+        let partners;
+        const thread = state.threads[threadId];
+        const isNonPublicChannel =
+            thread &&
+            (thread.type === "group" ||
+                thread.type === "chat" ||
+                (thread.type === "channel" && thread.serverData.group_based_subscription));
+        if (isNonPublicChannel) {
+            // Only return the channel members when in the context of a
+            // group restricted channel. Indeed, the message with the mention
+            // would be notified to the mentioned partner, so this prevents
+            // from inadvertently leaking the private message to the
+            // mentioned partner.
+            partners = thread.channelMembers;
+        } else {
+            partners = Object.values(state.partners);
+        }
+        const mainSuggestionList = [];
+        const extraSuggestionList = [];
+        for (const partner of partners) {
+            if (partner === state.partnerRoot) {
+                // ignore archived partners (except OdooBot)
+                continue;
+            }
+            if (!partner.name) {
+                continue;
+            }
+            if (
+                cleanTerm(partner.name).includes(cleanedSearchTerm) ||
+                (partner.email && cleanTerm(partner.email).includes(cleanedSearchTerm))
+            ) {
+                if (partner.user) {
+                    mainSuggestionList.push(partner);
+                } else {
+                    extraSuggestionList.push(partner);
+                }
+            }
+        }
+        const sortFunc = () => {
+            return (a, b) => {
+                const isAInternalUser = a.user && a.user.isInternalUser;
+                const isBInternalUser = b.user && b.user.isInternalUser;
+                if (isAInternalUser && !isBInternalUser) {
+                    return -1;
+                }
+                if (!isAInternalUser && isBInternalUser) {
+                    return 1;
+                }
+                if (thread && thread.serverData.channel) {
+                    const isAMember = thread.serverData.channel.channelMembers[0][1].includes(a);
+                    const isBMember = thread.serverData.channel.channelMembers[0][1].includes(b);
+                    if (isAMember && !isBMember) {
+                        return -1;
+                    }
+                    if (!isAMember && isBMember) {
+                        return 1;
+                    }
+                }
+                const cleanedAName = cleanTerm(a.name || "");
+                const cleanedBName = cleanTerm(b.name || "");
+                if (
+                    cleanedAName.startsWith(cleanedSearchTerm) &&
+                    !cleanedBName.startsWith(cleanedSearchTerm)
+                ) {
+                    return -1;
+                }
+                if (
+                    !cleanedAName.startsWith(cleanedSearchTerm) &&
+                    cleanedBName.startsWith(cleanedSearchTerm)
+                ) {
+                    return 1;
+                }
+                if (cleanedAName < cleanedBName) {
+                    return -1;
+                }
+                if (cleanedAName > cleanedBName) {
+                    return 1;
+                }
+                const cleanedAEmail = cleanTerm(a.email || "");
+                const cleanedBEmail = cleanTerm(b.email || "");
+                if (
+                    cleanedAEmail.startsWith(cleanedSearchTerm) &&
+                    !cleanedAEmail.startsWith(cleanedSearchTerm)
+                ) {
+                    return -1;
+                }
+                if (
+                    !cleanedBEmail.startsWith(cleanedSearchTerm) &&
+                    cleanedBEmail.startsWith(cleanedSearchTerm)
+                ) {
+                    return 1;
+                }
+                if (cleanedAEmail < cleanedBEmail) {
+                    return -1;
+                }
+                if (cleanedAEmail > cleanedBEmail) {
+                    return 1;
+                }
+                return a.id - b.id;
+            };
+        };
+        return [
+            {
+                type: "Partner",
+                suggestions: sort ? mainSuggestionList.sort(sortFunc) : mainSuggestionList,
+            },
+            {
+                type: "Partner",
+                suggestions: sort ? extraSuggestionList.sort(sortFunc) : extraSuggestionList,
+            },
+        ];
     }
 }

@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { escape, unaccent } from "@web/core/utils/strings";
+import { url } from "@web/core/utils/urls";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 
 const urlRegexp =
@@ -8,8 +9,10 @@ const urlRegexp =
 
 /**
  * @param rawBody {string}
+ * @param validRecords {Object}
+ * @param validRecords.partners {Partner}
  */
-export async function prettifyMessageContent(rawBody) {
+export async function prettifyMessageContent(rawBody, validRecords = []) {
     // Suggested URL Javascript regex of http://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
     // Adapted to make http(s):// not required if (and only if) www. is given. So `should.notmatch` does not match.
     // And further extended to include Latin-1 Supplement, Latin Extended-A, Latin Extended-B and Latin Extended Additional.
@@ -21,7 +24,7 @@ export async function prettifyMessageContent(rawBody) {
     // linkification a bit everywhere. Ideally we want to keep the content
     // as text internally and only make html enrichment at display time but
     // the current design makes this quite hard to do.
-    // body = this._generateMentionsLinks(body);
+    body = generateMentionsLinks(body, validRecords);
     body = parseAndTransform(body, addLink);
     body = _generateEmojisOnHtml(body);
     return body;
@@ -135,6 +138,39 @@ function escapeAndCompactTextContent(content) {
     // prevent html space collapsing
     value = value.replace(/ /g, "&nbsp;").replace(/([^>])&nbsp;([^<])/g, "$1 $2");
     return value;
+}
+
+/**
+ * @param body {string}
+ * @param validRecords {Object}
+ * @param validRecords.partners {Array}
+ * @return {string}
+ */
+function generateMentionsLinks(body, { partners = [] }) {
+    const mentions = [];
+    for (const partner of partners) {
+        const placeholder = `@-mention-partner-${partner.id}`;
+        const text = `@${escape(partner.name)}`;
+        mentions.push({
+            class: "o_mail_redirect",
+            id: partner.id,
+            model: "res.partner",
+            placeholder,
+            text,
+        });
+        body = body.replace(text, placeholder);
+    }
+    const baseHREF = url("/web");
+    for (const mention of mentions) {
+        const href = `href='${baseHREF}#model=${mention.model}&id=${mention.id}'`;
+        const attClass = `class='${mention.class}'`;
+        const dataOeId = `data-oe-id='${mention.id}'`;
+        const dataOeModel = `data-oe-model='${mention.model}'`;
+        const target = `target='_blank'`;
+        const link = `<a ${href} ${attClass} ${dataOeId} ${dataOeModel} ${target}>${mention.text}</a>`;
+        body = body.replace(mention.placeholder, link);
+    }
+    return body;
 }
 
 /**
