@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { markup, toRaw, reactive } from "@odoo/owl";
+import { markup, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
 import { prettifyMessageContent, convertBrToLineBreak, cleanTerm } from "@mail/new/utils/format";
@@ -50,6 +50,7 @@ export class Messaging {
         this.previewsProm = null;
         this.imStatusService = im_status;
 
+        this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
         this.state = reactive({
             /** @type Object<number, []> */
             areTyping: {},
@@ -72,7 +73,7 @@ export class Messaging {
             threads: {},
             users: {},
             internalUserGroupId: null,
-            registeredImStatusPartners: reactive([], () => this.updateImStatusRegistration()),
+            registeredImStatusPartners: this.registeredImStatusPartners,
             // messaging menu
             menu: null,
             // discuss app
@@ -199,7 +200,11 @@ export class Messaging {
     updateImStatusRegistration() {
         this.imStatusService.registerToImStatus(
             "res.partner",
-            toRaw(this.state.registeredImStatusPartners)
+            /**
+             * Read value from registeredImStatusPartners own reactive rather than
+             * from state reactive to ensure the callback keeps being registered.
+             */
+            [...this.registeredImStatusPartners]
         );
     }
 
