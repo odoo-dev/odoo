@@ -1,6 +1,7 @@
 /* @odoo-module */
 
 import { Follower } from "@mail/new/core/follower_model";
+import { Thread as ThreadModel } from "@mail/new/core/thread_model";
 import { Thread } from "../thread/thread";
 import { useMessaging } from "../messaging_hook";
 import { useDropzone } from "@mail/new/dropzone/dropzone_hook";
@@ -44,7 +45,10 @@ export class Chatter extends Component {
         });
         this.unfollowHover = useHover("unfollow");
         this.attachmentUploader = useAttachmentUploader({
-            threadId: `${this.props.resModel},${this.props.resId}`,
+            threadId: ThreadModel.createLocalId({
+                model: this.props.resModel,
+                id: this.props.resId,
+            }),
         });
         this.rootRef = useRef("root");
         useChildSubEnv({

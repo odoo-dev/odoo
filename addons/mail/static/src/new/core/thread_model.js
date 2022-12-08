@@ -13,6 +13,15 @@ export class Thread {
     _state;
 
     /**
+     * @param {Object} param0
+     * @param {string} param0.model
+     * @param {number} param0.id
+     */
+    static createLocalId({ model, id }) {
+        return `${model},${id}`;
+    }
+
+    /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
      * @returns {Thread}

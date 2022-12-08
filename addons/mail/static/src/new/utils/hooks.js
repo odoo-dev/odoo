@@ -14,6 +14,7 @@ import {
 } from "@odoo/owl";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { removeFromArrayWithPredicate } from "./arrays";
+import { Thread } from "../core/thread_model";
 
 function useExternalListener(target, eventName, handler, eventParams) {
     const boundHandler = handler.bind(useComponent());
@@ -272,7 +273,9 @@ export function useAttachmentUploader({ threadId, messageId }) {
         const threadModel = upload.data.get("thread_model");
         const originThread =
             messaging.state.threads[
-                threadModel === "mail.channel" ? parseInt(threadId) : `${threadModel},${threadId}`
+                threadModel === "mail.channel"
+                    ? parseInt(threadId, 10)
+                    : Thread.createLocalId({ model: threadModel, id: threadId })
             ];
         abortByUploadId[upload.id] = upload.xhr.abort.bind(upload.xhr);
         state.attachments.push({
@@ -302,7 +305,9 @@ export function useAttachmentUploader({ threadId, messageId }) {
         const threadModel = upload.data.get("thread_model");
         const originThread =
             messaging.state.threads[
-                threadModel === "mail.channel" ? parseInt(threadId) : `${threadModel},${threadId}`
+                threadModel === "mail.channel"
+                    ? parseInt(threadId, 10)
+                    : Thread.createLocalId({ model: threadModel, id: threadId })
             ];
         const attachment = {
             ...response,

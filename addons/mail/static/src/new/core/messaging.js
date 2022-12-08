@@ -388,7 +388,7 @@ export class Messaging {
     }
 
     getChatterThread(resModel, resId) {
-        const localId = resModel + "," + resId;
+        const localId = Thread.createLocalId({ model: resModel, id: resId });
         if (localId in this.state.threads) {
             if (resId === false) {
                 return this.state.threads[localId];
