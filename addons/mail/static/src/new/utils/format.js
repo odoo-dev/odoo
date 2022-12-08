@@ -1,6 +1,6 @@
 /* @odoo-module */
 
-import { escape } from "@web/core/utils/strings";
+import { escape, unaccent } from "@web/core/utils/strings";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 
 const urlRegexp =
@@ -175,4 +175,8 @@ export function convertBrToLineBreak(str) {
         str.replaceAll("<br>", "\n").replaceAll("</br>", "\n"),
         "text/html"
     ).body.textContent;
+}
+
+export function cleanTerm(term) {
+    return unaccent(term.toLowerCase());
 }

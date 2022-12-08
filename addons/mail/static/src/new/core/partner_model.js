@@ -4,6 +4,7 @@
  * @typedef Data
  * @property {number} id
  * @property {string} name
+ * @property {string} email
  */
 
 export class Partner {
@@ -28,11 +29,12 @@ export class Partner {
             // Get reactive version.
             partner = state.partners[data.id];
         }
-        const { id = partner.id, name = partner.name, im_status = partner.im_status } = data;
+        const { id = partner.id, name = partner.name, im_status = partner.im_status, email = partner.email } = data;
         Object.assign(partner, {
             id,
             name,
             im_status,
+            email,
         });
         if (
             partner.im_status !== "im_partner" &&

@@ -3,7 +3,7 @@
 import { markup, toRaw, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
-import { prettifyMessageContent, convertBrToLineBreak } from "@mail/new/utils/format";
+import { prettifyMessageContent, convertBrToLineBreak, cleanTerm } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
 import { MessagingMenu } from "./messaging_menu_model";
 import { ChatWindow } from "./chat_window_model";
@@ -138,14 +138,8 @@ export class Messaging {
      */
     initialize() {
         this.rpc("/mail/init_messaging", {}, { silent: true }).then((data) => {
-            Partner.insert(this.state, {
-                id: data.current_partner.id,
-                name: data.current_partner.name,
-            });
-            this.state.partnerRoot = Partner.insert(this.state, {
-                id: data.partner_root.id,
-                name: data.partner_root.name,
-            });
+            Partner.insert(this.state, data.current_partner);
+            this.state.partnerRoot = Partner.insert(this.state, data.partner_root);
             for (const channelData of data.channels) {
                 this.createChannelThread(channelData);
             }
@@ -770,6 +764,30 @@ export class Messaging {
             type: "chat",
             serverData: data,
         });
+    }
+
+    async searchPartners(searchStr = "", limit = 10) {
+        let partners = [];
+        const searchTerm = cleanTerm(searchStr);
+        for (const id in this.state.partners) {
+            const partner = this.state.partners[id];
+            // todo: need to filter out non-user partners (there was a user key)
+            // also, filter out inactive partners
+            if (partner.name && cleanTerm(partner.name).includes(searchTerm)) {
+                partners.push(partner);
+                if (partners.length >= limit) {
+                    break;
+                }
+            }
+        }
+        if (!partners.length) {
+            const partnersData = await this.orm.silent.call("res.partner", "im_search", [
+                searchTerm,
+                limit,
+            ]);
+            partners = partnersData.map((data) => Partner.insert(this.state, data));
+        }
+        return partners;
     }
 
     async leaveChannel(id) {
