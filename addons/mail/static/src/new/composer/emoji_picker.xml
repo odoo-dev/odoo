@@ -12,7 +12,7 @@
         </div>
         <div class="o-mail-emoji-picker-search p-1 d-flex flex-column">
             <div class="d-flex">
-                <input class="form-control border-0 flex-grow-1" t-ref="input" placeholder="Search for an emoji" t-model="state.searchStr"/>
+                <input class="o-mail-emoji-picker-search-input form-control border-0 flex-grow-1" t-ref="input" placeholder="Search for an emoji" t-model="state.searchStr"/>
                 <i class="oi oi-search p-2 fs-5" title="Search..." role="img" aria-label="Search..."></i>
             </div>
             <hr class="mx-2 my-0 text-muted"/>

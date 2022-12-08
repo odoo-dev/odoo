@@ -11,7 +11,13 @@ import {
 } from "@mail/../tests/helpers/test_utils";
 
 import { file, makeTestPromise } from "web.test_utils";
-import { click, getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import {
+    click,
+    editInput,
+    getFixture,
+    nextTick,
+    patchWithCleanup,
+} from "@web/../tests/helpers/utils";
 import { Composer } from "@mail/new/composer/composer";
 
 const { createFile, inputFiles } = file;
@@ -1031,6 +1037,39 @@ QUnit.module("mail", (hooks) => {
                 document.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
                 "@TestPartner 😊",
                 "text content of composer should have previous mention and selected emoji just after"
+            );
+        });
+
+        QUnit.only("category highlighted after a search", async function (assert) {
+            assert.expect(3);
+
+            const pyEnv = await startServer();
+            const mailChanelId1 = pyEnv["mail.channel"].create({ name: "search&rescue" });
+            const { click, insertText, openDiscuss } = await start({
+                discuss: {
+                    context: { active_id: mailChanelId1 },
+                },
+            });
+            await openDiscuss();
+            await click("i[aria-label='Emojis']");
+            const firstCategory = document.querySelector(".o-emoji[data-id='1']");
+
+            assert.ok(
+                firstCategory.classList.contains("o-isActive"),
+                "When opening the emoji picker, the first category should be highlighted"
+            );
+
+            await insertText(".o-mail-emoji-picker-search", "This is a search");
+            const allActiveCategories = document.querySelectorAll(".o-emoji.o-isActive");
+            assert.ok(
+                allActiveCategories.length === 0,
+                "When searching, no category should be active"
+            );
+
+            await editInput(target, ".o-mail-emoji-picker-search-input", "");
+            assert.ok(
+                firstCategory.classList.contains("o-isActive"),
+                "After the search, the first category should be highlighted again"
             );
         });
 
