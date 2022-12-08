@@ -75,6 +75,17 @@ export class Chatter extends Component {
         });
     }
 
+    get composerPlaceholder() {
+        switch (this.chatter.composerAction) {
+            case "logNote":
+                return this.env._t("Log an internal note…");
+            case "sendMessage":
+                return this.env._t("Send a message to followers…");
+            default:
+                return "";
+        }
+    }
+
     get followerButtonLabel() {
         return this.env._t("Show Followers");
     }

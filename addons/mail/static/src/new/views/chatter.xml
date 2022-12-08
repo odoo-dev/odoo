@@ -75,8 +75,7 @@
             <t t-if="chatter.composerAction === 'sendMessage'">
                 <small class="px-3 pb-1 pt-2" style="margin-left:48px;"><em class="text-muted">To followers of:</em> <b class="px-1">"<t t-esc="props.displayName"/>"</b></small>
             </t>
-            <t t-set="placeholder" t-value="chatter.composerAction === 'sendMessage' ? 'Send a message to followers...' : 'Log an internal note...'"/>
-            <Composer composer="thread.composer" autofocus="true" mode="'extended'" onPostCallback.bind="toggleComposer" placeholder="placeholder" dropzoneRef="rootRef"/>
+            <Composer composer="thread.composer" autofocus="true" mode="'extended'" onPostCallback.bind="toggleComposer" placeholder="composerPlaceholder" dropzoneRef="rootRef"/>
             <hr/>
         </t>
         <div class="overflow-auto">
