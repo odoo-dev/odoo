@@ -45,11 +45,11 @@
 
             </div>
             <div class="text-truncate" t-if="preview.mostRecentMsg">
-                <t t-if="isAuthor(preview)">
+                <t t-if="preview.mostRecentMsg.isAuthor">
                     <i class="fa fa-mail-reply me-1"/>You
                 </t>
                 <t t-else="">
-                    <t t-esc="getPreviewAuthor(preview.mostRecentMsg.author.id)"/>: 
+                    <t t-esc="preview.mostRecentMsg.author.name"/>: 
                 </t>:
                 <t t-esc="preview.mostRecentMsg.body"/>
             </div>

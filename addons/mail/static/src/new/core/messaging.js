@@ -3,9 +3,9 @@
 import { markup, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
+import { memoize } from "@web/core/utils/functions";
 import { prettifyMessageContent, convertBrToLineBreak, cleanTerm } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
-import { MessagingMenu } from "./messaging_menu_model";
 import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
 import { Partner } from "./partner_model";
@@ -47,7 +47,6 @@ export class Messaging {
         this.nextId = 1;
         this.router = router;
         this.isReady = new Deferred();
-        this.previewsProm = null;
         this.imStatusService = im_status;
 
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
@@ -75,7 +74,9 @@ export class Messaging {
             internalUserGroupId: null,
             registeredImStatusPartners: this.registeredImStatusPartners,
             // messaging menu
-            menu: null,
+            menu: {
+                counter: 5, // sounds about right.
+            },
             // discuss app
             discuss: {
                 isActive: false,
@@ -111,7 +112,6 @@ export class Messaging {
             chatWindows: [],
             commands: [],
         });
-        this.state.menu = MessagingMenu.insert(this.state);
         this.state.discuss.inbox = Thread.insert(this.state, {
             id: "inbox",
             name: env._t("Inbox"),
@@ -517,33 +517,24 @@ export class Messaging {
         }
     }
 
-    async fetchPreviews() {
-        if (this.previewsProm) {
-            return this.previewsProm;
-        }
+    fetchPreviews = memoize(async () => {
         const ids = [];
         for (const thread of Object.values(this.state.threads)) {
             if (thread.type === "channel" || thread.type === "chat") {
                 ids.push(thread.id);
             }
         }
-        if (!ids.length) {
-            this.previewsProm = Promise.resolve([]);
-        } else {
-            this.previewsProm = this.orm
-                .call("mail.channel", "channel_fetch_preview", [ids])
-                .then((previews) => {
-                    for (const preview of previews) {
-                        const thread = Thread.insert(this.state, preview.id);
-                        const data = Object.assign(preview.last_message, {
-                            body: markup(preview.last_message.body),
-                        });
-                        Message.insert(this.state, data, thread);
-                    }
+        if (ids.length) {
+            const previews = await this.orm.call("mail.channel", "channel_fetch_preview", [ids]);
+            for (const preview of previews) {
+                const thread = Thread.insert(this.state, { id: preview.id, type: "channel" });
+                const data = Object.assign(preview.last_message, {
+                    body: markup(preview.last_message.body),
                 });
+                Message.insert(this.state, data, thread);
+            }
         }
-        return this.previewsProm;
-    }
+    });
 
     async postInboxReply(threadId, threadModel, body, postData) {
         const thread = this.getChatterThread(threadModel, threadId);
