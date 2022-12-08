@@ -890,22 +890,18 @@ export class Messaging {
     /*
      * Returns suggestions that match the given search term from specified type.
      *
-     * @param {Object} [suggestionSearchProps={}]
-     * @param {String} [suggestionSearchProps.suggestionDelimiter] can be one one of the following: ["@", ":", "#", "/"]
-     * @param {String} [suggestionSearchProps.suggestionSearchTerm]
+     * @param {Object} [param0={}]
+     * @param {String} [param0.delimiter] can be one one of the following: ["@", ":", "#", "/"]
+     * @param {String} [param0.term]
      * @param {Object} [options={}]
      * @param {Integer} [options.thread] prioritize and/or restrict
      *  result in the context of given thread
      * @returns {[mainSuggestion[], extraSuggestion[]]}
      */
 
-    searchSuggestions(
-        { suggestionDelimiter, suggestionSearchTerm },
-        { threadId } = {},
-        sort = false
-    ) {
-        const cleanedSearchTerm = cleanTerm(suggestionSearchTerm);
-        switch (suggestionDelimiter) {
+    searchSuggestions({ delimiter, term }, { threadId } = {}, sort = false) {
+        const cleanedSearchTerm = cleanTerm(term);
+        switch (delimiter) {
             case "@": {
                 return Partner.searchSuggestions(this.state, cleanedSearchTerm, threadId, sort);
             }
@@ -928,9 +924,9 @@ export class Messaging {
         ];
     }
 
-    async fetchSuggestions({ suggestionDelimiter, suggestionSearchTerm }, { threadId } = {}) {
-        const cleanedSearchTerm = cleanTerm(suggestionSearchTerm);
-        switch (suggestionDelimiter) {
+    async fetchSuggestions({ delimiter, term }, { threadId } = {}) {
+        const cleanedSearchTerm = cleanTerm(term);
+        switch (delimiter) {
             case "@": {
                 this.fetchPartners(cleanedSearchTerm, threadId);
                 break;
@@ -944,8 +940,8 @@ export class Messaging {
         }
     }
 
-    async fetchPartners(suggestionSearchTerm, threadId) {
-        const kwargs = { search: suggestionSearchTerm };
+    async fetchPartners(term, threadId) {
+        const kwargs = { search: term };
         const thread = this.state.threads[threadId];
         const isNonPublicChannel =
             thread &&

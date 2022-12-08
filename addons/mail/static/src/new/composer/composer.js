@@ -27,6 +27,7 @@ import { FileUploader } from "@web/views/fields/file_handler";
 import { Typing } from "./typing";
 import { useDebounced } from "@web/core/utils/timing";
 import { browser } from "@web/core/browser/browser";
+import { useSuggestion } from "./composer_hook";
 
 export class Composer extends Component {
     setup() {
@@ -40,20 +41,8 @@ export class Composer extends Component {
         this.state = useState({
             autofocus: 0,
             active: true,
-            suggestions: [],
         });
-        this.suggestionSearchProps = {
-            suggestionDelimiter: undefined,
-            suggestionDelimiterPosition: undefined,
-            suggestionSearchTerm: undefined,
-        };
-        this.fetchMentionRpcProps = {
-            hasMentionRpcInProgress: false,
-            rpcFunction: undefined,
-        };
-        this.rawMentions = {
-            partnerIds: new Set(),
-        };
+        this.suggestion = useSuggestion();
         this.stopTyping = useDebounced(() => {
             this.notifyIsTyping(false);
             this.typingNotified = false;
@@ -111,38 +100,6 @@ export class Composer extends Component {
                 this.ref.el.style.height = this.ref.el.scrollHeight + "px";
             },
             () => [this.props.composer.textInputContent, this.ref.el]
-        );
-        useEffect(
-            () => {
-                this.detectSuggestionProps();
-            },
-            () => [
-                this.props.composer.selection.start,
-                this.props.composer.selection.end,
-                this.props.composer.textInputContent,
-            ]
-        );
-        useEffect(
-            () => {
-                this.updateSuggestionList();
-                this.executeOrQueueFunction(async () => {
-                    if (
-                        this.suggestionSearchProps.suggestionDelimiterPosition === undefined ||
-                        this.suggestionSearchProps.suggestionSearchTerm === ""
-                    ) {
-                        return; // ignore obsolete call
-                    }
-                    await this.messaging.fetchSuggestions(this.suggestionSearchProps, {
-                        threadId: this.props.composer.thread.id,
-                    });
-                    this.updateSuggestionList();
-                });
-            },
-            () => [
-                this.suggestionSearchProps.suggestionDelimiter,
-                this.suggestionSearchProps.suggestionDelimiterPosition,
-                this.suggestionSearchProps.suggestionSearchTerm,
-            ]
         );
         useEffect(
             () => {
@@ -221,17 +178,6 @@ export class Composer extends Component {
         );
     }
 
-    get hasSuggestions() {
-        return this.state.suggestions
-            .map((mainOrExtraSuggestions) => {
-                return Boolean(
-                    mainOrExtraSuggestions.suggestions &&
-                        mainOrExtraSuggestions.suggestions.length > 0
-                );
-            })
-            .reduce((result, hasSuggestion) => result || hasSuggestion, false);
-    }
-
     onKeydown(ev) {
         if (ev.key === "Enter") {
             const shouldPost = this.props.mode === "extended" ? ev.ctrlKey : !ev.shiftKey;
@@ -249,135 +195,15 @@ export class Composer extends Component {
         }
     }
 
-    detectSuggestionProps() {
-        const selectionEnd = this.props.composer.selection.end;
-        const selectionStart = this.props.composer.selection.start;
-        const content = this.props.composer.textInputContent;
-        if (selectionStart !== selectionEnd) {
-            // avoid interfering with multi-char selection
-            this.clearSuggestionSearch();
-        }
-        const candidatePositions = [];
-        // keep the current delimiter if it is still valid
-        if (
-            this.suggestionSearchProps.suggestionDelimiterPosition !== undefined &&
-            this.suggestionSearchProps.suggestionDelimiterPosition < selectionStart
-        ) {
-            candidatePositions.push(this.suggestionSearchProps.suggestionDelimiterPosition);
-        }
-        // consider the char before the current cursor position if the
-        // current delimiter is no longer valid (or if there is none)
-        if (selectionStart > 0) {
-            candidatePositions.push(selectionStart - 1);
-        }
-        const suggestionDelimiters = ["@", ":", "#", "/"];
-        for (const candidatePosition of candidatePositions) {
-            if (candidatePosition < 0 || candidatePosition >= content.length) {
-                continue;
-            }
-            const candidateChar = content[candidatePosition];
-            if (candidateChar === "/" && candidatePosition !== 0) {
-                continue;
-            }
-            if (!suggestionDelimiters.includes(candidateChar)) {
-                continue;
-            }
-            const charBeforeCandidate = content[candidatePosition - 1];
-            if (charBeforeCandidate && !/\s/.test(charBeforeCandidate)) {
-                continue;
-            }
-            Object.assign(this.suggestionSearchProps, {
-                suggestionDelimiter: candidateChar,
-                suggestionDelimiterPosition: candidatePosition,
-                suggestionSearchTerm: content.substring(candidatePosition + 1, selectionStart),
-            });
-            return;
-        }
-        this.clearSuggestionSearch();
-    }
-
-    async executeOrQueueFunction(func) {
-        if (this.fetchMentionRpcProps.hasMentionRpcInProgress) {
-            this.fetchMentionRpcProps.rpcFunction = func;
-            return;
-        }
-        this.fetchMentionRpcProps.hasMentionRpcInProgress = true;
-        this.fetchMentionRpcProps.rpcFunction = undefined;
-        await func();
-        this.fetchMentionRpcProps.hasMentionRpcInProgress = false;
-        if (this.fetchMentionRpcProps.nextMentionRpcFunction) {
-            this.executeOrQueueFunction(this.fetchMentionRpcProps.nextMentionRpcFunction);
-        }
-    }
-
-    updateSuggestionList() {
-        if (!this.suggestionSearchProps.suggestionDelimiter) {
-            return;
-        }
-        const [mainSuggestions, extraSuggestions = {}] = this.messaging.searchSuggestions(
-            this.suggestionSearchProps,
-            { threadId: this.props.composer.thread.id },
-            true
-        );
-        // arbitrary limit to avoid displaying too many elements at once
-        // ideally a load more mechanism should be introduced
-        const limit = 8;
-        mainSuggestions.suggestions.length = Math.min(mainSuggestions.suggestions.length, limit);
-        extraSuggestions.suggestions.length = Math.min(
-            extraSuggestions.suggestions.length,
-            limit - mainSuggestions.suggestions.length
-        );
-        this.state.suggestions = [mainSuggestions, extraSuggestions];
-    }
-
-    insertSuggestion(option) {
-        const cursorPosition = this.props.composer.selection.start;
-        const content = this.props.composer.textInputContent;
-        let textLeft = content.substring(
-            0,
-            this.suggestionSearchProps.suggestionDelimiterPosition + 1
-        );
-        let textRight = content.substring(cursorPosition, content.length);
-        if (this.suggestionSearchProps.suggestionDelimiter === ":") {
-            textLeft = content.substring(
-                0,
-                this.suggestionSearchProps.suggestionDelimiterPosition - 1
-            );
-            textRight = content.substring(cursorPosition, content.length);
-        }
-        const recordReplacement = option.label;
-        if (option.partner) {
-            this.rawMentions.partnerIds.add(option.partner.id);
-        }
-        this.clearSuggestionSearch();
-        this.props.composer.textInputContent = textLeft + recordReplacement + " " + textRight;
-        this.props.composer.selection.start = textLeft.length + recordReplacement.length + 1;
-        this.props.composer.selection.end = textLeft.length + recordReplacement.length + 1;
-        this.props.composer.forceCursorMove = true;
-    }
-
-    clearRawMentions() {
-        this.rawMentions.partnerIds.length = 0;
-    }
-
-    clearSuggestionSearch() {
-        Object.assign(this.suggestionSearchProps, {
-            suggestionDelimiter: undefined,
-            suggestionDelimiterPosition: undefined,
-            suggestionSearchTerm: undefined,
-        });
-        this.state.suggestions.length = [];
-    }
-
     getNavigableListProps() {
         return {
             anchorRef: this.ref.el,
             position: "top",
             onSelect: (ev, option) => {
-                this.insertSuggestion(option);
+                this.suggestion.insert(option);
                 markEventHandled(ev, "composer.selectSuggestion");
             },
-            sources: this.state.suggestions.map((mainOrExtraSuggestions) => {
+            sources: this.suggestion.state.items.map((mainOrExtraSuggestions) => {
                 switch (mainOrExtraSuggestions.type) {
                     case "Partner":
                         return {
@@ -444,7 +270,7 @@ export class Composer extends Component {
             const postData = {
                 attachments: this.attachmentUploader.attachments,
                 isNote: this.props.composer.type === "note" || isNote,
-                rawMentions: this.rawMentions,
+                rawMentions: this.suggestion.rawMentions,
                 parentId,
             };
             if (messageToReplyTo && this.props.composer.thread.id === "inbox") {
@@ -452,7 +278,7 @@ export class Composer extends Component {
             } else {
                 await this.messaging.postMessage(this.props.composer.thread.id, value, postData);
             }
-            this.clearRawMentions();
+            this.suggestion.clearRawMentions();
             this.messaging.cancelReplyTo();
         });
     }
@@ -481,10 +307,10 @@ export class Composer extends Component {
                 this.props.composer.message.id,
                 value,
                 this.attachmentUploader.attachments,
-                this.rawMentions
+                this.suggestion.rawMentions
             )
         );
-        this.clearRawMentions();
+        this.suggestion.clearRawMentions();
     }
 
     async onFileUpload({ data, name, type }) {
