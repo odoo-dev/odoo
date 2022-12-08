@@ -51,7 +51,6 @@ export class Thread {
             type,
             counter: 0,
             isUnread: false,
-            is_pinned: serverData?.is_pinned,
             icon: false,
             loadMore: false,
             description: false,
@@ -63,6 +62,11 @@ export class Thread {
             serverLastSeenMsgByCurrentUser: serverData ? serverData.seen_message_id : null,
             memberCount: 0,
         });
+        if (serverData) {
+            if ("is_pinned" in serverData) {
+                this.is_pinned = serverData.is_pinned;
+            }
+        }
         for (const key in data) {
             this[key] = data[key];
         }

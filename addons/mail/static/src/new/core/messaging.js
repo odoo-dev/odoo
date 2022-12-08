@@ -534,7 +534,10 @@ export class Messaging {
                 .call("mail.channel", "channel_fetch_preview", [ids])
                 .then((previews) => {
                     for (const preview of previews) {
-                        const thread = Thread.insert(this.state, preview.id);
+                        const thread = Thread.insert(this.state, {
+                            id: preview.id,
+                            type: "channel",
+                        });
                         const data = Object.assign(preview.last_message, {
                             body: markup(preview.last_message.body),
                         });
