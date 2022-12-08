@@ -213,4 +213,20 @@ export class Message {
     get url() {
         return `${url("/web")}#model=${this.resModel}&id=${this.id}`;
     }
+
+    get isBodyEmpty() {
+        return (
+            !this.body ||
+            ["", "<p></p>", "<p><br></p>", "<p><br/></p>"].includes(this.body.replace(/\s/g, ""))
+        );
+    }
+
+    get isEmpty() {
+        return (
+            this.isBodyEmpty &&
+            this.attachments.length === 0 &&
+            this.trackingValues.length === 0 &&
+            !this.subtypeDescription
+        );
+    }
 }

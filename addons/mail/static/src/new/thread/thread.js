@@ -82,12 +82,7 @@ export class Thread extends Component {
     }
 
     isSquashed(msg, prevMsg) {
-        if (
-            !prevMsg ||
-            prevMsg.type === "notification" ||
-            this.messaging.isMessageEmpty(prevMsg) ||
-            this.env.inChatter
-        ) {
+        if (!prevMsg || prevMsg.type === "notification" || prevMsg.isEmpty || this.env.inChatter) {
             return false;
         }
 

@@ -45,7 +45,7 @@
                     </small>
                 </div>
                 <div t-if="!state.isEditing" class="o-mail-message-content d-flex">
-                    <t t-if="(message.type === 'notification' or message.isTransient) and !messaging.isMessageBodyEmpty(message)">
+                    <t t-if="(message.type === 'notification' or message.isTransient) and !message.isBodyEmpty">
                         <t t-if="message.subtype_description">
                             <p class="mb-0"><t t-esc="message.subtype_description"/></p>
                         </t>
@@ -56,7 +56,7 @@
                             <t t-out="message.body"/>
                         </div>
                     </t>
-                    <t t-if="message.type !== 'notification' and !message.isTransient and !messaging.isMessageBodyEmpty(message)">
+                    <t t-if="message.type !== 'notification' and !message.isTransient and !message.isBodyEmpty">
                         <div class="o-mail-message-bubble-wrap position-relative">
                             <div class="o-mail-message-bubble border rounded-end-3 rounded-bottom-3 position-absolute top-0 start-0 w-100 h-100" t-att-class="{
                                     'bg-info-light border-info': !message.isAuthor,

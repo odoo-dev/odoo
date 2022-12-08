@@ -597,7 +597,7 @@ export class Messaging {
             Object.assign(data, { body: markup(data.body) }),
             thread
         );
-        if (!this.isMessageEmpty(message)) {
+        if (!message.isEmpty) {
             this.rpc(`/mail/link_preview`, { message_id: data.id }, { silent: true });
         }
         if (thread.type !== "chatter") {
@@ -845,22 +845,6 @@ export class Messaging {
         return this.rpc("/mail/attachment/delete", {
             attachment_id: attachment.id,
         });
-    }
-
-    isMessageBodyEmpty(message) {
-        return (
-            !message.body ||
-            ["", "<p></p>", "<p><br></p>", "<p><br/></p>"].includes(message.body.replace(/\s/g, ""))
-        );
-    }
-
-    isMessageEmpty(message) {
-        return (
-            this.isMessageBodyEmpty(message) &&
-            message.attachments.length === 0 &&
-            message.trackingValues.length === 0 &&
-            !message.subtypeDescription
-        );
     }
 
     async unstarAll() {

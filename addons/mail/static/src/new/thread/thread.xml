@@ -21,7 +21,7 @@
                     <t t-if="msg.isNotification">
                         <t t-call="mail.notification_message"/>
                     </t>
-                    <t t-elif="!messaging.isMessageEmpty(msg)">
+                    <t t-elif="!msg.isEmpty">
                         <Message
                             message="msg"
                             squashed="isSquashed(msg, prevMsg)"
