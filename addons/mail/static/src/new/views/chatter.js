@@ -75,6 +75,9 @@ export class Chatter extends Component {
         });
     }
 
+    /**
+     * @returns {string}
+     */
     get composerPlaceholder() {
         switch (this.chatter.composerAction) {
             case "logNote":
@@ -86,14 +89,23 @@ export class Chatter extends Component {
         }
     }
 
+    /**
+     * @returns {string}
+     */
     get followerButtonLabel() {
         return this.env._t("Show Followers");
     }
 
+    /**
+     * @returns {string}
+     */
     get followingText() {
         return this.env._t("Following");
     }
 
+    /**
+     * @returns {boolean}
+     */
     get isComposerOpen() {
         return this.chatter.composerAction !== "none";
     }
@@ -105,6 +117,9 @@ export class Chatter extends Component {
         return !this.props.resId || !this.thread.hasReadAccess;
     }
 
+    /**
+     * @returns {string}
+     */
     get unfollowText() {
         return this.env._t("Unfollow");
     }
