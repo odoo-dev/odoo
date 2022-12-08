@@ -63,7 +63,11 @@ export class Thread {
             this._state.discuss.chats.threads.push(this.id);
             if (serverData) {
                 for (const elem of serverData.channel.channelMembers[0][1]) {
-                    Partner.insert(this._state, elem.persona.partner);
+                    Partner.insert(this._state, {
+                        id: elem.persona.partner.id,
+                        name: elem.persona.partner.name,
+                        email: elem.persona.partner.email,
+                    });
                     if (
                         elem.persona.partner.id !== this._state.user.partnerId ||
                         (serverData.channel.channelMembers[0][1].length === 1 &&
