@@ -2,7 +2,6 @@
 
 import { markup, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
-import { sprintf } from "@web/core/utils/strings";
 import { memoize } from "@web/core/utils/functions";
 import { prettifyMessageContent, convertBrToLineBreak, cleanTerm } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";

@@ -16,7 +16,6 @@ import { browser } from "@web/core/browser/browser";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
-import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 
 let target;
 
