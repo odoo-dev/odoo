@@ -9,7 +9,7 @@
         <div class="o-mail-chat-window-header d-flex align-items-center cursor-pointer flex-shrink-0" t-on-click="toggleFold">
             <t t-set="thread" t-value="messaging.state.threads[props.chatWindow.threadId]"/>
             <ChatWindowIcon threadId="props.chatWindow.threadId" className="'ms-3 me-1 my-0'" />
-            <span class="o-mail-chat-window-header-name ms-3">#<t t-esc="thread.displayName"/></span>
+            <span class="o-mail-chat-window-header-name ms-3" t-out="thread.displayName"></span>
             <div class="flex-grow-1"/>
             <div t-if="!thread.inCall" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Start a Call" t-on-click.stop="startCall">
                 <i class="fa fa-phone"/>
