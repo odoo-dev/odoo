@@ -9,8 +9,17 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { markEventHandled } from "../utils/misc";
+import { ChatWindowIcon } from "../chat/chat_window_icon";
 
+/**
+ * @typedef {Object} Props
+ * @extends {Component<Props, Env>}
+ */
 export class Sidebar extends Component {
+    static template = "mail.discuss_sidebar";
+    static components = { ChannelSelector, ThreadIcon, PartnerImStatus, ChatWindowIcon };
+    static props = [];
+
     setup() {
         this.messaging = useMessaging();
         this.actionService = useService("action");
@@ -95,9 +104,3 @@ export class Sidebar extends Component {
         });
     }
 }
-
-Object.assign(Sidebar, {
-    components: { ChannelSelector, ThreadIcon, PartnerImStatus },
-    props: [],
-    template: "mail.discuss_sidebar",
-});

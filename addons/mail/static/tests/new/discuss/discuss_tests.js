@@ -427,14 +427,12 @@ QUnit.module("mail", (hooks) => {
         await openDiscuss();
         await afterNextRender(() => advanceTime(UPDATE_BUS_PRESENCE_DELAY));
         assert.strictEqual(
-            target.querySelectorAll(".o-mail-category-item").length,
+            target.querySelectorAll(".o-mail-discuss-sidebar-threadIcon").length,
             3,
             "should have 3 category items"
         );
         assert.strictEqual(
-            target.querySelectorAll(
-                ".o-mail-category-item .o-mail-category-im-status .o-mail-partner-im-status"
-            ).length,
+            target.querySelectorAll(".o-mail-discuss-sidebar-threadIcon").length,
             3,
             "should have 3 partner im-status"
         );
@@ -445,17 +443,17 @@ QUnit.module("mail", (hooks) => {
         assert.strictEqual(chat2.textContent, "Partner2", "First chat should have Partner2");
         assert.strictEqual(chat3.textContent, "Partner3", "First chat should have Partner3");
         assert.strictEqual(
-            chat1.querySelectorAll(".o-offline").length,
+            chat1.querySelectorAll(".o-mail-chatwindow-icon-offline").length,
             1,
             "chat1 should have offline icon"
         );
         assert.strictEqual(
-            chat2.querySelectorAll(".o-online").length,
+            chat2.querySelectorAll(".o-mail-chatwindow-icon-online").length,
             1,
             "chat2 should have online icon"
         );
         assert.strictEqual(
-            chat3.querySelectorAll(".o-away").length,
+            chat3.querySelectorAll(".o-mail-chatwindow-icon-away").length,
             1,
             "chat3 should have away icon"
         );
