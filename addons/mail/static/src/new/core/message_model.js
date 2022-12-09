@@ -115,7 +115,9 @@ export class Message {
             attachments: attachments.map((attachment) => ({
                 ...attachment,
                 extension: attachment.name.split(".").pop(),
-                originThread: Thread.insert(this._state, attachment.originThread[0][1]),
+                originThread: Array.isArray(attachment.originThread)
+                    ? Thread.insert(this._state, attachment.originThread[0][1])
+                    : attachment.originThread,
             })),
             author: data.author ? Partner.insert(this._state, data.author) : this.author,
             body,
