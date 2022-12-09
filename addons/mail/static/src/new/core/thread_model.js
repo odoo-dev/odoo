@@ -27,6 +27,7 @@ export class Thread {
     isUnread = false;
     loadMore = false;
     memberCount = 0;
+    message_needaction_counter = 0;
     /** @type {import("@mail/new/core/message_model").Message[]} */
     messages = [];
     /** @type {integer} */

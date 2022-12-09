@@ -316,6 +316,11 @@ export class Messaging {
                         delete this.state.messages[message_id].linkPreviews[index];
                     }
                     break;
+                case "mail.message/inbox": {
+                    const data = Object.assign(notif.payload, { body: markup(notif.payload.body) });
+                    Message.insert(this.state, data);
+                    break;
+                }
                 case "mail.message/toggle_star": {
                     const { message_ids: messageIds, starred } = notif.payload;
                     for (const messageId of messageIds) {

@@ -26,11 +26,12 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o_DiscussView_thread",
+                    ".o-mail-discuss-content .o-mail-thread",
                     "discuss should display a thread initially"
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_DiscussView_thread").dataset.threadId,
+                    document.querySelector(".o-mail-discuss-content .o-mail-thread").dataset
+                        .threadId,
                     messaging.inbox.thread.id,
                     "inbox mailbox should be opened initially"
                 );
@@ -47,11 +48,12 @@ QUnit.module("mail", {}, function () {
     `);
                 assert.containsOnce(
                     document.body,
-                    ".o_DiscussView_thread",
+                    ".o-mail-discuss-content .o-mail-thread",
                     "discuss should still have a thread after clicking on starred mailbox"
                 );
                 assert.strictEqual(
-                    document.querySelector(".o_DiscussView_thread").dataset.threadId,
+                    document.querySelector(".o-mail-discuss-content .o-mail-thread").dataset
+                        .threadId,
                     messaging.starred.thread.id,
                     "starred mailbox should be opened after clicking on it"
                 );

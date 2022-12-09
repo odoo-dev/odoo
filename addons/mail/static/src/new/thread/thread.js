@@ -86,7 +86,7 @@ export class Thread extends Component {
             return false;
         }
 
-        if (msg.author.id !== prevMsg.author.id) {
+        if (msg.author?.id !== prevMsg.author?.id) {
             return false;
         }
         if (msg.resModel !== prevMsg.resModel || msg.resId !== prevMsg.resId) {

@@ -17,15 +17,15 @@
             <div class="o-mail-message-sidebar d-flex flex-shrink-0 justify-content-center">
                 <div t-if="!props.squashed" class="o-mail-avatar-container position-relative bg-view">
                     <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
-                        t-att-src="message.author.avatarUrl"
-                        t-att-class="{ 'cursor-pointer': props.hasActions and message.author.isCurrentUser }"
+                        t-att-src="message.author and message.author.avatarUrl"
+                        t-att-class="{ 'cursor-pointer': props.hasActions and message.author and message.author.isCurrentUser }"
                         t-on-click="openChatAvatar" />
-                    <PartnerImStatus partner="message.author" className="'position-absolute bottom-0 end-0'"/>
+                    <PartnerImStatus t-if="message.author" partner="message.author" className="'position-absolute bottom-0 end-0'"/>
                 </div>
             </div>
             <div class="overflow-auto" t-att-class="{ 'flex-grow-1': state.isEditing }">
                 <div t-if="!props.squashed" class="o-mail-msg-header d-flex flex-wrap align-items-baseline">
-                    <span class="o-mail-own-name">
+                    <span t-if="message.author" class="o-mail-own-name">
                         <strong class="o_redirect me-1 text-truncate" t-att-class="{ 'cursor-pointer': props.hasActions and message.author.isCurrentUser }" t-on-click="openChatAvatar">
                         <t t-esc="message.author.name"/>
                         </strong>

@@ -418,7 +418,7 @@ QUnit.module("mail", {}, function () {
 
                 const pyEnv = await startServer();
                 const mailChannelId1 = pyEnv["mail.channel"].create({});
-                const { click, messaging, openDiscuss } = await start();
+                const { click, openDiscuss } = await start();
                 await openDiscuss();
 
                 assert.containsOnce(
@@ -441,9 +441,7 @@ QUnit.module("mail", {}, function () {
                     "the active channel item should remain even if the category is folded"
                 );
 
-                await click(
-                    `.o_DiscussSidebarMailboxView[data-mailbox-local-id="${messaging.inbox.localId}"]`
-                );
+                await click(`button[data-mailbox="inbox"]`);
                 assert.containsNone(
                     document.body,
                     `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,
@@ -828,7 +826,7 @@ QUnit.module("mail", {}, function () {
                 const mailChannelId1 = pyEnv["mail.channel"].create({
                     channel_type: "chat",
                 });
-                const { click, messaging, openDiscuss } = await start();
+                const { click, openDiscuss } = await start();
                 await openDiscuss();
 
                 assert.containsOnce(
@@ -851,9 +849,7 @@ QUnit.module("mail", {}, function () {
                     "the active chat item should remain even if the category is folded"
                 );
 
-                await click(
-                    `.o_DiscussSidebarMailboxView[data-mailbox-local-id="${messaging.inbox.localId}"]`
-                );
+                await click(`button[data-mailbox="inbox"]`);
                 assert.containsNone(
                     document.body,
                     `.o_DiscussSidebarCategory_item[data-channel-id="${mailChannelId1}"]`,

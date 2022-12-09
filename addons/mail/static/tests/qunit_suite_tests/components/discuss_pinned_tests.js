@@ -17,7 +17,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
                 assert.containsOnce(
                     document.body,
-                    `.o_DiscussView_thread[data-thread-id="${messaging.inbox.thread.id}"][data-thread-model="mail.box"]`,
+                    `.o-mail-discuss-content .o-mail-thread[data-thread-id="${messaging.inbox.thread.id}"][data-thread-model="mail.box"]`,
                     "The Inbox is opened in discuss"
                 );
                 assert.containsOnce(
@@ -41,7 +41,7 @@ QUnit.module("mail", {}, function () {
                 await click(`.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`);
                 assert.containsOnce(
                     document.body,
-                    `.o_DiscussView_thread[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]`,
+                    `.o-mail-discuss-content .o-mail-thread[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]`,
                     "The channel #General is displayed in discuss"
                 );
             }
@@ -111,7 +111,7 @@ QUnit.module("mail", {}, function () {
 
             assert.containsOnce(
                 document.body,
-                `.o_DiscussView_thread[data-thread-id="${messaging.inbox.thread.id}"][data-thread-model="mail.box"]`,
+                `.o-mail-discuss-content .o-mail-thread[data-thread-id="${messaging.inbox.thread.id}"][data-thread-model="mail.box"]`,
                 "The Inbox is opened in discuss"
             );
             assert.containsOnce(
@@ -123,7 +123,7 @@ QUnit.module("mail", {}, function () {
             await click(`.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`);
             assert.containsOnce(
                 document.body,
-                `.o_DiscussView_thread[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]`,
+                `.o-mail-discuss-content .o-mail-thread[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]`,
                 "The channel #General is opened in discuss"
             );
 

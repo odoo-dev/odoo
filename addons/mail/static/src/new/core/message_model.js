@@ -37,6 +37,8 @@ export class Message {
     isTransient;
     /** @type {LinkPreview[]} */
     linkPreviews = [];
+    /** @type {number[]} */
+    needaction_partner_ids = [];
     /** @type {Message|undefined} */
     parentMessage;
     /** @type {MessageReactions[]} */
@@ -62,11 +64,20 @@ export class Message {
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
-     * @param {Thread} thread
+     * @param {Thread} [thread]
      * @returns {Message}
      */
     static insert(state, data, thread) {
         let message;
+        if (!thread) {
+            const threadLocalId = (() => {
+                if (data.model === "mail.channel") {
+                    return data.res_id;
+                }
+                return Thread.createLocalId({ model: data.model, id: data.res_id });
+            })();
+            thread = Thread.insert(state, { id: threadLocalId });
+        }
         if (data.id in state.messages) {
             message = state.messages[data.id];
         } else {
@@ -89,6 +100,7 @@ export class Message {
             linkPreviews = this.linkPreviews,
             message_type: type = this.type,
             model: resModel = this.resModel,
+            needaction_partner_ids = this.needaction_partner_ids,
             record_name: recordName = this.recordName,
             res_id: resId = this.resId,
             subject = this.subject,
@@ -113,6 +125,7 @@ export class Message {
             isStarred: starred_partner_ids.includes(this._state.user.partnerId),
             isTransient,
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
+            needaction_partner_ids,
             parentMessage: this.parentMessage
                 ? Message.insert(this._state, this.parentMessage, thread)
                 : undefined,
@@ -133,6 +146,15 @@ export class Message {
                 thread.messages.push(this.id);
                 thread.sortMessages();
             }
+        }
+        if (
+            this.needaction_partner_ids.includes(this._state.user.partnerId) &&
+            !this._state.discuss.inbox.messages.includes(this.id)
+        ) {
+            this._state.discuss.inbox.counter++;
+            this.originThread.message_needaction_counter++;
+            this._state.discuss.inbox.messages.push(this.id);
+            this._state.discuss.inbox.sortMessages();
         }
     }
 
