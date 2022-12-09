@@ -129,7 +129,7 @@ export class Message {
             linkPreviews: linkPreviews.map((data) => new LinkPreview(data)),
             needaction_partner_ids,
             parentMessage: this.parentMessage
-                ? Message.insert(this._state, this.parentMessage, thread)
+                ? Message.insert(this._state, this.parentMessage, this.parentMessage.originThread)
                 : undefined,
             recordName,
             resId,
