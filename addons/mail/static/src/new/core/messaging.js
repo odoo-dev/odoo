@@ -10,6 +10,7 @@ import { removeFromArray } from "@mail/new/utils/arrays";
 import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
 import { Partner } from "./partner_model";
+import { ChannelMember } from "../core/channel_member_model";
 import { LinkPreview } from "./link_preview_model";
 import { Message } from "./message_model";
 import { browser } from "@web/core/browser/browser";
@@ -177,7 +178,7 @@ export class Messaging {
             !serverData.message_needaction_counter &&
             !serverData.group_based_subscription;
         const isAdmin = channelType !== "group" && serverData.create_uid === this.state.user.uid;
-        Thread.insert(this.state, {
+        const thread = Thread.insert(this.state, {
             id,
             name,
             type,
@@ -188,6 +189,31 @@ export class Messaging {
             canLeave,
             isAdmin,
         });
+        this.fetchChannelMembers(thread.id);
+    }
+
+    async fetchChannelMembers(threadId) {
+        const thread = this.state.threads[threadId];
+        const results = await this.orm.call("mail.channel", "load_more_members", [[threadId]], {
+            known_member_ids: thread.channelMembers.map((channelMember) => channelMember.id),
+        });
+        let channelMembers = [];
+        if (
+            results["channelMembers"] &&
+            results["channelMembers"][0] &&
+            results["channelMembers"][0][1]
+        ) {
+            channelMembers = results["channelMembers"][0][1];
+        }
+        thread.memberCount = results["memberCount"];
+        for (const channelMember of channelMembers) {
+            Partner.insert(this.state, channelMember.persona.partner);
+            ChannelMember.insert(this.state, {
+                id: channelMember.id,
+                partnerId: channelMember.persona.partner.id,
+                threadId,
+            });
+        }
     }
 
     sortChannels() {
@@ -936,12 +962,7 @@ export class Messaging {
             kwargs
         );
         suggestedPartners.map((data) => {
-            Partner.insert(this.state, {
-                id: data.id,
-                name: data.name,
-                email: data.email,
-                im_status: data.im_status,
-            });
+            Partner.insert(this.state, data);
         });
     }
 

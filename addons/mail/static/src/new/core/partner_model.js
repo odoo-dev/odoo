@@ -82,7 +82,7 @@ export class Partner {
             // would be notified to the mentioned partner, so this prevents
             // from inadvertently leaking the private message to the
             // mentioned partner.
-            partners = thread.channelMembers;
+            partners = thread.channelMembers.map((member) => member.partner);
         } else {
             partners = Object.values(state.partners);
         }

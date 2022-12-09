@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Discuss } from "@mail/new/discuss/discuss";
-import { start, startServer, afterNextRender } from "@mail/../tests/helpers/test_utils";
+import { start, startServer } from "@mail/../tests/helpers/test_utils";
 import {
     click,
     editInput,
@@ -14,7 +14,6 @@ import {
 import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
-import { UPDATE_BUS_PRESENCE_DELAY } from "@bus/im_status_service";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 
 let target;
@@ -401,9 +400,8 @@ QUnit.test("sidebar: chat im_status rendering", async function (assert) {
             channel_type: "chat",
         },
     ]);
-    const { advanceTime, openDiscuss } = await start({ hasTimeControl: true });
+    const { openDiscuss } = await start({ hasTimeControl: true });
     await openDiscuss();
-    await afterNextRender(() => advanceTime(UPDATE_BUS_PRESENCE_DELAY));
     assert.strictEqual(
         target.querySelectorAll(".o-mail-discuss-sidebar-threadIcon").length,
         3,

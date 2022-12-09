@@ -320,7 +320,7 @@ QUnit.test('display partner mention suggestions on typing "@"', async function (
     assert.containsNone(target, ".o-navigable-list--dropdown-item");
 
     await insertText(".o-mail-composer-textarea", "@");
-    assert.containsOnce(target, ".o-navigable-list--dropdown-item");
+    assert.containsN(target, ".o-navigable-list--dropdown-item", 3);
 });
 
 QUnit.test("show other channel member in @ mention", async function (assert) {
@@ -336,13 +336,12 @@ QUnit.test("show other channel member in @ mention", async function (assert) {
             [0, 0, { partner_id: resPartnerId }],
         ],
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { insertText, openDiscuss } = await start({
         discuss: {
             context: { active_id: mailChannelId1 },
         },
     });
     await openDiscuss();
-    await click(`.o-mail-discuss-actions button[title="Show Member List"]`); // FIXME: load channel members
     await insertText(".o-mail-composer-textarea", "@");
     assert.containsOnce(target, ".o-navigable-list--dropdown-item:contains(TestPartner)");
 });
@@ -360,13 +359,12 @@ QUnit.test("select @ mention insert mention text in composer", async function (a
             [0, 0, { partner_id: resPartnerId }],
         ],
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { insertText, openDiscuss } = await start({
         discuss: {
             context: { active_id: mailChannelId1 },
         },
     });
     await openDiscuss();
-    await click(`.o-mail-discuss-actions button[title="Show Member List"]`); // FIXME: load channel members
     await insertText(".o-mail-composer-textarea", "@");
     await afterNextRender(() =>
         $(target).find(".o-navigable-list--dropdown-item:contains(TestPartner)").click()
