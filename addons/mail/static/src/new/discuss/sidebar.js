@@ -10,6 +10,7 @@ import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { markEventHandled } from "../utils/misc";
 import { ChatWindowIcon } from "../chat/chat_window_icon";
+import { removeFromArray } from "../utils/arrays";
 
 /**
  * @typedef {Object} Props
@@ -24,6 +25,7 @@ export class Sidebar extends Component {
         this.messaging = useMessaging();
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
+        this.orm = useService("orm");
         this.state = useState({
             editing: false,
         });
@@ -70,6 +72,14 @@ export class Sidebar extends Component {
 
     addToCategory(category) {
         this.state.editing = category.id;
+    }
+
+    /**
+     * @param {number} channelId
+     */
+    unpinChannel(channelId) {
+        this.orm.silent.call("mail.channel", "channel_pin", [channelId], { pinned: false });
+        removeFromArray(this.messaging.state.discuss.chats.threads, channelId);
     }
 
     stopEditing() {

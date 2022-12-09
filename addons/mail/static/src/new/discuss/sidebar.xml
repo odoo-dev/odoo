@@ -122,6 +122,9 @@
                 <div class="fa fa-times ms-1" t-attf-class="{{ hover_class }}"
                     t-on-click.stop="() => this.leaveChannel(thread)" title="Leave this channel" role="img"/>
             </t>
+            <t t-if="thread.type === 'chat'">
+                <div t-attf-class="fa fa-times ms-1" t-on-click="() => this.unpinChannel(thread.id)" title="Unpin Conversation" role="img"/>
+            </t>
         </div>
     </button>
 </t>
