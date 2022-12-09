@@ -4,6 +4,7 @@ import { markup, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
 import { sprintf } from "@web/core/utils/strings";
 import { memoize } from "@web/core/utils/functions";
+import { registry } from "@web/core/registry";
 import { prettifyMessageContent, convertBrToLineBreak, cleanTerm } from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
 import { ChatWindow } from "./chat_window_model";
@@ -14,6 +15,8 @@ import { Message } from "./message_model";
 import { browser } from "@web/core/browser/browser";
 
 const FETCH_MSG_LIMIT = 30;
+
+const commandRegistry = registry.category("mail.chat_commands");
 
 export const asyncMethods = [
     "fetchPreviews",
@@ -110,7 +113,6 @@ export class Messaging {
                 history: null,
             },
             chatWindows: [],
-            commands: [],
         });
         this.state.discuss.inbox = Thread.insert(this.state, {
             id: "inbox",
@@ -152,7 +154,6 @@ export class Messaging {
             this.state.internalUserGroupId = data.internalUserGroupId;
             this.state.discuss.starred.counter = data.starred_counter;
             this.isReady.resolve();
-            this.initCommands();
         });
     }
 
@@ -236,30 +237,6 @@ export class Messaging {
             },
             this.state.threads[threadId]
         );
-    }
-
-    initCommands() {
-        const commands = [
-            {
-                help: this.env._t("Show a helper message"),
-                methodName: "execute_command_help",
-                name: "help",
-            },
-            {
-                help: this.env._t("Leave this channel"),
-                methodName: "execute_command_leave",
-                name: "leave",
-            },
-            {
-                channel_types: ["channel", "chat"],
-                help: this.env._t("List users in the current channel"),
-                methodName: "execute_command_who",
-                name: "who",
-            },
-        ];
-        for (const c of commands) {
-            this.state.commands.push(c);
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -547,13 +524,13 @@ export class Messaging {
     }
 
     async postMessage(threadId, body, { attachments = [], isNote = false, parentId, rawMentions }) {
-        const command = this.getCommandFromText(threadId, body);
+        const thread = this.state.threads[threadId];
+        const command = this.getCommandFromText(thread.type, body);
         if (command) {
-            await this.excuteCommand(threadId, command, body);
+            await this.executeCommand(threadId, command, body);
             return;
         }
         let tmpMsg;
-        const thread = this.state.threads[threadId];
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const validMentions = this.getMentionsFromText(rawMentions, body);
         const params = {
@@ -628,29 +605,21 @@ export class Messaging {
         return validMentions;
     }
 
-    async excuteCommand(threadId, command, body = "") {
+    executeCommand(threadId, command, body = "") {
         return this.orm.call("mail.channel", command.methodName, [[threadId]], {
             body,
         });
     }
 
-    getCommandFromText(threadId, content) {
-        const thread = this.state.threads[threadId];
-        if (["channel", "chat", "group"].includes(thread.type)) {
-            if (content.startsWith("/")) {
-                const firstWord = content.substring(1).split(/\s/)[0];
-                return this.state.commands.find((command) => {
-                    if (command.name !== firstWord) {
-                        return false;
-                    }
-                    if (command.channel_types) {
-                        return command.channel_types.includes(thread.type);
-                    }
-                    return true;
-                });
+    getCommandFromText(threadType, content) {
+        if (content.startsWith("/")) {
+            const firstWord = content.substring(1).split(/\s/)[0];
+            const command = commandRegistry.get(firstWord, false);
+            if (command) {
+                const types = command.channel_types || ["channel", "chat", "group"];
+                return types.includes(threadType) ? command : false;
             }
         }
-        return undefined;
     }
 
     async updateMessage(messageId, body, attachments = [], rawMentions) {
