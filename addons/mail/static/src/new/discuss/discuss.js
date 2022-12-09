@@ -12,6 +12,7 @@ import { ChannelMemberList } from "./channel_member_list";
 import { Component, onWillStart, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { CallSettings } from "../rtc/call_settings";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { ChannelInvitationForm } from "./channel_invitation_form";
 
 export class Discuss extends Component {
     setup() {
@@ -21,6 +22,7 @@ export class Discuss extends Component {
         this.popover = usePopover();
         this.closePopover = null;
         this.settingsRef = useRef("settings");
+        this.addUsersRef = useRef("addUsers");
         this.state = useState({
             /**
              * activeMode:
@@ -43,6 +45,25 @@ export class Discuss extends Component {
     }
     startCall() {
         this.messaging.startCall(this.messaging.state.discuss.threadId);
+    }
+
+    toggleInviteForm() {
+        if (this.closePopover) {
+            this.closePopover();
+            this.closePopover = null;
+        } else {
+            const el = this.addUsersRef.el;
+            this.closePopover = this.popover.add(
+                el,
+                ChannelInvitationForm,
+                {
+                    threadId: this.messaging.state.discuss.threadId,
+                },
+                {
+                    onClose: () => (this.closePopover = null),
+                }
+            );
+        }
     }
 
     toggleSettings() {

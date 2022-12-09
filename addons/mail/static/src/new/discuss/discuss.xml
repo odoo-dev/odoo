@@ -39,6 +39,11 @@
                         </button>
                     </t>
                     <t t-if="thread.type === 'channel'">
+                        <button class="btn" t-ref="addUsers" title="Add Users" t-on-click.stop="toggleInviteForm">
+                            <i class="fa fa-lg fa-user-plus text-700"/>
+                        </button>
+                    </t>
+                    <t t-if="thread.type === 'channel'">
                         <button class="btn" t-att-title="state.activeMode === 'member-list' ? 'Hide Member List' : 'Show Member List'" t-on-click.stop="toggleMemberList">
                             <i class="fa fa-lg fa-users text-700"/>
                         </button>

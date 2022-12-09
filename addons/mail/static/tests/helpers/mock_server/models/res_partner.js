@@ -223,7 +223,9 @@ patch(MockServer.prototype, "mail/models/res_partner", {
      * @returns {Object[]}
      */
     _mockResPartnerSearchForChannelInvite(search_term, channel_id, limit = 30) {
-        search_term = search_term.toLowerCase(); // simulates ILIKE
+        if (search_term) {
+            search_term = search_term.toLowerCase(); // simulates ILIKE
+        }
         // simulates domain with relational parts (not supported by mock server)
         const matchingPartners = [
             ...this._mockResPartnerMailPartnerFormat(

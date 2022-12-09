@@ -3,6 +3,7 @@
 import { Composer } from "./composer_model";
 import { Partner } from "./partner_model";
 import { _t } from "@web/core/l10n/translation";
+import { sprintf } from "@web/core/utils/strings";
 
 export class Thread {
     /** @type {string|number} */
@@ -217,5 +218,18 @@ export class Thread {
             return this.channelMembers.map((channelMember) => channelMember.name).join(_t(", "));
         }
         return this.name;
+    }
+
+    get invitationLink() {
+        return `${window.location.origin}/chat/${this.id}/${this.uuid}`;
+    }
+
+    get accessRestrictedToGroupText() {
+        if (!this.authorizedGroupFullName) {
+            return false;
+        }
+        return sprintf(_t('Access restricted to group "%(groupFullName)s"'), {
+            groupFullName: this.authorizedGroupFullName,
+        });
     }
 }

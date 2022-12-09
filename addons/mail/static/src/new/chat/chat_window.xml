@@ -8,21 +8,28 @@
     >
         <div class="o-mail-chat-window-header d-flex align-items-center cursor-pointer flex-shrink-0" t-on-click="toggleFold">
             <t t-set="thread" t-value="messaging.state.threads[props.chatWindow.threadId]"/>
-            <ChatWindowIcon threadId="props.chatWindow.threadId" className="'ms-3 me-1 my-0'" />
+            <ChatWindowIcon threadId="props.chatWindow.threadId" className="'ms-3 me-1 my-0'"/>
             <span class="o-mail-chat-window-header-name ms-3" t-out="thread.displayName"></span>
             <div class="flex-grow-1"/>
             <div t-if="!thread.inCall" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Start a Call" t-on-click.stop="startCall">
                 <i class="fa fa-phone"/>
             </div>
-            <div t-if="thread and thread.type === 'channel'" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" t-attf-title="{{state.activeMode === 'member-list' and 'Hide' or 'Show'}} Member List" t-on-click.stop="toggleMemberList">
+            <t t-if="env.isSmall">
+                <div t-if="thread and thread.type === 'channel'" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" t-att-title="state.activeMode === 'add-users' ? 'Stop adding users' : 'Add users'" t-on-click.stop="toggleAddUsers">
+                    <i class="fa fa-lg fa-user-plus"/>
+                </div>
+            </t>
+            <div t-if="thread and thread.type === 'channel'" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" t-att-title="state.activeMode === 'member-list' ? 'Hide Member List' : 'Show Member List'" t-on-click.stop="toggleMemberList">
                 <i class="fa fa-users"/>
             </div>
             <div class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Show Call Settings" t-on-click.stop="toggleSettings">
                 <i class="fa fa-gear"/>
             </div>
-            <div class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Open in Discuss" t-on-click.stop="expand">
-                <i class="fa fa-expand"/>
-            </div>
+            <t t-if="!env.isSmall">
+                <div class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Open in Discuss" t-on-click.stop="expand">
+                    <i class="fa fa-expand"/>
+                </div>
+            </t>
             <div class="o-mail-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Close chat window" t-on-click.stop="() => props.chatWindow.close()">
                 <i class="fa fa-close"></i>
             </div>
@@ -30,10 +37,13 @@
         <t t-if="!props.chatWindow.folded">
             <div class="o-mail-chat-window-content d-flex flex-column h-100 overflow-auto" t-ref="content">
                 <t t-if="state.activeMode === 'in-settings'">
-                    <CallSettings />
+                    <CallSettings/>
                 </t>
                 <t t-elif="state.activeMode === 'member-list'">
                     <ChannelMemberList thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start w-100 h-100'"/>
+                </t>
+                <t t-elif="state.activeMode === 'add-users'">
+                    <ChannelInvitationForm threadId="thread.id" chatState="state"/>
                 </t>
                 <t t-else="">
                     <t t-if="thread.inCall">

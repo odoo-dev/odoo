@@ -10,6 +10,7 @@ import { CallUI } from "../rtc/call_ui";
 import { CallSettings } from "../rtc/call_settings";
 import { ChannelMemberList } from "../discuss/channel_member_list";
 import { ChatWindowIcon } from "./chat_window_icon";
+import { ChannelInvitationForm } from "../discuss/channel_invitation_form";
 
 export class ChatWindow extends Component {
     setup() {
@@ -20,6 +21,7 @@ export class ChatWindow extends Component {
              * activeMode:
              *   "member-list": channel member list is displayed
              *   "in-settings": settings is displayed
+             *   "add-users": add users is displayed (small device)
              *   "": no action pannel
              */
             activeMode: "",
@@ -41,6 +43,10 @@ export class ChatWindow extends Component {
         this.state.activeMode = this.state.activeMode === "member-list" ? "" : "member-list";
     }
 
+    toggleAddUsers() {
+        this.state.activeMode = this.state.activeMode === "add-users" ? "" : "add-users";
+    }
+
     expand() {
         this.messaging.setDiscussThread(this.props.chatWindow.threadId);
         this.action.doAction(
@@ -58,7 +64,15 @@ export class ChatWindow extends Component {
 }
 
 Object.assign(ChatWindow, {
-    components: { Thread, Composer, CallUI, CallSettings, ChannelMemberList, ChatWindowIcon },
+    components: {
+        Thread,
+        Composer,
+        CallUI,
+        CallSettings,
+        ChannelMemberList,
+        ChatWindowIcon,
+        ChannelInvitationForm,
+    },
     props: ["chatWindow", "right?"],
     template: "mail.chat_window",
 });

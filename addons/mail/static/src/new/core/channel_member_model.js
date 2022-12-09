@@ -11,9 +11,9 @@ export class ChannelMember {
     static insert(state, data) {
         let channelMember = state.channelMembers[data.id];
         if (!channelMember) {
-            channelMember = new ChannelMember();
+            state.channelMembers[data.id] = new ChannelMember();
+            channelMember = state.channelMembers[data.id];
             channelMember._state = state;
-            state.channelMembers[data.id] = channelMember;
         }
         Object.assign(channelMember, {
             id: data.id,

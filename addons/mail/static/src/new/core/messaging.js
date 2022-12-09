@@ -168,7 +168,16 @@ export class Messaging {
      * todo: merge this with Thread.insert() (?)
      */
     createChannelThread(serverData) {
-        const { id, name, last_message_id, seen_message_id, description, channel } = serverData;
+        const {
+            id,
+            name,
+            last_message_id,
+            seen_message_id,
+            description,
+            channel,
+            uuid,
+            authorizedGroupFullName,
+        } = serverData;
         const isUnread = last_message_id !== seen_message_id;
         const type = channel.channel_type;
         const channelType = serverData.channel.channel_type;
@@ -187,6 +196,8 @@ export class Messaging {
             serverData: serverData,
             canLeave,
             isAdmin,
+            uuid,
+            authorizedGroupFullName,
         });
         this.fetchChannelMembers(thread.id);
     }
@@ -1012,5 +1023,10 @@ export class Messaging {
 
     stopCall(threadId) {
         this.state.threads[threadId].inCall = false;
+    }
+
+    notify(params) {
+        const { message, ...options } = params;
+        return this.env.services.notification.add(message, options);
     }
 }
