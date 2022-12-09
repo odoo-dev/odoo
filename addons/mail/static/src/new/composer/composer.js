@@ -141,12 +141,13 @@ export class Composer extends Component {
 
     get hasReplyToHeader() {
         const { messageToReplyTo } = this.messaging.state.discuss;
-        if (!messageToReplyTo || !this.props.composer.thread) {
+        const thread = this.props.composer.thread;
+        if (!messageToReplyTo || !thread) {
             return false;
         }
         return (
-            messageToReplyTo.resId === this.props.composer.thread.id ||
-            (this.props.composer.thread.id === "inbox" && messageToReplyTo.needaction)
+            messageToReplyTo.resId === thread.id ||
+            (thread.type === "mailbox" && thread.messages.includes(messageToReplyTo.id))
         );
     }
 
@@ -266,17 +267,19 @@ export class Composer extends Component {
     async sendMessage() {
         return this.processMessage(async (value) => {
             const { messageToReplyTo } = this.messaging.state.discuss;
-            const { id: parentId, isNote, resId, resModel } = messageToReplyTo || {};
+            const thread = messageToReplyTo?.originThread ?? this.props.composer.thread;
             const postData = {
                 attachments: this.attachmentUploader.attachments,
-                isNote: this.props.composer.type === "note" || isNote,
+                isNote: this.props.composer.type === "note" || messageToReplyTo?.isNote,
                 rawMentions: this.suggestion.rawMentions,
-                parentId,
+                parentId: messageToReplyTo?.id,
             };
-            if (messageToReplyTo && this.props.composer.thread.id === "inbox") {
-                await this.messaging.postInboxReply(resId, resModel, value, postData);
-            } else {
-                await this.messaging.postMessage(this.props.composer.thread.id, value, postData);
+            const message = await this.messaging.postMessage(thread.id, value, postData);
+            if (this.props.composer.thread.type === "mailbox") {
+                this.env.services.notification.add(
+                    sprintf(this.env._t('Message posted on "%s"'), message.recordName),
+                    { type: "info" }
+                );
             }
             this.suggestion.clearRawMentions();
             this.messaging.cancelReplyTo();

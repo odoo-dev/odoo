@@ -629,3 +629,75 @@ QUnit.test("reply to message from inbox (message linked to document)", async fun
         "message should not longer be selected after posting reply"
     );
 });
+
+QUnit.test("Can reply to starred message", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "RandomName" });
+    pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "mail.channel",
+        starred_partner_ids: [pyEnv.currentPartnerId],
+        res_id: mailChannelId,
+    });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: {
+                active_id: "starred",
+            },
+        },
+        services: {
+            notification: makeFakeNotificationService((message) => assert.step(message)),
+        },
+    });
+    await openDiscuss();
+    await click("i[aria-label='Reply']");
+    assert.containsOnce(
+        target,
+        ".o-mail-composer-origin-thread:contains('RandomName')",
+        "Composer should display origin thread of the message to reply to"
+    );
+    await insertText(".o-mail-composer-textarea", "abc");
+    await click(".o-mail-composer-send-button");
+    assert.verifySteps(['Message posted on "RandomName"']);
+    assert.containsOnce(
+        target,
+        ".o-mail-message",
+        "Reply should not be visible on starred mailbox"
+    );
+});
+
+QUnit.test("Can reply to history message", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "RandomName" });
+    pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "mail.channel",
+        history_partner_ids: [pyEnv.currentPartnerId],
+        res_id: mailChannelId,
+    });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: {
+                active_id: "history",
+            },
+        },
+        services: {
+            notification: makeFakeNotificationService((message) => assert.step(message)),
+        },
+    });
+    await openDiscuss();
+    await click("i[aria-label='Reply']");
+    assert.containsOnce(
+        target,
+        ".o-mail-composer-origin-thread:contains('RandomName')",
+        "Composer should display origin thread of the message to reply to"
+    );
+    await insertText(".o-mail-composer-textarea", "abc");
+    await click(".o-mail-composer-send-button");
+    assert.verifySteps(['Message posted on "RandomName"']);
+    assert.containsOnce(
+        target,
+        ".o-mail-message",
+        "Reply should not be visible on history mailbox"
+    );
+});

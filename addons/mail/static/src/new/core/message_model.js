@@ -230,7 +230,11 @@ export class Message {
             }
             return Thread.createLocalId({ model: this.resModel, id: this.resId });
         })();
-        return this._state.threads[threadLocalId];
+        return Thread.insert(this._state, {
+            id: threadLocalId,
+            resId: this.resId,
+            resModel: this.resModel,
+        });
     }
 
     get url() {
