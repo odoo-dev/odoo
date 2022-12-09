@@ -217,6 +217,17 @@ export class Composer extends Component {
                                 };
                             }),
                         };
+                    case "ChannelCommand":
+                        return {
+                            placeholder: "Loading",
+                            optionTemplate: "mail.Composer.suggestionChannelCommand",
+                            options: mainOrExtraSuggestions.suggestions.map((suggestion) => {
+                                return {
+                                    label: suggestion.name,
+                                    help: suggestion.help,
+                                };
+                            }),
+                        };
                     default:
                         return {
                             options: [],

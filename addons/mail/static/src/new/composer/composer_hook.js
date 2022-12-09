@@ -114,9 +114,9 @@ export function useSuggestion() {
             if (!self.search.delimiter) {
                 return;
             }
-            const [main, extra = {}] = messaging.searchSuggestions(
+            const [main, extra = {suggestions: []}] = messaging.searchSuggestions(
                 self.search,
-                { threadId: comp.props.composer.threadId },
+                { threadId: comp.props.composer.thread.id },
                 true
             );
             // arbitrary limit to avoid displaying too many elements at once

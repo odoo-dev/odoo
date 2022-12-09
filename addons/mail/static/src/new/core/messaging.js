@@ -16,7 +16,7 @@ import { browser } from "@web/core/browser/browser";
 
 const FETCH_MSG_LIMIT = 30;
 
-const commandRegistry = registry.category("mail.chat_commands");
+const commandRegistry = registry.category("mail.channel_commands");
 
 export const asyncMethods = [
     "fetchPreviews",
@@ -805,6 +805,34 @@ export class Messaging {
         return partners;
     }
 
+    searchChannelCommand(cleanedSearchTerm, threadId) {
+        const thread = this.state.threads[threadId];
+        if (!["chat", "channel", "group"].includes(thread.type)) {
+            // channel commands are channel specific
+            return [[]];
+        }
+        const commandLists = commandRegistry.getEntries().filter(([name, command]) => {
+            if (!cleanTerm(name).includes(cleanedSearchTerm)) {
+                return false;
+            }
+            if (command.channel_types) {
+                return command.channel_types.includes(thread.type);
+            }
+            return true;
+        });
+        return [
+            {
+                type: "ChannelCommand",
+                suggestions: commandLists.map(([name, command]) => {
+                    return {
+                        name,
+                        help: command.help,
+                    };
+                }),
+            },
+        ];
+    }
+
     async leaveChannel(id) {
         await this.orm.call("mail.channel", "action_unfollow", [id]);
         removeFromArray(this.state.discuss.channels.threads, id);
@@ -903,7 +931,7 @@ export class Messaging {
             case "#":
                 break;
             case "/":
-                break;
+                return this.searchChannelCommand(cleanedSearchTerm, threadId);
         }
         return [
             {
