@@ -2,13 +2,16 @@
 
 import { start, startServer } from "@mail/../tests/helpers/test_utils";
 
-import { nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 
-QUnit.module("message reply");
+let target;
+QUnit.module("message reply", {
+    async beforeEach() {
+        target = getFixture();
+    },
+});
 
 QUnit.test("click on message in reply to highlight the parent message", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
     const mailMessageId1 = pyEnv["mail.message"].create({
@@ -35,16 +38,10 @@ QUnit.test("click on message in reply to highlight the parent message", async fu
     await click(
         `.o-mail-message[data-message-id="${mailMessageId2}"] .o-mail-message-in-reply-body`
     );
-    assert.containsOnce(
-        document.body,
-        `.o-highlighted[data-message-id="${mailMessageId1}"]`,
-        "click on message in reply to should highlight the parent message"
-    );
+    assert.containsOnce(target, `.o-highlighted[data-message-id="${mailMessageId1}"]`);
 });
 
 QUnit.test("click on message in reply to scroll to the parent message", async function (assert) {
-    assert.expect(1);
-
     // make scroll behavior instantaneous.
     patchWithCleanup(Element.prototype, {
         scrollIntoView() {

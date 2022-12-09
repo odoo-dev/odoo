@@ -20,8 +20,6 @@ QUnit.module("composer", {
 });
 
 QUnit.test("composer text input: basic rendering when posting a message", async function (assert) {
-    assert.expect(3);
-
     const pyEnv = await startServer();
     const { click, openFormView } = await start();
     await openFormView({
@@ -29,7 +27,6 @@ QUnit.test("composer text input: basic rendering when posting a message", async 
         res_model: "res.partner",
     });
     await click(".o-mail-chatter-topbar-send-message-button");
-
     assert.containsOnce(target, ".o-mail-composer");
     assert.containsOnce(target, "textarea.o-mail-composer-textarea");
     assert.hasAttrValue(
@@ -40,8 +37,6 @@ QUnit.test("composer text input: basic rendering when posting a message", async 
 });
 
 QUnit.test("composer text input: basic rendering when logging note", async function (assert) {
-    assert.expect(3);
-
     const pyEnv = await startServer();
     const { click, openFormView } = await start();
     await openFormView({
@@ -49,7 +44,6 @@ QUnit.test("composer text input: basic rendering when logging note", async funct
         res_model: "res.partner",
     });
     await click(".o-mail-chatter-topbar-log-note-button");
-
     assert.containsOnce(target, ".o-mail-composer");
     assert.containsOnce(target, "textarea.o-mail-composer-textarea");
     assert.hasAttrValue(
@@ -62,8 +56,6 @@ QUnit.test("composer text input: basic rendering when logging note", async funct
 QUnit.test(
     "composer text input: basic rendering when linked thread is a mail.channel",
     async function (assert) {
-        assert.expect(2);
-
         const pyEnv = await startServer();
         const mailChanelId1 = pyEnv["mail.channel"].create({ name: "dofus-disco" });
         const { openDiscuss } = await start({
@@ -80,8 +72,6 @@ QUnit.test(
 QUnit.test(
     "composer text input placeholder should contain channel name when thread does not have specific correspondent",
     async function (assert) {
-        assert.expect(1);
-
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({
             channel_type: "channel",
@@ -102,8 +92,6 @@ QUnit.test(
 );
 
 QUnit.test("add an emoji", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const mailChanelId1 = pyEnv["mail.channel"].create({ name: "swamp-safari" });
     const { click, openDiscuss } = await start({
@@ -114,16 +102,10 @@ QUnit.test("add an emoji", async function (assert) {
     await openDiscuss();
     await click("i[aria-label='Emojis']");
     await click(".o-emoji[data-codepoints='😤']");
-    assert.strictEqual(
-        target.querySelector(".o-mail-composer-textarea").value,
-        "😤",
-        "emoji should be inserted in the composer text input"
-    );
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "😤");
 });
 
 QUnit.test("add an emoji after some text", async function (assert) {
-    assert.expect(2);
-
     const pyEnv = await startServer();
     const mailChanelId1 = pyEnv["mail.channel"].create({ name: "beyblade-room" });
     const { click, insertText, openDiscuss } = await start({
@@ -133,24 +115,14 @@ QUnit.test("add an emoji after some text", async function (assert) {
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "Blabla");
-    assert.strictEqual(
-        target.querySelector(".o-mail-composer-textarea").value,
-        "Blabla",
-        "composer text input should have text only initially"
-    );
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "Blabla");
 
     await click("i[aria-label='Emojis']");
     await click(".o-emoji[data-codepoints='🤑']");
-    assert.strictEqual(
-        target.querySelector(".o-mail-composer-textarea").value,
-        "Blabla🤑",
-        "emoji should be inserted after the text"
-    );
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "Blabla🤑");
 });
 
 QUnit.test("add emoji replaces (keyboard) text selection", async function (assert) {
-    assert.expect(2);
-
     const pyEnv = await startServer();
     const mailChanelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
     const { click, insertText, openDiscuss } = await start({
@@ -161,26 +133,16 @@ QUnit.test("add emoji replaces (keyboard) text selection", async function (asser
     await openDiscuss();
     const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
     await insertText(".o-mail-composer-textarea", "Blabla");
-    assert.strictEqual(
-        composerTextInputTextArea.value,
-        "Blabla",
-        "composer text input should have text only initially"
-    );
+    assert.strictEqual(composerTextInputTextArea.value, "Blabla");
 
     // simulate selection of all the content by keyboard
     composerTextInputTextArea.setSelectionRange(0, composerTextInputTextArea.value.length);
     await click("i[aria-label='Emojis']");
     await click('.o-emoji[data-codepoints="🤠"]');
-    assert.strictEqual(
-        document.querySelector(".o-mail-composer-textarea").value,
-        "🤠",
-        "whole text selection should have been replaced by emoji"
-    );
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "🤠");
 });
 
 QUnit.test("selected text is not replaced after cancelling the selection", async function (assert) {
-    assert.expect(2);
-
     const pyEnv = await startServer();
     const mailChanelId1 = pyEnv["mail.channel"].create({
         name: "pétanque-tournament-14",
@@ -193,11 +155,7 @@ QUnit.test("selected text is not replaced after cancelling the selection", async
     await openDiscuss();
     const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
     await insertText(".o-mail-composer-textarea", "Blabla");
-    assert.strictEqual(
-        composerTextInputTextArea.value,
-        "Blabla",
-        "composer text input should have text only initially"
-    );
+    assert.strictEqual(composerTextInputTextArea.value, "Blabla");
 
     // simulate selection of all the content by keyboard
     composerTextInputTextArea.setSelectionRange(0, composerTextInputTextArea.value.length);
@@ -205,18 +163,12 @@ QUnit.test("selected text is not replaced after cancelling the selection", async
     await nextTick();
     await click("i[aria-label='Emojis']");
     await click('.o-emoji[data-codepoints="🤠"]');
-    assert.strictEqual(
-        document.querySelector(".o-mail-composer-textarea").value,
-        "Blabla🤠",
-        "whole text selection should have been replaced by emoji"
-    );
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "Blabla🤠");
 });
 
 QUnit.test(
     "Selection is kept when changing channel and going back to original channel",
     async (assert) => {
-        assert.expect(1);
-
         const pyEnv = await startServer();
         const firstChannelId = pyEnv["mail.channel"].create([
             { name: "firstChannel" },
@@ -250,7 +202,6 @@ QUnit.test(
 QUnit.test(
     "click on emoji button, select emoji, then re-click on button should show emoji picker",
     async function (assert) {
-        assert.expect(1);
         const pyEnv = await startServer();
         const mailChanelId1 = pyEnv["mail.channel"].create({
             name: "roblox-skateboarding",
@@ -269,8 +220,6 @@ QUnit.test(
 );
 
 QUnit.test('do not send typing notification on typing "/" command', async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "channel" });
     const { insertText, openDiscuss } = await start({
@@ -373,8 +322,6 @@ QUnit.test("select @ mention insert mention text in composer", async function (a
 });
 
 QUnit.test("composer text input cleared on message post", async function (assert) {
-    assert.expect(4);
-
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "au-secours-aidez-moi" });
     const { click, insertText, openDiscuss } = await start({
@@ -390,27 +337,17 @@ QUnit.test("composer text input cleared on message post", async function (assert
     await openDiscuss();
     // Type message
     await insertText(".o-mail-composer-textarea", "test message");
-    assert.strictEqual(
-        document.querySelector(`.o-mail-composer-textarea`).value,
-        "test message",
-        "should have inserted text content in editable"
-    );
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "test message");
 
     // Send message
     await click(".o-mail-composer-send-button");
     assert.verifySteps(["message_post"]);
-    assert.strictEqual(
-        document.querySelector(`.o-mail-composer-textarea`).value,
-        "",
-        "should have no content in composer input after posting message"
-    );
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
 });
 
 QUnit.test(
     "send message only once when button send is clicked twice quickly",
     async function (assert) {
-        assert.expect(2);
-
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "nether-picnic" });
         const { insertText, openDiscuss } = await start({
@@ -431,13 +368,11 @@ QUnit.test(
             target.querySelector(".o-mail-composer-send-button").click();
             target.querySelector(".o-mail-composer-send-button").click();
         });
-        assert.verifySteps(["message_post"], "The message has been posted only once");
+        assert.verifySteps(["message_post"]);
     }
 );
 
 QUnit.test('send button on mail.channel should have "Send" as label', async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "minecraft-wii-u" });
     const { openDiscuss } = await start({
@@ -448,16 +383,13 @@ QUnit.test('send button on mail.channel should have "Send" as label', async func
     await openDiscuss();
     assert.strictEqual(
         target.querySelector(".o-mail-composer-send-button").textContent.trim(),
-        "Send",
-        "Send button of mail.channel composer should have 'Send' as label"
+        "Send"
     );
 });
 
 QUnit.test(
     "composer textarea content is retained when changing channel then going back",
     async function (assert) {
-        assert.expect(1);
-
         const pyEnv = await startServer();
         const [mailChannelId1] = pyEnv["mail.channel"].create([
             { name: "minigolf-galaxy-iv" },
@@ -481,8 +413,6 @@ QUnit.test(
 );
 
 QUnit.test('display command suggestions on typing "/"', async function (assert) {
-    assert.expect(2);
-
     const pyEnv = await startServer();
     const mailChanelId1 = pyEnv["mail.channel"].create({
         name: "General",
@@ -494,25 +424,14 @@ QUnit.test('display command suggestions on typing "/"', async function (assert) 
         },
     });
     await openDiscuss();
-
-    assert.containsNone(
-        document.body,
-        ".o-navigable-list-dropdown-menu",
-        "command suggestions list should not be present"
-    );
+    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
     await insertText(".o-mail-composer-textarea", "/");
-    assert.containsOnce(
-        document.body,
-        ".o-navigable-list-dropdown-menu",
-        "should display command suggestions on typing '/'"
-    );
+    assert.containsOnce(target, ".o-navigable-list-dropdown-menu");
 });
 
 QUnit.test(
     'do not send typing notification on typing after selecting suggestion from "/" command',
     async function (assert) {
-        assert.expect(1);
-
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "channel" });
         const { click, insertText, openDiscuss } = await start({
@@ -528,7 +447,6 @@ QUnit.test(
             },
         });
         await openDiscuss();
-
         await insertText(".o-mail-composer-textarea", "/");
         await click(".o-navigable-list--dropdown-item");
         await insertText(".o-mail-composer-textarea", " is user?");
@@ -537,8 +455,6 @@ QUnit.test(
 );
 
 QUnit.test("use a command for a specific channel type", async function (assert) {
-    assert.expect(3);
-
     const pyEnv = await startServer();
     const mailChanelId1 = pyEnv["mail.channel"].create({ channel_type: "chat" });
     const { click, insertText, openDiscuss } = await start({
@@ -548,20 +464,12 @@ QUnit.test("use a command for a specific channel type", async function (assert) 
     });
     await openDiscuss();
 
-    assert.containsNone(
-        document.body,
-        ".o-navigable-list-dropdown-menu",
-        "command suggestions list should not be present"
-    );
-    assert.strictEqual(
-        document.querySelector(`.o-mail-composer-textarea`).value,
-        "",
-        "text content of composer should be empty initially"
-    );
+    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
     await insertText(".o-mail-composer-textarea", "/");
     await click(".o-navigable-list--dropdown-item");
     assert.strictEqual(
-        document.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "/help ",
         "text content of composer should have used command + additional whitespace afterwards"
     );
@@ -570,8 +478,6 @@ QUnit.test("use a command for a specific channel type", async function (assert) 
 QUnit.test(
     "command suggestion should only open if command is the first character",
     async function (assert) {
-        assert.expect(4);
-
         const pyEnv = await startServer();
         const mailChanelId1 = pyEnv["mail.channel"].create({
             name: "General",
@@ -583,34 +489,16 @@ QUnit.test(
             },
         });
         await openDiscuss();
-        assert.containsNone(
-            document.body,
-            ".o-navigable-list-dropdown-menu",
-            "command suggestions list should not be present"
-        );
-        assert.strictEqual(
-            document.querySelector(`.o-mail-composer-textarea`).value,
-            "",
-            "text content of composer should be empty initially"
-        );
+        assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+        assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
         await insertText(".o-mail-composer-textarea", "bluhbluh ");
-        assert.strictEqual(
-            document.querySelector(`.o-mail-composer-textarea`).value,
-            "bluhbluh ",
-            "text content of composer should have content"
-        );
+        assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "bluhbluh ");
         await insertText(".o-mail-composer-textarea", "/");
-        assert.containsNone(
-            document.body,
-            ".o-navigable-list-dropdown-menu",
-            "should not have a command suggestion"
-        );
+        assert.containsNone(target, ".o-navigable-list-dropdown-menu");
     }
 );
 
 QUnit.test("add an emoji after a command", async function (assert) {
-    assert.expect(4);
-
     const pyEnv = await startServer();
     const mailChanelId1 = pyEnv["mail.channel"].create({
         name: "General",
@@ -622,21 +510,12 @@ QUnit.test("add an emoji after a command", async function (assert) {
         },
     });
     await openDiscuss();
-
-    assert.containsNone(
-        document.body,
-        ".o-navigable-list-dropdown-menu",
-        "command suggestions list should not be present"
-    );
-    assert.strictEqual(
-        document.querySelector(`.o-mail-composer-textarea`).value,
-        "",
-        "text content of composer should be empty initially"
-    );
+    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
     await insertText(".o-mail-composer-textarea", "/");
     await click(".o-navigable-list--dropdown-item");
     assert.strictEqual(
-        document.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "/help ",
         "text content of composer should have previous content + used command + additional whitespace afterwards"
     );
@@ -645,8 +524,7 @@ QUnit.test("add an emoji after a command", async function (assert) {
     await click("i[aria-label='Emojis']");
     await click('.o-emoji[data-codepoints="😊"]');
     assert.strictEqual(
-        document.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
-        "/help 😊",
-        "text content of composer should have previous command and selected emoji just after"
+        document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "/help 😊"
     );
 });

@@ -10,8 +10,6 @@ import {
 QUnit.module("typing");
 
 QUnit.test('receive other member typing status "is typing"', async function (assert) {
-    assert.expect(2);
-
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
     const mailChannelId1 = pyEnv["mail.channel"].create({
@@ -27,7 +25,6 @@ QUnit.test('receive other member typing status "is typing"', async function (ass
         },
     });
     await openDiscuss();
-
     assert.strictEqual(
         document.querySelector(".o-mail-composer-is-typing").textContent,
         "",
@@ -49,16 +46,13 @@ QUnit.test('receive other member typing status "is typing"', async function (ass
     );
     assert.strictEqual(
         document.querySelector(".o-mail-composer-is-typing").textContent,
-        "Demo is typing...",
-        "Should display that demo user is typing"
+        "Demo is typing..."
     );
 });
 
 QUnit.test(
     'receive other member typing status "is typing" then "no longer is typing"',
     async function (assert) {
-        assert.expect(3);
-
         const pyEnv = await startServer();
         const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
         const mailChannelId1 = pyEnv["mail.channel"].create({
@@ -75,11 +69,7 @@ QUnit.test(
         });
         await openDiscuss();
 
-        assert.strictEqual(
-            document.querySelector(".o-mail-composer-is-typing").textContent,
-            "",
-            "Should display no one is currently typing"
-        );
+        assert.strictEqual(document.querySelector(".o-mail-composer-is-typing").textContent, "");
 
         // simulate receive typing notification from demo "is typing"
         await afterNextRender(() =>
@@ -96,8 +86,7 @@ QUnit.test(
         );
         assert.strictEqual(
             document.querySelector(".o-mail-composer-is-typing").textContent,
-            "Demo is typing...",
-            "Should display that demo user is typing"
+            "Demo is typing..."
         );
 
         // simulate receive typing notification from demo "is no longer typing"
@@ -113,19 +102,13 @@ QUnit.test(
                 },
             })
         );
-        assert.strictEqual(
-            document.querySelector(".o-mail-composer-is-typing").textContent,
-            "",
-            "Should no longer display that demo user is typing"
-        );
+        assert.strictEqual(document.querySelector(".o-mail-composer-is-typing").textContent, "");
     }
 );
 
 QUnit.test(
     'assume other member typing status becomes "no longer is typing" after 60 seconds without any updated typing status',
     async function (assert) {
-        assert.expect(3);
-
         const pyEnv = await startServer();
         const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
         const mailChannelId1 = pyEnv["mail.channel"].create({
@@ -143,11 +126,7 @@ QUnit.test(
         });
         await openDiscuss();
 
-        assert.strictEqual(
-            document.querySelector(".o-mail-composer-is-typing").textContent,
-            "",
-            "Should display no one is currently typing"
-        );
+        assert.strictEqual(document.querySelector(".o-mail-composer-is-typing").textContent, "");
 
         // simulate receive typing notification from demo "is typing"
         await afterNextRender(() =>
@@ -164,24 +143,17 @@ QUnit.test(
         );
         assert.strictEqual(
             document.querySelector(".o-mail-composer-is-typing").textContent,
-            "Demo is typing...",
-            "Should display that demo user is typing"
+            "Demo is typing..."
         );
 
         await afterNextRender(() => advanceTime(60 * 1000));
-        assert.strictEqual(
-            document.querySelector(".o-mail-composer-is-typing").textContent,
-            "",
-            "Should no longer display that demo user is typing"
-        );
+        assert.strictEqual(document.querySelector(".o-mail-composer-is-typing").textContent, "");
     }
 );
 
 QUnit.test(
     'other member typing status "is typing" refreshes 60 seconds timer of assuming no longer typing',
     async function (assert) {
-        assert.expect(4);
-
         const pyEnv = await startServer();
         const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
         const mailChannelId1 = pyEnv["mail.channel"].create({
@@ -199,11 +171,7 @@ QUnit.test(
         });
         await openDiscuss();
 
-        assert.strictEqual(
-            document.querySelector(".o-mail-composer-is-typing").textContent,
-            "",
-            "Should display no one is currently typing"
-        );
+        assert.strictEqual(document.querySelector(".o-mail-composer-is-typing").textContent, "");
 
         // simulate receive typing notification from demo "is typing"
         await afterNextRender(() =>
@@ -220,8 +188,7 @@ QUnit.test(
         );
         assert.strictEqual(
             document.querySelector(".o-mail-composer-is-typing").textContent,
-            "Demo is typing...",
-            "Should display that demo user is typing"
+            "Demo is typing..."
         );
 
         // simulate receive typing notification from demo "is typing" again after 50s.
@@ -254,8 +221,6 @@ QUnit.test(
 );
 
 QUnit.test('receive several other members typing status "is typing"', async function (assert) {
-    assert.expect(6);
-
     const pyEnv = await startServer();
     const [resPartnerId1, resPartnerId2, resPartnerId3] = pyEnv["res.partner"].create([
         { name: "Other 10" },
@@ -277,12 +242,7 @@ QUnit.test('receive several other members typing status "is typing"', async func
         },
     });
     await openDiscuss();
-
-    assert.strictEqual(
-        document.querySelector(".o-mail-composer-is-typing").textContent,
-        "",
-        "Should display no one is currently typing"
-    );
+    assert.strictEqual(document.querySelector(".o-mail-composer-is-typing").textContent, "");
 
     // simulate receive typing notification from other 10 (is typing)
     await afterNextRender(() =>
@@ -299,8 +259,7 @@ QUnit.test('receive several other members typing status "is typing"', async func
     );
     assert.strictEqual(
         document.querySelector(".o-mail-composer-is-typing").textContent,
-        "Other 10 is typing...",
-        "Should display that 'Other 10' member is typing"
+        "Other 10 is typing..."
     );
 
     // simulate receive typing notification from other 11 (is typing)

@@ -224,18 +224,16 @@ QUnit.test("Other messages are grayed out when replying to another one", async f
         },
     });
     await openDiscuss();
-    assert.containsN(document.body, ".o-mail-message", 2, "Should display two messages");
+    assert.containsN(target, ".o-mail-message", 2);
     await click(`.o-mail-message[data-message-id='${firstMessageId}'] i[aria-label='Reply']`);
-    assert.notOk(
-        document
-            .querySelector(`.o-mail-message[data-message-id='${firstMessageId}']`)
-            .classList.contains("opacity-50"),
+    assert.doesNotHaveClass(
+        document.querySelector(`.o-mail-message[data-message-id='${firstMessageId}']`),
+        "opacity-50",
         "First message should not be grayed out"
     );
-    assert.ok(
-        document
-            .querySelector(`.o-mail-message[data-message-id='${secondMessageId}']`)
-            .classList.contains("opacity-50"),
+    assert.hasClass(
+        document.querySelector(`.o-mail-message[data-message-id='${secondMessageId}']`),
+        "opacity-50",
         "Second message should be grayed out"
     );
 });
@@ -260,19 +258,11 @@ QUnit.test("Parent message body is displayed on replies", async function (assert
     });
     await openDiscuss();
 
-    await click(`.o-mail-message i[aria-label='Reply']`);
-    await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
+    await click(".o-mail-message i[aria-label='Reply']");
+    await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
     await click(".o-mail-composer-send-button");
-    assert.containsOnce(
-        document.body,
-        ".o-mail-message-in-reply-body",
-        "Origin message should be displayed on reply"
-    );
-    assert.ok(
-        document.querySelector(".o-mail-message-in-reply-body").innerText,
-        "Hello world",
-        "Origin message should be correct"
-    );
+    assert.containsOnce(target, ".o-mail-message-in-reply-body");
+    assert.ok(document.querySelector(".o-mail-message-in-reply-body").innerText, "Hello world");
 });
 
 QUnit.test(
@@ -299,7 +289,7 @@ QUnit.test(
         await openDiscuss();
 
         await click("i[aria-label='Reply']");
-        await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
+        await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
         await triggerHotkey("Enter", false);
         await click("i[aria-label='Edit']");
         await editInput(target, ".o-mail-message textarea", "Goodbye World");
@@ -334,7 +324,7 @@ QUnit.test("Deleting parent message of a reply should adapt reply visual", async
     await openDiscuss();
 
     await click("i[aria-label='Reply']");
-    await editInput(document.body, ".o-mail-composer textarea", "FooBarFoo");
+    await editInput(target, ".o-mail-composer textarea", "FooBarFoo");
     await triggerHotkey("Enter", false);
     await click("i[aria-label='Delete']");
     $('button:contains("Delete")').click();
@@ -451,11 +441,7 @@ QUnit.test("Two users reacting with the same emoji", async (assert) => {
     });
     await click("i[aria-label='Add a Reaction']");
     await click(".o-emoji[data-codepoints='😅']");
-    assert.containsOnce(
-        target,
-        ".o-mail-message-reaction:contains(2)",
-        "Reaction count should be 2"
-    );
+    assert.containsOnce(target, ".o-mail-message-reaction:contains(2)");
 
     await click(".o-mail-message-reaction");
     assert.containsOnce(
@@ -463,11 +449,7 @@ QUnit.test("Two users reacting with the same emoji", async (assert) => {
         ".o-mail-message-reaction:contains('😅')",
         "Reaction should still be visible after one of the partners deleted its reaction"
     );
-    assert.containsOnce(
-        target,
-        ".o-mail-message-reaction:contains(1)",
-        "Reaction count should be updated"
-    );
+    assert.containsOnce(target, ".o-mail-message-reaction:contains(1)");
 });
 
 QUnit.test("Reaction summary", async (assert) => {
@@ -502,8 +484,9 @@ QUnit.test("Reaction summary", async (assert) => {
         pyEnv.currentPartnerId = partnerId;
         await click("i[aria-label='Add a Reaction']");
         await click(".o-emoji[data-codepoints='😅']");
-        assert.strictEqual(
-            target.querySelector(".o-mail-message-reaction").getAttribute("title"),
+        assert.hasAttrValue(
+            target.querySelector(".o-mail-message-reaction"),
+            "title",
             expectedSummaries[idx]
         );
     }

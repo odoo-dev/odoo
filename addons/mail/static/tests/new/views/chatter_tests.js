@@ -102,8 +102,9 @@ QUnit.test("composer has proper placeholder when sending message", async (assert
 
     await click($(target).find("button:contains(Send message)")[0]);
     assert.containsOnce(target, ".o-mail-composer");
-    assert.strictEqual(
-        target.querySelector("textarea").getAttribute("placeholder"),
+    assert.hasAttrValue(
+        target.querySelector("textarea"),
+        "placeholder",
         "Send a message to followers..."
     );
 });
@@ -119,10 +120,7 @@ QUnit.test("composer has proper placeholder when logging note", async (assert) =
 
     await click($(target).find("button:contains(Log note)")[0]);
     assert.containsOnce(target, ".o-mail-composer");
-    assert.strictEqual(
-        target.querySelector("textarea").getAttribute("placeholder"),
-        "Log an internal note..."
-    );
+    assert.hasAttrValue(target.querySelector("textarea"), "placeholder", "Log an internal note...");
 });
 
 QUnit.test("send/log buttons are properly styled", async (assert) => {
@@ -284,17 +282,11 @@ QUnit.test("can post a note on a record thread", async (assert) => {
 });
 
 QUnit.test("No attachment loading spinner when creating records", async (assert) => {
-    assert.expect(2);
-
     const { openFormView } = await start();
     await openFormView({
         res_model: "res.partner",
     });
-    assert.containsNone(
-        target,
-        ".o-mail-chatter-topbar-add-attachments .fa-spin",
-        "Should not contain attachment spinner"
-    );
+    assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
     assert.containsOnce(
         target,
         ".o-mail-chatter-topbar-add-attachments:contains(0)",
@@ -305,8 +297,6 @@ QUnit.test("No attachment loading spinner when creating records", async (assert)
 QUnit.test(
     "No attachment loading spinner when switching from loading record to creation of record",
     async (assert) => {
-        assert.expect(2);
-
         const { click, openFormView, pyEnv } = await start({
             async mockRPC(route) {
                 if (route === "/mail/thread/data") {
@@ -322,17 +312,9 @@ QUnit.test(
             },
             { waitUntilDataLoaded: false }
         );
-        assert.containsOnce(
-            target,
-            ".o-mail-chatter-topbar-add-attachments .fa-spin",
-            "Should contain attachment loading spinner"
-        );
+        assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
         await click(".o_form_button_create");
-        assert.containsNone(
-            target,
-            ".o-mail-chatter-topbar-add-attachments .fa-spin",
-            "Should not contain attachment spinner"
-        );
+        assert.containsNone(target, ".o-mail-chatter-topbar-add-attachments .fa-spin");
     }
 );
 
@@ -388,23 +370,18 @@ QUnit.test("Composer type is kept when switching from aside to bottom", async fu
         resId: partnerId,
         resModel: "res.partner",
     });
-    assert.ok(
-        target
-            .querySelector(".o-mail-chatter-topbar-log-note-button")
-            .classList.contains("btn-odoo"),
+    assert.hasClass(
+        target.querySelector(".o-mail-chatter-topbar-log-note-button"),
+        "btn-odoo",
         "Active button should be the log note button"
     );
-    assert.ok(
-        !target
-            .querySelector(".o-mail-chatter-topbar-send-message-button")
-            .classList.contains("btn-odoo"),
-        "Send message button should not be active"
+    assert.doesNotHaveClass(
+        target.querySelector(".o-mail-chatter-topbar-send-message-button"),
+        "btn-odoo"
     );
 });
 
 QUnit.test("chatter: drop attachments", async function (assert) {
-    assert.expect(4);
-
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({});
     const { openView } = await start();
@@ -426,20 +403,15 @@ QUnit.test("chatter: drop attachments", async function (assert) {
         }),
     ];
     await afterNextRender(() => dragenterFiles(document.querySelector(".o-mail-chatter")));
-    assert.ok(document.querySelector(".o-dropzone"), "should have a drop zone");
+    assert.containsOnce(target, ".o-dropzone");
     assert.containsNone(
-        document.body,
+        target,
         ".o-mail-attachment-image",
         "should have no attachment before files are dropped"
     );
 
     await afterNextRender(() => dropFiles(document.querySelector(".o-dropzone"), files));
-    assert.containsN(
-        document.body,
-        ".o-mail-attachment-image",
-        2,
-        "should have 2 attachments in the attachment box after files dropped"
-    );
+    assert.containsN(target, ".o-mail-attachment-image", 2);
 
     await afterNextRender(() => dragenterFiles(document.querySelector(".o-mail-chatter")));
     files = [
@@ -450,19 +422,12 @@ QUnit.test("chatter: drop attachments", async function (assert) {
         }),
     ];
     await afterNextRender(() => dropFiles(document.querySelector(".o-dropzone"), files));
-    assert.containsN(
-        document.body,
-        ".o-mail-attachment-image",
-        3,
-        "should have 3 attachments in the attachment box after files dropped"
-    );
+    assert.containsN(target, ".o-mail-attachment-image", 3);
 });
 
 QUnit.test(
     "should display subject when subject is not the same as the thread name",
     async function (assert) {
-        assert.expect(2);
-
         const pyEnv = await startServer();
         const resPartnerId1 = pyEnv["res.partner"].create({});
         pyEnv["mail.message"].create({
@@ -477,7 +442,6 @@ QUnit.test(
             res_model: "res.partner",
             views: [[false, "form"]],
         });
-
         assert.containsOnce(target, ".o-mail-message-subject");
         assert.strictEqual(
             target.querySelector(".o-mail-message-subject").textContent,
@@ -487,8 +451,6 @@ QUnit.test(
 );
 
 QUnit.test("should not display user notification messages in chatter", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({});
     pyEnv["mail.message"].create({
@@ -502,6 +464,5 @@ QUnit.test("should not display user notification messages in chatter", async fun
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-
-    assert.containsNone(document.body, ".o-mail-message", "should display no messages");
+    assert.containsNone(target, ".o-mail-message");
 });

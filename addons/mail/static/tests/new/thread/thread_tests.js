@@ -18,8 +18,6 @@ QUnit.module("thread", {
 });
 
 QUnit.test("dragover files on thread with composer", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({
         channel_type: "channel",
@@ -33,10 +31,7 @@ QUnit.test("dragover files on thread with composer", async function (assert) {
     });
     await openDiscuss();
     await afterNextRender(() => dragenterFiles(document.querySelector(".o-mail-thread")));
-    assert.ok(
-        document.querySelector(".o-dropzone"),
-        "should have dropzone when dragging file over the thread"
-    );
+    assert.containsOnce(target, ".o-dropzone");
 });
 
 QUnit.test("message list asc order", async function (assert) {
@@ -59,27 +54,15 @@ QUnit.test("message list asc order", async function (assert) {
         },
     });
     await openDiscuss();
-    assert.containsN(
-        target,
-        ".o-mail-thread button:contains(Load More) ~ .o-mail-message",
-        30,
-        "load more should be before all 30 fetched messages"
-    );
+    assert.containsN(target, ".o-mail-thread button:contains(Load More) ~ .o-mail-message", 30);
 
     await afterNextRender(() => (target.querySelector(".o-mail-thread").scrollTop = 0));
-    assert.containsN(
-        target,
-        ".o-mail-thread .o-mail-message",
-        60,
-        "should have fetched 30 more messages from scroll top (auto-load more)"
-    );
+    assert.containsN(target, ".o-mail-thread .o-mail-message", 60);
 });
 
 QUnit.test(
     "show message subject when subject is not the same as the thread name",
     async function (assert) {
-        assert.expect(3);
-
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({
             channel_type: "channel",
@@ -102,8 +85,7 @@ QUnit.test(
         assert.containsOnce(target, ".o-mail-message-subject");
         assert.strictEqual(
             document.querySelector(".o-mail-message-subject").textContent,
-            "Subject: Salutations, voyageur",
-            "Subject of the message should be 'Salutations, voyageur'"
+            "Subject: Salutations, voyageur"
         );
     }
 );
@@ -111,8 +93,6 @@ QUnit.test(
 QUnit.test(
     "do not show message subject when subject is the same as the thread name",
     async function (assert) {
-        assert.expect(1);
-
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({
             channel_type: "channel",
@@ -131,7 +111,6 @@ QUnit.test(
             },
         });
         await openDiscuss();
-
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );

@@ -82,7 +82,7 @@ QUnit.test("should have correct members in member list", async function (assert)
     });
     await openDiscuss();
     await click(".o-mail-discuss-actions button[title='Show Member List']");
-    assert.containsN(target, ".o-mail-channel-member", 2, "should have 2 members in member list");
+    assert.containsN(target, ".o-mail-channel-member", 2);
     assert.containsOnce(
         target,
         `.o-mail-channel-member .o-mail-channel-member-name:contains("${pyEnv.currentPartner.name}")`

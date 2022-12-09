@@ -65,8 +65,8 @@ QUnit.test("layout with card details and filename and extension", async function
         },
     });
     await openDiscuss();
-    assert.containsOnce(document.body, ".o-mail-attachment-card:contains('test.txt')");
-    assert.containsOnce(document.body, ".o-mail-attachment-card small:contains('txt')");
+    assert.containsOnce(target, ".o-mail-attachment-card:contains('test.txt')");
+    assert.containsOnce(target, ".o-mail-attachment-card small:contains('txt')");
 });
 
 QUnit.test(

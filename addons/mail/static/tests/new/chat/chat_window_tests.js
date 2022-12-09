@@ -2,14 +2,18 @@
 
 import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
 import { nextAnimationFrame, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { getFixture } from "@web/../tests/helpers/utils";
 
-QUnit.module("chat window");
+let target;
+QUnit.module("chat window", {
+    async beforeEach() {
+        target = getFixture();
+    },
+});
 
 QUnit.test(
     "Mobile: chat window shouldn't open automatically after receiving a new message",
     async function (assert) {
-        assert.expect(1);
-
         const pyEnv = await startServer();
         const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
         const resUsersId1 = pyEnv["res.users"].create({ partner_id: resPartnerId1 });
@@ -39,10 +43,6 @@ QUnit.test(
             },
         });
         await nextAnimationFrame();
-        assert.containsNone(
-            document.body,
-            ".o_ChatWindow",
-            "On mobile, the chat window shouldn't open automatically after receiving a new message"
-        );
+        assert.containsNone(target, ".o-mail-chat-window");
     }
 );

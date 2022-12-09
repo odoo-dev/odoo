@@ -13,8 +13,6 @@ QUnit.module("im status", {
 });
 
 QUnit.test("initially online", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ im_status: "online" });
     const mailChannelId = pyEnv["mail.channel"].create({ name: "TestChanel" });
@@ -38,8 +36,6 @@ QUnit.test("initially online", async function (assert) {
 });
 
 QUnit.test("initially offline", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ im_status: "offline" });
     const mailChannelId = pyEnv["mail.channel"].create({ name: "TestChannel" });
@@ -63,8 +59,6 @@ QUnit.test("initially offline", async function (assert) {
 });
 
 QUnit.test("initially away", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ im_status: "away" });
     const mailChannelId = pyEnv["mail.channel"].create({ name: "TestChanel" });
@@ -88,8 +82,6 @@ QUnit.test("initially away", async function (assert) {
 });
 
 QUnit.test("change icon on change partner im_status", async function (assert) {
-    assert.expect(4);
-
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ im_status: "online" });
     const mailChannelId = pyEnv["mail.channel"].create({ name: "TestChannel" });

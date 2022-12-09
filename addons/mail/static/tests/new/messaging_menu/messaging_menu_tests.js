@@ -18,8 +18,7 @@ QUnit.test("should have messaging menu button in systray", async (assert) => {
     assert.containsNone(target, ".o-mail-messaging-menu", "messaging menu closed by default");
     assert.hasClass(
         target.querySelector(".o_menu_systray i[aria-label='Messages']"),
-        "fa-comments",
-        "should have 'comments' icon on clickable element in messaging menu"
+        "fa-comments"
     );
 });
 
@@ -27,12 +26,7 @@ QUnit.test("messaging menu should have topbar buttons", async function (assert) 
     const { click } = await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     assert.containsOnce(target, ".o-mail-messaging-menu");
-    assert.containsN(
-        target,
-        ".o-mail-messaging-menu-topbar button",
-        3,
-        "should have 3 tab buttons to filter items in the header"
-    );
+    assert.containsN(target, ".o-mail-messaging-menu-topbar button", 3);
     assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(All)");
     assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(Chat)");
     assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(Channels)");

@@ -3,13 +3,16 @@
 import { start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import testUtils from "web.test_utils";
-import { selectDropdownItem } from "@web/../tests/helpers/utils";
+import { getFixture, selectDropdownItem } from "@web/../tests/helpers/utils";
 
-QUnit.module("FieldMany2ManyTagsEmail");
+let target;
+QUnit.module("FieldMany2ManyTagsEmail", {
+    async beforeEach() {
+        target = getFixture();
+    },
+});
 
 QUnit.test("fieldmany2many tags email (edition)", async function (assert) {
-    assert.expect(17);
-
     const pyEnv = await startServer();
     const [resPartnerId1, resPartnerId2] = pyEnv["res.partner"].create([
         { name: "gold", email: "coucou@petite.perruche" },
@@ -29,12 +32,12 @@ QUnit.test("fieldmany2many tags email (edition)", async function (assert) {
         "res.partner,false,form":
             '<form string="Types"><field name="name"/><field name="email"/></form>',
     };
-    var { openView } = await start({
+    const { openView } = await start({
         serverData: { views },
         mockRPC: function (route, args) {
             if (args.method === "read" && args.model === "res.partner") {
                 assert.step(JSON.stringify(args.args[0]));
-                assert.ok(args.args[1].includes("email"), "should read the email");
+                assert.ok(args.args[1].includes("email"));
             } else if (args.method === "get_formview_id") {
                 return false;
             }
@@ -53,17 +56,16 @@ QUnit.test("fieldmany2many tags email (edition)", async function (assert) {
 
     assert.verifySteps([`[${resPartnerId1}]`]);
     assert.containsOnce(
-        document.body,
-        '.o_field_many2many_tags_email[name="partner_ids"] .badge.o_tag_color_0',
-        "should contain one tag"
+        target,
+        '.o_field_many2many_tags_email[name="partner_ids"] .badge.o_tag_color_0'
     );
 
     // add an other existing tag
-    await selectDropdownItem(document.body, "partner_ids", "silver");
+    await selectDropdownItem(target, "partner_ids", "silver");
 
-    assert.strictEqual(
-        document.querySelectorAll(".modal-content .o_form_view").length,
-        1,
+    assert.containsOnce(
+        target,
+        ".modal-content .o_form_view",
         "there should be one modal opened to edit the empty email"
     );
     assert.strictEqual(
@@ -71,11 +73,7 @@ QUnit.test("fieldmany2many tags email (edition)", async function (assert) {
         "silver",
         "the opened modal in edit mode should be a form view dialog with the res.partner 14"
     );
-    assert.strictEqual(
-        document.querySelectorAll(".modal-content .o_form_view .o_input#email").length,
-        1,
-        "there should be an email field in the modal"
-    );
+    assert.containsOnce(target, ".modal-content .o_form_view .o_input#email");
 
     // set the email and save the modal (will rerender the form view)
     await testUtils.fields.editInput(
@@ -85,10 +83,9 @@ QUnit.test("fieldmany2many tags email (edition)", async function (assert) {
     await testUtils.dom.click($(".modal-content .o_form_button_save"));
 
     assert.containsN(
-        document.body,
+        target,
         '.o_field_many2many_tags_email[name="partner_ids"] .badge.o_tag_color_0',
-        2,
-        "should contain the second tag"
+        2
     );
     const firstTag = document.querySelector(
         '.o_field_many2many_tags_email[name="partner_ids"] .badge.o_tag_color_0'
@@ -98,20 +95,13 @@ QUnit.test("fieldmany2many tags email (edition)", async function (assert) {
         "gold",
         "tag should only show name"
     );
-    assert.hasAttrValue(
-        firstTag.querySelector(".o_badge_text"),
-        "title",
-        "coucou@petite.perruche",
-        "tag should show email address on mouse hover"
-    );
+    assert.hasAttrValue(firstTag.querySelector(".o_badge_text"), "title", "coucou@petite.perruche");
     // should have read resPartnerId2 three times: when opening the dropdown, when opening the modal, and
     // after the save
     assert.verifySteps([`[${resPartnerId2}]`, `[${resPartnerId2}]`, `[${resPartnerId2}]`]);
 });
 
 QUnit.test("many2many_tags_email widget can load more than 40 records", async function (assert) {
-    assert.expect(3);
-
     const pyEnv = await startServer();
     const messagePartnerIds = [];
     for (let i = 100; i < 200; i++) {
@@ -133,18 +123,10 @@ QUnit.test("many2many_tags_email widget can load more than 40 records", async fu
         views: [[false, "form"]],
     });
 
-    assert.strictEqual(
-        document.querySelectorAll('.o_field_widget[name="partner_ids"] .badge').length,
-        100
-    );
-
-    assert.containsOnce(document.body, ".o_form_editable");
+    assert.containsN(target, '.o_field_widget[name="partner_ids"] .badge', 100);
+    assert.containsOnce(target, ".o_form_editable");
 
     // add a record to the relation
-    await selectDropdownItem(document.body, "partner_ids", "Public user");
-
-    assert.strictEqual(
-        document.querySelectorAll('.o_field_widget[name="partner_ids"] .badge').length,
-        101
-    );
+    await selectDropdownItem(target, "partner_ids", "Public user");
+    assert.containsN(target, '.o_field_widget[name="partner_ids"] .badge', 101);
 });

@@ -1,12 +1,16 @@
 /** @odoo-module **/
 
 import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { getFixture } from "@web/../tests/helpers/utils";
 
-QUnit.module("follower subtype");
+let target;
+QUnit.module("follower subtype", {
+    async beforeEach() {
+        target = getFixture();
+    },
+});
 
 QUnit.test("simplest layout of a followed subtype", async function (assert) {
-    assert.expect(5);
-
     const pyEnv = await startServer();
     const subtypeId = pyEnv["mail.message.subtype"].create({
         default: true,
@@ -23,7 +27,7 @@ QUnit.test("simplest layout of a followed subtype", async function (assert) {
         message_follower_ids: [followerId],
     });
     const { click, openView } = await start({
-        // FIXME: should adapt mock server code to provide `hasWriteAccess`
+        // FIXME: should adapt mock server code to provide "hasWriteAccess"
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {
                 // mimic user with write access
@@ -40,39 +44,29 @@ QUnit.test("simplest layout of a followed subtype", async function (assert) {
     });
     await click(".o-mail-chatter-topbar-follower-list-button");
     await click(".o-mail-chatter-topbar-follower-list-follower-edit-button");
-    assert.containsOnce(
-        document.body,
-        ".o-mail-follower-subtype-dialog-subtype:contains(TestSubtype)",
-        "should have a follower subtype for 'TestSubtype'"
-    );
+    assert.containsOnce(target, ".o-mail-follower-subtype-dialog-subtype:contains(TestSubtype)");
     assert.containsOnce(
         document.querySelector(".o-mail-follower-subtype-dialog-subtype"),
-        ".o-mail-follower-subtype-dialog-subtype-label",
-        "should have a label"
+        ".o-mail-follower-subtype-dialog-subtype-label"
     );
     assert.containsOnce(
         $(".o-mail-follower-subtype-dialog-subtype:contains(TestSubtype)"),
-        ".o-mail-follower-subtype-dialog-subtype-checkbox",
-        "should have a checkbox"
+        ".o-mail-follower-subtype-dialog-subtype-checkbox"
     );
     assert.strictEqual(
         $(
             ".o-mail-follower-subtype-dialog-subtype:contains(TestSubtype) .o-mail-follower-subtype-dialog-subtype-label"
         )[0].textContent,
-        "TestSubtype",
-        "should have the name of the subtype as label"
+        "TestSubtype"
     );
     assert.ok(
         $(
             ".o-mail-follower-subtype-dialog-subtype:contains(TestSubtype) .o-mail-follower-subtype-dialog-subtype-checkbox"
-        )[0].checked,
-        "checkbox should be checked as follower subtype is followed"
+        )[0].checked
     );
 });
 
 QUnit.test("simplest layout of a not followed subtype", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     pyEnv["mail.message.subtype"].create({
         default: true,
@@ -88,7 +82,7 @@ QUnit.test("simplest layout of a not followed subtype", async function (assert) 
         message_follower_ids: [followerId],
     });
     const { click, openView } = await start({
-        // FIXME: should adapt mock server code to provide `hasWriteAccess`
+        // FIXME: should adapt mock server code to provide "hasWriteAccess"
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {
                 // mimic user with write access
@@ -114,8 +108,6 @@ QUnit.test("simplest layout of a not followed subtype", async function (assert) 
 });
 
 QUnit.test("toggle follower subtype checkbox", async function (assert) {
-    assert.expect(3);
-
     const pyEnv = await startServer();
     const followerSubtypeId = pyEnv["mail.message.subtype"].create({
         default: true,
@@ -131,7 +123,7 @@ QUnit.test("toggle follower subtype checkbox", async function (assert) {
         message_follower_ids: [followerId],
     });
     const { click, openView } = await start({
-        // FIXME: should adapt mock server code to provide `hasWriteAccess`
+        // FIXME: should adapt mock server code to provide "hasWriteAccess"
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {
                 // mimic user with write access
@@ -161,8 +153,7 @@ QUnit.test("toggle follower subtype checkbox", async function (assert) {
     assert.ok(
         document.querySelector(
             `.o-mail-follower-subtype-dialog-subtype[data-follower-subtype-id="${followerSubtypeId}"] .o-mail-follower-subtype-dialog-subtype-checkbox`
-        ).checked,
-        "checkbox should now be checked"
+        ).checked
     );
 
     await click(
@@ -171,7 +162,6 @@ QUnit.test("toggle follower subtype checkbox", async function (assert) {
     assert.notOk(
         document.querySelector(
             `.o-mail-follower-subtype-dialog-subtype[data-follower-subtype-id="${followerSubtypeId}"] .o-mail-follower-subtype-dialog-subtype-checkbox`
-        ).checked,
-        "checkbox should be no more checked"
+        ).checked
     );
 });

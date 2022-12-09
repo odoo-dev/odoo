@@ -1,28 +1,26 @@
 /** @odoo-module **/
 
 import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { getFixture } from "@web/../tests/helpers/utils";
 
-QUnit.module("follow button");
+let target;
+QUnit.module("follow button", {
+    async beforeEach() {
+        target = getFixture();
+    },
+});
 
 QUnit.test("base rendering not editable", async function (assert) {
-    assert.expect(1);
-
     const { openView, pyEnv } = await start();
     await openView({
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chatter-topbar-follow",
-        "should have 'Follow' button"
-    );
+    assert.containsOnce(target, ".o-mail-chatter-topbar-follow");
 });
 
 QUnit.test("hover following button", async function (assert) {
-    assert.expect(7);
-
     const pyEnv = await startServer();
     const threadId = pyEnv["res.partner"].create({});
     const followerId = pyEnv["mail.followers"].create({
@@ -40,26 +38,13 @@ QUnit.test("hover following button", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chatter-topbar-unfollow",
-        "should have 'Unfollow' button"
-    );
+    assert.containsOnce(target, ".o-mail-chatter-topbar-unfollow");
     assert.strictEqual(
         document.querySelector(".o-mail-chatter-topbar-unfollow-text").textContent.trim(),
-        "Following",
-        "'unfollow' button should display 'Following' as text when not hovered"
+        "Following"
     );
-    assert.containsNone(
-        document.querySelector(".o-mail-chatter-topbar-unfollow"),
-        ".fa-times",
-        "'unfollow' button should not contain a cross icon when not hovered"
-    );
-    assert.containsOnce(
-        document.querySelector(".o-mail-chatter-topbar-unfollow"),
-        ".fa-check",
-        "'unfollow' button should contain a check icon when not hovered"
-    );
+    assert.containsNone(document.querySelector(".o-mail-chatter-topbar-unfollow"), ".fa-times");
+    assert.containsOnce(document.querySelector(".o-mail-chatter-topbar-unfollow"), ".fa-check");
 
     await afterNextRender(() => {
         document
@@ -68,52 +53,27 @@ QUnit.test("hover following button", async function (assert) {
     });
     assert.strictEqual(
         document.querySelector(".o-mail-chatter-topbar-unfollow-text").textContent.trim(),
-        "Unfollow",
-        "'unfollow' button should display 'Unfollow' as text when hovered"
+        "Unfollow"
     );
-    assert.containsOnce(
-        document.querySelector(".o-mail-chatter-topbar-unfollow"),
-        ".fa-times",
-        "'unfollow' button should contain a cross icon when hovered"
-    );
-    assert.containsNone(
-        document.querySelector(".o-mail-chatter-topbar-unfollow"),
-        ".fa-check",
-        "'unfollow' button should not contain a check icon when hovered"
-    );
+    assert.containsOnce(document.querySelector(".o-mail-chatter-topbar-unfollow"), ".fa-times");
+    assert.containsNone(document.querySelector(".o-mail-chatter-topbar-unfollow"), ".fa-check");
 });
 
 QUnit.test('click on "follow" button', async function (assert) {
-    assert.expect(3);
-
     const { click, openView, pyEnv } = await start();
     await openView({
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chatter-topbar-follow",
-        "should have button follow"
-    );
+    assert.containsOnce(target, ".o-mail-chatter-topbar-follow");
 
     await click(".o-mail-chatter-topbar-follow");
-    assert.containsNone(
-        document.body,
-        ".o-mail-chatter-topbar-follow",
-        "should not have follow button after clicked on follow"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chatter-topbar-unfollow",
-        "should have unfollow button after clicked on follow"
-    );
+    assert.containsNone(target, ".o-mail-chatter-topbar-follow");
+    assert.containsOnce(target, ".o-mail-chatter-topbar-unfollow");
 });
 
 QUnit.test('click on "unfollow" button', async function (assert) {
-    assert.expect(4);
-
     const pyEnv = await startServer();
     const threadId = pyEnv["res.partner"].create({});
     pyEnv["mail.followers"].create({
@@ -128,26 +88,10 @@ QUnit.test('click on "unfollow" button', async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsNone(
-        document.body,
-        ".o-mail-chatter-topbar-follow",
-        "should not have button follow"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chatter-topbar-unfollow",
-        "should have button unfollow"
-    );
+    assert.containsNone(target, ".o-mail-chatter-topbar-follow");
+    assert.containsOnce(target, ".o-mail-chatter-topbar-unfollow");
 
     await click(".o-mail-chatter-topbar-unfollow");
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chatter-topbar-follow",
-        "should have follow button after clicked on unfollow"
-    );
-    assert.containsNone(
-        document.body,
-        ".o-mail-chatter-topbar-unfollow",
-        "should not have unfollow button after clicked on unfollow"
-    );
+    assert.containsOnce(target, ".o-mail-chatter-topbar-follow");
+    assert.containsNone(target, ".o-mail-chatter-topbar-unfollow");
 });

@@ -22,16 +22,16 @@ QUnit.test("Toggle activity detail", async (assert) => {
         props: { data: activity },
     });
     await click(document.querySelector(".o-mail-activity-toggle"));
-    assert.containsOnce(target, ".o-mail-activity-details", "Activity details should be open.");
+    assert.containsOnce(target, ".o-mail-activity-details");
     await click(document.querySelector(".o-mail-activity-toggle"));
-    assert.containsNone(target, ".o-mail-activity-details", "Activity details should be closed");
+    assert.containsNone(target, ".o-mail-activity-details");
 });
 
 QUnit.test("Delete activity", async (assert) => {
     const server = new TestServer();
     const env = makeTestEnv((route, params) => {
         if (route === "/web/dataset/call_kw/mail.activity/unlink") {
-            assert.step("/web/dataset/call_kw/mail.activity/unlink");
+            assert.step(route);
         }
         return server.rpc(route, params);
     });
@@ -45,8 +45,6 @@ QUnit.test("Delete activity", async (assert) => {
 });
 
 QUnit.test("activity upload document is available", async function (assert) {
-    assert.expect(3);
-
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({});
     const uploadActivityTypeId = pyEnv["mail.activity.type"].search([
@@ -65,11 +63,7 @@ QUnit.test("activity upload document is available", async function (assert) {
         res_model: "res.partner",
         views: [[false, "form"]],
     });
-    assert.containsOnce(
-        document.body,
-        ".o-mail-activity-name:contains('Upload Document')",
-        "Should have upload document activity"
-    );
-    assert.containsOnce(document.body, ".fa-upload", "Should have activity upload button");
-    assert.containsOnce(document.body, ".o_input_file", "Should have a file uploader");
+    assert.containsOnce(target, ".o-mail-activity-name:contains('Upload Document')");
+    assert.containsOnce(target, ".fa-upload", "Should have activity upload button");
+    assert.containsOnce(target, ".o_input_file", "Should have a file uploader");
 });

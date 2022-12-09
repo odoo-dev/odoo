@@ -39,8 +39,6 @@ const linkPreviewImagePayload = {
 };
 
 QUnit.test("auto layout with link preview list", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewGifPayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -59,17 +57,10 @@ QUnit.test("auto layout with link preview list", async function (assert) {
         },
     });
     await openDiscuss();
-
-    assert.containsOnce(
-        document.body,
-        ".o-mail-message .o-mail-link-preview-list",
-        "Should have a link preview list in the DOM"
-    );
+    assert.containsOnce(document.body, ".o-mail-message .o-mail-link-preview-list");
 });
 
 QUnit.test("auto layout with link preview as gif", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewGifPayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -88,17 +79,10 @@ QUnit.test("auto layout with link preview as gif", async function (assert) {
         },
     });
     await openDiscuss();
-
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-image",
-        "Should have a link preview gif in the DOM"
-    );
+    assert.containsOnce(document.body, ".o-mail-link-preview-image");
 });
 
 QUnit.test("simplest card layout", async function (assert) {
-    assert.expect(3);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewCardPayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -117,27 +101,12 @@ QUnit.test("simplest card layout", async function (assert) {
         },
     });
     await openDiscuss();
-
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-card",
-        "should have link preview in DOM"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-card-title",
-        "Should display the link preview title"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-card-description",
-        "Link preview should show the link description"
-    );
+    assert.containsOnce(document.body, ".o-mail-link-preview-card");
+    assert.containsOnce(document.body, ".o-mail-link-preview-card-title");
+    assert.containsOnce(document.body, ".o-mail-link-preview-card-description");
 });
 
 QUnit.test("simplest card layout with image", async function (assert) {
-    assert.expect(4);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewCardImagePayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -156,32 +125,13 @@ QUnit.test("simplest card layout with image", async function (assert) {
         },
     });
     await openDiscuss();
-
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-card",
-        "should have link preview in DOM"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-card-title",
-        "Should display the link preview title"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-card-description",
-        "Link preview should show the link description"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-card-image",
-        "Should display an image inside the link preview card"
-    );
+    assert.containsOnce(document.body, ".o-mail-link-preview-card");
+    assert.containsOnce(document.body, ".o-mail-link-preview-card-title");
+    assert.containsOnce(document.body, ".o-mail-link-preview-card-description");
+    assert.containsOnce(document.body, ".o-mail-link-preview-card-image");
 });
 
 QUnit.test("Link preview video layout", async function (assert) {
-    assert.expect(4);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewVideoPayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -200,32 +150,13 @@ QUnit.test("Link preview video layout", async function (assert) {
         },
     });
     await openDiscuss();
-
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-video",
-        "should have link preview video in DOM"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-video-title",
-        "Should display the link preview title"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-video-description",
-        "Link preview should show the link description"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-video-overlay",
-        "Should display overlay inside the link preview video image"
-    );
+    assert.containsOnce(document.body, ".o-mail-link-preview-video");
+    assert.containsOnce(document.body, ".o-mail-link-preview-video-title");
+    assert.containsOnce(document.body, ".o-mail-link-preview-video-description");
+    assert.containsOnce(document.body, ".o-mail-link-preview-video-overlay");
 });
 
 QUnit.test("Link preview image layout", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewImagePayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -244,17 +175,10 @@ QUnit.test("Link preview image layout", async function (assert) {
         },
     });
     await openDiscuss();
-
-    assert.containsOnce(
-        document.body,
-        ".o-mail-link-preview-image",
-        "should have link preview image"
-    );
+    assert.containsOnce(document.body, ".o-mail-link-preview-image");
 });
 
 QUnit.test("Remove link preview Gif", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewGifPayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -273,7 +197,6 @@ QUnit.test("Remove link preview Gif", async function (assert) {
         },
     });
     await openDiscuss();
-
     await click(".o-mail-link-preview-aside");
     assert.containsOnce(
         document.body,
@@ -283,8 +206,6 @@ QUnit.test("Remove link preview Gif", async function (assert) {
 });
 
 QUnit.test("Remove link preview card", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewCardPayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -303,18 +224,11 @@ QUnit.test("Remove link preview card", async function (assert) {
         },
     });
     await openDiscuss();
-
     await click(".o-mail-link-preview-aside");
-    assert.containsOnce(
-        document.body,
-        ".o-link-preview-confirm-delete-text",
-        "Should have a link preview confirmation dialog"
-    );
+    assert.containsOnce(document.body, ".o-link-preview-confirm-delete-text");
 });
 
 QUnit.test("Remove link preview video", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewVideoPayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -333,18 +247,11 @@ QUnit.test("Remove link preview video", async function (assert) {
         },
     });
     await openDiscuss();
-
     await click(".o-mail-link-preview-aside");
-    assert.containsOnce(
-        document.body,
-        ".o-link-preview-confirm-delete-text",
-        "Should have a link preview confirmation dialog"
-    );
+    assert.containsOnce(document.body, ".o-link-preview-confirm-delete-text");
 });
 
 QUnit.test("Remove link preview image", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create(linkPreviewImagePayload);
     const mailChannelId = pyEnv["mail.channel"].create({ name: "wololo" });
@@ -363,11 +270,6 @@ QUnit.test("Remove link preview image", async function (assert) {
         },
     });
     await openDiscuss();
-
     await click(".o-mail-link-preview-aside");
-    assert.containsOnce(
-        document.body,
-        ".o-link-preview-confirm-delete-text",
-        "Should have a link preview confirmation dialog"
-    );
+    assert.containsOnce(document.body, ".o-link-preview-confirm-delete-text");
 });

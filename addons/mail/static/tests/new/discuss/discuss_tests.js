@@ -234,7 +234,7 @@ QUnit.test("focus is set on composer when switching channel", async (assert) => 
 
     // unfocus composer, then switch on second channel and see if focus is correct
     target.querySelector(".o-mail-composer-textarea").blur();
-    assert.strictEqual(document.activeElement, document.body);
+    assert.notOk(document.activeElement === target.querySelector(".o-mail-composer-textarea"));
     await click(target.querySelectorAll(".o-mail-category-item")[1]);
     assert.containsOnce(target, ".o-mail-composer-textarea");
     assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
@@ -315,7 +315,6 @@ QUnit.test(
 );
 
 QUnit.test("Click on avatar opens its partner chat window", async (assert) => {
-    assert.expect(3);
     const pyEnv = await startServer();
     const testPartnerId = pyEnv["res.partner"].create({
         name: "testPartner",
@@ -343,8 +342,6 @@ QUnit.test("Click on avatar opens its partner chat window", async (assert) => {
 });
 
 QUnit.test("Can use channel command /who", async (assert) => {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({
         channel_type: "channel",
@@ -362,15 +359,13 @@ QUnit.test("Can use channel command /who", async (assert) => {
     await click(".o-mail-composer button[data-action='send']");
 
     assert.strictEqual(
-        document.querySelector(`.o_mail_notification`).textContent,
+        document.querySelector(".o_mail_notification").textContent,
         "You are alone in this channel.",
         "should display '/who' result"
     );
 });
 
 QUnit.test("sidebar: chat im_status rendering", async function (assert) {
-    assert.expect(8);
-
     const pyEnv = await startServer();
     const [resPartnerId1, resPartnerId2, resPartnerId3] = pyEnv["res.partner"].create([
         { im_status: "offline", name: "Partner1" },
@@ -402,37 +397,16 @@ QUnit.test("sidebar: chat im_status rendering", async function (assert) {
     ]);
     const { openDiscuss } = await start({ hasTimeControl: true });
     await openDiscuss();
-    assert.strictEqual(
-        target.querySelectorAll(".o-mail-discuss-sidebar-threadIcon").length,
-        3,
-        "should have 3 category items"
-    );
-    assert.strictEqual(
-        target.querySelectorAll(".o-mail-discuss-sidebar-threadIcon").length,
-        3,
-        "should have 3 partner im-status"
-    );
+    assert.containsN(target, ".o-mail-discuss-sidebar-threadIcon", 3);
     const chat1 = target.querySelectorAll(".o-mail-category-item")[0];
     const chat2 = target.querySelectorAll(".o-mail-category-item")[1];
     const chat3 = target.querySelectorAll(".o-mail-category-item")[2];
     assert.strictEqual(chat1.textContent, "Partner1", "First chat should have Partner1");
     assert.strictEqual(chat2.textContent, "Partner2", "First chat should have Partner2");
     assert.strictEqual(chat3.textContent, "Partner3", "First chat should have Partner3");
-    assert.strictEqual(
-        chat1.querySelectorAll(".o-mail-chatwindow-icon-offline").length,
-        1,
-        "chat1 should have offline icon"
-    );
-    assert.strictEqual(
-        chat2.querySelectorAll(".o-mail-chatwindow-icon-online").length,
-        1,
-        "chat2 should have online icon"
-    );
-    assert.strictEqual(
-        chat3.querySelectorAll(".o-mail-chatwindow-icon-away").length,
-        1,
-        "chat3 should have away icon"
-    );
+    assert.containsOnce(chat1, ".o-mail-chatwindow-icon-offline", "chat1 should have offline icon");
+    assert.containsOnce(chat2, ".o-mail-chatwindow-icon-online", "chat2 should have online icon");
+    assert.containsOnce(chat3, ".o-mail-chatwindow-icon-away", "chat3 should have away icon");
 });
 
 QUnit.test("No load more when fetch below fetch limit of 30", async function (assert) {
@@ -496,8 +470,6 @@ QUnit.test("show date separator above mesages of similar date", async function (
 });
 
 QUnit.test("sidebar: chat custom name", async function (assert) {
-    assert.expect(1);
-
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({ name: "Marc Demo" });
     pyEnv["mail.channel"].create({
@@ -516,12 +488,8 @@ QUnit.test("sidebar: chat custom name", async function (assert) {
     });
     const { openDiscuss } = await start();
     await openDiscuss();
-    const chat = document.querySelector(`.o-mail-category-item`);
-    assert.strictEqual(
-        chat.querySelector("span").textContent,
-        "Marc",
-        "chat should have custom name as name"
-    );
+    const chat = document.querySelector(".o-mail-category-item");
+    assert.strictEqual(chat.querySelector("span").textContent, "Marc");
 });
 
 QUnit.test("reply to message from inbox (message linked to document)", async function (assert) {
@@ -546,88 +514,48 @@ QUnit.test("reply to message from inbox (message linked to document)", async fun
         async mockRPC(route, args) {
             if (route === "/mail/message/post") {
                 assert.step("message_post");
-                assert.strictEqual(
-                    args.thread_model,
-                    "res.partner",
-                    "should post message to record with model 'res.partner'"
-                );
-                assert.strictEqual(
-                    args.thread_id,
-                    resPartnerId1,
-                    "should post message to record with Id 20"
-                );
-                assert.strictEqual(
-                    args.post_data.body,
-                    "Test",
-                    "should post with provided content in composer input"
-                );
-                assert.strictEqual(
-                    args.post_data.message_type,
-                    "comment",
-                    "should set message type as 'comment'"
-                );
+                assert.strictEqual(args.thread_model, "res.partner");
+                assert.strictEqual(args.thread_id, resPartnerId1);
+                assert.strictEqual(args.post_data.body, "Test");
+                assert.strictEqual(args.post_data.message_type, "comment");
             }
         },
         services: {
             notification: makeFakeNotificationService((notification) => {
                 assert.ok(true, "should display a notification after posting reply");
-                assert.strictEqual(
-                    notification,
-                    'Message posted on "Refactoring"',
-                    "notification should tell that message has been posted to the record 'Refactoring'"
-                );
+                assert.strictEqual(notification, 'Message posted on "Refactoring"');
             }),
         },
     });
     await openDiscuss();
-    assert.strictEqual(
-        document.querySelectorAll(".o-mail-message").length,
-        1,
-        "should display a single message"
-    );
+    assert.containsOnce(target, ".o-mail-message");
     assert.strictEqual(
         document.querySelector(".o-mail-message-recod-name").textContent,
-        " on Refactoring",
-        "should display message originates from record 'Refactoring'"
+        " on Refactoring"
     );
 
     await click("i[aria-label='Reply']");
-    assert.ok(
-        document.querySelector(".o-mail-composer"),
-        "should have composer after clicking on reply to message"
-    );
+    assert.ok(document.querySelector(".o-mail-composer"));
     assert.strictEqual(
-        document.querySelector(`.o-mail-composer-origin-thread`).textContent,
-        " on: Refactoring",
-        "composer should display origin thread name of message"
+        document.querySelector(".o-mail-composer-origin-thread").textContent,
+        " on: Refactoring"
     );
     assert.strictEqual(
         document.activeElement,
-        document.querySelector(`.o-mail-composer-textarea`),
+        document.querySelector(".o-mail-composer-textarea"),
         "composer text input should be auto-focus"
     );
 
     await insertText(".o-mail-composer-textarea", "Test");
     await click(".o-mail-composer-send-button");
     assert.verifySteps(["message_post"]);
-    assert.notOk(
-        document.querySelector(".o-mail-composer"),
-        "should no longer have composer after posting reply to message"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(".o-mail-message").length,
-        1,
-        "should still display a single message after posting reply"
-    );
+    assert.containsNone(target, ".o-mail-composer");
+    assert.containsOnce(target, ".o-mail-message");
     assert.strictEqual(
         parseInt(document.querySelector(".o-mail-message").dataset.messageId),
-        mailMessageId1,
-        "should still display message with ID 100 after posting reply"
+        mailMessageId1
     );
-    assert.notOk(
-        document.querySelector(".o-mail-message").classList.contains("o-selected"),
-        "message should not longer be selected after posting reply"
-    );
+    assert.doesNotHaveClass(document.querySelector(".o-mail-message"), "o-selected");
 });
 
 QUnit.test("Can reply to starred message", async function (assert) {
@@ -651,19 +579,11 @@ QUnit.test("Can reply to starred message", async function (assert) {
     });
     await openDiscuss();
     await click("i[aria-label='Reply']");
-    assert.containsOnce(
-        target,
-        ".o-mail-composer-origin-thread:contains('RandomName')",
-        "Composer should display origin thread of the message to reply to"
-    );
+    assert.containsOnce(target, ".o-mail-composer-origin-thread:contains('RandomName')");
     await insertText(".o-mail-composer-textarea", "abc");
     await click(".o-mail-composer-send-button");
     assert.verifySteps(['Message posted on "RandomName"']);
-    assert.containsOnce(
-        target,
-        ".o-mail-message",
-        "Reply should not be visible on starred mailbox"
-    );
+    assert.containsOnce(target, ".o-mail-message");
 });
 
 QUnit.test("Can reply to history message", async function (assert) {
@@ -687,43 +607,20 @@ QUnit.test("Can reply to history message", async function (assert) {
     });
     await openDiscuss();
     await click("i[aria-label='Reply']");
-    assert.containsOnce(
-        target,
-        ".o-mail-composer-origin-thread:contains('RandomName')",
-        "Composer should display origin thread of the message to reply to"
-    );
+    assert.containsOnce(target, ".o-mail-composer-origin-thread:contains('RandomName')");
     await insertText(".o-mail-composer-textarea", "abc");
     await click(".o-mail-composer-send-button");
     assert.verifySteps(['Message posted on "RandomName"']);
-    assert.containsOnce(
-        target,
-        ".o-mail-message",
-        "Reply should not be visible on history mailbox"
-    );
+    assert.containsOnce(target, ".o-mail-message");
 });
 
 QUnit.test("receive new needaction messages", async function (assert) {
-    assert.expect(12);
-
     const { afterNextRender, openDiscuss, pyEnv } = await start();
     await openDiscuss();
-    assert.ok(
-        document.querySelector(`button[data-mailbox="inbox"]`),
-        "should have inbox in sidebar"
-    );
-    assert.ok(
-        document.querySelector(`button[data-mailbox="inbox"]`).classList.contains("o-active"),
-        "inbox should be current discuss thread"
-    );
-    assert.notOk(
-        document.querySelector(`button[data-mailbox="inbox"] .badge`),
-        "inbox item in sidebar should not have any counter"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o-mail-discuss-content .o-mail-thread .o-mail-message`).length,
-        0,
-        "should have no messages in inbox initially"
-    );
+    assert.containsOnce(target, 'button[data-mailbox="inbox"]');
+    assert.hasClass(document.querySelector('button[data-mailbox="inbox"]'), "o-active");
+    assert.containsNone(target, '.button[data-mailbox="inbox"] .badge');
+    assert.containsNone(target, ".o-mail-discuss-content .o-mail-thread .o-mail-message");
 
     // simulate receiving a new needaction message
     await afterNextRender(() => {
@@ -735,27 +632,18 @@ QUnit.test("receive new needaction messages", async function (assert) {
             res_id: 20,
         });
     });
-    assert.ok(
-        document.querySelector(`button[data-mailbox="inbox"] .badge`),
-        "inbox item in sidebar should now have counter"
-    );
+    assert.containsOnce(target, 'button[data-mailbox="inbox"] .badge');
     assert.strictEqual(
-        document.querySelector(`button[data-mailbox="inbox"] .badge`).textContent,
-        "1",
-        "inbox item in sidebar should have counter of '1'"
+        document.querySelector('button[data-mailbox="inbox"] .badge').textContent,
+        "1"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o-mail-discuss-content .o-mail-thread .o-mail-message`).length,
-        1,
-        "should have one message in inbox"
-    );
+    assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread .o-mail-message");
     assert.strictEqual(
         parseInt(
-            document.querySelector(`.o-mail-discuss-content .o-mail-thread .o-mail-message`).dataset
+            document.querySelector(".o-mail-discuss-content .o-mail-thread .o-mail-message").dataset
                 .messageId
         ),
-        100,
-        "should display newly received needaction message"
+        100
     );
 
     // simulate receiving another new needaction message
@@ -769,27 +657,16 @@ QUnit.test("receive new needaction messages", async function (assert) {
         });
     });
     assert.strictEqual(
-        document.querySelector(`button[data-mailbox="inbox"] .badge`).textContent,
-        "2",
-        "inbox item in sidebar should have counter of '2'"
+        document.querySelector('button[data-mailbox="inbox"] .badge').textContent,
+        "2"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o-mail-discuss-content .o-mail-thread .o-mail-message`).length,
-        2,
-        "should have 2 messages in inbox"
+    assert.containsN(target, ".o-mail-discuss-content .o-mail-thread .o-mail-message", 2);
+    assert.containsOnce(
+        target,
+        '.o-mail-discuss-content .o-mail-thread .o-mail-message[data-message-id="100"]'
     );
-    assert.ok(
-        document.querySelector(`
-    .o-mail-discuss-content .o-mail-thread
-    .o-mail-message[data-message-id="100"]
-`),
-        "should still display 1st needaction message"
-    );
-    assert.ok(
-        document.querySelector(`
-    .o-mail-discuss-content .o-mail-thread
-    .o-mail-message[data-message-id="101"]
-`),
-        "should display 2nd needaction message"
+    assert.containsOnce(
+        target,
+        '.o-mail-discuss-content .o-mail-thread .o-mail-message[data-message-id="101"]'
     );
 });

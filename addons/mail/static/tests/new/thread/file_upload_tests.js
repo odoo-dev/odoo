@@ -1,16 +1,19 @@
 /** @odoo-module **/
 
 import { start, startServer } from "@mail/../tests/helpers/test_utils";
-import { editInput } from "@web/../tests/helpers/utils";
+import { editInput, getFixture } from "@web/../tests/helpers/utils";
 import { file } from "web.test_utils";
 
 const { createFile } = file;
 
-QUnit.module("file upload");
+let target;
+QUnit.module("file upload", {
+    async beforeEach() {
+        target = getFixture();
+    },
+});
 
 QUnit.test("no conflicts between file uploads", async function (assert) {
-    assert.expect(2);
-
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({});
     const channelId = pyEnv["mail.channel"].create({});
@@ -33,9 +36,7 @@ QUnit.test("no conflicts between file uploads", async function (assert) {
         content: "hello, world",
         contentType: "text/plain",
     });
-    await afterNextRender(() =>
-        editInput(document.body, ".o-mail-chatter input[type=file]", file1)
-    );
+    await afterNextRender(() => editInput(target, ".o-mail-chatter input[type=file]", file1));
 
     // Uploading file in the second thread: mail.channel in chatWindow.
     await click("i[aria-label='Messages']");
@@ -46,17 +47,7 @@ QUnit.test("no conflicts between file uploads", async function (assert) {
         contentType: "text/plain",
     });
 
-    await afterNextRender(() =>
-        editInput(document.body, ".o-mail-chat-window input[type=file]", file2)
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chatter .o-mail-attachment-image",
-        "chatter should have one attachment"
-    );
-    assert.containsOnce(
-        document.body,
-        ".o-mail-chat-window .o-mail-attachment-image",
-        "chat window should have one attachment"
-    );
+    await afterNextRender(() => editInput(target, ".o-mail-chat-window input[type=file]", file2));
+    assert.containsOnce(target, ".o-mail-chatter .o-mail-attachment-image");
+    assert.containsOnce(target, ".o-mail-chat-window .o-mail-attachment-image");
 });
