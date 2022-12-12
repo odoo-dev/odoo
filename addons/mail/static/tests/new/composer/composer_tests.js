@@ -528,3 +528,114 @@ QUnit.test("add an emoji after a command", async function (assert) {
         "/help 😊"
     );
 });
+
+QUnit.test('display canned response suggestions on typing ":"', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChanelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+    });
+    pyEnv["mail.shortcode"].create({
+        source: "hello",
+        substitution: "Hello! How are you?",
+    });
+    const { insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChanelId1 },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    await insertText(".o-mail-composer-textarea", ":");
+    assert.containsOnce(target, ".o-navigable-list-dropdown-menu");
+});
+
+QUnit.test("use a canned response", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChanelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+    });
+    pyEnv["mail.shortcode"].create({
+        source: "hello",
+        substitution: "Hello! How are you?",
+    });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChanelId1 },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "");
+    await insertText(".o-mail-composer-textarea", ":");
+    assert.containsOnce(target, ".o-navigable-list--dropdown-item");
+    await click(".o-navigable-list--dropdown-item");
+    assert.strictEqual(
+        target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        "Hello! How are you? ",
+        "text content of composer should have canned response + additional whitespace afterwards"
+    );
+});
+
+QUnit.test("use a canned response some text", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChanelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+    });
+    pyEnv["mail.shortcode"].create({
+        source: "hello",
+        substitution: "Hello! How are you?",
+    });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChanelId1 },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-navigable-list--dropdown-item");
+    assert.strictEqual(document.querySelector(`.o-mail-composer-textarea`).value, "");
+    await insertText(".o-mail-composer-textarea", "bluhbluh ");
+    assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "bluhbluh ");
+    await insertText(".o-mail-composer-textarea", ":");
+    assert.containsOnce(target, ".o-navigable-list--dropdown-item");
+    await click(".o-navigable-list--dropdown-item");
+    assert.strictEqual(
+        target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        "bluhbluh Hello! How are you? ",
+        "text content of composer should have previous content + canned response substitution + additional whitespace afterwards"
+    );
+});
+
+QUnit.test("add an emoji after a canned response", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChanelId1 = pyEnv["mail.channel"].create({
+        name: "Mario Party",
+    });
+    pyEnv["mail.shortcode"].create({
+        source: "hello",
+        substitution: "Hello! How are you?",
+    });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChanelId1 },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-navigable-list--dropdown-item");
+    assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "");
+    await insertText(".o-mail-composer-textarea", ":");
+    assert.containsOnce(target, ".o-navigable-list--dropdown-item");
+    await click(".o-navigable-list--dropdown-item");
+    assert.strictEqual(
+        target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        "Hello! How are you? ",
+        "text content of composer should have previous content + canned response substitution + additional whitespace afterwards"
+    );
+
+    // select emoji
+    await click("i[aria-label='Emojis']");
+    await click(".o-emoji[data-codepoints='😊']");
+    assert.strictEqual(
+        target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        "Hello! How are you? 😊"
+    );
+});

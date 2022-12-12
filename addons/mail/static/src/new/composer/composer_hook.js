@@ -72,7 +72,7 @@ export function useSuggestion() {
             let textLeft = content.substring(0, self.search.position + 1);
             let textRight = content.substring(cursorPosition, content.length);
             if (self.search.delimiter === ":") {
-                textLeft = content.substring(0, self.search.position - 1);
+                textLeft = content.substring(0, self.search.position);
                 textRight = content.substring(cursorPosition, content.length);
             }
             const recordReplacement = option.label;
@@ -114,7 +114,7 @@ export function useSuggestion() {
             if (!self.search.delimiter) {
                 return;
             }
-            const [main, extra = {suggestions: []}] = messaging.searchSuggestions(
+            const [main, extra = { suggestions: [] }] = messaging.searchSuggestions(
                 self.search,
                 { threadId: comp.props.composer.thread.id },
                 true

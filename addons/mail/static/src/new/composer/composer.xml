@@ -97,6 +97,15 @@
         </em>
     </t>
 
+    <t t-name="mail.Composer.suggestionCannedResponse" owl="1">
+        <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate">
+            <t t-esc="option.name" />
+        </strong>
+        <em class="text-600 text-truncate align-self-center">
+            <t t-esc="option.label"/>
+        </em>
+    </t>
+
     <t t-name="mail.Composer.actionButtons" owl="1">
         <div class="d-flex">
             <button class="o-mail-composer-send-button btn btn-primary o-last border-start-0"

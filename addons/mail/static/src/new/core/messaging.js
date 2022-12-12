@@ -12,6 +12,7 @@ import { Partner } from "./partner_model";
 import { ChannelMember } from "../core/channel_member_model";
 import { LinkPreview } from "./link_preview_model";
 import { Message } from "./message_model";
+import { CannedResponse } from "./canned_response_model";
 import { browser } from "@web/core/browser/browser";
 
 const FETCH_MSG_LIMIT = 30;
@@ -113,6 +114,7 @@ export class Messaging {
                 history: null,
             },
             chatWindows: [],
+            cannedResponses: [],
         });
         this.state.discuss.inbox = Thread.insert(this.state, {
             id: "inbox",
@@ -154,6 +156,13 @@ export class Messaging {
             this.state.internalUserGroupId = data.internalUserGroupId;
             this.state.discuss.starred.counter = data.starred_counter;
             this.isReady.resolve();
+            this.initCannedResponses(data.shortcodes);
+        });
+    }
+
+    initCannedResponses(shortcodes = []) {
+        shortcodes.forEach((code) => {
+            CannedResponse.insert(this.state, code);
         });
     }
 
@@ -941,7 +950,7 @@ export class Messaging {
                 return Partner.searchSuggestions(this.state, cleanedSearchTerm, threadId, sort);
             }
             case ":":
-                break;
+                return CannedResponse.searchSuggestions(this.state, cleanedSearchTerm, sort);
             case "#":
                 break;
             case "/":

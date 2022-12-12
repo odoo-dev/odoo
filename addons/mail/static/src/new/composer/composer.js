@@ -2,11 +2,7 @@
 
 import { AttachmentList } from "@mail/new/thread/attachment_list";
 import { onExternalClick, useAttachmentUploader, useSelection } from "@mail/new/utils/hooks";
-import {
-    isDragSourceExternalFile,
-    isEventHandled,
-    markEventHandled,
-} from "@mail/new/utils/misc";
+import { isDragSourceExternalFile, isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import {
     Component,
     onMounted,
@@ -226,6 +222,17 @@ export class Composer extends Component {
                                 return {
                                     label: suggestion.name,
                                     help: suggestion.help,
+                                };
+                            }),
+                        };
+                    case "CannedResponse":
+                        return {
+                            placeholder: "Loading",
+                            optionTemplate: "mail.Composer.suggestionCannedResponse",
+                            options: mainOrExtraSuggestions.suggestions.map((suggestion) => {
+                                return {
+                                    name: suggestion.name,
+                                    label: suggestion.substitution,
                                 };
                             }),
                         };
