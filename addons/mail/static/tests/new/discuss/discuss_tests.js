@@ -781,3 +781,22 @@ QUnit.test("channel become active - show composer in discuss content", async fun
     assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread");
     assert.containsOnce(target, ".o-mail-discuss-content .o-mail-composer");
 });
+
+QUnit.test("sidebar: channel rendering with needaction counter", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const mailMessageId1 = pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "mail.channel",
+        res_id: mailChannelId1,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: mailMessageId1, // id of related message
+        notification_type: "inbox",
+        res_partner_id: pyEnv.currentPartnerId, // must be for current partner
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-category-item:contains(general)");
+    assert.containsOnce(target, ".o-mail-category-item:contains(general) .badge:contains(1)");
+});

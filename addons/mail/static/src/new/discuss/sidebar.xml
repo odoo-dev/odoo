@@ -126,6 +126,11 @@
                 <div t-attf-class="fa fa-times ms-1" t-on-click="() => this.unpinChannel(thread.id)" title="Unpin Conversation" role="img"/>
             </t>
         </div>
+        <t t-if="thread.message_needaction_counter > 0">
+            <div t-attf-class="badge rounded-pill text-bg-primary ms-1 me-3">
+                <t t-esc="thread.message_needaction_counter"/>
+            </div>
+        </t>
     </button>
 </t>
 </templates>

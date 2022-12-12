@@ -146,59 +146,6 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring(
-            "sidebar: channel rendering with needaction counter",
-            async function (assert) {
-                assert.expect(5);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
-                const mailMessageId1 = pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                });
-                pyEnv["mail.notification"].create({
-                    mail_message_id: mailMessageId1, // id of related message
-                    notification_type: "inbox",
-                    res_partner_id: pyEnv.currentPartnerId, // must be for current partner
-                });
-                const { openDiscuss } = await start();
-                await openDiscuss();
-                const channel = document.querySelector(
-                    `.o-mail-category-channel .o_DiscussSidebarCategory_item`
-                );
-                assert.strictEqual(
-                    channel.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_counter`).length,
-                    1,
-                    "should have a counter when different from 0"
-                );
-                assert.strictEqual(
-                    channel.querySelector(`:scope .o_DiscussSidebarCategoryItem_counter`)
-                        .textContent,
-                    "1",
-                    "should have counter value"
-                );
-                assert.strictEqual(
-                    channel.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_command`).length,
-                    1,
-                    "should have single command"
-                );
-                assert.strictEqual(
-                    channel.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_commandSettings`)
-                        .length,
-                    1,
-                    "should have 'settings' command"
-                );
-                assert.strictEqual(
-                    channel.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_commandLeave`)
-                        .length,
-                    0,
-                    "should not have 'leave' command"
-                );
-            }
-        );
-
         QUnit.skipRefactoring("sidebar: public channel rendering", async function (assert) {
             assert.expect(3);
 

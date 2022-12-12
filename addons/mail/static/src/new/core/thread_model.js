@@ -94,6 +94,9 @@ export class Thread {
             if ("is_pinned" in serverData) {
                 this.is_pinned = serverData.is_pinned;
             }
+            if ("message_needaction_counter" in serverData) {
+                this.message_needaction_counter = serverData.message_needaction_counter;
+            }
             if ("seen_message_id" in serverData) {
                 this.serverLastSeenMsgByCurrentUser = serverData.seen_message_id;
             }
