@@ -112,7 +112,7 @@ function getAfterEvent({ messagingBus }) {
 
 function getClick({ afterNextRender }) {
     return async function click(selector) {
-        await afterNextRender(() => document.querySelector(selector).click());
+        await afterNextRender(() => $(selector)[0].click());
     };
 }
 
