@@ -10,7 +10,6 @@ import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { markEventHandled } from "../utils/misc";
 import { ChatWindowIcon } from "../chat/chat_window_icon";
-import { removeFromArray } from "../utils/arrays";
 
 /**
  * @typedef {Object} Props
@@ -79,7 +78,7 @@ export class Sidebar extends Component {
      */
     unpinChannel(channelId) {
         this.orm.silent.call("mail.channel", "channel_pin", [channelId], { pinned: false });
-        removeFromArray(this.messaging.state.discuss.chats.threads, channelId);
+        this.messaging.state.threads[channelId].remove();
     }
 
     stopEditing() {

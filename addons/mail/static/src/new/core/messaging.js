@@ -396,7 +396,7 @@ export class Messaging {
                     break;
                 }
                 case "mail.channel/unpin": {
-                    removeFromArray(this.state.discuss.chats.threads, notif.payload.id);
+                    this.state.threads[notif.payload.id]?.remove();
                     break;
                 }
             }
@@ -846,7 +846,7 @@ export class Messaging {
 
     async leaveChannel(id) {
         await this.orm.call("mail.channel", "action_unfollow", [id]);
-        removeFromArray(this.state.discuss.channels.threads, id);
+        this.state.threads[id].remove();
         this.setDiscussThread(this.state.discuss.channels.threads[0]);
     }
 

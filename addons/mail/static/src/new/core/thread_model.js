@@ -4,6 +4,7 @@ import { Composer } from "./composer_model";
 import { Partner } from "./partner_model";
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
+import { removeFromArray } from "../utils/arrays";
 
 export class Thread {
     /** @type {string|number} */
@@ -111,6 +112,15 @@ export class Thread {
             }
         }
         Composer.insert(this._state, { thread: this });
+    }
+
+    /**
+     * Remove a thread form the state
+     */
+    remove() {
+        removeFromArray(this._state.discuss.chats.threads, this.id);
+        removeFromArray(this._state.discuss.channels.threads, this.id);
+        delete this._state.threads[this.id];
     }
 
     /**
