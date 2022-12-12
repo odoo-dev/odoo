@@ -29,7 +29,7 @@ QUnit.test("simplest layout", async function (assert) {
     });
     const { openDiscuss } = await start({
         discuss: {
-            context: { active_id: channelId },
+            context: { active_id: `mail.channel_${channelId}` },
         },
     });
     await openDiscuss();
@@ -61,7 +61,7 @@ QUnit.test("layout with card details and filename and extension", async function
     });
     const { openDiscuss } = await start({
         discuss: {
-            context: { active_id: channelId },
+            context: { active_id: `mail.channel_${channelId}` },
         },
     });
     await openDiscuss();
@@ -89,7 +89,7 @@ QUnit.test(
         });
         const { click, openDiscuss } = await start({
             discuss: {
-                context: { active_id: channelId },
+                context: { active_id: `mail.channel_${channelId}` },
             },
             async mockRPC(route, args) {
                 if (route === "/mail/attachment/delete") {

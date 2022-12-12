@@ -60,9 +60,9 @@
                     <t t-if="thread.inCall">
                         <CallUI thread="thread"/>
                     </t>
-                    <Thread id="thread.id" t-key="thread.id" messageHighlight="messageHighlight"/>
+                    <Thread id="thread.localId" t-key="thread.localId" messageHighlight="messageHighlight"/>
                     <t t-if="thread.type !== 'mailbox' or messaging.state.discuss.messageToReplyTo">
-                        <Composer t-key="thread.id" composer="thread.composer" autofocus="true" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()" dropzoneRef="contentRef"/>
+                        <Composer t-key="thread.localId" composer="thread.composer" autofocus="true" highlightReplyTo="messageHighlight.highlightMessage" onDiscardCallback="() => messaging.cancelReplyTo()" dropzoneRef="contentRef"/>
                     </t>
                 </div>
                 <ChannelMemberList t-if="thread.type === 'channel' and state.activeMode === 'member-list'" thread="thread" className="'o-mail-discuss-channel-member-list flex-shrink-0 border-start'"/>

@@ -7,10 +7,10 @@ import { PartnerImStatus } from "./partner_im_status";
 export class ChannelMemberList extends Component {
     setup() {
         this.messaging = useMessaging();
-        onWillStart(() => this.messaging.fetchChannelMembers(this.props.thread.id));
+        onWillStart(() => this.messaging.fetchChannelMembers(this.props.thread.localId));
         onWillUpdateProps((nextProps) => {
             if (nextProps.thread.channelMembers.length === 0) {
-                this.messaging.fetchChannelMembers(nextProps.thread.id);
+                this.messaging.fetchChannelMembers(nextProps.thread.localId);
             }
         });
     }

@@ -8,8 +8,10 @@ import { removeFromArray } from "../utils/arrays";
 import { cleanTerm } from "@mail/new/utils/format";
 
 export class Thread {
-    /** @type {string|number} */
+    /** @type {number} */
     id;
+    /** @type {string} */
+    model;
     canLeave = false;
     /** @type {import("@mail/new/core/channel_member_model").channelMember[]} */
     channelMembers = [];
@@ -55,29 +57,37 @@ export class Thread {
      * @returns {Thread}
      */
     static insert(state, data) {
-        if (data.id in state.threads) {
-            const thread = state.threads[data.id];
+        if (!("id" in data)) {
+            throw new Error("Cannot insert thread: id is missing in data");
+        }
+        if (!("model" in data)) {
+            throw new Error("Cannot insert thread: model is missing in data");
+        }
+        const localId = Thread.createLocalId({ model: data.model, id: data.id });
+        if (localId in state.threads) {
+            const thread = state.threads[localId];
             thread.update(data);
             return thread;
         }
         const thread = new Thread(state, data);
         // return reactive version
-        return state.threads[thread.id];
+        return state.threads[thread.localId];
     }
 
     constructor(state, data) {
         Object.assign(this, {
             id: data.id,
+            model: data.model,
             type: data.type,
             _state: state,
         });
         if (this.type === "channel") {
-            this._state.discuss.channels.threads.push(this.id);
+            this._state.discuss.channels.threads.push(this.localId);
         } else if (this.type === "chat") {
-            this._state.discuss.chats.threads.push(this.id);
+            this._state.discuss.chats.threads.push(this.localId);
         }
         this.update(data);
-        state.threads[this.id] = this;
+        state.threads[this.localId] = this;
     }
 
     update(data) {
@@ -126,9 +136,9 @@ export class Thread {
      * Remove a thread form the state
      */
     remove() {
-        removeFromArray(this._state.discuss.chats.threads, this.id);
-        removeFromArray(this._state.discuss.channels.threads, this.id);
-        delete this._state.threads[this.id];
+        removeFromArray(this._state.discuss.chats.threads, this.localId);
+        removeFromArray(this._state.discuss.channels.threads, this.localId);
+        delete this._state.threads[this.localId];
     }
 
     static searchSuggestions(state, cleanedSearchTerm, threadId, sort) {
@@ -226,6 +236,10 @@ export class Thread {
 
     get isRenameable() {
         return ["chat", "channel", "group"].includes(this.type);
+    }
+
+    get localId() {
+        return Thread.createLocalId({ model: this.model, id: this.id });
     }
 
     /** @returns {import("@mail/new/core/message_model").Message | undefined} */

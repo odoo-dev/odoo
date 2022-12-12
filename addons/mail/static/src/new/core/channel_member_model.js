@@ -1,5 +1,7 @@
 /* @odoo-module */
 
+import { Thread } from "./thread_model";
+
 /**
  * @class ChannelMember
  * @typedef Data
@@ -18,7 +20,7 @@ export class ChannelMember {
         Object.assign(channelMember, {
             id: data.id,
             partnerId: data.partnerId,
-            threadId: data.threadId || channelMember.threadId,
+            threadId: data.threadId ?? channelMember.threadId,
         });
         if (!channelMember.thread.channelMembers.includes(channelMember)) {
             channelMember.thread.channelMembers.push(channelMember);
@@ -47,6 +49,8 @@ export class ChannelMember {
     }
 
     get thread() {
-        return this._state.threads[this.threadId];
+        return this._state.threads[
+            Thread.createLocalId({ model: "mail.channel", id: this.threadId })
+        ];
     }
 }

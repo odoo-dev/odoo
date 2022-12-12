@@ -37,14 +37,15 @@ export class Discuss extends Component {
     }
 
     get thread() {
-        return this.messaging.state.threads[this.messaging.state.discuss.threadId];
+        return this.messaging.state.threads[this.messaging.state.discuss.threadLocalId];
     }
 
     unstarAll() {
         this.messaging.unstarAll();
     }
+
     startCall() {
-        this.messaging.startCall(this.messaging.state.discuss.threadId);
+        this.messaging.startCall(this.messaging.state.discuss.threadLocalId);
     }
 
     toggleInviteForm() {
@@ -57,7 +58,8 @@ export class Discuss extends Component {
                 el,
                 ChannelInvitationForm,
                 {
-                    threadId: this.messaging.state.discuss.threadId,
+                    threadId:
+                        this.messaging.state.threads[this.messaging.state.discuss.threadLocalId].id,
                 },
                 {
                     onClose: () => (this.closePopover = null),
@@ -88,14 +90,17 @@ export class Discuss extends Component {
                 this.thread.type === "chat" ||
                 this.thread.type === "group")
         ) {
-            await this.messaging.notifyThreadNameToServer(this.thread.id, newName);
+            await this.messaging.notifyThreadNameToServer(this.thread.localId, newName);
         }
     }
 
     async updateThreadDescription({ value: description }) {
         const newDescription = description.trim();
         if (newDescription !== this.thread.description) {
-            await this.messaging.notifyThreadDescriptionToServer(this.thread.id, newDescription);
+            await this.messaging.notifyThreadDescriptionToServer(
+                this.thread.localId,
+                newDescription
+            );
         }
     }
 }

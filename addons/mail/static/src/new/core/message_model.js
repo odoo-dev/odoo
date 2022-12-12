@@ -69,15 +69,7 @@ export class Message {
      */
     static insert(state, data, thread) {
         let message;
-        if (!thread) {
-            const threadLocalId = (() => {
-                if (data.model === "mail.channel") {
-                    return data.res_id;
-                }
-                return Thread.createLocalId({ model: data.model, id: data.res_id });
-            })();
-            thread = Thread.insert(state, { id: threadLocalId });
-        }
+        thread ??= Thread.insert(state, { model: data.model, id: data.res_id });
         if (data.id in state.messages) {
             message = state.messages[data.id];
         } else {
@@ -226,17 +218,7 @@ export class Message {
     }
 
     get originThread() {
-        const threadLocalId = (() => {
-            if (this.resModel === "mail.channel") {
-                return this.resId;
-            }
-            return Thread.createLocalId({ model: this.resModel, id: this.resId });
-        })();
-        return Thread.insert(this._state, {
-            id: threadLocalId,
-            resId: this.resId,
-            resModel: this.resModel,
-        });
+        return Thread.insert(this._state, { id: this.resId, model: this.resModel });
     }
 
     get url() {

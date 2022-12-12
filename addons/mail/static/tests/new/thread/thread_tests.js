@@ -26,7 +26,7 @@ QUnit.test("dragover files on thread with composer", async function (assert) {
     });
     const { openDiscuss } = await start({
         discuss: {
-            context: { active_id: mailChannelId1 },
+            context: { active_id: `mail.channel_${mailChannelId1}` },
         },
     });
     await openDiscuss();
@@ -50,7 +50,7 @@ QUnit.test("message list asc order", async function (assert) {
     }
     const { openDiscuss } = await start({
         discuss: {
-            context: { active_id: mailChannelId1 },
+            context: { active_id: `mail.channel_${mailChannelId1}` },
         },
     });
     await openDiscuss();
@@ -77,7 +77,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                context: { active_id: mailChannelId1 },
+                context: { active_id: `mail.channel_${mailChannelId1}` },
             },
         });
         await openDiscuss();
@@ -107,7 +107,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                context: { active_id: mailChannelId1 },
+                context: { active_id: `mail.channel_${mailChannelId1}` },
             },
         });
         await openDiscuss();

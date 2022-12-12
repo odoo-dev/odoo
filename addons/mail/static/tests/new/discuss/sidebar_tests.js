@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { Thread } from "@mail/new/core/thread_model";
 import { Sidebar } from "@mail/new/discuss/sidebar";
 import { click, getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
@@ -30,7 +31,10 @@ QUnit.test("toggling category button does not hide active category items", async
     server.addChannel(43, "abc");
     server.addChannel(46, "def");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
-    env.services["mail.messaging"].state.discuss.threadId = 43; // #abc is active
+    env.services["mail.messaging"].state.discuss.threadLocalId = Thread.createLocalId({
+        model: "mail.channel",
+        id: 43,
+    }); // #abc is active
 
     await mount(Sidebar, target, { env });
     assert.containsN(target, ".o-mail-category-item", 2);

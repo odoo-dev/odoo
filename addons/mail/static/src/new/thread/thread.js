@@ -66,10 +66,10 @@ export class Thread extends Component {
         }
     }
 
-    requestMessages(threadId) {
+    requestMessages(threadLocalId) {
         // does not return the promise, so the thread is immediately rendered
         // then updated whenever messages get here
-        this.messaging.fetchThreadMessagesNew(threadId);
+        this.messaging.fetchThreadMessagesNew(threadLocalId);
     }
 
     isGrayedOut(msg) {

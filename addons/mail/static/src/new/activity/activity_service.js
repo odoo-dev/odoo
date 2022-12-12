@@ -61,7 +61,7 @@ export const activityService = {
 
         async function markAsDoneAndScheduleNext(activity, thread) {
             await markAsDone(activity.id);
-            await messaging.fetchThreadMessagesNew(thread.id);
+            await messaging.fetchThreadMessagesNew(thread.localId);
             await scheduleActivity(thread.resModel, thread.resId);
         }
 

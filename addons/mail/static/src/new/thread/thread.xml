@@ -28,7 +28,7 @@
                             highlighted="props.messageHighlight and props.messageHighlight.highlightedMessageId === msg.id"
                             onParentMessageClick="() => props.messageHighlight and msg.parentMessage and props.messageHighlight.highlightMessage(msg.parentMessage.id)"
                             grayedOut="isGrayedOut(msg)"
-                            threadId="props.id"
+                            threadLocalId="props.id"
                         />
                     </t>
                     <Transition visible="thread.serverLastSeenMsgByCurrentUser === msg.id and !messageId_last" name="'o-fade'" t-slot-scope="transition">

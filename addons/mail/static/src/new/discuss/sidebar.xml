@@ -33,11 +33,11 @@
 <t t-name="mail.discuss_mailbox" owl="1">
     <button class="btn d-flex align-items-center py-1 px-0 border-0 rounded-0 fw-normal text-dark"
         t-att-class="{
-            'bg-100': mailbox.id !== messaging.state.discuss.threadId,
-            'o-active bg-200': mailbox.id === messaging.state.discuss.threadId,
+            'bg-100': mailbox.localId !== messaging.state.discuss.threadLocalId,
+            'o-active bg-200': mailbox.localId === messaging.state.discuss.threadLocalId,
             'o-starred-box': mailbox.id === 'starred',
         }"
-        t-on-click="(ev) => this.openThread(ev, mailbox.id)"
+        t-on-click="(ev) => this.openThread(ev, mailbox.localId)"
         t-att-data-mailbox="mailbox.id"
     >
         <ThreadIcon className="'ms-4 me-2'" thread="mailbox"/>
@@ -81,17 +81,17 @@
                 <ChannelSelector category="category" onSelect.bind="stopEditing" />
             </div>
         </t>
-        <t t-foreach="category.threads" t-as="threadId" t-key="threadId">
+        <t t-foreach="category.threads" t-as="threadLocalId" t-key="threadLocalId">
             <t t-call="mail.discuss_category_item">
-                <t t-set="thread" t-value="messaging.state.threads[threadId]"/>
+                <t t-set="thread" t-value="messaging.state.threads[threadLocalId]"/>
             </t>
         </t>
     </t>
     <t t-else="">
-        <t t-if="category.threads.includes(messaging.state.discuss.threadId)">
+        <t t-if="category.threads.includes(messaging.state.discuss.threadLocalId)">
             <t t-call="mail.discuss_category_item">
-                <t t-set="threadId" t-value="messaging.state.discuss.threadId"/>
-                <t t-set="thread" t-value="messaging.state.threads[threadId]"/>
+                <t t-set="threadLocalId" t-value="messaging.state.discuss.threadLocalId"/>
+                <t t-set="thread" t-value="messaging.state.threads[threadLocalId]"/>
             </t>
         </t>
     </t>
@@ -102,15 +102,15 @@
     <t t-else="" t-set="counter" t-value="thread.message_needaction_counter"/>
     <button class="o-mail-category-item btn d-flex align-items-center w-100 px-0 py-2 border-0 text-reset"
         t-att-class="{
-            'bg-100': threadId !== messaging.state.discuss.threadId,
-            'o-active bg-200': threadId === messaging.state.discuss.threadId,
+            'bg-100': threadLocalId !== messaging.state.discuss.threadLocalId,
+            'o-active bg-200': threadLocalId === messaging.state.discuss.threadLocalId,
             'o-unread': thread.isUnread,
         }"
-        t-on-click="(ev) => this.openThread(ev, threadId)"
+        t-on-click="(ev) => this.openThread(ev, thread.localId)"
     >
         <div class="o-mail-background-inherit position-relative d-flex ms-4 flex-shrink-0" style="width:30px;height:30px">
             <img class="w-100 h-100 rounded-circle" t-att-src="thread.imgUrl" alt="Thread Image"/>
-            <ChatWindowIcon t-if="thread.type === 'chat'" threadId="thread.id" size="'small'" className="'o-mail-discuss-sidebar-threadIcon position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center rounded-circle bg-100'"/>
+            <ChatWindowIcon t-if="thread.type === 'chat'" threadLocalId="thread.localId" size="'small'" className="'o-mail-discuss-sidebar-threadIcon position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center rounded-circle bg-100'"/>
         </div>
         <span class="ms-3 me-2 text-truncate" t-att-class="{ 'o-item-unread fw-bolder': thread.isUnread }">
             <t t-esc="thread.displayName"/>

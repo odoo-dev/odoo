@@ -30,7 +30,7 @@
 </t>
 
 <t t-name="mail.messaging_menu.preview" owl="1">
-    <div class="o-mail-notification-item d-flex cursor-pointer align-items-center" t-att-class="{ 'border-bottom': !isLastItem }" t-on-click="() => this.openDiscussion(preview.id)">
+    <div class="o-mail-notification-item d-flex cursor-pointer align-items-center" t-att-class="{ 'border-bottom': !isLastItem }" t-on-click="() => this.openDiscussion(preview.localId)">
         <div class="position-relative o-mail-background-inherit m-1 flex-shrink-0" style="width:40px;height:40px;">
             <img class="w-100 h-100 rounded-circle" alt="Thread Image" t-att-src="preview.imgUrl" />
             <PartnerImStatus t-if="preview.type === 'chat'" className="'position-absolute bottom-0 end-0'" partner="messaging.state.partners[preview.chatPartnerId]"/>

@@ -81,7 +81,7 @@ export class ChannelSelector extends Component {
             } else {
                 this.messaging
                     .joinChat(choice.id)
-                    .then((chat) => this.messaging.setDiscussThread(chat.id));
+                    .then((chat) => this.messaging.setDiscussThread(chat.localId));
             }
         }
         if (this.props.onSelect) {

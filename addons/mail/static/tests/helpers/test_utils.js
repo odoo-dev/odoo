@@ -16,6 +16,7 @@ import { doAction, getActionManagerServerData } from "@web/../tests/webclient/he
 
 import { App, EventBus } from "@odoo/owl";
 import { registryNamesToCloneWithCleanup } from "@web/../tests/helpers/mock_env";
+import { Thread } from "@mail/new/core/thread_model";
 const { afterNextRender } = App;
 
 // load emoji data once, when the test suite starts.
@@ -134,12 +135,15 @@ function getOpenDiscuss(webClient, { context = {}, params = {}, ...props } = {})
             tag: "mail.action_discuss",
             type: "ir.actions.client",
         };
-        let threadId = context.active_id || params.default_active_id || "inbox";
-        if (typeof threadId === "string" && threadId.includes("_")) {
-            threadId = parseInt(threadId.split("_")[1]);
+        const activeId = context.active_id ?? params.default_active_id ?? "mail.box_inbox";
+        let [threadModel, threadId] = activeId.split("_");
+        if (threadModel === "mail.channel") {
+            threadId = parseInt(threadId, 10);
         }
         // TODO-DISCUSS-REFACTORING: remove when activeId will be handled.
-        webClient.env.services["mail.messaging"].setDiscussThread(threadId);
+        webClient.env.services["mail.messaging"].setDiscussThread(
+            Thread.createLocalId({ model: threadModel, id: threadId })
+        );
         if (waitUntilMessagesLoaded) {
             const messagesLoadedPromise = makeDeferred();
             let loadMessageRoute = `/mail/${threadId}/messages`;

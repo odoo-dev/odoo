@@ -108,7 +108,7 @@
                     </FileUploader>
                 </div>
             </div>
-            <Thread id="thread.id" t-key="thread.id" order="'desc'"/>
+            <Thread id="thread.localId" t-key="thread.localId" order="'desc'"/>
         </div>
     </div>
 </t>

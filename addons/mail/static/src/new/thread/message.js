@@ -26,7 +26,7 @@ import { useEmojiPicker } from "../composer/emoji_picker";
  * @property {function} [onParentMessageClick]
  * @property {import("@mail/new/core/message_model").Message} message
  * @property {boolean} [squashed]
- * @property {number} [threadId]
+ * @property {string} [threadLocalId]
  * @extends {Component<Props, Env>}
  */
 export class Message extends Component {
@@ -50,7 +50,7 @@ export class Message extends Component {
         "onParentMessageClick?",
         "message",
         "squashed?",
-        "threadId?",
+        "threadLocalId?",
     ];
     static template = "mail.message";
 
@@ -133,12 +133,10 @@ export class Message extends Component {
     }
 
     get isOriginThread() {
-        if (!this.props.threadId) {
+        if (!this.props.threadLocalId) {
             return false;
         }
-        const thread = this.messaging.state.threads[this.props.threadId];
-        // channel has no resId, it's indistinguishable from threadId in that case
-        return this.message.resId === (thread.resId || this.props.threadId);
+        return this.message.originThread.localId === this.props.threadLocalId;
     }
 
     toggleStar() {
@@ -164,7 +162,7 @@ export class Message extends Component {
 
     openRecord() {
         if (this.message.resModel === "mail.channel") {
-            this.messaging.openDiscussion(this.message.resId);
+            this.messaging.openDiscussion(this.message.originThread.localId);
         } else {
             this.action.doAction({
                 type: "ir.actions.act_window",

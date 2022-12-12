@@ -17,10 +17,10 @@ export class ActivityListPopoverItem extends Component {
         this.state = useState({ hasMarkDoneView: false });
         if (this.props.activity.activity_category === "upload_file") {
             this.attachmentUploader = useAttachmentUploader({
-                threadId: this.env.services["mail.messaging"].getChatterThread(
+                threadLocalId: this.env.services["mail.messaging"].getChatterThread(
                     this.props.activity.res_model,
                     this.props.activity.res_id
-                ).id,
+                ).localId,
             });
         }
         this.closeMarkAsDone = this.closeMarkAsDone.bind(this);

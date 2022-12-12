@@ -21,7 +21,7 @@ QUnit.test('receive other member typing status "is typing"', async function (ass
     });
     const { messaging, openDiscuss } = await start({
         discuss: {
-            context: { active_id: mailChannelId1 },
+            context: { active_id: `mail.channel_${mailChannelId1}` },
         },
     });
     await openDiscuss();
@@ -64,7 +64,7 @@ QUnit.test(
         });
         const { messaging, openDiscuss } = await start({
             discuss: {
-                context: { active_id: mailChannelId1 },
+                context: { active_id: `mail.channel_${mailChannelId1}` },
             },
         });
         await openDiscuss();
@@ -120,7 +120,7 @@ QUnit.test(
         });
         const { advanceTime, messaging, openDiscuss } = await start({
             discuss: {
-                context: { active_id: mailChannelId1 },
+                context: { active_id: `mail.channel_${mailChannelId1}` },
             },
             hasTimeControl: true,
         });
@@ -165,7 +165,7 @@ QUnit.test(
         });
         const { advanceTime, messaging, openDiscuss } = await start({
             discuss: {
-                context: { active_id: mailChannelId1 },
+                context: { active_id: `mail.channel_${mailChannelId1}` },
             },
             hasTimeControl: true,
         });
@@ -238,7 +238,7 @@ QUnit.test('receive several other members typing status "is typing"', async func
     });
     const { messaging, openDiscuss } = await start({
         discuss: {
-            context: { active_id: mailChannelId1 },
+            context: { active_id: `mail.channel_${mailChannelId1}` },
         },
     });
     await openDiscuss();

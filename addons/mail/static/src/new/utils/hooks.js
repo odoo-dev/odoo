@@ -222,7 +222,7 @@ function dataUrlToBlob(data, type) {
     return new Blob([uiArr], { type });
 }
 
-export function useAttachmentUploader({ threadId, messageId }) {
+export function useAttachmentUploader({ threadLocalId, messageId }) {
     const component = useComponent();
     const env = useEnv();
     const { bus, upload } = useService("file_upload");
@@ -238,14 +238,15 @@ export function useAttachmentUploader({ threadId, messageId }) {
             return this.uploadFile(file);
         },
         async uploadFile(file) {
-            const thread =
-                messaging.state.threads[threadId || messaging.state.messages[messageId].resId];
+            const thread = threadLocalId
+                ? messaging.state.threads[threadLocalId]
+                : messaging.state.messages[messageId].originThread;
             const tmpId = messaging.nextId++;
             uploadingAttachmentIds.add(tmpId);
             const { id } = await upload("/mail/attachment/upload", [file], {
                 buildFormData(formData) {
-                    formData.append("thread_id", thread.resId || thread.id);
-                    formData.append("thread_model", thread.resModel || "mail.channel");
+                    formData.append("thread_id", thread.id);
+                    formData.append("thread_model", thread.model);
                     formData.append("is_pending", Boolean(env.inComposer));
                     formData.append("temporary_id", tmpId);
                 },
@@ -286,17 +287,12 @@ export function useAttachmentUploader({ threadId, messageId }) {
         },
     });
     useBus(bus, "FILE_UPLOAD_ADDED", ({ detail: { upload } }) => {
-        if (!uploadingAttachmentIds.has(parseInt(upload.data.get("temporary_id")))) {
+        if (!uploadingAttachmentIds.has(parseInt(upload.data.get("temporary_id"), 10))) {
             return;
         }
         const threadId = upload.data.get("thread_id");
         const threadModel = upload.data.get("thread_model");
-        const originThread =
-            messaging.state.threads[
-                threadModel === "mail.channel"
-                    ? parseInt(threadId, 10)
-                    : Thread.createLocalId({ model: threadModel, id: threadId })
-            ];
+        const originThread = Thread.insert(messaging.state, { model: threadModel, id: threadId });
         abortByUploadId[upload.id] = upload.xhr.abort.bind(upload.xhr);
         state.attachments.push({
             extension: upload.title.split(".").pop(),
@@ -324,11 +320,7 @@ export function useAttachmentUploader({ threadId, messageId }) {
         const threadId = upload.data.get("thread_id");
         const threadModel = upload.data.get("thread_model");
         const originThread =
-            messaging.state.threads[
-                threadModel === "mail.channel"
-                    ? parseInt(threadId, 10)
-                    : Thread.createLocalId({ model: threadModel, id: threadId })
-            ];
+            messaging.state.threads[Thread.createLocalId({ model: threadModel, id: threadId })];
         const attachment = {
             ...response,
             extension: upload.title.split(".").pop(),

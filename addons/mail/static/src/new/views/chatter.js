@@ -45,7 +45,7 @@ export class Chatter extends Component {
         });
         this.unfollowHover = useHover("unfollow");
         this.attachmentUploader = useAttachmentUploader({
-            threadId: ThreadModel.createLocalId({
+            threadLocalId: ThreadModel.createLocalId({
                 model: this.props.resModel,
                 id: this.props.resId,
             }),

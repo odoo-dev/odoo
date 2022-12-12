@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { _lt } from "@web/core/l10n/translation";
 import { cleanTerm } from "@mail/new/utils/format";
 import { Component, xml } from "@odoo/owl";
+import { Thread } from "./core/thread_model";
 
 const commandSetupRegistry = registry.category("command_setup");
 const commandProviderRegistry = registry.category("command_provider");
@@ -74,7 +75,9 @@ commandProviderRegistry.add("mail.channel", {
         return channelsData.map((data) => ({
             async action() {
                 await messaging.joinChannel(data.id, data.name);
-                messaging.openDiscussion(data.id);
+                messaging.openDiscussion(
+                    Thread.createLocalId({ model: "mail.channel", id: data.id })
+                );
             },
             // todo: handle displayname in a way (seems like "group" channels
             // do not have a name

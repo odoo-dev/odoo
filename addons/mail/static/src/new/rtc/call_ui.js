@@ -9,7 +9,7 @@ export class CallUI extends Component {
     }
 
     disconnect() {
-        this.messaging.stopCall(this.props.thread.id);
+        this.messaging.stopCall(this.props.thread.localId);
     }
 }
 

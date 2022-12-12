@@ -26,7 +26,7 @@ export class Activity extends Component {
         });
         if (this.props.data.activity_category === "upload_file") {
             this.attachmentUploader = useAttachmentUploader({
-                threadId: this.thread.id,
+                threadLocalId: this.thread.localId,
             });
         }
     }
@@ -51,7 +51,7 @@ export class Activity extends Component {
         const { id: attachmentId } = await this.attachmentUploader.uploadData(data);
         await this.activity.markAsDone(this.props.data.id, [attachmentId]);
         this.props.onUpdate();
-        await this.messaging.fetchThreadMessagesNew(this.thread.id);
+        await this.messaging.fetchThreadMessagesNew(this.thread.localId);
     }
 
     async edit() {

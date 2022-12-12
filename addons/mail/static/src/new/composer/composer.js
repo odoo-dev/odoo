@@ -27,7 +27,7 @@ import { useSuggestion } from "./composer_hook";
 export class Composer extends Component {
     setup() {
         this.attachmentUploader = useAttachmentUploader({
-            threadId: this.props.composer.thread?.id,
+            threadLocalId: this.props.composer.thread?.localId,
             messageId: this.props.composer.message?.id,
         });
         this.messaging = useMessaging();
@@ -309,7 +309,7 @@ export class Composer extends Component {
                 rawMentions: this.suggestion.rawMentions,
                 parentId: messageToReplyTo?.id,
             };
-            const message = await this.messaging.postMessage(thread.id, value, postData);
+            const message = await this.messaging.postMessage(thread.localId, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
                 this.env.services.notification.add(
                     sprintf(this.env._t('Message posted on "%s"'), message.recordName),

@@ -6,7 +6,7 @@ import { Typing } from "../composer/typing";
 
 /**
  * @typedef {Object} Props
- * @property {number|string} threadId
+ * @property {string} threadLocalId
  * @property {string} size
  * @property {string} className
  * @extends {Component<Props, Env>}
@@ -14,7 +14,7 @@ import { Typing } from "../composer/typing";
 export class ChatWindowIcon extends Component {
     static template = "mail.chat_window_icon";
     static components = { Typing };
-    static props = ["threadId", "size?", "className?"];
+    static props = ["threadLocalId", "size?", "className?"];
     static defaultProps = {
         size: "medium",
         className: "",
@@ -25,7 +25,7 @@ export class ChatWindowIcon extends Component {
     }
 
     get thread() {
-        return this.messaging.state.threads[this.props.threadId];
+        return this.messaging.state.threads[this.props.threadLocalId];
     }
 
     get isTyping() {

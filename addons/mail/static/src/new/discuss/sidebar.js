@@ -10,6 +10,7 @@ import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { markEventHandled } from "../utils/misc";
 import { ChatWindowIcon } from "../chat/chat_window_icon";
+import { Thread } from "../core/thread_model";
 
 /**
  * @typedef {Object} Props
@@ -33,9 +34,9 @@ export class Sidebar extends Component {
         });
     }
 
-    openThread(ev, id) {
+    openThread(ev, localId) {
         markEventHandled(ev, "sidebar.openThread");
-        this.messaging.setDiscussThread(id);
+        this.messaging.setDiscussThread(localId);
     }
 
     toggleCategory(category) {
@@ -78,7 +79,9 @@ export class Sidebar extends Component {
      */
     unpinChannel(channelId) {
         this.orm.silent.call("mail.channel", "channel_pin", [channelId], { pinned: false });
-        this.messaging.state.threads[channelId].remove();
+        this.messaging.state.threads[
+            Thread.createLocalId({ model: "mail.channel", id: channelId })
+        ].remove();
     }
 
     stopEditing() {

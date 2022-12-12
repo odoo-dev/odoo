@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Discuss } from "@mail/new/discuss/discuss";
+import { Thread } from "@mail/new/core/thread_model";
 import { start, startServer } from "@mail/../tests/helpers/test_utils";
 import {
     click,
@@ -65,16 +66,22 @@ QUnit.test("can open #general", async (assert) => {
 });
 
 QUnit.test("can change the thread name of #general", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    const env = makeTestEnv((route, params) => {
-        if (route === "/web/dataset/call_kw/mail.channel/channel_rename") {
-            assert.step(route);
-        }
-        return server.rpc(route, params);
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
     });
-    env.services["mail.messaging"].setDiscussThread(1);
-    await mount(Discuss, target, { env });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+        mockRPC(route, params) {
+            if (route === "/web/dataset/call_kw/mail.channel/channel_rename") {
+                assert.step(route);
+            }
+        },
+    });
+    await openDiscuss();
     assert.containsOnce(target, "input.o-mail-discuss-thread-name");
     const threadNameElement = target.querySelector("input.o-mail-discuss-thread-name");
 
@@ -90,16 +97,23 @@ QUnit.test("can change the thread name of #general", async (assert) => {
 });
 
 QUnit.test("can change the thread description of #general", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    const env = makeTestEnv((route, params) => {
-        if (route === "/web/dataset/call_kw/mail.channel/channel_change_description") {
-            assert.step(route);
-        }
-        return server.rpc(route, params);
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+        description: "General announcements...",
     });
-    env.services["mail.messaging"].setDiscussThread(1);
-    await mount(Discuss, target, { env });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+        mockRPC(route, params) {
+            if (route === "/web/dataset/call_kw/mail.channel/channel_change_description") {
+                assert.step(route);
+            }
+        },
+    });
+    await openDiscuss();
 
     assert.containsOnce(target, "input.o-mail-discuss-thread-description");
     const threadDescriptionElement = target.querySelector(
@@ -115,33 +129,6 @@ QUnit.test("can change the thread description of #general", async (assert) => {
     assert.strictEqual(threadDescriptionElement.value, "I want a burger today!");
 
     assert.verifySteps(["/web/dataset/call_kw/mail.channel/channel_change_description"]);
-});
-
-QUnit.test("can post a message", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    const env = makeTestEnv((route, params) => {
-        if (route.startsWith("/mail")) {
-            assert.step(route);
-        }
-        return server.rpc(route, params);
-    });
-    env.services["mail.messaging"].setDiscussThread(1);
-
-    await mount(Discuss, target, { env });
-    assert.containsNone(target, ".o-mail-message");
-    await insertText(".o-mail-composer-textarea", "abc");
-    await click(target, ".o-mail-composer-send-button");
-    await loadEmoji(); // wait for emoji being loaded (required for rendering)
-    await nextTick(); // wait for following rendering
-    assert.containsOnce(target, ".o-mail-message");
-    assert.verifySteps([
-        "/mail/init_messaging",
-        "/mail/channel/messages",
-        "/mail/channel/notify_typing",
-        "/mail/message/post",
-        "/mail/link_preview",
-    ]);
 });
 
 QUnit.test("can create a new channel", async (assert) => {
@@ -254,18 +241,26 @@ QUnit.test("Message following a notification should not be squashed", async (ass
     server.addMessage("comment", 2, 1, "mail.channel", 3, "Hello world !");
     const env = makeTestEnv((route, params) => server.rpc(route, params));
     await env.services["mail.messaging"].isReady;
-    env.services["mail.messaging"].setDiscussThread(1);
+    env.services["mail.messaging"].setDiscussThread(
+        Thread.createLocalId({ model: "mail.channel", id: 1 })
+    );
     await mount(Discuss, target, { env });
 
     assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container");
 });
 
 QUnit.test("Posting message should transform links.", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    env.services["mail.messaging"].setDiscussThread(1);
-    await mount(Discuss, target, { env });
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test https://www.odoo.com/");
     await click(target, ".o-mail-composer-send-button");
     await loadEmoji(); // wait for emoji being loaded (required for rendering)
@@ -274,11 +269,17 @@ QUnit.test("Posting message should transform links.", async (assert) => {
 });
 
 QUnit.test("Posting message should transform relevant data to emoji.", async (assert) => {
-    const server = new TestServer();
-    server.addChannel(1, "general", "General announcements...");
-    const env = makeTestEnv((route, params) => server.rpc(route, params));
-    env.services["mail.messaging"].setDiscussThread(1);
-    await mount(Discuss, target, { env });
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test :P :laughing:");
     await click(target, ".o-mail-composer-send-button");
     await loadEmoji(); // wait for emoji being loaded (required for rendering)
@@ -289,18 +290,24 @@ QUnit.test("Posting message should transform relevant data to emoji.", async (as
 QUnit.test(
     "posting a message immediately after another one is displayed in 'simple' mode (squashed)",
     async (assert) => {
-        let flag = false;
-        const server = new TestServer();
-        server.addChannel(1, "general", "General announcements...");
-        const env = makeTestEnv(async (route, params) => {
-            if (flag && route === "/mail/message/post") {
-                await new Promise(() => {});
-            }
-            return server.rpc(route, params);
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            name: "general",
+            channel_type: "channel",
         });
-        env.services["mail.messaging"].setDiscussThread(1);
+        let flag = false;
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+            async mockRPC(route, params) {
+                if (flag && route === "/mail/message/post") {
+                    await new Promise(() => {});
+                }
+            },
+        });
 
-        await mount(Discuss, target, { env });
+        await openDiscuss();
         // write 1 message
         await editInput(target, ".o-mail-composer-textarea", "abc");
         await click(target, ".o-mail-composer button[data-action='send']");
@@ -350,7 +357,7 @@ QUnit.test("Can use channel command /who", async (assert) => {
     const { click, insertText, openDiscuss } = await start({
         discuss: {
             params: {
-                default_active_id: mailChannelId1,
+                default_active_id: `mail.channel_${mailChannelId1}`,
             },
         },
     });
@@ -570,7 +577,7 @@ QUnit.test("Can reply to starred message", async function (assert) {
     const { click, insertText, openDiscuss } = await start({
         discuss: {
             context: {
-                active_id: "starred",
+                active_id: "mail.box_starred",
             },
         },
         services: {
@@ -598,7 +605,7 @@ QUnit.test("Can reply to history message", async function (assert) {
     const { click, insertText, openDiscuss } = await start({
         discuss: {
             context: {
-                active_id: "history",
+                active_id: "mail.box_history",
             },
         },
         services: {
@@ -842,7 +849,7 @@ QUnit.test("default active id on mailbox", async function (assert) {
     const { openDiscuss } = await start({
         discuss: {
             params: {
-                default_active_id: "starred",
+                default_active_id: "mail.box_starred",
             },
         },
     });

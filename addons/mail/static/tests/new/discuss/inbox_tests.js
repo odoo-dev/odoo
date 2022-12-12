@@ -212,7 +212,7 @@ QUnit.test("show subject of message in history", async function (assert) {
     const { openDiscuss } = await start({
         discuss: {
             params: {
-                default_active_id: "history",
+                default_active_id: "mail.box_history",
             },
         },
     });
@@ -247,7 +247,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                default_active_id: "inbox",
+                default_active_id: "mail.box_inbox",
             },
         });
         await openDiscuss();
@@ -277,7 +277,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                default_active_id: "inbox",
+                default_active_id: "mail.box_inbox",
             },
         });
         await openDiscuss();
@@ -307,7 +307,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                default_active_id: "inbox",
+                default_active_id: "mail.box_inbox",
             },
         });
         await openDiscuss();
@@ -337,7 +337,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                default_active_id: "inbox",
+                default_active_id: "mail.box_inbox",
             },
         });
         await openDiscuss();
@@ -367,7 +367,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                default_active_id: "inbox",
+                default_active_id: "mail.box_inbox",
             },
         });
         await openDiscuss();
@@ -397,7 +397,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                default_active_id: "inbox",
+                default_active_id: "mail.box_inbox",
             },
         });
         await openDiscuss();
@@ -427,7 +427,7 @@ QUnit.test(
         });
         const { openDiscuss } = await start({
             discuss: {
-                default_active_id: "inbox",
+                default_active_id: "mail.box_inbox",
             },
         });
         await openDiscuss();
