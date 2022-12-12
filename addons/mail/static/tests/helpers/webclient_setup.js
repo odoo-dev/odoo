@@ -15,6 +15,7 @@ import { activityService } from "@mail/new/activity/activity_service";
 import { ChatWindowContainer } from "@mail/new/chat/chat_window_container";
 import { MessagingMenu } from "@mail/new/messaging_menu/messaging_menu";
 import { messagingService as newMessagingService } from "@mail/new/messaging_service";
+import { attachmentViewerService } from "@mail/new/attachment_viewer/attachment_viewer_service";
 import { messagingService } from "@mail/services/messaging_service";
 import { systrayService } from "@mail/services/systray_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
@@ -107,6 +108,7 @@ function setupMessagingServiceRegistries({
         "mail.activity": activityService,
         "mail.messaging": newMessagingService,
         messaging: messagingService,
+        attachmentViewer: attachmentViewerService,
         messagingValues,
         presence: makeFakePresenceService({
             isOdooFocused: () => true,

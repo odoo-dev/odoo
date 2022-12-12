@@ -11,6 +11,7 @@ import { toRaw } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { url } from "@web/core/utils/urls";
 import { deserializeDateTime } from "@web/core/l10n/dates";
+import { Attachment } from "./attachment_model";
 
 const { DateTime } = luxon;
 
@@ -97,13 +98,9 @@ export class Message {
             this[key] = remainingData[key];
         }
         Object.assign(this, {
-            attachments: attachments.map((attachment) => ({
-                ...attachment,
-                extension: attachment.name.split(".").pop(),
-                originThread: Array.isArray(attachment.originThread)
-                    ? Thread.insert(this._state, attachment.originThread[0][1])
-                    : attachment.originThread,
-            })),
+            attachments: attachments.map((attachment) =>
+                Attachment.insert(this._state, attachment)
+            ),
             author: data.author ? Partner.insert(this._state, data.author) : this.author,
             body,
             isDiscussion,

@@ -6,12 +6,12 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("attachment_box_tests.js");
 
-        QUnit.skipRefactoring("view attachments", async function (assert) {
-            assert.expect(7);
+        QUnit.test("view attachments", async function (assert) {
+            assert.expect(6);
 
             const pyEnv = await startServer();
             const resPartnerId1 = pyEnv["res.partner"].create({});
-            const [irAttachmentId1] = pyEnv["ir.attachment"].create([
+            pyEnv["ir.attachment"].create([
                 {
                     mimetype: "text/plain",
                     name: "Blah.txt",
@@ -32,56 +32,44 @@ QUnit.module("mail", {}, function () {
                 </div>
             </form>`,
             };
-            const { click, messaging, openView } = await start({ serverData: { views } });
+            const { click, openView } = await start({ serverData: { views } });
             await openView({
                 res_id: resPartnerId1,
                 res_model: "res.partner",
                 views: [[false, "form"]],
             });
-            const firstAttachment = messaging.models["Attachment"].findFromIdentifyingData({
-                id: irAttachmentId1,
-            });
-
-            await click(`
-        .o_AttachmentCard[data-id="${firstAttachment.localId}"]
-        .o_AttachmentCard_image
-    `);
+            await click(`.o-mail-attachment-card[aria-label="Blah.txt"] .o-mail-attachment-image`);
             assert.containsOnce(
                 document.body,
-                ".o_Dialog",
-                "a dialog should have been opened once attachment image is clicked"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_AttachmentViewer",
+                ".o-mail-attachment-viewer",
                 "an attachment viewer should have been opened once attachment image is clicked"
             );
             assert.strictEqual(
-                document.querySelector(".o_AttachmentViewer_name").textContent,
+                document.querySelector(".o-mail-attachment-viewer-name").textContent,
                 "Blah.txt",
                 "attachment viewer iframe should point to clicked attachment"
             );
             assert.containsOnce(
                 document.body,
-                ".o_AttachmentViewer_buttonNavigationNext",
+                ".o-mail-attachment-viewer-buttonNavigationNext",
                 "attachment viewer should allow to see next attachment"
             );
 
-            await click(".o_AttachmentViewer_buttonNavigationNext");
+            await click(".o-mail-attachment-viewer-buttonNavigationNext");
             assert.strictEqual(
-                document.querySelector(".o_AttachmentViewer_name").textContent,
+                document.querySelector(".o-mail-attachment-viewer-name").textContent,
                 "Blu.txt",
                 "attachment viewer iframe should point to next attachment of attachment box"
             );
             assert.containsOnce(
                 document.body,
-                ".o_AttachmentViewer_buttonNavigationNext",
+                ".o-mail-attachment-viewer-buttonNavigationNext",
                 "attachment viewer should allow to see next attachment"
             );
 
-            await click(".o_AttachmentViewer_buttonNavigationNext");
+            await click(".o-mail-attachment-viewer-buttonNavigationNext");
             assert.strictEqual(
-                document.querySelector(".o_AttachmentViewer_name").textContent,
+                document.querySelector(".o-mail-attachment-viewer-name").textContent,
                 "Blah.txt",
                 "attachment viewer iframe should point anew to first attachment"
             );

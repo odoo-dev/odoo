@@ -23,6 +23,7 @@ import { isDragSourceExternalFile } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
+import { Attachment } from "../core/attachment_model";
 
 export class Chatter extends Component {
     static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
@@ -120,7 +121,9 @@ export class Chatter extends Component {
                 this.state.activities = result.activities;
             }
             if ("attachments" in result) {
-                this.state.attachments = result.attachments;
+                this.state.attachments = result.attachments.map((attachment) =>
+                    Attachment.insert(this.messaging.state, attachment)
+                );
                 this.state.isLoadingAttachments = false;
             }
             if ("followers" in result) {

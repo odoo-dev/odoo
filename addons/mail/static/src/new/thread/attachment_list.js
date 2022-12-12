@@ -5,7 +5,15 @@ import { Component } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
+import { useAttachmentViewer } from "../attachment_viewer/attachment_viewer_hook";
 
+/**
+ * @typedef {Object} Props
+ * @property {import("@mail/new/core/attachment_model").Attachment[]} attachments
+ * @property {function} unlinkAttachment
+ * @property {number} imagesHeight
+ * @extends {Component<Props, Env>}
+ */
 export class AttachmentList extends Component {
     static props = ["attachments", "unlinkAttachment", "imagesHeight"];
     static template = "mail.attachment_list";
@@ -13,24 +21,16 @@ export class AttachmentList extends Component {
     setup() {
         // Arbitrary high value, this is effectively a max-width.
         this.imagesWidth = 1920;
-        this.imageMimetypes = new Set([
-            "image/bmp",
-            "image/gif",
-            "image/jpeg",
-            "image/png",
-            "image/svg+xml",
-            "image/tiff",
-            "image/x-icon",
-        ]);
         this.dialog = useService("dialog");
+        this.attachmentViewerService = useAttachmentViewer();
     }
 
     get nonImagesAttachments() {
-        return this.props.attachments.filter(({ mimetype }) => !this.imageMimetypes.has(mimetype));
+        return this.props.attachments.filter((attachment) => !attachment.isImage);
     }
 
     get imagesAttachments() {
-        return this.props.attachments.filter(({ mimetype }) => this.imageMimetypes.has(mimetype));
+        return this.props.attachments.filter((attachment) => attachment.isImage);
     }
 
     getImageUrl(attachment) {
@@ -39,18 +39,12 @@ export class AttachmentList extends Component {
             !this.env.inComposer &&
             !this.env.inChatter &&
             !attachment.accessToken &&
-            attachment.originThread &&
-            !attachment.originThread.model
+            !attachment.originThread?.model
         ) {
             return `/mail/channel/${attachment.originThread.id}/image/${attachment.id}/${this.imagesWidth}x${imagesHeight}`;
         }
         const accessToken = attachment.accessToken ? `?access_token=${attachment.accessToken}` : "";
         return `/web/image/${attachment.id}/${this.imagesWidth}x${imagesHeight}${accessToken}`;
-    }
-
-    getDownloadUrl(attachment) {
-        const accessToken = attachment.accessToken ? `access_token=${attachment.accessToken}&` : "";
-        return `/web/content/ir.attachment/${attachment.id}/datas?${accessToken}download=true`;
     }
 
     canDelete(attachment) {
@@ -63,7 +57,7 @@ export class AttachmentList extends Component {
 
     onClickDownload(attachment) {
         const downloadLink = document.createElement("a");
-        downloadLink.setAttribute("href", this.getDownloadUrl(attachment));
+        downloadLink.setAttribute("href", attachment.downloadUrl);
         // Adding 'download' attribute into a link prevents open a new
         // tab or change the current location of the window. This avoids
         // interrupting the activity in the page such as rtc call.
