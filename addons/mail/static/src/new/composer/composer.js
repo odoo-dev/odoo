@@ -211,6 +211,8 @@ export class Composer extends Component {
                                 return {
                                     label: suggestion.nameOrDisplayName,
                                     partner: suggestion,
+                                    classList:
+                                        "o-composer-suggestion o-composer-suggestion-partner",
                                 };
                             }),
                         };
@@ -222,6 +224,8 @@ export class Composer extends Component {
                                 return {
                                     label: suggestion.name,
                                     help: suggestion.help,
+                                    classList:
+                                        "o-composer-suggestion o-composer-suggestion-channel-command",
                                 };
                             }),
                         };
@@ -233,6 +237,8 @@ export class Composer extends Component {
                                 return {
                                     name: suggestion.name,
                                     label: suggestion.substitution,
+                                    classList:
+                                        "o-composer-suggestion o-composer-suggestion-canned-response",
                                 };
                             }),
                         };

@@ -107,68 +107,66 @@ export class Partner {
                 }
             }
         }
-        const sortFunc = () => {
-            return (a, b) => {
-                const isAInternalUser = a.user && a.user.isInternalUser;
-                const isBInternalUser = b.user && b.user.isInternalUser;
-                if (isAInternalUser && !isBInternalUser) {
+        const sortFunc = (a, b) => {
+            const isAInternalUser = a.user && a.user.isInternalUser;
+            const isBInternalUser = b.user && b.user.isInternalUser;
+            if (isAInternalUser && !isBInternalUser) {
+                return -1;
+            }
+            if (!isAInternalUser && isBInternalUser) {
+                return 1;
+            }
+            if (thread && thread.serverData.channel) {
+                const isAMember = thread.serverData.channel.channelMembers[0][1].includes(a);
+                const isBMember = thread.serverData.channel.channelMembers[0][1].includes(b);
+                if (isAMember && !isBMember) {
                     return -1;
                 }
-                if (!isAInternalUser && isBInternalUser) {
+                if (!isAMember && isBMember) {
                     return 1;
                 }
-                if (thread && thread.serverData.channel) {
-                    const isAMember = thread.serverData.channel.channelMembers[0][1].includes(a);
-                    const isBMember = thread.serverData.channel.channelMembers[0][1].includes(b);
-                    if (isAMember && !isBMember) {
-                        return -1;
-                    }
-                    if (!isAMember && isBMember) {
-                        return 1;
-                    }
-                }
-                const cleanedAName = cleanTerm(a.name || "");
-                const cleanedBName = cleanTerm(b.name || "");
-                if (
-                    cleanedAName.startsWith(cleanedSearchTerm) &&
-                    !cleanedBName.startsWith(cleanedSearchTerm)
-                ) {
-                    return -1;
-                }
-                if (
-                    !cleanedAName.startsWith(cleanedSearchTerm) &&
-                    cleanedBName.startsWith(cleanedSearchTerm)
-                ) {
-                    return 1;
-                }
-                if (cleanedAName < cleanedBName) {
-                    return -1;
-                }
-                if (cleanedAName > cleanedBName) {
-                    return 1;
-                }
-                const cleanedAEmail = cleanTerm(a.email || "");
-                const cleanedBEmail = cleanTerm(b.email || "");
-                if (
-                    cleanedAEmail.startsWith(cleanedSearchTerm) &&
-                    !cleanedAEmail.startsWith(cleanedSearchTerm)
-                ) {
-                    return -1;
-                }
-                if (
-                    !cleanedBEmail.startsWith(cleanedSearchTerm) &&
-                    cleanedBEmail.startsWith(cleanedSearchTerm)
-                ) {
-                    return 1;
-                }
-                if (cleanedAEmail < cleanedBEmail) {
-                    return -1;
-                }
-                if (cleanedAEmail > cleanedBEmail) {
-                    return 1;
-                }
-                return a.id - b.id;
-            };
+            }
+            const cleanedAName = cleanTerm(a.name || "");
+            const cleanedBName = cleanTerm(b.name || "");
+            if (
+                cleanedAName.startsWith(cleanedSearchTerm) &&
+                !cleanedBName.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedAName.startsWith(cleanedSearchTerm) &&
+                cleanedBName.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedAName < cleanedBName) {
+                return -1;
+            }
+            if (cleanedAName > cleanedBName) {
+                return 1;
+            }
+            const cleanedAEmail = cleanTerm(a.email || "");
+            const cleanedBEmail = cleanTerm(b.email || "");
+            if (
+                cleanedAEmail.startsWith(cleanedSearchTerm) &&
+                !cleanedAEmail.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedBEmail.startsWith(cleanedSearchTerm) &&
+                cleanedBEmail.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedAEmail < cleanedBEmail) {
+                return -1;
+            }
+            if (cleanedAEmail > cleanedBEmail) {
+                return 1;
+            }
+            return a.id - b.id;
         };
         return [
             {

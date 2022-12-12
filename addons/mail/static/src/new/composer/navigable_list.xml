@@ -9,12 +9,12 @@
         >
             <t t-if="isOpened and hasOptions">
                 <div
-                    class="o-navigable-list-dropdown-menu border"
+                    class="o-open border"
                     t-on-mousedown.prevent=""
                 >
                     <t t-foreach="sources" t-as="source" t-key="source.id">
                         <t t-if="source.isLoading">
-                            <div class="o-navigable-list--dropdown-item">
+                            <div class="o-navigable-list-dropdown-item">
                                 <a href="#" class="">
                                     <i class="fa fa-spin fa-circle-o-notch" />
                                     <t t-esc="source.placeholder" />
@@ -28,7 +28,7 @@
                                 t-key="option.id"
                             >
                                 <div
-                                    class="o-navigable-list--dropdown-item"
+                                    class="o-navigable-list-dropdown-item"
                                     t-att-class="option.classList"
                                     t-on-mouseenter="() => this.onOptionMouseEnter([source_index, option_index])"
                                     t-on-mouseleave="() => this.onOptionMouseLeave([source_index, option_index])"

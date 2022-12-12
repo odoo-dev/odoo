@@ -266,10 +266,10 @@ QUnit.test('display partner mention suggestions on typing "@"', async function (
         },
     });
     await openDiscuss();
-    assert.containsNone(target, ".o-navigable-list--dropdown-item");
+    assert.containsNone(target, ".o-composer-suggestion");
 
     await insertText(".o-mail-composer-textarea", "@");
-    assert.containsN(target, ".o-navigable-list--dropdown-item", 3);
+    assert.containsN(target, ".o-composer-suggestion", 3);
 });
 
 QUnit.test("show other channel member in @ mention", async function (assert) {
@@ -292,7 +292,7 @@ QUnit.test("show other channel member in @ mention", async function (assert) {
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "@");
-    assert.containsOnce(target, ".o-navigable-list--dropdown-item:contains(TestPartner)");
+    assert.containsOnce(target, ".o-composer-suggestion:contains(TestPartner)");
 });
 
 QUnit.test("select @ mention insert mention text in composer", async function (assert) {
@@ -316,7 +316,7 @@ QUnit.test("select @ mention insert mention text in composer", async function (a
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "@");
     await afterNextRender(() =>
-        $(target).find(".o-navigable-list--dropdown-item:contains(TestPartner)").click()
+        $(target).find(".o-composer-suggestion:contains(TestPartner)").click()
     );
     assert.strictEqual($(target).find(".o-mail-composer-textarea").val().trim(), "@TestPartner");
 });
@@ -424,9 +424,9 @@ QUnit.test('display command suggestions on typing "/"', async function (assert) 
         },
     });
     await openDiscuss();
-    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
     await insertText(".o-mail-composer-textarea", "/");
-    assert.containsOnce(target, ".o-navigable-list-dropdown-menu");
+    assert.containsOnce(target, ".o-composer-suggestion-list .o-open");
 });
 
 QUnit.test(
@@ -448,7 +448,7 @@ QUnit.test(
         });
         await openDiscuss();
         await insertText(".o-mail-composer-textarea", "/");
-        await click(".o-navigable-list--dropdown-item");
+        await click(".o-composer-suggestion");
         await insertText(".o-mail-composer-textarea", " is user?");
         assert.verifySteps([], "No rpc done");
     }
@@ -464,10 +464,10 @@ QUnit.test("use a command for a specific channel type", async function (assert) 
     });
     await openDiscuss();
 
-    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
     assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
     await insertText(".o-mail-composer-textarea", "/");
-    await click(".o-navigable-list--dropdown-item");
+    await click(".o-composer-suggestion");
     assert.strictEqual(
         document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "/who ",
@@ -489,12 +489,12 @@ QUnit.test(
             },
         });
         await openDiscuss();
-        assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+        assert.containsNone(target, ".o-composer-suggestion-list .o-open");
         assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
         await insertText(".o-mail-composer-textarea", "bluhbluh ");
         assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "bluhbluh ");
         await insertText(".o-mail-composer-textarea", "/");
-        assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+        assert.containsNone(target, ".o-composer-suggestion-list .o-open");
     }
 );
 
@@ -510,10 +510,10 @@ QUnit.test("add an emoji after a command", async function (assert) {
         },
     });
     await openDiscuss();
-    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
     assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
     await insertText(".o-mail-composer-textarea", "/");
-    await click(".o-navigable-list--dropdown-item");
+    await click(".o-composer-suggestion");
     assert.strictEqual(
         document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "/who ",
@@ -544,9 +544,9 @@ QUnit.test('display canned response suggestions on typing ":"', async function (
         },
     });
     await openDiscuss();
-    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
     await insertText(".o-mail-composer-textarea", ":");
-    assert.containsOnce(target, ".o-navigable-list-dropdown-menu");
+    assert.containsOnce(target, ".o-composer-suggestion-list .o-open");
 });
 
 QUnit.test("use a canned response", async function (assert) {
@@ -564,11 +564,11 @@ QUnit.test("use a canned response", async function (assert) {
         },
     });
     await openDiscuss();
-    assert.containsNone(target, ".o-navigable-list-dropdown-menu");
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
     assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "");
     await insertText(".o-mail-composer-textarea", ":");
-    assert.containsOnce(target, ".o-navigable-list--dropdown-item");
-    await click(".o-navigable-list--dropdown-item");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
     assert.strictEqual(
         target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
         "Hello! How are you? ",
@@ -591,13 +591,13 @@ QUnit.test("use a canned response some text", async function (assert) {
         },
     });
     await openDiscuss();
-    assert.containsNone(target, ".o-navigable-list--dropdown-item");
+    assert.containsNone(target, ".o-composer-suggestion");
     assert.strictEqual(document.querySelector(`.o-mail-composer-textarea`).value, "");
     await insertText(".o-mail-composer-textarea", "bluhbluh ");
     assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "bluhbluh ");
     await insertText(".o-mail-composer-textarea", ":");
-    assert.containsOnce(target, ".o-navigable-list--dropdown-item");
-    await click(".o-navigable-list--dropdown-item");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
     assert.strictEqual(
         target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
         "bluhbluh Hello! How are you? ",
@@ -620,11 +620,11 @@ QUnit.test("add an emoji after a canned response", async function (assert) {
         },
     });
     await openDiscuss();
-    assert.containsNone(target, ".o-navigable-list--dropdown-item");
+    assert.containsNone(target, ".o-composer-suggestion");
     assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "");
     await insertText(".o-mail-composer-textarea", ":");
-    assert.containsOnce(target, ".o-navigable-list--dropdown-item");
-    await click(".o-navigable-list--dropdown-item");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
     assert.strictEqual(
         target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
         "Hello! How are you? ",
