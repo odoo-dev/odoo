@@ -116,7 +116,7 @@ export class Partner {
             if (!isAInternalUser && isBInternalUser) {
                 return 1;
             }
-            if (thread && thread.serverData.channel) {
+            if (thread?.serverData?.channel) {
                 const isAMember = thread.serverData.channel.channelMembers[0][1].includes(a);
                 const isBMember = thread.serverData.channel.channelMembers[0][1].includes(b);
                 if (isAMember && !isBMember) {

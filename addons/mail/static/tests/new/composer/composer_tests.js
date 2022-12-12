@@ -272,6 +272,19 @@ QUnit.test('display partner mention suggestions on typing "@"', async function (
     assert.containsN(target, ".o-composer-suggestion", 3);
 });
 
+QUnit.test('display partner mention suggestions on typing "@" in chatter', async function (assert) {
+    const pyEnv = await startServer();
+    const { click, insertText, openFormView } = await start();
+    await openFormView({
+        res_id: pyEnv.currentPartnerId,
+        res_model: "res.partner",
+    });
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.containsNone(target, ".o-composer-suggestion");
+    await insertText(".o-mail-composer-textarea", "@");
+    assert.containsOnce(target, ".o-composer-suggestion:contains(Mitchell Admin)");
+});
+
 QUnit.test("show other channel member in @ mention", async function (assert) {
     const pyEnv = await startServer();
     const resPartnerId = pyEnv["res.partner"].create({
