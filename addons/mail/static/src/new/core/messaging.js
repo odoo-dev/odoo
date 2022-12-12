@@ -828,30 +828,66 @@ export class Messaging {
         return partners;
     }
 
-    searchChannelCommand(cleanedSearchTerm, threadId) {
+    searchChannelCommand(cleanedSearchTerm, threadId, sort) {
         const thread = this.state.threads[threadId];
         if (!["chat", "channel", "group"].includes(thread.type)) {
             // channel commands are channel specific
             return [[]];
         }
-        const commandLists = commandRegistry.getEntries().filter(([name, command]) => {
-            if (!cleanTerm(name).includes(cleanedSearchTerm)) {
-                return false;
+        const commands = commandRegistry
+            .getEntries()
+            .filter(([name, command]) => {
+                if (!cleanTerm(name).includes(cleanedSearchTerm)) {
+                    return false;
+                }
+                if (command.channel_types) {
+                    return command.channel_types.includes(thread.type);
+                }
+                return true;
+            })
+            .map(([name, command]) => {
+                return {
+                    channel_types: command.channel_types,
+                    help: command.help,
+                    id: command.id,
+                    name,
+                };
+            });
+        const sortFunc = (a, b) => {
+            const isATypeSpecific = a.channel_types;
+            const isBTypeSpecific = b.channel_types;
+            if (isATypeSpecific && !isBTypeSpecific) {
+                return -1;
             }
-            if (command.channel_types) {
-                return command.channel_types.includes(thread.type);
+            if (!isATypeSpecific && isBTypeSpecific) {
+                return 1;
             }
-            return true;
-        });
+            const cleanedAName = cleanTerm(a.name || "");
+            const cleanedBName = cleanTerm(b.name || "");
+            if (
+                cleanedAName.startsWith(cleanedSearchTerm) &&
+                !cleanedBName.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedAName.startsWith(cleanedSearchTerm) &&
+                cleanedBName.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedAName < cleanedBName) {
+                return -1;
+            }
+            if (cleanedAName > cleanedBName) {
+                return 1;
+            }
+            return a.id - b.id;
+        };
         return [
             {
                 type: "ChannelCommand",
-                suggestions: commandLists.map(([name, command]) => {
-                    return {
-                        name,
-                        help: command.help,
-                    };
-                }),
+                suggestions: sort ? commands.sort(sortFunc) : commands,
             },
         ];
     }
@@ -954,7 +990,7 @@ export class Messaging {
             case "#":
                 break;
             case "/":
-                return this.searchChannelCommand(cleanedSearchTerm, threadId);
+                return this.searchChannelCommand(cleanedSearchTerm, threadId, sort);
         }
         return [
             {

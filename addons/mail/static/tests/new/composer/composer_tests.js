@@ -470,7 +470,7 @@ QUnit.test("use a command for a specific channel type", async function (assert) 
     await click(".o-navigable-list--dropdown-item");
     assert.strictEqual(
         document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
-        "/help ",
+        "/who ",
         "text content of composer should have used command + additional whitespace afterwards"
     );
 });
@@ -516,7 +516,7 @@ QUnit.test("add an emoji after a command", async function (assert) {
     await click(".o-navigable-list--dropdown-item");
     assert.strictEqual(
         document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
-        "/help ",
+        "/who ",
         "text content of composer should have previous content + used command + additional whitespace afterwards"
     );
 
@@ -525,7 +525,7 @@ QUnit.test("add an emoji after a command", async function (assert) {
     await click('.o-emoji[data-codepoints="😊"]');
     assert.strictEqual(
         document.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
-        "/help 😊"
+        "/who 😊"
     );
 });
 
