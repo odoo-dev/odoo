@@ -639,7 +639,9 @@ export class Messaging {
     getMentionsFromText(rawMentions, body) {
         const validMentions = {};
         const partners = [];
+        const threads = [];
         const rawMentionedPartnerIds = rawMentions.partnerIds || [];
+        const rawMentionedThreadIds = rawMentions.threadIds || [];
         for (const partnerId of rawMentionedPartnerIds) {
             const partner = this.state.partners[partnerId];
             const index = body.indexOf(`@${partner.name}`);
@@ -648,7 +650,16 @@ export class Messaging {
             }
             partners.push(partner);
         }
+        for (const threadId of rawMentionedThreadIds) {
+            const thread = this.state.threads[threadId];
+            const index = body.indexOf(`#${thread.displayName}`);
+            if (index === -1) {
+                continue;
+            }
+            threads.push(thread);
+        }
         validMentions.partners = partners;
+        validMentions.threads = threads;
         return validMentions;
     }
 
@@ -988,7 +999,7 @@ export class Messaging {
             case ":":
                 return CannedResponse.searchSuggestions(this.state, cleanedSearchTerm, sort);
             case "#":
-                break;
+                return Thread.searchSuggestions(this.state, cleanedSearchTerm, threadId, sort);
             case "/":
                 return this.searchChannelCommand(cleanedSearchTerm, threadId, sort);
         }
@@ -1014,6 +1025,7 @@ export class Messaging {
             case ":":
                 break;
             case "#":
+                this.fetchThreads(cleanedSearchTerm);
                 break;
             case "/":
                 break;
@@ -1039,6 +1051,18 @@ export class Messaging {
         );
         suggestedPartners.map((data) => {
             Partner.insert(this.state, data);
+        });
+    }
+
+    async fetchThreads(term) {
+        const suggestedThreads = await this.orm.call(
+            "mail.channel",
+            "get_mention_suggestions",
+            [],
+            { search: term }
+        );
+        suggestedThreads.map((data) => {
+            Thread.insert(this.state, data);
         });
     }
 

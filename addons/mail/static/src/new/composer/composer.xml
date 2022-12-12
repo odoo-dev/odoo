@@ -88,6 +88,12 @@
         </t>
     </t>
 
+    <t t-name="mail.Composer.suggestionThread" owl="1">
+        <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate">
+            #<t t-esc="option.label" />
+        </strong>
+    </t>
+
     <t t-name="mail.Composer.suggestionChannelCommand" owl="1">
         <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate">
             <t t-esc="option.label" />

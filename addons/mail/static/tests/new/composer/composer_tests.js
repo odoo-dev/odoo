@@ -565,12 +565,12 @@ QUnit.test("use a canned response", async function (assert) {
     });
     await openDiscuss();
     assert.containsNone(target, ".o-composer-suggestion-list .o-open");
-    assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
     await insertText(".o-mail-composer-textarea", ":");
     assert.containsOnce(target, ".o-composer-suggestion");
     await click(".o-composer-suggestion");
     assert.strictEqual(
-        target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "Hello! How are you? ",
         "text content of composer should have canned response + additional whitespace afterwards"
     );
@@ -592,14 +592,14 @@ QUnit.test("use a canned response some text", async function (assert) {
     });
     await openDiscuss();
     assert.containsNone(target, ".o-composer-suggestion");
-    assert.strictEqual(document.querySelector(`.o-mail-composer-textarea`).value, "");
+    assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "");
     await insertText(".o-mail-composer-textarea", "bluhbluh ");
-    assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "bluhbluh ");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "bluhbluh ");
     await insertText(".o-mail-composer-textarea", ":");
     assert.containsOnce(target, ".o-composer-suggestion");
     await click(".o-composer-suggestion");
     assert.strictEqual(
-        target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "bluhbluh Hello! How are you? ",
         "text content of composer should have previous content + canned response substitution + additional whitespace afterwards"
     );
@@ -621,12 +621,12 @@ QUnit.test("add an emoji after a canned response", async function (assert) {
     });
     await openDiscuss();
     assert.containsNone(target, ".o-composer-suggestion");
-    assert.strictEqual(target.querySelector(`.o-mail-composer-textarea`).value, "");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
     await insertText(".o-mail-composer-textarea", ":");
     assert.containsOnce(target, ".o-composer-suggestion");
     await click(".o-composer-suggestion");
     assert.strictEqual(
-        target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "Hello! How are you? ",
         "text content of composer should have previous content + canned response substitution + additional whitespace afterwards"
     );
@@ -635,7 +635,110 @@ QUnit.test("add an emoji after a canned response", async function (assert) {
     await click("i[aria-label='Emojis']");
     await click(".o-emoji[data-codepoints='😊']");
     assert.strictEqual(
-        target.querySelector(`.o-mail-composer-textarea`).value.replace(/\s/, " "),
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
         "Hello! How are you? 😊"
+    );
+});
+
+QUnit.test('display channel mention suggestions on typing "#"', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChanelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChanelId1 },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    await insertText(".o-mail-composer-textarea", "#");
+    assert.containsOnce(target, ".o-composer-suggestion-list .o-open");
+});
+
+QUnit.test("mention a channel", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChanelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChanelId1 },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion-list .o-open");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "#");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "#General ",
+        "text content of composer should have mentioned channel + additional whitespace afterwards"
+    );
+});
+
+QUnit.test("mention a channel after some text", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChanelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChanelId1 },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "bluhbluh ");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value,
+        "bluhbluh ",
+        "text content of composer should have content"
+    );
+    await insertText(".o-mail-composer-textarea", "#");
+    assert.containsOnce(target, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "bluhbluh #General ",
+        "text content of composer should have previous content + mentioned channel + additional whitespace afterwards"
+    );
+});
+
+QUnit.test("add an emoji after a channel mention", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChanelId1 = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_type: "channel",
+    });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: mailChanelId1 },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-composer-suggestion");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    await insertText(".o-mail-composer-textarea", "#");
+    assert.containsOnce(document.body, ".o-composer-suggestion");
+    await click(".o-composer-suggestion");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "#General ",
+        "text content of composer should have previous content + mentioned channel + additional whitespace afterwards"
+    );
+
+    // select emoji
+    await click("i[aria-label='Emojis']");
+    await click(".o-emoji[data-codepoints='😊']");
+    assert.strictEqual(
+        target.querySelector(".o-mail-composer-textarea").value.replace(/\s/, " "),
+        "#General 😊"
     );
 });

@@ -5,6 +5,7 @@ import { Partner } from "./partner_model";
 import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 import { removeFromArray } from "../utils/arrays";
+import { cleanTerm } from "@mail/new/utils/format";
 
 export class Thread {
     /** @type {string|number} */
@@ -121,6 +122,77 @@ export class Thread {
         removeFromArray(this._state.discuss.chats.threads, this.id);
         removeFromArray(this._state.discuss.channels.threads, this.id);
         delete this._state.threads[this.id];
+    }
+
+    static searchSuggestions(state, cleanedSearchTerm, threadId, sort) {
+        let threads;
+        const thread = state.threads[threadId];
+        if (
+            thread &&
+            (thread.type === "group" ||
+                thread.type === "chat" ||
+                (thread.type === "channel" && thread.authorizedGroupFullName))
+        ) {
+            // Only return the current channel when in the context of a
+            // group restricted channel or group or chat. Indeed, the message with the mention
+            // would appear in the target channel, so this prevents from
+            // inadvertently leaking the private message into the mentioned
+            // channel.
+            threads = [thread];
+        } else {
+            threads = Object.values(state.threads);
+        }
+        const suggestionList = threads.filter(
+            (thread) =>
+                thread.type === "channel" &&
+                thread.displayName &&
+                cleanTerm(thread.displayName).includes(cleanedSearchTerm)
+        );
+        const sortFunc = (a, b) => {
+            const isAPublicChannel = a.type === "channel" && !a.authorizedGroupFullName;
+            const isBPublicChannel = b.type === "channel" && !b.authorizedGroupFullName;
+            if (isAPublicChannel && !isBPublicChannel) {
+                return -1;
+            }
+            if (!isAPublicChannel && isBPublicChannel) {
+                return 1;
+            }
+            const isMemberOfA = a.isCurrentUserAsMember;
+            const isMemberOfB = b.isCurrentUserAsMember;
+            if (isMemberOfA && !isMemberOfB) {
+                return -1;
+            }
+            if (!isMemberOfA && isMemberOfB) {
+                return 1;
+            }
+            const cleanedADisplayName = cleanTerm(a.displayName || "");
+            const cleanedBDisplayName = cleanTerm(b.displayName || "");
+            if (
+                cleanedADisplayName.startsWith(cleanedSearchTerm) &&
+                !cleanedBDisplayName.startsWith(cleanedSearchTerm)
+            ) {
+                return -1;
+            }
+            if (
+                !cleanedADisplayName.startsWith(cleanedSearchTerm) &&
+                cleanedBDisplayName.startsWith(cleanedSearchTerm)
+            ) {
+                return 1;
+            }
+            if (cleanedADisplayName < cleanedBDisplayName) {
+                return -1;
+            }
+            if (cleanedADisplayName > cleanedBDisplayName) {
+                return 1;
+            }
+            return a.id - b.id;
+        };
+        return [
+            {
+                type: "Thread",
+                suggestions: sort ? suggestionList.sort(sortFunc) : suggestionList,
+            },
+        ];
     }
 
     /**
@@ -241,5 +313,9 @@ export class Thread {
         return sprintf(_t('Access restricted to group "%(groupFullName)s"'), {
             groupFullName: this.authorizedGroupFullName,
         });
+    }
+
+    get isCurrentUserAsMember() {
+        return this.channelMembers.some((channelMember) => channelMember.isCurrentUser);
     }
 }

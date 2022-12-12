@@ -146,7 +146,7 @@ function escapeAndCompactTextContent(content) {
  * @param validRecords.partners {Array}
  * @return {string}
  */
-function generateMentionsLinks(body, { partners = [] }) {
+function generateMentionsLinks(body, { partners = [], threads = [] }) {
     const mentions = [];
     for (const partner of partners) {
         const placeholder = `@-mention-partner-${partner.id}`;
@@ -155,6 +155,18 @@ function generateMentionsLinks(body, { partners = [] }) {
             class: "o_mail_redirect",
             id: partner.id,
             model: "res.partner",
+            placeholder,
+            text,
+        });
+        body = body.replace(text, placeholder);
+    }
+    for (const thread of threads) {
+        const placeholder = `#-mention-channel-${thread.id}`;
+        const text = `#${escape(thread.displayName)}`;
+        mentions.push({
+            class: "o_channel_redirect",
+            id: thread.id,
+            model: "mail.channel",
             placeholder,
             text,
         });

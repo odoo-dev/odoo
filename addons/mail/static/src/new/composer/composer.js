@@ -216,6 +216,18 @@ export class Composer extends Component {
                                 };
                             }),
                         };
+                    case "Thread":
+                        return {
+                            placeholder: "Loading",
+                            optionTemplate: "mail.Composer.suggestionThread",
+                            options: mainOrExtraSuggestions.suggestions.map((suggestion) => {
+                                return {
+                                    label: suggestion.displayName,
+                                    thread: suggestion,
+                                    classList: "o-composer-suggestion o-composer-suggestion-thread",
+                                };
+                            }),
+                        };
                     case "ChannelCommand":
                         return {
                             placeholder: "Loading",

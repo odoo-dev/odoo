@@ -9,6 +9,7 @@ export function useSuggestion() {
     const self = {
         clearRawMentions() {
             self.rawMentions.partnerIds.length = 0;
+            self.rawMentions.threadIds.length = 0;
         },
         clearSearch() {
             Object.assign(self.search, {
@@ -79,6 +80,9 @@ export function useSuggestion() {
             if (option.partner) {
                 self.rawMentions.partnerIds.add(option.partner.id);
             }
+            if (option.thread) {
+                self.rawMentions.threadIds.add(option.thread.id);
+            }
             self.clearSearch();
             comp.props.composer.textInputContent = textLeft + recordReplacement + " " + textRight;
             comp.props.composer.selection.start = textLeft.length + recordReplacement.length + 1;
@@ -100,6 +104,7 @@ export function useSuggestion() {
         },
         rawMentions: {
             partnerIds: new Set(),
+            threadIds: new Set(),
         },
         search: {
             delimiter: undefined,
