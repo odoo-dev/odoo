@@ -407,6 +407,9 @@ export class Messaging {
     // actions that can be performed on the messaging system
     // -------------------------------------------------------------------------
 
+    /**
+     * @param {number|string} threadId
+     */
     setDiscussThread(threadId) {
         this.state.discuss.threadId = threadId;
         const activeId =
