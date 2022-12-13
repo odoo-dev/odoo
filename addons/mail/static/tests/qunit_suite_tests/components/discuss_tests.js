@@ -389,29 +389,6 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("auto-select thread in discuss context", async function (assert) {
-            assert.expect(1);
-
-            const { messaging, openDiscuss } = await start({
-                discuss: {
-                    context: {
-                        active_id: "mail.box_starred",
-                    },
-                },
-            });
-            await openDiscuss();
-            assert.ok(
-                document
-                    .querySelector(
-                        `
-            .o_DiscussSidebarMailboxView[data-mailbox-local-id="${messaging.starred.localId}"]
-        `
-                    )
-                    .classList.contains("o-active"),
-                "starred mailbox should become active"
-            );
-        });
-
         QUnit.skipRefactoring(
             "load single message from channel initially",
             async function (assert) {
@@ -477,162 +454,6 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.skipRefactoring("open channel from active_id as channel id", async function (assert) {
-            assert.expect(1);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const { openDiscuss } = await start({
-                discuss: {
-                    context: {
-                        active_id: mailChannelId1,
-                    },
-                },
-            });
-            await openDiscuss();
-            assert.containsOnce(
-                document.body,
-                `
-            .o-mail-discuss-content .o-mail-thread[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
-        `,
-                "should have channel 1 open in Discuss when providing its active_id"
-            );
-        });
-
-        QUnit.skipRefactoring("basic rendering of message", async function (assert) {
-            // AKU TODO: should be in message-only tests
-            assert.expect(15);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
-            const mailMessageId1 = pyEnv["mail.message"].create({
-                author_id: resPartnerId1,
-                body: "<p>body</p>",
-                date: "2019-04-20 10:00:00",
-                model: "mail.channel",
-                res_id: mailChannelId1,
-            });
-            const { click, openDiscuss } = await start({
-                discuss: {
-                    params: {
-                        default_active_id: `mail.channel_${mailChannelId1}`,
-                    },
-                },
-            });
-            await openDiscuss();
-            const message = document.querySelector(`
-        .o-mail-discuss-content .o-mail-thread
-        .o_ThreadView_messageList
-        .o_MessageListView_message[data-message-id="${mailMessageId1}"]
-    `);
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageView_sidebar`).length,
-                1,
-                "should have message sidebar of message"
-            );
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageView_authorAvatar`).length,
-                1,
-                "should have author avatar in sidebar of message"
-            );
-            assert.strictEqual(
-                message.querySelector(`:scope .o_MessageView_authorAvatar`).dataset.src,
-                `/mail/channel/${mailChannelId1}/partner/${resPartnerId1}/avatar_128`,
-                "should have url of message in author avatar sidebar"
-            );
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageView_core`).length,
-                1,
-                "should have core part of message"
-            );
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageView_header`).length,
-                1,
-                "should have header in core part of message"
-            );
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageView_authorName`).length,
-                1,
-                "should have author name in header of message"
-            );
-            assert.strictEqual(
-                message.querySelector(`:scope .o_MessageView_authorName`).textContent,
-                "Demo",
-                "should have textually author name in header of message"
-            );
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageView_header .o_MessageView_date`).length,
-                1,
-                "should have date in header of message"
-            );
-
-            await click(".o-mail-message");
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageActionList`).length,
-                1,
-                "should action list in message"
-            );
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageActionView`).length,
-                3,
-                "should have 3 actions in action list of message"
-            );
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o-mail-message-toggle-star`).length,
-                1,
-                "should have action to star message"
-            );
-            assert.containsOnce(
-                document.body,
-                ".o_MessageActionView_actionReaction",
-                "should have action to add a reaction"
-            );
-            assert.containsOnce(
-                message,
-                ".o_MessageActionView_actionReplyTo",
-                "should have action to reply to message"
-            );
-            assert.strictEqual(
-                message.querySelectorAll(`:scope .o-mail-message-body`).length,
-                1,
-                "should have content in core part of message"
-            );
-            assert.strictEqual(
-                message.querySelector(`:scope .o-mail-message-body`).textContent.trim(),
-                "body",
-                "should have body of message in content part of message"
-            );
-        });
-
-        QUnit.skipRefactoring(
-            "should not be able to reply to temporary/transient messages",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
-                const { click, insertText, openDiscuss } = await start({
-                    discuss: {
-                        params: {
-                            default_active_id: `mail.channel_${mailChannelId1}`,
-                        },
-                    },
-                });
-                await openDiscuss();
-                // these user interactions is to forge a transient message response from channel command "/who"
-                await insertText(".o-mail-composer-textarea", "/who");
-                await click(".o-mail-composer-send-button");
-                // click on message to show actions on the transient message resulting from the "/who" command
-                await click(".o-mail-message");
-                assert.containsNone(
-                    document.body,
-                    ".o_MessageActionView_actionReplyTo",
-                    "should not have action to reply to temporary/transient messages"
-                );
-            }
-        );
-
         QUnit.skipRefactoring("basic rendering of squashed message", async function (assert) {
             // messages are squashed when "close", e.g. less than 1 minute has elapsed
             // from messages of same author and same thread. Note that this should
@@ -641,9 +462,9 @@ QUnit.module("mail", {}, function () {
             assert.expect(12);
 
             const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const resPartnerId1 = pyEnv["res.partner"].create({});
-            const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
+            const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+            const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
+            const [mailMessageId2] = pyEnv["mail.message"].create([
                 {
                     author_id: resPartnerId1, // must be same author as other message
                     body: "<p>body1</p>", // random body, set for consistency
@@ -676,34 +497,11 @@ QUnit.module("mail", {}, function () {
                 2,
                 "should have 2 messages"
             );
-            const message1 = document.querySelector(`
-        .o-mail-discuss-content .o-mail-thread
-        .o_ThreadView_messageList
-        .o_MessageListView_message[data-message-id="${mailMessageId1}"]
-    `);
             const message2 = document.querySelector(`
         .o-mail-discuss-content .o-mail-thread
         .o_ThreadView_messageList
         .o_MessageListView_message[data-message-id="${mailMessageId2}"]
     `);
-            assert.notOk(
-                message1.classList.contains("o-squashed"),
-                "message 1 should not be squashed"
-            );
-            assert.notOk(
-                message1
-                    .querySelector(`:scope .o_MessageView_sidebar`)
-                    .classList.contains("o-message-squashed"),
-                "message 1 should not have squashed sidebar"
-            );
-            assert.ok(message2.classList.contains("o-squashed"), "message 2 should be squashed");
-            assert.ok(
-                message2
-                    .querySelector(`:scope .o_MessageView_sidebar`)
-                    .classList.contains("o-message-squashed"),
-                "message 2 should have squashed sidebar"
-            );
-
             await click(".o-mail-message.o-squashed");
             assert.strictEqual(
                 message2.querySelectorAll(`:scope .o_MessageView_sidebar .o_MessageView_date`)
@@ -720,26 +518,6 @@ QUnit.module("mail", {}, function () {
                 message2.querySelectorAll(`:scope .o-mail-message-toggle-star`).length,
                 1,
                 "message 2 should have star action in action list"
-            );
-            assert.strictEqual(
-                message2.querySelectorAll(`:scope .o_MessageView_core`).length,
-                1,
-                "message 2 should have core part"
-            );
-            assert.strictEqual(
-                message2.querySelectorAll(`:scope .o_MessageView_header`).length,
-                0,
-                "message 2 should have a header in core part"
-            );
-            assert.strictEqual(
-                message2.querySelectorAll(`:scope .o-mail-message-body`).length,
-                1,
-                "message 2 should have some content in core part"
-            );
-            assert.strictEqual(
-                message2.querySelector(`:scope .o-mail-message-body`).textContent.trim(),
-                "body2",
-                "message 2 should have body in content part"
             );
         });
 
@@ -824,204 +602,6 @@ QUnit.module("mail", {}, function () {
                 "message 2 should not be squashed"
             );
         });
-
-        QUnit.skipRefactoring("load more messages from channel", async function (assert) {
-            // AKU: thread specific test
-            assert.expect(6);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            const resPartnerId1 = pyEnv["res.partner"].create({});
-            pyEnv["res.partner"].create({});
-            for (let i = 0; i < 40; i++) {
-                pyEnv["mail.message"].create({
-                    author_id: resPartnerId1,
-                    body: "not empty",
-                    date: "2019-04-20 10:00:00",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                });
-            }
-            const { click, openDiscuss } = await start({
-                discuss: {
-                    params: {
-                        default_active_id: `mail.channel_${mailChannelId1}`,
-                    },
-                },
-            });
-            await openDiscuss();
-            assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_separatorDate
-        `).length,
-                1,
-                "should have a single date separator" // to check: may be client timezone dependent
-            );
-            assert.strictEqual(
-                document.querySelector(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_separatorLabelDate
-        `).textContent,
-                "April 20, 2019",
-                "should display date day of messages"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
-                30,
-                "should have 30 messages"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_loadMore
-        `).length,
-                1,
-                "should have load more link"
-            );
-
-            await click(
-                `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_loadMore`
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
-                40,
-                "should have 40 messages"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_loadMore
-        `).length,
-                0,
-                "should not longer have load more link (all messages loaded)"
-            );
-        });
-
-        QUnit.skipRefactoring("auto-scroll to bottom of thread", async function (assert) {
-            // AKU TODO: thread specific test
-            assert.expect(2);
-
-            const pyEnv = await startServer();
-            const mailChannelId1 = pyEnv["mail.channel"].create({});
-            for (let i = 1; i <= 25; i++) {
-                pyEnv["mail.message"].create({
-                    body: "not empty",
-                    model: "mail.channel",
-                    res_id: mailChannelId1,
-                });
-            }
-            const { afterEvent, openDiscuss } = await start({
-                discuss: {
-                    params: {
-                        default_active_id: `mail.channel_${mailChannelId1}`,
-                    },
-                },
-            });
-            await afterEvent({
-                eventName: "o-component-message-list-scrolled",
-                func: openDiscuss,
-                message: "should wait until channel scrolled to its last message initially",
-                predicate: ({ scrollTop, thread }) => {
-                    const messageList = document.querySelector(
-                        `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
-                    );
-                    return (
-                        thread &&
-                        thread.model === "mail.channel" &&
-                        thread.id === mailChannelId1 &&
-                        isScrolledToBottom(messageList)
-                    );
-                },
-            });
-            assert.strictEqual(
-                document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
-                25,
-                "should have 25 messages"
-            );
-            const messageList = document.querySelector(
-                `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
-            );
-            assert.ok(isScrolledToBottom(messageList), "should have scrolled to bottom of thread");
-        });
-
-        QUnit.skipRefactoring(
-            "load more messages from channel (auto-load on scroll)",
-            async function (assert) {
-                // AKU TODO: thread specific test
-                assert.expect(3);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
-                for (let i = 0; i < 40; i++) {
-                    pyEnv["mail.message"].create({
-                        body: "not empty",
-                        model: "mail.channel",
-                        res_id: mailChannelId1,
-                    });
-                }
-                const { afterEvent, openDiscuss } = await start({
-                    discuss: {
-                        params: {
-                            default_active_id: `mail.channel_${mailChannelId1}`,
-                        },
-                    },
-                });
-                await afterEvent({
-                    eventName: "o-component-message-list-scrolled",
-                    func: openDiscuss,
-                    message: "should wait until channel scrolled to its last message initially",
-                    predicate: ({ scrollTop, thread }) => {
-                        const messageList = document.querySelector(
-                            `.o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList`
-                        );
-                        return (
-                            thread &&
-                            thread.model === "mail.channel" &&
-                            thread.id === mailChannelId1 &&
-                            isScrolledToBottom(messageList)
-                        );
-                    },
-                });
-                assert.strictEqual(
-                    document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
-                    30,
-                    "should have 30 messages"
-                );
-
-                await afterEvent({
-                    eventName: "o-thread-view-hint-processed",
-                    func: () => (document.querySelector(".o_ThreadView_messageList").scrollTop = 0),
-                    message:
-                        "should wait until channel loaded more messages after scrolling to top",
-                    predicate: ({ hint, threadViewer }) => {
-                        return (
-                            hint.type === "more-messages-loaded" &&
-                            threadViewer.thread.model === "mail.channel" &&
-                            threadViewer.thread.id === mailChannelId1
-                        );
-                    },
-                });
-                assert.strictEqual(
-                    document.querySelectorAll(`
-            .o-mail-discuss-content .o-mail-thread .o_ThreadView_messageList .o_MessageListView_message
-        `).length,
-                    40,
-                    "should have 40 messages"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(`
-            .o_Dsiscuss_thread .o_ThreadView_messageList .o_MessageListView_loadMore
-        `).length,
-                    0,
-                    "should not longer have load more link (all messages loaded)"
-                );
-            }
-        );
 
         QUnit.skipRefactoring("new messages separator [REQUIRE FOCUS]", async function (assert) {
             // this test requires several messages so that the last message is not

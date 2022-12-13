@@ -34,7 +34,7 @@ QUnit.test("dragover files on thread with composer", async function (assert) {
     assert.containsOnce(target, ".o-dropzone");
 });
 
-QUnit.test("message list asc order", async function (assert) {
+QUnit.test("load more messages from channel (auto-load on scroll)", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({
         channel_type: "channel",
@@ -114,3 +114,26 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );
+
+QUnit.test("auto-scroll to bottom of thread on load", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    for (let i = 1; i <= 25; i++) {
+        pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "mail.channel",
+            res_id: mailChannelId1,
+        });
+    }
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    assert.containsN(document.body, ".o-mail-message", 25);
+    const $thread = $(target).find(".o-mail-thread");
+    assert.strictEqual($thread[0].scrollTop, $thread[0].scrollHeight - $thread[0].clientHeight);
+});

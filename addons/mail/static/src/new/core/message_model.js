@@ -191,6 +191,10 @@ export class Message {
         return toRaw(this.date ? deserializeDateTime(this.date) : this.now);
     }
 
+    get dateTimeSimpleStr() {
+        return this.dateTime.toLocaleString(DateTime.TIME_SIMPLE);
+    }
+
     get dateTimeStr() {
         return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
     }

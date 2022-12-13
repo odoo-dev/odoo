@@ -5,6 +5,10 @@ import { Thread } from "@mail/new/core/thread_model";
 import { Discuss } from "@mail/new/discuss/discuss";
 import { startServer, start } from "@mail/../tests/helpers/test_utils";
 
+import { deserializeDateTime } from "@web/core/l10n/dates";
+
+const { DateTime } = luxon;
+
 import {
     click,
     editInput,
@@ -539,3 +543,112 @@ QUnit.test("Toggle reaction from the emoji picker", async (assert) => {
     await click(".o-emoji[data-codepoints='😅']");
     assert.containsNone(target, ".o-mail-message-reaction:contains('😅')");
 });
+
+QUnit.test("basic rendering of message", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
+    const mailMessageId1 = pyEnv["mail.message"].create({
+        author_id: resPartnerId1,
+        body: "<p>body</p>",
+        date: "2019-04-20 10:00:00",
+        model: "mail.channel",
+        res_id: mailChannelId1,
+    });
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    assert.containsOnce(target, `.o-mail-message[data-message-id=${mailMessageId1}]`);
+    const $message = $(target).find(`.o-mail-message[data-message-id=${mailMessageId1}]`);
+    assert.containsOnce($message, ".o-mail-message-sidebar");
+    assert.containsOnce($message, ".o-mail-message-sidebar .o-mail-avatar-container img");
+    assert.hasAttrValue(
+        $message.find(".o-mail-message-sidebar .o-mail-avatar-container img"),
+        "data-src",
+        `/mail/channel/${mailChannelId1}/partner/${resPartnerId1}/avatar_128`
+    );
+    assert.containsOnce($message, ".o-mail-msg-header");
+    assert.containsOnce($message, ".o-mail-msg-header .o-mail-own-name:contains(Demo)");
+    assert.containsOnce($message, ".o-mail-msg-header .o-mail-message-date");
+    assert.hasAttrValue(
+        $message.find(".o-mail-msg-header .o-mail-message-date"),
+        "title",
+        deserializeDateTime("2019-04-20 10:00:00").toLocaleString(DateTime.DATETIME_SHORT)
+    );
+    assert.containsOnce($message, ".o-mail-message-actions");
+    assert.containsN($message, ".o-mail-message-actions i", 3);
+    assert.containsOnce($message, ".o-mail-message-actions i[aria-label='Add a Reaction']");
+    assert.containsOnce($message, ".o-mail-message-actions i[aria-label='Mark as Todo']");
+    assert.containsOnce($message, ".o-mail-message-actions i[aria-label='Reply']");
+    assert.containsOnce($message, ".o-mail-message-content");
+    assert.strictEqual($message.find(".o-mail-message-content").text(), "body");
+});
+
+QUnit.test("should not be able to reply to temporary/transient messages", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    // these user interactions is to forge a transient message response from channel command "/who"
+    await insertText(".o-mail-composer-textarea", "/who");
+    await click(".o-mail-composer-send-button");
+    assert.containsNone(target, ".o-mail-message .o-mail-message-actions i[aria-label='Reply']");
+});
+
+QUnit.test(
+    "message comment of same author within 1min. should be squashed",
+    async function (assert) {
+        // messages are squashed when "close", e.g. less than 1 minute has elapsed
+        // from messages of same author and same thread. Note that this should
+        // be working in non-mailboxes
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
+        const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
+            {
+                author_id: resPartnerId1,
+                body: "<p>body1</p>",
+                date: "2019-04-20 10:00:00",
+                message_type: "comment",
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            },
+            {
+                author_id: resPartnerId1,
+                body: "<p>body2</p>",
+                date: "2019-04-20 10:00:30",
+                message_type: "comment",
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            },
+        ]);
+        const { openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: `mail.channel_${mailChannelId1}`,
+                },
+            },
+        });
+        await openDiscuss();
+        assert.containsN(target, ".o-mail-message", 2);
+        assert.containsOnce(target, `.o-mail-message[data-message-id=${mailMessageId1}]`);
+        assert.containsOnce(target, `.o-mail-message[data-message-id=${mailMessageId2}]`);
+        const $message1 = $(target).find(`.o-mail-message[data-message-id=${mailMessageId1}]`);
+        const $message2 = $(target).find(`.o-mail-message[data-message-id=${mailMessageId2}]`);
+        assert.containsOnce($message1, ".o-mail-msg-header");
+        assert.containsNone($message2, ".o-mail-msg-header");
+        assert.containsNone($message1, ".o-mail-message-sidebar .o-mail-message-date");
+        assert.containsOnce($message2, ".o-mail-message-sidebar .o-mail-message-date");
+    }
+);

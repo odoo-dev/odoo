@@ -22,6 +22,9 @@
                         t-on-click="openChatAvatar" />
                     <PartnerImStatus t-if="message.author" partner="message.author" className="'position-absolute bottom-0 end-0'"/>
                 </div>
+                <small t-elif="!message.isTransient" class="o-mail-message-date text-muted opacity-0 ms-2" t-att-title="message.dateTimeStr">
+                    <t t-esc="message.dateTimeSimpleStr"/>
+                </small>
             </div>
             <div class="overflow-auto" t-att-class="{ 'flex-grow-1': state.isEditing }">
                 <div t-if="!props.squashed" class="o-mail-msg-header d-flex flex-wrap align-items-baseline">
@@ -30,7 +33,7 @@
                         <t t-esc="message.author.name"/>
                         </strong>
                     </span>
-                    <small t-if="!message.isTransient" class="text-muted opacity-50 ms-2" t-att-title="message.dateTimeStr">
+                    <small t-if="!message.isTransient" class="o-mail-message-date text-muted opacity-50 ms-2" t-att-title="message.dateTimeStr">
                         -
                         <RelativeTime datetime="message.dateTime" />
                     </small>
