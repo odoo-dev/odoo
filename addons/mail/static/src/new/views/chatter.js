@@ -54,16 +54,14 @@ export class Chatter extends Component {
         useChildSubEnv({
             inChatter: true,
         });
-        useDropzone(this.rootRef, {
-            onDrop: (ev) => {
-                if (this.thread.composer.type) {
-                    return;
-                }
-                if (isDragSourceExternalFile(ev.dataTransfer)) {
-                    [...ev.dataTransfer.files].forEach(this.attachmentUploader.uploadFile);
-                    this.state.isAttachmentBoxOpened = true;
-                }
-            },
+        useDropzone(this.rootRef, (ev) => {
+            if (this.thread.composer.type) {
+                return;
+            }
+            if (isDragSourceExternalFile(ev.dataTransfer)) {
+                [...ev.dataTransfer.files].forEach(this.attachmentUploader.uploadFile);
+                this.state.isAttachmentBoxOpened = true;
+            }
         });
 
         onWillStart(() => this.load());

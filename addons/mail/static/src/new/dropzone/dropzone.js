@@ -1,48 +1,59 @@
 /* @odoo-module */
 
-import { Component, onMounted, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 
 export class Dropzone extends Component {
     setup() {
-        // Prevents to browser to open or download the file when it is dropped
+        this.root = useRef("root");
+        this.dragCount = 0;
+        this.state = useState({
+            isDraggingFile: false,
+            isDraggingInside: false,
+            top: 0,
+            left: 0,
+            width: 0,
+            height: 0,
+        });
+        useExternalListener(document, "dragenter", this.startDrag);
+        useExternalListener(document, "dragleave", this.stopDrag);
+
+        // Prevents the browser to open or download the file when it is dropped
         // outside of the dropzone.
         useExternalListener(window, "dragover", (ev) => ev.preventDefault());
         useExternalListener(window, "drop", (ev) => ev.preventDefault());
-
-        this.root = useRef("root");
-        this.state = useState({ isDraggingInside: false });
-        this.dragCount = 0;
-
-        onMounted(() => {
-            const { top, left, width, height } = this.props.ref.el.getBoundingClientRect();
-            Object.assign(this.root.el.style, {
-                top: `${top}px`,
-                left: `${left}px`,
-                width: `${width}px`,
-                height: `${height}px`,
-            });
-        });
     }
 
-    onDragEnter(ev) {
+    startDrag(ev) {
         if (this.dragCount === 0) {
-            this.state.isDraggingInside = true;
+            const el = this.props.ref.el;
+            if (el && ev.dataTransfer && ev.dataTransfer.types.includes("Files")) {
+                const { top, left, width, height } = this.props.ref.el.getBoundingClientRect();
+                Object.assign(this.state, { top, left, width, height });
+                this.state.isDraggingFile = true;
+            }
         }
         this.dragCount++;
     }
 
-    onDragLeave(ev) {
+    stopDrag(ev) {
         this.dragCount--;
         if (this.dragCount === 0) {
-            this.state.isDraggingInside = false;
+            this.state.isDraggingFile = false;
         }
     }
 
-    onDrop(ev) {
+    onDragEnter() {
+        this.state.isDraggingInside = true;
+    }
+
+    onDragLeave() {
         this.state.isDraggingInside = false;
-        if (this.props.onDrop) {
-            this.props.onDrop(ev);
-        }
+    }
+
+    onDrop(ev) {
+        this.stopDrag();
+        this.dragCount = 0;
+        this.props.onDrop(ev);
     }
 }
 

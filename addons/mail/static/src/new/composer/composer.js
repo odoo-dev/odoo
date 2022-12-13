@@ -59,14 +59,12 @@ export class Composer extends Component {
             },
         });
         if (this.props.dropzoneRef) {
-            useDropzone(this.props.dropzoneRef, {
-                onDrop: (ev) => {
-                    if (isDragSourceExternalFile(ev.dataTransfer)) {
-                        for (const file of ev.dataTransfer.files) {
-                            this.attachmentUploader.uploadFile(file);
-                        }
+            useDropzone(this.props.dropzoneRef, (ev) => {
+                if (isDragSourceExternalFile(ev.dataTransfer)) {
+                    for (const file of ev.dataTransfer.files) {
+                        this.attachmentUploader.uploadFile(file);
                     }
-                },
+                }
             });
         }
         useChildSubEnv({
