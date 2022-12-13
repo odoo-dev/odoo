@@ -12,6 +12,13 @@ import { LinkPreviewVideo } from "./link_preview_video";
  * @extends {Component<Props, Env>}
  */
 export class LinkPreviewList extends Component {
+    static components = { LinkPreviewCard, LinkPreviewImage, LinkPreviewVideo };
+    static props = ["linkPreviews", "canBeDeleted?"];
+    static defaultProps = {
+        canBeDeleted: false,
+    };
+    static template = "mail.link_preview_list";
+
     get linkPreviewsImage() {
         return this.props.linkPreviews.filter((linkPreview) => linkPreview.isImage);
     }
@@ -24,12 +31,3 @@ export class LinkPreviewList extends Component {
         return this.props.linkPreviews.filter((linkPreview) => linkPreview.isCard);
     }
 }
-
-Object.assign(LinkPreviewList, {
-    template: "mail.link_preview_list",
-    components: { LinkPreviewCard, LinkPreviewImage, LinkPreviewVideo },
-    defaultProps: {
-        canBeDeleted: false,
-    },
-    props: ["linkPreviews", "canBeDeleted?"],
-});

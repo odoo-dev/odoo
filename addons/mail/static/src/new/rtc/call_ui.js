@@ -4,6 +4,9 @@ import { Component } from "@odoo/owl";
 import { useMessaging } from "../messaging_hook";
 
 export class CallUI extends Component {
+    static props = ["thread", "compact?"];
+    static template = "mail.call_ui";
+
     setup() {
         this.messaging = useMessaging();
     }
@@ -12,8 +15,3 @@ export class CallUI extends Component {
         this.messaging.stopCall(this.props.thread.localId);
     }
 }
-
-Object.assign(CallUI, {
-    props: ["thread", "compact?"],
-    template: "mail.call_ui",
-});

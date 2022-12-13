@@ -8,6 +8,13 @@ import { Message } from "./message";
 import { Transition } from "@web/core/transition";
 
 export class Thread extends Component {
+    static components = { Message, Transition };
+    static props = ["id", "messageHighlight?", "order?"];
+    static defaultProps = {
+        order: "asc", // 'asc' or 'desc'
+    };
+    static template = "mail.thread";
+
     setup() {
         this.messaging = useMessaging();
         if (!this.env.inChatter) {
@@ -98,12 +105,3 @@ export class Thread extends Component {
         return msg.dateTime.ts - prevMsg.dateTime.ts < 60 * 1000;
     }
 }
-
-Object.assign(Thread, {
-    components: { Message, Transition },
-    props: ["id", "messageHighlight?", "order?"],
-    defaultProps: {
-        order: "asc", // 'asc' or 'desc'
-    },
-    template: "mail.thread",
-});

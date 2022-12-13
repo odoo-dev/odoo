@@ -62,6 +62,9 @@ export async function loadEmoji() {
 }
 
 export class EmojiPicker extends Component {
+    static props = ["onSelect", "close"];
+    static template = "mail.emoji_picker";
+
     setup() {
         this.categories = null;
         this.emojis = null;
@@ -153,8 +156,3 @@ export class EmojiPicker extends Component {
         this.state.categoryId = parseInt(res.dataset.category);
     }
 }
-
-Object.assign(EmojiPicker, {
-    props: ["onSelect", "close"],
-    template: "mail.emoji_picker",
-});

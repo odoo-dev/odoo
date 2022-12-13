@@ -25,6 +25,16 @@ import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 
 export class Chatter extends Component {
+    static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
+    static props = [
+        "hasActivity",
+        "resId",
+        "resModel",
+        "displayName?",
+        "isAttachmentBoxOpenedInitially?",
+    ];
+    static template = "mail.chatter";
+
     /**
      * @type {import("@mail/new/core/thread_model").Thread}
      */
@@ -213,9 +223,3 @@ export class Chatter extends Component {
         removeFromArrayWithPredicate(this.state.attachments, ({ id }) => attachment.id === id);
     }
 }
-
-Object.assign(Chatter, {
-    components: { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader },
-    props: ["hasActivity", "resId", "resModel", "displayName?", "isAttachmentBoxOpenedInitially?"],
-    template: "mail.chatter",
-});

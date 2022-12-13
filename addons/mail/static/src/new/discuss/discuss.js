@@ -16,6 +16,19 @@ import { useService } from "@web/core/utils/hooks";
 import { ChannelInvitationForm } from "./channel_invitation_form";
 
 export class Discuss extends Component {
+    static components = {
+        AutoresizeInput,
+        Sidebar,
+        Thread,
+        ThreadIcon,
+        Composer,
+        CallUI,
+        CallSettings,
+        ChannelMemberList,
+    };
+    static props = ["*"];
+    static template = "mail.discuss";
+
     setup() {
         this.messaging = useMessaging();
         this.messageHighlight = useMessageHighlight();
@@ -110,18 +123,3 @@ export class Discuss extends Component {
         }
     }
 }
-
-Object.assign(Discuss, {
-    components: {
-        AutoresizeInput,
-        Sidebar,
-        Thread,
-        ThreadIcon,
-        Composer,
-        CallUI,
-        CallSettings,
-        ChannelMemberList,
-    },
-    props: ["*"],
-    template: "mail.discuss",
-});

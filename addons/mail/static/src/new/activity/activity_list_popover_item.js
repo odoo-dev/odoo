@@ -12,6 +12,15 @@ import { useAttachmentUploader } from "@mail/new/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 
 export class ActivityListPopoverItem extends Component {
+    static components = { ActivityMarkAsDone, FileUploader };
+    static props = [
+        "activity",
+        "onActivityChanged",
+        "onClickDoneAndScheduleNext?",
+        "onClickEditActivityButton",
+    ];
+    static template = "mail.ActivityListPopoverItem";
+
     setup() {
         this.user = useService("user");
         this.state = useState({ hasMarkDoneView: false });
@@ -78,14 +87,3 @@ export class ActivityListPopoverItem extends Component {
         this.props.onActivityChanged();
     }
 }
-
-Object.assign(ActivityListPopoverItem, {
-    components: { ActivityMarkAsDone, FileUploader },
-    props: [
-        "activity",
-        "onActivityChanged",
-        "onClickDoneAndScheduleNext?",
-        "onClickEditActivityButton",
-    ],
-    template: "mail.ActivityListPopoverItem",
-});

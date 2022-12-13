@@ -12,6 +12,10 @@ import { Dialog } from "@web/core/dialog/dialog";
  * @extends {Component<Props, Env>}
  */
 export class LinkPreviewConfirmDelete extends Component {
+    static components = { Dialog };
+    static props = ["linkPreview", "close", "LinkPreviewListComponent"];
+    static template = "mail.link_preview_confirm_delete";
+
     setup() {
         this.rpc = useService("rpc");
     }
@@ -29,9 +33,3 @@ export class LinkPreviewConfirmDelete extends Component {
         this.props.close();
     }
 }
-
-Object.assign(LinkPreviewConfirmDelete, {
-    components: { Dialog },
-    template: "mail.link_preview_confirm_delete",
-    props: ["linkPreview", "close", "LinkPreviewListComponent"],
-});

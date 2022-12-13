@@ -11,6 +11,9 @@ import { useAttachmentUploader } from "@mail/new/utils/hooks";
 
 export class Activity extends Component {
     static components = { FileUploader };
+    static props = ["data", "onUpdate?"];
+    static defaultProps = { onUpdate: () => {} };
+    static template = "mail.activity";
 
     setup() {
         this.orm = useService("orm");
@@ -69,9 +72,3 @@ export class Activity extends Component {
         return this.messaging.getChatterThread(this.props.data.res_model, this.props.data.res_id);
     }
 }
-
-Object.assign(Activity, {
-    props: ["data", "onUpdate?"],
-    defaultProps: { onUpdate: () => {} },
-    template: "mail.activity",
-});

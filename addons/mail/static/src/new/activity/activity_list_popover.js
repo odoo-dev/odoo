@@ -7,6 +7,17 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, onWillUpdateProps, useState } from "@odoo/owl";
 
 export class ActivityListPopover extends Component {
+    static components = { ActivityListPopoverItem };
+    static props = [
+        "activityIds",
+        "close",
+        "defaultActivityTypeId?",
+        "onActivityChanged",
+        "resId",
+        "resModel",
+    ];
+    static template = "mail.ActivityListPopover";
+
     setup() {
         this.orm = useService("orm");
         this.user = useService("user");
@@ -52,16 +63,3 @@ export class ActivityListPopover extends Component {
         });
     }
 }
-
-Object.assign(ActivityListPopover, {
-    components: { ActivityListPopoverItem },
-    props: [
-        "activityIds",
-        "close",
-        "defaultActivityTypeId?",
-        "onActivityChanged",
-        "resId",
-        "resModel",
-    ],
-    template: "mail.ActivityListPopover",
-});

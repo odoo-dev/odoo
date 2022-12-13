@@ -25,6 +25,23 @@ import { browser } from "@web/core/browser/browser";
 import { useSuggestion } from "./composer_hook";
 
 export class Composer extends Component {
+    static components = { NavigableList, AttachmentList, FileUploader, Typing };
+    static defaultProps = {
+        mode: "normal",
+        onDiscardCallback: () => {},
+    }; // mode = compact, normal, extended
+    static props = [
+        "composer",
+        "autofocus?",
+        "highlightReplyTo?",
+        "onDiscardCallback?",
+        "onPostCallback?",
+        "mode?",
+        "placeholder?",
+        "dropzoneRef?",
+    ];
+    static template = "mail.composer";
+
     setup() {
         this.attachmentUploader = useAttachmentUploader({
             threadLocalId: this.props.composer.thread?.localId,
@@ -359,22 +376,3 @@ export class Composer extends Component {
         this.state.autofocus++;
     }
 }
-
-Object.assign(Composer, {
-    components: { NavigableList, AttachmentList, FileUploader, Typing },
-    defaultProps: {
-        mode: "normal",
-        onDiscardCallback: () => {},
-    }, // mode = compact, normal, extended
-    props: [
-        "composer",
-        "autofocus?",
-        "highlightReplyTo?",
-        "onDiscardCallback?",
-        "onPostCallback?",
-        "mode?",
-        "placeholder?",
-        "dropzoneRef?",
-    ],
-    template: "mail.composer",
-});

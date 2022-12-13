@@ -5,6 +5,10 @@ import { Component } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 
 export class MessageDeleteDialog extends Component {
+    static components = { Dialog };
+    static props = ["close", "message", "messageComponent"];
+    static template = "mail.message.delete";
+
     setup() {
         this.messaging = useMessaging();
         this.title = this.env._t("Confirmation");
@@ -15,9 +19,3 @@ export class MessageDeleteDialog extends Component {
         this.props.close();
     }
 }
-
-Object.assign(MessageDeleteDialog, {
-    components: { Dialog },
-    props: ["close", "message", "messageComponent"],
-    template: "mail.message.delete",
-});

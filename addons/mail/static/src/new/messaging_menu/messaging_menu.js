@@ -7,6 +7,10 @@ import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { RelativeTime } from "../thread/relative_time";
 
 export class MessagingMenu extends Component {
+    static components = { Dropdown, RelativeTime, PartnerImStatus };
+    static props = [];
+    static template = "mail.messaging_menu";
+
     setup() {
         this.messaging = useMessaging();
         this.state = useState({
@@ -42,9 +46,3 @@ export class MessagingMenu extends Component {
         document.body.click();
     }
 }
-
-Object.assign(MessagingMenu, {
-    components: { Dropdown, RelativeTime, PartnerImStatus },
-    props: [],
-    template: "mail.messaging_menu",
-});

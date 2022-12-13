@@ -5,6 +5,10 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMenu extends Component {
+    static components = { Dropdown };
+    static props = [];
+    static template = "mail.activity_menu";
+
     setup() {
         this.activity = useState(useService("mail.activity").state);
         this.action = useService("action");
@@ -46,9 +50,3 @@ export class ActivityMenu extends Component {
         );
     }
 }
-
-Object.assign(ActivityMenu, {
-    components: { Dropdown },
-    props: [],
-    template: "mail.activity_menu",
-});

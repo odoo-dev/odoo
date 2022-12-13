@@ -5,6 +5,12 @@ import { Component, onMounted, useExternalListener, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMarkAsDone extends Component {
+    static template = "mail.activity_mark_as_done";
+    static props = ["activity", "close?", "onClickDoneAndScheduleNext?", "reload?"];
+    static defaultProps = {
+        hasHeader: false,
+    };
+
     get isSuggested() {
         return this.props.activity.chaining_type === "suggest";
     }
@@ -53,11 +59,3 @@ export class ActivityMarkAsDone extends Component {
         }
     }
 }
-
-Object.assign(ActivityMarkAsDone, {
-    template: "mail.activity_mark_as_done",
-    props: ["activity", "close?", "onClickDoneAndScheduleNext?", "reload?"],
-    defaultProps: {
-        hasHeader: false,
-    },
-});

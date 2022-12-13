@@ -4,6 +4,20 @@ import { onExternalClick } from "@mail/new/utils/hooks";
 import { Component, useRef, useState, onWillUpdateProps, useEffect } from "@odoo/owl";
 
 export class AutoresizeInput extends Component {
+    static template = "mail.autoresize_input";
+    static props = {
+        className: { type: String, optional: true },
+        disabled: { type: Boolean, optional: true },
+        onValidate: { type: Function, optional: true },
+        placeholder: { type: String, optional: true },
+        value: { type: String },
+    };
+    static defaultProps = {
+        className: "",
+        onValidate: () => {},
+        placeholder: "",
+    };
+
     setup() {
         this.state = useState({
             value: this.props.value,
@@ -64,19 +78,3 @@ export class AutoresizeInput extends Component {
         this.state.value = this.props.value;
     }
 }
-
-Object.assign(AutoresizeInput, {
-    template: "mail.autoresize_input",
-    props: {
-        className: { type: String, optional: true },
-        disabled: { type: Boolean, optional: true },
-        onValidate: { type: Function, optional: true },
-        placeholder: { type: String, optional: true },
-        value: { type: String },
-    },
-    defaultProps: {
-        className: "",
-        onValidate: () => {},
-        placeholder: "",
-    },
-});

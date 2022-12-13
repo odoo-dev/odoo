@@ -11,6 +11,9 @@ import { LinkPreviewConfirmDelete } from "./link_preview_confirm_delete";
  * @extends {Component<Props, Env>}
  */
 export class LinkPreviewAside extends Component {
+    static props = ["linkPreview", "className?"];
+    static template = "mail.link_preview_aside";
+
     setup() {
         this.dialogService = useService("dialog");
     }
@@ -22,8 +25,3 @@ export class LinkPreviewAside extends Component {
         });
     }
 }
-
-Object.assign(LinkPreviewAside, {
-    template: "mail.link_preview_aside",
-    props: ["linkPreview", "className?"],
-});

@@ -7,6 +7,9 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { Component, useRef } from "@odoo/owl";
 
 export class ActivityButton extends Component {
+    static props = ["record"];
+    static template = "mail.ActivityButton";
+
     setup() {
         this.popover = usePopover();
         this.buttonRef = useRef("button");
@@ -73,8 +76,3 @@ export class ActivityButton extends Component {
         }
     }
 }
-
-Object.assign(ActivityButton, {
-    props: ["record"],
-    template: "mail.ActivityButton",
-});

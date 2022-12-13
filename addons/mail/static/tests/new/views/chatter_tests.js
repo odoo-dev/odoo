@@ -21,15 +21,13 @@ const { createFile } = file;
 let target;
 
 class ChatterParent extends Component {
+    static components = { Chatter };
+    static template = xml`<Chatter resId="state.resId" resModel="props.resModel" displayName="props.displayName" hasActivity="true"/>`;
+
     setup() {
         this.state = useState({ resId: this.props.resId });
     }
 }
-
-Object.assign(ChatterParent, {
-    components: { Chatter },
-    template: xml`<Chatter resId="state.resId" resModel="props.resModel" displayName="props.displayName" hasActivity="true"/>`,
-});
 
 QUnit.module("chatter", {
     async beforeEach() {

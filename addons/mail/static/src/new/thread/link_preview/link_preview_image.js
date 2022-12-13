@@ -9,10 +9,8 @@ import { LinkPreviewAside } from "./link_preview_aside";
  * @property {boolean} canBeDeleted
  * @extends {Component<Props, Env>}
  */
-export class LinkPreviewImage extends Component {}
-
-Object.assign(LinkPreviewImage, {
-    template: "mail.link_preview_image",
-    components: { LinkPreviewAside },
-    props: ["linkPreview", "canBeDeleted"],
-});
+export class LinkPreviewImage extends Component {
+    static components = { LinkPreviewAside };
+    static props = ["linkPreview", "canBeDeleted"];
+    static template = "mail.link_preview_image";
+}

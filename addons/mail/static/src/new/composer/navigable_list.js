@@ -15,6 +15,27 @@ import {
 } from "@odoo/owl";
 
 export class NavigableList extends Component {
+    static components = { PartnerImStatus };
+    static template = "mail.navigable_list";
+    static props = {
+        anchorRef: {},
+        position: { type: String, optional: true },
+        onSelect: { type: Function },
+        sources: {
+            type: Array,
+            element: {
+                type: Object,
+                shape: {
+                    placeholder: { type: String, optional: true },
+                    optionTemplate: { type: String, optional: true },
+                    options: [Array, Function],
+                },
+            },
+        },
+        class: { type: String, optional: true },
+    };
+    static defaultProps = { position: "bottom" };
+
     setup() {
         this.nextOptionId = 0;
         this.nextSourceId = 0;
@@ -253,28 +274,3 @@ export class NavigableList extends Component {
         this.selectOption(ev, indices);
     }
 }
-
-Object.assign(NavigableList, {
-    components: { PartnerImStatus },
-    template: "mail.navigable_list",
-    props: {
-        anchorRef: {},
-        position: { type: String, optional: true },
-        onSelect: { type: Function },
-        sources: {
-            type: Array,
-            element: {
-                type: Object,
-                shape: {
-                    placeholder: { type: String, optional: true },
-                    optionTemplate: { type: String, optional: true },
-                    options: [Array, Function],
-                },
-            },
-        },
-        class: { type: String, optional: true },
-    },
-    defaultProps: {
-        position: "bottom",
-    },
-});

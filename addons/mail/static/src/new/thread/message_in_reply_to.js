@@ -7,6 +7,9 @@ import { useService } from "@web/core/utils/hooks";
 import { useMessaging } from "@mail/new/messaging_hook";
 
 export class MessageInReplyTo extends Component {
+    static props = ["message", "alignedRight", "onClick"];
+    static template = "mail.message_in_reply_to";
+
     setup() {
         this.messaging = useMessaging();
         this.user = useService("user");
@@ -29,8 +32,3 @@ export class MessageInReplyTo extends Component {
         return "/mail/static/src/img/smiley/avatar.jpg";
     }
 }
-
-Object.assign(MessageInReplyTo, {
-    props: ["message", "alignedRight", "onClick"],
-    template: "mail.message_in_reply_to",
-});

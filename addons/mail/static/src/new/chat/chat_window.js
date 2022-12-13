@@ -13,6 +13,18 @@ import { ChatWindowIcon } from "./chat_window_icon";
 import { ChannelInvitationForm } from "../discuss/channel_invitation_form";
 
 export class ChatWindow extends Component {
+    static components = {
+        Thread,
+        Composer,
+        CallUI,
+        CallSettings,
+        ChannelMemberList,
+        ChatWindowIcon,
+        ChannelInvitationForm,
+    };
+    static props = ["chatWindow", "right?"];
+    static template = "mail.chat_window";
+
     setup() {
         this.messaging = useMessaging();
         this.messageHighlight = useMessageHighlight();
@@ -66,17 +78,3 @@ export class ChatWindow extends Component {
         this.messaging.startCall(this.props.chatWindow.threadLocalId);
     }
 }
-
-Object.assign(ChatWindow, {
-    components: {
-        Thread,
-        Composer,
-        CallUI,
-        CallSettings,
-        ChannelMemberList,
-        ChatWindowIcon,
-        ChannelInvitationForm,
-    },
-    props: ["chatWindow", "right?"],
-    template: "mail.chat_window",
-});

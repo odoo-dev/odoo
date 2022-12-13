@@ -9,6 +9,10 @@ import { _t } from "@web/core/l10n/translation";
 import { Thread } from "../core/thread_model";
 
 export class ChannelInvitationForm extends Component {
+    static components = { PartnerImStatus };
+    static props = ["threadId", "close?", "chatState?"];
+    static template = "mail.channel_invitation_form";
+
     setup() {
         this.messaging = useMessaging();
         this.inputRef = useRef("input");
@@ -94,9 +98,3 @@ export class ChannelInvitationForm extends Component {
         ];
     }
 }
-
-Object.assign(ChannelInvitationForm, {
-    components: { PartnerImStatus },
-    props: ["threadId", "close?", "chatState?"],
-    template: "mail.channel_invitation_form",
-});

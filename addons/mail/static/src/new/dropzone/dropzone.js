@@ -3,6 +3,9 @@
 import { Component, useExternalListener, useRef, useState } from "@odoo/owl";
 
 export class Dropzone extends Component {
+    static props = { ref: Object, onDrop: { type: Function, optional: true } };
+    static template = "mail.dropzone";
+
     setup() {
         this.root = useRef("root");
         this.dragCount = 0;
@@ -56,8 +59,3 @@ export class Dropzone extends Component {
         this.props.onDrop(ev);
     }
 }
-
-Object.assign(Dropzone, {
-    template: "mail.dropzone",
-    props: { ref: Object, onDrop: { type: Function, optional: true } },
-});

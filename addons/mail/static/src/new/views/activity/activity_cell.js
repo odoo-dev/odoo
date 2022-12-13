@@ -8,6 +8,19 @@ import { useWowlService } from "@web/legacy/utils";
 import { Component, useRef, useSubEnv } from "@odoo/owl";
 
 export class ActivityCell extends Component {
+    static props = {
+        activityIds: {
+            type: Array,
+            elements: Number,
+        },
+        activityTypeId: Number,
+        closestDeadline: String,
+        reloadFunc: Function,
+        resId: Number,
+        resModel: String,
+    };
+    static template = "mail.ActivityCell";
+
     setup() {
         const messaging = useWowlService("mail.messaging");
         /**
@@ -58,18 +71,3 @@ export class ActivityCell extends Component {
         }
     }
 }
-
-Object.assign(ActivityCell, {
-    props: {
-        activityIds: {
-            type: Array,
-            elements: Number,
-        },
-        activityTypeId: Number,
-        closestDeadline: String,
-        reloadFunc: Function,
-        resId: Number,
-        resModel: String,
-    },
-    template: "mail.ActivityCell",
-});

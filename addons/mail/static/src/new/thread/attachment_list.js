@@ -7,6 +7,9 @@ import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 
 export class AttachmentList extends Component {
+    static props = ["attachments", "unlinkAttachment", "imagesHeight"];
+    static template = "mail.attachment_list";
+
     setup() {
         // Arbitrary high value, this is effectively a max-width.
         this.imagesWidth = 1920;
@@ -89,8 +92,3 @@ export class AttachmentList extends Component {
         return this.env.inChatWindow && !this.env.alignedRight;
     }
 }
-
-Object.assign(AttachmentList, {
-    props: ["attachments", "unlinkAttachment", "imagesHeight"],
-    template: "mail.attachment_list",
-});
