@@ -12,6 +12,7 @@ import { ChannelMemberList } from "./channel_member_list";
 import { Component, onWillStart, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { CallSettings } from "../rtc/call_settings";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { useService } from "@web/core/utils/hooks";
 import { ChannelInvitationForm } from "./channel_invitation_form";
 
 export class Discuss extends Component {
@@ -31,9 +32,14 @@ export class Discuss extends Component {
              */
             activeMode: "",
         });
+        this.orm = useService("orm");
         onWillStart(() => this.messaging.isReady);
         onMounted(() => (this.messaging.state.discuss.isActive = true));
         onWillUnmount(() => (this.messaging.state.discuss.isActive = false));
+    }
+
+    markAllAsRead() {
+        this.orm.silent.call("mail.message", "mark_all_as_read");
     }
 
     get thread() {

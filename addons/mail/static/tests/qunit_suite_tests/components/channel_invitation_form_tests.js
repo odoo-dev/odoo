@@ -32,7 +32,7 @@ QUnit.module("mail", {}, function () {
                     },
                 });
                 await openDiscuss();
-                await click(`.o_ThreadViewTopbar_inviteButton`);
+                await click(`.o-mail-discuss-actions button[data-action="add-users"]`);
                 assert.containsOnce(
                     document.body,
                     ".o_ChannelInvitationForm",
@@ -72,7 +72,7 @@ QUnit.module("mail", {}, function () {
                     },
                 });
                 await openDiscuss();
-                await click(`.o_ThreadViewTopbar_inviteButton`);
+                await click(`.o-mail-discuss-actions button[data-action="add-users"]`);
                 await insertText(".o_ChannelInvitationForm_searchInput", "TestPartner2");
                 assert.strictEqual(
                     document.querySelector(`.o_ChannelInvitationFormSelectablePartnerView_name`)
@@ -115,12 +115,12 @@ QUnit.module("mail", {}, function () {
                 });
                 await openDiscuss();
 
-                await click(`.o_ThreadViewTopbar_inviteButton`);
+                await click(`.o-mail-discuss-actions button[data-action="add-users"]`);
                 await insertText(".o_ChannelInvitationForm_searchInput", "TestPartner2");
                 await click(`.o_ChannelInvitationFormSelectablePartnerView_checkbox`);
                 await click(`.o_ChannelInvitationForm_inviteButton`);
                 assert.strictEqual(
-                    document.querySelector(`.o_ThreadViewTopbar_threadName`).textContent,
+                    document.querySelector(".o-mail-discuss-thread-name").value,
                     "Mitchell Admin, TestPartner, TestPartner2",
                     "should have created a new group chat with the existing chat members and the selected user"
                 );
@@ -155,7 +155,7 @@ QUnit.module("mail", {}, function () {
                 });
                 await openDiscuss();
 
-                await click(`.o_ThreadViewTopbar_inviteButton`);
+                await click(`.o-mail-discuss-actions button[data-action="add-users"]`);
                 assert.containsOnce(
                     document.body,
                     ".o_ChannelInvitationForm_accessRestrictedToGroup",

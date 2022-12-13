@@ -42,7 +42,7 @@
             </div>
         </t>
         <t t-else="">
-            <div class="d-flex flex-column align-items-center justify-content-center p-4 text-muted fst-italic h-100">
+            <div class="d-flex flex-column align-items-center justify-content-center p-4 text-muted fst-italic h-100" data-empty-thread="">
                 <t t-if="thread.status !== 'loading'">
                     <t t-if="thread.isEmpty and thread.type === 'mailbox'">
                         <t t-call="mail.empty.mailbox"/>

@@ -25,7 +25,7 @@ QUnit.module("mail", {}, function () {
             await openDiscuss();
 
             assert.containsOnce(
-                document.body.querySelector(".o_DiscussSidebarCategoryItem"),
+                document.body.querySelector(".o-mail-category-item"),
                 ".o_ThreadIconView",
                 "should have thread icon in the sidebar"
             );

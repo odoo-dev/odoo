@@ -434,3 +434,56 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-message-subject");
     }
 );
+
+QUnit.test("inbox: mark all messages as read", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({});
+    const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
+        {
+            body: "not empty",
+            model: "mail.channel",
+            needaction: true,
+            res_id: mailChannelId1,
+        },
+        {
+            body: "not empty",
+            model: "mail.channel",
+            needaction: true,
+            res_id: mailChannelId1,
+        },
+    ]);
+    pyEnv["mail.notification"].create([
+        {
+            mail_message_id: mailMessageId1,
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        },
+        {
+            mail_message_id: mailMessageId2,
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        },
+    ]);
+    const { click, openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, 'button[data-mailbox="inbox"] .badge:contains(2)');
+    assert.containsOnce(
+        target,
+        `.o-mail-category-item[data-channel-id="${mailChannelId1}"] .badge:contains(2)`
+    );
+    assert.containsN(target, ".o-mail-discuss-content .o-mail-message", 2);
+    assert.notOk(
+        $(target).find('.o-mail-discuss-actions button[data-action="mark-all-read"]')[0].disabled
+    );
+
+    await click('.o-mail-discuss-actions button[data-action="mark-all-read"]');
+    assert.containsNone(target, 'button[data-mailbox="inbox"] .badge');
+    assert.containsNone(
+        target,
+        `.o-mail-category-item[data-channel-id="${mailChannelId1}"] .badge`
+    );
+    assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
+    assert.ok(
+        $(target).find('.o-mail-discuss-actions button[data-action="mark-all-read"]')[0].disabled
+    );
+});

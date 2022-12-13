@@ -106,6 +106,7 @@
             'o-active bg-200': threadLocalId === messaging.state.discuss.threadLocalId,
             'o-unread': thread.isUnread,
         }"
+        t-att-data-channel-id="thread.id"
         t-on-click="(ev) => this.openThread(ev, thread.localId)"
     >
         <div class="o-mail-background-inherit position-relative d-flex ms-4 flex-shrink-0" style="width:30px;height:30px">

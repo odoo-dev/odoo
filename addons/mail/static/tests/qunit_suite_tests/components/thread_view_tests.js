@@ -1081,7 +1081,7 @@ QUnit.module("mail", (hooks) => {
                 });
                 assert.containsOnce(
                     document.body,
-                    ".o_MessageListView_empty",
+                    '[data-empty-thread=""]',
                     "message list empty placeholder should be shown as thread does not contain any messages"
                 );
                 assert.containsNone(
@@ -1122,7 +1122,7 @@ QUnit.module("mail", (hooks) => {
                 });
                 assert.containsOnce(
                     document.body,
-                    ".o_MessageListView_empty",
+                    '[data-empty-thread=""]',
                     "message list empty placeholder should be shown as thread contain only empty messages"
                 );
                 assert.containsNone(

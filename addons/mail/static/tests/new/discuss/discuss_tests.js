@@ -856,3 +856,31 @@ QUnit.test("default active id on mailbox", async function (assert) {
     await openDiscuss();
     assert.hasClass($(target).find(".o-starred-box"), "o-active");
 });
+
+QUnit.test("basic top bar rendering", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "General" });
+    const { click, openDiscuss } = await start();
+    await openDiscuss();
+    assert.strictEqual($(target).find(".o-mail-discuss-thread-name")[0].value, "Inbox");
+    const $markAllReadButton = $(target).find(
+        '.o-mail-discuss-actions button[data-action="mark-all-read"]'
+    );
+    assert.isVisible($markAllReadButton);
+    assert.ok($markAllReadButton[0].disabled);
+
+    await click('button[data-mailbox="starred"]');
+    assert.strictEqual($(target).find(".o-mail-discuss-thread-name")[0].value, "Starred");
+    const $unstarAllButton = $(target).find(
+        '.o-mail-discuss-actions button[data-action="unstar-all"]'
+    );
+    assert.isVisible($unstarAllButton);
+    assert.ok($unstarAllButton[0].disabled);
+
+    await click(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
+    assert.strictEqual($(target).find(".o-mail-discuss-thread-name")[0].value, "General");
+    assert.isVisible(
+        $(target).find('.o-mail-discuss-actions button[data-action="add-users"]'),
+        "should have button 'Invite' in the top bar of channel"
+    );
+});

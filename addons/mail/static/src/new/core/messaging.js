@@ -71,6 +71,7 @@ export class Messaging {
             /** @type {Object.<number, Partner>} */
             partners: {},
             partnerRoot: {},
+            /** @type {Object.<number, import("@mail/new/core/message_model").Message>} */
             messages: {},
             /** @type {{[key: string|number]: Thread}} */
             threads: {},
@@ -109,8 +110,11 @@ export class Messaging {
                     threads: [], // list of ids
                 },
                 // mailboxes in sidebar
+                /** @type {Thread} */
                 inbox: null,
+                /** @type {Thread} */
                 starred: null,
+                /** @type {Thread} */
                 history: null,
             },
             chatWindows: [],
@@ -156,6 +160,7 @@ export class Messaging {
             const settings = data.current_user_settings;
             this.state.discuss.channels.isOpen = settings.is_discuss_sidebar_category_channel_open;
             this.state.discuss.chats.isOpen = settings.is_discuss_sidebar_category_chat_open;
+            this.state.discuss.inbox.counter = data.needaction_inbox_counter;
             this.state.internalUserGroupId = data.internalUserGroupId;
             this.state.discuss.starred.counter = data.starred_counter;
             this.isReady.resolve();
@@ -345,6 +350,45 @@ export class Messaging {
                 case "mail.message/inbox": {
                     const data = Object.assign(notif.payload, { body: markup(notif.payload.body) });
                     Message.insert(this.state, data);
+                    break;
+                }
+                case "mail.message/mark_as_read": {
+                    for (const message_id of notif.payload.message_ids) {
+                        // We need to ignore all not yet known messages because we don't want them
+                        // to be shown partially as they would be linked directly to cache.
+                        // Furthermore, server should not send back all message_ids marked as read
+                        // but something like last read message_id or something like that.
+                        // (just imagine you mark 1000 messages as read ... )
+                        const message = this.state.messages[message_id];
+                        if (!message) {
+                            continue;
+                        }
+                        // update thread counter (before removing message from Inbox, to ensure isNeedaction check is correct)
+                        const originThread = message.originThread;
+                        if (originThread && message.isNeedaction) {
+                            originThread.message_needaction_counter--;
+                        }
+                        // move messages from Inbox to history
+                        const partnerIndex = message.needaction_partner_ids.find(
+                            (p) => p === this.state.user.partnerId
+                        );
+                        if (partnerIndex !== -1) {
+                            message.needaction_partner_ids.splice(partnerIndex, 1);
+                        }
+                        const messageIndex = this.state.discuss.inbox.messages.find(
+                            (m) => m.id === message.id
+                        );
+                        if (messageIndex !== -1) {
+                            this.state.discuss.inbox.messages.splice(messageIndex, 1);
+                        }
+                        // TODO move message to history mailbox
+                    }
+                    this.state.discuss.inbox.counter = notif.payload.needaction_inbox_counter;
+                    if (
+                        this.state.discuss.inbox.counter > this.state.discuss.inbox.messages.length
+                    ) {
+                        this.fetchThreadMessages(this.state.discuss.inbox);
+                    }
                     break;
                 }
                 case "mail.message/toggle_star": {

@@ -43,7 +43,7 @@ QUnit.skipRefactoring('livechat in the sidebar: basic rendering', async function
         "should have a channel group named 'Livechat'"
     );
     const livechat = groupLivechat.querySelector(`
-        .o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]
+        .o-mail-category-item[data-channel-id="${mailChannelId1}"]
     `);
     assert.ok(
         livechat,
@@ -84,7 +84,7 @@ QUnit.skipRefactoring('livechat in the sidebar: existing user with country', asy
         '.o_DiscussSidebarView_categoryLivechat',
         "should have a channel group livechat in the side bar"
     );
-    const livechat = document.querySelector('.o_DiscussSidebarView_categoryLivechat .o_DiscussSidebarCategoryItem');
+    const livechat = document.querySelector('.o_DiscussSidebarView_categoryLivechat .o-mail-category-item');
     assert.ok(
         livechat,
         "should have a livechat in sidebar"
@@ -233,11 +233,11 @@ QUnit.skipRefactoring('add livechat in the sidebar on visitor sending first mess
     );
     assert.containsOnce(
         document.body,
-        '.o_DiscussSidebarView_categoryLivechat .o_DiscussSidebarCategoryItem',
+        '.o_DiscussSidebarView_categoryLivechat .o-mail-category-item',
         "should have a livechat in the sidebar after receiving first message"
     );
     assert.strictEqual(
-        document.querySelector('.o_DiscussSidebarView_categoryLivechat .o_DiscussSidebarCategoryItem .o_DiscussSidebarCategoryItem_name').textContent,
+        document.querySelector('.o_DiscussSidebarView_categoryLivechat .o-mail-category-item .o_DiscussSidebarCategoryItem_name').textContent,
         "Visitor (Belgium)",
         "should have visitor name and country as livechat name"
     );
@@ -340,7 +340,7 @@ QUnit.skipRefactoring('invite button should be present on livechat', async funct
     await openDiscuss();
     assert.containsOnce(
         document.body,
-        '.o_ThreadViewTopbar_inviteButton',
+        '.o-mail-discuss-actions button[data-action="add-users"]',
         "Invite button should be visible in top bar when livechat is active thread"
     );
 });

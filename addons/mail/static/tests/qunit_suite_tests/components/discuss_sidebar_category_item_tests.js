@@ -20,7 +20,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
 
                 const channelItem = document.querySelector(`
-        .o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]
+        .o-mail-category-item[data-channel-id="${mailChannelId1}"]
     `);
                 assert.strictEqual(
                     channelItem.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_image`)
@@ -51,7 +51,7 @@ QUnit.module("mail", {}, function () {
 
                 assert.strictEqual(
                     document.querySelector(`
-        .o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]
+        .o-mail-category-item[data-channel-id="${mailChannelId1}"]
         .o_DiscussSidebarCategoryItem_image`).dataset.src,
                     `/web/image/mail.channel/${mailChannelId1}/avatar_128?unique=101010`
                 );
@@ -68,7 +68,7 @@ QUnit.module("mail", {}, function () {
 
                 assert.strictEqual(
                     document.querySelector(`
-        .o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]
+        .o-mail-category-item[data-channel-id="${mailChannelId1}"]
         .o_DiscussSidebarCategoryItem_image`).dataset.src,
                     `/web/image/mail.channel/${mailChannelId1}/avatar_128?unique=${newCacheKey}`
                 );
@@ -94,7 +94,7 @@ QUnit.module("mail", {}, function () {
             await openDiscuss();
 
             const chatItem = document.querySelector(`
-        .o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]
+        .o-mail-category-item[data-channel-id="${mailChannelId1}"]
     `);
             assert.strictEqual(
                 chatItem.querySelectorAll(`:scope .o_DiscussSidebarCategoryItem_image`).length,

@@ -22,7 +22,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    `.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`,
+                    `.o-mail-category-item[data-channel-id="${mailChannelId1}"]`,
                     "should have the only channel of which user is member in discuss sidebar"
                 );
             }
@@ -38,7 +38,7 @@ QUnit.module("mail", {}, function () {
                 const { click, openDiscuss } = await start();
                 await openDiscuss();
 
-                await click(`.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`);
+                await click(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
                 assert.containsOnce(
                     document.body,
                     `.o-mail-discuss-content .o-mail-thread[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]`,
@@ -80,7 +80,7 @@ QUnit.module("mail", {}, function () {
                 });
                 await openDiscuss();
 
-                await click(`.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`);
+                await click(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
                 assert.verifySteps([], "action_unfollow is not called yet");
 
                 await click(".o_DiscussSidebarCategoryItem_commandLeave");
@@ -90,7 +90,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsNone(
                     document.body,
-                    `.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`,
+                    `.o-mail-category-item[data-channel-id="${mailChannelId1}"]`,
                     "The channel must have been removed from discuss sidebar"
                 );
                 assert.containsOnce(
@@ -116,11 +116,11 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsOnce(
                 document.body,
-                `.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`,
+                `.o-mail-category-item[data-channel-id="${mailChannelId1}"]`,
                 "1 channel is present in discuss sidebar and it is 'general'"
             );
 
-            await click(`.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`);
+            await click(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
             assert.containsOnce(
                 document.body,
                 `.o-mail-discuss-content .o-mail-thread[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]`,
@@ -141,7 +141,7 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsNone(
                 document.body,
-                `.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`,
+                `.o-mail-category-item[data-channel-id="${mailChannelId1}"]`,
                 "The channel must have been removed from discuss sidebar"
             );
         });
@@ -175,7 +175,7 @@ QUnit.module("mail", {}, function () {
 
                 assert.containsOnce(
                     document.body,
-                    `.o_DiscussSidebarCategoryItem[data-channel-id="${mailChannelId1}"]`,
+                    `.o-mail-category-item[data-channel-id="${mailChannelId1}"]`,
                     "The channel #General is in discuss sidebar"
                 );
                 assert.containsNone(

@@ -141,10 +141,7 @@ export class Message {
                 thread.sortMessages();
             }
         }
-        if (
-            this.needaction_partner_ids.includes(this._state.user.partnerId) &&
-            !this._state.discuss.inbox.messages.includes(this.id)
-        ) {
+        if (this.isNeedaction && !this._state.discuss.inbox.messages.includes(this.id)) {
             this._state.discuss.inbox.counter++;
             this.originThread.message_needaction_counter++;
             this._state.discuss.inbox.messages.push(this.id);
@@ -197,6 +194,13 @@ export class Message {
 
     get dateTimeStr() {
         return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    get isNeedaction() {
+        return this.needaction_partner_ids.includes(this._state.user.partnerId);
     }
 
     get isSubjectSimilarToOriginThreadName() {

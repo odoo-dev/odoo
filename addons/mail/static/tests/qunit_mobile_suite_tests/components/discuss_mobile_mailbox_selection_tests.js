@@ -16,11 +16,11 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss();
                 assert.containsOnce(
                     document.body,
-                    ".o_DiscussView",
+                    ".o-mail-discuss-content",
                     "should display discuss initially"
                 );
                 assert.hasClass(
-                    document.querySelector(".o_DiscussView"),
+                    document.querySelector(".o-mail-discuss-content"),
                     "o-isDeviceSmall",
                     "discuss should be opened in mobile mode"
                 );
