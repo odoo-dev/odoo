@@ -800,3 +800,52 @@ QUnit.test("sidebar: channel rendering with needaction counter", async function 
     assert.containsOnce(target, ".o-mail-category-item:contains(general)");
     assert.containsOnce(target, ".o-mail-category-item:contains(general) .badge:contains(1)");
 });
+
+QUnit.test("sidebar: chat rendering with unread counter", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [
+                0,
+                0,
+                {
+                    message_unread_counter: 100,
+                    partner_id: pyEnv.currentPartnerId,
+                },
+            ],
+        ],
+        channel_type: "chat",
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-category-item .badge:contains(100)");
+    assert.containsNone(
+        target,
+        ".o-mail-category-item .o-mail-commands:contains(Unpin Conversation)"
+    );
+});
+
+QUnit.test("initially load messages from inbox", async function (assert) {
+    const { openDiscuss } = await start({
+        async mockRPC(route, args) {
+            if (route === "/mail/inbox/messages") {
+                assert.step("/mail/channel/messages");
+                assert.strictEqual(args.limit, 30, "should fetch up to 30 messages");
+            }
+        },
+    });
+    await openDiscuss();
+    assert.verifySteps(["/mail/channel/messages"]);
+});
+
+QUnit.test("default active id on mailbox", async function (assert) {
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: "starred",
+            },
+        },
+    });
+    await openDiscuss();
+    assert.hasClass($(target).find(".o-starred-box"), "o-active");
+});

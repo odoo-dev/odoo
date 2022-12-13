@@ -31,6 +31,7 @@ export class Thread {
     loadMore = false;
     memberCount = 0;
     message_needaction_counter = 0;
+    message_unread_counter = 0;
     /** @type {import("@mail/new/core/message_model").Message[]} */
     messages = [];
     /** @type {integer} */
@@ -96,6 +97,9 @@ export class Thread {
             }
             if ("message_needaction_counter" in serverData) {
                 this.message_needaction_counter = serverData.message_needaction_counter;
+            }
+            if ("message_unread_counter" in serverData) {
+                this.message_unread_counter = serverData.message_unread_counter;
             }
             if ("seen_message_id" in serverData) {
                 this.serverLastSeenMsgByCurrentUser = serverData.seen_message_id;
