@@ -75,7 +75,7 @@ QUnit.module("mail", {}, function () {
                 "should not have activity Cancel button"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_markDoneButton").length,
+                document.querySelectorAll(".btn:contains('Mark Done')").length,
                 0,
                 "should not have activity Mark as Done button"
             );
@@ -777,21 +777,21 @@ QUnit.module("mail", {}, function () {
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_markDoneButton").length,
+                document.querySelectorAll(".btn:contains('Mark Done')").length,
                 1,
                 "should have activity Mark as Done button"
             );
 
-            await click(".o_ActivityView_markDoneButton");
+            await click(".btn:contains('Mark Done')");
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityMarkDonePopoverContentView").length,
+                document.querySelectorAll(".o-mail-activity-mark-as-done").length,
                 1,
                 "should have opened the mark done popover"
             );
 
-            await click(".o_ActivityView_markDoneButton");
+            await click(".btn:contains('Mark Done')");
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityMarkDonePopoverContentView").length,
+                document.querySelectorAll(".o-mail-activity-mark-as-done").length,
                 0,
                 "should have closed the mark done popover"
             );
@@ -826,13 +826,13 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o_ActivityView_markDoneButton",
+                    ".btn:contains('Mark Done')",
                     "should have activity Mark as Done button"
                 );
 
-                await click(".o_ActivityView_markDoneButton");
+                await click(".btn:contains('Mark Done')");
                 assert.strictEqual(
-                    document.querySelector(".o_ActivityMarkDonePopoverContentView_feedback"),
+                    document.querySelector(".o-mail-activity-mark-as-done-feedback"),
                     document.activeElement,
                     "the popover textarea should have the focus"
                 );
@@ -1070,10 +1070,10 @@ QUnit.module("mail", {}, function () {
                     views: [[false, "form"]],
                 });
 
-                await click(".o_ActivityView_markDoneButton");
+                await click(".btn:contains('Mark Done')");
                 assert.containsOnce(
                     document.body,
-                    ".o_ActivityMarkDonePopoverContentView",
+                    ".o-mail-activity-mark-as-done",
                     "Popover component should be present"
                 );
 
@@ -1082,13 +1082,11 @@ QUnit.module("mail", {}, function () {
                         bubbles: true,
                         key: "Escape",
                     });
-                    document
-                        .querySelector(`.o_ActivityMarkDonePopoverContentView`)
-                        .dispatchEvent(ev);
+                    document.querySelector(`.o-mail-activity-mark-as-done`).dispatchEvent(ev);
                 });
                 assert.containsNone(
                     document.body,
-                    ".o_ActivityMarkDonePopoverContentView",
+                    ".o-mail-activity-mark-as-done",
                     "ESCAPE pressed should have closed the mark done popover"
                 );
             }
@@ -1120,21 +1118,21 @@ QUnit.module("mail", {}, function () {
                     views: [[false, "form"]],
                 });
 
-                await click(".o_ActivityView_markDoneButton");
+                await click(".btn:contains('Mark Done')");
                 assert.containsOnce(
                     document.body,
-                    ".o_ActivityMarkDonePopoverContentView",
+                    ".o-mail-activity-mark-as-done",
                     "Popover component should be present"
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o_ActivityMarkDonePopoverContentView_discardButton",
+                    ".o-mail-activity-mark-as-done-button-discard",
                     "Popover component should contain the discard button"
                 );
-                await click(".o_ActivityMarkDonePopoverContentView_discardButton");
+                await click(".o-mail-activity-mark-as-done-button-discard");
                 assert.containsNone(
                     document.body,
-                    ".o_ActivityMarkDonePopoverContentView",
+                    ".o-mail-activity-mark-as-done",
                     "Discard button clicked should have closed the mark done popover"
                 );
             }
@@ -1240,7 +1238,7 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.containsOnce(
                     document.body,
-                    ".o_ActivityView_markDoneButton",
+                    ".btn:contains('Mark Done')",
                     "should have a mark done button when changing activity type from 'Upload Document' to 'Email'"
                 );
                 assert.containsNone(

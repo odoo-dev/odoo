@@ -45,9 +45,15 @@ patch(MockServer.prototype, "mail/models/mail_activity", {
                     };
                 });
             }
-            const [activityType] = this.pyEnv["mail.activity.type"].searchRead([['id', '=', record.activity_type_id[0]]]);
-            record.display_name = activityType.name;
-            record.icon = activityType.icon;
+            const [activityType] = record.activity_type_id
+                ? this.pyEnv["mail.activity.type"].searchRead([
+                      ["id", "=", record.activity_type_id[0]],
+                  ])
+                : [false];
+            if (activityType) {
+                record.display_name = activityType.name;
+                record.icon = activityType.icon;
+            }
             return record;
         });
         return res;

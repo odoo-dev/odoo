@@ -6,7 +6,7 @@ import { useService } from "@web/core/utils/hooks";
 
 export class ActivityMarkAsDone extends Component {
     static template = "mail.activity_mark_as_done";
-    static props = ["activity", "close?", "onClickDoneAndScheduleNext?", "reload?"];
+    static props = ["activity", "close?", "hasHeader?", "onClickDoneAndScheduleNext?", "reload?"];
     static defaultProps = {
         hasHeader: false,
     };
@@ -50,10 +50,26 @@ export class ActivityMarkAsDone extends Component {
         if (this.props.close) {
             this.props.close();
         }
-        await this.env.services["mail.activity"].markAsDoneAndScheduleNext(
-            this.props.activity,
-            thread
+        const action = await this.env.services.orm.call(
+            "mail.activity",
+            "action_feedback_schedule_next",
+            [[this.props.activity.id]],
+            {
+                feedback: this.activityService.state.feedback[this.props.activity.id],
+            }
         );
+        this.messaging.fetchThreadMessagesNew(thread.localId);
+        if (this.props.reload) {
+            this.props.reload(this.props.activity.res_id, ["activities", "attachments"]);
+        }
+        if (!action) {
+            return;
+        }
+        await new Promise((resolve) => {
+            this.env.services.action.doAction(action, {
+                onClose: resolve,
+            });
+        });
         if (this.props.reload) {
             this.props.reload(this.props.activity.res_id, ["activities"]);
         }

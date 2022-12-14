@@ -4,7 +4,7 @@ import { reactive } from "@odoo/owl";
 
 export const activityService = {
     dependencies: ["orm", "action", "bus_service", "mail.messaging"],
-    async: ["scheduleActivity", "markAsDoneAndScheduleNext"],
+    async: ["scheduleActivity"],
     start(env, { orm, action, bus_service: bus, "mail.messaging": messaging }) {
         const state = reactive({
             counter: 0,
@@ -59,12 +59,6 @@ export const activityService = {
             });
         }
 
-        async function markAsDoneAndScheduleNext(activity, thread) {
-            await markAsDone(activity.id);
-            await messaging.fetchThreadMessagesNew(thread.localId);
-            await scheduleActivity(thread.resModel, thread.resId);
-        }
-
         bus.addEventListener("notification", (notifEvent) => {
             for (const notif of notifEvent.detail) {
                 if (notif.type === "mail.activity/updated") {
@@ -82,7 +76,6 @@ export const activityService = {
             state,
             scheduleActivity,
             markAsDone,
-            markAsDoneAndScheduleNext,
         };
     },
 };

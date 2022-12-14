@@ -281,9 +281,9 @@ QUnit.skipRefactoring('activity view: activity widget', async function (assert) 
     await testUtils.dom.click(document.querySelector('.o-activity-list-popover-add-activity-button'));
     await testUtils.dom.click(document.querySelector('.overdue .o-activity-cell-closest-deadline'));
     await testUtils.dom.click(document.querySelector('.o-activity-list-popover-item-mark-as-done'));
-    document.querySelector('.o_ActivityMarkDonePopoverContentView_feedback').value = "feedback2";
+    document.querySelector('.o-mail-activity-mark-as-done-feedback').value = "feedback2";
 
-    await testUtils.dom.click(document.querySelector('.o_ActivityMarkDonePopoverContentView_doneScheduleNextButton'));
+    await testUtils.dom.click(document.querySelector('.o-mail-activity-mark-as-done-button-done-and-schedule'));
     assert.verifySteps([
         "do_action_compose",
         "activity_send_mail",

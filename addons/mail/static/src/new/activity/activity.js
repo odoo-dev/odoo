@@ -44,6 +44,7 @@ export class Activity extends Component {
             ActivityMarkAsDone,
             {
                 activity: this.props.data,
+                hasHeader: true,
                 reload: this.props.onUpdate,
             },
             { position: "right" }
