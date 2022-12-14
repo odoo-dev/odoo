@@ -137,3 +137,47 @@ QUnit.test("auto-scroll to bottom of thread on load", async function (assert) {
     const $thread = $(target).find(".o-mail-thread");
     assert.strictEqual($thread[0].scrollTop, $thread[0].scrollHeight - $thread[0].clientHeight); // FIXME UI scaling might mess with this assertion
 });
+
+QUnit.test("display day separator before first message of the day", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
+    pyEnv["mail.message"].create([
+        {
+            body: "not empty",
+            model: "mail.channel",
+            res_id: mailChannelId1,
+        },
+        {
+            body: "not empty",
+            model: "mail.channel",
+            res_id: mailChannelId1,
+        },
+    ]);
+    const { openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-thread-date-separator");
+});
+
+QUnit.test(
+    "do not display day separator if all messages of the day are empty",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
+        pyEnv["mail.message"].create({
+            body: "",
+            model: "mail.channel",
+            res_id: mailChannelId1,
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-thread-date-separator");
+    }
+);
