@@ -45,7 +45,7 @@
 
             </div>
             <div class="text-truncate" t-if="preview.mostRecentMsg">
-                <t t-if="preview.mostRecentMsg.isAuthor">
+                <t t-if="preview.mostRecentMsg.isAuthoredByCurrentUser">
                     <i class="fa fa-mail-reply me-1"/>You
                 </t>
                 <t t-else="">

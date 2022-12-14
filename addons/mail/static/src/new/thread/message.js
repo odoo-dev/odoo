@@ -109,7 +109,7 @@ export class Message extends Component {
         if (!this.props.hasActions) {
             return false;
         }
-        if (!this.user.isAdmin && !this.message.isAuthor) {
+        if (!this.user.isAdmin && !this.message.isAuthoredByCurrentUser) {
             return false;
         }
         if (this.message.type !== "comment") {

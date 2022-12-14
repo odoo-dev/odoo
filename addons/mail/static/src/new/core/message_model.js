@@ -24,8 +24,6 @@ export class Message {
     /** @type {number|string} */
     id;
     /** @type {boolean} */
-    isAuthor;
-    /** @type {boolean} */
     isDiscussion;
     /** @type {boolean} */
     isNote;
@@ -133,9 +131,6 @@ export class Message {
             type,
         });
         this._updateReactions(data.messageReactionGroups);
-        if (this.author) {
-            this.isAuthor = this.author.id === this._state.user.partnerId;
-        }
         if (thread) {
             if (!thread.messages.includes(this.id)) {
                 thread.messages.push(this.id);
@@ -195,6 +190,13 @@ export class Message {
 
     get dateTimeStr() {
         return this.dateTime.toLocaleString(DateTime.DATETIME_SHORT);
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    get isAuthoredByCurrentUser() {
+        return this.author.id === this._state.user.partnerId;
     }
 
     /**

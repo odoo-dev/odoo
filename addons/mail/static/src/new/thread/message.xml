@@ -3,7 +3,7 @@
 
 <t t-name="mail.message" owl="1">
     <div class="o-mail-message position-relative py-1 mt-1" t-att-class="{
-            'o-mail-is-author': message.isAuthor,
+            'o-mail-is-author': message.isAuthoredByCurrentUser,
             'px-3': !env.inChatWindow,
             'px-1': env.inChatWindow,
             'o-highlighted bg-view shadow-lg': props.highlighted,
@@ -62,8 +62,8 @@
                     <t t-if="message.type !== 'notification' and !message.isTransient and !message.isBodyEmpty">
                         <div class="o-mail-message-bubble-wrap position-relative">
                             <div class="o-mail-message-bubble border rounded-end-3 rounded-bottom-3 position-absolute top-0 start-0 w-100 h-100" t-att-class="{
-                                    'bg-info-light border-info': !message.isAuthor,
-                                    'bg-success-light border-success opacity-25': message.isAuthor,
+                                    'bg-info-light border-info': !message.isAuthoredByCurrentUser,
+                                    'bg-success-light border-success opacity-25': message.isAuthoredByCurrentUser,
                                 }"/>
                             <div class="position-relative" t-att-class="{
                                 'p-1': message.isNote,
@@ -94,8 +94,8 @@
                 </div>
                 <div t-else="" class="position-relative">
                     <div class="o-mail-message-bubble border rounded-end-3 rounded-bottom-3 position-absolute top-0 start-0 w-100 h-100" t-att-class="{
-                            'bg-info-light border-info': !message.isAuthor,
-                            'bg-success-light border-success opacity-25': message.isAuthor,
+                            'bg-info-light border-info': !message.isAuthoredByCurrentUser,
+                            'bg-success-light border-success opacity-25': message.isAuthoredByCurrentUser,
                         }"/>
                     <div class="o-mail-message-editable-content position-relative flex-grow-1" t-att-class="{
                         'p-1': message.isNote,
