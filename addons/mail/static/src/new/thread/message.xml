@@ -2,10 +2,8 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.message" owl="1">
-    <div class="o-mail-message position-relative py-1 mt-1" t-att-class="{
+    <div class="o-mail-message position-relative py-1 mt-1 px-3" t-att-class="{
             'o-mail-is-author': message.isAuthoredByCurrentUser,
-            'px-3': !env.inChatWindow,
-            'px-1': env.inChatWindow,
             'o-highlighted bg-view shadow-lg': props.highlighted,
             'opacity-50': props.grayedOut,
         }"
@@ -14,7 +12,7 @@
     >
         <MessageInReplyTo t-if="message.parentMessage" alignedRight="isAlignedRight" message="message" onClick="props.onParentMessageClick"/>
         <div class="o-mail-message-core position-relative d-flex flex-shrink-0">
-            <div class="o-mail-message-sidebar d-flex flex-shrink-0 justify-content-center">
+            <div class="o-mail-message-sidebar d-flex flex-shrink-0" t-att-class="{ 'justify-content-end': isAlignedRight }">
                 <div t-if="!props.squashed" class="o-mail-avatar-container position-relative bg-view">
                     <img class="w-100 h-100 rounded-circle o_object_fit_cover o_redirect"
                         t-att-src="message.author and message.author.avatarUrl"
