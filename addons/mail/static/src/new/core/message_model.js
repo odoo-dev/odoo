@@ -126,6 +126,7 @@ export class Message {
             recordName,
             resId,
             resModel,
+            starred_partner_ids,
             subject,
             subtypeDescription,
             trackingValues: data.trackingValues || [],
