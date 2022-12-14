@@ -79,3 +79,23 @@ QUnit.test(
         assert.containsOnce(document.body, ".o-mail-message");
     }
 );
+
+QUnit.test("load messages from opening chat window from messaging menu", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        channel_type: "channel",
+        group_public_id: false,
+        name: "General",
+    });
+    for (let i = 0; i <= 20; i++) {
+        pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "mail.channel",
+            res_id: mailChannelId1,
+        });
+    }
+    const { click } = await start();
+    await click(".o_menu_systray i[aria-label='Messages']");
+    await click(".o-mail-messaging-menu .o-mail-notification-item");
+    assert.containsN(target, ".o-mail-message", 21);
+});

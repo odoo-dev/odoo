@@ -30,7 +30,7 @@ export class Thread {
     icon;
     isAdmin = false;
     isUnread = false;
-    loadMore = false;
+    loadMore = true;
     memberCount = 0;
     message_needaction_counter = 0;
     message_unread_counter = 0;
