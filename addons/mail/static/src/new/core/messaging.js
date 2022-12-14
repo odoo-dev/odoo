@@ -353,13 +353,14 @@ export class Messaging {
                     break;
                 }
                 case "mail.message/mark_as_read": {
-                    for (const message_id of notif.payload.message_ids) {
+                    const { message_ids: messageIds, needaction_inbox_counter } = notif.payload;
+                    for (const messageId of messageIds) {
                         // We need to ignore all not yet known messages because we don't want them
                         // to be shown partially as they would be linked directly to cache.
-                        // Furthermore, server should not send back all message_ids marked as read
-                        // but something like last read message_id or something like that.
+                        // Furthermore, server should not send back all messageIds marked as read
+                        // but something like last read messageId or something like that.
                         // (just imagine you mark 1000 messages as read ... )
-                        const message = this.state.messages[message_id];
+                        const message = this.state.messages[messageId];
                         if (!message) {
                             continue;
                         }
@@ -372,18 +373,13 @@ export class Messaging {
                         const partnerIndex = message.needaction_partner_ids.find(
                             (p) => p === this.state.user.partnerId
                         );
-                        if (partnerIndex !== -1) {
-                            message.needaction_partner_ids.splice(partnerIndex, 1);
+                        removeFromArray(message.needaction_partner_ids, partnerIndex);
+                        removeFromArray(this.state.discuss.inbox.messages, messageId);
+                        if (this.state.discuss.history.messages.length > 0) {
+                            this.state.discuss.history.messages.push(messageId);
                         }
-                        const messageIndex = this.state.discuss.inbox.messages.find(
-                            (m) => m.id === message.id
-                        );
-                        if (messageIndex !== -1) {
-                            this.state.discuss.inbox.messages.splice(messageIndex, 1);
-                        }
-                        // TODO move message to history mailbox
                     }
-                    this.state.discuss.inbox.counter = notif.payload.needaction_inbox_counter;
+                    this.state.discuss.inbox.counter = needaction_inbox_counter;
                     if (
                         this.state.discuss.inbox.counter > this.state.discuss.inbox.messages.length
                     ) {
@@ -987,6 +983,10 @@ export class Messaging {
 
     async toggleStar(messageId) {
         await this.orm.call("mail.message", "toggle_message_starred", [[messageId]]);
+    }
+
+    async setDone(messageId) {
+        await this.orm.call("mail.message", "set_message_done", [[messageId]]);
     }
 
     updateMessageStarredState(message, isStarred) {

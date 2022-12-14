@@ -77,18 +77,20 @@
                     </t>
                     <div t-if="props.hasActions and !message.isTransient" class="o-mail-message-actions invisible">
                         <div class="rounded-1 shadow-sm">
-                            <i t-if="canAddReaction" class="cursor-pointer px-1 py-2 fa fa-lg fa-smile-o"
+                            <i t-if="canAddReaction" class="o-mail-message-action-add-reaction cursor-pointer px-1 py-2 fa fa-lg fa-smile-o"
                                 role="button" tabindex="1" title="Add a Reaction" aria-label="Add a Reaction" t-ref="emoji-picker"/>
-                            <i t-if="canToggleStar" class="cursor-pointer px-1 py-2 fa fa-lg"
+                            <i t-if="canToggleStar" class="o-mail-message-action-toggle-star cursor-pointer px-1 py-2 fa fa-lg"
                                 t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
                                 t-on-click="toggleStar"
                                 role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"/>
-                            <i class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-if="canBeDeleted" t-on-click="onClickDelete"
+                            <i t-if="canBeDeleted" class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-on-click="onClickDelete"
                                 role="button" tabindex="0" title="Delete" aria-label="Delete"/>
-                            <i class="cursor-pointer px-1 py-2 fa fa-lg fa-pencil" t-if="canBeEdited" t-on-click="onClickEdit"
+                            <i t-if="canBeEdited" class="cursor-pointer px-1 py-2 fa fa-lg fa-pencil" t-on-click="onClickEdit"
                                 role="button" tabindex="1" title="Edit" aria-label="Edit"/>
-                            <i class="cursor-pointer px-1 py-2 fa fa-lg fa-reply" t-if="canReplyTo" t-on-click.stop="onClickReplyTo"
+                            <i t-if="canReplyTo" class="o-mail-message-action-reply-to cursor-pointer px-1 py-2 fa fa-lg fa-reply" t-on-click.stop="onClickReplyTo"
                                 role="button" tabindex="1" title="Reply" aria-label="Reply"/>
+                            <i t-if="isInInbox" class="o-mail-message-action-mark-read cursor-pointer px-1 py-2 fa fa-lg fa-check" t-on-click="() => messaging.setDone(props.message.id)"
+                                role="button" tabindex="0" title="Mark as Read" aria-label="Mark as Read"/>
                         </div>
                     </div>
                 </div>

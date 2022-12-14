@@ -2,7 +2,7 @@
 
 import { Discuss } from "@mail/new/discuss/discuss";
 import { Thread } from "@mail/new/core/thread_model";
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 import {
     click,
     editInput,
@@ -513,9 +513,9 @@ QUnit.test("reply to message from inbox (message linked to document)", async fun
         res_id: resPartnerId1,
     });
     pyEnv["mail.notification"].create({
-        mail_message_id: mailMessageId1, // id of related message
+        mail_message_id: mailMessageId1,
         notification_type: "inbox",
-        res_partner_id: pyEnv.currentPartnerId, // must be for current partner
+        res_partner_id: pyEnv.currentPartnerId,
     });
     const { click, insertText, openDiscuss } = await start({
         async mockRPC(route, args) {
@@ -798,9 +798,9 @@ QUnit.test("sidebar: channel rendering with needaction counter", async function 
         res_id: mailChannelId1,
     });
     pyEnv["mail.notification"].create({
-        mail_message_id: mailMessageId1, // id of related message
+        mail_message_id: mailMessageId1,
         notification_type: "inbox",
-        res_partner_id: pyEnv.currentPartnerId, // must be for current partner
+        res_partner_id: pyEnv.currentPartnerId,
     });
     const { openDiscuss } = await start();
     await openDiscuss();
@@ -884,3 +884,169 @@ QUnit.test("basic top bar rendering", async function (assert) {
         "should have button 'Invite' in the top bar of channel"
     );
 });
+
+QUnit.test("rendering of inbox message", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({ name: "Refactoring" });
+    const mailMessageId1 = pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "res.partner",
+        needaction: true,
+        needaction_partner_ids: [pyEnv.currentPartnerId],
+        res_id: resPartnerId1,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: mailMessageId1,
+        notification_status: "sent",
+        notification_type: "inbox",
+        res_partner_id: pyEnv.currentPartnerId,
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-message");
+    const $message = $(target).find(".o-mail-message");
+    assert.containsOnce($message, ".o-mail-message-recod-name");
+    assert.strictEqual($message.find(".o-mail-message-recod-name").text(), " on Refactoring");
+    assert.containsN($message, ".o-mail-message-actions i", 4);
+    assert.containsOnce($message, ".o-mail-message-action-add-reaction");
+    assert.containsOnce($message, ".o-mail-message-action-toggle-star");
+    assert.containsOnce($message, ".o-mail-message-action-reply-to");
+    assert.containsOnce($message, ".o-mail-message-action-mark-read");
+});
+
+QUnit.test('messages marked as read move to "History" mailbox', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "other-disco" });
+    const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
+        {
+            body: "not empty",
+            model: "mail.channel",
+            needaction: true,
+            res_id: mailChannelId1,
+        },
+        {
+            body: "not empty",
+            model: "mail.channel",
+            needaction: true,
+            res_id: mailChannelId1,
+        },
+    ]);
+    pyEnv["mail.notification"].create([
+        {
+            mail_message_id: mailMessageId1,
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        },
+        {
+            mail_message_id: mailMessageId2,
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        },
+    ]);
+    const { click, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: "mail.box_history",
+            },
+        },
+    });
+    await openDiscuss();
+    assert.hasClass($(target).find('button[data-mailbox="history"]'), "o-active");
+    assert.containsOnce(target, '.o-mail-discuss-content .o-mail-thread [data-empty-thread=""]');
+
+    await click('button[data-mailbox="inbox"]');
+    assert.hasClass($(target).find('button[data-mailbox="inbox"]'), "o-active");
+    assert.containsNone(target, '.o-mail-discuss-content .o-mail-thread [data-empty-thread=""]');
+    assert.containsN(target, ".o-mail-discuss-content .o-mail-thread .o-mail-message", 2);
+
+    await click('.o-mail-discuss-actions button[data-action="mark-all-read"]');
+    assert.hasClass($(target).find('button[data-mailbox="inbox"]'), "o-active");
+    assert.containsOnce(target, '.o-mail-discuss-content .o-mail-thread [data-empty-thread=""]');
+
+    await click('button[data-mailbox="history"]');
+    assert.hasClass($(target).find('button[data-mailbox="history"]'), "o-active");
+    assert.containsNone(target, '.o-mail-discuss-content .o-mail-thread [data-empty-thread=""]');
+    assert.containsN(target, ".o-mail-discuss-content .o-mail-thread .o-mail-message", 2);
+});
+
+QUnit.test(
+    'mark a single message as read should only move this message to "History" mailbox',
+    async function (assert) {
+        const pyEnv = await startServer();
+        const [mailMessageId1, mailMessageId2] = pyEnv["mail.message"].create([
+            {
+                body: "not empty",
+                needaction: true,
+                needaction_partner_ids: [pyEnv.currentPartnerId],
+            },
+            {
+                body: "not empty",
+                needaction: true,
+                needaction_partner_ids: [pyEnv.currentPartnerId],
+            },
+        ]);
+        pyEnv["mail.notification"].create([
+            {
+                mail_message_id: mailMessageId1,
+                notification_type: "inbox",
+                res_partner_id: pyEnv.currentPartnerId,
+            },
+            {
+                mail_message_id: mailMessageId2,
+                notification_type: "inbox",
+                res_partner_id: pyEnv.currentPartnerId,
+            },
+        ]);
+        const { click, openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: "mail.box_history",
+                },
+            },
+        });
+        await openDiscuss();
+        assert.hasClass($(target).find('button[data-mailbox="history"]'), "o-active");
+        assert.containsOnce(target, '[data-empty-thread=""]');
+
+        await click('button[data-mailbox="inbox"]');
+        assert.hasClass($(target).find('button[data-mailbox="inbox"]'), "o-active");
+        assert.containsN(target, ".o-mail-message", 2);
+
+        await click(
+            `.o-mail-message[data-message-id="${mailMessageId1}"] .o-mail-message-action-mark-read`
+        );
+        assert.containsOnce(target, ".o-mail-message");
+        assert.containsOnce(target, `.o-mail-message[data-message-id="${mailMessageId2}"]`);
+
+        await click('button[data-mailbox="history"]');
+        assert.hasClass($(target).find('button[data-mailbox="history"]'), "o-active");
+        assert.containsOnce(target, ".o-mail-message");
+        assert.containsOnce(target, `.o-mail-message[data-message-id="${mailMessageId1}"]`);
+    }
+);
+
+QUnit.test(
+    'all messages in "Inbox" in "History" after marked all as read',
+    async function (assert) {
+        const pyEnv = await startServer();
+        for (let i = 0; i < 40; i++) {
+            const currentMailMessageId = pyEnv["mail.message"].create({
+                body: "not empty",
+                needaction: true,
+            });
+            pyEnv["mail.notification"].create({
+                mail_message_id: currentMailMessageId,
+                notification_type: "inbox",
+                res_partner_id: pyEnv.currentPartnerId,
+            });
+        }
+        const { click, openDiscuss } = await start();
+        await openDiscuss();
+        await click('.o-mail-discuss-actions button[data-action="mark-all-read"]');
+        assert.containsNone(target, ".o-mail-message");
+
+        await click('button[data-mailbox="history"]');
+        await afterNextRender(() => (target.querySelector(".o-mail-thread").scrollTop = 0));
+        assert.containsN(target, ".o-mail-message", 40);
+    }
+);

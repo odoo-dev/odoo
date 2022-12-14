@@ -153,6 +153,13 @@ export class Message extends Component {
         return this.message.originThread.localId === this.props.threadLocalId;
     }
 
+    get isInInbox () {
+        if (!this.props.threadLocalId) {
+            return false;
+        }
+        return this.messaging.state.threads[this.props.threadLocalId].id === "inbox"; 
+    }
+
     toggleStar() {
         this.messaging.toggleStar(this.props.message.id);
     }
