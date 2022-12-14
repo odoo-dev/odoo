@@ -238,6 +238,10 @@ export class Thread {
         return ["chat", "channel", "group"].includes(this.type);
     }
 
+    get isTransient() {
+        return !this.id;
+    }
+
     get localId() {
         return Thread.createLocalId({ model: this.model, id: this.id });
     }

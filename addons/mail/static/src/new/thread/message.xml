@@ -77,9 +77,9 @@
                     </t>
                     <div t-if="props.hasActions and !message.isTransient" class="o-mail-message-actions invisible">
                         <div class="rounded-1 shadow-sm">
-                            <i class="cursor-pointer px-1 py-2 fa fa-lg fa-smile-o"
+                            <i t-if="canAddReaction" class="cursor-pointer px-1 py-2 fa fa-lg fa-smile-o"
                                 role="button" tabindex="1" title="Add a Reaction" aria-label="Add a Reaction" t-ref="emoji-picker"/>
-                            <i class="cursor-pointer px-1 py-2 fa fa-lg"
+                            <i t-if="canToggleStar" class="cursor-pointer px-1 py-2 fa fa-lg"
                                 t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
                                 t-on-click="toggleStar"
                                 role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"/>

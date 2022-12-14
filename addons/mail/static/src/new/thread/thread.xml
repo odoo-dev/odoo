@@ -2,12 +2,12 @@
 <templates xml:space="preserve">
 
 <t t-name="mail.thread" owl="1">
-    <div class="o-mail-thread overflow-auto pb-4 flex-grow-1 bg-view" t-ref="messages">
+    <div class="o-mail-thread overflow-auto pb-4 flex-grow-1 bg-view" t-att-data-thread-id="thread.id" t-att-data-thread-model="thread.model" t-ref="messages">
         <t t-if="!thread.isEmpty">
             <div class="d-flex flex-column" t-att-class="{'justify-content-end': !env.inChatter and thread.type !== 'mailbox'}" style="min-height:100%">
                 <t t-set="currentDay" t-value="0"/>
                 <t t-set="prevMsg" t-value="0"/>
-                <t t-if="thread.loadMore and props.order === 'asc'" t-call="mail.thread.load_more"/>
+                <t t-if="thread.loadMore and props.order === 'asc' and !thread.isTransient" t-call="mail.thread.load_more"/>
                 <t t-foreach="props.order === 'asc' ? thread.messages : [...thread.messages].reverse()" t-as="messageId" t-key="messageId">
                     <t t-set="msg" t-value="messaging.state.messages[messageId]"/>
                     <t t-if="!msg.isEmpty and msg.dateDay !== currentDay">
@@ -38,7 +38,7 @@
                     </Transition>
                     <t t-set="prevMsg" t-value="msg"/>
                 </t>
-                <t t-if="thread.loadMore and props.order !== 'asc'" t-call="mail.thread.load_more"/>
+                <t t-if="thread.loadMore and props.order !== 'asc' and !thread.isTransient" t-call="mail.thread.load_more"/>
             </div>
         </t>
         <t t-else="">

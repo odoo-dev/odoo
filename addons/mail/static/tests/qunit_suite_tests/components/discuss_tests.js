@@ -357,7 +357,7 @@ QUnit.module("mail", {}, function () {
                 "message 2 should have date in sidebar"
             );
             assert.strictEqual(
-                message2.querySelectorAll(`:scope .o_MessageActionList`).length,
+                message2.querySelectorAll(`:scope .o-mail-message-actions`).length,
                 1,
                 "message 2 should have some actions"
             );
@@ -1184,7 +1184,7 @@ QUnit.module("mail", {}, function () {
             );
             await afterNextRender(() => message.click());
             assert.strictEqual(
-                message.querySelectorAll(`:scope .o_MessageActionView`).length,
+                message.querySelectorAll(`:scope .o-mail-message-actions i`).length,
                 4,
                 "should display 4 actions"
             );

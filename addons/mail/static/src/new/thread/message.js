@@ -83,7 +83,7 @@ export class Message extends Component {
                 this.ref.el.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
-        if (this.props.hasActions && !this.message.isTransient) {
+        if (this.props.hasActions && this.canAddReaction) {
             useEmojiPicker("emoji-picker", {
                 onSelect: (emoji) => {
                     const reaction = this.message.reactions.find(
@@ -105,6 +105,13 @@ export class Message extends Component {
         return this.props.message;
     }
 
+    /**
+     * @returns {boolean}
+     */
+    get canAddReaction() {
+        return Boolean(!this.message.isTransient && this.message.resId);
+    }
+
     get canBeDeleted() {
         if (!this.props.hasActions) {
             return false;
@@ -124,6 +131,13 @@ export class Message extends Component {
 
     get canReplyTo() {
         return this.message.needaction || this.message.resModel === "mail.channel";
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    get canToggleStar() {
+        return Boolean(!this.message.isTransient && this.message.resId);
     }
 
     get isAlignedRight() {

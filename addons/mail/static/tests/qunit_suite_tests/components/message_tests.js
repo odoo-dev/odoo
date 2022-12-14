@@ -84,7 +84,7 @@ QUnit.module("mail", {}, function () {
             );
             await afterNextRender(() => messageEl.click());
             assert.strictEqual(
-                messageEl.querySelectorAll(`:scope .o_MessageActionList`).length,
+                messageEl.querySelectorAll(`:scope .o-mail-message-actions`).length,
                 1,
                 "message should display list of actions"
             );

@@ -488,3 +488,162 @@ QUnit.test('post message with "CTRL-Enter" keyboard shortcut in chatter', async 
     await afterNextRender(() => triggerHotkey("control+Enter"));
     assert.containsOnce(target, ".o-mail-message");
 });
+
+QUnit.test("base rendering when chatter has no attachment", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    for (let i = 0; i < 60; i++) {
+        pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "res.partner",
+            res_id: resPartnerId1,
+        });
+    }
+    const { openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter");
+    assert.containsOnce(target, ".o-mail-chatter-topbar");
+    assert.containsNone(target, ".o-mail-attachment-box");
+    assert.containsOnce(target, ".o-mail-chatter .o-mail-thread");
+    assert.containsOnce(
+        target,
+        `.o-mail-chatter .o-mail-thread[data-thread-id="${resPartnerId1}"][data-thread-model="res.partner"]`
+    );
+    assert.containsN(target, ".o-mail-message", 30);
+});
+
+QUnit.test("base rendering when chatter has no record", async function (assert) {
+    const { openView } = await start();
+    await openView({
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter");
+    assert.containsOnce(target, ".o-mail-chatter-topbar");
+    assert.containsNone(target, ".o-mail-attachment-box");
+    assert.containsOnce(target, ".o-mail-chatter .o-mail-thread");
+    assert.containsOnce(target, ".o-mail-message");
+    assert.strictEqual($(target).find(".o-mail-message-body").text(), "Creating a new record...");
+    assert.containsNone(target, "button:contains(Load More)");
+    assert.containsOnce(target, ".o-mail-message-actions");
+    assert.containsNone(target, ".o-mail-message-actions i");
+});
+
+QUnit.test("base rendering when chatter has attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    pyEnv["ir.attachment"].create([
+        {
+            mimetype: "text/plain",
+            name: "Blah.txt",
+            res_id: resPartnerId1,
+            res_model: "res.partner",
+        },
+        {
+            mimetype: "text/plain",
+            name: "Blu.txt",
+            res_id: resPartnerId1,
+            res_model: "res.partner",
+        },
+    ]);
+    const { openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter");
+    assert.containsOnce(target, ".o-mail-chatter-topbar");
+    assert.containsNone(target, ".o-mail-attachment-box");
+});
+
+QUnit.test("show attachment box", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    pyEnv["ir.attachment"].create([
+        {
+            mimetype: "text/plain",
+            name: "Blah.txt",
+            res_id: resPartnerId1,
+            res_model: "res.partner",
+        },
+        {
+            mimetype: "text/plain",
+            name: "Blu.txt",
+            res_id: resPartnerId1,
+            res_model: "res.partner",
+        },
+    ]);
+    const { click, openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter");
+    assert.containsOnce(target, ".o-mail-chatter-topbar");
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments");
+    assert.containsOnce(target, ".o-mail-chatter-topbar-add-attachments span");
+    assert.containsNone(target, ".o-mail-attachment-box");
+
+    await click(".o-mail-chatter-topbar-add-attachments");
+    assert.containsOnce(target, ".o-mail-attachment-box");
+});
+
+QUnit.test("composer show/hide on log note/send message [REQUIRE FOCUS]", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const { click, openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-chatter-topbar-send-message-button");
+    assert.containsOnce(target, ".o-mail-chatter-topbar-log-note-button");
+    assert.containsNone(target, ".o-mail-chatter .o-mail-composer");
+
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.containsOnce(target, ".o-mail-chatter .o-mail-composer");
+    assert.strictEqual(
+        document.activeElement,
+        target.querySelector(".o-mail-chatter .o-mail-composer-textarea")
+    );
+
+    await click(".o-mail-chatter-topbar-log-note-button");
+    assert.containsOnce(target, ".o-mail-chatter .o-mail-composer");
+    assert.strictEqual(
+        document.activeElement,
+        target.querySelector(".o-mail-chatter .o-mail-composer-textarea")
+    );
+
+    await click(".o-mail-chatter-topbar-log-note-button");
+    assert.containsNone(target, ".o-mail-chatter .o-mail-composer");
+
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.containsOnce(target, ".o-mail-chatter .o-mail-composer");
+
+    await click(".o-mail-chatter-topbar-send-message-button");
+    assert.containsNone(target, ".o-mail-chatter .o-mail-composer");
+});
+
+QUnit.test('do not post message with "Enter" keyboard shortcut', async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const { click, insertText, openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsNone(target, ".o-mail-message");
+
+    await click(".o-mail-chatter-topbar-send-message-button");
+    await insertText(".o-mail-composer-textarea", "Test");
+    await triggerHotkey("Enter");
+    assert.containsNone(target, ".o-mail-message");
+});

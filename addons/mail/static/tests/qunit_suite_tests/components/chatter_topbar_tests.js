@@ -94,7 +94,7 @@ QUnit.module("mail", {}, function () {
                     "attachments button should have a loader"
                 );
                 assert.strictEqual(
-                    document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
+                    document.querySelectorAll(`.o-mail-chatter-topbar-add-attachments span`).length,
                     0,
                     "attachments button should not have a counter"
                 );
@@ -139,7 +139,7 @@ QUnit.module("mail", {}, function () {
                     "attachments button should have a loader"
                 );
                 assert.strictEqual(
-                    document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
+                    document.querySelectorAll(`.o-mail-chatter-topbar-add-attachments span`).length,
                     0,
                     "attachments button should not have a counter"
                 );
@@ -215,17 +215,17 @@ QUnit.module("mail", {}, function () {
                 "should have a chatter topbar"
             );
             assert.strictEqual(
-                document.querySelectorAll(`.o_ChatterTopbar_buttonToggleAttachments`).length,
+                document.querySelectorAll(`.o-mail-chatter-topbar-add-attachments`).length,
                 1,
                 "should have an attachments button in chatter menu"
             );
             assert.strictEqual(
-                document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
+                document.querySelectorAll(`.o-mail-chatter-topbar-add-attachments span`).length,
                 1,
                 "attachments button should have a counter"
             );
             assert.strictEqual(
-                document.querySelector(`.o_ChatterTopbar_buttonAttachmentsCount`).textContent,
+                document.querySelector(`.o-mail-chatter-topbar-add-attachments span`).textContent,
                 "2",
                 'attachment counter content should contain "2 files"'
             );

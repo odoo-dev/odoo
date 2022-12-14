@@ -320,7 +320,11 @@ QUnit.module("mail", {}, function () {
                 ".o-mail-chatter-topbar-follower-list",
                 "there should be no followers menu because the 'message_follower_ids' field is not present in 'oe_chatter'"
             );
-            assert.containsOnce(document.body, ".o_Chatter_thread", "there should be a thread");
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chatter .o-mail-thread",
+                "there should be a thread"
+            );
         });
 
         QUnit.skipRefactoring(
@@ -372,7 +376,11 @@ QUnit.module("mail", {}, function () {
                     ".o-mail-chatter-topbar-follower-list",
                     "there should be a followers menu"
                 );
-                assert.containsOnce(document.body, ".o_Chatter_thread", "there should be a thread");
+                assert.containsOnce(
+                    document.body,
+                    ".o-mail-chatter .o-mail-thread",
+                    "there should be a thread"
+                );
             }
         );
 
@@ -423,7 +431,7 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsNone(
                 document.body,
-                ".o_Chatter_thread",
+                ".o-mail-chatter .o-mail-thread",
                 "there should be no thread because the 'message_ids' field is not present in 'oe_chatter'"
             );
         });
