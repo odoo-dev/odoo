@@ -28,6 +28,7 @@ export class Sidebar extends Component {
         this.orm = useService("orm");
         this.state = useState({
             editing: false,
+            quickSearchVal: "",
         });
         onExternalClick("selector", () => {
             this.state.editing = false;
@@ -113,6 +114,24 @@ export class Sidebar extends Component {
                 confirm: resolve,
                 cancel: () => {},
             });
+        });
+    }
+
+    get hasQuickSearch() {
+        return (
+            Object.values(this.messaging.state.threads).filter(
+                (thread) => thread.is_pinned && thread.model === "mail.channel"
+            ).length > 19
+        );
+    }
+
+    filteredThreads(category) {
+        if (!this.state.quickSearchVal) {
+            return category.threads;
+        }
+        return category.threads.filter((threadLocalId) => {
+            const thread = this.messaging.state.threads[threadLocalId];
+            return thread.name.includes(this.state.quickSearchVal);
         });
     }
 }

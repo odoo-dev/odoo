@@ -21,6 +21,7 @@
             </t>
         </div>
         <hr class="w-100 border-top"/>
+        <input t-if="hasQuickSearch" class="form-control mx-4 mb-2 rounded-3 w-auto" placeholder="Quick search..." t-model="state.quickSearchVal"/>
         <t t-call="mail.discuss_category">
             <t t-set="category" t-value="messaging.state.discuss.channels" />
         </t>
@@ -81,7 +82,7 @@
                 <ChannelSelector category="category" onSelect.bind="stopEditing" />
             </div>
         </t>
-        <t t-foreach="category.threads" t-as="threadLocalId" t-key="threadLocalId">
+        <t t-foreach="filteredThreads(category)" t-as="threadLocalId" t-key="threadLocalId">
             <t t-call="mail.discuss_category_item">
                 <t t-set="thread" t-value="messaging.state.threads[threadLocalId]"/>
             </t>

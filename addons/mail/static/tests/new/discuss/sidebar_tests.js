@@ -3,7 +3,7 @@
 import { start, startServer } from "@mail/../tests/helpers/test_utils";
 import { Thread } from "@mail/new/core/thread_model";
 import { Sidebar } from "@mail/new/discuss/sidebar";
-import { click, getFixture, mount } from "@web/../tests/helpers/utils";
+import { click, editInput, getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
 
 let target;
@@ -193,4 +193,40 @@ QUnit.test("default thread rendering", async function (assert) {
         $(target).find('.o-mail-discuss-content [data-empty-thread=""]').text().trim(),
         "There are no messages in this conversation."
     );
+});
+
+QUnit.test("sidebar quick search at 20 or more pinned channels", async function (assert) {
+    const pyEnv = await startServer();
+    for (let id = 1; id <= 20; id++) {
+        pyEnv["mail.channel"].create({ name: `channel${id}` });
+    }
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsN(document.body, ".o-mail-category-item", 20);
+    assert.containsOnce(
+        document.body,
+        ".o-mail-discuss-sidebar input[placeholder='Quick search...']"
+    );
+
+    await editInput(
+        document.body,
+        ".o-mail-discuss-sidebar input[placeholder='Quick search...']",
+        "1"
+    );
+    assert.containsN(document.body, ".o-mail-category-item", 11);
+
+    await editInput(
+        document.body,
+        ".o-mail-discuss-sidebar input[placeholder='Quick search...']",
+        "12"
+    );
+    assert.containsOnce(document.body, ".o-mail-category-item");
+    assert.containsOnce(document.body, ".o-mail-category-item:contains(channel12)");
+
+    await editInput(
+        document.body,
+        ".o-mail-discuss-sidebar input[placeholder='Quick search...']",
+        "123"
+    );
+    assert.containsNone(document.body, ".o-mail-category-item");
 });

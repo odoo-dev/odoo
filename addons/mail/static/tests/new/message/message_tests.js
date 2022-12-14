@@ -652,3 +652,41 @@ QUnit.test(
         assert.containsOnce($message2, ".o-mail-message-sidebar .o-mail-message-date");
     }
 );
+
+QUnit.test("redirect to author (open chat)", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
+    pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+    const [mailChannelId1] = pyEnv["mail.channel"].create([
+        { name: "General" },
+        {
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+            channel_type: "chat",
+        },
+    ]);
+    pyEnv["mail.message"].create({
+        author_id: resPartnerId1,
+        body: "not empty",
+        model: "mail.channel",
+        res_id: mailChannelId1,
+    });
+    const { click, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    assert.containsOnce(target, ".o-mail-category-item.o-active:contains(General)");
+    assert.containsOnce(
+        target,
+        ".o-mail-discuss-content .o-mail-message .o-mail-avatar-container img"
+    );
+
+    await click(".o-mail-discuss-content .o-mail-message .o-mail-avatar-container img");
+    assert.containsOnce(target, ".o-mail-category-item.o-active:contains(Demo)");
+});
