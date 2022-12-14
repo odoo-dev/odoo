@@ -193,6 +193,9 @@ export class Message {
      * @returns {boolean}
      */
     get isAuthoredByCurrentUser() {
+        if (!this.author) {
+            return false;
+        }
         return this.author.id === this._state.user.partnerId;
     }
 
