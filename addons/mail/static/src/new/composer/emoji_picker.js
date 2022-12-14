@@ -120,9 +120,11 @@ export class EmojiPicker extends Component {
         const search = this.state.searchStr;
         if (search.length > 1) {
             const regexp = new RegExp(search.split("").join(".*"));
-            return this.emojis.filter((emoji) => {
-                return emoji.name.match(regexp) || emoji.keywords.some((w) => w.match(regexp));
-            });
+            return this.emojis.filter((emoji) =>
+                [emoji.name, ...emoji.keywords, ...emoji.emoticons, ...emoji.shortcodes].some((x) =>
+                    x.match(regexp)
+                )
+            );
         }
         return this.emojis;
     }
