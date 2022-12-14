@@ -15,6 +15,7 @@ import {
 import { getBundle, loadBundle } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { memoize } from "@web/core/utils/functions";
+import { escapeRegExp } from "@web/core/utils/strings";
 
 /**
  *
@@ -119,7 +120,12 @@ export class EmojiPicker extends Component {
     getEmojis() {
         const search = this.state.searchStr;
         if (search.length > 1) {
-            const regexp = new RegExp(search.split("").join(".*"));
+            const regexp = new RegExp(
+                search
+                    .split("")
+                    .map((x) => escapeRegExp(x))
+                    .join(".*")
+            );
             return this.emojis.filter((emoji) =>
                 [emoji.name, ...emoji.keywords, ...emoji.emoticons, ...emoji.shortcodes].some((x) =>
                     x.match(regexp)
