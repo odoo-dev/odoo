@@ -1633,46 +1633,6 @@ QUnit.module("mail", {}, function () {
         );
 
         QUnit.skipRefactoring(
-            'chat window: post message on non-mailing channel with "CTRL-Enter" keyboard shortcut for small screen size',
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                pyEnv["mail.channel"].create({
-                    channel_member_ids: [
-                        [
-                            0,
-                            0,
-                            {
-                                is_minimized: true,
-                                partner_id: pyEnv.currentPartnerId,
-                            },
-                        ],
-                    ],
-                });
-                patchUiSize({ size: SIZES.SM });
-                const { click, insertText } = await start();
-
-                await click(`.o_MessagingMenu_toggler`);
-                await click(`.o_MessagingMenu_dropdownMenu .o_NotificationListView_preview`);
-                // insert some HTML in editable
-                await insertText(".o-mail-composer-textarea", "Test");
-                await afterNextRender(() => {
-                    const kevt = new window.KeyboardEvent("keydown", {
-                        ctrlKey: true,
-                        key: "Enter",
-                    });
-                    document.querySelector(".o-mail-composer-textarea").dispatchEvent(kevt);
-                });
-                assert.containsOnce(
-                    document.body,
-                    ".o-mail-message",
-                    "should now have single message in channel after posting message from pressing 'CTRL-Enter' in text input of composer for small screen"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
             "chat window with a thread: keep scroll position in message list on toggle discuss when folded",
             async function (assert) {
                 assert.expect(2);

@@ -11,7 +11,14 @@ import {
     waitFormViewLoaded,
 } from "@mail/../tests/helpers/test_utils";
 
-import { click, editInput, nextTick, getFixture, mount } from "@web/../tests/helpers/utils";
+import {
+    click,
+    editInput,
+    nextTick,
+    getFixture,
+    mount,
+    triggerHotkey,
+} from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
 import { Component, useState, xml } from "@odoo/owl";
 import { file } from "web.test_utils";
@@ -463,4 +470,21 @@ QUnit.test("should not display user notification messages in chatter", async fun
         views: [[false, "form"]],
     });
     assert.containsNone(target, ".o-mail-message");
+});
+
+QUnit.test('post message with "CTRL-Enter" keyboard shortcut in chatter', async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    const { click, insertText, openView } = await start();
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsNone(target, ".o-mail-message");
+
+    await click(".o-mail-chatter-topbar-send-message-button");
+    await insertText(".o-mail-composer-textarea", "Test");
+    await afterNextRender(() => triggerHotkey("control+Enter"));
+    assert.containsOnce(target, ".o-mail-message");
 });

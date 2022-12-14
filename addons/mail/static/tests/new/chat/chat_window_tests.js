@@ -1,8 +1,13 @@
 /** @odoo-module **/
 
 import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
-import { nextAnimationFrame, start, startServer } from "@mail/../tests/helpers/test_utils";
-import { getFixture } from "@web/../tests/helpers/utils";
+import {
+    afterNextRender,
+    nextAnimationFrame,
+    start,
+    startServer,
+} from "@mail/../tests/helpers/test_utils";
+import { getFixture, triggerHotkey } from "@web/../tests/helpers/utils";
 
 let target;
 QUnit.module("chat window", {
@@ -44,5 +49,33 @@ QUnit.test(
         });
         await nextAnimationFrame();
         assert.containsNone(target, ".o-mail-chat-window");
+    }
+);
+
+QUnit.test(
+    'chat window: post message on channel with "CTRL-Enter" keyboard shortcut for small screen size',
+    async function (assert) {
+        assert.expect(1);
+
+        const pyEnv = await startServer();
+        pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        is_minimized: true,
+                        partner_id: pyEnv.currentPartnerId,
+                    },
+                ],
+            ],
+        });
+        patchUiSize({ size: SIZES.SM });
+        const { click, insertText } = await start();
+        await click(".o_menu_systray i[aria-label='Messages']");
+        await click(".o-mail-messaging-menu .o-mail-notification-item");
+        await insertText(".o-mail-chat-window .o-mail-composer-textarea", "Test");
+        await afterNextRender(() => triggerHotkey("control+Enter"));
+        assert.containsOnce(document.body, ".o-mail-message");
     }
 );

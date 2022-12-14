@@ -3,7 +3,6 @@
 import {
     afterNextRender,
     isScrolledToBottom,
-    nextAnimationFrame,
     start,
     startServer,
 } from "@mail/../tests/helpers/test_utils";
@@ -1136,42 +1135,6 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.skipRefactoring(
-            'do not post message on channel with "SHIFT-Enter" keyboard shortcut',
-            async function (assert) {
-                // Note that test doesn't assert SHIFT-Enter makes a newline, because this
-                // default browser cannot be simulated with just dispatching
-                // programmatically crafted events...
-                assert.expect(2);
-
-                const pyEnv = await startServer();
-                const mailChannelId1 = pyEnv["mail.channel"].create({});
-                const { insertText, openDiscuss } = await start({
-                    discuss: {
-                        params: {
-                            default_active_id: `mail.channel_${mailChannelId1}`,
-                        },
-                    },
-                });
-                await openDiscuss();
-                assert.containsNone(
-                    document.body,
-                    ".o-mail-message",
-                    "should not have any message initially in channel"
-                );
-
-                // insert some HTML in editable
-                await insertText(".o-mail-composer-textarea", "Test");
-                const kevt = new window.KeyboardEvent("keydown", { key: "Enter", shiftKey: true });
-                document.querySelector(".o-mail-composer-textarea").dispatchEvent(kevt);
-                await nextAnimationFrame();
-                assert.containsNone(
-                    document.body,
-                    ".o-mail-message",
-                    "should still not have any message in channel after pressing 'Shift-Enter' in text input of composer"
-                );
-            }
-        );
         QUnit.skipRefactoring("rendering of inbox message", async function (assert) {
             // AKU TODO: kinda message specific test
             assert.expect(8);

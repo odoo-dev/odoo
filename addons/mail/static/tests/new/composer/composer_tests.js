@@ -2,7 +2,13 @@
 
 import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 
-import { click, getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import {
+    click,
+    getFixture,
+    nextTick,
+    patchWithCleanup,
+    triggerHotkey,
+} from "@web/../tests/helpers/utils";
 import { Composer } from "@mail/new/composer/composer";
 
 let target;
@@ -755,3 +761,25 @@ QUnit.test("add an emoji after a channel mention", async function (assert) {
         "#General 😊"
     );
 });
+
+QUnit.test(
+    'do not post message on channel with "SHIFT-Enter" keyboard shortcut',
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+        const { insertText, openDiscuss } = await start({
+            discuss: {
+                params: {
+                    default_active_id: `mail.channel_${mailChannelId1}`,
+                },
+            },
+        });
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-message");
+
+        await insertText(".o-mail-composer-textarea", "Test");
+        await triggerHotkey("shift+Enter");
+        await nextTick();
+        assert.containsNone(target, ".o-mail-message");
+    }
+);

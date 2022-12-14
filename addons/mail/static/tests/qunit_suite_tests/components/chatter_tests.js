@@ -1,11 +1,6 @@
 /** @odoo-module **/
 
-import {
-    afterNextRender,
-    nextAnimationFrame,
-    start,
-    startServer,
-} from "@mail/../tests/helpers/test_utils";
+import { nextAnimationFrame, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { getFixture } from "@web/../tests/helpers/utils";
 
@@ -337,78 +332,6 @@ QUnit.module("mail", (hooks) => {
                     });
 
                     assert.containsNone(target, ".o-mail-message-subject");
-                }
-            );
-
-            QUnit.skipRefactoring(
-                'post message with "CTRL-Enter" keyboard shortcut',
-                async function (assert) {
-                    assert.expect(2);
-
-                    const pyEnv = await startServer();
-                    const resPartnerId1 = pyEnv["res.partner"].create({});
-                    const { click, insertText, openView } = await start();
-                    await openView({
-                        res_id: resPartnerId1,
-                        res_model: "res.partner",
-                        views: [[false, "form"]],
-                    });
-                    assert.containsNone(
-                        document.body,
-                        ".o-mail-message",
-                        "should not have any message initially in chatter"
-                    );
-
-                    await click(".o-mail-chatter-topbar-send-message-button");
-                    await insertText(".o-mail-composer-textarea", "Test");
-                    await afterNextRender(() => {
-                        const kevt = new window.KeyboardEvent("keydown", {
-                            ctrlKey: true,
-                            key: "Enter",
-                        });
-                        document.querySelector(".o-mail-composer-textarea").dispatchEvent(kevt);
-                    });
-                    assert.containsOnce(
-                        document.body,
-                        ".o-mail-message",
-                        "should now have single message in chatter after posting message from pressing 'CTRL-Enter' in text input of composer"
-                    );
-                }
-            );
-
-            QUnit.skipRefactoring(
-                'post message with "META-Enter" keyboard shortcut',
-                async function (assert) {
-                    assert.expect(2);
-
-                    const pyEnv = await startServer();
-                    const resPartnerId1 = pyEnv["res.partner"].create({});
-                    const { click, insertText, openView } = await start();
-                    await openView({
-                        res_id: resPartnerId1,
-                        res_model: "res.partner",
-                        views: [[false, "form"]],
-                    });
-                    assert.containsNone(
-                        document.body,
-                        ".o-mail-message",
-                        "should not have any message initially in chatter"
-                    );
-
-                    await click(".o-mail-chatter-topbar-send-message-button");
-                    await insertText(".o-mail-composer-textarea", "Test");
-                    await afterNextRender(() => {
-                        const kevt = new window.KeyboardEvent("keydown", {
-                            key: "Enter",
-                            metaKey: true,
-                        });
-                        document.querySelector(".o-mail-composer-textarea").dispatchEvent(kevt);
-                    });
-                    assert.containsOnce(
-                        document.body,
-                        ".o-mail-message",
-                        "should now have single message in channel after posting message from pressing 'META-Enter' in text input of composer"
-                    );
                 }
             );
 
