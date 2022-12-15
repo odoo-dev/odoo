@@ -70,13 +70,13 @@ export class Message {
             message = new Message();
             message._state = state;
         }
-        message.update(data, thread);
+        message.update(state, data, thread);
         state.messages[message.id] = message;
         // return reactive version
         return state.messages[message.id];
     }
 
-    update(data, thread) {
+    update(state, data, thread) {
         const {
             attachment_ids: attachments = this.attachments,
             body = this.body,
@@ -127,6 +127,7 @@ export class Message {
             this.originThread.name = data.record_name;
         }
         this._updateReactions(data.messageReactionGroups);
+        state.messages[this.id] = this;
         if (thread) {
             if (!thread.messages.includes(this.id)) {
                 thread.messages.push(this.id);

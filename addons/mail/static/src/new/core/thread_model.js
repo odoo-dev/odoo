@@ -212,7 +212,14 @@ export class Thread {
     }
 
     sortMessages() {
-        this.messages.sort((msgId1, msgId2) => msgId1 - msgId2);
+        this.messages.sort((msgId1, msgId2) => {
+            const indicator = new Date(this._state.messages[msgId1].dateTime) - new Date(this._state.messages[msgId2].dateTime);
+            if (indicator) {
+                return indicator;
+            } else {
+                return msgId1 - msgId2;
+            }
+        });
     }
 
     get accessRestrictedToGroupText() {
