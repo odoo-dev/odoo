@@ -39,8 +39,6 @@ export class Message {
     parentMessage;
     /** @type {MessageReactions[]} */
     reactions = [];
-    /** @type {string} */
-    recordName;
     /** @type {number|string} */
     resId;
     /** @type {string|undefined} */
@@ -89,7 +87,6 @@ export class Message {
             message_type: type = this.type,
             model: resModel = this.resModel,
             needaction_partner_ids = this.needaction_partner_ids,
-            record_name: recordName = this.recordName,
             res_id: resId = this.resId,
             subject = this.subject,
             subtype_description: subtypeDescription = this.subtypeDescription,
@@ -118,7 +115,6 @@ export class Message {
             parentMessage: this.parentMessage
                 ? Message.insert(this._state, this.parentMessage, this.parentMessage.originThread)
                 : undefined,
-            recordName,
             resId,
             resModel,
             starred_partner_ids,
@@ -127,6 +123,9 @@ export class Message {
             trackingValues: data.trackingValues || [],
             type,
         });
+        if (data.record_name) {
+            this.originThread.name = data.record_name;
+        }
         this._updateReactions(data.messageReactionGroups);
         if (thread) {
             if (!thread.messages.includes(this.id)) {

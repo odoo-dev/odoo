@@ -22,7 +22,7 @@
                     Replying to <b t-esc="messageToReplyTo.author.name"/>
                 </span>
                 <span t-if="thread and thread.type === 'mailbox'" class="o-mail-composer-origin-thread">
-                    on: <b><t t-esc="messageToReplyTo.recordName"/></b>
+                    on: <b><t t-esc="messageToReplyTo.originThread.displayName"/></b>
                 </span>
                 <i t-if="!messageToReplyTo.needaction" class="fa fa-lg fa-times-circle rounded-circle p-0 ms-1 cursor-pointer" title="Stop replying" t-on-click="() => messaging.cancelReplyTo()"/>
             </div>

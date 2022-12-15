@@ -647,3 +647,27 @@ QUnit.test('do not post message with "Enter" keyboard shortcut', async function 
     await triggerHotkey("Enter");
     assert.containsNone(target, ".o-mail-message");
 });
+
+QUnit.test(
+    "should not display subject when subject is the same as the thread name",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({
+            name: "Salutations, voyageur",
+        });
+        pyEnv["mail.message"].create({
+            body: "not empty",
+            model: "res.partner",
+            res_id: resPartnerId1,
+            subject: "Salutations, voyageur",
+        });
+        const { openView } = await start();
+        await openView({
+            res_id: resPartnerId1,
+            res_model: "res.partner",
+            views: [[false, "form"]],
+        });
+
+        assert.containsNone(target, ".o-mail-message-subject");
+    }
+);

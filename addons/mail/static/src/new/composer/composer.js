@@ -329,7 +329,10 @@ export class Composer extends Component {
             const message = await this.messaging.postMessage(thread.localId, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
                 this.env.services.notification.add(
-                    sprintf(this.env._t('Message posted on "%s"'), message.recordName),
+                    sprintf(
+                        this.env._t('Message posted on "%s"'),
+                        message.originThread.displayName
+                    ),
                     { type: "info" }
                 );
             }
