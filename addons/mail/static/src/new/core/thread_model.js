@@ -123,7 +123,6 @@ export class Thread {
                             elem.persona.partner.id === this._state.user.partnerId)
                     ) {
                         this.chatPartnerId = elem.persona.partner.id;
-                        this.name = this._state.partners[elem.persona.partner.id].name;
                     }
                 }
                 this.customName = serverData.channel.custom_channel_name;
@@ -231,7 +230,7 @@ export class Thread {
 
     get displayName() {
         if (this.type === "chat" && this.chatPartnerId) {
-            return this.customName || this.name;
+            return this.customName || this._state.partners[this.chatPartnerId].name;
         }
         if (this.type === "group" && !this.name) {
             return this.channelMembers.map((channelMember) => channelMember.name).join(_t(", "));
