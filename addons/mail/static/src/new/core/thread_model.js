@@ -212,6 +212,33 @@ export class Thread {
         ];
     }
 
+    sortMessages() {
+        this.messages.sort((msgId1, msgId2) => msgId1 - msgId2);
+    }
+
+    get accessRestrictedToGroupText() {
+        if (!this.authorizedGroupFullName) {
+            return false;
+        }
+        return sprintf(_t('Access restricted to group "%(groupFullName)s"'), {
+            groupFullName: this.authorizedGroupFullName,
+        });
+    }
+
+    get areAllMembersLoaded() {
+        return this.memberCount === this.channelMembers.length;
+    }
+
+    get displayName() {
+        if (this.type === "chat" && this.chatPartnerId) {
+            return this.customName || this.name;
+        }
+        if (this.type === "group" && !this.name) {
+            return this.channelMembers.map((channelMember) => channelMember.name).join(_t(", "));
+        }
+        return this.name;
+    }
+
     /**
      * @returns {import("@mail/new/core/follower_model").Follower}
      */
@@ -271,32 +298,16 @@ export class Thread {
         return this._state.messages[oldestNonTransientMessageId];
     }
 
+    get hasCurrentUserAsMember() {
+        return this.channelMembers.some((channelMember) => channelMember.isCurrentUser);
+    }
+
+    get invitationLink() {
+        return `${window.location.origin}/chat/${this.id}/${this.uuid}`;
+    }
+
     get isEmpty() {
         return this.messages.length === 0;
-    }
-
-    get oldestNonTransientMessage() {
-        if (this.messages.length === 0) {
-            return undefined;
-        }
-        const oldestNonTransientMessageId = this.messages.find((messageId) =>
-            Number.isInteger(messageId)
-        );
-        return this._state.messages[oldestNonTransientMessageId];
-    }
-
-    sortMessages() {
-        this.messages.sort((msgId1, msgId2) => msgId1 - msgId2);
-    }
-
-    get onlineMembers() {
-        const orderedOnlineMembers = [];
-        for (const member of this.channelMembers) {
-            if (member.im_status === "online") {
-                orderedOnlineMembers.push(member);
-            }
-        }
-        return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
     }
 
     get offlineMembers() {
@@ -309,38 +320,27 @@ export class Thread {
         return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
     }
 
-    get areAllMembersLoaded() {
-        return this.memberCount === this.channelMembers.length;
+    get oldestNonTransientMessage() {
+        if (this.messages.length === 0) {
+            return undefined;
+        }
+        const oldestNonTransientMessageId = this.messages.find((messageId) =>
+            Number.isInteger(messageId)
+        );
+        return this._state.messages[oldestNonTransientMessageId];
+    }
+
+    get onlineMembers() {
+        const orderedOnlineMembers = [];
+        for (const member of this.channelMembers) {
+            if (member.im_status === "online") {
+                orderedOnlineMembers.push(member);
+            }
+        }
+        return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
     }
 
     get unknownMemberCount() {
         return this.memberCount - this.channelMembers.length;
-    }
-
-    get displayName() {
-        if (this.type === "chat" && this.chatPartnerId) {
-            return this.customName || this.name;
-        }
-        if (this.type === "group" && !this.name) {
-            return this.channelMembers.map((channelMember) => channelMember.name).join(_t(", "));
-        }
-        return this.name;
-    }
-
-    get invitationLink() {
-        return `${window.location.origin}/chat/${this.id}/${this.uuid}`;
-    }
-
-    get accessRestrictedToGroupText() {
-        if (!this.authorizedGroupFullName) {
-            return false;
-        }
-        return sprintf(_t('Access restricted to group "%(groupFullName)s"'), {
-            groupFullName: this.authorizedGroupFullName,
-        });
-    }
-
-    get hasCurrentUserAsMember() {
-        return this.channelMembers.some((channelMember) => channelMember.isCurrentUser);
     }
 }
