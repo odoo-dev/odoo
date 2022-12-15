@@ -127,7 +127,7 @@
                     t-on-click.stop="() => this.leaveChannel(thread)" title="Leave this channel" role="img"/>
             </t>
             <t t-if="thread.type === 'chat' and counter === 0">
-                <div t-attf-class="fa fa-times ms-1" t-on-click="() => this.unpinChannel(thread.id)" title="Unpin Conversation" role="img"/>
+                <div t-attf-class="fa fa-times ms-1" t-on-click.stop="() => this.unpinChannel(thread.id)" title="Unpin Conversation" role="img"/>
             </t>
         </div>
         <t t-if="counter > 0">
