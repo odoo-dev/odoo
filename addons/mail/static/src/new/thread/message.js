@@ -153,11 +153,11 @@ export class Message extends Component {
         return this.message.originThread.localId === this.props.threadLocalId;
     }
 
-    get isInInbox () {
+    get isInInbox() {
         if (!this.props.threadLocalId) {
             return false;
         }
-        return this.messaging.state.threads[this.props.threadLocalId].id === "inbox"; 
+        return this.messaging.state.threads[this.props.threadLocalId].id === "inbox";
     }
 
     toggleStar() {
@@ -196,8 +196,9 @@ export class Message extends Component {
 
     openChatAvatar() {
         if (this.message.author.isCurrentUser) {
-            this.messaging.openChat({ partnerId: this.message.author.id });
+            return;
         }
+        this.messaging.openChat({ partnerId: this.message.author.id });
     }
 
     /**

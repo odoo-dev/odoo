@@ -65,7 +65,7 @@ export class Partner {
     }
 
     get isCurrentUser() {
-        return this.id !== this._state.user.partnerId;
+        return this.id === this._state.user.partnerId;
     }
 
     static searchSuggestions(state, cleanedSearchTerm, threadLocalId, sort) {

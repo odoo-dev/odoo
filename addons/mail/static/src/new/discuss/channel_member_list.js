@@ -21,7 +21,8 @@ export class ChannelMemberList extends Component {
 
     openChatAvatar(member) {
         if (member.isCurrentUser) {
-            this.messaging.openChat({ partnerId: member.partner.id });
+            return;
         }
+        this.messaging.openChat({ partnerId: member.partner.id });
     }
 }
