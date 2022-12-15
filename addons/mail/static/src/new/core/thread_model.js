@@ -340,7 +340,7 @@ export class Thread {
         return orderedOnlineMembers.sort((p1, p2) => (p1.name < p2.name ? -1 : 1));
     }
 
-    get unknownMemberCount() {
+    get unknownMembersCount() {
         return this.memberCount - this.channelMembers.length;
     }
 }
