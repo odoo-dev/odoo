@@ -1090,3 +1090,66 @@ QUnit.test("post a simple message", async function (assert) {
     assert.strictEqual($message.find(".o-mail-own-name").text(), "Mitchell Admin");
     assert.strictEqual($message.find(".o-mail-message-body").text(), "Test");
 });
+
+QUnit.test("starred: unstar all", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.message"].create([
+        { body: "not empty", starred_partner_ids: [pyEnv.currentPartnerId] },
+        { body: "not empty", starred_partner_ids: [pyEnv.currentPartnerId] },
+    ]);
+    const { click, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: "mail.box_starred",
+            },
+        },
+    });
+    await openDiscuss();
+    assert.strictEqual($(target).find('button[data-mailbox="starred"] .badge').text(), "2");
+    assert.containsN(target, ".o-mail-message", 2);
+    let $unstarAll = $(target).find('.o-mail-discuss-actions button[data-action="unstar-all"]');
+    assert.notOk($unstarAll[0].disabled);
+
+    await click($unstarAll);
+    assert.containsNone(target, 'button[data-mailbox="starred"] .badge');
+    assert.containsNone(target, ".o-mail-message");
+    $unstarAll = $(target).find('.o-mail-discuss-actions button[data-action="unstar-all"]');
+    assert.ok($unstarAll[0].disabled);
+});
+
+QUnit.test("auto-focus composer on opening thread", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo User" });
+    pyEnv["mail.channel"].create([
+        { name: "General" },
+        {
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+            channel_type: "chat",
+        },
+    ]);
+    const { click, openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, 'button[data-mailbox="inbox"]');
+    assert.hasClass($(target).find('button[data-mailbox="inbox"]'), "o-active");
+    assert.containsOnce(target, ".o-mail-category-item:contains(General)");
+    assert.doesNotHaveClass($(target).find(".o-mail-category-item:contains(General)"), "o-active");
+    assert.containsOnce(target, ".o-mail-category-item:contains(Demo User)");
+    assert.doesNotHaveClass(
+        $(target).find(".o-mail-category-item:contains(Demo User)"),
+        "o-active"
+    );
+    assert.containsNone(target, ".o-mail-composer");
+
+    await click(".o-mail-category-item:contains(General)");
+    assert.hasClass($(target).find(".o-mail-category-item:contains(General)"), "o-active");
+    assert.containsOnce(target, ".o-mail-composer");
+    assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
+
+    await click(".o-mail-category-item:contains(Demo User)");
+    assert.hasClass($(target).find(".o-mail-category-item:contains(Demo User)"), "o-active");
+    assert.containsOnce(target, ".o-mail-composer");
+    assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
+});
