@@ -783,3 +783,22 @@ QUnit.test(
         assert.containsNone(target, ".o-mail-message");
     }
 );
+
+QUnit.test('post message on channel with "Enter" keyboard shortcut', async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const { insertText, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-mail-message");
+
+    // insert some HTML in editable
+    await insertText(".o-mail-composer-textarea", "Test");
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsOnce(target, ".o-mail-message");
+});

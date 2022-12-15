@@ -1050,3 +1050,43 @@ QUnit.test(
         assert.containsN(target, ".o-mail-message", 40);
     }
 );
+
+QUnit.test("post a simple message", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const { click, insertText, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+        async mockRPC(route, args) {
+            if (route === "/mail/message/post") {
+                assert.step("message_post");
+                assert.strictEqual(args.thread_model, "mail.channel");
+                assert.strictEqual(args.thread_id, mailChannelId1);
+                assert.strictEqual(args.post_data.body, "Test");
+                assert.strictEqual(args.post_data.message_type, "comment");
+                assert.strictEqual(args.post_data.subtype_xmlid, "mail.mt_comment");
+            }
+        },
+    });
+    await openDiscuss();
+    assert.containsOnce(target, '[data-empty-thread=""]');
+    assert.containsNone(target, ".o-mail-message");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+
+    // insert some HTML in editable
+    await insertText(".o-mail-composer-textarea", "Test");
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "Test");
+
+    await click(".o-mail-composer-send-button");
+    assert.verifySteps(["message_post"]);
+    assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "");
+    assert.containsOnce(target, ".o-mail-message");
+    const [postedMessageId] = pyEnv["mail.message"].search([], { order: "id DESC" });
+    const $message = $(target).find(".o-mail-message");
+    assert.strictEqual(parseInt($message[0].dataset.messageId), postedMessageId);
+    assert.strictEqual($message.find(".o-mail-own-name").text(), "Mitchell Admin");
+    assert.strictEqual($message.find(".o-mail-message-body").text(), "Test");
+});

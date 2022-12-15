@@ -690,3 +690,50 @@ QUnit.test("redirect to author (open chat)", async function (assert) {
     await click(".o-mail-discuss-content .o-mail-message .o-mail-avatar-container img");
     assert.containsOnce(target, ".o-mail-category-item.o-active:contains(Demo)");
 });
+
+QUnit.test("toggle_star message", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const mailMessageId1 = pyEnv["mail.message"].create({
+        body: "not empty",
+        model: "mail.channel",
+        res_id: mailChannelId1,
+    });
+    const { click, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+        async mockRPC(route, args) {
+            if (args.method === "toggle_message_starred") {
+                assert.step("rpc:toggle_message_starred");
+                assert.strictEqual(
+                    args.args[0][0],
+                    mailMessageId1,
+                    "should have message Id in args"
+                );
+            }
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, 'button[data-mailbox="starred"] .badge');
+    assert.containsOnce(target, ".o-mail-message");
+    let $message = $(target).find(".o-mail-message");
+    assert.hasClass($message.find(".o-mail-message-action-toggle-star"), "fa-star-o");
+    assert.containsOnce($message, ".o-mail-message-action-toggle-star");
+
+    await click(".o-mail-message-action-toggle-star");
+    assert.verifySteps(["rpc:toggle_message_starred"]);
+    assert.strictEqual($(target).find('button[data-mailbox="starred"] .badge').text(), "1");
+    assert.containsOnce(target, ".o-mail-message");
+    $message = $(target).find(".o-mail-message");
+    assert.hasClass($message.find(".o-mail-message-action-toggle-star"), "fa-star");
+
+    await click(".o-mail-message-action-toggle-star");
+    assert.verifySteps(["rpc:toggle_message_starred"]);
+    assert.containsNone(target, 'button[data-mailbox="starred"] .badge');
+    assert.containsOnce(target, ".o-mail-message");
+    $message = $(target).find(".o-mail-message");
+    assert.hasClass($message.find(".o-mail-message-action-toggle-star"), "fa-star-o");
+});
