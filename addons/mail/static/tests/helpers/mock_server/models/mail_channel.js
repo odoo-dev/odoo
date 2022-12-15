@@ -628,7 +628,7 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
         if (channel.channel_type === "channel") {
             this._mockMailChannelActionUnfollow([channel.id]);
         } else {
-            this._mockMailChannelChannelPin(channel.uuid, false);
+            this._mockMailChannelChannelPin([channel.id], false);
         }
     },
     /**

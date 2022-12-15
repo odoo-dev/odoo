@@ -2,6 +2,8 @@
 
 import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 
+import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
+
 import {
     click,
     getFixture,
@@ -801,4 +803,65 @@ QUnit.test('post message on channel with "Enter" keyboard shortcut', async funct
     await insertText(".o-mail-composer-textarea", "Test");
     await afterNextRender(() => triggerHotkey("Enter"));
     assert.containsOnce(target, ".o-mail-message");
+});
+
+QUnit.test("leave command on channel", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({ name: "general" });
+    const { insertText, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId}`,
+            },
+        },
+        services: {
+            notification: makeFakeNotificationService((message) => {
+                assert.step(message);
+            }),
+        },
+    });
+    await openDiscuss();
+    assert.hasClass(
+        $(target).find(`.o-mail-category-item[data-channel-id="${mailChannelId}"]`),
+        "o-active"
+    );
+    await insertText(".o-mail-composer-textarea", "/leave");
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsNone(target, `.o-mail-category-item[data-channel-id="${mailChannelId}"]`);
+    assert.containsOnce(target, ".o-mail-discuss-no-thread");
+    assert.verifySteps(["You unsubscribed from general."]);
+});
+
+QUnit.test("leave command on chat", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId = pyEnv["res.partner"].create({ name: "Chuck Norris" });
+    const mailChannelId = pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId }],
+        ],
+        channel_type: "chat",
+    });
+    const { insertText, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId}`,
+            },
+        },
+        services: {
+            notification: makeFakeNotificationService((message) => {
+                assert.step(message);
+            }),
+        },
+    });
+    await openDiscuss();
+    assert.hasClass(
+        $(target).find(`.o-mail-category-item[data-channel-id="${mailChannelId}"]`),
+        "o-active"
+    );
+    await insertText(".o-mail-composer-textarea", "/leave");
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsNone(target, `.o-mail-category-item[data-channel-id="${mailChannelId}"]`);
+    assert.containsOnce(target, ".o-mail-discuss-no-thread");
+    assert.verifySteps(["You unpinned your conversation with Chuck Norris"]);
 });

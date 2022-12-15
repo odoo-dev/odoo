@@ -14,6 +14,7 @@ import { LinkPreview } from "./link_preview_model";
 import { Message } from "./message_model";
 import { CannedResponse } from "./canned_response_model";
 import { browser } from "@web/core/browser/browser";
+import { sprintf } from "@web/core/utils/strings";
 
 const FETCH_MSG_LIMIT = 30;
 
@@ -308,6 +309,22 @@ export class Messaging {
                         Message.insert(this.state, data, this.state.threads[id]);
                     }
                     break;
+                case "mail.channel/leave":
+                    {
+                        const thread = Thread.insert(this.state, {
+                            ...notif.payload,
+                            model: "mail.channel",
+                        });
+                        removeFromArray(this.state.discuss.channels.threads, thread.localId);
+                        if (thread.localId === this.state.discuss.threadLocalId) {
+                            this.state.discuss.threadLocalId = undefined;
+                        }
+                        this.notification.add(
+                            sprintf(this.env._t("You unsubscribed from %s."), thread.displayName),
+                            { type: "info" }
+                        );
+                    }
+                    break;
                 case "mail.record/insert":
                     {
                         if (notif.payload.Partner) {
@@ -449,9 +466,21 @@ export class Messaging {
                     break;
                 }
                 case "mail.channel/unpin": {
-                    this.state.threads[
-                        Thread.createLocalId({ model: "mail.channel", id: notif.payload.id })
-                    ]?.remove();
+                    const thread =
+                        this.state.threads[
+                            Thread.createLocalId({ model: "mail.channel", id: notif.payload.id })
+                        ];
+                    if (!thread) {
+                        return;
+                    }
+                    this.state.threads[thread.localId]?.remove();
+                    this.notification.add(
+                        sprintf(
+                            this.env._t("You unpinned your conversation with %s"),
+                            thread.displayName
+                        ),
+                        { type: "info" }
+                    );
                     break;
                 }
             }
