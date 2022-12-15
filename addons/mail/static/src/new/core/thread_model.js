@@ -174,8 +174,8 @@ export class Thread {
             if (!isAPublicChannel && isBPublicChannel) {
                 return 1;
             }
-            const isMemberOfA = a.isCurrentUserAsMember;
-            const isMemberOfB = b.isCurrentUserAsMember;
+            const isMemberOfA = a.hasCurrentUserAsMember;
+            const isMemberOfB = b.hasCurrentUserAsMember;
             if (isMemberOfA && !isMemberOfB) {
                 return -1;
             }
@@ -340,7 +340,7 @@ export class Thread {
         });
     }
 
-    get isCurrentUserAsMember() {
+    get hasCurrentUserAsMember() {
         return this.channelMembers.some((channelMember) => channelMember.isCurrentUser);
     }
 }
