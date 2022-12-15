@@ -636,7 +636,7 @@ export class Messaging {
                 body: await prettifyMessageContent(body, validMentions),
                 attachment_ids: attachments.map(({ id }) => id),
                 message_type: "comment",
-                partner_ids: [],
+                partner_ids: validMentions.partners.map((partner) => partner.id),
                 subtype_xmlid: subtype,
             },
             thread_id: thread.id,
@@ -648,8 +648,6 @@ export class Messaging {
         if (thread.type === "chatter") {
             params.thread_id = thread.id;
             params.thread_model = thread.model;
-            // need to get suggested recipients here, if !isNote...
-            params.post_data.partner_ids = [];
         } else {
             const tmpId = `pending${this.nextId++}`;
             const tmpData = {

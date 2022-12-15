@@ -8,6 +8,7 @@ import { App, EventBus } from "@odoo/owl";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { fileUploadService } from "@web/core/file_upload/file_upload_service";
+import { effectService } from "@web/core/effects/effect_service";
 
 const { afterNextRender } = App;
 
@@ -54,6 +55,8 @@ export function makeTestEnv(rpc) {
         bus_service,
         im_status,
     });
+    const effect = effectService.start(env);
+    env.services.effect = effect;
     env.services["mail.messaging"] = messaging;
     const activity = activityService.start(env, {
         action,

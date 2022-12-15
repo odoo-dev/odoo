@@ -9,11 +9,20 @@ import { useMessageHighlight } from "@mail/new/utils/hooks";
 import { Composer } from "../composer/composer";
 import { CallUI } from "../rtc/call_ui";
 import { ChannelMemberList } from "./channel_member_list";
-import { Component, onWillStart, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
+import {
+    Component,
+    onWillStart,
+    onMounted,
+    onWillUnmount,
+    useRef,
+    useState,
+    useEffect,
+} from "@odoo/owl";
 import { CallSettings } from "../rtc/call_settings";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import { ChannelInvitationForm } from "./channel_invitation_form";
+import { _t } from "@web/core/l10n/translation";
 
 export class Discuss extends Component {
     static components = {
@@ -46,6 +55,24 @@ export class Discuss extends Component {
             activeMode: "",
         });
         this.orm = useService("orm");
+        this.effect = useService("effect");
+        this.prevInboxCounter = this.messaging.state.discuss.inbox.counter;
+        useEffect(
+            () => {
+                if (
+                    this.prevInboxCounter !== this.messaging.state.discuss.inbox.counter &&
+                    this.messaging.state.discuss.inbox.counter === 0
+                ) {
+                    this.effect.add({
+                        message: _t("Congratulations, your inbox is empty!"),
+                        type: "rainbow_man",
+                        fadeout: "fast",
+                    });
+                }
+                this.prevInboxCounter = this.messaging.state.discuss.inbox.counter;
+            },
+            () => [this.messaging.state.discuss.inbox.counter]
+        );
         onWillStart(() => this.messaging.isReady);
         onMounted(() => (this.messaging.state.discuss.isActive = true));
         onWillUnmount(() => (this.messaging.state.discuss.isActive = false));

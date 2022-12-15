@@ -23,6 +23,7 @@ import { fileUploadService } from "@web/core/file_upload/file_upload_service";
 import { registry } from "@web/core/registry";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { createWebClient } from "@web/../tests/webclient/helpers";
+import { effectService } from "@web/core/effects/effect_service";
 
 const ROUTES_TO_IGNORE = [
     "/web/webclient/load_menus",
@@ -102,6 +103,7 @@ function setupMessagingServiceRegistries({
     services = {
         bus_service: busService,
         im_status: imStatusService,
+        effect: effectService,
         "mail.activity": activityService,
         "mail.messaging": newMessagingService,
         messaging: messagingService,
