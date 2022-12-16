@@ -16,6 +16,7 @@ import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
+import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 
 let target;
 
@@ -1152,4 +1153,133 @@ QUnit.test("auto-focus composer on opening thread", async function (assert) {
     assert.hasClass($(target).find(".o-mail-category-item:contains(Demo User)"), "o-active");
     assert.containsOnce(target, ".o-mail-composer");
     assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
+});
+
+QUnit.test(
+    "receive new chat message: out of odoo focus (notification, channel)",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ channel_type: "chat" });
+        const { env, openDiscuss } = await start({
+            services: {
+                presence: makeFakePresenceService({ isOdooFocused: () => false }),
+            },
+        });
+        await openDiscuss();
+        env.services.bus_service.addEventListener("set_title_part", ({ detail: payload }) => {
+            assert.step("set_title_part");
+            assert.strictEqual(payload.part, "_chat");
+            assert.strictEqual(payload.title, "1 Message");
+        });
+        const mailChannel1 = pyEnv["mail.channel"].searchRead([["id", "=", mailChannelId1]])[0];
+        // simulate receiving a new message with odoo focused
+        pyEnv["bus.bus"]._sendone(mailChannel1, "mail.channel/new_message", {
+            id: mailChannelId1,
+            message: {
+                id: 126,
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            },
+        });
+        await nextTick();
+        assert.verifySteps(["set_title_part"]);
+    }
+);
+
+QUnit.test(
+    "receive new chat message: out of odoo focus (notification, chat)",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ channel_type: "chat" });
+        const { env, openDiscuss } = await start({
+            services: {
+                presence: makeFakePresenceService({ isOdooFocused: () => false }),
+            },
+        });
+        await openDiscuss();
+        env.services.bus_service.addEventListener("set_title_part", ({ detail: payload }) => {
+            assert.step("set_title_part");
+            assert.strictEqual(payload.part, "_chat");
+            assert.strictEqual(payload.title, "1 Message");
+        });
+        const mailChannel1 = pyEnv["mail.channel"].searchRead([["id", "=", mailChannelId1]])[0];
+        // simulate receiving a new message with odoo focused
+        pyEnv["bus.bus"]._sendone(mailChannel1, "mail.channel/new_message", {
+            id: mailChannelId1,
+            message: {
+                id: 126,
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            },
+        });
+        await nextTick();
+        assert.verifySteps(["set_title_part"]);
+    }
+);
+
+QUnit.test("receive new chat messages: out of odoo focus (tab title)", async function (assert) {
+    let step = 0;
+    const pyEnv = await startServer();
+    const [mailChannelId1, mailChannelId2] = pyEnv["mail.channel"].create([
+        { channel_type: "chat" },
+        { channel_type: "chat" },
+    ]);
+    const { env, openDiscuss } = await start({
+        services: {
+            presence: makeFakePresenceService({ isOdooFocused: () => false }),
+        },
+    });
+    await openDiscuss();
+    env.services.bus_service.addEventListener("set_title_part", ({ detail: payload }) => {
+        step++;
+        assert.step("set_title_part");
+        assert.strictEqual(payload.part, "_chat");
+        if (step === 1) {
+            assert.strictEqual(payload.title, "1 Message");
+        }
+        if (step === 2) {
+            assert.strictEqual(payload.title, "2 Messages");
+        }
+        if (step === 3) {
+            assert.strictEqual(payload.title, "3 Messages");
+        }
+    });
+    const mailChannel1 = pyEnv["mail.channel"].searchRead([["id", "=", mailChannelId1]])[0];
+    // simulate receiving a new message in chat 1 with odoo focused
+    pyEnv["bus.bus"]._sendone(mailChannel1, "mail.channel/new_message", {
+        id: mailChannelId1,
+        message: {
+            id: 126,
+            model: "mail.channel",
+            res_id: mailChannelId1,
+        },
+    });
+    await nextTick();
+    assert.verifySteps(["set_title_part"]);
+
+    const mailChannel2 = pyEnv["mail.channel"].searchRead([["id", "=", mailChannelId2]])[0];
+    // simulate receiving a new message in chat 2 with odoo focused
+    pyEnv["bus.bus"]._sendone(mailChannel2, "mail.channel/new_message", {
+        id: mailChannelId2,
+        message: {
+            id: 127,
+            model: "mail.channel",
+            res_id: mailChannelId2,
+        },
+    });
+    await nextTick();
+    assert.verifySteps(["set_title_part"]);
+
+    // simulate receiving another new message in chat 2 with odoo focused
+    pyEnv["bus.bus"]._sendone(mailChannel2, "mail.channel/new_message", {
+        id: mailChannelId2,
+        message: {
+            id: 128,
+            model: "mail.channel",
+            res_id: mailChannelId2,
+        },
+    });
+    await nextTick();
+    await nextTick();
+    assert.verifySteps(["set_title_part"]);
 });

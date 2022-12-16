@@ -4,9 +4,32 @@ import { Messaging, asyncMethods } from "./core/messaging";
 import { Thread } from "./core/thread_model";
 
 export const messagingService = {
-    dependencies: ["rpc", "orm", "user", "router", "bus_service", "im_status", "notification"],
+    dependencies: [
+        "rpc",
+        "orm",
+        "user",
+        "router",
+        "bus_service",
+        "im_status",
+        "notification",
+        "multi_tab",
+        "presence",
+    ],
     async: asyncMethods,
-    start(env, { rpc, orm, user, router, bus_service: bus, im_status, notification }) {
+    start(
+        env,
+        {
+            rpc,
+            orm,
+            user,
+            router,
+            bus_service: bus,
+            im_status,
+            notification,
+            multi_tab: multiTab,
+            presence,
+        }
+    ) {
         // compute initial discuss thread
         let threadLocalId = Thread.createLocalId({ model: "mail.box", id: "inbox" });
         const activeId = router.current.hash.active_id;
@@ -26,9 +49,12 @@ export const messagingService = {
             orm,
             user,
             router,
+            bus,
             threadLocalId,
             im_status,
-            notification
+            notification,
+            multiTab,
+            presence
         );
         messaging.initialize();
         bus.addEventListener("notification", (notifEvent) => {

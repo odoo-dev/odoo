@@ -9,6 +9,7 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { fileUploadService } from "@web/core/file_upload/file_upload_service";
 import { effectService } from "@web/core/effects/effect_service";
+import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 
 const { afterNextRender } = App;
 
@@ -28,6 +29,7 @@ export function makeTestEnv(rpc) {
     const bus_service = new EventBus();
     const action = {};
     const env = {
+        bus: new EventBus(),
         _t: (s) => s,
         services: {
             rpc,
@@ -39,6 +41,7 @@ export function makeTestEnv(rpc) {
             ui,
             popover: {},
             "mail.activity": {},
+            presence: makeFakePresenceService(),
         },
     };
     const hotkey = hotkeyService.start(env, { ui });

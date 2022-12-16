@@ -4,7 +4,12 @@ import { markup, reactive } from "@odoo/owl";
 import { Deferred } from "@web/core/utils/concurrency";
 import { memoize } from "@web/core/utils/functions";
 import { registry } from "@web/core/registry";
-import { prettifyMessageContent, convertBrToLineBreak, cleanTerm } from "@mail/new/utils/format";
+import {
+    prettifyMessageContent,
+    convertBrToLineBreak,
+    cleanTerm,
+    htmlToTextContentInline,
+} from "@mail/new/utils/format";
 import { removeFromArray } from "@mail/new/utils/arrays";
 import { ChatWindow } from "./chat_window_model";
 import { Thread } from "./thread_model";
@@ -15,7 +20,10 @@ import { Message } from "./message_model";
 import { CannedResponse } from "./canned_response_model";
 import { browser } from "@web/core/browser/browser";
 import { sprintf } from "@web/core/utils/strings";
+import { _t } from "@web/core/l10n/translation";
+import { url } from "@web/core/utils/urls";
 
+const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 const FETCH_MSG_LIMIT = 30;
 
 const commandRegistry = registry.category("mail.channel_commands");
@@ -44,16 +52,40 @@ export class Messaging {
         this.setup(...args);
     }
 
-    setup(env, rpc, orm, user, router, initialThreadLocalId, im_status, notification) {
+    setup(
+        env,
+        rpc,
+        orm,
+        user,
+        router,
+        bus,
+        initialThreadLocalId,
+        im_status,
+        notification,
+        multiTab,
+        presence
+    ) {
         this.env = env;
         this.rpc = rpc;
         this.orm = orm;
         this.notification = notification;
         this.nextId = 1;
         this.router = router;
+        this.bus = bus;
+        this.multiTab = multiTab;
+        this.presence = presence;
         this.isReady = new Deferred();
         this.imStatusService = im_status;
-
+        this.outOfFocusAudio = new Audio();
+        this.outOfFocusAudio.src = this.outOfFocusAudio.canPlayType("audio/ogg; codecs=vorbis")
+            ? url("/mail/static/src/audio/ting.ogg")
+            : url("/mail/static/src/audio/ting.mp3");
+        this.bus.addEventListener("window_focus", () => {
+            this.state.outOfFocusUnreadMessageCounter = 0;
+            this.bus.trigger("set_title_part", {
+                part: "_chat",
+            });
+        });
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
         this.state = reactive({
             /** @type Object<number, []> */
@@ -79,6 +111,7 @@ export class Messaging {
             users: {},
             internalUserGroupId: null,
             registeredImStatusPartners: this.registeredImStatusPartners,
+            outOfFocusUnreadMessageCounter: 0,
             // messaging menu
             menu: {
                 counter: 5, // sounds about right.
@@ -298,6 +331,116 @@ export class Messaging {
     // process notifications received by the bus
     // -------------------------------------------------------------------------
 
+    notifyOutOfFocusMessage(message, channel) {
+        const author = message.author;
+        let notificationTitle;
+        if (!author) {
+            notificationTitle = _t("New message");
+        } else {
+            if (channel.channel_type === "channel") {
+                notificationTitle = sprintf(_t("%(author name)s from %(channel name)s"), {
+                    "author name": author.name,
+                    "channel name": channel.displayName,
+                });
+            } else {
+                notificationTitle = author.name;
+            }
+        }
+        const notificationContent = escape(
+            htmlToTextContentInline(message.body).substr(0, PREVIEW_MSG_MAX_SIZE)
+        );
+        this.sendNotification({
+            message: notificationContent,
+            title: notificationTitle,
+            type: "info",
+        });
+        this.state.outOfFocusUnreadMessageCounter++;
+        const titlePattern =
+            this.state.outOfFocusUnreadMessageCounter === 1 ? _t("%s Message") : _t("%s Messages");
+        this.bus.trigger("set_title_part", {
+            part: "_chat",
+            title: sprintf(titlePattern, this.state.outOfFocusUnreadMessageCounter),
+        });
+    }
+
+    /**
+     * Send a notification, preferably a native one. If native
+     * notifications are disable or unavailable on the current
+     * platform, fallback on the notification service.
+     *
+     * @param {Object} param0
+     * @param {string} [param0.message] The body of the
+     * notification.
+     * @param {string} [param0.title] The title of the notification.
+     * @param {string} [param0.type] The type to be passed to the no
+     * service when native notifications can't be sent.
+     */
+    sendNotification({ message, title, type }) {
+        if (!this.canSendNativeNotification) {
+            this.sendOdooNotification(message, { title, type });
+            return;
+        }
+        if (!this.multiTab.isOnMainTab()) {
+            return;
+        }
+        try {
+            this.sendNativeNotification(title, message);
+        } catch (error) {
+            // Notification without Serviceworker in Chrome Android doesn't works anymore
+            // So we fallback to the notification service in this case
+            // https://bugs.chromium.org/p/chromium/issues/detail?id=481856
+            if (error.message.includes("ServiceWorkerRegistration")) {
+                this.sendOdooNotification(message, { title, type });
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    /**
+     * @param {string} message
+     * @param {Object} options
+     */
+    async sendOdooNotification(message, options) {
+        this.notification.add(message, options);
+        if (this.canPlayAudio && this.multiTab.isOnMainTab()) {
+            try {
+                await this.outOfFocusAudio.play();
+            } catch {
+                // Ignore errors due to the user not having interracted
+                // with the page before playing the sound.
+            }
+        }
+    }
+
+    /**
+     * @param {string} title
+     * @param {string} message
+     */
+    sendNativeNotification(title, message) {
+        const notification = new Notification(
+            // The native Notification API works with plain text and not HTML
+            // unescaping is safe because done only at the **last** step
+            _.unescape(title),
+            {
+                body: _.unescape(message),
+                icon: this.icon,
+            }
+        );
+        notification.addEventListener("click", ({ target: notification }) => {
+            window.focus();
+            notification.close();
+        });
+    }
+
+    get canPlayAudio() {
+        return typeof Audio !== "undefined";
+    }
+
+    get canSendNativeNotification() {
+        return Boolean(browser.Notification && browser.Notification.permission === "granted");
+    }
+
     handleNotification(notifications) {
         console.log("notifications received", notifications);
         for (const notif of notifications) {
@@ -305,8 +448,17 @@ export class Messaging {
                 case "mail.channel/new_message":
                     {
                         const { id, message } = notif.payload;
+                        const channel =
+                            this.state.threads[Thread.createLocalId({ id, model: "mail.channel" })];
                         const data = Object.assign(message, { body: markup(message.body) });
-                        Message.insert(this.state, data, this.state.threads[id]);
+                        Message.insert(this.state, data, channel);
+                        if (
+                            !this.presence.isOdooFocused() &&
+                            channel.type === "chat" &&
+                            channel.chatPartnerId !== this.state.partnerRoot.id
+                        ) {
+                            this.notifyOutOfFocusMessage(message, channel);
+                        }
                     }
                     break;
                 case "mail.channel/leave":
@@ -1197,6 +1349,6 @@ export class Messaging {
 
     notify(params) {
         const { message, ...options } = params;
-        return this.env.services.notification.add(message, options);
+        return this.notification.add(message, options);
     }
 }
