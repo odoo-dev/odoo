@@ -91,9 +91,7 @@ export class Message extends Component {
                             content === emoji &&
                             partners.find(({ id }) => id === this.user.partnerId)
                     );
-                    if (reaction) {
-                        this.messaging.removeReaction(reaction);
-                    } else {
+                    if (!reaction) {
                         this.messaging.addReaction(this.message.id, emoji);
                     }
                 },

@@ -517,7 +517,7 @@ QUnit.test("Reaction summary", async (assert) => {
     }
 });
 
-QUnit.test("Toggle reaction from the emoji picker", async (assert) => {
+QUnit.test("Add the same reaction twice from the emoji picker", async (assert) => {
     const pyEnv = await startServer();
     const channelId = pyEnv["mail.channel"].create({
         channel_type: "channel",
@@ -541,7 +541,7 @@ QUnit.test("Toggle reaction from the emoji picker", async (assert) => {
     await click(".o-emoji[data-codepoints='😅']");
     await click("i[aria-label='Add a Reaction']");
     await click(".o-emoji[data-codepoints='😅']");
-    assert.containsNone(target, ".o-mail-message-reaction:contains('😅')");
+    assert.containsOnce(target, ".o-mail-message-reaction:contains('😅')");
 });
 
 QUnit.test("basic rendering of message", async function (assert) {
