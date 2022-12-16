@@ -168,7 +168,12 @@ export class Composer extends Component {
             return this.props.placeholder;
         }
         if (this.thread) {
-            return sprintf(this.env._t("Message #%(thread name)s…"), {
+            if (this.thread.type === "channel") {
+                return sprintf(this.env._t("Message #%(thread name)s…"), {
+                    "thread name": this.thread.displayName,
+                });
+            }
+            return sprintf(this.env._t("Message %(thread name)s…"), {
                 "thread name": this.thread.displayName,
             });
         }

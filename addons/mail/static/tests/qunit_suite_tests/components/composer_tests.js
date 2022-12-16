@@ -11,15 +11,13 @@ import {
 } from "@mail/../tests/helpers/test_utils";
 
 import { file, makeTestPromise } from "web.test_utils";
-import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { Composer } from "@mail/new/composer/composer";
 
 const { createFile, inputFiles } = file;
-let target;
 
 QUnit.module("mail", (hooks) => {
     hooks.beforeEach(async () => {
-        target = getFixture();
         // Simulate real user interactions
         patchWithCleanup(Composer.prototype, {
             isEventTrusted() {
@@ -29,34 +27,6 @@ QUnit.module("mail", (hooks) => {
     });
     QUnit.module("components", {}, function () {
         QUnit.module("composer_tests.js");
-
-        QUnit.skipRefactoring(
-            "composer text input placeholder should contain correspondent name when thread has exactly one correspondent",
-            async function (assert) {
-                assert.expect(1);
-
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({ name: "Marc Demo" });
-                const mailChannelId1 = pyEnv["mail.channel"].create({
-                    channel_member_ids: [
-                        [0, 0, { partner_id: pyEnv.currentPartnerId }],
-                        [0, 0, { partner_id: resPartnerId1 }],
-                    ],
-                    channel_type: "chat",
-                });
-                const { openDiscuss } = await start({
-                    discuss: {
-                        context: { active_id: mailChannelId1 },
-                    },
-                });
-                await openDiscuss();
-                assert.hasAttrValue(
-                    target.querySelector(".o-mail-composer-textarea"),
-                    "placeholder",
-                    "Message Marc Demo…"
-                );
-            }
-        );
 
         QUnit.skipRefactoring("mention a partner", async function (assert) {
             assert.expect(4);

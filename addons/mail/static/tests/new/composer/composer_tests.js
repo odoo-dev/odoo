@@ -917,3 +917,29 @@ QUnit.test("Can post suggestions", async function (assert) {
     await afterNextRender(() => triggerHotkey("Enter"));
     assert.containsOnce(target, ".o-mail-message .o_channel_redirect");
 });
+
+QUnit.test(
+    "composer text input placeholder should contain correspondent name when thread has exactly one correspondent",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "Marc Demo" });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+            channel_type: "chat",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.hasAttrValue(
+            target.querySelector(".o-mail-composer-textarea"),
+            "placeholder",
+            "Message Marc Demo…"
+        );
+    }
+);
