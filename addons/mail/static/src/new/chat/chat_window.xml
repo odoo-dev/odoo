@@ -29,7 +29,7 @@
                     <i class="fa fa-expand"/>
                 </div>
             </t>
-            <div class="o-mail-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Close chat window" t-on-click.stop="() => props.chatWindow.close()">
+            <div class="o-mail-command d-flex align-items-center h-100 px-3 opacity-50 opacity-100-hover" title="Close chat window" t-on-click.stop="() => this.close()">
                 <i class="fa fa-close"></i>
             </div>
         </div>
