@@ -3,18 +3,18 @@
 
 <t t-name="mail.activity" owl="1">
     <t t-set="activity" t-value="props.data"/>
-    <div class="d-flex px-4 py-1 mb-2">
+    <div class="o-mail-activity d-flex px-4 py-1 mb-2">
         <div class="o-mail-activity-sidebar">
-            <img class="w-100 h-100 rounded-circle" t-attf-src="/web/image/res.users/{{activity.user_id[0]}}/avatar_128"/>
+            <img class="o-mail-activity-user-avatar w-100 h-100 rounded-circle" t-attf-src="/web/image/res.users/{{activity.user_id[0]}}/avatar_128"/>
         </div>
         <div class="flex-grow px-3">
-            <div>
-                <span class="fw-bolder text-success" t-if="delay === 1">Tomorrow:</span>
-                <span class="fw-bolder text-success" t-elif="delay gt 0">Due in <t t-esc="delay"/> days:</span>
-                <span class="fw-bolder text-danger" t-elif="delay === -1">Yesterday:</span>
-                <span class="fw-bolder text-danger" t-elif="delay lt 0"><t t-esc="-delay"/> days overdue:</span>
-                <span class="fw-bolder text-warning" t-else="">Today:</span>
-                <span class="o-mail-activity-name fw-bolder px-2"><t t-esc="activity.display_name"/></span>
+            <div class="o-mail-activity-info">
+                <span class="o-mail-activity-due-date fw-bolder text-success" t-if="delay === 1">Tomorrow:</span>
+                <span class="o-mail-activity-due-date fw-bolder text-success" t-elif="delay gt 0">Due in <t t-esc="delay"/> days:</span>
+                <span class="o-mail-activity-due-date fw-bolder text-danger" t-elif="delay === -1">Yesterday:</span>
+                <span class="o-mail-activity-due-date fw-bolder text-danger" t-elif="delay lt 0"><t t-esc="-delay"/> days overdue:</span>
+                <span class="o-mail-activity-due-date fw-bolder text-warning" t-else="">Today:</span>
+                <span class="o-mail-activity-name fw-bolder px-2"><t t-esc="displayName"/></span>
                 <span class="o-mail-activity-user px-1">for <t t-esc="activity.user_id[1]"/></span>
                 <i class="o-mail-activity-toggle fa fa-info-circle btn-link btn-primary cursor-pointer ms-1" role="img" title="Info" aria-label="Info" t-on-click="toggleDetails"></i>
             </div>
@@ -28,7 +28,36 @@
                     </tbody>
                 </table>
             </div>
-            <div>
+            <div t-if="activity.note" class="o-activity-note" t-out="activity.note"/>
+            <div t-if="activity.mail_template_ids.length > 0" class="o-mail-activity-mail-templates">
+                <t t-foreach="activity.mail_template_ids" t-as="mailTemplate" t-key="mailTemplate.id">
+                    <div class="d-flex align-items-baseline flex-wrap">
+                        <div class="text-truncate">
+                            <i class="fa fa-envelope-o" title="Mail" role="img"/>
+                            <span class="o-mail-activity-mail-template-name ms-2" t-esc="mailTemplate.name"/>
+                            <span>:</span>
+                        </div>
+                        <div class="d-flex align-items-baseline">
+                            <button
+                                class="o-mail-activity-mail-template-preview btn btn-link py-0"
+                                t-att-data-mail-template-id="mailTemplate.id"
+                                t-on-click="(ev) => this.onClickPreview(ev, mailTemplate)"
+                            >
+                                Preview
+                            </button>
+                            <em class="text-500">or</em>
+                            <button
+                                class="o-mail-activity-mail-template-send btn btn-link py-0"
+                                t-att-data-mail-template-id="mailTemplate.id"
+                                t-on-click="(ev) => this.onClickSend(ev, mailTemplate)"
+                            >
+                                Send Now
+                            </button>
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <div t-if="activity.can_write">
                 <span class="btn btn-link btn-primary p-0 me-3" t-on-click="markAsDone"><i class="fa fa-check"/> Mark Done</span>
                 <FileUploader t-if="activity.activity_category === 'upload_file'" onUploaded.bind="onFileUploaded">
                     <t t-set-slot="toggler">

@@ -54,6 +54,9 @@ patch(MockServer.prototype, "mail/models/mail_activity", {
                 record.display_name = activityType.name;
                 record.icon = activityType.icon;
             }
+            if (record.summary) {
+                record.display_name = record.summary;
+            }
             return record;
         });
         return res;

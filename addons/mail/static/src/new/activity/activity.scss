@@ -2,3 +2,7 @@
     width: $o-mail-thread-avatar-size;
     height: $o-mail-thread-avatar-size;
 }
+
+.o-activity-note p {
+    margin-bottom: map-get($spacers, 0);
+}

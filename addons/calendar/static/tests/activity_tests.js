@@ -37,7 +37,7 @@ QUnit.skipRefactoring('activity click on Reschedule', async function (assert) {
         },
     );
 
-    await click('.o_ActivityView_editButton');
+    await click('.btn:contains('Edit')');
     assert.containsOnce(
         document.body,
         '.o_calendar_view',

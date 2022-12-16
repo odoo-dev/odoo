@@ -9,8 +9,8 @@ QUnit.module("mail", {}, function () {
     QUnit.module("components", {}, function () {
         QUnit.module("activity_tests.js");
 
-        QUnit.skipRefactoring("activity simplest layout", async function (assert) {
-            assert.expect(12);
+        QUnit.test("activity simplest layout", async function (assert) {
+            assert.expect(11);
 
             const pyEnv = await startServer();
             const resPartnerId1 = pyEnv["res.partner"].create({});
@@ -25,58 +25,53 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_sidebar").length,
+                document.querySelectorAll(".o-mail-activity-sidebar").length,
                 1,
                 "should have activity sidebar"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_core").length,
-                1,
-                "should have activity core"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_user").length,
+                document.querySelectorAll(".o-mail-activity-user").length,
                 1,
                 "should have activity user"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_info").length,
+                document.querySelectorAll(".o-mail-activity-info").length,
                 1,
                 "should have activity info"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_note").length,
+                document.querySelectorAll(".o-activity-note").length,
                 0,
                 "should not have activity note"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_details").length,
+                document.querySelectorAll(".o-mail-activity-details").length,
                 0,
                 "should not have activity details"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_mailTemplates").length,
+                document.querySelectorAll(".o-mail-activity-mail-templates").length,
                 0,
                 "should not have activity mail templates"
             );
-            assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_editButton").length,
-                0,
+            assert.containsNone(
+                document.body,
+                ".btn:contains('Edit')",
                 "should not have activity Edit button"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_cancelButton").length,
+                document.querySelectorAll(".o-mail-activity-unlink-button").length,
                 0,
                 "should not have activity Cancel button"
             );
-            assert.strictEqual(
-                document.querySelectorAll(".btn:contains('Mark Done')").length,
-                0,
+            assert.containsNone(
+                document.body,
+                ".btn:contains('Mark Done')",
                 "should not have activity Mark as Done button"
             );
             assert.strictEqual(
@@ -86,13 +81,13 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("activity with note layout", async function (assert) {
+        QUnit.test("activity with note layout", async function (assert) {
             assert.expect(3);
 
             const pyEnv = await startServer();
             const resPartnerId1 = pyEnv["res.partner"].create({});
             pyEnv["mail.activity"].create({
-                note: "There is no good or bad note",
+                note: "<p>There is no good or bad note</p>",
                 res_id: resPartnerId1,
                 res_model: "res.partner",
             });
@@ -103,115 +98,109 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_note").length,
+                document.querySelectorAll(".o-activity-note").length,
                 1,
                 "should have activity note"
             );
             assert.strictEqual(
-                document.querySelector(".o_ActivityView_note").textContent,
+                document.querySelector(".o-activity-note").textContent,
                 "There is no good or bad note",
                 "activity note should be 'There is no good or bad note'"
             );
         });
 
-        QUnit.skipRefactoring(
-            "activity info layout when planned after tomorrow",
-            async function (assert) {
-                assert.expect(4);
+        QUnit.test("activity info layout when planned after tomorrow", async function (assert) {
+            assert.expect(4);
 
-                const today = new Date();
-                const fiveDaysFromNow = new Date();
-                fiveDaysFromNow.setDate(today.getDate() + 5);
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                pyEnv["mail.activity"].create({
-                    date_deadline: date_to_str(fiveDaysFromNow),
-                    res_id: resPartnerId1,
-                    res_model: "res.partner",
-                    state: "planned",
-                });
-                const { openView } = await start();
-                await openView({
-                    res_model: "res.partner",
-                    res_id: resPartnerId1,
-                    views: [[false, "form"]],
-                });
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ActivityView").length,
-                    1,
-                    "should have activity component"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ActivityView_dueDateText").length,
-                    1,
-                    "should have activity delay"
-                );
-                assert.ok(
-                    document
-                        .querySelector(".o_ActivityView_dueDateText")
-                        .classList.contains("text-success"),
-                    "activity delay should have the right color modifier class (text-success)"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_ActivityView_dueDateText").textContent,
-                    "Due in 5 days:",
-                    "activity delay should have 'Due in 5 days:' as label"
-                );
-            }
-        );
+            const today = new Date();
+            const fiveDaysFromNow = new Date();
+            fiveDaysFromNow.setDate(today.getDate() + 5);
+            const pyEnv = await startServer();
+            const resPartnerId1 = pyEnv["res.partner"].create({});
+            pyEnv["mail.activity"].create({
+                date_deadline: date_to_str(fiveDaysFromNow),
+                res_id: resPartnerId1,
+                res_model: "res.partner",
+                state: "planned",
+            });
+            const { openView } = await start();
+            await openView({
+                res_model: "res.partner",
+                res_id: resPartnerId1,
+                views: [[false, "form"]],
+            });
+            assert.strictEqual(
+                document.querySelectorAll(".o-mail-activity").length,
+                1,
+                "should have activity component"
+            );
+            assert.strictEqual(
+                document.querySelectorAll(".o-mail-activity-due-date").length,
+                1,
+                "should have activity delay"
+            );
+            assert.ok(
+                document
+                    .querySelector(".o-mail-activity-due-date")
+                    .classList.contains("text-success"),
+                "activity delay should have the right color modifier class (text-success)"
+            );
+            assert.strictEqual(
+                document.querySelector(".o-mail-activity-due-date").textContent,
+                "Due in 5 days:",
+                "activity delay should have 'Due in 5 days:' as label"
+            );
+        });
 
-        QUnit.skipRefactoring(
-            "activity info layout when planned tomorrow",
-            async function (assert) {
-                assert.expect(4);
+        QUnit.test("activity info layout when planned tomorrow", async function (assert) {
+            assert.expect(4);
 
-                const today = new Date();
-                const tomorrow = new Date();
-                tomorrow.setDate(today.getDate() + 1);
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                pyEnv["mail.activity"].create({
-                    date_deadline: date_to_str(tomorrow),
-                    res_id: resPartnerId1,
-                    res_model: "res.partner",
-                    state: "planned",
-                });
-                const { openView } = await start();
-                await openView({
-                    res_model: "res.partner",
-                    res_id: resPartnerId1,
-                    views: [[false, "form"]],
-                });
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ActivityView").length,
-                    1,
-                    "should have activity component"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ActivityView_dueDateText").length,
-                    1,
-                    "should have activity delay"
-                );
-                assert.ok(
-                    document
-                        .querySelector(".o_ActivityView_dueDateText")
-                        .classList.contains("text-success"),
-                    "activity delay should have the right color modifier class (text-success)"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_ActivityView_dueDateText").textContent,
-                    "Tomorrow:",
-                    "activity delay should have 'Tomorrow:' as label"
-                );
-            }
-        );
+            const today = new Date();
+            const tomorrow = new Date();
+            tomorrow.setDate(today.getDate() + 1);
+            const pyEnv = await startServer();
+            const resPartnerId1 = pyEnv["res.partner"].create({});
+            pyEnv["mail.activity"].create({
+                date_deadline: date_to_str(tomorrow),
+                res_id: resPartnerId1,
+                res_model: "res.partner",
+                state: "planned",
+            });
+            const { openView } = await start();
+            await openView({
+                res_model: "res.partner",
+                res_id: resPartnerId1,
+                views: [[false, "form"]],
+            });
+            assert.strictEqual(
+                document.querySelectorAll(".o-mail-activity").length,
+                1,
+                "should have activity component"
+            );
+            assert.strictEqual(
+                document.querySelectorAll(".o-mail-activity-due-date").length,
+                1,
+                "should have activity delay"
+            );
+            assert.ok(
+                document
+                    .querySelector(".o-mail-activity-due-date")
+                    .classList.contains("text-success"),
+                "activity delay should have the right color modifier class (text-success)"
+            );
+            assert.strictEqual(
+                document.querySelector(".o-mail-activity-due-date").textContent,
+                "Tomorrow:",
+                "activity delay should have 'Tomorrow:' as label"
+            );
+        });
 
-        QUnit.skipRefactoring("activity info layout when planned today", async function (assert) {
+        QUnit.test("activity info layout when planned today", async function (assert) {
             assert.expect(4);
 
             const pyEnv = await startServer();
@@ -229,123 +218,115 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_dueDateText").length,
+                document.querySelectorAll(".o-mail-activity-due-date").length,
                 1,
                 "should have activity delay"
             );
             assert.ok(
                 document
-                    .querySelector(".o_ActivityView_dueDateText")
+                    .querySelector(".o-mail-activity-due-date")
                     .classList.contains("text-warning"),
                 "activity delay should have the right color modifier class (text-warning)"
             );
             assert.strictEqual(
-                document.querySelector(".o_ActivityView_dueDateText").textContent,
+                document.querySelector(".o-mail-activity-due-date").textContent,
                 "Today:",
                 "activity delay should have 'Today:' as label"
             );
         });
 
-        QUnit.skipRefactoring(
-            "activity info layout when planned yesterday",
-            async function (assert) {
-                assert.expect(4);
-
-                const today = new Date();
-                const yesterday = new Date();
-                yesterday.setDate(today.getDate() - 1);
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                pyEnv["mail.activity"].create({
-                    date_deadline: date_to_str(yesterday),
-                    res_id: resPartnerId1,
-                    res_model: "res.partner",
-                    state: "overdue",
-                });
-                const { openView } = await start();
-                await openView({
-                    res_model: "res.partner",
-                    res_id: resPartnerId1,
-                    views: [[false, "form"]],
-                });
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ActivityView").length,
-                    1,
-                    "should have activity component"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ActivityView_dueDateText").length,
-                    1,
-                    "should have activity delay"
-                );
-                assert.ok(
-                    document
-                        .querySelector(".o_ActivityView_dueDateText")
-                        .classList.contains("text-danger"),
-                    "activity delay should have the right color modifier class (text-danger)"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_ActivityView_dueDateText").textContent,
-                    "Yesterday:",
-                    "activity delay should have 'Yesterday:' as label"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring(
-            "activity info layout when planned before yesterday",
-            async function (assert) {
-                assert.expect(4);
-
-                const today = new Date();
-                const fiveDaysBeforeNow = new Date();
-                fiveDaysBeforeNow.setDate(today.getDate() - 5);
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                pyEnv["mail.activity"].create({
-                    date_deadline: date_to_str(fiveDaysBeforeNow),
-                    res_id: resPartnerId1,
-                    res_model: "res.partner",
-                    state: "overdue",
-                });
-                const { openView } = await start();
-                await openView({
-                    res_model: "res.partner",
-                    res_id: resPartnerId1,
-                    views: [[false, "form"]],
-                });
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ActivityView").length,
-                    1,
-                    "should have activity component"
-                );
-                assert.strictEqual(
-                    document.querySelectorAll(".o_ActivityView_dueDateText").length,
-                    1,
-                    "should have activity delay"
-                );
-                assert.ok(
-                    document
-                        .querySelector(".o_ActivityView_dueDateText")
-                        .classList.contains("text-danger"),
-                    "activity delay should have the right color modifier class (text-danger)"
-                );
-                assert.strictEqual(
-                    document.querySelector(".o_ActivityView_dueDateText").textContent,
-                    "5 days overdue:",
-                    "activity delay should have '5 days overdue:' as label"
-                );
-            }
-        );
-
-        QUnit.skipRefactoring("activity with a summary layout", async function (assert) {
+        QUnit.test("activity info layout when planned yesterday", async function (assert) {
             assert.expect(4);
 
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+            const pyEnv = await startServer();
+            const resPartnerId1 = pyEnv["res.partner"].create({});
+            pyEnv["mail.activity"].create({
+                date_deadline: date_to_str(yesterday),
+                res_id: resPartnerId1,
+                res_model: "res.partner",
+                state: "overdue",
+            });
+            const { openView } = await start();
+            await openView({
+                res_model: "res.partner",
+                res_id: resPartnerId1,
+                views: [[false, "form"]],
+            });
+            assert.strictEqual(
+                document.querySelectorAll(".o-mail-activity").length,
+                1,
+                "should have activity component"
+            );
+            assert.strictEqual(
+                document.querySelectorAll(".o-mail-activity-due-date").length,
+                1,
+                "should have activity delay"
+            );
+            assert.ok(
+                document
+                    .querySelector(".o-mail-activity-due-date")
+                    .classList.contains("text-danger"),
+                "activity delay should have the right color modifier class (text-danger)"
+            );
+            assert.strictEqual(
+                document.querySelector(".o-mail-activity-due-date").textContent,
+                "Yesterday:",
+                "activity delay should have 'Yesterday:' as label"
+            );
+        });
+
+        QUnit.test("activity info layout when planned before yesterday", async function (assert) {
+            assert.expect(4);
+
+            const today = new Date();
+            const fiveDaysBeforeNow = new Date();
+            fiveDaysBeforeNow.setDate(today.getDate() - 5);
+            const pyEnv = await startServer();
+            const resPartnerId1 = pyEnv["res.partner"].create({});
+            pyEnv["mail.activity"].create({
+                date_deadline: date_to_str(fiveDaysBeforeNow),
+                res_id: resPartnerId1,
+                res_model: "res.partner",
+                state: "overdue",
+            });
+            const { openView } = await start();
+            await openView({
+                res_model: "res.partner",
+                res_id: resPartnerId1,
+                views: [[false, "form"]],
+            });
+            assert.strictEqual(
+                document.querySelectorAll(".o-mail-activity").length,
+                1,
+                "should have activity component"
+            );
+            assert.strictEqual(
+                document.querySelectorAll(".o-mail-activity-due-date").length,
+                1,
+                "should have activity delay"
+            );
+            assert.ok(
+                document
+                    .querySelector(".o-mail-activity-due-date")
+                    .classList.contains("text-danger"),
+                "activity delay should have the right color modifier class (text-danger)"
+            );
+            assert.strictEqual(
+                document.querySelector(".o-mail-activity-due-date").textContent,
+                "5 days overdue:",
+                "activity delay should have '5 days overdue:' as label"
+            );
+        });
+
+        QUnit.test("activity with a summary layout", async function (assert) {
             const pyEnv = await startServer();
             const resPartnerId1 = pyEnv["res.partner"].create({});
             pyEnv["mail.activity"].create({
@@ -360,30 +341,18 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity-name").length,
                 1,
-                "should have activity component"
+                "should have activity name"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_summary").length,
-                1,
-                "should have activity summary"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_type").length,
-                0,
-                "should not have the activity type as summary"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_ActivityView_summary").textContent.trim(),
+                document.querySelector(".o-mail-activity-name").textContent.trim(),
                 "“test summary”",
-                "should have the specific activity summary in activity summary"
+                "should have the specific activity summary in activity name"
             );
         });
 
-        QUnit.skipRefactoring("activity without summary layout", async function (assert) {
-            assert.expect(5);
-
+        QUnit.test("activity without summary layout", async function (assert) {
             const pyEnv = await startServer();
             const resPartnerId1 = pyEnv["res.partner"].create({});
             pyEnv["mail.activity"].create({
@@ -398,34 +367,18 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity-name").length,
                 1,
-                "should have activity component"
+                "activity details should have an activity name section"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_type").length,
-                1,
-                "activity details should have an activity type section"
-            );
-            assert.strictEqual(
-                document.querySelector(".o_ActivityView_type").textContent.trim(),
+                document.querySelector(".o-mail-activity-name").textContent.trim(),
                 "Email",
-                "activity details should have the activity type display name in type section"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_summary.o_ActivityView_type").length,
-                1,
-                "should have activity type as summary"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_summary:not(.o_ActivityView_type)")
-                    .length,
-                0,
-                "should not have a specific summary"
+                "activity details should have the activity type display name in name section"
             );
         });
 
-        QUnit.skipRefactoring("activity details toggle", async function (assert) {
+        QUnit.test("activity details toggle", async function (assert) {
             assert.expect(5);
 
             const today = new Date();
@@ -448,31 +401,31 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_details").length,
+                document.querySelectorAll(".o-mail-activity-details").length,
                 0,
                 "activity details should not be visible by default"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_detailsButton").length,
+                document.querySelectorAll(".o-mail-activity-toggle").length,
                 1,
                 "activity should have a details button"
             );
 
-            await click(".o_ActivityView_detailsButton");
+            await click(".o-mail-activity-toggle");
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_details").length,
+                document.querySelectorAll(".o-mail-activity-details").length,
                 1,
                 "activity details should be visible after clicking on details button"
             );
 
-            await click(".o_ActivityView_detailsButton");
+            await click(".o-mail-activity-toggle");
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_details").length,
+                document.querySelectorAll(".o-mail-activity-details").length,
                 0,
                 "activity details should no longer be visible after clicking again on details button"
             );
@@ -507,36 +460,36 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_userAvatar").length,
+                document.querySelectorAll(".o-mail-activity-user-avatar").length,
                 1,
                 "should have activity user avatar"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_detailsButton").length,
+                document.querySelectorAll(".o-mail-activity-toggle").length,
                 1,
                 "activity should have a details button"
             );
 
-            await click(".o_ActivityView_detailsButton");
+            await click(".o-mail-activity-toggle");
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_details").length,
+                document.querySelectorAll(".o-mail-activity-details").length,
                 1,
                 "activity details should be visible after clicking on details button"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_details .o_ActivityView_type").length,
+                document.querySelectorAll(".o-mail-activity-name").length,
                 1,
-                "activity details should have type"
+                "activity details should have name"
             );
             assert.strictEqual(
-                document.querySelector(".o_ActivityView_details .o_ActivityView_type").textContent,
+                document.querySelector(".o-mail-activity-name").textContent,
                 "Email",
-                "activity details type should be 'Email'"
+                "activity details name should be 'Email'"
             );
             assert.strictEqual(
                 document.querySelectorAll(".o_ActivityView_detailsCreation").length,
@@ -567,8 +520,8 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("activity with mail template layout", async function (assert) {
-            assert.expect(8);
+        QUnit.test("activity with mail template layout", async function (assert) {
+            assert.expect(7);
 
             const pyEnv = await startServer();
             const resPartnerId1 = pyEnv["res.partner"].create({});
@@ -589,48 +542,43 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_sidebar").length,
+                document.querySelectorAll(".o-mail-activity-sidebar").length,
                 1,
                 "should have activity sidebar"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_mailTemplates").length,
+                document.querySelectorAll(".o-mail-activity-mail-templates").length,
                 1,
                 "should have activity mail templates"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_mailTemplate").length,
-                1,
-                "should have activity mail template"
-            );
-            assert.strictEqual(
-                document.querySelectorAll(".o_MailTemplateView_name").length,
+                document.querySelectorAll(".o-mail-activity-mail-template-name").length,
                 1,
                 "should have activity mail template name"
             );
             assert.strictEqual(
-                document.querySelector(".o_MailTemplateView_name").textContent,
+                document.querySelector(".o-mail-activity-mail-template-name").textContent,
                 "Dummy mail template",
                 "should have activity mail template name"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_MailTemplateView_preview").length,
+                document.querySelectorAll(".o-mail-activity-mail-template-preview").length,
                 1,
                 "should have activity mail template name preview button"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_MailTemplateView_send").length,
+                document.querySelectorAll(".o-mail-activity-mail-template-send").length,
                 1,
                 "should have activity mail template name send button"
             );
         });
 
-        QUnit.skipRefactoring("activity with mail template: preview mail", async function (assert) {
+        QUnit.test("activity with mail template: preview mail", async function (assert) {
             assert.expect(10);
 
             const pyEnv = await startServer();
@@ -686,24 +634,24 @@ QUnit.module("mail", {}, function () {
                 },
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_MailTemplateView_preview").length,
+                document.querySelectorAll(".o-mail-activity-mail-template-preview").length,
                 1,
                 "should have activity mail template name preview button"
             );
 
-            document.querySelector(".o_MailTemplateView_preview").click();
+            document.querySelector(".o-mail-activity-mail-template-preview").click();
             assert.verifySteps(
                 ["do_action"],
                 "should have called 'compose email' action correctly"
             );
         });
 
-        QUnit.skipRefactoring("activity with mail template: send mail", async function (assert) {
+        QUnit.test("activity with mail template: send mail", async function (assert) {
             assert.expect(7);
 
             const pyEnv = await startServer();
@@ -736,21 +684,21 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_MailTemplateView_send").length,
+                document.querySelectorAll(".o-mail-activity-mail-template-send").length,
                 1,
                 "should have activity mail template name send button"
             );
 
-            document.querySelector(".o_MailTemplateView_send").click();
+            document.querySelector(".o-mail-activity-mail-template-send").click();
             assert.verifySteps(["activity_send_mail"], "should have called activity_send_mail rpc");
         });
 
-        QUnit.skipRefactoring("activity click on mark as done", async function (assert) {
+        QUnit.test("activity click on mark as done", async function (assert) {
             assert.expect(4);
 
             const pyEnv = await startServer();
@@ -772,13 +720,13 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
-            assert.strictEqual(
-                document.querySelectorAll(".btn:contains('Mark Done')").length,
-                1,
+            assert.containsOnce(
+                document.body,
+                ".btn:contains('Mark Done')",
                 "should have activity Mark as Done button"
             );
 
@@ -797,7 +745,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring(
+        QUnit.test(
             "activity mark as done popover should focus feedback input on open [REQUIRE FOCUS]",
             async function (assert) {
                 assert.expect(3);
@@ -821,7 +769,7 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.containsOnce(
                     document.body,
-                    ".o_ActivityView",
+                    ".o-mail-activity",
                     "should have activity component"
                 );
                 assert.containsOnce(
@@ -839,7 +787,7 @@ QUnit.module("mail", {}, function () {
             }
         );
 
-        QUnit.skipRefactoring("activity click on edit", async function (assert) {
+        QUnit.test("activity click on edit", async function (assert) {
             assert.expect(9);
 
             const pyEnv = await startServer();
@@ -893,17 +841,17 @@ QUnit.module("mail", {}, function () {
                 },
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
-            assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_editButton").length,
-                1,
+            assert.containsOnce(
+                document.body,
+                ".btn:contains('Edit')",
                 "should have activity edit button"
             );
 
-            await click(".o_ActivityView_editButton");
+            await click(".btn:contains('Edit')");
             assert.verifySteps(
                 ["do_action"],
                 "should have called 'schedule activity' action correctly"
@@ -959,10 +907,14 @@ QUnit.module("mail", {}, function () {
                     options.onClose();
                 },
             });
-            assert.containsOnce(document.body, ".o_ActivityView", "should have activity component");
             assert.containsOnce(
                 document.body,
-                ".o_ActivityView_editButton",
+                ".o-mail-activity",
+                "should have activity component"
+            );
+            assert.containsOnce(
+                document.body,
+                ".btn:contains('Edit')",
                 "should have activity edit button"
             );
             assert.containsOnce(document.body, ".o_ActivityView_icon", "should have activity icon");
@@ -977,7 +929,7 @@ QUnit.module("mail", {}, function () {
                 "should not have new activity icon when not edited yet"
             );
 
-            await click(".o_ActivityView_editButton");
+            await click(".btn:contains('Edit')");
             assert.verifySteps(
                 ["do_action"],
                 "should have called 'schedule activity' action correctly"
@@ -994,7 +946,7 @@ QUnit.module("mail", {}, function () {
             );
         });
 
-        QUnit.skipRefactoring("activity click on cancel", async function (assert) {
+        QUnit.test("activity click on cancel", async function (assert) {
             assert.expect(7);
 
             const pyEnv = await startServer();
@@ -1023,120 +975,114 @@ QUnit.module("mail", {}, function () {
                 views: [[false, "form"]],
             });
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 1,
                 "should have activity component"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView_cancelButton").length,
+                document.querySelectorAll(".o-mail-activity-unlink-button").length,
                 1,
                 "should have activity cancel button"
             );
 
-            await click(".o_ActivityView_cancelButton");
+            await click(".o-mail-activity-unlink-button");
             assert.verifySteps(
                 ["unlink"],
                 "should have called unlink rpc after clicking on cancel"
             );
             assert.strictEqual(
-                document.querySelectorAll(".o_ActivityView").length,
+                document.querySelectorAll(".o-mail-activity").length,
                 0,
                 "should no longer display activity after clicking on cancel"
             );
         });
 
-        QUnit.skipRefactoring(
-            "activity mark done popover close on ESCAPE",
-            async function (assert) {
-                // This test is not in activity_mark_done_popover_tests.js as it requires the activity mark done
-                // component to have a parent in order to allow testing interactions the popover.
-                assert.expect(2);
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                const emailActivityTypeId = pyEnv["mail.activity.type"].search([
-                    ["name", "=", "Email"],
-                ])[0];
-                pyEnv["mail.activity"].create({
-                    activity_category: "default",
-                    activity_type_id: emailActivityTypeId,
-                    can_write: true,
-                    res_id: resPartnerId1,
-                    res_model: "res.partner",
-                });
-                const { click, openView } = await start();
-                await openView({
-                    res_id: resPartnerId1,
-                    res_model: "res.partner",
-                    views: [[false, "form"]],
-                });
+        QUnit.test("activity mark done popover close on ESCAPE", async function (assert) {
+            // This test is not in activity_mark_done_popover_tests.js as it requires the activity mark done
+            // component to have a parent in order to allow testing interactions the popover.
+            assert.expect(2);
+            const pyEnv = await startServer();
+            const resPartnerId1 = pyEnv["res.partner"].create({});
+            const emailActivityTypeId = pyEnv["mail.activity.type"].search([
+                ["name", "=", "Email"],
+            ])[0];
+            pyEnv["mail.activity"].create({
+                activity_category: "default",
+                activity_type_id: emailActivityTypeId,
+                can_write: true,
+                res_id: resPartnerId1,
+                res_model: "res.partner",
+            });
+            const { click, openView } = await start();
+            await openView({
+                res_id: resPartnerId1,
+                res_model: "res.partner",
+                views: [[false, "form"]],
+            });
 
-                await click(".btn:contains('Mark Done')");
-                assert.containsOnce(
-                    document.body,
-                    ".o-mail-activity-mark-as-done",
-                    "Popover component should be present"
-                );
+            await click(".btn:contains('Mark Done')");
+            assert.containsOnce(
+                document.body,
+                ".o-mail-activity-mark-as-done",
+                "Popover component should be present"
+            );
 
-                await afterNextRender(() => {
-                    const ev = new window.KeyboardEvent("keydown", {
-                        bubbles: true,
-                        key: "Escape",
-                    });
-                    document.querySelector(`.o-mail-activity-mark-as-done`).dispatchEvent(ev);
+            await afterNextRender(() => {
+                const ev = new window.KeyboardEvent("keydown", {
+                    bubbles: true,
+                    key: "Escape",
                 });
-                assert.containsNone(
-                    document.body,
-                    ".o-mail-activity-mark-as-done",
-                    "ESCAPE pressed should have closed the mark done popover"
-                );
-            }
-        );
+                document.querySelector(`.o-mail-activity-mark-as-done`).dispatchEvent(ev);
+            });
+            assert.containsNone(
+                document.body,
+                ".o-mail-activity-mark-as-done",
+                "ESCAPE pressed should have closed the mark done popover"
+            );
+        });
 
-        QUnit.skipRefactoring(
-            "activity mark done popover click on discard",
-            async function (assert) {
-                // This test is not in activity_mark_done_popover_tests.js as it requires the activity mark done
-                // component to have a parent in order to allow testing interactions the popover.
-                assert.expect(3);
+        QUnit.test("activity mark done popover click on discard", async function (assert) {
+            // This test is not in activity_mark_done_popover_tests.js as it requires the activity mark done
+            // component to have a parent in order to allow testing interactions the popover.
+            assert.expect(3);
 
-                const pyEnv = await startServer();
-                const resPartnerId1 = pyEnv["res.partner"].create({});
-                const emailActivityTypeId = pyEnv["mail.activity.type"].search([
-                    ["name", "=", "Email"],
-                ])[0];
-                pyEnv["mail.activity"].create({
-                    activity_category: "default",
-                    activity_type_id: emailActivityTypeId,
-                    can_write: true,
-                    res_id: resPartnerId1,
-                    res_model: "res.partner",
-                });
-                const { click, openView } = await start();
-                await openView({
-                    res_id: resPartnerId1,
-                    res_model: "res.partner",
-                    views: [[false, "form"]],
-                });
+            const pyEnv = await startServer();
+            const resPartnerId1 = pyEnv["res.partner"].create({});
+            const emailActivityTypeId = pyEnv["mail.activity.type"].search([
+                ["name", "=", "Email"],
+            ])[0];
+            pyEnv["mail.activity"].create({
+                activity_category: "default",
+                activity_type_id: emailActivityTypeId,
+                can_write: true,
+                res_id: resPartnerId1,
+                res_model: "res.partner",
+            });
+            const { click, openView } = await start();
+            await openView({
+                res_id: resPartnerId1,
+                res_model: "res.partner",
+                views: [[false, "form"]],
+            });
 
-                await click(".btn:contains('Mark Done')");
-                assert.containsOnce(
-                    document.body,
-                    ".o-mail-activity-mark-as-done",
-                    "Popover component should be present"
-                );
-                assert.containsOnce(
-                    document.body,
-                    ".o-mail-activity-mark-as-done-button-discard",
-                    "Popover component should contain the discard button"
-                );
-                await click(".o-mail-activity-mark-as-done-button-discard");
-                assert.containsNone(
-                    document.body,
-                    ".o-mail-activity-mark-as-done",
-                    "Discard button clicked should have closed the mark done popover"
-                );
-            }
-        );
+            await click(".btn:contains('Mark Done')");
+            assert.containsOnce(
+                document.body,
+                ".o-mail-activity-mark-as-done",
+                "Popover component should be present"
+            );
+            assert.containsOnce(
+                document.body,
+                ".o-mail-activity-mark-as-done-button-discard",
+                "Popover component should contain the discard button"
+            );
+            await click(".o-mail-activity-mark-as-done-button-discard");
+            assert.containsNone(
+                document.body,
+                ".o-mail-activity-mark-as-done",
+                "Discard button clicked should have closed the mark done popover"
+            );
+        });
 
         QUnit.skipRefactoring(
             "data-oe-id & data-oe-model link redirection on click",
@@ -1180,16 +1126,16 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.containsOnce(
                     document.body,
-                    ".o_ActivityView_note",
+                    ".o-activity-note",
                     "activity should have a note"
                 );
                 assert.containsOnce(
-                    document.querySelector(".o_ActivityView_note"),
+                    document.querySelector(".o-activity-note"),
                     "a",
                     "activity note should have a link"
                 );
 
-                document.querySelector(`.o_ActivityView_note a`).click();
+                document.querySelector(`.o-activity-note a`).click();
                 assert.verifySteps(
                     ["do-action:openFormView_some.model_250"],
                     "should have open form view on related record after click on link"

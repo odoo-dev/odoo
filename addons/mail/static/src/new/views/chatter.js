@@ -10,11 +10,12 @@ import { Composer } from "../composer/composer";
 import { Activity } from "@mail/new/activity/activity";
 import {
     Component,
-    useState,
+    markup,
+    onWillStart,
     onWillUpdateProps,
     useChildSubEnv,
     useRef,
-    onWillStart,
+    useState,
 } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useService } from "@web/core/utils/hooks";
@@ -23,6 +24,36 @@ import { isDragSourceExternalFile } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
+
+/**
+ * @typedef ActivityData
+ * @property {string} activity_category
+ * @property {[number, string]} activity_type_id
+ * @property {string|false} activity_decoration
+ * @property {boolean} can_write
+ * @property {'suggest'|'trigger'} chaining_type
+ * @property {string} create_date
+ * @property {[number, string]} create_uid
+ * @property {string} date_deadline
+ * @property {string} display_name
+ * @property {boolean} has_recommended_activities
+ * @property {string} icon
+ * @property {number} id
+ * @property {Object[]} mail_template_ids
+ * @property {string} note
+ * @property {number|false} previous_activity_type_id
+ * @property {number|false} recommended_activity_type_id
+ * @property {string} res_model
+ * @property {[number, string]} res_model_id
+ * @property {string} res_id
+ * @property {string} res_name
+ * @property {number|false} request_partner_id
+ * @property {'overdue'|'planned'|'today'} state
+ * @property {string} summary
+ * @property {[number, string]} user_id
+ * @property {string} write_date
+ * @property {[number, string]} write_uid
+ */
 
 export class Chatter extends Component {
     static components = { AttachmentList, Dropdown, Thread, Composer, Activity, FileUploader };
@@ -47,6 +78,7 @@ export class Chatter extends Component {
         this.orm = useService("orm");
         this.rpc = useService("rpc");
         this.state = useState({
+            /** @type {ActivityData[]} */
             activities: [],
             attachments: [],
             showActivities: true,
@@ -117,6 +149,11 @@ export class Chatter extends Component {
             this.thread.hasReadAccess = result.hasReadAccess;
             this.thread.hasWriteAccess = result.hasWriteAccess;
             if ("activities" in result) {
+                for (const activity of result.activities) {
+                    if (activity.note) {
+                        activity.note = markup(activity.note);
+                    }
+                }
                 this.state.activities = result.activities;
             }
             if ("attachments" in result) {

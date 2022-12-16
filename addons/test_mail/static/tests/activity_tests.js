@@ -266,16 +266,16 @@ QUnit.skipRefactoring('activity view: activity widget', async function (assert) 
     await testUtils.dom.click(document.querySelector('.today .o-activity-cell-closest-deadline'));
     assert.containsOnce(document.body, '.o-activity-list-popover', "dropdown should be displayed");
     assert.ok(document.querySelector('.o-activity-list-popover-today-title').textContent.includes('Today'), "Title should be today");
-    assert.ok([...document.querySelectorAll('.o_MailTemplateView_name')].filter(el => el.textContent.includes('Template1')).length,
+    assert.ok([...document.querySelectorAll('.o-mail-activity-mail-template-name')].filter(el => el.textContent.includes('Template1')).length,
         "Template1 should be available");
-    assert.ok([...document.querySelectorAll('.o_MailTemplateView_name')].filter(el => el.textContent.includes('Template2')).length,
+    assert.ok([...document.querySelectorAll('.o-mail-activity-mail-template-name')].filter(el => el.textContent.includes('Template2')).length,
         "Template2 should be available");
 
-    await testUtils.dom.click(document.querySelector('.o_MailTemplateView_preview'));
+    await testUtils.dom.click(document.querySelector('.o-mail-activity-mail-template-preview'));
     await testUtils.dom.click(document.querySelector('.today .o-activity-cell-closest-deadline'));
-    await testUtils.dom.click(document.querySelector('.o_MailTemplateView_send'));
+    await testUtils.dom.click(document.querySelector('.o-mail-activity-mail-template-send'));
     await testUtils.dom.click(document.querySelector('.overdue .o-activity-cell-closest-deadline'));
-    assert.containsNone(document.body, '.o_MailTemplateView_name',
+    assert.containsNone(document.body, '.o-mail-activity-mail-template-name',
         "No template should be available");
 
     await testUtils.dom.click(document.querySelector('.o-activity-list-popover-add-activity-button'));
