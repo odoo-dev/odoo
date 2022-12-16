@@ -14,6 +14,7 @@ import {
     onWillStart,
     onMounted,
     onWillUnmount,
+    useChildSubEnv,
     useRef,
     useState,
     useEffect,
@@ -57,6 +58,9 @@ export class Discuss extends Component {
         this.orm = useService("orm");
         this.effect = useService("effect");
         this.prevInboxCounter = this.messaging.state.discuss.inbox.counter;
+        useChildSubEnv({
+            inDiscuss: true,
+        });
         useEffect(
             () => {
                 if (

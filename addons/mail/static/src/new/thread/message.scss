@@ -38,6 +38,10 @@
     }
 }
 
+.o-mail-message-actions {
+    z-index: 10;
+}
+
 .o-mail-message:hover {
     .o-mail-message-actions {
         visibility: visible !important;

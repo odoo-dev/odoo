@@ -57,6 +57,7 @@ export class Message extends Component {
     setup() {
         this.state = useState({
             isEditing: false,
+            isActionListSquashed: this.env.inChatWindow,
         });
         this.ref = useRef("ref");
         this.messaging = useMessaging();

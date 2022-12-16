@@ -24,7 +24,7 @@
                     <t t-esc="message.dateTimeSimpleStr"/>
                 </small>
             </div>
-            <div class="overflow-auto" t-att-class="{ 'flex-grow-1': state.isEditing }">
+            <div class="flex-grow-1">
                 <div t-if="!props.squashed" class="o-mail-msg-header d-flex flex-wrap align-items-baseline">
                     <span t-if="message.author" class="o-mail-own-name">
                         <strong class="o_redirect me-1 text-truncate" t-att-class="{ 'cursor-pointer': props.hasActions and !message.author.isCurrentUser }" t-on-click="openChatAvatar">
@@ -45,7 +45,7 @@
                         </t>
                     </small>
                 </div>
-                <div t-if="!state.isEditing" class="o-mail-message-content d-flex">
+                <div t-if="!state.isEditing" class="o-mail-message-content d-flex position-relative">
                     <t t-if="(message.type === 'notification' or message.isTransient) and !message.isBodyEmpty">
                         <t t-if="message.subtype_description">
                             <p class="mb-0"><t t-esc="message.subtype_description"/></p>
@@ -73,22 +73,41 @@
                             </div>
                         </div>
                     </t>
-                    <div t-if="props.hasActions and !message.isTransient" class="o-mail-message-actions invisible">
-                        <div class="rounded-1 shadow-sm">
+                    <div t-if="props.hasActions and !message.isTransient" class="o-mail-message-actions bg-view invisible"
+                        t-att-class="{
+                            'position-absolute top-0': !env.inDiscuss,
+                            'start-0 ms-3': isAlignedRight,
+                            'end-0 me-3': env.inChatWindow and !isAlignedRight or env.inChatter,
+                            'mt-n4': env.inChatter and (message.isDiscussion or message.isNotification),
+                            'mt-n5': env.inChatter and !(message.isDiscussion or message.isNotification),
+                            'mt-2': env.inDiscuss and (message.isDiscussion or message.isNotification),
+                            'mt-n3': env.inChatWindow,
+                            'ms-2': env.inDiscuss,
+                        }"
+                    >
+                        <div class="d-flex rounded-1 shadow-sm overflow-hidden alignedRight" t-att-class="{
+                                'mt-3': env.inChatter and !(message.isDiscussion or message.isNotification),
+                                'flex-row-reverse': env.inChatWindow and isAlignedRight,
+                            }"
+                        >
                             <i t-if="canAddReaction" class="o-mail-message-action-add-reaction cursor-pointer px-1 py-2 fa fa-lg fa-smile-o"
                                 role="button" tabindex="1" title="Add a Reaction" aria-label="Add a Reaction" t-ref="emoji-picker"/>
-                            <i t-if="canToggleStar" class="o-mail-message-action-toggle-star cursor-pointer px-1 py-2 fa fa-lg"
-                                t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
-                                t-on-click="toggleStar"
-                                role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"/>
-                            <i t-if="canBeDeleted" class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-on-click="onClickDelete"
-                                role="button" tabindex="0" title="Delete" aria-label="Delete"/>
-                            <i t-if="canBeEdited" class="cursor-pointer px-1 py-2 fa fa-lg fa-pencil" t-on-click="onClickEdit"
-                                role="button" tabindex="1" title="Edit" aria-label="Edit"/>
-                            <i t-if="canReplyTo" class="o-mail-message-action-reply-to cursor-pointer px-1 py-2 fa fa-lg fa-reply" t-on-click.stop="onClickReplyTo"
-                                role="button" tabindex="1" title="Reply" aria-label="Reply"/>
-                            <i t-if="isInInbox" class="o-mail-message-action-mark-read cursor-pointer px-1 py-2 fa fa-lg fa-check" t-on-click="() => messaging.setDone(props.message.id)"
-                                role="button" tabindex="0" title="Mark as Read" aria-label="Mark as Read"/>
+                            <i t-if="env.inChatWindow" class="cursor-pointer px-1 py-2 fa fa-lg fa-ellipsis-h order-1"
+                                t-on-click="() => state.isActionListSquashed = !state.isActionListSquashed" role="button" tabindex="1" title="Compact" aria-label="Compact"/>
+                            <t t-if="!env.inChatWindow or !state.isActionListSquashed">
+                                <i t-if="canToggleStar" class="o-mail-message-action-toggle-star cursor-pointer px-1 py-2 fa fa-lg"
+                                    t-att-class="message.isStarred ? 'fa-star' : 'fa-star-o'"
+                                    t-on-click="toggleStar"
+                                    role="button" tabindex="0" title="Mark as Todo" aria-label="Mark as Todo"/>
+                                <i t-if="canBeDeleted" class="cursor-pointer px-1 py-2 fa fa-lg fa-trash" t-on-click="onClickDelete"
+                                    role="button" tabindex="0" title="Delete" aria-label="Delete"/>
+                                <i t-if="canBeEdited" class="cursor-pointer px-1 py-2 fa fa-lg fa-pencil" t-on-click="onClickEdit"
+                                    role="button" tabindex="1" title="Edit" aria-label="Edit"/>
+                                <i t-if="canReplyTo" class="o-mail-message-action-reply-to cursor-pointer px-1 py-2 fa fa-lg fa-reply" t-on-click.stop="onClickReplyTo"
+                                    role="button" tabindex="1" title="Reply" aria-label="Reply"/>
+                                <i t-if="isInInbox" class="o-mail-message-action-mark-read cursor-pointer px-1 py-2 fa fa-lg fa-check" t-on-click="() => messaging.setDone(props.message.id)"
+                                    role="button" tabindex="0" title="Mark as Read" aria-label="Mark as Read"/>
+                            </t>
                         </div>
                     </div>
                 </div>
