@@ -25,6 +25,7 @@ import { url } from "@web/core/utils/urls";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
 const FETCH_MSG_LIMIT = 30;
+export const OTHER_LONG_TYPING = 60000;
 
 const commandRegistry = registry.category("mail.channel_commands");
 
@@ -610,7 +611,7 @@ export class Messaging {
                         this.state.areTypingTimer[channel_id] = {
                             [name]: browser.setTimeout(() => {
                                 remove();
-                            }, 60000),
+                            }, OTHER_LONG_TYPING),
                         };
                     } else {
                         remove();

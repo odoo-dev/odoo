@@ -24,6 +24,9 @@ import { useDebounced } from "@web/core/utils/timing";
 import { browser } from "@web/core/browser/browser";
 import { useSuggestion } from "./composer_hook";
 
+export const SHORT_TYPING = 5000;
+export const LONG_TYPING = 50000;
+
 export class Composer extends Component {
     static components = { NavigableList, AttachmentList, FileUploader, Typing };
     static defaultProps = {
@@ -58,7 +61,7 @@ export class Composer extends Component {
         this.stopTyping = useDebounced(() => {
             this.notifyIsTyping(false);
             this.typingNotified = false;
-        }, 1000);
+        }, SHORT_TYPING);
         this.selection = useSelection({
             refName: "textarea",
             model: this.props.composer.selection,
@@ -146,7 +149,7 @@ export class Composer extends Component {
             this.typingNotified = true;
             browser.setTimeout(() => {
                 this.typingNotified = false;
-            }, 50000);
+            }, LONG_TYPING);
         }
         this.stopTyping();
     }
@@ -343,6 +346,10 @@ export class Composer extends Component {
             }
             this.suggestion.clearRawMentions();
             this.messaging.cancelReplyTo();
+            if (this.typingNotified) {
+                this.typingNotified = false;
+                this.notifyIsTyping(false);
+            }
         });
     }
 
