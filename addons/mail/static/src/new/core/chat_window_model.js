@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+/** @typedef {{ threadLocalId?: string, folded?: boolean}} ChatWindowData */
 export class ChatWindow {
     /** @type {number} */
     autofocus = 0;
@@ -8,7 +9,7 @@ export class ChatWindow {
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
-     * @param {Object} data
+     * @param {ChatWindowData} data
      * @returns {ChatWindow}
      */
     static insert(state, data) {
@@ -22,7 +23,7 @@ export class ChatWindow {
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
-     * @param {Object} data
+     * @param {ChatWindowData} data
      * @returns {ChatWindow}
      */
     constructor(state, data) {
@@ -36,7 +37,7 @@ export class ChatWindow {
     }
 
     /**
-     * @param {Object} data
+     * @param {ChatWindow} data
      */
     update(data) {
         const { autofocus = this.autofocus, folded = this.folded } = data;
@@ -52,6 +53,18 @@ export class ChatWindow {
         );
         if (index > -1) {
             this._state.chatWindows.splice(index, 1);
+        }
+        const thread = this._state.threads[this.threadLocalId];
+        if (thread) {
+            thread.state = "closed";
+        }
+    }
+
+    toggleFold() {
+        this.folded = !this.folded;
+        const thread = this._state.threads[this.threadLocalId];
+        if (thread) {
+            thread.state = this.folded ? "folded" : "open";
         }
     }
 }

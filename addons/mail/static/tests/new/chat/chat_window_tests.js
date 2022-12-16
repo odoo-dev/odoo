@@ -150,3 +150,90 @@ QUnit.test(
         assert.strictEqual(member.fold_state, "closed");
     }
 );
+
+QUnit.test("chat window: fold", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({});
+    const { click } = await start({
+        mockRPC(route, args) {
+            if (args.method === "channel_fold") {
+                assert.step(`rpc:${args.method}/${args.kwargs.state}`);
+            }
+        },
+    });
+    // Open Thread
+    await click("button i[aria-label='Messages']");
+    await click(".o-mail-notification-item");
+    assert.containsOnce(target, ".o-mail-chat-window .o-mail-thread");
+    assert.verifySteps(["rpc:channel_fold/open"]);
+
+    // Fold chat window
+    await click(".o-mail-chat-window-header");
+    assert.verifySteps(["rpc:channel_fold/folded"]);
+    assert.containsNone(target, ".o-mail-chat-window .o-mail-thread");
+
+    // Unfold chat window
+    await click(".o-mail-chat-window-header");
+    assert.verifySteps(["rpc:channel_fold/open"]);
+    assert.containsOnce(target, ".o-mail-chat-window .o-mail-thread");
+});
+
+QUnit.test("chat window: open / close", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({});
+    const { click } = await start({
+        mockRPC(route, args) {
+            if (args.method === "channel_fold") {
+                assert.step(`rpc:channel_fold/${args.kwargs.state}`);
+            }
+        },
+    });
+    assert.containsNone(target, ".o-mail-chat-window");
+    await click("button i[aria-label='Messages']");
+    await click(".o-mail-notification-item");
+    assert.containsOnce(target, ".o-mail-chat-window");
+    assert.verifySteps(["rpc:channel_fold/open"]);
+
+    // Close chat window
+    await click(".o-mail-command[title='Close chat window']");
+    assert.containsNone(target, ".o-mail-chat-window");
+    assert.verifySteps(["rpc:channel_fold/closed"]);
+
+    // Reopen chat window
+    await click("button i[aria-label='Messages']");
+    await click(".o-mail-notification-item");
+    assert.containsOnce(target, ".o-mail-chat-window");
+    assert.verifySteps(["rpc:channel_fold/open"]);
+});
+
+QUnit.test(
+    "Mobile: closing a chat window should not update channel state on the server",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        fold_state: "open",
+                        partner_id: pyEnv.currentPartnerId,
+                    },
+                ],
+            ],
+        });
+        patchUiSize({ size: SIZES.SM });
+        const { click } = await start();
+        await click("button i[aria-label='Messages']");
+        await click(".o-mail-notification-item");
+        assert.containsOnce(target, ".o-mail-chat-window");
+        // Close chat window
+        await click(".o-mail-command[title='Close chat window']");
+        assert.containsNone(target, ".o-mail-chat-window");
+        const [member] = pyEnv["mail.channel.member"].searchRead([
+            ["channel_id", "=", mailChannelId1],
+            ["partner_id", "=", pyEnv.currentPartnerId],
+        ]);
+        assert.strictEqual(member.fold_state, "open");
+    }
+);

@@ -38,6 +38,8 @@ export class Thread {
     messages = [];
     /** @type {integer} */
     serverLastSeenMsgByCurrentUser;
+    /** @type {'opened' | 'folded' | 'closed'} */
+    state;
     status = "new";
     /** @type {import("@mail/new/core/messaging").Messaging['state']} */
     _state;
@@ -113,6 +115,9 @@ export class Thread {
             }
             if ("seen_message_id" in serverData) {
                 this.serverLastSeenMsgByCurrentUser = serverData.seen_message_id;
+            }
+            if ("state" in serverData) {
+                this.state = serverData.state;
             }
             if (this.type === "chat") {
                 for (const elem of serverData.channel.channelMembers[0][1]) {

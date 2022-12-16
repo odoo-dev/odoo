@@ -48,7 +48,8 @@ export class ChatWindow extends Component {
     }
 
     toggleFold() {
-        this.props.chatWindow.folded = !this.props.chatWindow.folded;
+        this.props.chatWindow.toggleFold();
+        this.messaging.notifyChatWindowState(this.props.chatWindow.threadLocalId);
     }
 
     toggleSettings() {
@@ -72,6 +73,11 @@ export class ChatWindow extends Component {
             },
             { clearBreadcrumbs: true }
         );
+    }
+
+    close() {
+        this.props.chatWindow.close();
+        this.messaging.notifyChatWindowState(this.props.chatWindow.threadLocalId);
     }
 
     startCall() {

@@ -967,12 +967,29 @@ export class Messaging {
         Message.insert(this.state, messageData, message.originThread);
     }
 
+    notifyChatWindowState(threadLocalId) {
+        if (this.env.isSmall) {
+            return;
+        }
+        const thread = this.state.threads[threadLocalId];
+        if (thread?.model === "mail.channel") {
+            return this.orm.silent.call("mail.channel", "channel_fold", [[thread.id]], {
+                state: thread.state,
+            });
+        }
+    }
+
     openDiscussion(threadLocalId) {
         if (this.state.discuss.isActive) {
             this.setDiscussThread(threadLocalId);
         } else {
             const chatWindow = ChatWindow.insert(this.state, { folded: false, threadLocalId });
             chatWindow.autofocus++;
+            const thread = this.state.threads[threadLocalId];
+            if (thread) {
+                this.state.threads[threadLocalId].state = "open";
+            }
+            this.notifyChatWindowState(threadLocalId);
         }
     }
 
