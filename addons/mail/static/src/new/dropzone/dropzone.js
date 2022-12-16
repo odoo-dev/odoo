@@ -23,7 +23,10 @@ export class Dropzone extends Component {
         // Prevents the browser to open or download the file when it is dropped
         // outside of the dropzone.
         useExternalListener(window, "dragover", (ev) => ev.preventDefault());
-        useExternalListener(window, "drop", (ev) => ev.preventDefault());
+        useExternalListener(window, "drop", (ev) => {
+            ev.preventDefault();
+            this.dragCount = 0;
+        });
     }
 
     startDrag(ev) {
@@ -55,7 +58,6 @@ export class Dropzone extends Component {
 
     onDrop(ev) {
         this.stopDrag();
-        this.dragCount = 0;
         this.props.onDrop(ev);
     }
 }
