@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { makeDeferred } from "@mail/utils/deferred";
 import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
@@ -864,4 +865,55 @@ QUnit.test("leave command on chat", async function (assert) {
     assert.containsNone(target, `.o-mail-category-item[data-channel-id="${mailChannelId}"]`);
     assert.containsOnce(target, ".o-mail-discuss-no-thread");
     assert.verifySteps(["You unpinned your conversation with Chuck Norris"]);
+});
+
+QUnit.test("Channel suggestions do not crash after rpc returns", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const getSuggestionsDeferred = makeDeferred();
+    const { insertText, openDiscuss } = await start({
+        async mockRPC(args, params, originalFn) {
+            if (params.method === "get_mention_suggestions") {
+                const res = await originalFn(args, params);
+                assert.step("get_mention_suggestions");
+                assert.strictEqual(res.length, 1, "Should return a thread");
+                getSuggestionsDeferred.resolve();
+                return res;
+            }
+            return originalFn(args, params);
+        },
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    pyEnv["mail.channel"].create({ name: "foo" });
+    insertText(".o-mail-composer-textarea", "#");
+    await nextTick();
+    insertText(".o-mail-composer-textarea", "f");
+    await getSuggestionsDeferred;
+    assert.verifySteps(["get_mention_suggestions"]);
+});
+
+QUnit.test("Can post suggestions", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const { insertText, openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+    });
+    await openDiscuss();
+    insertText(".o-mail-composer-textarea", "#");
+    await nextTick();
+    await insertText(".o-mail-composer-textarea", "general");
+    // Close the popup.
+    await afterNextRender(() => triggerHotkey("Enter"));
+    // Send the message.
+    await afterNextRender(() => triggerHotkey("Enter"));
+    assert.containsOnce(target, ".o-mail-message .o_channel_redirect");
 });

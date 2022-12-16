@@ -729,7 +729,8 @@ export class Messaging {
             partners.push(partner);
         }
         for (const threadId of rawMentionedThreadIds) {
-            const thread = this.state.threads[threadId];
+            const thread =
+                this.state.threads[Thread.createLocalId({ model: "mail.channel", id: threadId })];
             const index = body.indexOf(`#${thread.displayName}`);
             if (index === -1) {
                 continue;
@@ -1156,7 +1157,10 @@ export class Messaging {
             { search: term }
         );
         suggestedThreads.map((data) => {
-            Thread.insert(this.state, data);
+            Thread.insert(this.state, {
+                model: "mail.channel",
+                ...data,
+            });
         });
     }
 
