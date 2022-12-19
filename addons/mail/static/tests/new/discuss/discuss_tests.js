@@ -623,11 +623,17 @@ QUnit.test("Can reply to starred message", async function (assert) {
 QUnit.test("Can reply to history message", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId = pyEnv["mail.channel"].create({ name: "RandomName" });
-    pyEnv["mail.message"].create({
+    const mailMessageId1 = pyEnv["mail.message"].create({
         body: "not empty",
         model: "mail.channel",
         history_partner_ids: [pyEnv.currentPartnerId],
         res_id: mailChannelId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: mailMessageId1,
+        notification_type: "inbox",
+        res_partner_id: pyEnv.currentPartnerId,
+        is_read: true,
     });
     const { click, insertText, openDiscuss } = await start({
         discuss: {

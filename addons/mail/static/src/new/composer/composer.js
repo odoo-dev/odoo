@@ -43,6 +43,7 @@ export class Composer extends Component {
         "mode?",
         "placeholder?",
         "dropzoneRef?",
+        "startEditingLastMessageOfCurrentUser?",
     ];
     static template = "mail.composer";
 
@@ -155,6 +156,10 @@ export class Composer extends Component {
         this.stopTyping();
     }
 
+    get hasSuggestions() {
+        return this.suggestion.state.items.length > 0;
+    }
+
     get hasReplyToHeader() {
         const { messageToReplyTo } = this.messaging.state.discuss;
         const thread = this.props.composer.thread;
@@ -201,22 +206,35 @@ export class Composer extends Component {
     }
 
     onKeydown(ev) {
-        if (ev.key === "Enter") {
-            const shouldPost = this.props.mode === "extended" ? ev.ctrlKey : !ev.shiftKey;
-            if (!shouldPost) {
-                return;
+        switch (ev.key) {
+            case "ArrowUp":
+                if (this.hasSuggestions) {
+                    return;
+                }
+                this.props.startEditingLastMessageOfCurrentUser?.();
+                break;
+            case "Enter": {
+                if (this.hasSuggestions) {
+                    return;
+                }
+                const shouldPost = this.props.mode === "extended" ? ev.ctrlKey : !ev.shiftKey;
+                if (!shouldPost) {
+                    return;
+                }
+                ev.preventDefault(); // to prevent useless return
+                if (this.props.composer.message) {
+                    this.editMessage();
+                } else {
+                    this.sendMessage();
+                }
+                break;
             }
-            ev.preventDefault(); // to prevent useless return
-            if (this.props.composer.message) {
-                this.editMessage();
-            } else {
-                this.sendMessage();
-            }
-        } else if (ev.key === "Escape") {
-            if (this.props.onDiscardCallback) {
-                this.props.onDiscardCallback();
-                markEventHandled(ev, "composer.onKeydownEscape");
-            }
+            case "Escape":
+                if (this.props.onDiscardCallback) {
+                    this.props.onDiscardCallback();
+                    markEventHandled(ev, "composer.onKeydownEscape");
+                }
+                break;
         }
     }
 

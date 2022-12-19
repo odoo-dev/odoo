@@ -56,6 +56,7 @@ export class Discuss extends Component {
              *   "": no action pannel
              */
             activeMode: "",
+            messageInEditId: undefined,
         });
         this.orm = useService("orm");
         this.effect = useService("effect");
@@ -143,6 +144,17 @@ export class Discuss extends Component {
                 this.thread.type === "group")
         ) {
             await this.messaging.notifyThreadNameToServer(this.thread.localId, newName);
+        }
+    }
+
+    resetMessageInEdit() {
+        this.state.messageInEditId = undefined;
+    }
+
+    startEditingLastMessageOfCurrentUser() {
+        const messageToEdit = this.thread.lastEditableMessageOfCurrentUser;
+        if (messageToEdit) {
+            this.state.messageInEditId = messageToEdit.id;
         }
     }
 

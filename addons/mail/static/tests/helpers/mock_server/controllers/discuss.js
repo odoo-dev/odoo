@@ -297,7 +297,18 @@ patch(MockServer.prototype, "mail/controllers/discuss", {
     _mockRouteMailMessageHistory(min_id = false, max_id = false, limit = 30) {
         const domain = [["needaction", "=", false]];
         const messages = this._mockMailMessage_MessageFetch(domain, max_id, min_id, limit);
-        return this._mockMailMessageMessageFormat(messages.map((message) => message.id));
+        const messagesWithNotification = messages.filter((message) => {
+            const notifs = this.pyEnv["mail.notification"].searchRead([
+                ["mail_message_id", "=", message.id],
+                ["is_read", "=", true],
+                ["res_partner_id", "=", this.currentPartnerId],
+            ]);
+            return notifs.length > 0;
+        });
+
+        return this._mockMailMessageMessageFormat(
+            messagesWithNotification.map((message) => message.id)
+        );
     },
     /**
      * Simulates the `/mail/inbox/messages` route.

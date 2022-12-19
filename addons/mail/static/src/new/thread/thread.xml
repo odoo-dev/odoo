@@ -22,6 +22,7 @@
                         <t t-call="mail.notification_message"/>
                     </t>
                     <t t-elif="!msg.isEmpty">
+                        <t t-set="isMessageInEdit" t-value="props.messageInEditId === msg.id"/>
                         <Message
                             message="msg"
                             squashed="isSquashed(msg, prevMsg)"
@@ -29,6 +30,8 @@
                             onParentMessageClick="() => props.messageHighlight and msg.parentMessage and props.messageHighlight.highlightMessage(msg.parentMessage.id)"
                             grayedOut="isGrayedOut(msg)"
                             threadLocalId="props.id"
+                            shouldEnterEditMode="isMessageInEdit"
+                            onExitEditMode="() => isMessageInEdit and props.resetMessageInEdit?.()"
                         />
                     </t>
                     <Transition visible="thread.serverLastSeenMsgByCurrentUser === msg.id and !messageId_last" name="'o-fade'" t-slot-scope="transition">

@@ -253,7 +253,6 @@ export class NavigableList extends Component {
             default:
                 return;
         }
-        ev.stopPropagation();
         ev.preventDefault();
     }
 

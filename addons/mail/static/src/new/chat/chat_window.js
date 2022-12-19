@@ -40,6 +40,7 @@ export class ChatWindow extends Component {
              *   "": no action pannel
              */
             activeMode: "",
+            messageInEditId: undefined,
         });
         this.action = useService("action");
         this.contentRef = useRef("content");
@@ -95,7 +96,18 @@ export class ChatWindow extends Component {
         this.messaging.notifyChatWindowState(this.props.chatWindow.threadLocalId);
     }
 
+    resetMessageInEdit() {
+        this.state.messageInEditId = undefined;
+    }
+
     startCall() {
         this.rtc.toggleCall(this.props.chatWindow.thread.id);
+    }
+
+    startEditingLastMessageOfCurrentUser() {
+        const messageToEdit = this.thread.lastEditableMessageOfCurrentUser;
+        if (messageToEdit) {
+            this.state.messageInEditId = messageToEdit.id;
+        }
     }
 }

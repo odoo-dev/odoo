@@ -9,7 +9,7 @@ import { Transition } from "@web/core/transition";
 
 export class Thread extends Component {
     static components = { Message, Transition };
-    static props = ["id", "messageHighlight?", "order?"];
+    static props = ["id", "messageHighlight?", "order?", "messageInEditId?", "resetMessageInEdit?"];
     static defaultProps = {
         order: "asc", // 'asc' or 'desc'
     };

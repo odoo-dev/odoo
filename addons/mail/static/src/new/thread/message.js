@@ -7,7 +7,7 @@ import { isEventHandled, markEventHandled } from "@mail/new/utils/misc";
 import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { convertBrToLineBreak } from "@mail/new/utils/format";
 import { onExternalClick } from "@mail/new/utils/hooks";
-import { Component, onPatched, useChildSubEnv, useRef, useState } from "@odoo/owl";
+import { Component, onPatched, useChildSubEnv, useEffect, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Composer } from "../composer/composer";
 import { Composer as ComposerModel } from "../core/composer_model";
@@ -51,6 +51,8 @@ export class Message extends Component {
         "message",
         "squashed?",
         "threadLocalId?",
+        "onExitEditMode?",
+        "shouldEnterEditMode?",
     ];
     static template = "mail.message";
 
@@ -67,6 +69,14 @@ export class Message extends Component {
             LinkPreviewListComponent: LinkPreviewList,
             alignedRight: this.isAlignedRight,
         });
+        useEffect(
+            (shouldEnterEditMode) => {
+                if (shouldEnterEditMode) {
+                    this.enterEditMode();
+                }
+            },
+            () => [this.props.shouldEnterEditMode]
+        );
         onExternalClick("ref", async (ev) => {
             // Let event be handled by bubbling handlers first.
             await new Promise(setTimeout);
@@ -112,20 +122,14 @@ export class Message extends Component {
     }
 
     get canBeDeleted() {
-        if (!this.props.hasActions) {
-            return false;
-        }
-        if (!this.user.isAdmin && !this.message.isAuthoredByCurrentUser) {
-            return false;
-        }
-        if (this.message.type !== "comment") {
-            return false;
-        }
-        return this.message.isNote || this.message.resModel === "mail.channel";
+        return this.canBeEdited;
     }
 
     get canBeEdited() {
-        return this.canBeDeleted;
+        if (!this.props.hasActions) {
+            return false;
+        }
+        return this.message.canBeEdited;
     }
 
     get canReplyTo() {
@@ -220,10 +224,11 @@ export class Message extends Component {
         this.messaging.openChat({ partnerId: this.message.author.id });
     }
 
-    /**
-     * @param {MouseEvent} ev
-     */
-    onClickEdit(ev) {
+    onClickEdit() {
+        this.enterEditMode();
+    }
+
+    enterEditMode() {
         const messageContent = convertBrToLineBreak(this.props.message.body);
         ComposerModel.insert(this.messaging.state, {
             message: this.props.message,
@@ -238,6 +243,7 @@ export class Message extends Component {
     }
 
     exitEditMode() {
+        this.props.onExitEditMode?.();
         this.message.composer = null;
         this.state.isEditing = false;
     }

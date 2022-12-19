@@ -103,6 +103,7 @@ export class Messaging {
                 partnerId: user.partnerId,
                 uid: user.context.uid,
                 avatarUrl: `/web/image?field=avatar_128&id=${user.userId}&model=res.users`,
+                isAdmin: user.isAdmin,
             },
             /** @type {Object.<number, import("@mail/new/core/channel_member_model").ChannelMember>} */
             channelMembers: {},

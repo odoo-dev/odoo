@@ -49,8 +49,8 @@
                     <t t-if="thread.inCall">
                         <CallUI thread="thread" compact="true"/>
                     </t>
-                    <Thread id="thread.localId" t-key="thread.localId" messageHighlight="messageHighlight"/>
-                    <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage" dropzoneRef="contentRef"/>
+                    <Thread id="thread.localId" t-key="thread.localId" messageHighlight="messageHighlight" messageInEditId="state.messageInEditId" resetMessageInEdit="resetMessageInEdit.bind(this)"/>
+                    <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage" startEditingLastMessageOfCurrentUser="startEditingLastMessageOfCurrentUser.bind(this)" dropzoneRef="contentRef"/>
                 </t>
             </div>
         </t>

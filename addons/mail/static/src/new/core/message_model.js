@@ -166,6 +166,19 @@ export class Message {
         });
     }
 
+    /**
+     * @returns {boolean}
+     */
+    get canBeEdited() {
+        if (!this._state.user.isAdmin && !this.isAuthoredByCurrentUser) {
+            return false;
+        }
+        if (this.type !== "comment") {
+            return false;
+        }
+        return this.isNote || this.resModel === "mail.channel";
+    }
+
     get dateDay() {
         let dateDay = this.dateTime.toLocaleString(DateTime.DATE_FULL);
         if (dateDay === DateTime.now().toLocaleString(DateTime.DATE_FULL)) {

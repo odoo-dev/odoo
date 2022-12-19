@@ -309,6 +309,17 @@ export class Thread {
         return !this.id;
     }
 
+    get lastEditableMessageOfCurrentUser() {
+        const messages = this.messages.map((id) => this._state.messages[id]);
+        const editableMessagesOfCurrentUser = messages.filter(
+            (message) => message.isAuthoredByCurrentUser && message.canBeEdited
+        );
+        if (editableMessagesOfCurrentUser.length > 0) {
+            return editableMessagesOfCurrentUser.at(-1);
+        }
+        return null;
+    }
+
     get localId() {
         return createLocalId(this.model, this.id);
     }
