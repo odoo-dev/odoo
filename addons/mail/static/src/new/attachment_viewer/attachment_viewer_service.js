@@ -20,6 +20,9 @@ export const attachmentViewerService = {
          * @param {import("@mail/new/core/attachment_model").Attachment[]} attachments
          */
         function open(attachment, attachments = []) {
+            if (!attachment.isViewable) {
+                return;
+            }
             if (attachments.length > 0) {
                 const viewableAttachments = attachments.filter(
                     (attachment) => attachment.isViewable
