@@ -1,27 +1,49 @@
 /* @odoo-module */
 
 export class ChatWindow {
+    /** @type {number} */
+    autofocus = 0;
+    /** @type {boolean} */
+    folded = false;
+
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
      * @param {Object} data
      * @returns {ChatWindow}
      */
     static insert(state, data) {
-        const { threadLocalId } = data;
-        const chatWindow = state.chatWindows.find((c) => c.threadLocalId === threadLocalId);
+        const chatWindow = state.chatWindows.find((c) => c.threadLocalId === data.threadLocalId);
         if (!chatWindow) {
-            const chatWindow = new ChatWindow(data);
-            chatWindow._state = state;
-            state.chatWindows.push(chatWindow);
-        } else {
-            chatWindow.folded = false;
-            chatWindow.autofocus++;
+            return new ChatWindow(state, data);
         }
+        chatWindow.update(data);
+        return chatWindow;
     }
 
-    constructor(data) {
-        const { threadLocalId } = data;
-        Object.assign(this, { threadLocalId, autofocus: 1, folded: false });
+    /**
+     * @param {import("@mail/new/core/messaging").Messaging['state']} state
+     * @param {Object} data
+     * @returns {ChatWindow}
+     */
+    constructor(state, data) {
+        Object.assign(this, {
+            threadLocalId: data.threadLocalId,
+            _state: state,
+        });
+        this.update(data);
+        state.chatWindows.push(this);
+        return state.chatWindows.find((c) => c.threadLocalId === data.threadLocalId); // return reactive version
+    }
+
+    /**
+     * @param {Object} data
+     */
+    update(data) {
+        const { autofocus = this.autofocus, folded = this.folded } = data;
+        Object.assign(this, {
+            autofocus,
+            folded,
+        });
     }
 
     close() {

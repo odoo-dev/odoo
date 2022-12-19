@@ -37,7 +37,7 @@ QUnit.module("mail", {}, function () {
                     );
 
                     await afterNextRender(() => click(document.body, ".o_command.focused"));
-                    assert.containsOnce(document.body, ".o_ChatWindow");
+                    assert.containsOnce(document.body, ".o-mail-chat-window");
                 }
             );
 
@@ -73,10 +73,11 @@ QUnit.module("mail", {}, function () {
                     );
 
                     await afterNextRender(() => click(document.body, ".o_command.focused"));
-                    assert.containsOnce(document.body, ".o_ChatWindow");
+                    assert.containsOnce(document.body, ".o-mail-chat-window");
                     assert.strictEqual(
-                        document.querySelector(".o_ChatWindow .o-mail-chat-window-header-name")
-                            .textContent,
+                        document.querySelector(
+                            ".o-mail-chat-window .o-mail-chat-window-header-name"
+                        ).textContent,
                         "general"
                     );
                 }

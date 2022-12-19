@@ -1060,7 +1060,7 @@ QUnit.module("mail", {}, function () {
                 await nextAnimationFrame();
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have no thread opened after clicking on author avatar when currently chatting with the author"
                 );
             }

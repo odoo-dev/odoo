@@ -37,7 +37,7 @@ QUnit.module("mail", {}, function () {
         });
 
         await dom.click(document.querySelector(".o_data_cell .o_m2o_avatar > img"));
-        assert.containsOnce(document.body, ".o_ChatWindow", "Chat window should be opened");
+        assert.containsOnce(document.body, ".o-mail-chat-window", "Chat window should be opened");
         assert.strictEqual(
             document.querySelector(".o-mail-chat-window-header-name").textContent,
             "Partner 1",
@@ -68,7 +68,7 @@ QUnit.module("mail", {}, function () {
         await dom.click(
             document.querySelector(".o_field_many2many_avatar_user .badge .o_m2m_avatar")
         );
-        assert.containsOnce(document.body, ".o_ChatWindow", "Chat window should be opened");
+        assert.containsOnce(document.body, ".o-mail-chat-window", "Chat window should be opened");
         assert.strictEqual(
             document.querySelector(".o-mail-chat-window-header-name").textContent,
             "Partner 1",

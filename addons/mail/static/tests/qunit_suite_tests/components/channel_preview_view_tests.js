@@ -70,7 +70,7 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsNone(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should not have opened the thread"
             );
         });

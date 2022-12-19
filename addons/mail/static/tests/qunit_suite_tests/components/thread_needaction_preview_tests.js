@@ -60,7 +60,7 @@ QUnit.module("mail", {}, function () {
             assert.verifySteps(["mark_all_as_read"], "should have marked the thread as read");
             assert.containsNone(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should not have opened the thread"
             );
         });
@@ -102,14 +102,14 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have no chat window initially"
                 );
 
                 await click(".o_ThreadNeedactionPreviewView");
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have opened the thread on clicking on the preview"
                 );
                 await click(".o_MessagingMenu_toggler");
@@ -175,7 +175,7 @@ QUnit.module("mail", {}, function () {
                 await click(".o_ThreadNeedactionPreviewView");
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have opened the thread on clicking on the preview"
                 );
                 assert.containsOnce(
@@ -187,7 +187,7 @@ QUnit.module("mail", {}, function () {
                 await click(".o_ChatWindowHeaderView_commandExpand");
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have closed the chat window on clicking expand"
                 );
                 assert.verifySteps(
@@ -246,14 +246,14 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have no chat window initially"
                 );
 
                 await click(".o_ThreadNeedactionPreviewView");
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have opened the chat window on clicking on the preview"
                 );
             }
@@ -347,7 +347,7 @@ QUnit.module("mail", {}, function () {
                 await click(".o_ThreadNeedactionPreviewView");
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have opened the chat window on clicking on the preview"
                 );
                 assert.containsNone(
