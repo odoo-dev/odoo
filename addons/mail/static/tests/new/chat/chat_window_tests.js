@@ -99,3 +99,54 @@ QUnit.test("load messages from opening chat window from messaging menu", async f
     await click(".o-mail-messaging-menu .o-mail-notification-item");
     assert.containsN(target, ".o-mail-message", 21);
 });
+
+QUnit.test("chat window: basic rendering", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({ name: "General" });
+    const { click } = await start();
+    await click(".o_menu_systray i[aria-label='Messages']");
+    await click(".o-mail-messaging-menu .o-mail-notification-item");
+    assert.containsOnce(target, ".o-mail-chat-window");
+    assert.containsOnce(target, ".o-mail-chat-window-header");
+    assert.containsOnce($(target).find(".o-mail-chat-window-header"), ".o-mail-chatwindow-icon");
+    assert.containsOnce(target, ".o-mail-chat-window-header-name:contains(General)");
+    assert.containsN(target, ".o-mail-command", 5);
+    assert.containsOnce(target, ".o-mail-command[title='Start a Call']");
+    assert.containsOnce(target, ".o-mail-command[title='Show Member List']");
+    assert.containsOnce(target, ".o-mail-command[title='Show Call Settings']");
+    assert.containsOnce(target, ".o-mail-command[title='Open in Discuss']");
+    assert.containsOnce(target, ".o-mail-command[title='Close chat window']");
+    assert.containsOnce(target, ".o-mail-chat-window-content .o-mail-thread");
+    assert.strictEqual(
+        $(target).find(".o-mail-chat-window-content .o-mail-thread").text().trim(),
+        "There are no messages in this conversation."
+    );
+});
+
+QUnit.test(
+    "Mobile: opening a chat window should not update channel state on the server",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [
+                    0,
+                    0,
+                    {
+                        fold_state: "closed",
+                        partner_id: pyEnv.currentPartnerId,
+                    },
+                ],
+            ],
+        });
+        patchUiSize({ size: SIZES.SM });
+        const { click } = await start();
+        await click(".o_menu_systray i[aria-label='Messages']");
+        await click(".o-mail-messaging-menu .o-mail-notification-item");
+        const [member] = pyEnv["mail.channel.member"].searchRead([
+            ["channel_id", "=", mailChannelId1],
+            ["partner_id", "=", pyEnv.currentPartnerId],
+        ]);
+        assert.strictEqual(member.fold_state, "closed");
+    }
+);

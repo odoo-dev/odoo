@@ -230,3 +230,24 @@ QUnit.test("sidebar quick search at 20 or more pinned channels", async function 
     );
     assert.containsNone(document.body, ".o-mail-category-item");
 });
+
+QUnit.test("sidebar: basic chat rendering", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
+    const mailChannelId1 = pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            [0, 0, { partner_id: resPartnerId1 }],
+        ],
+        channel_type: "chat",
+    });
+    const { openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsOnce(target, `.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
+    const $chat = $(target).find(`.o-mail-category-item[data-channel-id="${mailChannelId1}"]`);
+    assert.containsOnce($chat, "img[data-alt='Thread Image']");
+    assert.containsOnce($chat, "span:contains(Demo)");
+    assert.containsOnce($chat, ".o-mail-commands");
+    assert.containsOnce($chat, ".o-mail-commands div[title='Unpin Conversation']");
+    assert.containsNone($chat, ".badge");
+});

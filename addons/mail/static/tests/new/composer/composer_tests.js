@@ -943,3 +943,27 @@ QUnit.test(
         );
     }
 );
+
+QUnit.test("send message only once when enter is pressed twice quickly", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
+    const { insertText, openDiscuss } = await start({
+        discuss: {
+            context: {
+                active_id: `mail.channel_${mailChannelId1}`,
+            },
+        },
+        async mockRPC(route, args) {
+            if (route === "/mail/message/post") {
+                assert.step("message_post");
+            }
+        },
+    });
+    await openDiscuss();
+    // Type message
+    await insertText(".o-mail-composer-textarea", "test message");
+    triggerHotkey("Enter");
+    triggerHotkey("Enter");
+    await nextTick();
+    assert.verifySteps(["message_post"], "The message has been posted only once");
+});
