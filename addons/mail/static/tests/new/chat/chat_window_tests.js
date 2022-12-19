@@ -7,6 +7,11 @@ import {
     start,
     startServer,
 } from "@mail/../tests/helpers/test_utils";
+import {
+    CHAT_WINDOW_END_GAP_WIDTH,
+    CHAT_WINDOW_INBETWEEN_WIDTH,
+    CHAT_WINDOW_WIDTH,
+} from "@mail/new/core/chat_window_model";
 import { getFixture, triggerHotkey } from "@web/../tests/helpers/utils";
 
 let target;
@@ -286,3 +291,102 @@ QUnit.test(
         assert.containsOnce(target, ".o-mail-chat-window");
     }
 );
+
+QUnit.test(
+    "open 2 different chat windows: enough screen width [REQUIRE FOCUS]",
+    async function (assert) {
+        const pyEnv = await startServer();
+        pyEnv["mail.channel"].create([{ name: "mailChannel1" }, { name: "mailChannel2" }]);
+        patchUiSize({ width: 1920 });
+        assert.ok(
+            CHAT_WINDOW_END_GAP_WIDTH * 2 + CHAT_WINDOW_WIDTH * 2 + CHAT_WINDOW_INBETWEEN_WIDTH <
+                1920,
+            "should have enough space to open 2 chat windows simultaneously"
+        );
+        const { click } = await start();
+        await click("button i[aria-label='Messages']");
+        await click(".o-mail-notification-item:contains(mailChannel1)");
+        assert.containsOnce(target, ".o-mail-chat-window");
+        assert.containsOnce(
+            target,
+            ".o-mail-chat-window .o-mail-chat-window-header:contains(mailChannel1)"
+        );
+        assert.strictEqual(
+            document.activeElement,
+            $(target)
+                .find(".o-mail-chat-window .o-mail-chat-window-header:contains(mailChannel1)")
+                .closest(".o-mail-chat-window")
+                .find(".o-mail-composer-textarea")[0]
+        );
+
+        await click("button i[aria-label='Messages']");
+        await click(".o-mail-notification-item:contains(mailChannel2)");
+        assert.containsN(target, ".o-mail-chat-window", 2);
+        assert.containsOnce(
+            target,
+            ".o-mail-chat-window .o-mail-chat-window-header:contains(mailChannel2)"
+        );
+        assert.containsOnce(
+            target,
+            ".o-mail-chat-window .o-mail-chat-window-header:contains(mailChannel1)"
+        );
+        assert.strictEqual(
+            document.activeElement,
+            $(target)
+                .find(".o-mail-chat-window .o-mail-chat-window-header:contains(mailChannel2)")
+                .closest(".o-mail-chat-window")
+                .find(".o-mail-composer-textarea")[0]
+        );
+    }
+);
+
+QUnit.test("open 3 different chat windows: not enough screen width", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create([
+        { name: "mailChannel1" },
+        { name: "mailChannel2" },
+        { name: "mailChannel3" },
+    ]);
+    patchUiSize({ width: 900 });
+    assert.ok(
+        CHAT_WINDOW_END_GAP_WIDTH * 2 + CHAT_WINDOW_WIDTH * 2 + CHAT_WINDOW_INBETWEEN_WIDTH < 900,
+        "should have enough space to open 2 chat windows simultaneously"
+    );
+    assert.ok(
+        CHAT_WINDOW_END_GAP_WIDTH * 2 + CHAT_WINDOW_WIDTH * 3 + CHAT_WINDOW_INBETWEEN_WIDTH * 2 >
+            900,
+        "should not have enough space to open 3 chat windows simultaneously"
+    );
+    const { click } = await start();
+
+    // open, from systray menu, chat windows of channels with Id 1, 2, then 3
+    await click("button i[aria-label='Messages']");
+    await click(".o-mail-notification-item:contains(mailChannel1)");
+    assert.containsOnce(target, ".o-mail-chat-window");
+    assert.containsNone(target, ".o-mail-chat-window-hidden-menu");
+
+    await click("button i[aria-label='Messages']");
+    await click(".o-mail-notification-item:contains(mailChannel2)");
+    assert.containsN(target, ".o-mail-chat-window", 2);
+    assert.containsNone(target, ".o-mail-chat-window-hidden-menu");
+
+    await click("button i[aria-label='Messages']");
+    await click(".o-mail-notification-item:contains(mailChannel3)");
+    assert.containsN(target, ".o-mail-chat-window", 2);
+    assert.containsOnce(target, ".o-mail-chat-window-hidden-menu");
+    assert.containsOnce(
+        target,
+        ".o-mail-chat-window .o-mail-chat-window-header:contains(mailChannel1)"
+    );
+    assert.containsOnce(
+        target,
+        ".o-mail-chat-window .o-mail-chat-window-header:contains(mailChannel3)"
+    );
+    assert.strictEqual(
+        document.activeElement,
+        $(target)
+            .find(".o-mail-chat-window .o-mail-chat-window-header:contains(mailChannel3)")
+            .closest(".o-mail-chat-window")
+            .find(".o-mail-composer-textarea")[0]
+    );
+});

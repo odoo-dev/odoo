@@ -15,6 +15,12 @@ import { ChannelInvitationForm } from "../discuss/channel_invitation_form";
 import { isEventHandled } from "../utils/misc";
 import { ChannelSelector } from "@mail/new/discuss/channel_selector";
 
+/**
+ * @typedef {Object} Props
+ * @property {import("@mail/new/core/chat_window_model").ChatWindow} chatWindow
+ * @property {boolean} [right]
+ * @extends {Component<Props, Env>}
+ */
 export class ChatWindow extends Component {
     static components = {
         Thread,
@@ -66,7 +72,11 @@ export class ChatWindow extends Component {
     }
 
     toggleFold() {
-        this.props.chatWindow.toggleFold();
+        if (this.props.chatWindow.hidden) {
+            this.props.chatWindow.makeVisible();
+        } else {
+            this.props.chatWindow.toggleFold();
+        }
         this.messaging.notifyChatWindowState(this.props.chatWindow.threadLocalId);
     }
 

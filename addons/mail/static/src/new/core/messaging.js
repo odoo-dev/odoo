@@ -95,6 +95,9 @@ export class Messaging {
         });
         this.registeredImStatusPartners = reactive([], () => this.updateImStatusRegistration());
         this.state = reactive({
+            get isSmall() {
+                return env.isSmall;
+            },
             /** @type Object<number, []> */
             areTyping: {},
             areTypingTimer: {},
@@ -163,6 +166,7 @@ export class Messaging {
                 /** @type {Thread} */
                 history: null,
             },
+            /** @type {import("@mail/new/core/chat_window_model").ChatWindow[]} */
             chatWindows: [],
             cannedResponses: [],
         });
@@ -226,6 +230,18 @@ export class Messaging {
         shortcodes.forEach((code) => {
             CannedResponse.insert(this.state, code);
         });
+    }
+
+    get visibleChatWindows() {
+        return ChatWindow.visibleChatWindows(this.state);
+    }
+
+    get hiddenChatWindows() {
+        return ChatWindow.hiddenChatWindows(this.state);
+    }
+
+    get maxVisibleChatWindows() {
+        return ChatWindow.maxVisibleChatWindows(this.state);
     }
 
     /**

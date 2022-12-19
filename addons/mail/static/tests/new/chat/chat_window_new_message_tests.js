@@ -4,6 +4,11 @@ import { patchUiSize } from "@mail/../tests/helpers/patch_ui_size";
 import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 import { makeDeferred } from "@mail/utils/deferred";
+import {
+    CHAT_WINDOW_END_GAP_WIDTH,
+    CHAT_WINDOW_INBETWEEN_WIDTH,
+    CHAT_WINDOW_WIDTH,
+} from "@mail/new/core/chat_window_model";
 
 let target;
 QUnit.module("chat window: new message", {
@@ -69,19 +74,6 @@ QUnit.test("fold", async function (assert) {
 QUnit.test(
     'open chat from "new message" chat window should open chat in place of this "new message" chat window',
     async function (assert) {
-        /**
-         * InnerWith computation uses following info:
-         * ([mocked] global window width: @see `mail/static/tests/helpers/test_utils.js:start()` method)
-         * (others: @see mail/static/src/models/chat_window_manager.js:visual)
-         *
-         * - chat window width: 340px
-         * - start/end/between gap width: 10px/10px/5px
-         * - hidden menu width: 170px
-         * - global width: 1920px
-         *
-         * Enough space for 3 visible chat windows:
-         *  10 + 340 + 5 + 340 + 5 + 340 + 10 = 1050 < 1920
-         */
         const pyEnv = await startServer();
         const resPartnerId1 = pyEnv["res.partner"].create({ name: "Partner 131" });
         pyEnv["res.users"].create({ partner_id: resPartnerId1 });
@@ -115,6 +107,13 @@ QUnit.test(
         ]);
         const imSearchDef = makeDeferred();
         patchUiSize({ width: 1920 });
+        assert.ok(
+            CHAT_WINDOW_END_GAP_WIDTH * 2 +
+                CHAT_WINDOW_WIDTH * 3 +
+                CHAT_WINDOW_INBETWEEN_WIDTH * 2 <
+                1920,
+            "should have enough space to open 3 chat windows simultaneously"
+        );
         const { click, insertText } = await start({
             mockRPC(route, args) {
                 if (args.method === "im_search") {
