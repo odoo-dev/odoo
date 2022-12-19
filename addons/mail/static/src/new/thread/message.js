@@ -204,9 +204,15 @@ export class Message extends Component {
      * @param {MouseEvent} ev
      */
     onClickEdit(ev) {
+        const messageContent = convertBrToLineBreak(this.props.message.body);
         ComposerModel.insert(this.messaging.state, {
             message: this.props.message,
-            textInputContent: convertBrToLineBreak(this.props.message.body),
+            textInputContent: messageContent,
+            selection: {
+                start: messageContent.length,
+                end: messageContent.length,
+                direction: "none",
+            },
         });
         this.state.isEditing = true;
     }

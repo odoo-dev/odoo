@@ -56,6 +56,9 @@ export class Composer {
         if ("textInputContent" in data) {
             this.textInputContent = data.textInputContent;
         }
+        if ("selection" in data) {
+            Object.assign(this.selection, data.selection);
+        }
         return this;
     }
 }
