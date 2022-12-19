@@ -133,10 +133,6 @@ QUnit.test("can change the thread description of #general", async (assert) => {
 });
 
 QUnit.test("can create a new channel", async (assert) => {
-    // for autocomplete stuff
-    patchWithCleanup(browser, {
-        setTimeout: (fn) => fn(),
-    });
     const server = new TestServer();
     const env = makeTestEnv((route, params) => {
         if (
@@ -153,8 +149,9 @@ QUnit.test("can create a new channel", async (assert) => {
     await mount(Discuss, target, { env });
     assert.containsNone(target, ".o-mail-category-item");
     await click(target, ".o-mail-discuss-sidebar i[title='Add or join a channel']");
-    await editInput(target, ".o-autocomplete--input", "abc");
-    await click(target, ".o-mail-discuss-sidebar .o-autocomplete--dropdown-item");
+    await editInput(target, ".o-mail-channel-selector-input", "abc");
+    await nextTick(); // wait for following rendering
+    await click(target, ".o-mail-channel-selector-suggestion");
     assert.containsN(target, ".o-mail-category-item", 1);
     assert.containsN(target, ".o-mail-discuss-content .o-mail-message", 0);
     assert.verifySteps([
@@ -176,10 +173,7 @@ QUnit.test("can join a chat conversation", async (assert) => {
     const env = makeTestEnv((route, params) => {
         if (
             route.startsWith("/mail") ||
-            [
-                "/web/dataset/call_kw/res.partner/im_search",
-                "/web/dataset/call_kw/mail.channel/channel_get",
-            ].includes(route)
+            ["/web/dataset/call_kw/mail.channel/channel_get"].includes(route)
         ) {
             assert.step(route);
         }
@@ -192,17 +186,51 @@ QUnit.test("can join a chat conversation", async (assert) => {
     await mount(Discuss, target, { env });
     assert.containsNone(target, ".o-mail-category-item");
     await click(target, ".o-mail-discuss-sidebar i[title='Start a conversation']");
-    await editInput(target, ".o-autocomplete--input", "abc");
-    await click(target, ".o-mail-discuss-sidebar .o-autocomplete--dropdown-item");
+    await editInput(target, ".o-mail-channel-selector-input", "abc");
+    await nextTick(); // wait for following rendering
+    await click(target, ".o-mail-channel-selector-suggestion");
+    await triggerEvent(target, ".o-mail-channel-selector-input", "keydown", {
+        key: "Enter",
+    });
     assert.containsN(target, ".o-mail-category-item", 1);
     assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
     assert.verifySteps([
         "/mail/init_messaging",
         "/mail/inbox/messages",
-        "/web/dataset/call_kw/res.partner/im_search",
         "/web/dataset/call_kw/mail.channel/channel_get",
         "/mail/channel/messages",
     ]);
+});
+
+QUnit.test("can create a group chat conversation", async (assert) => {
+    const pyEnv = await startServer();
+    const [resPartnerId1, resPartnerId2] = pyEnv["res.partner"].create([
+        {
+            name: "Mario",
+        },
+        { name: "Luigi" },
+    ]);
+    pyEnv["res.users"].create([
+        {
+            partner_id: resPartnerId1,
+        },
+        {
+            partner_id: resPartnerId2,
+        },
+    ]);
+    const { click, insertText, openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsNone(target, ".o-mail-category-item");
+    await click(".o-mail-discuss-sidebar i[title='Start a conversation']");
+    await insertText(".o-mail-channel-selector-input", "Mario");
+    await click(".o-mail-channel-selector-suggestion");
+    await insertText(".o-mail-channel-selector-input", "Luigi");
+    await click(".o-mail-channel-selector-suggestion");
+    await triggerEvent(target, ".o-mail-channel-selector-input", "keydown", {
+        key: "Enter",
+    });
+    assert.containsN(target, ".o-mail-category-item", 1);
+    assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
 });
 
 QUnit.test("focus is set on composer when switching channel", async (assert) => {

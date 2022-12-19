@@ -28,7 +28,7 @@ export class NavigableList extends Component {
                 shape: {
                     placeholder: { type: String, optional: true },
                     optionTemplate: { type: String, optional: true },
-                    options: [Array, Function],
+                    options: [Array, Promise],
                 },
             },
         },
@@ -108,12 +108,15 @@ export class NavigableList extends Component {
             }
             const source = this.makeSource(pSource);
             this.sources.push(source);
-            const options = this.loadOptions(pSource.options);
+            const options = pSource.options;
             if (options instanceof Promise) {
                 source.isLoading = true;
                 const prom = options.then((options) => {
                     source.options = options.map((option) => this.makeOption(option));
                     source.isLoading = false;
+                    if (source.options.length === 0) {
+                        this.sources = this.sources.filter((s) => s !== source);
+                    }
                     this.state.optionsRev++;
                 });
                 proms.push(prom);
@@ -128,14 +131,6 @@ export class NavigableList extends Component {
             return;
         }
         this.state.open = true;
-    }
-
-    loadOptions(options, request) {
-        if (typeof options === "function") {
-            return options(request);
-        } else {
-            return options;
-        }
     }
 
     makeOption(option) {

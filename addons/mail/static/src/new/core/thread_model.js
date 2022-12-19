@@ -83,7 +83,7 @@ export class Thread {
         });
         if (this.type === "channel") {
             this._state.discuss.channels.threads.push(this.localId);
-        } else if (this.type === "chat") {
+        } else if (this.type === "chat" || this.type === "group") {
             this._state.discuss.chats.threads.push(this.localId);
         }
         this.update(data);
@@ -126,6 +126,11 @@ export class Thread {
                     }
                 }
                 this.customName = serverData.channel.custom_channel_name;
+            }
+            if (this.type === "group") {
+                serverData.channel.channelMembers[0][1].forEach((elem) => {
+                    Partner.insert(this._state, elem.persona.partner);
+                });
             }
         }
         Composer.insert(this._state, { thread: this });
@@ -213,7 +218,9 @@ export class Thread {
 
     sortMessages() {
         this.messages.sort((msgId1, msgId2) => {
-            const indicator = new Date(this._state.messages[msgId1].dateTime) - new Date(this._state.messages[msgId2].dateTime);
+            const indicator =
+                new Date(this._state.messages[msgId1].dateTime) -
+                new Date(this._state.messages[msgId2].dateTime);
             if (indicator) {
                 return indicator;
             } else {
@@ -254,7 +261,7 @@ export class Thread {
 
     get imgUrl() {
         const avatarCacheKey = this.serverData.channel.avatarCacheKey;
-        if (this.type === "channel") {
+        if (this.type === "channel" || this.type === "group") {
             return `/web/image/mail.channel/${this.id}/avatar_128?unique=${avatarCacheKey}`;
         }
         if (this.type === "chat") {

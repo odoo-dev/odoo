@@ -15,7 +15,7 @@ commandRegistry
         methodName: "execute_command_leave",
     })
     .add("who", {
-        channel_types: ["channel", "chat"],
+        channel_types: ["channel", "chat", "group"],
         help: _lt("List users in the current channel"),
         methodName: "execute_command_who",
     });

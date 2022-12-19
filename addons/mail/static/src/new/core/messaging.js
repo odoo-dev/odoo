@@ -255,6 +255,19 @@ export class Messaging {
         this.fetchChannelMembers(thread.localId);
     }
 
+    async createGroupChat({ default_display_mode, partners_to }) {
+        const channel = await this.orm.call("mail.channel", "create_group", [], {
+            default_display_mode,
+            partners_to,
+        });
+        this.createChannelThread(channel);
+        this.sortChannels();
+        this.state.discuss.threadLocalId = Thread.createLocalId({
+            model: "mail.channel",
+            id: channel.id,
+        });
+    }
+
     async fetchChannelMembers(threadLocalId) {
         const thread = this.state.threads[threadLocalId];
         const results = await this.orm.call("mail.channel", "load_more_members", [[thread.id]], {
@@ -724,6 +737,7 @@ export class Messaging {
                 });
                 break;
             case "channel":
+            case "group":
             case "chat":
                 rawMessages = await this.rpc("/mail/channel/messages", {
                     channel_id: thread.id,

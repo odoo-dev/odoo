@@ -78,8 +78,8 @@
     </div>
     <t t-if="category.isOpen">
         <t t-if="state.editing === category.id">
-            <div class="mb-2" t-ref="selector">
-                <ChannelSelector category="category" onSelect.bind="stopEditing" />
+            <div class="p-2" t-ref="selector">
+                <ChannelSelector category="category" onValidate.bind="stopEditing" autofocus="true"/>
             </div>
         </t>
         <t t-foreach="filteredThreads(category)" t-as="threadLocalId" t-key="threadLocalId">

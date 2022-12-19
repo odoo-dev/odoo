@@ -1,9 +1,5 @@
-.o-mail-channel-selector .o-autocomplete {
-    width: 100%;
+.o-mail-channel-selector {
     input {
-        border: 0;
-    }
-    .dropdown-menu {
-        min-width: 220px;
+        width: unset !important;
     }
 }
