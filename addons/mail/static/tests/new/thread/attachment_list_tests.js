@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
-import { getFixture } from "@web/../tests/helpers/utils";
+import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 
 let target;
 
@@ -315,3 +315,53 @@ QUnit.test("DOCX file is not viewable", async function (assert) {
     await openDiscuss();
     assert.doesNotHaveClass($(target).find(".o-mail-attachment-card"), "o-mail-viewable");
 });
+
+QUnit.test(
+    "should not view attachment from click on non-viewable attachment in list containing a viewable attachment",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "channel1",
+        });
+        const [messageAttachmentId1, messageAttachmentId2] = pyEnv["ir.attachment"].create([
+            {
+                name: "test.png",
+                mimetype: "image/png",
+            },
+            {
+                name: "test.odt",
+                mimetype: "application/vnd.oasis.opendocument.text",
+            },
+        ]);
+        pyEnv["mail.message"].create({
+            attachment_ids: [messageAttachmentId1, messageAttachmentId2],
+            body: "<p>Test</p>",
+            model: "mail.channel",
+            res_id: channelId,
+        });
+        const { click, openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${channelId}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsOnce(target, ".o-mail-attachment-image[title='test.png']");
+        assert.containsOnce(target, ".o-mail-attachment-card:contains(test.odt)");
+        assert.hasClass(
+            $(target).find(".o-mail-attachment-image[title='test.png'] img"),
+            "o-mail-viewable"
+        );
+        assert.doesNotHaveClass(
+            $(target).find(".o-mail-attachment-card:contains(test.odt)"),
+            "o-mail-viewable"
+        );
+
+        click(".o-mail-attachment-card:contains(test.odt)").catch(() => {});
+        await nextTick();
+        assert.containsNone(target, ".o-mail-attachment-viewer");
+
+        await click(".o-mail-attachment-image[title='test.png']");
+        assert.containsOnce(target, ".o-mail-attachment-viewer");
+    }
+);
