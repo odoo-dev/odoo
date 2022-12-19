@@ -8,6 +8,7 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { cleanTerm } from "@mail/new/utils/format";
 import { Partner } from "../core/partner_model";
+import { _t } from "@web/core/l10n/translation";
 
 export class ChannelSelector extends Component {
     static components = { TagsList, NavigableList };
@@ -138,6 +139,12 @@ export class ChannelSelector extends Component {
             (partnerId) => partnerId !== id
         );
         this.inputRef.el.focus();
+    }
+
+    get inputPlaceholder() {
+        return this.state.selectedPartners.length > 0
+            ? _t("Press Enter to start")
+            : this.props.category.addTitle;
     }
 
     get tagsList() {
