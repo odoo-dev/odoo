@@ -189,7 +189,14 @@ export class Messaging {
             Partner.insert(this.state, data.current_partner);
             this.state.partnerRoot = Partner.insert(this.state, data.partner_root);
             for (const channelData of data.channels) {
-                this.createChannelThread(channelData);
+                const thread = this.createChannelThread(channelData);
+                if (channelData.is_minimized && channelData.state !== "closed") {
+                    ChatWindow.insert(this.state, {
+                        autofocus: 0,
+                        folded: channelData.state === "folded",
+                        threadLocalId: thread.localId,
+                    });
+                }
             }
             this.sortChannels();
             const settings = data.current_user_settings;
@@ -218,6 +225,8 @@ export class Messaging {
 
     /**
      * todo: merge this with Thread.insert() (?)
+     *
+     * @returns {Thread}
      */
     createChannelThread(serverData) {
         const {
@@ -253,6 +262,7 @@ export class Messaging {
             authorizedGroupFullName,
         });
         this.fetchChannelMembers(thread.localId);
+        return thread;
     }
 
     async createGroupChat({ default_display_mode, partners_to }) {
@@ -965,7 +975,8 @@ export class Messaging {
         if (this.state.discuss.isActive) {
             this.setDiscussThread(threadLocalId);
         } else {
-            ChatWindow.insert(this.state, { threadLocalId });
+            const chatWindow = ChatWindow.insert(this.state, { folded: false, threadLocalId });
+            chatWindow.autofocus++;
         }
     }
 

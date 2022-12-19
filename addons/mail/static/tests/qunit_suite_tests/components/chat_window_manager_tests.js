@@ -63,7 +63,7 @@ QUnit.module("mail", {}, function () {
             await click(`.o_MessagingMenu_toggler`);
             await click(`.o_MessagingMenu_newMessageButton`);
             assert.strictEqual(
-                document.querySelectorAll(`.o_ChatWindow`).length,
+                document.querySelectorAll(`.o-mail-chat-window`).length,
                 1,
                 "should have open a chat window"
             );
@@ -128,7 +128,7 @@ QUnit.module("mail", {}, function () {
                 await click(`.o_MessagingMenu_toggler`);
                 await click(`.o_MessagingMenu_newMessageButton`);
                 assert.ok(
-                    document.querySelector(`.o_ChatWindow`).classList.contains("o-focused"),
+                    document.querySelector(`.o-mail-chat-window`).classList.contains("o-focused"),
                     "chat window should be focused"
                 );
                 assert.strictEqual(
@@ -147,7 +147,7 @@ QUnit.module("mail", {}, function () {
             await click(`.o_MessagingMenu_newMessageButton`);
             await click(`.o_ChatWindow_header .o_ChatWindowHeaderView_commandClose`);
             assert.strictEqual(
-                document.querySelectorAll(`.o_ChatWindow`).length,
+                document.querySelectorAll(`.o-mail-chat-window`).length,
                 0,
                 "chat window should be closed"
             );
@@ -160,7 +160,7 @@ QUnit.module("mail", {}, function () {
             await click(`.o_MessagingMenu_toggler`);
             await click(`.o_MessagingMenu_newMessageButton`);
             assert.doesNotHaveClass(
-                document.querySelector(`.o_ChatWindow`),
+                document.querySelector(`.o-mail-chat-window`),
                 "o-folded",
                 "chat window should not be folded by default"
             );
@@ -172,7 +172,7 @@ QUnit.module("mail", {}, function () {
 
             await click(`.o_ChatWindow_header`);
             assert.hasClass(
-                document.querySelector(`.o_ChatWindow`),
+                document.querySelector(`.o-mail-chat-window`),
                 "o-folded",
                 "chat window should become folded"
             );
@@ -184,7 +184,7 @@ QUnit.module("mail", {}, function () {
 
             await click(`.o_ChatWindow_header`);
             assert.doesNotHaveClass(
-                document.querySelector(`.o_ChatWindow`),
+                document.querySelector(`.o-mail-chat-window`),
                 "o-folded",
                 "chat window should become unfolded"
             );
@@ -255,13 +255,13 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.containsN(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     1,
                     "should have 1 chat window initially"
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow.o-new-message",
+                    ".o-mail-chat-window.o-new-message",
                     "should not have any 'new message' chat window initially"
                 );
 
@@ -270,12 +270,12 @@ QUnit.module("mail", {}, function () {
                 await click(`.o_MessagingMenu_newMessageButton`);
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow.o-new-message",
+                    ".o-mail-chat-window.o-new-message",
                     "should have 'new message' chat window after clicking 'new message' in messaging menu"
                 );
                 assert.containsN(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     2,
                     "should have 2 chat windows after opening 'new message' chat window"
                 );
@@ -285,7 +285,7 @@ QUnit.module("mail", {}, function () {
                     "'new message' chat window should have new message form input"
                 );
                 assert.hasClass(
-                    document.querySelector('.o_ChatWindow[data-visible-index="1"]'),
+                    document.querySelector('.o-mail-chat-window[data-visible-index="1"]'),
                     "o-new-message",
                     "'new message' chat window should be the last chat window initially"
                 );
@@ -295,12 +295,12 @@ QUnit.module("mail", {}, function () {
                 await click(`.o_ChannelPreviewView[data-channel-id="${mailChannelId2}"]`);
                 assert.containsN(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     3,
                     "should have 3 chat windows after opening chat window of 'channel-2'"
                 );
                 assert.hasClass(
-                    document.querySelector('.o_ChatWindow[data-visible-index="1"]'),
+                    document.querySelector('.o-mail-chat-window[data-visible-index="1"]'),
                     "o-new-message",
                     "'new message' chat window should be in the middle after opening chat window of 'channel-2'"
                 );
@@ -326,12 +326,12 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() => link.click());
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow.o-new-message",
+                    ".o-mail-chat-window.o-new-message",
                     "should have removed the 'new message' chat window after selecting a partner"
                 );
                 assert.strictEqual(
                     document.querySelector(
-                        '.o_ChatWindow[data-visible-index="1"] .o-mail-chat-window-header-name'
+                        '.o-mail-chat-window[data-visible-index="1"] .o-mail-chat-window-header-name'
                     ).textContent,
                     "Partner 131",
                     "chat window with selected partner should be opened in position where 'new message' chat window was, which is in the middle"
@@ -395,7 +395,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have only one chat window after selecting user whose chat is already open"
                 );
             }
@@ -507,14 +507,14 @@ QUnit.module("mail", {}, function () {
             });
             assert.containsNone(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should not have a chat window initially"
             );
             await click(`.o_MessagingMenu_toggler`);
             await click(`.o_MessagingMenu_dropdownMenu .o_NotificationListView_preview`);
             assert.containsOnce(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should have a chat window after clicking on thread preview"
             );
             assert.verifySteps(
@@ -526,7 +526,7 @@ QUnit.module("mail", {}, function () {
             await click(`.o_ChatWindowHeaderView_commandClose`);
             assert.containsNone(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should not have a chat window after closing it"
             );
             assert.verifySteps(
@@ -539,7 +539,7 @@ QUnit.module("mail", {}, function () {
             await click(`.o_MessagingMenu_dropdownMenu .o_NotificationListView_preview`);
             assert.containsOnce(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should have a chat window again after clicking on thread preview again"
             );
             assert.verifySteps(
@@ -572,14 +572,14 @@ QUnit.module("mail", {}, function () {
                 await click(`.o_NotificationListView_preview`);
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should have a chat window after clicking on thread preview"
                 );
                 // Close chat window
                 await click(`.o_ChatWindowHeaderView_commandClose`);
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should not have a chat window after closing it"
                 );
                 const [member] = pyEnv["mail.channel.member"].searchRead([
@@ -620,7 +620,7 @@ QUnit.module("mail", {}, function () {
             });
             assert.containsOnce(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "chat window should be opened initially"
             );
 
@@ -642,7 +642,7 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsOnce(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "chat window should still be opened after pressing escape on emojis button"
             );
 
@@ -664,7 +664,7 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsOnce(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "chat window should still be opened after pressing escape on mention suggestion"
             );
 
@@ -674,7 +674,7 @@ QUnit.module("mail", {}, function () {
             });
             assert.containsNone(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "chat window should be closed after pressing escape if there was no other priority escape handler"
             );
             assert.verifySteps(["rpc:channel_fold/closed"]);
@@ -731,13 +731,13 @@ QUnit.module("mail", {}, function () {
                 await start();
                 assert.containsN(
                     document.body,
-                    ".o_ChatWindow .o-mail-composer-textarea",
+                    ".o-mail-chat-window .o-mail-composer-textarea",
                     2,
                     "2 chat windows should be present initially"
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow.o-folded",
+                    ".o-mail-chat-window.o-folded",
                     "both chat windows should be open"
                 );
 
@@ -750,11 +750,11 @@ QUnit.module("mail", {}, function () {
                 });
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "only one chat window should remain after pressing escape on first chat window"
                 );
                 assert.hasClass(
-                    document.querySelector(".o_ChatWindow"),
+                    document.querySelector(".o-mail-chat-window"),
                     "o-focused",
                     "next visible chat window should be focused after pressing escape on first chat window"
                 );
@@ -813,7 +813,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss({ waitUntilMessagesLoaded: false });
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should not have any chat window after opening discuss"
                 );
 
@@ -888,7 +888,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss({ waitUntilMessagesLoaded: false });
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should not have any chat window after opening discuss"
                 );
 
@@ -950,13 +950,13 @@ QUnit.module("mail", {}, function () {
         .o_ChannelPreviewView[data-channel-id="${mailChannelId1}"]
     `);
                 assert.strictEqual(
-                    document.querySelectorAll(`.o_ChatWindow`).length,
+                    document.querySelectorAll(`.o-mail-chat-window`).length,
                     1,
                     "should have open a chat window"
                 );
                 assert.strictEqual(
                     document.querySelectorAll(`
-            .o_ChatWindow[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
         `).length,
                     1,
                     "chat window of chat should be open"
@@ -965,7 +965,7 @@ QUnit.module("mail", {}, function () {
                     document
                         .querySelector(
                             `
-            .o_ChatWindow[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
         `
                         )
                         .classList.contains("o-focused"),
@@ -978,20 +978,20 @@ QUnit.module("mail", {}, function () {
         .o_ChannelPreviewView[data-channel-id="${mailChannelId2}"]
     `);
                 assert.strictEqual(
-                    document.querySelectorAll(`.o_ChatWindow`).length,
+                    document.querySelectorAll(`.o-mail-chat-window`).length,
                     2,
                     "should have open a new chat window"
                 );
                 assert.strictEqual(
                     document.querySelectorAll(`
-            .o_ChatWindow[data-thread-id="${mailChannelId2}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId2}"][data-thread-model="mail.channel"]
         `).length,
                     1,
                     "chat window of channel should be open"
                 );
                 assert.strictEqual(
                     document.querySelectorAll(`
-            .o_ChatWindow[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
         `).length,
                     1,
                     "chat window of chat should still be open"
@@ -1000,7 +1000,7 @@ QUnit.module("mail", {}, function () {
                     document
                         .querySelector(
                             `
-            .o_ChatWindow[data-thread-id="${mailChannelId2}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId2}"][data-thread-model="mail.channel"]
         `
                         )
                         .classList.contains("o-focused"),
@@ -1010,7 +1010,7 @@ QUnit.module("mail", {}, function () {
                     document
                         .querySelector(
                             `
-            .o_ChatWindow[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
         `
                         )
                         .classList.contains("o-focused"),
@@ -1058,7 +1058,7 @@ QUnit.module("mail", {}, function () {
         .o_ChannelPreviewView[data-channel-id="${mailChannelId1}"]
     `);
                 assert.strictEqual(
-                    document.querySelectorAll(`.o_ChatWindow`).length,
+                    document.querySelectorAll(`.o-mail-chat-window`).length,
                     1,
                     "should have open 1 visible chat window"
                 );
@@ -1079,7 +1079,7 @@ QUnit.module("mail", {}, function () {
         .o_ChannelPreviewView[data-channel-id="${mailChannelId2}"]
     `);
                 assert.strictEqual(
-                    document.querySelectorAll(`.o_ChatWindow`).length,
+                    document.querySelectorAll(`.o-mail-chat-window`).length,
                     2,
                     "should have open 2 visible chat windows"
                 );
@@ -1100,7 +1100,7 @@ QUnit.module("mail", {}, function () {
         .o_ChannelPreviewView[data-channel-id="${mailChannelId3}"]
     `);
                 assert.strictEqual(
-                    document.querySelectorAll(`.o_ChatWindow`).length,
+                    document.querySelectorAll(`.o-mail-chat-window`).length,
                     2,
                     "should have open 2 visible chat windows"
                 );
@@ -1116,14 +1116,14 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.strictEqual(
                     document.querySelectorAll(`
-            .o_ChatWindow[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId1}"][data-thread-model="mail.channel"]
         `).length,
                     1,
                     "chat window of channel 1 should be open"
                 );
                 assert.strictEqual(
                     document.querySelectorAll(`
-            .o_ChatWindow[data-thread-id="${mailChannelId3}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId3}"][data-thread-model="mail.channel"]
         `).length,
                     1,
                     "chat window of channel 3 should be open"
@@ -1132,7 +1132,7 @@ QUnit.module("mail", {}, function () {
                     document
                         .querySelector(
                             `
-            .o_ChatWindow[data-thread-id="${mailChannelId3}"][data-thread-model="mail.channel"]
+            .o-mail-chat-window[data-thread-id="${mailChannelId3}"][data-thread-model="mail.channel"]
         `
                         )
                         .classList.contains("o-focused"),
@@ -1156,8 +1156,12 @@ QUnit.module("mail", {}, function () {
         .o_MessagingMenu_dropdownMenu
         .o_ChannelPreviewView[data-channel-id="${mailChannelId1}"]`);
 
-            assert.containsOnce(document.body, ".o_ChatWindow", "Only 1 chatWindow must be opened");
-            const chatWindow = document.querySelector(".o_ChatWindow");
+            assert.containsOnce(
+                document.body,
+                ".o-mail-chat-window",
+                "Only 1 chatWindow must be opened"
+            );
+            const chatWindow = document.querySelector(".o-mail-chat-window");
             assert.strictEqual(
                 chatWindow.querySelector(".o-mail-chat-window-header-name").textContent,
                 "channel1",
@@ -1171,13 +1175,13 @@ QUnit.module("mail", {}, function () {
 
             await afterNextRender(() =>
                 triggerEvent(
-                    chatWindow.querySelector(".o_ChatWindow .o-mail-composer-textarea"),
+                    chatWindow.querySelector(".o-mail-chat-window .o-mail-composer-textarea"),
                     "keydown",
                     { key: "Tab" }
                 )
             );
             assert.strictEqual(
-                chatWindow.querySelector(".o_ChatWindow .o-mail-composer-textarea"),
+                chatWindow.querySelector(".o-mail-chat-window .o-mail-composer-textarea"),
                 document.activeElement,
                 "The chatWindow composer still has focus"
             );
@@ -1187,8 +1191,13 @@ QUnit.module("mail", {}, function () {
         .o_MessagingMenu_dropdownMenu
         .o_ChannelPreviewView[data-channel-id="${mailChannelId2}"]`);
 
-            assert.containsN(document.body, ".o_ChatWindow", 2, "2 chatWindows must be opened");
-            const chatWindows = document.querySelectorAll(".o_ChatWindow");
+            assert.containsN(
+                document.body,
+                ".o-mail-chat-window",
+                2,
+                "2 chatWindows must be opened"
+            );
+            const chatWindows = document.querySelectorAll(".o-mail-chat-window");
             assert.strictEqual(
                 chatWindows[0].querySelector(".o-mail-chat-window-header-name").textContent,
                 "channel1",
@@ -1212,7 +1221,7 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsN(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 2,
                 "2 chatWindows should still be opened"
             );
@@ -1287,26 +1296,26 @@ QUnit.module("mail", {}, function () {
                 await start();
                 assert.containsN(
                     document.body,
-                    ".o_ChatWindow .o-mail-composer-textarea",
+                    ".o-mail-chat-window .o-mail-composer-textarea",
                     3,
                     "initialy, 3 chat windows should be present"
                 );
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow.o-folded",
+                    ".o-mail-chat-window.o-folded",
                     "all 3 chat windows should be open"
                 );
 
                 await afterNextRender(() => {
                     document
                         .querySelector(
-                            ".o_ChatWindow[data-visible-index='2'] .o-mail-composer-textarea"
+                            ".o-mail-chat-window[data-visible-index='2'] .o-mail-composer-textarea"
                         )
                         .focus();
                 });
                 assert.strictEqual(
                     document.querySelector(
-                        ".o_ChatWindow[data-visible-index='2'] .o-mail-composer-textarea"
+                        ".o-mail-chat-window[data-visible-index='2'] .o-mail-composer-textarea"
                     ),
                     document.activeElement,
                     "The chatWindow with visible-index 2 should have the focus"
@@ -1315,7 +1324,7 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     triggerEvent(
                         document.querySelector(
-                            ".o_ChatWindow[data-visible-index='2'] .o-mail-composer-textarea"
+                            ".o-mail-chat-window[data-visible-index='2'] .o-mail-composer-textarea"
                         ),
                         "keydown",
                         { key: "Tab" }
@@ -1323,7 +1332,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.strictEqual(
                     document.querySelector(
-                        ".o_ChatWindow[data-visible-index='1'] .o-mail-composer-textarea"
+                        ".o-mail-chat-window[data-visible-index='1'] .o-mail-composer-textarea"
                     ),
                     document.activeElement,
                     "after pressing tab on the chatWindow with visible-index 2, the chatWindow with visible-index 1 should have focus"
@@ -1332,7 +1341,7 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     triggerEvent(
                         document.querySelector(
-                            ".o_ChatWindow[data-visible-index='1'] .o-mail-composer-textarea"
+                            ".o-mail-chat-window[data-visible-index='1'] .o-mail-composer-textarea"
                         ),
                         "keydown",
                         { key: "Tab" }
@@ -1340,7 +1349,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.strictEqual(
                     document.querySelector(
-                        ".o_ChatWindow[data-visible-index='0'] .o-mail-composer-textarea"
+                        ".o-mail-chat-window[data-visible-index='0'] .o-mail-composer-textarea"
                     ),
                     document.activeElement,
                     "after pressing tab on the chat window with visible-index 1, the chatWindow with visible-index 0 should have focus"
@@ -1349,7 +1358,7 @@ QUnit.module("mail", {}, function () {
                 await afterNextRender(() =>
                     triggerEvent(
                         document.querySelector(
-                            ".o_ChatWindow[data-visible-index='0'] .o-mail-composer-textarea"
+                            ".o-mail-chat-window[data-visible-index='0'] .o-mail-composer-textarea"
                         ),
                         "keydown",
                         { key: "Tab" }
@@ -1357,7 +1366,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.strictEqual(
                     document.querySelector(
-                        ".o_ChatWindow[data-visible-index='2'] .o-mail-composer-textarea"
+                        ".o-mail-chat-window[data-visible-index='2'] .o-mail-composer-textarea"
                     ),
                     document.activeElement,
                     "the chatWindow with visible-index 2 should have the focus after pressing tab on the chatWindow with visible-index 0"
@@ -1484,7 +1493,7 @@ QUnit.module("mail", {}, function () {
                 // Send a new message in the chatwindow to trigger the scroll
                 await afterNextRender(() =>
                     triggerEvent(
-                        document.querySelector(".o_ChatWindow .o-mail-composer-textarea"),
+                        document.querySelector(".o-mail-chat-window .o-mail-composer-textarea"),
                         "keydown",
                         { key: "Enter" }
                     )
@@ -1549,7 +1558,7 @@ QUnit.module("mail", {}, function () {
                 await openDiscuss({ waitUntilMessagesLoaded: false });
                 assert.containsNone(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "should not have any chat window after opening discuss"
                 );
 
@@ -1661,13 +1670,13 @@ QUnit.module("mail", {}, function () {
 
                 assert.containsN(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     2,
                     "2 chat windows should be visible"
                 );
                 assert.containsNone(
                     document.body,
-                    `.o_ChatWindow[data-thread-id="${mailChannelId3}"][data-thread-model="mail.channel"]`,
+                    `.o-mail-chat-window[data-thread-id="${mailChannelId3}"][data-thread-model="mail.channel"]`,
                     "chat window for Channel #12 should be hidden"
                 );
                 assert.containsOnce(
@@ -1693,13 +1702,13 @@ QUnit.module("mail", {}, function () {
                 await click(".o_ChatWindowHiddenMenuItemView_chatWindowHeader");
                 assert.containsN(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     2,
                     "2 chat windows should still be visible"
                 );
                 assert.containsOnce(
                     document.body,
-                    `.o_ChatWindow[data-thread-id="${mailChannelId3}"][data-thread-model="mail.channel"]`,
+                    `.o-mail-chat-window[data-thread-id="${mailChannelId3}"][data-thread-model="mail.channel"]`,
                     "chat window for Channel #12 should now be visible"
                 );
                 assert.verifySteps(
@@ -1758,7 +1767,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "a chat window should be visible after receiving a new message from a chat"
                 );
                 assert.containsN(
@@ -1929,7 +1938,7 @@ QUnit.module("mail", {}, function () {
                 );
                 assert.containsOnce(
                     document.body,
-                    ".o_ChatWindow",
+                    ".o-mail-chat-window",
                     "a chat window should be open now that current user received a new message"
                 );
             }
@@ -1985,7 +1994,7 @@ QUnit.module("mail", {}, function () {
                     })
                 );
                 assert.hasClass(
-                    document.querySelector(`.o_ChatWindow`),
+                    document.querySelector(`.o-mail-chat-window`),
                     "o-folded",
                     "chat window should remain folded"
                 );

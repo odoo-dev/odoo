@@ -48,11 +48,11 @@ QUnit.module("website_livechat", {}, function () {
 
             assert.containsOnce(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should have a chat window open after sending chat request to website visitor"
             );
             assert.hasClass(
-                document.querySelector(".o_ChatWindow"),
+                document.querySelector(".o-mail-chat-window"),
                 "o-focused",
                 "chat window of livechat should be focused on open"
             );

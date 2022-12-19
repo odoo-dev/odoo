@@ -447,16 +447,16 @@ QUnit.module("mail", (hooks) => {
             await click(`.o_MessagingMenu_newMessageButton`);
 
             assert.strictEqual(
-                document.querySelectorAll(`.o_ChatWindow`).length,
+                document.querySelectorAll(`.o-mail-chat-window`).length,
                 1,
                 "should have open a chat window"
             );
             assert.ok(
-                document.querySelector(`.o_ChatWindow`).classList.contains("o-new-message"),
+                document.querySelector(`.o-mail-chat-window`).classList.contains("o-new-message"),
                 "chat window should be for new message"
             );
             assert.ok(
-                document.querySelector(`.o_ChatWindow`).classList.contains("o-focused"),
+                document.querySelector(`.o-mail-chat-window`).classList.contains("o-focused"),
                 "chat window should be focused"
             );
         });
@@ -718,7 +718,7 @@ QUnit.module("mail", (hooks) => {
             await click(`.o_MessagingMenu_toggler`);
             await click(`.o_MessagingMenu_dropdownMenu .o_ChannelPreviewView`);
             assert.strictEqual(
-                document.querySelectorAll(`.o_ChatWindow`).length,
+                document.querySelectorAll(`.o-mail-chat-window`).length,
                 1,
                 "should have open a chat window"
             );

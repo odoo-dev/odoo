@@ -176,14 +176,14 @@ QUnit.module("mail", {}, function () {
             );
             assert.containsNone(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should have no chat window initially"
             );
 
             await click(".o_NotificationGroupView");
             assert.containsOnce(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should have opened the thread in a chat window after clicking on it"
             );
         });
@@ -374,7 +374,7 @@ QUnit.module("mail", {}, function () {
             await afterNextRender(() => groups[0].click());
             assert.containsOnce(
                 document.body,
-                ".o_ChatWindow",
+                ".o-mail-chat-window",
                 "should have opened the channel related to the first group in a chat window"
             );
         });
