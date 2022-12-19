@@ -51,6 +51,34 @@ QUnit.test("Start edition on click edit", async (assert) => {
     );
 });
 
+QUnit.test("Cursor is at end of composer input on edit", async (assert) => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({
+        channel_type: "channel",
+        name: "",
+    });
+    pyEnv["mail.message"].create({
+        body: "sattva",
+        res_id: channelId,
+        model: "mail.channel",
+        message_type: "comment",
+    });
+    const { click, openDiscuss } = await start({
+        discuss: {
+            context: {
+                active_id: `mail.channel_${channelId}`,
+            },
+        },
+    });
+    await openDiscuss();
+    await click("i[aria-label='Edit']");
+    const composerTextarea = target.querySelector(".o-mail-composer-textarea");
+    const contentLength = composerTextarea.length;
+    assert.strictEqual(composerTextarea.selectionStart, contentLength);
+    assert.strictEqual(composerTextarea.selectionEnd, contentLength);
+    assert.strictEqual(composerTextarea.selectionDirection, "none");
+});
+
 QUnit.test("Stop edition on click cancel", async (assert) => {
     const server = new TestServer();
     server.addChannel(1, "general", "General announcements...");
