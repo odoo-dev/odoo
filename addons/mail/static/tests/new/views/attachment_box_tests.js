@@ -109,3 +109,46 @@ QUnit.test("remove attachment should ask for confirmation", async function (asse
     await click(".modal-footer .btn-primary");
     assert.containsNone(target, ".o-mail-attachment-images");
 });
+
+QUnit.test("view attachments", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({});
+    pyEnv["ir.attachment"].create([
+        {
+            mimetype: "text/plain",
+            name: "Blah.txt",
+            res_id: resPartnerId1,
+            res_model: "res.partner",
+        },
+        {
+            mimetype: "text/plain",
+            name: "Blu.txt",
+            res_id: resPartnerId1,
+            res_model: "res.partner",
+        },
+    ]);
+    const views = {
+        "res.partner,false,form": `<form>
+            <div class="oe_chatter">
+                <field name="message_ids"  options="{'open_attachments': True}"/>
+            </div>
+        </form>`,
+    };
+    const { click, openView } = await start({ serverData: { views } });
+    await openView({
+        res_id: resPartnerId1,
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    await click('.o-mail-attachment-card[aria-label="Blah.txt"] .o-mail-attachment-image');
+    assert.containsOnce(target, ".o-mail-attachment-viewer");
+    assert.strictEqual($(target).find(".o-mail-attachment-viewer-name").text(), "Blah.txt");
+    assert.containsOnce(target, ".o-mail-attachment-viewer-buttonNavigationNext");
+
+    await click(".o-mail-attachment-viewer-buttonNavigationNext");
+    assert.strictEqual($(target).find(".o-mail-attachment-viewer-name").text(), "Blu.txt");
+    assert.containsOnce(target, ".o-mail-attachment-viewer-buttonNavigationNext");
+
+    await click(".o-mail-attachment-viewer-buttonNavigationNext");
+    assert.strictEqual($(target).find(".o-mail-attachment-viewer-name").text(), "Blah.txt");
+});
