@@ -34,8 +34,8 @@ export class MessagingMenu extends Component {
         if (filter === "all") {
             return previews;
         }
-        const target = filter === "chats" ? "chat" : "channel";
-        return previews.filter((preview) => preview.type === target);
+        const target = filter === "chats" ? ["chat", "group"] : "channel";
+        return previews.filter((preview) => target.includes(preview.type));
     }
 
     openDiscussion(threadLocalId) {
