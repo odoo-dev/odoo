@@ -126,6 +126,16 @@ export class Partner {
                     return 1;
                 }
             }
+            if (thread) {
+                const isAFollower = thread.followers.some((follower) => follower.partner === a);
+                const isBFollower = thread.followers.some((follower) => follower.partner === b);
+                if (isAFollower && !isBFollower) {
+                    return -1;
+                }
+                if (!isAFollower && isBFollower) {
+                    return 1;
+                }
+            }
             const cleanedAName = cleanTerm(a.name || "");
             const cleanedBName = cleanTerm(b.name || "");
             if (
