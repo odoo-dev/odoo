@@ -793,18 +793,14 @@ export class Messaging {
     fetchPreviews = memoize(async () => {
         const ids = [];
         for (const thread of Object.values(this.state.threads)) {
-            if (thread.type === "channel" || thread.type === "chat") {
+            if (["channel", "group", "chat"].includes(thread.type)) {
                 ids.push(thread.id);
             }
         }
         if (ids.length) {
             const previews = await this.orm.call("mail.channel", "channel_fetch_preview", [ids]);
             for (const preview of previews) {
-                const thread = Thread.insert(this.state, {
-                    id: preview.id,
-                    model: "mail.channel",
-                    type: "channel",
-                });
+                const thread = this.state.threads[preview.id];
                 const data = Object.assign(preview.last_message, {
                     body: markup(preview.last_message.body),
                 });
