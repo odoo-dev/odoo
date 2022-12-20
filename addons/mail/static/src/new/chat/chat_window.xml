@@ -5,6 +5,7 @@
     <div class="o-mail-chat-window position-absolute bottom-0 rounded-top-3 bg-view overflow-hidden d-flex flex-column"
         t-attf-style="right:{{props.right}}px;"
         t-att-class="{'o-folded': props.chatWindow.folded}"
+        t-on-keydown="onKeydown"
     >
         <div class="o-mail-chat-window-header d-flex align-items-center cursor-pointer flex-shrink-0" t-on-click="toggleFold">
             <ChatWindowIcon threadLocalId="thread.localId" className="'ms-3 me-1 my-0'" />

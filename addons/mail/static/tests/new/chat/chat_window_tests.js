@@ -237,3 +237,31 @@ QUnit.test(
         assert.strictEqual(member.fold_state, "open");
     }
 );
+
+QUnit.test("chat window: close on ESCAPE", async function (assert) {
+    const pyEnv = await startServer();
+    pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [
+                0,
+                0,
+                {
+                    is_minimized: true,
+                    partner_id: pyEnv.currentPartnerId,
+                },
+            ],
+        ],
+    });
+    const { click } = await start({
+        mockRPC(route, args) {
+            if (args.method === "channel_fold") {
+                assert.step(`rpc:channel_fold/${args.kwargs.state}`);
+            }
+        },
+    });
+    assert.containsOnce(target, ".o-mail-chat-window");
+    click(".o-mail-composer-textarea").catch(() => {});
+    await afterNextRender(() => triggerHotkey("Escape"));
+    assert.containsNone(target, ".o-mail-chat-window");
+    assert.verifySteps(["rpc:channel_fold/closed"]);
+});
