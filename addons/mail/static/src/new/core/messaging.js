@@ -281,7 +281,7 @@ export class Messaging {
         });
         this.createChannelThread(channel);
         this.sortChannels();
-        this.state.discuss.threadLocalId = createLocalId("mail.channel", channel.id);
+        this.openDiscussion(createLocalId("mail.channel", channel.id));
     }
 
     async fetchChannelMembers(threadLocalId) {
@@ -1027,11 +1027,15 @@ export class Messaging {
         }
     }
 
-    openDiscussion(threadLocalId) {
+    openDiscussion(threadLocalId, replaceNewMessageChatWindow) {
         if (this.state.discuss.isActive) {
             this.setDiscussThread(threadLocalId);
         } else {
-            const chatWindow = ChatWindow.insert(this.state, { folded: false, threadLocalId });
+            const chatWindow = ChatWindow.insert(this.state, {
+                folded: false,
+                threadLocalId,
+                replaceNewMessageChatWindow,
+            });
             chatWindow.autofocus++;
             const thread = this.state.threads[threadLocalId];
             if (thread) {
@@ -1039,6 +1043,18 @@ export class Messaging {
             }
             this.notifyChatWindowState(threadLocalId);
         }
+    }
+
+    openNewMessageChatWindow() {
+        if (this.state.chatWindows.some(({ threadLocalId }) => !threadLocalId)) {
+            // New message chat window is already opened.
+            return;
+        }
+        ChatWindow.insert(this.state);
+    }
+
+    closeNewMessageChatWindow() {
+        this.state.chatWindows.find(({ threadLocalId }) => !threadLocalId)?.close();
     }
 
     toggleReplyTo(message) {
@@ -1060,7 +1076,7 @@ export class Messaging {
         ]);
         this.createChannelThread(channel);
         this.sortChannels();
-        this.state.discuss.threadLocalId = createLocalId("mail.channel", channel.id);
+        this.openDiscussion(createLocalId("mail.channel", channel.id));
     }
 
     async getChat({ userId, partnerId }) {

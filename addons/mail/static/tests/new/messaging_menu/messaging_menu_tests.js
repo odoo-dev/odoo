@@ -26,10 +26,11 @@ QUnit.test("messaging menu should have topbar buttons", async function (assert) 
     const { click } = await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     assert.containsOnce(target, ".o-mail-messaging-menu");
-    assert.containsN(target, ".o-mail-messaging-menu-topbar button", 3);
+    assert.containsN(target, ".o-mail-messaging-menu-topbar button", 4);
     assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(All)");
     assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(Chat)");
     assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(Channels)");
+    assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(New Message)");
     assert.hasClass(
         $(target).find(".o-mail-messaging-menu-topbar button:contains(All)"),
         "fw-bolder",

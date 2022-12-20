@@ -13,10 +13,12 @@ import { ChannelMemberList } from "../discuss/channel_member_list";
 import { ChatWindowIcon } from "./chat_window_icon";
 import { ChannelInvitationForm } from "../discuss/channel_invitation_form";
 import { isEventHandled } from "../utils/misc";
+import { ChannelSelector } from "@mail/new/discuss/channel_selector";
 
 export class ChatWindow extends Component {
     static components = {
         Thread,
+        ChannelSelector,
         Composer,
         CallUI,
         CallSettings,
@@ -45,10 +47,6 @@ export class ChatWindow extends Component {
         this.action = useService("action");
         this.contentRef = useRef("content");
         useChildSubEnv({ inChatWindow: true });
-    }
-
-    get thread() {
-        return this.messaging.state.threads[this.props.chatWindow.threadLocalId];
     }
 
     onKeydown(ev) {

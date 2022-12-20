@@ -1,6 +1,9 @@
 /* @odoo-module */
 
-/** @typedef {{ threadLocalId?: string, folded?: boolean}} ChatWindowData */
+/** @typedef {{ threadLocalId?: string, folded?: boolean, replaceNewMessageChatWindow?: boolean }} ChatWindowData */
+
+import { _t } from "@web/core/l10n/translation";
+
 export class ChatWindow {
     /** @type {number} */
     autofocus = 0;
@@ -9,10 +12,10 @@ export class ChatWindow {
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
-     * @param {ChatWindowData} data
+     * @param {ChatWindowData} [data]
      * @returns {ChatWindow}
      */
-    static insert(state, data) {
+    static insert(state, data = {}) {
         const chatWindow = state.chatWindows.find((c) => c.threadLocalId === data.threadLocalId);
         if (!chatWindow) {
             return new ChatWindow(state, data);
@@ -32,8 +35,28 @@ export class ChatWindow {
             _state: state,
         });
         this.update(data);
-        state.chatWindows.push(this);
-        return state.chatWindows.find((c) => c.threadLocalId === data.threadLocalId); // return reactive version
+        let index;
+        if (!data.replaceNewMessageChatWindow) {
+            index = state.chatWindows.length;
+        } else {
+            const newMessageChatWindowIndex = state.chatWindows.findIndex(
+                (chatWindow) => !chatWindow.thread
+            );
+            index =
+                newMessageChatWindowIndex !== -1
+                    ? newMessageChatWindowIndex
+                    : state.chatWindows.length;
+        }
+        state.chatWindows.splice(index, 1, this);
+        return state.chatWindows[index]; // return reactive version
+    }
+
+    get thread() {
+        return this._state.threads[this.threadLocalId];
+    }
+
+    get displayName() {
+        return this.thread?.displayName ?? _t("New message");
     }
 
     /**
@@ -48,13 +71,11 @@ export class ChatWindow {
     }
 
     close() {
-        const index = this._state.chatWindows.findIndex(
-            (c) => c.threadLocalId === this.threadLocalId
-        );
+        const index = this._state.chatWindows.findIndex((c) => c.thread === this.thread);
         if (index > -1) {
             this._state.chatWindows.splice(index, 1);
         }
-        const thread = this._state.threads[this.threadLocalId];
+        const thread = this.thread;
         if (thread) {
             thread.state = "closed";
         }
@@ -62,16 +83,9 @@ export class ChatWindow {
 
     toggleFold() {
         this.folded = !this.folded;
-        const thread = this._state.threads[this.threadLocalId];
+        const thread = this.thread;
         if (thread) {
             thread.state = this.folded ? "folded" : "open";
         }
-    }
-
-    /**
-     * @returns {import("@mail/new/core/thread_model").Thread}
-     */
-    get thread() {
-        return this._state.threads[this.threadLocalId];
     }
 }

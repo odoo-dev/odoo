@@ -40,7 +40,6 @@ export class MessagingMenu extends Component {
 
     openDiscussion(threadLocalId) {
         this.messaging.openDiscussion(threadLocalId);
-        this.state.isOpen = false;
         // hack: click on window to close dropdown, because we use a dropdown
         // without dropdownitem...
         document.body.click();

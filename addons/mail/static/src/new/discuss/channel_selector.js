@@ -12,7 +12,8 @@ import { _t } from "@web/core/l10n/translation";
 
 export class ChannelSelector extends Component {
     static components = { TagsList, NavigableList };
-    static props = ["category", "onValidate?", "autofocus?"];
+    static props = ["category", "onValidate?", "autofocus?", "multiple?"];
+    static defaultProps = { multiple: true };
     static template = "mail.channel_selector";
 
     setup() {
@@ -89,6 +90,9 @@ export class ChannelSelector extends Component {
             }
             this.state.value = "";
         }
+        if (!this.props.multiple) {
+            this.onValidate();
+        }
     }
 
     async onValidate() {
@@ -100,7 +104,9 @@ export class ChannelSelector extends Component {
             if (selectedPartners.length === 1) {
                 await this.messaging
                     .joinChat(selectedPartners[0])
-                    .then((chat) => this.messaging.setDiscussThread(chat.localId));
+                    .then((chat) =>
+                        this.messaging.openDiscussion(chat.localId, this.env.inChatWindow)
+                    );
             } else {
                 const partners_to = [
                     ...new Set([this.messaging.state.user.partnerId, ...selectedPartners]),
