@@ -32,7 +32,9 @@
                         </strong>
                     </span>
                     <small t-if="!message.isTransient" class="o-mail-message-date text-muted opacity-50 ms-2" t-att-title="message.dateTimeStr">
+                        <t t-if="!message.isAuthoredByCurrentUser or !env.inChatWindow">
                         -
+                        </t>
                         <RelativeTime datetime="message.dateTime" />
                     </small>
 
