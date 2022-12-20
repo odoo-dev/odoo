@@ -31,7 +31,6 @@ export class Composer extends Component {
     static components = { NavigableList, AttachmentList, FileUploader, Typing };
     static defaultProps = {
         mode: "normal",
-        onDiscardCallback: () => {},
     }; // mode = compact, normal, extended
     static props = [
         "composer",
@@ -212,7 +211,10 @@ export class Composer extends Component {
                 this.sendMessage();
             }
         } else if (ev.key === "Escape") {
-            this.props.onDiscardCallback();
+            if (this.props.onDiscardCallback) {
+                this.props.onDiscardCallback();
+                markEventHandled(ev, "composer.onKeydownEscape");
+            }
         }
     }
 

@@ -11,6 +11,7 @@ import { CallSettings } from "../rtc/call_settings";
 import { ChannelMemberList } from "../discuss/channel_member_list";
 import { ChatWindowIcon } from "./chat_window_icon";
 import { ChannelInvitationForm } from "../discuss/channel_invitation_form";
+import { isEventHandled } from "../utils/misc";
 
 export class ChatWindow extends Component {
     static components = {
@@ -45,6 +46,18 @@ export class ChatWindow extends Component {
 
     get thread() {
         return this.messaging.state.threads[this.props.chatWindow.threadLocalId];
+    }
+
+    onKeydown(ev) {
+        switch (ev.key) {
+            case "Escape":
+                if (!isEventHandled(ev, "composer.onKeydownEscape")) {
+                    this.close();
+                }
+                // prevent reopening last app when in home menu
+                ev.stopPropagation();
+                break;
+        }
     }
 
     toggleFold() {
