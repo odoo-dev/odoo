@@ -321,6 +321,9 @@ export class Thread {
     }
 
     get invitationLink() {
+        if (!this.uuid || this.type === "chat") {
+            return undefined;
+        }
         return `${window.location.origin}/chat/${this.id}/${this.uuid}`;
     }
 
