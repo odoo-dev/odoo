@@ -159,6 +159,26 @@ export class Message extends Component {
         return this.messaging.state.threads[this.props.threadLocalId].id === "inbox";
     }
 
+    /**
+     * @returns {boolean}
+     */
+    get shouldDisplayAuthorName() {
+        if (!this.env.inChatWindow) {
+            return true;
+        }
+        if (this.message.isAuthoredByCurrentUser) {
+            return false;
+        }
+        if (this.thread.type === "chat") {
+            return false;
+        }
+        return true;
+    }
+
+    get thread() {
+        return this.messaging.state.threads[this.props.threadLocalId];
+    }
+
     toggleStar() {
         this.messaging.toggleStar(this.props.message.id);
     }
