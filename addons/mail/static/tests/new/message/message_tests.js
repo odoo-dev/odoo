@@ -764,3 +764,60 @@ QUnit.test("toggle_star message", async function (assert) {
     $message = $(target).find(".o-mail-message");
     assert.hasClass($message.find(".o-mail-message-action-toggle-star"), "fa-star-o");
 });
+
+QUnit.test(
+    "Name of message author is only displayed in chat window for partners others than the current user",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+        });
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "Not the current user" });
+        pyEnv["mail.message"].create([
+            {
+                body: "not empty",
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            },
+            {
+                author_id: resPartnerId1,
+                body: "not empty",
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            },
+        ]);
+        const { click } = await start();
+        await click(".o_menu_systray i[aria-label='Messages']");
+        await click(".o-mail-notification-item");
+        assert.containsOnce(target, ".o-mail-own-name");
+        assert.equal(target.querySelector(".o-mail-own-name").textContent, "Not the current user");
+    }
+);
+
+QUnit.test(
+    "Name of message author is not displayed in chat window for channel of type chat",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "chat",
+        });
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "A" });
+        pyEnv["mail.message"].create([
+            {
+                body: "not empty",
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            },
+            {
+                author_id: resPartnerId1,
+                body: "not empty",
+                model: "mail.channel",
+                res_id: mailChannelId1,
+            },
+        ]);
+        const { click } = await start();
+        await click(".o_menu_systray i[aria-label='Messages']");
+        await click(".o-mail-notification-item");
+        assert.containsNone(target, ".o-mail-own-name");
+    }
+);
