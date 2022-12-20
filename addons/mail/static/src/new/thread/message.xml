@@ -31,7 +31,7 @@
                         <t t-esc="message.author.name"/>
                         </strong>
                     </span>
-                    <small t-if="!message.isTransient" class="o-mail-message-date text-muted opacity-50 ms-2" t-att-title="message.dateTimeStr">
+                    <small t-if="!message.isTransient" class="o-mail-message-date text-muted opacity-50" t-att-title="message.dateTimeStr">
                         -
                         <RelativeTime datetime="message.dateTime" />
                     </small>
