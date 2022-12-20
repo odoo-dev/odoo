@@ -82,9 +82,18 @@ export class ChannelInvitationForm extends Component {
     }
 
     async onClickInvite() {
-        await this.messaging.orm.call("mail.channel", "add_members", [[this.props.threadId]], {
-            partner_ids: this.state.selectedPartners.map((partner) => partner.id),
-        });
+        if (this.thread.type === "chat") {
+            const partners_to = [
+                this.messaging.state.user.partnerId,
+                this.thread.chatPartnerId,
+                ...this.state.selectedPartners.map((partner) => partner.id),
+            ];
+            await this.messaging.createGroupChat({ partners_to });
+        } else if (["channel", "group"].includes(this.thread.type)) {
+            await this.messaging.orm.call("mail.channel", "add_members", [[this.props.threadId]], {
+                partner_ids: this.state.selectedPartners.map((partner) => partner.id),
+            });
+        }
         if (this.env.isSmall) {
             this.props.chatState.activeMode = "";
         } else {
@@ -96,5 +105,16 @@ export class ChannelInvitationForm extends Component {
         return this.messaging.state.threads[
             Thread.createLocalId({ model: "mail.channel", id: this.props.threadId })
         ];
+    }
+
+    get invitationButtonText() {
+        if (this.thread.type === "channel") {
+            return _t("Invite to Channel");
+        } else if (this.thread.type === "group") {
+            return _t("Invite to Group Chat");
+        } else if (this.thread.type === "chat") {
+            return _t("Create Group Chat");
+        }
+        return _t("Invite");
     }
 }

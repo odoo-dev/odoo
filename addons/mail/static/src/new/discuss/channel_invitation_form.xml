@@ -42,7 +42,9 @@
                 </div>
             </div>
             <div class="mx-3 mt-2 mb-3">
-                <button class="btn btn-primary w-100" t-att-disabled="this.state.selectedPartners.length === 0" title="Invite to Channel" t-on-click="onClickInvite">Invite to Channel</button>
+                <button class="btn btn-primary w-100" t-att-disabled="this.state.selectedPartners.length === 0" t-att-title="invitationButtonText" t-on-click="onClickInvite">
+                    <t t-esc="invitationButtonText"/>
+                </button>
             </div>
             <t t-if="thread.invitationLink">
                 <h4 class="mx-3 mt-3 mb-2">Invitation Link</h4>
