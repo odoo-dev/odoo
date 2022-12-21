@@ -4,6 +4,7 @@ import { ActivityButton } from "@mail/new/activity/activity_button";
 
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { _t } from "@web/core/l10n/translation";
 
 import { Component } from "@odoo/owl";
 
@@ -23,7 +24,7 @@ export class ListActivity extends Component {
 
     get summaryText() {
         if (this.props.record.data.activity_exception_decoration) {
-            return this.env._t("Warning");
+            return _t("Warning");
         }
         if (this.props.record.data.activity_summary) {
             return this.props.record.data.activity_summary;

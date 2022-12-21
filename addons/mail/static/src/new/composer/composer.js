@@ -24,6 +24,8 @@ import { useDebounced } from "@web/core/utils/timing";
 import { browser } from "@web/core/browser/browser";
 import { useSuggestion } from "./composer_hook";
 
+import { _t } from "@web/core/l10n/translation";
+
 export const SHORT_TYPING = 5000;
 export const LONG_TYPING = 50000;
 
@@ -171,11 +173,11 @@ export class Composer extends Component {
         }
         if (this.thread) {
             if (this.thread.type === "channel") {
-                return sprintf(this.env._t("Message #%(thread name)s…"), {
+                return sprintf(_t("Message #%(thread name)s…"), {
                     "thread name": this.thread.displayName,
                 });
             }
-            return sprintf(this.env._t("Message %(thread name)s…"), {
+            return sprintf(_t("Message %(thread name)s…"), {
                 "thread name": this.thread.displayName,
             });
         }
@@ -339,10 +341,7 @@ export class Composer extends Component {
             const message = await this.messaging.postMessage(thread.localId, value, postData);
             if (this.props.composer.thread.type === "mailbox") {
                 this.env.services.notification.add(
-                    sprintf(
-                        this.env._t('Message posted on "%s"'),
-                        message.originThread.displayName
-                    ),
+                    sprintf(_t('Message posted on "%s"'), message.originThread.displayName),
                     { type: "info" }
                 );
             }

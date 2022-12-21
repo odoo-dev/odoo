@@ -5,6 +5,7 @@ import { Component, onWillStart, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
+import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef {Object} SubtypeData
@@ -61,7 +62,7 @@ export class FollowerSubtypeDialog extends Component {
                 }
             );
             this.env.services.notification.add(
-                this.env._t("The subscription preferences were successfully applied."),
+                _t("The subscription preferences were successfully applied."),
                 { type: "success" }
             );
         }
@@ -70,7 +71,7 @@ export class FollowerSubtypeDialog extends Component {
     }
 
     get title() {
-        return sprintf(this.env._t("Edit Subscription of %(name)s"), {
+        return sprintf(_t("Edit Subscription of %(name)s"), {
             name: this.props.follower.partner.nameOrDisplayName,
         });
     }

@@ -496,7 +496,7 @@ export class Messaging {
                             this.state.discuss.threadLocalId = undefined;
                         }
                         this.notification.add(
-                            sprintf(this.env._t("You unsubscribed from %s."), thread.displayName),
+                            sprintf(_t("You unsubscribed from %s."), thread.displayName),
                             { type: "info" }
                         );
                     }
@@ -651,10 +651,7 @@ export class Messaging {
                     }
                     this.state.threads[thread.localId]?.remove();
                     this.notification.add(
-                        sprintf(
-                            this.env._t("You unpinned your conversation with %s"),
-                            thread.displayName
-                        ),
+                        sprintf(_t("You unpinned your conversation with %s"), thread.displayName),
                         { type: "info" }
                     );
                     break;
@@ -695,7 +692,7 @@ export class Messaging {
             const tmpData = {
                 id: tmpId,
                 author: { id: this.state.user.partnerId },
-                body: this.env._t("Creating a new record..."),
+                body: _t("Creating a new record..."),
                 message_type: "notification",
                 trackingValues: [],
             };
@@ -1039,7 +1036,7 @@ export class Messaging {
                 }
             }
             if (!user.partner_id) {
-                this.notification.add(this.env._t("You can only chat with existing users."), {
+                this.notification.add(_t("You can only chat with existing users."), {
                     type: "warning",
                 });
                 return;
@@ -1054,7 +1051,7 @@ export class Messaging {
         }
         if (!chat) {
             this.notification.add(
-                this.env._t("An unexpected error occurred during the creation of the chat."),
+                _t("An unexpected error occurred during the creation of the chat."),
                 { type: "warning" }
             );
             return;
