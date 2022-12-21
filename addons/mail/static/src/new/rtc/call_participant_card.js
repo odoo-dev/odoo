@@ -17,7 +17,7 @@ export class CallParticipantCard extends Component {
         });
     }
     get isOfActiveCall() {
-        return Boolean(this.state.rtcSession.channelId === this.rtc?.channel?.id);
+        return Boolean(this.state.rtcSession.channelId === this.rtc.state?.channel?.id);
     }
     get showConnectionState() {
         return Boolean(

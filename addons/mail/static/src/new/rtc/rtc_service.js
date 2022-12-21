@@ -1,7 +1,6 @@
 /** @odoo-module */
 
 import { registry } from "@web/core/registry";
-import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 
 import { Rtc } from "./rtc";
@@ -26,9 +25,7 @@ export const rtcService = {
             "mail.userSettings": userSettings,
         }
     ) {
-        const rtc = reactive(
-            new Rtc(env, messaging, notification, rpc, soundEffects, userSettings)
-        );
+        const rtc = new Rtc(env, messaging, notification, rpc, soundEffects, userSettings);
         bus.addEventListener("notification", (notifEvent) => {
             for (const notif of notifEvent.detail) {
                 switch (notif.type) {
@@ -43,7 +40,7 @@ export const rtcService = {
                     case "mail.channel.rtc.session/ended":
                         {
                             const { sessionId } = notif.payload;
-                            if (rtc.currentRtcSession?.id === sessionId) {
+                            if (rtc.state.currentRtcSession?.id === sessionId) {
                                 rtc.endCall();
                                 notification.notify({
                                     message: _t("Disconnected from the RTC call by the server"),

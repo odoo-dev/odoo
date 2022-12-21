@@ -12,7 +12,7 @@ export class CallActionList extends Component {
         this.rtc = useRtc();
     }
     get isOfActiveCall() {
-        return Boolean(this.props.thread.id === this.rtc?.channel?.id);
+        return Boolean(this.props.thread.id === this.rtc.state?.channel?.id);
     }
     get isSmall() {
         /*
@@ -36,28 +36,28 @@ export class CallActionList extends Component {
         }
     }
     get cameraButtonTitle() {
-        if (this.rtc.sendUserVideo) {
+        if (this.rtc.state.sendUserVideo) {
             return _t("Stop camera");
         } else {
             return _t("Turn camera on");
         }
     }
     get headphoneButtonTitle() {
-        if (this.rtc?.currentRtcSession.isDeaf) {
+        if (this.rtc.state?.currentRtcSession.isDeaf) {
             return _t("Undeafen");
         } else {
             return _t("Deafen");
         }
     }
     get microphoneButtonTitle() {
-        if (this.rtc?.currentRtcSession.isMute) {
+        if (this.rtc.state?.currentRtcSession.isMute) {
             return _t("Unmute");
         } else {
             return _t("Mute");
         }
     }
     get screenSharingButtonTitle() {
-        if (this.rtc.sendDisplay) {
+        if (this.rtc.state.sendDisplay) {
             return _t("Stop screen sharing");
         } else {
             return _t("Share screen");
@@ -81,7 +81,7 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     async onClickDeafen(ev) {
-        if (this.rtc.currentRtcSession.isDeaf) {
+        if (this.rtc.state.currentRtcSession.isDeaf) {
             this.rtc.undeafen();
         } else {
             this.rtc.deafen();
@@ -91,11 +91,11 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     onClickMicrophone(ev) {
-        if (this.rtc.currentRtcSession.isMute) {
-            if (this.rtc.currentRtcSession.isSelfMuted) {
+        if (this.rtc.state.currentRtcSession.isMute) {
+            if (this.rtc.state.currentRtcSession.isSelfMuted) {
                 this.rtc.unmute();
             }
-            if (this.rtc.currentRtcSession.isDeaf) {
+            if (this.rtc.state.currentRtcSession.isDeaf) {
                 this.rtc.undeafen();
             }
         } else {
@@ -112,7 +112,7 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     async onClickRejectCall(ev) {
-        if (this.rtc.hasPendingRtcRequest) {
+        if (this.rtc.state.hasPendingRtcRequest) {
             return;
         }
         await this.rtc.leaveCall(this.props.thread.id);
@@ -127,7 +127,7 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     async onClickToggleAudioCall(ev) {
-        if (this.rtc.hasPendingRtcRequest) {
+        if (this.rtc.state.hasPendingRtcRequest) {
             return;
         }
         await this.rtc.toggleCall(this.props.thread.id);
@@ -136,7 +136,7 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     async onClickToggleVideoCall(ev) {
-        if (this.rtc.hasPendingRtcRequest) {
+        if (this.rtc.state.hasPendingRtcRequest) {
             return;
         }
         await this.rtc.toggleCall(this.props.thread.id, {
