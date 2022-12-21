@@ -6,6 +6,7 @@ import { sprintf } from "@web/core/utils/strings";
 
 import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
+import { _t } from "@web/core/l10n/translation";
 
 import { onMounted, onWillUpdateProps } from "@odoo/owl";
 
@@ -49,7 +50,7 @@ export class FieldMany2ManyTagsEmail extends Many2ManyTagsField {
                 this.openMany2xRecord({
                     resId: record.resId,
                     context: props.record.getFieldContext(this.props.name),
-                    title: sprintf(this.env._t("Edit: %s"), record.data.display_name),
+                    title: sprintf(_t("Edit: %s"), record.data.display_name),
                 })
             );
         }

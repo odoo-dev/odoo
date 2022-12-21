@@ -25,6 +25,7 @@ import { removeFromArrayWithPredicate } from "@mail/new/utils/arrays";
 import { useAttachmentUploader, useHover } from "@mail/new/utils/hooks";
 import { FollowerSubtypeDialog } from "./follower_subtype_dialog";
 import { Attachment } from "../core/attachment_model";
+import { _t } from "@web/core/l10n/translation";
 
 /**
  * @typedef ActivityData
@@ -120,11 +121,11 @@ export class Chatter extends Component {
     }
 
     get followerButtonLabel() {
-        return this.env._t("Show Followers");
+        return _t("Show Followers");
     }
 
     get followingText() {
-        return this.env._t("Following");
+        return _t("Following");
     }
 
     /**
@@ -181,7 +182,7 @@ export class Chatter extends Component {
             res_model: "mail.wizard.invite",
             view_mode: "form",
             views: [[false, "form"]],
-            name: this.env._t("Invite Follower"),
+            name: _t("Invite Follower"),
             target: "new",
             context: {
                 default_res_model: this.props.resModel,
@@ -255,7 +256,7 @@ export class Chatter extends Component {
     }
 
     get unfollowText() {
-        return this.env._t("Unfollow");
+        return _t("Unfollow");
     }
 
     async unlinkAttachment(attachment) {

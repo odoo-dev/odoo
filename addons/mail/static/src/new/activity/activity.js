@@ -10,6 +10,8 @@ import { ActivityMarkAsDone } from "./activity_markasdone_popover";
 import { computeDelay } from "@mail/new/utils/dates";
 import { useAttachmentUploader } from "@mail/new/utils/hooks";
 
+import { _t } from "@web/core/l10n/translation";
+
 /**
  * @typedef {Object} Props
  * @property {import("@mail/new/views/chatter").ActivityData} data
@@ -46,7 +48,7 @@ export class Activity extends Component {
 
     get displayName() {
         if (this.props.data.summary) {
-            return sprintf(this.env._t("“%s”"), this.props.data.summary);
+            return sprintf(_t("“%s”"), this.props.data.summary);
         }
         return this.props.data.display_name;
     }
@@ -59,7 +61,7 @@ export class Activity extends Component {
         ev.stopPropagation();
         ev.preventDefault();
         const action = {
-            name: this.env._t("Compose Email"),
+            name: _t("Compose Email"),
             type: "ir.actions.act_window",
             res_model: "mail.compose.message",
             views: [[false, "form"]],

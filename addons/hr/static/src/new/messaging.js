@@ -3,6 +3,7 @@
 import { Messaging } from "@mail/new/core/messaging";
 
 import { patch } from "web.utils";
+import { _t } from "@web/core/l10n/translation";
 
 patch(Messaging.prototype, "hr", {
     setup(...args) {
@@ -42,7 +43,7 @@ patch(Messaging.prototype, "hr", {
         }
         if (!employee.user_id) {
             this.notification.add(
-                this.env._t("You can only chat with employees that have a dedicated user."),
+                _t("You can only chat with employees that have a dedicated user."),
                 { type: "info" }
             );
             return;

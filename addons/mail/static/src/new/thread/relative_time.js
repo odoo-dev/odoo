@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { _t } from "@web/core/l10n/translation";
 import { Component, xml, onWillDestroy } from "@odoo/owl";
 
 const MINUTE = 60 * 1000;
@@ -23,7 +24,7 @@ export class RelativeTime extends Component {
         }
         const delta = Date.now() - datetime.ts;
         if (delta < 45 * 1000) {
-            this.relativeTime = this.env._t("now");
+            this.relativeTime = _t("now");
         } else {
             this.relativeTime = datetime.toRelative();
         }

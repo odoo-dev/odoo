@@ -4,6 +4,8 @@ import { useMessaging } from "@mail/new/messaging_hook";
 import { Component } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 
+import { _t } from "@web/core/l10n/translation";
+
 export class MessageDeleteDialog extends Component {
     static components = { Dialog };
     static props = ["close", "message", "messageComponent"];
@@ -11,7 +13,7 @@ export class MessageDeleteDialog extends Component {
 
     setup() {
         this.messaging = useMessaging();
-        this.title = this.env._t("Confirmation");
+        this.title = _t("Confirmation");
     }
 
     onClickDelete() {

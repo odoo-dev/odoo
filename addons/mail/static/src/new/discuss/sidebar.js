@@ -12,6 +12,8 @@ import { markEventHandled } from "../utils/misc";
 import { ChatWindowIcon } from "../chat/chat_window_icon";
 import { Thread } from "../core/thread_model";
 
+import { _t } from "@web/core/l10n/translation";
+
 /**
  * @typedef {Object} Props
  * @extends {Component<Props, Env>}
@@ -47,7 +49,7 @@ export class Sidebar extends Component {
     openCategory(category) {
         if (category.id === "channels") {
             this.actionService.doAction({
-                name: this.env._t("Public Channels"),
+                name: _t("Public Channels"),
                 type: "ir.actions.act_window",
                 res_model: "mail.channel",
                 views: [
@@ -92,14 +94,12 @@ export class Sidebar extends Component {
     async leaveChannel(thread) {
         if (thread.type !== "group" && thread.isAdmin) {
             await this.askConfirmation(
-                this.env._t(
-                    "You are the administrator of this channel. Are you sure you want to leave?"
-                )
+                _t("You are the administrator of this channel. Are you sure you want to leave?")
             );
         }
         if (thread.type === "group") {
             await this.askConfirmation(
-                this.env._t(
+                _t(
                     "You are about to leave this group conversation and will no longer have access to it unless you are invited again. Are you sure you want to continue?"
                 )
             );

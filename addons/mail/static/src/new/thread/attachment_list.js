@@ -7,6 +7,8 @@ import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { useAttachmentViewer } from "../attachment_viewer/attachment_viewer_hook";
 
+import { _t } from "@web/core/l10n/translation";
+
 /**
  * @typedef {Object} Props
  * @property {import("@mail/new/core/attachment_model").Attachment[]} attachments
@@ -70,7 +72,7 @@ export class AttachmentList extends Component {
             return this.props.unlinkAttachment(attachment);
         }
         this.dialog.add(ConfirmationDialog, {
-            body: sprintf(this.env._t('Do you really want to delete "%s"?'), attachment.filename),
+            body: sprintf(_t('Do you really want to delete "%s"?'), attachment.filename),
             cancel: () => {},
             confirm: () => {
                 this.props.unlinkAttachment(attachment);

@@ -10,6 +10,7 @@ import { computeDelay } from "@mail/new/utils/dates";
 import { useAttachmentUploader } from "@mail/new/utils/hooks";
 
 import { Component, useState } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 
 export class ActivityListPopoverItem extends Component {
     static components = { ActivityMarkAsDone, FileUploader };
@@ -42,15 +43,15 @@ export class ActivityListPopoverItem extends Component {
     get delayLabel() {
         const diff = computeDelay(this.props.activity.date_deadline);
         if (diff === 0) {
-            return this.env._t("Today");
+            return _t("Today");
         } else if (diff === -1) {
-            return this.env._t("Yesterday");
+            return _t("Yesterday");
         } else if (diff < 0) {
-            return sprintf(this.env._t("%s days overdue"), Math.round(Math.abs(diff)));
+            return sprintf(_t("%s days overdue"), Math.round(Math.abs(diff)));
         } else if (diff === 1) {
-            return this.env._t("Tomorrow");
+            return _t("Tomorrow");
         } else {
-            return sprintf(this.env._t("Due in %s days"), Math.round(Math.abs(diff)));
+            return sprintf(_t("Due in %s days"), Math.round(Math.abs(diff)));
         }
     }
 
