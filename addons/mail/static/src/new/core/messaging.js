@@ -465,6 +465,18 @@ export class Messaging {
         return Boolean(browser.Notification && browser.Notification.permission === "granted");
     }
 
+    createNotificationMessage(message, channel) {
+        const data = Object.assign(message, { body: markup(message.body) });
+        Message.insert(this.state, data, channel);
+        if (
+            !this.presence.isOdooFocused() &&
+            channel.type === "chat" &&
+            channel.chatPartnerId !== this.state.partnerRoot.id
+        ) {
+            this.notifyOutOfFocusMessage(message, channel);
+        }
+    }
+
     handleNotification(notifications) {
         console.log("notifications received", notifications);
         for (const notif of notifications) {
@@ -474,14 +486,12 @@ export class Messaging {
                         const { id, message } = notif.payload;
                         const channel =
                             this.state.threads[Thread.createLocalId({ id, model: "mail.channel" })];
-                        const data = Object.assign(message, { body: markup(message.body) });
-                        Message.insert(this.state, data, channel);
-                        if (
-                            !this.presence.isOdooFocused() &&
-                            channel.type === "chat" &&
-                            channel.chatPartnerId !== this.state.partnerRoot.id
-                        ) {
-                            this.notifyOutOfFocusMessage(message, channel);
+                        if (channel) {
+                            this.createNotificationMessage(message, channel);
+                        } else {
+                            this.joinChat(message.author.id).then((channel) =>
+                                this.createNotificationMessage(message, channel)
+                            );
                         }
                     }
                     break;

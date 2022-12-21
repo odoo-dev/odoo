@@ -1311,3 +1311,42 @@ QUnit.test("receive new chat messages: out of odoo focus (tab title)", async fun
     await nextTick();
     assert.verifySteps(["set_title_part"]);
 });
+
+QUnit.test("should auto-pin chat when receiving a new DM", async function (assert) {
+    const pyEnv = await startServer();
+    const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
+    const resUsersId1 = pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+    pyEnv["mail.channel"].create({
+        channel_member_ids: [
+            [
+                0,
+                0,
+                {
+                    is_pinned: false,
+                    partner_id: pyEnv.currentPartnerId,
+                },
+            ],
+            [0, 0, { partner_id: resPartnerId1 }],
+        ],
+        channel_type: "chat",
+        uuid: "channel11uuid",
+    });
+    const { messaging, openDiscuss } = await start();
+    await openDiscuss();
+    assert.containsNone(target, ".o-mail-category-item:contains(Demo)");
+
+    // simulate receiving the first message on channel 11
+    await afterNextRender(() =>
+        messaging.rpc({
+            route: "/mail/chat_post",
+            params: {
+                context: {
+                    mockedUserId: resUsersId1,
+                },
+                message_content: "new message",
+                uuid: "channel11uuid",
+            },
+        })
+    );
+    assert.containsOnce(target, ".o-mail-category-item:contains(Demo)");
+});
