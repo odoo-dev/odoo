@@ -104,14 +104,51 @@ export class Rtc {
             void proxyAudioInputDevice.audioInputDeviceId;
         }).audioInputDeviceId;
 
-        this._onKeyDown = this._onKeyDown.bind(this);
-        this._onKeyUp = this._onKeyUp.bind(this);
-        browser.addEventListener("keydown", this._onKeyDown);
-        browser.addEventListener("keyup", this._onKeyUp);
+        browser.addEventListener("keydown", (ev) => {
+            if (!this.state.channel) {
+                return;
+            }
+            if (this.userSettings.isRegisteringKey) {
+                return;
+            }
+            if (!this.userSettings.usePushToTalk || !this.userSettings.isPushToTalkKey(ev)) {
+                return;
+            }
+            if (this.state._pushToTalkTimeoutId) {
+                browser.clearTimeout(this.state._pushToTalkTimeoutId);
+            }
+            if (!this.state.currentRtcSession.isTalking && !this.state.currentRtcSession.isMute) {
+                this.soundEffects.play("pushToTalk", { volume: 0.3 });
+            }
+            this._setSoundBroadcast(true);
+        });
+        browser.addEventListener("keyup", (ev) => {
+            if (!this.state.channel) {
+                return;
+            }
+            if (
+                !this.userSettings.usePushToTalk ||
+                !this.userSettings.isPushToTalkKey(ev, { ignoreModifiers: true })
+            ) {
+                return;
+            }
+            if (!this.state.currentRtcSession.isTalking) {
+                return;
+            }
+            if (!this.state.currentRtcSession.isMute) {
+                this.soundEffects.play("pushToTalk", { volume: 0.3 });
+            }
+            this.state._pushToTalkTimeoutId = browser.setTimeout(() => {
+                this._setSoundBroadcast(false);
+            }, this.userSettings.voiceActiveDuration || 0);
+        });
 
         // Disconnects the RTC session if the page is closed or reloaded.
-        this._onPageHide = this._onPageHide.bind(this);
-        browser.addEventListener("pagehide", this._onPageHide);
+        browser.addEventListener("pagehide", async (ev) => {
+            if (this.state.channel && !ev.persisted) {
+                await this._performRpcLeaveCall(this.state.channel.id);
+            }
+        });
         /**
          * Call all sessions for which no peerConnection is established at
          * a regular interval to try to recover any connection that failed
@@ -1365,16 +1402,6 @@ export class Rtc {
 
     /**
      * @private
-     * @param {Event} ev
-     */
-    async _onPageHide(ev) {
-        if (this.state.channel && !ev.persisted) {
-            await this._performRpcLeaveCall(this.state.channel.id);
-        }
-    }
-
-    /**
-     * @private
      * @param {String} state the new state of the connection
      * @param {number} rtcSessionId of the peer whose the connection changed
      */
@@ -1420,54 +1447,6 @@ export class Rtc {
                 });
                 break;
         }
-    }
-
-    /**
-     * @private
-     * @param {keyboardEvent} ev
-     */
-    _onKeyDown(ev) {
-        if (!this.state.channel) {
-            return;
-        }
-        if (this.userSettings.isRegisteringKey) {
-            return;
-        }
-        if (!this.userSettings.usePushToTalk || !this.userSettings.isPushToTalkKey(ev)) {
-            return;
-        }
-        if (this.state._pushToTalkTimeoutId) {
-            browser.clearTimeout(this.state._pushToTalkTimeoutId);
-        }
-        if (!this.state.currentRtcSession.isTalking && !this.state.currentRtcSession.isMute) {
-            this.soundEffects.play("pushToTalk", { volume: 0.3 });
-        }
-        this._setSoundBroadcast(true);
-    }
-
-    /**
-     * @private
-     * @param {keyboardEvent} ev
-     */
-    _onKeyUp(ev) {
-        if (!this.state.channel) {
-            return;
-        }
-        if (
-            !this.userSettings.usePushToTalk ||
-            !this.userSettings.isPushToTalkKey(ev, { ignoreModifiers: true })
-        ) {
-            return;
-        }
-        if (!this.state.currentRtcSession.isTalking) {
-            return;
-        }
-        if (!this.state.currentRtcSession.isMute) {
-            this.soundEffects.play("pushToTalk", { volume: 0.3 });
-        }
-        this.state._pushToTalkTimeoutId = browser.setTimeout(() => {
-            this._setSoundBroadcast(false);
-        }, this.userSettings.voiceActiveDuration || 0);
     }
 
     /**
