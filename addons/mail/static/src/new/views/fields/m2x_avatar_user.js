@@ -9,6 +9,7 @@ import {
     Many2OneAvatar,
 } from "web.relational_fields";
 import session from "web.session";
+import { _t } from "@web/core/l10n/translation";
 
 import { Component } from "@odoo/owl";
 
@@ -96,7 +97,7 @@ export const Many2OneAvatarUser = Many2OneAvatar.extend(M2XAvatarMixin, {
                 }));
             };
             let getCommandDefinition = (env) => ({
-                name: env._t("Assign to ..."),
+                name: _t("Assign to ..."),
                 options: {
                     activeElement: env.services.ui.getActiveElementOf(self.el),
                     category: "smart_action",
@@ -106,10 +107,10 @@ export const Many2OneAvatarUser = Many2OneAvatar.extend(M2XAvatarMixin, {
                     return {
                         configByNamespace: {
                             default: {
-                                emptyMessage: env._t("No users found"),
+                                emptyMessage: _t("No users found"),
                             },
                         },
-                        placeholder: env._t("Select a user..."),
+                        placeholder: _t("Select a user..."),
                         providers: [{ provide }],
                     };
                 },
@@ -122,7 +123,7 @@ export const Many2OneAvatarUser = Many2OneAvatar.extend(M2XAvatarMixin, {
             );
 
             getCommandDefinition = (env) => ({
-                name: env._t("Assign/unassign to me"),
+                name: _t("Assign/unassign to me"),
                 options: {
                     activeElement: env.services.ui.getActiveElementOf(self.el),
                     category: "smart_action",
@@ -284,7 +285,7 @@ export const Many2ManyAvatarUser = FieldMany2ManyTagsAvatar.extend(M2MAvatarMixi
                 }));
             };
             let getCommandDefinition = (env) => ({
-                name: env._t("Assign to ..."),
+                name: _t("Assign to ..."),
                 options: {
                     activeElement: env.services.ui.getActiveElementOf(self.el),
                     category: "smart_action",
@@ -294,10 +295,10 @@ export const Many2ManyAvatarUser = FieldMany2ManyTagsAvatar.extend(M2MAvatarMixi
                     return {
                         configByNamespace: {
                             default: {
-                                emptyMessage: env._t("No users found"),
+                                emptyMessage: _t("No users found"),
                             },
                         },
-                        placeholder: env._t("Select a user..."),
+                        placeholder: _t("Select a user..."),
                         providers: [{ provide }],
                     };
                 },
@@ -309,7 +310,7 @@ export const Many2ManyAvatarUser = FieldMany2ManyTagsAvatar.extend(M2MAvatarMixi
             );
 
             getCommandDefinition = (env) => ({
-                name: env._t("Assign/unassign to me"),
+                name: _t("Assign/unassign to me"),
                 options: {
                     activeElement: env.services.ui.getActiveElementOf(self.el),
                     category: "smart_action",

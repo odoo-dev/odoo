@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { _t } from "@web/core/l10n/translation";
 import { reactive } from "@odoo/owl";
 
 export const activityService = {
@@ -39,7 +40,7 @@ export const activityService = {
                 action.doAction(
                     {
                         type: "ir.actions.act_window",
-                        name: env._t("Schedule Activity"),
+                        name: _t("Schedule Activity"),
                         res_model: "mail.activity",
                         view_mode: "form",
                         views: [[false, "form"]],

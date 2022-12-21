@@ -3,8 +3,9 @@
 import { useCommand } from "@web/core/commands/command_hook";
 import { useService } from "@web/core/utils/hooks";
 import { Domain } from "@web/core/domain";
+import { _t } from "@web/core/l10n/translation";
 
-import { useComponent, useEnv } from "@odoo/owl";
+import { useComponent } from "@odoo/owl";
 
 /**
  * Use this hook to add "Assign to.." and "Assign/Unassign me" to the command palette.
@@ -12,7 +13,6 @@ import { useComponent, useEnv } from "@odoo/owl";
 
 export function useAssignUserCommand() {
     const component = useComponent();
-    const env = useEnv();
     const orm = useService("orm");
     const user = useService("user");
     if (
@@ -77,14 +77,14 @@ export function useAssignUserCommand() {
     };
 
     useCommand(
-        env._t("Assign to ..."),
+        _t("Assign to ..."),
         () => ({
             configByNameSpace: {
                 default: {
-                    emptyMessage: env._t("No users found"),
+                    emptyMessage: _t("No users found"),
                 },
             },
-            placeholder: env._t("Select a user..."),
+            placeholder: _t("Select a user..."),
             providers: [
                 {
                     provide,
@@ -99,7 +99,7 @@ export function useAssignUserCommand() {
     );
 
     useCommand(
-        env._t("Assign/Unassign to me"),
+        _t("Assign/Unassign to me"),
         () => {
             const record = [user.userId, user.name];
             if (getCurrentIds().includes(user.userId)) {

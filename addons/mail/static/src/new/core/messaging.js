@@ -125,22 +125,22 @@ export class Messaging {
                 channels: {
                     extraClass: "o-mail-category-channel",
                     id: "channels",
-                    name: env._t("Channels"),
+                    name: _t("Channels"),
                     isOpen: false,
                     canView: true,
                     canAdd: true,
-                    addTitle: env._t("Add or join a channel"),
+                    addTitle: _t("Add or join a channel"),
                     counter: 0,
                     threads: [], // list of ids
                 },
                 chats: {
                     extraClass: "o-mail-category-chat",
                     id: "chats",
-                    name: env._t("Direct messages"),
+                    name: _t("Direct messages"),
                     isOpen: false,
                     canView: false,
                     canAdd: true,
-                    addTitle: env._t("Start a conversation"),
+                    addTitle: _t("Start a conversation"),
                     counter: 0,
                     threads: [], // list of ids
                 },
@@ -158,14 +158,14 @@ export class Messaging {
         this.state.discuss.inbox = Thread.insert(this.state, {
             id: "inbox",
             model: "mail.box",
-            name: env._t("Inbox"),
+            name: _t("Inbox"),
             type: "mailbox",
             icon: "fa-inbox",
         });
         this.state.discuss.starred = Thread.insert(this.state, {
             id: "starred",
             model: "mail.box",
-            name: env._t("Starred"),
+            name: _t("Starred"),
             type: "mailbox",
             icon: "fa-star-o",
             counter: 0,
@@ -173,7 +173,7 @@ export class Messaging {
         this.state.discuss.history = Thread.insert(this.state, {
             id: "history",
             model: "mail.box",
-            name: env._t("History"),
+            name: _t("History"),
             type: "mailbox",
             icon: "fa-history",
             counter: 0,
