@@ -119,9 +119,13 @@ export function useSuggestion() {
             if (!self.search.delimiter) {
                 return;
             }
+            const composer = comp.props.composer;
+            const threadLocalId = composer.thread
+                ? composer.thread.localId
+                : composer.message.originThread.localId;
             const [main, extra = { suggestions: [] }] = messaging.searchSuggestions(
                 self.search,
-                { threadLocalId: comp.props.composer.thread.localId },
+                { threadLocalId },
                 true
             );
             // arbitrary limit to avoid displaying too many elements at once
@@ -142,9 +146,11 @@ export function useSuggestion() {
                 if (self.search.position === undefined || self.search.term === "") {
                     return; // ignore obsolete call
                 }
-                await messaging.fetchSuggestions(self.search, {
-                    threadLocalId: comp.props.composer.thread.localId,
-                });
+                const composer = comp.props.composer;
+                const threadLocalId = composer.thread
+                    ? composer.thread.localId
+                    : composer.message.originThread.localId;
+                await messaging.fetchSuggestions(self.search, { threadLocalId });
                 self.update();
             });
         },
