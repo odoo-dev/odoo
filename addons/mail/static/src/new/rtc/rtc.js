@@ -11,6 +11,17 @@ import { RtcSession } from "./rtc_session_model";
 import { createLocalId } from "../core/thread_model.create_local_id";
 
 const TRANSCEIVER_ORDER = ["audio", "video"];
+const PEER_NOTIFICATION_WAIT_DELAY = 50;
+const RECOVERY_TIMEOUT = 15_000;
+const RECOVERY_DELAY = 3_000;
+const VIDEO_CONFIG = {
+    aspectRatio: 16 / 9,
+    frameRate: {
+        max: 30,
+    },
+};
+const INVALID_ICE_CONNECTION_STATES = new Set(["disconnected", "failed", "closed"]);
+const IS_CLIENT_RTC_COMPATIBLE = Boolean(window.RTCPeerConnection && window.MediaStream);
 
 let tmpId = 0;
 
@@ -30,23 +41,12 @@ export class Rtc {
             iceServers: [
                 { urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"] },
             ],
-            isClientRtcCompatible: Boolean(window.RTCPeerConnection && window.MediaStream),
-            invalidIceConnectionStates: new Set(["disconnected", "failed", "closed"]),
             logs: new Map(),
             sendUserVideo: false,
             sendDisplay: false,
-            videoConfig: {
-                aspectRatio: 16 / 9,
-                frameRate: {
-                    max: 30,
-                },
-            },
             _isNotifyPeersRPCInProgress: false,
             _debounceIds: new Map(),
             _peerNotificationsToSend: new Map(),
-            _peerNotificationWaitDelay: 50,
-            _recoveryTimeout: 15000,
-            _recoveryDelay: 3000,
             _audioTrack: undefined,
             _videoTrack: undefined,
             /**
@@ -186,7 +186,7 @@ export class Rtc {
             // does handle notifications targeting a different session
             return;
         }
-        if (!this.state.isClientRtcCompatible) {
+        if (!IS_CLIENT_RTC_COMPATIBLE) {
             return;
         }
         if (
@@ -394,7 +394,7 @@ export class Rtc {
         peerConnection.onicecandidateerror = async (error) => {
             this._addLogEntry(rtcSessionId, `ice candidate error`);
             this._recoverConnection(rtcSessionId, {
-                delay: this.state._recoveryTimeout,
+                delay: RECOVERY_TIMEOUT,
                 reason: "ice candidate error",
             });
         };
@@ -503,7 +503,7 @@ export class Rtc {
         const peerConnection = this.state._peerConnections.get(rtcSessionId);
         if (
             !peerConnection ||
-            this.state.invalidIceConnectionStates.has(peerConnection.iceConnectionState) ||
+            INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState) ||
             peerConnection.signalingState === "stable"
         ) {
             return;
@@ -537,7 +537,7 @@ export class Rtc {
         const peerConnection = this.state._peerConnections.get(rtcSessionId);
         if (
             !peerConnection ||
-            this.state.invalidIceConnectionStates.has(peerConnection.iceConnectionState)
+            INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState)
         ) {
             return;
         }
@@ -551,7 +551,7 @@ export class Rtc {
                 { error }
             );
             this._recoverConnection(rtcSessionId, {
-                delay: this.state._recoveryTimeout,
+                delay: RECOVERY_TIMEOUT,
                 reason: "failed at adding ice candidate",
             });
         }
@@ -570,7 +570,7 @@ export class Rtc {
 
         if (
             !peerConnection ||
-            this.state.invalidIceConnectionStates.has(peerConnection.iceConnectionState)
+            INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState)
         ) {
             return;
         }
@@ -614,7 +614,7 @@ export class Rtc {
             payload: { sdp: peerConnection.localDescription },
         });
         this._recoverConnection(rtcSessionId, {
-            delay: this.state._recoveryTimeout,
+            delay: RECOVERY_TIMEOUT,
             reason: "standard answer timeout",
         });
     }
@@ -701,7 +701,7 @@ export class Rtc {
      * @param {boolean} [param1.videoType] type of the video: 'user-video' or 'display'
      */
     async _joinCall(channelId, { startWithAudio = true, startWithVideo = false, videoType } = {}) {
-        if (!this.state.isClientRtcCompatible) {
+        if (!IS_CLIENT_RTC_COMPATIBLE) {
             this.notification.notify({
                 message: _t("Your browser does not support webRTC."),
                 type: "warning",
@@ -951,7 +951,7 @@ export class Rtc {
             return;
         }
         this.state._isNotifyPeersRPCInProgress = true;
-        await new Promise((resolve) => setTimeout(resolve, this.state._peerNotificationWaitDelay));
+        await new Promise((resolve) => setTimeout(resolve, PEER_NOTIFICATION_WAIT_DELAY));
         const ids = [];
         const notifications = [];
         this.state._peerNotificationsToSend.forEach((peerNotification, id) => {
@@ -1179,12 +1179,12 @@ export class Rtc {
         try {
             if (type === "user-video") {
                 sourceWebMediaStream = await browser.navigator.mediaDevices.getUserMedia({
-                    video: this.state.videoConfig,
+                    video: VIDEO_CONFIG,
                 });
             }
             if (type === "display") {
                 sourceWebMediaStream = await browser.navigator.mediaDevices.getDisplayMedia({
-                    video: this.state.videoConfig,
+                    video: VIDEO_CONFIG,
                 });
                 this.soundEffects.play("screenSharing");
             }
@@ -1387,7 +1387,7 @@ export class Rtc {
             case "failed":
             case "disconnected":
                 await this._recoverConnection(rtcSessionId, {
-                    delay: this.state._recoveryDelay,
+                    delay: RECOVERY_DELAY,
                     reason: `connection ${state}`,
                 });
                 break;
@@ -1415,7 +1415,7 @@ export class Rtc {
             case "failed":
             case "disconnected":
                 await this._recoverConnection(rtcSessionId, {
-                    delay: this.state._recoveryDelay,
+                    delay: RECOVERY_DELAY,
                     reason: `ice connection ${connectionState}`,
                 });
                 break;
