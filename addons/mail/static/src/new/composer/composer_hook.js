@@ -116,7 +116,7 @@ export function useSuggestion() {
             items: [],
         }),
         update() {
-            if (!self.search.delimiter) {
+            if (!self.search.delimiter || !comp.props.composer.thread) {
                 return;
             }
             const [main, extra = { suggestions: [] }] = messaging.searchSuggestions(
@@ -141,6 +141,9 @@ export function useSuggestion() {
             self.process(async () => {
                 if (self.search.position === undefined || self.search.term === "") {
                     return; // ignore obsolete call
+                }
+                if (!comp.props.composer.thread) {
+                    return;
                 }
                 await messaging.fetchSuggestions(self.search, {
                     threadLocalId: comp.props.composer.thread.localId,
