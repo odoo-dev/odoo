@@ -1354,3 +1354,78 @@ QUnit.test("should auto-pin chat when receiving a new DM", async function (asser
     );
     assert.containsOnce(target, ".o-mail-category-item:contains(Demo)");
 });
+
+QUnit.test(
+    "'Add Users' button should be displayed in the topbar of channels",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            name: "general",
+            channel_type: "channel",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsOnce(target, ".o-mail-discuss-actions button[data-action='add-users']");
+    }
+);
+
+QUnit.test(
+    "'Add Users' button should be displayed in the topbar of chats",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "Marc Demo" });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+            channel_type: "chat",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsOnce(target, ".o-mail-discuss-actions button[data-action='add-users']");
+    }
+);
+
+QUnit.test(
+    "'Add Users' button should be displayed in the topbar of groups",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({ name: "Demo" });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+            channel_type: "group",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsOnce(target, ".o-mail-discuss-actions button[data-action='add-users']");
+    }
+);
+
+QUnit.test(
+    "'Add Users' button should not be displayed in the topbar of mailboxes",
+    async function (assert) {
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: "mail.box_starred" },
+            },
+        });
+        await openDiscuss();
+        assert.containsNone(target, ".o-mail-discuss-actions button[data-action='add-users']");
+    }
+);
