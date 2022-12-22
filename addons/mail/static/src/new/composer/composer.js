@@ -230,9 +230,12 @@ export class Composer extends Component {
                 break;
             }
             case "Escape":
+                if (isEventHandled(ev, "NavigableList.close")) {
+                    return;
+                }
                 if (this.props.onDiscardCallback) {
                     this.props.onDiscardCallback();
-                    markEventHandled(ev, "composer.onKeydownEscape");
+                    markEventHandled(ev, "Composer.discard");
                 }
                 break;
         }

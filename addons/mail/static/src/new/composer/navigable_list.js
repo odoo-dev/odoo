@@ -13,6 +13,7 @@ import {
     useRef,
     useState,
 } from "@odoo/owl";
+import { markEventHandled } from "../utils/misc";
 
 export class NavigableList extends Component {
     static components = { PartnerImStatus };
@@ -230,6 +231,7 @@ export class NavigableList extends Component {
                 if (!this.isOpened) {
                     return;
                 }
+                markEventHandled(ev, "NavigableList.close");
                 this.close();
                 break;
             case "tab":
