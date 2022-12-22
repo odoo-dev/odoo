@@ -5,7 +5,7 @@
     <Dropdown beforeOpen.bind="() => messaging.fetchPreviews()" position="'bottom-end'" menuClass="'p-0'">
         <t t-set-slot="toggler">
             <i class="fa fa-lg fa-comments" role="img" aria-label="Messages"></i>
-            <span class="badge"><t t-esc="messaging.state.menu.counter"/></span>
+            <span class="o-mail-messaging-menu-counter badge"><t t-esc="counter"/></span>
         </t>
         <t t-set-slot="default">
             <div class="o-mail-messaging-menu">

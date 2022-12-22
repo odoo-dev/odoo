@@ -4,6 +4,7 @@ import { LinkPreview } from "./link_preview_model";
 import { MessageReactions } from "./message_reactions_model";
 import { Partner } from "./partner_model";
 import { Thread } from "./thread_model";
+import { Notification } from "./notification_model";
 import { htmlToTextContentInline } from "@mail/new/utils/format";
 
 import { toRaw } from "@odoo/owl";
@@ -40,6 +41,8 @@ export class Message {
     parentMessage;
     /** @type {MessageReactions[]} */
     reactions = [];
+    /** @type {Notification[]} */
+    notifications = [];
     /** @type {number|string} */
     resId;
     /** @type {string|undefined} */
@@ -73,6 +76,7 @@ export class Message {
         }
         message.update(state, data, thread);
         state.messages[message.id] = message;
+        message.updateNotifications();
         // return reactive version
         return state.messages[message.id];
     }
@@ -92,6 +96,7 @@ export class Message {
             subject = this.subject,
             subtype_description: subtypeDescription = this.subtypeDescription,
             starred_partner_ids = this.starred_partner_ids,
+            notifications = this.notifications,
             ...remainingData
         } = data;
         for (const key in remainingData) {
@@ -119,9 +124,13 @@ export class Message {
             subtypeDescription,
             trackingValues: data.trackingValues || [],
             type,
+            notifications,
         });
         if (data.record_name) {
             this.originThread.name = data.record_name;
+        }
+        if (data.res_model_name) {
+            this.originThread.modelName = data.res_model_name;
         }
         this._updateReactions(data.messageReactionGroups);
         state.messages[this.id] = this;
@@ -137,6 +146,12 @@ export class Message {
             this._state.discuss.inbox.messages.push(this.id);
             this._state.discuss.inbox.sortMessages();
         }
+    }
+
+    updateNotifications() {
+        this.notifications = this.notifications.map((notification) =>
+            Notification.insert(this._state, { ...notification, messageId: this.id })
+        );
     }
 
     _updateReactions(reactionGroups = []) {

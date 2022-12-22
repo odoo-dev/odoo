@@ -107,6 +107,9 @@ export class Messaging {
             },
             /** @type {Object.<number, import("@mail/new/core/channel_member_model").ChannelMember>} */
             channelMembers: {},
+            /** @type {Object.<number, import("@mail/new/core/notification_model").Notification>} */
+            notifications: {},
+            notificationGroups: {},
             /** @type {Object.<number, import("@mail/new/core/follower_model").Follower>} */
             followers: {},
             /** @type {Object.<number, Partner>} */
@@ -123,7 +126,7 @@ export class Messaging {
             outOfFocusUnreadMessageCounter: 0,
             // messaging menu
             menu: {
-                counter: 5, // sounds about right.
+                counter: 0,
             },
             // discuss app
             discuss: {

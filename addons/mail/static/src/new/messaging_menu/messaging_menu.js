@@ -5,6 +5,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useMessaging } from "../messaging_hook";
 import { PartnerImStatus } from "@mail/new/discuss/partner_im_status";
 import { RelativeTime } from "../thread/relative_time";
+import { browser } from "@web/core/browser/browser";
 
 export class MessagingMenu extends Component {
     static components = { Dropdown, RelativeTime, PartnerImStatus };
@@ -43,5 +44,17 @@ export class MessagingMenu extends Component {
         // hack: click on window to close dropdown, because we use a dropdown
         // without dropdownitem...
         document.body.click();
+    }
+
+    get counter() {
+        let value =
+            this.messaging.state.discuss.inbox.counter +
+            Object.values(this.messaging.state.threads).filter((thread) => thread.is_pinned)
+                .length +
+            Object.keys(this.messaging.state.notificationGroups).length;
+        if (browser.Notification?.permission === "default") {
+            value++;
+        }
+        return value;
     }
 }
