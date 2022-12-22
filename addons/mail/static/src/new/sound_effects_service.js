@@ -1,7 +1,5 @@
 /** @odoo-module */
 
-import { registry } from "@web/core/registry";
-
 class SoundEffects {
     constructor(env) {
         this.soundEffects = {
@@ -72,5 +70,3 @@ export const soundEffects = {
         return new SoundEffects(env);
     },
 };
-
-registry.category("services").add("mail.soundEffects", soundEffects);

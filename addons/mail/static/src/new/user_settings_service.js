@@ -2,8 +2,6 @@
 
 import { browser } from "@web/core/browser/browser";
 
-import { registry } from "@web/core/registry";
-
 class UserSettings {
     constructor(env, rpc, user) {
         this.rpc = rpc;
@@ -232,5 +230,3 @@ export const userSettingsService = {
         return new UserSettings(env, rpc, user);
     },
 };
-
-registry.category("services").add("mail.userSettings", userSettingsService);

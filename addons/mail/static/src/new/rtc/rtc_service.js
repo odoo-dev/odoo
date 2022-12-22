@@ -1,6 +1,5 @@
 /** @odoo-module */
 
-import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 
 import { Rtc } from "./rtc";
@@ -55,5 +54,3 @@ export const rtcService = {
         return rtc;
     },
 };
-
-registry.category("services").add("mail.rtc", rtcService);

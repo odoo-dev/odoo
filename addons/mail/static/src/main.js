@@ -13,6 +13,9 @@ import { systrayService } from "@mail/services/systray_service";
 import { makeMessagingToLegacyEnv } from "@mail/utils/make_messaging_to_legacy_env";
 
 import { registry } from "@web/core/registry";
+import { rtcService } from "./new/rtc/rtc_service";
+import { soundEffects } from "./new/sound_effects_service";
+import { userSettingsService } from "./new/user_settings_service";
 
 const messagingValuesService = {
     start() {
@@ -23,6 +26,9 @@ const messagingValuesService = {
 const serviceRegistry = registry.category("services");
 serviceRegistry.add("mail.activity", activityService);
 serviceRegistry.add("mail.messaging", newMessagingService);
+serviceRegistry.add("mail.rtc", rtcService);
+serviceRegistry.add("mail.soundEffects", soundEffects);
+serviceRegistry.add("mail.userSettings", userSettingsService);
 serviceRegistry.add("messaging", messagingService);
 serviceRegistry.add("messagingValues", messagingValuesService);
 serviceRegistry.add("systray_service", systrayService);
