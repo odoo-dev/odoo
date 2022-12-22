@@ -225,6 +225,7 @@ export class NavigableList extends Component {
                 if (!this.isOpened || !this.state.activeSourceOption) {
                     return;
                 }
+                markEventHandled(ev, "NavigableList.select");
                 this.selectOption(ev, this.state.activeSourceOption);
                 break;
             case "escape":

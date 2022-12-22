@@ -999,3 +999,40 @@ QUnit.test("quick edit last self-message from UP arrow", async function (assert)
         `.o-mail-message[data-message-id=${mailMessageId}] .o-mail-composer`
     );
 });
+
+QUnit.test(
+    "Select composer suggestion via Enter does not send the message",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({
+            email: "shrek@odoo.com",
+            name: "Shrek",
+        });
+        pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            name: "general",
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+        });
+        const { insertText, openDiscuss } = await start({
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${mailChannelId1}`,
+                },
+            },
+            async mockRPC(route, args) {
+                if (route === "/mail/message/post") {
+                    assert.step("message_post");
+                }
+            },
+        });
+        await openDiscuss();
+        await insertText(".o-mail-composer-textarea", "@");
+        await insertText(".o-mail-composer-textarea", "Shrek");
+        await afterNextRender(() => triggerHotkey("Enter"));
+        assert.equal(target.querySelector(".o-mail-composer-textarea").value.trim(), "@Shrek");
+        assert.verifySteps([]);
+    }
+);
