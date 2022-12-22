@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { TEST_USER_IDS } from "@bus/../tests/helpers/test_constants";
 import { Discuss } from "@mail/new/discuss/discuss";
 import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 import {
@@ -1427,5 +1428,127 @@ QUnit.test(
         });
         await openDiscuss();
         assert.containsNone(target, ".o-mail-discuss-actions button[data-action='add-users']");
+    }
+);
+
+QUnit.test(
+    "'Hashtag' thread icon is displayed in top bar of channels of type 'channel' limited to a group",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resGroupId1 = pyEnv["res.groups"].create({
+            name: "testGroup",
+        });
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "string",
+            group_public_id: resGroupId1,
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsOnce(target, ".fa-hashtag");
+    }
+);
+
+QUnit.test(
+    "'Globe' thread icon is displayed in top bar of channels of type 'channel' not limited to any group",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "channel",
+            name: "string",
+            group_public_id: false,
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsOnce(target, ".fa-globe");
+    }
+);
+
+QUnit.test(
+    "Partner IM status is displayed as thread icon in top bar of channels of type 'chat'",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const [resPartnerId1, resPartnerId2, resPartnerId3, resPartnerId4] = pyEnv[
+            "res.partner"
+        ].create([
+            { im_status: "online", name: "Michel Online" },
+            { im_status: "offline", name: "Jacqueline Offline" },
+            { im_status: "away", name: "Nabuchodonosor Away" },
+            { im_status: "im_partner", name: "Robert Fired" },
+        ]);
+        pyEnv["mail.channel"].create([
+            {
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId1 }],
+                ],
+                channel_type: "chat",
+            },
+            {
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId2 }],
+                ],
+                channel_type: "chat",
+            },
+            {
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId3 }],
+                ],
+                channel_type: "chat",
+            },
+            {
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: resPartnerId4 }],
+                ],
+                channel_type: "chat",
+            },
+            {
+                channel_member_ids: [
+                    [0, 0, { partner_id: pyEnv.currentPartnerId }],
+                    [0, 0, { partner_id: TEST_USER_IDS.partnerRootId }],
+                ],
+                channel_type: "chat",
+            },
+        ]);
+        const { click, openDiscuss } = await start();
+        await openDiscuss();
+        await click(".o-mail-category-item:contains('Michel Online')");
+        assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread-icon-online");
+        await click(".o-mail-category-item:contains('Jacqueline Offline')");
+        assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread-icon-offline");
+        await click(".o-mail-category-item:contains('Nabuchodonosor Away')");
+        assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread-icon-away");
+        await click(".o-mail-category-item:contains('Robert Fired')");
+        assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread-icon-unknown");
+        await click(".o-mail-category-item:contains('OdooBot')");
+        assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread-icon-bot");
+    }
+);
+
+QUnit.test(
+    "'Users' thread icon is displayed in top bar of channels of type 'group'",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({
+            channel_type: "group",
+        });
+        const { openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        assert.containsOnce(target, ".fa-users");
     }
 );

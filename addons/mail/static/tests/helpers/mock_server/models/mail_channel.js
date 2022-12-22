@@ -773,7 +773,7 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
             if (member.partner_id) {
                 const [partner] = this.pyEnv["res.partner"].searchRead(
                     [["id", "=", member.partner_id[0]]],
-                    { fields: ["id", "name", "im_status"] }
+                    { fields: ["id", "name", "im_status"], context: { active_test: false } }
                 );
                 persona = {
                     partner: {
