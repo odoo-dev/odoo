@@ -9,6 +9,7 @@ import { reactive } from "@odoo/owl";
 
 import { RtcSession } from "./rtc_session_model";
 import { createLocalId } from "../core/thread_model.create_local_id";
+import { debounce } from "@web/core/utils/timing";
 
 const TRANSCEIVER_ORDER = ["audio", "video"];
 const PEER_NOTIFICATION_WAIT_DELAY = 50;
@@ -44,8 +45,8 @@ export class Rtc {
             logs: new Map(),
             sendUserVideo: false,
             sendDisplay: false,
+            updateAndBroadcastDebounce: undefined,
             _isNotifyPeersRPCInProgress: false,
-            _debounceIds: new Map(),
             _peerNotificationsToSend: new Map(),
             _audioTrack: undefined,
             _videoTrack: undefined,
@@ -491,22 +492,6 @@ export class Rtc {
 
     /**
      * @private
-     */
-    _debounce(key, f, delay) {
-        const debounceId = this.state._debounceIds.get(key);
-        if (debounceId) {
-            browser.clearTimeout(debounceId);
-        }
-        this.state._debounceIds.set(
-            key,
-            browser.setTimeout(() => {
-                f();
-            }, delay)
-        );
-    }
-
-    /**
-     * @private
      * @param {RTCPeerConnection} peerConnection
      * @param {String} trackKind
      * @returns {RTCRtpTransceiver} the transceiver used for this trackKind.
@@ -942,11 +927,8 @@ export class Rtc {
             clearTimeout(timeoutId);
         }
         this.state._fallBackTimeouts.clear();
-        for (const timeoutId of this.state._debounceIds.values()) {
-            clearTimeout(timeoutId);
-        }
-        this.state._debounceIds.clear();
-
+        this.state.updateAndBroadcastDebounce?.cancel();
+        this.state.updateAndBroadcastDebounce = undefined;
         this.state._disconnectAudioMonitor?.();
         this.state._audioTrack?.stop();
         this.state._videoTrack?.stop();
@@ -1126,25 +1108,21 @@ export class Rtc {
      */
     _updateAndBroadcast(rtcSession, data) {
         Object.assign(rtcSession, data);
-        this._debounce(
-            "_updateAndBroadcast",
-            async () => {
-                await this.rpc(
-                    "/mail/rtc/session/update_and_broadcast",
-                    {
-                        session_id: rtcSession.id,
-                        values: {
-                            is_camera_on: rtcSession.isCameraOn,
-                            is_deaf: rtcSession.isDeaf,
-                            is_muted: rtcSession.isSelfMuted,
-                            is_screen_sharing_on: rtcSession.isScreenSharingOn,
-                        },
+        this.state.updateAndBroadcastDebounce = debounce(async () => {
+            await this.rpc(
+                "/mail/rtc/session/update_and_broadcast",
+                {
+                    session_id: rtcSession.id,
+                    values: {
+                        is_camera_on: rtcSession.isCameraOn,
+                        is_deaf: rtcSession.isDeaf,
+                        is_muted: rtcSession.isSelfMuted,
+                        is_screen_sharing_on: rtcSession.isScreenSharingOn,
                     },
-                    { silent: true }
-                );
-            },
-            3000
-        );
+                },
+                { silent: true }
+            );
+        }, 3000);
     }
 
     /**
