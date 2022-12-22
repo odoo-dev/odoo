@@ -501,6 +501,9 @@ export class Messaging {
                                 this.createNotificationMessage(message, channel)
                             );
                         }
+                        ChatWindow.insert(this.state, {
+                            threadLocalId: createLocalId("mail.channel", id),
+                        });
                     }
                     break;
                 case "mail.channel/leave":
