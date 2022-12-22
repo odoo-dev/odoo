@@ -107,3 +107,10 @@ QUnit.test("rendering without OdooBot has a request (accepted)", async function 
     await start();
     assert.strictEqual($(target).find(".o-mail-messaging-menu-counter").text(), "0");
 });
+
+QUnit.test("Is closed after clicking on new message", async function (assert) {
+    const { click } = await start();
+    await click(".o_menu_systray i[aria-label='Messages']");
+    await click(".o-mail-messaging-menu-new-message");
+    assert.containsNone(target, ".o-mail-messaging-menu");
+});
