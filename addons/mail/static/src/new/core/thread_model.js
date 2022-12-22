@@ -33,8 +33,6 @@ export class Thread {
     description;
     /** @type {import("@mail/new/core/follower_model").Follower[]} */
     followers = [];
-    /** @type {string} */
-    icon;
     isAdmin = false;
     isUnread = false;
     loadMore = true;

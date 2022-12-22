@@ -171,14 +171,12 @@ export class Messaging {
             model: "mail.box",
             name: _t("Inbox"),
             type: "mailbox",
-            icon: "fa-inbox",
         });
         this.state.discuss.starred = Thread.insert(this.state, {
             id: "starred",
             model: "mail.box",
             name: _t("Starred"),
             type: "mailbox",
-            icon: "fa-star-o",
             counter: 0,
         });
         this.state.discuss.history = Thread.insert(this.state, {
@@ -186,7 +184,6 @@ export class Messaging {
             model: "mail.box",
             name: _t("History"),
             type: "mailbox",
-            icon: "fa-history",
             counter: 0,
         });
         this.updateImStatusRegistration();
@@ -265,7 +262,6 @@ export class Messaging {
             name,
             type,
             isUnread,
-            icon: "fa-hashtag",
             description,
             serverData: serverData,
             canLeave,
