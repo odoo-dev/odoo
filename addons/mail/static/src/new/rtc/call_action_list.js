@@ -74,12 +74,6 @@ export class CallActionList extends Component {
     /**
      * @param {MouseEvent} ev
      */
-    onClickCamera(ev) {
-        this.rtc.toggleUserVideo();
-    }
-    /**
-     * @param {MouseEvent} ev
-     */
     async onClickDeafen(ev) {
         if (this.rtc.state.currentRtcSession.isDeaf) {
             this.rtc.undeafen();
@@ -116,12 +110,6 @@ export class CallActionList extends Component {
             return;
         }
         await this.rtc.leaveCall(this.props.thread.id);
-    }
-    /**
-     * @param {MouseEvent} ev
-     */
-    onClickScreen(ev) {
-        this.rtc.toggleScreenShare();
     }
     /**
      * @param {MouseEvent} ev

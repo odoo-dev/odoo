@@ -41,7 +41,7 @@
                         }"
                         t-att-aria-label="cameraButtonTitle"
                         t-att-title="cameraButtonTitle"
-                        t-on-click="onClickCamera">
+                        t-on-click="() => this.rtc.toggleVideoBroadcast('user-video')">
                         <div class="o-mail-call-action-list-buttonIconWrapper fa-stack" t-att-class="{ 'o-isSmall': isSmall }">
                             <i class="fa fa-video-camera fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendUserVideo }"/>
                         </div>
@@ -54,7 +54,7 @@
                         }"
                         t-att-aria-label="screenSharingButtonTitle"
                         t-att-title="screenSharingButtonTitle"
-                        t-on-click="onClickScreen">
+                        t-on-click="() => this.rtc.toggleVideoBroadcast('display')">
                         <div class="o-mail-call-action-list-buttonIconWrapper fa-stack" t-att-class="{ 'o-isSmall': isSmall }">
                             <i class="fa fa-desktop fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendDisplay }"/>
                         </div>

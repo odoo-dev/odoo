@@ -88,7 +88,7 @@ export class Rtc {
             if (!this.state.sendUserVideo) {
                 return;
             }
-            this.toggleUserVideo({ force: true });
+            this.toggleVideoBroadcast("user-video");
             void proxyBlur.useBlur;
         }).useBlur;
         const proxyVoiceActivation = reactive(this.userSettings, async () => {
@@ -294,20 +294,6 @@ export class Rtc {
         } else {
             await this.mute();
         }
-    }
-
-    /**
-     * toggles screen broadcasting to peers.
-     */
-    async toggleScreenShare() {
-        this._toggleVideoBroadcast({ type: "display" });
-    }
-
-    /**
-     * Toggles user video (eg: webcam) broadcasting to peers.
-     */
-    async toggleUserVideo() {
-        this._toggleVideoBroadcast({ type: "user-video" });
     }
 
     async undeafen() {
@@ -726,7 +712,7 @@ export class Rtc {
         this.soundEffects.play("channelJoin");
         await this._updateLocalAudioTrack(startWithAudio);
         if (startWithVideo) {
-            await this._toggleVideoBroadcast({ type: videoType });
+            await this.toggleVideoBroadcast(videoType);
         }
     }
 
@@ -1089,14 +1075,14 @@ export class Rtc {
     }
 
     /**
-     * @private
-     * @param {Object} trackOptions
+     * @param {string} type
+     * @param {boolean} [force]
      */
-    async _toggleVideoBroadcast(trackOptions) {
+    async toggleVideoBroadcast(type, force) {
         if (!this.state.channel.id) {
             return;
         }
-        await this._toggleLocalVideoTrack(trackOptions);
+        await this._toggleLocalVideoTrack(type, force);
         for (const [rtcSessionId, peerConnection] of this.state._peerConnections) {
             await this._updateRemoteTrack(peerConnection, "video", { rtcSessionId });
         }
@@ -1111,11 +1097,10 @@ export class Rtc {
 
     /**
      * @private
-     * @param {Object} param0
-     * @param {String} param0.type 'user-video' (eg: webcam) or 'display' (eg: screen sharing)
-     * @param {boolean} [param0.force]
+     * @param {String} type 'user-video' (eg: webcam) or 'display' (eg: screen sharing)
+     * @param {boolean} [force]
      */
-    async _toggleLocalVideoTrack({ type, force }) {
+    async _toggleLocalVideoTrack(type, force) {
         if (type === "user-video") {
             const sendUserVideo = force ?? !this.state.sendUserVideo;
             await this._updateLocalVideoTrack(type, sendUserVideo);
@@ -1241,7 +1226,7 @@ export class Rtc {
         const videoTrack = videoStream ? videoStream.getVideoTracks()[0] : undefined;
         if (videoTrack) {
             videoTrack.addEventListener("ended", async () => {
-                await this._toggleVideoBroadcast({ force: false, type });
+                await this.toggleVideoBroadcast(type, false);
             });
         }
         this.state._videoTrack = videoTrack;
