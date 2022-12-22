@@ -4,6 +4,9 @@ import { useMessaging } from "@mail/new/messaging_hook";
 
 import { Component } from "@odoo/owl";
 
+import { _t } from "@web/core/l10n/translation";
+import { sprintf } from "@web/core/utils/strings";
+
 export class ThreadIcon extends Component {
     static props = ["thread", "className?"];
     static template = "mail.thread_icon";
@@ -57,5 +60,34 @@ export class ThreadIcon extends Component {
 
     get thread() {
         return this.messaging.state.threads[this.props.thread.localId];
+    }
+
+    get titleText() {
+        switch (this.thread.type) {
+            case "channel":
+                if (this.thread.authorizedGroupFullName) {
+                    return sprintf(_t('Access restricted to group "%(group name)s"'), {
+                        "group name": this.thread.authorizedGroupFullName,
+                    });
+                } else {
+                    return _t("Public Channel");
+                }
+            case "chat":
+                switch (this.chatPartner.im_status) {
+                    case "online":
+                        return _t("Online");
+                    case "offline":
+                        return _t("Offline");
+                    case "away":
+                        return _t("Away");
+                    case "bot":
+                        return _t("Bot");
+                    default:
+                        return _t("No IM status available");
+                }
+            case "group":
+                return _t("Grouped Chat");
+        }
+        return "";
     }
 }
