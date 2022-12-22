@@ -1607,3 +1607,29 @@ QUnit.test(
         assert.verifySteps([]);
     }
 );
+
+QUnit.test("Channel is added to discuss after invitation", async function (assert) {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["mail.channel"].create({
+        name: "General",
+        channel_member_ids: [],
+    });
+    const userId = pyEnv["res.users"].create({ name: "Harry" });
+    const { env, openDiscuss } = await start({
+        services: {
+            notification: makeFakeNotificationService((message) => assert.step(message)),
+        },
+    });
+    await openDiscuss();
+    assert.containsNone(target, ".o-mail-category-item:contains(General)");
+    await afterNextRender(() => {
+        env.services.orm.call("mail.channel", "add_members", [[channelId]], {
+            partner_ids: [pyEnv.currentPartnerId],
+            context: {
+                mockedUserId: userId,
+            },
+        });
+    });
+    assert.containsOnce(target, ".o-mail-category-item:contains(General)");
+    assert.verifySteps(["You have been invited to #General"]);
+});

@@ -26,7 +26,7 @@ Model({
                 "notification",
                 this._handleNotifications
             );
-            this.env.services['bus_service'].start();
+            this.env.services["bus_service"].start();
         },
         /**
          * @private
@@ -116,8 +116,6 @@ Model({
                             }
                             return;
                         }
-                        case "mail.channel/joined":
-                            return this._handleNotificationChannelJoined(message.payload);
                         case "mail.channel/last_interest_dt_changed":
                             return this._handleNotificationChannelLastInterestDateTimeChanged(
                                 message.payload

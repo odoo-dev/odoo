@@ -267,10 +267,6 @@ export class Messaging {
         const isUnread = last_message_id !== seen_message_id;
         const type = channel.channel_type;
         const channelType = serverData.channel.channel_type;
-        const canLeave =
-            (channelType === "channel" || channelType === "group") &&
-            !serverData.message_needaction_counter &&
-            !serverData.group_based_subscription;
         const isAdmin = channelType !== "group" && serverData.create_uid === this.state.user.uid;
         const thread = Thread.insert(this.state, {
             id,
@@ -280,7 +276,6 @@ export class Messaging {
             isUnread,
             description,
             serverData: serverData,
-            canLeave,
             isAdmin,
             uuid,
             authorizedGroupFullName,
@@ -572,6 +567,24 @@ export class Messaging {
                         }
                     }
                     break;
+                case "mail.channel/joined": {
+                    const { channel, invited_by_user_id: invitedByUserId } = notif.payload;
+                    const thread = Thread.insert(this.state, {
+                        ...channel,
+                        model: "mail.channel",
+                        serverData: {
+                            channel: channel.channel,
+                        },
+                        type: channel.channel.channel_type,
+                    });
+                    if (invitedByUserId !== this.state.user.uid) {
+                        this.notification.add(
+                            sprintf(_t("You have been invited to #%s"), thread.displayName),
+                            { type: "info" }
+                        );
+                    }
+                    break;
+                }
                 case "mail.channel/transient_message":
                     return this.createTransientMessage(
                         Object.assign(notif.payload, { body: markup(notif.payload.body) })
