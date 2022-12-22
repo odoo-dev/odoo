@@ -41,6 +41,16 @@ export class MessagingMenu extends Component {
 
     openDiscussion(threadLocalId) {
         this.messaging.openDiscussion(threadLocalId);
+        this.close();
+
+    }
+
+    onClickNewMessage() {
+        this.messaging.openNewMessageChatWindow();
+        this.close();
+    }
+
+    close() {
         // hack: click on window to close dropdown, because we use a dropdown
         // without dropdownitem...
         document.body.click();

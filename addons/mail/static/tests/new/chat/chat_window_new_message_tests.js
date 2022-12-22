@@ -143,6 +143,7 @@ QUnit.test(
         );
 
         // open channel-2
+        await click(".o_menu_systray i[aria-label='Messages']");
         await click(".o-mail-notification-item:nth-child(2)");
         assert.containsN(target, ".o-mail-chat-window", 3);
 
