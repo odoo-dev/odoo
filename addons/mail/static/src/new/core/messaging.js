@@ -585,6 +585,16 @@ export class Messaging {
                     }
                     break;
                 }
+                case "mail.channel/legacy_insert":
+                    Thread.insert(this.state, {
+                        ...notif.payload,
+                        model: "mail.channel",
+                        serverData: {
+                            channel: notif.payload.channel,
+                        },
+                        type: notif.payload.channel.channel_type,
+                    });
+                    break;
                 case "mail.channel/transient_message":
                     return this.createTransientMessage(
                         Object.assign(notif.payload, { body: markup(notif.payload.body) })
