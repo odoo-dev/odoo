@@ -263,3 +263,26 @@ QUnit.test("chat window: close on ESCAPE", async function (assert) {
     assert.containsNone(target, ".o-mail-chat-window");
     assert.verifySteps(["rpc:channel_fold/closed"]);
 });
+
+QUnit.test(
+    "Close composer suggestions in chat window with ESCAPE does not also close the chat window",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId1 = pyEnv["res.partner"].create({
+            email: "testpartner@odoo.com",
+            name: "TestPartner",
+        });
+        pyEnv["res.users"].create({ partner_id: resPartnerId1 });
+        pyEnv["mail.channel"].create({
+            name: "general",
+            channel_member_ids: [
+                [0, 0, { partner_id: pyEnv.currentPartnerId, is_minimized: true }],
+                [0, 0, { partner_id: resPartnerId1 }],
+            ],
+        });
+        const { insertText } = await start();
+        await insertText(".o-mail-composer-textarea", "@");
+        await afterNextRender(() => triggerHotkey("Escape"));
+        assert.containsOnce(target, ".o-mail-chat-window");
+    }
+);
