@@ -1,8 +1,8 @@
 /* @odoo-module */
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 
-import { getFixture } from "@web/../tests/helpers/utils";
+import { getFixture, triggerHotkey } from "@web/../tests/helpers/utils";
 
 let target;
 
@@ -38,4 +38,18 @@ QUnit.test("search emoji from keywords with special regex character", async func
     await click("i[aria-label='Emojis']");
     await insertText("input[placeholder='Search for an emoji']", "(blood");
     assert.containsOnce(target, ".o-emoji[data-codepoints='🆎']");
+});
+
+QUnit.test("Press Escape in emoji picker closes the emoji picker", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
+    const { click, openDiscuss } = await start({
+        discuss: {
+            context: { active_id: `mail.channel_${mailChannelId1}` },
+        },
+    });
+    await openDiscuss();
+    await click("i[aria-label='Emojis']");
+    await afterNextRender(() => triggerHotkey("Escape"));
+    assert.containsNone(target, ".o-mail-emoji-picker");
 });

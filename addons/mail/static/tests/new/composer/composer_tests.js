@@ -114,6 +114,23 @@ QUnit.test("add an emoji", async function (assert) {
     assert.strictEqual(target.querySelector(".o-mail-composer-textarea").value, "😤");
 });
 
+QUnit.test(
+    "Exiting emoji picker brings the focus back to the Composer textarea",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
+        const { click, openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        await click("i[aria-label='Emojis']");
+        await afterNextRender(() => triggerHotkey("Escape"));
+        assert.equal(target.querySelector(".o-mail-composer-textarea"), document.activeElement);
+    }
+);
+
 QUnit.test("add an emoji after some text", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "beyblade-room" });

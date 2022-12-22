@@ -22,6 +22,7 @@ import { escapeRegExp } from "@web/core/utils/strings";
  * @param {string} refName
  * @param {object} props
  * @param {function} [props.onSelect]
+ * @param {function} [props.onClose]
  */
 export function useEmojiPicker(refName, props) {
     const ref = useRef(refName);
@@ -63,7 +64,8 @@ export async function loadEmoji() {
 }
 
 export class EmojiPicker extends Component {
-    static props = ["onSelect", "close"];
+    static props = ["onSelect", "close", "onClose?"];
+    static defaultProps = { onClose: () => {} };
     static template = "mail.emoji_picker";
 
     setup() {
@@ -117,6 +119,14 @@ export class EmojiPicker extends Component {
         markEventHandled(ev, "emoji.selectEmoji");
     }
 
+    onKeydown(ev) {
+        if (ev.key === "Escape") {
+            this.props.close();
+            this.props.onClose();
+            ev.stopPropagation();
+        }
+    }
+
     getEmojis() {
         const search = this.state.searchStr;
         if (search.length > 1) {
@@ -149,6 +159,7 @@ export class EmojiPicker extends Component {
         if (codepoints) {
             this.props.onSelect(codepoints);
             this.props.close();
+            this.props.onClose();
         }
     }
 

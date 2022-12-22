@@ -94,6 +94,7 @@ export class Composer extends Component {
         });
         useEmojiPicker("emoji-picker", {
             onSelect: (str) => this.addEmoji(str),
+            onClose: () => this.state.autofocus++,
         });
         useEffect(
             (focus) => {
