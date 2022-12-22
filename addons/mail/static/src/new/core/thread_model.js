@@ -157,6 +157,10 @@ export class Thread {
                         Partner.insert(this._state, partner)
                     );
             }
+            this.canLeave =
+                ["channel", "group"].includes(this.type) &&
+                !this.message_needaction_counter &&
+                !this.serverData.group_based_subscription;
         }
         Composer.insert(this._state, { thread: this });
     }

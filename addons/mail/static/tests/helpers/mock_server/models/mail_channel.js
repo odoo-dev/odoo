@@ -41,7 +41,7 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
         if (args.model === "mail.channel" && args.method === "add_members") {
             const ids = args.args[0];
             const partner_ids = args.args[1] || args.kwargs.partner_ids;
-            return this._mockMailChannelAddMembers(ids, partner_ids);
+            return this._mockMailChannelAddMembers(ids, partner_ids, args.kwargs.context);
         }
         if (args.model === "mail.channel" && args.method === "channel_pin") {
             const ids = args.args[0];
@@ -183,22 +183,24 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
      * @param {integer[]} ids
      * @param {integer[]} partner_ids
      */
-    _mockMailChannelAddMembers(ids, partner_ids) {
+    _mockMailChannelAddMembers(ids, partner_ids, context = {}) {
         const [channel] = this.getRecords("mail.channel", [["id", "in", ids]]);
         const partners = this.getRecords("res.partner", [["id", "in", partner_ids]]);
         for (const partner of partners) {
-            this.pyEnv["mail.channel.member"].create({
-                channel_id: channel.id,
-                partner_id: partner.id,
-            });
             const body = `<div class="o_mail_notification">invited ${partner.name} to the channel</div>`;
             const message_type = "notification";
             const subtype_xmlid = "mail.mt_comment";
             this._mockMailChannelMessagePost(channel.id, { body, message_type, subtype_xmlid });
         }
+        for (const partner of partners) {
+            this.pyEnv["mail.channel.member"].create({
+                channel_id: channel.id,
+                partner_id: partner.id,
+            });
+        }
         this.pyEnv["bus.bus"]._sendone(channel, "mail.channel/joined", {
             channel: this._mockMailChannelChannelInfo([channel.id])[0],
-            invited_by_user_id: this.currentUserId,
+            invited_by_user_id: context.mockedUserId ?? this.currentUserId,
         });
     },
     /**
