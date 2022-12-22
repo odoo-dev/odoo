@@ -15,8 +15,12 @@ import { getFixture, makeDeferred, patchWithCleanup } from "@web/../tests/helper
 import { doAction, getActionManagerServerData } from "@web/../tests/webclient/helpers";
 
 import { App, EventBus } from "@odoo/owl";
-import { registryNamesToCloneWithCleanup } from "@web/../tests/helpers/mock_env";
+import {
+    registryNamesToCloneWithCleanup,
+    clearRegistryWithCleanup,
+} from "@web/../tests/helpers/mock_env";
 import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
+import { browser } from "@web/core/browser/browser";
 const { afterNextRender } = App;
 
 // load emoji data once, when the test suite starts.
@@ -258,32 +262,99 @@ function getOpenFormView(openView) {
 //------------------------------------------------------------------------------
 
 /**
+ * Reset registries used by the messaging environment. Useful to create multiple
+ * web clients.
+ */
+function resetRegistries() {
+    const categories = [
+        "actions",
+        "main_components",
+        "services",
+        "systray",
+        "wowlToLegacyServiceMappers",
+    ];
+    for (const name of categories) {
+        clearRegistryWithCleanup(registry.category(name));
+    }
+}
+
+let tabs = [];
+registerCleanup(() => (tabs = []));
+/**
+ * Add an item to the "Switch Tab" dropdown. If it doesn't exist, create the
+ * dropdown and add the item afterwards.
+ *
+ * @param {HTMLElement} rootTarget Where to mount the dropdown menu.
+ * @param {HTMLElement} tabTarget Tab to switch to when clicking on the dropdown
+ * item.
+ */
+async function addSwitchTabDropdownItem(rootTarget, tabTarget) {
+    tabs.push(tabTarget);
+    const zIndexMainTab = 100000;
+    let dropdownDiv = rootTarget.querySelector(".o-mail-multi-tab-dropdown");
+    if (!dropdownDiv) {
+        dropdownDiv = document.createElement("div");
+        dropdownDiv.style.zIndex = zIndexMainTab + 1;
+        dropdownDiv.style.top = "10%";
+        dropdownDiv.style.right = "5%";
+        dropdownDiv.style.position = "absolute";
+        dropdownDiv.classList.add("dropdown");
+        dropdownDiv.classList.add("o-mail-multi-tab-dropdown");
+        dropdownDiv.innerHTML = `
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Switch Tab (${tabs.length})
+            </button>
+            <ul class="dropdown-menu"></ul>
+        `;
+        rootTarget.appendChild(dropdownDiv);
+    }
+    const tabIndex = tabs.length;
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    li.appendChild(a)
+    a.classList.add("dropdown-item");
+    a.innerText = `Tab ${tabIndex}`;
+    browser.addEventListener("click", (ev) => {
+        const link = ev.target.closest(".dropdown-item");
+        if (a.isEqualNode(link)) {
+            tabs.forEach((tab) => (tab.style.zIndex = 0));
+            tabTarget.style.zIndex = zIndexMainTab;
+            dropdownDiv.querySelector(".dropdown-toggle").innerText = `Switch Tab (${tabIndex})`;
+        }
+    });
+    dropdownDiv.querySelector(".dropdown-menu").appendChild(li);
+}
+
+/**
  * Main function used to make a mocked environment with mocked messaging env.
  *
  * @param {Object} [param0={}]
+ * @param {boolean} [param0.asTab] Whether or not the resulting WebClient should
+ * be considered as a separate tab.
  * @param {Object} [param0.serverData] The data to pass to the webClient
- * @param {Object} [param0.discuss={}] provide data that is passed to the discuss action.
+ * @param {Object} [param0.discuss={}] provide data that is passed to the
+ * discuss action.
  * @param {Object} [param0.legacyServices]
  * @param {Object} [param0.services]
  * @param {function} [param0.mockRPC]
- * @param {boolean} [param0.hasTimeControl=false] if set, all flow of time
- *   with `messaging.browser.setTimeout` are fully controlled by test itself.
+ * @param {boolean} [param0.hasTimeControl=false] if set, all flow of time with
+ *   `messaging.browser.setTimeout` are fully controlled by test itself.
  * @param {integer} [param0.loadingBaseDelayDuration=0]
- * @param {Deferred|Promise} [param0.messagingBeforeCreationDeferred=Promise.resolve()]
- *   Deferred that let tests block messaging creation and simulate resolution.
- *   Useful for testing working components when messaging is not yet created.
+ * @param {Deferred|Promise}
+ *   [param0.messagingBeforeCreationDeferred=Promise.resolve()] Deferred that
+ *   let tests block messaging creation and simulate resolution. Useful for
+ *   testing working components when messaging is not yet created.
  * @param {string} [param0.waitUntilMessagingCondition='initialized'] Determines
- *   the condition of messaging when this function is resolved.
- *   Supported values: ['none', 'created', 'initialized'].
+ *   the condition of messaging when this function is resolved. Supported
+ *   values: ['none', 'created', 'initialized'].
  *   - 'none': the function resolves regardless of whether messaging is created.
  *   - 'created': the function resolves when messaging is created, but
  *     regardless of whether messaging is initialized.
  *   - 'initialized' (default): the function resolves when messaging is
- *     initialized.
- *   To guarantee messaging is not created, test should pass a pending deferred
- *   as param of `messagingBeforeCreationDeferred`. To make sure messaging is
- *   not initialized, test should mock RPC `mail/init_messaging` and block its
- *   resolution.
+ *     initialized. To guarantee messaging is not created, test should pass a
+ *     pending deferred as param of `messagingBeforeCreationDeferred`. To make
+ *     sure messaging is not initialized, test should mock RPC
+ *     `mail/init_messaging` and block its resolution.
  * @throws {Error} in case some provided parameters are wrong, such as
  *   `waitUntilMessagingCondition`.
  * @returns {Object}
@@ -296,7 +367,15 @@ async function start(param0 = {}) {
     });
     const { discuss = {}, hasTimeControl, waitUntilMessagingCondition = "initialized" } = param0;
     const advanceTime = hasTimeControl ? getAdvanceTime() : undefined;
-    const target = param0["target"] || getFixture();
+    let target = param0["target"] || getFixture();
+    if (param0.asTab) {
+        resetRegistries();
+        const rootTarget = target;
+        target = document.createElement("div");
+        target.style.width = "100%";
+        rootTarget.appendChild(target);
+        addSwitchTabDropdownItem(rootTarget, target);
+    }
     // make qunit fixture in visible range,
     // so that features like IntersectionObserver work as expected
     target.style.position = "absolute";
@@ -348,9 +427,11 @@ async function start(param0 = {}) {
         await webClient.env.services.messaging.modelManager.messagingInitializedPromise;
         webClient.env.services.messaging.modelManager.destroy();
         delete webClient.env.services.messaging;
-        delete owl.Component.env.services.messaging;
-        delete owl.Component.env[wowlServicesSymbol].messaging;
-        delete owl.Component.env;
+        if (owl.Component.env) {
+            delete owl.Component.env.services.messaging;
+            delete owl.Component.env[wowlServicesSymbol].messaging;
+            delete owl.Component.env;
+        }
     });
     const openView = async (action, options) => {
         action["type"] = action["type"] || "ir.actions.act_window";
@@ -369,6 +450,7 @@ async function start(param0 = {}) {
         openView,
         openFormView: getOpenFormView(openView),
         pyEnv,
+        target,
         webClient,
     };
 }

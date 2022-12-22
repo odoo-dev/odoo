@@ -11,6 +11,7 @@ import {
     nextTick,
     patchWithCleanup,
     triggerEvent,
+    triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
@@ -1633,3 +1634,22 @@ QUnit.test("Channel is added to discuss after invitation", async function (asser
     assert.containsOnce(target, ".o-mail-category-item:contains(General)");
     assert.verifySteps(["You have been invited to #General"]);
 });
+
+QUnit.test(
+    "Chat is added to discuss on other tab that the one that joined",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const resPartnerId = pyEnv["res.partner"].create({ name: "Jerry Golay" });
+        pyEnv["res.users"].create({ partner_id: resPartnerId });
+        const tab1 = await start({ asTab: true });
+        const tab2 = await start({ asTab: true });
+        await tab1.openDiscuss();
+        await tab2.openDiscuss();
+        await tab1.click(".o-mail-category-chat .o-mail-category-add-button");
+        await tab1.insertText(".o-mail-channel-selector-input", "Jer");
+        await tab1.click(".o-mail-channel-selector-suggestion");
+        await afterNextRender(() => triggerHotkey("Enter"));
+        assert.containsOnce(tab1.target, ".o-mail-category-item:contains(Jerry Golay)");
+        assert.containsOnce(tab2.target, ".o-mail-category-item:contains(Jerry Golay)");
+    }
+);

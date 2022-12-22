@@ -381,6 +381,10 @@ patch(MockServer.prototype, "mail/models/mail_channel", {
             channel_type: "chat",
             name: partners.map((partner) => partner.name).join(", "),
         });
+        this._mockMailChannel_broadcast(
+            id,
+            partners.map(({ id }) => id)
+        );
         return this._mockMailChannelChannelInfo([id])[0];
     },
     /**
