@@ -18,11 +18,6 @@
                 </t>
             </t>
             <div t-elif="thread.type === 'group'" class="o-mail-chatwindow-icon fa fa-fw fa-users" title="Grouped Chat"/>
-            <t t-elif="thread.mailbox">
-                <div t-if="thread.mailbox === messaging.inbox" class="o-mail-chatwindow-icon-mailboxInbox fa fa-fw fa-inbox"/>
-                <div t-elif="thread.mailbox === messaging.starred" class="o-mail-chatwindow-icon-mailboxStarred fa fa-fw fa-star-o"/>
-                <div t-elif="thread.mailbox === messaging.history" class="o-mail-chatwindow-icon-mailboxHistory fa fa-fw fa-history"/>
-            </t>
         </div>
     </t>
 
