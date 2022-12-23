@@ -143,6 +143,25 @@ export class Message extends Component {
         return Boolean(!this.message.isTransient && this.message.resId);
     }
 
+    /**
+     * Determines whether clicking on the author's avatar opens a chat with the
+     * author.
+     *
+     * @returns {boolean}
+     */
+    get hasOpenChatFeature() {
+        if (!this.props.hasActions) {
+            return false;
+        }
+        if (!this.message.author) {
+            return false;
+        }
+        if (this.message.isAuthoredByCurrentUser) {
+            return false;
+        }
+        return this.thread.chatPartnerId !== this.message.author.id;
+    }
+
     get isAlignedRight() {
         return Boolean(
             this.env.inChatWindow && this.user.partnerId === this.props.message.author.id
@@ -218,7 +237,7 @@ export class Message extends Component {
     }
 
     openChatAvatar() {
-        if (this.message.author.isCurrentUser) {
+        if (!this.hasOpenChatFeature) {
             return;
         }
         this.messaging.openChat({ partnerId: this.message.author.id });
