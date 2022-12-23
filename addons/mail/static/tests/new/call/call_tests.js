@@ -25,7 +25,7 @@ QUnit.test("basic rendering", async function (assert) {
     assert.containsOnce(target, ".o-mail-call-participant-card-overlay:contains(Mitchell Admin)");
     assert.containsOnce(target, ".o-mail-call-action-list");
     assert.containsN(target, ".o-mail-call-action-list button", 6);
-    assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Unmute']");
+    assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Unmute']"); // FIXME depends on current browser navigation
     assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Deafen']");
     assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Turn camera on']");
     assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Share screen']");

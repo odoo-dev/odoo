@@ -36,7 +36,7 @@ export class CallActionList extends Component {
         }
     }
     get cameraButtonTitle() {
-        if (this.rtc.state.sendUserVideo) {
+        if (this.rtc.state.sendCamera) {
             return _t("Stop camera");
         } else {
             return _t("Turn camera on");
@@ -57,7 +57,7 @@ export class CallActionList extends Component {
         }
     }
     get screenSharingButtonTitle() {
-        if (this.rtc.state.sendDisplay) {
+        if (this.rtc.state.sendScreen) {
             return _t("Stop screen sharing");
         } else {
             return _t("Share screen");
@@ -127,8 +127,6 @@ export class CallActionList extends Component {
         if (this.rtc.state.hasPendingRtcRequest) {
             return;
         }
-        await this.rtc.toggleCall(this.props.thread.id, {
-            startWithVideo: true,
-        });
+        await this.rtc.toggleCall(this.props.thread.id, true);
     }
 }

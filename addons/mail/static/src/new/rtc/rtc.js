@@ -23,8 +23,45 @@ const VIDEO_CONFIG = {
 };
 const INVALID_ICE_CONNECTION_STATES = new Set(["disconnected", "failed", "closed"]);
 const IS_CLIENT_RTC_COMPATIBLE = Boolean(window.RTCPeerConnection && window.MediaStream);
+const DEFAULT_ICE_SERVERS = [
+    { urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"] },
+];
 
 let tmpId = 0;
+
+/**
+ * Returns a string representation of a data channel for logging and
+ * debugging purposes.
+ *
+ * @param {RTCDataChannel} dataChannel
+ * @returns string
+ */
+function serializeRTCDataChannel(data) {
+    const toLog = [
+        "binaryType",
+        "bufferedAmount",
+        "bufferedAmountLowThreshold",
+        "id",
+        "label",
+        "maxPacketLifeTime",
+        "maxRetransmits",
+        "negotiated",
+        "ordered",
+        "protocol",
+        "readyState",
+    ];
+    return JSON.stringify(Object.fromEntries(toLog.map((p) => [p, data[p]])));
+}
+
+/**
+ * @param {RTCPeerConnection} peerConnection
+ * @param {String} trackKind
+ * @returns {RTCRtpTransceiver} the transceiver used for this trackKind.
+ */
+function getTransceiver(peerConnection, trackKind) {
+    const transceivers = peerConnection.getTransceivers();
+    return transceivers[TRANSCEIVER_ORDER.indexOf(trackKind)];
+}
 
 export class Rtc {
     constructor(env, messaging, notification, rpc, soundEffects, userSettings) {
@@ -39,115 +76,104 @@ export class Rtc {
             hasPendingRtcRequest: false,
             currentRtcSession: undefined,
             channel: undefined,
-            iceServers: [
-                { urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"] },
-            ],
+            iceServers: DEFAULT_ICE_SERVERS,
             logs: new Map(),
-            sendUserVideo: false,
-            sendDisplay: false,
+            sendCamera: false,
+            sendScreen: false,
             updateAndBroadcastDebounce: undefined,
-            _isNotifyPeersRPCInProgress: false,
-            _peerNotificationsToSend: new Map(),
-            _audioTrack: undefined,
-            _videoTrack: undefined,
+            pendingNotifyPeers: false,
+            peerNotificationsToSend: new Map(),
+            audioTrack: undefined,
+            videoTrack: undefined,
             /**
              * Object { rtcSessionId: dataChannel<RTCDataChannel> }
              * Contains the RTCDataChannels with the other rtc sessions.
              */
-            _dataChannels: new Map(),
+            dataChannels: new Map(),
             /**
              * callback to properly end the audio monitoring.
              * If set it indicates that we are currently monitoring the local
              * audioTrack for the voice activation feature.
              */
-            _disconnectAudioMonitor: undefined,
+            disconnectAudioMonitor: undefined,
             /**
              * Object { rtcSessionId: timeoutId<Number> }
              * Contains the timeoutIds of the reconnection attempts.
              */
-            _fallBackTimeouts: new Map(),
+            recoverTimeouts: new Map(),
             /**
              * Set of rtcSessionIds, used to track which calls are outgoing,
              * which is used when attempting to recover a failed peer connection by
              * inverting the call direction.
              */
-            _outGoingCallSessionIds: new Set(),
+            outgoingSessionIds: new Set(),
             /**
              * Object { rtcSessionId: peerConnection<RTCPeerConnection> }
              * Contains the RTCPeerConnection established with the other rtc sessions.
              * Exposing this field and keeping references to closed peer connections may lead
              * to difficulties reconnecting to the same peer.
              */
-            _peerConnections: new Map(),
-            /**
-             *  timeoutId for the push to talk release delay.
-             */
-            _pushToTalkTimeoutId: undefined,
+            peerConnections: new Map(),
+            pushToTalkReleaseTimeout: undefined,
         });
         // discuss refactor: use observe util when available
         const proxyBlur = reactive(this.userSettings, () => {
-            if (!this.state.sendUserVideo) {
+            if (!this.state.sendCamera) {
                 return;
             }
-            this.toggleVideoBroadcast("user-video");
+            this.toggleVideoBroadcast("camera");
             void proxyBlur.useBlur;
         }).useBlur;
         const proxyVoiceActivation = reactive(this.userSettings, async () => {
-            await this._updateVoiceActivation();
+            await this.updateVoiceActivation();
             void proxyVoiceActivation.voiceActivationThreshold;
         }).voiceActivationThreshold;
         const proxyPushToTalk = reactive(this.userSettings, async () => {
-            await this._updateVoiceActivation();
+            await this.updateVoiceActivation();
             void proxyPushToTalk.usePushToTalk;
         }).usePushToTalk;
         const proxyAudioInputDevice = reactive(this.userSettings, async () => {
-            this._updateLocalAudioTrack();
+            this.resetAudioTrack();
             void proxyAudioInputDevice.audioInputDeviceId;
         }).audioInputDeviceId;
 
         browser.addEventListener("keydown", (ev) => {
-            if (!this.state.channel) {
-                return;
-            }
-            if (this.userSettings.isRegisteringKey) {
-                return;
-            }
-            if (!this.userSettings.usePushToTalk || !this.userSettings.isPushToTalkKey(ev)) {
-                return;
-            }
-            if (this.state._pushToTalkTimeoutId) {
-                browser.clearTimeout(this.state._pushToTalkTimeoutId);
-            }
-            if (!this.state.currentRtcSession.isTalking && !this.state.currentRtcSession.isMute) {
-                this.soundEffects.play("pushToTalk", { volume: 0.3 });
-            }
-            this._setSoundBroadcast(true);
-        });
-        browser.addEventListener("keyup", (ev) => {
-            if (!this.state.channel) {
-                return;
-            }
             if (
+                !this.state.channel ||
+                this.userSettings.isRegisteringKey ||
                 !this.userSettings.usePushToTalk ||
-                !this.userSettings.isPushToTalkKey(ev, { ignoreModifiers: true })
+                !this.userSettings.isPushToTalkKey(ev)
             ) {
                 return;
             }
-            if (!this.state.currentRtcSession.isTalking) {
+            browser.clearTimeout(this.state.pushToTalkReleaseTimeout);
+            if (!this.state.currentRtcSession.isTalking && !this.state.currentRtcSession.isMute) {
+                this.soundEffects.play("push-to-talk-on", { volume: 0.3 });
+            }
+            this.setTalking(true);
+        });
+        browser.addEventListener("keyup", (ev) => {
+            if (
+                !this.state.channel ||
+                !this.userSettings.usePushToTalk ||
+                !this.userSettings.isPushToTalkKey(ev, { ignoreModifiers: true }) ||
+                !this.state.currentRtcSession.isTalking
+            ) {
                 return;
             }
             if (!this.state.currentRtcSession.isMute) {
-                this.soundEffects.play("pushToTalk", { volume: 0.3 });
+                this.soundEffects.play("push-to-talk-off", { volume: 0.3 });
             }
-            this.state._pushToTalkTimeoutId = browser.setTimeout(() => {
-                this._setSoundBroadcast(false);
-            }, this.userSettings.voiceActiveDuration || 0);
+            this.state.pushToTalkReleaseTimeout = browser.setTimeout(
+                () => this.setTalking(false),
+                this.userSettings.voiceActiveDuration || 0
+            );
         });
 
         // Disconnects the RTC session if the page is closed or reloaded.
         browser.addEventListener("pagehide", async (ev) => {
             if (this.state.channel && !ev.persisted) {
-                await this._performRpcLeaveCall(this.state.channel.id);
+                await this.performRpcLeaveCall(this.state.channel.id);
             }
         });
         /**
@@ -155,26 +181,26 @@ export class Rtc {
          * a regular interval to try to recover any connection that failed
          * to start.
          *
-         * This is distinct from this._recoverConnection which tries to restores
+         * This is distinct from this.recoverConnection which tries to restores
          * connection that were established but failed or timed out.
          */
         browser.setInterval(async () => {
             if (!this.state.currentRtcSession || !this.state.channel) {
                 return;
             }
-            await this._pingServer();
+            await this.pingServer();
             if (!this.state.currentRtcSession || !this.state.channel) {
                 return;
             }
-            this._callSessions();
-        }, 30000); // 30 seconds
+            this.callSessions();
+        }, 30_000);
     }
 
     /**
      * Notifies the server and does the cleanup of the current call.
      */
     async leaveCall(channelId = this.state.channel.id) {
-        await this._performRpcLeaveCall(channelId);
+        await this.performRpcLeaveCall(channelId);
         this.endCall(channelId);
     }
     //
@@ -186,13 +212,13 @@ export class Rtc {
         this.messaging.state.threads[createLocalId("mail.channel", channelId)].rtcInvitingSession =
             undefined;
         if (this.state.channel.id === channelId) {
-            this._reset();
-            this.soundEffects.play("channelLeave");
+            this.reset();
+            this.soundEffects.play("channel-leave");
         }
     }
 
     async deafen() {
-        await this._setDeafState(true);
+        await this.setDeaf(true);
         this.soundEffects.play("deafen");
     }
     /**
@@ -202,77 +228,188 @@ export class Rtc {
      */
     filterIncomingVideoTraffic(rtcSessionIds) {
         const ids = new Set(rtcSessionIds);
-        for (const [rtcSessionId, peerConnection] of this.state._peerConnections) {
-            const fullDirection = this.state._videoTrack ? "sendrecv" : "recvonly";
-            const limitedDirection = this.state._videoTrack ? "sendonly" : "inactive";
-            const transceiver = this._getTransceiver(peerConnection, "video");
+        for (const [rtcSessionId, peerConnection] of this.state.peerConnections) {
+            const fullDirection = this.state.videoTrack ? "sendrecv" : "recvonly";
+            const limitedDirection = this.state.videoTrack ? "sendonly" : "inactive";
+            const transceiver = getTransceiver(peerConnection, "video");
             if (!transceiver) {
                 continue;
             }
-            if (!ids.size || ids.has(rtcSessionId)) {
-                transceiver.direction = fullDirection;
-            } else {
-                transceiver.direction = limitedDirection;
-            }
+            transceiver.direction =
+                !ids.size || ids.has(rtcSessionId) ? fullDirection : limitedDirection;
         }
     }
 
     async handleNotification(rtcSessionId, content) {
         const { event, channelId, payload } = JSON.parse(content);
         const rtcSession = this.state.channel.rtcSessions.get(rtcSessionId);
-        if (!rtcSession || rtcSession.channelId !== this.state.channel.id) {
-            // does handle notifications targeting a different session
-            return;
-        }
-        if (!IS_CLIENT_RTC_COMPATIBLE) {
-            return;
-        }
         if (
-            !this.state._peerConnections.get(rtcSession.id) &&
-            (!channelId || !this.state.channel || channelId !== this.state.channel.id)
+            !rtcSession ||
+            rtcSession.channelId !== this.state.channel.id || // does handle notifications targeting a different session
+            !IS_CLIENT_RTC_COMPATIBLE ||
+            (!this.state.peerConnections.get(rtcSession.id) &&
+                (!channelId || !this.state.channel || channelId !== this.state.channel.id))
         ) {
             return;
         }
         switch (event) {
-            case "offer":
-                this._addLogEntry(rtcSessionId, `received notification: ${event}`, {
+            case "offer": {
+                this.addLog(rtcSessionId, `received notification: ${event}`, {
                     step: "received offer",
                 });
-                await this._handleRtcTransactionOffer(rtcSession.id, payload);
+                const peerConnection =
+                    this.state.peerConnections.get(rtcSessionId) ||
+                    this.createPeerConnection(rtcSessionId);
+                if (
+                    !peerConnection ||
+                    INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState) ||
+                    peerConnection.signalingState === "have-remote-offer"
+                ) {
+                    return;
+                }
+                const rtcSessionDescription = new window.RTCSessionDescription(payload.sdp);
+                try {
+                    await peerConnection.setRemoteDescription(rtcSessionDescription);
+                } catch (e) {
+                    this.addLog(
+                        rtcSessionId,
+                        "offer handling: failed at setting remoteDescription",
+                        {
+                            error: e,
+                        }
+                    );
+                    return;
+                }
+                await this.updateRemoteTrack(peerConnection, "audio", rtcSessionId);
+                await this.updateRemoteTrack(peerConnection, "video", rtcSessionId);
+
+                let answer;
+                try {
+                    answer = await peerConnection.createAnswer();
+                } catch (e) {
+                    this.addLog(rtcSessionId, "offer handling: failed at creating answer", {
+                        error: e,
+                    });
+                    return;
+                }
+                try {
+                    await peerConnection.setLocalDescription(answer);
+                } catch (e) {
+                    this.addLog(
+                        rtcSessionId,
+                        "offer handling: failed at setting localDescription",
+                        {
+                            error: e,
+                        }
+                    );
+                    return;
+                }
+
+                this.addLog(rtcSessionId, "sending notification: answer", {
+                    step: "sending answer",
+                });
+                await this.notifyPeers([rtcSessionId], "answer", {
+                    sdp: peerConnection.localDescription,
+                });
+                this.recoverConnection(rtcSessionId, RECOVERY_TIMEOUT, "standard answer timeout");
                 break;
-            case "answer":
-                this._addLogEntry(rtcSessionId, `received notification: ${event}`, {
+            }
+            case "answer": {
+                this.addLog(rtcSessionId, `received notification: ${event}`, {
                     step: "received answer",
                 });
-                await this._handleRtcTransactionAnswer(rtcSession.id, payload);
+                const peerConnection = this.state.peerConnections.get(rtcSessionId);
+                if (
+                    !peerConnection ||
+                    INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState) ||
+                    peerConnection.signalingState === "stable" ||
+                    peerConnection.signalingState === "have-remote-offer"
+                ) {
+                    return;
+                }
+                const rtcSessionDescription = new window.RTCSessionDescription(payload.sdp);
+                try {
+                    await peerConnection.setRemoteDescription(rtcSessionDescription);
+                } catch (e) {
+                    this.addLog(
+                        rtcSessionId,
+                        "answer handling: Failed at setting remoteDescription",
+                        {
+                            error: e,
+                        }
+                    );
+                    // ignored the transaction may have been resolved by another concurrent offer.
+                }
                 break;
-            case "ice-candidate":
-                await this._handleRtcTransactionICECandidate(rtcSession.id, payload);
+            }
+            case "ice-candidate": {
+                const peerConnection = this.state.peerConnections.get(rtcSessionId);
+                if (
+                    !peerConnection ||
+                    INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState)
+                ) {
+                    return;
+                }
+                const rtcIceCandidate = new window.RTCIceCandidate(payload.candidate);
+                try {
+                    await peerConnection.addIceCandidate(rtcIceCandidate);
+                } catch (error) {
+                    this.addLog(
+                        rtcSessionId,
+                        "ICE candidate handling: failed at adding the candidate to the connection",
+                        { error }
+                    );
+                    this.recoverConnection(
+                        rtcSessionId,
+                        RECOVERY_TIMEOUT,
+                        "failed at adding ice candidate"
+                    );
+                }
                 break;
+            }
             case "disconnect":
-                this._addLogEntry(rtcSessionId, `received notification: ${event}`, {
+                this.addLog(rtcSessionId, `received notification: ${event}`, {
                     step: " peer cleanly disconnected ",
                 });
-                this._removePeer(rtcSession.id);
+                this.removePeer(rtcSession.id);
                 break;
-            case "trackChange":
-                this._handleTrackChange(rtcSession, payload);
+            case "trackChange": {
+                const { isSelfMuted, isTalking, isSendingVideo, isDeaf } = payload.state;
+                if (payload.type === "audio") {
+                    if (!rtcSession.audioStream) {
+                        return;
+                    }
+                    Object.assign(rtcSession, {
+                        isSelfMuted,
+                        isTalking,
+                        isDeaf,
+                    });
+                }
+                if (payload.type === "video" && isSendingVideo === false) {
+                    /**
+                     * Since WebRTC "unified plan", the local track is tied to the
+                     * remote transceiver.sender and not the remote track. Therefore
+                     * when the remote track is 'ended' the local track is not 'ended'
+                     * but only 'muted'. This is why we do not stop the local track
+                     * until the peer is completely removed.
+                     */
+                    rtcSession.videoStream = undefined;
+                }
                 break;
+            }
         }
     }
 
     async mute() {
-        await this._setMuteState(true);
+        await this.setMute(true);
         this.soundEffects.play("mute");
     }
 
     /**
      * Leaves the current call if there is one, joins the call if the user was
      * not yet in it.
-     *
-     * @param {Object} [options]
      */
-    async toggleCall(channelId, options = {}) {
+    async toggleCall(channelId, startWithVideo) {
         this.state.hasPendingRtcRequest = true;
         const isActiveCall = Boolean(this.state.channel && this.state.channel.id === channelId);
         if (this.state.channel) {
@@ -282,7 +419,7 @@ export class Rtc {
             this.state.hasPendingRtcRequest = false;
             return;
         }
-        await this._joinCall(channelId, options);
+        await this.joinCall(channelId, startWithVideo);
         this.state.hasPendingRtcRequest = false;
     }
 
@@ -298,16 +435,16 @@ export class Rtc {
     }
 
     async undeafen() {
-        await this._setDeafState(false);
+        await this.setDeaf(false);
         this.soundEffects.play("undeafen");
     }
 
     async unmute() {
-        if (this.state._audioTrack) {
-            await this._setMuteState(false);
+        if (this.state.audioTrack) {
+            await this.setMute(false);
         } else {
             // if we don't have an audioTrack, we try to request it again
-            await this._updateLocalAudioTrack(true);
+            await this.resetAudioTrack(true);
         }
         this.soundEffects.play("unmute");
     }
@@ -317,7 +454,6 @@ export class Rtc {
     //----------------------------------------------------------------------
 
     /**
-     * @private
      * @param {number} rtcSessionId
      * @param {String} entry
      * @param {Object} [param2]
@@ -325,12 +461,7 @@ export class Rtc {
      * @param {String} [param2.step] current step of the flow
      * @param {String} [param2.state] current state of the connection
      */
-    _addLogEntry(rtcSessionId, entry, { error, step, state } = {}) {
-        /*
-        if (!this.modelManager.isDebug) {
-            return;
-        }
-        */
+    addLog(rtcSessionId, entry, { error, step, state } = {}) {
         if (!(rtcSessionId in this.state.logs)) {
             this.state.logs.set(rtcSessionId, { step: "", state: "", logs: [] });
         }
@@ -353,94 +484,122 @@ export class Rtc {
     }
 
     /**
-     * @private
      * @param {number} rtcSessionId
      */
-    async _callPeer(rtcSessionId) {
-        const peerConnection = this._createPeerConnection(rtcSessionId);
+    async callPeer(rtcSessionId) {
+        const peerConnection = this.createPeerConnection(rtcSessionId);
         for (const trackKind of TRANSCEIVER_ORDER) {
-            await this._updateRemoteTrack(peerConnection, trackKind, {
-                initTransceiver: true,
-                rtcSessionId,
-            });
+            await this.updateRemoteTrack(peerConnection, trackKind, rtcSessionId, true);
         }
-        this.state._outGoingCallSessionIds.add(rtcSessionId);
+        this.state.outgoingSessionIds.add(rtcSessionId);
     }
 
     /**
      * Call all the sessions that do not have an already initialized peerConnection.
-     *
-     * @private
      */
-    _callSessions() {
+    callSessions() {
         if (!this.state.channel.rtcSessions) {
             return;
         }
         for (const session of this.state.channel.rtcSessions.values()) {
-            if (session.id in this.state._peerConnections) {
-                continue;
-            }
-            if (session.id === this.state.currentRtcSession.id) {
+            if (
+                session.id in this.state.peerConnections ||
+                session.id === this.state.currentRtcSession.id
+            ) {
                 continue;
             }
             session.connectionState = "Not connected: sending initial RTC offer";
-            this._addLogEntry(session.id, "init call", { step: "init call" });
-            this._callPeer(session.id);
+            this.addLog(session.id, "init call", { step: "init call" });
+            this.callPeer(session.id);
         }
     }
 
     /**
      * Creates and setup a RTCPeerConnection.
      *
-     * @private
      * @param {number} rtcSessionId
      */
-    _createPeerConnection(rtcSessionId) {
+    createPeerConnection(rtcSessionId) {
         const peerConnection = new window.RTCPeerConnection({ iceServers: this.state.iceServers });
-        this._addLogEntry(rtcSessionId, `RTCPeerConnection created`, {
+        this.addLog(rtcSessionId, "RTCPeerConnection created", {
             step: "peer connection created",
         });
         peerConnection.onicecandidate = async (event) => {
             if (!event.candidate) {
                 return;
             }
-            await this._notifyPeers([rtcSessionId], {
-                event: "ice-candidate",
-                payload: { candidate: event.candidate },
+            await this.notifyPeers([rtcSessionId], "ice-candidate", {
+                candidate: event.candidate,
             });
         };
-        peerConnection.oniceconnectionstatechange = (event) => {
-            this._onICEConnectionStateChange(peerConnection.iceConnectionState, rtcSessionId);
+        peerConnection.oniceconnectionstatechange = async (event) => {
+            this.addLog(
+                rtcSessionId,
+                `ICE connection state changed: ${peerConnection.iceConnectionState}`,
+                {
+                    state: peerConnection.iceConnectionState,
+                }
+            );
+            const rtcSession = this.state.channel.rtcSessions.get(rtcSessionId);
+            if (!rtcSession) {
+                return;
+            }
+            rtcSession.connectionState = peerConnection.iceConnectionState;
+            switch (peerConnection.iceConnectionState) {
+                case "closed":
+                    this.removePeer(rtcSessionId);
+                    break;
+                case "failed":
+                case "disconnected":
+                    await this.recoverConnection(
+                        rtcSessionId,
+                        RECOVERY_DELAY,
+                        `ice connection ${peerConnection.iceConnectionState}`
+                    );
+                    break;
+            }
         };
-        peerConnection.onconnectionstatechange = (event) => {
-            this._onConnectionStateChange(peerConnection.connectionState, rtcSessionId);
+        peerConnection.onconnectionstatechange = async (event) => {
+            this.addLog(
+                rtcSessionId,
+                `connection state changed: ${peerConnection.connectionState}`
+            );
+            switch (peerConnection.connectionState) {
+                case "closed":
+                    this.removePeer(rtcSessionId);
+                    break;
+                case "failed":
+                case "disconnected":
+                    await this.recoverConnection(
+                        rtcSessionId,
+                        RECOVERY_DELAY,
+                        `connection ${peerConnection.connectionState}`
+                    );
+                    break;
+            }
         };
         peerConnection.onicecandidateerror = async (error) => {
-            this._addLogEntry(rtcSessionId, `ice candidate error`);
-            this._recoverConnection(rtcSessionId, {
-                delay: RECOVERY_TIMEOUT,
-                reason: "ice candidate error",
-            });
+            this.addLog(rtcSessionId, "ice candidate error");
+            this.recoverConnection(rtcSessionId, RECOVERY_TIMEOUT, "ice candidate error");
         };
         peerConnection.onnegotiationneeded = async (event) => {
             const offer = await peerConnection.createOffer();
             try {
                 await peerConnection.setLocalDescription(offer);
-            } catch (e) {
+            } catch (error) {
                 // Possibly already have a remote offer here: cannot set local description
-                this._addLogEntry(rtcSessionId, `couldn't setLocalDescription`, { error: e });
+                this.addLog(rtcSessionId, "couldn't setLocalDescription", { error });
                 return;
             }
-            this._addLogEntry(rtcSessionId, `sending notification: offer`, {
+            this.addLog(rtcSessionId, "sending notification: offer", {
                 step: "sending offer",
             });
-            await this._notifyPeers([rtcSessionId], {
-                event: "offer",
-                payload: { sdp: peerConnection.localDescription },
+            await this.notifyPeers([rtcSessionId], "offer", {
+                sdp: peerConnection.localDescription,
             });
         };
         peerConnection.ontrack = ({ transceiver, track }) => {
-            this._addLogEntry(rtcSessionId, `received ${track.kind} track`);
+            this.addLog(rtcSessionId, `received ${track.kind} track`);
             const rtcSession = this.state.channel.rtcSessions.get(rtcSessionId);
             const volume = this.userSettings.partnerVolumes.get(rtcSession.channelMember.partnerId);
             rtcSession?.updateStream(track, {
@@ -461,218 +620,41 @@ export class Rtc {
              * even when it is disabled on the sender-side.
              */
             try {
-                await this._notifyPeers([rtcSessionId], {
-                    event: "trackChange",
-                    type: "peerToPeer",
-                    payload: {
-                        type: "audio",
-                        state: {
-                            isTalking: this.state.currentRtcSession.isTalking,
-                            isSelfMuted: this.state.currentRtcSession.isSelfMuted,
-                        },
+                await this.notifyPeers([rtcSessionId], "trackChange", {
+                    type: "audio",
+                    state: {
+                        isTalking: this.state.currentRtcSession.isTalking,
+                        isSelfMuted: this.state.currentRtcSession.isSelfMuted,
                     },
                 });
             } catch (e) {
                 if (!(e instanceof DOMException) || e.name !== "OperationError") {
                     throw e;
                 }
-                this._addLogEntry(
+                this.addLog(
                     rtcSessionId,
-                    `failed to send on datachannel; dataChannelInfo: ${this._serializeRTCDataChannel(
+                    `failed to send on datachannel; dataChannelInfo: ${serializeRTCDataChannel(
                         dataChannel
                     )}`,
                     { error: e }
                 );
             }
         };
-        this.state._peerConnections.set(rtcSessionId, peerConnection);
-        this.state._dataChannels.set(rtcSessionId, dataChannel);
+        this.state.peerConnections.set(rtcSessionId, peerConnection);
+        this.state.dataChannels.set(rtcSessionId, dataChannel);
         return peerConnection;
     }
 
-    /**
-     * @private
-     * @param {RTCPeerConnection} peerConnection
-     * @param {String} trackKind
-     * @returns {RTCRtpTransceiver} the transceiver used for this trackKind.
-     */
-    _getTransceiver(peerConnection, trackKind) {
-        const transceivers = peerConnection.getTransceivers();
-        return transceivers[TRANSCEIVER_ORDER.indexOf(trackKind)];
-    }
-
-    /**
-     * @private
-     * @param {number} rtcSessionId
-     * @param {Object} param1
-     * @param {Object} param1.sdp Session Description Protocol
-     */
-    async _handleRtcTransactionAnswer(rtcSessionId, { sdp }) {
-        const peerConnection = this.state._peerConnections.get(rtcSessionId);
-        if (
-            !peerConnection ||
-            INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState) ||
-            peerConnection.signalingState === "stable"
-        ) {
-            return;
-        }
-        if (peerConnection.signalingState === "have-remote-offer") {
-            // we already have an offer
-            return;
-        }
-        const rtcSessionDescription = new window.RTCSessionDescription(sdp);
-        try {
-            await peerConnection.setRemoteDescription(rtcSessionDescription);
-        } catch (e) {
-            this._addLogEntry(
-                rtcSessionId,
-                "answer handling: Failed at setting remoteDescription",
-                {
-                    error: e,
-                }
-            );
-            // ignored the transaction may have been resolved by another concurrent offer.
-        }
-    }
-
-    /**
-     * @private
-     * @param {number} rtcSessionId
-     * @param {Object} param1
-     * @param {Object} param1.candidate RTCIceCandidateInit
-     */
-    async _handleRtcTransactionICECandidate(rtcSessionId, { candidate }) {
-        const peerConnection = this.state._peerConnections.get(rtcSessionId);
-        if (
-            !peerConnection ||
-            INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState)
-        ) {
-            return;
-        }
-        const rtcIceCandidate = new window.RTCIceCandidate(candidate);
-        try {
-            await peerConnection.addIceCandidate(rtcIceCandidate);
-        } catch (error) {
-            this._addLogEntry(
-                rtcSessionId,
-                "ICE candidate handling: failed at adding the candidate to the connection",
-                { error }
-            );
-            this._recoverConnection(rtcSessionId, {
-                delay: RECOVERY_TIMEOUT,
-                reason: "failed at adding ice candidate",
-            });
-        }
-    }
-
-    /**
-     * @private
-     * @param {number} rtcSessionId
-     * @param {Object} param1
-     * @param {Object} param1.sdp Session Description Protocol
-     */
-    async _handleRtcTransactionOffer(rtcSessionId, { sdp }) {
-        const peerConnection =
-            this.state._peerConnections.get(rtcSessionId) ||
-            this._createPeerConnection(rtcSessionId);
-
-        if (
-            !peerConnection ||
-            INVALID_ICE_CONNECTION_STATES.has(peerConnection.iceConnectionState)
-        ) {
-            return;
-        }
-        if (peerConnection.signalingState === "have-remote-offer") {
-            // we already have an offer
-            return;
-        }
-        const rtcSessionDescription = new window.RTCSessionDescription(sdp);
-        try {
-            await peerConnection.setRemoteDescription(rtcSessionDescription);
-        } catch (e) {
-            this._addLogEntry(rtcSessionId, "offer handling: failed at setting remoteDescription", {
-                error: e,
-            });
-            return;
-        }
-        await this._updateRemoteTrack(peerConnection, "audio", { rtcSessionId });
-        await this._updateRemoteTrack(peerConnection, "video", { rtcSessionId });
-
-        let answer;
-        try {
-            answer = await peerConnection.createAnswer();
-        } catch (e) {
-            this._addLogEntry(rtcSessionId, "offer handling: failed at creating answer", {
-                error: e,
-            });
-            return;
-        }
-        try {
-            await peerConnection.setLocalDescription(answer);
-        } catch (e) {
-            this._addLogEntry(rtcSessionId, "offer handling: failed at setting localDescription", {
-                error: e,
-            });
-            return;
-        }
-
-        this._addLogEntry(rtcSessionId, `sending notification: answer`, { step: "sending answer" });
-        await this._notifyPeers([rtcSessionId], {
-            event: "answer",
-            payload: { sdp: peerConnection.localDescription },
-        });
-        this._recoverConnection(rtcSessionId, {
-            delay: RECOVERY_TIMEOUT,
-            reason: "standard answer timeout",
-        });
-    }
-
-    /**
-     * @private
-     * @param {mail.rtc_session} rtcSession
-     * @param {Object} param1
-     * @param {String} param1.type 'audio' or 'video'
-     * @param {Object} param1.state
-     */
-    _handleTrackChange(rtcSession, { type, state }) {
-        const { isSelfMuted, isTalking, isSendingVideo, isDeaf } = state;
-        if (type === "audio") {
-            if (!rtcSession.audioStream) {
-                return;
-            }
-            Object.assign(rtcSession, {
-                isSelfMuted,
-                isTalking,
-                isDeaf,
-            });
-        }
-        if (type === "video" && isSendingVideo === false) {
-            /**
-             * Since WebRTC "unified plan", the local track is tied to the
-             * remote transceiver.sender and not the remote track. Therefore
-             * when the remote track is 'ended' the local track is not 'ended'
-             * but only 'muted'. This is why we do not stop the local track
-             * until the peer is completely removed.
-             */
-            rtcSession.videoStream = undefined;
-        }
-    }
-
-    /**
-     * @param {Object} param0
-     */
-    async _initSession({
+    async initSession({
         channel,
         iceServers,
         invitedPartners,
         rtcSessions,
         sessionId,
-        startWithAudio,
         startWithVideo,
-        videoType = "user-video",
     }) {
         // Initializing a new session implies closing the current session.
-        this._reset();
+        this.reset();
         this.state.channel = channel;
         this.state.channel.update({
             serverData: {
@@ -681,34 +663,43 @@ export class Rtc {
             },
         });
         this.state.currentRtcSession = this.messaging.state.rtcSessions.get(sessionId);
-        this.state.iceServers = iceServers || this.state.iceServers;
+        this.state.iceServers = iceServers || DEFAULT_ICE_SERVERS;
         const channelProxy = reactive(this.state.channel, () => {
             if (channel !== this.state.channel) {
                 throw new Error("channel has changed");
             }
             if (this.state.channel) {
-                this._onUpdateRtcSessions(channelProxy.rtcSessions);
+                if (
+                    this.state.channel &&
+                    !channelProxy.rtcSessions.has(this.state.currentRtcSession.id)
+                ) {
+                    // if the current RTC session is not in the channel sessions, this call is no longer valid.
+                    this.endCall();
+                    return;
+                }
+                for (const rtcSessionId of this.state.peerConnections.keys()) {
+                    if (!channelProxy.rtcSessions.has(rtcSessionId)) {
+                        this.addLog(rtcSessionId, "session removed from the server");
+                        this.removePeer(rtcSessionId);
+                    }
+                }
             }
             void channelProxy.rtcSessions.size;
         });
         this.state.channel.rtcInvitingSession = undefined;
         // discuss refactor: todo call channel.update below when availalbe and do the formatting in update
-        this._callSessions();
-        this.soundEffects.play("channelJoin");
-        await this._updateLocalAudioTrack(startWithAudio);
+        this.callSessions();
+        this.soundEffects.play("channel-join");
+        await this.resetAudioTrack();
         if (startWithVideo) {
-            await this.toggleVideoBroadcast(videoType);
+            await this.toggleVideoBroadcast("camera");
         }
     }
 
     /**
      * @param {number} channelId
-     * @param {Object} [param1]
-     * @param {boolean} [param1.startWithAudio] whether or not to start the call with the audio on
-     * @param {boolean} [param1.startWithVideo] whether or not to start the call with the video on
-     * @param {boolean} [param1.videoType] type of the video: 'user-video' or 'display'
      */
-    async _joinCall(channelId, { startWithAudio = true, startWithVideo = false, videoType } = {}) {
+    async joinCall(channelId, startWithVideo = false) {
         if (!IS_CLIENT_RTC_COMPATIBLE) {
             this.notification.add(_t("Your browser does not support webRTC."), { type: "warning" });
             return;
@@ -722,45 +713,29 @@ export class Rtc {
             },
             { silent: true }
         );
-        await this._initSession({
+        await this.initSession({
             channel,
             iceServers,
             invitedPartners,
             rtcSessions,
             sessionId,
-            startWithAudio,
             startWithVideo,
-            videoType,
         });
     }
 
     /**
-     * @private
      * @param {String[]} rtcSessionId
-     * @param {Object} param1
-     * @param {String} param1.event
-     * @param {Object} [param1.payload]
-     * @param {String} [param1.type] 'server' or 'peerToPeer',
-     *                 'peerToPeer' requires an active RTCPeerConnection
+     * @param {String} event
+     * @param {Object} [payload]
      */
-    async _notifyPeers(rtcSessionIds, { event, payload, type = "server" }) {
+    async notifyPeers(rtcSessionIds, event, payload) {
         if (!rtcSessionIds.length || !this.state.channel.id || !this.state.currentRtcSession) {
             return;
         }
-        if (type === "server") {
-            this.state._peerNotificationsToSend.set(++tmpId, {
-                channelId: this.state.channel.id,
-                event,
-                payload,
-                senderId: this.state.currentRtcSession.id,
-                rtcSessionIds,
-            });
-            await this._sendPeerNotifications();
-        }
-
-        if (type === "peerToPeer") {
+        if (event === "trackChange") {
+            // p2p
             for (const rtcSessionId of rtcSessionIds) {
-                const dataChannel = this.state._dataChannels.get(rtcSessionId);
+                const dataChannel = this.state.dataChannels.get(rtcSessionId);
                 if (!dataChannel || dataChannel.readyState !== "open") {
                     continue;
                 }
@@ -772,13 +747,20 @@ export class Rtc {
                     })
                 );
             }
+        } else {
+            // server
+            this.state.peerNotificationsToSend.set(++tmpId, {
+                channelId: this.state.channel.id,
+                event,
+                payload,
+                senderId: this.state.currentRtcSession.id,
+                rtcSessionIds,
+            });
+            await this.sendPeerNotifications();
         }
     }
 
-    /**
-     * Performs the rpc to leave the rtc call of the channel.
-     */
-    async _performRpcLeaveCall(channelId) {
+    async performRpcLeaveCall(channelId) {
         await this.rpc(
             "/mail/rtc/channel/leave_call",
             {
@@ -788,10 +770,7 @@ export class Rtc {
         );
     }
 
-    /**
-     * Pings the server to ensure this session is kept alive.
-     */
-    async _pingServer() {
+    async pingServer() {
         const { rtcSessions } = await this.rpc(
             "/mail/channel/ping",
             {
@@ -819,39 +798,33 @@ export class Rtc {
      * Attempts a connection recovery by closing and restarting the call
      * from the receiving end.
      *
-     * @private
      * @param {number} rtcSessionId
-     * @param {Object} [param1]
-     * @param {number} [param1.delay] in ms
-     * @param {string} [param1.reason]
+     * @param {number} [delay] in ms
      */
-    _recoverConnection(rtcSessionId, { delay = 0, reason = "" } = {}) {
-        if (this.state._fallBackTimeouts.get(rtcSessionId)) {
+    recoverConnection(rtcSessionId, delay = 0, reason = "") {
+        if (this.state.recoverTimeouts.get(rtcSessionId)) {
             return;
         }
-        this.state._fallBackTimeouts.set(
+        this.state.recoverTimeouts.set(
             rtcSessionId,
             browser.setTimeout(async () => {
-                this.state._fallBackTimeouts.delete(rtcSessionId);
-                const peerConnection = this.state._peerConnections.get(rtcSessionId);
-                if (!peerConnection || !this.state.channel.id) {
+                this.state.recoverTimeouts.delete(rtcSessionId);
+                const peerConnection = this.state.peerConnections.get(rtcSessionId);
+                if (
+                    !peerConnection ||
+                    !this.state.channel.id ||
+                    this.state.outgoingSessionIds.has(rtcSessionId) ||
+                    peerConnection.iceConnectionState === "connected"
+                ) {
                     return;
                 }
-                if (this.state._outGoingCallSessionIds.has(rtcSessionId)) {
-                    return;
-                }
-                if (peerConnection.iceConnectionState === "connected") {
-                    return;
-                }
-                this._addLogEntry(
+                this.addLog(
                     rtcSessionId,
                     `calling back to recover ${peerConnection.iceConnectionState} connection, reason: ${reason}`
                 );
-                await this._notifyPeers([rtcSessionId], {
-                    event: "disconnect",
-                });
-                this._removePeer(rtcSessionId);
-                this._callPeer(rtcSessionId);
+                await this.notifyPeers([rtcSessionId], "disconnect");
+                this.removePeer(rtcSessionId);
+                this.callPeer(rtcSessionId);
             }, delay)
         );
     }
@@ -859,39 +832,37 @@ export class Rtc {
     /**
      * Cleans up a peer by closing all its associated content and the connection.
      *
-     * @private
      * @param {number} rtcSessionId
      */
-    _removePeer(rtcSessionId) {
+    removePeer(rtcSessionId) {
         const rtcSession = this.state.channel.rtcSessions.get(rtcSessionId);
         if (rtcSession) {
             rtcSession.reset();
         }
-        const dataChannel = this.state._dataChannels.get(rtcSessionId);
+        const dataChannel = this.state.dataChannels.get(rtcSessionId);
         if (dataChannel) {
             dataChannel.close();
         }
-        this.state._dataChannels.delete(rtcSessionId);
-        const peerConnection = this.state._peerConnections.get(rtcSessionId);
+        this.state.dataChannels.delete(rtcSessionId);
+        const peerConnection = this.state.peerConnections.get(rtcSessionId);
         if (peerConnection) {
-            this._removeRemoteTracks(peerConnection);
+            this.removeRemoteTracks(peerConnection);
             peerConnection.close();
         }
-        this.state._peerConnections.delete(rtcSessionId);
-        browser.clearTimeout(this.state._fallBackTimeouts.get(rtcSessionId));
-        this.state._fallBackTimeouts.delete(rtcSessionId);
+        this.state.peerConnections.delete(rtcSessionId);
+        browser.clearTimeout(this.state.recoverTimeouts.get(rtcSessionId));
+        this.state.recoverTimeouts.delete(rtcSessionId);
 
-        this.state._outGoingCallSessionIds.delete(rtcSessionId);
-        this._addLogEntry(rtcSessionId, "peer removed", { step: "peer removed" });
+        this.state.outgoingSessionIds.delete(rtcSessionId);
+        this.addLog(rtcSessionId, "peer removed", { step: "peer removed" });
     }
 
     /**
      * Terminates the Transceivers of the peer connection.
      *
-     * @private
      * @param {RTCPeerConnection} peerConnection
      */
-    _removeRemoteTracks(peerConnection) {
+    removeRemoteTracks(peerConnection) {
         const RTCRtpSenders = peerConnection.getSenders();
         for (const sender of RTCRtpSenders) {
             try {
@@ -912,51 +883,49 @@ export class Rtc {
     /**
      * Resets the state of the model and cleanly ends all connections and
      * streams.
-     *
-     * @private
      */
-    _reset() {
-        for (const rtcSessionId of this.state._peerConnections.keys()) {
-            this._removePeer(rtcSessionId);
+    reset() {
+        for (const rtcSessionId of this.state.peerConnections.keys()) {
+            this.removePeer(rtcSessionId);
         }
-        this.state._peerConnections.clear();
-        for (const timeoutId of this.state._fallBackTimeouts.values()) {
+        this.state.peerConnections.clear();
+        for (const timeoutId of this.state.recoverTimeouts.values()) {
             clearTimeout(timeoutId);
         }
-        this.state._fallBackTimeouts.clear();
+        this.state.recoverTimeouts.clear();
         this.state.updateAndBroadcastDebounce?.cancel();
-        this.state.updateAndBroadcastDebounce = undefined;
-        this.state._disconnectAudioMonitor?.();
-        this.state._audioTrack?.stop();
-        this.state._videoTrack?.stop();
-        this.state._disconnectAudioMonitor = undefined;
-        this.state._dataChannels.clear();
-        this.state._outGoingCallSessionIds = new Set();
-        this.state._videoTrack = undefined;
-        this.state._audioTrack = undefined;
-        this.state._peerNotificationsToSend.clear();
-        this.state.currentRtcSession = undefined;
-        this.state.sendUserVideo = false;
-        this.state.sendDisplay = false;
-        this.state.channel = undefined;
+        this.state.disconnectAudioMonitor?.();
+        this.state.audioTrack?.stop();
+        this.state.videoTrack?.stop();
+        this.state.dataChannels.clear();
+        this.state.peerNotificationsToSend.clear();
         this.state.logs.clear();
+        Object.assign(this.state, {
+            updateAndBroadcastDebounce: undefined,
+            disconnectAudioMonitor: undefined,
+            outgoingSessionIds: new Set(),
+            videoTrack: undefined,
+            audioTrack: undefined,
+            currentRtcSession: undefined,
+            sendCamera: false,
+            sendScreen: false,
+            channel: undefined,
+        });
     }
 
     /**
      * Sends this peer notifications to send as soon as the last pending
      * sending finishes.
-     *
-     * @private
      */
-    async _sendPeerNotifications() {
-        if (this.state._isNotifyPeersRPCInProgress) {
+    async sendPeerNotifications() {
+        if (this.state.pendingNotifyPeers) {
             return;
         }
-        this.state._isNotifyPeersRPCInProgress = true;
+        this.state.pendingNotifyPeers = true;
         await new Promise((resolve) => setTimeout(resolve, PEER_NOTIFICATION_WAIT_DELAY));
         const ids = [];
         const notifications = [];
-        this.state._peerNotificationsToSend.forEach((peerNotification, id) => {
+        this.state.peerNotificationsToSend.forEach((peerNotification, id) => {
             ids.push(id);
             notifications.push([
                 peerNotification.senderId,
@@ -977,79 +946,47 @@ export class Rtc {
                 { silent: true }
             );
             for (const id of ids) {
-                this.state._peerNotificationsToSend.delete(id);
+                this.state.peerNotificationsToSend.delete(id);
             }
         } finally {
-            this.state._isNotifyPeersRPCInProgress = false;
-            if (this.state._peerNotificationsToSend.size > 0) {
-                this._sendPeerNotifications();
+            this.state.pendingNotifyPeers = false;
+            if (this.state.peerNotificationsToSend.size > 0) {
+                this.sendPeerNotifications();
             }
         }
     }
 
     /**
-     * Returns a string representation of a data channel for logging and
-     * debugging purposes.
-     *
-     * @private
-     * @param {RTCDataChannel} dataChannel
-     * @returns string
-     */
-    _serializeRTCDataChannel(dataChannel) {
-        const toLog = [
-            "binaryType",
-            "bufferedAmount",
-            "bufferedAmountLowThreshold",
-            "id",
-            "label",
-            "maxPacketLifeTime",
-            "maxRetransmits",
-            "negotiated",
-            "ordered",
-            "protocol",
-            "readyState",
-        ];
-        return JSON.stringify(Object.fromEntries(toLog.map((p) => [p, dataChannel[p]])));
-    }
-
-    /**
      * @param {Boolean} isDeaf
      */
-    async _setDeafState(isDeaf) {
-        this._updateAndBroadcast(this.state.currentRtcSession, { isDeaf });
+    async setDeaf(isDeaf) {
+        this.updateAndBroadcast(this.state.currentRtcSession, { isDeaf });
         for (const session of this.messaging.state.rtcSessions.values()) {
             if (!session.audioElement) {
                 continue;
             }
             session.audioElement.muted = isDeaf;
         }
-        await this._updateLocalAudioTrackEnabledState();
+        await this.refreshAudioTrack();
     }
     /**
      * @param {Boolean} isSelfMuted
      */
-    async _setMuteState(isSelfMuted) {
-        this._updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted });
-        await this._updateLocalAudioTrackEnabledState();
+    async setMute(isSelfMuted) {
+        this.updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted });
+        await this.refreshAudioTrack();
     }
 
     /**
-     * Updates the "isTalking" state of the current user and sets the
-     * enabled state of its audio track accordingly.
-     *
-     * @private
      * @param {boolean} isTalking
      */
-    async _setSoundBroadcast(isTalking) {
-        if (!this.state.currentRtcSession) {
-            return;
-        }
-        if (isTalking === this.state.currentRtcSession.isTalking) {
+    async setTalking(isTalking) {
+        if (!this.state.currentRtcSession || isTalking === this.state.currentRtcSession.isTalking) {
             return;
         }
         this.state.currentRtcSession.isTalking = isTalking;
         if (!this.state.currentRtcSession.isMute) {
-            await this._updateLocalAudioTrackEnabledState();
+            await this.refreshAudioTrack();
         }
     }
 
@@ -1061,49 +998,51 @@ export class Rtc {
         if (!this.state.channel.id) {
             return;
         }
-        await this._toggleLocalVideoTrack(type, force);
-        for (const [rtcSessionId, peerConnection] of this.state._peerConnections) {
-            await this._updateRemoteTrack(peerConnection, "video", { rtcSessionId });
+        await this.toggleLocalVideoTrack(type, force);
+        for (const [rtcSessionId, peerConnection] of this.state.peerConnections) {
+            await this.updateRemoteTrack(peerConnection, "video", rtcSessionId);
         }
         if (!this.state.currentRtcSession) {
             return;
         }
-        this._updateAndBroadcast(this.state.currentRtcSession, {
-            isScreenSharingOn: !!this.state.sendDisplay,
-            isCameraOn: !!this.state.sendUserVideo,
+        this.updateAndBroadcast(this.state.currentRtcSession, {
+            isScreenSharingOn: !!this.state.sendScreen,
+            isCameraOn: !!this.state.sendCamera,
         });
     }
 
     /**
-     * @private
-     * @param {String} type 'user-video' (eg: webcam) or 'display' (eg: screen sharing)
+     * @param {String} type 'camera' or 'display' (eg: screen sharing)
      * @param {boolean} [force]
      */
-    async _toggleLocalVideoTrack(type, force) {
-        if (type === "user-video") {
-            const sendUserVideo = force ?? !this.state.sendUserVideo;
-            await this._updateLocalVideoTrack(type, sendUserVideo);
-        }
-        if (type === "display") {
-            const sendDisplay = force ?? !this.state.sendDisplay;
-            await this._updateLocalVideoTrack(type, sendDisplay);
+    async toggleLocalVideoTrack(type, force) {
+        switch (type) {
+            case "camera": {
+                const sendCamera = force ?? !this.state.sendCamera;
+                await this.updateLocalVideoTrack(type, sendCamera);
+                break;
+            }
+            case "screen": {
+                const sendScreen = force ?? !this.state.sendScreen;
+                await this.updateLocalVideoTrack(type, sendScreen);
+                break;
+            }
         }
         if (!this.state.currentRtcSession) {
             return;
         }
-        if (!this.state._videoTrack) {
+        if (!this.state.videoTrack) {
             this.state.currentRtcSession.removeVideo();
         } else {
-            this.state.currentRtcSession.updateStream(this.state._videoTrack);
+            this.state.currentRtcSession.updateStream(this.state.videoTrack);
         }
     }
 
     /**
-     * updates the record and notifies the server of the change
-     *
+     * @param {RtcSession} rtcSession
      * @param {Object} data
      */
-    _updateAndBroadcast(rtcSession, data) {
+    updateAndBroadcast(rtcSession, data) {
         Object.assign(rtcSession, data);
         this.state.updateAndBroadcastDebounce = debounce(async () => {
             await this.rpc(
@@ -1125,88 +1064,80 @@ export class Rtc {
     /**
      * Sets the enabled property of the local audio track based on the
      * current session state. And notifies peers of the new audio state.
-     *
-     * @private
      */
-    async _updateLocalAudioTrackEnabledState() {
-        if (!this.state._audioTrack) {
+    async refreshAudioTrack() {
+        if (!this.state.audioTrack) {
             return;
         }
-        this.state._audioTrack.enabled =
+        this.state.audioTrack.enabled =
             !this.state.currentRtcSession.isMute && this.state.currentRtcSession.isTalking;
-        await this._notifyPeers(Object.keys(this.state._peerConnections), {
-            event: "trackChange",
-            type: "peerToPeer",
-            payload: {
-                type: "audio",
-                state: {
-                    isTalking:
-                        this.state.currentRtcSession.isTalking &&
-                        !this.state.currentRtcSession.isSelfMuted,
-                    isSelfMuted: this.state.currentRtcSession.isSelfMuted,
-                    isDeaf: this.state.currentRtcSession.isDeaf,
-                },
+        await this.notifyPeers(Object.keys(this.state.peerConnections), "trackChange", {
+            type: "audio",
+            state: {
+                isTalking:
+                    this.state.currentRtcSession.isTalking &&
+                    !this.state.currentRtcSession.isSelfMuted,
+                isSelfMuted: this.state.currentRtcSession.isSelfMuted,
+                isDeaf: this.state.currentRtcSession.isDeaf,
             },
         });
     }
 
     /**
-     * @private
-     * TODO refactor
-     * @param {String} type 'user-video' or 'display'
-     * @param {boolean} activateVideo true if we want to activate the video
+     * @param {String} type 'camera' or 'screen'
      */
-    async _updateLocalVideoTrack(type, activateVideo) {
-        this.state.sendDisplay = false;
-        this.state.sendUserVideo = false;
+    async updateLocalVideoTrack(type, activateVideo = false) {
+        this.state.sendScreen = false;
+        this.state.sendCamera = false;
         const stopVideo = () => {
-            if (this.state._videoTrack) {
-                this.state._videoTrack.stop();
+            if (this.state.videoTrack) {
+                this.state.videoTrack.stop();
             }
-            this.state._videoTrack = undefined;
+            this.state.videoTrack = undefined;
         };
         if (!activateVideo) {
-            if (type === "display") {
-                this.soundEffects.play("screenSharing");
+            if (type === "screen") {
+                this.soundEffects.play("screen-sharing");
             }
             stopVideo();
             return;
         }
-        let sourceWebMediaStream;
+        let stream;
         try {
-            if (type === "user-video") {
-                sourceWebMediaStream = await browser.navigator.mediaDevices.getUserMedia({
+            if (type === "camera") {
+                stream = await browser.navigator.mediaDevices.getUserMedia({
                     video: VIDEO_CONFIG,
                 });
             }
-            if (type === "display") {
-                sourceWebMediaStream = await browser.navigator.mediaDevices.getDisplayMedia({
+            if (type === "screen") {
+                stream = await browser.navigator.mediaDevices.getDisplayMedia({
                     video: VIDEO_CONFIG,
                 });
-                this.soundEffects.play("screenSharing");
+                this.soundEffects.play("screen-sharing");
             }
         } catch {
+            const str =
+                type === "camera"
+                    ? _t('%s" requires "camera" access')
+                    : _t('%s" requires "screen recording" access');
             this.messaging.notify({
-                message: sprintf(
-                    _t(`"%s" requires "%s" access`),
-                    window.location.host,
-                    type === "user-video" ? "camera" : "display"
-                ),
+                message: sprintf(str, window.location.host),
                 type: "warning",
             });
             stopVideo();
             return;
         }
-        const videoStream = sourceWebMediaStream;
-        const videoTrack = videoStream ? videoStream.getVideoTracks()[0] : undefined;
-        if (videoTrack) {
-            videoTrack.addEventListener("ended", async () => {
+        const track = stream ? stream.getVideoTracks()[0] : undefined;
+        if (track) {
+            track.addEventListener("ended", async () => {
                 await this.toggleVideoBroadcast(type, false);
             });
         }
-        this.state._videoTrack = videoTrack;
-        this.state.sendUserVideo = type === "user-video" && !!videoTrack;
-        this.state.sendDisplay = type === "display" && !!videoTrack;
+        Object.assign(this.state, {
+            videoTrack: track,
+            sendCamera: type === "camera" && track,
+            sendScreen: type === "screen" && track,
+        });
     }
 
     /**
@@ -1216,16 +1147,13 @@ export class Rtc {
      *
      * negotiationneeded -> offer -> answer -> ...
      *
-     * @private
      * @param {RTCPeerConnection} peerConnection
      * @param {String} trackKind
-     * @param {Object} [param2]
-     * @param {boolean} [param2.initTransceiver]
-     * @param {number} [param2.rtcSessionId]
+     * @param {number} rtcSessionId
      */
-    async _updateRemoteTrack(peerConnection, trackKind, { initTransceiver, rtcSessionId } = {}) {
-        this._addLogEntry(rtcSessionId, `updating ${trackKind} transceiver`);
-        const track = trackKind === "audio" ? this.state._audioTrack : this.state._videoTrack;
+    async updateRemoteTrack(peerConnection, trackKind, rtcSessionId, initTransceiver = false) {
+        this.addLog(rtcSessionId, `updating ${trackKind} transceiver`);
+        const track = trackKind === "audio" ? this.state.audioTrack : this.state.videoTrack;
         const fullDirection = track ? "sendrecv" : "recvonly";
         const limitedDirection = track ? "sendonly" : "inactive";
         let transceiverDirection = fullDirection;
@@ -1240,7 +1168,7 @@ export class Rtc {
         if (initTransceiver) {
             transceiver = peerConnection.addTransceiver(trackKind);
         } else {
-            transceiver = this._getTransceiver(peerConnection, trackKind);
+            transceiver = getTransceiver(peerConnection, trackKind);
         }
         if (track) {
             try {
@@ -1258,24 +1186,17 @@ export class Rtc {
             // ignored, the transceiver is probably already removed
         }
         if (trackKind === "video") {
-            this._notifyPeers([rtcSessionId], {
-                event: "trackChange",
-                type: "peerToPeer",
-                payload: {
-                    type: "video",
-                    state: { isSendingVideo: false },
-                },
+            this.notifyPeers([rtcSessionId], "trackChange", {
+                type: "video",
+                state: { isSendingVideo: false },
             });
         }
     }
 
-    /**
-     * @param {Boolean} audio
-     */
-    async _updateLocalAudioTrack(audio) {
-        if (this.state._audioTrack) {
-            this.state._audioTrack.stop();
-            this.state._audioTrack = undefined;
+    async resetAudioTrack(audio = false) {
+        if (this.state.audioTrack) {
+            this.state.audioTrack.stop();
+            this.state.audioTrack = undefined;
         }
         if (!this.state.channel.id) {
             return;
@@ -1289,13 +1210,13 @@ export class Rtc {
                 audioTrack = audioStream.getAudioTracks()[0];
             } catch {
                 this.notification.add(
-                    sprintf(_t(`"%(hostname)s" requires microphone access`), {
+                    sprintf(_t('"%(hostname)s" requires microphone access'), {
                         hostname: window.location.host,
                     }),
                     { type: "warning" }
                 );
                 if (this.state.currentRtcSession) {
-                    this._updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted: true });
+                    this.updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted: true });
                 }
                 return;
             }
@@ -1307,17 +1228,17 @@ export class Rtc {
             }
             audioTrack.addEventListener("ended", async () => {
                 // this mostly happens when the user retracts microphone permission.
-                await this._updateLocalAudioTrack(false);
-                this._updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted: true });
-                await this._updateLocalAudioTrackEnabledState();
+                await this.resetAudioTrack(false);
+                this.updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted: true });
+                await this.refreshAudioTrack();
             });
-            this._updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted: false });
+            this.updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted: false });
             audioTrack.enabled =
                 !this.state.currentRtcSession.isMute && this.state.currentRtcSession.isTalking;
-            this.state._audioTrack = audioTrack;
-            await this._updateVoiceActivation();
-            for (const [rtcSessionId, peerConnection] of this.state._peerConnections) {
-                await this._updateRemoteTrack(peerConnection, "audio", { rtcSessionId });
+            this.state.audioTrack = audioTrack;
+            await this.updateVoiceActivation();
+            for (const [rtcSessionId, peerConnection] of this.state.peerConnections) {
+                await this.updateRemoteTrack(peerConnection, "audio", rtcSessionId);
             }
         }
     }
@@ -1326,17 +1247,17 @@ export class Rtc {
      * Updates the way broadcast of the local audio track is handled,
      * attaches an audio monitor for voice activation if necessary.
      */
-    async _updateVoiceActivation() {
-        this.state._disconnectAudioMonitor?.();
-        if (this.userSettings.usePushToTalk || !this.state.channel || !this.state._audioTrack) {
+    async updateVoiceActivation() {
+        this.state.disconnectAudioMonitor?.();
+        if (this.userSettings.usePushToTalk || !this.state.channel || !this.state.audioTrack) {
             this.state.currentRtcSession.isTalking = false;
-            await this._updateLocalAudioTrackEnabledState();
+            await this.refreshAudioTrack();
             return;
         }
         try {
-            this.state._disconnectAudioMonitor = await monitorAudio(this.state._audioTrack, {
+            this.state.disconnectAudioMonitor = await monitorAudio(this.state.audioTrack, {
                 onThreshold: async (isAboveThreshold) => {
-                    this._setSoundBroadcast(isAboveThreshold);
+                    this.setTalking(isAboveThreshold);
                 },
                 volumeThreshold: this.userSettings.voiceActivationThreshold,
             });
@@ -1351,78 +1272,6 @@ export class Rtc {
             });
             this.state.currentRtcSession.isTalking = true;
         }
-        await this._updateLocalAudioTrackEnabledState();
-    }
-
-    //----------------------------------------------------------------------
-    // Handlers
-    //----------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {String} state the new state of the connection
-     * @param {number} rtcSessionId of the peer whose the connection changed
-     */
-    async _onConnectionStateChange(state, rtcSessionId) {
-        this._addLogEntry(rtcSessionId, `connection state changed: ${state}`);
-        switch (state) {
-            case "closed":
-                this._removePeer(rtcSessionId);
-                break;
-            case "failed":
-            case "disconnected":
-                await this._recoverConnection(rtcSessionId, {
-                    delay: RECOVERY_DELAY,
-                    reason: `connection ${state}`,
-                });
-                break;
-        }
-    }
-
-    /**
-     * @private
-     * @param {String} connectionState the new state of the connection
-     * @param {number} rtcSessionId of the peer whose the connection changed
-     */
-    async _onICEConnectionStateChange(connectionState, rtcSessionId) {
-        this._addLogEntry(rtcSessionId, `ICE connection state changed: ${connectionState}`, {
-            state: connectionState,
-        });
-        const rtcSession = this.state.channel.rtcSessions.get(rtcSessionId);
-        if (!rtcSession) {
-            return;
-        }
-        rtcSession.connectionState = connectionState;
-        switch (connectionState) {
-            case "closed":
-                this._removePeer(rtcSessionId);
-                break;
-            case "failed":
-            case "disconnected":
-                await this._recoverConnection(rtcSessionId, {
-                    delay: RECOVERY_DELAY,
-                    reason: `ice connection ${connectionState}`,
-                });
-                break;
-        }
-    }
-
-    /**
-     * Removes and disconnects all the peerConnections that are not current members of the call.
-     *
-     * @param {Map} currentSessions list of sessions of this call.
-     */
-    async _onUpdateRtcSessions(currentSessions) {
-        if (this.state.channel && !currentSessions.has(this.state.currentRtcSession.id)) {
-            // if the current RTC session is not in the channel sessions, this call is no longer valid.
-            this.endCall();
-            return;
-        }
-        for (const rtcSessionId of this.state._peerConnections.keys()) {
-            if (!currentSessions.has(rtcSessionId)) {
-                this._addLogEntry(rtcSessionId, "session removed from the server");
-                this._removePeer(rtcSessionId);
-            }
-        }
+        await this.refreshAudioTrack();
     }
 }
