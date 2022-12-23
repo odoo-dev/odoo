@@ -79,7 +79,7 @@ class UserSettings {
     async setPushToTalkKey(ev) {
         const pushToTalkKey = `${ev.shiftKey || ""}.${ev.ctrlKey || ev.metaKey || ""}.${
             ev.altKey || ""
-        }.${ev.key}`;
+        }.${ev.key === " " ? "Space" : ev.key}`;
         this.pushToTalkKey = pushToTalkKey;
         this._saveSettings();
     }
