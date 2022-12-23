@@ -138,7 +138,7 @@ export class Discuss extends Component {
     async renameThread({ value: name }) {
         const newName = name.trim();
         if (
-            newName !== this.thread.name &&
+            newName !== this.thread.displayName &&
             ((newName && this.thread.type === "channel") ||
                 this.thread.type === "chat" ||
                 this.thread.type === "group")
@@ -160,6 +160,9 @@ export class Discuss extends Component {
 
     async updateThreadDescription({ value: description }) {
         const newDescription = description.trim();
+        if (!newDescription && !this.thread.description) {
+            return;
+        }
         if (newDescription !== this.thread.description) {
             await this.messaging.notifyThreadDescriptionToServer(
                 this.thread.localId,

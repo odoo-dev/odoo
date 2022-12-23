@@ -1552,3 +1552,58 @@ QUnit.test(
         assert.containsOnce(target, ".fa-users");
     }
 );
+
+QUnit.test("Do not trigger chat name server update when it is unchanged", async function (assert) {
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv["mail.channel"].create({
+        channel_type: "chat",
+    });
+    const { openDiscuss } = await start({
+        mockRPC(route, args, originalRPC) {
+            if (args.method === "channel_set_custom_name") {
+                assert.step(args.method);
+            }
+            return originalRPC(route, args);
+        },
+        discuss: {
+            context: {
+                active_id: `mail.channel_${mailChannelId}`,
+            },
+        },
+    });
+    await openDiscuss();
+    await editInput(target, "input.o-mail-discuss-thread-name", "Mitchell Admin");
+    await triggerEvent(target, "input.o-mail-discuss-thread-name", "keydown", {
+        key: "Enter",
+    });
+    assert.verifySteps([]);
+});
+
+QUnit.test(
+    "Do not trigger channel description server update when channel has no description and editing to empty description",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId = pyEnv["mail.channel"].create({
+            name: "General",
+        });
+        const { openDiscuss } = await start({
+            mockRPC(route, args, originalRPC) {
+                if (args.method === "channel_change_description") {
+                    assert.step(args.method);
+                }
+                return originalRPC(route, args);
+            },
+            discuss: {
+                context: {
+                    active_id: `mail.channel_${mailChannelId}`,
+                },
+            },
+        });
+        await openDiscuss();
+        await editInput(target, "input.o-mail-discuss-thread-description", "");
+        await triggerEvent(target, "input.o-mail-discuss-thread-description", "keydown", {
+            key: "Enter",
+        });
+        assert.verifySteps([]);
+    }
+);
