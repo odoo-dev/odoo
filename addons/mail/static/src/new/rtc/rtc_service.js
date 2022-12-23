@@ -41,10 +41,10 @@ export const rtcService = {
                             const { sessionId } = notif.payload;
                             if (rtc.state.currentRtcSession?.id === sessionId) {
                                 rtc.endCall();
-                                notification.notify({
-                                    message: _t("Disconnected from the RTC call by the server"),
-                                    type: "warning",
-                                });
+                                notification.add(
+                                    _t("Disconnected from the RTC call by the server"),
+                                    { type: "warning" }
+                                );
                             }
                         }
                         break;
