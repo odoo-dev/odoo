@@ -35,20 +35,20 @@
                     </button>
                     <button class="o-mail-call-action-list-button o-mail-call-action-list-videoButton btn d-flex m-1 border-0 rounded-circle shadow-none opacity-100 opacity-75-hover"
                         t-att-class="{
-                            'o-isActive': rtc.state.sendUserVideo,
+                            'o-isActive': rtc.state.sendCamera,
                             'o-isSmall p-2': isSmall,
                             'p-3': !isSmall,
                         }"
                         t-att-aria-label="cameraButtonTitle"
                         t-att-title="cameraButtonTitle"
-                        t-on-click="() => this.rtc.toggleVideoBroadcast('user-video')">
+                        t-on-click="() => this.rtc.toggleVideoBroadcast('camera')">
                         <div class="o-mail-call-action-list-buttonIconWrapper fa-stack" t-att-class="{ 'o-isSmall': isSmall }">
-                            <i class="fa fa-video-camera fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendUserVideo }"/>
+                            <i class="fa fa-video-camera fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendCamera }"/>
                         </div>
                     </button>
                     <button t-if="!isMobileDevice" class="o-mail-call-action-list-button o-mail-call-action-list-videoButton btn d-flex m-1 border-0 rounded-circle shadow-none opacity-100 opacity-75-hover"
                         t-att-class="{
-                            'o-isActive': rtc.state.sendDisplay,
+                            'o-isActive': rtc.state.sendScreen,
                             'o-isSmall p-2': isSmall,
                             'p-3': !isSmall,
                         }"
@@ -56,7 +56,7 @@
                         t-att-title="screenSharingButtonTitle"
                         t-on-click="() => this.rtc.toggleVideoBroadcast('display')">
                         <div class="o-mail-call-action-list-buttonIconWrapper fa-stack" t-att-class="{ 'o-isSmall': isSmall }">
-                            <i class="fa fa-desktop fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendDisplay }"/>
+                            <i class="fa fa-desktop fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall, 'text-success': rtc.state.sendScreen }"/>
                         </div>
                     </button>
                     <button t-if="!callView.isFullScreen" class="o-mail-call-action-list-button btn d-flex m-1 border-0 rounded-circle shadow-none opacity-100 opacity-75-hover"

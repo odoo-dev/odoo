@@ -746,10 +746,10 @@ export class Messaging {
                 break;
         }
         if (rtcSessions.length > oldCount) {
-            this.soundEffects.play("channelJoin");
+            this.soundEffects.play("channel-join");
         }
         if (rtcSessions.length < oldCount) {
-            this.soundEffects.play("memberLeave");
+            this.soundEffects.play("member-leave");
         }
     }
 

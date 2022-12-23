@@ -3,16 +3,19 @@
 class SoundEffects {
     constructor(env) {
         this.soundEffects = {
-            channelJoin: { defaultVolume: 0.3, path: "/mail/static/src/audio/channel_01_in" },
-            channelLeave: { path: "/mail/static/src/audio/channel_04_out" },
+            "channel-join": { defaultVolume: 0.3, path: "/mail/static/src/audio/channel_01_in" },
+            "channel-leave": { path: "/mail/static/src/audio/channel_04_out" },
             deafen: { defaultVolume: 0.15, path: "/mail/static/src/audio/deafen_new_01" },
-            incomingCall: { defaultVolume: 0.15, path: "/mail/static/src/audio/call_02_in_" },
-            memberLeave: { defaultVolume: 0.5, path: "/mail/static/src/audio/channel_01_out" },
+            "incoming-call": { defaultVolume: 0.15, path: "/mail/static/src/audio/call_02_in_" },
+            "member-leave": { defaultVolume: 0.5, path: "/mail/static/src/audio/channel_01_out" },
             mute: { defaultVolume: 0.2, path: "/mail/static/src/audio/mute_1" },
-            newMessage: { path: "/mail/static/src/audio/dm_02" },
-            pushToTalkOn: { defaultVolume: 0.05, path: "/mail/static/src/audio/ptt_push_1" },
-            pushToTalkOff: { defaultVolume: 0.05, path: "/mail/static/src/audio/ptt_release_1" },
-            screenSharing: { defaultVolume: 0.5, path: "/mail/static/src/audio/share_02" },
+            "new-message": { path: "/mail/static/src/audio/dm_02" },
+            "push-to-talk-on": { defaultVolume: 0.05, path: "/mail/static/src/audio/ptt_push_1" },
+            "push-to-talk-off": {
+                defaultVolume: 0.05,
+                path: "/mail/static/src/audio/ptt_release_1",
+            },
+            "screen-sharing": { defaultVolume: 0.5, path: "/mail/static/src/audio/share_02" },
             undeafen: { defaultVolume: 0.15, path: "/mail/static/src/audio/undeafen_new_01" },
             unmute: { defaultVolume: 0.2, path: "/mail/static/src/audio/unmute_1" },
         };
