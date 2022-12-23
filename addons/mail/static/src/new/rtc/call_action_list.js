@@ -6,7 +6,7 @@ import { _t } from "@web/core/l10n/translation";
 
 export class CallActionList extends Component {
     static props = ["thread"];
-    static template = "mail.call_action_list_view";
+    static template = "mail.call_action_list";
 
     setup() {
         this.rtc = useRtc();
