@@ -710,10 +710,7 @@ export class Rtc {
      */
     async _joinCall(channelId, { startWithAudio = true, startWithVideo = false, videoType } = {}) {
         if (!IS_CLIENT_RTC_COMPATIBLE) {
-            this.notification.notify({
-                message: _t("Your browser does not support webRTC."),
-                type: "warning",
-            });
+            this.notification.add(_t("Your browser does not support webRTC."), { type: "warning" });
             return;
         }
         const channel = this.messaging.state.threads[createLocalId("mail.channel", channelId)];
@@ -1291,13 +1288,12 @@ export class Rtc {
                 });
                 audioTrack = audioStream.getAudioTracks()[0];
             } catch {
-                this.notification.notify({
-                    message: _.str.sprintf(
-                        _t(`"%s" requires microphone access`),
-                        window.location.host
-                    ),
-                    type: "warning",
-                });
+                this.notification.add(
+                    sprintf(_t(`"%(hostname)s" requires microphone access`), {
+                        hostname: window.location.host,
+                    }),
+                    { type: "warning" }
+                );
                 if (this.state.currentRtcSession) {
                     this._updateAndBroadcast(this.state.currentRtcSession, { isSelfMuted: true });
                 }
@@ -1350,8 +1346,7 @@ export class Rtc {
              * in that case, voice activation is not enabled
              * and the microphone is always 'on'.
              */
-            this.notification.notify({
-                message: _t("Your browser does not support voice activation"),
+            this.notification.add(_t("Your browser does not support voice activation"), {
                 type: "warning",
             });
             this.state.currentRtcSession.isTalking = true;
