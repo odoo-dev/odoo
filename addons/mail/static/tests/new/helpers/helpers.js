@@ -29,7 +29,12 @@ export function makeTestEnv(rpc) {
         },
     };
     const router = { current: { hash: { active_id: false } }, pushState() {} };
-    const bus_service = new EventBus();
+    const busService = new EventBus();
+    const bus_service = {
+        addEventListener: busService.addEventListener.bind(busService),
+        removeEventListener: busService.removeEventListener.bind(busService),
+        start() {},
+    };
     const action = {};
     const env = {
         bus: new EventBus(),

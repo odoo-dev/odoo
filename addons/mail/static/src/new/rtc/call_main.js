@@ -1,10 +1,9 @@
 /** @odoo-module **/
 
-import { useUpdate } from "@mail/component_hooks/use_update";
 import { CallActionList } from "@mail/new/rtc/call_action_list";
 import { CallParticipantCard } from "@mail/new/rtc/call_participant_card";
 
-const { Component, useState, useRef, onMounted, onWillUnmount } = owl;
+const { Component, useState, useRef, onMounted, onPatched, onWillUnmount } = owl;
 
 export class CallMain extends Component {
     static components = { CallActionList, CallParticipantCard };
@@ -20,11 +19,12 @@ export class CallMain extends Component {
             rtcSessions: this.props.thread.rtcSessions,
         });
         this.tileContainerRef = useRef("tileContainer");
-        useUpdate({ func: () => this._update() });
         onMounted(() => {
             this.resizeObserver = new ResizeObserver(() => this._setTileLayout());
             this.resizeObserver.observe(this.tileContainerRef.el);
+            this._update();
         });
+        onPatched(() => this._update());
         onWillUnmount(() => this.resizeObserver.disconnect());
     }
     get rtcSessionArray() {

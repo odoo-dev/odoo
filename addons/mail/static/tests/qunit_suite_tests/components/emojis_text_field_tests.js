@@ -9,7 +9,7 @@ import { testEmojiButton,
          testEmojiButtonVisible,
         } from "./emojis_field_common_tests";
 
-QUnit.module("Field text emojis", (hooks) => {
+QUnit.skipRefactoring("Field text emojis", (hooks) => {
     let target = undefined;
 
     addFakeModel('fields.text.emojis.user', {

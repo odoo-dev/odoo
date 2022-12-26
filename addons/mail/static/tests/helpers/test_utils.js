@@ -311,7 +311,7 @@ async function addSwitchTabDropdownItem(rootTarget, tabTarget) {
     const tabIndex = tabs.length;
     const li = document.createElement("li");
     const a = document.createElement("a");
-    li.appendChild(a)
+    li.appendChild(a);
     a.classList.add("dropdown-item");
     a.innerText = `Tab ${tabIndex}`;
     browser.addEventListener("click", (ev) => {
@@ -340,23 +340,6 @@ async function addSwitchTabDropdownItem(rootTarget, tabTarget) {
  * @param {boolean} [param0.hasTimeControl=false] if set, all flow of time with
  *   `messaging.browser.setTimeout` are fully controlled by test itself.
  * @param {integer} [param0.loadingBaseDelayDuration=0]
- * @param {Deferred|Promise}
- *   [param0.messagingBeforeCreationDeferred=Promise.resolve()] Deferred that
- *   let tests block messaging creation and simulate resolution. Useful for
- *   testing working components when messaging is not yet created.
- * @param {string} [param0.waitUntilMessagingCondition='initialized'] Determines
- *   the condition of messaging when this function is resolved. Supported
- *   values: ['none', 'created', 'initialized'].
- *   - 'none': the function resolves regardless of whether messaging is created.
- *   - 'created': the function resolves when messaging is created, but
- *     regardless of whether messaging is initialized.
- *   - 'initialized' (default): the function resolves when messaging is
- *     initialized. To guarantee messaging is not created, test should pass a
- *     pending deferred as param of `messagingBeforeCreationDeferred`. To make
- *     sure messaging is not initialized, test should mock RPC
- *     `mail/init_messaging` and block its resolution.
- * @throws {Error} in case some provided parameters are wrong, such as
- *   `waitUntilMessagingCondition`.
  * @returns {Object}
  */
 async function start(param0 = {}) {
@@ -365,7 +348,7 @@ async function start(param0 = {}) {
         debounce: (func) => func,
         throttle: (func) => func,
     });
-    const { discuss = {}, hasTimeControl, waitUntilMessagingCondition = "initialized" } = param0;
+    const { discuss = {}, hasTimeControl } = param0;
     const advanceTime = hasTimeControl ? getAdvanceTime() : undefined;
     let target = param0["target"] || getFixture();
     if (param0.asTab) {
@@ -391,11 +374,6 @@ async function start(param0 = {}) {
         target.style.opacity = "";
     });
     param0["target"] = target;
-    if (!["none", "created", "initialized"].includes(waitUntilMessagingCondition)) {
-        throw Error(
-            `Unknown parameter value ${waitUntilMessagingCondition} for 'waitUntilMessaging'.`
-        );
-    }
     const messagingBus = new EventBus();
     const afterEvent = getAfterEvent({ messagingBus });
 
@@ -414,25 +392,8 @@ async function start(param0 = {}) {
     let webClient;
     await afterNextRender(async () => {
         webClient = await getWebClientReady({ ...param0, messagingBus });
-        if (waitUntilMessagingCondition === "created") {
-            await webClient.env.services.messaging.modelManager.messagingCreatedPromise;
-        }
-        if (waitUntilMessagingCondition === "initialized") {
-            await webClient.env.services.messaging.modelManager.messagingCreatedPromise;
-            await webClient.env.services.messaging.modelManager.messagingInitializedPromise;
-        }
     });
 
-    registerCleanup(async () => {
-        await webClient.env.services.messaging.modelManager.messagingInitializedPromise;
-        webClient.env.services.messaging.modelManager.destroy();
-        delete webClient.env.services.messaging;
-        if (owl.Component.env) {
-            delete owl.Component.env.services.messaging;
-            delete owl.Component.env[wowlServicesSymbol].messaging;
-            delete owl.Component.env;
-        }
-    });
     const openView = async (action, options) => {
         action["type"] = action["type"] || "ir.actions.act_window";
         await afterNextRender(() => doAction(webClient, action, { props: options }));

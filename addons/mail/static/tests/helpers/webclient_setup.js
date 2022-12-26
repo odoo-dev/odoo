@@ -44,7 +44,6 @@ const WEBCLIENT_PARAMETER_NAMES = new Set([
 const SERVICES_PARAMETER_NAMES = new Set([
     "legacyServices",
     "loadingBaseDelayDuration",
-    "messagingBeforeCreationDeferred",
     "messagingBus",
     "services",
 ]);
@@ -68,27 +67,20 @@ function setupMainComponentRegistry() {
  * @param {Object} param0
  * @param {Object} [param0.services]
  * @param {number} [param0.loadingBaseDelayDuration=0]
- * @param {Promise} [param0.messagingBeforeCreationDeferred=Promise.resolve()]
- *   Deferred that let tests block messaging creation and simulate resolution.
- *   Useful for testing components behavior when messaging is not yet created.
  * @param {EventBus} [param0.messagingBus]
  * @returns {LegacyRegistry} The registry containing all the legacy services that will be passed
  * to the webClient as a legacy parameter.
  */
 function setupMessagingServiceRegistries({
     loadingBaseDelayDuration = 0,
-    messagingBeforeCreationDeferred = Promise.resolve(),
     messagingBus,
     services,
 }) {
     const serviceRegistry = registry.category("services");
 
     patchWithCleanup(messagingService, {
-        async _startModelManager(modelManager, messagingValues) {
-            modelManager.isDebug = true;
-            const _super = this._super.bind(this);
-            await messagingBeforeCreationDeferred;
-            return _super(modelManager, messagingValues);
+        async _startModelManager() {
+            // never start model manager since it interferes with tests.
         },
     });
 
@@ -164,7 +156,6 @@ function setupMessagingServiceRegistries({
  * @param {Object} [param0.serverData]
  * @param {Object} [param0.services]
  * @param {Object} [param0.loadingBaseDelayDuration]
- * @param {Object} [param0.messagingBeforeCreationDeferred]
  * @param {EventBus} [param0.messagingBus] The event bus to be used by messaging.
  * @returns {WebClient}
  */

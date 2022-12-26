@@ -63,6 +63,7 @@ export const messagingService = {
         bus.addEventListener("notification", (notifEvent) => {
             messaging.handleNotification(notifEvent.detail);
         });
+        bus.start();
 
         // debugging. remove this
         window.messaging = messaging;
