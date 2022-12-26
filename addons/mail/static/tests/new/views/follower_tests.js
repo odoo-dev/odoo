@@ -101,7 +101,7 @@ QUnit.test("click on partner follower details", async function (assert) {
     assert.verifySteps(["do_action"], "clicking on follower should redirect to partner form view");
 });
 
-QUnit.test("click on edit follower", async function (assert) {
+QUnit.skipRefactoring("click on edit follower", async function (assert) {
     const pyEnv = await startServer();
     const [threadId, partnerId] = pyEnv["res.partner"].create([{}, {}]);
     pyEnv["mail.followers"].create({

@@ -39,19 +39,19 @@ QUnit.test(
             },
         ];
         patchUiSize({ size: SIZES.SM });
-        const { messaging } = await start();
+        const { env } = await start();
 
         // simulate receiving a message
-        messaging.rpc({
-            route: "/mail/chat_post",
-            params: {
+        env.services.rpc(
+            "/mail/chat_post",
+            {
                 context: {
                     mockedUserId: resUsersId1,
                 },
                 message_content: "hu",
                 uuid: "channel-10-uuid",
             },
-        });
+        );
         await nextAnimationFrame();
         assert.containsNone(target, ".o-mail-chat-window");
     }

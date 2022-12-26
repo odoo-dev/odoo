@@ -29,15 +29,15 @@ QUnit.module("discuss", {
 });
 
 QUnit.test("sanity check", async (assert) => {
-    const server = new TestServer();
-    const env = makeTestEnv((route, params) => {
-        if (route.startsWith("/mail")) {
-            assert.step(route);
+    const { openDiscuss } = await start({
+        mockRPC(route, args, originRPC) {
+            if (route.startsWith("/mail")) {
+                assert.step(route);
+            }
+            return originRPC(route, args);
         }
-        return server.rpc(route, params);
     });
-
-    await mount(Discuss, target, { env });
+    await openDiscuss();
     assert.containsOnce(target, ".o-mail-discuss-sidebar");
     assert.containsOnce(
         target,
@@ -1337,22 +1337,22 @@ QUnit.test("should auto-pin chat when receiving a new DM", async function (asser
         channel_type: "chat",
         uuid: "channel11uuid",
     });
-    const { messaging, openDiscuss } = await start();
+    const { env, openDiscuss } = await start();
     await openDiscuss();
     assert.containsNone(target, ".o-mail-category-item:contains(Demo)");
 
     // simulate receiving the first message on channel 11
     await afterNextRender(() =>
-        messaging.rpc({
-            route: "/mail/chat_post",
-            params: {
+        env.services.rpc(
+            "/mail/chat_post",
+            {
                 context: {
                     mockedUserId: resUsersId1,
                 },
                 message_content: "new message",
                 uuid: "channel11uuid",
             },
-        })
+        )
     );
     assert.containsOnce(target, ".o-mail-category-item:contains(Demo)");
 });

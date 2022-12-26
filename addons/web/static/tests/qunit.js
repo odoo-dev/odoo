@@ -584,3 +584,4 @@ export function setupQUnit() {
 }
 
 QUnit.skipRefactoring = QUnit.skip;
+QUnit.module.skipRefactoring = QUnit.module.skip;
