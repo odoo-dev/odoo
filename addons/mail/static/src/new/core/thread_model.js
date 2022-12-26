@@ -144,8 +144,8 @@ export class Thread {
                         break;
                     case "insert":
                         for (const rtcSessionData of sessionsData) {
-                            const rtcSession = RtcSession.insert(this._state, rtcSessionData);
-                            this.rtcSessions.set(rtcSession.id, rtcSession);
+                            const session = RtcSession.insert(this._state, rtcSessionData);
+                            this.rtcSessions.set(session.id, session);
                         }
                         break;
                 }

@@ -39,7 +39,7 @@ export const rtcService = {
                     case "mail.channel.rtc.session/ended":
                         {
                             const { sessionId } = notif.payload;
-                            if (rtc.state.currentRtcSession?.id === sessionId) {
+                            if (rtc.state.selfSession?.id === sessionId) {
                                 rtc.endCall();
                                 notification.add(
                                     _t("Disconnected from the RTC call by the server"),
