@@ -32,8 +32,10 @@ export class RtcSession {
     calledChannels;
     callParticipantCards;
     rtc; // means that this is the rtc session of the current user and rtc is active
-    rtcDataChannel; // maybe not necessary as it is stored in rtc service
-    rtcPeerConnection; // maybe not necessary as it is stored in rtc service
+    /** @type {RTCDataChannel} */
+    dataChannel;
+    /** @type {RTCPeerConnection} */
+    peerConnection;
 
     /**
      * @param {import("@mail/new/core/messaging").Messaging['state']} state
@@ -156,6 +158,28 @@ export class RtcSession {
     reset() {
         this._removeAudio();
         this.removeVideo();
+        this.dataChannel?.close();
+        delete this.dataChannel;
+        const peerConnection = this.peerConnection;
+        if (peerConnection) {
+            const RTCRtpSenders = peerConnection.getSenders();
+            for (const sender of RTCRtpSenders) {
+                try {
+                    peerConnection.removeTrack(sender);
+                } catch {
+                    // ignore error
+                }
+            }
+            for (const transceiver of peerConnection.getTransceivers()) {
+                try {
+                    transceiver.stop();
+                } catch {
+                    // transceiver may already be stopped by the remote.
+                }
+            }
+            peerConnection.close();
+            delete this.peerConnection;
+        }
     }
 
     /**
