@@ -16,7 +16,7 @@ export class CallMain extends Component {
             tileWidth: 0,
             tileHeight: 0,
             columnCount: 0,
-            rtcSessions: this.props.thread.rtcSessions,
+            sessions: this.props.thread.rtcSessions,
         });
         this.tileContainerRef = useRef("tileContainer");
         onMounted(() => {
@@ -27,9 +27,9 @@ export class CallMain extends Component {
         onPatched(() => this._update());
         onWillUnmount(() => this.resizeObserver.disconnect());
     }
-    get rtcSessionArray() {
+    get sessionArray() {
         // t-foreach needs an array, not any iterable.
-        return [...this.state.rtcSessions.values()];
+        return [...this.state.sessions.values()];
     }
     get hasSidebarButton() {
         return false;

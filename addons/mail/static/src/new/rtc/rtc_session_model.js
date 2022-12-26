@@ -43,23 +43,23 @@ export class RtcSession {
      * @returns {RtcSession}
      */
     static insert(state, data) {
-        let rtcSession;
+        let session;
         if (state.rtcSessions.has(data.id)) {
-            rtcSession = state.rtcSessions.get(data.id);
+            session = state.sessions.get(data.id);
         } else {
-            rtcSession = new RtcSession();
-            rtcSession._state = state;
+            session = new RtcSession();
+            session._state = state;
         }
-        rtcSession.update(data);
-        state.rtcSessions.set(rtcSession.id, rtcSession);
+        session.update(data);
+        state.rtcSessions.set(session.id, session);
         // return reactive version
-        return state.rtcSessions.get(rtcSession.id);
+        return state.rtcSessions.get(session.id);
     }
     static delete(state, id) {
         const session = state.rtcSessions.get(id);
         if (session) {
             state.threads[session.channelId]?.rtcSessions.delete(id);
-            session.reset();
+            session.clear();
         }
         state.rtcSessions.delete(id);
     }
@@ -155,7 +155,7 @@ export class RtcSession {
     /**
      * restores the session to its default values
      */
-    reset() {
+    clear() {
         this._removeAudio();
         this.removeVideo();
         this.dataChannel?.close();

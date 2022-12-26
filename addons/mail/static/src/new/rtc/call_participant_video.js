@@ -5,7 +5,7 @@ import { useRtc } from "@mail/new/rtc/rtc_hook";
 import { useUpdate } from "@mail/component_hooks/use_update";
 
 export class CallParticipantVideo extends Component {
-    static props = ["rtcSession"];
+    static props = ["session"];
     static template = "mail.call_participant_video";
 
     setup() {
@@ -18,10 +18,10 @@ export class CallParticipantVideo extends Component {
         if (!this.root.el) {
             return;
         }
-        if (!this.props.rtcSession || !this.props.rtcSession.videoStream) {
+        if (!this.props.session || !this.props.session.videoStream) {
             this.root.el.srcObject = undefined;
         } else {
-            this.root.el.srcObject = this.props.rtcSession.videoStream;
+            this.root.el.srcObject = this.props.session.videoStream;
         }
         this.root.el.load();
     }

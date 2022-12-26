@@ -10,10 +10,10 @@
             t-on-mousemove="onMouseMove"
             t-ref="tileContainer"
         >
-            <t t-foreach="rtcSessionArray" t-as="rtcSession" t-key="'grid_tile_'+rtcSession.id">
+            <t t-foreach="sessionArray" t-as="session" t-key="'grid_tile_'+session.id">
                 <CallParticipantCard
                     className="'o-mail-call-main-gridParticipantCard'"
-                    rtcSession="rtcSession"
+                    session="session"
                 />
             </t>
         </div>

@@ -726,7 +726,7 @@ export class Messaging {
         }
     }
 
-    _updateRtcSessions(channelId, rtcSessions, command) {
+    _updateRtcSessions(channelId, sessionsData, command) {
         const channel = this.state.threads[channelId];
         if (!channel) {
             return;
@@ -734,21 +734,21 @@ export class Messaging {
         const oldCount = channel.rtcSessions.size;
         switch (command) {
             case "insert-and-unlink":
-                for (const rtcSessionData of rtcSessions) {
-                    RtcSession.delete(this.state, rtcSessionData.id);
+                for (const sessionData of sessionsData) {
+                    RtcSession.delete(this.state, sessionData.id);
                 }
                 break;
             case "insert":
-                for (const rtcSessionData of rtcSessions) {
-                    const rtcSession = RtcSession.insert(this.state, rtcSessionData);
-                    channel.rtcSessions.set(rtcSession.id, rtcSession);
+                for (const sessionData of sessionsData) {
+                    const session = RtcSession.insert(this.state, sessionData);
+                    channel.rtcSessions.set(session.id, session);
                 }
                 break;
         }
-        if (rtcSessions.length > oldCount) {
+        if (sessionsData.length > oldCount) {
             this.soundEffects.play("channel-join");
         }
-        if (rtcSessions.length < oldCount) {
+        if (sessionsData.length < oldCount) {
             this.soundEffects.play("member-leave");
         }
     }

@@ -43,14 +43,14 @@ export class CallActionList extends Component {
         }
     }
     get headphoneButtonTitle() {
-        if (this.rtc.state?.currentRtcSession.isDeaf) {
+        if (this.rtc.state?.selfSession.isDeaf) {
             return _t("Undeafen");
         } else {
             return _t("Deafen");
         }
     }
     get microphoneButtonTitle() {
-        if (this.rtc.state?.currentRtcSession.isMute) {
+        if (this.rtc.state?.selfSession.isMute) {
             return _t("Unmute");
         } else {
             return _t("Mute");
@@ -75,7 +75,7 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     async onClickDeafen(ev) {
-        if (this.rtc.state.currentRtcSession.isDeaf) {
+        if (this.rtc.state.selfSession.isDeaf) {
             this.rtc.undeafen();
         } else {
             this.rtc.deafen();
@@ -85,11 +85,11 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     onClickMicrophone(ev) {
-        if (this.rtc.state.currentRtcSession.isMute) {
-            if (this.rtc.state.currentRtcSession.isSelfMuted) {
+        if (this.rtc.state.selfSession.isMute) {
+            if (this.rtc.state.selfSession.isSelfMuted) {
                 this.rtc.unmute();
             }
-            if (this.rtc.state.currentRtcSession.isDeaf) {
+            if (this.rtc.state.selfSession.isDeaf) {
                 this.rtc.undeafen();
             }
         } else {
@@ -106,27 +106,18 @@ export class CallActionList extends Component {
      * @param {MouseEvent} ev
      */
     async onClickRejectCall(ev) {
-        if (this.rtc.state.hasPendingRtcRequest) {
+        if (this.rtc.state.hasPendingRequest) {
             return;
         }
-        await this.rtc.leaveCall(this.props.thread.id);
+        await this.rtc.leaveCall(this.props.thread);
     }
     /**
      * @param {MouseEvent} ev
      */
     async onClickToggleAudioCall(ev) {
-        if (this.rtc.state.hasPendingRtcRequest) {
+        if (this.rtc.state.hasPendingRequest) {
             return;
         }
-        await this.rtc.toggleCall(this.props.thread.id);
-    }
-    /**
-     * @param {MouseEvent} ev
-     */
-    async onClickToggleVideoCall(ev) {
-        if (this.rtc.state.hasPendingRtcRequest) {
-            return;
-        }
-        await this.rtc.toggleCall(this.props.thread.id, true);
+        await this.rtc.toggleCall(this.props.thread);
     }
 }

@@ -98,7 +98,7 @@ export class Discuss extends Component {
     }
 
     startCall() {
-        this.rtc.toggleCall(this.thread.id);
+        this.rtc.toggleCall(this.thread);
     }
 
     toggleInviteForm() {

@@ -113,7 +113,7 @@ export class ChatWindow extends Component {
     }
 
     startCall() {
-        this.rtc.toggleCall(this.props.chatWindow.thread.id);
+        this.rtc.toggleCall(this.props.chatWindow.thread);
     }
 
     startEditingLastMessageOfCurrentUser() {
