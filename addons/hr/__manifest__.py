@@ -58,7 +58,6 @@
             'hr/static/src/js/standalone_m2o_avatar_employee.js',
             'hr/static/src/js/work_permit_upload.js',
             'hr/static/src/xml/*.xml',
-            'hr/static/src/new/**/*',
         ],
         'web.qunit_suite_tests': [
             'hr/static/tests/helpers/*.js',
@@ -69,6 +68,9 @@
         'web.assets_tests': [
             'hr/static/tests/tours/hr_employee_flow.js',
             'hr/static/tests/tours/user_modify_own_profile_tour.js',
+        ],
+         'mail.assets_backend': [
+            'hr/static/src/new/**/*',
         ],
     },
     'license': 'LGPL-3',

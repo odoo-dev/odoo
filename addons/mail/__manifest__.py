@@ -124,9 +124,6 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/models/*.js',
             'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
         ],
-        'mail.assets_model_data': [
-            'mail/static/src/new/composer/emoji_data.js',
-        ],
         # Custom bundle in case we want to remove things that are later added to web.assets_common
         'mail.assets_common_discuss_public': [
             ('include', 'web.assets_common'),
@@ -207,13 +204,11 @@ For more specific needs, you may also assign custom-defined actions
             # Don't include dark mode files in light mode
             ('remove', 'mail/static/src/components/*/*.dark.scss'),
 
-            'mail/static/src/new/**/*',
-            ('remove', 'mail/static/src/new/**/*.dark.scss'),
-            ('remove', 'mail/static/src/new/composer/emoji_data.js'),
+            ('include', 'mail.assets_backend'),
         ],
         "web.dark_mode_assets_backend": [
             'mail/static/src/components/*/*.dark.scss',
-            'mail/static/src/new/**/*.dark.scss',
+            ('include', 'mail.assets_dark'),
         ],
         'web.assets_backend_prod_only': [
             'mail/static/src/main.js',
@@ -235,6 +230,35 @@ For more specific needs, you may also assign custom-defined actions
         ],
         'web.qunit_mobile_suite_tests': [
             'mail/static/tests/qunit_mobile_suite_tests/**/*.js',
+        ],
+        # new bundles
+        'mail.assets_backend': [
+            'mail/static/src/new/**/*',
+            ('remove', 'mail/static/src/new/public/**/*'),
+            ('remove', 'mail/static/src/new/**/*.dark.scss'),
+            ('remove', 'mail/static/src/new/composer/emoji_data.js'),
+        ],
+        'mail.assets_dark': [
+            'mail/static/src/new/**/*.dark.scss',
+        ],
+        'mail.assets_emoji': [
+            'mail/static/src/new/composer/emoji_data.js',
+        ],
+        'mail.assets_public': [
+            ('include', 'web.assets_common'),
+            ('include', 'web._assets_bootstrap'),
+            'web/static/src/scss/bootstrap_overridden.scss',
+            'web/static/src/webclient/webclient.scss',
+            'web/static/src/core/utils/transitions.scss',  # included early because used by other files
+            'web/static/src/core/**/*',
+            'web/static/src/env.js',
+            ('remove', 'web/static/src/legacy/js/services/ajax_service.js'),
+            ('remove', 'web/static/src/legacy/js/common_env.js'),
+            ('remove', 'web/static/src/legacy/js/widgets/translation_dialog.js'),
+            ('remove', 'web_tour/static/src/js/tour_manager.js'),
+            ('remove', 'web_tour/static/src/js/tour_service.js'),
+
+            'mail/static/src/new/public/**/*',
         ],
     },
     'license': 'LGPL-3',
