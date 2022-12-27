@@ -114,3 +114,21 @@ QUnit.test("Is closed after clicking on new message", async function (assert) {
     await click(".o-mail-messaging-menu-new-message");
     assert.containsNone(target, ".o-mail-messaging-menu");
 });
+
+QUnit.test("no 'New Message' button when discuss is open", async function (assert) {
+    const { openDiscuss, openView } = await start();
+    await click(".o_menu_systray i[aria-label='Messages']");
+    assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(New Message)");
+
+    await openDiscuss();
+    assert.containsNone(target, ".o-mail-messaging-menu-topbar button:contains(New Message)");
+
+    await openView({
+        res_model: "res.partner",
+        views: [[false, "form"]],
+    });
+    assert.containsOnce(target, ".o-mail-messaging-menu-topbar button:contains(New Message)");
+
+    await openDiscuss();
+    assert.containsNone(target, ".o-mail-messaging-menu-topbar button:contains(New Message)");
+});

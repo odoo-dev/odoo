@@ -42,7 +42,6 @@ export class MessagingMenu extends Component {
     openDiscussion(threadLocalId) {
         this.messaging.openDiscussion(threadLocalId);
         this.close();
-
     }
 
     onClickNewMessage() {
