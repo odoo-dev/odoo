@@ -386,5 +386,9 @@ export function useSelection({ refName, model, preserveOnClickAwayPredicate = ()
         restore() {
             ref.el?.setSelectionRange(model.start, model.end, model.direction);
         },
+        moveCursor(position) {
+            model.start = model.end = position;
+            ref.el.selectionStart = ref.el.selectionEnd = position;
+        }
     };
 }

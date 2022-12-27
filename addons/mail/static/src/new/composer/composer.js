@@ -99,6 +99,7 @@ export class Composer extends Component {
         useEffect(
             (focus) => {
                 if (focus && this.ref.el) {
+                    this.selection.restore();
                     this.ref.el.focus();
                 }
             },
@@ -124,8 +125,7 @@ export class Composer extends Component {
                 if (!this.props.composer.forceCursorMove) {
                     return;
                 }
-                this.ref.el.selectionStart = this.props.composer.selection.start;
-                this.ref.el.selectionEnd = this.props.composer.selection.end;
+                this.selection.restore();
                 this.props.composer.forceCursorMove = false;
             },
             () => [this.props.composer.forceCursorMove]
@@ -411,6 +411,7 @@ export class Composer extends Component {
         const firstPart = textContent.slice(0, this.props.composer.selection.start);
         const secondPart = textContent.slice(this.props.composer.selection.end, textContent.length);
         this.props.composer.textInputContent = firstPart + str + secondPart;
+        this.selection.moveCursor((firstPart + str).length);
         this.state.autofocus++;
     }
 }
