@@ -8,7 +8,6 @@ import { getAdvanceTime } from "@mail/../tests/helpers/time_control";
 import { getWebClientReady } from "@mail/../tests/helpers/webclient_setup";
 
 import { registry } from "@web/core/registry";
-import { wowlServicesSymbol } from "@web/legacy/utils";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { session as sessionInfo } from "@web/session";
 import { getFixture, makeDeferred, patchWithCleanup } from "@web/../tests/helpers/utils";
@@ -17,10 +16,12 @@ import { doAction, getActionManagerServerData } from "@web/../tests/webclient/he
 import { App, EventBus } from "@odoo/owl";
 import {
     registryNamesToCloneWithCleanup,
+    utils,
     clearRegistryWithCleanup,
 } from "@web/../tests/helpers/mock_env";
 import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 import { browser } from "@web/core/browser/browser";
+const { prepareRegistriesWithCleanup } = utils;
 const { afterNextRender } = App;
 
 // load emoji data once, when the test suite starts.
@@ -276,6 +277,7 @@ function resetRegistries() {
     for (const name of categories) {
         clearRegistryWithCleanup(registry.category(name));
     }
+    prepareRegistriesWithCleanup();
 }
 
 let tabs = [];

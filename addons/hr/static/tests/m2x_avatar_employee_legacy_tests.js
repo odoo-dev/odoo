@@ -17,7 +17,7 @@ QUnit.module('hr', {}, function () {
         },
     });
 
-    QUnit.test('many2one_avatar_employee: click on an employee not associated with a user', async function (assert) {
+    QUnit.skipRefactoring('many2one_avatar_employee: click on an employee not associated with a user', async function (assert) {
         assert.expect(6);
 
         const pyEnv = await startServer();
