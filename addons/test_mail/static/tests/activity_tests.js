@@ -339,7 +339,7 @@ QUnit.test("activity view: no group_by_menu and no comparison_menu", async funct
     );
 });
 
-QUnit.test('activity view: search more to schedule an activity for a record of a respecting model', async function (assert) {
+QUnit.skipRefactoring('activity view: search more to schedule an activity for a record of a respecting model', async function (assert) {
     assert.expect(5);
     const mailTestActivityId1 = pyEnv['mail.test.activity'].create({ name: 'MailTestActivity 3' });
     Object.assign(serverData.views, {
