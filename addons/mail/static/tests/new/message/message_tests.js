@@ -2,14 +2,14 @@
 
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { Discuss } from "@mail/new/discuss/discuss";
-import { startServer, start } from "@mail/../tests/helpers/test_utils";
+import { startServer, start, click, insertText } from "@mail/../tests/helpers/test_utils";
 
 import { deserializeDateTime } from "@web/core/l10n/dates";
 
 const { DateTime } = luxon;
 
 import {
-    click,
+    click as webClick,
     editInput,
     getFixture,
     mount,
@@ -40,7 +40,7 @@ QUnit.test("Start edition on click edit", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
     assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
     assert.strictEqual(
@@ -61,7 +61,7 @@ QUnit.test("Cursor is at end of composer input on edit", async (assert) => {
         model: "mail.channel",
         message_type: "comment",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -85,9 +85,9 @@ QUnit.test("Stop edition on click cancel", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
-    await click($("a:contains('cancel')")[0]);
+    await webClick($("a:contains('cancel')")[0]);
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
 });
 
@@ -100,7 +100,7 @@ QUnit.test("Stop edition on press escape", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
     await triggerHotkey("Escape", false);
     await nextTick();
@@ -116,9 +116,9 @@ QUnit.test("Stop edition on click save", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
-    await click($("a:contains('save')")[0]);
+    await webClick($("a:contains('save')")[0]);
     assert.containsNone(target, ".o-mail-message-editable-content .o-mail-composer");
 });
 
@@ -131,7 +131,7 @@ QUnit.test("Stop edition on press enter", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
     await triggerHotkey("Enter", false);
     await nextTick();
@@ -147,7 +147,7 @@ QUnit.test("Stop edition on click away", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
     await triggerEvent(target, ".o-mail-discuss-sidebar", "click");
     await nextTick();
@@ -167,12 +167,12 @@ QUnit.test("Do not stop edition on click away when clicking on emoji", async (as
     await mount(PopoverContainer, target, { env, props });
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
-    await click(target.querySelector("i[aria-label='Emojis']").closest("button"));
+    await webClick(target.querySelector("i[aria-label='Emojis']").closest("button"));
     await loadEmoji(); // wait for emoji being loaded (required for rendering)
     await nextTick(); // wait for following rendering
-    await click(target.querySelector(".o-mail-emoji-picker-content .o-emoji"));
+    await webClick(target.querySelector(".o-mail-emoji-picker-content .o-emoji"));
     assert.containsOnce(target, ".o-mail-message-editable-content .o-mail-composer");
 });
 
@@ -185,10 +185,10 @@ QUnit.test("Save on click", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
     await editInput(target, ".o-mail-message textarea", "Goodbye World");
-    await click($("a:contains('save')")[0]);
+    await webClick($("a:contains('save')")[0]);
     assert.strictEqual(document.querySelector(".o-mail-message-body").innerText, "Goodbye World");
 });
 
@@ -206,9 +206,9 @@ QUnit.test("Do not call server on save if no changes", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
-    await click($("a:contains('save')")[0]);
+    await webClick($("a:contains('save')")[0]);
     await nextTick();
     assert.verifySteps([]);
 });
@@ -222,7 +222,7 @@ QUnit.test("Scroll bar to the top when edit starts", async (assert) => {
     env.services["mail.messaging"].setDiscussThread(createLocalId("mail.channel", 1));
     await mount(Discuss, target, { env });
     target.querySelector(".o-mail-message-actions").classList.remove("invisible");
-    await click(target, "i[aria-label='Edit']");
+    await webClick(target, "i[aria-label='Edit']");
 
     const messageTextarea = document.querySelector(
         ".o-mail-message-editable-content .o-mail-composer-textarea"
@@ -248,7 +248,7 @@ QUnit.test("Other messages are grayed out when replying to another one", async f
         { body: "Hello world", res_id: channelId, model: "mail.channel" },
         { body: "Goodbye world", res_id: channelId, model: "mail.channel" },
     ]);
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -281,7 +281,7 @@ QUnit.test("Parent message body is displayed on replies", async function (assert
         res_id: channelId,
         model: "mail.channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -311,7 +311,7 @@ QUnit.test(
             message_type: "comment",
             model: "mail.channel",
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: {
                     active_id: `mail.channel_${channelId}`,
@@ -346,7 +346,7 @@ QUnit.test("Deleting parent message of a reply should adapt reply visual", async
         message_type: "comment",
         model: "mail.channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -379,7 +379,7 @@ QUnit.test("Can open emoji picker after edit mode", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -405,7 +405,7 @@ QUnit.test("Can add a reaction", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -430,7 +430,7 @@ QUnit.test("Can remove a reaction", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -456,7 +456,7 @@ QUnit.test("Two users reacting with the same emoji", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { click, env, openDiscuss } = await start({
+    const { env, openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -496,7 +496,7 @@ QUnit.test("Reaction summary", async (assert) => {
         message_type: "comment",
         model: "mail.channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -536,7 +536,7 @@ QUnit.test("Add the same reaction twice from the emoji picker", async (assert) =
         message_type: "comment",
         model: "mail.channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${channelId}`,
@@ -599,7 +599,7 @@ QUnit.test("basic rendering of message", async function (assert) {
 QUnit.test("should not be able to reply to temporary/transient messages", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -680,7 +680,7 @@ QUnit.test("redirect to author (open chat)", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId1,
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -706,7 +706,7 @@ QUnit.test("toggle_star message", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId1,
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -766,7 +766,7 @@ QUnit.test(
                 res_id: mailChannelId1,
             },
         ]);
-        const { click } = await start();
+        await start();
         await click(".o_menu_systray i[aria-label='Messages']");
         await click(".o-mail-notification-item");
         assert.containsOnce(target, ".o-mail-own-name");
@@ -795,7 +795,7 @@ QUnit.test(
                 res_id: mailChannelId1,
             },
         ]);
-        const { click } = await start();
+        await start();
         await click(".o_menu_systray i[aria-label='Messages']");
         await click(".o-mail-notification-item");
         assert.containsNone(target, ".o-mail-own-name");

@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
+import { afterNextRender, start } from "@mail/../tests/helpers/test_utils";
+import { getFixture } from "@web/../tests/helpers/utils";
+
 let target;
 QUnit.module("messaging", {
     async beforeEach() {
         target = getFixture();
     },
 });
-import { afterNextRender, start } from "@mail/../tests/helpers/test_utils";
-
-import { getFixture } from "@web/../tests/helpers/utils";
 
 QUnit.test(
     "Posting a message to a partner out of discuss should open a chat window",

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -15,7 +15,7 @@ QUnit.test("basic rendering", async function (assert) {
     const channelId = pyEnv["mail.channel"].create({
         name: "General",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: { context: { active_id: `mail.channel_${channelId}` } },
     });
     await openDiscuss();
@@ -43,7 +43,7 @@ QUnit.test(
         const channelId = pyEnv["mail.channel"].create({
             name: "General",
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: { context: { active_id: `mail.channel_${channelId}` } },
         });
         await openDiscuss();

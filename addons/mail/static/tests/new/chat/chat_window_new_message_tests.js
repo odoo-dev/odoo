@@ -1,7 +1,13 @@
 /** @odoo-module **/
 
 import { patchUiSize } from "@mail/../tests/helpers/patch_ui_size";
-import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import {
+    afterNextRender,
+    click,
+    insertText,
+    start,
+    startServer,
+} from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 import { makeDeferred } from "@mail/utils/deferred";
 import {
@@ -18,7 +24,7 @@ QUnit.module("chat window: new message", {
 });
 
 QUnit.test("basic rendering", async function (assert) {
-    const { click } = await start();
+    await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-messaging-menu-new-message");
     assert.containsOnce(target, ".o-mail-chat-window");
@@ -38,7 +44,7 @@ QUnit.test("basic rendering", async function (assert) {
 });
 
 QUnit.test("focused on open [REQUIRE FOCUS]", async function (assert) {
-    const { click } = await start();
+    await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-messaging-menu-new-message");
     assert.strictEqual(
@@ -48,7 +54,7 @@ QUnit.test("focused on open [REQUIRE FOCUS]", async function (assert) {
 });
 
 QUnit.test("close", async function (assert) {
-    const { click } = await start();
+    await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-messaging-menu-new-message");
     await click(".o-mail-chat-window-header .o-mail-command[title='Close chat window']");
@@ -56,7 +62,7 @@ QUnit.test("close", async function (assert) {
 });
 
 QUnit.test("fold", async function (assert) {
-    const { click } = await start();
+    await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-messaging-menu-new-message");
     assert.containsOnce(target, ".o-mail-chat-window-content");
@@ -114,7 +120,7 @@ QUnit.test(
                 1920,
             "should have enough space to open 3 chat windows simultaneously"
         );
-        const { click, insertText } = await start({
+        await start({
             mockRPC(route, args) {
                 if (args.method === "im_search") {
                     imSearchDef.resolve();
@@ -199,7 +205,7 @@ QUnit.test(
             channel_type: "chat",
             name: "Partner 131",
         });
-        const { click, insertText } = await start();
+        await start();
         await click(".o_menu_systray i[aria-label='Messages']");
         await click(".o-mail-messaging-menu-new-message");
         await insertText(".o-mail-channel-selector", "131");
@@ -219,7 +225,7 @@ QUnit.test(
         const resPartnerId1 = pyEnv["res.partner"].create({ name: "Partner 131" });
         pyEnv["res.users"].create({ partner_id: resPartnerId1 });
         const imSearchDef = makeDeferred();
-        const { click, insertText } = await start({
+        await start({
             mockRPC(route, args) {
                 if (args.method === "im_search") {
                     imSearchDef.resolve();

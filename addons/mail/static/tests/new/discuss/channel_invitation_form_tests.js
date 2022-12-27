@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, insertText, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -28,7 +28,7 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             hasTimeControl: true,
             discuss: {
                 params: {
@@ -64,7 +64,7 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { click, insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId}`,
@@ -97,7 +97,7 @@ QUnit.test("Invitation form should display channel group restriction", async fun
         channel_type: "channel",
         group_public_id: resGroupId1,
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,

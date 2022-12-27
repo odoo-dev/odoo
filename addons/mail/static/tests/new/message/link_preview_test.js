@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 QUnit.module("link preview");
 
@@ -189,7 +189,7 @@ QUnit.test("Remove link preview Gif", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss, click } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId}`,
@@ -216,7 +216,7 @@ QUnit.test("Remove link preview card", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss, click } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId}`,
@@ -239,7 +239,7 @@ QUnit.test("Remove link preview video", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss, click } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId}`,
@@ -262,7 +262,7 @@ QUnit.test("Remove link preview image", async function (assert) {
         model: "mail.channel",
         res_id: mailChannelId,
     });
-    const { openDiscuss, click } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId}`,

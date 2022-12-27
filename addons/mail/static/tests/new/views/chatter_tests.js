@@ -4,15 +4,17 @@ import { Chatter } from "@mail/new/views/chatter";
 import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
 import {
     afterNextRender,
+    click,
     dragenterFiles,
     dropFiles,
+    insertText,
     start,
     startServer,
     waitFormViewLoaded,
 } from "@mail/../tests/helpers/test_utils";
 
 import {
-    click,
+    click as webClick,
     editInput,
     nextTick,
     getFixture,
@@ -88,7 +90,7 @@ QUnit.test("composer is closed when creating record", async (assert) => {
     const parent = await mount(ChatterParent, target, { env, props });
     assert.containsNone(target, ".o-mail-composer");
 
-    await click($(target).find("button:contains(Send message)")[0]);
+    await webClick($(target).find("button:contains(Send message)")[0]);
     assert.containsOnce(target, ".o-mail-composer");
 
     parent.state.resId = false;
@@ -105,7 +107,7 @@ QUnit.test("composer has proper placeholder when sending message", async (assert
     });
     assert.containsNone(target, ".o-mail-composer");
 
-    await click($(target).find("button:contains(Send message)")[0]);
+    await webClick($(target).find("button:contains(Send message)")[0]);
     assert.containsOnce(target, ".o-mail-composer");
     assert.hasAttrValue(
         target.querySelector("textarea"),
@@ -123,7 +125,7 @@ QUnit.test("composer has proper placeholder when logging note", async (assert) =
     });
     assert.containsNone(target, ".o-mail-composer");
 
-    await click($(target).find("button:contains(Log note)")[0]);
+    await webClick($(target).find("button:contains(Log note)")[0]);
     assert.containsOnce(target, ".o-mail-composer");
     assert.hasAttrValue(target.querySelector("textarea"), "placeholder", "Log an internal note...");
 });
@@ -142,11 +144,11 @@ QUnit.test("send/log buttons are properly styled", async (assert) => {
     assert.ok(sendMsgBtn.classList.contains("btn-odoo"));
     assert.notOk(sendNoteBtn.classList.contains("btn-odoo"));
 
-    await click(sendNoteBtn);
+    await webClick(sendNoteBtn);
     assert.notOk(sendMsgBtn.classList.contains("btn-odoo"));
     assert.ok(sendNoteBtn.classList.contains("btn-odoo"));
 
-    await click(sendMsgBtn);
+    await webClick(sendMsgBtn);
     assert.ok(sendMsgBtn.classList.contains("btn-odoo"));
     assert.notOk(sendNoteBtn.classList.contains("btn-odoo"));
 });
@@ -163,20 +165,20 @@ QUnit.test("composer is focused", async (assert) => {
     const sendMsgBtn = $(target).find("button:contains(Send message)")[0];
     const sendNoteBtn = $(target).find("button:contains(Log note)")[0];
 
-    await click(sendMsgBtn);
+    await webClick(sendMsgBtn);
     const composer = target.querySelector(".o-mail-composer textarea");
     assert.strictEqual(document.activeElement, composer);
 
     // unfocus composer
     composer.blur();
     assert.notEqual(document.activeElement, composer);
-    await click(sendNoteBtn);
+    await webClick(sendNoteBtn);
     assert.strictEqual(document.activeElement, composer);
 
     // unfocus composer
     composer.blur();
     assert.notEqual(document.activeElement, composer);
-    await click(sendMsgBtn);
+    await webClick(sendMsgBtn);
     assert.strictEqual(document.activeElement, composer);
 });
 
@@ -187,7 +189,7 @@ QUnit.test("displayname is used when sending a message", async (assert) => {
         env,
         props: { resId: 43, resModel: "somemodel", displayName: "Gnargl", hasActivity: true },
     });
-    await click($(target).find("button:contains(Send message)")[0]);
+    await webClick($(target).find("button:contains(Send message)")[0]);
     const msg = $(target).find("small:contains(Gnargl)")[0];
     assert.ok(msg);
 });
@@ -221,13 +223,13 @@ QUnit.test("can post a message on a record thread", async (assert) => {
     });
 
     assert.containsNone(target, ".o-mail-composer");
-    await click($(target).find("button:contains(Send message)")[0]);
+    await webClick($(target).find("button:contains(Send message)")[0]);
     assert.containsOnce(target, ".o-mail-composer");
 
     await editInput(target, "textarea", "hey");
 
     assert.containsNone(target, ".o-mail-message");
-    await click($(target).find(".o-mail-composer button:contains(Send)")[0]);
+    await webClick($(target).find(".o-mail-composer button:contains(Send)")[0]);
     assert.containsOnce(target, ".o-mail-message");
 
     assert.verifySteps([
@@ -268,13 +270,13 @@ QUnit.test("can post a note on a record thread", async (assert) => {
     });
 
     assert.containsNone(target, ".o-mail-composer");
-    await click($(target).find("button:contains(Log note)")[0]);
+    await webClick($(target).find("button:contains(Log note)")[0]);
     assert.containsOnce(target, ".o-mail-composer");
 
     await editInput(target, "textarea", "hey");
 
     assert.containsNone(target, ".o-mail-message");
-    await click($(target).find(".o-mail-composer button:contains(Send)")[0]);
+    await webClick($(target).find(".o-mail-composer button:contains(Send)")[0]);
     assert.containsOnce(target, ".o-mail-message");
 
     assert.verifySteps([
@@ -302,7 +304,7 @@ QUnit.test("No attachment loading spinner when creating records", async (assert)
 QUnit.test(
     "No attachment loading spinner when switching from loading record to creation of record",
     async (assert) => {
-        const { click, openFormView, pyEnv } = await start({
+        const { openFormView, pyEnv } = await start({
             async mockRPC(route) {
                 if (route === "/mail/thread/data") {
                     await new Promise(() => {});
@@ -327,7 +329,7 @@ QUnit.test(
     "Composer toggle state is kept when switching from aside to bottom",
     async function (assert) {
         patchUiSize({ size: SIZES.XXL });
-        const { click, openFormView, pyEnv } = await start();
+        const { openFormView, pyEnv } = await start();
         const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
         await openFormView({
             res_model: "res.partner",
@@ -345,7 +347,7 @@ QUnit.test(
 
 QUnit.test("Textarea content is kept when switching from aside to bottom", async function (assert) {
     patchUiSize({ size: SIZES.XXL });
-    const { click, openFormView, pyEnv } = await start();
+    const { openFormView, pyEnv } = await start();
     const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
     await openFormView({
         res_model: "res.partner",
@@ -363,7 +365,7 @@ QUnit.test("Textarea content is kept when switching from aside to bottom", async
 
 QUnit.test("Composer type is kept when switching from aside to bottom", async function (assert) {
     patchUiSize({ size: SIZES.XXL });
-    const { click, openFormView, pyEnv } = await start();
+    const { openFormView, pyEnv } = await start();
     const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
     await openFormView({
         res_model: "res.partner",
@@ -475,7 +477,7 @@ QUnit.test("should not display user notification messages in chatter", async fun
 QUnit.test('post message with "CTRL-Enter" keyboard shortcut in chatter', async function (assert) {
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({});
-    const { click, insertText, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",
@@ -578,7 +580,7 @@ QUnit.test("show attachment box", async function (assert) {
             res_model: "res.partner",
         },
     ]);
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",
@@ -597,7 +599,7 @@ QUnit.test("show attachment box", async function (assert) {
 QUnit.test("composer show/hide on log note/send message [REQUIRE FOCUS]", async function (assert) {
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({});
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",
@@ -634,7 +636,7 @@ QUnit.test("composer show/hide on log note/send message [REQUIRE FOCUS]", async 
 QUnit.test('do not post message with "Enter" keyboard shortcut', async function (assert) {
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({});
-    const { click, insertText, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",

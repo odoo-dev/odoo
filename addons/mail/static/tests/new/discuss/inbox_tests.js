@@ -1,6 +1,12 @@
 /** @odoo-module **/
 
-import { nextAnimationFrame, start, startServer } from "@mail/../tests/helpers/test_utils";
+import {
+    click,
+    insertText,
+    nextAnimationFrame,
+    start,
+    startServer,
+} from "@mail/../tests/helpers/test_utils";
 
 import { getFixture } from "@web/../tests/helpers/utils";
 
@@ -28,7 +34,7 @@ QUnit.test("reply: discard on reply button toggle", async function (assert) {
         notification_type: "inbox",
         res_partner_id: pyEnv.currentPartnerId,
     });
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, ".o-mail-message");
 
@@ -54,7 +60,7 @@ QUnit.test("reply: discard on click away", async function (assert) {
         notification_type: "inbox",
         res_partner_id: pyEnv.currentPartnerId,
     });
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, ".o-mail-message");
 
@@ -103,7 +109,7 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { click, insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             async mockRPC(route, args) {
                 if (route === "/mail/message/post") {
                     assert.step("/mail/message/post");
@@ -141,7 +147,7 @@ QUnit.test(
             notification_type: "inbox",
             res_partner_id: pyEnv.currentPartnerId,
         });
-        const { click, insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             async mockRPC(route, args) {
                 if (route === "/mail/message/post") {
                     assert.step("/mail/message/post");
@@ -464,7 +470,7 @@ QUnit.test("inbox: mark all messages as read", async function (assert) {
             res_partner_id: pyEnv.currentPartnerId,
         },
     ]);
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, 'button[data-mailbox="inbox"] .badge:contains(2)');
     assert.containsOnce(

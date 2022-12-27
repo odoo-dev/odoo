@@ -1,6 +1,12 @@
 /* @odoo-module */
 
-import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import {
+    afterNextRender,
+    click,
+    insertText,
+    start,
+    startServer,
+} from "@mail/../tests/helpers/test_utils";
 
 import { getFixture, triggerHotkey } from "@web/../tests/helpers/utils";
 
@@ -15,7 +21,7 @@ QUnit.module("emoji", {
 QUnit.test("search emoji from keywords", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -29,7 +35,7 @@ QUnit.test("search emoji from keywords", async function (assert) {
 QUnit.test("search emoji from keywords with special regex character", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -43,7 +49,7 @@ QUnit.test("search emoji from keywords with special regex character", async func
 QUnit.test("Press Escape in emoji picker closes the emoji picker", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },

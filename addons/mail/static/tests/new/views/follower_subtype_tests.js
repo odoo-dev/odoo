@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -26,7 +26,7 @@ QUnit.test("simplest layout of a followed subtype", async function (assert) {
     pyEnv["res.partner"].write([pyEnv.currentPartnerId], {
         message_follower_ids: [followerId],
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         // FIXME: should adapt mock server code to provide "hasWriteAccess"
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {
@@ -81,7 +81,7 @@ QUnit.test("simplest layout of a not followed subtype", async function (assert) 
     pyEnv["res.partner"].write([pyEnv.currentPartnerId], {
         message_follower_ids: [followerId],
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         // FIXME: should adapt mock server code to provide "hasWriteAccess"
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {
@@ -122,7 +122,7 @@ QUnit.test("toggle follower subtype checkbox", async function (assert) {
     pyEnv["res.partner"].write([pyEnv.currentPartnerId], {
         message_follower_ids: [followerId],
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         // FIXME: should adapt mock server code to provide "hasWriteAccess"
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {

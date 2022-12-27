@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { ROUTES_TO_IGNORE } from "@mail/../tests/helpers/webclient_setup";
 
 import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
@@ -182,7 +182,7 @@ QUnit.test("list activity widget: open dropdown", async function (assert) {
     const views = {
         "res.users,false,list": '<list><field name="activity_ids" widget="list_activity"/></list>',
     };
-    const { click, openView } = await start({
+    const { openView } = await start({
         mockRPC: function (route, args) {
             if (
                 args.method !== "get_views" &&

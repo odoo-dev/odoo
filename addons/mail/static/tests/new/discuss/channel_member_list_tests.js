@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -49,7 +49,7 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId}`,
@@ -73,7 +73,7 @@ QUnit.test("should have correct members in member list", async function (assert)
         ],
         channel_type: "channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId}`,
@@ -106,7 +106,7 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId}`,
@@ -133,7 +133,7 @@ QUnit.test(
             ],
             channel_type: "channel",
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId}`,
@@ -161,7 +161,7 @@ QUnit.test(
             name: "TestChanel",
             channel_type: "channel",
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId}`,
@@ -187,7 +187,7 @@ QUnit.test("Load more button should load more members", async function (assert) 
         name: "TestChanel",
         channel_type: "channel",
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId}`,

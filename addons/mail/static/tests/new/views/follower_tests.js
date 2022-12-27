@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { makeDeferred } from "@mail/utils/deferred";
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 
@@ -21,7 +21,7 @@ QUnit.test("base rendering not editable", async function (assert) {
         res_id: threadId,
         res_model: "res.partner",
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         async mockRPC(route, args, performRpc) {
             if (route === "/mail/thread/data") {
                 // mimic user without write access
@@ -52,7 +52,7 @@ QUnit.test("base rendering editable", async function (assert) {
         res_id: threadId,
         res_model: "res.partner",
     });
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: threadId,
         res_model: "res.partner",
@@ -77,7 +77,7 @@ QUnit.test("click on partner follower details", async function (assert) {
         res_model: "res.partner",
     });
     const openFormDef = makeDeferred();
-    const { click, env, openView } = await start();
+    const { env, openView } = await start();
     await openView({
         res_id: threadId,
         res_model: "res.partner",
@@ -110,7 +110,7 @@ QUnit.skipRefactoring("click on edit follower", async function (assert) {
         res_id: threadId,
         res_model: "res.partner",
     });
-    const { click, messaging, openView } = await start({
+    const { messaging, openView } = await start({
         async mockRPC(route, args) {
             if (route.includes("/mail/read_subscription_data")) {
                 assert.step("fetch_subtypes");
@@ -150,7 +150,7 @@ QUnit.test("edit follower and close subtype dialog", async function (assert) {
         res_id: threadId,
         res_model: "res.partner",
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         async mockRPC(route, args) {
             if (route.includes("/mail/read_subscription_data")) {
                 assert.step("fetch_subtypes");

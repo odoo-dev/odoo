@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, insertText, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 
@@ -21,7 +21,7 @@ QUnit.test("activity mark done popover simplest layout", async function (assert)
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_model: "res.partner",
         res_id: resPartnerId1,
@@ -46,7 +46,7 @@ QUnit.test("activity with force next mark done popover simplest layout", async f
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_model: "res.partner",
         res_id: resPartnerId1,
@@ -70,7 +70,7 @@ QUnit.test("activity mark done popover mark done without feedback", async functi
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         async mockRPC(route, args) {
             if (route === "/web/dataset/call_kw/mail.activity/action_feedback") {
                 assert.step("action_feedback");
@@ -109,7 +109,7 @@ QUnit.test("activity mark done popover mark done with feedback", async function 
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, insertText, openView } = await start({
+    const { openView } = await start({
         async mockRPC(route, args) {
             if (route === "/web/dataset/call_kw/mail.activity/action_feedback") {
                 assert.step("action_feedback");
@@ -150,7 +150,7 @@ QUnit.test("activity mark done popover mark done and schedule next", async funct
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, env, insertText, openView } = await start({
+    const { env, openView } = await start({
         async mockRPC(route, args) {
             if (route === "/web/dataset/call_kw/mail.activity/action_feedback_schedule_next") {
                 assert.step("action_feedback_schedule_next");
@@ -199,7 +199,7 @@ QUnit.test(
             res_id: resPartnerId1,
             res_model: "res.partner",
         });
-        const { click, env, openView } = await start({
+        const { env, openView } = await start({
             async mockRPC(route, args) {
                 if (route === "/web/dataset/call_kw/mail.activity/action_feedback_schedule_next") {
                     return { type: "ir.actions.act_window" };

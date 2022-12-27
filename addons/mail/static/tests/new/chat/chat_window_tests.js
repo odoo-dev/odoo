@@ -3,6 +3,8 @@
 import { patchUiSize, SIZES } from "@mail/../tests/helpers/patch_ui_size";
 import {
     afterNextRender,
+    click,
+    insertText,
     nextAnimationFrame,
     start,
     startServer,
@@ -42,16 +44,13 @@ QUnit.test(
         const { env } = await start();
 
         // simulate receiving a message
-        env.services.rpc(
-            "/mail/chat_post",
-            {
-                context: {
-                    mockedUserId: resUsersId1,
-                },
-                message_content: "hu",
-                uuid: "channel-10-uuid",
+        env.services.rpc("/mail/chat_post", {
+            context: {
+                mockedUserId: resUsersId1,
             },
-        );
+            message_content: "hu",
+            uuid: "channel-10-uuid",
+        });
         await nextAnimationFrame();
         assert.containsNone(target, ".o-mail-chat-window");
     }
@@ -74,7 +73,7 @@ QUnit.test(
             ],
         });
         patchUiSize({ size: SIZES.SM });
-        const { click, insertText } = await start();
+        await start();
         await click(".o_menu_systray i[aria-label='Messages']");
         await click(".o-mail-messaging-menu .o-mail-notification-item");
         await insertText(".o-mail-chat-window .o-mail-composer-textarea", "Test");
@@ -97,7 +96,7 @@ QUnit.test("load messages from opening chat window from messaging menu", async f
             res_id: mailChannelId1,
         });
     }
-    const { click } = await start();
+    await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-messaging-menu .o-mail-notification-item");
     assert.containsN(target, ".o-mail-message", 21);
@@ -106,7 +105,7 @@ QUnit.test("load messages from opening chat window from messaging menu", async f
 QUnit.test("chat window: basic rendering", async function (assert) {
     const pyEnv = await startServer();
     pyEnv["mail.channel"].create({ name: "General" });
-    const { click } = await start();
+    await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-messaging-menu .o-mail-notification-item");
     assert.containsOnce(target, ".o-mail-chat-window");
@@ -143,7 +142,7 @@ QUnit.test(
             ],
         });
         patchUiSize({ size: SIZES.SM });
-        const { click } = await start();
+        await start();
         await click(".o_menu_systray i[aria-label='Messages']");
         await click(".o-mail-messaging-menu .o-mail-notification-item");
         const [member] = pyEnv["mail.channel.member"].searchRead([
@@ -157,7 +156,7 @@ QUnit.test(
 QUnit.test("chat window: fold", async function (assert) {
     const pyEnv = await startServer();
     pyEnv["mail.channel"].create({});
-    const { click } = await start({
+    await start({
         mockRPC(route, args) {
             if (args.method === "channel_fold") {
                 assert.step(`rpc:${args.method}/${args.kwargs.state}`);
@@ -184,7 +183,7 @@ QUnit.test("chat window: fold", async function (assert) {
 QUnit.test("chat window: open / close", async function (assert) {
     const pyEnv = await startServer();
     pyEnv["mail.channel"].create({});
-    const { click } = await start({
+    await start({
         mockRPC(route, args) {
             if (args.method === "channel_fold") {
                 assert.step(`rpc:channel_fold/${args.kwargs.state}`);
@@ -226,7 +225,7 @@ QUnit.test(
             ],
         });
         patchUiSize({ size: SIZES.SM });
-        const { click } = await start();
+        await start();
         await click("button i[aria-label='Messages']");
         await click(".o-mail-notification-item");
         assert.containsOnce(target, ".o-mail-chat-window");
@@ -255,7 +254,7 @@ QUnit.test("chat window: close on ESCAPE", async function (assert) {
             ],
         ],
     });
-    const { click } = await start({
+    await start({
         mockRPC(route, args) {
             if (args.method === "channel_fold") {
                 assert.step(`rpc:channel_fold/${args.kwargs.state}`);
@@ -285,7 +284,7 @@ QUnit.test(
                 [0, 0, { partner_id: resPartnerId1 }],
             ],
         });
-        const { insertText } = await start();
+        await start();
         await insertText(".o-mail-composer-textarea", "@");
         await afterNextRender(() => triggerHotkey("Escape"));
         assert.containsOnce(target, ".o-mail-chat-window");
@@ -303,7 +302,7 @@ QUnit.test(
                 1920,
             "should have enough space to open 2 chat windows simultaneously"
         );
-        const { click } = await start();
+        await start();
         await click("button i[aria-label='Messages']");
         await click(".o-mail-notification-item:contains(mailChannel1)");
         assert.containsOnce(target, ".o-mail-chat-window");
@@ -357,7 +356,7 @@ QUnit.test("open 3 different chat windows: not enough screen width", async funct
             900,
         "should not have enough space to open 3 chat windows simultaneously"
     );
-    const { click } = await start();
+    await start();
 
     // open, from systray menu, chat windows of channels with Id 1, 2, then 3
     await click("button i[aria-label='Messages']");

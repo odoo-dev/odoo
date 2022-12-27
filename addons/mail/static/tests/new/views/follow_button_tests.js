@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -60,7 +60,7 @@ QUnit.test("hover following button", async function (assert) {
 });
 
 QUnit.test('click on "follow" button', async function (assert) {
-    const { click, openView, pyEnv } = await start();
+    const { openView, pyEnv } = await start();
     await openView({
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
@@ -82,7 +82,7 @@ QUnit.test('click on "unfollow" button', async function (assert) {
         res_id: threadId,
         res_model: "res.partner",
     });
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: threadId,
         res_model: "res.partner",

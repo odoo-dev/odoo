@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -60,7 +60,7 @@ QUnit.test("rendering with multiple partner followers", async function (assert) 
             res_model: "res.partner",
         },
     ]);
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: resPartnerId3,
         res_model: "res.partner",

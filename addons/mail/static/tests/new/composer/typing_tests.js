@@ -3,6 +3,7 @@
 import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 import {
     afterNextRender,
+    insertText,
     nextAnimationFrame,
     start,
     startServer,
@@ -41,16 +42,13 @@ QUnit.test('receive other member typing status "is typing"', async function (ass
 
     // simulate receive typing notification from demo
     await afterNextRender(() =>
-        env.services.rpc(
-            "/mail/channel/notify_typing",
-            {
-                channel_id: mailChannelId1,
-                context: {
-                    mockedPartnerId: resPartnerId1,
-                },
-                is_typing: true,
+        env.services.rpc("/mail/channel/notify_typing", {
+            channel_id: mailChannelId1,
+            context: {
+                mockedPartnerId: resPartnerId1,
             },
-        )
+            is_typing: true,
+        })
     );
     assert.strictEqual($(target).find(".o-mail-composer-is-typing").text(), "Demo is typing...");
 });
@@ -77,16 +75,13 @@ QUnit.test(
 
         // simulate receive typing notification from demo "is typing"
         await afterNextRender(() =>
-            env.services.rpc(
-                "/mail/channel/notify_typing",
-                {
-                    channel_id: mailChannelId1,
-                    context: {
-                        mockedPartnerId: resPartnerId1,
-                    },
-                    is_typing: true,
+            env.services.rpc("/mail/channel/notify_typing", {
+                channel_id: mailChannelId1,
+                context: {
+                    mockedPartnerId: resPartnerId1,
                 },
-            )
+                is_typing: true,
+            })
         );
         assert.strictEqual(
             $(target).find(".o-mail-composer-is-typing").text(),
@@ -95,16 +90,13 @@ QUnit.test(
 
         // simulate receive typing notification from demo "is no longer typing"
         await afterNextRender(() =>
-            env.services.rpc(
-                "/mail/channel/notify_typing",
-                {
-                    channel_id: mailChannelId1,
-                    context: {
-                        mockedPartnerId: resPartnerId1,
-                    },
-                    is_typing: false,
+            env.services.rpc("/mail/channel/notify_typing", {
+                channel_id: mailChannelId1,
+                context: {
+                    mockedPartnerId: resPartnerId1,
                 },
-            )
+                is_typing: false,
+            })
         );
         assert.strictEqual($(target).find(".o-mail-composer-is-typing").text(), "");
     }
@@ -134,16 +126,13 @@ QUnit.test(
 
         // simulate receive typing notification from demo "is typing"
         await afterNextRender(() =>
-            env.services.rpc(
-                "/mail/channel/notify_typing",
-                {
-                    channel_id: mailChannelId1,
-                    context: {
-                        mockedPartnerId: resPartnerId1,
-                    },
-                    is_typing: true,
+            env.services.rpc("/mail/channel/notify_typing", {
+                channel_id: mailChannelId1,
+                context: {
+                    mockedPartnerId: resPartnerId1,
                 },
-            )
+                is_typing: true,
+            })
         );
         assert.strictEqual(
             $(target).find(".o-mail-composer-is-typing").text(),
@@ -178,16 +167,13 @@ QUnit.test(
 
         // simulate receive typing notification from demo "is typing"
         await afterNextRender(() =>
-            env.services.rpc(
-                "/mail/channel/notify_typing",
-                {
-                    channel_id: mailChannelId1,
-                    context: {
-                        mockedPartnerId: resPartnerId1,
-                    },
-                    is_typing: true,
+            env.services.rpc("/mail/channel/notify_typing", {
+                channel_id: mailChannelId1,
+                context: {
+                    mockedPartnerId: resPartnerId1,
                 },
-            )
+                is_typing: true,
+            })
         );
         assert.strictEqual(
             $(target).find(".o-mail-composer-is-typing").text(),
@@ -196,16 +182,13 @@ QUnit.test(
 
         // simulate receive typing notification from demo "is typing" again after long time.
         await advanceTime(LONG_TYPING);
-        env.services.rpc(
-            "/mail/channel/notify_typing",
-            {
-                channel_id: mailChannelId1,
-                context: {
-                    mockedPartnerId: resPartnerId1,
-                },
-                is_typing: true,
+        env.services.rpc("/mail/channel/notify_typing", {
+            channel_id: mailChannelId1,
+            context: {
+                mockedPartnerId: resPartnerId1,
             },
-        );
+            is_typing: true,
+        });
         await nextTick();
         await advanceTime(LONG_TYPING);
         await nextAnimationFrame();
@@ -244,16 +227,13 @@ QUnit.test('receive several other members typing status "is typing"', async func
 
     // simulate receive typing notification from other 10 (is typing)
     await afterNextRender(() =>
-        env.services.rpc(
-            "/mail/channel/notify_typing",
-            {
-                channel_id: mailChannelId1,
-                context: {
-                    mockedPartnerId: resPartnerId1,
-                },
-                is_typing: true,
+        env.services.rpc("/mail/channel/notify_typing", {
+            channel_id: mailChannelId1,
+            context: {
+                mockedPartnerId: resPartnerId1,
             },
-        )
+            is_typing: true,
+        })
     );
     assert.strictEqual(
         $(target).find(".o-mail-composer-is-typing").text(),
@@ -262,16 +242,13 @@ QUnit.test('receive several other members typing status "is typing"', async func
 
     // simulate receive typing notification from other 11 (is typing)
     await afterNextRender(() =>
-        env.services.rpc(
-            "/mail/channel/notify_typing",
-            {
-                channel_id: mailChannelId1,
-                context: {
-                    mockedPartnerId: resPartnerId2,
-                },
-                is_typing: true,
+        env.services.rpc("/mail/channel/notify_typing", {
+            channel_id: mailChannelId1,
+            context: {
+                mockedPartnerId: resPartnerId2,
             },
-        )
+            is_typing: true,
+        })
     );
     assert.strictEqual(
         $(target).find(".o-mail-composer-is-typing").text(),
@@ -281,16 +258,13 @@ QUnit.test('receive several other members typing status "is typing"', async func
 
     // simulate receive typing notification from other 12 (is typing)
     await afterNextRender(() =>
-        env.services.rpc(
-            "/mail/channel/notify_typing",
-            {
-                channel_id: mailChannelId1,
-                context: {
-                    mockedPartnerId: resPartnerId3,
-                },
-                is_typing: true,
+        env.services.rpc("/mail/channel/notify_typing", {
+            channel_id: mailChannelId1,
+            context: {
+                mockedPartnerId: resPartnerId3,
             },
-        )
+            is_typing: true,
+        })
     );
     assert.strictEqual(
         $(target).find(".o-mail-composer-is-typing").text(),
@@ -300,16 +274,13 @@ QUnit.test('receive several other members typing status "is typing"', async func
 
     // simulate receive typing notification from other 10 (no longer is typing)
     await afterNextRender(() =>
-        env.services.rpc(
-            "/mail/channel/notify_typing",
-            {
-                channel_id: mailChannelId1,
-                context: {
-                    mockedPartnerId: resPartnerId1,
-                },
-                is_typing: false,
+        env.services.rpc("/mail/channel/notify_typing", {
+            channel_id: mailChannelId1,
+            context: {
+                mockedPartnerId: resPartnerId1,
             },
-        )
+            is_typing: false,
+        })
     );
     assert.strictEqual(
         $(target).find(".o-mail-composer-is-typing").text(),
@@ -319,16 +290,13 @@ QUnit.test('receive several other members typing status "is typing"', async func
 
     // simulate receive typing notification from other 10 (is typing again)
     await afterNextRender(() =>
-        env.services.rpc(
-            "/mail/channel/notify_typing",
-            {
-                channel_id: mailChannelId1,
-                context: {
-                    mockedPartnerId: resPartnerId1,
-                },
-                is_typing: true,
+        env.services.rpc("/mail/channel/notify_typing", {
+            channel_id: mailChannelId1,
+            context: {
+                mockedPartnerId: resPartnerId1,
             },
-        )
+            is_typing: true,
+        })
     );
     assert.strictEqual(
         $(target).find(".o-mail-composer-is-typing").text(),
@@ -340,7 +308,7 @@ QUnit.test('receive several other members typing status "is typing"', async func
 QUnit.test("current partner notify is typing to other thread members", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -362,7 +330,7 @@ QUnit.test(
     async function (assert) {
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-        const { advanceTime, insertText, openDiscuss } = await start({
+        const { advanceTime, openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId1}`,
@@ -396,7 +364,7 @@ QUnit.test(
     async function (assert) {
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-        const { advanceTime, insertText, openDiscuss } = await start({
+        const { advanceTime, openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId1}`,
@@ -423,7 +391,7 @@ QUnit.test(
     async function (assert) {
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-        const { insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId1}`,

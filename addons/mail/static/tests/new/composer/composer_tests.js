@@ -1,12 +1,18 @@
 /** @odoo-module **/
 
 import { makeDeferred } from "@mail/utils/deferred";
-import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import {
+    afterNextRender,
+    click,
+    insertText,
+    start,
+    startServer,
+} from "@mail/../tests/helpers/test_utils";
 
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
 
 import {
-    click,
+    click as webClick,
     getFixture,
     nextTick,
     patchWithCleanup,
@@ -30,7 +36,7 @@ QUnit.module("composer", {
 
 QUnit.test("composer text input: basic rendering when posting a message", async function (assert) {
     const pyEnv = await startServer();
-    const { click, openFormView } = await start();
+    const { openFormView } = await start();
     await openFormView({
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
@@ -47,7 +53,7 @@ QUnit.test("composer text input: basic rendering when posting a message", async 
 
 QUnit.test("composer text input: basic rendering when logging note", async function (assert) {
     const pyEnv = await startServer();
-    const { click, openFormView } = await start();
+    const { openFormView } = await start();
     await openFormView({
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
@@ -103,7 +109,7 @@ QUnit.test(
 QUnit.test("add an emoji", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "swamp-safari" });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -119,7 +125,7 @@ QUnit.test(
     async function (assert) {
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: { active_id: `mail.channel_${mailChannelId1}` },
             },
@@ -134,7 +140,7 @@ QUnit.test(
 QUnit.test("add an emoji after some text", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "beyblade-room" });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -151,7 +157,7 @@ QUnit.test("add an emoji after some text", async function (assert) {
 QUnit.test("add emoji replaces (keyboard) text selection", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -173,7 +179,7 @@ QUnit.test("selected text is not replaced after cancelling the selection", async
     const mailChannelId1 = pyEnv["mail.channel"].create({
         name: "pétanque-tournament-14",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -200,7 +206,7 @@ QUnit.test(
             { name: "firstChannel" },
             { name: "secondChannel" },
         ]);
-        const { insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${firstChannelId}`,
@@ -232,7 +238,7 @@ QUnit.test(
         const mailChannelId1 = pyEnv["mail.channel"].create({
             name: "roblox-skateboarding",
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: { active_id: `mail.channel_${mailChannelId1}` },
             },
@@ -248,7 +254,7 @@ QUnit.test(
 QUnit.test('do not send typing notification on typing "/" command', async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "channel" });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -286,7 +292,7 @@ QUnit.test('display partner mention suggestions on typing "@"', async function (
             [0, 0, { partner_id: resPartnerId2 }],
         ],
     });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -300,7 +306,7 @@ QUnit.test('display partner mention suggestions on typing "@"', async function (
 
 QUnit.test('display partner mention suggestions on typing "@" in chatter', async function (assert) {
     const pyEnv = await startServer();
-    const { click, insertText, openFormView } = await start();
+    const { openFormView } = await start();
     await openFormView({
         res_id: pyEnv.currentPartnerId,
         res_model: "res.partner",
@@ -324,7 +330,7 @@ QUnit.test("show other channel member in @ mention", async function (assert) {
             [0, 0, { partner_id: resPartnerId }],
         ],
     });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -347,7 +353,7 @@ QUnit.test("select @ mention insert mention text in composer", async function (a
             [0, 0, { partner_id: resPartnerId }],
         ],
     });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -363,7 +369,7 @@ QUnit.test("select @ mention insert mention text in composer", async function (a
 QUnit.test("composer text input cleared on message post", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "au-secours-aidez-moi" });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -389,7 +395,7 @@ QUnit.test(
     async function (assert) {
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "nether-picnic" });
-        const { insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: { active_id: `mail.channel_${mailChannelId1}` },
             },
@@ -434,7 +440,7 @@ QUnit.test(
             { name: "minigolf-galaxy-iv" },
             { name: "epic-shrek-lovers" },
         ]);
-        const { insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: { active_id: `mail.channel_${mailChannelId1}` },
             },
@@ -442,8 +448,8 @@ QUnit.test(
         await openDiscuss();
         await insertText(".o-mail-composer-textarea", "According to all known laws of aviation,");
 
-        await click($(target).find("span:contains('epic-shrek-lovers')")[0]);
-        await click($(target).find("span:contains('minigolf-galaxy-iv')")[0]);
+        await webClick($(target).find("span:contains('epic-shrek-lovers')")[0]);
+        await webClick($(target).find("span:contains('minigolf-galaxy-iv')")[0]);
         assert.strictEqual(
             target.querySelector(".o-mail-composer-textarea").value,
             "According to all known laws of aviation,"
@@ -457,7 +463,7 @@ QUnit.test('display command suggestions on typing "/"', async function (assert) 
         name: "General",
         channel_type: "channel",
     });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -473,7 +479,7 @@ QUnit.test(
     async function (assert) {
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "channel" });
-        const { click, insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId1}`,
@@ -496,7 +502,7 @@ QUnit.test(
 QUnit.test("use a command for a specific channel type", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ channel_type: "chat" });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -522,7 +528,7 @@ QUnit.test(
             name: "General",
             channel_type: "channel",
         });
-        const { insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: { active_id: `mail.channel_${mailChannelId1}` },
             },
@@ -543,7 +549,7 @@ QUnit.test("add an emoji after a command", async function (assert) {
         name: "General",
         channel_type: "channel",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -577,7 +583,7 @@ QUnit.test('display canned response suggestions on typing ":"', async function (
         source: "hello",
         substitution: "Hello! How are you?",
     });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -597,7 +603,7 @@ QUnit.test("use a canned response", async function (assert) {
         source: "hello",
         substitution: "Hello! How are you?",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -624,7 +630,7 @@ QUnit.test("use a canned response some text", async function (assert) {
         source: "hello",
         substitution: "Hello! How are you?",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -653,7 +659,7 @@ QUnit.test("add an emoji after a canned response", async function (assert) {
         source: "hello",
         substitution: "Hello! How are you?",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -685,7 +691,7 @@ QUnit.test('display channel mention suggestions on typing "#"', async function (
         name: "General",
         channel_type: "channel",
     });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -702,7 +708,7 @@ QUnit.test("mention a channel", async function (assert) {
         name: "General",
         channel_type: "channel",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -726,7 +732,7 @@ QUnit.test("mention a channel after some text", async function (assert) {
         name: "General",
         channel_type: "channel",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -756,7 +762,7 @@ QUnit.test("add an emoji after a channel mention", async function (assert) {
         name: "General",
         channel_type: "channel",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${mailChannelId1}` },
         },
@@ -787,7 +793,7 @@ QUnit.test(
     async function (assert) {
         const pyEnv = await startServer();
         const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-        const { insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: `mail.channel_${mailChannelId1}`,
@@ -807,7 +813,7 @@ QUnit.test(
 QUnit.test('post message on channel with "Enter" keyboard shortcut', async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -826,7 +832,7 @@ QUnit.test('post message on channel with "Enter" keyboard shortcut', async funct
 QUnit.test("leave command on channel", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId = pyEnv["mail.channel"].create({ name: "general" });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId}`,
@@ -860,7 +866,7 @@ QUnit.test("leave command on chat", async function (assert) {
         ],
         channel_type: "chat",
     });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId}`,
@@ -888,7 +894,7 @@ QUnit.test("Channel suggestions do not crash after rpc returns", async function 
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
     const getSuggestionsDeferred = makeDeferred();
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         async mockRPC(args, params, originalFn) {
             if (params.method === "get_mention_suggestions") {
                 const res = await originalFn(args, params);
@@ -917,7 +923,7 @@ QUnit.test("Channel suggestions do not crash after rpc returns", async function 
 QUnit.test("Can post suggestions", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -964,7 +970,7 @@ QUnit.test(
 QUnit.test("send message only once when enter is pressed twice quickly", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-    const { insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: `mail.channel_${mailChannelId1}`,
@@ -1033,7 +1039,7 @@ QUnit.test(
                 [0, 0, { partner_id: resPartnerId1 }],
             ],
         });
-        const { insertText, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: {
                     active_id: `mail.channel_${mailChannelId1}`,
