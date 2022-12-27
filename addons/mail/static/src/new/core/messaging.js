@@ -662,7 +662,7 @@ export class Messaging {
                 }
                 case "mail.channel.member/seen": {
                     const { channel_id, last_message_id, partner_id } = notif.payload;
-                    const channel = this.state.threads[channel_id];
+                    const channel = this.state.threads[createLocalId("mail.channel", channel_id)];
                     if (!channel) {
                         // for example seen from another browser, the current one has no
                         // knowledge of the channel
@@ -727,7 +727,7 @@ export class Messaging {
     }
 
     _updateRtcSessions(channelId, sessionsData, command) {
-        const channel = this.state.threads[channelId];
+        const channel = this.state.threads[createLocalId("mail.channel", channelId)];
         if (!channel) {
             return;
         }
@@ -880,8 +880,8 @@ export class Messaging {
         });
     }
 
-    async fetchThreadMessagesMore(threadId) {
-        const thread = this.state.threads[threadId];
+    async fetchThreadMessagesMore(threadLocalId) {
+        const thread = this.state.threads[threadLocalId];
         const fetchedMsgs = await this.fetchThreadMessages(thread, {
             max: thread.oldestNonTransientMessage?.id,
         });
@@ -900,7 +900,7 @@ export class Messaging {
         if (ids.length) {
             const previews = await this.orm.call("mail.channel", "channel_fetch_preview", [ids]);
             for (const preview of previews) {
-                const thread = this.state.threads[preview.id];
+                const thread = this.state.threads[createLocalId("mail.channel", preview.id)];
                 const data = Object.assign(preview.last_message, {
                     body: markup(preview.last_message.body),
                 });

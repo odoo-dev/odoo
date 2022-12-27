@@ -29,7 +29,7 @@
                             highlighted="props.messageHighlight and props.messageHighlight.highlightedMessageId === msg.id"
                             onParentMessageClick="() => props.messageHighlight and msg.parentMessage and props.messageHighlight.highlightMessage(msg.parentMessage.id)"
                             grayedOut="isGrayedOut(msg)"
-                            threadLocalId="props.id"
+                            threadLocalId="props.localId"
                             shouldEnterEditMode="isMessageInEdit"
                             onExitEditMode="() => isMessageInEdit and props.resetMessageInEdit?.()"
                         />
@@ -60,7 +60,7 @@
 </t>
 
 <t t-name="mail.thread.load_more" owl="1">
-    <button class="btn btn-link" t-on-click="() => messaging.fetchThreadMessagesMore(props.id)" t-ref="load-more">Load More</button>
+    <button class="btn btn-link" t-on-click="() => messaging.fetchThreadMessagesMore(props.localId)" t-ref="load-more">Load More</button>
 </t>
 
 <t t-name="mail.notification_message" owl="1">

@@ -35,3 +35,22 @@ QUnit.test("basic rendering", async function (assert) {
     );
     assert.containsOnce(target, ".o-mail-call-action-list button[aria-label='Join Call']");
 });
+
+QUnit.test(
+    "should not display call UI when no more members (self disconnect)",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const channelId = pyEnv["mail.channel"].create({
+            name: "General",
+        });
+        const { click, openDiscuss } = await start({
+            discuss: { context: { active_id: `mail.channel_${channelId}` } },
+        });
+        await openDiscuss();
+        await click(".o-mail-discuss-actions button[title='Start a Call']");
+        assert.containsOnce(target, ".o-mail-call");
+
+        await click(".o-mail-call-action-list button[aria-label='Join Call']");
+        assert.containsNone(target, ".o-mail-call");
+    }
+);

@@ -15,12 +15,15 @@ export class Call extends Component {
             isFullScreen: false,
         });
     }
+
     get isMinimized() {
         return false;
     }
+
     get hasSidebar() {
         return false;
     }
+
     async activateFullScreen() {
         const el = document.body;
         try {
@@ -43,6 +46,7 @@ export class Call extends Component {
             */
         }
     }
+
     async deactivateFullScreen() {
         const fullScreenElement = document.webkitFullscreenElement || document.fullscreenElement;
         if (fullScreenElement) {

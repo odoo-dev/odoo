@@ -25,6 +25,7 @@ export class CallParticipantVideo extends Component {
         }
         this.root.el.load();
     }
+
     async onVideoLoadedMetaData(ev) {
         try {
             await ev.target.play();

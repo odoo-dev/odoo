@@ -580,7 +580,7 @@ export class Rtc {
                 );
             }
         };
-        RtcSession.insert(this.messaging.state, {
+        Object.assign(session, {
             peerConnection,
             dataChannel,
         });
