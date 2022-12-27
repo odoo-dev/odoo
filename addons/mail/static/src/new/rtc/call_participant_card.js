@@ -16,9 +16,11 @@ export class CallParticipantCard extends Component {
             session: this.props.session,
         });
     }
+
     get isOfActiveCall() {
         return Boolean(this.state.session.channelId === this.rtc.state?.channel?.id);
     }
+
     get showConnectionState() {
         return Boolean(
             this.isOfActiveCall &&
@@ -26,29 +28,37 @@ export class CallParticipantCard extends Component {
                 !["connected", "completed"].includes(this.state.session.connectionState)
         );
     }
+
     get name() {
         return this.state.session?.channelMember?.partner?.name;
     }
+
     get avatarUrl() {
         return this.state.session?.channelMember?.partner?.avatarUrl;
     }
+
     get hasVideo() {
         return Boolean(this.state.session.videoStream);
     }
+
     get isMinimized() {
         return this.callView?.isMinimized; // should be in sub env?
     }
+
     get isTalking() {
         return Boolean(
             this.state.session && this.state.session.isTalking && !this.state.session.isMute
         );
     }
+
     onClick() {
         return; // TODO
     }
+
     onContextMenu() {
         return; // TODO
     }
+
     onClickVolumeAnchor() {
         return; // TODO
     }

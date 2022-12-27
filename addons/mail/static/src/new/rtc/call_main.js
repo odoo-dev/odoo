@@ -22,42 +22,53 @@ export class CallMain extends Component {
         onMounted(() => {
             this.resizeObserver = new ResizeObserver(() => this._setTileLayout());
             this.resizeObserver.observe(this.tileContainerRef.el);
-            this._update();
+            this._setTileLayout();
         });
-        onPatched(() => this._update());
+        onPatched(() => this._setTileLayout());
         onWillUnmount(() => this.resizeObserver.disconnect());
     }
+
     get sessionArray() {
         // t-foreach needs an array, not any iterable.
         return [...this.state.sessions.values()];
     }
+
     get hasSidebarButton() {
         return false;
     }
+
     get isSidebarOpen() {
         return false; // maybe prop as it comes from callView
     }
+
     get showOverlay() {
         return true; // TODO based on timer, mouseMove/leave, etc.
     }
+
     get isControllerFloating() {
         return false;
     }
+
     onMouseleave() {
         return;
     }
+
     onClick() {
         return;
     }
+
     onMouseMove() {
         return;
     }
+
     onClickHideSidebar() {
         return;
     }
+
     onClickShowSidebar() {
         return;
     }
+
     onMouseMoveOverlay() {
         return;
     }
@@ -131,12 +142,5 @@ export class CallMain extends Component {
         this.state.tileWidth = tileWidth;
         this.state.tileHeight = tileHeight;
         this.state.columnCount = columnCount;
-    }
-
-    /**
-     * @private
-     */
-    _update() {
-        this._setTileLayout();
     }
 }

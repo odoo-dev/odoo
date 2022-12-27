@@ -139,7 +139,7 @@ export class Thread {
                 switch (command) {
                     case "insert-and-unlink":
                         for (const rtcSessionData of sessionsData) {
-                            RtcSession.delete(this.state, rtcSessionData.id);
+                            RtcSession.delete(this._state, rtcSessionData.id);
                         }
                         break;
                     case "insert":
@@ -174,9 +174,9 @@ export class Thread {
         delete this._state.threads[this.localId];
     }
 
-    static searchSuggestions(state, cleanedSearchTerm, threadId, sort) {
+    static searchSuggestions(state, cleanedSearchTerm, threadLocalId, sort) {
         let threads;
-        const thread = state.threads[threadId];
+        const thread = state.threads[threadLocalId];
         if (
             thread &&
             (thread.type === "group" ||

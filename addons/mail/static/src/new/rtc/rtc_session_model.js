@@ -1,6 +1,7 @@
 /** @odoo-module */
 
 import { ChannelMember } from "@mail/new/core/channel_member_model";
+import { createLocalId } from "../core/thread_model.create_local_id";
 
 /**
  * @class Partner
@@ -45,7 +46,7 @@ export class RtcSession {
     static insert(state, data) {
         let session;
         if (state.rtcSessions.has(data.id)) {
-            session = state.sessions.get(data.id);
+            session = state.rtcSessions.get(data.id);
         } else {
             session = new RtcSession();
             session._state = state;
@@ -55,14 +56,16 @@ export class RtcSession {
         // return reactive version
         return state.rtcSessions.get(session.id);
     }
+
     static delete(state, id) {
         const session = state.rtcSessions.get(id);
         if (session) {
-            state.threads[session.channelId]?.rtcSessions.delete(id);
+            state.threads[createLocalId("mail.channel", session.channelId)]?.rtcSessions.delete(id);
             session.clear();
         }
         state.rtcSessions.delete(id);
     }
+
     update(data) {
         const { channelMember, ...remainingData } = data;
         for (const key in remainingData) {
@@ -77,12 +80,15 @@ export class RtcSession {
         }
         this.isOwnSession = this.channelMember?.partnerId === this._state.user.partnerId;
     }
+
     get channelMember() {
         return this._state.channelMembers[this.channelMemberId];
     }
+
     get channel() {
-        return this._state.threads[this.channelId];
+        return this._state.threads[createLocalId("mail.channel", this.channelId)];
     }
+
     /**
      * @returns {string}
      */
@@ -133,8 +139,6 @@ export class RtcSession {
     //----------------------------------------------------------------------
 
     /**
-     * Updates the RtcSession with a new track.
-     *
      * @param {Track} [track]
      * @param {Object} parm1
      * @param {boolean} parm1.mute
@@ -152,9 +156,6 @@ export class RtcSession {
         console.log("updateStream", this.id);
     }
 
-    /**
-     * restores the session to its default values
-     */
     clear() {
         this._removeAudio();
         this.removeVideo();
@@ -182,9 +183,6 @@ export class RtcSession {
         }
     }
 
-    /**
-     * cleanly removes the video stream of the session
-     */
     removeVideo() {
         if (this.videoStream) {
             for (const track of this.videoStream.getTracks() || []) {
@@ -194,15 +192,6 @@ export class RtcSession {
         this.videoStream = undefined;
     }
 
-    //----------------------------------------------------------------------
-    // Private
-    //----------------------------------------------------------------------
-
-    /**
-     * cleanly removes the audio stream of the session
-     *
-     * @private
-     */
     _removeAudio() {
         if (this.audioStream) {
             for (const track of this.audioStream.getTracks() || []) {

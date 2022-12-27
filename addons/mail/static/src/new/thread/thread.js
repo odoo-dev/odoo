@@ -9,7 +9,13 @@ import { Transition } from "@web/core/transition";
 
 export class Thread extends Component {
     static components = { Message, Transition };
-    static props = ["id", "messageHighlight?", "order?", "messageInEditId?", "resetMessageInEdit?"];
+    static props = [
+        "localId",
+        "messageHighlight?",
+        "order?",
+        "messageInEditId?",
+        "resetMessageInEdit?",
+    ];
     static defaultProps = {
         order: "asc", // 'asc' or 'desc'
     };
@@ -54,12 +60,12 @@ export class Thread extends Component {
             this.oldestNonTransientMessage = this.thread.oldestNonTransientMessage?.id;
             this.loadMore();
         });
-        onWillStart(() => this.requestMessages(this.props.id));
-        onWillUpdateProps((nextProps) => this.requestMessages(nextProps.id));
+        onWillStart(() => this.requestMessages(this.props.localId));
+        onWillUpdateProps((nextProps) => this.requestMessages(nextProps.localId));
     }
 
     get thread() {
-        return this.messaging.state.threads[this.props.id];
+        return this.messaging.state.threads[this.props.localId];
     }
 
     loadMore() {
@@ -68,7 +74,7 @@ export class Thread extends Component {
             this.thread.status !== "loading" &&
             !this.pendingLoadMore
         ) {
-            this.messaging.fetchThreadMessagesMore(this.props.id);
+            this.messaging.fetchThreadMessagesMore(this.props.localId);
             this.pendingLoadMore = true;
         }
     }
