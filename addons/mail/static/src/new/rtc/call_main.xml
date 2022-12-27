@@ -8,9 +8,9 @@
             t-attf-style="--height:{{state.tileHeight}}px; --width:{{state.tileWidth}}px;"
             t-on-click="onClick"
             t-on-mousemove="onMouseMove"
-            t-ref="tileContainer"
+            t-ref="grid"
         >
-            <CallParticipantCard t-foreach="sessionArray" t-as="session" t-key="'grid_tile_'+session.id"
+            <CallParticipantCard t-foreach="[...props.thread.rtcSessions.values()]" t-as="session" t-key="session.id"
                 className="'o-mail-call-main-gridParticipantCard'"
                 session="session"
             />

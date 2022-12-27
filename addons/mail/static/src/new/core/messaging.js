@@ -1476,18 +1476,6 @@ export class Messaging {
         follower.delete();
     }
 
-    // -------------------------------------------------------------------------
-    // rtc (audio and video calls)
-    // -------------------------------------------------------------------------
-
-    startCall(threadLocalId) {
-        this.state.threads[threadLocalId].inCall = true;
-    }
-
-    stopCall(threadLocalId) {
-        this.state.threads[threadLocalId].inCall = false;
-    }
-
     notify(params) {
         const { message, ...options } = params;
         return this.notification.add(message, options);

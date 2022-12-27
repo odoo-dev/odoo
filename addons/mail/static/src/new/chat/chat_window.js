@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { Call } from "../rtc/call";
 import { Thread } from "../thread/thread";
 import { Composer } from "../composer/composer";
 import { useMessaging } from "../messaging_hook";
@@ -7,7 +8,6 @@ import { useRtc } from "../rtc/rtc_hook";
 import { useMessageHighlight } from "@mail/new/utils/hooks";
 import { Component, useChildSubEnv, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { CallUI } from "../rtc/call_ui";
 import { CallSettings } from "../rtc/call_settings";
 import { ChannelMemberList } from "../discuss/channel_member_list";
 import { ChatWindowIcon } from "./chat_window_icon";
@@ -23,10 +23,10 @@ import { ChannelSelector } from "@mail/new/discuss/channel_selector";
  */
 export class ChatWindow extends Component {
     static components = {
+        Call,
         Thread,
         ChannelSelector,
         Composer,
-        CallUI,
         CallSettings,
         ChannelMemberList,
         ChatWindowIcon,
@@ -110,10 +110,6 @@ export class ChatWindow extends Component {
 
     resetMessageInEdit() {
         this.state.messageInEditId = undefined;
-    }
-
-    startCall() {
-        this.rtc.toggleCall(this.props.chatWindow.thread);
     }
 
     startEditingLastMessageOfCurrentUser() {

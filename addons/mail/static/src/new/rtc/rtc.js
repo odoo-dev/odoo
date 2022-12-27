@@ -156,11 +156,8 @@ export class Rtc {
             );
         });
 
-        // Disconnects the RTC session if the page is closed or reloaded.
-        browser.addEventListener("pagehide", async (ev) => {
-            if (this.state.channel && !ev.persisted) {
-                await this.rpcLeaveCall(this.state.channel);
-            }
+        browser.addEventListener("beforeunload", async (ev) => {
+            await this.rpcLeaveCall(this.state.channel);
         });
         /**
          * Call all sessions for which no peerConnection is established at
