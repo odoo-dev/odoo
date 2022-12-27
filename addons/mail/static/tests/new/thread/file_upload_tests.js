@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { editInput, getFixture } from "@web/../tests/helpers/utils";
 import { file } from "web.test_utils";
 
@@ -22,7 +22,7 @@ QUnit.test("no conflicts between file uploads", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { afterNextRender, click, openView } = await start();
+    const { openView } = await start();
 
     // Uploading file in the first thread: res.partner chatter.
     await openView({

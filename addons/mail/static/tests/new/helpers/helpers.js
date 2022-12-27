@@ -4,7 +4,7 @@ import { messagingService } from "@mail/new/messaging_service";
 import { activityService } from "@mail/new/activity/activity_service";
 import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
-import { App, EventBus } from "@odoo/owl";
+import { EventBus } from "@odoo/owl";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { fileUploadService } from "@web/core/file_upload/file_upload_service";
@@ -13,8 +13,6 @@ import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 import { soundEffects } from "@mail/new/sound_effects_service";
 import { userSettingsService } from "@mail/new/user_settings_service";
 import { rtcService } from "@mail/new/rtc/rtc_service";
-
-const { afterNextRender } = App;
 
 export { TestServer } from "./test_server";
 
@@ -98,23 +96,4 @@ export function makeTestEnv(rpc) {
     });
     env.services["mail.rtc"] = rtc;
     return env;
-}
-
-/**
- * @param {string} selector
- * @param {string} content
- */
-export async function insertText(selector, content) {
-    await afterNextRender(() => {
-        document.querySelector(selector).focus();
-        for (const char of content) {
-            document.execCommand("insertText", false, char);
-            document
-                .querySelector(selector)
-                .dispatchEvent(new window.KeyboardEvent("keydown", { key: char }));
-            document
-                .querySelector(selector)
-                .dispatchEvent(new window.KeyboardEvent("keyup", { key: char }));
-        }
-    });
 }

@@ -2,9 +2,15 @@
 
 import { TEST_USER_IDS } from "@bus/../tests/helpers/test_constants";
 import { Discuss } from "@mail/new/discuss/discuss";
-import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
 import {
+    afterNextRender,
     click,
+    insertText,
+    start,
+    startServer,
+} from "@mail/../tests/helpers/test_utils";
+import {
+    click as webClick,
     editInput,
     getFixture,
     mount,
@@ -13,7 +19,7 @@ import {
     triggerEvent,
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
-import { insertText, makeTestEnv, TestServer } from "../helpers/helpers";
+import { makeTestEnv, TestServer } from "../helpers/helpers";
 import { browser } from "@web/core/browser/browser";
 import { loadEmoji } from "@mail/new/composer/emoji_picker";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
@@ -35,7 +41,7 @@ QUnit.test("sanity check", async (assert) => {
                 assert.step(route);
             }
             return originRPC(route, args);
-        }
+        },
     });
     await openDiscuss();
     assert.containsOnce(target, ".o-mail-discuss-sidebar");
@@ -62,7 +68,7 @@ QUnit.test("can open #general", async (assert) => {
     await mount(Discuss, target, { env });
     assert.containsOnce(target, ".o-mail-category-item");
     assert.containsNone(target, ".o-mail-category-item.o-active");
-    await click(target, ".o-mail-category-item");
+    await webClick(target, ".o-mail-category-item");
     assert.containsOnce(target, ".o-mail-category-item.o-active");
     assert.containsNone(target, ".o-mail-discuss-content .o-mail-message");
     assert.strictEqual(target.querySelector(".o-mail-composer-textarea"), document.activeElement);
@@ -88,7 +94,7 @@ QUnit.test("can change the thread name of #general", async (assert) => {
     assert.containsOnce(target, "input.o-mail-discuss-thread-name");
     const threadNameElement = target.querySelector("input.o-mail-discuss-thread-name");
 
-    await click(threadNameElement);
+    await webClick(threadNameElement);
     assert.strictEqual(threadNameElement.value, "general");
     await editInput(target, "input.o-mail-discuss-thread-name", "special");
     await triggerEvent(target, "input.o-mail-discuss-thread-name", "keydown", {
@@ -123,7 +129,7 @@ QUnit.test("can change the thread description of #general", async (assert) => {
         "input.o-mail-discuss-thread-description"
     );
 
-    await click(threadDescriptionElement);
+    await webClick(threadDescriptionElement);
     assert.strictEqual(threadDescriptionElement.value, "General announcements...");
     await editInput(target, "input.o-mail-discuss-thread-description", "I want a burger today!");
     await triggerEvent(target, "input.o-mail-discuss-thread-description", "keydown", {
@@ -150,10 +156,10 @@ QUnit.test("can create a new channel", async (assert) => {
     });
     await mount(Discuss, target, { env });
     assert.containsNone(target, ".o-mail-category-item");
-    await click(target, ".o-mail-discuss-sidebar i[title='Add or join a channel']");
+    await webClick(target, ".o-mail-discuss-sidebar i[title='Add or join a channel']");
     await editInput(target, ".o-mail-channel-selector-input", "abc");
     await nextTick(); // wait for following rendering
-    await click(target, ".o-mail-channel-selector-suggestion");
+    await webClick(target, ".o-mail-channel-selector-suggestion");
     assert.containsN(target, ".o-mail-category-item", 1);
     assert.containsN(target, ".o-mail-discuss-content .o-mail-message", 0);
     assert.verifySteps([
@@ -187,10 +193,10 @@ QUnit.test("can join a chat conversation", async (assert) => {
 
     await mount(Discuss, target, { env });
     assert.containsNone(target, ".o-mail-category-item");
-    await click(target, ".o-mail-discuss-sidebar i[title='Start a conversation']");
+    await webClick(target, ".o-mail-discuss-sidebar i[title='Start a conversation']");
     await editInput(target, ".o-mail-channel-selector-input", "abc");
     await nextTick(); // wait for following rendering
-    await click(target, ".o-mail-channel-selector-suggestion");
+    await webClick(target, ".o-mail-channel-selector-suggestion");
     await triggerEvent(target, ".o-mail-channel-selector-input", "keydown", {
         key: "Enter",
     });
@@ -220,7 +226,7 @@ QUnit.test("can create a group chat conversation", async (assert) => {
             partner_id: resPartnerId2,
         },
     ]);
-    const { click, insertText, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsNone(target, ".o-mail-category-item");
     await click(".o-mail-discuss-sidebar i[title='Start a conversation']");
@@ -246,14 +252,14 @@ QUnit.test("focus is set on composer when switching channel", async (assert) => 
     assert.containsN(target, ".o-mail-category-item", 2);
 
     // switch to first channel and check focus is correct
-    await click(target.querySelectorAll(".o-mail-category-item")[0]);
+    await webClick(target.querySelectorAll(".o-mail-category-item")[0]);
     assert.containsOnce(target, ".o-mail-composer-textarea");
     assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
 
     // unfocus composer, then switch on second channel and see if focus is correct
     target.querySelector(".o-mail-composer-textarea").blur();
     assert.notOk(document.activeElement === target.querySelector(".o-mail-composer-textarea"));
-    await click(target.querySelectorAll(".o-mail-category-item")[1]);
+    await webClick(target.querySelectorAll(".o-mail-category-item")[1]);
     assert.containsOnce(target, ".o-mail-composer-textarea");
     assert.strictEqual(document.activeElement, target.querySelector(".o-mail-composer-textarea"));
 });
@@ -291,7 +297,7 @@ QUnit.test("Posting message should transform links.", async (assert) => {
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test https://www.odoo.com/");
-    await click(target, ".o-mail-composer-send-button");
+    await webClick(target, ".o-mail-composer-send-button");
     await loadEmoji(); // wait for emoji being loaded (required for rendering)
     await nextTick(); // wait for following rendering
     assert.containsOnce(target, "a[href='https://www.odoo.com/']", "Message should have a link");
@@ -310,7 +316,7 @@ QUnit.test("Posting message should transform relevant data to emoji.", async (as
     });
     await openDiscuss();
     await insertText(".o-mail-composer-textarea", "test :P :laughing:");
-    await click(target, ".o-mail-composer-send-button");
+    await webClick(target, ".o-mail-composer-send-button");
     await loadEmoji(); // wait for emoji being loaded (required for rendering)
     await nextTick(); // wait for following rendering
     assert.equal(target.querySelector(".o-mail-message-body").textContent, "test 😛 😆");
@@ -339,12 +345,12 @@ QUnit.test(
         await openDiscuss();
         // write 1 message
         await editInput(target, ".o-mail-composer-textarea", "abc");
-        await click(target, ".o-mail-composer button[data-action='send']");
+        await webClick(target, ".o-mail-composer button[data-action='send']");
 
         // write another message, but /mail/message/post is delayed by promise
         flag = true;
         await editInput(target, ".o-mail-composer-textarea", "def");
-        await click(target, ".o-mail-composer button[data-action='send']");
+        await webClick(target, ".o-mail-composer button[data-action='send']");
         assert.containsN(target, ".o-mail-message", 2);
         assert.containsN(target, ".o-mail-msg-header", 1); // just 1, because 2nd message is squashed
     }
@@ -368,7 +374,7 @@ QUnit.test("Click on avatar opens its partner chat window", async (assert) => {
         res_model: "res.partner",
     });
     assert.containsOnce(target, ".o-mail-message-sidebar .o-mail-avatar-container .cursor-pointer");
-    await click(
+    await webClick(
         target.querySelector(".o-mail-message-sidebar .o-mail-avatar-container .cursor-pointer")
     );
     assert.containsOnce(target, ".o-mail-chat-window-header-name");
@@ -383,7 +389,7 @@ QUnit.test("Can use channel command /who", async (assert) => {
         channel_type: "channel",
         name: "my-channel",
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -546,7 +552,7 @@ QUnit.test("reply to message from inbox (message linked to document)", async fun
         notification_type: "inbox",
         res_partner_id: pyEnv.currentPartnerId,
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         async mockRPC(route, args) {
             if (route === "/mail/message/post") {
                 assert.step("message_post");
@@ -603,7 +609,7 @@ QUnit.test("Can reply to starred message", async function (assert) {
         starred_partner_ids: [pyEnv.currentPartnerId],
         res_id: mailChannelId,
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: "mail.box_starred",
@@ -637,7 +643,7 @@ QUnit.test("Can reply to history message", async function (assert) {
         res_partner_id: pyEnv.currentPartnerId,
         is_read: true,
     });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: {
                 active_id: "mail.box_history",
@@ -657,7 +663,7 @@ QUnit.test("Can reply to history message", async function (assert) {
 });
 
 QUnit.test("receive new needaction messages", async function (assert) {
-    const { afterNextRender, openDiscuss, pyEnv } = await start();
+    const { openDiscuss, pyEnv } = await start();
     await openDiscuss();
     assert.containsOnce(target, 'button[data-mailbox="inbox"]');
     assert.hasClass(document.querySelector('button[data-mailbox="inbox"]'), "o-active");
@@ -751,7 +757,7 @@ QUnit.test("sidebar: default active inbox", async function (assert) {
 });
 
 QUnit.test("sidebar: change active", async function (assert) {
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, ".o-mail-discuss-sidebar button:contains(Inbox)");
     assert.containsOnce(target, ".o-mail-discuss-sidebar button:contains(Starred)");
@@ -767,7 +773,7 @@ QUnit.test("sidebar: change active", async function (assert) {
 });
 
 QUnit.test("sidebar: add channel", async function (assert) {
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, ".o-mail-category-channel .o-mail-category-add-button");
     assert.hasAttrValue(
@@ -806,7 +812,7 @@ QUnit.test("sidebar: basic channel rendering", async function (assert) {
 QUnit.test("channel become active", async function (assert) {
     const pyEnv = await startServer();
     pyEnv["mail.channel"].create({ name: "General" });
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, ".o-mail-category-item");
     assert.containsNone(target, ".o-mail-category-item.o-active");
@@ -817,7 +823,7 @@ QUnit.test("channel become active", async function (assert) {
 QUnit.test("channel become active - show composer in discuss content", async function (assert) {
     const pyEnv = await startServer();
     pyEnv["mail.channel"].create({ name: "General" });
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     await click(".o-mail-category-item");
     assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread");
@@ -895,7 +901,7 @@ QUnit.test("default active id on mailbox", async function (assert) {
 QUnit.test("basic top bar rendering", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "General" });
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.strictEqual($(target).find(".o-mail-discuss-thread-name")[0].value, "Inbox");
     const $markAllReadButton = $(target).find(
@@ -978,7 +984,7 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
             res_partner_id: pyEnv.currentPartnerId,
         },
     ]);
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: "mail.box_history",
@@ -1032,7 +1038,7 @@ QUnit.test(
                 res_partner_id: pyEnv.currentPartnerId,
             },
         ]);
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 params: {
                     default_active_id: "mail.box_history",
@@ -1075,7 +1081,7 @@ QUnit.test(
                 res_partner_id: pyEnv.currentPartnerId,
             });
         }
-        const { click, openDiscuss } = await start();
+        const { openDiscuss } = await start();
         await openDiscuss();
         await click('.o-mail-discuss-actions button[data-action="mark-all-read"]');
         assert.containsNone(target, ".o-mail-message");
@@ -1089,7 +1095,7 @@ QUnit.test(
 QUnit.test("post a simple message", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "general" });
-    const { click, insertText, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -1132,7 +1138,7 @@ QUnit.test("starred: unstar all", async function (assert) {
         { body: "not empty", starred_partner_ids: [pyEnv.currentPartnerId] },
         { body: "not empty", starred_partner_ids: [pyEnv.currentPartnerId] },
     ]);
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: "mail.box_starred",
@@ -1165,7 +1171,7 @@ QUnit.test("auto-focus composer on opening thread", async function (assert) {
             channel_type: "chat",
         },
     ]);
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, 'button[data-mailbox="inbox"]');
     assert.hasClass($(target).find('button[data-mailbox="inbox"]'), "o-active");
@@ -1343,16 +1349,13 @@ QUnit.test("should auto-pin chat when receiving a new DM", async function (asser
 
     // simulate receiving the first message on channel 11
     await afterNextRender(() =>
-        env.services.rpc(
-            "/mail/chat_post",
-            {
-                context: {
-                    mockedUserId: resUsersId1,
-                },
-                message_content: "new message",
-                uuid: "channel11uuid",
+        env.services.rpc("/mail/chat_post", {
+            context: {
+                mockedUserId: resUsersId1,
             },
-        )
+            message_content: "new message",
+            uuid: "channel11uuid",
+        })
     );
     assert.containsOnce(target, ".o-mail-category-item:contains(Demo)");
 });
@@ -1522,7 +1525,7 @@ QUnit.test(
                 channel_type: "chat",
             },
         ]);
-        const { click, openDiscuss } = await start();
+        const { openDiscuss } = await start();
         await openDiscuss();
         await click(".o-mail-category-item:contains('Michel Online')");
         assert.containsOnce(target, ".o-mail-discuss-content .o-mail-thread-icon-online");

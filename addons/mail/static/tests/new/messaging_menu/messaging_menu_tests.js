@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
 
@@ -23,7 +23,7 @@ QUnit.test("should have messaging menu button in systray", async (assert) => {
 });
 
 QUnit.test("messaging menu should have topbar buttons", async function (assert) {
-    const { click } = await start();
+    await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     assert.containsOnce(target, ".o-mail-messaging-menu");
     assert.containsN(target, ".o-mail-messaging-menu-topbar button", 4);
@@ -109,7 +109,7 @@ QUnit.test("rendering without OdooBot has a request (accepted)", async function 
 });
 
 QUnit.test("Is closed after clicking on new message", async function (assert) {
-    const { click } = await start();
+    await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-messaging-menu-new-message");
     assert.containsNone(target, ".o-mail-messaging-menu");

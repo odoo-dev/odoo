@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 
@@ -27,7 +27,7 @@ QUnit.test("click on message in reply to highlight the parent message", async fu
         parent_id: mailMessageId1,
         res_id: mailChannelId1,
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,
@@ -68,7 +68,7 @@ QUnit.test("click on message in reply to scroll to the parent message", async fu
         parent_id: oldestMessageId,
         res_id: mailChannelId1,
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             params: {
                 default_active_id: `mail.channel_${mailChannelId1}`,

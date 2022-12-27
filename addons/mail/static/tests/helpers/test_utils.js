@@ -475,7 +475,7 @@ function pasteFiles(el, files) {
  * @param {string} selector
  * @param {string} content
  */
-async function insertText(selector, content) {
+export async function insertText(selector, content) {
     await afterNextRender(() => {
         document.querySelector(selector).focus();
         for (const char of content) {
@@ -522,3 +522,5 @@ export {
     start,
     startServer,
 };
+
+export const click = getClick({ afterNextRender });

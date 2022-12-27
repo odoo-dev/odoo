@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture } from "@web/../tests/helpers/utils";
 
 let target;
@@ -90,7 +90,7 @@ QUnit.test("remove attachment should ask for confirmation", async function (asse
             </form>
         `,
     };
-    const { click, openView } = await start({ serverData: { views } });
+    const { openView } = await start({ serverData: { views } });
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",
@@ -134,7 +134,7 @@ QUnit.test("view attachments", async function (assert) {
             </div>
         </form>`,
     };
-    const { click, openView } = await start({ serverData: { views } });
+    const { openView } = await start({ serverData: { views } });
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",

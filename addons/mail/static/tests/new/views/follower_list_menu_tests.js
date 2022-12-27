@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 
 import { nextTick } from "web.test_utils";
 import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
@@ -38,7 +38,7 @@ QUnit.test("base rendering not editable", async function (assert) {
 QUnit.test("base rendering editable", async function (assert) {
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({});
-    const { click, openView } = await start({
+    const { openView } = await start({
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {
                 // mimic user with write access
@@ -77,7 +77,7 @@ QUnit.test('click on "add followers" button', async function (assert) {
         res_model: "res.partner",
     });
 
-    const { click, env, openView } = await start({
+    const { env, openView } = await start({
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {
                 // mimic user with write access
@@ -152,7 +152,7 @@ QUnit.test("click on remove follower", async function (assert) {
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         async mockRPC(route, args, performRPC) {
             if (route === "/mail/thread/data") {
                 // mimic user with write access
@@ -203,7 +203,7 @@ QUnit.test(
                 res_model: "res.partner",
             },
         ]);
-        const { click, openView } = await start({
+        const { openView } = await start({
             async mockRPC(route, args, performRPC) {
                 if (route === "/mail/thread/data") {
                     // mimic user with no write access
@@ -267,7 +267,7 @@ QUnit.test(
                 res_model: "res.partner",
             },
         ]);
-        const { click, openView } = await start({
+        const { openView } = await start({
             async mockRPC(route, args, performRPC) {
                 if (route === "/mail/thread/data") {
                     // mimic user with write access
@@ -312,7 +312,7 @@ QUnit.test(
     async function (assert) {
         const pyEnv = await startServer();
         const resPartnerId1 = pyEnv["res.partner"].create({});
-        const { click, openView } = await start({
+        const { openView } = await start({
             async mockRPC(route, args, performRPC) {
                 if (route === "/mail/thread/data") {
                     // mimic user without write access

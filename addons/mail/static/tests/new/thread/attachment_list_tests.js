@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { afterNextRender, start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 
 let target;
@@ -87,7 +87,7 @@ QUnit.test(
             model: "mail.channel",
             res_id: channelId,
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: { active_id: `mail.channel_${channelId}` },
             },
@@ -125,7 +125,7 @@ QUnit.test("view attachment", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${channelId}` },
         },
@@ -152,7 +152,7 @@ QUnit.test("close attachment viewer", async function (assert) {
         model: "mail.channel",
         res_id: channelId,
     });
-    const { click, openDiscuss } = await start({
+    const { openDiscuss } = await start({
         discuss: {
             context: { active_id: `mail.channel_${channelId}` },
         },
@@ -194,7 +194,7 @@ QUnit.test(
             model: "mail.channel",
             res_id: channelId,
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: { active_id: `mail.channel_${channelId}` },
             },
@@ -340,7 +340,7 @@ QUnit.test(
             model: "mail.channel",
             res_id: channelId,
         });
-        const { click, openDiscuss } = await start({
+        const { openDiscuss } = await start({
             discuss: {
                 context: { active_id: `mail.channel_${channelId}` },
             },

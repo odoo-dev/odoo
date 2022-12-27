@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { Sidebar } from "@mail/new/discuss/sidebar";
-import { click, editInput, getFixture, mount } from "@web/../tests/helpers/utils";
+import { click as webClick, editInput, getFixture, mount } from "@web/../tests/helpers/utils";
 import { makeTestEnv, TestServer } from "../helpers/helpers";
 import { createLocalId } from "@mail/new/core/thread_model.create_local_id";
 
@@ -22,7 +22,7 @@ QUnit.test("toggling category button hide category items", async (assert) => {
 
     assert.containsOnce(target, "button.o-active:contains('Inbox')");
     assert.containsN(target, ".o-mail-category-item", 1);
-    await click(target.querySelector(".o-mail-category-icon"));
+    await webClick(target.querySelector(".o-mail-category-icon"));
     assert.containsNone(target, ".o-mail-category-item");
 });
 
@@ -36,7 +36,7 @@ QUnit.test("toggling category button does not hide active category items", async
     await mount(Sidebar, target, { env });
     assert.containsN(target, ".o-mail-category-item", 2);
     assert.containsOnce(target, ".o-mail-category-item.o-active");
-    await click(target.querySelector(".o-mail-category-icon"));
+    await webClick(target.querySelector(".o-mail-category-icon"));
     assert.containsOnce(target, ".o-mail-category-item");
     assert.containsOnce(target, ".o-mail-category-item.o-active");
 });
@@ -61,7 +61,7 @@ QUnit.test(
             user_id: pyEnv.currentUserId,
             is_discuss_sidebar_category_channel_open: false,
         });
-        const { click, openDiscuss } = await start();
+        const { openDiscuss } = await start();
         await openDiscuss();
         await click(".o-mail-category-channel span:contains(Channels)");
         assert.containsOnce(
@@ -109,7 +109,7 @@ QUnit.test("channel - states: close manually by clicking the title", async funct
         user_id: pyEnv.currentUserId,
         is_discuss_sidebar_category_channel_open: true,
     });
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(document.body, ".o-mail-category-item:contains(general)");
     await click(".o-mail-category-channel span:contains(Channels)");
@@ -123,7 +123,7 @@ QUnit.test("channel - states: open manually by clicking the title", async functi
         user_id: pyEnv.currentUserId,
         is_discuss_sidebar_category_channel_open: false,
     });
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsNone(document.body, ".o-mail-category-item:contains(general)");
     await click(".o-mail-category-channel span:contains(Channels)");
@@ -144,7 +144,7 @@ QUnit.test("sidebar: inbox with counter", async function (assert) {
 QUnit.test("default thread rendering", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({ name: "" });
-    const { click, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     await openDiscuss();
     assert.containsOnce(target, 'button[data-mailbox="inbox"]');
     assert.containsOnce(target, 'button[data-mailbox="starred"]');

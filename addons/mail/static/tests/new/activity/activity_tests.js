@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import { start, startServer } from "@mail/../tests/helpers/test_utils";
+import { afterNextRender, click, start, startServer } from "@mail/../tests/helpers/test_utils";
 import { Activity } from "@mail/new/activity/activity";
 import {
-    click,
+    click as webClick,
     getFixture,
     mount,
     patchWithCleanup,
@@ -28,9 +28,9 @@ QUnit.test("Toggle activity detail", async (assert) => {
         env,
         props: { data: activity },
     });
-    await click(document.querySelector(".o-mail-activity-toggle"));
+    await webClick(document.querySelector(".o-mail-activity-toggle"));
     assert.containsOnce(target, ".o-mail-activity-details");
-    await click(document.querySelector(".o-mail-activity-toggle"));
+    await webClick(document.querySelector(".o-mail-activity-toggle"));
     assert.containsNone(target, ".o-mail-activity-details");
 });
 
@@ -47,7 +47,7 @@ QUnit.test("Delete activity", async (assert) => {
         env,
         props: { data: activity },
     });
-    await click(document.querySelector(".o-mail-activity-unlink-button"));
+    await webClick(document.querySelector(".o-mail-activity-unlink-button"));
     assert.verifySteps(["/web/dataset/call_kw/mail.activity/unlink"]);
 });
 
@@ -287,7 +287,7 @@ QUnit.test("activity details toggle", async function (assert) {
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_model: "res.partner",
         res_id: resPartnerId1,
@@ -410,7 +410,7 @@ QUnit.test("activity with mail template: send mail", async function (assert) {
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         async mockRPC(route, args) {
             if (args.method === "activity_send_mail") {
                 assert.step("activity_send_mail");
@@ -445,7 +445,7 @@ QUnit.test("activity click on mark as done", async function (assert) {
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",
@@ -474,7 +474,7 @@ QUnit.test(
             res_id: resPartnerId1,
             res_model: "res.partner",
         });
-        const { click, openView } = await start();
+        const { openView } = await start();
         await openView({
             res_id: resPartnerId1,
             res_model: "res.partner",
@@ -503,7 +503,7 @@ QUnit.test("activity click on edit", async function (assert) {
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, env, openView } = await start();
+    const { env, openView } = await start();
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",
@@ -537,7 +537,7 @@ QUnit.test("activity click on cancel", async function (assert) {
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start({
+    const { openView } = await start({
         async mockRPC(route, args) {
             if (route === "/web/dataset/call_kw/mail.activity/unlink") {
                 assert.step("unlink");
@@ -570,7 +570,7 @@ QUnit.test("activity mark done popover close on ESCAPE", async function (assert)
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { afterNextRender, click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",
@@ -595,7 +595,7 @@ QUnit.test("activity mark done popover click on discard", async function (assert
         res_id: resPartnerId1,
         res_model: "res.partner",
     });
-    const { click, openView } = await start();
+    const { openView } = await start();
     await openView({
         res_id: resPartnerId1,
         res_model: "res.partner",
