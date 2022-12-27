@@ -174,6 +174,28 @@ QUnit.test("add emoji replaces (keyboard) text selection", async function (asser
     assert.strictEqual(document.querySelector(".o-mail-composer-textarea").value, "🤠");
 });
 
+QUnit.test(
+    "Cursor is positioned after emoji after adding it",
+    async function (assert) {
+        const pyEnv = await startServer();
+        const mailChannelId1 = pyEnv["mail.channel"].create({ name: "pétanque-tournament-14" });
+        const { click, insertText, openDiscuss } = await start({
+            discuss: {
+                context: { active_id: `mail.channel_${mailChannelId1}` },
+            },
+        });
+        await openDiscuss();
+        const composerTextInputTextArea = document.querySelector(".o-mail-composer-textarea");
+        await insertText(".o-mail-composer-textarea", "Blabla");
+        composerTextInputTextArea.setSelectionRange(2, 2);
+        await click("i[aria-label='Emojis']");
+        await click('.o-emoji[data-codepoints="🤠"]');
+        const expectedCursorPos = 2 + "🤠".length;
+        assert.strictEqual(composerTextInputTextArea.selectionStart, expectedCursorPos);
+        assert.strictEqual(composerTextInputTextArea.selectionEnd, expectedCursorPos);
+    }
+);
+
 QUnit.test("selected text is not replaced after cancelling the selection", async function (assert) {
     const pyEnv = await startServer();
     const mailChannelId1 = pyEnv["mail.channel"].create({
