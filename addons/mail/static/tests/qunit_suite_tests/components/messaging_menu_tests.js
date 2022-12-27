@@ -461,38 +461,6 @@ QUnit.module("mail", (hooks) => {
             );
         });
 
-        QUnit.skipRefactoring("no new message when discuss is open", async function (assert) {
-            assert.expect(3);
-
-            const { click, openDiscuss, openView } = await start();
-            await openDiscuss({ waitUntilMessagesLoaded: false });
-
-            await click(`.o_MessagingMenu_toggler`);
-            assert.strictEqual(
-                document.querySelectorAll(`.o_MessagingMenu_newMessageButton`).length,
-                0,
-                "should not have 'new message' when discuss is open"
-            );
-
-            await openView({
-                res_model: "res.partner",
-                views: [[false, "form"]],
-            });
-
-            assert.strictEqual(
-                document.querySelectorAll(`.o_MessagingMenu_newMessageButton`).length,
-                1,
-                "should have 'new message' when discuss is closed"
-            );
-
-            await openDiscuss({ waitUntilMessagesLoaded: false });
-            assert.strictEqual(
-                document.querySelectorAll(`.o_MessagingMenu_newMessageButton`).length,
-                0,
-                "should not have 'new message' when discuss is open again"
-            );
-        });
-
         QUnit.skipRefactoring("channel preview: basic rendering", async function (assert) {
             assert.expect(9);
 
