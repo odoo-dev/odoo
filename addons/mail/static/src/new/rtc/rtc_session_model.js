@@ -3,9 +3,6 @@
 import { ChannelMember } from "@mail/new/core/channel_member_model";
 import { createLocalId } from "../core/thread_model.create_local_id";
 
-/**
- * @class Partner
- */
 export class RtcSession {
     // Server data
     isCameraOn;
@@ -13,8 +10,6 @@ export class RtcSession {
     isDeaf;
     isSelfMuted;
     isScreenSharingOn;
-    isOwnSession;
-    partner;
     // Client data
     audioElement;
     audioStream;
@@ -22,17 +17,10 @@ export class RtcSession {
     localVolume;
     isTalking;
     videoStream;
-    connectionRecoveryTimeout;
     connectionState;
-    isCurrentUserInitiatorOfConnectionOffer; // maybe not necessary
-    localCandidateType;
-    remoteCandidateType;
     // "relational data"
     channelId;
     channelMemberId;
-    calledChannels;
-    callParticipantCards;
-    rtc; // means that this is the rtc session of the current user and rtc is active
     /** @type {RTCDataChannel} */
     dataChannel;
     /** @type {RTCPeerConnection} */
@@ -78,7 +66,6 @@ export class RtcSession {
             ChannelMember.insert(this._state, channelMember);
             this.channelMemberId = channelMember.id;
         }
-        this.isOwnSession = this.channelMember?.partnerId === this._state.user.partnerId;
     }
 
     get channelMember() {
@@ -128,9 +115,6 @@ export class RtcSession {
         this.volume = volume;
         if (this.audioElement) {
             this.audioElement.volume = volume;
-        }
-        if (this.isOwnSession) {
-            return;
         }
     }
 

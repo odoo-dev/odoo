@@ -1,9 +1,9 @@
 /* @odoo-module */
 
-import { Component, useState } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { useRtc } from "@mail/new/rtc/rtc_hook";
-import { session } from "@web/session";
 import { CallParticipantVideo } from "@mail/new/rtc/call_participant_video";
+import { useService } from "@web/core/utils/hooks";
 
 export class CallParticipantCard extends Component {
     static props = ["session", "className"];
@@ -12,33 +12,31 @@ export class CallParticipantCard extends Component {
 
     setup() {
         this.rtc = useRtc();
-        this.state = useState({
-            session: this.props.session,
-        });
+        this.user = useService("user");
     }
 
     get isOfActiveCall() {
-        return Boolean(this.state.session.channelId === this.rtc.state?.channel?.id);
+        return Boolean(this.props.session.channelId === this.rtc.state.channel?.id);
     }
 
     get showConnectionState() {
         return Boolean(
             this.isOfActiveCall &&
-                !(this.state.session?.channelMember?.partnerId === session.partner_id) &&
-                !["connected", "completed"].includes(this.state.session.connectionState)
+                !(this.props.session.channelMember?.partnerId === this.user.partnerId) &&
+                !["connected", "completed"].includes(this.props.session.connectionState)
         );
     }
 
     get name() {
-        return this.state.session?.channelMember?.partner?.name;
+        return this.props.session.channelMember?.partner?.name;
     }
 
     get avatarUrl() {
-        return this.state.session?.channelMember?.partner?.avatarUrl;
+        return this.props.session.channelMember?.partner?.avatarUrl;
     }
 
     get hasVideo() {
-        return Boolean(this.state.session.videoStream);
+        return Boolean(this.props.session.videoStream);
     }
 
     get isMinimized() {
@@ -47,7 +45,7 @@ export class CallParticipantCard extends Component {
 
     get isTalking() {
         return Boolean(
-            this.state.session && this.state.session.isTalking && !this.state.session.isMute
+            this.props.session && this.props.session.isTalking && !this.props.session.isMute
         );
     }
 

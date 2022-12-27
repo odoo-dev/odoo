@@ -16,21 +16,15 @@ export class CallMain extends Component {
             tileWidth: 0,
             tileHeight: 0,
             columnCount: 0,
-            sessions: this.props.thread.rtcSessions,
         });
-        this.tileContainerRef = useRef("tileContainer");
+        this.grid = useRef("grid");
         onMounted(() => {
-            this.resizeObserver = new ResizeObserver(() => this._setTileLayout());
-            this.resizeObserver.observe(this.tileContainerRef.el);
-            this._setTileLayout();
+            this.resizeObserver = new ResizeObserver(() => this.arrangeTiles());
+            this.resizeObserver.observe(this.grid.el);
+            this.arrangeTiles();
         });
-        onPatched(() => this._setTileLayout());
+        onPatched(() => this.arrangeTiles());
         onWillUnmount(() => this.resizeObserver.disconnect());
-    }
-
-    get sessionArray() {
-        // t-foreach needs an array, not any iterable.
-        return [...this.state.sessions.values()];
     }
 
     get hasSidebarButton() {
@@ -73,74 +67,47 @@ export class CallMain extends Component {
         return;
     }
 
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * Finds a tile layout and dimensions that respects param0.aspectRatio while maximizing
-     * the total area covered by the tiles within the specified container dimensions.
-     *
-     * @private
-     * @param {Object} param0
-     * @param {number} [param0.aspectRatio]
-     * @param {number} param0.containerHeight
-     * @param {number} param0.containerWidth
-     * @param {number} param0.tileCount
-     */
-    _computeTessellation({ aspectRatio = 1, containerHeight, containerWidth, tileCount }) {
-        let optimalLayout = {
+    arrangeTiles() {
+        if (!this.grid.el) {
+            return;
+        }
+        const { width, height } = this.grid.el.getBoundingClientRect();
+        const aspectRatio = 16 / 9;
+        const tileCount = this.grid.el.children.length;
+        let optimal = {
             area: 0,
-            cols: 0,
+            columnCount: 0,
             tileHeight: 0,
             tileWidth: 0,
         };
-
         for (let columnCount = 1; columnCount <= tileCount; columnCount++) {
             const rowCount = Math.ceil(tileCount / columnCount);
-            const potentialHeight = containerWidth / (columnCount * aspectRatio);
-            const potentialWidth = containerHeight / rowCount;
+            const potentialHeight = width / (columnCount * aspectRatio);
+            const potentialWidth = height / rowCount;
             let tileHeight;
             let tileWidth;
             if (potentialHeight > potentialWidth) {
                 tileHeight = Math.floor(potentialWidth);
                 tileWidth = Math.floor(tileHeight * aspectRatio);
             } else {
-                tileWidth = Math.floor(containerWidth / columnCount);
+                tileWidth = Math.floor(width / columnCount);
                 tileHeight = Math.floor(tileWidth / aspectRatio);
             }
             const area = tileHeight * tileWidth;
-            if (area <= optimalLayout.area) {
+            if (area <= optimal.area) {
                 continue;
             }
-            optimalLayout = {
+            optimal = {
                 area,
                 columnCount,
                 tileHeight,
                 tileWidth,
             };
         }
-        return optimalLayout;
-    }
-
-    /**
-     * @private
-     */
-    _setTileLayout() {
-        if (!this.tileContainerRef.el) {
-            return;
-        }
-        const { width, height } = this.tileContainerRef.el.getBoundingClientRect();
-
-        const { tileWidth, tileHeight, columnCount } = this._computeTessellation({
-            aspectRatio: 16 / 9,
-            containerHeight: height,
-            containerWidth: width,
-            tileCount: this.tileContainerRef.el.children.length,
+        Object.assign(this.state, {
+            tileWidth: optimal.tileWidth,
+            tileHeight: optimal.tileHeight,
+            columnCount: optimal.columnCount,
         });
-
-        this.state.tileWidth = tileWidth;
-        this.state.tileHeight = tileHeight;
-        this.state.columnCount = columnCount;
     }
 }

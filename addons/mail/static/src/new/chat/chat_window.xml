@@ -19,7 +19,7 @@
                 }"
             />
             <div class="flex-grow-1"/>
-            <div t-if="thread and !thread.inCall" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Start a Call" t-on-click.stop="startCall">
+            <div t-if="thread and thread !== rtc.state.channel" class="o-mail-command d-flex align-items-center h-100 px-3 py-0 m-0 opacity-50 opacity-100-hover" title="Start a Call" t-on-click.stop="() => this.rtc.toggleCall(this.props.chatWindow.thread)">
                 <i class="fa fa-phone"/>
             </div>
             <t t-if="env.isSmall">
@@ -57,9 +57,7 @@
                         <ChannelInvitationForm threadId="thread.id" chatState="state"/>
                     </t>
                     <t t-else="">
-                        <t t-if="thread.inCall">
-                            <CallUI thread="thread" compact="true"/>
-                        </t>
+                        <Call t-if="thread.rtcSessions.size > 0" thread="thread"/>
                         <Thread localId="thread.localId" t-key="thread.localId" messageHighlight="messageHighlight" messageInEditId="state.messageInEditId" resetMessageInEdit="resetMessageInEdit.bind(this)"/>
                         <Composer composer="thread.composer" autofocus="props.chatWindow.autofocus" mode="'compact'" highlightReplyTo="messageHighlight.highlightMessage" startEditingLastMessageOfCurrentUser="startEditingLastMessageOfCurrentUser.bind(this)" dropzoneRef="contentRef"/>
                     </t>

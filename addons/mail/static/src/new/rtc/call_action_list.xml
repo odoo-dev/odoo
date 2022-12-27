@@ -109,7 +109,7 @@
                         <i class="fa fa-phone fa-stack-1x" t-att-class="{ 'fa-lg': !isSmall }"/>
                     </div>
                 </button>
-                <t t-if="props.thread?.rtc" t-set="callText">Disconnect</t>
+                <t t-if="props.thread === rtc.state.channel" t-set="callText">Disconnect</t>
                 <t t-else="" t-set="callText">Join Call</t>
                 <button class="o-mail-call-action-list-button o-mail-call-action-list-callToggle btn d-flex m-1 border-0 rounded-circle shadow-none"
                     t-att-aria-label="callText"

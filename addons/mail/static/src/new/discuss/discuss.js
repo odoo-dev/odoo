@@ -97,10 +97,6 @@ export class Discuss extends Component {
         this.messaging.unstarAll();
     }
 
-    startCall() {
-        this.rtc.toggleCall(this.thread);
-    }
-
     toggleInviteForm() {
         if (this.closePopover) {
             this.closePopover();
